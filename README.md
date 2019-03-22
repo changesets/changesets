@@ -98,4 +98,4 @@ Conceptually though, the benefits of changesets are detacheable from this. I thi
 - Modify/build a changeset tool that uses yarn workspaces instead of bolt (or is tool-agnostic)
 - Build a github addon to alert when there is no changeset present in a PR (without this changesets are v hard to recommend to open source projects)
 - Explore if we can populate github releases using changesets - either a separate package or a modification on the existing toolset
-- Add support for 
+- Add support for a monorepo that requires everything remain on version lockstep (required to support emotion)
