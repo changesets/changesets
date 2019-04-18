@@ -20,8 +20,10 @@ A changeset is a piece of information about changes made in a branch or commit. 
 After this, you will have new files added to your repository. These will be:
 
 ```
-- .changeset/HASH/changes.json
-- .changeset/HASH/changes.md
+-| .changeset/
+-|-| UNIQUE_ID/
+-|-|-| changes.json
+-|-|-| changes.md
 ```
 
 The message you typed can now be found in the `changes.md` file. If you want to expand on it, you can write as much markdown as you want, which will all be added to the the changelog on publish.
@@ -37,8 +39,10 @@ The message you typed can now be found in the `changes.md` file. If you want to 
 After this, you will have new files added to your repository. These will be:
 
 ```
-- .changeset/HASH/changes.json
-- .changeset/HASH/changes.md
+-| .changeset/
+-|-| UNIQUE_ID/
+-|-|-| changes.json
+-|-|-| changes.md
 ```
 
 The message you typed can now be found in the `changes.md` file. If you want to expand on it, you can write as much markdown as you want, which will all be added to the the changelog on publish.
@@ -47,6 +51,13 @@ The message you typed can now be found in the `changes.md` file. If you want to 
 
 ## Tips on adding changesets
 
-TODO
+### You can add more than one changeset to a pull request
 
-## I want to know more about changesets [here is a more in-depth explanation]()
+Changesets are designed to stack, so there's no problem with adding multiple. You might want to add more than one changeset when:
+
+- You want to release multiple packages with different changelog entries
+- You have made multiple changes to a package that should each be called out separately
+
+## I want to know more about changesets
+
+[here is a more in-depth explanation]()
