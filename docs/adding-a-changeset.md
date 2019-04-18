@@ -1,0 +1,52 @@
+# Adding a changeset
+
+Hi! You might be here because a person or a bot has asked you to 'add a changeset' to a project. Let's walk through adding a changesets. But first, what is a changeset?
+
+## What is a changeset?
+
+A changeset is a piece of information about changes made in a branch or commit. It holds three bits of information:
+
+- What we need to release
+- What version we are releasing packages at (using a [semver bump type](https://semver.org/))
+- A changelog entry for the released packages
+
+## I am in a multi-package repository (a mono-repo)
+
+1. Run the command line script `npm build-releases changeset` or `yarn build-releases changeset`.
+2. Select the packages you want to include in the changeset using ↑	and ↓ to navigate to packages, and :space: to select a package. Hit enter when all desired packages are selected.
+3. You will be prompted to select a bump type for each selected package. Select an appropriate bump type for the changes made. See [here](https://semver.org/) for informaiton on semver versioning
+4. Your final prompt will be to provide a message to go alongside the changeset. This will be written into the changelog when the next release occurs.
+
+After this, you will have new files added to your repository. These will be:
+
+```
+- .changeset/HASH/changes.json
+- .changeset/HASH/changes.md
+```
+
+The message you typed can now be found in the `changes.md` file. If you want to expand on it, you can write as much markdown as you want, which will all be added to the the changelog on publish.
+
+5. Once you are happy with the changeset message, commit the .changeset files to your branch.
+
+## I am in a single-package repository
+
+1. Run the command line script `npm build-releases changeset` or `yarn build-releases changeset`.
+2. Select an appropriate bump type for the changes made. See [here](https://semver.org/) for informaiton on semver versioning
+3. Your final prompt will be to provide a message to go alongside the changeset. This will be written into the changelog when the next release occurs.
+
+After this, you will have new files added to your repository. These will be:
+
+```
+- .changeset/HASH/changes.json
+- .changeset/HASH/changes.md
+```
+
+The message you typed can now be found in the `changes.md` file. If you want to expand on it, you can write as much markdown as you want, which will all be added to the the changelog on publish.
+
+4. Once you are happy with the changeset message, commit the .changeset files to your branch.
+
+## Tips on adding changesets
+
+TODO
+
+## I want to know more about changesets [here is a more in-depth explanation]()
