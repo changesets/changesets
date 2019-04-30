@@ -1,0 +1,44 @@
+{
+  "name": "changesets",
+  "version": "0.0.0",
+  "description": "Manage your versions and changelogs in a monorepo",
+  "main": "index.js",
+  "scripts": {
+    "build": "rimraf lib && babel src --out-dir lib --ignore '**/__tests__/**/*','**/__mocks__/**/*'",
+    "watch": "babel src --watch --out-dir lib --ignore '**/__tests__/**/*','**/__mocks__/**/*'"
+  },
+  "repository": "git@github.com:Noviny/changesets.git",
+  "author": "Ben Conolly <ben@thinkmill.com.au>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "babel-eslint": "^10.0.1",
+    "boxen": "^3.1.0",
+    "chalk": "^2.4.2",
+    "editor": "^1.0.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.2.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-jest": "^22.5.1",
+    "flow": "^0.2.3",
+    "fs-extra": "^7.0.1",
+    "fuzzy": "^0.1.3",
+    "globby": "^9.2.0",
+    "inquirer": "^6.3.1",
+    "inquirer-checkbox-plus-prompt": "^1.0.1",
+    "meow": "^5.0.0",
+    "outdent": "^0.7.0",
+    "prettier": "^1.17.0",
+    "projector-spawn": "^1.0.1",
+    "semver": "^6.0.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "@babel/preset-flow": "^7.0.0",
+    "jest": "^24.7.1"
+  }
+}

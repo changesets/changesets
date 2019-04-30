@@ -1,0 +1,29 @@
+{
+  "parser": "babel-eslint",
+  "extends": [
+    "airbnb-base",
+    "prettier",
+    "prettier/flowtype",
+    "plugin:jest/recommended"
+  ],
+  "rules": {
+    "no-restricted-syntax": "off",
+    "no-console": "off",
+    "prefer-destructuring": [
+      "error",
+      {
+        "VariableDeclarator": {
+          "array": true,
+          "object": false
+        },
+        "AssignmentExpression": {
+          "array": false,
+          "object": false
+        }
+      },
+      {
+        "enforceForRenamedProperties": true
+      }
+    ]
+  }
+}
