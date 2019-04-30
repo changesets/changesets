@@ -1,11 +1,11 @@
 // @flow
-const path = require('path');
-const fs = require('fs-extra');
+const path = require("path");
+const fs = require("fs-extra");
 
 // These two helpers are designed to operate on the .changeset
 // folder, and tidy up the subfolders
 
-const removeEmptyFolders = (folderPath /*: string */) => {
+const removeEmptyFolders = folderPath => {
   const dirContents = fs.readdirSync(folderPath);
   dirContents.forEach(contentPath => {
     const singleChangesetPath = path.resolve(folderPath, contentPath);
@@ -18,7 +18,7 @@ const removeEmptyFolders = (folderPath /*: string */) => {
   });
 };
 
-const removeFolders = (folderPath /*: string */) => {
+const removeFolders = folderPath => {
   if (!fs.existsSync(folderPath)) return;
   const dirContents = fs.readdirSync(folderPath);
   dirContents.forEach(contentPath => {
