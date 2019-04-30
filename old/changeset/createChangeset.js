@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 // @flow
 
-const { green, yellow, red } = require('chalk');
-const bolt = require('bolt');
+const { green, yellow, red } = require("chalk");
+const bolt = require("bolt");
 
-const cli = require('@atlaskit/build-utils/cli');
-const logger = require('@atlaskit/build-utils/logger');
-const inquirer = require('inquirer');
-const semver = require('semver');
-const outdent = require('outdent');
+const cli = require("@atlaskit/build-utils/cli");
+const logger = require("../../src/utils/logger");
+const inquirer = require("inquirer");
+const semver = require("semver");
+const outdent = require("outdent");
 
 /*::
 type releaseType = {
@@ -38,19 +38,19 @@ async function getPackageBumpRange(pkgJSON) {
   // Get the version range for a package someone has chosen to release
   let type = await cli.askList(
     `What kind of change is this for ${green(
-      name,
+      name
     )}? (current version is ${version})`,
-    ['patch', 'minor', 'major'],
+    ["patch", "minor", "major"]
   );
 
   // for packages that are under v1, we want to make sure major releases are intended,
   // as some repo-wide sweeping changes have mistakenly release first majors
   // of packages.
-  if (type === 'major' && semver.lt(version, '1.0.0')) {
-    let maintainersString = '';
+  if (type === "major" && semver.lt(version, "1.0.0")) {
+    let maintainersString = "";
 
     if (maintainers && Array.isArray(maintainers) && maintainers.length > 0) {
-      maintainersString = ` (${maintainers.join(', ')})`;
+      maintainersString = ` (${maintainers.join(", ")})`;
     }
     // prettier-ignore
     const message = yellow(outdent`
@@ -60,7 +60,7 @@ async function getPackageBumpRange(pkgJSON) {
       If you still want to release this package, select the appropriate version below:
     `)
     // prettier-ignore-end
-    type = await cli.askList(message, ['patch', 'minor', 'major']);
+    type = await cli.askList(message, ["patch", "minor", "major"]);
   }
 
   return type;
@@ -68,7 +68,7 @@ async function getPackageBumpRange(pkgJSON) {
 
 async function createChangeset(
   changedPackages /*: Array<string> */,
-  opts /*: { cwd?: string }  */ = {},
+  opts /*: { cwd?: string }  */ = {}
 ) {
   const cwd = opts.cwd || process.cwd();
   const allPackages = await bolt.getWorkspaces({ cwd });
@@ -80,7 +80,7 @@ async function createChangeset(
 
   const packagesToRelease = await getPackagesToRelease(
     changedPackages,
-    allPackages,
+    allPackages
   );
 
   const releases = [];
@@ -96,13 +96,13 @@ async function createChangeset(
   }
 
   logger.log(
-    'Please enter a summary for this change (this will be in the changelogs)',
+    "Please enter a summary for this change (this will be in the changelogs)"
   );
 
-  let summary = await cli.askQuestion('Summary');
+  let summary = await cli.askQuestion("Summary");
   while (summary.length === 0) {
-    logger.error('A summary is required for the changelog! 😪');
-    summary = await cli.askQuestion('Summary');
+    logger.error("A summary is required for the changelog! 😪");
+    summary = await cli.askQuestion("Summary");
   }
 
   let pkgsToSearch = [...releases];
@@ -118,35 +118,35 @@ async function createChangeset(
     // is leaving the version range.
     pkgDependents
       .map(dependent => {
-        let type = 'none';
+        let type = "none";
 
         const dependentPkgJSON = getPackageJSON(dependent);
         const { depTypes, versionRange } = getDependencyVersionRange(
           dependentPkgJSON,
-          nextRelease.name,
+          nextRelease.name
         );
         // Firstly we check if it is a peerDependency because if it is, our dependent bump type needs to be major.
         if (
-          depTypes.includes('peerDependencies') &&
-          nextRelease.type !== 'patch'
+          depTypes.includes("peerDependencies") &&
+          nextRelease.type !== "patch"
         ) {
-          type = 'major';
+          type = "major";
         } else {
           const nextReleaseVersion = semver.inc(
             getPackageJSON(nextRelease.name).version,
-            nextRelease.type,
+            nextRelease.type
           );
           if (
             !dependents.some(dep => dep.name === dependent) &&
             !releases.some(dep => dep.name === dependent) &&
             !semver.satisfies(nextReleaseVersion, versionRange)
           ) {
-            type = 'patch';
+            type = "patch";
           }
         }
         return { name: dependent, type };
       })
-      .filter(({ type }) => type !== 'none')
+      .filter(({ type }) => type !== "none")
       .forEach(dependent => {
         const existing = dependents.find(dep => dep.name === dependent.name);
         // For things that are being given a major bump, we check if we have already
@@ -155,10 +155,10 @@ async function createChangeset(
         // largest possible bump type.
         if (
           existing &&
-          dependent.type === 'major' &&
-          existing.type !== 'major'
+          dependent.type === "major" &&
+          existing.type !== "major"
         ) {
-          existing.type = 'major';
+          existing.type = "major";
         } else {
           pkgsToSearch.push(dependent);
           dependents.push(dependent);
@@ -173,14 +173,14 @@ async function createChangeset(
     dependent.dependencies = [...dependents, ...releases]
       .map(pkg => pkg.name)
       .filter(
-        dep => !!getDependencyVersionRange(dependentPkgJSON, dep).versionRange,
+        dep => !!getDependencyVersionRange(dependentPkgJSON, dep).versionRange
       );
   });
 
   return {
     summary,
     releases,
-    dependents,
+    dependents
   };
 }
 
@@ -189,8 +189,8 @@ async function getPackagesToRelease(changedPackages, allPackages) {
     return cli.askCheckboxPlus(
       // TODO: Make this wording better
       // TODO: take objects and be fancy with matching
-      'Which packages would you like to include?',
-      defaultInquirerList,
+      "Which packages would you like to include?",
+      defaultInquirerList
     );
   }
 
@@ -199,19 +199,19 @@ async function getPackagesToRelease(changedPackages, allPackages) {
     .filter(name => !changedPackages.includes(name));
 
   const defaultInquirerList = [
-    new inquirer.Separator('changed packages'),
+    new inquirer.Separator("changed packages"),
     ...changedPackages,
-    new inquirer.Separator('unchanged packages'),
+    new inquirer.Separator("unchanged packages"),
     ...unchangedPackagesNames,
-    new inquirer.Separator(),
+    new inquirer.Separator()
   ];
 
   let packagesToRelease = await askInitialReleaseQuestion(defaultInquirerList);
 
   if (packagesToRelease.length === 0) {
     do {
-      logger.error('You must select at least one package to release');
-      logger.error('(You most likely hit enter instead of space!)');
+      logger.error("You must select at least one package to release");
+      logger.error("(You most likely hit enter instead of space!)");
 
       packagesToRelease = await askInitialReleaseQuestion(defaultInquirerList);
     } while (packagesToRelease.length === 0);
@@ -226,15 +226,15 @@ async function getPackagesToRelease(changedPackages, allPackages) {
 
 function getDependencyVersionRange(dependentPkgJSON, dependencyName) {
   const DEPENDENCY_TYPES = [
-    'dependencies',
-    'devDependencies',
-    'peerDependencies',
-    'bundledDependencies',
-    'optionalDependencies',
+    "dependencies",
+    "devDependencies",
+    "peerDependencies",
+    "bundledDependencies",
+    "optionalDependencies"
   ];
   const dependencyVersionRange = {
     depTypes: [],
-    versionRange: '',
+    versionRange: ""
   };
   for (const type of DEPENDENCY_TYPES) {
     const deps = dependentPkgJSON[type];

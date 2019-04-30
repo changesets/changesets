@@ -1,22 +1,21 @@
-const path = require('path');
-const bolt = require('bolt');
-const logger = require('@atlaskit/build-utils/logger');
-const git = require('@atlaskit/build-utils/git');
-const createRelease = require('./createRelease');
-const createReleaseCommit = require('./createReleaseCommit');
-const { removeFolders } = require('../utils/removeFolders');
-const updateChangelog = require('../changelog');
-const fs = require('@atlaskit/build-utils/fs');
-const fse = require('fs-extra');
-const resolveConfig = require('../utils/resolveConfig');
-const { removeEmptyFolders } = require('../utils/removeFolders');
-const getChangesetBase = require('../utils/getChangesetBase');
-const { versionOptions } = require('../initialize/initial/config');
+const path = require("path");
+const bolt = require("bolt");
+const logger = require("@atlaskit/build-utils/logger");
+const git = require("@atlaskit/build-utils/git");
+const createRelease = require("./createRelease");
+const createReleaseCommit = require("./createReleaseCommit");
+const { removeFolders } = require("../utils/removeFolders");
+const updateChangelog = require("../changelog");
+const fse = require("fs-extra");
+const resolveConfig = require("../utils/resolveConfig");
+const { removeEmptyFolders } = require("../utils/removeFolders");
+const getChangesetBase = require("../utils/getChangesetBase");
+const { versionOptions } = require("../initialize/initial/config");
 
 async function bumpReleasedPackages(releaseObj, allPackages, config) {
   for (const release of releaseObj.releases) {
     const pkgDir = allPackages.find(pkg => pkg.name === release.name).dir;
-    const pkgJsonPath = path.join(pkgDir, 'package.json');
+    const pkgJsonPath = path.join(pkgDir, "package.json");
     const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath));
 
     pkgJson.version = release.version;
@@ -28,23 +27,10 @@ async function bumpReleasedPackages(releaseObj, allPackages, config) {
   }
 }
 
-// TODO: This old method of writing changesets is being removed, however we are reading from it
-// for a grace period. Once this is done, we will need to:
-//    1. Remove this function
-// This should be done by the beginning of 2019
-async function getOldCommitChangesets() {
-  const lastPublishCommit = await git.getLastPublishCommit();
-  // getUnpublishedChangesetCommits takes a 'since' flag, we do commits since last publish
-  const unreleasedChangesets = await git.getUnpublishedChangesetCommits(
-    lastPublishCommit,
-  );
-  return unreleasedChangesets || [];
-}
-
 async function getNewFSChangesets(changesetBase) {
   removeEmptyFolders(changesetBase);
   if (!fse.existsSync(changesetBase)) {
-    throw new Error('There is no .changeset directory in this project');
+    throw new Error("There is no .changeset directory in this project");
   }
 
   const dirs = fse.readdirSync(changesetBase);
@@ -53,10 +39,10 @@ async function getNewFSChangesets(changesetBase) {
     .filter(file => fse.lstatSync(path.join(changesetBase, file)).isDirectory())
     .map(async changesetDir => {
       const summary = fse.readFileSync(
-        path.join(changesetBase, changesetDir, 'changes.md'),
-        'utf-8',
+        path.join(changesetBase, changesetDir, "changes.md"),
+        "utf-8"
       );
-      const jsonPath = path.join(changesetBase, changesetDir, 'changes.json');
+      const jsonPath = path.join(changesetBase, changesetDir, "changes.json");
       const json = require(jsonPath);
       const commit = await git.getCommitThatAddsFile(jsonPath);
       return { ...json, summary, commit };
@@ -73,14 +59,12 @@ async function run(opts) {
   const noChangelogFlag = config.noChangelog;
   const allPackages = await bolt.getWorkspaces({ cwd });
   const changesetBase = await getChangesetBase(cwd);
-  const oldChangesets = await getOldCommitChangesets();
-  const newChangesets = await getNewFSChangesets(changesetBase);
-  const unreleasedChangesets = [...oldChangesets, ...newChangesets];
+  const unreleasedChangesets = await getNewFSChangesets(changesetBase);
   const releaseObj = createRelease(unreleasedChangesets, allPackages);
   const publishCommit = createReleaseCommit(releaseObj, config.skipCI);
 
   if (unreleasedChangesets.length === 0) {
-    logger.warn('No unreleased changesets found, exiting.');
+    logger.warn("No unreleased changesets found, exiting.");
     return;
   }
 
@@ -92,13 +76,13 @@ async function run(opts) {
   const versionsToUpdate = releaseObj.releases.reduce(
     (cur, next) => ({
       ...cur,
-      [next.name]: next.version,
+      [next.name]: next.version
     }),
-    {},
+    {}
   );
   // update dependencies on those versions using bolt
   const pkgPaths = await bolt.updatePackageVersions(versionsToUpdate, {
-    cwd,
+    cwd
   });
 
   if (config.commit) {
@@ -109,7 +93,7 @@ async function run(opts) {
 
   // This double negative is bad, but cleaner than the alternative
   if (!noChangelogFlag) {
-    logger.log('Updating changelogs...');
+    logger.log("Updating changelogs...");
     // Now update the changelogs
     const changelogPaths = await updateChangelog(releaseObj, config);
     if (config.commit) {
@@ -119,23 +103,23 @@ async function run(opts) {
     }
   }
 
-  logger.log('Removing changesets...');
+  logger.log("Removing changesets...");
 
   // This should then reset the changesets folder to a blank state
   removeFolders(changesetBase);
   if (config.commit) {
     await git.add(changesetBase);
 
-    logger.log('Committing changes...');
+    logger.log("Committing changes...");
     // TODO: Check if there are any unstaged changed before committing and throw
     // , as it means something went super-odd.
     await git.commit(publishCommit);
   } else {
     logger.log(
-      'All files have been updated. Review them and commit at your leisure',
+      "All files have been updated. Review them and commit at your leisure"
     );
     logger.warn(
-      'If you alter version changes in package.jsons, make sure to run bolt before publishing to ensure the repo is in a valid state',
+      "If you alter version changes in package.jsons, make sure to run bolt before publishing to ensure the repo is in a valid state"
     );
   }
 }

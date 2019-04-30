@@ -1,9 +1,9 @@
-const generateMarkdownTemplate = require('./template');
-const fs = require('fs');
-const bolt = require('bolt');
-const path = require('path');
-const util = require('util');
-const logger = require('@atlaskit/build-utils/logger');
+const generateMarkdownTemplate = require("./template");
+const fs = require("fs");
+const bolt = require("bolt");
+const path = require("path");
+const util = require("util");
+const logger = require("../../src/utils/logger");
 
 function writeFile(filePath, fileContents) {
   return util.promisify(cb => fs.writeFile(filePath, fileContents, cb))();
@@ -20,18 +20,18 @@ async function updateChangelog(releaseObject, opts) {
       logger.warn(
         `While writing changelog, could not find workspace ${
           release.name
-        } in project.`,
+        } in project.`
       );
     }
-    const changelogPath = path.join(pkg.dir, 'CHANGELOG.md');
+    const changelogPath = path.join(pkg.dir, "CHANGELOG.md");
 
     const markdown = await generateMarkdownTemplate(
       release,
       releaseObject,
-      opts,
+      opts
     );
 
-    const templateString = `\n\n${markdown.trim('\n')}\n`;
+    const templateString = `\n\n${markdown.trim("\n")}\n`;
     try {
       if (fs.existsSync(changelogPath)) {
         await prependFile(changelogPath, templateString, pkg);
@@ -56,7 +56,7 @@ async function prependFile(filePath, data, pkg) {
     fs.writeFileSync(filePath, completelyNewChangelog);
     return;
   }
-  const newChangelog = fileData.replace('\n', data);
+  const newChangelog = fileData.replace("\n", data);
   fs.writeFileSync(filePath, newChangelog);
 }
 
