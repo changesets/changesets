@@ -145,6 +145,7 @@ describe("Changesets", () => {
         { name: "pkg-c", type: "patch", dependencies: ["pkg-b"] }
       ]
     };
+
     const call = writeChangeset.mock.calls[0][0];
     expect(call).toEqual(expectedChangeset);
   });

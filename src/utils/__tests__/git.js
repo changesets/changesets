@@ -1,6 +1,6 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 
-describe("git", () => {
+describe.skip("git", () => {
   describe("getCommitThatAddsFile", () => {
     it("should have tests", () => false);
   });

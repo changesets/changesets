@@ -5,7 +5,7 @@ import logger from "./utils/logger";
 
 import init from "./commands/init";
 import add from "./commands/add";
-import consume from "./commands/consume";
+import bump from "./commands/bump";
 import release from "./commands/release";
 import status from "./commands/status";
 
@@ -16,7 +16,7 @@ const { input, flags } = meow(
   Commands
     init
     add
-    consume
+    bump
     release
     status
   `,
@@ -37,6 +37,14 @@ const { input, flags } = meow(
       },
       sinceMaster: {
         type: "boolean"
+      },
+      verbose: {
+        type: "boolean",
+        alias: "v"
+      },
+      output: {
+        type: "string",
+        alias: "o"
       }
     }
   }
@@ -58,7 +66,9 @@ const cwd = process.cwd();
       updateChangelog,
       skipCI,
       public: isPublic,
-      sinceMaster
+      sinceMaster,
+      verbose,
+      output
     } = flags;
 
     switch (input[0]) {
@@ -70,8 +80,8 @@ const cwd = process.cwd();
         await add({ cwd, commit });
         return;
       }
-      case "consume": {
-        await consume({ cwd, updateChangelog, skipCI, commit });
+      case "bump": {
+        await bump({ cwd, updateChangelog, skipCI, commit });
         return;
       }
       case "release": {
@@ -79,7 +89,7 @@ const cwd = process.cwd();
         return;
       }
       case "status": {
-        await status({ cwd, sinceMaster });
+        await status({ cwd, sinceMaster, verbose, output });
         return;
       }
       default: {
