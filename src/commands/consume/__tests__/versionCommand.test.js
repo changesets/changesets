@@ -3,17 +3,17 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 import fs from "fs-extra";
 import path from "path";
 import versionCommand from "../index";
-import * as git from "../../../new-utils/git";
-import logger from "../../../new-utils/logger";
+import * as git from "../../../utils/git";
+import logger from "../../../utils/logger";
 import writeChangeset from "../../add/writeChangeset";
 
 // avoid polluting test logs with error message in console
 const consoleError = console.error;
 
-jest.mock("../../../new-utils/cli");
-jest.mock("../../../new-utils/git");
+jest.mock("../../../utils/cli");
+jest.mock("../../../utils/git");
 jest.mock("../../add/parseChangesetCommit");
-jest.mock("../../../new-utils/logger");
+jest.mock("../../../utils/logger");
 
 git.add.mockImplementation(() => Promise.resolve(true));
 git.commit.mockImplementation(() => Promise.resolve(true));

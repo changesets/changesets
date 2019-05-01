@@ -1,5 +1,5 @@
 import outdent from "outdent";
-import createRelease from "../createRelease";
+import createRelease from "../../../utils/createRelease";
 import createReleaseCommit from "../createReleaseCommit";
 
 const fakeAllPackages = [
@@ -10,14 +10,17 @@ const simpleChangeset = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
   dependents: [],
-  commit: "dec4a66"
+  commit: "dec4a66",
+  id: "abc123xy"
 };
 const simpleChangesetWithDeleted = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
   dependents: [{ name: "package-c", type: "patch" }],
-  commit: "dec4a66"
+  commit: "dec4a66",
+  id: "abc123ph"
 };
+
 const simpleChangeset2 = {
   summary: "This is another summary",
   releases: [
@@ -25,7 +28,8 @@ const simpleChangeset2 = {
     { name: "package-b", type: "minor" }
   ],
   dependents: [],
-  commit: "695fad0"
+  commit: "695fad0",
+  id: "abc123fh"
 };
 
 describe("createReleaseCommit", () => {
@@ -45,7 +49,7 @@ describe("createReleaseCommit", () => {
         []
 
       ---
-      {"releases":[{"name":"package-a","commits":["dec4a66"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"}]}
+      {"releases":[{"name":"package-a","type":"minor","commits":["dec4a66"],"changesets":["abc123xy"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"}]}
       ---
 
     `);
@@ -66,7 +70,7 @@ describe("createReleaseCommit", () => {
         []
 
       ---
-      {"releases":[{"name":"package-a","commits":["dec4a66"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"}]}
+      {"releases":[{"name":"package-a","type":"minor","commits":["dec4a66"],"changesets":["abc123xy"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"}]}
       ---
 
 
@@ -93,7 +97,7 @@ describe("createReleaseCommit", () => {
         package-c
 
       ---
-      {"releases":[{"name":"package-a","commits":["dec4a66"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"}]}
+      {"releases":[{"name":"package-a","type":"minor","commits":["dec4a66"],"changesets":["abc123ph"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"}]}
       ---
 
     `);
@@ -116,7 +120,7 @@ describe("createReleaseCommit", () => {
         []
 
       ---
-      {"releases":[{"name":"package-a","commits":["695fad0"],"version":"1.0.1"},{"name":"package-b","commits":["695fad0"],"version":"1.1.0"}],"changesets":[{"commit":"695fad0","summary":"This is another summary"}]}
+      {"releases":[{"name":"package-a","type":"patch","commits":["695fad0"],"changesets":["abc123fh"],"version":"1.0.1"},{"name":"package-b","type":"minor","commits":["695fad0"],"changesets":["abc123fh"],"version":"1.1.0"}],"changesets":[{"commit":"695fad0","summary":"This is another summary"}]}
       ---
 
     `);
@@ -143,7 +147,7 @@ describe("createReleaseCommit", () => {
         []
 
       ---
-      {"releases":[{"name":"package-a","commits":["dec4a66","695fad0"],"version":"1.1.0"},{"name":"package-b","commits":["695fad0"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"},{"commit":"695fad0","summary":"This is another summary"}]}
+      {"releases":[{"name":"package-a","type":"minor","commits":["dec4a66","695fad0"],"changesets":["abc123xy","abc123fh"],"version":"1.1.0"},{"name":"package-b","type":"minor","commits":["695fad0"],"changesets":["abc123fh"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"},{"commit":"695fad0","summary":"This is another summary"}]}
       ---
 
     `);

@@ -6,17 +6,19 @@ function maxType(types) {
 }
 
 export default function flattenReleases(changesets) {
-  const abc = changesets
+  const flatChangesets = changesets
     .map(changeset => [
       ...changeset.releases.map(release => ({
         name: release.name,
         type: release.type,
-        commit: changeset.commit
+        commit: changeset.commit,
+        id: changeset.id
       })),
       ...changeset.dependents.map(dependent => ({
         name: dependent.name,
         type: dependent.type,
-        commit: changeset.commit
+        commit: changeset.commit,
+        id: changeset.id
       }))
     ])
     .reduce((acc, a) => [...acc, ...a], []) // flatten
@@ -28,9 +30,10 @@ export default function flattenReleases(changesets) {
       return acc;
     }, {});
 
-  return Object.entries(abc).map(([name, releases]) => ({
+  return Object.entries(flatChangesets).map(([name, releases]) => ({
     name,
     type: maxType(releases.map(r => r.type)),
-    commits: [...new Set(releases.map(r => r.commit))]
+    commits: [...new Set(releases.map(r => r.commit))].filter(a => a),
+    changesets: [...new Set(releases.map(r => r.id))]
   }));
 }

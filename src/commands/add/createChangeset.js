@@ -9,8 +9,8 @@ import inquirer from "inquirer";
 import semver from "semver";
 import outdent from "outdent";
 
-import * as cli from "../../new-utils/cli";
-import logger from "../../new-utils/logger";
+import * as cli from "../../utils/cli";
+import logger from "../../utils/logger";
 
 /*::
 type releaseType = {

@@ -1,6 +1,6 @@
-const outdent = require("outdent");
-const generateMarkdownTemplate = require("../../changelog/template");
-const { defaultConfig } = require("../../utils/constants");
+import outdent from "outdent";
+import generateMarkdownTemplate from "../template";
+import { defaultConfig } from "../../../utils/constants";
 
 const { versionOptions } = defaultConfig;
 

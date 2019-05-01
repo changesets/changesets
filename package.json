@@ -4,7 +4,7 @@
   "description": "This will definitely get split up at some point, just using for testing",
   "main": "old/bin/build-releases.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build": "rimraf lib && babel src --out-dir lib --ignore '**/__tests__/**/*','**/__mocks__/**/*','**/__fixtures__/**/*'",
     "watch": "babel src --watch --out-dir lib --ignore '**/__tests__/**/*','**/__mocks__/**/*','**/__fixtures__/**/*'"
   },
@@ -17,7 +17,6 @@
     "bolt": "^0.22.1",
     "boxen": "^1.3.0",
     "chalk": "^2.1.0",
-    "editor": "^1.0.0",
     "fs-extra": "^7.0.1",
     "fuzzy": "^0.1.3",
     "inquirer": "^3.3.0",

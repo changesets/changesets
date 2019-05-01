@@ -1,4 +1,5 @@
-const chalk = require("chalk");
+/* eslint-disable prefer-rest-params */
+import chalk from "chalk";
 
 function log() {
   console.log.apply(this, arguments);

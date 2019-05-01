@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import meow from "meow";
 
-import logger from "./new-utils/logger";
+import logger from "./utils/logger";
 
 import init from "./commands/init";
 import add from "./commands/add";
 import consume from "./commands/consume";
 import release from "./commands/release";
+import status from "./commands/status";
 
 const { input, flags } = meow(
   `
@@ -24,7 +25,7 @@ const { input, flags } = meow(
       commit: {
         type: "boolean"
       },
-      changelog: {
+      updateChangelog: {
         type: "boolean",
         default: true
       },
@@ -32,6 +33,9 @@ const { input, flags } = meow(
         type: "boolean"
       },
       public: {
+        type: "boolean"
+      },
+      sinceMaster: {
         type: "boolean"
       }
     }
@@ -49,7 +53,13 @@ const cwd = process.cwd();
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
   } else {
-    const { commit, updateChangelog, skipCI, public: isPublic } = flags;
+    const {
+      commit,
+      updateChangelog,
+      skipCI,
+      public: isPublic,
+      sinceMaster
+    } = flags;
 
     switch (input[0]) {
       case "init": {
@@ -65,15 +75,11 @@ const cwd = process.cwd();
         return;
       }
       case "release": {
-        await release({ release, public: isPublic });
+        await release({ cwd, release, public: isPublic });
         return;
       }
       case "status": {
-        logger.error("the add command has not been implemented yet");
-        return;
-      }
-      case "check": {
-        logger.error("the add command has not been implemented yet");
+        await status({ cwd, sinceMaster });
         return;
       }
       default: {

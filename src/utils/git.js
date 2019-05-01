@@ -7,52 +7,6 @@ async function getMasterRef() {
   return gitCmd.stdout.trim().split("\n")[0];
 }
 
-async function getCommitsSince(ref) {
-  const gitCmd = await spawn("git", [
-    "rev-list",
-    "--no-merges",
-    "--abbrev-commit",
-    `${ref}..HEAD`
-  ]);
-  return gitCmd.stdout.trim().split("\n");
-}
-
-async function getChangedFilesSince(ref, fullPath = false) {
-  // First we need to find the commit where we diverged from `ref` at using `git merge-base`
-  let cmd = await spawn("git", ["merge-base", ref, "HEAD"]);
-  const divergedAt = cmd.stdout.trim();
-  // Now we can find which files we added
-  cmd = await spawn("git", ["diff", "--name-only", divergedAt]);
-  const files = cmd.stdout.trim().split("\n");
-  if (!fullPath) return files;
-  return files.map(file => path.resolve(file));
-}
-
-async function getChangedChangesetFilesSinceMaster(fullPath = false) {
-  const ref = await getMasterRef();
-  // First we need to find the commit where we diverged from `ref` at using `git merge-base`
-  let cmd = await spawn("git", ["merge-base", ref, "HEAD"]);
-  // Now we can find which files we added
-  cmd = await spawn("git", [
-    "diff",
-    "--name-only",
-    "--diff-filter=d",
-    "master"
-  ]);
-
-  const files = cmd.stdout
-    .trim()
-    .split("\n")
-    .filter(file => file.includes("changes.json"));
-  if (!fullPath) return files;
-  return files.map(file => path.resolve(file));
-}
-
-async function getBranchName() {
-  const gitCmd = await spawn("git", ["rev-parse", "--abbrev-ref", "HEAD"]);
-  return gitCmd.stdout.trim();
-}
-
 async function add(pathToFile) {
   const gitCmd = await spawn("git", ["add", pathToFile]);
   return gitCmd.code === 0;
@@ -83,6 +37,38 @@ async function getCommitThatAddsFile(gitPath) {
   // For reasons I do not understand, passing pretty format through this is not working
   // The slice below is aimed at achieving the same thing.
   return gitCmd.stdout.split("\n")[0];
+}
+
+async function getChangedFilesSince(ref, fullPath = false) {
+  // First we need to find the commit where we diverged from `ref` at using `git merge-base`
+  let cmd = await spawn("git", ["merge-base", ref, "HEAD"]);
+  const divergedAt = cmd.stdout.trim();
+  // Now we can find which files we added
+  cmd = await spawn("git", ["diff", "--name-only", divergedAt]);
+  const files = cmd.stdout.trim().split("\n");
+  if (!fullPath) return files;
+  return files.map(file => path.resolve(file));
+}
+
+// below are less generic functions that we use in combination with other things we are doing
+async function getChangedChangesetFilesSinceMaster(fullPath = false) {
+  const ref = await getMasterRef();
+  // First we need to find the commit where we diverged from `ref` at using `git merge-base`
+  let cmd = await spawn("git", ["merge-base", ref, "HEAD"]);
+  // Now we can find which files we added
+  cmd = await spawn("git", [
+    "diff",
+    "--name-only",
+    "--diff-filter=d",
+    "master"
+  ]);
+
+  const files = cmd.stdout
+    .trim()
+    .split("\n")
+    .filter(file => file.includes("changes.json"));
+  if (!fullPath) return files;
+  return files.map(file => path.resolve(file));
 }
 
 async function getChangedPackagesSinceCommit(commitHash) {
@@ -121,10 +107,7 @@ async function getChangedPackagesSinceMaster() {
 
 export {
   getCommitThatAddsFile,
-  getCommitsSince,
   getChangedFilesSince,
-  getBranchName,
-  getMasterRef,
   add,
   commit,
   tag,

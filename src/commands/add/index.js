@@ -3,9 +3,9 @@ import { green } from "chalk";
 import path from "path";
 import fs from "fs-extra";
 
-import * as cli from "../../new-utils/cli";
-import * as git from "../../new-utils/git";
-import logger from "../../new-utils/logger";
+import * as cli from "../../utils/cli";
+import * as git from "../../utils/git";
+import logger from "../../utils/logger";
 
 import writeChangeset from "./writeChangeset";
 import createChangeset from "./createChangeset";

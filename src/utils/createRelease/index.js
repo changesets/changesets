@@ -43,6 +43,7 @@ function getCurrentVersion(packageName, allPackages) {
 
 export default function createRelease(changesets, allPackages) {
   // First, combine all the changeset.releases into one useful array
+
   const flattenedChangesets = flattenChangesets(changesets);
 
   const allReleases = flattenedChangesets
@@ -57,9 +58,7 @@ export default function createRelease(changesets, allPackages) {
     .map(release => ({
       ...release,
       version: semver.inc(release.version, release.type)
-    }))
-    // strip out type field
-    .map(({ type, ...rest }) => rest);
+    }));
 
   return {
     releases: allReleases.filter(release => release.version !== null),

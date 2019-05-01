@@ -1,15 +1,17 @@
-const generateMarkdownTemplate = require("./template");
-const fs = require("fs-extra");
-const bolt = require("bolt");
-const path = require("path");
-const util = require("util");
-const logger = require("../new-utils/logger");
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-await-in-loop */
+import fs from "fs-extra";
+import * as bolt from "bolt";
+import path from "path";
+import util from "util";
+import generateMarkdownTemplate from "./template";
+import logger from "../../utils/logger";
 
 function writeFile(filePath, fileContents) {
   return util.promisify(cb => fs.writeFile(filePath, fileContents, cb))();
 }
 
-async function updateChangelog(releaseObject, opts) {
+export default async function updateChangelog(releaseObject, opts) {
   const cwd = opts.cwd || process.cwd();
   const allPackages = await bolt.getWorkspaces({ cwd });
   const udpatedChangelogs = [];
@@ -59,5 +61,3 @@ async function prependFile(filePath, data, pkg) {
   const newChangelog = fileData.replace("\n", data);
   fs.writeFileSync(filePath, newChangelog);
 }
-
-module.exports = updateChangelog;

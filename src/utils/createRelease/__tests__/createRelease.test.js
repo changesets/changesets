@@ -1,4 +1,4 @@
-import createRelease from "../createRelease";
+import createRelease from "..";
 
 const fakeAllPackages = [
   { name: "package-a", config: { version: "1.0.0" } },
@@ -8,13 +8,15 @@ const simpleChangeset = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
   dependents: [],
-  commit: "dec4a66"
+  commit: "dec4a66",
+  id: "abc123a1"
 };
 const simpleChangeset2 = {
   summary: "This is another summary",
   releases: [{ name: "package-a", type: "patch" }],
   dependents: [],
-  commit: "695fad0"
+  commit: "695fad0",
+  id: "abc123ph"
 };
 
 const changesetWithDep = {
@@ -23,7 +25,8 @@ const changesetWithDep = {
   dependents: [
     { name: "package-b", type: "patch", dependencies: ["package-a"] }
   ],
-  commit: "695fad0"
+  commit: "695fad0",
+  id: "abc123xy"
 };
 
 const changesetWithCircularDep = {
@@ -32,7 +35,8 @@ const changesetWithCircularDep = {
   dependents: [
     { name: "package-a", type: "patch", dependencies: ["package-a"] }
   ],
-  commit: "695fad0"
+  commit: "695fad0",
+  id: "abc123aa"
 };
 
 const changesetWithNone = {
@@ -41,7 +45,8 @@ const changesetWithNone = {
   dependents: [
     { name: "package-b", type: "none", dependencies: ["package-a"] }
   ],
-  commit: "695fad0"
+  commit: "695fad0",
+  id: "abc123nw"
 };
 
 const changesetWithDeletedPackage = {
@@ -51,14 +56,23 @@ const changesetWithDeletedPackage = {
     { name: "package-b", type: "patch", dependencies: ["package-a"] },
     { name: "package-c", type: "patch", dependencies: [] }
   ],
-  commit: "695fad0"
+  commit: "695fad0",
+  id: "ascii521"
 };
 
 describe("createRelease", () => {
   it("should handle a single simple changeset", () => {
     const releaseObj = createRelease([simpleChangeset], fakeAllPackages);
     expect(releaseObj).toEqual({
-      releases: [{ name: "package-a", commits: ["dec4a66"], version: "1.1.0" }],
+      releases: [
+        {
+          name: "package-a",
+          commits: ["dec4a66"],
+          version: "1.1.0",
+          type: "minor",
+          changesets: ["abc123a1"]
+        }
+      ],
       deleted: [],
       changesets: [simpleChangeset]
     });
@@ -75,7 +89,9 @@ describe("createRelease", () => {
         {
           name: "package-a",
           commits: ["dec4a66", "695fad0"],
-          version: "1.1.0"
+          version: "1.1.0",
+          type: "minor",
+          changesets: ["abc123a1", "abc123ph"]
         }
       ],
       deleted: [],
@@ -94,7 +110,9 @@ describe("createRelease", () => {
         {
           name: "package-a",
           commits: ["695fad0"],
-          version: "1.1.0"
+          version: "1.1.0",
+          type: "minor",
+          changesets: ["abc123aa"]
         }
       ],
       deleted: [],
@@ -107,8 +125,20 @@ describe("createRelease", () => {
 
     expect(releaseObj).toEqual({
       releases: [
-        { name: "package-a", commits: ["695fad0"], version: "1.1.0" },
-        { name: "package-b", commits: ["695fad0"], version: "1.0.1" }
+        {
+          name: "package-a",
+          commits: ["695fad0"],
+          version: "1.1.0",
+          type: "minor",
+          changesets: ["abc123xy"]
+        },
+        {
+          name: "package-b",
+          commits: ["695fad0"],
+          version: "1.0.1",
+          type: "patch",
+          changesets: ["abc123xy"]
+        }
       ],
       deleted: [],
       changesets: [changesetWithDep]
@@ -119,13 +149,21 @@ describe("createRelease", () => {
     const releaseObj = createRelease([changesetWithNone], fakeAllPackages);
 
     expect(releaseObj).toEqual({
-      releases: [{ name: "package-a", commits: ["695fad0"], version: "1.1.0" }],
+      releases: [
+        {
+          name: "package-a",
+          commits: ["695fad0"],
+          version: "1.1.0",
+          type: "minor",
+          changesets: ["abc123nw"]
+        }
+      ],
       deleted: [],
       changesets: [changesetWithNone]
     });
   });
 
-  it("should handle a deleted package", () => {
+  it.only("should handle a deleted package", () => {
     const releaseObj = createRelease(
       [changesetWithDeletedPackage],
       fakeAllPackages
@@ -133,14 +171,28 @@ describe("createRelease", () => {
 
     expect(releaseObj).toEqual({
       releases: [
-        { name: "package-a", commits: ["695fad0"], version: "1.1.0" },
-        { name: "package-b", commits: ["695fad0"], version: "1.0.1" }
+        {
+          name: "package-a",
+          commits: ["695fad0"],
+          version: "1.1.0",
+          type: "minor",
+          changesets: ["ascii521"]
+        },
+        {
+          name: "package-b",
+          commits: ["695fad0"],
+          version: "1.0.1",
+          type: "patch",
+          changesets: ["ascii521"]
+        }
       ],
       deleted: [
         {
           commits: ["695fad0"],
           name: "package-c",
-          version: null
+          version: null,
+          type: "patch",
+          changesets: ["ascii521"]
         }
       ],
       changesets: [changesetWithDeletedPackage]

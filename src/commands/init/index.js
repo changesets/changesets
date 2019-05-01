@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs-extra";
-import logger from "../../new-utils/logger";
+import logger from "../../utils/logger";
 import getChangesetBase from "../../utils/getChangesetBase";
 import { pkgPath } from "../../utils/constants";
 

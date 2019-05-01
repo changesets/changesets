@@ -1,4 +1,3 @@
-import editor from "editor";
 import uuid from "uuid/v1";
 import inquirer from "inquirer";
 import fuzzy from "fuzzy";
@@ -105,20 +104,4 @@ async function askCheckbox(message, choices) {
     .catch(e => console.log("can we do this?", e));
 }
 
-async function askEditor(pathToFile) {
-  return new Promise((resolve, reject) => {
-    editor(pathToFile, code => {
-      if (code === 0) resolve();
-      reject();
-    });
-  });
-}
-
-export {
-  askCheckboxPlus,
-  askQuestion,
-  askConfirm,
-  askList,
-  askCheckbox,
-  askEditor
-};
+export { askCheckboxPlus, askQuestion, askConfirm, askList, askCheckbox };

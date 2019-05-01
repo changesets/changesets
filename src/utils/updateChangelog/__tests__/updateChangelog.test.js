@@ -1,12 +1,13 @@
+/* eslint-disable one-var */
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import path from "path";
 import fs from "fs-extra";
-import updateChangelog from "../../changelog";
-import { defaultConfig } from "../../utils/constants";
+import updateChangelog from "..";
+import { defaultConfig } from "../../../utils/constants";
 
 const { versionOptions } = defaultConfig;
 
-jest.mock("../../new-utils/logger");
+jest.mock("../../../utils/logger");
 
 const emptyFileChangeset = {
   releases: [

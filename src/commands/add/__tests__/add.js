@@ -5,15 +5,15 @@ import {
   askList,
   askConfirm,
   askQuestion
-} from "../../../new-utils/cli";
-import * as git from "../../../new-utils/git";
+} from "../../../utils/cli";
+import * as git from "../../../utils/git";
 
 import addChangeset from "..";
 import writeChangeset from "../writeChangeset";
 
-jest.mock("../../../new-utils/logger");
-jest.mock("../../../new-utils/cli");
-jest.mock("../../../new-utils/git");
+jest.mock("../../../utils/logger");
+jest.mock("../../../utils/cli");
+jest.mock("../../../utils/git");
 jest.mock("../../../commands/add/writeChangeset");
 writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 git.commit.mockImplementation(() => Promise.resolve(true));

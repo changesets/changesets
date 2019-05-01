@@ -2,7 +2,7 @@
 import { green, red } from "chalk";
 import boxen from "boxen";
 import outdent from "outdent";
-import logger from "../../new-utils/logger";
+import logger from "../../utils/logger";
 
 export function printConfirmationMessage(changeset) {
   function getReleasesOfType(type) {

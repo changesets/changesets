@@ -5,8 +5,8 @@ import {
   askList,
   askConfirm,
   askQuestion
-} from "../../../new-utils/cli";
-import * as git from "../../../new-utils/git";
+} from "../../../utils/cli";
+import * as git from "../../../utils/git";
 import addChangeset from "..";
 import writeChangeset from "../writeChangeset";
 
@@ -18,9 +18,9 @@ import writeChangeset from "../writeChangeset";
       * Otherwise - normal patching rules apply
  */
 
-jest.mock("../../../new-utils/logger");
-jest.mock("../../../new-utils/cli");
-jest.mock("../../../new-utils/git");
+jest.mock("../../../utils/logger");
+jest.mock("../../../utils/cli");
+jest.mock("../../../utils/git");
 jest.mock("../../../commands/add/writeChangeset");
 
 // This is some sad flow hackery

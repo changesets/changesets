@@ -1,55 +1,21 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable import/no-dynamic-require */
+/* eslint-disable global-require */
 /* eslint-disable no-await-in-loop */
 import path from "path";
 import * as bolt from "bolt";
 import fs from "fs-extra";
-import logger from "../../new-utils/logger";
-import * as git from "../../new-utils/git";
-import createRelease from "./createRelease";
+import logger from "../../utils/logger";
+import * as git from "../../utils/git";
+import createRelease from "../../utils/createRelease";
 import createReleaseCommit from "./createReleaseCommit";
 import { removeFolders, removeEmptyFolders } from "../../utils/removeFolders";
-import updateChangelog from "../../changelog";
+import updateChangelog from "../../utils/updateChangelog";
+import getChangesets from "../../utils/getChangesets";
 
 import resolveConfig from "../../utils/resolveConfig";
 import getChangesetBase from "../../utils/getChangesetBase";
 import { defaultConfig } from "../../utils/constants";
-
-async function bumpReleasedPackages(releaseObj, allPackages, config) {
-  for (const release of releaseObj.releases) {
-    const pkgDir = allPackages.find(pkg => pkg.name === release.name).dir;
-    const pkgJsonPath = path.join(pkgDir, "package.json");
-    const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath));
-
-    pkgJson.version = release.version;
-    const pkgJsonStr = `${JSON.stringify(pkgJson, null, 2)}\n`;
-    await fs.writeFile(pkgJsonPath, pkgJsonStr);
-    if (config.commit) {
-      await git.add(pkgJsonPath);
-    }
-  }
-}
-
-async function getNewFSChangesets(changesetBase) {
-  removeEmptyFolders(changesetBase);
-  if (!fs.existsSync(changesetBase)) {
-    throw new Error("There is no .changeset directory in this project");
-  }
-
-  const dirs = fs.readdirSync(changesetBase);
-  // this needs to support just not dealing with dirs that aren't set up properly
-  const changesets = dirs
-    .filter(file => fs.lstatSync(path.join(changesetBase, file)).isDirectory())
-    .map(async changesetDir => {
-      const summary = fs.readFileSync(
-        path.join(changesetBase, changesetDir, "changes.md"),
-        "utf-8"
-      );
-      const jsonPath = path.join(changesetBase, changesetDir, "changes.json");
-      const json = require(jsonPath);
-      const commit = await git.getCommitThatAddsFile(jsonPath);
-      return { ...json, summary, commit };
-    });
-  return Promise.all(changesets);
-}
 
 export default async function version(opts) {
   let userConfig = await resolveConfig(opts);
@@ -59,7 +25,9 @@ export default async function version(opts) {
   const cwd = config.cwd || process.cwd();
   const allPackages = await bolt.getWorkspaces({ cwd });
   const changesetBase = await getChangesetBase(cwd);
-  const unreleasedChangesets = await getNewFSChangesets(changesetBase);
+  removeEmptyFolders(changesetBase);
+
+  const unreleasedChangesets = await getChangesets(changesetBase);
   const releaseObj = createRelease(unreleasedChangesets, allPackages);
   const publishCommit = createReleaseCommit(releaseObj, config.skipCI);
 
@@ -91,7 +59,6 @@ export default async function version(opts) {
     }
   }
 
-  // This double negative is bad, but cleaner than the alternative
   if (config.updateChangelog) {
     logger.log("Updating changelogs...");
     // Now update the changelogs
@@ -121,5 +88,20 @@ export default async function version(opts) {
     logger.warn(
       "If you alter version changes in package.jsons, make sure to run bolt before publishing to ensure the repo is in a valid state"
     );
+  }
+}
+
+async function bumpReleasedPackages(releaseObj, allPackages, config) {
+  for (const release of releaseObj.releases) {
+    const pkgDir = allPackages.find(pkg => pkg.name === release.name).dir;
+    const pkgJsonPath = path.join(pkgDir, "package.json");
+    const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath));
+
+    pkgJson.version = release.version;
+    const pkgJsonStr = `${JSON.stringify(pkgJson, null, 2)}\n`;
+    await fs.writeFile(pkgJsonPath, pkgJsonStr);
+    if (config.commit) {
+      await git.add(pkgJsonPath);
+    }
   }
 }

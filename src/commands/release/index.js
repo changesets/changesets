@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import * as bolt from "bolt";
-import logger from "../../new-utils/logger";
-import * as git from "../../new-utils/git";
+import logger from "../../utils/logger";
+import * as git from "../../utils/git";
 import resolveUserConfig from "../../utils/resolveConfig";
 import { defaultConfig } from "../../utils/constants";
 

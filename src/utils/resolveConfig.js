@@ -1,10 +1,10 @@
-const path = require("path");
-const fs = require("fs-extra");
-const logger = require("../new-utils/logger");
+import path from "path";
+import fs from "fs-extra";
+import logger from "../utils/logger";
 
-const getChangesetBase = require("./getChangesetBase");
+import getChangesetBase from "./getChangesetBase";
 
-async function resolveConfig(config) {
+export default async function resolveConfig(config) {
   const changesetBase = await getChangesetBase(config.cwd);
 
   const configPath = path.resolve(changesetBase, "config.js");
@@ -22,5 +22,3 @@ async function resolveConfig(config) {
     return {};
   }
 }
-
-module.exports = resolveConfig;

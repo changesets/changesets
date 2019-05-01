@@ -1,14 +1,14 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 
 import * as bolt from "bolt";
-import * as git from "../../../new-utils/git";
+import * as git from "../../../utils/git";
 import runRelease from "..";
 // avoid polluting test logs with error message in console
 const consoleError = console.error;
 
-jest.mock("../../../new-utils/cli");
-jest.mock("../../../new-utils/git");
-jest.mock("../../../new-utils/logger");
+jest.mock("../../../utils/cli");
+jest.mock("../../../utils/git");
+jest.mock("../../../utils/logger");
 jest.mock("../../add/parseChangesetCommit");
 
 git.tag.mockImplementation(() => Promise.resolve(true));
