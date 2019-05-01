@@ -1,3 +1,5 @@
+/* eslint-disable no-continue */
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
 // @flow
@@ -12,7 +14,7 @@ import outdent from "outdent";
 import * as cli from "../../utils/cli";
 import logger from "../../utils/logger";
 
-/*::
+/*
 type releaseType = {
   name: string,
   type: string,
@@ -133,8 +135,8 @@ function getDependencyVersionRange(dependentPkgJSON, dependencyName) {
 }
 
 export default async function createChangeset(
-  changedPackages /*: Array<string> */,
-  opts /*: { cwd?: string }  */ = {}
+  changedPackages /* Array<string> */,
+  opts /* { cwd?: string }  */ = {}
 ) {
   const cwd = opts.cwd || process.cwd();
   const allPackages = await bolt.getWorkspaces({ cwd });
@@ -171,7 +173,7 @@ export default async function createChangeset(
     summary = await cli.askQuestion("Summary");
   }
 
-  let pkgsToSearch = [...releases];
+  const pkgsToSearch = [...releases];
   const dependents = [];
 
   while (pkgsToSearch.length > 0) {

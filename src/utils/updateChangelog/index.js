@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-await-in-loop */
 import fs from "fs-extra";
@@ -5,7 +6,7 @@ import * as bolt from "bolt";
 import path from "path";
 import util from "util";
 import generateMarkdownTemplate from "./template";
-import logger from "../../utils/logger";
+import logger from "../logger";
 
 function writeFile(filePath, fileContents) {
   return util.promisify(cb => fs.writeFile(filePath, fileContents, cb))();

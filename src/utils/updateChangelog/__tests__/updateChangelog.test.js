@@ -3,11 +3,11 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 import path from "path";
 import fs from "fs-extra";
 import updateChangelog from "..";
-import { defaultConfig } from "../../../utils/constants";
+import { defaultConfig } from "../../constants";
 
 const { versionOptions } = defaultConfig;
 
-jest.mock("../../../utils/logger");
+jest.mock("../../logger");
 
 const emptyFileChangeset = {
   releases: [

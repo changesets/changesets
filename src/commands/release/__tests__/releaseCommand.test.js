@@ -22,16 +22,6 @@ bolt.publishPackages = jest.fn(() =>
   ])
 );
 
-const simpleChangeset2 = {
-  summary: "This is a summary",
-  releases: [
-    { name: "pkg-a", type: "minor" },
-    { name: "pkg-b", type: "patch" }
-  ],
-  dependents: [{ name: "pkg-b", type: "none", dependencies: [] }],
-  commit: "b8bb699"
-};
-
 describe("running release", () => {
   let cwd;
 

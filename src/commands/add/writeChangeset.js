@@ -2,7 +2,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const crypto = require("crypto");
 const prettier = require("prettier");
-const bolt = require("bolt");
+const pkgDir = require("pkg-dir");
 const { removeEmptyFolders } = require("../../utils/removeFolders");
 const getChangesetBase = require("../../utils/getChangesetBase");
 
@@ -17,7 +17,8 @@ async function writeChangeset(changesetData, opts) {
   const cwd = opts.cwd || process.cwd();
 
   const { summary, ...jsonData } = changesetData;
-  const { dir } = await bolt.getProject({ cwd });
+  const dir = await pkgDir(cwd);
+
   const changesetBase = await getChangesetBase(cwd);
 
   // Worth understanding that the ID merely needs to be a unique hash to avoid git conflicts

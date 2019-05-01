@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 // @flow
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import {
@@ -28,25 +29,26 @@ const unsafeGetChangedPackagesSinceMaster: any =
   git.getChangedPackagesSinceMaster;
 unsafeGetChangedPackagesSinceMaster.mockReturnValue([]);
 
-type releases = {
-  [string]: string
-};
-type dependent = {
-  name: string,
-  type: string,
-  dependencies: Array<string>
-};
-type mockResponses = {
-  summary?: string,
-  shouldCommit?: string,
-  releases: releases,
-  dependents?: Array<dependent>
-};
+// type releases = {
+//   [string]: string
+// };
+// type dependent = {
+//   name: string,
+//   type: string,
+//   dependencies: Array<string>
+// };
+// type mockResponses = {
+//   summary?: string,
+//   shouldCommit?: string,
+//   releases: releases,
+//   dependents?: Array<dependent>
+// };
 
-const mockUserResponses = (mockResponses: mockResponses) => {
+const mockUserResponses = mockResponses => {
   const summary = mockResponses.summary || "summary message mock";
   const shouldCommit = mockResponses.shouldCommit || "n";
   askCheckboxPlus.mockReturnValueOnce(Object.keys(mockResponses.releases));
+  // eslint-disable-next-line no-unused-vars
   Object.entries(mockResponses.releases).forEach(([pkg, type]) =>
     askList.mockReturnValueOnce(type)
   );
@@ -66,7 +68,7 @@ describe("Changesets - bumping peerDeps", () => {
       "simple-pinned-peer-dep"
     );
     mockUserResponses({ releases: { "depended-upon": "patch" } });
-    const cs = await addChangeset({ cwd });
+    await addChangeset({ cwd });
 
     const expectedChangeset = {
       summary: "summary message mock",
@@ -91,7 +93,7 @@ describe("Changesets - bumping peerDeps", () => {
       "simple-tilde-peer-dep"
     );
     mockUserResponses({ releases: { "depended-upon": "patch" } });
-    const cs = await addChangeset({ cwd });
+    await addChangeset({ cwd });
 
     const expectedChangeset = {
       summary: "summary message mock",
@@ -109,7 +111,7 @@ describe("Changesets - bumping peerDeps", () => {
       "simple-tilde-peer-dep"
     );
     mockUserResponses({ releases: { "depended-upon": "minor" } });
-    const cs = await addChangeset({ cwd });
+    await addChangeset({ cwd });
 
     const expectedChangeset = {
       summary: "summary message mock",
@@ -133,7 +135,7 @@ describe("Changesets - bumping peerDeps", () => {
       "simple-tilde-peer-dep"
     );
     mockUserResponses({ releases: { "depended-upon": "major" } });
-    const cs = await addChangeset({ cwd });
+    await addChangeset({ cwd });
 
     const expectedChangeset = {
       summary: "summary message mock",
@@ -157,7 +159,7 @@ describe("Changesets - bumping peerDeps", () => {
       "simple-caret-peer-dep"
     );
     mockUserResponses({ releases: { "depended-upon": "patch" } });
-    const cs = await addChangeset({ cwd });
+    await addChangeset({ cwd });
 
     const expectedChangeset = {
       summary: "summary message mock",
@@ -174,7 +176,7 @@ describe("Changesets - bumping peerDeps", () => {
       "simple-caret-peer-dep"
     );
     mockUserResponses({ releases: { "depended-upon": "minor" } });
-    const cs = await addChangeset({ cwd });
+    await addChangeset({ cwd });
 
     const expectedChangeset = {
       summary: "summary message mock",
@@ -197,7 +199,7 @@ describe("Changesets - bumping peerDeps", () => {
       "simple-caret-peer-dep"
     );
     mockUserResponses({ releases: { "depended-upon": "major" } });
-    const cs = await addChangeset({ cwd });
+    await addChangeset({ cwd });
 
     const expectedChangeset = {
       summary: "summary message mock",
@@ -224,7 +226,7 @@ describe("Changesets - bumping peerDeps", () => {
       "previously-checked-transitive-peer-dependent"
     );
     mockUserResponses({ releases: { "pkg-a": "minor" } });
-    const cs = await addChangeset({ cwd });
+    await addChangeset({ cwd });
 
     const expectedChangeset = {
       summary: "summary message mock",

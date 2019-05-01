@@ -3,7 +3,7 @@
 import fs from "fs-extra";
 import path from "path";
 
-import * as git from "../utils/git";
+import * as git from "./git";
 
 export default async function getChangesets(changesetBase, sinceMasterOnly) {
   if (!fs.existsSync(changesetBase)) {

@@ -1,6 +1,6 @@
 import outdent from "outdent";
 import generateMarkdownTemplate from "../template";
-import { defaultConfig } from "../../../utils/constants";
+import { defaultConfig } from "../../constants";
 
 const { versionOptions } = defaultConfig;
 

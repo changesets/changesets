@@ -163,7 +163,7 @@ describe("createRelease", () => {
     });
   });
 
-  it.only("should handle a deleted package", () => {
+  it("should handle a deleted package", () => {
     const releaseObj = createRelease(
       [changesetWithDeletedPackage],
       fakeAllPackages
