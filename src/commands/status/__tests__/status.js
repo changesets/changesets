@@ -65,6 +65,12 @@ describe("status", () => {
     const releaseObj = await status({ cwd });
     expect(releaseObj).toEqual(simpleReleaseObj);
   });
+  it("should exit with a non-zero error code when there are no changesets", async () => {
+    const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
+    await status({ cwd });
+    expect(mockExit).toHaveBeenCalledWith(1);
+  });
+
   it.skip("should respect since master flag", () => false);
   it.skip("should respect the verbose flag", () => false);
   it("should respect the output flag", async () => {

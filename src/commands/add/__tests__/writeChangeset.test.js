@@ -4,9 +4,6 @@ import fs from "fs-extra";
 import path from "path";
 import writeChangeset from "../writeChangeset";
 
-// avoid polluting test logs with error message in console
-const consoleError = console.error;
-
 const simpleChangeset = {
   summary: "This is a summary",
   releases: [{ name: "pkg-a", type: "minor" }],
@@ -18,12 +15,10 @@ describe("simple project", () => {
 
   beforeEach(async () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
-    console.error = jest.fn();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    console.error = consoleError;
   });
   it("should write a changeset", async () => {
     const changesetID = await writeChangeset(simpleChangeset, { cwd });

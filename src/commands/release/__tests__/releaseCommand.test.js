@@ -3,8 +3,6 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 import * as bolt from "bolt";
 import * as git from "../../../utils/git";
 import runRelease from "..";
-// avoid polluting test logs with error message in console
-const consoleError = console.error;
 
 jest.mock("../../../utils/cli");
 jest.mock("../../../utils/git");
@@ -39,12 +37,10 @@ describe("running release", () => {
 
   beforeEach(async () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
-    console.error = jest.fn();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    console.error = consoleError;
   });
 
   describe("When there is no changeset commits", () => {

@@ -8,6 +8,7 @@ import logger from "../../../utils/logger";
 import writeChangeset from "../../add/writeChangeset";
 
 // avoid polluting test logs with error message in console
+// This is from bolt's error log
 const consoleError = console.error;
 
 jest.mock("../../../utils/cli");
