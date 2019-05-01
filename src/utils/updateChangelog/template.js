@@ -19,8 +19,36 @@ export default async function generateMarkdownTemplate(
   // messages
   const { changesets, releases } = releaseObject;
   // get changesets that "release" this package (not a dependent bump)
-  const releaseChangesets = changesets.filter(cs =>
-    cs.releases.find(r => r.name === release.name)
+
+  const releaseObj = {
+    major: [],
+    minor: [],
+    patch: []
+  };
+
+  changesets.forEach(cs => {
+    const rls = cs.releases.find(r => r.name === release.name);
+    if (rls) {
+      releaseObj[rls.type].push(cs);
+    }
+  });
+
+  // First, we construct the release lines, summaries of changesets that caused us to be released
+  const majorReleaseLines = await getReleaseLines(
+    releaseObj.major,
+    release.name,
+    config
+  );
+
+  const minorReleaseLines = await getReleaseLines(
+    releaseObj.minor,
+    release.name,
+    config
+  );
+  const patchReleaseLines = await getReleaseLines(
+    releaseObj.patch,
+    release.name,
+    config
   );
 
   // get changesets that bump our dependencies
@@ -30,12 +58,6 @@ export default async function generateMarkdownTemplate(
     cs.dependents.find(d => d.name === release.name)
   );
 
-  // First, we construct the release lines, summaries of changesets that caused us to be released
-  const releaseLines = await getReleaseLines(
-    releaseChangesets,
-    release.name,
-    config
-  );
   const dependenciesUpdated = new Set( // We use a set so we can dedupe on the fly
     dependentChangesets
       .map(
@@ -56,7 +78,13 @@ export default async function generateMarkdownTemplate(
     dependenciesUpdatedArr
   );
 
-  return [`## ${release.version}`, ...releaseLines, dependencyReleaseLine]
+  return [
+    `## ${release.version}`,
+    ...majorReleaseLines,
+    ...minorReleaseLines,
+    ...patchReleaseLines,
+    dependencyReleaseLine
+  ]
     .filter(line => line)
     .join("\n");
 }

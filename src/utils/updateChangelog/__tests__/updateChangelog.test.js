@@ -149,12 +149,12 @@ describe("updateChangelog", () => {
     expect(updatedChangelog).toEqual(`# has-empty-changelog
 
 ## 1.1.0
-- [patch] b8bb699:
-
-  This is a summary
 - [minor] abcdefg:
 
   This is a second summary
+- [patch] b8bb699:
+
+  This is a summary
 `);
   });
   it("should work for multiple packages", async () => {
