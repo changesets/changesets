@@ -1,14 +1,3 @@
-async function getReleaseLines(changesets, releaseName, config) {
-  return Promise.all(
-    changesets.map(async changeset => {
-      const relevantRelease = changeset.releases.find(
-        r => r.name === releaseName
-      );
-      return config.getReleaseLine(changeset, relevantRelease.type);
-    })
-  );
-}
-
 // release is the package and version we are releasing
 export default async function generateMarkdownTemplate(
   release,
@@ -29,27 +18,14 @@ export default async function generateMarkdownTemplate(
   changesets.forEach(cs => {
     const rls = cs.releases.find(r => r.name === release.name);
     if (rls) {
-      releaseObj[rls.type].push(cs);
+      releaseObj[rls.type].push(config.getReleaseLine(cs, rls.type));
     }
   });
 
   // First, we construct the release lines, summaries of changesets that caused us to be released
-  const majorReleaseLines = await getReleaseLines(
-    releaseObj.major,
-    release.name,
-    config
-  );
-
-  const minorReleaseLines = await getReleaseLines(
-    releaseObj.minor,
-    release.name,
-    config
-  );
-  const patchReleaseLines = await getReleaseLines(
-    releaseObj.patch,
-    release.name,
-    config
-  );
+  const majorReleaseLines = await Promise.all(releaseObj.major);
+  const minorReleaseLines = await Promise.all(releaseObj.minor);
+  const patchReleaseLines = await Promise.all(releaseObj.patch);
 
   // get changesets that bump our dependencies
   // There is a happy accident that this includes all dependents being bumped, so we
