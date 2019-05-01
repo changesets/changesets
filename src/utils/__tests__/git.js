@@ -24,6 +24,6 @@ describe.skip("git", () => {
   });
 
   it("should have tests", async () => {
-    // const cwd = await copyFixtureIntoTempDir(__dirname, "with-git");
+    const cwd = await copyFixtureIntoTempDir(__dirname, "with-git");
   });
 });
