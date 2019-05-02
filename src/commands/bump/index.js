@@ -1,10 +1,15 @@
+/* eslint-disable no-continue */
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 /* eslint-disable no-await-in-loop */
 import path from "path";
-import * as bolt from "bolt";
 import fs from "fs-extra";
+import detectIndent from "detect-indent";
+import semver from "semver";
+
+import * as bolt from "../../utils/bolt-replacements";
+
 import logger from "../../utils/logger";
 import * as git from "../../utils/git";
 import createRelease from "../../utils/createRelease";
@@ -15,6 +20,11 @@ import getChangesets from "../../utils/getChangesets";
 
 import resolveConfig from "../../utils/resolveConfig";
 import getChangesetBase from "../../utils/getChangesetBase";
+import {
+  getDependencyVersionRange,
+  getDependencyTypes
+} from "../../utils/bolt-replacements/getDependencyInfo";
+import versionRangeToRangeType from "../../utils/bolt-replacements/versionRangeToRangeType";
 import { defaultConfig } from "../../utils/constants";
 
 export default async function version(opts) {
@@ -39,25 +49,6 @@ export default async function version(opts) {
   logger.log(publishCommit);
 
   await bumpReleasedPackages(releaseObj, allPackages, config);
-
-  // Need to transform releases into a form for bolt to update dependencies
-  const versionsToUpdate = releaseObj.releases.reduce(
-    (cur, next) => ({
-      ...cur,
-      [next.name]: next.version
-    }),
-    {}
-  );
-  // update dependencies on those versions using bolt
-  const pkgPaths = await bolt.updatePackageVersions(versionsToUpdate, {
-    cwd
-  });
-
-  if (config.commit) {
-    for (const pkgPath of pkgPaths) {
-      await git.add(pkgPath);
-    }
-  }
 
   if (config.updateChangelog) {
     logger.log("Updating changelogs...");
@@ -92,13 +83,78 @@ export default async function version(opts) {
 }
 
 async function bumpReleasedPackages(releaseObj, allPackages, config) {
-  for (const release of releaseObj.releases) {
-    const pkgDir = allPackages.find(pkg => pkg.name === release.name).dir;
-    const pkgJsonPath = path.join(pkgDir, "package.json");
-    const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath));
+  const versionsToUpdate = releaseObj.releases.reduce(
+    (cur, next) => ({
+      ...cur,
+      [next.name]: next.version
+    }),
+    {}
+  );
 
-    pkgJson.version = release.version;
-    const pkgJsonStr = `${JSON.stringify(pkgJson, null, 2)}\n`;
+  const { graph } = await bolt.getDependencyGraph(allPackages, config.cwd);
+  const internalDeps = Object.keys(versionsToUpdate).filter(dep =>
+    graph.has(dep)
+  );
+  const externalDeps = Object.keys(versionsToUpdate).filter(
+    dep => !graph.has(dep)
+  );
+
+  if (externalDeps.length !== 0) {
+    logger.warn(
+      "Oh noes a disaster (but seriously, I should update this error message, TODO"
+      // messages.externalDepsPassedToUpdatePackageVersions(externalDeps)
+    );
+  }
+
+  // for each package, even non-released ones we:
+  // Check if all its things are still in semver
+  // IF they are not AND it's not being released, collect an error about it
+  // If the package is being released, modify its
+
+  for (const pkg of allPackages) {
+    const newPkgJSON = { ...pkg.config };
+    const inUpdatedPackages = internalDeps.includes(pkg.name);
+
+    for (const depName of internalDeps) {
+      const depRange = String(getDependencyVersionRange(depName, pkg.config));
+      const depTypes = getDependencyTypes(depName, pkg.config);
+      const rangeType = versionRangeToRangeType(depRange);
+      const newDepRange = rangeType + versionsToUpdate[depName];
+      if (depTypes.length === 0) continue;
+
+      const willLeaveSemverRange = !semver.satisfies(
+        versionsToUpdate[depName],
+        depRange
+      );
+      // This check determines whether the package will be released. If the
+      // package will not be released, we throw.
+      if (!inUpdatedPackages && willLeaveSemverRange) {
+        throw new Error(
+          console.log("important logging definitely fix this before releasing")
+          // messages.invalidBoltWorkspacesFromUpdate(
+          //   name,
+          //   depName,
+          //   depRange,
+          //   updatedPackages[depName]
+          // )
+        );
+      }
+
+      for (const depType of depTypes) {
+        newPkgJSON[depType][depName] = newDepRange;
+      }
+    }
+
+    if (!inUpdatedPackages) continue;
+
+    const pkgDir = pkg.dir;
+    const pkgJsonPath = path.join(pkgDir, "package.json");
+    const pkgJsonRaw = await fs.readFile(pkgJsonPath, "utf-8");
+    const indent = detectIndent(pkgJsonRaw).indent || "  ";
+
+    newPkgJSON.version = versionsToUpdate[pkg.name];
+
+    const pkgJsonStr = JSON.stringify(newPkgJSON, null, indent);
     await fs.writeFile(pkgJsonPath, pkgJsonStr);
     if (config.commit) {
       await git.add(pkgJsonPath);

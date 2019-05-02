@@ -2,13 +2,16 @@
 
 Currently there are 13 places where we call bolt functions.
 
-- getWorkspaces x 5
-- getDependentsGraph x 1
-- getProject x 1
-- updatePackageVersions x 1
+✅ getWorkspaces x 5 - inlined
+✅ getDependentsGraph x 1 - inlined
+✅ updatePackageVersions x 1 - reworked 'bump' so we do this work in our own function
+
+- getProject x 1 - inlined
 - publishPackages x 1
 
 updatePackageVersions is the one that is most heavily tied to bolt internals. The rest are easy enough to abstract out.
+
+# I rolled all of the file updates into a single function! BUT there are no tests for dependents being updated
 
 NEW TOPIC
 

@@ -48,10 +48,6 @@ describe("createReleaseCommit", () => {
       Deleted:
         []
 
-      ---
-      {"releases":[{"name":"package-a","type":"minor","commits":["dec4a66"],"changesets":["abc123xy"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"}]}
-      ---
-
     `);
   });
   it("should skip CI when the flag is passed", () => {
@@ -68,10 +64,6 @@ describe("createReleaseCommit", () => {
 
       Deleted:
         []
-
-      ---
-      {"releases":[{"name":"package-a","type":"minor","commits":["dec4a66"],"changesets":["abc123xy"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"}]}
-      ---
 
 
       [skip ci]
@@ -96,10 +88,6 @@ describe("createReleaseCommit", () => {
       Deleted:
         package-c
 
-      ---
-      {"releases":[{"name":"package-a","type":"minor","commits":["dec4a66"],"changesets":["abc123ph"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"}]}
-      ---
-
     `);
   });
 
@@ -118,10 +106,6 @@ describe("createReleaseCommit", () => {
 
       Deleted:
         []
-
-      ---
-      {"releases":[{"name":"package-a","type":"patch","commits":["695fad0"],"changesets":["abc123fh"],"version":"1.0.1"},{"name":"package-b","type":"minor","commits":["695fad0"],"changesets":["abc123fh"],"version":"1.1.0"}],"changesets":[{"commit":"695fad0","summary":"This is another summary"}]}
-      ---
 
     `);
   });
@@ -145,10 +129,6 @@ describe("createReleaseCommit", () => {
 
       Deleted:
         []
-
-      ---
-      {"releases":[{"name":"package-a","type":"minor","commits":["dec4a66","695fad0"],"changesets":["abc123xy","abc123fh"],"version":"1.1.0"},{"name":"package-b","type":"minor","commits":["695fad0"],"changesets":["abc123fh"],"version":"1.1.0"}],"changesets":[{"commit":"dec4a66","summary":"This is a summary"},{"commit":"695fad0","summary":"This is another summary"}]}
-      ---
 
     `);
   });

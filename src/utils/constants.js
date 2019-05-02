@@ -9,3 +9,11 @@ export const defaultConfig = require(path.join(
   pkgPath,
   "default-files/config"
 ));
+
+export const DEPENDENCY_TYPES = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "bundledDependencies",
+  "optionalDependencies"
+];
