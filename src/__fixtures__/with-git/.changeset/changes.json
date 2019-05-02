@@ -1,0 +1,4 @@
+{
+  "releases": [{ "name": "with-git", "type": "patch" }],
+  "dependents": []
+}
