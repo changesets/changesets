@@ -4,7 +4,7 @@ import path from "path";
 
 import initializeCommand from "..";
 
-const consoleLog = console.log;
+jest.mock("../../../utils/logger");
 
 const getPaths = cwd => ({
   readmePath: path.join(cwd, ".changeset/README.md"),
@@ -12,13 +12,6 @@ const getPaths = cwd => ({
 });
 
 describe("init", () => {
-  beforeEach(() => {
-    console.log = jest.fn();
-  });
-  afterEach(() => {
-    jest.clearAllMocks();
-    console.log = consoleLog;
-  });
   it("should initialize in a project without a .changeset folder", async () => {
     const cwd = await copyFixtureIntoTempDir(
       __dirname,

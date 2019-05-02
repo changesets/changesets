@@ -20,18 +20,20 @@ const changesetOptions = {
 // It may be a good idea to replace the commit hash with a link to the commit.
 
 /* the default shape is:
-- [patch] ABCDEFG:
+### Bump Type
 
-  A summary message you wrote, indented
+- GIT_HASH: A summary message you wrote, indented?
 */
 
-const getReleaseLine = async (changeset, versionType) => {
-  const indentedSummary = changeset.summary
+// eslint-disable-next-line no-unused-vars
+const getReleaseLine = async (changeset, type) => {
+  const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
-    .map(l => `  ${l}`.trimRight())
-    .join("\n");
+    .map(l => l.trimRight());
 
-  return `- [${versionType}] ${changeset.commit}:\n\n${indentedSummary}`;
+  return `- ${changeset.commit}: ${firstLine}\n${futureLines
+    .map(l => `  ${l}`)
+    .join("\n")}`;
 };
 
 // This function takes information about what dependencies we are updating in the package.

@@ -34,7 +34,7 @@ const simpleReleaseObj = {
   deleted: [],
   changesets: [
     {
-      summary: "- This is a summary",
+      summary: "This is a summary",
       commit: undefined,
       releases: [
         { name: "pkg-a", type: "minor" },

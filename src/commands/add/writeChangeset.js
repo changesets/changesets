@@ -38,12 +38,10 @@ async function writeChangeset(changesetData, opts) {
   removeEmptyFolders(changesetBase);
   fs.mkdirSync(newFolderPath);
 
-  const summaryString = `- ${summary}`;
-
   // the changeset is divided into two parts, a .md and a .json file.
   // the .md file represents what will be written into the changelogs for packages
   // the .json file includes metadata about the changeset.
-  fs.writeFileSync(path.resolve(newFolderPath, "changes.md"), summaryString);
+  fs.writeFileSync(path.resolve(newFolderPath, "changes.md"), summary);
 
   fs.writeFileSync(
     path.resolve(newFolderPath, "changes.json"),

@@ -1,3 +1,12 @@
+import startCase from "lodash.startcase";
+
+async function smallHelper(obj, type) {
+  const releaseLines = obj[type];
+  if (!releaseLines.length) return "";
+  const resolvedLines = await Promise.all(releaseLines);
+
+  return `### ${startCase(type)} Changes\n\n${resolvedLines.join("")}`;
+}
 // release is the package and version we are releasing
 export default async function generateMarkdownTemplate(
   release,
@@ -23,9 +32,9 @@ export default async function generateMarkdownTemplate(
   });
 
   // First, we construct the release lines, summaries of changesets that caused us to be released
-  const majorReleaseLines = await Promise.all(releaseObj.major);
-  const minorReleaseLines = await Promise.all(releaseObj.minor);
-  const patchReleaseLines = await Promise.all(releaseObj.patch);
+  const majorReleaseLines = await smallHelper(releaseObj, "major");
+  const minorReleaseLines = await smallHelper(releaseObj, "minor");
+  const patchReleaseLines = await smallHelper(releaseObj, "patch");
 
   // get changesets that bump our dependencies
   // There is a happy accident that this includes all dependents being bumped, so we
@@ -56,9 +65,9 @@ export default async function generateMarkdownTemplate(
 
   return [
     `## ${release.version}`,
-    ...majorReleaseLines,
-    ...minorReleaseLines,
-    ...patchReleaseLines,
+    majorReleaseLines,
+    minorReleaseLines,
+    patchReleaseLines,
     dependencyReleaseLine
   ]
     .filter(line => line)

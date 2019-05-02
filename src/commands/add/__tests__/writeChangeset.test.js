@@ -33,7 +33,7 @@ describe("simple project", () => {
 
     const { summary, ...rest } = simpleChangeset;
 
-    expect(mdContent).toBe(`- ${summary}`);
+    expect(mdContent).toBe(summary);
     expect(json).toEqual(rest);
   });
   it("should clean up empty folders", async () => {

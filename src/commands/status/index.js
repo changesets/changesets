@@ -15,6 +15,7 @@ import createRelease from "../../utils/createRelease";
 export default async function getStatus({ cwd, sinceMaster, verbose, output }) {
   const changesetBase = await getChangesetBase(cwd);
   const allPackages = await bolt.getWorkspaces({ cwd });
+  // TODO: Check if we are no master and give a different error message if we are
   const changesets = await getChangesets(changesetBase, sinceMaster);
 
   if (changesets.length < 1) {
@@ -67,7 +68,7 @@ function verbosePrint(type, releases) {
     const columns = packages.map(({ name, version, changesets }) => [
       chalk.green(name),
       version,
-      changesets.map(c => chalk.blue(`.changeset/${c}/changes.md`)).join(" + ")
+      changesets.map(c => chalk.blue(` .changeset/${c}/changes.md`)).join(" +")
     ]);
 
     const t1 = table(

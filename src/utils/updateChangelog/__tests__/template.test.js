@@ -34,11 +34,11 @@ describe("template", () => {
       input,
       versionOptions
     );
-    const expectedOutput = outdent`
-      ## 1.0.0
-      - [patch] 496287c:
+    const expectedOutput = `## 1.0.0
+### Patch Changes
 
-        We fix few bugs in badge.`;
+- 496287c: We fix few bugs in badge.
+`;
     expect(output).toBe(expectedOutput);
   });
 
@@ -121,6 +121,8 @@ describe("template", () => {
     });
     const expectedOutput = outdent`
       ## 1.0.0
+      ### Patch Changes
+
       look at me I'm the DCI`;
     expect(output).toBe(expectedOutput);
   });

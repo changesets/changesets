@@ -135,9 +135,9 @@ describe("updateChangelog", () => {
     expect(updatedChangelog).toEqual(`# has-empty-changelog
 
 ## 1.1.0
-- [minor] b8bb699:
+### Minor Changes
 
-  This is a summary
+- b8bb699: This is a summary
 `);
   });
   it("should work with multiple changesets", async () => {
@@ -149,12 +149,13 @@ describe("updateChangelog", () => {
     expect(updatedChangelog).toEqual(`# has-empty-changelog
 
 ## 1.1.0
-- [minor] abcdefg:
+### Minor Changes
 
-  This is a second summary
-- [patch] b8bb699:
+- abcdefg: This is a second summary
 
-  This is a summary
+### Patch Changes
+
+- b8bb699: This is a summary
 `);
   });
   it("should work for multiple packages", async () => {
@@ -171,16 +172,16 @@ describe("updateChangelog", () => {
     expect(updatedChangelog).toEqual(`# has-empty-changelog
 
 ## 1.1.0
-- [minor] b8bb699:
+### Minor Changes
 
-  This is a summary
+- b8bb699: This is a summary
 `);
     expect(updatedExistingChangelog).toEqual(`# Has Empty Changelog
 
 ## 1.0.1
-- [patch] b8bb699:
+### Patch Changes
 
-  This is a summary
+- b8bb699: This is a summary
 
 ## 1.0.0
 - [patch] This existed before [b8bb699](https://bitbucket.org/atlassian/atlaskit-mk-2/commits/b8bb699)
@@ -206,9 +207,9 @@ describe("updateChangelog", () => {
     expect(updatedChangelog).toEqual(`# has-no-changelog
 
 ## 1.1.0
-- [minor] b8bb699:
+### Minor Changes
 
-  This is a summary
+- b8bb699: This is a summary
 `);
   });
   it("should work with an existing changelog", async () => {
@@ -224,9 +225,9 @@ describe("updateChangelog", () => {
     expect(updatedChangelog).toEqual(`# Has Empty Changelog
 
 ## 1.1.0
-- [minor] b8bb699:
+### Minor Changes
 
-  This is a summary
+- b8bb699: This is a summary
 
 ## 1.0.0
 - [patch] This existed before [b8bb699](https://bitbucket.org/atlassian/atlaskit-mk-2/commits/b8bb699)
