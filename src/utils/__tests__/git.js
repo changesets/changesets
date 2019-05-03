@@ -10,21 +10,23 @@ import {
   tag,
   getChangedPackagesSinceMaster,
   getChangedChangesetFilesSinceMaster
-} from '../git';
+} from "../git";
 
 describe("git", () => {
   let cwd;
   beforeEach(async () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "with-git");
-    await spawn("git", ["init"], { cwd: cwd });
+    await spawn("git", ["init"], { cwd });
   });
 
   describe("add", () => {
     it("should add a file to the staging area", async () => {
       await add("packages/pkg-a/package.json", cwd);
 
-      const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], { cwd: cwd });
-      const stagedFiles = gitCmd.stdout.split('\n').filter(a => a);
+      const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
+        cwd
+      });
+      const stagedFiles = gitCmd.stdout.split("\n").filter(a => a);
 
       expect(stagedFiles).toHaveLength(1);
       expect(stagedFiles[0]).toEqual("packages/pkg-a/package.json");
@@ -35,8 +37,10 @@ describe("git", () => {
       await add("packages/pkg-a/package.json", cwd);
       await add("packages/pkg-b/package.json", cwd);
 
-      const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], { cwd: cwd });
-      const stagedFiles = gitCmd.stdout.split('\n').filter(a => a);
+      const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
+        cwd
+      });
+      const stagedFiles = gitCmd.stdout.split("\n").filter(a => a);
 
       expect(stagedFiles).toHaveLength(3);
       expect(stagedFiles[0]).toEqual("package.json");
@@ -47,8 +51,10 @@ describe("git", () => {
     it("should add a directory", async () => {
       await add("packages", cwd);
 
-      const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], { cwd: cwd });
-      const stagedFiles = gitCmd.stdout.split('\n').filter(a => a);
+      const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
+        cwd
+      });
+      const stagedFiles = gitCmd.stdout.split("\n").filter(a => a);
 
       expect(stagedFiles).toHaveLength(4);
       expect(stagedFiles[0]).toEqual("packages/pkg-a/index.js");
@@ -63,7 +69,9 @@ describe("git", () => {
       await add("packages/pkg-a/package.json", cwd);
       await commit("added packageA package.json", cwd);
 
-      const gitCmd = await spawn("git", ["log", "-1", "--pretty=%B"], { cwd: cwd });
+      const gitCmd = await spawn("git", ["log", "-1", "--pretty=%B"], {
+        cwd
+      });
       const commitMessage = gitCmd.stdout.trim();
 
       expect(commitMessage).toEqual("added packageA package.json");
@@ -77,38 +85,57 @@ describe("git", () => {
     });
 
     it("should create a tag for the current head", async () => {
-      const head = await spawn("git", ["rev-parse", "HEAD"], { cwd: cwd });
+      const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
       await tag("tag_message", cwd);
 
       // Gets the hash of the commit the tag is referring to, not the hash of the tag itself
-      const tagRef = await spawn("git", ["rev-list", "-n", "1", "tag_message"], { cwd: cwd });
+      const tagRef = await spawn(
+        "git",
+        ["rev-list", "-n", "1", "tag_message"],
+        { cwd }
+      );
       expect(tagRef).toEqual(head);
     });
 
-    it('should create a tag, make a new commit, then create a second tag', async () => {
-      const initialHead = await spawn("git", ["rev-parse", "HEAD"], { cwd: cwd });
+    it("should create a tag, make a new commit, then create a second tag", async () => {
+      const initialHead = await spawn("git", ["rev-parse", "HEAD"], {
+        cwd
+      });
       await tag("tag_message", cwd);
       await add("packages/pkg-b/package.json", cwd);
       await commit("added packageB package.json", cwd);
-      const newHead = await spawn("git", ["rev-parse", "HEAD"], { cwd: cwd });
+      const newHead = await spawn("git", ["rev-parse", "HEAD"], { cwd });
       await tag("new_tag", cwd);
 
       // Gets the hash of the commit the tag is referring to, not the hash of the tag itself
-      const firstTagRef = await spawn("git", ["rev-list", "-n", "1", "tag_message"], { cwd: cwd });
-      const secondTagRef = await spawn("git", ["rev-list", "-n", "1", "new_tag"], { cwd: cwd });
+      const firstTagRef = await spawn(
+        "git",
+        ["rev-list", "-n", "1", "tag_message"],
+        { cwd }
+      );
+      const secondTagRef = await spawn(
+        "git",
+        ["rev-list", "-n", "1", "new_tag"],
+        { cwd }
+      );
 
       expect(firstTagRef).toEqual(initialHead);
       expect(secondTagRef).toEqual(newHead);
-    })
+    });
   });
 
   describe("getCommitThatAddsFile", () => {
     it("should commit a file and get the hash of that commit", async () => {
       await add("packages/pkg-b/package.json", cwd);
       await commit("added packageB package.json", cwd);
-      const head = await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd: cwd });
+      const head = await spawn("git", ["rev-parse", "--short", "HEAD"], {
+        cwd
+      });
 
-      const commitHash = await getCommitThatAddsFile("packages/pkg-b/package.json", cwd);
+      const commitHash = await getCommitThatAddsFile(
+        "packages/pkg-b/package.json",
+        cwd
+      );
 
       expect(commitHash).toEqual(head.stdout.trim());
     });
@@ -121,29 +148,39 @@ describe("git", () => {
     });
 
     it("should be empty if no changes", async () => {
-      const head = await spawn("git", ["rev-parse", "HEAD"], { cwd: cwd });
+      const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
       const changedFiles = await getChangedFilesSince(head.stdout.trim(), cwd);
       expect(changedFiles.filter(a => a)).toHaveLength(0);
     });
 
     it("should get list of files that have been committed", async () => {
-      const firstRef = await spawn("git", ["rev-parse", "HEAD"], { cwd: cwd });
+      const firstRef = await spawn("git", ["rev-parse", "HEAD"], { cwd });
       await add("packages/pkg-a/index.js", cwd);
       await commit("added packageA index", cwd);
 
-      const secondRef = await spawn("git", ["rev-parse", "HEAD"], { cwd: cwd });
+      const secondRef = await spawn("git", ["rev-parse", "HEAD"], { cwd });
       await add("packages/pkg-b/index.js", cwd);
       await add("packages/pkg-b/package.json", cwd);
       await commit("added packageB files", cwd);
 
-      const filesChangedSinceFirstRef = await getChangedFilesSince(firstRef.stdout.trim(), cwd);
+      const filesChangedSinceFirstRef = await getChangedFilesSince(
+        firstRef.stdout.trim(),
+        cwd
+      );
       expect(filesChangedSinceFirstRef[0]).toEqual("packages/pkg-a/index.js");
       expect(filesChangedSinceFirstRef[1]).toEqual("packages/pkg-b/index.js");
-      expect(filesChangedSinceFirstRef[2]).toEqual("packages/pkg-b/package.json");
+      expect(filesChangedSinceFirstRef[2]).toEqual(
+        "packages/pkg-b/package.json"
+      );
 
-      const filesChangedSinceSecondRef = await getChangedFilesSince(secondRef.stdout.trim(), cwd);
+      const filesChangedSinceSecondRef = await getChangedFilesSince(
+        secondRef.stdout.trim(),
+        cwd
+      );
       expect(filesChangedSinceSecondRef[0]).toEqual("packages/pkg-b/index.js");
-      expect(filesChangedSinceSecondRef[1]).toEqual("packages/pkg-b/package.json");
+      expect(filesChangedSinceSecondRef[1]).toEqual(
+        "packages/pkg-b/package.json"
+      );
     });
   });
 

@@ -8,6 +8,7 @@ import fs from "fs-extra";
 import detectIndent from "detect-indent";
 import semver from "semver";
 
+import * as boltMessages from "bolt/dist/modern/utils/messages";
 import * as bolt from "../../utils/bolt-replacements";
 
 import logger from "../../utils/logger";
@@ -56,7 +57,7 @@ export default async function version(opts) {
     const changelogPaths = await updateChangelog(releaseObj, config);
     if (config.commit) {
       for (const changelogPath of changelogPaths) {
-        await git.add(changelogPath);
+        await git.add(changelogPath, cwd);
       }
     }
   }
@@ -66,12 +67,12 @@ export default async function version(opts) {
   // This should then reset the changesets folder to a blank state
   removeFolders(changesetBase);
   if (config.commit) {
-    await git.add(changesetBase);
+    await git.add(changesetBase, cwd);
 
     logger.log("Committing changes...");
     // TODO: Check if there are any unstaged changed before committing and throw
     // , as it means something went super-odd.
-    await git.commit(publishCommit);
+    await git.commit(publishCommit, cwd);
   } else {
     logger.log(
       "All files have been updated. Review them and commit at your leisure"
@@ -101,8 +102,7 @@ async function bumpReleasedPackages(releaseObj, allPackages, config) {
 
   if (externalDeps.length !== 0) {
     logger.warn(
-      "Oh noes a disaster (but seriously, I should update this error message, TODO"
-      // messages.externalDepsPassedToUpdatePackageVersions(externalDeps)
+      boltMessages.externalDepsPassedToUpdatePackageVersions(externalDeps)
     );
   }
 
@@ -130,13 +130,12 @@ async function bumpReleasedPackages(releaseObj, allPackages, config) {
       // package will not be released, we throw.
       if (!inUpdatedPackages && willLeaveSemverRange) {
         throw new Error(
-          console.log("important logging definitely fix this before releasing")
-          // messages.invalidBoltWorkspacesFromUpdate(
-          //   name,
-          //   depName,
-          //   depRange,
-          //   updatedPackages[depName]
-          // )
+          boltMessages.invalidBoltWorkspacesFromUpdate(
+            pkg.name,
+            depName,
+            depRange,
+            internalDeps[depName]
+          )
         );
       }
 
@@ -157,7 +156,7 @@ async function bumpReleasedPackages(releaseObj, allPackages, config) {
     const pkgJsonStr = JSON.stringify(newPkgJSON, null, indent);
     await fs.writeFile(pkgJsonPath, pkgJsonStr);
     if (config.commit) {
-      await git.add(pkgJsonPath);
+      await git.add(pkgJsonPath, config.cwd);
     }
   }
 }

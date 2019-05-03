@@ -6,6 +6,8 @@
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
+import * as boltMessages from "bolt/dist/modern/utils/messages";
+
 import { DEPENDENCY_TYPES } from "../constants";
 
 const getAllDependencies = config => {
@@ -61,13 +63,12 @@ export default async function getDependencyGraph(packages, cwd) {
       if (!semver.satisfies(expected, depVersion)) {
         valid = false;
         console.error(
-          "TODO fix this with proper erroring"
-          //   messages.packageMustDependOnCurrentVersion(
-          //     name,
-          //     depName,
-          //     expected,
-          //     depVersion
-          //   )
+          boltMessages.packageMustDependOnCurrentVersion(
+            name,
+            depName,
+            expected,
+            depVersion
+          )
         );
         continue;
       }

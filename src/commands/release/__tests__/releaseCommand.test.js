@@ -1,6 +1,6 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 
-import * as bolt from "bolt";
+import * as bolt from "../../../utils/bolt-replacements";
 import * as git from "../../../utils/git";
 import runRelease from "..";
 

@@ -92,17 +92,17 @@ describe("running version in a simple project", () => {
       const pkgBConfigPath = path.join(cwd, "packages/pkg-b/package.json");
       const changesetConfigPath = path.join(cwd, ".changeset");
 
-      expect(git.add).toHaveBeenCalledWith(pkgAConfigPath);
-      expect(git.add).toHaveBeenCalledWith(pkgBConfigPath);
-      expect(git.add).toHaveBeenCalledWith(changesetConfigPath);
+      expect(git.add).toHaveBeenCalledWith(pkgAConfigPath, cwd);
+      expect(git.add).toHaveBeenCalledWith(pkgBConfigPath, cwd);
+      expect(git.add).toHaveBeenCalledWith(changesetConfigPath, cwd);
     });
     it("should git add the expected files (with changelog)", async () => {
       await writeChangesets([simpleChangeset2], cwd);
       await versionCommand({ cwd, changelogs: true, commit: true });
       const pkgAChangelogPath = path.join(cwd, "packages/pkg-a/CHANGELOG.md");
       const pkgBChangelogPath = path.join(cwd, "packages/pkg-b/CHANGELOG.md");
-      expect(git.add).toHaveBeenCalledWith(pkgAChangelogPath);
-      expect(git.add).toHaveBeenCalledWith(pkgBChangelogPath);
+      expect(git.add).toHaveBeenCalledWith(pkgAChangelogPath, cwd);
+      expect(git.add).toHaveBeenCalledWith(pkgBChangelogPath, cwd);
     });
   });
 

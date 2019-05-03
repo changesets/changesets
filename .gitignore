@@ -1,2 +1,4 @@
 node_modules/
 lib/
+*error.log
+scratchings.js

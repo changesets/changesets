@@ -5,6 +5,7 @@ import path from "path";
 
 import * as git from "./git";
 
+// TODO take in cwd, and fetch changesetBase ourselves
 export default async function getChangesets(changesetBase, sinceMasterOnly) {
   if (!fs.existsSync(changesetBase)) {
     throw new Error("There is no .changeset directory in this project");
@@ -17,7 +18,9 @@ export default async function getChangesets(changesetBase, sinceMasterOnly) {
   );
 
   if (sinceMasterOnly) {
-    const newChangesets = await git.getChangedChangesetFilesSinceMaster();
+    const newChangesets = await git.getChangedChangesetFilesSinceMaster(
+      changesetBase
+    );
     const newHahses = newChangesets.map(c => c.split("/")[1]);
 
     changesets = changesets.filter(dir => newHahses.includes(dir));
@@ -30,7 +33,7 @@ export default async function getChangesets(changesetBase, sinceMasterOnly) {
     );
     const jsonPath = path.join(changesetBase, changesetDir, "changes.json");
     const json = require(jsonPath);
-    const commit = await git.getCommitThatAddsFile(jsonPath);
+    const commit = await git.getCommitThatAddsFile(jsonPath, changesetBase);
     return { ...json, summary, commit, id: changesetDir };
   });
   return Promise.all(changesetContents);

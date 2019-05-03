@@ -35,7 +35,7 @@ export default async function add(opts) {
     return;
   }
 
-  const changedPackages = await git.getChangedPackagesSinceMaster();
+  const changedPackages = await git.getChangedPackagesSinceMaster(config.cwd);
   const changePackagesName = changedPackages.map(pkg => pkg.name);
   const newChangeset = await createChangeset(changePackagesName, config);
   printConfirmationMessage(newChangeset);
@@ -47,8 +47,11 @@ export default async function add(opts) {
   if (confirmChangeset) {
     const changesetID = await writeChangeset(newChangeset, config);
     if (config.commit) {
-      await git.add(path.resolve(changesetBase, changesetID));
-      await git.commit(`CHANGESET: ${changesetID}. ${newChangeset.summary}`);
+      await git.add(path.resolve(changesetBase, changesetID), config.cwd);
+      await git.commit(
+        `CHANGESET: ${changesetID}. ${newChangeset.summary}`,
+        config.cwd
+      );
       logger.log(green("Changeset added and committed"));
     } else {
       logger.log(green("Changeset added! - you can now commit it"));

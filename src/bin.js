@@ -85,7 +85,7 @@ const cwd = process.cwd();
         return;
       }
       case "release": {
-        await release({ cwd, release, public: isPublic });
+        await release({ cwd, public: isPublic });
         return;
       }
       case "status": {

@@ -1,17 +1,15 @@
 import spawn from "projector-spawn";
 import path from "path";
-import * as bolt from "bolt";
+import pkgDir from "pkg-dir";
+import * as bolt from "./bolt-replacements";
 
 async function getMasterRef(cwd) {
-  const gitCmd = await spawn("git", ["rev-parse", "master"], { cwd: cwd });
+  const gitCmd = await spawn("git", ["rev-parse", "master"], { cwd });
   return gitCmd.stdout.trim().split("\n")[0];
 }
 
 async function add(pathToFile, cwd) {
-  const gitCmd = await spawn(
-    "git",
-    ["add", pathToFile],
-    { cwd });
+  const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
   return gitCmd.code === 0;
 }
 
@@ -19,7 +17,8 @@ async function commit(message, cwd) {
   const gitCmd = await spawn(
     "git",
     ["commit", "-m", message, "--allow-empty"],
-    { cwd });
+    { cwd }
+  );
   return gitCmd.code === 0;
 }
 
@@ -27,22 +26,16 @@ async function commit(message, cwd) {
 async function tag(tagStr, cwd) {
   // NOTE: it's important we use the -m flag otherwise 'git push --follow-tags' wont actually push
   // the tags
-  const gitCmd = await spawn(
-    "git",
-    ["tag", tagStr, "-m", tagStr],
-    { cwd });
+  const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], { cwd });
   return gitCmd.code === 0;
 }
 
 async function getCommitThatAddsFile(gitPath, cwd) {
-  const gitCmd = await spawn("git", [
-    "log",
-    "--reverse",
-    "--max-count=1",
-    "--pretty=format:%h",
-    "-p",
-    gitPath
-  ], { cwd });
+  const gitCmd = await spawn(
+    "git",
+    ["log", "--reverse", "--max-count=1", "--pretty=format:%h", "-p", gitPath],
+    { cwd }
+  );
   // For reasons I do not understand, passing pretty format through this is not working
   // The slice below is aimed at achieving the same thing.
   return gitCmd.stdout.split("\n")[0];
@@ -65,12 +58,11 @@ async function getChangedChangesetFilesSinceMaster(cwd, fullPath = false) {
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
   // Now we can find which files we added
-  cmd = await spawn("git", [
-    "diff",
-    "--name-only",
-    "--diff-filter=d",
-    "master"
-  ], { cwd });
+  cmd = await spawn(
+    "git",
+    ["diff", "--name-only", "--diff-filter=d", "master"],
+    { cwd }
+  );
 
   const files = cmd.stdout
     .trim()
@@ -82,8 +74,7 @@ async function getChangedChangesetFilesSinceMaster(cwd, fullPath = false) {
 
 async function getChangedPackagesSinceCommit(commitHash, cwd) {
   const changedFiles = await getChangedFilesSince(commitHash, cwd, true);
-  const project = await bolt.getProject({ cwd });
-  const projectDir = project.dir;
+  const projectDir = await pkgDir(cwd);
   const workspaces = await bolt.getWorkspaces({ cwd });
   const allPackages = workspaces.map(pkg => ({
     ...pkg,
@@ -97,7 +88,7 @@ async function getChangedPackagesSinceCommit(commitHash, cwd) {
 
   return (
     changedFiles
-    // ignore deleted files
+      // ignore deleted files
       .filter(fileExistsInPackage)
       .map(fileNameToPackage)
       // filter, so that we have only unique packages
