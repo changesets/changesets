@@ -10,6 +10,7 @@
   "bin": {
     "changeset": "lib/bin.js"
   },
+  "main": "lib/index.js",
   "author": "Atlassian Pty Ltd",
   "license": "Apache-2.0",
   "dependencies": {
