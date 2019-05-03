@@ -21,7 +21,7 @@ function success() {
   console.log.apply(this, [chalk.green("success"), ...arguments]);
 }
 
-module.exports = {
+export default {
   log,
   info,
   warn,

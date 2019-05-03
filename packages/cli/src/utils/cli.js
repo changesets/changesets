@@ -100,8 +100,7 @@ async function askCheckbox(message, choices) {
         type: "checkbox"
       }
     ])
-    .then(responses => responses[name])
-    .catch(e => console.log("can we do this?", e));
+    .then(responses => responses[name]);
 }
 
 export { askCheckboxPlus, askQuestion, askConfirm, askList, askCheckbox };

@@ -1,10 +1,10 @@
-const fs = require("fs-extra");
-const path = require("path");
-const crypto = require("crypto");
-const prettier = require("prettier");
-const pkgDir = require("pkg-dir");
-const { removeEmptyFolders } = require("../../utils/removeFolders");
-const getChangesetBase = require("../../utils/getChangesetBase");
+import fs from "fs-extra";
+import path from "path";
+import crypto from "crypto";
+import prettier from "prettier";
+import pkgDir from "pkg-dir";
+import { removeEmptyFolders } from "../../utils/removeFolders";
+import getChangesetBase from "../../utils/getChangesetBase";
 
 const getID = data => {
   const hash = crypto.createHash("sha256");
@@ -53,4 +53,4 @@ async function writeChangeset(changesetData, opts) {
   return changesetID;
 }
 
-module.exports = writeChangeset;
+export default writeChangeset;

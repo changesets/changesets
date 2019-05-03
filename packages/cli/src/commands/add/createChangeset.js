@@ -47,29 +47,37 @@ async function getPackagesToRelease(changedPackages, allPackages) {
     );
   }
 
-  const unchangedPackagesNames = allPackages
-    .map(({ name }) => name)
-    .filter(name => !changedPackages.includes(name));
+  if (allPackages.length > 1) {
+    const unchangedPackagesNames = allPackages
+      .map(({ name }) => name)
+      .filter(name => !changedPackages.includes(name));
 
-  const defaultInquirerList = [
-    new inquirer.Separator("changed packages"),
-    ...changedPackages,
-    new inquirer.Separator("unchanged packages"),
-    ...unchangedPackagesNames,
-    new inquirer.Separator()
-  ];
+    const defaultInquirerList = [
+      new inquirer.Separator("changed packages"),
+      ...changedPackages,
+      new inquirer.Separator("unchanged packages"),
+      ...unchangedPackagesNames,
+      new inquirer.Separator()
+    ];
 
-  let packagesToRelease = await askInitialReleaseQuestion(defaultInquirerList);
+    let packagesToRelease = await askInitialReleaseQuestion(
+      defaultInquirerList
+    );
 
-  if (packagesToRelease.length === 0) {
-    do {
-      logger.error("You must select at least one package to release");
-      logger.error("(You most likely hit enter instead of space!)");
+    if (packagesToRelease.length === 0) {
+      do {
+        logger.error("You must select at least one package to release");
+        logger.error("(You most likely hit enter instead of space!)");
 
-      packagesToRelease = await askInitialReleaseQuestion(defaultInquirerList);
-    } while (packagesToRelease.length === 0);
+        packagesToRelease = await askInitialReleaseQuestion(
+          defaultInquirerList
+        );
+      } while (packagesToRelease.length === 0);
+    }
+    return packagesToRelease;
+  } else {
+    return [allPackages[0].name];
   }
-  return packagesToRelease;
 }
 
 async function getPackageBumpRange(pkgJSON) {
@@ -140,8 +148,8 @@ export default async function createChangeset(
 ) {
   const cwd = opts.cwd || process.cwd();
   const allPackages = await bolt.getWorkspaces({ cwd });
-  const dependencyGraph = await bolt.getDependentsGraph({ cwd });
 
+  const dependencyGraph = await bolt.getDependentsGraph({ cwd });
   // helper because we do this a lot
   const getPackageJSON = pkgName =>
     allPackages.find(({ name }) => name === pkgName).config;
