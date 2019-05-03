@@ -5,7 +5,6 @@
 // @flow
 
 import { green, yellow, red } from "chalk";
-import * as bolt from "bolt";
 
 import inquirer from "inquirer";
 import semver from "semver";
@@ -13,6 +12,7 @@ import outdent from "outdent";
 
 import * as cli from "../../utils/cli";
 import logger from "../../utils/logger";
+import * as bolt from "../../utils/bolt-replacements";
 
 /*
 type releaseType = {

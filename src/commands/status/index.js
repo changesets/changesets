@@ -1,6 +1,5 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-use-before-define */
-import * as bolt from "bolt";
 import chalk from "chalk";
 import table from "tty-table";
 import fs from "fs-extra";
@@ -9,6 +8,7 @@ import path from "path";
 import getChangesetBase from "../../utils/getChangesetBase";
 import logger from "../../utils/logger";
 import getChangesets from "../../utils/getChangesets";
+import * as bolt from "../../utils/bolt-replacements";
 
 import createRelease from "../../utils/createRelease";
 
