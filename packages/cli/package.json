@@ -29,5 +29,8 @@
     "semver": "^5.4.1",
     "tty-table": "^2.7.0",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "jest-fixtures": "^0.5.0"
   }
 }

@@ -6,8 +6,12 @@
   "scripts": {
     "test": "jest",
     "build": "preconstruct build",
-    "preconstruct:watch": "preconstruct watch",
-    "postinstall": "preconstruct dev"
+    "watch": "preconstruct watch",
+    "postinstall": "preconstruct dev",
+    "lint": "yarn lint:eslint && yarn lint:prettier",
+    "lint:prettier": "prettier --list-different \"**/*.{js,ts,tsx}\"",
+    "lint:eslint": "yarn eslint . --ext .ts,.tsx,.js",
+    "prettier": "prettier --write \"**/*.{js,ts,tsx}\""
   },
   "workspaces": [
     "packages/*"

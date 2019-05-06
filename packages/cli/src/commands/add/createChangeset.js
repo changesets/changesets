@@ -75,9 +75,8 @@ async function getPackagesToRelease(changedPackages, allPackages) {
       } while (packagesToRelease.length === 0);
     }
     return packagesToRelease;
-  } else {
-    return [allPackages[0].name];
   }
+  return [allPackages[0].name];
 }
 
 async function getPackageBumpRange(pkgJSON) {
@@ -189,7 +188,6 @@ export default async function createChangeset(
     const nextRelease = pkgsToSearch.shift();
     // pkgDependents will be a list of packages that depend on nextRelease ie. ['avatar-group', 'comment']
     const pkgDependents = dependencyGraph.get(nextRelease.name);
-
     // For each dependent we are going to see whether it needs to be bumped because it's dependency
     // is leaving the version range.
     pkgDependents
