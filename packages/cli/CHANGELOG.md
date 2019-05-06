@@ -1,5 +1,10 @@
 # @changesets/cli
 
+## 1.0.1
+### Patch Changes
+
+- 9435d886: Fix binary and published files
+
 ## 1.0.0
 
 ### Major Changes
