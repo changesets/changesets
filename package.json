@@ -11,7 +11,7 @@
     "lint": "yarn eslint . --ext .ts,.tsx,.js",
     "lint:fix": "yarn lint --fix",
     "changeset": "packages/cli/bin.js",
-    "release": "preconstruct build packages/cli/bin.js release --public"
+    "release": "yarn build && packages/cli/bin.js release --public"
   },
   "workspaces": [
     "packages/*"
