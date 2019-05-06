@@ -52,6 +52,8 @@ async function getPackagesToRelease(changedPackages, allPackages) {
     .filter(name => !changedPackages.includes(name));
 
   const defaultInquirerList = [
+    "All packages",
+    "All changed packages",
     new inquirer.Separator("changed packages"),
     ...changedPackages,
     new inquirer.Separator("unchanged packages"),
@@ -68,6 +70,11 @@ async function getPackagesToRelease(changedPackages, allPackages) {
 
       packagesToRelease = await askInitialReleaseQuestion(defaultInquirerList);
     } while (packagesToRelease.length === 0);
+
+  } else if (packagesToRelease[0] === "All packages") {
+    packagesToRelease = [...changedPackages, ...unchangedPackagesNames];
+  } else if (packagesToRelease[0] === "All changed packages") {
+    packagesToRelease = [...changedPackages];
   }
   return packagesToRelease;
 }
