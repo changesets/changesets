@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
-    "changeset": "lib/bin.js"
+    "changeset": "bin.js"
   },
+  "files": [
+    "default-files",
+    "dist",
+    "bin.js"
+  ],
   "main": "dist/cli.cjs.js",
   "module": "dist/cli.esm.js",
   "author": "Atlassian Pty Ltd",

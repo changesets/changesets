@@ -1,0 +1,1 @@
+Fix binary and published files
