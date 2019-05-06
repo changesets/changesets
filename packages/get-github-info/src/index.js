@@ -40,7 +40,7 @@ function makeQuery(requests) {
 const GHDataLoader = new DataLoader(async requests => {
   if (!process.env.GITHUB_TOKEN) {
     throw new Error(
-      "Please create a GitHub personal access token at https://github.com/settings/tokens/new and add it to a .env file in the root of the repository"
+      "Please create a GitHub personal access token at https://github.com/settings/tokens/new and add it as the GITHUB_TOKEN environment variable"
     );
   }
   const data = await fetch(

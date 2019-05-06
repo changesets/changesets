@@ -18,12 +18,40 @@ or
 npm install --save-dev @changesets/get-github-info dotenv
 ```
 
-Then you can use it in your `.changeset/config.js` like this
+Then you can use it in your `.changeset/config.js` like this.
 
 ```jsx
 require("dotenv").config();
 const { getInfo } = require("@changesets/get-github-info");
+
+// ...
+
+const getReleaseLine = async (changeset, type) => {
+  const [firstLine, ...futureLines] = changeset.summary
+    .split("\n")
+    .map(l => l.trimRight());
+  // getInfo exposes the GH username and PR number if you want them directly
+  // but it also exposes a set of links for the commit, PR and GH username
+  let { user, pull, links } = getInfo({
+    // replace this will your own repo
+    repo: "Noviny/changesets",
+    commit: changeset.commit
+  });
+  return `- ${links.commit}${links.pull === null ? "" : ` ${links.pull}`}${
+    links.user === null ? "" : ` Thanks ${links.user}!`
+  }: ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+};
+
+// ...
 ```
+
+You'll need to [get a GitHub personal access token](https://github.com/settings/tokens/new) and add it to a `.env` file.
+
+```bash
+GITHUB_TOKEN=token_here
+```
+
+You can now bump your packages and changelogs with `changeset bump` and it'll have the GitHub info. 🎉
 
 ## API
 
