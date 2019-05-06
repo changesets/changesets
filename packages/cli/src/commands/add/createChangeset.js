@@ -52,9 +52,11 @@ async function getPackagesToRelease(changedPackages, allPackages) {
       .map(({ name }) => name)
       .filter(name => !changedPackages.includes(name));
 
+    const selectAllPackagesOptions = allPackages.length > 10 ?
+      ["All packages", "All changed packages"] : [];
+
     const defaultInquirerList = [
-      "All packages",
-      "All changed packages",
+      ...selectAllPackagesOptions,
       new inquirer.Separator("changed packages"),
       ...changedPackages,
       new inquirer.Separator("unchanged packages"),
