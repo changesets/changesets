@@ -20,6 +20,11 @@ npm install --save-dev @changesets/get-github-info dotenv
 
 Then you can use it in your `.changeset/config.js` like this
 
+```jsx
+require("dotenv").config();
+const { getInfo } = require("@changesets/get-github-info");
+```
+
 ## API
 
 ```ts

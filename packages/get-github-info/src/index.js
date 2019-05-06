@@ -94,12 +94,19 @@ export async function getInfo(request) {
     user: data === null ? null : data.user,
     pull: data === null ? null : data.number,
     links: {
-      commit: `https://github.com/${request.repo}/commit/${request.commit}`,
+      commit: `[${request.commit}](https://github.com/${request.repo}/commit/${
+        request.commit
+      })`,
       pull:
         data === null
           ? null
-          : `https://github.com/${request.repo}/pulls/${data.number}`,
-      user: data === null ? null : `https://github.com/${data.user}`
+          : `[#${data.number}](https://github.com/${request.repo}/pulls/${
+              data.number
+            })`,
+      user:
+        data === null
+          ? null
+          : `[@${data.user}](https://github.com/${data.user})`
     }
   };
 }
