@@ -35,16 +35,33 @@ import flattenChangesets from "./flattenChangesets";
   }
 */
 
-function getCurrentVersion(packageName, allPackages) {
-  const pkg = allPackages.find(p => p.name === packageName);
-  // When changeset contains deleted package returning null as its version
-  return pkg ? pkg.config.version : null;
-}
-
-export default function createRelease(changesets, allPackages) {
+export default function createRelease(
+  changesets,
+  allPackages,
+  allLinkedPackages = []
+) {
   // First, combine all the changeset.releases into one useful array
 
-  const flattenedChangesets = flattenChangesets(changesets);
+  const flattenedChangesets = flattenChangesets(changesets, allLinkedPackages);
+
+  let currentVersions = new Map();
+
+  for (let pkg of allPackages) {
+    currentVersions.set(pkg.name, pkg ? pkg.config.version : null);
+  }
+
+  for (let linkedPackages of allLinkedPackages) {
+    let highestVersion;
+    for (let linkedPackage of linkedPackages) {
+      let version = currentVersions.get(linkedPackage);
+      if (highestVersion === undefined || semver.gt(version, highestVersion)) {
+        highestVersion = version;
+      }
+    }
+    for (let linkedPackage of linkedPackages) {
+      currentVersions.set(linkedPackage, highestVersion);
+    }
+  }
 
   const allReleases = flattenedChangesets
     // do not update none packages
@@ -52,7 +69,7 @@ export default function createRelease(changesets, allPackages) {
     // get the current version for each package
     .map(release => ({
       ...release,
-      version: getCurrentVersion(release.name, allPackages)
+      version: currentVersions.get(release.name)
     }))
     // update to new version for each package
     .map(release => ({
