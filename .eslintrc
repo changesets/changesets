@@ -1,29 +1,35 @@
 {
+  "extends": ["standard", "prettier"],
+  "plugins": ["prettier"],
   "parser": "babel-eslint",
-  "extends": [
-    "airbnb-base",
-    "prettier",
-    "prettier/flowtype",
-    "plugin:jest/recommended"
-  ],
   "rules": {
-    "no-restricted-syntax": "off",
-    "no-console": "off",
-    "prefer-destructuring": [
-      "error",
-      {
-        "VariableDeclarator": {
-          "array": true,
-          "object": false
-        },
-        "AssignmentExpression": {
-          "array": false,
-          "object": false
-        }
-      },
-      {
-        "enforceForRenamedProperties": true
+    "prettier/prettier": "error",
+    "standard/computed-property-even-spacing": "off",
+    "no-template-curly-in-string": "off",
+    "camelcase": "off",
+    "import/no-duplicates": "off"
+  },
+  "overrides": [
+    {
+      "files": ["*.test.js", "**/__tests__/**"],
+      "env": {
+        "jest": true
       }
-    ]
-  }
+    },
+    {
+      "files": ["**/packages/*/src/*", "**/packages/*/src/**/*"],
+      "rules": {
+        "import/no-commonjs": "error"
+      }
+    },
+    {
+      "files": ["**/__fixtures__/*"],
+      "rules": {
+        "no-unused-vars": "off"
+      },
+      "env": {
+        "jest": false
+      }
+    }
+  ]
 }
