@@ -32,7 +32,7 @@ const getReleaseLine = async (changeset, type) => {
     .map(l => l.trimRight());
   // getInfo exposes the GH username and PR number if you want them directly
   // but it also exposes a set of links for the commit, PR and GH username
-  let { user, pull, links } = getInfo({
+  let { user, pull, links } = await getInfo({
     // replace this will your own repo
     repo: "Noviny/changesets",
     commit: changeset.commit
