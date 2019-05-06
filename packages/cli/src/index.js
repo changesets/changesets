@@ -14,10 +14,10 @@ const { input, flags } = meow(
     $ changesets [command]
   Commands
     init
-    add
-    bump
-    release
-    status
+    add [--commit]
+    bump [--commit --update-changelog --skip-ci]
+    release [--public]
+    status [--since-master --verbose --output=JSON_FILE.json]
   `,
   {
     flags: {
@@ -51,7 +51,6 @@ const { input, flags } = meow(
 
 const cwd = process.cwd();
 
-// TODO - run 'add' if no command is passed in
 (async () => {
   if (input.length < 1) {
     await add({ cwd });

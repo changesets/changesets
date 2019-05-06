@@ -1,4 +1,110 @@
-# @atlaskit/build-releases
+# @changesets/cli
+
+## 1.0.0
+
+### Major Changes
+
+- 51c8b0d6: Remove `noChangelog` flag in favor of `updateChangelog` flag (default behaviour remains the same).
+
+  If you were using this custom flag, you will need to replaces `noChangelog: true` with `updateChangelog: false`
+
+- 51c8b0d6: Rename commands from @atlaskit/build-releases
+
+  We are no longer mirroring the names from npm/yarn commands, so it is easy to write package scripts
+  for each command without footguns. The functionality of the commands remains the same. In addition,
+  the binary has been changed to `changeset`.
+
+  The new names are:
+
+  - `build-releases initialize` => `changeset init` (for ecosystem consistency)
+  - `build-releases changeset` => `changeset` (default command). You can also run `changeset add`
+  - `build-releases version` => `changeset bump`
+  - `build-releases publish` => `changeset release`
+
+  The function of these commands remains unchanged.
+
+  - 51c8b0d6: Change format of changelog entries
+
+  Previously changelog entries were in the form of:
+
+  ```md
+  ## 2.1.0
+
+  - [patch] Allows passing --public flag for publishing scoped packages [159c28e](https://bitbucket.org/atlassian/atlaskit-mk-2/commits/159c28e)
+  - [minor] Changes changelogs to be opt out rather than opt in [f461788](https://bitbucket.org/atlassian/atlaskit-mk-2/commits/f461788)
+  ```
+
+  which doesn't take into account the importance of particular entries. We are moving to an ordered system for changelog
+  entries, and to match this, we are updating the headings we use to the following format:
+
+  ```md
+  ## 2.1.0
+
+  ### Minor
+
+  - Allows passing --public flag for publishing scoped packages [159c28e](https://bitbucket.org/atlassian/atlaskit-mk-2/commits/159c28e)
+
+  ### Patch
+
+  - [minor] Changes changelogs to be opt out rather than opt in [f461788](https://bitbucket.org/atlassian/atlaskit-mk-2/commits/f461788)
+  ```
+
+  This changes the format of the default `getReleaseLine` from
+
+  ```js
+  const getReleaseLine = async (changeset, versionType) => {
+    const indentedSummary = changeset.summary
+      .split("\n")
+      .map(l => `  ${l}`.trimRight())
+      .join("\n");
+
+    return `- [${versionType}] ${changeset.commit}:\n\n${indentedSummary}`;
+  };
+  ```
+
+  to
+
+  ```js
+  // eslint-disable-next-line no-unused-vars
+  const getReleaseLine = async (changeset, type) => {
+    const [firstLine, ...futureLines] = changeset.summary
+      .split("\n")
+      .map(l => l.trimRight());
+
+    return `- ${changeset.commit}: ${firstLine}\n${futureLines
+      .map(l => `  ${l}`)
+      .join("\n")}`;
+  };
+  ```
+
+  You will end up with some odd changelog entries if you do not update your release line.
+
+### Minor Changes
+
+- 51c8b0d6: Support non-bolt repositories
+
+  Changesets have been expanded to support:
+
+  - bolt repositories
+  - yarn workspaces-based repositories
+  - single package repositories.
+
+  Currently **not** supported: bolt repositories with nested workspaces.
+
+  To do this, functions that call out to bolt have been inlined, and obviously marked
+  within the file-system. In addition, the `get-workspaces` function has undergone
+  significant change, and will be extracted out into its own package soon.
+
+  This is to support other tools wanting this level of inter-operability.
+
+  If plans to modularize bolt proceed, we may go back to relying on its functions.
+
+  This should have no impact on use.
+
+  - 51c8b0d6: Add 'select all' and 'select all changed' options, to make mass-bumping easier.
+  - eeb4d5c6: Add new command: `status` - see Readme for more information
+
+# @atlaskit/build-releases - legacy changelog
 
 ## 3.0.3
 

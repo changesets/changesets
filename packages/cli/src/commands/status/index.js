@@ -65,9 +65,7 @@ function verbosePrint(type, releases) {
     const columns = packages.map(({ name, version, changesets }) => [
       chalk.green(name),
       version,
-      changesets
-        .map(c => chalk.blue(`U+00A0.changeset/${c}/changes.md`))
-        .join(" +")
+      changesets.map(c => chalk.blue(` .changeset/${c}/changes.md`)).join(" +")
     ]);
 
     const t1 = table(
@@ -77,7 +75,7 @@ function verbosePrint(type, releases) {
         { value: "Related Changeset Summaries" }
       ],
       columns,
-      { paddingLeft: 0, paddingRight: 0, headerAlign: "center", align: "left" }
+      { paddingLeft: 1, paddingRight: 0, headerAlign: "center", align: "left" }
     );
     logger.log(t1.render());
   } else {
