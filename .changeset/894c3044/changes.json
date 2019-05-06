@@ -1,0 +1,4 @@
+{
+  "releases": [{ "name": "@changesets/cli", "type": "minor" }],
+  "dependents": []
+}

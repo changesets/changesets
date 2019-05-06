@@ -25,9 +25,7 @@ export default async function getStatus({ cwd, sinceMaster, verbose, output }) {
 
   const releaseObject = createRelease(changesets, allPackages);
   const { releases } = releaseObject;
-  logger.log(
-    "==================================================================="
-  );
+  logger.log("---");
 
   if (output) {
     await fs.writeFile(
@@ -39,7 +37,9 @@ export default async function getStatus({ cwd, sinceMaster, verbose, output }) {
 
   const print = verbose ? verbosePrint : SimplePrint;
   print("patch", releases);
+  logger.log("---");
   print("minor", releases);
+  logger.log("---");
   print("major", releases);
 
   return releaseObject;
@@ -50,14 +50,11 @@ function SimplePrint(type, releases) {
   if (packages.length) {
     logger.info(chalk`Packages to be bumped at {green ${type}}:\n`);
 
-    const pkgs = packages.map(({ name }) => name).join("\n");
+    const pkgs = packages.map(({ name }) => `- ${name}`).join("\n");
     logger.log(chalk.green(pkgs));
   } else {
     logger.info(chalk`{red NO} packages to be bumped at {green ${type}}`);
   }
-  logger.log(
-    "==================================================================="
-  );
 }
 
 function verbosePrint(type, releases) {
@@ -68,7 +65,9 @@ function verbosePrint(type, releases) {
     const columns = packages.map(({ name, version, changesets }) => [
       chalk.green(name),
       version,
-      changesets.map(c => chalk.blue(` .changeset/${c}/changes.md`)).join(" +")
+      changesets
+        .map(c => chalk.blue(`U+00A0.changeset/${c}/changes.md`))
+        .join(" +")
     ]);
 
     const t1 = table(
@@ -86,7 +85,4 @@ function verbosePrint(type, releases) {
       chalk`Running release would release {red NO} packages as a {green ${type}}`
     );
   }
-  logger.log(
-    "==================================================================="
-  );
 }

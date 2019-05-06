@@ -12,7 +12,8 @@
     "lint:prettier": "prettier --list-different \"**/*.{js,ts,tsx}\"",
     "lint:eslint": "yarn eslint . --ext .ts,.tsx,.js",
     "prettier": "prettier --write \"**/*.{js,ts,tsx}\"",
-    "changeset": "yarn build && packages/cli/bin.js"
+    "changeset": "yarn build && packages/cli/bin.js",
+    "release": "yarn build && packages/cli/bin.js release --public"
   },
   "workspaces": [
     "packages/*"
