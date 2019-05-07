@@ -46,12 +46,16 @@ export default function flattenReleases(changesets, allLinkedPackages) {
     const allBumpTypes = [];
     for (let linkedPackage of linkedPackages) {
       let release = flatReleases.get(linkedPackage);
-      allBumpTypes.push(release.type);
+      if (release) {
+        allBumpTypes.push(release.type);
+      }
     }
     const highestBumpType = maxType(allBumpTypes);
     for (let linkedPackage of linkedPackages) {
       let release = flatReleases.get(linkedPackage);
-      release.type = highestBumpType;
+      if (release) {
+        release.type = highestBumpType;
+      }
     }
   }
 
