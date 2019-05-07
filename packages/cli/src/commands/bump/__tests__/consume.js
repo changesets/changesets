@@ -134,6 +134,21 @@ describe("running version in a simple project", () => {
     );
   });
 
+  it("should not break when there is a linked package without a changeset", async () => {
+    const cwd2 = await copyFixtureIntoTempDir(__dirname, "linked-packages");
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangesets([simpleChangeset], cwd2);
+
+    await versionCommand({ cwd: cwd2 });
+    const calls = spy.mock.calls;
+
+    expect(JSON.parse(calls[0][1])).toEqual(
+      expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
+    );
+
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
   describe("when there are multiple changeset commits", () => {
     it("should bump releasedPackages", async () => {
       await writeChangesets([simpleChangeset, simpleChangeset2], cwd);
