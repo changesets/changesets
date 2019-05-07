@@ -1,0 +1,4 @@
+{
+  "releases": [{ "name": "@changesets/get-github-info", "type": "minor" }],
+  "dependents": []
+}

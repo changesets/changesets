@@ -1,0 +1,1 @@
+Add @changesets/get-github-info package
