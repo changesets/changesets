@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import * as bolt from "../../utils/bolt-replacements";
 import logger from "../../utils/logger";
 import * as git from "../../utils/git";

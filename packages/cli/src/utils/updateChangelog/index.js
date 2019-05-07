@@ -1,6 +1,3 @@
-/* eslint-disable consistent-return */
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-await-in-loop */
 import fs from "fs-extra";
 
 import path from "path";

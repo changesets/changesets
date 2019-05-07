@@ -1,5 +1,3 @@
-/* eslint-disable import/no-dynamic-require */
-/* eslint-disable global-require */
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 
 import fs from "fs-extra";

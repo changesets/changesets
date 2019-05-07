@@ -1,6 +1,7 @@
 # @changesets/cli
 
 ## 1.0.1
+
 ### Patch Changes
 
 - 9435d886: Fix binary and published files
@@ -70,7 +71,6 @@
   to
 
   ```js
-  // eslint-disable-next-line no-unused-vars
   const getReleaseLine = async (changeset, type) => {
     const [firstLine, ...futureLines] = changeset.summary
       .split("\n")

@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { green, red } from "chalk";
 import boxen from "boxen";
 import outdent from "outdent";

@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-// NB for tracing this back, publishPackages is
 import semver from "semver";
 import * as boltNpm from "bolt/dist/modern/utils/npm";
 import * as boltMessages from "bolt/dist/modern/utils/messages";

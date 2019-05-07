@@ -1,8 +1,5 @@
 // This is a modified version of the graph-getting in bolt
 
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-continue */
-/* eslint-disable no-restricted-syntax */
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";

@@ -1,4 +1,3 @@
-/* eslint-disable one-var */
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import path from "path";
 import fs from "fs-extra";

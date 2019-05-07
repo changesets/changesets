@@ -1,4 +1,3 @@
-/* eslint-disable prefer-rest-params */
 import chalk from "chalk";
 
 function log() {

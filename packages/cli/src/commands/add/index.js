@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { green } from "chalk";
 import path from "path";
 import fs from "fs-extra";

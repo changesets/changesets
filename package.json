@@ -8,8 +8,10 @@
     "build": "preconstruct build",
     "watch": "preconstruct watch",
     "postinstall": "preconstruct dev",
-    "lint": "yarn eslint . --ext .ts,.tsx,.js",
-    "lint:fix": "yarn lint --fix",
+    "lint": "yarn lint:eslint && yarn lint:prettier",
+    "lint:eslint": "yarn eslint . --ext .ts,.tsx,.js",
+    "lint:prettier": "prettier --list-different \"**/*.{js,ts,tsx}\"",
+    "prettier": "prettier --write \"**/*.{js,ts,tsx}\"",
     "changeset": "packages/cli/bin.js",
     "release": "yarn build && packages/cli/bin.js release --public"
   },

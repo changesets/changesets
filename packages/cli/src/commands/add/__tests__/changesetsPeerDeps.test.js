@@ -1,4 +1,3 @@
-/* eslint-disable prefer-destructuring */
 // @flow
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import {
@@ -48,7 +47,6 @@ const mockUserResponses = mockResponses => {
   const summary = mockResponses.summary || "summary message mock";
   const shouldCommit = mockResponses.shouldCommit || "n";
   askCheckboxPlus.mockReturnValueOnce(Object.keys(mockResponses.releases));
-  // eslint-disable-next-line no-unused-vars
   Object.entries(mockResponses.releases).forEach(([pkg, type]) =>
     askList.mockReturnValueOnce(type)
   );

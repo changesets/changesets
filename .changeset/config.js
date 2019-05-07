@@ -28,7 +28,6 @@ const changesetOptions = {
 - GIT_HASH: A summary message you wrote, indented?
 */
 
-// eslint-disable-next-line no-unused-vars
 const getReleaseLine = async (changeset, type) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")

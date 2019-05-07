@@ -1,7 +1,3 @@
-/* eslint-disable no-continue */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-console */
 // @flow
 
 import { green, yellow, red } from "chalk";

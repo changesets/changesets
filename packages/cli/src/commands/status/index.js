@@ -1,5 +1,3 @@
-/* eslint-disable consistent-return */
-/* eslint-disable no-use-before-define */
 import chalk from "chalk";
 import table from "tty-table";
 import fs from "fs-extra";

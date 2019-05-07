@@ -1,5 +1,3 @@
-/* eslint-disable consistent-return */
-/* eslint-disable no-use-before-define */
 import { DEPENDENCY_TYPES } from "../constants";
 
 export function getDependencyTypes(depName, config) {

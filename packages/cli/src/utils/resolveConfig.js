@@ -1,5 +1,3 @@
-/* eslint-disable import/no-dynamic-require */
-/* eslint-disable global-require */
 import path from "path";
 import fs from "fs-extra";
 import logger from "./logger";
