@@ -1,0 +1,85 @@
+# A Detailed Expalanation of Changesets
+
+Below, you will find a detailed explanation of what changesets are, and how they are being thought about.
+If you want to build tools that use changesets, I recommend checking out our [changesets spec](./spec.md)
+
+## The problem:
+
+When organising the release of packages, you may end up wanting to group several changes together written by different people and/or over a relatively large period of time. The best time to capture this information is when submitting a PR (when it is fresh in your mind), not when you eventually go to batch and release these changes.
+
+Git is a bad place to store this information, as it discourages writing detailed change descriptions - you want to allow people to provide as much documentation for the change as they want.
+
+## The solution, Changesets:
+
+The best way to think about a changeset as separate to either a changelog or a version bump is that a changeset is an 'intent to change'. The intent to change carries with it two key bits of information:
+
+- versioning
+- changelogs
+
+As it is an intent to change, the relevant versioning information is:
+
+- 'major' | 'minor' | 'patch'
+
+In addition, within a mono-repository, we can encode information about any other packages in the mono-repository that should be re-released to consume this change. This ensures that if you upgrade latest of all the packages, they are all compatible. The current implementation is heavily informed by [bolt's](https://github.com/boltpkg/bolt) opinion on version compatibility.
+
+- changelog information can be stored as a markdown snippet.
+
+As storing this information directly in git is problematic, we store it in the file system using the following structure:
+
+```
+-| .changeset/
+-|-| UNIQUE_ID/
+-|-|-| changes.json
+-|-|-| changes.md
+```
+
+The `changes.json` has the following format (this is currently structured towards a mono-repo):
+
+```json
+{
+  "releases": [
+    { "name": "extract-react-types", "type": "minor" },
+    { "name": "extract-react-types-loader", "type": "patch" }
+  ],
+  "dependents": [
+    {
+      "name": "babel-plugin-extract-react-types",
+      "type": "patch",
+      "dependencies": ["extract-react-types"]
+    },
+    {
+      "name": "kind2string",
+      "type": "patch",
+      "dependencies": ["extract-react-types"]
+    },
+    {
+      "name": "pretty-proptypes",
+      "type": "patch",
+      "dependencies": ["kind2string", "extract-react-types"]
+    }
+  ]
+}
+```
+
+The `changes.md` is just a markdown snippet, and it should be encouraged to go and manually edit it.
+
+This is useful because it breaks versioning into two steps:
+
+1. Adding a changeset - can be done in a PR, by a contributor, while the change is fresh in their mind
+2. Versioning - combines all changesets, creates one version bump for each package based on the maximum version bump of each package, and updates dependencies where needed, write changelogs. Can then be reviewed as an aggregate.
+
+## The tooling that makes this worthwhile
+
+1. CLI generation of new changesets
+2. Automated consumption of changesets to do versioning
+3. Detection + surfacing of changesets in PRs
+
+A tool to publish multiple packages from a mono-repo is also important, however does not need to be linked to this.
+
+See this blog post [I need to write this this link goes nowhere]()
+
+## Benefits to single-package repos
+
+Changesets are designed first and formost to handle versioning in monorepos, where interdependencies flowing through the system are important to understand and capture.
+
+Conceptually though, the benefits of changesets are detacheable from this. I think this process overall leads to an improvement in Pull Requests that helps increase confidence in versioning decisions and changelog entries.

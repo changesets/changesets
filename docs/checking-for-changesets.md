@@ -1,11 +1,11 @@
 # Checking for changesets
 
-Currently we don't have a simple command that tells you what changesets exist, and would prompt for a missing changeset. We do have a [github bot]() and a [bitbucket bot]() that alert users of missing changesets.
+Using `@changeset/cli`, there is a `status` command. See the docs for it in the
+[@changeset/cli readme](../packages/cli/README.md#status)
 
-Since some kinds of change may not require a release (changes to testing and unpublished docs for example), we recommend that any check that alerts people of the non-existance of a changeset is used as a warning, not as a blocking element to getting contributions merged.
+We have a [github bot](https://github.com/apps/changeset-bot) and a
+[bitbucket addon](https://bitbucket.org/atlassian/atlaskit-mk-2/src/master/build/bitbucket-release-addon/) that
+alert users of missing changesets.
 
-In the future, we will be adding an `info` command so you can surface this information more easily.
-
-If you are unsatisfied with the workflows suggested above, the following git command is a good starting point for discovering if a branch contains changesets:
-
-`git diff --name-only --diff-filter=d master .changeset`
+If you want to cause a failure in CI on missing changesets (not recommended), you can run `changeset status --since-master`,
+which will exit with a status code of 1 if there are no new changesets.

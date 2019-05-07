@@ -17,25 +17,25 @@ The second two steps can be made part of a CI process.
 ## Add the changeset tool
 
 ```shell
-npm install @atlaskit/build-releases && npx build-releases init
+npm install @changesets/cli && npx changeset init
 ```
 
 or
 
 ```shell
-yarn add @atlaskit/build-releases && yarn build-releases init
+yarn add @changesets/cli && yarn changeset init
 ```
 
 ## Adding changesets
 
 ```shell
-npx build-releases changeset
+npx changeset
 ```
 
 or
 
 ```shell
-yarn build-releases changeset
+yarn changeset
 ```
 
 ## Versioning and releasing
@@ -43,13 +43,13 @@ yarn build-releases changeset
 Once you decide you want to do a release, you can run
 
 ```shell
-npx build-releases version
+npx changeset bump
 ```
 
 or
 
 ```shell
-yarn build-releases version
+yarn changeset bump
 ```
 
 This consumes all changesets, and updates to the most appropriate semver version based on those changesets. It also writes changelog entries for each consumed changeset.
@@ -57,13 +57,13 @@ This consumes all changesets, and updates to the most appropriate semver version
 We recommend at this step reviewing both the changelog entries and the version changes for packages. Once you are confident that these are correct, and have made any necessary tweeks to changelogs, you can publish your packages:
 
 ```shell
-npx build-releases publish
+npx changeset release
 ```
 
 or
 
 ```shell
-yarn build-releases publish
+yarn changeset release
 ```
 
 This will run npm publish in each package that is of a later version than the one currently listed on npm.
