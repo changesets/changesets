@@ -47,3 +47,10 @@ See the above section on why we write files to disc
 3. We use semver for specifying the change
 
 When selecting the kind of change your package is, we do not specify any change types beyond `major`, `minor`, or `patch`. Semantic release allows you to specify a range of fields (bug-fix, feature) that it converts to an appropriate semver type. This is a design decision on our part to push adding this information into the changeset description itself.
+
+## The versioning of peer dependencies
+
+Currently, if you list a package as a peerDependency of another package, this causes the package with the peerDependency to
+be released as a `major` change. This is because peerDependency changes will not be caught by package installation.
+
+This decision is open for discussion.
