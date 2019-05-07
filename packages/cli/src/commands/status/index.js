@@ -11,8 +11,27 @@ import getChangesets from "../../utils/getChangesets";
 import * as bolt from "../../utils/bolt-replacements";
 
 import createRelease from "../../utils/createRelease";
+import { defaultConfig } from "../../utils/constants";
+import resolveConfig from "../../utils/resolveConfig";
 
-export default async function getStatus({ cwd, sinceMaster, verbose, output }) {
+export default async function getStatus({
+  cwd,
+  sinceMaster,
+  verbose,
+  output,
+  ...opts
+}) {
+  let userConfig = await resolveConfig({
+    cwd,
+    sinceMaster,
+    verbose,
+    output,
+    ...opts
+  });
+  userConfig =
+    userConfig && userConfig.versionOptions ? userConfig.versionOptions : {};
+  const config = { ...defaultConfig.versionOptions, ...userConfig, ...opts };
+
   const changesetBase = await getChangesetBase(cwd);
   const allPackages = await bolt.getWorkspaces({ cwd });
   // TODO: Check if we are no master and give a different error message if we are
@@ -23,7 +42,7 @@ export default async function getStatus({ cwd, sinceMaster, verbose, output }) {
     process.exit(1);
   }
 
-  const releaseObject = createRelease(changesets, allPackages);
+  const releaseObject = createRelease(changesets, allPackages, config.linked);
   const { releases } = releaseObject;
   logger.log("---");
 

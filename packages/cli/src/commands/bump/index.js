@@ -39,7 +39,11 @@ export default async function version(opts) {
   removeEmptyFolders(changesetBase);
 
   const unreleasedChangesets = await getChangesets(changesetBase);
-  const releaseObj = createRelease(unreleasedChangesets, allPackages);
+  const releaseObj = createRelease(
+    unreleasedChangesets,
+    allPackages,
+    config.linked
+  );
   const publishCommit = createReleaseCommit(releaseObj, config.skipCI);
 
   if (unreleasedChangesets.length === 0) {

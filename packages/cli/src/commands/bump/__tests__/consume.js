@@ -118,6 +118,22 @@ describe("running version in a simple project", () => {
     expect(git.commit).toHaveBeenCalledTimes(1);
   });
 
+  it("should bump packages to the correct versions when packages are linked", async () => {
+    const cwd2 = await copyFixtureIntoTempDir(__dirname, "linked-packages");
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangesets([simpleChangeset2], cwd2);
+
+    await versionCommand({ cwd: cwd2 });
+    const calls = spy.mock.calls;
+
+    expect(JSON.parse(calls[0][1])).toEqual(
+      expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
+    );
+    expect(JSON.parse(calls[1][1])).toEqual(
+      expect.objectContaining({ name: "pkg-b", version: "1.1.0" })
+    );
+  });
+
   describe("when there are multiple changeset commits", () => {
     it("should bump releasedPackages", async () => {
       await writeChangesets([simpleChangeset, simpleChangeset2], cwd);

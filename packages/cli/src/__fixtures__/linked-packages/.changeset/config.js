@@ -73,7 +73,7 @@ const versionOptions = {
   // An array of arrays that defines packages that are linked.
   // Linked packages are packages that should be at the same version when they're released.
   // If you've used Lerna to version packages before, this is very similar.
-  linked: [[]]
+  linked: [["pkg-a", "pkg-b"]]
 };
 
 const publishOptions = {
