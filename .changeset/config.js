@@ -38,7 +38,7 @@ const getReleaseLine = async (changeset, type) => {
   });
   return `- ${links.commit}${links.pull === null ? "" : ` ${links.pull}`}${
     links.user === null ? "" : ` Thanks ${links.user}!`
-  }: ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+  } - ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
 };
 
 // This function takes information about what dependencies we are updating in the package.

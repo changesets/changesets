@@ -1,5 +1,10 @@
 # @changesets/cli
 
+## 1.1.0
+### Minor Changes
+
+- [6929624b](https://github.com/Noviny/changesets/commit/6929624b) [#27](https://github.com/Noviny/changesets/pulls/27) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add linked packages/lockstep
+
 ## 1.0.1
 
 ### Patch Changes
