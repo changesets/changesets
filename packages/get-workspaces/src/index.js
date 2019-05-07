@@ -8,7 +8,7 @@ import globby from "globby";
 
 export default async function getWorkspaces(opts) {
   const cwd = opts.cwd || process.cwd();
-  const tools = opts.tools || ["yarn", "bolt", "root"]; // We also support root, but don't do it by default
+  const tools = opts.tools || ["yarn", "bolt"]; // We also support root, but don't do it by default
 
   const pkg = await fs
     .readFile(path.join(cwd, "package.json"), "utf-8")
