@@ -1,3 +1,6 @@
+require("dotenv").config();
+const { getInfo } = require("@changesets/get-github-info");
+
 /*
 Hey, welcome to the changeset config! This file has been generated
 for you with the default configs we use, and some comments around
@@ -30,10 +33,13 @@ const getReleaseLine = async (changeset, type) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
     .map(l => l.trimRight());
-
-  return `- ${changeset.commit}: ${firstLine}\n${futureLines
-    .map(l => `  ${l}`)
-    .join("\n")}`;
+  let { links } = await getInfo({
+    repo: "Noviny/changesets",
+    commit: changeset.commit
+  });
+  return `- ${links.commit}${links.pull === null ? "" : ` ${links.pull}`}${
+    links.user === null ? "" : ` Thanks ${links.user}!`
+  }: ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
 };
 
 // This function takes information about what dependencies we are updating in the package.
