@@ -1,0 +1,1 @@
+Use workspaces.packages instead of the incorrect workspaces.package field for resolving yarn workspaces

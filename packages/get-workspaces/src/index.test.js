@@ -8,7 +8,7 @@ describe("get-workspaces", () => {
     expect(workspaces[0].name).toEqual("yarn-workspace-base-pkg-a");
     expect(workspaces[1].name).toEqual("yarn-workspace-base-pkg-b");
   });
-  it("should resolve yarn workspaces if the yarn option is passed and package field is used", async () => {
+  it("should resolve yarn workspaces if the yarn option is passed and packages field is used", async () => {
     let cwd = await getFixturePath(__dirname, "yarn-workspace-package");
     const workspaces = await getWorkspaces({ cwd, tools: ["yarn"] });
     expect(workspaces[0].name).toEqual("yarn-workspace-package-pkg-a");
