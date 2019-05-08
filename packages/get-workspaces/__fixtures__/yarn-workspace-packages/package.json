@@ -4,7 +4,7 @@
   "description": "Yarn workspace using the nested package field",
   "version": "1.0.0",
   "workspaces": {
-    "package": [
+    "packages": [
       "packages/*"
     ]
   }

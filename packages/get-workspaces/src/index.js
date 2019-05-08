@@ -19,8 +19,8 @@ export default async function getWorkspaces(opts) {
   if (tools.includes("yarn") && pkg.workspaces) {
     if (Array.isArray(pkg.workspaces)) {
       workspaces = pkg.workspaces;
-    } else if (pkg.workspaces.package) {
-      workspaces = pkg.workspaces.package;
+    } else if (pkg.workspaces.packages) {
+      workspaces = pkg.workspaces.packages;
     }
   } else if (tools.includes("bolt") && pkg.bolt && pkg.bolt.workspaces) {
     workspaces = pkg.bolt.workspaces;
