@@ -1,1 +1,0 @@
-Consume get-workspaces as dependency

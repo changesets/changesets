@@ -1,5 +1,14 @@
 # @changesets/cli
 
+## 1.1.1
+### Patch Changes
+
+- [b93d04a2](https://github.com/Noviny/changesets/commit/b93d04a2) - Consume get-workspaces as dependency
+- [079eabae](https://github.com/Noviny/changesets/commit/079eabae) [#33](https://github.com/Noviny/changesets/pulls/33) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix a bug with linked packages where it would break if there was a linked package that didn't have a changeset
+
+- Updated dependencies [b93d04a2]:
+  - get-workspaces@0.1.0
+
 ## 1.1.0
 ### Minor Changes
 
