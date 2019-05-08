@@ -1,5 +1,10 @@
 # @changesets/get-github-info
 
+## 0.1.1
+### Patch Changes
+
+- [e0328dc0](https://github.com/Noviny/changesets/commit/e0328dc0) - Previous publish was missing dist, publish with dist.
+
 ## 0.1.0
 ### Minor Changes
 

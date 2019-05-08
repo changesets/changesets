@@ -1,1 +1,0 @@
-Previous publish was missing dist, publish with dist.
