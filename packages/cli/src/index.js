@@ -7,6 +7,7 @@ import add from "./commands/add";
 import bump from "./commands/bump";
 import release from "./commands/release";
 import status from "./commands/status";
+import validate from "./commands/validate";
 
 const { input, flags } = meow(
   `
@@ -70,6 +71,10 @@ const cwd = process.cwd();
     } = flags;
 
     switch (input[0]) {
+      case "validate": {
+        await validate({ cwd });
+        return;
+      }
       case "init": {
         await init({ cwd });
         return;
