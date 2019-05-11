@@ -12,7 +12,7 @@ A changeset is a piece of information about changes made in a branch or commit. 
 
 ## I am in a multi-package repository (a mono-repo)
 
-1. Run the command line script `npx build-releases changeset` or `yarn build-releases changeset`.
+1. Run the command line script `npx changeset` or `yarn changeset`.
 2. Select the packages you want to include in the changeset using ↑	and ↓ to navigate to packages, and :space: to select a package. Hit enter when all desired packages are selected.
 3. You will be prompted to select a bump type for each selected package. Select an appropriate bump type for the changes made. See [here](https://semver.org/) for informaiton on semver versioning
 4. Your final prompt will be to provide a message to go alongside the changeset. This will be written into the changelog when the next release occurs.
@@ -32,7 +32,7 @@ The message you typed can now be found in the `changes.md` file. If you want to 
 
 ## I am in a single-package repository
 
-1. Run the command line script `npm build-releases changeset` or `yarn build-releases changeset`.
+1. Run the command line script `npx changeset` or `yarn changeset`.
 2. Select an appropriate bump type for the changes made. See [here](https://semver.org/) for informaiton on semver versioning
 3. Your final prompt will be to provide a message to go alongside the changeset. This will be written into the changelog when the next release occurs.
 
