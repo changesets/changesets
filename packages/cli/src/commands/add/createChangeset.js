@@ -49,7 +49,7 @@ async function getPackagesToRelease(changedPackages, allPackages) {
       .filter(name => !changedPackages.includes(name));
 
     const selectAllPackagesOptions =
-      allPackages.length > 10 ? ["All packages", "All changed packages"] : [];
+      allPackages.length > 10 ? ["All changed packages", "All packages"] : [];
 
     const defaultInquirerList = [
       ...selectAllPackagesOptions,
