@@ -6,7 +6,14 @@ import fs from "fs-extra";
 import path from "path";
 import globby from "globby";
 
-export default async function getWorkspaces(opts) {
+type Options = {
+  cwd?: string;
+  tools?: Array<"yarn" | "bolt" | "root">;
+};
+
+export default async function getWorkspaces(
+  opts: Options = {}
+): Promise<Array<{ config: object; name?: string; dir: string }> | null> {
   const cwd = opts.cwd || process.cwd();
   const tools = opts.tools || ["yarn", "bolt"]; // We also support root, but don't do it by default
 
@@ -44,7 +51,7 @@ export default async function getWorkspaces(opts) {
     folders
       .filter(dir => fs.existsSync(path.join(dir, "package.json")))
       .map(async dir =>
-        fs.readFile(path.join(dir, "package.json")).then(contents => {
+        fs.readFile(path.join(dir, "package.json"), "utf8").then(contents => {
           const config = JSON.parse(contents);
           return { config, name: config.name, dir };
         })

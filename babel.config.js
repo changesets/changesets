@@ -6,6 +6,6 @@ module.exports = {
         targets: { node: 8 }
       }
     ],
-    "@babel/preset-flow"
+    "@babel/preset-typescript"
   ]
 };
