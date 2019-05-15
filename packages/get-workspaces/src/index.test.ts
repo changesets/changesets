@@ -68,7 +68,7 @@ describe("get-workspaces", () => {
       await getWorkspaces({ cwd });
     } catch (err) {
       expect(err.message).toBe(
-        'The package.json at packages/pkg-a/package.json is missing a "name" field.'
+        'The following package.jsons are missing the "name" field:\npackages/pkg-a/package.json\npackages/pkg-b/package.json'
       );
       return;
     }

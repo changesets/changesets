@@ -47,6 +47,8 @@ export default async function getWorkspaces(
     expandDirectories: false
   });
 
+  let pkgJsonsMissingNameField: Array<string> = [];
+
   const results = await Promise.all(
     folders
       .filter(dir => fs.existsSync(path.join(dir, "package.json")))
@@ -54,16 +56,20 @@ export default async function getWorkspaces(
         fs.readFile(path.join(dir, "package.json"), "utf8").then(contents => {
           const config = JSON.parse(contents);
           if (!config.name) {
-            throw new Error(
-              `The package.json at ${path.relative(
-                cwd,
-                path.join(dir, "package.json")
-              )} is missing a "name" field.`
+            pkgJsonsMissingNameField.push(
+              path.relative(cwd, path.join(dir, "package.json"))
             );
           }
           return { config, name: config.name, dir };
         })
       )
   );
+  if (pkgJsonsMissingNameField.length !== 0) {
+    throw new Error(
+      `The following package.jsons are missing the "name" field:\n${pkgJsonsMissingNameField.join(
+        "\n"
+      )}`
+    );
+  }
   return results;
 }
