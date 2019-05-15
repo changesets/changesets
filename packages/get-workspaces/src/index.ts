@@ -13,7 +13,7 @@ type Options = {
 
 export default async function getWorkspaces(
   opts: Options = {}
-): Promise<Array<{ config: object; name?: string; dir: string }> | null> {
+): Promise<Array<{ config: object; name: string; dir: string }> | null> {
   const cwd = opts.cwd || process.cwd();
   const tools = opts.tools || ["yarn", "bolt"]; // We also support root, but don't do it by default
 
@@ -53,6 +53,14 @@ export default async function getWorkspaces(
       .map(async dir =>
         fs.readFile(path.join(dir, "package.json"), "utf8").then(contents => {
           const config = JSON.parse(contents);
+          if (!config.name) {
+            throw new Error(
+              `The package.json at ${path.relative(
+                cwd,
+                path.join(dir, "package.json")
+              )} is missing a "name" field.`
+            );
+          }
           return { config, name: config.name, dir };
         })
       )

@@ -1,0 +1,1 @@
+Throw when the name field is missing in a package.json

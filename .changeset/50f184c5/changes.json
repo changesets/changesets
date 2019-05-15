@@ -1,0 +1,10 @@
+{
+  "releases": [{ "name": "get-workspaces", "type": "minor" }],
+  "dependents": [
+    {
+      "name": "@changesets/cli",
+      "type": "patch",
+      "dependencies": ["get-workspaces"]
+    }
+  ]
+}
