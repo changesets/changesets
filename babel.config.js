@@ -5,7 +5,10 @@ module.exports = {
       {
         targets: { node: 8 }
       }
-    ],
-    "@babel/preset-flow"
+    ]
+  ],
+  overrides: [
+    { test: "**/*.ts", presets: ["@babel/preset-typescript"] },
+    { test: "**/*.js", presets: ["@babel/preset-flow"] }
   ]
 };
