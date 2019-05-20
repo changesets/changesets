@@ -1,0 +1,1 @@
+Print out the last changes.md path in terminal as last step of adding a changeset

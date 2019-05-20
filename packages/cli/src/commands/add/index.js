@@ -1,4 +1,4 @@
-import { green } from "chalk";
+import { green, blue } from "chalk";
 import path from "path";
 import fs from "fs-extra";
 
@@ -53,7 +53,28 @@ export default async function add(opts) {
       );
       logger.log(green("Changeset added and committed"));
     } else {
-      logger.log(green("Changeset added! - you can now commit it"));
+      logger.log(green("Changeset added! - you can now commit it\n"));
     }
+
+    let hasMajorChange = [
+      ...newChangeset.releases,
+      ...newChangeset.dependents
+    ].find(c => c.type === "major");
+
+    if (hasMajorChange) {
+      logger.warn(
+        "This Changeset includes a major change and we STRONGLY recommend adding more information to the changeset:"
+      );
+      logger.warn("WHAT the breaking change is");
+      logger.warn("WHY the change was made");
+      logger.warn("HOW a consumer should update their code");
+    } else {
+      logger.log(
+        green(
+          "If you want to modify or expand on the changeset summary, you can find it here"
+        )
+      );
+    }
+    logger.info(blue(path.resolve(changesetBase, changesetID, "changes.md")));
   }
 }
