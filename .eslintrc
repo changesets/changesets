@@ -1,7 +1,11 @@
 {
-  "extends": ["standard", "prettier"],
-  "plugins": ["prettier"],
-  "parser": "babel-eslint",
+  "extends": [
+    "plugin:@typescript-eslint/eslint-recommended",
+    "standard",
+    "prettier"
+  ],
+  "plugins": ["prettier", "@typescript-eslint"],
+  "parser": "@typescript-eslint/parser",
   "rules": {
     "prettier/prettier": "error",
     "standard/computed-property-even-spacing": "off",
@@ -29,6 +33,12 @@
       },
       "env": {
         "jest": false
+      }
+    },
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "prefer-const": "off"
       }
     }
   ]
