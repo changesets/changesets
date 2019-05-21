@@ -1,1 +1,0 @@
-Convert package to TypeScript
