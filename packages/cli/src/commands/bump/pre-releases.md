@@ -107,7 +107,7 @@ If you run `bump` while there is a `pre.json`, it will error and explain itself.
 BONUS: I think changesets should error if there is a package in a pre state when you run bump,
 as I don't think changesets handle this gracefully.
 
-## Adding new categories to changesets and having explicit pre changesets
+## Run pre-release instead of `add` - and make changesets for them
 
 This is the alternate suggestion. Effectively the version select becomes something like:
 
