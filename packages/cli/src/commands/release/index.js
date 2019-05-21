@@ -11,7 +11,7 @@ function logReleases(status, pkgs) {
 }
 
 export default async function run(opts) {
-  const userConfig = await resolveUserConfig({ cwd: opts.cwd });
+  const userConfig = await resolveUserConfig(opts.cwd);
   const userPublishOptions =
     userConfig && userConfig.publishOptions ? userConfig.publishOptions : {};
 

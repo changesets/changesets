@@ -24,7 +24,7 @@ import versionRangeToRangeType from "../../utils/bolt-replacements/versionRangeT
 import { defaultConfig } from "../../utils/constants";
 
 export default async function version(opts) {
-  let userConfig = await resolveConfig(opts);
+  let userConfig = await resolveConfig(opts.cwd);
   userConfig =
     userConfig && userConfig.versionOptions ? userConfig.versionOptions : {};
   const config = { ...defaultConfig.versionOptions, ...userConfig, ...opts };

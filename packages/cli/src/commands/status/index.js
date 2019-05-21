@@ -19,13 +19,7 @@ export default async function getStatus({
   output,
   ...opts
 }) {
-  let userConfig = await resolveConfig({
-    cwd,
-    sinceMaster,
-    verbose,
-    output,
-    ...opts
-  });
+  let userConfig = await resolveConfig(cwd);
   userConfig =
     userConfig && userConfig.versionOptions ? userConfig.versionOptions : {};
   const config = { ...defaultConfig.versionOptions, ...userConfig, ...opts };
