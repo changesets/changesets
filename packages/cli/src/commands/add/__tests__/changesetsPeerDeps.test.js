@@ -55,6 +55,9 @@ const mockUserResponses = mockResponses => {
 };
 
 describe("Changesets - bumping peerDeps", () => {
+  beforeEach(() => {
+    writeChangeset.mockResolvedValue("ABCDE");
+  });
   afterEach(() => {
     jest.clearAllMocks();
   });

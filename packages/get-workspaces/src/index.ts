@@ -13,6 +13,8 @@ type Options = {
 
 export default async function getWorkspaces(
   opts: Options = {}
+  // TODO: Find out why eslint hates this
+  // eslint-disable-next-line
 ): Promise<Array<{ config: object; name: string; dir: string }> | null> {
   const cwd = opts.cwd || process.cwd();
   const tools = opts.tools || ["yarn", "bolt"]; // We also support root, but don't do it by default
