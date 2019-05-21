@@ -4057,10 +4057,10 @@ posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
 
-preconstruct@0.0.0-ts-types-build.1:
-  version "0.0.0-ts-types-build.1"
-  resolved "https://registry.yarnpkg.com/preconstruct/-/preconstruct-0.0.0-ts-types-build.1.tgz#c772cdec68bd3fc45af8c7dac6329a8614e56b64"
-  integrity sha512-eGYi1kcOzSuJDI578MVlLVCVzVI+cC6u3JjH95LYQA1rAjx/o+PZq22UxGMsgfDJV4a/rFwY6yDS1SwnxyMvlQ==
+preconstruct@^0.0.70:
+  version "0.0.70"
+  resolved "https://registry.yarnpkg.com/preconstruct/-/preconstruct-0.0.70.tgz#4e17c85f7f76e698ca982475223628ed0d09e68b"
+  integrity sha512-Aon5VBbZ/wLfi02N/Lfdh3OSzslvNTThb6NLh2OT0h0NyuU6Y4S52eKGt9/KLrw6X5s1tc56z1tYGGJ2QsFH4A==
   dependencies:
     "@babel/code-frame" "^7.0.0"
     "@babel/core" "^7.1.2"
