@@ -1,1 +1,0 @@
-Distribute TypeScript types
