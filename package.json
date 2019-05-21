@@ -65,7 +65,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "jest": "^24.7.1",
     "jest-fixtures": "^0.5.0",
-    "preconstruct": "^0.0.64"
+    "preconstruct": "^0.0.70"
   },
   "preconstruct": {
     "packages": [
