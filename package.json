@@ -14,6 +14,7 @@
     "types:check": "tsc",
     "prettier": "prettier --write \"**/*.{js,ts,tsx}\"",
     "changeset": "packages/cli/bin.js",
+    "check-all": "yarn test && yarn lint && yarn types:check",
     "release": "yarn build && packages/cli/bin.js release --public"
   },
   "workspaces": [
