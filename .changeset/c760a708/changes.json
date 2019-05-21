@@ -1,0 +1,4 @@
+{
+  "releases": [{ "name": "get-workspaces", "type": "patch" }],
+  "dependents": []
+}
