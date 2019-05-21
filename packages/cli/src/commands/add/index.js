@@ -14,7 +14,7 @@ import getChangesetBase from "../../utils/getChangesetBase";
 import { printConfirmationMessage } from "./messages";
 
 export default async function add(opts) {
-  const userConfig = await resolveUserConfig({ cwd: opts.cwd });
+  const userConfig = await resolveUserConfig(opts.cwd);
   const userchangesetOptions =
     userConfig && userConfig.changesetOptions
       ? userConfig.changesetOptions

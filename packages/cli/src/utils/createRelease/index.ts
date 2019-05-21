@@ -1,5 +1,7 @@
 import semver from "semver";
 import flattenChangesets from "./flattenChangesets";
+import { Changeset, BumpType } from "../types";
+import { Workspace } from "get-workspaces";
 /*
   This flattens an array of Version objects into one object that can be used to create the changelogs
   and the publish commit messages.
@@ -36,8 +38,8 @@ import flattenChangesets from "./flattenChangesets";
 */
 
 export default function createRelease(
-  changesets,
-  allPackages,
+  changesets: Array<Changeset>,
+  allPackages: Array<Workspace>,
   allLinkedPackages = []
 ) {
   // First, combine all the changeset.releases into one useful array
@@ -47,7 +49,11 @@ export default function createRelease(
   let currentVersions = new Map();
 
   for (let pkg of allPackages) {
-    currentVersions.set(pkg.name, pkg ? pkg.config.version : null);
+    currentVersions.set(
+      pkg.name,
+      // @ts-ignore
+      pkg.config.version !== undefined ? pkg.config.version : null
+    );
   }
 
   for (let linkedPackages of allLinkedPackages) {
@@ -63,19 +69,26 @@ export default function createRelease(
     }
   }
 
-  const allReleases = flattenedChangesets
-    // do not update none packages
-    .filter(release => release.type !== "none")
-    // get the current version for each package
-    .map(release => ({
-      ...release,
-      version: currentVersions.get(release.name)
-    }))
-    // update to new version for each package
-    .map(release => ({
-      ...release,
-      version: semver.inc(release.version, release.type)
-    }));
+  const allReleases: Array<{
+    name: string;
+    type: BumpType;
+    changesets: Array<string>;
+    commits: Array<string>;
+    version?: string | null;
+  }> = [];
+
+  for (let flattenedChangeset of flattenedChangesets) {
+    if (flattenedChangeset.type === "none") {
+      continue;
+    }
+    allReleases.push({
+      ...flattenedChangeset,
+      version: semver.inc(
+        currentVersions.get(flattenedChangeset.name),
+        flattenedChangeset.type
+      )
+    });
+  }
 
   return {
     releases: allReleases.filter(release => release.version !== null),

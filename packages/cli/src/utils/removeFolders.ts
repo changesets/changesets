@@ -5,7 +5,7 @@ import fs from "fs-extra";
 // These two helpers are designed to operate on the .changeset
 // folder, and tidy up the subfolders
 
-const removeEmptyFolders = folderPath => {
+const removeEmptyFolders = (folderPath: string) => {
   const dirContents = fs.readdirSync(folderPath);
   dirContents.forEach(contentPath => {
     const singleChangesetPath = path.resolve(folderPath, contentPath);
@@ -18,7 +18,7 @@ const removeEmptyFolders = folderPath => {
   });
 };
 
-const removeFolders = folderPath => {
+const removeFolders = (folderPath: string) => {
   if (!fs.existsSync(folderPath)) return;
   const dirContents = fs.readdirSync(folderPath);
   dirContents.forEach(contentPath => {

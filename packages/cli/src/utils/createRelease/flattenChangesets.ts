@@ -1,11 +1,16 @@
-function maxType(types) {
+import { Changeset, BumpType } from "../types";
+
+function maxType(types: Array<BumpType>) {
   if (types.includes("major")) return "major";
   if (types.includes("minor")) return "minor";
   if (types.includes("patch")) return "patch";
   return "none";
 }
 
-export default function flattenReleases(changesets, allLinkedPackages) {
+export default function flattenReleases(
+  changesets: Array<Changeset>,
+  allLinkedPackages: Array<Array<string>>
+) {
   const flatChangesets = changesets
     .map(changeset => [
       ...changeset.releases.map(release => ({
@@ -22,7 +27,14 @@ export default function flattenReleases(changesets, allLinkedPackages) {
       }))
     ])
     .reduce((acc, a) => [...acc, ...a], []) // flatten
-    .reduce((acc, release) => {
+    .reduce<{
+      [key: string]: Array<{
+        name: string;
+        type: BumpType;
+        commit: string;
+        id: string;
+      }>;
+    }>((acc, release) => {
       if (!acc[release.name]) {
         acc[release.name] = [];
       }
@@ -30,7 +42,15 @@ export default function flattenReleases(changesets, allLinkedPackages) {
       return acc;
     }, {});
 
-  const flatReleases = new Map(
+  const flatReleases = new Map<
+    string,
+    {
+      name: string;
+      type: BumpType;
+      commits: Array<string>;
+      changesets: Array<string>;
+    }
+  >(
     Object.entries(flatChangesets).map(([name, releases]) => [
       name,
       {
@@ -43,7 +63,7 @@ export default function flattenReleases(changesets, allLinkedPackages) {
   );
 
   for (const linkedPackages of allLinkedPackages) {
-    const allBumpTypes = [];
+    const allBumpTypes: Array<BumpType> = [];
     for (let linkedPackage of linkedPackages) {
       let release = flatReleases.get(linkedPackage);
       if (release) {

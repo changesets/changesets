@@ -1,19 +1,20 @@
 import spawn from "projector-spawn";
 import path from "path";
-import pkgDir from "pkg-dir";
+import { getProjectDirectory } from "./getProjectDirectory";
+// @ts-ignore
 import * as bolt from "./bolt-replacements";
 
-async function getMasterRef(cwd) {
+async function getMasterRef(cwd: string) {
   const gitCmd = await spawn("git", ["rev-parse", "master"], { cwd });
   return gitCmd.stdout.trim().split("\n")[0];
 }
 
-async function add(pathToFile, cwd) {
+async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
   return gitCmd.code === 0;
 }
 
-async function commit(message, cwd) {
+async function commit(message: string, cwd: string) {
   const gitCmd = await spawn(
     "git",
     ["commit", "-m", message, "--allow-empty"],
@@ -23,14 +24,14 @@ async function commit(message, cwd) {
 }
 
 // used to create a single tag at a time for the current head only
-async function tag(tagStr, cwd) {
+async function tag(tagStr: string, cwd: string) {
   // NOTE: it's important we use the -m flag otherwise 'git push --follow-tags' wont actually push
   // the tags
   const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], { cwd });
   return gitCmd.code === 0;
 }
 
-async function getCommitThatAddsFile(gitPath, cwd) {
+async function getCommitThatAddsFile(gitPath: string, cwd: string) {
   const gitCmd = await spawn(
     "git",
     ["log", "--reverse", "--max-count=1", "--pretty=format:%h", "-p", gitPath],
@@ -41,7 +42,11 @@ async function getCommitThatAddsFile(gitPath, cwd) {
   return gitCmd.stdout.split("\n")[0];
 }
 
-async function getChangedFilesSince(ref, cwd, fullPath = false) {
+async function getChangedFilesSince(
+  ref: string,
+  cwd: string,
+  fullPath = false
+) {
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
   const divergedAt = cmd.stdout.trim();
@@ -53,7 +58,10 @@ async function getChangedFilesSince(ref, cwd, fullPath = false) {
 }
 
 // below are less generic functions that we use in combination with other things we are doing
-async function getChangedChangesetFilesSinceMaster(cwd, fullPath = false) {
+async function getChangedChangesetFilesSinceMaster(
+  cwd: string,
+  fullPath = false
+) {
   const ref = await getMasterRef(cwd);
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
@@ -72,19 +80,20 @@ async function getChangedChangesetFilesSinceMaster(cwd, fullPath = false) {
   return files.map(file => path.resolve(cwd, file));
 }
 
-async function getChangedPackagesSinceCommit(commitHash, cwd) {
+async function getChangedPackagesSinceCommit(commitHash: string, cwd: string) {
   const changedFiles = await getChangedFilesSince(commitHash, cwd, true);
-  const projectDir = await pkgDir(cwd);
+  const projectDir = await getProjectDirectory(cwd);
   const workspaces = await bolt.getWorkspaces({ cwd });
   const allPackages = workspaces.map(pkg => ({
     ...pkg,
     relativeDir: path.relative(projectDir, pkg.dir)
   }));
 
-  const fileNameToPackage = fileName =>
+  const fileNameToPackage = (fileName: string) =>
     allPackages.find(pkg => fileName.startsWith(pkg.dir + path.sep));
 
-  const fileExistsInPackage = fileName => !!fileNameToPackage(fileName);
+  const fileExistsInPackage = (fileName: string) =>
+    !!fileNameToPackage(fileName);
 
   return (
     changedFiles
@@ -100,7 +109,7 @@ async function getChangedPackagesSinceCommit(commitHash, cwd) {
 // it wont include staged/unstaged changes
 //
 // Don't use this function in master branch as it returns nothing in that case.
-async function getChangedPackagesSinceMaster(cwd) {
+async function getChangedPackagesSinceMaster(cwd: string) {
   const masterRef = await getMasterRef(cwd);
   return getChangedPackagesSinceCommit(masterRef, cwd);
 }

@@ -2,9 +2,13 @@ import fs from "fs-extra";
 import path from "path";
 
 import * as git from "./git";
+import { Changeset } from "./types";
 
 // TODO take in cwd, and fetch changesetBase ourselves
-export default async function getChangesets(changesetBase, sinceMasterOnly) {
+export default async function getChangesets(
+  changesetBase: string,
+  sinceMasterOnly: boolean
+): Promise<Array<Changeset>> {
   if (!fs.existsSync(changesetBase)) {
     throw new Error("There is no .changeset directory in this project");
   }
