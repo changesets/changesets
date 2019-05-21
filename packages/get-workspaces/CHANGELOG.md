@@ -1,5 +1,10 @@
 # get-workspaces
 
+## 0.2.1
+### Patch Changes
+
+- [67db935d](https://github.com/Noviny/changesets/commit/67db935d) - Fix release without built files
+
 ## 0.2.0
 
 ### Minor Changes

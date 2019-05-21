@@ -1,5 +1,10 @@
 # @changesets/cli
 
+## 1.1.3
+### Patch Changes
+
+- [67db935d](https://github.com/Noviny/changesets/commit/67db935d) - Fix release without built files
+
 ## 1.1.2
 
 ### Patch Changes
