@@ -4,8 +4,8 @@ import logger from "./logger";
 
 import getChangesetBase from "./getChangesetBase";
 
-export default async function resolveConfig(config) {
-  const changesetBase = await getChangesetBase(config.cwd);
+export default async function resolveConfig(cwd: string) {
+  const changesetBase = await getChangesetBase(cwd);
 
   const configPath = path.resolve(changesetBase, "config.js");
   const hasConfigFile = await fs.pathExists(configPath);
