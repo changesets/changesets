@@ -47,6 +47,12 @@ After this, you will have new files added to your repository. These will be:
 
 The message you typed can now be found in the `changes.md` file. If you want to expand on it, you can write as much markdown as you want, which will all be added to the the changelog on publish.
 
+While not every changeset is going to need a huge amount of detail, a good idea of what should be in a changeset is:
+
+- WHAT the change is
+- WHY the change was made
+- HOW a consumer should update their code
+
 4. Once you are happy with the changeset message, commit the .changeset files to your branch.
 
 ## Tips on adding changesets
@@ -60,4 +66,4 @@ Changesets are designed to stack, so there's no problem with adding multiple. Yo
 
 ## I want to know more about changesets
 
-[here is a more in-depth explanation]()
+[here is a more in-depth explanation](https://github.com/Noviny/changesets/blob/master/docs/detailed-explanation.md)
