@@ -15,6 +15,9 @@ jobs:
           name: Install
           command: yarn install --pure-lockfile
       - run:
+          name: GitSetup
+          command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+      - run:
           name: "Jest Tests"
           command: yarn jest --ci --runInBand --coverage --reporters=default --reporters=jest-junit
           environment:
