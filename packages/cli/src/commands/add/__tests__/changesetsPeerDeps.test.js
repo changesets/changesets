@@ -47,7 +47,7 @@ const mockUserResponses = mockResponses => {
   const summary = mockResponses.summary || "summary message mock";
   const shouldCommit = mockResponses.shouldCommit || "n";
   askCheckboxPlus.mockReturnValueOnce(Object.keys(mockResponses.releases));
-  Object.entries(mockResponses.releases).forEach(([pkg, type]) =>
+  Object.entries(mockResponses.releases).forEach(([_pkg, type]) =>
     askList.mockReturnValueOnce(type)
   );
   askQuestion.mockReturnValueOnce(summary);

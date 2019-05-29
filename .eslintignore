@@ -1,2 +1,3 @@
-dist/
+dist
 __fixtures__
+node_modules

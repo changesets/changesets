@@ -7,7 +7,6 @@ import runRelease from "..";
 jest.mock("../../../utils/cli");
 jest.mock("../../../utils/git");
 jest.mock("../../../utils/logger");
-jest.mock("../../add/parseChangesetCommit");
 jest.mock("../../../utils/bolt-replacements");
 
 git.tag.mockImplementation(() => Promise.resolve(true));

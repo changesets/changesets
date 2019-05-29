@@ -11,7 +11,13 @@
     "standard/computed-property-even-spacing": "off",
     "no-template-curly-in-string": "off",
     "camelcase": "off",
-    "import/no-duplicates": "off"
+    "import/no-duplicates": "off",
+    "no-useless-constructor": "off",
+    "no-unusued-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "ignoreRestSiblings": true }
+    ]
   },
   "overrides": [
     {
@@ -39,6 +45,12 @@
       "files": ["*.ts"],
       "rules": {
         "prefer-const": "off"
+      }
+    },
+    {
+      "files": ["packages/cli/default-files/config.js"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off"
       }
     }
   ]

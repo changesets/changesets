@@ -1,0 +1,80 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/node:10.6.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "yarn.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Install
+          command: yarn install --pure-lockfile
+      - run:
+          name: GitSetup
+          command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+      - run:
+          name: "Jest Tests"
+          command: yarn jest --ci --runInBand --coverage --reporters=default --reporters=jest-junit
+          environment:
+            JEST_JUNIT_OUTPUT: "reports/junit/js-test-results.xml"
+      - run:
+          name: "Upload Coverage"
+          command: yarn codecov
+      - store_test_results:
+          path: reports/junit
+      - store_artifacts:
+          path: reports/junit
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+            - node_modules
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
+
+  typescript:
+    docker:
+      - image: circleci/node:10.6.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "yarn.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Install
+          command: yarn install --pure-lockfile
+      - run:
+          name: "Typescript"
+          command: yarn types:check
+
+  lint:
+    docker:
+      - image: circleci/node:10.6.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "yarn.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Install
+          command: yarn install --pure-lockfile
+      - run:
+          name: "ESLint"
+          command: yarn lint
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
+      - lint
+      - typescript

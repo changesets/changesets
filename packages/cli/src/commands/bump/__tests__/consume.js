@@ -13,7 +13,6 @@ const consoleError = console.error;
 
 jest.mock("../../../utils/cli");
 jest.mock("../../../utils/git");
-jest.mock("../../add/parseChangesetCommit");
 jest.mock("../../../utils/logger");
 
 git.add.mockImplementation(() => Promise.resolve(true));
