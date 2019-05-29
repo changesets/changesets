@@ -1,0 +1,11 @@
+{
+  "name": "bolt-check",
+  "version": "0.0.0",
+  "description": "Run the two major checks that the bolt package does in yarn workspaces",
+  "main": "dist/bolt-check.cjs.js",
+  "author": "Ben Conolly",
+  "license": "MIT",
+  "bin": {
+    "bolt-check": "bin.js"
+  }
+}
