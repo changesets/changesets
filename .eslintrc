@@ -17,6 +17,12 @@
     "@typescript-eslint/no-unused-vars": [
       "error",
       { "argsIgnorePattern": "^_", "ignoreRestSiblings": true }
+    ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": ["**/__tests__/**/*.{ts,js}", "**/*.test.{ts,js}"]
+      }
     ]
   },
   "overrides": [
