@@ -22,17 +22,23 @@ const { input, flags } = meow(
   {
     flags: {
       commit: {
-        type: "boolean"
+        type: "boolean",
+        // Command line options need to be undefined, otherwise their
+        // default value overrides the user's provided config in their
+        // config file
+        default: undefined
       },
       updateChangelog: {
         type: "boolean",
-        default: true
+        default: undefined
       },
       skipCI: {
-        type: "boolean"
+        type: "boolean",
+        default: undefined
       },
       public: {
-        type: "boolean"
+        type: "boolean",
+        default: undefined
       },
       sinceMaster: {
         type: "boolean"
@@ -69,21 +75,45 @@ const cwd = process.cwd();
       output
     } = flags;
 
+    // Command line options need to be undefined, otherwise their
+    // default value overrides the user's provided config in their
+    // config file. For this reason, we only assign them to this
+    // object as and when they exist.
+    const config = { cwd };
+
     switch (input[0]) {
       case "init": {
         await init({ cwd });
         return;
       }
       case "add": {
-        await add({ cwd, commit });
+        if (commit !== undefined) {
+          config.commit = commit;
+        }
+        await add(config);
         return;
       }
       case "bump": {
-        await bump({ cwd, updateChangelog, skipCI, commit });
+        // We only assign them to this
+        // object as and when they exist.
+        if (updateChangelog !== undefined) {
+          config.updateChangelog = updateChangelog;
+        }
+        if (skipCI !== undefined) {
+          config.skipCI = skipCI;
+        }
+        if (commit !== undefined) {
+          config.commit = commit;
+        }
+        await bump(config);
         return;
       }
       case "release": {
-        await release({ cwd, public: isPublic });
+        if (isPublic !== undefined) {
+          // This exists as
+          config.public = isPublic;
+        }
+        await release(config);
         return;
       }
       case "status": {
