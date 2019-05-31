@@ -14,22 +14,23 @@ inquirer.registerPrompt(
  * identifier for the name every time. This is why we are using UUIDs.
  */
 
-async function askCheckboxPlus(message, choices) {
+async function askCheckboxPlus(
+  message: string,
+  choices: Array<any>
+): Promise<Array<string>> {
   const name = `CheckboxPlus-${uuid()}`;
 
   // wraps fuzzyfilter, and removes inquirer sepearators/other data invalid to
   // fuzzy.
-  function fuzzySearch(answersSoFar, input) {
-    return new Promise(resolve => {
-      if (!input) return resolve(choices);
-      const fuzzyResult = fuzzy.filter(
-        input,
-        choices.filter(choice => typeof choice === "string")
-      );
-      const data = fuzzyResult.map(element => element.original);
+  async function fuzzySearch(answersSoFar: any, input: string) {
+    if (!input) return choices;
+    const fuzzyResult = fuzzy.filter(
+      input,
+      choices.filter(choice => typeof choice === "string")
+    );
+    const data = fuzzyResult.map(element => element.original);
 
-      return resolve(data);
-    });
+    return data;
   }
 
   return inquirer
@@ -38,6 +39,7 @@ async function askCheckboxPlus(message, choices) {
         message,
         name,
         prefix,
+        // @ts-ignore
         searchable: true,
         pageSize: 10,
         type: "checkbox-plus",
@@ -45,10 +47,10 @@ async function askCheckboxPlus(message, choices) {
         source: fuzzySearch
       }
     ])
-    .then(responses => responses[name]);
+    .then((responses: any) => responses[name]);
 }
 
-async function askQuestion(message) {
+async function askQuestion(message: string): Promise<string> {
   const name = `Question-${uuid()}`;
 
   return inquirer
@@ -59,10 +61,10 @@ async function askQuestion(message) {
         prefix
       }
     ])
-    .then(responses => responses[name]);
+    .then((responses: any) => responses[name]);
 }
 
-async function askConfirm(message) {
+async function askConfirm(message: string): Promise<boolean> {
   const name = `Confirm-${uuid()}`;
 
   return inquirer
@@ -74,10 +76,13 @@ async function askConfirm(message) {
         type: "confirm"
       }
     ])
-    .then(responses => responses[name]);
+    .then((responses: any) => responses[name]);
 }
 
-async function askList(message, choices) {
+async function askList(
+  message: string,
+  choices: Array<string>
+): Promise<string> {
   const name = `List-${uuid()}`;
 
   return inquirer
@@ -90,10 +95,13 @@ async function askList(message, choices) {
         type: "list"
       }
     ])
-    .then(responses => responses[name]);
+    .then((responses: any) => responses[name]);
 }
 
-async function askCheckbox(message, choices) {
+async function askCheckbox(
+  message: string,
+  choices: Array<string>
+): Promise<Array<string>> {
   const name = `Checkbox-${uuid()}`;
 
   return inquirer
@@ -106,7 +114,7 @@ async function askCheckbox(message, choices) {
         type: "checkbox"
       }
     ])
-    .then(responses => responses[name]);
+    .then((responses: any) => responses[name]);
 }
 
 export { askCheckboxPlus, askQuestion, askConfirm, askList, askCheckbox };
