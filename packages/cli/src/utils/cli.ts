@@ -1,6 +1,7 @@
 import uuid from "uuid/v1";
 import inquirer from "inquirer";
 import fuzzy from "fuzzy";
+import { prefix } from "./logger";
 
 inquirer.registerPrompt(
   "checkbox-plus",
@@ -36,6 +37,7 @@ async function askCheckboxPlus(message, choices) {
       {
         message,
         name,
+        prefix,
         searchable: true,
         pageSize: 10,
         type: "checkbox-plus",
@@ -53,7 +55,8 @@ async function askQuestion(message) {
     .prompt([
       {
         message,
-        name
+        name,
+        prefix
       }
     ])
     .then(responses => responses[name]);
@@ -67,6 +70,7 @@ async function askConfirm(message) {
       {
         message,
         name,
+        prefix,
         type: "confirm"
       }
     ])
@@ -82,6 +86,7 @@ async function askList(message, choices) {
         choices,
         message,
         name,
+        prefix,
         type: "list"
       }
     ])
@@ -97,6 +102,7 @@ async function askCheckbox(message, choices) {
         choices,
         message,
         name,
+        prefix,
         type: "checkbox"
       }
     ])
