@@ -1,5 +1,10 @@
 # @changesets/get-github-info
 
+## 0.1.2
+### Patch Changes
+
+- [a966701d](https://github.com/Noviny/changesets/commit/a966701d) - Add repository information to package.json
+
 ## 0.1.1
 ### Patch Changes
 
