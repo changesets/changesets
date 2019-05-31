@@ -5,6 +5,11 @@
   "main": "dist/get-workspaces.cjs.js",
   "module": "dist/get-workspaces.esm.js",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/changesets/changesets.git",
+    "directory": "packages/get-workspaces"
+  },
   "dependencies": {
     "fs-extra": "^7.0.1",
     "globby": "^9.2.0"

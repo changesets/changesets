@@ -5,6 +5,11 @@
   "bin": {
     "changeset": "bin.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/changesets/changesets.git",
+    "directory": "packages/cli"
+  },
   "files": [
     "default-files",
     "dist",

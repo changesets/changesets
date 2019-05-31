@@ -17,6 +17,10 @@
     "check-all": "yarn test && yarn lint && yarn types:check",
     "release": "yarn build && packages/cli/bin.js release --public"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/changesets/changesets.git"
+  },
   "workspaces": [
     "packages/*"
   ],
@@ -69,7 +73,7 @@
     "jest": "^24.7.1",
     "jest-fixtures": "^0.5.0",
     "jest-junit": "^6.4.0",
-    "preconstruct": "^0.0.70"
+    "preconstruct": "^0.0.76"
   },
   "preconstruct": {
     "packages": [

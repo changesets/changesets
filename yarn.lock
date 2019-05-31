@@ -630,6 +630,16 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@emotion/memoize@^0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@emotion/memoize/-/memoize-0.7.1.tgz#e93c13942592cf5ef01aa8297444dc192beee52f"
+  integrity sha512-Qv4LTqO11jepd5Qmlp3M1YEjBumoTHcHFdgPTQ+sFlIL5myi/7xu/POwP7IRu6odBdmLXdtIs1D6TuW6kbwbbg==
+
+"@emotion/weak-memoize@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.2.tgz#63985d3d8b02530e0869962f4da09142ee8e200e"
+  integrity sha512-n/VQ4mbfr81aqkx/XmVicOLjviMuy02eenSdJY33SVA7S2J42EU0P1H0mOogfYedb3wXA0d/LVtBrgTSm04WEA==
+
 "@jest/console@^24.7.1":
   version "24.7.1"
   resolved "https://registry.yarnpkg.com/@jest/console/-/console-24.7.1.tgz#32a9e42535a97aedfe037e725bd67e954b459545"
@@ -4157,14 +4167,16 @@ posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
 
-preconstruct@^0.0.70:
-  version "0.0.70"
-  resolved "https://registry.yarnpkg.com/preconstruct/-/preconstruct-0.0.70.tgz#4e17c85f7f76e698ca982475223628ed0d09e68b"
-  integrity sha512-Aon5VBbZ/wLfi02N/Lfdh3OSzslvNTThb6NLh2OT0h0NyuU6Y4S52eKGt9/KLrw6X5s1tc56z1tYGGJ2QsFH4A==
+preconstruct@^0.0.76:
+  version "0.0.76"
+  resolved "https://registry.yarnpkg.com/preconstruct/-/preconstruct-0.0.76.tgz#13be36761c8a9da72745e7c946a8386ddb716979"
+  integrity sha512-eFDLxwaNlO6JZCT716rFEHLX6dPLTT1qk45uG/xofbXQeP2SqaPWRY7UFdtunNDZ7OyT6mbETcZjTwUsUNsezQ==
   dependencies:
     "@babel/code-frame" "^7.0.0"
     "@babel/core" "^7.1.2"
     "@babel/plugin-transform-runtime" "^7.2.0"
+    "@emotion/memoize" "^0.7.1"
+    "@emotion/weak-memoize" "^0.2.2"
     "@preconstruct/hook" "^0.0.1"
     builtin-modules "^3.0.0"
     chalk "^2.3.2"
