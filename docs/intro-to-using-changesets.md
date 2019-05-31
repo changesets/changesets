@@ -9,8 +9,8 @@ This guide is aimed at package maintainers adding changesets as a tool. For the 
 The overall tool after initialisation should lead to a loop that looks like:
 
 1. Changesets added along with each change
-2. The version command is run when a release is ready, and the changes are verified
-3. The publish command is run afterwards.
+2. The bump command is run when a release is ready, and the changes are verified
+3. The release command is run afterwards.
 
 The second two steps can be made part of a CI process.
 
