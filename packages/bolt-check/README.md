@@ -23,3 +23,7 @@ not contain any dependencies that are not in the root.
 Depends! This package is not a replacement for bolt, doesn't do nearly as much as bolt,
 and implements the two above checks in a fairly naive/simple way. Bolt is still a great
 tool, and a great way to manage projects.
+
+Most importantly, we aren't doing any work installing packages, so guarantees that bolt
+can make by owning that, this won't have. Also, since `bolt-check` must be separately
+installed, you won't gain benefits from short-circuiting installs.
