@@ -80,6 +80,6 @@ See this blog post [I need to write this this link goes nowhere]()
 
 ## Benefits to single-package repos
 
-Changesets are designed first and formost to handle versioning in monorepos, where interdependencies flowing through the system are important to understand and capture.
+Changesets are designed first and foremost to handle versioning in monorepos, where interdependencies flowing through the system are important to understand and capture.
 
 Conceptually though, the benefits of changesets are detacheable from this. I think this process overall leads to an improvement in Pull Requests that helps increase confidence in versioning decisions and changelog entries.
