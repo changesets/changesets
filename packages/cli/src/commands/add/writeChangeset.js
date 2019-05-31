@@ -21,6 +21,7 @@ async function writeChangeset(changesetData, opts) {
     separator: "-",
     capitalize: false
   });
+
   const prettierConfig = await prettier.resolveConfig(dir);
 
   const newFolderPath = path.resolve(changesetBase, changesetID);
