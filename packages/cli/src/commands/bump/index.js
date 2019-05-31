@@ -25,9 +25,11 @@ import { defaultConfig } from "../../utils/constants";
 
 export default async function version(opts) {
   let userConfig = await resolveConfig(opts.cwd);
+
   userConfig =
     userConfig && userConfig.versionOptions ? userConfig.versionOptions : {};
   const config = { ...defaultConfig.versionOptions, ...userConfig, ...opts };
+
   const cwd = config.cwd || process.cwd();
   const allPackages = await bolt.getWorkspaces({ cwd });
   const changesetBase = await getChangesetBase(cwd);
