@@ -1,10 +1,13 @@
 import fs from "fs-extra";
-
 import path from "path";
 import util from "util";
+import prettier from "prettier";
+
 import generateMarkdownTemplate from "./template";
 import logger from "../logger";
 import * as bolt from "../bolt-replacements";
+
+prettier.resolveConfig(process.cwd());
 
 function writeFile(filePath, fileContents) {
   return util.promisify(cb => fs.writeFile(filePath, fileContents, cb))();
@@ -54,9 +57,16 @@ async function prependFile(filePath, data, pkg) {
   // if the file exists but doesn't have the header, we'll add it in
   if (!fileData) {
     const completelyNewChangelog = `# ${pkg.name}${data}`;
-    fs.writeFileSync(filePath, completelyNewChangelog);
+    fs.writeFileSync(
+      filePath,
+      prettier.format(completelyNewChangelog, { parser: "markdown" })
+    );
     return;
   }
   const newChangelog = fileData.replace("\n", data);
-  fs.writeFileSync(filePath, newChangelog);
+
+  fs.writeFileSync(
+    filePath,
+    prettier.format(newChangelog, { parser: "markdown" })
+  );
 }

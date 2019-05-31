@@ -1,0 +1,1 @@
+When bumping, run prettier over the changelog file
