@@ -3,9 +3,22 @@
   "version": "0.0.0",
   "description": "Run the two major checks that the bolt package does in yarn workspaces",
   "main": "dist/bolt-check.cjs.js",
+  "module": "dist/bolt-check.esm.js",
   "author": "Ben Conolly",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/changesets/changesets.git",
+    "directory": "packages/bolt-check"
+  },
   "bin": {
     "bolt-check": "bin.js"
+  },
+  "files": [
+    "dist",
+    "bin.js"
+  ],
+  "devDependencies": {
+    "jest-fixtures": "^0.5.0"
   }
 }

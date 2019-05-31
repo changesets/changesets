@@ -17,6 +17,10 @@
     "check-all": "yarn test && yarn lint && yarn types:check",
     "release": "yarn build && packages/cli/bin.js release --public"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/changesets/changesets.git"
+  },
   "workspaces": [
     "packages/*"
   ],
