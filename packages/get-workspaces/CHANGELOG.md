@@ -1,5 +1,14 @@
 # get-workspaces
 
+## 0.3.0
+### Minor Changes
+
+- [83ba6d3f](https://github.com/Noviny/changesets/commit/83ba6d3f) - Export Workspace type
+
+### Patch Changes
+
+- [a966701d](https://github.com/Noviny/changesets/commit/a966701d) - Add repository information to package.json
+
 ## 0.2.1
 ### Patch Changes
 

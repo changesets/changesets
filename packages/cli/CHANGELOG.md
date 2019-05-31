@@ -1,5 +1,17 @@
 # @changesets/cli
 
+## 1.1.4
+### Patch Changes
+
+- [83ba6d3f](https://github.com/Noviny/changesets/commit/83ba6d3f) - Convert various modules to TypeScript
+- [a966701d](https://github.com/Noviny/changesets/commit/a966701d) - Add repository information to package.json
+- [c00e65ef](https://github.com/Noviny/changesets/commit/c00e65ef) - Fix bug where unprovided command line options overrode the config file, leading to incorrect states
+- [8d2e700c](https://github.com/Noviny/changesets/commit/8d2e700c) - Remove unused function parseChangesetCommit
+- [7399648d](https://github.com/Noviny/changesets/commit/7399648d) - Make ids human readable
+
+- Updated dependencies [83ba6d3f]:
+  - get-workspaces@0.3.0
+
 ## 1.1.3
 ### Patch Changes
 

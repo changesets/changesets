@@ -1,6 +1,6 @@
 {
   "name": "bolt-check",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Run the two major checks that the bolt package does in yarn workspaces",
   "main": "dist/bolt-check.cjs.js",
   "module": "dist/bolt-check.esm.js",
@@ -22,7 +22,7 @@
     "chalk": "^2.1.0",
     "semver": "^5.4.1",
     "fs-extra": "^7.0.1",
-    "get-workspaces": "^0.2.1"
+    "get-workspaces": "^0.3.0"
   },
   "devDependencies": {
     "jest-fixtures": "^0.5.0"
