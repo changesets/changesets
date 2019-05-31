@@ -1,5 +1,5 @@
-import boltCheck from './bolt-check';
+import boltCheck from "./bolt-check";
 
 const cwd = process.cwd();
 
-boltCheck({ cwd })
+boltCheck({ cwd });

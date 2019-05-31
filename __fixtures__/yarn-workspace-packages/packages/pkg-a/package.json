@@ -2,6 +2,6 @@
   "name": "yarn-workspace-package-pkg-a",
   "version": "1.0.0",
   "dependencies": {
-    "pkg-b": "1.0.0"
+    "yarn-workspace-package-pkg-b": "1.0.0"
   }
 }

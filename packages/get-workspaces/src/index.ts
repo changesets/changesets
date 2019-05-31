@@ -11,7 +11,12 @@ type Options = {
   tools?: Array<"yarn" | "bolt" | "root">;
 };
 
-export type Workspace = { config: object; name: string; dir: string };
+type pkgJSON = {
+  name: string;
+  version: string;
+};
+
+export type Workspace = { config: pkgJSON; name: string; dir: string };
 
 export default async function getWorkspaces(
   opts: Options = {}
