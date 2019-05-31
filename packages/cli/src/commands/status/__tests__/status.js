@@ -5,6 +5,10 @@ import path from "path";
 import writeChangeset from "../../add/writeChangeset";
 import status from "..";
 
+import humanId from "human-id";
+
+jest.mock("human-id");
+
 const simpleChangeset = {
   summary: "This is a summary",
   releases: [
@@ -19,14 +23,14 @@ const simpleReleaseObj = {
     {
       name: "pkg-a",
       type: "minor",
-      changesets: ["b5340909"],
+      changesets: ["ascii"],
       commits: [],
       version: "1.1.0"
     },
     {
       name: "pkg-b",
       type: "patch",
-      changesets: ["b5340909"],
+      changesets: ["ascii"],
       commits: [],
       version: "1.0.1"
     }
@@ -40,7 +44,7 @@ const simpleReleaseObj = {
         { name: "pkg-a", type: "minor" },
         { name: "pkg-b", type: "patch" }
       ],
-      id: "b5340909",
+      id: "ascii",
       dependents: [{ name: "pkg-b", type: "none", dependencies: [] }]
     }
   ]
@@ -61,6 +65,9 @@ describe("status", () => {
   });
 
   it("should get the status for a simple changeset and return the release object", async () => {
+    const changesetID = "ascii";
+    humanId.mockReturnValueOnce(changesetID);
+
     await writeChangesets([simpleChangeset], cwd);
     const releaseObj = await status({ cwd });
     expect(releaseObj).toEqual(simpleReleaseObj);
@@ -75,6 +82,9 @@ describe("status", () => {
   it.skip("should respect the verbose flag", () => false);
   it("should respect the output flag", async () => {
     const output = "nonsense.json";
+
+    const changesetID = "ascii";
+    humanId.mockReturnValueOnce(changesetID);
 
     await writeChangesets([simpleChangeset], cwd);
     const probsUndefined = await status({ cwd, output });

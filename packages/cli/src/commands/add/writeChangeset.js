@@ -1,17 +1,11 @@
 import fs from "fs-extra";
 import path from "path";
-import crypto from "crypto";
 import prettier from "prettier";
 import pkgDir from "pkg-dir";
+import humanId from "human-id";
+
 import { removeEmptyFolders } from "../../utils/removeFolders";
 import getChangesetBase from "../../utils/getChangesetBase";
-
-const getID = data => {
-  const hash = crypto.createHash("sha256");
-
-  hash.update(JSON.stringify(data));
-  return hash.digest("hex");
-};
 
 async function writeChangeset(changesetData, opts) {
   const cwd = opts.cwd || process.cwd();
@@ -22,10 +16,12 @@ async function writeChangeset(changesetData, opts) {
   const changesetBase = await getChangesetBase(cwd);
 
   // Worth understanding that the ID merely needs to be a unique hash to avoid git conflicts
-  // There is no significance to using a hash of the changeset info aside from the fringe
-  // benefit that it stops adding the same changeset twice.
-  // If this is discovered to be bad or a more meaningful pattern is discovered, replacing this is fine.
-  const changesetID = getID(changesetData).slice(0, 8);
+  // experimenting with human readable ids to make finding changesets easier
+  const changesetID = humanId({
+    separator: "-",
+    capitalize: false
+  });
+
   const prettierConfig = await prettier.resolveConfig(dir);
 
   const newFolderPath = path.resolve(changesetBase, changesetID);

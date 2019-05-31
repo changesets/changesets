@@ -4,6 +4,10 @@ import fs from "fs-extra";
 import path from "path";
 import writeChangeset from "../writeChangeset";
 
+import humanId from "human-id";
+
+jest.mock("human-id");
+
 const simpleChangeset = {
   summary: "This is a summary",
   releases: [{ name: "pkg-a", type: "minor" }],
@@ -21,7 +25,10 @@ describe("simple project", () => {
     jest.clearAllMocks();
   });
   it("should write a changeset", async () => {
-    const changesetID = await writeChangeset(simpleChangeset, { cwd });
+    const changesetID = "ascii";
+    humanId.mockReturnValueOnce(changesetID);
+
+    await writeChangeset(simpleChangeset, { cwd });
 
     const mdPath = path.join(cwd, ".changeset", changesetID, "changes.md");
     const jsonPath = path.join(cwd, ".changeset", changesetID, "changes.json");
@@ -35,6 +42,9 @@ describe("simple project", () => {
     expect(json).toEqual(rest);
   });
   it("should clean up empty folders", async () => {
+    const changesetID = "ascii";
+    humanId.mockReturnValueOnce(changesetID);
+
     const emptyDirPath = path.join(cwd, ".changeset/empty-dir");
 
     await fs.mkdir(emptyDirPath);
@@ -43,23 +53,14 @@ describe("simple project", () => {
     expect(fs.pathExistsSync(emptyDirPath)).toBe(false);
   });
   it("should leave folders with contents", async () => {
+    const changesetID = "ascii";
+    humanId.mockReturnValueOnce(changesetID);
+
     const fullFilePath = path.join(cwd, ".changeset/full-dir/changes.md");
 
     await fs.ensureFile(fullFilePath);
     await writeChangeset(simpleChangeset, { cwd });
 
     expect(fs.pathExistsSync(fullFilePath)).toBe(true);
-  });
-  it("should not write the same changeset twice", async () => {
-    let message;
-    await writeChangeset(simpleChangeset, { cwd });
-    try {
-      await writeChangeset(simpleChangeset, { cwd });
-    } catch (e) {
-      message = e.message;
-    }
-    expect(message).toBe(
-      "A changeset with the unique ID 2b479644 already exists"
-    );
   });
 });
