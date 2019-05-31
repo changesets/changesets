@@ -28,8 +28,8 @@ type ExternalMismatch = {
   type: "externalMismatch";
   pkgName: string;
   dependency: string;
-  version: string;
-  range: string;
+  rootVersion: string;
+  pkgVersion: string;
 };
 
 type ErrorObj = InternalMismatch | ExternalMismatch | MissingDep;
@@ -47,10 +47,10 @@ const getMissingDepErrorMessage = ({ pkgName, dependency }: MissingDep) =>
 const getExternalErrorMessage = ({
   pkgName,
   dependency,
-  version,
-  range
+  rootVersion,
+  pkgVersion
 }: ExternalMismatch) =>
-  chalk`{yellow ${pkgName}} relies on {yellow ${range}} in {green ${dependency}}, but on {yellow ${version}} at the project root.`;
+  chalk`{yellow ${pkgName}} relies on {yellow ${pkgVersion}} in {green ${dependency}}, but on {yellow ${rootVersion}} at the project root.`;
 
 // TODO: This function could sort, and order these errors to make nicer output. Not doing that for now.
 const printErrors = (errors: ErrorObj[]) => {
@@ -140,9 +140,9 @@ export default async function boltCheck(config: {
           errors.push({
             type: "externalMismatch",
             pkgName: workspace.name,
-            range,
+            pkgVersion: range,
             dependency: name,
-            version: rootVersion
+            rootVersion
           });
         }
       }
