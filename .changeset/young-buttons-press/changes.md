@@ -1,0 +1,1 @@
+Add butterfly emoji prefix to CLI output

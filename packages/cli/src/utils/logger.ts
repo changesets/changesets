@@ -1,23 +1,38 @@
 import chalk from "chalk";
+import util from "util";
+
+export let prefix = "🦋 ";
+
+function format(args: Array<any>, customPrefix?: string) {
+  let fullPrefix =
+    prefix + (customPrefix === undefined ? "" : " " + customPrefix);
+  return (
+    fullPrefix +
+    util
+      .format("", ...args)
+      .split("\n")
+      .join("\n" + fullPrefix)
+  );
+}
 
 function log(...args: Array<any>) {
-  console.log(...args);
+  console.log(format(args));
 }
 
 function info(...args: Array<any>) {
-  console.error(chalk.cyan("info"), ...args);
+  console.error(format(args, chalk.cyan("info")));
 }
 
 function warn(...args: Array<any>) {
-  console.error(chalk.yellow("warn"), ...args);
+  console.error(format(args, chalk.yellow("warn")));
 }
 
 function error(...args: Array<any>) {
-  console.error(chalk.red("error"), ...args);
+  console.error(format(args, chalk.red("error")));
 }
 
 function success(...args: Array<any>) {
-  console.log(chalk.green("success"), ...args);
+  console.log(format(args, chalk.green("success")));
 }
 
 export default {
