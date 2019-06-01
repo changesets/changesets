@@ -5,7 +5,7 @@ export let prefix = "🦋 ";
 
 function format(args: Array<any>, customPrefix?: string) {
   let fullPrefix =
-    prefix + (customPrefix === undefined ? "" : " " + customPrefix + " ");
+    prefix + (customPrefix === undefined ? "" : " " + customPrefix);
   return (
     fullPrefix +
     util
