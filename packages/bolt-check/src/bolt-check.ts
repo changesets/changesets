@@ -3,6 +3,7 @@ import semver from "semver";
 import path from "path";
 import fs from "fs-extra";
 import chalk from "chalk";
+import detectIndent from "detect-indent";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -15,6 +16,7 @@ type MissingDep = {
   type: "missingDependency";
   pkgName: string;
   dependency: string;
+  pkgVersion: string;
 };
 
 type InternalMismatch = {
@@ -33,6 +35,8 @@ type ExternalMismatch = {
 };
 
 type ErrorObj = InternalMismatch | ExternalMismatch | MissingDep;
+
+type PkgErrors = InternalMismatch | ExternalMismatch;
 
 const getInternalErrorMessage = ({
   pkgName,
@@ -94,6 +98,7 @@ const flatten = (workspace: workspaceConfig) => {
 export default async function boltCheck(config: {
   cwd: string;
   silent?: boolean;
+  fix?: boolean;
 }) {
   const errors: ErrorObj[] = [];
 
@@ -134,7 +139,8 @@ export default async function boltCheck(config: {
           errors.push({
             type: "missingDependency",
             pkgName: workspace.name,
-            dependency: name
+            dependency: name,
+            pkgVersion: range
           });
         } else if (rootVersion !== range) {
           errors.push({
@@ -153,11 +159,112 @@ export default async function boltCheck(config: {
     return errors;
   }
 
-  if (errors.length > 0) {
+  if (errors.length > 0 && !config.fix) {
     console.error(chalk.red("there are errors in your config!"));
     printErrors(errors);
     process.exit(1);
+  } else if (errors.length > 0 && config.fix) {
+    const missingDepErrors = [];
+    const otherErrors = [];
+
+    for (let error of errors) {
+      if (error.type === "missingDependency") {
+        missingDepErrors.push(error);
+      } else {
+        otherErrors.push(error);
+      }
+    }
+
+    if (missingDepErrors.length > 0) {
+      await fixMissingDependencies(missingDepErrors, config.cwd);
+    }
+
+    // We want to sort other errors by workspace, so we can handle a
+    // workspace all at once
+
+    const workSpacesToUpdate: {
+      [key: string]: { pkgDir: string; errors: PkgErrors[] };
+    } = {};
+
+    otherErrors.forEach(error => {
+      if (!workSpacesToUpdate[error.pkgName]) {
+        const workspace = workspaces.find(w => w.name === error.pkgName);
+        if (!workspace) {
+          throw new Error("congrats! you found an impossible error");
+        }
+
+        workSpacesToUpdate[error.pkgName] = {
+          pkgDir: workspace.dir,
+          errors: []
+        };
+      }
+      workSpacesToUpdate[error.pkgName].errors.push(error);
+    });
+
+    await Object.values(workSpacesToUpdate).map(async ({ pkgDir, errors }) =>
+      fix(errors, pkgDir)
+    );
   } else {
     console.log("Looks like your dependencies are fine");
   }
 }
+
+const fix = async (errors: PkgErrors[], pkgDir: string) => {
+  const pkgPath = path.resolve(pkgDir, "package.json");
+  const pkgRaw = await fs.readFile(pkgPath, "utf-8");
+  const indent = detectIndent(pkgRaw).indent || "  ";
+  const pkg = JSON.parse(pkgRaw);
+
+  errors.forEach(() => {});
+
+  await fs.writeFile(pkgPath, JSON.stringify(pkg, null, indent));
+};
+
+const fixMissingDependencies = async (errors: MissingDep[], cwd: string) => {
+  const cannotAdd: { [key: string]: string[] } = {};
+  const update = new Map();
+
+  errors.forEach(({ dependency, pkgVersion }) => {
+    if (update.has(dependency)) {
+      if (!cannotAdd.dependency) {
+        cannotAdd[dependency] = [];
+      }
+      const v1 = update.get(dependency);
+      cannotAdd[dependency].push(v1, pkgVersion);
+      update.delete(dependency);
+    } else if (cannotAdd[dependency]) {
+      cannotAdd[dependency].push(pkgVersion);
+    } else {
+      update.set(dependency, pkgVersion);
+    }
+  });
+
+  const rootPkgJsonPath = path.resolve(cwd, "package.json");
+  const rootRaw = await fs.readFile(rootPkgJsonPath, "utf-8");
+  const indent = detectIndent(rootRaw).indent || "  ";
+  const rootPkgJson = JSON.parse(rootRaw);
+
+  update.forEach((pkgVersion, dependency) => {
+    if (!rootPkgJson.dependencies) {
+      rootPkgJson.dependencies = {};
+    }
+    rootPkgJson.dependencies[dependency] = pkgVersion;
+  });
+
+  await fs.writeFile(
+    rootPkgJsonPath,
+    JSON.stringify(rootPkgJson, null, indent)
+  );
+
+  if (Object.keys(cannotAdd).length) {
+    Object.entries(cannotAdd).forEach(([name, versions]) => {
+      console.error(
+        "could not automatically udpate",
+        name,
+        // TODO Add enough info so we can say where each of these versions is
+        "because it had multiple versions in your repository:",
+        ...versions
+      );
+    });
+  }
+};
