@@ -6,11 +6,7 @@
   "module": "dist/bolt-check.esm.js",
   "author": "Ben Conolly",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/changesets/changesets.git",
-    "directory": "packages/bolt-check"
-  },
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/bolt-check",
   "bin": {
     "bolt-check": "bin.js"
   },
