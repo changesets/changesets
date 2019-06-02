@@ -1,5 +1,7 @@
+import { getFixturePath, copyFixtureIntoTempDir } from "jest-fixtures";
+import fs from "fs-extra";
+import path from "path";
 import boltCheck from "./bolt-check";
-import { getFixturePath } from "jest-fixtures";
 
 describe("bolt-check", () => {
   it("should validate a project with no errors", async () => {
@@ -20,7 +22,8 @@ describe("bolt-check", () => {
       {
         dependency: "get-workspaces",
         pkgName: "yarn-workspace-base-pkg-a",
-        type: "missingDependency"
+        type: "missingDependency",
+        pkgVersion: "^0.2.1"
       }
     ]);
   });
@@ -65,5 +68,64 @@ describe("bolt-check", () => {
   });
   it.skip("should print multiple errors for multiple external mismatches", async () => {
     throw new Error("write this test");
+  });
+});
+
+describe("bolt-check --fix", () => {
+  it("should error if a package contains an external dependency missing at root", async () => {
+    const cwd = await copyFixtureIntoTempDir(
+      __dirname,
+      "yarn-workspace-missing-external"
+    );
+
+    const pkgJSonPath = path.join(cwd, "package.json");
+    const pkgJSONOriginal = JSON.parse(
+      await fs.readFileSync(pkgJSonPath, "utf-8")
+    );
+
+    expect(pkgJSONOriginal.dependencies["get-workspaces"]).toBeUndefined();
+
+    await boltCheck({ cwd, fix: true });
+
+    const pkgJSON = JSON.parse(await fs.readFileSync(pkgJSonPath, "utf-8"));
+
+    expect(pkgJSON.dependencies["get-workspaces"]).toEqual("^0.2.1");
+  });
+  it("should error if a package contains an external dependency at a mistmatched version", async () => {
+    const cwd = await copyFixtureIntoTempDir(
+      __dirname,
+      "yarn-workspace-mismatched-external"
+    );
+
+    const pkgJSonPath = path.join(cwd, "packages", "pkg-a", "package.json");
+    const pkgJSONOriginal = JSON.parse(
+      await fs.readFileSync(pkgJSonPath, "utf-8")
+    );
+
+    expect(pkgJSONOriginal.dependencies["get-workspaces"]).toEqual("^0.2.1");
+
+    await boltCheck({ cwd, fix: true });
+    const pkgJSON = JSON.parse(await fs.readFileSync(pkgJSonPath, "utf-8"));
+
+    expect(pkgJSON.dependencies["get-workspaces"]).toEqual("^0.2.0");
+  });
+  it("should error if a package contains an internal dependency at an incompatible version", async () => {
+    const cwd = await copyFixtureIntoTempDir(
+      __dirname,
+      "yarn-workspace-mismatched-internal"
+    );
+    const pkgJSonPath = path.join(cwd, "packages", "pkg-a", "package.json");
+    const pkgJSONOriginal = JSON.parse(
+      await fs.readFileSync(pkgJSonPath, "utf-8")
+    );
+
+    expect(pkgJSONOriginal.dependencies["yarn-workspace-base-pkg-b"]).toEqual(
+      "^0.1.0"
+    );
+
+    await boltCheck({ cwd, fix: true });
+    const pkgJSON = JSON.parse(await fs.readFileSync(pkgJSonPath, "utf-8"));
+
+    expect(pkgJSON.dependencies["yarn-workspace-base-pkg-b"]).toEqual("^1.0.0");
   });
 });
