@@ -100,7 +100,7 @@ export async function getInfo(request) {
       pull:
         data === null
           ? null
-          : `[#${data.number}](https://github.com/${request.repo}/pulls/${
+          : `[#${data.number}](https://github.com/${request.repo}/pull/${
               data.number
             })`,
       user:
