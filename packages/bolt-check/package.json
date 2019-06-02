@@ -1,6 +1,6 @@
 {
   "name": "bolt-check",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Run the two major checks that the bolt package does in yarn workspaces",
   "main": "dist/bolt-check.cjs.js",
   "module": "dist/bolt-check.esm.js",

@@ -33,7 +33,7 @@ const getReleaseLine = async (changeset, type) => {
     .split("\n")
     .map(l => l.trimRight());
   let { links } = await getInfo({
-    repo: "Noviny/changesets",
+    repo: "changesets/changesets",
     commit: changeset.commit
   });
   return `- ${links.commit}${links.pull === null ? "" : ` ${links.pull}`}${
