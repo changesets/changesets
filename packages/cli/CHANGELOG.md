@@ -1,6 +1,17 @@
 # @changesets/cli
 
+## 1.1.5
+
+### Patch Changes
+
+- [7fa42641](https://github.com/changesets/changesets/commit/7fa42641) [#61](https://github.com/changesets/changesets/pulls/61) Thanks [@Noviny](https://github.com/Noviny)! - When bumping, run prettier over the changelog file.
+
+  If you want this option turned off, add `disabledLanguage: ["markdown"] to your prettier config.
+
+  - [6dc510f4](https://github.com/changesets/changesets/commit/6dc510f4) [#62](https://github.com/changesets/changesets/pulls/62) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add butterfly emoji prefix to CLI output
+
 ## 1.1.4
+
 ### Patch Changes
 
 - [83ba6d3f](https://github.com/Noviny/changesets/commit/83ba6d3f) - Convert various modules to TypeScript
@@ -13,6 +24,7 @@
   - get-workspaces@0.3.0
 
 ## 1.1.3
+
 ### Patch Changes
 
 - [67db935d](https://github.com/Noviny/changesets/commit/67db935d) - Fix release without built files
