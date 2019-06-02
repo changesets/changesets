@@ -205,8 +205,10 @@ export default async function boltCheck(config: {
       workSpacesToUpdate[error.pkgName].errors.push(error);
     });
 
-    await Object.values(workSpacesToUpdate).map(async ({ pkgDir, errors }) =>
-      fixPkgErrors(errors, pkgDir)
+    await Promise.all(
+      Object.values(workSpacesToUpdate).map(async ({ pkgDir, errors }) =>
+        fixPkgErrors(errors, pkgDir)
+      )
     );
   } else {
     console.log("Looks like your dependencies are fine");
@@ -219,24 +221,24 @@ const fixPkgErrors = async (errors: PkgErrors[], pkgDir: string) => {
   let indent = detectIndent(pkgRaw).indent || "  ";
   let pkg = JSON.parse(pkgRaw);
 
-  errors.forEach((error) => {
-    if (error.type === 'internalMismatch') {
+  errors.forEach(error => {
+    if (error.type === "internalMismatch") {
       let { dependency, version } = error;
-      DEPENDENCY_TYPES.forEach((depType) => {
+      DEPENDENCY_TYPES.forEach(depType => {
         if (pkg[depType] && pkg[depType][dependency]) {
-          let currentRange = pkg[depType][dependency]
-          let rangeType = versionRangeToRangeType(currentRange)
+          let currentRange = pkg[depType][dependency];
+          let rangeType = versionRangeToRangeType(currentRange);
           pkg[depType][dependency] = rangeType + version;
         }
-      })
+      });
     }
-    if (error.type === 'externalMismatch') {
-      DEPENDENCY_TYPES.forEach((depType) => {
+    if (error.type === "externalMismatch") {
+      DEPENDENCY_TYPES.forEach(depType => {
         let { dependency, rootVersion } = error;
         if (pkg[depType] && pkg[depType][dependency]) {
           pkg[depType][dependency] = rootVersion;
         }
-      })
+      });
     }
   });
 
@@ -255,7 +257,10 @@ const fixMissingDependencies = async (errors: MissingDep[], cwd: string) => {
       let v1 = update.get(dependency);
       cannotAdd[dependency].push(v1, pkgVersion);
       update.delete(dependency);
-    } else if (cannotAdd[dependency] && !cannotAdd[dependency].includes(pkgVersion)) {
+    } else if (
+      cannotAdd[dependency] &&
+      !cannotAdd[dependency].includes(pkgVersion)
+    ) {
       cannotAdd[dependency].push(pkgVersion);
     } else {
       update.set(dependency, pkgVersion);

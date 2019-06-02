@@ -2,7 +2,7 @@ import meow from "meow";
 import boltCheck from "./bolt-check";
 
 const { flags } = meow(
-    `
+  `
     Usage
       $ bolt-check
         Performs the bolt-check action. See readme for full details.
@@ -16,25 +16,23 @@ const { flags } = meow(
         Do not show any console warnings.
 
     `,
-    {
-      flags: {
-        cwd: {
-          type: "string",
-          default: process.cwd()
-        },
-        fix: {
-          type: "boolean",
-        },
-        silent: {
-          type: "boolean",
-        },
+  {
+    flags: {
+      cwd: {
+        type: "string",
+        default: process.cwd()
+      },
+      fix: {
+        type: "boolean"
+      },
+      silent: {
+        type: "boolean"
       }
     }
-  );
+  }
+);
 
-
-  (async () => {
-    boltCheck(flags);
-  })()
-
-
+(async () => {
+  // @ts-ignore
+  boltCheck(flags);
+})();
