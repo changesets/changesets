@@ -1,0 +1,1 @@
+Update package.json field so each links into its own package
