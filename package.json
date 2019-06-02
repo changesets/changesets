@@ -54,7 +54,9 @@
     "semver": "^5.4.1",
     "tty-table": "^2.7.0",
     "typescript": "^3.4.5",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "@types/inquirer": "^6.0.3",
+    "@types/uuid": "^3.4.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
