@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "yarn-workspace-root-contains-dev-deps",
+  "description": "Base yarn workspace work",
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "react": "^16.8.6"
+  },
+  "devDependencies": {
+    "react-test-renderer": "^16.8.6"
+  }
+}

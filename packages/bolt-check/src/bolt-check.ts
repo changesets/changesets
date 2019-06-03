@@ -40,7 +40,15 @@ type ExternalMismatch = {
   pkgVersion: string;
 };
 
-type ErrorObj = InternalMismatch | ExternalMismatch | MissingDep;
+type RootContainsDevDeps = {
+  type: "rootContainsDevDeps";
+};
+
+type ErrorObj =
+  | InternalMismatch
+  | ExternalMismatch
+  | MissingDep
+  | RootContainsDevDeps;
 
 type PkgErrors = InternalMismatch | ExternalMismatch;
 
@@ -62,6 +70,8 @@ const getExternalErrorMessage = ({
 }: ExternalMismatch) =>
   chalk`{yellow ${pkgName}} relies on {green ${dependency}} at {red ${pkgVersion}}, but your project relies on  {green ${dependency}} at {green ${rootVersion}}.`;
 
+const rootContainsDevDepsMessage = chalk`the root package.json contains {yellow devDependencies}, this is disallowed as {yellow devDependencies} vs {green dependencies} in a private package does not affect anything and creates confusion.`;
+
 // TODO: This function could sort, and order these errors to make nicer output. Not doing that for now.
 let printErrors = (errors: ErrorObj[]) => {
   errors.forEach(error => {
@@ -74,6 +84,17 @@ let printErrors = (errors: ErrorObj[]) => {
         break;
       case "missingDependency":
         console.error(getMissingDepErrorMessage(error));
+        break;
+      case "rootContainsDevDeps":
+        console.error(rootContainsDevDepsMessage);
+        break;
+      default:
+        throw new Error(
+          `the error type "${
+            // @ts-ignore TS understands that this case will never happen with the current code but it won't throw an error if there is an unhandled case
+            error.type
+          }" is not handled in printErrors, this is likely a bug in bolt-check, please open an issue`
+        );
     }
   });
 };
@@ -119,8 +140,22 @@ export default async function boltCheck(config: {
   let rootPkgJson: workspaceConfig = JSON.parse(
     await fs.readFile(path.resolve(config.cwd, "package.json"), "utf-8")
   );
+  let rootDeps = new Map();
 
-  let rootDeps = flatten(rootPkgJson);
+  for (let depType of DEPENDENCY_TYPES) {
+    let deps = rootPkgJson[depType];
+    if (!deps || typeof deps !== "object") continue;
+    if (depType === "devDependencies") {
+      errors.push({
+        type: "rootContainsDevDeps"
+      });
+    }
+    for (let [name, version] of Object.entries(deps)) {
+      if (!rootDeps.has(name)) {
+        rootDeps.set(name, version);
+      }
+    }
+  }
 
   for (let workspace of workspaces) {
     workspaceVersions.set(workspace.config.name, workspace.config.version);
@@ -167,15 +202,23 @@ export default async function boltCheck(config: {
 
   if (errors.length > 0 && !config.fix) {
     console.error(chalk.red("there are errors in your config!"));
+    console.log(
+      chalk.cyan("these errors may be fixable with `bolt-check --fix`")
+    );
+
     printErrors(errors);
     process.exit(1);
   } else if (errors.length > 0 && config.fix) {
     let missingDepErrors = [];
     let otherErrors = [];
 
+    let hasRootDevDeps;
+
     for (let error of errors) {
       if (error.type === "missingDependency") {
         missingDepErrors.push(error);
+      } else if (error.type === "rootContainsDevDeps") {
+        hasRootDevDeps = true;
       } else {
         otherErrors.push(error);
       }
@@ -183,6 +226,10 @@ export default async function boltCheck(config: {
 
     if (missingDepErrors.length > 0) {
       await fixMissingDependencies(missingDepErrors, config.cwd);
+    }
+
+    if (hasRootDevDeps) {
+      await moveDevDepsToDeps(config.cwd);
     }
 
     let workSpacesToUpdate: {
@@ -295,4 +342,21 @@ const fixMissingDependencies = async (errors: MissingDep[], cwd: string) => {
       );
     });
   }
+};
+
+const moveDevDepsToDeps = async (cwd: string) => {
+  let rootPkgJsonPath = path.resolve(cwd, "package.json");
+  let rootRaw = await fs.readFile(rootPkgJsonPath, "utf-8");
+  let indent = detectIndent(rootRaw).indent || "  ";
+  let rootPkgJson = JSON.parse(rootRaw);
+
+  rootPkgJson.dependencies = {
+    ...rootPkgJson.dependencies,
+    ...rootPkgJson.devDependencies
+  };
+  delete rootPkgJson.devDependencies;
+  await fs.writeFile(
+    rootPkgJsonPath,
+    JSON.stringify(rootPkgJson, null, indent)
+  );
 };
