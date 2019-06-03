@@ -91,6 +91,7 @@ let printErrors = (errors: ErrorObj[]) => {
       default:
         throw new Error(
           `the error type "${
+            // @ts-ignore TS understands that this case will never happen with the current code but it won't throw an error if there is an unhandled case
             error.type
           }" is not handled in printErrors, this is likely a bug in bolt-check, please open an issue`
         );
