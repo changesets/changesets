@@ -56,9 +56,7 @@
     "typescript": "^3.4.5",
     "uuid": "^3.3.2",
     "@types/inquirer": "^6.0.3",
-    "@types/uuid": "^3.4.4"
-  },
-  "devDependencies": {
+    "@types/uuid": "^3.4.4",
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.0.0-0",
     "@babel/preset-env": "^7.4.4",

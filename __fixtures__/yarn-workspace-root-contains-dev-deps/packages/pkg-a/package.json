@@ -1,0 +1,7 @@
+{
+  "name": "yarn-workspace-base-pkg-a",
+  "version": "1.0.0",
+  "dependencies": {
+    "yarn-workspace-base-pkg-b": "1.0.0"
+  }
+}

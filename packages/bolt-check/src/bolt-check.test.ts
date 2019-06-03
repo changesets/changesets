@@ -60,6 +60,19 @@ describe("bolt-check", () => {
       }
     ]);
   });
+  it("should error if the root package.json contains devDeps", async () => {
+    const cwd = await getFixturePath(
+      __dirname,
+      "yarn-workspace-root-contains-dev-deps"
+    );
+
+    const errors = await boltCheck({ cwd, silent: true });
+    expect(errors).toEqual([
+      {
+        type: "rootContainsDevDeps"
+      }
+    ]);
+  });
   it.skip("should print errors for both external and internal dependencies at once", async () => {
     throw new Error("write this test");
   });
@@ -127,5 +140,21 @@ describe("bolt-check --fix", () => {
     const pkgJSON = JSON.parse(await fs.readFileSync(pkgJSonPath, "utf-8"));
 
     expect(pkgJSON.dependencies["yarn-workspace-base-pkg-b"]).toEqual("^1.0.0");
+  });
+  it("should move devDeps to deps if the root package.json contains devDeps", async () => {
+    const cwd = await copyFixtureIntoTempDir(
+      __dirname,
+      "yarn-workspace-root-contains-dev-deps"
+    );
+
+    await boltCheck({ cwd, fix: true });
+    const pkgJSON = JSON.parse(
+      await fs.readFile(path.join(cwd, "package.json"), "utf-8")
+    );
+    expect(pkgJSON.devDependencies).toBeUndefined();
+    expect(pkgJSON.dependencies).toEqual({
+      react: "^16.8.6",
+      "react-test-renderer": "^16.8.6"
+    });
   });
 });
