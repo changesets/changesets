@@ -1,11 +1,6 @@
 // @flow
 import { copyFixtureIntoTempDir } from "jest-fixtures";
-import {
-  askCheckboxPlus,
-  askList,
-  askConfirm,
-  askQuestion
-} from "../../../utils/cli";
+import { askCheckboxPlus, askConfirm, askQuestion } from "../../../utils/cli";
 import * as git from "../../../utils/git";
 import addChangeset from "..";
 import writeChangeset from "../writeChangeset";
@@ -45,15 +40,26 @@ unsafeGetChangedPackagesSinceMaster.mockReturnValue([]);
 
 const mockUserResponses = mockResponses => {
   const summary = mockResponses.summary || "summary message mock";
-  const shouldCommit = mockResponses.shouldCommit || "n";
+  const shouldCommit = mockResponses.shouldCommit || false;
   askCheckboxPlus.mockReturnValueOnce(Object.keys(mockResponses.releases));
-  Object.entries(mockResponses.releases).forEach(([_pkg, type]) =>
-    askList.mockReturnValueOnce(type)
-  );
+  let majorReleases = [];
+  let minorReleases = [];
+  Object.entries(mockResponses.releases).forEach(([pkgName, type]) => {
+    if (type === "major") {
+      majorReleases.push(pkgName);
+    }
+    if (type === "minor") {
+      minorReleases.push(pkgName);
+    }
+  });
+
+  askCheckboxPlus.mockReturnValueOnce(majorReleases);
+  askCheckboxPlus.mockReturnValueOnce(minorReleases);
+  askConfirm.mockReturnValueOnce(true);
+
   askQuestion.mockReturnValueOnce(summary);
   askConfirm.mockReturnValueOnce(shouldCommit);
 };
-
 describe("Changesets - bumping peerDeps", () => {
   beforeEach(() => {
     writeChangeset.mockResolvedValue("ABCDE");
