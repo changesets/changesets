@@ -1,6 +1,6 @@
 // @flow
 
-import { green, yellow, red, bold, blue } from "chalk";
+import { green, yellow, red, bold, blue, cyan } from "chalk";
 
 import semver from "semver";
 
@@ -37,7 +37,7 @@ async function getPackagesToRelease(changedPackages, allPackages) {
       // TODO: Make this wording better
       // TODO: take objects and be fancy with matching
       `Which packages would you like to include?`,
-      defaultChoiceList
+      defaultChoiceList,
       x => {
         // this removes changed packages and unchanged packages from the list
         // of packages shown after selection
