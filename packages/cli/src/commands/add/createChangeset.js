@@ -38,17 +38,17 @@ async function getPackagesToRelease(changedPackages, allPackages) {
       // TODO: take objects and be fancy with matching
       `Which packages would you like to include?`,
       defaultChoiceList
-      // x => {
-      //   // this removes changed packages and unchanged packages from the list
-      //   // of packages shown after selection
-      //   if (Array.isArray(x)) {
-      //     return x
-      //       .filter(x => x !== "changed packages" && x !== "unchanged packages")
-      //       .map(x => cyan(x))
-      //       .join(", ");
-      //   }
-      //   return x;
-      // }
+      x => {
+        // this removes changed packages and unchanged packages from the list
+        // of packages shown after selection
+        if (Array.isArray(x)) {
+          return x
+            .filter(x => x !== "changed packages" && x !== "unchanged packages")
+            .map(x => cyan(x))
+            .join(", ");
+        }
+        return x;
+      }
     );
   }
 
