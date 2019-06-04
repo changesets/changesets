@@ -1,5 +1,6 @@
 // @flow
 import { copyFixtureIntoTempDir } from "jest-fixtures";
+import stripAnsi from "strip-ansi";
 import { askCheckboxPlus, askConfirm, askQuestion } from "../../../utils/cli";
 import * as git from "../../../utils/git";
 
@@ -34,7 +35,6 @@ unsafeGetChangedPackagesSinceMaster.mockReturnValue([]);
 
 const mockUserResponses = mockResponses => {
   const summary = mockResponses.summary || "summary message mock";
-  const shouldCommit = mockResponses.shouldCommit || false;
   let majorReleases = [];
   let minorReleases = [];
   Object.entries(mockResponses.releases).forEach(([pkgName, type]) => {
@@ -51,14 +51,25 @@ const mockUserResponses = mockResponses => {
     minorReleases
   ];
   askCheckboxPlus.mockImplementation(() => {
-    if (callCount === returnValues.length) {
-      throw new Error(`There was an unexpected call to askCheckboxPlus`);
-    }
+    // if (callCount === returnValues.length) {
+    //   throw new Error(`There was an unexpected call to askCheckboxPlus`);
+    // }
     return returnValues[callCount++];
   });
 
+  let confirmAnswers = {
+    "Are you okay with these packages having a patch bump?": true,
+    "Is this your desired changeset?": true
+  };
+
   askQuestion.mockReturnValueOnce(summary);
-  askConfirm.mockReturnValueOnce(shouldCommit);
+  askConfirm.mockImplementation(question => {
+    question = stripAnsi(question);
+    if (confirmAnswers[question]) {
+      return confirmAnswers[question];
+    }
+    throw new Error(`An answer could not be found for ${question}`);
+  });
 };
 
 describe("Changesets", () => {
