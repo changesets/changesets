@@ -145,44 +145,9 @@ function getDependencyVersionRange(dependentPkgJSON, dependencyName) {
   return dependencyVersionRange;
 }
 
-export default async function createChangeset(
-  changedPackages /* Array<string> */,
-  opts /* { cwd?: string }  */ = {}
-) {
-  const cwd = opts.cwd || process.cwd();
-  const allPackages = await bolt.getWorkspaces({ cwd });
-
-  const dependencyGraph = await bolt.getDependentsGraph({ cwd });
-  // helper because we do this a lot
+function createChangesetFromData({ summary, releases }) {
   const getPackageJSON = pkgName =>
     allPackages.find(({ name }) => name === pkgName).config;
-
-  const packagesToRelease = await getPackagesToRelease(
-    changedPackages,
-    allPackages
-  );
-
-  const releases = [];
-
-  // We use a for loop instead of a map because we need to ensure they are
-  // run in sequence
-  for (const pkg of packagesToRelease) {
-    const pkgJSON = allPackages.find(({ name }) => name === pkg).config;
-
-    const type = await getPackageBumpRange(pkgJSON);
-
-    releases.push({ name: pkg, type });
-  }
-
-  logger.log(
-    "Please enter a summary for this change (this will be in the changelogs)"
-  );
-
-  let summary = await cli.askQuestion("Summary");
-  while (summary.length === 0) {
-    logger.error("A summary is required for the changelog! 😪");
-    summary = await cli.askQuestion("Summary");
-  }
 
   const pkgsToSearch = [...releases];
   const dependents = [];
@@ -260,4 +225,44 @@ export default async function createChangeset(
     releases,
     dependents
   };
+}
+
+export default async function createChangeset(
+  changedPackages /* Array<string> */,
+  opts /* { cwd?: string }  */ = {}
+) {
+  const cwd = opts.cwd || process.cwd();
+  const allPackages = await bolt.getWorkspaces({ cwd });
+
+  const dependencyGraph = await bolt.getDependentsGraph({ cwd });
+  // helper because we do this a lot
+  const getPackageJSON = pkgName =>
+    allPackages.find(({ name }) => name === pkgName).config;
+
+  const packagesToRelease = await getPackagesToRelease(
+    changedPackages,
+    allPackages
+  );
+
+  const releases = [];
+
+  // We use a for loop instead of a map because we need to ensure they are
+  // run in sequence
+  for (const pkg of packagesToRelease) {
+    const pkgJSON = allPackages.find(({ name }) => name === pkg).config;
+
+    const type = await getPackageBumpRange(pkgJSON);
+
+    releases.push({ name: pkg, type });
+  }
+
+  logger.log(
+    "Please enter a summary for this change (this will be in the changelogs)"
+  );
+
+  let summary = await cli.askQuestion("Summary");
+  while (summary.length === 0) {
+    logger.error("A summary is required for the changelog! 😪");
+    summary = await cli.askQuestion("Summary");
+  }
 }
