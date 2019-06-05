@@ -64,7 +64,6 @@ const mockUserResponses = mockResponses => {
   });
 
   let confirmAnswers = {
-    "Are you okay with these packages having a patch bump?": true,
     "Is this your desired changeset?": true
   };
 

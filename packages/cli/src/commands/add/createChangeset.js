@@ -222,15 +222,6 @@ export default async function createChangeset(
         formatPkgNameAndVersion(pkgName, pkgJsonsByName.get(pkgName).version)
       );
     });
-    let shouldTheRestOfThePkgsBeMinorBumped = await cli.askConfirm(
-      bold(`Are you okay with these packages having a ${blue("patch")} bump?`)
-    );
-    while (!shouldTheRestOfThePkgsBeMinorBumped) {
-      logger.error("The rest of the selected packages must be patch bumped");
-      shouldTheRestOfThePkgsBeMinorBumped = await cli.askConfirm(
-        bold(`Are you okay with these packages having a ${blue("patch")} bump?`)
-      );
-    }
 
     for (const pkgName of pkgsLeftToGetBumpTypeFor) {
       releases.push({ name: pkgName, type: "patch" });
