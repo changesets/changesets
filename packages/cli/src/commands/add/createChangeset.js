@@ -127,9 +127,6 @@ export default async function createChangeset(
   const allPackages = await bolt.getWorkspaces({ cwd });
 
   const dependencyGraph = await bolt.getDependentsGraph({ cwd });
-  // helper because we do this a lot
-  const getPackageJSON = pkgName =>
-    allPackages.find(({ name }) => name === pkgName).config;
 
   const packagesToRelease = await getPackagesToRelease(
     changedPackages,
@@ -252,7 +249,7 @@ export default async function createChangeset(
       .map(dependent => {
         let type = "none";
 
-        const dependentPkgJSON = getPackageJSON(dependent);
+        const dependentPkgJSON = pkgJsonsByName.get(dependent);
         const { depTypes, versionRange } = getDependencyVersionRange(
           dependentPkgJSON,
           nextRelease.name
@@ -265,7 +262,7 @@ export default async function createChangeset(
           type = "major";
         } else {
           const nextReleaseVersion = semver.inc(
-            getPackageJSON(nextRelease.name).version,
+            pkgJsonsByName.get(nextRelease.name).version,
             nextRelease.type
           );
           if (
@@ -301,7 +298,7 @@ export default async function createChangeset(
   // Now we need to fill in the dependencies arrays for each of the dependents. We couldn't accurately
   // do it until now because we didn't have the entire list of packages being released yet
   dependents.forEach(dependent => {
-    const dependentPkgJSON = getPackageJSON(dependent.name);
+    const dependentPkgJSON = pkgJsonsByName.get(dependent.name);
     dependent.dependencies = [...dependents, ...releases]
       .map(pkg => pkg.name)
       .filter(
