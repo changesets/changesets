@@ -14,7 +14,6 @@ function versionRangeToRangeType(versionRange: string) {
 const DEPENDENCY_TYPES = [
   "dependencies",
   "devDependencies",
-  "peerDependencies",
   "optionalDependencies"
 ] as const;
 
@@ -103,7 +102,6 @@ type workspaceConfig = {
   name: string;
   dependencies?: { [key: string]: string };
   devDependencies?: { [key: string]: string };
-  peerDependencies?: { [key: string]: string };
   optionalDependencies?: { [key: string]: string };
 };
 
