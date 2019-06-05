@@ -7,3 +7,9 @@ export type Changeset = {
   releases: Array<{ name: string; type: BumpType }>;
   dependents: Array<{ name: string; type: BumpType }>;
 };
+
+export type DependencyType =
+  | "dependencies"
+  | "devDependencies"
+  | "peerDependencies"
+  | "optionalDependencies";

@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs-extra";
 import detectIndent from "detect-indent";
 import semver from "semver";
+import { getDependencyGraph } from "get-dependency-graph";
 
 import * as boltMessages from "bolt/dist/modern/utils/messages";
 import * as bolt from "../../utils/bolt-replacements";
@@ -13,6 +14,7 @@ import createReleaseCommit from "./createReleaseCommit";
 import { removeFolders, removeEmptyFolders } from "../../utils/removeFolders";
 import updateChangelog from "../../utils/updateChangelog";
 import getChangesets from "../../utils/getChangesets";
+import { getProjectDirectory } from "../../utils/getProjectDirectory";
 
 import resolveConfig from "../../utils/resolveConfig";
 import getChangesetBase from "../../utils/getChangesetBase";
@@ -92,8 +94,13 @@ async function bumpReleasedPackages(releaseObj, allPackages, config) {
     }),
     {}
   );
+  let projectDir = await getProjectDirectory(config.cwd);
+  let rootPkgJson = JSON.parse(
+    await fs.readFile(path.join(projectDir, "package.json"))
+  );
+  let root = { dir: projectDir, config: rootPkgJson, name: rootPkgJson.name };
 
-  const { graph } = await bolt.getDependencyGraph(allPackages, config.cwd);
+  const { graph } = await getDependencyGraph({ packages: allPackages, root });
   const internalDeps = Object.keys(versionsToUpdate).filter(dep =>
     graph.has(dep)
   );

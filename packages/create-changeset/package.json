@@ -1,0 +1,15 @@
+{
+  "name": "@changesets/create-changeset",
+  "version": "0.0.0",
+  "description": "Create a changeset programmatically",
+  "main": "dist/create-changeset.cjs.js",
+  "module": "dist/create-changeset.esm.js",
+  "license": "MIT",
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/create-changeset",
+  "dependencies": {
+    "@types/semver": "^6.0.0",
+    "get-dependency-graph": "^0.0.0",
+    "get-workspaces": "^0.3.0",
+    "semver": "^5.4.1"
+  }
+}

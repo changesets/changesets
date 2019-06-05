@@ -5,9 +5,14 @@ import semver from "semver";
 import * as boltMessages from "bolt/dist/modern/utils/messages";
 import { Workspace, PackageJSON } from "get-workspaces";
 
-import { DEPENDENCY_TYPES } from "./constants";
+const DEPENDENCY_TYPES = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies"
+] as const;
 
-const getAllDependencies = (config: any) => {
+const getAllDependencies = (config: PackageJSON) => {
   const allDependencies = new Map();
 
   for (const type of DEPENDENCY_TYPES) {
@@ -23,35 +28,24 @@ const getAllDependencies = (config: any) => {
 };
 
 type Options = {
-  cwd: string;
-  workspaces: Array<Workspace>;
-  rootPkg: PackageJSON;
+  packages: Array<Workspace>;
+  root: Workspace;
 };
 
-export default async function getDependencyGraph({
-  workspaces,
-  cwd,
-  rootPkg
-}: Options) {
+export function getDependencyGraph({ packages, root }: Options) {
   const graph = new Map<
     string,
     { pkg: Workspace; dependencies: Array<string> }
   >();
   let valid = true;
 
-  const pkgRootConfigged = {
-    config: rootPkg,
-    name: rootPkg.name,
-    dir: cwd
-  };
-
   const packagesByName = {
-    [rootPkg.name]: pkgRootConfigged
+    [root.name]: root
   } as { [key: string]: Workspace };
 
-  const queue = [pkgRootConfigged];
+  const queue = [root];
 
-  for (const pkg of workspaces) {
+  for (const pkg of packages) {
     queue.push(pkg);
     packagesByName[pkg.name] = pkg;
   }
