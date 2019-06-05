@@ -51,9 +51,9 @@ const mockUserResponses = mockResponses => {
     minorReleases
   ];
   askCheckboxPlus.mockImplementation(() => {
-    // if (callCount === returnValues.length) {
-    //   throw new Error(`There was an unexpected call to askCheckboxPlus`);
-    // }
+    if (callCount === returnValues.length) {
+      throw new Error(`There was an unexpected call to askCheckboxPlus`);
+    }
     return returnValues[callCount++];
   });
 
