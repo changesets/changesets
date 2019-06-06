@@ -79,7 +79,8 @@
     "tty-table": "^2.7.0",
     "typescript": "^3.4.5",
     "uuid": "^3.3.2",
-    "strip-ansi": "^5.2.0"
+    "strip-ansi": "^5.2.0",
+    "term-size": "^2.1.0"
   },
   "preconstruct": {
     "packages": [
