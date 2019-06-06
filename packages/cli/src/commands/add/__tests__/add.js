@@ -1,11 +1,7 @@
 // @flow
 import { copyFixtureIntoTempDir } from "jest-fixtures";
-import {
-  askCheckboxPlus,
-  askList,
-  askConfirm,
-  askQuestion
-} from "../../../utils/cli";
+import stripAnsi from "strip-ansi";
+import { askCheckboxPlus, askConfirm, askQuestion } from "../../../utils/cli";
 import * as git from "../../../utils/git";
 
 import addChangeset from "..";
@@ -14,7 +10,7 @@ import writeChangeset from "../writeChangeset";
 jest.mock("../../../utils/logger");
 jest.mock("../../../utils/cli");
 jest.mock("../../../utils/git");
-jest.mock("../../../commands/add/writeChangeset");
+jest.mock("../writeChangeset");
 writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 git.commit.mockImplementation(() => Promise.resolve(true));
 
@@ -39,13 +35,40 @@ unsafeGetChangedPackagesSinceMaster.mockReturnValue([]);
 
 const mockUserResponses = mockResponses => {
   const summary = mockResponses.summary || "summary message mock";
-  const shouldCommit = mockResponses.shouldCommit || "n";
-  askCheckboxPlus.mockReturnValueOnce(Object.keys(mockResponses.releases));
-  Object.entries(mockResponses.releases).forEach(([_pkg, type]) =>
-    askList.mockReturnValueOnce(type)
-  );
+  let majorReleases = [];
+  let minorReleases = [];
+  Object.entries(mockResponses.releases).forEach(([pkgName, type]) => {
+    if (type === "major") {
+      majorReleases.push(pkgName);
+    } else if (type === "minor") {
+      minorReleases.push(pkgName);
+    }
+  });
+  let callCount = 0;
+  let returnValues = [
+    Object.keys(mockResponses.releases),
+    majorReleases,
+    minorReleases
+  ];
+  askCheckboxPlus.mockImplementation(() => {
+    if (callCount === returnValues.length) {
+      throw new Error(`There was an unexpected call to askCheckboxPlus`);
+    }
+    return returnValues[callCount++];
+  });
+
+  let confirmAnswers = {
+    "Is this your desired changeset?": true
+  };
+
   askQuestion.mockReturnValueOnce(summary);
-  askConfirm.mockReturnValueOnce(shouldCommit);
+  askConfirm.mockImplementation(question => {
+    question = stripAnsi(question);
+    if (confirmAnswers[question]) {
+      return confirmAnswers[question];
+    }
+    throw new Error(`An answer could not be found for ${question}`);
+  });
 };
 
 describe("Changesets", () => {
