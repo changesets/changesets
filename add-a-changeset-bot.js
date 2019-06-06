@@ -3,6 +3,7 @@ require("dotenv").config();
 
 let _glob = require("glob-github");
 const Octokit = require("@octokit/rest");
+const humanId = require("human-id");
 const { createChangeset } = require("@changesets/create-changeset");
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
@@ -54,16 +55,21 @@ let getWorkspacesFromGitHub = async ({ owner, repo, ref }) => {
     ref
   });
 
-  let globs = ["/"];
-  if (jsonContents.bolt && jsonContents.bolt.workspaces) {
-    globs = jsonContents.bolt.workspaces;
-  }
+  let globs;
   if (jsonContents.workspaces) {
     if (!Array.isArray(jsonContents.workspaces)) {
       globs = jsonContents.workspaces.packages;
     } else {
       globs = jsonContents.workspaces;
     }
+  } else if (jsonContents.bolt && jsonContents.bolt.workspaces) {
+    globs = jsonContents.bolt.workspaces;
+  } else {
+    let root = { name: jsonContents.name, config: jsonContents, dir: "/" };
+    return {
+      workspaces: [root],
+      root
+    };
   }
 
   let results = [];
@@ -98,16 +104,62 @@ let getWorkspacesFromGitHub = async ({ owner, repo, ref }) => {
 };
 
 (async () => {
-  let { workspaces, root } = await getWorkspacesFromGitHub({
-    owner: "changesets",
-    repo: "changesets",
-    ref: "master"
-  });
+  let config = {
+    owner: "mitchellhamilton",
+    repo: "wait-for-all-the-things",
+    ref: "test-changeset-stuff"
+  };
+  let { workspaces, root } = await getWorkspacesFromGitHub(config);
 
-  let changesetObj = createChangeset({
+  let { summary, ...changesetObj } = createChangeset({
     summary: "a cool new thing",
-    releases: [{ name: "get-workspaces", type: "major" }],
+    releases: [{ name: "wait-for-all-the-things", type: "major" }],
     packages: workspaces,
     root
   });
+  let id = humanId({
+    separator: "-",
+    capitalize: false
+  });
+  let ref = await octokit.git.getRef({
+    owner: config.owner,
+    repo: config.repo,
+    ref: `heads/${config.ref}`
+  });
+  let {
+    data: { sha }
+  } = await octokit.git.createTree({
+    owner: config.owner,
+    repo: config.repo,
+    base_tree: ref.data.object.sha,
+    tree: [
+      {
+        path: `.changeset/${id}/changes.md`,
+        mode: "100644",
+        content: summary
+      },
+      {
+        path: `.changeset/${id}/changes.json`,
+        mode: "100644",
+        content: JSON.stringify(changesetObj, null, 2) + "\n"
+      }
+    ]
+  });
+
+  console.log(ref);
+  let commit = await octokit.git.createCommit({
+    owner: config.owner,
+    repo: config.repo,
+    tree: sha,
+    message: "Add changeset",
+    parents: [ref.data.object.sha]
+  });
+
+  octokit.git.updateRef({
+    owner: config.owner,
+    repo: config.repo,
+    ref: `heads/${config.ref}`,
+    sha: commit.data.sha
+  });
+  console.log(changesetObj);
 })();
