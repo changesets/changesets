@@ -1,0 +1,1 @@
+Fix tables in status command from flowing over to the next line

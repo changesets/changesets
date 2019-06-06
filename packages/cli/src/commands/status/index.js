@@ -71,7 +71,7 @@ function SimplePrint(type, releases) {
 function verbosePrint(type, releases) {
   const packages = releases.filter(r => r.type === type);
   if (packages.length) {
-    logger.info(chalk`Packages to be bumped at {green ${type}}:\n`);
+    logger.info(chalk`Packages to be bumped at {green ${type}}`);
 
     const columns = packages.map(({ name, version, changesets }) => [
       chalk.green(name),
@@ -81,14 +81,14 @@ function verbosePrint(type, releases) {
 
     const t1 = table(
       [
-        { value: "Package Name" },
+        { value: "Package Name", width: 20 },
         { value: "New Version", width: 20 },
-        { value: "Related Changeset Summaries" }
+        { value: "Related Changeset Summaries", width: 70 }
       ],
       columns,
       { paddingLeft: 1, paddingRight: 0, headerAlign: "center", align: "left" }
     );
-    logger.log(t1.render());
+    logger.log(t1.render() + "\n");
   } else {
     logger.info(
       chalk`Running release would release {red NO} packages as a {green ${type}}`
