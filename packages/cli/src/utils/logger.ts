@@ -11,7 +11,7 @@ function format(args: Array<any>, customPrefix?: string) {
     util
       .format("", ...args)
       .split("\n")
-      .join("\n" + fullPrefix)
+      .join("\n" + fullPrefix + " ")
   );
 }
 
