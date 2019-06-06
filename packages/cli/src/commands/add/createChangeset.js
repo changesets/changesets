@@ -1,10 +1,8 @@
 // @flow
 
-import { green, yellow, red } from "chalk";
+import { green, yellow, red, bold, blue, cyan } from "chalk";
 
-import inquirer from "inquirer";
 import semver from "semver";
-import outdent from "outdent";
 
 import * as cli from "../../utils/cli";
 import logger from "../../utils/logger";
@@ -34,12 +32,23 @@ type changesetType = {
 */
 
 async function getPackagesToRelease(changedPackages, allPackages) {
-  function askInitialReleaseQuestion(defaultInquirerList) {
+  function askInitialReleaseQuestion(defaultChoiceList) {
     return cli.askCheckboxPlus(
       // TODO: Make this wording better
       // TODO: take objects and be fancy with matching
-      "Which packages would you like to include?",
-      defaultInquirerList
+      `Which packages would you like to include?`,
+      defaultChoiceList,
+      x => {
+        // this removes changed packages and unchanged packages from the list
+        // of packages shown after selection
+        if (Array.isArray(x)) {
+          return x
+            .filter(x => x !== "changed packages" && x !== "unchanged packages")
+            .map(x => cyan(x))
+            .join(", ");
+        }
+        return x;
+      }
     );
   }
 
@@ -48,72 +57,37 @@ async function getPackagesToRelease(changedPackages, allPackages) {
       .map(({ name }) => name)
       .filter(name => !changedPackages.includes(name));
 
-    const selectAllPackagesOptions =
-      allPackages.length > 10 ? ["All changed packages", "All packages"] : [];
+    const defaultChoiceList = [
+      {
+        name: "changed packages",
+        choices: changedPackages
+      },
+      {
+        name: "unchanged packages",
+        choices: unchangedPackagesNames
+      }
+    ].filter(({ choices }) => choices.length !== 0);
 
-    const defaultInquirerList = [
-      ...selectAllPackagesOptions,
-      new inquirer.Separator("changed packages"),
-      ...changedPackages,
-      new inquirer.Separator("unchanged packages"),
-      ...unchangedPackagesNames,
-      new inquirer.Separator()
-    ];
-
-    let packagesToRelease = await askInitialReleaseQuestion(
-      defaultInquirerList
-    );
+    let packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
 
     if (packagesToRelease.length === 0) {
       do {
         logger.error("You must select at least one package to release");
         logger.error("(You most likely hit enter instead of space!)");
 
-        packagesToRelease = await askInitialReleaseQuestion(
-          defaultInquirerList
-        );
+        packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
       } while (packagesToRelease.length === 0);
-    } else if (packagesToRelease[0] === "All packages") {
-      packagesToRelease = [...changedPackages, ...unchangedPackagesNames];
-    } else if (packagesToRelease[0] === "All changed packages") {
-      packagesToRelease = [...changedPackages];
     }
-    return packagesToRelease;
+    return packagesToRelease.filter(
+      pkgName =>
+        pkgName !== "changed packages" && pkgName !== "unchanged packages"
+    );
   }
   return [allPackages[0].name];
 }
 
-async function getPackageBumpRange(pkgJSON) {
-  const { name, version, maintainers } = pkgJSON;
-  // Get the version range for a package someone has chosen to release
-  let type = await cli.askList(
-    `What kind of change is this for ${green(
-      name
-    )}? (current version is ${version})`,
-    ["patch", "minor", "major"]
-  );
-
-  // for packages that are under v1, we want to make sure major releases are intended,
-  // as some repo-wide sweeping changes have mistakenly release first majors
-  // of packages.
-  if (type === "major" && semver.lt(version, "1.0.0")) {
-    let maintainersString = "";
-
-    if (maintainers && Array.isArray(maintainers) && maintainers.length > 0) {
-      maintainersString = ` (${maintainers.join(", ")})`;
-    }
-    // prettier-ignore
-    const message = yellow(outdent`
-      WARNING: Releasing a major version for ${green(name)} will be its ${red('first major release')}.
-      If you are unsure if this is correct, contact the package's maintainers${maintainersString} ${red('before committing this changeset')}.
-
-      If you still want to release this package, select the appropriate version below:
-    `)
-    // prettier-ignore-end
-    type = await cli.askList(message, ["patch", "minor", "major"]);
-  }
-
-  return type;
+function formatPkgNameAndVersion(pkgName, version) {
+  return `${bold(pkgName)}@${bold(version)}`;
 }
 
 /*
@@ -153,25 +127,102 @@ export default async function createChangeset(
   const allPackages = await bolt.getWorkspaces({ cwd });
 
   const dependencyGraph = await bolt.getDependentsGraph({ cwd });
-  // helper because we do this a lot
-  const getPackageJSON = pkgName =>
-    allPackages.find(({ name }) => name === pkgName).config;
 
   const packagesToRelease = await getPackagesToRelease(
     changedPackages,
     allPackages
   );
 
+  let pkgJsonsByName = new Map(
+    allPackages.map(({ name, config }) => [name, config])
+  );
+
   const releases = [];
 
-  // We use a for loop instead of a map because we need to ensure they are
-  // run in sequence
-  for (const pkg of packagesToRelease) {
-    const pkgJSON = allPackages.find(({ name }) => name === pkg).config;
+  let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 
-    const type = await getPackageBumpRange(pkgJSON);
+  let pkgsThatShouldBeMajorBumped = await cli.askCheckboxPlus(
+    bold(`Which packages should have a ${red("major")} bump?`),
+    packagesToRelease.map(pkgName => {
+      return {
+        name: pkgName,
+        message: formatPkgNameAndVersion(
+          pkgName,
+          pkgJsonsByName.get(pkgName).version
+        )
+      };
+    })
+  );
 
-    releases.push({ name: pkg, type });
+  for (const pkgName of pkgsThatShouldBeMajorBumped) {
+    // for packages that are under v1, we want to make sure major releases are intended,
+    // as some repo-wide sweeping changes have mistakenly release first majors
+    // of packages.
+    let { version, maintainers } = pkgJsonsByName.get(pkgName);
+    if (semver.lt(version, "1.0.0")) {
+      let maintainersString = "";
+
+      if (maintainers && Array.isArray(maintainers) && maintainers.length > 0) {
+        maintainersString = ` (${maintainers.join(", ")})`;
+      }
+      // prettier-ignore
+      logger.log(yellow(`WARNING: Releasing a major version for ${green(pkgName)} will be its ${red('first major release')}.`))
+      logger.log(
+        yellow(
+          `If you are unsure if this is correct, contact the package's maintainers${maintainersString} ${red(
+            "before committing this changeset"
+          )}.`
+        )
+      );
+
+      let shouldReleaseFirstMajor = await cli.askConfirm(
+        bold(
+          `Are you sure you want still want to release the ${red(
+            "first major release"
+          )} of ${pkgName}?`
+        )
+      );
+      if (!shouldReleaseFirstMajor) {
+        continue;
+      }
+    }
+    pkgsLeftToGetBumpTypeFor.delete(pkgName);
+
+    releases.push({ name: pkgName, type: "major" });
+  }
+
+  if (pkgsLeftToGetBumpTypeFor.size !== 0) {
+    let pkgsThatShouldBeMinorBumped = await cli.askCheckboxPlus(
+      bold(`Which packages should have a ${green("minor")} bump?`),
+      [...pkgsLeftToGetBumpTypeFor].map(pkgName => {
+        return {
+          name: pkgName,
+          message: formatPkgNameAndVersion(
+            pkgName,
+            pkgJsonsByName.get(pkgName).version
+          )
+        };
+      })
+    );
+
+    for (const pkgName of pkgsThatShouldBeMinorBumped) {
+      pkgsLeftToGetBumpTypeFor.delete(pkgName);
+
+      releases.push({ name: pkgName, type: "minor" });
+    }
+  }
+
+  if (pkgsLeftToGetBumpTypeFor.size !== 0) {
+    logger.log(`The following packages will be ${blue("patch")} bumped:`);
+    pkgsLeftToGetBumpTypeFor.forEach(pkgName => {
+      logger.log(
+        formatPkgNameAndVersion(pkgName, pkgJsonsByName.get(pkgName).version)
+      );
+    });
+
+    for (const pkgName of pkgsLeftToGetBumpTypeFor) {
+      releases.push({ name: pkgName, type: "patch" });
+    }
   }
 
   logger.log(
@@ -198,7 +249,7 @@ export default async function createChangeset(
       .map(dependent => {
         let type = "none";
 
-        const dependentPkgJSON = getPackageJSON(dependent);
+        const dependentPkgJSON = pkgJsonsByName.get(dependent);
         const { depTypes, versionRange } = getDependencyVersionRange(
           dependentPkgJSON,
           nextRelease.name
@@ -211,7 +262,7 @@ export default async function createChangeset(
           type = "major";
         } else {
           const nextReleaseVersion = semver.inc(
-            getPackageJSON(nextRelease.name).version,
+            pkgJsonsByName.get(nextRelease.name).version,
             nextRelease.type
           );
           if (
@@ -247,7 +298,7 @@ export default async function createChangeset(
   // Now we need to fill in the dependencies arrays for each of the dependents. We couldn't accurately
   // do it until now because we didn't have the entire list of packages being released yet
   dependents.forEach(dependent => {
-    const dependentPkgJSON = getPackageJSON(dependent.name);
+    const dependentPkgJSON = pkgJsonsByName.get(dependent.name);
     dependent.dependencies = [...dependents, ...releases]
       .map(pkg => pkg.name)
       .filter(
