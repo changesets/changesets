@@ -5160,6 +5160,11 @@ term-size@^1.2.0:
   dependencies:
     execa "^0.7.0"
 
+term-size@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/term-size/-/term-size-2.1.0.tgz#3aec444c07a7cf936e157c1dc224b590c3c7eef2"
+  integrity sha512-I42EWhJ+2aeNQawGx1VtpO0DFI9YcfuvAMNIdKyf/6sRbHJ4P+ZQ/zIT87tE+ln1ymAGcCJds4dolfSAS0AcNg==
+
 terser@^3.14.1:
   version "3.17.0"
   resolved "https://registry.yarnpkg.com/terser/-/terser-3.17.0.tgz#f88ffbeda0deb5637f9d24b0da66f4e15ab10cb2"
