@@ -40,7 +40,7 @@ function getDependencyVersionRange(
   return dependencyVersionRange;
 }
 
-export async function createChangeset({
+export function createChangeset({
   summary,
   releases,
   packages,
