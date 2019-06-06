@@ -1,4 +1,6 @@
 import uuid from "uuid/v1";
+// @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
+import termSize from "term-size";
 import { prefix } from "./logger";
 // @ts-ignore
 import { prompt } from "enquirer";
@@ -8,6 +10,8 @@ import { prompt } from "enquirer";
  * At each call, the entire responses object is returned, so we need a unique
  * identifier for the name every time. This is why we are using UUIDs.
  */
+
+const limit = Math.max(termSize().rows - 5, 10);
 
 async function askCheckboxPlus(
   message: string,
@@ -24,7 +28,8 @@ async function askCheckboxPlus(
     prefix,
     multiple: true,
     choices,
-    format
+    format,
+    limit
   }).then((responses: any) => responses[name]);
 }
 
