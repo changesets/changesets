@@ -1,5 +1,16 @@
 # bolt-check
 
+## 0.3.0
+
+### Minor Changes
+
+- [3d2f023f](https://github.com/changesets/changesets/commit/3d2f023f) [#77](https://github.com/changesets/changesets/pull/77) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Stop checking peerDependencies because peerDependencies are very different to dependencies and devDependencies. They generally need different ranges than what dependencies and devDependencies have and they also don't affect what version of a dependency is installed. bolt and bolt-check already only check the devDep version if there's a package that is a devDep and peerDep (and similar for other cases) so this doesn't affect checking, only auto fixing.
+- [f71188cd](https://github.com/changesets/changesets/commit/f71188cd) [#74](https://github.com/changesets/changesets/pull/74) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add check banning devDependencies in root package.jsons
+
+### Patch Changes
+
+- [20da7747](https://github.com/changesets/changesets/commit/20da7747) [#66](https://github.com/changesets/changesets/pull/66) Thanks [@Noviny](https://github.com/Noviny)! - Update package.json field so each links into its own package
+
 ## 0.2.0
 
 ### Minor Changes

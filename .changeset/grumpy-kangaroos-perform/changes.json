@@ -1,9 +1,0 @@
-{
-  "releases": [
-    { "name": "bolt-check", "type": "patch" },
-    { "name": "@changesets/cli", "type": "patch" },
-    { "name": "@changesets/get-github-info", "type": "patch" },
-    { "name": "get-workspaces", "type": "patch" }
-  ],
-  "dependents": []
-}

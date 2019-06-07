@@ -1,6 +1,13 @@
 # get-workspaces
 
+## 0.3.1
+
+### Patch Changes
+
+- [20da7747](https://github.com/changesets/changesets/commit/20da7747) [#66](https://github.com/changesets/changesets/pull/66) Thanks [@Noviny](https://github.com/Noviny)! - Update package.json field so each links into its own package
+
 ## 0.3.0
+
 ### Minor Changes
 
 - [83ba6d3f](https://github.com/Noviny/changesets/commit/83ba6d3f) - Export Workspace type
@@ -10,6 +17,7 @@
 - [a966701d](https://github.com/Noviny/changesets/commit/a966701d) - Add repository information to package.json
 
 ## 0.2.1
+
 ### Patch Changes
 
 - [67db935d](https://github.com/Noviny/changesets/commit/67db935d) - Fix release without built files

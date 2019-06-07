@@ -1,1 +1,0 @@
-Add check banning devDependencies in root package.jsons
