@@ -7,18 +7,20 @@ const humanId = require("human-id");
 const { createChangeset } = require("@changesets/create-changeset");
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-async function fetchJsonFile({ owner, repo, path, ref }) {
+class UserError extends Error {}
+
+async function fetchJsonFile({ owner, repo, path, branch }) {
   let output = await octokit.repos.getContents({
     owner,
     repo,
     path,
-    ref
+    ref: branch
   });
   let buffer = Buffer.from(output.data.content, "base64");
   return JSON.parse(buffer.toString("utf8"));
 }
 
-function glob({ owner, repo, glob, ref }) {
+function glob({ owner, repo, glob, branch }) {
   return new Promise((resolve, reject) =>
     _glob(
       {
@@ -29,8 +31,7 @@ function glob({ owner, repo, glob, ref }) {
           type: "oauth",
           token: process.env.GITHUB_TOKEN
         },
-        // glob-github calls this option branch but it's actually setting the ref
-        branch: ref
+        branch
       },
       function(err, results) {
         if (err) {
@@ -47,12 +48,12 @@ function glob({ owner, repo, glob, ref }) {
   );
 }
 
-let getWorkspacesFromGitHub = async ({ owner, repo, ref }) => {
+let getWorkspacesFromGitHub = async ({ owner, repo, branch }) => {
   let jsonContents = await fetchJsonFile({
     owner,
     repo,
     path: "package.json",
-    ref
+    ref: branch
   });
 
   let globs;
@@ -76,13 +77,13 @@ let getWorkspacesFromGitHub = async ({ owner, repo, ref }) => {
   if (Array.isArray(globs)) {
     await Promise.all(
       globs.map(pattern => {
-        return glob({ owner, repo, glob: pattern, ref }).then(paths => {
+        return glob({ owner, repo, glob: pattern, branch }).then(paths => {
           results.push(...paths);
         });
       })
     );
   } else {
-    results.push(await glob({ owner, repo, glob: globs, ref }));
+    results.push(await glob({ owner, repo, glob: globs, branch }));
   }
 
   let workspaces = await Promise.all(
@@ -91,29 +92,34 @@ let getWorkspacesFromGitHub = async ({ owner, repo, ref }) => {
         owner,
         repo,
         path: dir + "/package.json",
-        ref
+        branch
       });
       return { dir, config, name: config.name };
     })
   );
-  console.log(workspaces);
   return {
     workspaces,
     root: { name: jsonContents.name, config: jsonContents, dir: "/" }
   };
 };
 
-(async () => {
-  let config = {
-    owner: "mitchellhamilton",
-    repo: "wait-for-all-the-things",
-    ref: "test-changeset-stuff"
-  };
-  let { workspaces, root } = await getWorkspacesFromGitHub(config);
+let writeChangeset = async ({ owner, repo, branch, releases, summary }) => {
+  let { workspaces, root } = await getWorkspacesFromGitHub({
+    owner,
+    repo,
+    branch
+  });
 
-  let { summary, ...changesetObj } = createChangeset({
-    summary: "a cool new thing",
-    releases: [{ name: "wait-for-all-the-things", type: "major" }],
+  let workspacesSet = new Set(workspaces.map(({ name }) => name));
+
+  for (let release of releases) {
+    if (!workspacesSet.has(release.name)) {
+      throw new UserError(`There is no workspace named ${release.name}`);
+    }
+  }
+
+  let changesetObj = createChangeset({
+    releases,
     packages: workspaces,
     root
   });
@@ -122,15 +128,15 @@ let getWorkspacesFromGitHub = async ({ owner, repo, ref }) => {
     capitalize: false
   });
   let ref = await octokit.git.getRef({
-    owner: config.owner,
-    repo: config.repo,
-    ref: `heads/${config.ref}`
+    owner,
+    repo,
+    ref: `heads/${branch}`
   });
   let {
     data: { sha }
   } = await octokit.git.createTree({
-    owner: config.owner,
-    repo: config.repo,
+    owner,
+    repo,
     base_tree: ref.data.object.sha,
     tree: [
       {
@@ -146,20 +152,41 @@ let getWorkspacesFromGitHub = async ({ owner, repo, ref }) => {
     ]
   });
 
-  console.log(ref);
   let commit = await octokit.git.createCommit({
-    owner: config.owner,
-    repo: config.repo,
+    owner,
+    repo,
     tree: sha,
     message: "Add changeset",
     parents: [ref.data.object.sha]
   });
 
-  octokit.git.updateRef({
-    owner: config.owner,
-    repo: config.repo,
-    ref: `heads/${config.ref}`,
+  await octokit.git.updateRef({
+    owner,
+    repo,
+    ref: `heads/${branch}`,
     sha: commit.data.sha
   });
-  console.log(changesetObj);
+};
+
+(async () => {
+  let comment = `
+  \`\`\`changeset
+  - wait-for-all-the-things@major
+  --- 
+  The summary for my cool change.
+  \`\`\`
+  `;
+
+  let ghUsername = "mitchellhamilton";
+
+  // we do a naive check on the comment first because parsing markdown is expensive
+  if (comment.includes("```changeset")) {
+  }
+
+  await writeChangeset({
+    owner: "mitchellhamilton",
+    repo: "wait-for-all-the-things",
+    summary: "a cool new thing",
+    releases: [{ name: "wait-for-all-the-things", type: "major" }]
+  });
 })();

@@ -6,7 +6,6 @@ import { DEPENDENCY_TYPES } from "./constants";
 type BumpType = "major" | "minor" | "patch";
 
 type Options = {
-  summary: string;
   releases: Array<{ name: string; type: BumpType }>;
   packages: Array<Workspace>;
   root: Workspace;
@@ -40,12 +39,7 @@ function getDependencyVersionRange(
   return dependencyVersionRange;
 }
 
-export function createChangeset({
-  summary,
-  releases,
-  packages,
-  root
-}: Options) {
+export function createChangeset({ releases, packages, root }: Options) {
   const dependencyGraph = getDependentsGraph({ packages, root });
 
   let pkgJsonsByName = new Map(
@@ -156,7 +150,6 @@ export function createChangeset({
   });
 
   return {
-    summary,
     releases,
     dependents: finalisedDependents
   };

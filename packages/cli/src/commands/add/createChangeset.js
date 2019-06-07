@@ -212,10 +212,12 @@ export default async function createChangeset(
     await fs.readFile(path.join(projectDir, "package.json"))
   );
   let root = { config: rootPkgJson, name: rootPkgJson.name, dir: projectDir };
-  return createChangesetFromData({
+  return {
     summary,
-    releases,
-    packages: allPackages,
-    root
-  });
+    ...createChangesetFromData({
+      releases,
+      packages: allPackages,
+      root
+    })
+  };
 }
