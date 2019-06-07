@@ -58,6 +58,7 @@ export default async function getWorkspaces(
 
   const results = await Promise.all(
     folders
+      .sort()
       .filter(dir => fs.existsSync(path.join(dir, "package.json")))
       .map(async dir =>
         fs.readFile(path.join(dir, "package.json"), "utf8").then(contents => {
@@ -67,6 +68,7 @@ export default async function getWorkspaces(
               path.relative(cwd, path.join(dir, "package.json"))
             );
           }
+          pkgJsonsMissingNameField.sort();
           return { config, name: config.name, dir };
         })
       )
