@@ -191,13 +191,18 @@ let writeChangesets = async ({ owner, repo, branch, changesets }) => {
   `;
 
   let ghUsername = "mitchellhamilton";
+  let baseRepoOwner = "mitchellhamilton";
+  let baseRepoName = "wait-for-all-the-things";
+  let forkRepoOwner = "mitchellhamilton";
+  let forkRepoName = "wait-for-all-the-things";
+  let forkRepoBranch = "test-changeset-stuff";
 
   // we do a naive check on the comment first because parsing markdown is expensive
   if (comment.includes("```changeset")) {
     let output = await octokit.repos.getCollaboratorPermissionLevel({
-      owner: "mitchellhamilton",
+      owner: baseRepoOwner,
       username: ghUsername,
-      repo: "wait-for-all-the-things"
+      repo: baseRepoName
     });
     if (
       output.data.permission === "admin" ||
@@ -231,9 +236,9 @@ let writeChangesets = async ({ owner, repo, branch, changesets }) => {
       });
       if (changesets.length) {
         await writeChangesets({
-          owner: "mitchellhamilton",
-          repo: "wait-for-all-the-things",
-          branch: "test-changeset-stuff",
+          owner: forkRepoOwner,
+          repo: forkRepoName,
+          branch: forkRepoBranch,
           changesets
         });
       }
