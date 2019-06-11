@@ -13,7 +13,7 @@ import { prompt } from "enquirer";
 
 const limit = Math.max(termSize().rows - 5, 10);
 
-function handleSigint(message: string) {
+function handlePromiseOnSigint(message: string) {
   console.log(message);
   process.exit();
 }
@@ -38,7 +38,7 @@ async function askCheckboxPlus(
   })
     .then((responses: any) => responses[name])
     .catch(() => {
-      handleSigint("Try choosing at least one item");
+      handlePromiseOnSigint("Try choosing at least one item");
     });
 }
 
@@ -56,7 +56,7 @@ async function askQuestion(message: string): Promise<string> {
   ])
     .then((responses: any) => responses[name])
     .catch(() => {
-      handleSigint("Please make sure to answer the question(s)");
+      handlePromiseOnSigint("Please make sure to answer the question(s)");
     });
 }
 
@@ -75,7 +75,7 @@ async function askConfirm(message: string): Promise<boolean> {
   ])
     .then((responses: any) => responses[name])
     .catch(() => {
-      handleSigint("Please type Y or N");
+      handlePromiseOnSigint("Please type Y or N");
     });
 }
 
@@ -97,7 +97,7 @@ async function askList(
   ])
     .then((responses: any) => responses[name])
     .catch(() => {
-      handleSigint("Try choosing at least one item");
+      handlePromiseOnSigint("Try choosing at least one item");
     });
 }
 
