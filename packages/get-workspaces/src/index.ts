@@ -11,12 +11,16 @@ type Options = {
   tools?: Array<"yarn" | "bolt" | "root">;
 };
 
-type pkgJSON = {
+export type PackageJSON = {
   name: string;
   version: string;
+  dependencies?: { [key: string]: string };
+  peerDependencies?: { [key: string]: string };
+  devDependencies?: { [key: string]: string };
+  optionalDependencies?: { [key: string]: string };
 };
 
-export type Workspace = { config: pkgJSON; name: string; dir: string };
+export type Workspace = { config: PackageJSON; name: string; dir: string };
 
 export default async function getWorkspaces(
   opts: Options = {}

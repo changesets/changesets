@@ -1,0 +1,1 @@
+Convert some internals to TypeScript
