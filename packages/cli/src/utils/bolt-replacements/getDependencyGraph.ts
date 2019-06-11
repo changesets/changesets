@@ -3,11 +3,13 @@
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
+import { PackageJSON, Workspace } from "get-workspaces";
+// @ts-ignore
 import * as boltMessages from "bolt/dist/modern/utils/messages";
 
 import { DEPENDENCY_TYPES } from "../constants";
 
-const getAllDependencies = config => {
+const getAllDependencies = (config: PackageJSON) => {
   const allDependencies = new Map();
 
   for (const type of DEPENDENCY_TYPES) {
@@ -22,12 +24,18 @@ const getAllDependencies = config => {
   return allDependencies;
 };
 
-export default async function getDependencyGraph(packages, cwd) {
-  const graph = new Map();
+export default async function getDependencyGraph(
+  packages: Array<Workspace>,
+  cwd: string
+) {
+  const graph = new Map<
+    string,
+    { pkg: Workspace; dependencies: Array<string> }
+  >();
   let valid = true;
 
   const pkgRoot = await fs
-    .readFile(path.resolve(cwd, "package.json"))
+    .readFile(path.resolve(cwd, "package.json"), "utf8")
     .then(JSON.parse);
 
   const pkgRootConfigged = {
@@ -36,7 +44,9 @@ export default async function getDependencyGraph(packages, cwd) {
     dir: path.resolve(cwd)
   };
 
-  const packagesByName = { [pkgRoot.name]: pkgRootConfigged };
+  const packagesByName: { [key: string]: Workspace } = {
+    [pkgRoot.name]: pkgRootConfigged
+  };
 
   const queue = [pkgRootConfigged];
 

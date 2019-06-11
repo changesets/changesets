@@ -1,13 +1,16 @@
 import getWorkspaces from "./getWorkspaces";
 import getDependencyGraph from "./getDependencyGraph";
+import { Workspace } from "get-workspaces";
 
-export default async function getDependentsGraph({ cwd }) {
+export default async function getDependentsGraph({ cwd }: { cwd: string }) {
   const packages = await getWorkspaces({ cwd });
   const graph = new Map();
 
   const { graph: dependencyGraph } = await getDependencyGraph(packages, cwd);
 
-  const dependentsLookup = {};
+  const dependentsLookup: {
+    [key: string]: { pkg: Workspace; dependents: Array<string> };
+  } = {};
 
   packages.forEach(pkg => {
     dependentsLookup[pkg.config.name] = {
@@ -18,12 +21,14 @@ export default async function getDependentsGraph({ cwd }) {
 
   packages.forEach(pkg => {
     const dependent = pkg.config.name;
-    const valFromDependencyGraph = dependencyGraph.get(dependent) || {};
-    const dependencies = valFromDependencyGraph.dependencies || [];
+    const valFromDependencyGraph = dependencyGraph.get(dependent);
+    if (valFromDependencyGraph) {
+      const dependencies = valFromDependencyGraph.dependencies;
 
-    dependencies.forEach(dependency => {
-      dependentsLookup[dependency].dependents.push(dependent);
-    });
+      dependencies.forEach(dependency => {
+        dependentsLookup[dependency].dependents.push(dependent);
+      });
+    }
   });
 
   // can't use Object.entries here as the flow type for it is Array<[string, mixed]>;
