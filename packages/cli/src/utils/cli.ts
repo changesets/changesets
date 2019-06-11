@@ -30,7 +30,12 @@ async function askCheckboxPlus(
     choices,
     format,
     limit
-  }).then((responses: any) => responses[name]);
+  })
+    .then((responses: any) => responses[name])
+    .catch(() => {
+      console.log("Try choosing at least one item");
+      process.exit();
+    });
 }
 
 async function askQuestion(message: string): Promise<string> {
@@ -44,7 +49,12 @@ async function askQuestion(message: string): Promise<string> {
       // @ts-ignore
       prefix
     }
-  ]).then((responses: any) => responses[name]);
+  ])
+    .then((responses: any) => responses[name])
+    .catch(() => {
+      console.log("Please make sure to answer the question(s)");
+      process.exit();
+    });
 }
 
 async function askConfirm(message: string): Promise<boolean> {
@@ -59,7 +69,12 @@ async function askConfirm(message: string): Promise<boolean> {
       type: "confirm",
       initial: true
     }
-  ]).then((responses: any) => responses[name]);
+  ])
+    .then((responses: any) => responses[name])
+    .catch(() => {
+      console.log("Please type Y or N)");
+      process.exit();
+    });
 }
 
 async function askList(
@@ -77,7 +92,12 @@ async function askList(
       prefix,
       type: "select"
     }
-  ]).then((responses: any) => responses[name]);
+  ])
+    .then((responses: any) => responses[name])
+    .catch(() => {
+      console.log("Try choosing at least one item");
+      process.exit();
+    });
 }
 
 export { askCheckboxPlus, askQuestion, askConfirm, askList };
