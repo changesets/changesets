@@ -58,7 +58,7 @@ async function askQuestion(message: string): Promise<string> {
   ])
     .then((responses: any) => responses[name])
     .catch(() => {
-      handlePromiseOnSigint("Please make sure to answer the question(s)");
+      handlePromiseOnSigint("Please make sure to answer the question");
     });
 }
 
