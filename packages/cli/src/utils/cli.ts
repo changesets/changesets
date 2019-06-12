@@ -2,6 +2,8 @@ import uuid from "uuid/v1";
 // @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
 import termSize from "term-size";
 import { prefix } from "./logger";
+import logger from  "./logger";
+
 // @ts-ignore
 import { prompt } from "enquirer";
 
@@ -14,7 +16,7 @@ import { prompt } from "enquirer";
 const limit = Math.max(termSize().rows - 5, 10);
 
 function handlePromiseOnSigint(message: string) {
-  console.log(message);
+  logger.error(message);
   process.exit();
 }
 
@@ -38,7 +40,7 @@ async function askCheckboxPlus(
   })
     .then((responses: any) => responses[name])
     .catch(() => {
-      handlePromiseOnSigint("Try choosing at least one item");
+      handlePromiseOnSigint("Please choose at least one item");
     });
 }
 
@@ -94,11 +96,7 @@ async function askList(
       prefix,
       type: "select"
     }
-  ])
-    .then((responses: any) => responses[name])
-    .catch(() => {
-      handlePromiseOnSigint("Try choosing at least one item");
-    });
+  ]);
 }
 
 export { askCheckboxPlus, askQuestion, askConfirm, askList };
