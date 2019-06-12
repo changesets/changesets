@@ -62,6 +62,7 @@ export default async function getWorkspaces(
 
   const results = await Promise.all(
     folders
+      .sort()
       .filter(dir => fs.existsSync(path.join(dir, "package.json")))
       .map(async dir =>
         fs.readFile(path.join(dir, "package.json"), "utf8").then(contents => {
@@ -76,6 +77,7 @@ export default async function getWorkspaces(
       )
   );
   if (pkgJsonsMissingNameField.length !== 0) {
+    pkgJsonsMissingNameField.sort();
     throw new Error(
       `The following package.jsons are missing the "name" field:\n${pkgJsonsMissingNameField.join(
         "\n"

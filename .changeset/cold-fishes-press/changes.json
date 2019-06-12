@@ -1,0 +1,15 @@
+{
+  "releases": [{ "name": "get-workspaces", "type": "minor" }],
+  "dependents": [
+    {
+      "name": "bolt-check",
+      "type": "patch",
+      "dependencies": ["get-workspaces"]
+    },
+    {
+      "name": "@changesets/cli",
+      "type": "patch",
+      "dependencies": ["get-workspaces"]
+    }
+  ]
+}
