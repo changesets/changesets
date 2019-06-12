@@ -2,7 +2,7 @@ import uuid from "uuid/v1";
 // @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
 import termSize from "term-size";
 import { prefix } from "./logger";
-import logger from  "./logger";
+import logger from "./logger";
 
 // @ts-ignore
 import { prompt } from "enquirer";
