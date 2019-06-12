@@ -68,12 +68,12 @@ export default async function getWorkspaces(
               path.relative(cwd, path.join(dir, "package.json"))
             );
           }
-          pkgJsonsMissingNameField.sort();
           return { config, name: config.name, dir };
         })
       )
   );
   if (pkgJsonsMissingNameField.length !== 0) {
+    pkgJsonsMissingNameField.sort();
     throw new Error(
       `The following package.jsons are missing the "name" field:\n${pkgJsonsMissingNameField.join(
         "\n"
