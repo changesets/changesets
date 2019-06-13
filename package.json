@@ -67,6 +67,7 @@
     "jest": "^24.7.1",
     "jest-fixtures": "^0.5.0",
     "jest-junit": "^6.4.0",
+    "js-yaml": "^3.13.1",
     "lodash.startcase": "^4.4.0",
     "meow": "^5.0.0",
     "node-fetch": "^2.5.0",
@@ -76,11 +77,11 @@
     "prettier": "^1.14.3",
     "projector-spawn": "^1.0.1",
     "semver": "^5.4.1",
+    "strip-ansi": "^5.2.0",
+    "term-size": "^2.1.0",
     "tty-table": "^2.7.0",
     "typescript": "^3.4.5",
-    "uuid": "^3.3.2",
-    "strip-ansi": "^5.2.0",
-    "term-size": "^2.1.0"
+    "uuid": "^3.3.2"
   },
   "preconstruct": {
     "packages": [

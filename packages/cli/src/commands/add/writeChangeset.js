@@ -4,13 +4,20 @@ import prettier from "prettier";
 import pkgDir from "pkg-dir";
 import humanId from "human-id";
 
-import { removeEmptyFolders } from "../../utils/removeFolders";
 import getChangesetBase from "../../utils/getChangesetBase";
 
-async function writeChangeset(changesetData, opts) {
+// Note with getChangeset - we put the name in quotes as it stops errors
+// on scoped package names
+const getChangeset = (releases, summary) => `---
+${releases.map(({ name, type }) => `"${name}": ${type}`).join("\n")}
+---
+
+${summary}`;
+
+async function newwriteChangeset(changesetData, opts) {
   const cwd = opts.cwd || process.cwd();
 
-  const { summary, ...jsonData } = changesetData;
+  const { summary, releases } = changesetData;
   const dir = await pkgDir(cwd);
 
   const changesetBase = await getChangesetBase(cwd);
@@ -24,29 +31,22 @@ async function writeChangeset(changesetData, opts) {
 
   const prettierConfig = await prettier.resolveConfig(dir);
 
-  const newFolderPath = path.resolve(changesetBase, changesetID);
-  if (fs.existsSync(newFolderPath)) {
+  const filePath = path.resolve(changesetBase, `${changesetID}.md`);
+  if (fs.existsSync(filePath)) {
     throw new Error(
-      `A changeset with the unique ID ${changesetID} already exists`
+      `A changeset with the ID ${changesetID} already exists - this is unlikely, and will work if you try again 😅`
     );
   }
 
-  removeEmptyFolders(changesetBase);
-  fs.mkdirSync(newFolderPath);
-
-  // the changeset is divided into two parts, a .md and a .json file.
-  // the .md file represents what will be written into the changelogs for packages
-  // the .json file includes metadata about the changeset.
-  fs.writeFileSync(path.resolve(newFolderPath, "changes.md"), summary);
-
   fs.writeFileSync(
-    path.resolve(newFolderPath, "changes.json"),
-    prettier.format(JSON.stringify(jsonData), {
+    filePath,
+    prettier.format(getChangeset(releases, summary), {
       ...prettierConfig,
-      parser: "json"
+      parser: "markdown"
     })
   );
+
   return changesetID;
 }
 
-export default writeChangeset;
+export default newwriteChangeset;
