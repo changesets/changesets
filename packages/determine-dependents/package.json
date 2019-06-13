@@ -1,0 +1,16 @@
+{
+  "name": "@changesets/determine-dependents",
+  "version": "0.3.1",
+  "description": "Get workspaces for yarn workspaces, bolt workspaces, or the root package for building repo-agnostic tools",
+  "main": "dist/determine-dependents.cjs.js",
+  "module": "dist/determine-dependents.esm.js",
+  "license": "MIT",
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/determine-dependents",
+  "dependencies": {
+    "semver": "^5.4.1",
+    "get-workspaces": "^0.3.1"
+  },
+  "devDependencies": {
+    "jest-fixtures": "^0.5.0"
+  }
+}

@@ -2,6 +2,7 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 
 import fs from "fs-extra";
 import path from "path";
+import outdent from "outdent";
 import writeChangeset from "../writeChangeset";
 
 import humanId from "human-id";
@@ -30,16 +31,19 @@ describe("simple project", () => {
 
     await writeChangeset(simpleChangeset, { cwd });
 
-    const mdPath = path.join(cwd, ".changeset", changesetID, "changes.md");
-    const jsonPath = path.join(cwd, ".changeset", changesetID, "changes.json");
+    const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
 
-    const json = require(jsonPath);
     const mdContent = await fs.readFile(mdPath, "utf-8");
 
-    const { summary, ...rest } = simpleChangeset;
+    const correctSummary = outdent`---
+    pkg-a: minor
+    ---
 
-    expect(mdContent).toBe(summary);
-    expect(json).toEqual(rest);
+    This is a summary
+
+    `;
+
+    expect(mdContent).toBe(correctSummary);
   });
   it("should clean up empty folders", async () => {
     const changesetID = "ascii";
