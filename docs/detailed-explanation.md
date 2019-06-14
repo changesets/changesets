@@ -1,4 +1,4 @@
-# A Detailed Expalanation of Changesets
+# A Detailed Explanation of Changesets
 
 Below, you will find a detailed explanation of what changesets are, and how they are being thought about.
 If you want to build tools that use changesets, I recommend checking out our [changesets spec](./spec.md)
