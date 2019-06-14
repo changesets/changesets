@@ -6,6 +6,23 @@ single-package repositories too).
 
 This package is intended as a successor to `@atlaskit/build-releases` with a more general focus.
 
+## Getting Started
+
+```
+yarn add --dev @changesets/cli
+yarn changeset init
+```
+
+From here you are set up to use changesets. Add your first changeset by running
+
+```
+yarn changeset add
+```
+
+and following the prompts that you are presented with.
+
+Below you can find a basic workflow for maintainers to help them use changesets, which you can vary to meet your own needs.
+
 ## Core Concepts
 
 The core concept that `changesets` follows is that contributors to a repository should be able to declare an intent to release, and that multiple intents should be able to be combined sensibly. Sensibly here refers to if there is one intent to release button as a 'minor' and another to release button as a 'patch', only one release will be made, at the higher of the two versions.
