@@ -6,6 +6,32 @@ single-package repositories too).
 
 This package is intended as a successor to `@atlaskit/build-releases` with a more general focus.
 
+## Getting Started
+
+If you are installing this in a monorepo run
+
+```
+yarn add @changesets/cli
+yarn changeset init
+```
+
+otherwise run
+
+```
+yarn add --dev @changesets/cli
+yarn changeset init
+```
+
+From here you are set up to use changesets. Add your first changeset by running
+
+```
+yarn changeset
+```
+
+and following the prompts that you are presented with.
+
+Below you can find a basic workflow for maintainers to help them use changesets, which you can vary to meet your own needs.
+
 ## Core Concepts
 
 The core concept that `changesets` follows is that contributors to a repository should be able to declare an intent to release, and that multiple intents should be able to be combined sensibly. Sensibly here refers to if there is one intent to release button as a 'minor' and another to release button as a 'patch', only one release will be made, at the higher of the two versions.
@@ -109,41 +135,17 @@ You can pass the option `--commit`, or provide this in the config. Commit is fal
 changeset bump [--update-changelog] [--skipCI] [--commit]
 ```
 
-Creates release commit with bumped versions for all packages (and depdendencies) described in changeset commits since last release. Should be part of release process on CI.
+Updates the versions for all packages (and depdendencies) described in changesets since last release.
 
 Will also create/append to a CHANGELOG file for each package using the summaries from the changesets.
 
-The reccomended approach is to run `bump`, then push to master, then publish, so that your repo is the source of truth.
+We recommend making sure changes made from this commmand are merged back into master before you run `release.
 
-```
-git push origin master
-```
+This command will read then delete changesets on disk, ensuring that they are only used once.
 
-`--update-changelog=false` - disables the changelog functionality
+`--update-changelog` (default true) - Sets whether you want changesets to write out changelog files.
 
-Example of commit message:
-
-```
-RELEASING: Releasing 2 package(s)
-
-Releases:
-  @atlaskit/icon@13.3.0
-  @atlaskit/reduced-ui-pack@9.2.0
-
-Dependents:
-  []
-
-Deleted:
-  []
-
----
-{"releases":[{"name":"@atlaskit/icon","commits":["d36f760","7cf05b3"],"version":"13.3.0"},{"name":"@atlaskit/reduced-ui-pack","commits":["d36f760","365460a"],"version":"9.2.0"}],"changesets":[{"commit":"d36f760","summary":"Add new icon"},{"commit":"365460a","summary":"Add new icon for Roadmap"},{"commit":"7cf05b3","summary":"Add new icon for Roadmap"}]}
----
-
-[skip ci]
-```
-
-This command will read then delete changeset folders, ensuring that they are only used once.
+`--commit` (default false) - If true, running this command will automatically commit the changes it made.
 
 > `[skip ci]` can be used to prevent this commit from triggering a CI build as the common use case would be to run this in master and then push back to master. We want to avoid the infinite loop there. If you are running version locally, you may need to make another commit after this to trigger your CI.
 
@@ -153,9 +155,11 @@ This command will read then delete changeset folders, ensuring that they are onl
 changeset release [--public]
 ```
 
-Publishes to NPM repo, and creates tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is acurate. Should be part of release process on CI.
+Publishes to NPM repo, and creates tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is acurate.
 
 `--public` - enables the `--access-public` flag when publishing. This is required if trying to publish public scoped packages.
+
+> **IF YOU HAVE 2FA TURNED ON FOR NPM** you need to provide your auth token. Currently the way to do this is to run `NPM_CONFIG_OTP=123456 yarn changeset release`.
 
 **NOTE:** You will still need to push your changes back to master after this
 
