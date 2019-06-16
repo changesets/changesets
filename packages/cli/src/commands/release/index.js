@@ -1,6 +1,6 @@
 import * as bolt from "../../utils/bolt-replacements";
 import logger from "../../utils/logger";
-import * as git from "../../utils/git";
+import * as git from "@changesets/git";
 import resolveUserConfig from "../../utils/resolveConfig";
 import { defaultConfig } from "../../utils/constants";
 

@@ -6,7 +6,7 @@ import semver from "semver";
 
 import * as cli from "../../utils/cli";
 import logger from "../../utils/logger";
-import getWorkspaces from "../../utils/get-workspaces";
+import getWorkspaces from "../../utils/getWorkspaces";
 
 /*
 type releaseType = {
