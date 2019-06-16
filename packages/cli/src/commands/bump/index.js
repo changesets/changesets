@@ -14,7 +14,7 @@ import createRelease from "../../utils/createRelease";
 import createReleaseCommit from "./createReleaseCommit";
 import { removeFolders, removeEmptyFolders } from "../../utils/removeFolders";
 import updateChangelog from "../../utils/updateChangelog";
-import getChangesets from "../../utils/getChangesets";
+import getChangesets from "@changesets/get-release-info";
 
 import resolveConfig from "../../utils/resolveConfig";
 import getChangesetBase from "../../utils/getChangesetBase";
