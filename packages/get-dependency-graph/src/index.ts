@@ -7,7 +7,12 @@ import { PackageJSON, Workspace } from "get-workspaces";
 // @ts-ignore
 import * as boltMessages from "bolt/dist/modern/utils/messages";
 
-import { DEPENDENCY_TYPES } from "../constants";
+const DEPENDENCY_TYPES = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies"
+] as const;
 
 const getAllDependencies = (config: PackageJSON) => {
   const allDependencies = new Map();

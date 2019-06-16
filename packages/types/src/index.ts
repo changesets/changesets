@@ -1,4 +1,9 @@
-import { DEPENDENCY_TYPES } from "./constants";
+const DEPENDENCY_TYPES = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies"
+] as const;
 
 export type BumpType = "major" | "minor" | "patch" | "none";
 

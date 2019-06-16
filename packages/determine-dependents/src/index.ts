@@ -2,7 +2,7 @@ import semver from "semver";
 
 export default async function getDependents(
   releases,
-  allPackages,
+  workspaces,
   dependencyGraph,
   // We want to
   /* eslint-disable-next-line */
@@ -12,7 +12,7 @@ export default async function getDependents(
   const dependents = [];
 
   let pkgJsonsByName = new Map(
-    allPackages.map(({ name, config }) => [name, config])
+    workspaces.map(({ name, config }) => [name, config])
   );
 
   while (pkgsToSearch.length > 0) {

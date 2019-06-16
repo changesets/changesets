@@ -1,6 +1,6 @@
 {
   "name": "@changesets/determine-dependents",
-  "version": "0.3.1",
+  "version": "0.0.0",
   "description": "Get workspaces for yarn workspaces, bolt workspaces, or the root package for building repo-agnostic tools",
   "main": "dist/determine-dependents.cjs.js",
   "module": "dist/determine-dependents.esm.js",

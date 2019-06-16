@@ -4,7 +4,9 @@ import detectIndent from "detect-indent";
 import semver from "semver";
 
 import * as boltMessages from "bolt/dist/modern/utils/messages";
-import * as bolt from "../../utils/bolt-replacements";
+
+import getWorkspaces from "../../utils/get-workspaces";
+import getDependencyGraph from "get-dependency-graph";
 
 import logger from "../../utils/logger";
 import * as git from "../../utils/git";
@@ -31,7 +33,7 @@ export default async function version(opts) {
   const config = { ...defaultConfig.versionOptions, ...userConfig, ...opts };
 
   const cwd = config.cwd || process.cwd();
-  const allPackages = await bolt.getWorkspaces({ cwd });
+  const allPackages = await getWorkspaces({ cwd });
   const changesetBase = await getChangesetBase(cwd);
   removeEmptyFolders(changesetBase);
 
@@ -93,7 +95,7 @@ async function bumpReleasedPackages(releaseObj, allPackages, config) {
     {}
   );
 
-  const { graph } = await bolt.getDependencyGraph(allPackages, config.cwd);
+  const { graph } = await getDependencyGraph(allPackages, config.cwd);
   const internalDeps = Object.keys(versionsToUpdate).filter(dep =>
     graph.has(dep)
   );

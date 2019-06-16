@@ -35,6 +35,7 @@
     "@babel/runtime": "^7.4.4",
     "@types/fs-extra": "^5.1.0",
     "@types/jest": "^24.0.12",
+    "@types/js-yaml": "^3.12.1",
     "@types/meow": "^5.0.0",
     "@types/semver": "^6.0.0",
     "@types/uuid": "^3.4.4",
@@ -81,7 +82,8 @@
     "term-size": "^2.1.0",
     "tty-table": "^2.7.0",
     "typescript": "^3.4.5",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "get-worksapces": "^0.0.0"
   },
   "preconstruct": {
     "packages": [
