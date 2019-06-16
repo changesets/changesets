@@ -1,5 +1,7 @@
 import yaml from "js-yaml";
-import { Release } from "@changesets/types";
+import { Release, BumpType } from "@changesets/types";
+
+const mdRegex = /\s*---([^]+?)\n\s*---\n([^]+)/;
 
 export default function parseChangesetFile(
   contents: string
@@ -7,17 +9,18 @@ export default function parseChangesetFile(
   summary: string;
   releases: Release[];
 } {
-  if (!contents.startsWith("---")) {
+  const execResult = mdRegex.exec(contents);
+  if (!execResult) {
     throw new Error(
       `could not parse changeset - invalid frontmatter: ${contents}`
     );
   }
-  let [, roughReleases, roughSummary] = contents.split("---");
+  let [, roughReleases, roughSummary] = execResult;
   let summary = roughSummary.trim();
 
   let releases: Release[];
   try {
-    const yamlStuff = yaml.safeLoad(roughReleases);
+    const yamlStuff: { [key: string]: BumpType } = yaml.safeLoad(roughReleases);
     releases = Object.entries(yamlStuff).map(([name, type]) => ({
       name,
       type

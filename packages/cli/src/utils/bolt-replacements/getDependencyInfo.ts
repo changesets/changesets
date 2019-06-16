@@ -1,6 +1,5 @@
-import { PackageJSON } from "get-workspaces";
 import { DEPENDENCY_TYPES } from "../constants";
-import { DependencyType } from "@changesets/types";
+import { DependencyType, PackageJSON } from "@changesets/types";
 
 export function getDependencyTypes(depName: string, config: PackageJSON) {
   const matchedTypes = [];
