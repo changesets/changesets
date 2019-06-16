@@ -1,15 +1,26 @@
 import semver from "semver";
+import {
+  NewChangeset,
+  Release,
+  Workspace,
+  DependencyType,
+  PackageJSON,
+  BumpType
+} from "@changesets/types";
 
 export default async function getDependents(
-  releases,
-  workspaces,
-  dependencyGraph,
+  changeset: NewChangeset,
+  workspaces: Workspace[],
+  dependencyGraph: Map<string, string[]>,
   // We want to
   /* eslint-disable-next-line */
-  config
+  globalConfig: Object
 ) {
-  const pkgsToSearch = [...releases];
-  const dependents = [];
+  // TODO reduce changesets down to set of releases
+
+  let releases = [...changeset.releases];
+  let pkgsToSearch: Release[] = [...releases];
+  let dependents: Release[] = [];
 
   let pkgJsonsByName = new Map(
     workspaces.map(({ name, config }) => [name, config])
@@ -18,15 +29,22 @@ export default async function getDependents(
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
     const nextRelease = pkgsToSearch.shift();
+    if (!nextRelease || nextRelease.type === "none") continue;
     // pkgDependents will be a list of packages that depend on nextRelease ie. ['avatar-group', 'comment']
     const pkgDependents = dependencyGraph.get(nextRelease.name);
+    if (!pkgDependents) {
+      throw new Error(
+        "Error in determining dependents - could not find package"
+      );
+    }
     // For each dependent we are going to see whether it needs to be bumped because it's dependency
     // is leaving the version range.
     pkgDependents
       .map(dependent => {
-        let type = "none";
+        let type: BumpType = "none";
 
         const dependentPkgJSON = pkgJsonsByName.get(dependent);
+        if (!dependentPkgJSON) throw new Error("Dependency map is incorrect");
         const { depTypes, versionRange } = getDependencyVersionRange(
           dependentPkgJSON,
           nextRelease.name
@@ -38,10 +56,15 @@ export default async function getDependents(
         ) {
           type = "major";
         } else {
-          const nextReleaseVersion = semver.inc(
-            pkgJsonsByName.get(nextRelease.name).version,
-            nextRelease.type
-          );
+          let nextReleaseVersion =
+            semver.inc(
+              // @ts-ignore - I don't know how to tell ts that the
+              // set of names is the same set
+              pkgJsonsByName.get(nextRelease.name).version,
+              // @ts-ignore - we are escaping here if nextRelease.type === 'none' waay earlier - the error case
+              nextRelease.type
+            ) || "";
+
           if (
             !dependents.some(dep => dep.name === dependent) &&
             !releases.some(dep => dep.name === dependent) &&
@@ -80,15 +103,20 @@ export default async function getDependents(
   matched ('dependencies', 'peerDependencies', etc) and the versionRange itself ('^1.0.0')
 */
 
-function getDependencyVersionRange(dependentPkgJSON, dependencyName) {
+function getDependencyVersionRange(
+  dependentPkgJSON: PackageJSON,
+  dependencyName: string
+) {
   const DEPENDENCY_TYPES = [
     "dependencies",
     "devDependencies",
     "peerDependencies",
-    "bundledDependencies",
     "optionalDependencies"
-  ];
-  const dependencyVersionRange = {
+  ] as const;
+  const dependencyVersionRange: {
+    depTypes: DependencyType[];
+    versionRange: string;
+  } = {
     depTypes: [],
     versionRange: ""
   };

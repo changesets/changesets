@@ -1,5 +1,6 @@
-import getWorkspaces, { Workspace } from "get-workspaces";
-import { getDependencyGraph } from "get-dependency-graph";
+import getWorkspaces from "get-workspaces";
+import { Workspace } from "@changesets/types";
+import getDependencyGraph from "get-dependency-graph";
 
 export default async function getDependentsGraph({ cwd }: { cwd: string }) {
   const packages = await getWorkspaces({
@@ -10,7 +11,10 @@ export default async function getDependentsGraph({ cwd }: { cwd: string }) {
   if (!packages) {
     throw new Error("could not get packages");
   }
-  const graph = new Map();
+  const graph: Map<
+    string,
+    { pkg: Workspace; dependents: string[] }
+  > = new Map();
 
   const { graph: dependencyGraph } = await getDependencyGraph(packages, cwd);
 
@@ -37,12 +41,11 @@ export default async function getDependentsGraph({ cwd }: { cwd: string }) {
     }
   });
 
-  // can't use Object.entries here as the flow type for it is Array<[string, mixed]>;
   Object.keys(dependentsLookup).forEach(key => {
     graph.set(key, dependentsLookup[key]);
   });
 
-  const simplifiedDependentsGraph = new Map();
+  const simplifiedDependentsGraph: Map<string, string[]> = new Map();
 
   graph.forEach((pkgInfo, pkgName) => {
     simplifiedDependentsGraph.set(pkgName, pkgInfo.dependents);

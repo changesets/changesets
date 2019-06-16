@@ -32,7 +32,10 @@ const getAllDependencies = (config: PackageJSON) => {
 export default async function getDependencyGraph(
   packages: Array<Workspace>,
   cwd: string
-) {
+): Promise<{
+  graph: Map<string, { pkg: Workspace; dependencies: Array<string> }>;
+  valid: boolean;
+}> {
   const graph = new Map<
     string,
     { pkg: Workspace; dependencies: Array<string> }
