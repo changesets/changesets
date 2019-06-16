@@ -5,7 +5,7 @@ import path from "path";
 
 import getChangesetBase from "../../utils/getChangesetBase";
 import logger from "../../utils/logger";
-import getChangesets from "../../utils/getChangesets";
+import getChangesets from "@changesets/get-release-info";
 import getWorkspaces from "../../utils/getWorkspaces";
 
 import createRelease from "../../utils/createRelease";
