@@ -1,7 +1,7 @@
 import semver from "semver";
 import * as boltNpm from "bolt/dist/modern/utils/npm";
 import * as boltMessages from "bolt/dist/modern/utils/messages";
-import getWorkspaces from "./getWorkspaces";
+import getWorkspaces from "../getWorkspaces";
 import logger from "../logger";
 
 export default async function publishPackages({ cwd, access }) {
