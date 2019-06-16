@@ -36,7 +36,7 @@ describe("simple project", () => {
     const mdContent = await fs.readFile(mdPath, "utf-8");
 
     const correctSummary = outdent`---
-    pkg-a: minor
+    "pkg-a": minor
     ---
 
     This is a summary

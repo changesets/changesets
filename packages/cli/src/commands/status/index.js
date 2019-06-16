@@ -6,7 +6,7 @@ import path from "path";
 import getChangesetBase from "../../utils/getChangesetBase";
 import logger from "../../utils/logger";
 import getChangesets from "../../utils/getChangesets";
-import getWorkspaces from "../../utils/get-workspaces";
+import getWorkspaces from "../../utils/getWorkspaces";
 
 import createRelease from "../../utils/createRelease";
 import { defaultConfig } from "../../utils/constants";

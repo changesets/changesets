@@ -5,11 +5,11 @@ import semver from "semver";
 
 import * as boltMessages from "bolt/dist/modern/utils/messages";
 
-import getWorkspaces from "../../utils/get-workspaces";
+import getWorkspaces from "../../utils/getWorkspaces";
 import getDependencyGraph from "get-dependency-graph";
 
 import logger from "../../utils/logger";
-import * as git from "../../utils/git";
+import * as git from "@changesets/git";
 import createRelease from "../../utils/createRelease";
 import createReleaseCommit from "./createReleaseCommit";
 import { removeFolders, removeEmptyFolders } from "../../utils/removeFolders";

@@ -5,7 +5,7 @@ import prettier from "prettier";
 
 import generateMarkdownTemplate from "./template";
 import logger from "../logger";
-import getWorkspaces from "../../utils/get-workspaces";
+import getWorkspaces from "../../utils/getWorkspaces";
 
 function writeFile(filePath, fileContents) {
   return util.promisify(cb => fs.writeFile(filePath, fileContents, cb))();
