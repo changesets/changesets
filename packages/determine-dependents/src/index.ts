@@ -8,21 +8,18 @@ import {
   BumpType
 } from "@changesets/types";
 
-export default async function getDependents(
+export default function getDependents(
   changeset: NewChangeset,
   workspaces: Workspace[],
-  dependencyGraph: Map<string, string[]>,
-  // We want to
-  /* eslint-disable-next-line */
-  globalConfig: Object
+  dependencyGraph: Map<string, string[]>
 ) {
-  // TODO reduce changesets down to set of releases
-
   let releases = [...changeset.releases];
   let pkgsToSearch: Release[] = [...releases];
   let dependents: Release[] = [];
 
   let pkgJsonsByName = new Map(
+    // TODO this seems an inefficient use of getting the whole workspaces
+    // Should we ask for this to be simplified 'above'?
     workspaces.map(({ name, config }) => [name, config])
   );
 

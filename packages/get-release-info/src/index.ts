@@ -4,7 +4,9 @@ import getWorkspaces from "get-workspaces";
 import { Changeset } from "@changesets/types";
 import determineDependents from "@changesets/determine-dependents";
 
-export default async function(cwd: string): Promise<Changeset[]> {
+export default async function getReleaseInfo(
+  cwd: string
+): Promise<Changeset[]> {
   let changesets = await read(cwd);
   let workspaces = await getWorkspaces({
     cwd,
