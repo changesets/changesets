@@ -8,7 +8,8 @@
   "repository": "https://github.com/changesets/changesets/tree/master/packages/determine-dependents",
   "dependencies": {
     "semver": "^5.4.1",
-    "get-workspaces": "^0.3.1"
+    "get-workspaces": "^0.3.1",
+    "@changesets/types": "^0.0.0"
   },
   "devDependencies": {
     "jest-fixtures": "^0.5.0"

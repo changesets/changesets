@@ -1,10 +1,11 @@
 import yaml from "js-yaml";
+import { Release } from "@changesets/types";
 
 export default function parseChangesetFile(
   contents: string
 ): {
   summary: string;
-  releases: { [key: string]: string };
+  releases: Release[];
 } {
   if (!contents.startsWith("---")) {
     throw new Error(
@@ -14,9 +15,13 @@ export default function parseChangesetFile(
   let [, roughReleases, roughSummary] = contents.split("---");
   let summary = roughSummary.trim();
 
-  let releases;
+  let releases: Release[];
   try {
-    releases = yaml.safeLoad(roughReleases);
+    const yamlStuff = yaml.safeLoad(roughReleases);
+    releases = Object.entries(yamlStuff).map(([name, type]) => ({
+      name,
+      type
+    }));
   } catch (e) {
     throw new Error(
       `could not parse changeset - invalid frontmatter: ${contents}`

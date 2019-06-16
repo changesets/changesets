@@ -1,13 +1,13 @@
 import fs from "fs-extra";
 import path from "path";
 import parse from "@changesets/parse";
-import { Changeset } from "@changesets/types";
+import { NewChangeset } from "@changesets/types";
 import * as git from "@changesets/git";
 
 export default async function getChangesets(
   cwd: string,
   sinceMasterOnly?: boolean
-): Promise<Array<Changeset>> {
+): Promise<Array<NewChangeset>> {
   let changesetBase = path.join(cwd, ".changeset");
 
   if (!fs.existsSync(changesetBase)) {
@@ -35,7 +35,7 @@ export default async function getChangesets(
       "utf-8"
     );
 
-    return parse(changeset);
+    return { ...parse(changeset), id: file.replace(".md", "") };
   });
   return Promise.all(changesetContents);
 }

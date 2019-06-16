@@ -1,7 +1,7 @@
 import semver from "semver";
 import flattenChangesets from "./flattenChangesets";
 import { Changeset, BumpType } from "@changesets/types";
-import { Workspace } from "get-workspaces";
+import { Workspace } from "@changesets/types";
 /*
   This flattens an array of Version objects into one object that can be used to create the changelogs
   and the publish commit messages.
