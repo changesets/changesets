@@ -3,7 +3,7 @@
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
-import { PackageJSON, Workspace } from "get-workspaces";
+import { PackageJSON, Workspace } from "@changesets/types";
 // @ts-ignore
 import * as boltMessages from "bolt/dist/modern/utils/messages";
 

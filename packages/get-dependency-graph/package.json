@@ -10,6 +10,7 @@
     "fs-extra": "^7.0.1",
     "semver": "^5.4.1",
     "get-workspaces": "^0.3.1",
-    "bolt": "^0.22.1"
+    "bolt": "^0.22.1",
+    "@changesets/types": "^0.0.0"
   }
 }

@@ -5,7 +5,7 @@
 import fs from "fs-extra";
 import path from "path";
 import globby from "globby";
-import { Workspace } from "@changesets/types";
+import { Workspace, PackageJSON } from "@changesets/types";
 
 type Options = {
   cwd?: string;
@@ -74,3 +74,10 @@ export default async function getWorkspaces(
   }
   return results;
 }
+
+// As this package does not live under the changeset scope, but needs to share its types,
+// we have chosen to import then re-export these types.
+
+// If you are working on the changeset mono-repo, please import from @changesets/types,
+// not this package. We are trying to ensure no circular dependencies
+export { Workspace, PackageJSON };
