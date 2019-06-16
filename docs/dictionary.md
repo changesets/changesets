@@ -5,7 +5,7 @@ This is a list of some words and phrases that are used in changesets which are h
 - changeset - an intent to releases a set of packages at particular bump types with a summary of the changes made
 - workspace - a local package in a multi-package repo
 - single-package repo - A repository which only contains a single package which is at the root of the repo
-- multi-package repo - A repository which contains multiple packages, generally managed by [Bolt](https://github.com/boltpkg/bolt) or [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/).
+- multi-package repo/monorepo - A repository which contains multiple packages, generally managed by [Bolt](https://github.com/boltpkg/bolt) or [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/).
 - release line generators - The `getReleaseLine` and `getDependencyReleaseLine` functions which are responsible for creating the lines inserted into changelog. A changelog entry for a particular release can be thought of as `releaseLineGenerators(changesets)`
 
 ## Things that we haven't figured out how to explain well yet
