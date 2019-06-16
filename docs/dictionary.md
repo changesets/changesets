@@ -4,8 +4,8 @@ This is a list of some words and phrases that are used in changesets which are h
 
 - **changeset** - an intent to release a set of packages at particular bump types with a summary of the changes made. For the purposes of this library, a changeset has a defined shape, as presented in [the spec](./spec.md)
 - **workspace** - a local package in a multi-package repo
-- **bump-type** - The type of change expected. Of type `major | minor | patch`
-- **range-type** - The type of range a package depends on, such as `1.0.0`, `~1.0.0`, or `^1.0.0`
+- **bump-type** - The type of change expected. Of type `major | minor | patch`, based on the change types of [semver](https://semver.org/ )
+- **range-type** - The type of range a package depends on, such as `1.0.0`, `~1.0.0`, or `^1.0.0`. This is a subset of valid semver ranges as [defined by node](https://github.com/npm/node-semver#ranges), narrowing to ranges we can update programmatically.
 - **bump** - update versions of all packages, based on the information in the current changesets
 - **single-package repo** - A repository which only contains a single package which is at the root of the repo
 - **multi-package repo/monorepo** - A repository which contains multiple packages, generally managed by [Bolt](https://github.com/boltpkg/bolt) or [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/).
