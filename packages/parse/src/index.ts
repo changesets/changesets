@@ -1,6 +1,11 @@
 import yaml from "js-yaml";
 
-export default function parseChangesetFile(contents: string) {
+export default function parseChangesetFile(
+  contents: string
+): {
+  summary: string;
+  releases: { [key: string]: string };
+} {
   if (!contents.startsWith("---")) {
     throw new Error(
       `could not parse changeset - invalid frontmatter: ${contents}`

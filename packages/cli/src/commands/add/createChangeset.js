@@ -6,7 +6,7 @@ import semver from "semver";
 
 import * as cli from "../../utils/cli";
 import logger from "../../utils/logger";
-import * as bolt from "../../utils/bolt-replacements";
+import getWorkspaces from "../../utils/get-workspaces";
 
 /*
 type releaseType = {
@@ -95,7 +95,7 @@ export default async function createChangeset(
   opts /* { cwd?: string }  */ = {}
 ) {
   const cwd = opts.cwd || process.cwd();
-  const allPackages = await bolt.getWorkspaces({ cwd });
+  const allPackages = await getWorkspaces({ cwd });
 
   const packagesToRelease = await getPackagesToRelease(
     changedPackages,

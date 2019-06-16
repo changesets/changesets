@@ -1,0 +1,15 @@
+{
+  "name": "get-dependency-graph",
+  "version": "0.0.0",
+  "description": "Get the graph of dependency in a mono-repo",
+  "main": "dist/get-dependency-graph.cjs.js",
+  "module": "dist/get-dependency-graph.esm.js",
+  "license": "MIT",
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/get-dependency-graph",
+  "dependencies": {
+    "fs-extra": "^7.0.1",
+    "semver": "^5.4.1",
+    "get-workspaces": "^0.3.1",
+    "bolt": "^0.22.1"
+  }
+}

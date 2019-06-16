@@ -1,9 +1,15 @@
-import getWorkspaces from "./getWorkspaces";
-import getDependencyGraph from "./getDependencyGraph";
-import { Workspace } from "get-workspaces";
+import getWorkspaces, { Workspace } from "get-workspaces";
+import { getDependencyGraph } from "get-dependency-graph";
 
 export default async function getDependentsGraph({ cwd }: { cwd: string }) {
-  const packages = await getWorkspaces({ cwd });
+  const packages = await getWorkspaces({
+    cwd,
+    tools: ["yarn", "bolt", "root"]
+  });
+
+  if (!packages) {
+    throw new Error("could not get packages");
+  }
   const graph = new Map();
 
   const { graph: dependencyGraph } = await getDependencyGraph(packages, cwd);

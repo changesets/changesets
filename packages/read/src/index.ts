@@ -1,13 +1,12 @@
 import fs from "fs-extra";
 import path from "path";
 import parse from "@changesets/parse";
-
-import * as git from "./git";
-import { Changeset } from "./types";
+import { Changeset } from "@changesets/types";
+import * as git from "@changesets/git";
 
 export default async function getChangesets(
   cwd: string,
-  sinceMasterOnly: boolean
+  sinceMasterOnly?: boolean
 ): Promise<Array<Changeset>> {
   let changesetBase = path.join(cwd, ".changeset");
 
@@ -31,7 +30,10 @@ export default async function getChangesets(
   }
 
   const changesetContents = changesets.map(async file => {
-    const changeset = await fs.readFile(path.join(changesetBase, file));
+    const changeset = await fs.readFile(
+      path.join(changesetBase, file),
+      "utf-8"
+    );
 
     return parse(changeset);
   });

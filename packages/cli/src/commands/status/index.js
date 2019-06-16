@@ -6,7 +6,7 @@ import path from "path";
 import getChangesetBase from "../../utils/getChangesetBase";
 import logger from "../../utils/logger";
 import getChangesets from "../../utils/getChangesets";
-import * as bolt from "../../utils/bolt-replacements";
+import getWorkspaces from "../../utils/get-workspaces";
 
 import createRelease from "../../utils/createRelease";
 import { defaultConfig } from "../../utils/constants";
@@ -25,7 +25,7 @@ export default async function getStatus({
   const config = { ...defaultConfig.versionOptions, ...userConfig, ...opts };
 
   const changesetBase = await getChangesetBase(cwd);
-  const allPackages = await bolt.getWorkspaces({ cwd });
+  const allPackages = await getWorkspaces({ cwd });
   // TODO: Check if we are no master and give a different error message if we are
   const changesets = await getChangesets(changesetBase, sinceMaster);
 

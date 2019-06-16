@@ -5,7 +5,7 @@ import prettier from "prettier";
 
 import generateMarkdownTemplate from "./template";
 import logger from "../logger";
-import * as bolt from "../bolt-replacements";
+import getWorkspaces from "../../utils/get-workspaces";
 
 function writeFile(filePath, fileContents) {
   return util.promisify(cb => fs.writeFile(filePath, fileContents, cb))();
@@ -13,7 +13,7 @@ function writeFile(filePath, fileContents) {
 
 export default async function updateChangelog(releaseObject, opts) {
   const cwd = opts.cwd || process.cwd();
-  const allPackages = await bolt.getWorkspaces({ cwd });
+  const allPackages = await getWorkspaces({ cwd });
   const udpatedChangelogs = [];
   // Updating ChangeLog files for each package
   for (const release of releaseObject.releases) {

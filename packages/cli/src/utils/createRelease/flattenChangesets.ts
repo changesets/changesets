@@ -1,4 +1,4 @@
-import { Changeset, BumpType } from "../types";
+import { Changeset, BumpType } from "@changesets/types";
 
 function maxType(types: Array<BumpType>) {
   if (types.includes("major")) return "major";
