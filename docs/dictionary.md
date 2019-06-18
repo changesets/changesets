@@ -51,7 +51,7 @@ This is a list of some words and phrases that are used in changesets which are h
 - **release plan** - A calculated object that shows everything a collection of changesets will release, and how. This object includes a calculation of dependencies, and considerations for `linked` packages. It has the shape:
 
   ```tsx
-  type ReleasePlan {
+  type ReleasePlan = {
       changesets
       releases: Array<ReleaseInformation>
       dependents: Array<ReleaseInformation>
