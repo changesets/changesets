@@ -60,9 +60,8 @@ This is a list of some words and phrases that are used in changesets which are h
 
   A release plan is what is used to update packages and write changelogs - all states before this are used to generate the release plan. Note that in the conversion from `release instruction` to `release information`, packages are flattened, so each package is only represented once.
 
-**dependent releases** A secondary set of `release information` detailing packages not specified in changesets which should still be published to ensure all packages remain compatible. A package can only ever be a `release` or a `dependency`.
-
-- **linked packages** -
+- **dependent releases** A secondary set of `release information` detailing packages not specified in changesets which should still be published to ensure all packages remain compatible. A package can only ever be a `release` or a `dependency`.
+- **linked packages** - Linked packages share a semver categorisation, such that all published linked packages have consistent new semver ranges. The logistics of this are best left to our [./linked-packages.md] documentation.
 
 ## Things that we haven't figured out how to explain well yet
 
