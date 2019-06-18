@@ -9,14 +9,12 @@ const fakeAllPackages = [
 const simpleChangeset = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
-  dependents: [],
   commit: "dec4a66",
   id: "abc123xy"
 };
 const simpleChangesetWithDeleted = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
-  dependents: [{ name: "package-c", type: "patch" }],
   commit: "dec4a66",
   id: "abc123ph"
 };
@@ -27,7 +25,6 @@ const simpleChangeset2 = {
     { name: "package-a", type: "patch" },
     { name: "package-b", type: "minor" }
   ],
-  dependents: [],
   commit: "695fad0",
   id: "abc123fh"
 };

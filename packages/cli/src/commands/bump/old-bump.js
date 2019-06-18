@@ -14,7 +14,7 @@ import createRelease from "../../utils/createRelease";
 import createReleaseCommit from "./createReleaseCommit";
 import { removeFolders, removeEmptyFolders } from "../../utils/removeFolders";
 import updateChangelog from "../../utils/updateChangelog";
-import getChangesets from "@changesets/get-release-info";
+import getReleaseInfo from "@changesets/get-release-info";
 
 import resolveConfig from "../../utils/resolveConfig";
 import getChangesetBase from "../../utils/getChangesetBase";
@@ -33,22 +33,28 @@ export default async function version(opts) {
   const config = { ...defaultConfig.versionOptions, ...userConfig, ...opts };
 
   const cwd = config.cwd || process.cwd();
+
   const allPackages = await getWorkspaces({ cwd });
   const changesetBase = await getChangesetBase(cwd);
+
   removeEmptyFolders(changesetBase);
 
-  const unreleasedChangesets = await getChangesets(changesetBase);
+  // 1 get old changesets
+  // 2 get new changesets + dependents
+
+  const unreleasedChangesets = await getReleaseInfo(cwd);
+
+  if (unreleasedChangesets.length === 0) {
+    logger.warn("No unreleased changesets found, exiting.");
+    return;
+  }
+
   const releaseObj = createRelease(
     unreleasedChangesets,
     allPackages,
     config.linked
   );
   const publishCommit = createReleaseCommit(releaseObj, config.skipCI);
-
-  if (unreleasedChangesets.length === 0) {
-    logger.warn("No unreleased changesets found, exiting.");
-    return;
-  }
 
   logger.log(publishCommit);
 
@@ -69,6 +75,7 @@ export default async function version(opts) {
 
   // This should then reset the changesets folder to a blank state
   removeFolders(changesetBase);
+  // Remove files
   if (config.commit) {
     await git.add(changesetBase, cwd);
 
