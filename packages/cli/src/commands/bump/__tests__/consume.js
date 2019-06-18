@@ -22,7 +22,6 @@ git.tag.mockImplementation(() => Promise.resolve(true));
 const simpleChangeset = {
   summary: "This is a summary",
   releases: [{ name: "pkg-a", type: "minor" }],
-  dependents: [],
   commit: "b8bb699"
 };
 
@@ -32,7 +31,6 @@ const simpleChangeset2 = {
     { name: "pkg-a", type: "minor" },
     { name: "pkg-b", type: "patch" }
   ],
-  dependents: [{ name: "pkg-b", type: "none", dependencies: [] }],
   commit: "b8bb699"
 };
 
@@ -55,8 +53,8 @@ describe("running version in a simple project", () => {
     console.error = consoleError;
   });
 
-  describe("when there are no changeset commits", () => {
-    it("should warn if no changeset commits exist", async () => {
+  describe("when there are no changeset", () => {
+    it("should warn if no changesets exist", async () => {
       await writeEmptyChangeset(cwd);
       await versionCommand({ cwd });
       const loggerWarnCalls = logger.warn.mock.calls;
@@ -67,7 +65,7 @@ describe("running version in a simple project", () => {
     });
   });
 
-  describe("When there is a changeset commit", () => {
+  describe("When there is a changeset", () => {
     it("should bump releasedPackages", async () => {
       const spy = jest.spyOn(fs, "writeFile");
       await writeChangesets([simpleChangeset2], cwd);

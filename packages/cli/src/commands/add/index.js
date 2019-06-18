@@ -12,6 +12,7 @@ import { defaultConfig } from "../../utils/constants";
 import resolveUserConfig from "../../utils/resolveConfig";
 import getChangesetBase from "../../utils/getChangesetBase";
 import { printConfirmationMessage } from "./messages";
+import { removeEmptyFolders } from "../../utils/removeFolders";
 
 export default async function add(opts) {
   const userConfig = await resolveUserConfig(opts.cwd);
@@ -33,6 +34,10 @@ export default async function add(opts) {
     );
     return;
   }
+
+  // This previously existed in writeChangeset - which wasn't the right place for this
+  // TODO Remove this from 3.0 release, after grace period for old changesets is over
+  removeEmptyFolders(changesetBase);
 
   const changedPackages = await git.getChangedPackagesSinceMaster(config.cwd);
   const changePackagesName = changedPackages.map(pkg => pkg.name);
@@ -56,10 +61,7 @@ export default async function add(opts) {
       logger.log(green("Changeset added! - you can now commit it\n"));
     }
 
-    let hasMajorChange = [
-      ...newChangeset.releases,
-      ...newChangeset.dependents
-    ].find(c => c.type === "major");
+    let hasMajorChange = newChangeset.releases.find(c => c.type === "major");
 
     if (hasMajorChange) {
       logger.warn(

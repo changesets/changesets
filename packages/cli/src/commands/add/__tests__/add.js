@@ -1,5 +1,8 @@
 // @flow
 import { copyFixtureIntoTempDir } from "jest-fixtures";
+import path from "path";
+import fs from "fs-extra";
+
 import stripAnsi from "strip-ansi";
 import { askCheckboxPlus, askConfirm, askQuestion } from "../../../utils/cli";
 import * as git from "@changesets/git";
@@ -71,7 +74,7 @@ const mockUserResponses = mockResponses => {
   });
 };
 
-describe.skip("Changesets", () => {
+describe("Changesets", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -89,109 +92,6 @@ describe.skip("Changesets", () => {
     expect(call).toEqual(expectedChangeset);
   });
 
-  it("should patch a single pinned dependent", async () => {
-    const cwd = await copyFixtureIntoTempDir(
-      __dirname,
-      "pinned-caret-tilde-dependents"
-    );
-    mockUserResponses({ releases: { "depended-upon": "patch" } });
-    await addChangeset({ cwd });
-
-    const expectedChangeset = {
-      summary: "summary message mock",
-      releases: [{ name: "depended-upon", type: "patch" }],
-      dependents: [
-        { name: "pinned-dep", type: "patch", dependencies: ["depended-upon"] }
-      ]
-    };
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(expectedChangeset);
-  });
-
-  it("should patch pinned and tilde dependents when minor bumping", async () => {
-    const cwd = await copyFixtureIntoTempDir(
-      __dirname,
-      "pinned-caret-tilde-dependents"
-    );
-    mockUserResponses({ releases: { "depended-upon": "minor" } });
-    await addChangeset({ cwd });
-
-    const expectedChangeset = {
-      summary: "summary message mock",
-      releases: [{ name: "depended-upon", type: "minor" }],
-      dependents: [
-        { name: "pinned-dep", type: "patch", dependencies: ["depended-upon"] },
-        { name: "tilde-dep", type: "patch", dependencies: ["depended-upon"] }
-      ]
-    };
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(expectedChangeset);
-  });
-
-  it("should patch pinned, tilde and caret deps when major bumping", async () => {
-    const cwd = await copyFixtureIntoTempDir(
-      __dirname,
-      "pinned-caret-tilde-dependents"
-    );
-    mockUserResponses({ releases: { "depended-upon": "major" } });
-    await addChangeset({ cwd });
-
-    const expectedChangeset = {
-      summary: "summary message mock",
-      releases: [{ name: "depended-upon", type: "major" }],
-      dependents: [
-        { name: "caret-dep", type: "patch", dependencies: ["depended-upon"] },
-        { name: "pinned-dep", type: "patch", dependencies: ["depended-upon"] },
-        { name: "tilde-dep", type: "patch", dependencies: ["depended-upon"] }
-      ]
-    };
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(expectedChangeset);
-  });
-
-  it("should patch a transitively bumped dependent that leaves range", async () => {
-    // Here we have a project where b -> a and c -> b, all pinned, so bumping a should bump b and c
-    const cwd = await copyFixtureIntoTempDir(
-      __dirname,
-      "simplest-transitive-dependents"
-    );
-    mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset({ cwd });
-
-    const expectedChangeset = {
-      summary: "summary message mock",
-      releases: [{ name: "pkg-a", type: "patch" }],
-      dependents: [
-        { name: "pkg-b", type: "patch", dependencies: ["pkg-a"] },
-        { name: "pkg-c", type: "patch", dependencies: ["pkg-b"] }
-      ]
-    };
-
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(expectedChangeset);
-  });
-
-  it("should patch a previously checked transitive dependent", async () => {
-    // Here we use project where b->a (caret) and c->a (pinned) and b -> c (pinned)
-    // Therefore bumping a will bump c (but not b), but bumping c will bump b anyway
-    const cwd = await copyFixtureIntoTempDir(
-      __dirname,
-      "previously-checked-transitive-dependent"
-    );
-    mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset({ cwd });
-
-    const expectedChangeset = {
-      summary: "summary message mock",
-      releases: [{ name: "pkg-a", type: "patch" }],
-      dependents: [
-        { name: "pkg-c", type: "patch", dependencies: ["pkg-a"] },
-        { name: "pkg-b", type: "patch", dependencies: ["pkg-c", "pkg-a"] }
-      ]
-    };
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(expectedChangeset);
-  });
   it("should commit when the commit flag is passed in", async () => {
     const cwd = await copyFixtureIntoTempDir(
       __dirname,
@@ -201,5 +101,18 @@ describe.skip("Changesets", () => {
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset({ cwd, commit: true });
     expect(git.add).toHaveBeenCalledTimes(1);
+  });
+  it("should clean up empty folders", async () => {
+    const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+
+    const emptyDirPath = path.join(cwd, ".changeset/empty-dir");
+    expect(fs.pathExistsSync(emptyDirPath)).toBe(false);
+    await fs.mkdir(emptyDirPath);
+    expect(fs.pathExistsSync(emptyDirPath)).toBe(true);
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset({ cwd });
+
+    expect(fs.pathExistsSync(emptyDirPath)).toBe(false);
   });
 });

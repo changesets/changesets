@@ -45,26 +45,4 @@ describe("simple project", () => {
 
     expect(mdContent).toBe(correctSummary);
   });
-  it("should clean up empty folders", async () => {
-    const changesetID = "ascii";
-    humanId.mockReturnValueOnce(changesetID);
-
-    const emptyDirPath = path.join(cwd, ".changeset/empty-dir");
-
-    await fs.mkdir(emptyDirPath);
-    await writeChangeset(simpleChangeset, { cwd });
-
-    expect(fs.pathExistsSync(emptyDirPath)).toBe(false);
-  });
-  it("should leave folders with contents", async () => {
-    const changesetID = "ascii";
-    humanId.mockReturnValueOnce(changesetID);
-
-    const fullFilePath = path.join(cwd, ".changeset/full-dir/changes.md");
-
-    await fs.ensureFile(fullFilePath);
-    await writeChangeset(simpleChangeset, { cwd });
-
-    expect(fs.pathExistsSync(fullFilePath)).toBe(true);
-  });
 });
