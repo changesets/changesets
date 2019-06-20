@@ -18,7 +18,7 @@ Several of these have associated type definitions, which you can find in [our ty
 - **release line generators** - The `getReleaseLine` and `getDependencyReleaseLine` functions which are responsible for creating the lines inserted into changelog. A changelog entry for a particular release can be thought of as `releaseLineGenerators(changesets)`
 - **linked packages** - Linked packages share a semver categorisation, such that all published linked packages have consistent new semver ranges. The logistics of this are best left to our [./linked-packages.md] documentation.
 - **release instruction** An object containing an intent to release a single package, consisting of the package name and a bump type
-- **release plan** - A calculated object that shows everything a collection of changesets will release, and how. This object includes a calculation of dependencies, and considerations for `linked` packages.
+- **release plan** - A calculated object that shows everything a collection of changesets will release, and at what version, and how. This object includes a calculation of dependencies, and considerations for `linked` packages.
 
 ## Things that we haven't figured out how to explain well yet
 
