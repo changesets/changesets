@@ -2,18 +2,9 @@
 
 This is a list of some words and phrases that are used in changesets which are helpful to know so that contributors to changesets have a shared understanding of various concepts in the project.
 
-- **changeset** - an intent to release a set of packages at particular bump types with a summary of the changes made. For the purposes of this library, a changeset has a defined shape:
+Several of these have associated type definitions, which you can find in [our types package](./packages/types)
 
-  ```tsx
-  type Changeset = {
-    summary: string;
-    id: string;
-    releases: Array<ReleaseInstruction>;
-  };
-  ```
-
-  Changesets are stackable, that is running `bump` will apply any number of changesets correctly. Changesets are used to generate further information, such as the `release information`, and the `release plan`.
-
+- **changeset** - an intent to release a set of packages at particular bump types with a summary of the changes made. Changesets are stackable, that is running `bump` will apply any number of changesets correctly. Changesets are used to generate further information, such as the `release information`, and the `release plan`.
 - **summary** - Information about the changes the changeset represents - this is written out to the `CHANGELOG.md` file of every package mentioned in the changeset.
 - **changeset folder** - A `./changeset` folder - this is where we store written versions of changesets. Currently we assume all changesets are written to this.
 - **workspace** - a local package in a multi-package repo
@@ -25,43 +16,9 @@ This is a list of some words and phrases that are used in changesets which are h
 - **single-package repo** - A repository which only contains a single package which is at the root of the repo
 - **multi-package repo/monorepo** - A repository which contains multiple packages, generally managed by [Bolt](https://github.com/boltpkg/bolt) or [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/).
 - **release line generators** - The `getReleaseLine` and `getDependencyReleaseLine` functions which are responsible for creating the lines inserted into changelog. A changelog entry for a particular release can be thought of as `releaseLineGenerators(changesets)`
-- **release instruction** An object containing an intent to release a single package, in the shape:
-
-  ```tsx
-  type ReleaseInstruction = {
-    // The name of the package you want to release
-    name: string;
-    type: BumpType;
-  };
-  ```
-
-- **release information** Release Information is a transformed state of `ReleaseInstruction`s. It contains several extra properties as seen in the type below
-
-  ```tsx
-  type ReleaseInformation = {
-    // The name of the package you want to release
-    name: string;
-    oldVersion: semverVersion;
-    newVersion: semverVersion;
-    type: BumpType;
-    changsesets: Array<ChangesetId>;
-  };
-  ```
-
-- **release plan** - A calculated object that shows everything a collection of changesets will release, and how. This object includes a calculation of dependencies, and considerations for `linked` packages. It has the shape:
-
-  ```tsx
-  type ReleasePlan = {
-      changesets
-      releases: Array<ReleaseInformation>
-      dependents: Array<ReleaseInformation>
-  }
-  ```
-
-  A release plan is what is used to update packages and write changelogs - all states before this are used to generate the release plan. Note that in the conversion from `release instruction` to `release information`, packages are flattened, so each package is only represented once.
-
-- **dependent releases** A secondary set of `release information` detailing packages not specified in changesets which should still be published to ensure all packages remain compatible. A package can only ever be a `release` or a `dependency`.
 - **linked packages** - Linked packages share a semver categorisation, such that all published linked packages have consistent new semver ranges. The logistics of this are best left to our [./linked-packages.md] documentation.
+- **release instruction** An object containing an intent to release a single package, consisting of the package name and a bump type
+- **release plan** - A calculated object that shows everything a collection of changesets will release, and at what version, and how. This object includes a calculation of dependencies, and considerations for `linked` packages.
 
 ## Things that we haven't figured out how to explain well yet
 

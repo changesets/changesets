@@ -19,18 +19,6 @@ function getConfig(cwd: string) {
   return require(configPath);
 }
 
-function applyLinks(
-  releases: ComprehensiveRelease[],
-  linked: Linked
-): { releases: ComprehensiveRelease[]; updated: boolean } {
-  let updated = false;
-
-  for (linkedSet in linked) {
-  }
-
-  return { updated };
-}
-
 async function createReleasePlan(
   changesets: NewChangeset[],
   workspaces: Workspace[],
@@ -82,4 +70,17 @@ export default async function getReleasePlan(
     dependentsGraph,
     config
   );
+}
+
+// This obv should not live in this file
+function applyLinks(
+  releases: ComprehensiveRelease[],
+  linked: Linked
+): { releases: ComprehensiveRelease[]; updated: boolean } {
+  let updated = false;
+
+  for (linkedSet in linked) {
+  }
+
+  return { updated };
 }
