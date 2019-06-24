@@ -1,19 +1,18 @@
 import semver from "semver";
 import {
-  NewChangeset,
   Release,
   Workspace,
   DependencyType,
   PackageJSON,
-  BumpType
+  BumpType,
+  ComprehensiveRelease
 } from "@changesets/types";
 
 export default function getDependents(
-  changeset: NewChangeset,
+  releases: ComprehensiveRelease[],
   workspaces: Workspace[],
   dependencyGraph: Map<string, string[]>
-) {
-  let releases = [...changeset.releases];
+): ComprehensiveRelease[] {
   let pkgsToSearch: Release[] = [...releases];
   let dependents: Release[] = [];
 
@@ -26,7 +25,7 @@ export default function getDependents(
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
     const nextRelease = pkgsToSearch.shift();
-    if (!nextRelease || nextRelease.type === "none") continue;
+    if (!nextRelease) continue;
     // pkgDependents will be a list of packages that depend on nextRelease ie. ['avatar-group', 'comment']
     const pkgDependents = dependencyGraph.get(nextRelease.name);
     if (!pkgDependents) {
@@ -38,7 +37,7 @@ export default function getDependents(
     // is leaving the version range.
     pkgDependents
       .map(dependent => {
-        let type: BumpType = "none";
+        let type: BumpType | undefined;
 
         const dependentPkgJSON = pkgJsonsByName.get(dependent);
         if (!dependentPkgJSON) throw new Error("Dependency map is incorrect");
@@ -72,8 +71,9 @@ export default function getDependents(
         }
         return { name: dependent, type };
       })
-      .filter(({ type }) => type !== "none")
-      .forEach(dependent => {
+      .filter(({ type }) => type)
+      // @ts-ignore - I don't know how to make typescript understand that the filter above guarantees this and I got sick of trying
+      .forEach((dependent: Release) => {
         const existing = dependents.find(dep => dep.name === dependent.name);
         // For things that are being given a major bump, we check if we have already
         // added them here. If we have, we update the existing item instead of pushing it on to search.

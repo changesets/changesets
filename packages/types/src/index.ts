@@ -5,11 +5,22 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies"
 ] as const;
 
-export type BumpType = "major" | "minor" | "patch" | "none";
+export type BumpType = "major" | "minor" | "patch";
 
 export type DependencyType = typeof DEPENDENCY_TYPES[number];
 
 export type Release = { name: string; type: BumpType };
+
+// This is a release that has been modified to include all relevant information
+// about releasing - it is calculated and doesn't make sense as an artefact
+export type ComprehensiveRelease = {
+  name: string;
+  type: BumpType;
+  dependentOnlyBump: boolean;
+  oldVersion: string;
+  newVersion: string;
+  changesets: string[];
+};
 
 export type Changeset = {
   id: string;
@@ -25,6 +36,11 @@ export type NewChangeset = {
   releases: Array<Release>;
 };
 
+export type ReleasePlan = {
+  changesets: NewChangeset[];
+  releases: ComprehensiveRelease[];
+};
+
 export type PackageJSON = {
   name: string;
   version: string;
@@ -32,6 +48,12 @@ export type PackageJSON = {
   peerDependencies?: { [key: string]: string };
   devDependencies?: { [key: string]: string };
   optionalDependencies?: { [key: string]: string };
+};
+
+export type Linked = Array<Array<string>>;
+
+export type Config = {
+  linked: Linked;
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };
