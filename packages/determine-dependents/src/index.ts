@@ -13,8 +13,8 @@ export default function getDependents(
   workspaces: Workspace[],
   dependencyGraph: Map<string, string[]>
 ): ComprehensiveRelease[] {
-  let pkgsToSearch: Release[] = [...releases];
-  let dependents: Release[] = [];
+  let pkgsToSearch = [...releases];
+  let dependents: ComprehensiveRelease[] = [];
 
   let pkgJsonsByName = new Map(
     // TODO this seems an inefficient use of getting the whole workspaces

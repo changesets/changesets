@@ -1,0 +1,16 @@
+{
+  "name": "@changesets/get-release-info",
+  "version": "0.0.0",
+  "description": "Reads changesets and adds information on dependents that need bumping",
+  "main": "dist/get-release-info.cjs.js",
+  "module": "dist/get-release-info.esm.js",
+  "license": "MIT",
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/get-release-info",
+  "dependencies": {
+    "@changesets/read": "^0.0.0",
+    "@changesets/determine-dependents": "^0.0.0",
+    "get-dependents-graph": "^0.0.0",
+    "get-workspaces": "^0.3.1",
+    "@changesets/types": "^0.0.0"
+  }
+}
