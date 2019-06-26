@@ -25,18 +25,19 @@ async function createReleasePlan(
   dependentsGraph: Map<string, string[]>,
   config: Config
 ): Promise<ReleasePlan> {
+  // releases is, at this point a list of all packages we are going to releases,
+  // flattened down to one release per package, having a reference back to their
+  // changesets, and with a calculated new versions
   let releases = await flattenReleases(changesets, workspaces);
 
   let releaseObjectValidated = false;
   while (releaseObjectValidated === false) {
-    let newDependents = determineDependents(
-      releases,
-      workspaces || [],
-      dependentsGraph
-    );
-    if (newDependents.length) {
-      releases.concat(newDependents);
-      continue;
+    let {
+      releases: dependentReleases,
+      updated: dependentAdded
+    } = determineDependents(releases, workspaces || [], dependentsGraph);
+    if (dependentAdded) {
+      releases = dependentReleases;
     }
     let { releases: linkAppliedReleases, updated } = applyLinks(
       releases,
@@ -45,9 +46,8 @@ async function createReleasePlan(
 
     if (updated) {
       releases = linkAppliedReleases;
-      continue;
     }
-    releaseObjectValidated = false;
+    releaseObjectValidated = !updated && !dependentAdded;
   }
 
   return { changesets, releases };

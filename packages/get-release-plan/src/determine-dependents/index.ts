@@ -9,12 +9,14 @@ import {
 } from "@changesets/types";
 
 export default function getDependents(
-  releases: ComprehensiveRelease[],
+  startingReleases: ComprehensiveRelease[],
   workspaces: Workspace[],
   dependencyGraph: Map<string, string[]>
-): ComprehensiveRelease[] {
-  let pkgsToSearch = [...releases];
-  let dependents: ComprehensiveRelease[] = [];
+): { releases: ComprehensiveRelease[]; updated: boolean } {
+  let updated = false;
+  // NOTE this is intended to be called recursively
+  let pkgsToSearch = [...startingReleases];
+  let releases: ComprehensiveRelease[] = [...startingReleases];
 
   let pkgJsonsByName = new Map(
     // TODO this seems an inefficient use of getting the whole workspaces
@@ -57,42 +59,59 @@ export default function getDependents(
               // @ts-ignore - I don't know how to tell ts that the
               // set of names is the same set
               pkgJsonsByName.get(nextRelease.name).version,
-              // @ts-ignore - we are escaping here if nextRelease.type === 'none' waay earlier - the error case
               nextRelease.type
             ) || "";
 
           if (
-            !dependents.some(dep => dep.name === dependent) &&
+            // TODO validate this - I don't think it's right anymore
             !releases.some(dep => dep.name === dependent) &&
             !semver.satisfies(nextReleaseVersion, versionRange)
           ) {
             type = "patch";
           }
         }
-        return { name: dependent, type };
+        return { name: dependent, type, pkgJSON: dependentPkgJSON };
       })
       .filter(({ type }) => type)
-      // @ts-ignore - I don't know how to make typescript understand that the filter above guarantees this and I got sick of trying
-      .forEach((dependent: Release) => {
-        const existing = dependents.find(dep => dep.name === dependent.name);
-        // For things that are being given a major bump, we check if we have already
-        // added them here. If we have, we update the existing item instead of pushing it on to search.
-        // It is safe to not add it to pkgsToSearch because it should have already been searched at the
-        // largest possible bump type.
-        if (
-          existing &&
-          dependent.type === "major" &&
-          existing.type !== "major"
-        ) {
-          existing.type = "major";
-        } else {
-          pkgsToSearch.push(dependent);
-          dependents.push(dependent);
+      .forEach(
+        // @ts-ignore - I don't know how to make typescript understand that the filter above guarantees this and I got sick of trying
+        ({ name, type, pkgJSON }: Release & { pkgJSON: PackageJSON }) => {
+          // At this point, we know if we are making a change
+          updated = true;
+
+          const existing = releases.find(dep => dep.name === name);
+          // For things that are being given a major bump, we check if we have already
+          // added them here. If we have, we update the existing item instead of pushing it on to search.
+          // It is safe to not add it to pkgsToSearch because it should have already been searched at the
+          // largest possible bump type.
+          if (existing && type === "major" && existing.type !== "major") {
+            existing.type = "major";
+
+            // @ts-ignore
+            existing.newVersion = semver.inc(
+              existing.oldVersion,
+              existing.type
+            );
+
+            pkgsToSearch.push(existing);
+          } else {
+            let newDependent: ComprehensiveRelease = {
+              name,
+              type,
+              oldVersion: pkgJSON.version,
+              // @ts-ignore
+              newVersion: semver.inc(pkgJSON.version),
+              changesets: []
+            };
+
+            pkgsToSearch.push(newDependent);
+            releases.push(newDependent);
+          }
         }
-      });
+      );
   }
 
-  return dependents;
+  return { releases, updated };
 }
 
 /*

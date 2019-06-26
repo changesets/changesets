@@ -16,7 +16,6 @@ export type Release = { name: string; type: BumpType };
 export type ComprehensiveRelease = {
   name: string;
   type: BumpType;
-  dependentOnlyBump: boolean;
   oldVersion: string;
   newVersion: string;
   changesets: string[];
