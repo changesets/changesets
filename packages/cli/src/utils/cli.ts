@@ -1,7 +1,7 @@
 import uuid from "uuid/v1";
 // @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
 import termSize from "term-size";
-import { prefix } from "./logger";
+import logger, { prefix } from "./logger";
 // @ts-ignore
 import { prompt } from "enquirer";
 
@@ -12,6 +12,11 @@ import { prompt } from "enquirer";
  */
 
 const limit = Math.max(termSize().rows - 5, 10);
+
+let cancelFlow = () => {
+  logger.success("Cancelled... 👋 ");
+  process.exit();
+};
 
 async function askCheckboxPlus(
   message: string,
@@ -29,8 +34,13 @@ async function askCheckboxPlus(
     multiple: true,
     choices,
     format,
-    limit
-  }).then((responses: any) => responses[name]);
+    limit,
+    onCancel: cancelFlow
+  })
+    .then((responses: any) => responses[name])
+    .catch((err: unknown) => {
+      logger.error(err);
+    });
 }
 
 async function askQuestion(message: string): Promise<string> {
@@ -42,9 +52,14 @@ async function askQuestion(message: string): Promise<string> {
       message,
       name,
       // @ts-ignore
-      prefix
+      prefix,
+      onCancel: cancelFlow
     }
-  ]).then((responses: any) => responses[name]);
+  ])
+    .then((responses: any) => responses[name])
+    .catch((err: unknown) => {
+      logger.error(err);
+    });
 }
 
 async function askConfirm(message: string): Promise<boolean> {
@@ -57,9 +72,14 @@ async function askConfirm(message: string): Promise<boolean> {
       // @ts-ignore
       prefix,
       type: "confirm",
-      initial: true
+      initial: true,
+      onCancel: cancelFlow
     }
-  ]).then((responses: any) => responses[name]);
+  ])
+    .then((responses: any) => responses[name])
+    .catch((err: unknown) => {
+      logger.error(err);
+    });
 }
 
 async function askList(
@@ -75,9 +95,14 @@ async function askList(
       name,
       // @ts-ignore
       prefix,
-      type: "select"
+      type: "select",
+      onCancel: cancelFlow
     }
-  ]).then((responses: any) => responses[name]);
+  ])
+    .then((responses: any) => responses[name])
+    .catch((err: unknown) => {
+      logger.error(err);
+    });
 }
 
 export { askCheckboxPlus, askQuestion, askConfirm, askList };
