@@ -13,6 +13,11 @@ import { prompt } from "enquirer";
 
 const limit = Math.max(termSize().rows - 5, 10);
 
+let cancelFlow = () => {
+  logger.success("Cancelled... 👋 ");
+  process.exit();
+};
+
 async function askCheckboxPlus(
   message: string,
   choices: Array<any>,
@@ -30,10 +35,7 @@ async function askCheckboxPlus(
     choices,
     format,
     limit,
-    onCancel: () => {
-      logger.success("Cancelled... 👋 ");
-      process.exit();
-    }
+    onCancel: cancelFlow
   })
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
@@ -51,10 +53,7 @@ async function askQuestion(message: string): Promise<string> {
       name,
       // @ts-ignore
       prefix,
-      onCancel: () => {
-        logger.success("Cancelled... 👋 ");
-        process.exit();
-      }
+      onCancel: cancelFlow
     }
   ])
     .then((responses: any) => responses[name])
@@ -74,10 +73,7 @@ async function askConfirm(message: string): Promise<boolean> {
       prefix,
       type: "confirm",
       initial: true,
-      onCancel: () => {
-        logger.success("Cancelled... 👋 ");
-        process.exit();
-      }
+      onCancel: cancelFlow
     }
   ])
     .then((responses: any) => responses[name])
@@ -100,10 +96,7 @@ async function askList(
       // @ts-ignore
       prefix,
       type: "select",
-      onCancel: () => {
-        logger.success("Cancelled... 👋 ");
-        process.exit();
-      }
+      onCancel: cancelFlow
     }
   ])
     .then((responses: any) => responses[name])
