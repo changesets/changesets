@@ -3,7 +3,6 @@ import fs from "fs-extra";
 import detectIndent from "detect-indent";
 import semver from "semver";
 
-import * as boltMessages from "bolt/dist/modern/utils/messages";
 import * as bolt from "../../utils/bolt-replacements";
 
 import logger from "../../utils/logger";
@@ -103,7 +102,9 @@ async function bumpReleasedPackages(releaseObj, allPackages, config) {
 
   if (externalDeps.length !== 0) {
     logger.warn(
-      boltMessages.externalDepsPassedToUpdatePackageVersions(externalDeps)
+      `Attempted to pass external dependencies to updatePackageVersions:\n${externalDeps.join(
+        ", "
+      )}`
     );
   }
 

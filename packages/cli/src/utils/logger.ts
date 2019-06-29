@@ -40,5 +40,6 @@ export default {
   info,
   warn,
   error,
-  success
+  success,
+  format
 };

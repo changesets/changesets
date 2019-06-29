@@ -1,6 +1,5 @@
 import semver from "semver";
-import * as boltNpm from "bolt/dist/modern/utils/npm";
-import * as boltMessages from "bolt/dist/modern/utils/messages";
+import chalk from "chalk";
 import getWorkspaces from "./getWorkspaces";
 import logger from "../logger";
 
@@ -14,7 +13,7 @@ export default async function publishPackages({ cwd, access }) {
   });
 
   if (unpublishedPackagesInfo.length === 0) {
-    logger.warn(boltMessages.noUnpublishedPackagesToPublish());
+    logger.warn("No unpublished packages to publish");
   }
 
   const publishedPackages = await Promise.all(
@@ -25,9 +24,10 @@ export default async function publishPackages({ cwd, access }) {
 }
 
 async function publishAPackage(pkg, opts) {
-  const name = pkg.config.name;
-  const version = pkg.config.version;
-  logger.info(boltMessages.publishingPackage(name, version));
+  const { name, version } = pkg.config;
+  logger.info(
+    `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
+  );
 
   const publishDir = pkg.dir;
 
@@ -67,12 +67,12 @@ async function getUnpublishedPackages(packages) {
     } else if (semver.gt(localVersion, publishedVersion)) {
       packagesToPublish.push(pkgInfo);
       logger.info(
-        boltMessages.willPublishPackage(localVersion, publishedVersion, name)
+        `${name} is being published because our local version (${localVersion}) is ahead of npm's (${publishedVersion})`
       );
     } else if (semver.lt(localVersion, publishedVersion)) {
       // If the local version is behind npm, something is wrong, we warn here, and by not getting published later, it will fail
       logger.warn(
-        boltMessages.willNotPublishPackage(localVersion, publishedVersion, name)
+        `${name} is not being published because version ${publishedVersion} is already published on npm and we are trying to publish version ${localVersion}`
       );
     }
   }
