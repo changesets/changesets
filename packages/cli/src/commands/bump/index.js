@@ -1,7 +1,6 @@
 import path from "path";
 import fs from "fs-extra";
 import detectIndent from "detect-indent";
-import semver from "semver";
 
 import * as bolt from "../../utils/bolt-replacements";
 
@@ -124,22 +123,29 @@ async function bumpReleasedPackages(releaseObj, allPackages, config) {
       const newDepRange = rangeType + versionsToUpdate[depName];
       if (depTypes.length === 0) continue;
 
-      const willLeaveSemverRange = !semver.satisfies(
-        versionsToUpdate[depName],
-        depRange
-      );
+      // i commented out this stuff because it seems wrong
+      // it's accessing `internalDeps[depName]` (internalDeps is an array) which doesn't make sense
+      // and this case shouldn't happen ever because it should always bump things that leave semver range
+      // we should probably have an error _somewhere_ just in case this case does happen though
+      // maybe it should be on the new changeset format branch though?
+      // (i don't want to create annoying conflicts)
+
+      // const willLeaveSemverRange = !semver.satisfies(
+      //   versionsToUpdate[depName],
+      //   depRange
+      // );
       // This check determines whether the package will be released. If the
       // package will not be released, we throw.
-      if (!inUpdatedPackages && willLeaveSemverRange) {
-        throw new Error(
-          boltMessages.invalidBoltWorkspacesFromUpdate(
-            pkg.name,
-            depName,
-            depRange,
-            internalDeps[depName]
-          )
-        );
-      }
+      //       if (!inUpdatedPackages && willLeaveSemverRange) {
+      //         throw new Error(
+      //           boltMessages.invalidBoltWorkspacesFromUpdate(
+      //             pkg.name,
+      //             depName,
+      //             depRange,
+      //             internalDeps[depName]
+      //           )
+      //         );
+      //       }
 
       for (const depType of depTypes) {
         newPkgJSON[depType][depName] = newDepRange;
