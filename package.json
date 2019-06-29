@@ -81,7 +81,8 @@
     "uuid": "^3.3.2",
     "strip-ansi": "^5.2.0",
     "term-size": "^2.1.0",
-    "p-limit": "^2.2.0"
+    "p-limit": "^2.2.0",
+    "spawndamnit": "^2.0.0"
   },
   "preconstruct": {
     "packages": [
