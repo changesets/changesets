@@ -1,7 +1,7 @@
 import logger from "../../utils/logger";
 import pLimit from "p-limit";
 import chalk from "chalk";
-import spawn from "projector-spawn";
+import spawn from "spawndamnit";
 import { askQuestion } from "../../utils/cli";
 // @ts-ignore
 import isCI from "is-ci";
@@ -34,7 +34,7 @@ export function info(pkgName: string) {
       env: Object.assign({}, process.env, envOverride)
     });
 
-    return JSON.parse(result.stdout);
+    return JSON.parse(result.stdout.toString());
   });
 }
 
@@ -101,7 +101,7 @@ async function internalPublish(
     env: Object.assign({}, process.env, envOverride)
   });
 
-  let json = JSON.parse(stdout);
+  let json = JSON.parse(stdout.toString());
   if (json.error) {
     if (json.error.code === "EOTP" && !isCI) {
       if (currentOtpCode !== null) {
