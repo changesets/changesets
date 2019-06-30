@@ -1,7 +1,7 @@
 import logger from "../../utils/logger";
 import pLimit from "p-limit";
 import chalk from "chalk";
-import spawn from "spawndamnit";
+import spawn from "projector-spawn";
 import { askQuestion } from "../../utils/cli";
 // @ts-ignore
 import isCI from "is-ci";
@@ -79,45 +79,53 @@ let getOtpCode = async () => {
   return currentOtpCode;
 };
 
+// we have this so that we can do try a publish again after a publish without
+// the call being wrapped in the npm request limit and causing the publishes to potentially never run
+async function internalPublish(
+  pkgName: string,
+  opts: { cwd?: string; access?: string } = {}
+): Promise<{ published: boolean }> {
+  let publishFlags = opts.access ? ["--access", opts.access] : [];
+  if (requiresOtpCode) {
+    let otpCode = await getOtpCode();
+    publishFlags.push("--otp", otpCode);
+  }
+
+  // Due to a super annoying issue in yarn, we have to manually override this env variable
+  // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
+  const envOverride = {
+    npm_config_registry: getCorrectRegistry()
+  };
+  let { stdout } = await spawn("npm", ["publish", "--json", ...publishFlags], {
+    cwd: opts.cwd,
+    env: Object.assign({}, process.env, envOverride)
+  });
+
+  let json = JSON.parse(stdout);
+  if (json.error) {
+    if (json.error.code === "EOTP" && !isCI) {
+      if (currentOtpCode !== null) {
+        // the current otp code must be invalid since it errored
+        currentOtpCode = null;
+      }
+      requiresOtpCode = true;
+      return internalPublish(pkgName, opts);
+    }
+    logger.error(
+      `an error occurred while publishing ${pkgName}: ${json.error.code}`,
+      json.error.summary,
+      json.error.detail ? "\n" + json.error.detail : ""
+    );
+    return { published: false };
+  }
+  return { published: true };
+}
+
 export function publish(
   pkgName: string,
   opts: { cwd?: string; access?: string } = {}
 ): Promise<{ published: boolean }> {
-  return npmRequestLimit(async () => {
-    let publishFlags = opts.access ? ["--access", opts.access] : [];
-    if (requiresOtpCode) {
-      let otpCode = await getOtpCode();
-      publishFlags.push("--otp", otpCode);
-    }
-
-    // Due to a super annoying issue in yarn, we have to manually override this env variable
-    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-    const envOverride = {
-      npm_config_registry: getCorrectRegistry()
-    };
-    let child = spawn("npm", ["publish", "--json", ...publishFlags], {
-      cwd: opts.cwd,
-      env: Object.assign({}, process.env, envOverride)
-    });
-
-    let output = await child;
-    let json = JSON.parse(output.stdout.toString());
-    if (json.error) {
-      if (json.error.code === "EOTP" && !isCI) {
-        if (currentOtpCode !== null) {
-          // the current otp code must be invalid since it errored
-          currentOtpCode = null;
-        }
-        requiresOtpCode = true;
-        return publish(pkgName, opts);
-      }
-      logger.error(
-        `an error occurred while publishing ${pkgName}: ${json.error.code}`,
-        json.error.summary,
-        json.error.detail ? "\n" + json.error.detail : ""
-      );
-      return { published: false };
-    }
-    return { published: true };
+  return npmRequestLimit(() => {
+    return internalPublish(pkgName, opts);
   });
 }

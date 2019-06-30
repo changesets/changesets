@@ -38,14 +38,13 @@
     "pkg-dir": "^4.1.0",
     "prettier": "^1.14.3",
     "semver": "^5.4.1",
-    "spawndamnit": "^2.0.0",
+    "projector-spawn": "^1.0.1",
     "term-size": "^2.1.0",
     "tty-table": "^2.7.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
     "jest-fixtures": "^0.5.0",
-    "projector-spawn": "^1.0.1",
     "strip-ansi": "^5.2.0"
   }
 }
