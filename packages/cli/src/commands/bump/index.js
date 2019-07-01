@@ -1,6 +1,8 @@
 import path from "path";
 import fs from "fs-extra";
 import detectIndent from "detect-indent";
+import chalk from "chalk";
+import semver from "semver";
 
 import * as bolt from "../../utils/bolt-replacements";
 
@@ -20,6 +22,10 @@ import {
 } from "../../utils/bolt-replacements/getDependencyInfo";
 import versionRangeToRangeType from "../../utils/bolt-replacements/versionRangeToRangeType";
 import { defaultConfig } from "../../utils/constants";
+
+const importantSeparator = chalk.red(
+  "===============================IMPORTANT!==============================="
+);
 
 export default async function version(opts) {
   let userConfig = await resolveConfig(opts.cwd);
@@ -123,29 +129,28 @@ async function bumpReleasedPackages(releaseObj, allPackages, config) {
       const newDepRange = rangeType + versionsToUpdate[depName];
       if (depTypes.length === 0) continue;
 
-      // i commented out this stuff because it seems wrong
-      // it's accessing `internalDeps[depName]` (internalDeps is an array) which doesn't make sense
-      // and this case shouldn't happen ever because it should always bump things that leave semver range
-      // we should probably have an error _somewhere_ just in case this case does happen though
-      // maybe it should be on the new changeset format branch though?
-      // (i don't want to create annoying conflicts)
-
-      // const willLeaveSemverRange = !semver.satisfies(
-      //   versionsToUpdate[depName],
-      //   depRange
-      // );
+      const willLeaveSemverRange = !semver.satisfies(
+        versionsToUpdate[depName],
+        depRange
+      );
       // This check determines whether the package will be released. If the
       // package will not be released, we throw.
-      //       if (!inUpdatedPackages && willLeaveSemverRange) {
-      //         throw new Error(
-      //           boltMessages.invalidBoltWorkspacesFromUpdate(
-      //             pkg.name,
-      //             depName,
-      //             depRange,
-      //             internalDeps[depName]
-      //           )
-      //         );
-      //       }
+      if (!inUpdatedPackages && willLeaveSemverRange) {
+        // TODO: this error message was copied directly from bolt
+        // it seems wrong, shouldn't this case be covered by dependents stuff
+        // and this should be something like "this should never happen, please open an issue because there's probably a bug in changesets"
+        throw new Error(
+          `${importantSeparator}
+  ${
+    pkg.name
+  } has a dependency on ${depName} at ${depRange}, however the new version of ${
+            // TODO: look into this, accessing internalDeps[depName] seems wrong
+            internalDeps[depName]
+          } leaves this range.
+  You will need to make a new changeset that includes an update to ${pkg.name}
+${importantSeparator}`
+        );
+      }
 
       for (const depType of depTypes) {
         newPkgJSON[depType][depName] = newDepRange;
