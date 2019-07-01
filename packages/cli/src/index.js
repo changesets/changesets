@@ -17,7 +17,7 @@ const { input, flags } = meow(
     init
     add [--commit]
     bump [--commit --update-changelog --skip-ci]
-    release [--public]
+    release [--public --otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
   `,
   {
@@ -51,6 +51,10 @@ const { input, flags } = meow(
       output: {
         type: "string",
         alias: "o"
+      },
+      otp: {
+        type: "string",
+        default: undefined
       }
     }
   }
@@ -73,7 +77,8 @@ const cwd = process.cwd();
       public: isPublic,
       sinceMaster,
       verbose,
-      output
+      output,
+      otp
     } = flags;
 
     // Command line options need to be undefined, otherwise their
@@ -114,6 +119,7 @@ const cwd = process.cwd();
             // This exists as
             config.public = isPublic;
           }
+          config.otp = otp;
           await release(config);
           return;
         }

@@ -5,6 +5,8 @@ import spawn from "spawndamnit";
 import { askQuestion } from "../../utils/cli";
 // @ts-ignore
 import isCI from "is-ci";
+import { ExitError } from "../../utils/errors";
+import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);
 
@@ -14,6 +16,27 @@ function getCorrectRegistry() {
       ? undefined
       : process.env.npm_config_registry;
   return registry;
+}
+
+export async function getTokenIsRequired() {
+  // Due to a super annoying issue in yarn, we have to manually override this env variable
+  // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
+  const envOverride = {
+    npm_config_registry: getCorrectRegistry()
+  };
+  let result = await spawn("npm", ["profile", "get", "--json"], {
+    env: Object.assign({}, process.env, envOverride)
+  });
+  let json = JSON.parse(result.stdout.toString());
+  if (json.error) {
+    logger.error(
+      `an error occurred while running \`npm profile get\`: ${json.error.code}`
+    );
+    logger.error(json.error.summary);
+    if (json.error.summary) logger.error(json.error.summary);
+    throw new ExitError(1);
+  }
+  return json.tfa.mode === "auth-and-writes";
 }
 
 export function info(pkgName: string) {
@@ -56,38 +79,35 @@ export async function infoAllow404(pkgName: string) {
   return { published: true, pkgInfo };
 }
 
-let requiresOtpCode = false;
-
-let currentOtpCode: string | null = null;
-
 let otpAskLimit = pLimit(1);
 
-let askForOtpCode = () =>
+let askForOtpCode = (twoFactorState: TwoFactorState) =>
   otpAskLimit(() => {
-    if (currentOtpCode !== null) return currentOtpCode;
+    if (twoFactorState.token !== null) return twoFactorState.token;
     logger.info(
       "This operation requires a one-time password from your authenticator."
     );
     return askQuestion("Enter one-time password:");
   });
 
-let getOtpCode = async () => {
-  if (currentOtpCode !== null) {
-    return currentOtpCode;
+export let getOtpCode = async (twoFactorState: TwoFactorState) => {
+  if (twoFactorState.token !== null) {
+    return twoFactorState.token;
   }
-  currentOtpCode = await askForOtpCode();
-  return currentOtpCode;
+  twoFactorState.token = await askForOtpCode(twoFactorState);
+  return twoFactorState.token;
 };
 
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
   pkgName: string,
-  opts: { cwd?: string; access?: string } = {}
+  opts: { cwd: string; access?: string },
+  twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   let publishFlags = opts.access ? ["--access", opts.access] : [];
-  if (requiresOtpCode) {
-    let otpCode = await getOtpCode();
+  if (twoFactorState.isRequired) {
+    let otpCode = await getOtpCode(twoFactorState);
     publishFlags.push("--otp", otpCode);
   }
 
@@ -104,12 +124,13 @@ async function internalPublish(
   let json = JSON.parse(stdout.toString());
   if (json.error) {
     if (json.error.code === "EOTP" && !isCI) {
-      if (currentOtpCode !== null) {
+      if (twoFactorState.token !== null) {
         // the current otp code must be invalid since it errored
-        currentOtpCode = null;
+        twoFactorState.token = null;
       }
-      requiresOtpCode = true;
-      return internalPublish(pkgName, opts);
+      // just in case this isn't already true
+      twoFactorState.isRequired = Promise.resolve(true);
+      return internalPublish(pkgName, opts, twoFactorState);
     }
     logger.error(
       `an error occurred while publishing ${pkgName}: ${json.error.code}`,
@@ -123,9 +144,10 @@ async function internalPublish(
 
 export function publish(
   pkgName: string,
-  opts: { cwd?: string; access?: string } = {}
+  opts: { cwd: string; access?: string },
+  twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   return npmRequestLimit(() => {
-    return internalPublish(pkgName, opts);
+    return internalPublish(pkgName, opts, twoFactorState);
   });
 }

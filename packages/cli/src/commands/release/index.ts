@@ -10,7 +10,7 @@ function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   logger.log(mappedPkgs);
 }
 
-export default async function run(opts: { cwd: string }) {
+export default async function run(opts: { cwd: string; otp?: string }) {
   const userConfig = await resolveUserConfig(opts.cwd);
   const userPublishOptions =
     userConfig && userConfig.publishOptions ? userConfig.publishOptions : {};
@@ -24,7 +24,8 @@ export default async function run(opts: { cwd: string }) {
   const response = await publishPackages({
     cwd: config.cwd || process.cwd(),
     // if not public, we wont pass the access, and it works as normal
-    access: config.public ? "public" : undefined
+    access: config.public ? "public" : undefined,
+    otp: opts.otp
   });
 
   const successful = response.filter(p => p.published);

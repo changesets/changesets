@@ -2,19 +2,32 @@ import semver from "semver";
 import chalk from "chalk";
 import getWorkspaces from "../../utils/bolt-replacements/getWorkspaces";
 import { Workspace } from "get-workspaces";
-import * as boltNpm from "./npm-utils";
+import * as npmUtils from "./npm-utils";
 import logger from "../../utils/logger";
+import { TwoFactorState } from "../../utils/types";
 
 export default async function publishPackages({
   cwd,
-  access
+  access,
+  otp
 }: {
   cwd: string;
   access?: "public";
+  otp?: string;
 }) {
   const packages = await getWorkspaces({ cwd });
   const publicPackages = packages.filter(pkg => !pkg.config.private);
-
+  let twoFactorState: TwoFactorState =
+    otp === undefined
+      ? {
+          token: null,
+          // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
+          isRequired: npmUtils.getTokenIsRequired()
+        }
+      : {
+          token: otp,
+          isRequired: Promise.resolve(true)
+        };
   const unpublishedPackagesInfo = await getUnpublishedPackages(publicPackages);
   const unpublishedPackages = publicPackages.filter(pkg => {
     return unpublishedPackagesInfo.some(p => pkg.name === p.name);
@@ -25,13 +38,17 @@ export default async function publishPackages({
   }
 
   const publishedPackages = await Promise.all(
-    unpublishedPackages.map(pkg => publishAPackage(pkg, access))
+    unpublishedPackages.map(pkg => publishAPackage(pkg, access, twoFactorState))
   );
 
   return publishedPackages;
 }
 
-async function publishAPackage(pkg: Workspace, access?: "public") {
+async function publishAPackage(
+  pkg: Workspace,
+  access: "public" | undefined,
+  twoFactorState: TwoFactorState
+) {
   const { name, version } = pkg.config;
   logger.info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
@@ -39,10 +56,14 @@ async function publishAPackage(pkg: Workspace, access?: "public") {
 
   const publishDir = pkg.dir;
 
-  const publishConfirmation = await boltNpm.publish(name, {
-    cwd: publishDir,
-    access
-  });
+  const publishConfirmation = await npmUtils.publish(
+    name,
+    {
+      cwd: publishDir,
+      access
+    },
+    twoFactorState
+  );
 
   return {
     name,
@@ -62,7 +83,7 @@ async function getUnpublishedPackages(packages: Array<Workspace>) {
   const results: Array<PkgInfo> = await Promise.all(
     packages.map(async pkg => {
       const config = pkg.config;
-      const response = await boltNpm.infoAllow404(config.name);
+      const response = await npmUtils.infoAllow404(config.name);
       return {
         name: config.name,
         localVersion: config.version,
