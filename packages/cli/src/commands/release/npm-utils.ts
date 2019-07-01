@@ -68,13 +68,15 @@ export async function infoAllow404(pkgName: string) {
     return { published: false, pkgInfo: {} };
   }
   if (pkgInfo.error) {
-    logger.warn(
+    logger.error(
       `Recieved an unknown error code: ${
         pkgInfo.error.code
       } for npm info ${chalk.cyan(`"${pkgName}"`)}`
     );
-    logger.warn(pkgInfo);
-    return { published: false, pkgInfo: {} };
+    logger.error(pkgInfo.error.summary);
+    if (pkgInfo.error.detail) logger.error(pkgInfo.error.detail);
+
+    throw new ExitError(1);
   }
   return { published: true, pkgInfo };
 }
