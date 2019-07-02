@@ -21,7 +21,11 @@
     "import/no-extraneous-dependencies": [
       "error",
       {
-        "devDependencies": ["**/__tests__/**/*.{ts,js}", "**/*.test.{ts,js}"]
+        "devDependencies": [
+          "**/__tests__/**/*.{ts,js}",
+          "**/*.test.{ts,js}",
+          "**/test.{ts,js}"
+        ]
       }
     ]
   },

@@ -25,7 +25,7 @@ describe("check", () => {
       }
     ]);
   });
-  it("should error if a package contains an external dependency at a mistmatched version", async () => {
+  it("should error if a package contains an external dependency at a mismatched version", async () => {
     const cwd = await getFixturePath(
       __dirname,
       "yarn-workspace-mismatched-external"
