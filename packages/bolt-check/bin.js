@@ -1,4 +1,6 @@
 #!/usr/bin/env node
 "use strict";
 
-require("./");
+const cli = require("./").cli;
+
+cli();
