@@ -84,19 +84,21 @@ export async function infoAllow404(pkgName: string) {
 let otpAskLimit = pLimit(1);
 
 let askForOtpCode = (twoFactorState: TwoFactorState) =>
-  otpAskLimit(() => {
+  otpAskLimit(async () => {
     if (twoFactorState.token !== null) return twoFactorState.token;
     logger.info(
       "This operation requires a one-time password from your authenticator."
     );
-    return askQuestion("Enter one-time password:");
+
+    let val = await askQuestion("Enter one-time password:");
+    twoFactorState.token = val;
   });
 
 export let getOtpCode = async (twoFactorState: TwoFactorState) => {
   if (twoFactorState.token !== null) {
     return twoFactorState.token;
   }
-  twoFactorState.token = await askForOtpCode(twoFactorState);
+  await askForOtpCode(twoFactorState);
   return twoFactorState.token;
 };
 
