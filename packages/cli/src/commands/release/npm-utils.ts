@@ -92,14 +92,14 @@ let askForOtpCode = (twoFactorState: TwoFactorState) =>
 
     let val = await askQuestion("Enter one-time password:");
     twoFactorState.token = val;
+    return val;
   });
 
 export let getOtpCode = async (twoFactorState: TwoFactorState) => {
   if (twoFactorState.token !== null) {
     return twoFactorState.token;
   }
-  await askForOtpCode(twoFactorState);
-  return twoFactorState.token;
+  return askForOtpCode(twoFactorState);
 };
 
 // we have this so that we can do try a publish again after a publish without
