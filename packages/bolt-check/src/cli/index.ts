@@ -56,9 +56,8 @@ let printErrors = (errors: ErrorObj[]) => {
   });
 };
 
-export default () => {
-  const { flags } = meow(
-    `
+const { flags } = meow(
+  `
     Usage
       $ bolt-check
         Performs the bolt-check action. See readme for full details.
@@ -72,41 +71,39 @@ export default () => {
         Do not show any console warnings.
 
     `,
-    {
-      flags: {
-        cwd: {
-          type: "string",
-          default: process.cwd()
-        },
-        fix: {
-          type: "boolean"
-        },
-        silent: {
-          type: "boolean"
-        }
+  {
+    flags: {
+      cwd: {
+        type: "string",
+        default: process.cwd()
+      },
+      fix: {
+        type: "boolean"
+      },
+      silent: {
+        type: "boolean"
       }
     }
-  );
+  }
+);
 
-  (async () => {
-    const config = { cwd: flags.cwd };
-    // @ts-ignore
-    const errors = await check(config);
+(async () => {
+  const config = { cwd: flags.cwd };
+  const errors = await check(config);
 
-    if (errors.length > 0 && !flags.fix) {
-      if (!flags.silent) {
-        console.error(chalk.red("there are errors in your config!"));
-        console.log(
-          chalk.cyan("these errors may be fixable with `bolt-check --fix`")
-        );
+  if (errors.length > 0 && !flags.fix) {
+    if (!flags.silent) {
+      console.error(chalk.red("there are errors in your config!"));
+      console.log(
+        chalk.cyan("these errors may be fixable with `bolt-check --fix`")
+      );
 
-        printErrors(errors);
-      }
-      process.exit(1);
-    } else if (errors.length > 0 && flags.fix) {
-      fix(errors, config);
-    } else {
-      console.log("Looks like your dependencies are fine");
+      printErrors(errors);
     }
-  })();
-};
+    process.exit(1);
+  } else if (errors.length > 0 && flags.fix) {
+    fix(errors, config);
+  } else {
+    console.log("Looks like your dependencies are fine");
+  }
+})();
