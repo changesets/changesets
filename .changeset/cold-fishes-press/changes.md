@@ -1,1 +1,0 @@
-Making sure the arrays are sorted before using them

@@ -1,5 +1,14 @@
 # bolt-check
 
+## 0.4.0
+
+### Minor Changes
+
+- [23ee7d64](https://github.com/changesets/changesets/commit/23ee7d64) [#108](https://github.com/changesets/changesets/pull/108) Thanks [@Blasz](https://github.com/Blasz)! - Add javascript API for bolt-check. The API currently contains check and fix commands.
+
+- Updated dependencies [cbb2c953]:
+  - get-workspaces@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

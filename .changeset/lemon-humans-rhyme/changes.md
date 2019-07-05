@@ -1,1 +1,0 @@
-Inline last usages of bolt

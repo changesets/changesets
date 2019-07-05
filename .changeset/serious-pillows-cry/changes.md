@@ -1,1 +1,0 @@
-Catch Promise rejection on SIGINT and exit gracefully

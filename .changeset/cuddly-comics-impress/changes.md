@@ -1,1 +1,0 @@
-Fix auto-generated documentation to point outwards to changesets repo to stop it going stale
