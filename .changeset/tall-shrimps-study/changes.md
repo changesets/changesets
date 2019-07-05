@@ -1,0 +1,1 @@
+Add private property to PackageJSON type

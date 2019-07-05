@@ -7,6 +7,7 @@ import add from "./commands/add";
 import bump from "./commands/bump";
 import release from "./commands/release";
 import status from "./commands/status";
+import { ExitError } from "./utils/errors";
 
 const { input, flags } = meow(
   `
@@ -16,7 +17,7 @@ const { input, flags } = meow(
     init
     add [--commit]
     bump [--commit --update-changelog --skip-ci]
-    release [--public]
+    release [--public --otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
   `,
   {
@@ -50,6 +51,10 @@ const { input, flags } = meow(
       output: {
         type: "string",
         alias: "o"
+      },
+      otp: {
+        type: "string",
+        default: undefined
       }
     }
   }
@@ -72,7 +77,8 @@ const cwd = process.cwd();
       public: isPublic,
       sinceMaster,
       verbose,
-      output
+      output,
+      otp
     } = flags;
 
     // Command line options need to be undefined, otherwise their
@@ -80,49 +86,56 @@ const cwd = process.cwd();
     // config file. For this reason, we only assign them to this
     // object as and when they exist.
     const config = { cwd };
-
-    switch (input[0]) {
-      case "init": {
-        await init({ cwd });
-        return;
-      }
-      case "add": {
-        if (commit !== undefined) {
-          config.commit = commit;
+    try {
+      switch (input[0]) {
+        case "init": {
+          await init({ cwd });
+          return;
         }
-        await add(config);
-        return;
-      }
-      case "bump": {
-        // We only assign them to this
-        // object as and when they exist.
-        if (updateChangelog !== undefined) {
-          config.updateChangelog = updateChangelog;
+        case "add": {
+          if (commit !== undefined) {
+            config.commit = commit;
+          }
+          await add(config);
+          return;
         }
-        if (skipCI !== undefined) {
-          config.skipCI = skipCI;
+        case "bump": {
+          // We only assign them to this
+          // object as and when they exist.
+          if (updateChangelog !== undefined) {
+            config.updateChangelog = updateChangelog;
+          }
+          if (skipCI !== undefined) {
+            config.skipCI = skipCI;
+          }
+          if (commit !== undefined) {
+            config.commit = commit;
+          }
+          await bump(config);
+          return;
         }
-        if (commit !== undefined) {
-          config.commit = commit;
+        case "release": {
+          if (isPublic !== undefined) {
+            // This exists as
+            config.public = isPublic;
+          }
+          config.otp = otp;
+          await release(config);
+          return;
         }
-        await bump(config);
-        return;
-      }
-      case "release": {
-        if (isPublic !== undefined) {
-          // This exists as
-          config.public = isPublic;
+        case "status": {
+          await status({ cwd, sinceMaster, verbose, output });
+          return;
         }
-        await release(config);
-        return;
+        default: {
+          logger.error(`Invalid command ${input[0]} was provided`);
+        }
       }
-      case "status": {
-        await status({ cwd, sinceMaster, verbose, output });
-        return;
+    } catch (err) {
+      if (err instanceof ExitError) {
+        return process.exit(err.code);
       }
-      default: {
-        logger.error(`Invalid command ${input[0]} was provided`);
-      }
+      throw err;
     }
   }
 })();

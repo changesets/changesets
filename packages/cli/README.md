@@ -152,14 +152,14 @@ This command will read then delete changesets on disk, ensuring that they are on
 ### release
 
 ```
-changeset release [--public]
+changeset release [--public] [--otp={token}]
 ```
 
 Publishes to NPM repo, and creates tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is acurate.
 
 `--public` - enables the `--access-public` flag when publishing. This is required if trying to publish public scoped packages.
 
-> **IF YOU HAVE 2FA TURNED ON FOR NPM** you need to provide your auth token. Currently the way to do this is to run `NPM_CONFIG_OTP=123456 yarn changeset release`.
+`--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the `--otp` option.
 
 **NOTE:** You will still need to push your changes back to master after this
 
