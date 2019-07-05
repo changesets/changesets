@@ -1,1 +1,0 @@
-Add javascript API for bolt-check. The API currently contains check and fix commands.

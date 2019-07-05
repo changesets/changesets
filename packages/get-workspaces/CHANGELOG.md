@@ -1,5 +1,16 @@
 # get-workspaces
 
+## 0.4.0
+
+### Minor Changes
+
+- [cbb2c953](https://github.com/changesets/changesets/commit/cbb2c953) [#89](https://github.com/changesets/changesets/pull/89) Thanks [@highvoltag3](https://github.com/highvoltag3)! - Making sure the arrays are sorted before using them
+
+### Patch Changes
+
+- [d4bbab4e](https://github.com/changesets/changesets/commit/d4bbab4e) [#91](https://github.com/changesets/changesets/pull/91) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add PackageJSON type
+- [94267ff3](https://github.com/changesets/changesets/commit/94267ff3) [#106](https://github.com/changesets/changesets/pull/106) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add private property to PackageJSON type
+
 ## 0.3.1
 
 ### Patch Changes
