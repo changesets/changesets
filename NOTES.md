@@ -19,7 +19,7 @@ I integrated into workflow
 - +`applyLinks` takes dependents and linked packages, then updates dependents where needed - returns the dependents and if they have been updated
 - +C`assembleReleasePlan` `assembleReleasePlan(NewChangeset[], Workspace[], DependentsGraph config) => ReleasePlan`, basically takes in the needed info and then repeatedly determines dependents and applies links until neither cause an update
 - \*C`getReleasePlan` performs `getReleasePlan(cwd) => assembleReleasePlan(all-the-things)` - it's a composition of other packages
-- \*`apply` `apply(cwd)` Does all reading from disc, assembles release plan, and then applies the release plan (including removing files) (this is just bump, but I keep using the word apply)
+- -`apply` `apply(ReleasePlan, cwd)` assembles release plan, and then applies the release plan (including removing files) (this is just bump, but I keep using the word apply)
 
 Some notes:
 

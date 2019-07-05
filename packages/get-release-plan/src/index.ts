@@ -32,22 +32,17 @@ async function createReleasePlan(
 
   let releaseObjectValidated = false;
   while (releaseObjectValidated === false) {
-    let {
-      releases: dependentReleases,
-      updated: dependentAdded
-    } = determineDependents(releases, workspaces || [], dependentsGraph);
-    if (dependentAdded) {
-      releases = dependentReleases;
-    }
-    let { releases: linkAppliedReleases, updated } = applyLinks(
+    // The map passed in to determineDependents will be mutated
+    let dependentAdded = determineDependents(
       releases,
-      config.linked
+      workspaces || [],
+      dependentsGraph
     );
 
-    if (updated) {
-      releases = linkAppliedReleases;
-    }
-    releaseObjectValidated = !updated && !dependentAdded;
+    // The map passed in to determineDependents will be mutated
+    let linksUpdated = applyLinks(releases, config.linked);
+
+    releaseObjectValidated = !linksUpdated && !dependentAdded;
   }
 
   return { changesets, releases };
