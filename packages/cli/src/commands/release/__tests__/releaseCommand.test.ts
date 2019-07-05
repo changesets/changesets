@@ -1,14 +1,15 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 
-import { publishPackages } from "../../../utils/bolt-replacements";
+import publishPackages from "../publishPackages";
 import * as git from "../../../utils/git";
 import runRelease from "..";
 
 jest.mock("../../../utils/cli");
 jest.mock("../../../utils/git");
 jest.mock("../../../utils/logger");
-jest.mock("../../../utils/bolt-replacements");
+jest.mock("../publishPackages");
 
+// @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
 // we want to keep other bolt commands still running so our tests are more e2e
 // NOTE: This is pretty terrible. Quite obviously bolt is not going to return these results
@@ -16,6 +17,7 @@ git.tag.mockImplementation(() => Promise.resolve(true));
 // and we know this will be heavily refactored once its moved into the bolt org anyway. So we are happy
 // to keep this debt in for now. LB takes full responsibility for this if it becomes flakey.
 
+// @ts-ignore
 publishPackages.mockImplementation(() =>
   Promise.resolve([
     { name: "pkg-a", newVersion: "1.1.0", published: true },
@@ -24,7 +26,7 @@ publishPackages.mockImplementation(() =>
 );
 
 describe("running release", () => {
-  let cwd;
+  let cwd: string;
 
   beforeEach(async () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");

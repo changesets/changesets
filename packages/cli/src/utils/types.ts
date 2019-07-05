@@ -11,3 +11,8 @@ export type Changeset = {
   releases: Array<{ name: string; type: BumpType }>;
   dependents: Array<{ name: string; type: BumpType }>;
 };
+
+export type TwoFactorState = {
+  token: string | null;
+  isRequired: Promise<boolean>;
+};
