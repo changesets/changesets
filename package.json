@@ -82,7 +82,9 @@
     "term-size": "^2.1.0",
     "tty-table": "^2.7.0",
     "typescript": "^3.4.5",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "@types/child-process-promise": "^2.2.1",
+    "child-process-promise": "^2.2.1"
   },
   "preconstruct": {
     "packages": [
