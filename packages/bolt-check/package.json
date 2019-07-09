@@ -12,7 +12,8 @@
   },
   "files": [
     "dist",
-    "bin.js"
+    "bin.js",
+    "cli"
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
