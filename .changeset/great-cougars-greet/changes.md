@@ -1,0 +1,1 @@
+Add cli entrypoint to published files so the cli isn't broken
