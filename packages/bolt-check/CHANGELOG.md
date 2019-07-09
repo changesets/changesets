@@ -1,5 +1,11 @@
 # bolt-check
 
+## 0.4.1
+
+### Patch Changes
+
+- [6d1b196f](https://github.com/changesets/changesets/commit/6d1b196f) - Add cli entrypoint to published files so the cli isn't broken
+
 ## 0.4.0
 
 ### Minor Changes
