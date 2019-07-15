@@ -2,7 +2,7 @@
 
 > A way to manage your versioning and changelogs with a focus on multi-package repositories
 
-The `changesets` workflow is designed to help you from adding changes all the way through to publishing. It lets contributors inform you about their changes with their pull requests, then we automate updating package versions, and publishing new versions of packages based on provided information.
+The `changesets` workflow is designed to help you from when people are making changes, all the way through to publishing. It lets contributors inform you about their changes with their pull requests, then we automate updating package versions, and changelogs, and publishing new versions of packages based on the provided information.
 
 Changesets has a focus on solving these problems for multi-package repositories, and keeps packages that rely on each other within the multi-package repository up-to-date, as well as making it easy to make changes to groups of packages.
 
