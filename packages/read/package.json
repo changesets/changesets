@@ -11,5 +11,9 @@
     "@changesets/parse": "^0.0.0",
     "@changesets/types": "^0.0.0",
     "@changesets/git": "^0.0.0"
+  },
+  "devDependencies": {
+    "fixturez": "^1.1.0",
+    "outdent": "0.7.0"
   }
 }

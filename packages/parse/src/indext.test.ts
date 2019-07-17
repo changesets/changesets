@@ -117,7 +117,7 @@ describe("parsing a changeset", () => {
       summary: "Nice simple summary"
     });
   });
-  it("should be fine if the summary body includes", () => {
+  it("should be fine if the summary body includes ---", () => {
     let expectedSummary = outdent`---
     Nice simple summary---that has this`;
 
