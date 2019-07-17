@@ -8,6 +8,18 @@ import {
   ComprehensiveRelease
 } from "@changesets/types";
 
+/*
+  WARNING:
+  Important note for understanding how this package works:
+
+  We are doing some kind of wacky things with manipulating the objects within the
+  releases array, despite the fact that this was passed to us as an argument. We are
+  aware that this is generally bad practice, but have decided to to this here as
+  we control the entire flow of releases.
+
+  We could solve this by inlining this function, or by returning a deep-cloned then
+  modified array, but we decided both of those are worse than this solution.
+*/
 export default function getDependents(
   releases: ComprehensiveRelease[],
   workspaces: Workspace[],
@@ -55,18 +67,10 @@ export default function getDependents(
         ) {
           type = "major";
         } else {
-          let nextReleaseVersion =
-            semver.inc(
-              // @ts-ignore - I don't know how to tell ts that the
-              // set of names is the same set
-              pkgJsonsByName.get(nextRelease.name).version,
-              nextRelease.type
-            ) || "";
-
           if (
             // TODO validate this - I don't think it's right anymore
             !releases.some(dep => dep.name === dependent) &&
-            !semver.satisfies(nextReleaseVersion, versionRange)
+            !semver.satisfies(nextRelease.newVersion, versionRange)
           ) {
             type = "patch";
           }

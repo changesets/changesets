@@ -1,168 +1,9 @@
-// This is going to be mostly old fixtures that we can copy across
-
-// import getReleaseInfo from "./";
-
-import {
-  NewChangeset,
-  Workspace,
-  Config,
-  Release,
-  VersionType
-} from "@changesets/types";
-
 import assembleReleasePlan from "./";
 
-function getFakeData(
-  data: {
-    changesets?: NewChangeset[];
-    workspaces?: Workspace[];
-    dependentsGraph?: Map<string, string[]>;
-    config?: Config;
-  } = {}
-) {
-  let changesets = data.changesets || [];
-  let workspaces = data.workspaces || [];
-  let dependentsGraph = data.dependentsGraph || new Map();
-  let config = data.config || {};
+import FakeFullState from "./test-utils";
 
-  return {
-    changesets,
-    workspaces,
-    dependentsGraph,
-    config
-  };
-}
-
-function getWorkspace(
-  name: string = "pkg-a",
-  version: string = "1.0.0"
-): Workspace {
-  return {
-    name,
-    config: {
-      name,
-      version
-    },
-    dir: "this-shouldn't-matter"
-  };
-}
-
-function getChangeset(
-  data: {
-    id?: string;
-    summary?: string;
-    releases?: Array<Release>;
-  } = {}
-): NewChangeset {
-  let id = data.id || "strange-words-combine";
-  let summary = data.summary || "base summary whatever";
-  let releases = data.releases || [];
-  return {
-    id,
-    summary,
-    releases
-  };
-}
-
-function getRelease(data: { name?: string; type?: VersionType } = {}): Release {
-  let name = data.name || "pkg-a";
-  let type = data.type || "patch";
-
-  return { name, type };
-}
-
-function getDependentsGraph(
-  thing: [[string, Array<String>]] = [["pkg-a", []]]
-) {
-  let map = new Map();
-  for (let acity of thing) {
-    let [name, depenents] = acity;
-    map.set(name, depenents);
-  }
-  return map;
-}
-
-function getSimpleSetup(
-  custom: {
-    workspaces?: Workspace[];
-    changesets?: NewChangeset[];
-    dependentsGraph?: Map<string, string[]>;
-  } = {}
-) {
-  return getFakeData({
-    workspaces: [getWorkspace()],
-    changesets: [getChangeset({ releases: [getRelease()] })],
-    dependentsGraph: getDependentsGraph(),
-    ...custom
-  });
-}
-
-class FakeFullState {
-  workspaces: Workspace[];
-  changesets: NewChangeset[];
-  dependentsGraph: Map<string, string[]>;
-
-  constructor(custom?: {
-    workspaces?: Workspace[];
-    changesets?: NewChangeset[];
-    dependentsGraph?: Map<string, string[]>;
-  }) {
-    let { workspaces, changesets, dependentsGraph } = getSimpleSetup(custom);
-    this.workspaces = workspaces;
-    this.changesets = changesets;
-    this.dependentsGraph = dependentsGraph;
-  }
-
-  addChangeset(
-    data: {
-      id?: string;
-      summary?: string;
-      releases?: Array<Release>;
-    } = {}
-  ) {
-    let changeset = getChangeset(data);
-    if (this.changesets.find(c => c.id === changeset.id)) {
-      throw new Error(
-        `tried to add a second changeset with same id: ${changeset.id}`
-      );
-    }
-    this.changesets.push(changeset);
-  }
-
-  updateDependency(pkgA: string, pkgB: string, version: string) {
-    let ws = this.workspaces.find(a => a.name === pkgA);
-    if (!ws) throw new Error("no ws");
-    if (!ws.config.dependencies) ws.config.dependencies = {};
-    ws.config.dependencies[pkgB] = version;
-
-    let depList = this.dependentsGraph.get(pkgB);
-    if (!depList) throw new Error("could not add dependency");
-    this.dependentsGraph.set(pkgB, [...depList, pkgA]);
-  }
-
-  addWorkspace(name: string, version: string) {
-    let ws = getWorkspace(name, version);
-    if (this.workspaces.find(c => c.name === ws.name)) {
-      throw new Error(
-        `tried to add a second workspace with same name': ${ws.name}`
-      );
-    }
-    this.workspaces.push(ws);
-    this.dependentsGraph.set(name, []);
-  }
-  updateWorkspace(name: string, version: string) {
-    let ws = this.workspaces.find(c => c.name === name);
-    if (!ws) {
-      throw new Error(
-        `could not update workspace ${name} because it doesn't exist - try addWorskpace`
-      );
-    }
-    ws.config.version = version;
-  }
-}
-
-describe("get-release-info", () => {
-  it("should get release info for basic setup", async () => {
+describe("assemble-release-plan", () => {
+  it("should assemble release plan for basic setup", async () => {
     let setup = new FakeFullState();
 
     let { releases } = assembleReleasePlan(
@@ -181,7 +22,7 @@ describe("get-release-info", () => {
       changesets: ["strange-words-combine"]
     });
   });
-  it("should get release with multiple packages", async () => {
+  it("should assemble release plan with multiple packages", async () => {
     let setup = new FakeFullState();
     setup.addWorkspace("pkg-b", "1.0.0");
     setup.addWorkspace("pkg-c", "1.0.0");
@@ -232,8 +73,7 @@ describe("get-release-info", () => {
     expect(releases[0].type).toEqual("major");
     expect(releases[0].newVersion).toEqual("2.0.0");
   });
-
-  it("should get release info with dependents", async () => {
+  it("should assemble release plan with dependents", async () => {
     let setup = new FakeFullState();
     setup.addWorkspace("pkg-b", "1.0.0");
     setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
@@ -255,5 +95,60 @@ describe("get-release-info", () => {
     expect(releases[1].name).toEqual("pkg-b");
     expect(releases[1].newVersion).toEqual("1.0.1");
     expect(releases[1].changesets).toEqual([]);
+  });
+  it("should assemble release plan for linked packages", () => {
+    let setup = new FakeFullState();
+    setup.addWorkspace("pkg-b", "1.0.0");
+    setup.addChangeset({
+      id: "just-some-umbrellas",
+      releases: [{ name: "pkg-b", type: "major" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      { linked: [["pkg-a", "pkg-b"]] }
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+  });
+  it.only("should assemble release plan where a link causes a dependency to need changing which causes a second link to update", () => {
+    /*
+      Expected events:
+      - dependencies are checked, nothing leaves semver, nothing changes
+      - linked are checked, pkg-a is aligned with pkg-b
+      - depencencies are checked, pkg-c is now outside its dependency on pkg-a, and is given a patch
+      - linked is checked, pkg-c is aligned with pkg-d
+    */
+    let setup = new FakeFullState();
+    setup.addWorkspace("pkg-b", "1.0.0");
+    setup.addWorkspace("pkg-c", "1.0.0");
+    setup.addWorkspace("pkg-d", "1.0.0");
+    setup.addChangeset({
+      id: "just-some-umbrellas",
+      releases: [{ name: "pkg-b", type: "major" }]
+    });
+    setup.addChangeset({
+      id: "totally-average-verbiage",
+      releases: [{ name: "pkg-d", type: "minor" }]
+    });
+
+    setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      { linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] }
+    );
+
+    expect(releases.length).toEqual(4);
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+    expect(releases[2].newVersion).toEqual("1.1.0");
+    expect(releases[3].newVersion).toEqual("1.1.0");
   });
 });
