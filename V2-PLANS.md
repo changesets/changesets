@@ -1,7 +1,6 @@
 # V2 PLanning
 
 List of planned changes that will require a breaking change to implement. We are fine having multiple majors if something from this list is ready to ship before the others.
-List of planned changes that will require a breaking change to implement. We are fine having multiple majors if something from this list is ready to ship before the others.
 
 ## New changeset format
 
