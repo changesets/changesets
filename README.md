@@ -21,6 +21,13 @@ of changesets, check out our [detailed-explanation](./docs/detailed-explanation.
 
 We also have a [spec](./docs/spec.md)
 
+## Cool Projects already using Changesets for versioning and changelogs
+
+- [atlaskit](https://atlaskit.atlassian.com/)
+- [emotion](https://emotion.sh/docs/introduction)
+- [keystone](https://v5.keystonejs.com/)
+- [react-select](https://react-select.com/home)
+
 # Thanks/Inspiration
 
 - [bolt](https://github.com/boltpkg/bolt) - Brought us a strong concept of how packages in a mono-repo should be able to interconnect, and provided the initial infrastructure to get inter-package information.
