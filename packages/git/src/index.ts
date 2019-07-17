@@ -55,7 +55,7 @@ async function getChangedFilesSince(
   ref: string,
   cwd: string,
   fullPath = false
-) {
+): Promise<Array<string>> {
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
   const divergedAt = cmd.stdout.trim();
@@ -70,7 +70,7 @@ async function getChangedFilesSince(
 async function getChangedChangesetFilesSinceMaster(
   cwd: string,
   fullPath = false
-) {
+): Promise<Array<string>> {
   const ref = await getMasterRef(cwd);
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });

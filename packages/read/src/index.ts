@@ -4,6 +4,19 @@ import parse from "@changesets/parse";
 import { NewChangeset } from "@changesets/types";
 import * as git from "@changesets/git";
 
+async function filterChangetsSinceMaster(
+  changesets: Array<string>,
+  changesetBase: string
+) {
+  const newChangesets = await git.getChangedChangesetFilesSinceMaster(
+    changesetBase
+  );
+
+  const newHahses = newChangesets.map(c => c.split("/")[1]);
+
+  return changesets.filter(dir => newHahses.includes(dir));
+}
+
 export default async function getChangesets(
   cwd: string,
   sinceMasterOnly?: boolean
@@ -21,12 +34,7 @@ export default async function getChangesets(
   );
 
   if (sinceMasterOnly) {
-    const newChangesets = await git.getChangedChangesetFilesSinceMaster(
-      changesetBase
-    );
-    const newHahses = newChangesets.map(c => c.split("/")[1]);
-
-    changesets = changesets.filter(dir => newHahses.includes(dir));
+    changesets = await filterChangetsSinceMaster(changesets, changesetBase);
   }
 
   const changesetContents = changesets.map(async file => {

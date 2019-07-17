@@ -84,7 +84,9 @@
     "typescript": "^3.4.5",
     "uuid": "^3.3.2",
     "@types/child-process-promise": "^2.2.1",
-    "child-process-promise": "^2.2.1"
+    "child-process-promise": "^2.2.1",
+    "js-yaml": "^3.13.1",
+    "fixturez": "^1.1.0"
   },
   "preconstruct": {
     "packages": [
