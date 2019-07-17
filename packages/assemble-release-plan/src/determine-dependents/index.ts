@@ -4,19 +4,18 @@ import {
   Workspace,
   DependencyType,
   PackageJSON,
-  BumpType,
+  VersionType,
   ComprehensiveRelease
 } from "@changesets/types";
 
 export default function getDependents(
-  startingReleases: ComprehensiveRelease[],
+  releases: ComprehensiveRelease[],
   workspaces: Workspace[],
   dependencyGraph: Map<string, string[]>
-): { releases: ComprehensiveRelease[]; updated: boolean } {
+): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
-  let pkgsToSearch = [...startingReleases];
-  let releases: ComprehensiveRelease[] = [...startingReleases];
+  let pkgsToSearch = [...releases];
 
   let pkgJsonsByName = new Map(
     // TODO this seems an inefficient use of getting the whole workspaces
@@ -32,14 +31,16 @@ export default function getDependents(
     const pkgDependents = dependencyGraph.get(nextRelease.name);
     if (!pkgDependents) {
       throw new Error(
-        "Error in determining dependents - could not find package"
+        `Error in determining dependents - could not find package in repository: ${
+          nextRelease.name
+        }`
       );
     }
     // For each dependent we are going to see whether it needs to be bumped because it's dependency
     // is leaving the version range.
     pkgDependents
       .map(dependent => {
-        let type: BumpType | undefined;
+        let type: VersionType | undefined;
 
         const dependentPkgJSON = pkgJsonsByName.get(dependent);
         if (!dependentPkgJSON) throw new Error("Dependency map is incorrect");
@@ -84,6 +85,7 @@ export default function getDependents(
           // added them here. If we have, we update the existing item instead of pushing it on to search.
           // It is safe to not add it to pkgsToSearch because it should have already been searched at the
           // largest possible bump type.
+
           if (existing && type === "major" && existing.type !== "major") {
             existing.type = "major";
 
@@ -100,7 +102,7 @@ export default function getDependents(
               type,
               oldVersion: pkgJSON.version,
               // @ts-ignore
-              newVersion: semver.inc(pkgJSON.version),
+              newVersion: semver.inc(pkgJSON.version, type),
               changesets: []
             };
 
@@ -111,7 +113,7 @@ export default function getDependents(
       );
   }
 
-  return { releases, updated };
+  return updated;
 }
 
 /*

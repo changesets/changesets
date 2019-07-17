@@ -4,15 +4,24 @@
 import {
   NewChangeset,
   ComprehensiveRelease,
-  Workspace
+  Workspace,
+  VersionType
 } from "@changesets/types";
 import semver from "semver";
 
-export default async function flattenReleases(
+export default function flattenReleases(
   changesets: NewChangeset[],
   workspaces: Workspace[]
-): Promise<ComprehensiveRelease[]> {
-  let releases: Map<string, ComprehensiveRelease> = new Map();
+): ComprehensiveRelease[] {
+  let releases: Map<
+    string,
+    {
+      name: string;
+      type: VersionType;
+      oldVersion: string;
+      changesets: string[];
+    }
+  > = new Map();
 
   changesets.forEach(changeset => {
     changeset.releases.forEach(({ name, type }) => {
@@ -23,21 +32,10 @@ export default async function flattenReleases(
       }
       let { config } = ws;
       if (!release) {
-        let newVersion = semver.inc(config.version, type);
-        if (!newVersion) {
-          throw new Error(
-            `Unable to increment semver version ${
-              config.version
-            } by a ${type} in ${name}`
-          );
-        }
-
         release = {
           name,
           type,
           oldVersion: config.version,
-          newVersion,
-          dependentOnlyBump: false,
           changesets: [changeset.id]
         };
       } else {
@@ -60,5 +58,11 @@ export default async function flattenReleases(
     });
   });
 
-  return [...releases.values()];
+  return [...releases.values()].map(release => {
+    let newVersion: string = semver.inc(release.oldVersion, release.type);
+    return {
+      ...release,
+      newVersion
+    };
+  });
 }
