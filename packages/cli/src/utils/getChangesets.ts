@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import path from "path";
 
-import * as git from "./git";
+import * as git from "@changesets/git";
 import { Changeset } from "./types";
 
 // TODO take in cwd, and fetch changesetBase ourselves

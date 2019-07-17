@@ -51,7 +51,7 @@ const simpleReleaseObj = {
 };
 
 jest.mock("../../../utils/logger");
-jest.mock("../../../utils/git");
+jest.mock("@changesets/git");
 
 const writeChangesets = (commits, cwd) => {
   return Promise.all(commits.map(commit => writeChangeset(commit, { cwd })));
