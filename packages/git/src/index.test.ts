@@ -1,7 +1,6 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import spawn from "projector-spawn";
 import path from "path";
-import fs from "fs-extra";
 
 import {
   getCommitThatAddsFile,
@@ -10,8 +9,7 @@ import {
   commit,
   tag,
   getChangedPackagesSinceMaster,
-  getChangedChangesetFilesSinceMaster,
-  hasChangesetChangedSinceMaster
+  getChangedChangesetFilesSinceMaster
 } from "./";
 
 describe("git", () => {
@@ -210,7 +208,9 @@ describe("git", () => {
       const changedPackages = await getChangedPackagesSinceMaster(cwd);
 
       expect(changedPackages).toHaveLength(2);
+      // @ts-ignore
       expect(changedPackages[0].name).toEqual("pkg-a");
+      // @ts-ignore
       expect(changedPackages[1].name).toEqual("pkg-b");
     });
   });
