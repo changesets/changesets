@@ -3,7 +3,7 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 import fs from "fs-extra";
 import path from "path";
 import versionCommand from "../index";
-import * as git from "../../../utils/git";
+import * as git from "@changesets/git";
 import logger from "../../../utils/logger";
 import writeChangeset from "../../add/writeChangeset";
 
@@ -12,7 +12,7 @@ import writeChangeset from "../../add/writeChangeset";
 const consoleError = console.error;
 
 jest.mock("../../../utils/cli");
-jest.mock("../../../utils/git");
+jest.mock("@changesets/git");
 jest.mock("../../../utils/logger");
 
 git.add.mockImplementation(() => Promise.resolve(true));

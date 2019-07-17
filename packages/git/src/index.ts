@@ -1,8 +1,17 @@
 import spawn from "projector-spawn";
 import path from "path";
-import { getProjectDirectory } from "./getProjectDirectory";
-// @ts-ignore
-import * as bolt from "./bolt-replacements";
+import getWorkspaces from "get-workspaces";
+import pkgDir from "pkg-dir";
+
+// TODO: Currently getting this working, need to decide how to
+// share projectDir between packages if that's what we need
+async function getProjectDirectory(cwd: string) {
+  const projectDir = await pkgDir(cwd);
+  if (!projectDir) {
+    throw new Error("Could not find project directory");
+  }
+  return projectDir;
+}
 
 async function getMasterRef(cwd: string) {
   const gitCmd = await spawn("git", ["rev-parse", "master"], { cwd });
@@ -46,7 +55,7 @@ async function getChangedFilesSince(
   ref: string,
   cwd: string,
   fullPath = false
-) {
+): Promise<Array<string>> {
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
   const divergedAt = cmd.stdout.trim();
@@ -61,7 +70,7 @@ async function getChangedFilesSince(
 async function getChangedChangesetFilesSinceMaster(
   cwd: string,
   fullPath = false
-) {
+): Promise<Array<string>> {
   const ref = await getMasterRef(cwd);
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
@@ -83,7 +92,14 @@ async function getChangedChangesetFilesSinceMaster(
 async function getChangedPackagesSinceCommit(commitHash: string, cwd: string) {
   const changedFiles = await getChangedFilesSince(commitHash, cwd, true);
   const projectDir = await getProjectDirectory(cwd);
-  const workspaces = await bolt.getWorkspaces({ cwd });
+  let workspaces = await getWorkspaces({
+    cwd,
+    tools: ["yarn", "bolt", "root"]
+  });
+  if (workspaces === null) {
+    workspaces = [];
+  }
+
   const allPackages = workspaces.map(pkg => ({
     ...pkg,
     relativeDir: path.relative(projectDir, pkg.dir)

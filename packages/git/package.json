@@ -1,0 +1,17 @@
+{
+  "name": "@changesets/git",
+  "version": "0.0.0",
+  "description": "Some git helpers that changesets use to get information",
+  "main": "dist/git.cjs.js",
+  "module": "dist/git.esm.js",
+  "license": "MIT",
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/git",
+  "dependencies": {
+    "projector-spawn": "^1.0.1",
+    "get-workspaces": "^0.4.0",
+    "pkg-dir": "^4.1.0"
+  },
+  "devDependencies": {
+    "jest-fixtures": "^0.5.0"
+  }
+}

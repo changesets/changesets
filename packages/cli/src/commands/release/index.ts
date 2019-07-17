@@ -1,6 +1,6 @@
 import publishPackages from "./publishPackages";
 import logger from "../../utils/logger";
-import * as git from "../../utils/git";
+import * as git from "@changesets/git";
 import resolveUserConfig from "../../utils/resolveConfig";
 import { defaultConfig } from "../../utils/constants";
 import { ExitError } from "../../utils/errors";

@@ -7,7 +7,7 @@ import semver from "semver";
 import * as bolt from "../../utils/bolt-replacements";
 
 import logger from "../../utils/logger";
-import * as git from "../../utils/git";
+import * as git from "@changesets/git";
 import createRelease from "../../utils/createRelease";
 import createReleaseCommit from "./createReleaseCommit";
 import { removeFolders, removeEmptyFolders } from "../../utils/removeFolders";

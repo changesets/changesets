@@ -1,11 +1,11 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 
 import publishPackages from "../publishPackages";
-import * as git from "../../../utils/git";
+import * as git from "@changesets/git";
 import runRelease from "..";
 
 jest.mock("../../../utils/cli");
-jest.mock("../../../utils/git");
+jest.mock("@changesets/git");
 jest.mock("../../../utils/logger");
 jest.mock("../publishPackages");
 

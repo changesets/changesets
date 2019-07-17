@@ -10,10 +10,10 @@ import {
   tag,
   getChangedPackagesSinceMaster,
   getChangedChangesetFilesSinceMaster
-} from "../git";
+} from "./";
 
 describe("git", () => {
-  let cwd;
+  let cwd: string;
   beforeEach(async () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "with-git");
     await spawn("git", ["init"], { cwd });
@@ -208,7 +208,9 @@ describe("git", () => {
       const changedPackages = await getChangedPackagesSinceMaster(cwd);
 
       expect(changedPackages).toHaveLength(2);
+      // @ts-ignore
       expect(changedPackages[0].name).toEqual("pkg-a");
+      // @ts-ignore
       expect(changedPackages[1].name).toEqual("pkg-b");
     });
   });
