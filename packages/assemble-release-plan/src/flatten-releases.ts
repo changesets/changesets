@@ -59,6 +59,7 @@ export default function flattenReleases(
   });
 
   return [...releases.values()].map(release => {
+    // @ts-ignore
     let newVersion: string = semver.inc(release.oldVersion, release.type);
     return {
       ...release,
