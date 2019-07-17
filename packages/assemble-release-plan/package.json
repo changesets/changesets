@@ -7,10 +7,6 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/master/packages/assemble-release-plan",
   "dependencies": {
-    "@changesets/read": "^0.0.0",
-    "@changesets/determine-dependents": "^0.0.0",
-    "get-dependents-graph": "^0.0.0",
-    "get-workspaces": "^0.3.1",
     "@changesets/types": "^0.0.0"
   }
 }

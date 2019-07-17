@@ -7,7 +7,7 @@ import {
   Workspace,
   Config,
   Release,
-  BumpType
+  VersionType
 } from "@changesets/types";
 
 function getFakeData(
@@ -62,7 +62,7 @@ function getChangeset(
   };
 }
 
-function getRelease(data: { name?: string; type?: BumpType } = {}): Release {
+function getRelease(data: { name?: string; type?: VersionType } = {}): Release {
   let name = data.name || "pkg-a";
   let type = data.type || "patch";
 

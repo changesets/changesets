@@ -1,6 +1,3 @@
-import read from "@changesets/read";
-import getDependentsGraph from "get-dependents-graph";
-import getWorkspaces from "get-workspaces";
 import {
   ReleasePlan,
   Linked,
