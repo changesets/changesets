@@ -1,4 +1,4 @@
-import spawn from "projector-spawn";
+import spawn from "spawndamnit";
 import path from "path";
 import getWorkspaces from "get-workspaces";
 import pkgDir from "pkg-dir";
@@ -15,7 +15,10 @@ async function getProjectDirectory(cwd: string) {
 
 async function getMasterRef(cwd: string) {
   const gitCmd = await spawn("git", ["rev-parse", "master"], { cwd });
-  return gitCmd.stdout.trim().split("\n")[0];
+  return gitCmd.stdout
+    .toString()
+    .trim()
+    .split("\n")[0];
 }
 
 async function add(pathToFile: string, cwd: string) {
@@ -48,7 +51,7 @@ async function getCommitThatAddsFile(gitPath: string, cwd: string) {
   );
   // For reasons I do not understand, passing pretty format through this is not working
   // The slice below is aimed at achieving the same thing.
-  return gitCmd.stdout.split("\n")[0];
+  return gitCmd.stdout.toString().split("\n")[0];
 }
 
 async function getChangedFilesSince(
@@ -58,10 +61,13 @@ async function getChangedFilesSince(
 ): Promise<Array<string>> {
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
-  const divergedAt = cmd.stdout.trim();
+  const divergedAt = cmd.stdout.toString().trim();
   // Now we can find which files we added
   cmd = await spawn("git", ["diff", "--name-only", divergedAt], { cwd });
-  const files = cmd.stdout.trim().split("\n");
+  const files = cmd.stdout
+    .toString()
+    .trim()
+    .split("\n");
   if (!fullPath) return files;
   return files.map(file => path.resolve(cwd, file));
 }
@@ -82,6 +88,7 @@ async function getChangedChangesetFilesSinceMaster(
   );
 
   const files = cmd.stdout
+    .toString()
     .trim()
     .split("\n")
     .filter(file => file.includes("changes.json"));
