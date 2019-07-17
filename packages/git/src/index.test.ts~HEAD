@@ -1,6 +1,7 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import spawn from "projector-spawn";
 import path from "path";
+import fs from "fs-extra";
 
 import {
   getCommitThatAddsFile,
@@ -9,11 +10,12 @@ import {
   commit,
   tag,
   getChangedPackagesSinceMaster,
-  getChangedChangesetFilesSinceMaster
-} from "../git";
+  getChangedChangesetFilesSinceMaster,
+  hasChangesetChangedSinceMaster
+} from "./";
 
 describe("git", () => {
-  let cwd;
+  let cwd: string;
   beforeEach(async () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "with-git");
     await spawn("git", ["init"], { cwd });

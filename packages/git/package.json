@@ -10,5 +10,8 @@
     "projector-spawn": "^1.0.1",
     "get-workspaces": "^0.4.0",
     "pkg-dir": "^4.1.0"
+  },
+  "devDependencies": {
+    "jest-fixtures": "^0.5.0"
   }
 }
