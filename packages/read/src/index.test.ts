@@ -71,9 +71,15 @@ describe("read changesets from disc", () => {
   it("should error when there is no changeset folder", async () => {
     const changesetPath = f.find("no-changeset-folder");
 
-    expect(read(changesetPath)).rejects.toEqual(
-      "There is no .changeset directory in this project"
-    );
+    try {
+      await read(changesetPath);
+    } catch (e) {
+      expect(e.message).toBe(
+        "There is no .changeset directory in this project"
+      );
+      return;
+    }
+    expect("never run this because we returned above").toBe(true);
   });
   it("should error on broken changeset?", async () => {
     const changesetPath = f.find("broken-changeset");
