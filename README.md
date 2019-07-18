@@ -1,25 +1,21 @@
 # 🦋 changesets 🦋
 
-> A way to manage your versioning and changelogs with a focus on multi-package repositories
+> Manage versions and changelogs for release
 
-The `changesets` workflow is designed to help from when people are making changes, all the way through to publishing. It lets contributors declare how their changes should be released, then we automate updating package versions, and changelogs, and publishing new versions of packages based on the provided information.
+Changesets let pull request authors define the minimum [semver version type](https://semver.org/) their changes introduce, decoupled from actually releasing to npm.
 
-Changesets has a focus on solving these problems for multi-package repositories, and keeps packages that rely on each other within the multi-package repository up-to-date, as well as making it easy to make changes to groups of packages.
+Pull request authors create changesets indicating the semver version type and changelog for their individual pull request. Releases Managers consolidate one or more changesets to update version numbers and changelog files before a release.
 
-## How do we do that?
+It works great with multi-package repositories, using bolt or yarn workspaces. (no lerna support yet)
 
-A `changeset` is an intent to release a set of packages at particular [semver bump types](https://semver.org/) with a summary of the changes made.
+```sh
+yarn add @changesets/cli
+yarn changeset init
+```
 
-The **@changesets/cli** package allows you to write `changeset` files as you make changes, then combine any number of changesets into a release, that flattens the bump-types into a single release per package, handles internal dependencies in a multi-package-repository, and updates changelogs, as well as release all updated packages from a mono-repository with one command.
+## Using changesets
 
-## How do I get started?
-
-If you just want to jump in to using changesets, the [@changesets/cli](./packages/cli/README.md) docs are where you should head.
-
-If you want a detailed explanation of the the concepts behind changesets, or to understand how you would build on top
-of changesets, check out our [detailed-explanation](./docs/detailed-explanation.md)
-
-We also have a [spec](./docs/spec.md)
+For information on the why and how of changesets, see the [@changesets/cli](./packages/cli/README.md) documentation.
 
 # Thanks/Inspiration
 
