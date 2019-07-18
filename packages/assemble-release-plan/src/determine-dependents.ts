@@ -60,10 +60,15 @@ export default function getDependents(
           dependentPkgJSON,
           nextRelease.name
         );
+
         // Firstly we check if it is a peerDependency because if it is, our dependent bump type needs to be major.
         if (
           depTypes.includes("peerDependencies") &&
-          nextRelease.type !== "patch"
+          nextRelease.type !== "patch" &&
+          (!releases.some(dep => dep.name === dependent) ||
+            releases.some(
+              dep => dep.name === dependent && dep.type !== "major"
+            ))
         ) {
           type = "major";
         } else {

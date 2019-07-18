@@ -1,11 +1,17 @@
 import assembleReleasePlan from "./";
-
 import FakeFullState from "./test-utils";
 
 describe("assemble-release-plan", () => {
-  it("should assemble release plan for basic setup", async () => {
-    let setup = new FakeFullState();
+  let setup: FakeFullState;
+  beforeEach(() => {
+    setup = new FakeFullState();
 
+    setup.addWorkspace("pkg-b", "1.0.0");
+    setup.addWorkspace("pkg-c", "1.0.0");
+    setup.addWorkspace("pkg-d", "1.0.0");
+  });
+
+  it("should assemble release plan for basic setup", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.workspaces,
@@ -22,12 +28,7 @@ describe("assemble-release-plan", () => {
       changesets: ["strange-words-combine"]
     });
   });
-  it("should assemble release plan with multiple packages", async () => {
-    let setup = new FakeFullState();
-    setup.addWorkspace("pkg-b", "1.0.0");
-    setup.addWorkspace("pkg-c", "1.0.0");
-    setup.addWorkspace("pkg-d", "1.0.0");
-
+  it("should assemble release plan with multiple packages", () => {
     setup.addChangeset({
       id: "big-cats-delight",
       releases: [
@@ -54,8 +55,7 @@ describe("assemble-release-plan", () => {
     expect(releases[3].name).toBe("pkg-d");
     expect(releases[3].newVersion).toBe("2.0.0");
   });
-  it("should handle two changesets for a package", async () => {
-    let setup = new FakeFullState();
+  it("should handle two changesets for a package", () => {
     setup.addChangeset({
       id: "big-cats-delight",
       releases: [{ name: "pkg-a", type: "major" }]
@@ -73,9 +73,7 @@ describe("assemble-release-plan", () => {
     expect(releases[0].type).toEqual("major");
     expect(releases[0].newVersion).toEqual("2.0.0");
   });
-  it("should assemble release plan with dependents", async () => {
-    let setup = new FakeFullState();
-    setup.addWorkspace("pkg-b", "1.0.0");
+  it("should assemble release plan with dependents", () => {
     setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
@@ -97,8 +95,6 @@ describe("assemble-release-plan", () => {
     expect(releases[1].changesets).toEqual([]);
   });
   it("should assemble release plan for linked packages", () => {
-    let setup = new FakeFullState();
-    setup.addWorkspace("pkg-b", "1.0.0");
     setup.addChangeset({
       id: "just-some-umbrellas",
       releases: [{ name: "pkg-b", type: "major" }]
@@ -115,7 +111,7 @@ describe("assemble-release-plan", () => {
     expect(releases[0].newVersion).toEqual("2.0.0");
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
-  it.only("should assemble release plan where a link causes a dependency to need changing which causes a second link to update", () => {
+  it("should assemble release plan where a link causes a dependency to need changing which causes a second link to update", () => {
     /*
       Expected events:
       - dependencies are checked, nothing leaves semver, nothing changes
@@ -123,10 +119,6 @@ describe("assemble-release-plan", () => {
       - depencencies are checked, pkg-c is now outside its dependency on pkg-a, and is given a patch
       - linked is checked, pkg-c is aligned with pkg-d
     */
-    let setup = new FakeFullState();
-    setup.addWorkspace("pkg-b", "1.0.0");
-    setup.addWorkspace("pkg-c", "1.0.0");
-    setup.addWorkspace("pkg-d", "1.0.0");
     setup.addChangeset({
       id: "just-some-umbrellas",
       releases: [{ name: "pkg-b", type: "major" }]
@@ -151,4 +143,315 @@ describe("assemble-release-plan", () => {
     expect(releases[2].newVersion).toEqual("1.1.0");
     expect(releases[3].newVersion).toEqual("1.1.0");
   });
+  it("should return an empty release array when no chnages will occur", () => {
+    let { releases } = assembleReleasePlan(
+      [],
+      setup.workspaces,
+      setup.dependentsGraph,
+      { linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] }
+    );
+
+    expect(releases).toEqual([]);
+  });
+  it("should update multiple dependencies of a single package", () => {
+    setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
+    setup.updateDependency("pkg-c", "pkg-a", "1.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      { linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] }
+    );
+
+    expect(releases.length).toEqual(3);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+    expect(releases[2].name).toEqual("pkg-c");
+    expect(releases[2].newVersion).toEqual("1.0.1");
+  });
+  it("should update a second dependent based on updating a first dependant", () => {
+    setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
+    setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      { linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] }
+    );
+
+    expect(releases.length).toEqual(3);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+    expect(releases[2].name).toEqual("pkg-c");
+    expect(releases[2].newVersion).toEqual("1.0.1");
+  });
+  it("should update a peerDep by a major bump", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.addChangeset({
+      id: "nonsense-words-combine",
+      releases: [{ name: "pkg-a", type: "minor" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.1.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+  });
 });
+
+describe("version update thoroughness", () => {
+  let setup: FakeFullState;
+  beforeEach(() => {
+    setup = new FakeFullState();
+
+    setup.addWorkspace("pkg-b", "1.0.0");
+    setup.addWorkspace("pkg-c", "1.0.0");
+    setup.addWorkspace("pkg-d", "1.0.0");
+    setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
+    setup.updateDependency("pkg-c", "pkg-a", "~1.0.0");
+    setup.updateDependency("pkg-d", "pkg-a", "^1.0.0");
+  });
+
+  it("should patch a single pinned dependent", () => {
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+    expect(releases.length).toEqual(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+  });
+  it("should path a pinned and tilde dependents when minor versioning", () => {
+    setup.addChangeset({
+      id: "stuff-and-nonsense",
+      releases: [{ name: "pkg-a", type: "minor" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toEqual(3);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.1.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+    expect(releases[2].name).toEqual("pkg-c");
+    expect(releases[2].newVersion).toEqual("1.0.1");
+  });
+  it("should patch pinned, tilde and caret dependents when a major versioning", () => {
+    setup.addChangeset({
+      id: "stuff-and-nonsense",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toEqual(4);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+    expect(releases[2].name).toEqual("pkg-c");
+    expect(releases[2].newVersion).toEqual("1.0.1");
+    expect(releases[3].name).toEqual("pkg-d");
+    expect(releases[3].newVersion).toEqual("1.0.1");
+  });
+});
+
+describe("bumping peerDeps", () => {
+  let setup: FakeFullState;
+  beforeEach(() => {
+    setup = new FakeFullState();
+    setup.addWorkspace("pkg-b", "1.0.0");
+  });
+
+  it("should patch a pinned peerDep", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "1.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+  });
+  it("should not bump the dependent when bumping a tilde peerDep by a patch", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toBe(1);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+  });
+  it("should major bump dependent when bumping a tilde peerDep by minor", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "minor" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.1.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+  });
+  it("should major bump dependent when bumping a tilde peerDep by major", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+  });
+  it("should not bump dependent when bumping caret peerDep by patch", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toBe(1);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+  });
+  it("should major bump dependent when bumping caret peerDep by minor", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "minor" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.1.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+  });
+  it("should major bump dependent when bumping caret peerDep by major", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+  });
+  it("should patch bump transitive dep that is only affected by peerDep bump", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.addWorkspace("pkg-c", "1.0.0");
+    setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "minor" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      {}
+    );
+
+    expect(releases.length).toBe(3);
+    expect(releases[0]).toMatchObject({
+      name: "pkg-a",
+      newVersion: "1.1.0"
+    });
+    expect(releases[1]).toMatchObject({
+      name: "pkg-b",
+      newVersion: "2.0.0"
+    });
+    expect(releases[2]).toMatchObject({
+      name: "pkg-c",
+      newVersion: "1.0.1"
+    });
+  });
+});
+
+/*
+    Bumping peerDeps is a tricky issue, so we are testing every single combination here so that
+    we can have absolute certainty when changing anything to do with them.
+    In general the rule for bumping peerDeps is that:
+      * All MINOR or MAJOR peerDep bumps must MAJOR bump all dependents - regardless of ranges
+      * Otherwise - normal patching rules apply
+ */

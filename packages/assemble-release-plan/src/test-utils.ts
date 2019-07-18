@@ -133,6 +133,16 @@ class FakeFullState {
     if (!depList) throw new Error("could not add dependency");
     this.dependentsGraph.set(pkgB, [...depList, pkgA]);
   }
+  updatePeerDep(pkgA: string, pkgB: string, version: string) {
+    let ws = this.workspaces.find(a => a.name === pkgA);
+    if (!ws) throw new Error("no ws");
+    if (!ws.config.peerDependencies) ws.config.peerDependencies = {};
+    ws.config.peerDependencies[pkgB] = version;
+
+    let depList = this.dependentsGraph.get(pkgB);
+    if (!depList) throw new Error("could not add dependency");
+    this.dependentsGraph.set(pkgB, [...depList, pkgA]);
+  }
 
   addWorkspace(name: string, version: string) {
     let ws = getWorkspace(name, version);
