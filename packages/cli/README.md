@@ -1,12 +1,11 @@
 ## @changeset/cli 🦋
 
-The primary implementation of [changesets](https://github.com/Noviny/changesets). Helps you manage the versioning
+The primary implementation of [changesets](https://github.com/changesets/changesets). Helps you manage the versioning
 and changelog entries for your packages, with a focus on versioning within a mono-repository (though we support
 single-package repositories too).
 
-This package is intended as a successor to `@atlaskit/build-releases` with a more general focus. It works in
-[bolt](https://www.npmjs.com/package/bolt) multi-package repositories, [yarn workspaces] multi-package repositories, and
-in single-package repositories.
+It works in [bolt](https://www.npmjs.com/package/bolt) multi-package repositories, [yarn workspaces] multi-package
+repositories (including lerna repositories using yarn workspaces), and in single-package repositories.
 
 ## Getting Started
 
@@ -37,12 +36,11 @@ Below you can find a basic workflow for maintainers to help them use changesets,
 ## Core Concepts
 
 The core concept that `changesets` follows is that contributors to a repository should be able to declare an intent to release, and that multiple intents should be able to be combined sensibly. Sensibly here refers to if there is one intent to release button as a 'minor' and another to release button as a 'patch', only one release will be made, at the higher of the two versions.
-
 A single `changeset` is an intent to release stored as data, with the information we need to combine multiple changesets and coordinate releases. It will also update internal dependencies within a multi-package repository.
 
 ## Base workflow
 
-Contributor runs:
+Pull request authors run:
 
 ```
 yarn changeset

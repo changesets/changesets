@@ -6,7 +6,9 @@ Changesets let pull request authors define the minimum [semver version type](htt
 
 Pull request authors create changesets indicating the semver version type and changelog for their individual pull request. Releases Managers consolidate one or more changesets to update version numbers and changelog files before a release.
 
-It works great with multi-package repositories, using bolt or yarn workspaces. (no lerna support yet)
+It works great with multi-package repositories using bolt or yarn workspaces. (minimal lerna support so far)
+
+<Cool image goes here>
 
 ```sh
 yarn add @changesets/cli
@@ -15,7 +17,20 @@ yarn changeset init
 
 ## Using changesets
 
-For information on the why and how of changesets, see the [@changesets/cli](./packages/cli/README.md) documentation.
+For information on the why and how of changesets, see the [@changesets/cli](./packages/cli/README.md) documentation or our [intro to using changesets](./docs/intro-to-using-changesets.md) guide.
+
+## More docs packages
+
+- [intro to using changesets](./docs/intro-to-using-changesets.md)
+- [common questions](./docs/common-questions.md)
+- [adding a changeset](./docs/adding-a-changeset.md)
+- [detailed explanation](./docs/detailed-explanation.md)
+- [dictionary of terms](./docs/dictionary.md)
+
+## Related packages docs
+
+- [bolt-check]('./packages/bolt-check/README.md)
+- [get-workspaces]('./packages/get-workspaces/README.md)
 
 # Thanks/Inspiration
 
