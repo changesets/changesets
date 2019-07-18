@@ -1,0 +1,14 @@
+{
+  "releases": [
+    { "name": "bolt-check", "type": "patch" },
+    { "name": "@changesets/cli", "type": "patch" },
+    { "name": "@changesets/git", "type": "patch" }
+  ],
+  "dependents": [
+    {
+      "name": "@changesets/read",
+      "type": "patch",
+      "dependencies": ["@changesets/git"]
+    }
+  ]
+}

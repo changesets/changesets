@@ -1,5 +1,5 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
-import spawn from "projector-spawn";
+import spawn from "spawndamnit";
 import path from "path";
 
 import {
@@ -26,7 +26,10 @@ describe("git", () => {
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
         cwd
       });
-      const stagedFiles = gitCmd.stdout.split("\n").filter(a => a);
+      const stagedFiles = gitCmd.stdout
+        .toString()
+        .split("\n")
+        .filter(a => a);
 
       expect(stagedFiles).toHaveLength(1);
       expect(stagedFiles[0]).toEqual("packages/pkg-a/package.json");
@@ -40,7 +43,10 @@ describe("git", () => {
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
         cwd
       });
-      const stagedFiles = gitCmd.stdout.split("\n").filter(a => a);
+      const stagedFiles = gitCmd.stdout
+        .toString()
+        .split("\n")
+        .filter(a => a);
 
       expect(stagedFiles).toHaveLength(3);
       expect(stagedFiles[0]).toEqual("package.json");
@@ -54,7 +60,10 @@ describe("git", () => {
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
         cwd
       });
-      const stagedFiles = gitCmd.stdout.split("\n").filter(a => a);
+      const stagedFiles = gitCmd.stdout
+        .toString()
+        .split("\n")
+        .filter(a => a);
 
       expect(stagedFiles).toHaveLength(4);
       expect(stagedFiles[0]).toEqual("packages/pkg-a/index.js");
@@ -72,7 +81,7 @@ describe("git", () => {
       const gitCmd = await spawn("git", ["log", "-1", "--pretty=%B"], {
         cwd
       });
-      const commitMessage = gitCmd.stdout.trim();
+      const commitMessage = gitCmd.stdout.toString().trim();
 
       expect(commitMessage).toEqual("added packageA package.json");
     });
@@ -137,7 +146,7 @@ describe("git", () => {
         cwd
       );
 
-      expect(commitHash).toEqual(head.stdout.trim());
+      expect(commitHash).toEqual(head.stdout.toString().trim());
     });
   });
 
@@ -149,7 +158,10 @@ describe("git", () => {
 
     it("should be empty if no changes", async () => {
       const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
-      const changedFiles = await getChangedFilesSince(head.stdout.trim(), cwd);
+      const changedFiles = await getChangedFilesSince(
+        head.stdout.toString().trim(),
+        cwd
+      );
       expect(changedFiles.filter(a => a)).toHaveLength(0);
     });
 
@@ -164,7 +176,7 @@ describe("git", () => {
       await commit("added packageB files", cwd);
 
       const filesChangedSinceFirstRef = await getChangedFilesSince(
-        firstRef.stdout.trim(),
+        firstRef.stdout.toString().trim(),
         cwd
       );
       expect(filesChangedSinceFirstRef[0]).toEqual("packages/pkg-a/index.js");
@@ -174,7 +186,7 @@ describe("git", () => {
       );
 
       const filesChangedSinceSecondRef = await getChangedFilesSince(
-        secondRef.stdout.trim(),
+        secondRef.stdout.toString().trim(),
         cwd
       );
       expect(filesChangedSinceSecondRef[0]).toEqual("packages/pkg-b/index.js");
