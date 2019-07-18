@@ -55,6 +55,7 @@ export type Linked = Array<Array<string>>;
 
 export type Config = {
   linked?: Linked;
+  changelog: (releasePlan: ComprehensiveRelease, changesets: NewChangeset[]) => Promise<string>
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };
