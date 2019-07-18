@@ -15,7 +15,6 @@
   "author": "Atlassian Pty Ltd",
   "license": "MIT",
   "dependencies": {
-    "ajv": "^6.10.1",
     "@changesets/types": "^0.0.0"
   }
 }
