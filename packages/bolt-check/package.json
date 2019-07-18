@@ -26,8 +26,7 @@
     "strip-ansi": "^5.2.0"
   },
   "devDependencies": {
-    "@types/child-process-promise": "^2.2.1",
-    "child-process-promise": "^2.2.1",
+    "spawndamnit": "^2.0.0",
     "jest-fixtures": "^0.5.0"
   },
   "preconstruct": {
