@@ -25,13 +25,7 @@ function getNormalisedChangelogOption(
   return thing;
 }
 
-export let read = async ({
-  cwd,
-  workspaces
-}: {
-  cwd: string;
-  workspaces: Array<Workspace>;
-}) => {
+export let read = async (cwd: string, workspaces: Array<Workspace>) => {
   let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
   return parse(json, workspaces);
 };
