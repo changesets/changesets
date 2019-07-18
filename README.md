@@ -8,8 +8,6 @@ Pull request authors create changesets indicating the semver version type and ch
 
 It works great with multi-package repositories using bolt or yarn workspaces. (minimal lerna support so far)
 
-<Cool image goes here>
-
 ```sh
 yarn add @changesets/cli
 yarn changeset init
