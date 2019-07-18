@@ -110,7 +110,7 @@ async function internalPublish(
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   let publishFlags = opts.access ? ["--access", opts.access] : [];
-  if (twoFactorState.isRequired) {
+  if ((await twoFactorState.isRequired) && !isCI) {
     let otpCode = await getOtpCode(twoFactorState);
     publishFlags.push("--otp", otpCode);
   }
