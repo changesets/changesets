@@ -12,6 +12,10 @@
   ],
   "dependencies": {
     "@changesets/types": "^0.0.0",
-    "jest-in-case": "^1.0.2"
+    "jest-in-case": "^1.0.2",
+    "fs-extra": "^7.0.1"
+  },
+  "devDependencies": {
+    "fixturez": "^1.1.0"
   }
 }

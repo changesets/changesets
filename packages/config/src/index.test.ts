@@ -1,7 +1,6 @@
 import fixturez from "fixturez";
 import { read, parse } from "./";
 import jestInCase from "jest-in-case";
-import { WrittenConfig, Config } from "@changesets/types";
 
 let f = fixturez(__dirname);
 
