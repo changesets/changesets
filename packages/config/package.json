@@ -11,6 +11,7 @@
     "schema.json"
   ],
   "dependencies": {
-    "@changesets/types": "^0.0.0"
+    "@changesets/types": "^0.0.0",
+    "jest-in-case": "^1.0.2"
   }
 }

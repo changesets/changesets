@@ -9,7 +9,7 @@ export let defaultConfig = {
   }/schema.json`,
   changelog: "@changesets/cli/changelog",
   commit: false,
-  linked: [[]] as ReadonlyArray<ReadonlyArray<string>>,
+  linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "private"
 } as const;
 
@@ -37,6 +37,7 @@ export let parse = (
   let messages = [];
   if (
     json.changelog !== undefined &&
+    json.changelog !== false &&
     typeof json.changelog !== "string" &&
     !(
       Array.isArray(json.changelog) &&
@@ -45,8 +46,8 @@ export let parse = (
     )
   ) {
     messages.push(
-      `The \`changeset\` option is set as ${JSON.stringify(
-        json.access,
+      `The \`changelog\` option is set as ${JSON.stringify(
+        json.changelog,
         null,
         2
       )} when the only valid values are undefined, a module path or a tuple with a module path and config for the changelog generator`
@@ -70,7 +71,7 @@ export let parse = (
   if (json.commit !== undefined && typeof json.commit !== "boolean") {
     messages.push(
       `The \`commit\` option is set as ${JSON.stringify(
-        json.access,
+        json.commit,
         null,
         2
       )} when the only valid values are undefined or a boolean`
@@ -89,36 +90,41 @@ export let parse = (
     ) {
       messages.push(
         `The \`linked\` option is set as ${JSON.stringify(
-          json.access,
+          json.linked,
           null,
           2
         )} when the only valid values are undefined or an array of arrays of package names`
       );
-    }
-    let pkgNames = new Set(workspaces.map(({ name }) => name));
-    let foundPkgNames = new Set<string>();
-    let duplicatedPkgNames = new Set<string>();
-    for (let linkedGroup of json.linked) {
-      for (let linkedPkgName of linkedGroup) {
-        if (!pkgNames.has(linkedPkgName)) {
+    } else {
+      let pkgNames = new Set(workspaces.map(({ name }) => name));
+      let foundPkgNames = new Set<string>();
+      let duplicatedPkgNames = new Set<string>();
+      for (let linkedGroup of json.linked) {
+        for (let linkedPkgName of linkedGroup) {
+          if (!pkgNames.has(linkedPkgName)) {
+            messages.push(
+              `The package "${linkedPkgName}" is specified in the \`linked\` option but it is not found in the project. You may have misspelled the package name.`
+            );
+          }
+          if (foundPkgNames.has(linkedPkgName)) {
+            duplicatedPkgNames.add(linkedPkgName);
+          }
+          foundPkgNames.add(linkedPkgName);
+        }
+      }
+      if (duplicatedPkgNames.size) {
+        duplicatedPkgNames.forEach(pkgName => {
           messages.push(
-            `The package "${linkedPkgName}" is specified in the \`linked\` option but it is not found in the project. You may have misspelled the package name.`
+            `The package "${pkgName}" is in multiple sets of linked packages. Packages can only be in a single set of linked packages.`
           );
-        }
-        if (foundPkgNames.has(linkedPkgName)) {
-          duplicatedPkgNames.add(linkedPkgName);
-        }
-        foundPkgNames.add(linkedPkgName);
+        });
       }
     }
-    if (duplicatedPkgNames.size) {
-      duplicatedPkgNames.forEach(pkgName => {
-        messages.push(
-          `The package "${pkgName}" is in multiple sets of linked packages. Packages can only be in a single set of linked packages.`
-        );
-      });
-    }
   }
+  if (messages.length) {
+    throw new ValidationError(messages);
+  }
+
   let config: Config = {
     changelog: getNormalisedChangelogOption(
       json.changelog === undefined ? defaultConfig.changelog : json.changelog
