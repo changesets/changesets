@@ -54,7 +54,7 @@ export type PackageJSON = {
 export type Linked = Array<Array<string>>;
 
 export type Config = {
-  linked: Linked;
+  linked?: Linked;
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };
