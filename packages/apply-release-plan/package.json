@@ -8,7 +8,7 @@
     "repository": "https://github.com/changesets/changesets/tree/master/packages/apply-release-plan",
     "dependencies": {
       "@changesets/types": "^0.0.0",
-      "@changesets/get-version-range-type": "^0.0.0"
-      
+      "@changesets/get-version-range-type": "^0.0.0",
+      "prettier": "^1.18.2"
     }
   }
