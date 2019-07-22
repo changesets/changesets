@@ -3,7 +3,7 @@
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
-import chalk from 'chalk';
+import chalk from "chalk";
 import { PackageJSON, Workspace } from "@changesets/types";
 // @ts-ignore
 
