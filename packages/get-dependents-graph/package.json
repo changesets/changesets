@@ -11,6 +11,6 @@
     "@changesets/types": "^0.0.0",
     "fs-extra": "^7.0.1",
     "semver": "^5.4.1",
-    "chalk": "^2.4.2"
+    "chalk": "^2.1.0"
   }
 }
