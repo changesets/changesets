@@ -1,0 +1,6 @@
+{
+  "releases": [
+    { "name": "@changesets/assemble-release-plan", "type": "minor" }
+  ],
+  "dependents": []
+}
