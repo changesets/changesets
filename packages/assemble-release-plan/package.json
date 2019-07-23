@@ -9,5 +9,8 @@
   "dependencies": {
     "@changesets/types": "^0.0.0",
     "semver": "^5.4.1"
+  },
+  "devDependencies": {
+    "@changesets/config": "^0.0.0"
   }
 }
