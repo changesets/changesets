@@ -3,7 +3,7 @@ import path from "path";
 import { Config, WrittenConfig, Workspace } from "@changesets/types";
 import packageJson from "../package.json";
 
-export let defaultConfig = {
+export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${
     packageJson.version
   }/schema.json`,
@@ -127,14 +127,21 @@ export let parse = (
 
   let config: Config = {
     changelog: getNormalisedChangelogOption(
-      json.changelog === undefined ? defaultConfig.changelog : json.changelog
+      json.changelog === undefined
+        ? defaultWrittenConfig.changelog
+        : json.changelog
     ),
-    access: json.access === undefined ? defaultConfig.access : json.access,
-    commit: json.commit === undefined ? defaultConfig.commit : json.commit,
-    linked: json.linked === undefined ? defaultConfig.linked : json.linked
+    access:
+      json.access === undefined ? defaultWrittenConfig.access : json.access,
+    commit:
+      json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
+    linked:
+      json.linked === undefined ? defaultWrittenConfig.linked : json.linked
   };
   return config;
 };
+
+export let defaultConfig = parse(defaultWrittenConfig, []);
 
 export class ValidationError extends Error {
   constructor(messages: Array<string>) {
