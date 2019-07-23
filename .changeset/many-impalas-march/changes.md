@@ -1,0 +1,1 @@
+Initial release with parse and read functions along with defaultConfig and defaultWrittenConfig

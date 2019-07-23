@@ -51,10 +51,20 @@ export type PackageJSON = {
   optionalDependencies?: { [key: string]: string };
 };
 
-export type Linked = Array<Array<string>>;
+export type Linked = ReadonlyArray<ReadonlyArray<string>>;
 
 export type Config = {
+  changelog: false | readonly [string, any];
+  commit: boolean;
+  linked: Linked;
+  access: "public" | "private";
+};
+
+export type WrittenConfig = {
+  changelog?: false | readonly [string, any] | string;
+  commit?: boolean;
   linked?: Linked;
+  access?: "public" | "private";
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };

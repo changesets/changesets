@@ -13,10 +13,7 @@ import { Linked, ComprehensiveRelease } from "@changesets/types";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-function applyLinks(
-  releases: ComprehensiveRelease[],
-  linked?: Linked
-): boolean {
+function applyLinks(releases: ComprehensiveRelease[], linked: Linked): boolean {
   let updated = false;
   if (!linked) return updated;
 
