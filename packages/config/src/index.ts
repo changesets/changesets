@@ -50,7 +50,7 @@ export let parse = (
         json.changelog,
         null,
         2
-      )} when the only valid values are undefined, a module path or a tuple with a module path and config for the changelog generator`
+      )} when the only valid values are undefined, a module path(e.g. "@changesets/cli/changelog" or "./some-module") or a tuple with a module path and config for the changelog generator(e.g. ["@changesets/cli/changelog", { someOption: true }])`
     );
   }
 

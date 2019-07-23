@@ -24,7 +24,8 @@
           "title": "Changelog Generator Path"
         }
       ],
-      "description": "The configuration for changelog generators."
+      "description": "The configuration for changelog generators.",
+      "default": ["@changesets/cli", null]
     },
     "linked": {
       "type": "array",
@@ -34,16 +35,19 @@
           "type": "string"
         }
       },
-      "description": "Packages that should be linked together so when they are being released, they will be released at the same version. If you've used Lerna to version packages before, this is very similar."
+      "description": "Packages that should be linked together so when they are being released, they will be released at the same version.",
+      "default": []
     },
     "commit": {
       "type": "boolean",
-      "description": "Determines whether changesets should commit the results of the add and bump command"
+      "description": "Determines whether changesets should commit the results of the add and bump command",
+      "default": false
     },
     "access": {
       "enum": ["private", "public"],
       "type": "string",
-      "description": "Determines whether changesets should publish packages to the registry publicly or privately"
+      "description": "Determines whether changesets should publish packages to the registry publicly or privately",
+      "default": "private"
     }
   }
 }
