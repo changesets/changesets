@@ -59,7 +59,7 @@ export default function flattenReleases(
   });
 
   return [...releases.values()].map(release => {
-    // @ts-ignore
+    // @ts-ignore by this point we're comfy semver.inc will return a non-null value so just casting it
     let newVersion: string = semver.inc(release.oldVersion, release.type);
     return {
       ...release,

@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "changelog": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": [
+            {
+              "type": "string",
+              "title": "Changelog Generator Path"
+            },
+            { "title": "Changelog Generator Options" }
+          ],
+          "minItems": 2
+        },
+        {
+          "enum": [false],
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "title": "Changelog Generator Path"
+        }
+      ],
+      "description": "The configuration for changelog generators.",
+      "default": ["@changesets/cli", null]
+    },
+    "linked": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "description": "Packages that should be linked together so when they are being released, they will be released at the same version.",
+      "default": []
+    },
+    "commit": {
+      "type": "boolean",
+      "description": "Determines whether changesets should commit the results of the add and bump command",
+      "default": false
+    },
+    "access": {
+      "enum": ["private", "public"],
+      "type": "string",
+      "description": "Determines whether changesets should publish packages to the registry publicly or privately",
+      "default": "private"
+    }
+  }
+}

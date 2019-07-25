@@ -3,9 +3,9 @@
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
+import chalk from "chalk";
 import { PackageJSON, Workspace } from "@changesets/types";
 // @ts-ignore
-import * as boltMessages from "bolt/dist/modern/utils/messages";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -78,12 +78,13 @@ export default async function getDependencyGraph(
       if (!semver.satisfies(expected, depVersion)) {
         valid = false;
         console.error(
-          boltMessages.packageMustDependOnCurrentVersion(
-            name,
-            depName,
-            expected,
-            depVersion
-          )
+          `Package ${chalk.cyan(
+            `"${name}"`
+          )} must depend on the current version of ${chalk.cyan(
+            `"${depName}"`
+          )}: ${chalk.green(`"${expected}"`)} vs ${chalk.red(
+            `"${depVersion}"`
+          )}`
         );
         continue;
       }

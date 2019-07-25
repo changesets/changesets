@@ -98,7 +98,7 @@ export default function getDependents(
           if (existing && type === "major" && existing.type !== "major") {
             existing.type = "major";
 
-            // @ts-ignore
+            // @ts-ignore by this point we're comfy semver.inc will return a non-null value so just casting it
             existing.newVersion = semver.inc(
               existing.oldVersion,
               existing.type
@@ -110,7 +110,7 @@ export default function getDependents(
               name,
               type,
               oldVersion: pkgJSON.version,
-              // @ts-ignore
+              // @ts-ignore by this point we're comfy semver.inc will return a non-null value so just casting it
               newVersion: semver.inc(pkgJSON.version, type),
               changesets: []
             };
