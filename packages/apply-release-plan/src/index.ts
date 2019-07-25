@@ -2,8 +2,7 @@ import {
   ReleasePlan,
   Config,
   ComprehensiveRelease,
-  NewChangeset,
-  Workspace
+  NewChangeset
 } from "@changesets/types";
 
 import getWorksaces from "get-workspaces";
@@ -15,8 +14,10 @@ import versionPackage from "./version-package";
 
 const badDefaultConfig = {
   changelog: (
+    /* eslint-disable */
     releasePlan: ComprehensiveRelease,
     changesets: NewChangeset[]
+    /* eslint-enable */
   ): Promise<string> => new Promise(resolve => resolve(""))
 };
 
@@ -25,7 +26,7 @@ export default async function applyReleasePlan(
   cwd: string,
   config: Config = badDefaultConfig
 ) {
-    let touchedFiles = [] 
+  let touchedFiles = [];
   let workspaces = await getWorksaces({
     cwd,
     tools: ["yarn", "bolt", "root"]
@@ -36,7 +37,7 @@ export default async function applyReleasePlan(
   let { releases, changesets } = releasePlan;
 
   let releaseWithWorkspaces = releases.map(release => {
-      // @ts-ignore we already threw if workspaces wasn't defined
+    // @ts-ignore we already threw if workspaces wasn't defined
     let workspace = workspaces.find(ws => ws.name === release.name);
     if (!workspace)
       throw new Error(
@@ -77,13 +78,15 @@ export default async function applyReleasePlan(
     touchedFiles.push(pkgJSONPath, changelogPath);
   }
 
-  let changesetFolder = path.resolve(cwd, '.changeset');
+  let changesetFolder = path.resolve(cwd, ".changeset");
 
-  await Promise.all(changesets.map(changeset => {
-    let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`)
-    touchedFiles.push(changesetPath)
-    return fs.remove(changesetPath);
-  }));
+  await Promise.all(
+    changesets.map(changeset => {
+      let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
+      touchedFiles.push(changesetPath);
+      return fs.remove(changesetPath);
+    })
+  );
 
   // We return the touched files so things such as the CLI can commit them
   // if they want
@@ -96,7 +99,7 @@ async function updateChangelog(
   name: string,
   prettierConfig: Object
 ) {
-let changelog = await changelogPromise;
+  let changelog = await changelogPromise;
   let templateString = `\n\n${changelog.trim("\n")}\n`;
 
   try {
@@ -115,7 +118,7 @@ async function prependFile(
   filePath: string,
   data: string,
   name: string,
-  prettierConfig: Object
+  prettierConfig: prettier.Options
 ) {
   const fileData = fs.readFileSync(filePath).toString();
   // if the file exists but doesn't have the header, we'll add it in
