@@ -214,6 +214,37 @@ describe("assemble-release-plan", () => {
     expect(releases[2].name).toEqual("pkg-c");
     expect(releases[2].newVersion).toEqual("1.0.1");
   });
+
+  it("should bump peer dependents where the version is updated because of linked", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "1.0.0");
+
+    setup.addChangeset({
+      id: "some-id",
+      releases: [{ type: "minor", name: "pkg-c" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      { ...defaultConfig, linked: [["pkg-a", "pkg-c"]] }
+    );
+
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "1.1.0"
+      },
+      {
+        name: "pkg-c",
+        newVersion: "1.1.0"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "2.0.0"
+      }
+    ]);
+  });
   it("should update a peerDep by a major bump", () => {
     setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
