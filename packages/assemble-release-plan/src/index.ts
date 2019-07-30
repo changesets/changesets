@@ -29,7 +29,7 @@ function assembleReleasePlan(
     );
 
     // The map passed in to determineDependents will be mutated
-    let linksUpdated = applyLinks(releases, config.linked);
+    let linksUpdated = applyLinks(releases, workspaces, config.linked);
 
     releaseObjectValidated = !linksUpdated && !dependentAdded;
   }
