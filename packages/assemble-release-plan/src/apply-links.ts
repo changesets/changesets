@@ -1,5 +1,10 @@
 import semver from "semver";
-import { Linked, ComprehensiveRelease, Workspace, VersionType } from "@changesets/types";
+import {
+  Linked,
+  ComprehensiveRelease,
+  Workspace,
+  VersionType
+} from "@changesets/types";
 
 /*
   WARNING:
@@ -67,9 +72,11 @@ function applyLinks(
       }
     }
 
-    if (!highestVersion || !highestReleaseType) throw new Error(`Large internal changesets error in calculating linked versions. Please contact the maintainers`)
+    if (!highestVersion || !highestReleaseType)
+      throw new Error(
+        `Large internal changesets error in calculating linked versions. Please contact the maintainers`
+      );
 
-    
     let newHighestVersion = semver.inc(highestVersion, highestReleaseType);
 
     // Finally, we update the packages so all of them are on the highest version

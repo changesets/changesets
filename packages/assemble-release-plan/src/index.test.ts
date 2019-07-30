@@ -112,25 +112,28 @@ describe("assemble-release-plan", () => {
     expect(releases[0].newVersion).toEqual("2.0.0");
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
-  it('should assemble a release plan where new highest version is set by an unreleased package', () => {
+  it("should assemble a release plan where new highest version is set by an unreleased package", () => {
     setup.addChangeset({
       id: "just-some-umbrellas",
-      releases: [{ name: "pkg-b", type: "minor" }, { name: "pkg-a", type: "patch" }]
+      releases: [
+        { name: "pkg-b", type: "minor" },
+        { name: "pkg-a", type: "patch" }
+      ]
     });
 
-    setup.updateWorkspace('pkg-c', '2.0.0')
+    setup.updateWorkspace("pkg-c", "2.0.0");
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b", 'pkg-c']] }
+      { ...defaultConfig, linked: [["pkg-a", "pkg-b", "pkg-c"]] }
     );
 
     expect(releases.length).toEqual(2);
     expect(releases[0].newVersion).toEqual("2.1.0");
     expect(releases[1].newVersion).toEqual("2.1.0");
-  })
+  });
   it("should assemble release plan where a link causes a dependency to need changing which causes a second link to update", () => {
     /*
       Expected events:
