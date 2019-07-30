@@ -1,47 +1,74 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
-import applyReleasePlan from "./";
 import { ReleasePlan, Config } from "@changesets/types";
+import fs from "fs-extra";
+import outdent from "outdent";
+
+import applyReleasePlan from "./";
 
 async function testSetup(
   fixtureName: string,
   releasePlan: ReleasePlan,
-  config: Config
+  config?: Config
 ) {
   let tempDir = await copyFixtureIntoTempDir(__dirname, fixtureName);
   return applyReleasePlan(releasePlan, tempDir, config);
 }
 
-function fakeReleasePlan(changesets = [], releases = []): ReleasePlan {
-  return {
-    changesets,
-    releases
-  };
-}
+let simpleFakePlan: ReleasePlan = {
+  changesets: [
+    {
+      id: "quick-lions-devour",
+      summary: "Hey, let's have fun with testing!",
+      releases: [{ name: "pkg-a", type: "minor" }]
+    }
+  ],
+  releases: [
+    {
+      name: "pkg-a",
+      type: "minor",
+      oldVersion: "1.0.0",
+      newVersion: "1.1.0",
+      changesets: ["quick-lions-devour"]
+    }
+  ]
+};
 
 describe("apply release plan", () => {
   describe("versioning", () => {
     it("should update a version for one package", async () => {
-      let changedFiles = await testSetup(
-        "simple-project",
-        {
-          changesets: [
-            {
-              id: "quick-lions-devour",
-              summary: "Hey, let's have fun with testing!",
-              releases: [{ name: "pkg-a", type: "minor" }]
-            }
-          ],
-          releases: []
-        },
-        {}
-      );
+      let changedFiles = await testSetup("simple-project", simpleFakePlan);
 
-      expect(changedFiles.length).toEqual(3);
+      let pkgPath = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
+
+      if (!pkgPath) throw new Error(`could not find an updated package json`);
+      let pkgJSON = await fs.readJSON(pkgPath);
+
+      expect(pkgJSON).toMatchObject({
+        name: "pkg-a",
+        version: "1.1.0"
+      });
     });
     it("should update a version for five packages with different new versions", () => {});
   });
   describe("changelogs", () => {
-    it("should update a changelog for one package", () => {});
+    it.skip("should update a changelog for one package", async () => {
+      let changedFiles = await testSetup("simple-project", simpleFakePlan);
+
+      let readmePath = changedFiles.find(a => a.endsWith("pkg-a/CHANGELOG.md"));
+
+      console.log(changedFiles);
+
+      if (!readmePath) throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+
+      expect(readme).toEqual(outdent`
+      # pkg-a
+
+      ## 1.1.0
+
+      - Hey, let's have fun with testing!
+      `);
+    });
     it("should update a changelog for five packages", () => {});
   });
   describe("should error and not write if", () => {

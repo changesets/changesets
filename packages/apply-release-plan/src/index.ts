@@ -1,9 +1,6 @@
-import {
-  ReleasePlan,
-  Config,
-  ComprehensiveRelease,
-  NewChangeset
-} from "@changesets/types";
+import { ReleasePlan, Config } from "@changesets/types";
+
+import { defaultConfig } from "@changesets/config";
 
 import getWorksaces from "get-workspaces";
 import fs from "fs-extra";
@@ -12,19 +9,10 @@ import prettier from "prettier";
 
 import versionPackage from "./version-package";
 
-const badDefaultConfig = {
-  changelog: (
-    /* eslint-disable */
-    releasePlan: ComprehensiveRelease,
-    changesets: NewChangeset[]
-    /* eslint-enable */
-  ): Promise<string> => new Promise(resolve => resolve(""))
-};
-
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   cwd: string,
-  config: Config = badDefaultConfig
+  config: Config = defaultConfig
 ) {
   let touchedFiles = [];
   let workspaces = await getWorksaces({
@@ -49,7 +37,8 @@ export default async function applyReleasePlan(
   // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
   let releaseWithChangelogs = releaseWithWorkspaces.map(release => ({
     ...release,
-    changelog: config.changelog(release, changesets)
+    changelog: Promise.resolve("it's all a bit silly really")
+    // changelog: config.changelog(release, changesets)
   }));
 
   let versionsToUpdate = releases.map(
@@ -71,8 +60,13 @@ export default async function applyReleasePlan(
     let pkgJSONPath = path.resolve(dir, "package.json");
     let changelogPath = path.resolve(dir, "CHANGELOG.md");
 
+    let parsedConfig = prettier.format(JSON.stringify(config), {
+      ...prettierConfig,
+      parser: "markdown"
+    });
+
     await Promise.all([
-      fs.writeFile(pkgJSONPath, config),
+      fs.writeFile(pkgJSONPath, parsedConfig),
       updateChangelog(changelogPath, changelog, name, prettierConfig)
     ]);
     touchedFiles.push(pkgJSONPath, changelogPath);
@@ -97,7 +91,7 @@ async function updateChangelog(
   changelogPath: string,
   changelogPromise: Promise<string>,
   name: string,
-  prettierConfig: Object
+  prettierConfig?: prettier.Options
 ) {
   let changelog = await changelogPromise;
   let templateString = `\n\n${changelog.trim("\n")}\n`;
@@ -109,8 +103,7 @@ async function updateChangelog(
       await fs.writeFile(changelogPath, `# ${name}${templateString}`);
     }
   } catch (e) {
-    logger.warn(e);
-    return;
+    console.warn(e);
   }
 }
 
@@ -118,7 +111,7 @@ async function prependFile(
   filePath: string,
   data: string,
   name: string,
-  prettierConfig: prettier.Options
+  prettierConfig?: prettier.Options
 ) {
   const fileData = fs.readFileSync(filePath).toString();
   // if the file exists but doesn't have the header, we'll add it in

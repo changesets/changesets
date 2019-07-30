@@ -16,7 +16,7 @@ export default async function versionPackage(
   },
   versionsToUpdate: Array<{ name: string; version: string }>
 ) {
-  let { newVersion, config, dir, changelog } = release;
+  let { newVersion, config } = release;
 
   config.version = newVersion;
 
