@@ -111,6 +111,8 @@ describe("apply release plan", () => {
     it.only("should update a changelog for one package", async () => {
       const releasePlan = new FakeReleasePlan();
 
+      releasePlan.config.
+
       let changedFiles = await testSetup("simple-project", releasePlan.getReleasePlan(), releasePlan.config);
 
       let readmePath = changedFiles.find(a => a.endsWith("pkg-a/CHANGELOG.md"));
