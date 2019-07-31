@@ -1,13 +1,19 @@
-import { ReleasePlan, Config } from "@changesets/types";
+import {
+  ReleasePlan,
+  Config,
+  ComprehensiveRelease,
+  NewChangeset
+} from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
 
-import getWorksaces from "get-workspaces";
+import getWorksaces, { PackageJSON } from "get-workspaces";
 import fs from "fs-extra";
 import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
+import resolveFrom from "resolve-from";
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
@@ -35,11 +41,12 @@ export default async function applyReleasePlan(
   });
 
   // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
-  let releaseWithChangelogs = releaseWithWorkspaces.map(release => ({
-    ...release,
-    changelog: Promise.resolve("it's all a bit silly really")
-    // changelog: config.changelog(release, changesets)
-  }));
+  let releaseWithChangelogs = await getNewChangelogEntry(
+    releaseWithWorkspaces,
+    changesets,
+    config.changelog,
+    cwd
+  );
 
   let versionsToUpdate = releases.map(
     ({ name, newVersion }) => ({ name, version: newVersion }),
@@ -58,18 +65,22 @@ export default async function applyReleasePlan(
   for (let release of finalisedRelease) {
     let { changelog, config, dir, name } = release;
     let pkgJSONPath = path.resolve(dir, "package.json");
+
     let changelogPath = path.resolve(dir, "CHANGELOG.md");
 
     let parsedConfig = prettier.format(JSON.stringify(config), {
       ...prettierConfig,
-      parser: "markdown"
+      parser: "json"
     });
 
-    await Promise.all([
-      fs.writeFile(pkgJSONPath, parsedConfig),
-      updateChangelog(changelogPath, changelog, name, prettierConfig)
-    ]);
-    touchedFiles.push(pkgJSONPath, changelogPath);
+    await fs.writeFile(pkgJSONPath, parsedConfig)
+    touchedFiles.push(pkgJSONPath);
+    
+    if (changelog.length > 0) {
+      await updateChangelog(changelogPath, changelog, name, prettierConfig)
+      touchedFiles.push( changelogPath)
+    }
+
   }
 
   let changesetFolder = path.resolve(cwd, ".changeset");
@@ -87,14 +98,48 @@ export default async function applyReleasePlan(
   return touchedFiles;
 }
 
+type ModCompWithWorkspace = ComprehensiveRelease & {
+  config: PackageJSON;
+  dir: string;
+};
+
+type GetChangelogFunc = (
+  release: ModCompWithWorkspace,
+  allChangesets: NewChangeset[],
+  options: any
+) => Promise<string>;
+
+function getNewChangelogEntry(
+  releaseWithWorkspaces: ModCompWithWorkspace[],
+  changesets: NewChangeset[],
+  changelogConfig: false | readonly [string, any],
+  cwd: string
+) {
+  let getChangelogFunc: GetChangelogFunc = () => Promise.resolve("");
+  let changelogOpts: any;
+  if (changelogConfig) {
+    let changelogPath = resolveFrom(cwd, changelogConfig[0]);
+
+    getChangelogFunc = require(changelogPath);
+  }
+
+  return Promise.all(releaseWithWorkspaces.map(async release => {
+    let changelog = await getChangelogFunc(release, changesets, changelogOpts);
+    return {
+      ...release,
+      changelog
+    };
+  }));
+}
+
 async function updateChangelog(
   changelogPath: string,
-  changelogPromise: Promise<string>,
+  changelog: string,
   name: string,
-  prettierConfig?: prettier.Options
+  prettierConfig: prettier.Options | null
 ) {
-  let changelog = await changelogPromise;
-  let templateString = `\n\n${changelog.trim("\n")}\n`;
+
+  let templateString = `\n\n${changelog.trim()}\n`;
 
   try {
     if (fs.existsSync(changelogPath)) {
@@ -111,7 +156,7 @@ async function prependFile(
   filePath: string,
   data: string,
   name: string,
-  prettierConfig?: prettier.Options
+  prettierConfig?: prettier.Options | null
 ) {
   const fileData = fs.readFileSync(filePath).toString();
   // if the file exists but doesn't have the header, we'll add it in

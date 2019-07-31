@@ -1,15 +1,68 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
-import { ReleasePlan, Config } from "@changesets/types";
+import {
+  ReleasePlan,
+  Config,
+  NewChangeset,
+  ComprehensiveRelease
+} from "@changesets/types";
 import fs from "fs-extra";
 import outdent from "outdent";
 
 import applyReleasePlan from "./";
 
+class FakeReleasePlan {
+  changesets: NewChangeset[];
+  releases: ComprehensiveRelease[];
+  baseChangeset: NewChangeset;
+  baseRelease: ComprehensiveRelease;
+  config: Config;
+
+  constructor(
+    changesets: NewChangeset[] = [],
+    releases: ComprehensiveRelease[] = []
+  ) {
+    this.baseChangeset = {
+      id: "quick-lions-devour",
+      summary: "Hey, let's have fun with testing!",
+      releases: [{ name: "pkg-a", type: "minor" }]
+    };
+    this.baseRelease = {
+      name: "pkg-a",
+      type: "minor",
+      oldVersion: "1.0.0",
+      newVersion: "1.1.0",
+      changesets: ["quick-lions-devour"]
+    };
+    this.config = {
+      changelog: false,
+      commit: false,
+      linked: [],
+      access: 'private'
+    }
+
+    this.changesets = [this.baseChangeset, ...changesets];
+    this.releases = [this.baseRelease, ...releases];
+  }
+
+  getReleasePlan(): ReleasePlan {
+    return {
+      changesets: this.changesets,
+      releases: this.releases
+    };
+  }
+}
+
 async function testSetup(
   fixtureName: string,
   releasePlan: ReleasePlan,
-  config?: Config
+  config: Config
 ) {
+  if (!config) config = {
+    changelog: false,
+    commit: false,
+    linked: [],
+    access: 'private'
+  }
   let tempDir = await copyFixtureIntoTempDir(__dirname, fixtureName);
   return applyReleasePlan(releasePlan, tempDir, config);
 }
@@ -36,8 +89,12 @@ let simpleFakePlan: ReleasePlan = {
 describe("apply release plan", () => {
   describe("versioning", () => {
     it("should update a version for one package", async () => {
-      let changedFiles = await testSetup("simple-project", simpleFakePlan);
-
+      const releasePlan = new FakeReleasePlan();
+      let changedFiles = await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        releasePlan.config
+      );
       let pkgPath = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
@@ -51,12 +108,12 @@ describe("apply release plan", () => {
     it("should update a version for five packages with different new versions", () => {});
   });
   describe("changelogs", () => {
-    it.skip("should update a changelog for one package", async () => {
-      let changedFiles = await testSetup("simple-project", simpleFakePlan);
+    it.only("should update a changelog for one package", async () => {
+      const releasePlan = new FakeReleasePlan();
+
+      let changedFiles = await testSetup("simple-project", releasePlan.getReleasePlan(), releasePlan.config);
 
       let readmePath = changedFiles.find(a => a.endsWith("pkg-a/CHANGELOG.md"));
-
-      console.log(changedFiles);
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       let readme = await fs.readFile(readmePath, "utf-8");
@@ -69,20 +126,87 @@ describe("apply release plan", () => {
       - Hey, let's have fun with testing!
       `);
     });
-    it("should update a changelog for five packages", () => {});
+    it.skip("should update a changelog for five packages", () => {});
   });
   describe("should error and not write if", () => {
-    it("a package appears twice", () => {});
-    it("a package cannot be found", () => {});
-    it("a provided changelog function fails", () => {});
-    it("a changelog write fails", () => {});
-    it("a changelog write fails", () => {});
+    // This is skipped as *for now* we are assuming we have been passed
+    // valid releasePlans - this may get work done on it in the future
+    it.skip("a package appears twice", async () => {
+      let changedFiles;
+      try {
+        changedFiles = await testSetup("simple-project", {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [{ name: "pkg-a", type: "minor" }]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-a",
+              type: "minor",
+              oldVersion: "1.0.0",
+              newVersion: "1.1.0",
+              changesets: ["quick-lions-devour"]
+            },
+            {
+              name: "pkg-a",
+              type: "minor",
+              oldVersion: "1.0.0",
+              newVersion: "1.1.0",
+              changesets: ["quick-lions-devour"]
+            }
+          ]
+        });
+      } catch (e) {
+        expect(e.message).toEqual("some string probably");
+
+        return;
+      }
+
+      throw new Error(
+        `expected error but instead got changed files: \n${changedFiles.join(
+          "\n"
+        )}`
+      );
+    });
+    it("a package cannot be found", async () => {
+      let releasePlan = new FakeReleasePlan(
+        [],
+        [
+          {
+            name: "impossible-package",
+            type: "minor",
+            oldVersion: "1.0.0",
+            newVersion: "1.0.0",
+            changesets: []
+          }
+        ]
+      );
+      let changedFiles
+      try {
+        changedFiles = await testSetup("simple-project", releasePlan.getReleasePlan(), releasePlan.config);
+
+      } catch (e) {
+        expect(e.message).toEqual('Could not find matching package for release of: impossible-package')
+        return;
+      }
+
+      throw new Error(`Expected test to exit before this point but instead got changedFiles ${changedFiles}`);
+    });
+    it("a provided changelog function fails", async () => {
+      throw new Error("test not written");
+    });
+    it("a changelog write fails", async () => {
+      throw new Error("test not written");
+    });
   });
-  describe("changesets", () => {
+  describe.skip("changesets", () => {
     it("should delete one changeset after it is applied", () => {});
     it("should delete five changesets after they are applied", () => {});
   });
-  describe("git", () => {
+  describe.skip("git", () => {
     it("should commit updating files from packages", () => {});
     it("should commit removing applied changesets", () => {});
   });
