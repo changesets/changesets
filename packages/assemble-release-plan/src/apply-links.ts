@@ -1,10 +1,6 @@
 import semver from "semver";
-import {
-  Linked,
-  ComprehensiveRelease,
-  Workspace,
-  VersionType
-} from "@changesets/types";
+import { Linked, Workspace, VersionType } from "@changesets/types";
+import { InternalRelease } from "./types";
 
 /*
   WARNING:
@@ -19,7 +15,7 @@ import {
   modified array, but we decided both of those are worse than this solution.
 */
 function applyLinks(
-  releases: ComprehensiveRelease[],
+  releases: InternalRelease[],
   workspaces: Workspace[],
   linked: Linked
 ): boolean {
@@ -77,14 +73,15 @@ function applyLinks(
         `Large internal changesets error in calculating linked versions. Please contact the maintainers`
       );
 
-    let newHighestVersion = semver.inc(highestVersion, highestReleaseType);
-
     // Finally, we update the packages so all of them are on the highest version
     for (let linkedPackage of releasingLinkedPackages) {
-      if (linkedPackage.newVersion !== newHighestVersion) {
+      if (linkedPackage.type !== highestReleaseType) {
         updated = true;
-        // @ts-ignore We are confident here this is a semver string, but semver.inc is not
-        linkedPackage.newVersion = newHighestVersion;
+        linkedPackage.type = highestReleaseType;
+      }
+      if (linkedPackage.oldVersion !== highestVersion) {
+        updated = true;
+        linkedPackage.oldVersion = highestVersion;
       }
     }
   }

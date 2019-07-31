@@ -1,18 +1,13 @@
 // This function takes in changesets and returns one release per
 // package listed in the changesets
 
-import {
-  NewChangeset,
-  ComprehensiveRelease,
-  Workspace,
-  VersionType
-} from "@changesets/types";
-import semver from "semver";
+import { NewChangeset, Workspace, VersionType } from "@changesets/types";
+import { InternalRelease } from "./types";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
   workspaces: Workspace[]
-): ComprehensiveRelease[] {
+): InternalRelease[] {
   let releases: Map<
     string,
     {
@@ -58,12 +53,5 @@ export default function flattenReleases(
     });
   });
 
-  return [...releases.values()].map(release => {
-    // @ts-ignore by this point we're comfy semver.inc will return a non-null value so just casting it
-    let newVersion: string = semver.inc(release.oldVersion, release.type);
-    return {
-      ...release,
-      newVersion
-    };
-  });
+  return [...releases.values()];
 }
