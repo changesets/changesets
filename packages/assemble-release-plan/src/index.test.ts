@@ -112,6 +112,28 @@ describe("assemble-release-plan", () => {
     expect(releases[0].newVersion).toEqual("2.0.0");
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
+  it("should assemble a release plan where new highest version is set by an unreleased package", () => {
+    setup.addChangeset({
+      id: "just-some-umbrellas",
+      releases: [
+        { name: "pkg-b", type: "minor" },
+        { name: "pkg-a", type: "patch" }
+      ]
+    });
+
+    setup.updateWorkspace("pkg-c", "2.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      { ...defaultConfig, linked: [["pkg-a", "pkg-b", "pkg-c"]] }
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].newVersion).toEqual("2.1.0");
+    expect(releases[1].newVersion).toEqual("2.1.0");
+  });
   it("should assemble release plan where a link causes a dependency to need changing which causes a second link to update", () => {
     /*
       Expected events:
@@ -191,6 +213,37 @@ describe("assemble-release-plan", () => {
     expect(releases[1].newVersion).toEqual("1.0.1");
     expect(releases[2].name).toEqual("pkg-c");
     expect(releases[2].newVersion).toEqual("1.0.1");
+  });
+
+  it("should bump peer dependents where the version is updated because of linked", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "1.0.0");
+
+    setup.addChangeset({
+      id: "some-id",
+      releases: [{ type: "minor", name: "pkg-c" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.workspaces,
+      setup.dependentsGraph,
+      { ...defaultConfig, linked: [["pkg-a", "pkg-c"]] }
+    );
+
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "1.1.0"
+      },
+      {
+        name: "pkg-c",
+        newVersion: "1.1.0"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "2.0.0"
+      }
+    ]);
   });
   it("should update a peerDep by a major bump", () => {
     setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
