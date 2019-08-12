@@ -1,0 +1,10 @@
+{
+  "releases": [{ "name": "@changesets/config", "type": "minor" }],
+  "dependents": [
+    {
+      "name": "@changesets/assemble-release-plan",
+      "type": "patch",
+      "dependencies": ["@changesets/config"]
+    }
+  ]
+}

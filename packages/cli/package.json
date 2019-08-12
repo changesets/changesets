@@ -37,7 +37,6 @@
     "p-limit": "^2.2.0",
     "pkg-dir": "^4.1.0",
     "prettier": "^1.14.3",
-    "projector-spawn": "^1.0.1",
     "semver": "^5.4.1",
     "spawndamnit": "^2.0.0",
     "term-size": "^2.1.0",

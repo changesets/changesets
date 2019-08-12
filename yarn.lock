@@ -671,16 +671,6 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@emotion/memoize@^0.7.1":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@emotion/memoize/-/memoize-0.7.1.tgz#e93c13942592cf5ef01aa8297444dc192beee52f"
-  integrity sha512-Qv4LTqO11jepd5Qmlp3M1YEjBumoTHcHFdgPTQ+sFlIL5myi/7xu/POwP7IRu6odBdmLXdtIs1D6TuW6kbwbbg==
-
-"@emotion/weak-memoize@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.2.tgz#63985d3d8b02530e0869962f4da09142ee8e200e"
-  integrity sha512-n/VQ4mbfr81aqkx/XmVicOLjviMuy02eenSdJY33SVA7S2J42EU0P1H0mOogfYedb3wXA0d/LVtBrgTSm04WEA==
-
 "@jest/console@^24.7.1":
   version "24.7.1"
   resolved "https://registry.yarnpkg.com/@jest/console/-/console-24.7.1.tgz#32a9e42535a97aedfe037e725bd67e954b459545"
@@ -868,13 +858,6 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/child-process-promise@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@types/child-process-promise/-/child-process-promise-2.2.1.tgz#049033bef102f77a1719b38672cc86a2c4710ab1"
-  integrity sha512-xZ4kkF82YkmqPCERqV9Tj0bVQj3Tk36BqGlNgxv5XhifgDRhwAqp+of+sccksdpZRbbPsNwMOkmUqOnLgxKtGw==
-  dependencies:
-    "@types/node" "*"
-
 "@types/estree@0.0.39":
   version "0.0.39"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.39.tgz#e177e699ee1b8c22d23174caaa7422644389509f"
@@ -919,6 +902,21 @@
   version "20.0.1"
   resolved "https://registry.yarnpkg.com/@types/jest-diff/-/jest-diff-20.0.1.tgz#35cc15b9c4f30a18ef21852e255fdb02f6d59b89"
   integrity sha512-yALhelO3i0hqZwhjtcr6dYyaLoCHbAMshwtj6cGxTvHZAKXHsYGdff6E8EPw3xLKY0ELUTQ69Q1rQiJENnccMA==
+
+"@types/jest-in-case@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/jest-in-case/-/jest-in-case-1.0.1.tgz#712b6ccd1a51fe6e342cf836a99fbb6889a83034"
+  integrity sha512-fADBNWvW40tsitQhPWewmVNTr6oZj7W0FVYlwRrBNQGLyqOznWdM5S1Nnw/3IWdG1Q4edgNYQHX4Et4POKpWiw==
+  dependencies:
+    "@types/jest" "*"
+    "@types/node" "*"
+
+"@types/jest@*":
+  version "24.0.15"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-24.0.15.tgz#6c42d5af7fe3b44ffff7cc65de7bf741e8fa427f"
+  integrity sha512-MU1HIvWUme74stAoc3mgAi+aMlgKOudgEvQDIm1v4RkrDudBh1T+NFp5sftpBAdXdx1J0PbdpJ+M2EsSOi1djA==
+  dependencies:
+    "@types/jest-diff" "*"
 
 "@types/jest@^24.0.12":
   version "24.0.12"
@@ -1432,15 +1430,6 @@ chardet@^0.4.0:
 chardet@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.7.0.tgz#90094849f0937f2eedc2425d0d28a9e5f0cbad9e"
-
-child-process-promise@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/child-process-promise/-/child-process-promise-2.2.1.tgz#4730a11ef610fad450b8f223c79d31d7bdad8074"
-  integrity sha1-RzChHvYQ+tRQuPIjx50x172tgHQ=
-  dependencies:
-    cross-spawn "^4.0.2"
-    node-version "^1.0.0"
-    promise-polyfill "^6.0.1"
 
 chokidar@^2.0.4:
   version "2.1.6"
@@ -2100,6 +2089,11 @@ estraverse@^4.0.0, estraverse@^4.1.0, estraverse@^4.1.1, estraverse@^4.2.0:
 estree-walker@^0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-0.6.0.tgz#5d865327c44a618dde5699f763891ae31f257dae"
+
+estree-walker@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-0.6.1.tgz#53049143f40c6eb918b23671d1fe3219f3a1b362"
+  integrity sha512-SqmZANLWS0mnatqbSfRP5g8OXZC12Fgg1IwNtLsyHDzJizORW4khDfjPqJZsemPWBB2uqykUah5YpQ6epsqC/w==
 
 esutils@^2.0.2:
   version "2.0.2"
@@ -3131,6 +3125,11 @@ jest-haste-map@^24.8.0:
   optionalDependencies:
     fsevents "^1.2.7"
 
+jest-in-case@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/jest-in-case/-/jest-in-case-1.0.2.tgz#56744b5af33222bd0abab70cf919f1d170ab75cc"
+  integrity sha1-VnRLWvMyIr0KurcM+Rnx0XCrdcw=
+
 jest-jasmine2@^24.8.0:
   version "24.8.0"
   resolved "https://registry.yarnpkg.com/jest-jasmine2/-/jest-jasmine2-24.8.0.tgz#a9c7e14c83dd77d8b15e820549ce8987cc8cd898"
@@ -3851,11 +3850,6 @@ node-releases@^1.1.17:
   dependencies:
     semver "^5.3.0"
 
-node-version@^1.0.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/node-version/-/node-version-1.2.0.tgz#34fde3ffa8e1149bd323983479dda620e1b5060d"
-  integrity sha512-ma6oU4Sk0qOoKEAymVoTvk8EdXEobdS7m/mAGhDJ8Rouugho48crHBORAmy5BoOcv8wraPM6xumapQp5hl4iIQ==
-
 nopt@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/nopt/-/nopt-4.0.1.tgz#d0d4685afd5415193c8c7505602d0d17cd64474d"
@@ -4205,16 +4199,14 @@ posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
 
-preconstruct@^0.0.79:
-  version "0.0.79"
-  resolved "https://registry.yarnpkg.com/preconstruct/-/preconstruct-0.0.79.tgz#041810ebcbe7a7e6bfab82cc9de0a450cf2d3e48"
-  integrity sha512-1c6OwJjEX21hn+mN6uD/Gfc+ixJ2fTSgQwG6Py3MYqFC05ggi0flXOgr3z0L9TAD4eR1p+7aRdLp6HQiWK9nJA==
+preconstruct@^0.0.84:
+  version "0.0.84"
+  resolved "https://registry.yarnpkg.com/preconstruct/-/preconstruct-0.0.84.tgz#c47d187c0de3d3aa46bec1740b2355237bc6011e"
+  integrity sha512-FBuU8ps7j/ED9qks/cyPsv+p7c7VGvuBAMKZ5FaI9qpgTsWQc8b/ESizvPIEL7SF1G2xAJPLbujjEyTY58MF7g==
   dependencies:
     "@babel/code-frame" "^7.0.0"
     "@babel/core" "^7.1.2"
     "@babel/plugin-transform-runtime" "^7.2.0"
-    "@emotion/memoize" "^0.7.1"
-    "@emotion/weak-memoize" "^0.2.2"
     "@preconstruct/hook" "^0.0.3"
     builtin-modules "^3.0.0"
     chalk "^2.3.2"
@@ -4240,6 +4232,7 @@ preconstruct@^0.0.79:
     rollup "^1.12.2"
     rollup-plugin-alias "^1.5.1"
     rollup-plugin-commonjs "^10.0.0"
+    rollup-plugin-json "^4.0.0"
     rollup-plugin-node-resolve "^5.0.0"
     rollup-plugin-replace "^2.2.0"
     rollup-pluginutils "^2.7.1"
@@ -4281,17 +4274,6 @@ process-nextick-args@~2.0.0:
 progress@^2.0.0:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
-
-projector-spawn@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/projector-spawn/-/projector-spawn-1.0.1.tgz#0849a9a54d5a76a9293d8240b4374417653312cb"
-  dependencies:
-    cross-spawn "^5.1.0"
-
-promise-polyfill@^6.0.1:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/promise-polyfill/-/promise-polyfill-6.1.0.tgz#dfa96943ea9c121fca4de9b5868cb39d3472e057"
-  integrity sha1-36lpQ+qcEh/KTem1hoyznTRy4Fc=
 
 prompts@^2.0.1:
   version "2.0.4"
@@ -4606,6 +4588,13 @@ rollup-plugin-commonjs@^10.0.0:
     resolve "^1.10.1"
     rollup-pluginutils "^2.7.0"
 
+rollup-plugin-json@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-json/-/rollup-plugin-json-4.0.0.tgz#a18da0a4b30bf5ca1ee76ddb1422afbb84ae2b9e"
+  integrity sha512-hgb8N7Cgfw5SZAkb3jf0QXii6QX/FOkiIq2M7BAQIEydjHvTyxXHQiIzZaTFgx1GK0cRCHOCBHIyEkkLdWKxow==
+  dependencies:
+    rollup-pluginutils "^2.5.0"
+
 rollup-plugin-node-resolve@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/rollup-plugin-node-resolve/-/rollup-plugin-node-resolve-5.0.0.tgz#754abf4841ed4bab2241551cba0a11d04c57f290"
@@ -4624,6 +4613,13 @@ rollup-plugin-replace@^2.2.0:
   dependencies:
     magic-string "^0.25.2"
     rollup-pluginutils "^2.6.0"
+
+rollup-pluginutils@^2.5.0:
+  version "2.8.1"
+  resolved "https://registry.yarnpkg.com/rollup-pluginutils/-/rollup-pluginutils-2.8.1.tgz#8fa6dd0697344938ef26c2c09d2488ce9e33ce97"
+  integrity sha512-J5oAoysWar6GuZo0s+3bZ6sVZAC0pfqKz68De7ZgDi5z63jOVZn1uJL/+z1jeKHNbGII8kAyHF5q8LnxSX5lQg==
+  dependencies:
+    estree-walker "^0.6.1"
 
 rollup-pluginutils@^2.6.0:
   version "2.6.0"
