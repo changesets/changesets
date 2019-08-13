@@ -68,3 +68,15 @@ export type WrittenConfig = {
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };
+
+export type ChangelogFunction = (
+  release: ComprehensiveRelease,
+  relevantChangesets: {
+    major: NewChangeset[];
+    minor: NewChangeset[];
+    patch: NewChangeset[];
+  },
+  options: any, // the user options
+  allReleases: ComprehensiveRelease[],
+  allChangesets: NewChangeset[]
+) => Promise<string | null>;

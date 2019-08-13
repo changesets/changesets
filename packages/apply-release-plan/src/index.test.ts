@@ -6,6 +6,7 @@ import {
   ComprehensiveRelease
 } from "@changesets/types";
 import fs from "fs-extra";
+import path from "path";
 import outdent from "outdent";
 
 import applyReleasePlan from "./";
@@ -37,8 +38,8 @@ class FakeReleasePlan {
       changelog: false,
       commit: false,
       linked: [],
-      access: 'private'
-    }
+      access: "private"
+    };
 
     this.changesets = [this.baseChangeset, ...changesets];
     this.releases = [this.baseRelease, ...releases];
@@ -55,14 +56,15 @@ class FakeReleasePlan {
 async function testSetup(
   fixtureName: string,
   releasePlan: ReleasePlan,
-  config: Config
+  config?: Config
 ) {
-  if (!config) config = {
-    changelog: false,
-    commit: false,
-    linked: [],
-    access: 'private'
-  }
+  if (!config)
+    config = {
+      changelog: false,
+      commit: false,
+      linked: [],
+      access: "private"
+    };
   let tempDir = await copyFixtureIntoTempDir(__dirname, fixtureName);
   return applyReleasePlan(releasePlan, tempDir, config);
 }
@@ -110,10 +112,17 @@ describe("apply release plan", () => {
   describe("changelogs", () => {
     it.only("should update a changelog for one package", async () => {
       const releasePlan = new FakeReleasePlan();
-
-      releasePlan.config.
-
-      let changedFiles = await testSetup("simple-project", releasePlan.getReleasePlan(), releasePlan.config);
+      let changedFiles = await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        {
+          ...releasePlan.config,
+          changelog: [
+            path.resolve(__dirname, "test-utils/default-changelog"),
+            null
+          ]
+        }
+      );
 
       let readmePath = changedFiles.find(a => a.endsWith("pkg-a/CHANGELOG.md"));
 
@@ -186,16 +195,23 @@ describe("apply release plan", () => {
           }
         ]
       );
-      let changedFiles
+      let changedFiles;
       try {
-        changedFiles = await testSetup("simple-project", releasePlan.getReleasePlan(), releasePlan.config);
-
+        changedFiles = await testSetup(
+          "simple-project",
+          releasePlan.getReleasePlan(),
+          releasePlan.config
+        );
       } catch (e) {
-        expect(e.message).toEqual('Could not find matching package for release of: impossible-package')
+        expect(e.message).toEqual(
+          "Could not find matching package for release of: impossible-package"
+        );
         return;
       }
 
-      throw new Error(`Expected test to exit before this point but instead got changedFiles ${changedFiles}`);
+      throw new Error(
+        `Expected test to exit before this point but instead got changedFiles ${changedFiles}`
+      );
     });
     it("a provided changelog function fails", async () => {
       throw new Error("test not written");

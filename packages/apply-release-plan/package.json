@@ -12,6 +12,11 @@
     "@changesets/get-version-range-type": "^0.0.0",
     "prettier": "^1.14.3",
     "get-workspaces": "^0.4.0",
-    "fs-extra": "^7.0.1"
+    "fs-extra": "^7.0.1",
+    "resolve-from": "^5.0.0"
+  },
+  "devDependencies": {
+    "jest-fixtures": "^0.5.0",
+    "outdent": "^0.5.0"
   }
 }

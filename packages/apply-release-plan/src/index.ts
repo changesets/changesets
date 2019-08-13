@@ -2,18 +2,20 @@ import {
   ReleasePlan,
   Config,
   ComprehensiveRelease,
-  NewChangeset
+  NewChangeset,
+  ChangelogFunction
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
 
 import getWorksaces, { PackageJSON } from "get-workspaces";
+import resolveFrom from "resolve-from";
+
 import fs from "fs-extra";
 import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
-import resolveFrom from "resolve-from";
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
@@ -73,14 +75,13 @@ export default async function applyReleasePlan(
       parser: "json"
     });
 
-    await fs.writeFile(pkgJSONPath, parsedConfig)
+    await fs.writeFile(pkgJSONPath, parsedConfig);
     touchedFiles.push(pkgJSONPath);
-    
-    if (changelog.length > 0) {
-      await updateChangelog(changelogPath, changelog, name, prettierConfig)
-      touchedFiles.push( changelogPath)
-    }
 
+    if (changelog.length > 0) {
+      await updateChangelog(changelogPath, changelog, name, prettierConfig);
+      touchedFiles.push(changelogPath);
+    }
   }
 
   let changesetFolder = path.resolve(cwd, ".changeset");
@@ -103,33 +104,61 @@ type ModCompWithWorkspace = ComprehensiveRelease & {
   dir: string;
 };
 
-type GetChangelogFunc = (
-  release: ModCompWithWorkspace,
-  allChangesets: NewChangeset[],
-  options: any
-) => Promise<string>;
-
 function getNewChangelogEntry(
   releaseWithWorkspaces: ModCompWithWorkspace[],
   changesets: NewChangeset[],
   changelogConfig: false | readonly [string, any],
   cwd: string
 ) {
-  let getChangelogFunc: GetChangelogFunc = () => Promise.resolve("");
+  let getChangelogFunc: ChangelogFunction = () => Promise.resolve("");
   let changelogOpts: any;
   if (changelogConfig) {
     let changelogPath = resolveFrom(cwd, changelogConfig[0]);
 
-    getChangelogFunc = require(changelogPath);
+    let possibleChangelogFunc = require(changelogPath);
+    if (typeof possibleChangelogFunc === "function") {
+      getChangelogFunc = possibleChangelogFunc;
+    } else if (typeof possibleChangelogFunc.default === "function") {
+      getChangelogFunc = possibleChangelogFunc.default;
+    } else {
+      throw new Error("Could not resolve changelog generation function");
+    }
   }
 
-  return Promise.all(releaseWithWorkspaces.map(async release => {
-    let changelog = await getChangelogFunc(release, changesets, changelogOpts);
-    return {
-      ...release,
-      changelog
-    };
-  }));
+  return Promise.all(
+    releaseWithWorkspaces.map(async release => {
+      let relevantChangesets: {
+        major: NewChangeset[];
+        minor: NewChangeset[];
+        patch: NewChangeset[];
+      } = {
+        major: [],
+        minor: [],
+        patch: []
+      };
+
+      for (let changeset of changesets) {
+        if (release.changesets.includes(changeset.id)) {
+          let csRelease = changeset.releases.find(
+            rel => rel.name === release.name
+          )!;
+          relevantChangesets[csRelease.type].push(changeset);
+        }
+      }
+
+      let changelog = await getChangelogFunc(
+        release,
+        relevantChangesets,
+        changelogOpts,
+        releaseWithWorkspaces,
+        changesets
+      );
+      return {
+        ...release,
+        changelog
+      };
+    })
+  );
 }
 
 async function updateChangelog(
@@ -138,7 +167,6 @@ async function updateChangelog(
   name: string,
   prettierConfig: prettier.Options | null
 ) {
-
   let templateString = `\n\n${changelog.trim()}\n`;
 
   try {
