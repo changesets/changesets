@@ -1,4 +1,4 @@
 {
-  "changelog": ".changeset/get-changelog-entry",
+  "changelog": "./getChangelogEntry.js",
   "commit": false
 }
