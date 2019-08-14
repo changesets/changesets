@@ -64,6 +64,7 @@ describe("running version in a simple project", () => {
     it("should warn if no changeset commits exist", async () => {
       await writeEmptyChangeset(cwd);
       await versionCommand(cwd, defaultConfig);
+      // @ts-ignore
       const loggerWarnCalls = logger.warn.mock.calls;
       expect(loggerWarnCalls.length).toEqual(1);
       expect(loggerWarnCalls[0][0]).toEqual(

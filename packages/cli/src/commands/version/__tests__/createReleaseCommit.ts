@@ -1,34 +1,29 @@
 import outdent from "outdent";
 import createRelease from "../../../utils/createRelease";
 import createReleaseCommit from "../createReleaseCommit";
+import { NewChangeset } from "@changesets/types";
 
 const fakeAllPackages = [
   { name: "package-a", config: { version: "1.0.0" } },
   { name: "package-b", config: { version: "1.0.0" } }
 ];
-const simpleChangeset = {
+const simpleChangeset: NewChangeset = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
-  dependents: [],
-  commit: "dec4a66",
   id: "abc123xy"
 };
-const simpleChangesetWithDeleted = {
+const simpleChangesetWithDeleted: NewChangeset = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
-  dependents: [{ name: "package-c", type: "patch" }],
-  commit: "dec4a66",
   id: "abc123ph"
 };
 
-const simpleChangeset2 = {
+const simpleChangeset2: NewChangeset = {
   summary: "This is another summary",
   releases: [
     { name: "package-a", type: "patch" },
     { name: "package-b", type: "minor" }
   ],
-  dependents: [],
-  commit: "695fad0",
   id: "abc123fh"
 };
 
