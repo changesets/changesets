@@ -149,7 +149,7 @@ const cwd = process.cwd();
           logger.error(
             "To fix this, use `changeset publish` instead, and update any scripts that use changesets"
           );
-          throw new Error("old command used");
+          throw new ExitError(1);
         }
         case "status": {
           await status(cwd, { sinceMaster, verbose, output });
