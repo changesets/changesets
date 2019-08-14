@@ -140,7 +140,7 @@ const cwd = process.cwd();
           logger.error(
             "To fix this, use `changeset version` instead, and update any scripts that use changesets"
           );
-          throw new Error("old command used");
+          throw new ExitError(1);
         }
         case "release": {
           logger.error(
