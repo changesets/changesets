@@ -4,9 +4,9 @@ import {
   Workspace,
   DependencyType,
   PackageJSON,
-  VersionType,
-  ComprehensiveRelease
+  VersionType
 } from "@changesets/types";
+import { InternalRelease } from "./types";
 
 /*
   WARNING:
@@ -21,7 +21,7 @@ import {
   modified array, but we decided both of those are worse than this solution.
 */
 export default function getDependents(
-  releases: ComprehensiveRelease[],
+  releases: InternalRelease[],
   workspaces: Workspace[],
   dependencyGraph: Map<string, string[]>
 ): boolean {
@@ -75,7 +75,10 @@ export default function getDependents(
           if (
             // TODO validate this - I don't think it's right anymore
             !releases.some(dep => dep.name === dependent) &&
-            !semver.satisfies(nextRelease.newVersion, versionRange)
+            !semver.satisfies(
+              semver.inc(nextRelease.oldVersion, nextRelease.type)!,
+              versionRange
+            )
           ) {
             type = "patch";
           }
@@ -98,20 +101,12 @@ export default function getDependents(
           if (existing && type === "major" && existing.type !== "major") {
             existing.type = "major";
 
-            // @ts-ignore by this point we're comfy semver.inc will return a non-null value so just casting it
-            existing.newVersion = semver.inc(
-              existing.oldVersion,
-              existing.type
-            );
-
             pkgsToSearch.push(existing);
           } else {
-            let newDependent: ComprehensiveRelease = {
+            let newDependent: InternalRelease = {
               name,
               type,
               oldVersion: pkgJSON.version,
-              // @ts-ignore by this point we're comfy semver.inc will return a non-null value so just casting it
-              newVersion: semver.inc(pkgJSON.version, type),
               changesets: []
             };
 

@@ -1,5 +1,6 @@
 import semver from "semver";
-import { Linked, ComprehensiveRelease } from "@changesets/types";
+import { Linked, Workspace, VersionType } from "@changesets/types";
+import { InternalRelease } from "./types";
 
 /*
   WARNING:
@@ -13,7 +14,11 @@ import { Linked, ComprehensiveRelease } from "@changesets/types";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-function applyLinks(releases: ComprehensiveRelease[], linked: Linked): boolean {
+function applyLinks(
+  releases: InternalRelease[],
+  workspaces: Workspace[],
+  linked: Linked
+): boolean {
   let updated = false;
   if (!linked) return updated;
 
@@ -24,19 +29,59 @@ function applyLinks(releases: ComprehensiveRelease[], linked: Linked): boolean {
       linkedPackages.includes(release.name)
     );
 
+    // If we proceed any further we do extra work with calculating highestVersion for things that might
+    // not need one, as they only have workspace based packages
+    if (releasingLinkedPackages.length < 1) continue;
+
+    let highestReleaseType: VersionType | undefined;
     let highestVersion;
-    // Next we determine what the highest version among the linked packages will be
-    for (let linkedPackage of releasingLinkedPackages) {
-      let version = linkedPackage.newVersion;
-      if (highestVersion === undefined || semver.gt(version, highestVersion)) {
-        highestVersion = version;
+
+    for (let pkg of releasingLinkedPackages) {
+      // Note that patch is implictly set here, but never needs to override another value
+      if (!highestReleaseType) {
+        highestReleaseType = pkg.type;
+      } else if (pkg.type === "major") {
+        highestReleaseType = pkg.type;
+      } else if (pkg.type === "minor" && highestReleaseType !== "major") {
+        highestReleaseType = pkg.type;
       }
     }
+
+    // Next we determine what the highest version among the linked packages will be
+    for (let linkedPackage of linkedPackages) {
+      let workspace = workspaces.find(
+        workspace => workspace.name === linkedPackage
+      );
+
+      if (workspace) {
+        if (
+          highestVersion === undefined ||
+          semver.gt(workspace.config.version, highestVersion)
+        ) {
+          highestVersion = workspace.config.version;
+        }
+      } else {
+        console.error(
+          `FATAL ERROR IN CHANGESETS! We were unable to version for linked package: ${linkedPackage} in linkedPackages: ${linkedPackages.toString()}`
+        );
+        throw new Error(`fatal: could not resolve linked packages`);
+      }
+    }
+
+    if (!highestVersion || !highestReleaseType)
+      throw new Error(
+        `Large internal changesets error in calculating linked versions. Please contact the maintainers`
+      );
+
     // Finally, we update the packages so all of them are on the highest version
     for (let linkedPackage of releasingLinkedPackages) {
-      if (highestVersion && linkedPackage.newVersion !== highestVersion) {
+      if (linkedPackage.type !== highestReleaseType) {
         updated = true;
-        linkedPackage.newVersion = highestVersion;
+        linkedPackage.type = highestReleaseType;
+      }
+      if (linkedPackage.oldVersion !== highestVersion) {
+        updated = true;
+        linkedPackage.oldVersion = highestVersion;
       }
     }
   }

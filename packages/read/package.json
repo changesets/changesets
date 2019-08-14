@@ -7,6 +7,7 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/master/packages/read",
   "dependencies": {
+    "@babel/runtime": "^7.4.4",
     "fs-extra": "^7.0.1",
     "@changesets/parse": "^0.0.0",
     "@changesets/types": "^0.0.0",

@@ -7,6 +7,7 @@ import {
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
+import semver from "semver";
 
 function assembleReleasePlan(
   changesets: NewChangeset[],
@@ -29,12 +30,23 @@ function assembleReleasePlan(
     );
 
     // The map passed in to determineDependents will be mutated
-    let linksUpdated = applyLinks(releases, config.linked);
+    let linksUpdated = applyLinks(releases, workspaces, config.linked);
 
     releaseObjectValidated = !linksUpdated && !dependentAdded;
   }
 
-  return { changesets, releases };
+  return {
+    changesets,
+    releases: releases.map(incompleteRelease => {
+      return {
+        ...incompleteRelease,
+        newVersion: semver.inc(
+          incompleteRelease.oldVersion,
+          incompleteRelease.type
+        )!
+      };
+    })
+  };
 }
 
 export default assembleReleasePlan;
