@@ -1,31 +1,19 @@
-import { green, blue } from "chalk";
+import chalk from "chalk";
 import path from "path";
 import fs from "fs-extra";
 
 import * as cli from "../../utils/cli";
 import * as git from "@changesets/git";
+import { Config } from "@changesets/types";
 import logger from "../../utils/logger";
 
 import writeChangeset from "./writeChangeset";
 import createChangeset from "./createChangeset";
-import { defaultConfig } from "../../utils/constants";
-import resolveUserConfig from "../../utils/resolveConfig";
 import getChangesetBase from "../../utils/getChangesetBase";
-import { printConfirmationMessage } from "./messages";
+import printConfirmationMessage from "./messages";
 
-export default async function add(opts) {
-  const userConfig = await resolveUserConfig(opts.cwd);
-  const userchangesetOptions =
-    userConfig && userConfig.changesetOptions
-      ? userConfig.changesetOptions
-      : {};
-
-  const config = {
-    ...defaultConfig.changesetOptions,
-    ...userchangesetOptions,
-    ...opts
-  };
-  const changesetBase = await getChangesetBase(config.cwd);
+export default async function add(cwd: string, config: Config) {
+  const changesetBase = await getChangesetBase(cwd);
 
   if (!fs.existsSync(changesetBase)) {
     console.warn(
@@ -34,9 +22,11 @@ export default async function add(opts) {
     return;
   }
 
-  const changedPackages = await git.getChangedPackagesSinceMaster(config.cwd);
-  const changePackagesName = changedPackages.map(pkg => pkg.name);
-  const newChangeset = await createChangeset(changePackagesName, config);
+  const changedPackages = await git.getChangedPackagesSinceMaster(cwd);
+  const changePackagesName = changedPackages
+    .filter(a => a)
+    .map(pkg => pkg.name);
+  const newChangeset = await createChangeset(changePackagesName, cwd);
   printConfirmationMessage(newChangeset);
 
   const confirmChangeset = await cli.askConfirm(
@@ -44,22 +34,21 @@ export default async function add(opts) {
   );
 
   if (confirmChangeset) {
-    const changesetID = await writeChangeset(newChangeset, config);
+    const changesetID = await writeChangeset(newChangeset, cwd);
     if (config.commit) {
-      await git.add(path.resolve(changesetBase, changesetID), config.cwd);
+      await git.add(path.resolve(changesetBase, changesetID), cwd);
       await git.commit(
         `CHANGESET: ${changesetID}. ${newChangeset.summary}`,
-        config.cwd
+        cwd
       );
-      logger.log(green("Changeset added and committed"));
+      logger.log(chalk.green("Changeset added and committed"));
     } else {
-      logger.log(green("Changeset added! - you can now commit it\n"));
+      logger.log(chalk.green("Changeset added! - you can now commit it\n"));
     }
 
-    let hasMajorChange = [
-      ...newChangeset.releases,
-      ...newChangeset.dependents
-    ].find(c => c.type === "major");
+    let hasMajorChange = [...newChangeset.releases].find(
+      c => c.type === "major"
+    );
 
     if (hasMajorChange) {
       logger.warn(
@@ -70,11 +59,11 @@ export default async function add(opts) {
       logger.warn("HOW a consumer should update their code");
     } else {
       logger.log(
-        green(
+        chalk.green(
           "If you want to modify or expand on the changeset summary, you can find it here"
         )
       );
     }
-    logger.info(blue(path.resolve(changesetBase, changesetID, "changes.md")));
+    logger.info(chalk.blue(path.resolve(changesetBase, `${changesetID}.md`)));
   }
 }

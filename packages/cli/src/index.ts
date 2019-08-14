@@ -4,10 +4,14 @@ import logger from "./utils/logger";
 
 import init from "./commands/init";
 import add from "./commands/add";
-import bump from "./commands/bump";
-import release from "./commands/release";
+import version from "./commands/version";
+import publish from "./commands/publish";
 import status from "./commands/status";
 import { ExitError } from "./utils/errors";
+import { CommandOptions, CliOptions } from "./types";
+
+import { defaultConfig, read } from "@changesets/config";
+import getWorkspaces from "get-workspaces";
 
 const { input, flags } = meow(
   `
@@ -16,8 +20,8 @@ const { input, flags } = meow(
   Commands
     init
     add [--commit]
-    bump [--commit --update-changelog --skip-ci]
-    release [--public --otp=code]
+    version [--commit --update-changelog --skip-ci]
+    publish [--public --otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
   `,
   {
@@ -79,13 +83,25 @@ const cwd = process.cwd();
       verbose,
       output,
       otp
-    } = flags;
+    }: CliOptions = flags;
 
     // Command line options need to be undefined, otherwise their
     // default value overrides the user's provided config in their
     // config file. For this reason, we only assign them to this
     // object as and when they exist.
-    const config = { cwd };
+
+    const workspaces = await getWorkspaces({
+      cwd,
+      tools: ["yarn", "bolt", "root"]
+    });
+
+    if (!workspaces) {
+      throw new Error(
+        "We could not resolve workspaces - check you are running this command from the correct directory"
+      );
+    }
+
+    const config = await read(cwd, workspaces);
     try {
       switch (input[0]) {
         case "init": {
@@ -96,10 +112,10 @@ const cwd = process.cwd();
           if (commit !== undefined) {
             config.commit = commit;
           }
-          await add(config);
+          await add(cwd, config);
           return;
         }
-        case "bump": {
+        case "version": {
           // We only assign them to this
           // object as and when they exist.
           if (updateChangelog !== undefined) {
@@ -111,17 +127,35 @@ const cwd = process.cwd();
           if (commit !== undefined) {
             config.commit = commit;
           }
-          await bump(config);
+          await version(config);
           return;
         }
-        case "release": {
+        case "publish": {
           if (isPublic !== undefined) {
             // This exists as
             config.public = isPublic;
           }
           config.otp = otp;
-          await release(config);
+          await publish(config);
           return;
+        }
+        case "bump": {
+          logger.error(
+            'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation'
+          );
+          logger.error(
+            "To fix this, use `changeset version` instead, and update any scripts that use changesets"
+          );
+          throw new Error("old command used");
+        }
+        case "release": {
+          logger.error(
+            'In version 2 of changesets, "release" has been renamed to "publish" - see our changelog for an explanation'
+          );
+          logger.error(
+            "To fix this, use `changeset publish` instead, and update any scripts that use changesets"
+          );
+          throw new Error("old command used");
         }
         case "status": {
           await status({ cwd, sinceMaster, verbose, output });

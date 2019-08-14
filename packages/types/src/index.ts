@@ -55,7 +55,7 @@ export type Linked = ReadonlyArray<ReadonlyArray<string>>;
 
 export type Config = {
   changelog: false | readonly [string, any];
-  commit: boolean;
+  commit: boolean | "skipCI";
   linked: Linked;
   access: "public" | "private";
 };

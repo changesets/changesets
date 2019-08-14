@@ -2,6 +2,7 @@ import spawn from "spawndamnit";
 import path from "path";
 import getWorkspaces from "get-workspaces";
 import pkgDir from "pkg-dir";
+import { Workspace } from "@changesets/types";
 
 // TODO: Currently getting this working, need to decide how to
 // share projectDir between packages if that's what we need
@@ -112,8 +113,8 @@ async function getChangedPackagesSinceCommit(commitHash: string, cwd: string) {
     relativeDir: path.relative(projectDir, pkg.dir)
   }));
 
-  const fileNameToPackage = (fileName: string) =>
-    allPackages.find(pkg => fileName.startsWith(pkg.dir + path.sep));
+  const fileNameToPackage = (fileName: string): Workspace =>
+    allPackages.find(pkg => fileName.startsWith(pkg.dir + path.sep))!;
 
   const fileExistsInPackage = (fileName: string) =>
     !!fileNameToPackage(fileName);

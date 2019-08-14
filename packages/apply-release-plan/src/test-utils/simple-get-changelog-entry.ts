@@ -4,7 +4,7 @@ import {
   ComprehensiveRelease,
   VersionType,
   NewChangeset
-} from "@changesets/types/src";
+} from "@changesets/types";
 import { RelevantChangesets } from "../types";
 
 async function getReleaseLine(changeset: NewChangeset) {

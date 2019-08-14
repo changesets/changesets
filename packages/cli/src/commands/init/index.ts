@@ -5,8 +5,9 @@ import chalk from "chalk";
 import logger from "../../utils/logger";
 import getChangesetBase from "../../utils/getChangesetBase";
 import { pkgPath } from "../../utils/constants";
+import { defaultWrittenConfig } from "@changesets/config";
 
-export default async function init({ cwd }) {
+export default async function init(cwd: string) {
   const changesetBase = await getChangesetBase(cwd);
 
   if (fs.existsSync(changesetBase)) {
@@ -15,6 +16,11 @@ export default async function init({ cwd }) {
     );
   } else {
     await fs.copy(path.resolve(pkgPath, "./default-files"), changesetBase);
+    await fs.writeFile(
+      path.resolve(changesetBase, "config.json"),
+      JSON.stringify(defaultWrittenConfig, null, 2)
+    );
+
     logger.log(
       chalk`Thanks for choosing {green changesets} to help manage your versioning and publishing\n`
     );
