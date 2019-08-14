@@ -6,9 +6,9 @@ import initializeCommand from "..";
 
 jest.mock("../../../utils/logger");
 
-const getPaths = cwd => ({
+const getPaths = (cwd: string) => ({
   readmePath: path.join(cwd, ".changeset/README.md"),
-  configPath: path.join(cwd, ".changeset/config.js")
+  configPath: path.join(cwd, ".changeset/config.json")
 });
 
 describe("init", () => {
@@ -21,17 +21,19 @@ describe("init", () => {
 
     expect(fs.pathExistsSync(readmePath)).toBe(false);
     expect(fs.pathExistsSync(configPath)).toBe(false);
-    await initializeCommand({ cwd });
+    await initializeCommand(cwd);
     expect(fs.pathExistsSync(readmePath)).toBe(true);
     expect(fs.pathExistsSync(configPath)).toBe(true);
   });
   it("should fail in a project with a .changeset folder", async () => {
     const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    await fs.remove(path.join(cwd, ".changeset/config.json"));
+
     expect(fs.pathExistsSync(path.join(cwd, ".changeset/README.md"))).toBe(
       true
     );
-    await initializeCommand({ cwd });
-    expect(fs.pathExistsSync(path.join(cwd, ".changeset/config.js"))).toBe(
+    await initializeCommand(cwd);
+    expect(fs.pathExistsSync(path.join(cwd, ".changeset/config.json"))).toBe(
       false
     );
   });

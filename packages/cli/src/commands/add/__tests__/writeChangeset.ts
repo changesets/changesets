@@ -36,6 +36,6 @@ describe("simple project", () => {
 
     const mdContent = await fs.readFile(mdPath, "utf-8");
 
-    expect(parse(mdContent)).toBe(simpleChangeset);
+    expect(parse(mdContent)).toEqual(simpleChangeset);
   });
 });

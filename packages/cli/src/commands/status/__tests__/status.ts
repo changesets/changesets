@@ -6,46 +6,41 @@ import writeChangeset from "../../add/writeChangeset";
 import status from "..";
 
 import humanId from "human-id";
+import { NewChangeset, ReleasePlan } from "@changesets/types";
 
 jest.mock("human-id");
 
-const simpleChangeset = {
+const simpleChangeset: NewChangeset = {
+  id: "fake-ids-abound",
   summary: "This is a summary",
-  releases: [
-    { name: "pkg-a", type: "minor" },
-    { name: "pkg-b", type: "patch" }
-  ],
-  dependents: [{ name: "pkg-b", type: "none", dependencies: [] }]
+  releases: [{ name: "pkg-a", type: "minor" }, { name: "pkg-b", type: "patch" }]
 };
 
-const simpleReleaseObj = {
+const simpleReleasePlan: ReleasePlan = {
   releases: [
     {
       name: "pkg-a",
       type: "minor",
       changesets: ["ascii"],
-      commits: [],
-      version: "1.1.0"
+      oldVersion: "1.0.0",
+      newVersion: "1.1.0"
     },
     {
       name: "pkg-b",
       type: "patch",
       changesets: ["ascii"],
-      commits: [],
-      version: "1.0.1"
+      oldVersion: "1.0.0",
+      newVersion: "1.0.1"
     }
   ],
-  deleted: [],
   changesets: [
     {
       summary: "This is a summary",
-      commit: undefined,
       releases: [
         { name: "pkg-a", type: "minor" },
         { name: "pkg-b", type: "patch" }
       ],
-      id: "ascii",
-      dependents: [{ name: "pkg-b", type: "none", dependencies: [] }]
+      id: "ascii"
     }
   ]
 };
@@ -53,12 +48,12 @@ const simpleReleaseObj = {
 jest.mock("../../../utils/logger");
 jest.mock("@changesets/git");
 
-const writeChangesets = (commits, cwd) => {
-  return Promise.all(commits.map(commit => writeChangeset(commit, { cwd })));
+const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
+  return Promise.all(changesets.map(commit => writeChangeset(commit, cwd)));
 };
 
 describe("status", () => {
-  let cwd;
+  let cwd: string;
 
   beforeEach(async () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
@@ -66,15 +61,17 @@ describe("status", () => {
 
   it("should get the status for a simple changeset and return the release object", async () => {
     const changesetID = "ascii";
+    // @ts-ignore
     humanId.mockReturnValueOnce(changesetID);
 
     await writeChangesets([simpleChangeset], cwd);
-    const releaseObj = await status({ cwd });
-    expect(releaseObj).toEqual(simpleReleaseObj);
+    const releaseObj = await status(cwd, {});
+    expect(releaseObj).toEqual(simpleReleasePlan);
   });
   it("should exit with a non-zero error code when there are no changesets", async () => {
+    // @ts-ignore
     const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
-    await status({ cwd });
+    await status(cwd, {});
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
@@ -84,14 +81,15 @@ describe("status", () => {
     const output = "nonsense.json";
 
     const changesetID = "ascii";
+    // @ts-ignore
     humanId.mockReturnValueOnce(changesetID);
 
     await writeChangesets([simpleChangeset], cwd);
-    const probsUndefined = await status({ cwd, output });
+    const probsUndefined = await status(cwd, { output });
 
-    const releaseObj = await fs.readFile(path.join(cwd, output));
+    const releaseObj = await fs.readFile(path.join(cwd, output), "utf-8");
 
     expect(probsUndefined).toEqual(undefined);
-    expect(JSON.parse(releaseObj)).toEqual(simpleReleaseObj);
+    expect(JSON.parse(releaseObj)).toEqual(simpleReleasePlan);
   });
 });
