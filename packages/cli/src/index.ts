@@ -8,9 +8,9 @@ import version from "./commands/version";
 import publish from "./commands/publish";
 import status from "./commands/status";
 import { ExitError } from "./utils/errors";
-import { CommandOptions, CliOptions } from "./types";
+import { CliOptions } from "./types";
 
-import { defaultConfig, read } from "@changesets/config";
+import { read } from "@changesets/config";
 import getWorkspaces from "get-workspaces";
 
 const { input, flags } = meow(
@@ -20,7 +20,7 @@ const { input, flags } = meow(
   Commands
     init
     add [--commit]
-    version [--commit --update-changelog --skip-ci]
+    version [--commit --changelog=path.js --skip-ci]
     publish [--public --otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
   `,
@@ -33,16 +33,16 @@ const { input, flags } = meow(
         // config file
         default: undefined
       },
-      updateChangelog: {
-        type: "boolean",
+      changelog: {
+        type: "string",
         default: undefined
       },
       skipCI: {
         type: "boolean",
         default: undefined
       },
-      public: {
-        type: "boolean",
+      access: {
+        type: "string",
         default: undefined
       },
       sinceMaster: {
@@ -67,8 +67,21 @@ const { input, flags } = meow(
 const cwd = process.cwd();
 
 (async () => {
+  const workspaces = await getWorkspaces({
+    cwd,
+    tools: ["yarn", "bolt", "root"]
+  });
+
+  if (!workspaces) {
+    throw new Error(
+      "We could not resolve workspaces - check you are running this command from the correct directory"
+    );
+  }
+
+  const config = await read(cwd, workspaces);
+
   if (input.length < 1) {
-    await add({ cwd });
+    await add(cwd, config);
   } else if (input.length > 1) {
     logger.error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -76,9 +89,9 @@ const cwd = process.cwd();
   } else {
     const {
       commit,
-      updateChangelog,
+      changelog,
       skipCI,
-      public: isPublic,
+      access,
       sinceMaster,
       verbose,
       output,
@@ -90,22 +103,10 @@ const cwd = process.cwd();
     // config file. For this reason, we only assign them to this
     // object as and when they exist.
 
-    const workspaces = await getWorkspaces({
-      cwd,
-      tools: ["yarn", "bolt", "root"]
-    });
-
-    if (!workspaces) {
-      throw new Error(
-        "We could not resolve workspaces - check you are running this command from the correct directory"
-      );
-    }
-
-    const config = await read(cwd, workspaces);
     try {
       switch (input[0]) {
         case "init": {
-          await init({ cwd });
+          await init(cwd);
           return;
         }
         case "add": {
@@ -118,22 +119,23 @@ const cwd = process.cwd();
         case "version": {
           // We only assign them to this
           // object as and when they exist.
-          if (updateChangelog !== undefined) {
-            config.updateChangelog = updateChangelog;
-          }
-          if (skipCI !== undefined) {
-            config.skipCI = skipCI;
+          if (changelog !== undefined) {
+            config.changelog = [changelog, null];
           }
           if (commit !== undefined) {
             config.commit = commit;
           }
+          if (skipCI !== undefined) {
+            config.commit = "skipCI";
+          }
+
           await version(config);
           return;
         }
         case "publish": {
-          if (isPublic !== undefined) {
+          if (access !== undefined) {
             // This exists as
-            config.public = isPublic;
+            config.access = access;
           }
           config.otp = otp;
           await publish(config);
@@ -158,7 +160,7 @@ const cwd = process.cwd();
           throw new Error("old command used");
         }
         case "status": {
-          await status({ cwd, sinceMaster, verbose, output });
+          await status(cwd, { sinceMaster, verbose, output });
           return;
         }
         default: {

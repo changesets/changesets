@@ -2,46 +2,32 @@ import chalk from "chalk";
 import table from "tty-table";
 import fs from "fs-extra";
 import path from "path";
-
-import getChangesetBase from "../../utils/getChangesetBase";
+import getReleasePlan from "@changesets/get-release-plan";
+import { VersionType, Release, ComprehensiveRelease } from "@changesets/types";
 import logger from "../../utils/logger";
-import getChangesets from "../../utils/getChangesets";
-import * as bolt from "../../utils/bolt-replacements";
 
-import createRelease from "../../utils/createRelease";
-import { defaultConfig } from "../../utils/constants";
-import resolveConfig from "../../utils/resolveConfig";
-
-export default async function getStatus({
-  cwd,
-  sinceMaster,
-  verbose,
-  output,
-  ...opts
-}) {
-  let userConfig = await resolveConfig(cwd);
-  userConfig =
-    userConfig && userConfig.versionOptions ? userConfig.versionOptions : {};
-  const config = { ...defaultConfig.versionOptions, ...userConfig, ...opts };
-
-  const changesetBase = await getChangesetBase(cwd);
-  const allPackages = await bolt.getWorkspaces({ cwd });
+export default async function getStatus(
+  cwd: string,
+  {
+    sinceMaster,
+    verbose,
+    output
+  }: { sinceMaster?: boolean; verbose?: boolean; output?: string }
+) {
   // TODO: Check if we are no master and give a different error message if we are
-  const changesets = await getChangesets(changesetBase, sinceMaster);
+  const releasePlan = await getReleasePlan(cwd, sinceMaster);
+
+  const { changesets, releases } = releasePlan;
 
   if (changesets.length < 1) {
     logger.error("No changesets present");
     process.exit(1);
   }
 
-  const releaseObject = createRelease(changesets, allPackages, config.linked);
-  const { releases } = releaseObject;
-  logger.log("---");
-
   if (output) {
     await fs.writeFile(
       path.join(cwd, output),
-      JSON.stringify(releaseObject, undefined, 2)
+      JSON.stringify(releasePlan, undefined, 2)
     );
     return;
   }
@@ -53,10 +39,10 @@ export default async function getStatus({
   logger.log("---");
   print("major", releases);
 
-  return releaseObject;
+  return releasePlan;
 }
 
-function SimplePrint(type, releases) {
+function SimplePrint(type: VersionType, releases: Array<Release>) {
   const packages = releases.filter(r => r.type === type);
   if (packages.length) {
     logger.info(chalk`Packages to be bumped at {green ${type}}:\n`);
@@ -68,16 +54,23 @@ function SimplePrint(type, releases) {
   }
 }
 
-function verbosePrint(type, releases) {
+function verbosePrint(
+  type: VersionType,
+  releases: Array<ComprehensiveRelease>
+) {
   const packages = releases.filter(r => r.type === type);
   if (packages.length) {
     logger.info(chalk`Packages to be bumped at {green ${type}}`);
 
-    const columns = packages.map(({ name, version, changesets }) => [
-      chalk.green(name),
-      version,
-      changesets.map(c => chalk.blue(` .changeset/${c}/changes.md`)).join(" +")
-    ]);
+    const columns = packages.map(
+      ({ name, newVersion: version, changesets }) => [
+        chalk.green(name),
+        version,
+        changesets
+          .map(c => chalk.blue(` .changeset/${c}/changes.md`))
+          .join(" +")
+      ]
+    );
 
     const t1 = table(
       [

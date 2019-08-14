@@ -1,8 +1,8 @@
 export type CliOptions = {
   commit?: boolean;
-  updateChangelog?: boolean;
+  changelog?: string;
   skipCI?: boolean;
-  public?: boolean;
+  access?: "public" | "private";
   sinceMaster?: boolean;
   verbose?: boolean;
   output?: string;
