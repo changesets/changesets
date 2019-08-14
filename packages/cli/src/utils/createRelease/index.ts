@@ -1,6 +1,6 @@
 import semver from "semver";
 import flattenChangesets from "./flattenChangesets";
-import { Changeset, BumpType } from "../types";
+import { Changeset, VersionType } from "@changesets/types";
 import { Workspace } from "get-workspaces";
 /*
   This flattens an array of Version objects into one object that can be used to create the changelogs
@@ -71,7 +71,7 @@ export default function createRelease(
 
   const allReleases: Array<{
     name: string;
-    type: BumpType;
+    type: VersionType;
     changesets: Array<string>;
     commits: Array<string>;
     version?: string | null;

@@ -37,10 +37,6 @@ const { input, flags } = meow(
         type: "string",
         default: undefined
       },
-      skipCI: {
-        type: "boolean",
-        default: undefined
-      },
       access: {
         type: "string",
         default: undefined
@@ -90,7 +86,6 @@ const cwd = process.cwd();
     const {
       commit,
       changelog,
-      skipCI,
       access,
       sinceMaster,
       verbose,
@@ -125,11 +120,8 @@ const cwd = process.cwd();
           if (commit !== undefined) {
             config.commit = commit;
           }
-          if (skipCI !== undefined) {
-            config.commit = "skipCI";
-          }
 
-          await version(config);
+          await version(cwd, config);
           return;
         }
         case "publish": {

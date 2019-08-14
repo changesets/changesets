@@ -10,3 +10,4 @@ of their names.
 - `updateChangelog` option has been removed in favor of `changelog`
   - `changelog` options accepts a path which we will use to resolve your `getChangelogEntry` function.
 - `isPublic` flag has been changed to `access` and accepts `public` or `private`
+- Removed `skipCI` - the `commit` option now automatically skips CI.

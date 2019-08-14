@@ -134,7 +134,7 @@ You can pass the option `--commit`, or provide this in the config. Commit is fal
 ### bump
 
 ```
-changeset bump [--update-changelog] [--skipCI] [--commit]
+changeset bump [--update-changelog] [--commit]
 ```
 
 Updates the versions for all packages (and depdendencies) described in changesets since last release.
@@ -147,9 +147,7 @@ This command will read then delete changesets on disk, ensuring that they are on
 
 `--update-changelog` (default true) - Sets whether you want changesets to write out changelog files.
 
-`--commit` (default false) - If true, running this command will automatically commit the changes it made.
-
-> `[skip ci]` can be used to prevent this commit from triggering a CI build as the common use case would be to run this in master and then push back to master. We want to avoid the infinite loop there. If you are running version locally, you may need to make another commit after this to trigger your CI.
+`--commit` (default false) - If true, running this command will automatically commit the changes it made. Note this will cause CI to be skipped.
 
 ### release
 
