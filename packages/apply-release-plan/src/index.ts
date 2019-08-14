@@ -114,7 +114,7 @@ function getNewChangelogEntry(
   let getChangelogFunc: ChangelogFunction = () => Promise.resolve("");
   let changelogOpts: any;
   if (changelogConfig) {
-    let changelogPath = resolveFrom(cwd, changelogConfig[0]);
+    let changelogPath = resolveFrom(path.join(cwd, ".changeset"), changelogConfig[0]);
 
     let possibleChangelogFunc = require(changelogPath);
     if (typeof possibleChangelogFunc === "function") {
