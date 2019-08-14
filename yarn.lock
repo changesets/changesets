@@ -619,6 +619,13 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
+"@babel/runtime@^7.5.5":
+  version "7.5.5"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.5.5.tgz#74fba56d35efbeca444091c7850ccd494fd2f132"
+  integrity sha512-28QvEGyQyNkB0/m2B4FU7IEZGK2NUrcMtT6BZEFALTguLk+AUT6ofsHtPk5QyjAdUkpMJ+/Em+quwz4HOt30AQ==
+  dependencies:
+    regenerator-runtime "^0.13.2"
+
 "@babel/template@^7.1.0", "@babel/template@^7.4.0", "@babel/template@^7.4.4":
   version "7.4.4"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.4.4.tgz#f4b88d1225689a08f5bc3a17483545be9e4ed237"
@@ -818,10 +825,10 @@
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
 
-"@preconstruct/hook@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@preconstruct/hook/-/hook-0.0.3.tgz#fd5c14d6e4f7b52076973c3dc136218a1913ca3b"
-  integrity sha512-fezJbvdDUnrb94dneEl46XZpBijPRK7k45bhony7tiORcjgUCVALY1BWk4EJbqz0q5as6z++0D/piMlqmtZugA==
+"@preconstruct/hook@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@preconstruct/hook/-/hook-0.0.4.tgz#5280abdcb85444c0922c58516d00e6f11553c97e"
+  integrity sha512-HWaaaGPN3GDGJJ+2nEGLMe4oSZRXTw1shM4VffS+LmMPXIALaUOSp6o0JarW68+NzY1pTbx+x6f9LhkuokPQJg==
   dependencies:
     "@babel/core" "^7.1.2"
     "@babel/plugin-transform-modules-commonjs" "^7.4.4"
@@ -4199,15 +4206,16 @@ posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
 
-preconstruct@^0.0.84:
-  version "0.0.84"
-  resolved "https://registry.yarnpkg.com/preconstruct/-/preconstruct-0.0.84.tgz#c47d187c0de3d3aa46bec1740b2355237bc6011e"
-  integrity sha512-FBuU8ps7j/ED9qks/cyPsv+p7c7VGvuBAMKZ5FaI9qpgTsWQc8b/ESizvPIEL7SF1G2xAJPLbujjEyTY58MF7g==
+preconstruct@^0.0.89:
+  version "0.0.89"
+  resolved "https://registry.yarnpkg.com/preconstruct/-/preconstruct-0.0.89.tgz#0d5b6257dc00a7eebdc942838119f6cf4b51f06d"
+  integrity sha512-wV2fBSurmotyXrQy8W9g9WXP5t25YfYKY89zSu2/Si98fzETd+ZWk3qp0Iv372T93e0TAJsFVrTASFwN4HGPxg==
   dependencies:
     "@babel/code-frame" "^7.0.0"
     "@babel/core" "^7.1.2"
     "@babel/plugin-transform-runtime" "^7.2.0"
-    "@preconstruct/hook" "^0.0.3"
+    "@babel/runtime" "^7.5.5"
+    "@preconstruct/hook" "^0.0.4"
     builtin-modules "^3.0.0"
     chalk "^2.3.2"
     dataloader "^1.4.0"

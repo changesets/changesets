@@ -78,7 +78,7 @@
     "outdent": "^0.5.0",
     "p-limit": "^2.2.0",
     "pkg-dir": "^4.1.0",
-    "preconstruct": "^0.0.84",
+    "preconstruct": "^0.0.89",
     "prettier": "^1.14.3",
     "semver": "^5.4.1",
     "spawndamnit": "^2.0.0",
