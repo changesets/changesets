@@ -76,6 +76,7 @@ export type ChangelogFunction = (
     minor: NewChangeset[];
     patch: NewChangeset[];
   },
+  dependents: Release[],
   options: any, // the user options
   allReleases: ComprehensiveRelease[],
   allChangesets: NewChangeset[]
