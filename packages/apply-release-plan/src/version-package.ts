@@ -10,7 +10,7 @@ const DEPENDENCY_TYPES = [
 
 export default async function versionPackage(
   release: ComprehensiveRelease & {
-    changelog: string;
+    changelog: string | null;
     config: PackageJSON;
     dir: string;
   },

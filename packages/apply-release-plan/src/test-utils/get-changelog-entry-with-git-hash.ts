@@ -1,18 +1,37 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import startCase from "lodash.startcase";
 import { getCommitThatAddsFile } from "@changesets/git";
+import {
+  ComprehensiveRelease,
+  NewChangeset,
+  VersionType
+} from "@changesets/types";
 
-async function getReleaseLine(changeset, cwd) {
+import { RelevantChangesets } from "../types";
+
+async function getReleaseLine(changeset: NewChangeset, cwd: string) {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
     .map(l => l.trimRight());
 
-  const commitThatAddsFile = getCommitThatAddsFile();
+  const commitThatAddsFile = await getCommitThatAddsFile(
+    `.changeset${changeset.id}.md`,
+    cwd
+  );
 
-  return `- ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+  return `- [${commitThatAddsFile}] ${firstLine}\n${futureLines
+    .map(l => `  ${l}`)
+    .join("\n")}`;
 }
 
-async function getReleaseLines(obj, type, cwd) {
-  const releaseLines = obj[type].map(getReleaseLine);
+async function getReleaseLines(
+  obj: RelevantChangesets,
+  type: VersionType,
+  cwd: string
+) {
+  const releaseLines = obj[type].map(changeset =>
+    getReleaseLine(changeset, cwd)
+  );
   if (!releaseLines.length) return "";
   const resolvedLines = await Promise.all(releaseLines);
 
@@ -20,18 +39,28 @@ async function getReleaseLines(obj, type, cwd) {
 }
 
 export default async function defaultChangelogGetter(
-  release,
-  relevantChangesets,
-  options,
-  allReleases,
-  allChangesets
+  release: ComprehensiveRelease,
+  relevantChangesets: RelevantChangesets,
+  options: { cwd: string }
 ) {
   let { cwd } = options;
 
   // First, we construct the release lines, summaries of changesets that caused us to be released
-  let majorReleaseLines = await getReleaseLines(relevantChangesets, "major");
-  let minorReleaseLines = await getReleaseLines(relevantChangesets, "minor");
-  let patchReleaseLines = await getReleaseLines(relevantChangesets, "patch");
+  let majorReleaseLines = await getReleaseLines(
+    relevantChangesets,
+    "major",
+    cwd
+  );
+  let minorReleaseLines = await getReleaseLines(
+    relevantChangesets,
+    "minor",
+    cwd
+  );
+  let patchReleaseLines = await getReleaseLines(
+    relevantChangesets,
+    "patch",
+    cwd
+  );
 
   return [
     `## ${release.newVersion}`,

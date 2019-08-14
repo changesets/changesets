@@ -16,6 +16,7 @@ import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
+import { RelevantChangesets } from "./types";
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
@@ -78,7 +79,7 @@ export default async function applyReleasePlan(
     await fs.writeFile(pkgJSONPath, parsedConfig);
     touchedFiles.push(pkgJSONPath);
 
-    if (changelog.length > 0) {
+    if (changelog && changelog.length > 0) {
       await updateChangelog(changelogPath, changelog, name, prettierConfig);
       touchedFiles.push(changelogPath);
     }
@@ -127,11 +128,7 @@ function getNewChangelogEntry(
 
   return Promise.all(
     releaseWithWorkspaces.map(async release => {
-      let relevantChangesets: {
-        major: NewChangeset[];
-        minor: NewChangeset[];
-        patch: NewChangeset[];
-      } = {
+      let relevantChangesets: RelevantChangesets = {
         major: [],
         minor: [],
         patch: []

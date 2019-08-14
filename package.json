@@ -37,6 +37,7 @@
     "@types/jest": "^24.0.12",
     "@types/jest-in-case": "^1.0.1",
     "@types/js-yaml": "^3.12.1",
+    "@types/lodash": "^4.14.136",
     "@types/meow": "^5.0.0",
     "@types/prettier": "^1.18.0",
     "@types/semver": "^6.0.0",
