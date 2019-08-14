@@ -69,25 +69,6 @@ async function testSetup(
   return applyReleasePlan(releasePlan, tempDir, config);
 }
 
-let simpleFakePlan: ReleasePlan = {
-  changesets: [
-    {
-      id: "quick-lions-devour",
-      summary: "Hey, let's have fun with testing!",
-      releases: [{ name: "pkg-a", type: "minor" }]
-    }
-  ],
-  releases: [
-    {
-      name: "pkg-a",
-      type: "minor",
-      oldVersion: "1.0.0",
-      newVersion: "1.1.0",
-      changesets: ["quick-lions-devour"]
-    }
-  ]
-};
-
 describe("apply release plan", () => {
   describe("versioning", () => {
     it("should update a version for one package", async () => {
@@ -107,10 +88,10 @@ describe("apply release plan", () => {
         version: "1.1.0"
       });
     });
-    it("should update a version for five packages with different new versions", () => {});
+    it.skip("should update a version for five packages with different new versions", () => {});
   });
   describe("changelogs", () => {
-    it.only("should update a changelog for one package", async () => {
+    it("should update a changelog for one package", async () => {
       const releasePlan = new FakeReleasePlan();
       let changedFiles = await testSetup(
         "simple-project",
@@ -118,7 +99,7 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           changelog: [
-            path.resolve(__dirname, "test-utils/default-changelog"),
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ]
         }
@@ -129,17 +110,16 @@ describe("apply release plan", () => {
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       let readme = await fs.readFile(readmePath, "utf-8");
 
-      expect(readme).toEqual(outdent`
-      # pkg-a
+      expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.1.0
+      ### Minor Changes
 
-      - Hey, let's have fun with testing!
-      `);
+      - Hey, let's have fun with testing!`);
     });
     it.skip("should update a changelog for five packages", () => {});
   });
-  describe("should error and not write if", () => {
+  describe.skip("should error and not write if", () => {
     // This is skipped as *for now* we are assuming we have been passed
     // valid releasePlans - this may get work done on it in the future
     it.skip("a package appears twice", async () => {
@@ -213,10 +193,10 @@ describe("apply release plan", () => {
         `Expected test to exit before this point but instead got changedFiles ${changedFiles}`
       );
     });
-    it("a provided changelog function fails", async () => {
+    it.skip("a provided changelog function fails", async () => {
       throw new Error("test not written");
     });
-    it("a changelog write fails", async () => {
+    it.skip("a changelog write fails", async () => {
       throw new Error("test not written");
     });
   });

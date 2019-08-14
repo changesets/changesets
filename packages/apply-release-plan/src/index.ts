@@ -149,7 +149,7 @@ function getNewChangelogEntry(
       let changelog = await getChangelogFunc(
         release,
         relevantChangesets,
-        changelogOpts,
+        { cwd, ...changelogOpts },
         releaseWithWorkspaces,
         changesets
       );
