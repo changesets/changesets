@@ -68,6 +68,11 @@ export default async function version(cwd: string, config: Config) {
 
   let changesets = [...oldChangesets, ...newChangesets];
 
+  if (changesets.length === 0) {
+    logger.warn("No unreleased changesets found, exiting.");
+    return;
+  }
+
   let workspaces = await getWorkspaces({
     cwd,
     tools: ["yarn", "bolt", "root"]

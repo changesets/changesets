@@ -4,12 +4,12 @@ import { ReleasePlan } from "@changesets/types/src";
 // This data is not depended upon by the publish step, but can be useful for other tools/debugging
 // I believe it would be safe to deprecate this format
 export default function createReleaseCommit(
-  releaseObj: ReleasePlan,
+  releasePlan: ReleasePlan,
   commit: boolean
 ) {
-  const numPackagesReleased = releaseObj.releases.length;
+  const numPackagesReleased = releasePlan.releases.length;
 
-  const releasesLines = releaseObj.releases
+  const releasesLines = releasePlan.releases
     .map(release => `  ${release.name}@${release.newVersion}`)
     .join("\n");
 
@@ -18,6 +18,6 @@ export default function createReleaseCommit(
 
     Releases:
     ${releasesLines}
-    ${commit ? "\n\n[skip ci]" : ""}
+    ${commit ? "\n[skip ci]\n" : ""}
 `;
 }

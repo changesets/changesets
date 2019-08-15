@@ -188,7 +188,7 @@ async function prependFile(
   // if the file exists but doesn't have the header, we'll add it in
   if (!fileData) {
     const completelyNewChangelog = `# ${name}${data}`;
-    fs.writeFileSync(
+    await fs.writeFile(
       filePath,
       prettier.format(completelyNewChangelog, {
         ...prettierConfig,
@@ -199,7 +199,7 @@ async function prependFile(
   }
   const newChangelog = fileData.replace("\n", data);
 
-  fs.writeFileSync(
+  await fs.writeFile(
     filePath,
     prettier.format(newChangelog, { ...prettierConfig, parser: "markdown" })
   );

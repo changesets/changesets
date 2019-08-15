@@ -1,21 +1,11 @@
 import outdent from "outdent";
-import createRelease from "../../../utils/createRelease";
 import createReleaseCommit from "../createReleaseCommit";
-import { NewChangeset } from "@changesets/types";
+import { NewChangeset, ReleasePlan } from "@changesets/types";
 
-const fakeAllPackages = [
-  { name: "package-a", config: { version: "1.0.0" } },
-  { name: "package-b", config: { version: "1.0.0" } }
-];
 const simpleChangeset: NewChangeset = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
   id: "abc123xy"
-};
-const simpleChangesetWithDeleted: NewChangeset = {
-  summary: "This is a summary",
-  releases: [{ name: "package-a", type: "minor" }],
-  id: "abc123ph"
 };
 
 const simpleChangeset2: NewChangeset = {
@@ -27,68 +17,85 @@ const simpleChangeset2: NewChangeset = {
   id: "abc123fh"
 };
 
+let simpleReleasePlan: ReleasePlan = {
+  changesets: [simpleChangeset],
+  releases: [
+    {
+      name: "package-a",
+      type: "minor",
+      oldVersion: "1.0.0",
+      newVersion: "1.1.0",
+      changesets: [simpleChangeset.id]
+    }
+  ]
+};
+
+let secondReleasePlan: ReleasePlan = {
+  changesets: [simpleChangeset, simpleChangeset2],
+  releases: [
+    {
+      name: "package-a",
+      type: "minor",
+      oldVersion: "1.0.0",
+      newVersion: "1.1.0",
+      changesets: [simpleChangeset.id]
+    },
+    {
+      name: "package-b",
+      type: "minor",
+      oldVersion: "1.0.0",
+      newVersion: "1.1.0",
+      changesets: [simpleChangeset2.id]
+    }
+  ]
+};
+
 describe("createReleaseCommit", () => {
   it("should handle a single simple releaseObject with one released package", () => {
-    const releaseObj = createRelease([simpleChangeset], fakeAllPackages);
-    const commitStr = createReleaseCommit(releaseObj);
+    const commitStr = createReleaseCommit(simpleReleasePlan, false);
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)
 
       Releases:
         package-a@1.1.0
-
-      Dependents:
-        []
-
-      Deleted:
-        []
-
-    `);
+      
+      `);
   });
   it("should skip CI when the flag is passed", () => {
-    const releaseObj = createRelease([simpleChangeset], fakeAllPackages);
-    const commitStr = createReleaseCommit(releaseObj, { skipCI: true });
+    const commitStr = createReleaseCommit(simpleReleasePlan, true);
+
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)
 
       Releases:
         package-a@1.1.0
-
-      Dependents:
-        []
-
-      Deleted:
-        []
-
 
       [skip ci]
-    `);
-  });
-
-  it("should handle a single simple releaseObject with deleted package", () => {
-    const releaseObj = createRelease(
-      [simpleChangesetWithDeleted],
-      fakeAllPackages
-    );
-    const commitStr = createReleaseCommit(releaseObj);
-    expect(commitStr).toEqual(outdent`
-      RELEASING: Releasing 1 package(s)
-
-      Releases:
-        package-a@1.1.0
-
-      Dependents:
-        []
-
-      Deleted:
-        package-c
-
-    `);
+    
+      `);
   });
 
   it("should handle a multiple releases from one changeset", () => {
-    const releaseObj = createRelease([simpleChangeset2], fakeAllPackages);
-    const commitStr = createReleaseCommit(releaseObj);
+    let releasePlan: ReleasePlan = {
+      changesets: [simpleChangeset, simpleChangeset2],
+      releases: [
+        {
+          name: "package-a",
+          type: "patch",
+          oldVersion: "1.0.0",
+          newVersion: "1.0.1",
+          changesets: [simpleChangeset.id]
+        },
+        {
+          name: "package-b",
+          type: "minor",
+          oldVersion: "1.0.0",
+          newVersion: "1.1.0",
+          changesets: [simpleChangeset2.id]
+        }
+      ]
+    };
+    const commitStr = createReleaseCommit(releasePlan, false);
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 2 package(s)
 
@@ -96,21 +103,11 @@ describe("createReleaseCommit", () => {
         package-a@1.0.1
         package-b@1.1.0
 
-      Dependents:
-        []
-
-      Deleted:
-        []
-
     `);
   });
 
   it("should handle a merging releases from multiple changesets", () => {
-    const releaseObj = createRelease(
-      [simpleChangeset, simpleChangeset2],
-      fakeAllPackages
-    );
-    const commitStr = createReleaseCommit(releaseObj);
+    const commitStr = createReleaseCommit(secondReleasePlan, false);
 
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 2 package(s)
@@ -118,12 +115,6 @@ describe("createReleaseCommit", () => {
       Releases:
         package-a@1.1.0
         package-b@1.1.0
-
-      Dependents:
-        []
-
-      Deleted:
-        []
 
     `);
   });
