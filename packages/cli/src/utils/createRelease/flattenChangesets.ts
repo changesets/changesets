@@ -1,6 +1,6 @@
-import { Changeset, BumpType } from "../types";
+import { Changeset, VersionType } from "@changesets/types";
 
-function maxType(types: Array<BumpType>) {
+function maxType(types: Array<VersionType>) {
   if (types.includes("major")) return "major";
   if (types.includes("minor")) return "minor";
   if (types.includes("patch")) return "patch";
@@ -30,7 +30,7 @@ export default function flattenReleases(
     .reduce<{
       [key: string]: Array<{
         name: string;
-        type: BumpType;
+        type: VersionType;
         commit: string;
         id: string;
       }>;
@@ -46,7 +46,7 @@ export default function flattenReleases(
     string,
     {
       name: string;
-      type: BumpType;
+      type: VersionType;
       commits: Array<string>;
       changesets: Array<string>;
     }
@@ -63,7 +63,7 @@ export default function flattenReleases(
   );
 
   for (const linkedPackages of allLinkedPackages) {
-    const allBumpTypes: Array<BumpType> = [];
+    const allBumpTypes: Array<VersionType> = [];
     for (let linkedPackage of linkedPackages) {
       let release = flatReleases.get(linkedPackage);
       if (release) {

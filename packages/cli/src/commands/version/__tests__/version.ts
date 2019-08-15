@@ -203,4 +203,16 @@ describe("running version in a simple project", () => {
       expect(dirs.length).toBe(1);
     });
   });
+
+  describe("v1 legacy changesets are still processed", () => {
+    it("should still apply a legacy changeset", () => {
+      throw new Error("write this test before shipping v2");
+    });
+    it("should still remove a legacy changeset", () => {
+      throw new Error("write this test before shipping v2");
+    });
+    it("should still commit removing a legacy changeset when that makes sense", () => {
+      throw new Error("write this test before shipping v2");
+    });
+  });
 });

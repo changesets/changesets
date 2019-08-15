@@ -133,6 +133,10 @@ const cwd = process.cwd();
           await publish(config);
           return;
         }
+        case "status": {
+          await status(cwd, { sinceMaster, verbose, output }, config);
+          return;
+        }
         case "bump": {
           logger.error(
             'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation'
@@ -150,10 +154,6 @@ const cwd = process.cwd();
             "To fix this, use `changeset publish` instead, and update any scripts that use changesets"
           );
           throw new ExitError(1);
-        }
-        case "status": {
-          await status(cwd, { sinceMaster, verbose, output });
-          return;
         }
         default: {
           logger.error(`Invalid command ${input[0]} was provided`);

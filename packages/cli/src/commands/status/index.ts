@@ -3,7 +3,12 @@ import table from "tty-table";
 import fs from "fs-extra";
 import path from "path";
 import getReleasePlan from "@changesets/get-release-plan";
-import { VersionType, Release, ComprehensiveRelease } from "@changesets/types";
+import {
+  VersionType,
+  Release,
+  ComprehensiveRelease,
+  Config
+} from "@changesets/types";
 import logger from "../../utils/logger";
 
 export default async function getStatus(
@@ -12,10 +17,11 @@ export default async function getStatus(
     sinceMaster,
     verbose,
     output
-  }: { sinceMaster?: boolean; verbose?: boolean; output?: string }
+  }: { sinceMaster?: boolean; verbose?: boolean; output?: string },
+  config: Config
 ) {
   // TODO: Check if we are no master and give a different error message if we are
-  const releasePlan = await getReleasePlan(cwd, sinceMaster);
+  const releasePlan = await getReleasePlan(cwd, sinceMaster, config);
 
   const { changesets, releases } = releasePlan;
 

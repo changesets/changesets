@@ -1,8 +1,8 @@
 import publishPackages from "./publishPackages";
 import logger from "../../utils/logger";
 import * as git from "@changesets/git";
+import { defaultConfig } from "@changesets/config";
 import resolveUserConfig from "../../utils/resolveConfig";
-import { defaultConfig } from "../../utils/constants";
 import { ExitError } from "../../utils/errors";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
