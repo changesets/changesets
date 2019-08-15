@@ -8,11 +8,11 @@ The Changesets config is now written in JSON with fewer options. The new default
 
 ```json
 {
-  $schema: `https://unpkg.com/@changesets/config/schema.json`,
-  changelog: "@changesets/cli/changelog",
-  commit: false,
-  linked: [],
-  access: "private"
+  "$schema": `https://unpkg.com/@changesets/config/schema.json`,
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "linked": [],
+  "access": "private"
 }
 ```
 
