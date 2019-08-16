@@ -2,14 +2,14 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 
 import fs from "fs-extra";
 import path from "path";
-import versionCommand from "../index";
+import versionCommand from "./index";
 import * as git from "@changesets/git";
-import logger from "../../../utils/logger";
-import writeChangeset from "../../add/writeChangeset";
+import logger from "../../utils/logger";
+import writeChangeset from "../add/writeChangeset";
 import { NewChangeset, Config } from "@changesets/types";
 import { defaultConfig } from "@changesets/config";
 
-let changelogPath = path.resolve(__dirname, "../../../changelog");
+let changelogPath = path.resolve(__dirname, "../../changelog");
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: [changelogPath, null]
@@ -19,9 +19,9 @@ let modifiedDefaultConfig: Config = {
 // This is from bolt's error log
 const consoleError = console.error;
 
-jest.mock("../../../utils/cli");
+jest.mock("../../utils/cli");
 jest.mock("@changesets/git");
-jest.mock("../../../utils/logger");
+jest.mock("../../utils/logger");
 
 // @ts-ignore
 git.add.mockImplementation(() => Promise.resolve(true));
@@ -96,7 +96,6 @@ describe("running version in a simple project", () => {
       const spy = jest.spyOn(fs, "writeFile");
 
       await versionCommand(cwd, modifiedDefaultConfig);
-      const calls = spy.mock.calls;
 
       expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
         expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
@@ -105,35 +104,9 @@ describe("running version in a simple project", () => {
         expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
       );
     });
-
-    it("should git add the expected files (without changelog) when commit: true", async () => {
-      await writeChangesets([simpleChangeset2], cwd);
-      await versionCommand(cwd, { ...modifiedDefaultConfig, commit: true });
-
-      const pkgAConfigPath = path.join(cwd, "packages/pkg-a/package.json");
-      const pkgBConfigPath = path.join(cwd, "packages/pkg-b/package.json");
-      const changesetConfigPath = path.join(cwd, ".changeset");
-
-      expect(git.add).toHaveBeenCalledWith(pkgAConfigPath, cwd);
-      expect(git.add).toHaveBeenCalledWith(pkgBConfigPath, cwd);
-      expect(git.add).toHaveBeenCalledWith(changesetConfigPath, cwd);
-    });
-    it("should git add the expected files (with changelog)", async () => {
-      let changelogPath = path.resolve(__dirname, "../../changelogs");
-      await writeChangesets([simpleChangeset2], cwd);
-      await versionCommand(cwd, {
-        ...modifiedDefaultConfig,
-        changelog: [changelogPath, null],
-        commit: true
-      });
-      const pkgAChangelogPath = path.join(cwd, "packages/pkg-a/CHANGELOG.md");
-      const pkgBChangelogPath = path.join(cwd, "packages/pkg-b/CHANGELOG.md");
-      expect(git.add).toHaveBeenCalledWith(pkgAChangelogPath, cwd);
-      expect(git.add).toHaveBeenCalledWith(pkgBChangelogPath, cwd);
-    });
   });
 
-  it("should respect config file", async () => {
+  it.skip("should respect config file", async () => {
     // We have used the atlaskit config. Its two differences are it has skipCI and commit as true
     const cwd2 = await copyFixtureIntoTempDir(
       __dirname,

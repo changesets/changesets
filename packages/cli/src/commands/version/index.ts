@@ -8,7 +8,6 @@ import getWorkspaces from "get-workspaces";
 
 import logger from "../../utils/logger";
 import * as git from "@changesets/git";
-import createReleaseCommit from "./createReleaseCommit";
 import { removeFolders, removeEmptyFolders } from "../../utils/removeFolders";
 import getOldChangesets from "../../utils/getChangesets";
 
@@ -52,14 +51,14 @@ async function getOldChangesetsAndWarn(
 }
 // this function only exists while we wait for v1 changesets to be obsoleted
 // and should be deleted before v3
-async function cleanupOldChangesets(cwd: string, publishCommit: string) {
+async function cleanupOldChangesets(cwd: string) {
   let changesetBase = await getChangesetBase(cwd);
   removeFolders(changesetBase);
 
   await git.add(changesetBase, cwd);
 
   logger.log("Committing removing old changesets...");
-  await git.commit(publishCommit, cwd);
+  await git.commit(`removing legacy changesets`, cwd);
 }
 
 export default async function version(cwd: string, config: Config) {
@@ -93,13 +92,10 @@ export default async function version(cwd: string, config: Config) {
     config
   );
 
-  let publishCommit = createReleaseCommit(releasePlan, config.commit);
-
-  logger.log(publishCommit);
   await applyReleasePlan(releasePlan, cwd, config);
 
   if (oldChangesets.length > 0 && config.commit) {
-    cleanupOldChangesets(cwd, publishCommit);
+    cleanupOldChangesets(cwd);
   } else {
     logger.log(
       "All files have been updated. Review them and commit at your leisure"

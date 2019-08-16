@@ -24,6 +24,10 @@ async function getMasterRef(cwd: string) {
 
 async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
+
+  if (gitCmd.code !== 0) {
+    console.log(pathToFile, gitCmd.stderr.toString());
+  }
   return gitCmd.code === 0;
 }
 

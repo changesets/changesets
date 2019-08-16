@@ -7,7 +7,7 @@ import {
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
-
+import * as git from "@changesets/git";
 import getWorksaces, { PackageJSON } from "get-workspaces";
 import resolveFrom from "resolve-from";
 
@@ -17,6 +17,7 @@ import prettier from "prettier";
 
 import versionPackage from "./version-package";
 import { RelevantChangesets } from "./types";
+import createVersionCommit from "./createVersionCommit";
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
@@ -32,6 +33,10 @@ export default async function applyReleasePlan(
   if (!workspaces) throw new Error(`could not find any workspaces in ${cwd}`);
 
   let { releases, changesets } = releasePlan;
+
+  const versionCommit = createVersionCommit(releasePlan, config.commit);
+
+  console.log(versionCommit);
 
   let releaseWithWorkspaces = releases.map(release => {
     // @ts-ignore we already threw if workspaces wasn't defined
@@ -95,8 +100,19 @@ export default async function applyReleasePlan(
     })
   );
 
-  // We return the touched files so things such as the CLI can commit them
-  // if they want
+  if (config.commit) {
+    await Promise.all(
+      touchedFiles.map(file => git.add(path.relative(cwd, file), cwd))
+    );
+
+    let commit = await git.commit(versionCommit, cwd);
+
+    if (!commit) {
+      console.error("Changesets ran into trouble committing your files");
+    }
+  }
+
+  // We return the touched files mostly for testing purposes
   return touchedFiles;
 }
 

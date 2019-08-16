@@ -5,11 +5,14 @@ import {
   NewChangeset,
   ComprehensiveRelease
 } from "@changesets/types";
+import * as git from "@changesets/git";
 import fs from "fs-extra";
 import path from "path";
 import outdent from "outdent";
+import spawn from "spawndamnit";
 
 import applyReleasePlan from "./";
+import createReleaseCommit from "./createVersionCommit";
 
 class FakeReleasePlan {
   changesets: NewChangeset[];
@@ -65,15 +68,25 @@ async function testSetup(
       linked: [],
       access: "private"
     };
+
   let tempDir = await copyFixtureIntoTempDir(__dirname, fixtureName);
-  return applyReleasePlan(releasePlan, tempDir, config);
+
+  if (config.commit) {
+    await git.add(".", tempDir);
+    await git.commit("first commit", tempDir);
+  }
+
+  return {
+    changedFiles: await applyReleasePlan(releasePlan, tempDir, config),
+    tempDir
+  };
 }
 
 describe("apply release plan", () => {
   describe("versioning", () => {
     it("should update a version for one package", async () => {
       const releasePlan = new FakeReleasePlan();
-      let changedFiles = await testSetup(
+      let { changedFiles } = await testSetup(
         "simple-project",
         releasePlan.getReleasePlan(),
         releasePlan.config
@@ -93,7 +106,7 @@ describe("apply release plan", () => {
   describe("changelogs", () => {
     it("should update a changelog for one package", async () => {
       const releasePlan = new FakeReleasePlan();
-      let changedFiles = await testSetup(
+      let { changedFiles } = await testSetup(
         "simple-project",
         releasePlan.getReleasePlan(),
         {
@@ -125,7 +138,7 @@ describe("apply release plan", () => {
     it.skip("a package appears twice", async () => {
       let changedFiles;
       try {
-        changedFiles = await testSetup("simple-project", {
+        let testResults = await testSetup("simple-project", {
           changesets: [
             {
               id: "quick-lions-devour",
@@ -150,6 +163,7 @@ describe("apply release plan", () => {
             }
           ]
         });
+        changedFiles = testResults.changedFiles;
       } catch (e) {
         expect(e.message).toEqual("some string probably");
 
@@ -177,11 +191,12 @@ describe("apply release plan", () => {
       );
       let changedFiles;
       try {
-        changedFiles = await testSetup(
+        let testResults = await testSetup(
           "simple-project",
           releasePlan.getReleasePlan(),
           releasePlan.config
         );
+        changedFiles = testResults.changedFiles;
       } catch (e) {
         expect(e.message).toEqual(
           "Could not find matching package for release of: impossible-package"
@@ -204,8 +219,65 @@ describe("apply release plan", () => {
     it("should delete one changeset after it is applied", () => {});
     it("should delete five changesets after they are applied", () => {});
   });
-  describe.skip("git", () => {
-    it("should commit updating files from packages", () => {});
+  describe("git", () => {
+    it("should commit updating files from packages", async () => {
+      const releasePlan = new FakeReleasePlan();
+
+      let { tempDir } = await testSetup(
+        "with-git",
+        releasePlan.getReleasePlan(),
+        { ...releasePlan.config, commit: true }
+      );
+
+      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+
+      expect(
+        gitCmd.stdout
+          .toString()
+          .includes("nothing to commit, working tree clean")
+      ).toBe(true);
+
+      let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
+
+      lastCommit.stdout.toString();
+
+      console.log(lastCommit.stdout.toString());
+      console.log(createReleaseCommit(releasePlan.getReleasePlan(), true));
+
+      expect(
+        lastCommit.stdout
+          .toString()
+          .includes("RELEASING: Releasing 1 package(s)")
+      ).toBe(true);
+    });
     it("should commit removing applied changesets", () => {});
   });
 });
+
+// MAKE SURE BOTH OF THESE ARE COVERED
+
+// it("should git add the expected files (without changelog) when commit: true", async () => {
+//   await writeChangesets([simpleChangeset2], cwd);
+//   await versionCommand(cwd, { ...modifiedDefaultConfig, commit: true });
+
+//   const pkgAConfigPath = path.join(cwd, "packages/pkg-a/package.json");
+//   const pkgBConfigPath = path.join(cwd, "packages/pkg-b/package.json");
+//   const changesetConfigPath = path.join(cwd, ".changeset");
+
+//   expect(git.add).toHaveBeenCalledWith(pkgAConfigPath, cwd);
+//   expect(git.add).toHaveBeenCalledWith(pkgBConfigPath, cwd);
+//   expect(git.add).toHaveBeenCalledWith(changesetConfigPath, cwd);
+// });
+// it("should git add the expected files (with changelog)", async () => {
+//   let changelogPath = path.resolve(__dirname, "../../changelogs");
+//   await writeChangesets([simpleChangeset2], cwd);
+//   await versionCommand(cwd, {
+//     ...modifiedDefaultConfig,
+//     changelog: [changelogPath, null],
+//     commit: true
+//   });
+//   const pkgAChangelogPath = path.join(cwd, "packages/pkg-a/CHANGELOG.md");
+//   const pkgBChangelogPath = path.join(cwd, "packages/pkg-b/CHANGELOG.md");
+//   expect(git.add).toHaveBeenCalledWith(pkgAChangelogPath, cwd);
+//   expect(git.add).toHaveBeenCalledWith(pkgBChangelogPath, cwd);
+// });
