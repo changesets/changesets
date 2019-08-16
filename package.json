@@ -33,7 +33,6 @@
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
     "@babel/runtime": "^7.4.4",
-    "@types/boxen": "^3.0.1",
     "@types/fs-extra": "^5.1.0",
     "@types/jest": "^24.0.12",
     "@types/jest-in-case": "^1.0.1",

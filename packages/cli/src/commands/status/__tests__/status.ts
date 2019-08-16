@@ -1,6 +1,7 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import fs from "fs-extra";
 import path from "path";
+import { defaultConfig } from "@changesets/config";
 
 import writeChangeset from "../../add/writeChangeset";
 import status from "..";
@@ -65,13 +66,13 @@ describe("status", () => {
     humanId.mockReturnValueOnce(changesetID);
 
     await writeChangesets([simpleChangeset], cwd);
-    const releaseObj = await status(cwd, {});
+    const releaseObj = await status(cwd, {}, defaultConfig);
     expect(releaseObj).toEqual(simpleReleasePlan);
   });
   it("should exit with a non-zero error code when there are no changesets", async () => {
     // @ts-ignore
     const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
-    await status(cwd, {});
+    await status(cwd, {}, defaultConfig);
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
@@ -85,7 +86,7 @@ describe("status", () => {
     humanId.mockReturnValueOnce(changesetID);
 
     await writeChangesets([simpleChangeset], cwd);
-    const probsUndefined = await status(cwd, { output });
+    const probsUndefined = await status(cwd, { output }, defaultConfig);
 
     const releaseObj = await fs.readFile(path.join(cwd, output), "utf-8");
 
