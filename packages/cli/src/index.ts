@@ -19,28 +19,13 @@ const { input, flags } = meow(
     $ changesets [command]
   Commands
     init
-    add [--commit]
-    version [--commit --changelog=path.js --skip-ci]
-    publish [--public --otp=code]
+    add
+    version
+    publish [--otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
   `,
   {
     flags: {
-      commit: {
-        type: "boolean",
-        // Command line options need to be undefined, otherwise their
-        // default value overrides the user's provided config in their
-        // config file
-        default: undefined
-      },
-      changelog: {
-        type: "string",
-        default: undefined
-      },
-      access: {
-        type: "string",
-        default: undefined
-      },
       sinceMaster: {
         type: "boolean"
       },
@@ -83,15 +68,19 @@ const cwd = process.cwd();
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
   } else {
-    const {
-      commit,
-      changelog,
-      access,
-      sinceMaster,
-      verbose,
-      output,
-      otp
-    }: CliOptions = flags;
+    const { sinceMaster, verbose, output, otp }: CliOptions = flags;
+    const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
+
+    deadFlags.forEach(flag => {
+      if (flags[flag]) {
+        logger.error(
+          `the flag ${flag} has been removed from changesets for version 2`
+        );
+        logger.error(`Please encode the desired value into your config`);
+        logger.error(`See our changelog for more details`);
+        throw new ExitError(1);
+      }
+    });
 
     // Command line options need to be undefined, otherwise their
     // default value overrides the user's provided config in their
@@ -105,32 +94,15 @@ const cwd = process.cwd();
           return;
         }
         case "add": {
-          if (commit !== undefined) {
-            config.commit = commit;
-          }
           await add(cwd, config);
           return;
         }
         case "version": {
-          // We only assign them to this
-          // object as and when they exist.
-          if (changelog !== undefined) {
-            config.changelog = [changelog, null];
-          }
-          if (commit !== undefined) {
-            config.commit = commit;
-          }
-
           await version(cwd, config);
           return;
         }
         case "publish": {
-          if (access !== undefined) {
-            // This exists as
-            config.access = access;
-          }
-          config.otp = otp;
-          await publish(config);
+          await publish(cwd, { otp }, config);
           return;
         }
         case "status": {

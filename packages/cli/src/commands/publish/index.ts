@@ -1,31 +1,24 @@
 import publishPackages from "./publishPackages";
 import logger from "../../utils/logger";
 import * as git from "@changesets/git";
-import { defaultConfig } from "@changesets/config";
-import resolveUserConfig from "../../utils/resolveConfig";
 import { ExitError } from "../../utils/errors";
+import { Config } from "@changesets/types";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map(p => `${p.name}@${p.newVersion}`).join("\n");
   logger.log(mappedPkgs);
 }
 
-export default async function run(opts: { cwd: string; otp?: string }) {
-  const userConfig = await resolveUserConfig(opts.cwd);
-  const userPublishOptions =
-    userConfig && userConfig.publishOptions ? userConfig.publishOptions : {};
-
-  const config = {
-    ...defaultConfig.publishOptions,
-    ...userPublishOptions,
-    ...opts
-  };
-
+export default async function run(
+  cwd: string,
+  { otp }: { otp?: string },
+  config: Config
+) {
   const response = await publishPackages({
-    cwd: config.cwd || process.cwd(),
+    cwd: cwd,
     // if not public, we wont pass the access, and it works as normal
-    access: config.public ? "public" : undefined,
-    otp: opts.otp
+    access: config.access,
+    otp: otp
   });
 
   const successful = response.filter(p => p.published);
@@ -41,7 +34,7 @@ export default async function run(opts: { cwd: string; otp?: string }) {
     for (const pkg of successful) {
       const tag = `${pkg.name}@${pkg.newVersion}`;
       logger.log("New tag: ", tag);
-      await git.tag(tag, config.cwd);
+      await git.tag(tag, cwd);
     }
   }
 

@@ -8,8 +8,11 @@ import getWorkspaces from "get-workspaces";
 
 import logger from "../../utils/logger";
 import * as git from "@changesets/git";
-import { removeFolders, removeEmptyFolders } from "../../utils/removeFolders";
-import getOldChangesets from "../../utils/getChangesets";
+import {
+  removeFolders,
+  removeEmptyFolders
+} from "../../utils/v1-legacy/removeFolders";
+import getOldChangesets from "../../utils/v1-legacy/getChangesets";
 
 import getChangesetBase from "../../utils/getChangesetBase";
 

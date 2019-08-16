@@ -2,6 +2,7 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 
 import publishPackages from "../publishPackages";
 import * as git from "@changesets/git";
+import { defaultConfig } from "@changesets/config";
 import runRelease from "..";
 
 jest.mock("../../../utils/cli");
@@ -40,8 +41,8 @@ describe("running release", () => {
     // we make sure we still do this so that a later build can clean up after a previously
     // failed one (where the change was pushed back but not released and the next build has no
     // changeset commits)
-    it("should still run bolt.publishPackages", async () => {
-      await runRelease({ cwd });
+    it("should still run publishPackages", async () => {
+      await runRelease(cwd, {}, defaultConfig);
 
       expect(publishPackages).toHaveBeenCalled();
     });

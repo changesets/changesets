@@ -4,10 +4,13 @@
 
 #### Changed command line argument names
 
-To align command line argument names with the new config, we have updated some
-of their names.
+We have removed command line arguments that overrwrite the config. The following commands can no longer
+be passed in:
 
-- `updateChangelog` option has been removed in favor of `changelog`
-  - `changelog` options accepts a path which we will use to resolve your `getChangelogEntry` function.
-- `isPublic` flag has been changed to `access` and accepts `public` or `private`
-- Removed `skipCI` - the `commit` option now automatically skips CI.
+- `updateChangelog`
+- `isPublic`
+- `skipCI`
+- `commit`
+
+This has been done to avoid overloading the number of ways you can pass options, as within any single
+repository, there should be a single consistent way in which these values are always provided.

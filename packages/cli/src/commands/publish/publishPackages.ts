@@ -1,6 +1,6 @@
 import semver from "semver";
 import chalk from "chalk";
-import getWorkspaces from "../../utils/bolt-replacements/getWorkspaces";
+import getWorkspaces from "../../utils/getWorkspaces";
 import { Workspace } from "get-workspaces";
 import * as npmUtils from "./npm-utils";
 import logger from "../../utils/logger";
@@ -12,7 +12,7 @@ export default async function publishPackages({
   otp
 }: {
   cwd: string;
-  access?: "public";
+  access: "public" | "private";
   otp?: string;
 }) {
   const packages = await getWorkspaces({ cwd });
@@ -46,7 +46,7 @@ export default async function publishPackages({
 
 async function publishAPackage(
   pkg: Workspace,
-  access: "public" | undefined,
+  access: "public" | "private",
   twoFactorState: TwoFactorState
 ) {
   const { name, version } = pkg.config;

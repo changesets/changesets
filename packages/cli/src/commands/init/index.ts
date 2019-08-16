@@ -4,8 +4,9 @@ import chalk from "chalk";
 
 import logger from "../../utils/logger";
 import getChangesetBase from "../../utils/getChangesetBase";
-import { pkgPath } from "../../utils/constants";
 import { defaultWrittenConfig } from "@changesets/config";
+
+const pkgPath = path.dirname(require.resolve("@changesets/cli/package.json"));
 
 export default async function init(cwd: string) {
   const changesetBase = await getChangesetBase(cwd);

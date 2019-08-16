@@ -6,7 +6,7 @@ import semver from "semver";
 
 import * as cli from "../../utils/cli";
 import logger from "../../utils/logger";
-import * as bolt from "../../utils/bolt-replacements";
+import getWorkspaces from "../../utils/getWorkspaces";
 import { Release, Workspace } from "@changesets/types";
 
 const { green, yellow, red, bold, blue, cyan } = chalk;
@@ -77,7 +77,7 @@ export default async function createChangeset(
   changedPackages: Array<string>,
   cwd: string
 ): Promise<{ summary: string; releases: Array<Release> }> {
-  const allPackages = await bolt.getWorkspaces({ cwd });
+  const allPackages = await getWorkspaces({ cwd });
   const packagesToRelease = await getPackagesToRelease(
     changedPackages,
     allPackages
