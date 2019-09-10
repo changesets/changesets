@@ -1,8 +1,7 @@
 import {
-  ComprehensiveRelease,
   NewChangeset,
   ChangelogFunction,
-  PackageJSON
+  ModCompWithWorkspace
 } from "@changesets/types";
 
 import resolveFrom from "resolve-from";
@@ -13,10 +12,6 @@ import path from "path";
 import prettier from "prettier";
 
 import { RelevantChangesets } from "./types";
-type ModCompWithWorkspace = ComprehensiveRelease & {
-  config: PackageJSON;
-  dir: string;
-};
 
 export async function getNewChangelogEntry(
   releaseWithWorkspaces: ModCompWithWorkspace[],
