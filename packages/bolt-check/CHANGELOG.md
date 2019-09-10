@@ -1,5 +1,11 @@
 # bolt-check
 
+## 0.4.2
+
+### Patch Changes
+
+- [c46e9ee7](https://github.com/changesets/changesets/commit/c46e9ee7) - Use 'spawndamnit' package for all new process spawning
+
 ## 0.4.1
 
 ### Patch Changes

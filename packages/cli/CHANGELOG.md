@@ -1,5 +1,14 @@
 # @changesets/cli
 
+## 1.3.1
+
+### Patch Changes
+
+- [c46e9ee7](https://github.com/changesets/changesets/commit/c46e9ee7) - Use 'spawndamnit' package for all new process spawning
+- [5b28c527](https://github.com/changesets/changesets/commit/5b28c527) - Fix 2FA check on release
+- [6f8eb05a](https://github.com/changesets/changesets/commit/6f8eb05a) - Updated readme
+- [6d119893](https://github.com/changesets/changesets/commit/6d119893) - Move `git` module to be its own external module
+
 ## 1.3.0
 
 ### Minor Changes

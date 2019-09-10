@@ -1,1 +1,0 @@
-Use new Config type which makes linked required

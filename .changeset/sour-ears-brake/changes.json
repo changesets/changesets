@@ -1,4 +1,0 @@
-{
-  "releases": [{ "name": "@changesets/apply-release-plan", "type": "minor" }],
-  "dependents": []
-}
