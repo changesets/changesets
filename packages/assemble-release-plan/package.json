@@ -1,6 +1,6 @@
 {
   "name": "@changesets/assemble-release-plan",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Reads changesets and adds information on dependents that need bumping",
   "main": "dist/assemble-release-plan.cjs.js",
   "module": "dist/assemble-release-plan.esm.js",
@@ -8,10 +8,10 @@
   "repository": "https://github.com/changesets/changesets/tree/master/packages/assemble-release-plan",
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@changesets/types": "^0.0.0",
+    "@changesets/types": "^0.1.0",
     "semver": "^5.4.1"
   },
   "devDependencies": {
-    "@changesets/config": "^0.0.0"
+    "@changesets/config": "^0.1.0"
   }
 }
