@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 1.3.3
+
+### Patch Changes
+
+- [a15abbf9](https://github.com/changesets/changesets/commit/a15abbf9) - Previous release shipped unbuilt code - fixing that
+
 ## 1.3.1
 
 ### Patch Changes

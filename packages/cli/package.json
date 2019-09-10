@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
     "changeset": "bin.js"
@@ -19,7 +19,7 @@
     "@babel/runtime": "^7.4.4",
     "@types/semver": "^6.0.0",
     "@types/uuid": "^3.4.4",
-    "@changesets/git": "^0.1.1",
+    "@changesets/git": "^0.1.2",
     "boxen": "^1.3.0",
     "chalk": "^2.1.0",
     "cli-table": "^0.3.1",
@@ -27,7 +27,7 @@
     "enquirer": "^2.3.0",
     "fs-extra": "^7.0.1",
     "fuzzy": "^0.1.3",
-    "get-workspaces": "^0.4.1",
+    "get-workspaces": "^0.4.2",
     "globby": "^9.2.0",
     "human-id": "^1.0.2",
     "is-ci": "^2.0.0",

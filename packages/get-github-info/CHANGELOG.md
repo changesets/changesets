@@ -1,5 +1,11 @@
 # @changesets/get-github-info
 
+## 0.1.5
+
+### Patch Changes
+
+- [a15abbf9](https://github.com/changesets/changesets/commit/a15abbf9) - Previous release shipped unbuilt code - fixing that
+
 ## 0.1.3
 
 ### Patch Changes
