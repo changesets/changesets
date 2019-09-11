@@ -36,8 +36,6 @@ export default async function applyReleasePlan(
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
-  console.log(versionCommit);
-
   let releaseWithWorkspaces = releases.map(release => {
     // @ts-ignore we already threw if workspaces wasn't defined
     let workspace = workspaces.find(ws => ws.name === release.name);
@@ -132,19 +130,23 @@ async function getNewChangelogEntry(
     let changelogPath = resolveFrom(changesetPath, changelogConfig[0]);
 
     let possibleChangelogFunc = require(changelogPath);
-    if (typeof possibleChangelogFunc === "function") {
+    if (possibleChangelogFunc.default) {
+      possibleChangelogFunc = possibleChangelogFunc.default;
+    }
+    if (
+      typeof possibleChangelogFunc.getReleaseLine === "function" &&
+      typeof possibleChangelogFunc.getDependencyReleaseLine === "function"
+    ) {
       getChangelogFuncs = possibleChangelogFunc;
-    } else if (typeof possibleChangelogFunc.default === "function") {
-      getChangelogFuncs = possibleChangelogFunc.default;
     } else {
-      throw new Error("Could not resolve changelog generation function");
+      throw new Error("Could not resolve changelog generation functions");
     }
   }
 
   let moddedChangesets = await Promise.all(
     changesets.map(async cs => ({
       ...cs,
-      commit: await git.getCommitThatAddsFile(`${cs.id}.md`, cwd)
+      commit: await git.getCommitThatAddsFile(`.changeset/${cs.id}.md`, cwd)
     }))
   );
 

@@ -15,7 +15,7 @@ async function getReleaseLine(changeset: NewChangeset, cwd: string) {
     .map(l => l.trimRight());
 
   const commitThatAddsFile = await getCommitThatAddsFile(
-    `.changeset${changeset.id}.md`,
+    `.changeset/${changeset.id}.md`,
     cwd
   );
 
