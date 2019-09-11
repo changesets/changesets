@@ -69,14 +69,26 @@ export type WrittenConfig = {
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };
 
-export type ChangelogFunction = (
-  release: ComprehensiveRelease,
-  relevantChangesets: {
-    major: NewChangeset[];
-    minor: NewChangeset[];
-    patch: NewChangeset[];
-  },
-  options: any, // the user options
-  allReleases: ComprehensiveRelease[],
-  allChangesets: NewChangeset[]
-) => Promise<string | null>;
+export type NewChangesetWithCommit = NewChangeset & { commit: string };
+
+export type ModCompWithWorkspace = ComprehensiveRelease & {
+  config: PackageJSON;
+  dir: string;
+};
+
+export type GetReleaseLine = (
+  changeset: NewChangesetWithCommit,
+  type: VersionType,
+  changelogOpts: any
+) => Promise<string>;
+
+export type GetDependencyReleaseLine = (
+  changesets: NewChangesetWithCommit[],
+  dependenciesUpdated: ModCompWithWorkspace[],
+  changelogOpts: any
+) => Promise<string>;
+
+export type ChangelogFunctions = {
+  getReleaseLine: GetReleaseLine;
+  getDependencyReleaseLine: GetDependencyReleaseLine;
+};

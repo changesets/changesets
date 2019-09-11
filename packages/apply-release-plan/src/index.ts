@@ -1,14 +1,14 @@
 import {
   ReleasePlan,
   Config,
-  ComprehensiveRelease,
+  ChangelogFunctions,
   NewChangeset,
-  ChangelogFunction
+  ModCompWithWorkspace
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import getWorksaces, { PackageJSON } from "get-workspaces";
+import getWorksaces from "get-workspaces";
 import resolveFrom from "resolve-from";
 
 import fs from "fs-extra";
@@ -16,8 +16,8 @@ import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
-import { RelevantChangesets } from "./types";
 import createVersionCommit from "./createVersionCommit";
+import getChangelogEntry from "./get-changelog-entry";
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
@@ -116,18 +116,16 @@ export default async function applyReleasePlan(
   return touchedFiles;
 }
 
-type ModCompWithWorkspace = ComprehensiveRelease & {
-  config: PackageJSON;
-  dir: string;
-};
-
-function getNewChangelogEntry(
+async function getNewChangelogEntry(
   releaseWithWorkspaces: ModCompWithWorkspace[],
   changesets: NewChangeset[],
   changelogConfig: false | readonly [string, any],
   cwd: string
 ) {
-  let getChangelogFunc: ChangelogFunction = () => Promise.resolve("");
+  let getChangelogFuncs: ChangelogFunctions = {
+    getReleaseLine: () => Promise.resolve(""),
+    getDependencyReleaseLine: () => Promise.resolve("")
+  };
   let changelogOpts: any;
   if (changelogConfig) {
     let changesetPath = path.join(cwd, ".changeset");
@@ -135,38 +133,31 @@ function getNewChangelogEntry(
 
     let possibleChangelogFunc = require(changelogPath);
     if (typeof possibleChangelogFunc === "function") {
-      getChangelogFunc = possibleChangelogFunc;
+      getChangelogFuncs = possibleChangelogFunc;
     } else if (typeof possibleChangelogFunc.default === "function") {
-      getChangelogFunc = possibleChangelogFunc.default;
+      getChangelogFuncs = possibleChangelogFunc.default;
     } else {
       throw new Error("Could not resolve changelog generation function");
     }
   }
 
+  let moddedChangesets = await Promise.all(
+    changesets.map(async cs => ({
+      ...cs,
+      commit: await git.getCommitThatAddsFile(`${cs.id}.md`, cwd)
+    }))
+  );
+
   return Promise.all(
     releaseWithWorkspaces.map(async release => {
-      let relevantChangesets: RelevantChangesets = {
-        major: [],
-        minor: [],
-        patch: []
-      };
-
-      for (let changeset of changesets) {
-        if (release.changesets.includes(changeset.id)) {
-          let csRelease = changeset.releases.find(
-            rel => rel.name === release.name
-          )!;
-          relevantChangesets[csRelease.type].push(changeset);
-        }
-      }
-
-      let changelog = await getChangelogFunc(
+      let changelog = await getChangelogEntry(
         release,
-        relevantChangesets,
-        { cwd, ...changelogOpts },
         releaseWithWorkspaces,
-        changesets
+        moddedChangesets,
+        getChangelogFuncs,
+        changelogOpts
       );
+
       return {
         ...release,
         changelog
