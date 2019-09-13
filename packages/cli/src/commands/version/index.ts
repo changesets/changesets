@@ -38,7 +38,7 @@ async function getOldChangesetsAndWarn(
   );
   logger.warn("Make sure you validate all your dependencies");
   logger.warn(
-    "In version 3, we will no longer apply these old changesets, and will instead throw here"
+    "In a future version, we will no longer apply these old changesets, and will instead throw here"
   );
   logger.warn(
     "----------------------------------------------------------------------"
@@ -97,14 +97,20 @@ export default async function version(cwd: string, config: Config) {
 
   await applyReleasePlan(releasePlan, cwd, config);
 
-  if (oldChangesets.length > 0 && config.commit) {
-    cleanupOldChangesets(cwd);
+  if (oldChangesets.length > 0) {
+    await cleanupOldChangesets(cwd);
+  }
+
+  if (config.commit) {
+    logger.log(
+      "All files have been updated and committed. You're ready to publish!"
+    );
   } else {
     logger.log(
       "All files have been updated. Review them and commit at your leisure"
     );
-    logger.warn(
-      "If you alter version changes in package.jsons, make sure to run bolt before publishing to ensure the repo is in a valid state"
-    );
   }
+  logger.warn(
+    "If you alter version changes in package.jsons, make sure to run bolt before publishing to ensure the repo is in a valid state"
+  );
 }

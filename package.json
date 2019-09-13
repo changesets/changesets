@@ -24,7 +24,7 @@
   "workspaces": [
     "packages/*"
   ],
-  "author": "Atlassian Pty Ltd",
+  "author": "Ben Conolly",
   "license": "MIT",
   "dependencies": {
     "@babel/cli": "^7.4.4",

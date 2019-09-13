@@ -1,4 +1,9 @@
 import meow from "meow";
+import { read } from "@changesets/config";
+import { Config } from "@changesets/types";
+import fs from "fs-extra";
+import path from "path";
+import getWorkspaces from "get-workspaces";
 
 import logger from "./utils/logger";
 
@@ -9,9 +14,6 @@ import publish from "./commands/publish";
 import status from "./commands/status";
 import { ExitError } from "./utils/errors";
 import { CliOptions } from "./types";
-
-import { read } from "@changesets/config";
-import getWorkspaces from "get-workspaces";
 
 const { input, flags } = meow(
   `
@@ -58,10 +60,32 @@ const cwd = process.cwd();
       "We could not resolve workspaces - check you are running this command from the correct directory"
     );
   }
-
-  const config = await read(cwd, workspaces);
+  let config: Config;
+  try {
+    config = await read(cwd, workspaces);
+  } catch (e) {
+    let oldConfigExists = await fs.pathExists(
+      path.resolve(cwd, ".changeset/config.js")
+    );
+    if (oldConfigExists) {
+      logger.error(
+        "It looks like you're using the version 1 `.changeset/config.js` file"
+      );
+      logger.error(
+        "You'll need to convert it to a `.changeset/config.json` file"
+      );
+      logger.error(
+        "The format of the config object has significantly changed in v2 as well"
+      );
+      logger.error(
+        " - we thoroughly recommend looking at the changelog for this package for what has changed"
+      );
+      process.exit();
+    }
+  }
 
   if (input.length < 1) {
+    // @ts-ignore if this is undefined, we have already exited
     await add(cwd, config);
   } else if (input.length > 1) {
     logger.error(

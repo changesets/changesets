@@ -106,9 +106,13 @@ export default async function applyReleasePlan(
   );
 
   if (config.commit) {
-    await Promise.all(
-      touchedFiles.map(file => git.add(path.relative(cwd, file), cwd))
-    );
+    let newTouchedFilesArr = [...touchedFiles];
+    // Note, git gets angry if you try and have two git actions running at once
+    // So we need to be careful that these iterations are properly sequential
+    while (newTouchedFilesArr.length > 0) {
+      let file = newTouchedFilesArr.shift();
+      await git.add(path.relative(cwd, file!), cwd);
+    }
 
     let commit = await git.commit(versionCommit, cwd);
 

@@ -16,8 +16,12 @@ export default async function add(cwd: string, config: Config) {
   const changesetBase = await getChangesetBase(cwd);
 
   if (!fs.existsSync(changesetBase)) {
-    console.warn(
-      "There is no .changeset folder. If this is the first time `changesets` have been used in this project, run `yarn changesets init` to get set up. If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration."
+    logger.warn("There is no .changeset folder. ");
+    logger.warn(
+      "If this is the first time `changesets` have been used in this project, run `yarn changesets init` to get set up."
+    );
+    logger.warn(
+      "If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration."
     );
     return;
   }
@@ -36,7 +40,7 @@ export default async function add(cwd: string, config: Config) {
   if (confirmChangeset) {
     const changesetID = await writeChangeset(newChangeset, cwd);
     if (config.commit) {
-      await git.add(path.resolve(changesetBase, changesetID), cwd);
+      await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
       await git.commit(
         `CHANGESET: ${changesetID}. ${newChangeset.summary}`,
         cwd

@@ -33,8 +33,6 @@ export default async function init(cwd: string) {
     logger.info(
       chalk`- {blue .changeset/README.md} contains information about using changesets`
     );
-    logger.info(
-      chalk`- {blue .changeset/config.js} is our default config, with a lot of comments about each option.`
-    );
+    logger.info(chalk`- {blue .changeset/config.json} is our default config`);
   }
 }
