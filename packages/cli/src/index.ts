@@ -80,7 +80,9 @@ const cwd = process.cwd();
       logger.error(
         " - we thoroughly recommend looking at the changelog for this package for what has changed"
       );
-      process.exit();
+      process.exit(1);
+    } else {
+      throw e;
     }
   }
 

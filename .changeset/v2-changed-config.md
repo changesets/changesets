@@ -21,7 +21,7 @@ The Changesets config is now written in JSON with fewer options. The new default
 ##### Migrating
 
 1. Run `yarn changeset init` to create a config file in the new format at `.changeset/config.json`
-1. TODO: how to convert to new changelog thing (we should probably provide helpers or some code examples to take the old two functions and write a full entry)
+1. If you're using changelogs, move `getReleaseLine` and `getDependencyReleaseLine` to their own module and set the changelog option to the path to the module. If you're not using changelogs, set the changelog option to `false`. In the future, we will be providing packages to write changelogs for common use cases
 1. Set `access` to `"public"` if `publishOptions.public` is `true`, otherwise set it to `"private"`
 1. If you use `linked`, copy your linked package groups from the JS config to the the JSON file
 1. If you use `commit` and `skipCI` in `versionOptions` or `publishOptions`, set commit to `true`, all commits will include a skip ci message. if you have a use case for only using commit on one command or not including a skip ci message by default
