@@ -1,5 +1,15 @@
 # bolt-check
 
+## 0.4.3
+
+### Patch Changes
+
+- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)! - Use `@changesets/get-version-range-type` to get version range type, to avoid having this function duplicated
+
+- Updated dependencies [296a6731]:
+  - @changesets/get-version-range-type@0.1.0
+  - get-workspaces@0.5.0
+
 ## 0.4.2
 
 ### Patch Changes

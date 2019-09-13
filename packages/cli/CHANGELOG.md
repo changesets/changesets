@@ -1,5 +1,114 @@
 # @changesets/cli
 
+## 2.0.0
+
+Welcome to version 2 🎉🦋
+
+Quickest summary of the most exciting changes:
+
+🦋 Changesets (the written files) have a new format! They are now human readable/writeable
+
+🦋 The config options have been completely rethought to be clearer and more concise
+
+🦋 Changesets has been significantly decomposed, allowing an easier time building tools on top of it
+
+### Major Changes
+
+- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)!
+
+  #### Changed command line argument names
+
+  We have removed command line arguments that overrwrite the config. The following commands can no longer
+  be passed in:
+
+  - `updateChangelog`
+  - `isPublic`
+  - `skipCI`
+  - `commit`
+
+  This has been done to avoid overloading the number of ways you can pass options, as within any single
+  repository, there should be a single consistent way in which these values are always provided.
+
+- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)!
+
+  #### Changed how Config works
+
+  The Changesets config is now written in JSON with fewer options. The new defaults are shown below.
+
+  ```json
+  {
+    "$schema": "https://unpkg.com/@changesets/config/schema.json",
+    "changelog": "@changesets/cli/changelog",
+    "commit": false,
+    "linked": [],
+    "access": "private"
+  }
+  ```
+
+  **Reasoning**: Having a JSON config makes it easier to build other tools on changesets because the config can be read without executing user code that could potentially be unsafe. It also means we can have easy autocompletion and descriptions in editors that don't go out of date like the comments in the JS config along with being able to packagise changelog entry generators.
+
+  ##### Migrating
+
+  1. Run `yarn changeset init` to create a config file in the new format at `.changeset/config.json`
+  1. If you're using changelogs, move `getReleaseLine` and `getDependencyReleaseLine` to their own module and set the changelog option to the path to the module. If you're not using changelogs, set the changelog option to `false`. In the future, we will be providing packages to write changelogs for common use cases
+  1. Set `access` to `"public"` if `publishOptions.public` is `true`, otherwise set it to `"private"`
+  1. If you use `linked`, copy your linked package groups from the JS config to the the JSON file
+  1. If you use `commit` and `skipCI` in `versionOptions` or `publishOptions`, set commit to `true`, all commits will include a skip ci message. if you have a use case for only using commit on one command or not including a skip ci message by default, contact us and we will talk about re-implementing these features.
+  1. Delete `.changeset/config.js`
+
+- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)!
+
+  #### Changelog generation functions have minor changes
+
+  In addition to how these functions are defined (see changes to config), the data that is passed through
+  to these functions is notably different to what it was before. For the most part, the changelog functions
+  simply receive richer information, based on the new changelog format.
+
+  **BREAKING**: The release objects and dependency release objects now use `release.newVersion` for the latest
+  version, instead of the previous `release.version`.
+
+  The `@changesets/types` package includes exports for both `GetReleaseLine` as well as `GetDependencyReleaseLine`.
+
+  If you were using the default changelog generation scripts, you won't need to worry. Otherwise, we recommend updating
+  your command and manually running `version` to ensure you are still getting the changelogs you expect.
+
+  **Looking further forward** We are already aware that we want to change how people write these generation functions,
+  including opening up more flexibility, and access to things such as the underlying release plan. This will likely require
+  a breaking change in the future, but we thought we were changing enough this release that we didn't want too much turmoil. 😁
+
+- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)!
+
+  #### Renamed commands
+
+  - `bump` has been renamed to `version`
+  - `release` has been renamed to `publish`
+
+  This is a reversion to the changes made in `1.0.0`.
+
+  **Reasoning**: We switched the names because we wanted to avoid confusion with the related
+  tasks in npm. While technically it removed confusion that this was doing the same thing as
+  `npm version`, or `npm publish`, the new terms did not convey easily grokkable meanings. As
+  we weren't benefiting from the new names, we have decided to revert to names that have more
+  meaning within the community, even though these commands do slightly more than this.
+
+### Minor Changes
+
+- [296a6731](https://github.com/atlassian/changesets/commit/296a6731) - Safety bump: Towards the end of preparing changesets v2, there was a lot of chaos - this bump is to ensure every package on npm matches what is found in the repository.
+
+### Patch Changes
+
+- Updated dependencies [ca8ff585, 296a6731]:
+  - @changesets/get-release-plan@0.1.0
+  - @changesets/apply-release-plan@0.2.0
+  - @changesets/assemble-release-plan@0.2.0
+  - @changesets/config@0.2.0
+  - get-dependents-graph@0.1.0
+  - get-workspaces@0.5.0
+  - @changesets/git@0.2.0
+  - @changesets/parse@0.2.0
+  - @changesets/read@0.2.0
+  - @changesets/types@0.2.0
+
 ## 1.3.3
 
 ### Patch Changes

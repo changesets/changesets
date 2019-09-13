@@ -11,11 +11,13 @@ const getReleaseLine = async (changeset, type) => {
       repo: "atlassian/changesets",
       commit: changeset.commit
     });
-    return `- ${links.commit}${links.pull === null ? "" : ` ${links.pull}`}${
+    return `\n\n- ${links.commit}${
+      links.pull === null ? "" : ` ${links.pull}`
+    }${
       links.user === null ? "" : ` Thanks ${links.user}!`
     } - ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
   } else {
-    return `- ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+    return `\n\n- ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
   }
 };
 

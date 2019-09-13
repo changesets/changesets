@@ -87,6 +87,9 @@ export default async function generateMarkdown(
     majorReleaseLines,
     minorReleaseLines,
     patchReleaseLines,
+    patchReleaseLines.length < 1 && dependencyReleaseLine.length > 0
+      ? "### Patch Changes"
+      : "",
     dependencyReleaseLine
   ]
     .filter(line => line)
