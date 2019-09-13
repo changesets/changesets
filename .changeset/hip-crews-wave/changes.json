@@ -1,6 +1,0 @@
-{
-  "releases": [
-    { "name": "@changesets/assemble-release-plan", "type": "patch" }
-  ],
-  "dependents": []
-}

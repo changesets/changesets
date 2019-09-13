@@ -1,1 +1,0 @@
-Use 'spawndamnit' package for all new process spawning
