@@ -12,7 +12,6 @@ import outdent from "outdent";
 import spawn from "spawndamnit";
 
 import applyReleasePlan from "./";
-import createReleaseCommit from "./createVersionCommit";
 
 class FakeReleasePlan {
   changesets: NewChangeset[];
@@ -130,7 +129,7 @@ describe("apply release plan", () => {
 
       - Hey, let's have fun with testing!`);
     });
-    it.skip("should update a changelog for five packages", () => {});
+    it.skip("should update a changelog for two packages", () => {});
   });
   describe.skip("should error and not write if", () => {
     // This is skipped as *for now* we are assuming we have been passed
@@ -240,9 +239,6 @@ describe("apply release plan", () => {
       let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
 
       lastCommit.stdout.toString();
-
-      console.log(lastCommit.stdout.toString());
-      console.log(createReleaseCommit(releasePlan.getReleasePlan(), true));
 
       expect(
         lastCommit.stdout
