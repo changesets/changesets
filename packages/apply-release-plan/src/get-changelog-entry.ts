@@ -7,7 +7,6 @@ import {
 } from "@changesets/types";
 
 import { ModCompWithWorkspace } from "@changesets/types";
-import { patch } from "semver";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
