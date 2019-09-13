@@ -9,8 +9,8 @@ This guide is aimed at package maintainers adding changesets as a tool. For the 
 The overall tool after initialisation should lead to a loop that looks like:
 
 1. Changesets added along with each change
-2. The bump command is run when a release is ready, and the changes are verified
-3. The release command is run afterwards.
+2. The version command is run when a release is ready, and the changes are verified
+3. The publish command is run afterwards.
 
 The second two steps can be made part of a CI process.
 
@@ -38,18 +38,20 @@ or
 yarn changeset
 ```
 
-## Versioning and releasing
+> Note: You can run `changeset add` to add a changeset if you want to but running Changesets without any command works as well.
+
+## Versioning and publishing
 
 Once you decide you want to do a release, you can run
 
 ```shell
-npx changeset bump
+npx changeset version
 ```
 
 or
 
 ```shell
-yarn changeset bump
+yarn changeset version
 ```
 
 This consumes all changesets, and updates to the most appropriate semver version based on those changesets. It also writes changelog entries for each consumed changeset.
@@ -57,13 +59,13 @@ This consumes all changesets, and updates to the most appropriate semver version
 We recommend at this step reviewing both the changelog entries and the version changes for packages. Once you are confident that these are correct, and have made any necessary tweeks to changelogs, you can publish your packages:
 
 ```shell
-npx changeset release
+npx changeset publish
 ```
 
 or
 
 ```shell
-yarn changeset release
+yarn changeset publish
 ```
 
 This will run npm publish in each package that is of a later version than the one currently listed on npm.

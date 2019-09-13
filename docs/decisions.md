@@ -54,3 +54,7 @@ Currently, if you list a package as a peerDependency of another package, this ca
 be released as a `major` change. This is because peerDependency changes will not be caught by package installation.
 
 This decision is open for discussion.
+
+## How Changesets interacts with Git
+
+Changesets core flow of adding changesets, versioning packages/writing changelogs and publishing packages should work without Git. Using Git in a way where the user doesn't explicitly ask to do something that involves Git such as showing changed packages in the add command shouldn't show an error if Git fails for any reason. Using Git in a way where the user explicitly chooses to use Git such as using the commit option or `status --since-master`, Changesets should log an error and fail with a non-zero exit code.

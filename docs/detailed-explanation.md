@@ -28,40 +28,18 @@ As storing this information directly in git is problematic, we store it in the f
 
 ```
 -| .changeset/
--|-| UNIQUE_ID/
--|-|-| changes.json
--|-|-| changes.md
+-|-| UNIQUE_ID.md
 ```
 
-The `changes.json` has the following format (this is currently structured towards a mono-repo):
+A changeset is a Markdown file with YAML front matter. The contents of the Markdown is the change summary which will be written to the changelog and the YAML front matter describes what packages have changed and what semver bump types they should be
 
-```json
-{
-  "releases": [
-    { "name": "extract-react-types", "type": "minor" },
-    { "name": "extract-react-types-loader", "type": "patch" }
-  ],
-  "dependents": [
-    {
-      "name": "babel-plugin-extract-react-types",
-      "type": "patch",
-      "dependencies": ["extract-react-types"]
-    },
-    {
-      "name": "kind2string",
-      "type": "patch",
-      "dependencies": ["extract-react-types"]
-    },
-    {
-      "name": "pretty-proptypes",
-      "type": "patch",
-      "dependencies": ["kind2string", "extract-react-types"]
-    }
-  ]
-}
+```md
+---
+"@changesets/cli": major
+---
+
+Change all the things
 ```
-
-The `changes.md` is just a markdown snippet, and it should be encouraged to go and manually edit it.
 
 This is useful because it breaks versioning into two steps:
 
@@ -80,6 +58,6 @@ See this blog post [I need to write this this link goes nowhere]()
 
 ## Benefits to single-package repos
 
-Changesets are designed first and foremost to handle versioning in monorepos, where interdependencies flowing through the system are important to understand and capture.
+Changesets are designed first and foremost to handle versioning in multi-package repos, where interdependencies flowing through the system are important to understand and capture.
 
 Conceptually though, the benefits of changesets are detacheable from this. I think this process overall leads to an improvement in Pull Requests that helps increase confidence in versioning decisions and changelog entries.
