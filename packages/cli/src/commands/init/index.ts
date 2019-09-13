@@ -36,10 +36,11 @@ export default async function init(cwd: string) {
         path.resolve(changesetBase, "config.json"),
         JSON.stringify(defaultWrittenConfig, null, 2)
       );
+    } else {
+      logger.warn(
+        "It looks like you already have changesets initialized. You should be able to run changeset commands no problems."
+      );
     }
-    logger.warn(
-      "It looks like you already have changesets initialized. You should be able to run changeset commands no problems."
-    );
   } else {
     await fs.copy(path.resolve(pkgPath, "./default-files"), changesetBase);
     await fs.writeFile(
