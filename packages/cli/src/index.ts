@@ -86,7 +86,7 @@ const cwd = process.cwd();
       );
       process.exit(1);
     } else {
-      throw err;
+      throw e;
     }
   }
 
