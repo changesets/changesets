@@ -75,6 +75,7 @@ async function testSetup(
   }
 
   if (config.commit) {
+    await spawn("git", ["init"], { cwd: tempDir });
     await git.add(".", tempDir);
     await git.commit("first commit", tempDir);
   }
@@ -276,6 +277,8 @@ describe("apply release plan", () => {
 
       let tempDir = await copyFixtureIntoTempDir(__dirname, "with-git");
 
+      await spawn("git", ["init"], { cwd: tempDir });
+
       await git.add(".", tempDir);
       await git.commit("first commit", tempDir);
 
@@ -306,6 +309,8 @@ describe("apply release plan", () => {
       let releasePlan = new FakeReleasePlan();
 
       let tempDir = await copyFixtureIntoTempDir(__dirname, "with-git");
+
+      await spawn("git", ["init"], { cwd: tempDir });
 
       await git.add(".", tempDir);
       await git.commit("first commit", tempDir);
