@@ -1,5 +1,7 @@
 # @changesets/cli
 
+## 2.0.1
+
 ### Patch Changes
 
 - [62873042](https://github.com/atlassian/changesets/commit/62873042) [#153](https://github.com/atlassian/changesets/pull/153) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Make init write the default config file if it doesn't exist with a special message if an old config file exists
