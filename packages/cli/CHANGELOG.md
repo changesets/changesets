@@ -7,7 +7,9 @@ Welcome to version 2 🎉🦋
 Quickest summary of the most exciting changes:
 
 🦋 Changesets (the written files) have a new format! They are now human readable/writeable
+
 🦋 The config options have been completely rethought to be clearer and more concise
+
 🦋 Changesets has been significantly decomposed, allowing an easier time building tools on top of it
 
 ### Major Changes
