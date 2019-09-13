@@ -295,11 +295,9 @@ describe("apply release plan", () => {
 
         let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
-        expect(
-          gitCmd.stdout
-            .toString()
-            .includes("nothing to commit, working tree clean")
-        ).toEqual(true);
+        expect(gitCmd.stdout.toString().includes("nothing to commit")).toEqual(
+          true
+        );
         return;
       }
 
@@ -328,11 +326,9 @@ describe("apply release plan", () => {
 
         let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
-        expect(
-          gitCmd.stdout
-            .toString()
-            .includes("nothing to commit, working tree clean")
-        ).toEqual(true);
+        expect(gitCmd.stdout.toString().includes("nothing to commit")).toEqual(
+          true
+        );
         return;
       }
 
@@ -427,11 +423,7 @@ describe("apply release plan", () => {
 
       console.log(gitCmd.stdout.toString());
 
-      expect(
-        gitCmd.stdout
-          .toString()
-          .includes("nothing to commit, working tree clean")
-      ).toBe(true);
+      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
 
       let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
 
@@ -472,11 +464,7 @@ describe("apply release plan", () => {
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
-      expect(
-        gitCmd.stdout
-          .toString()
-          .includes("nothing to commit, working tree clean")
-      ).toBe(true);
+      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
     });
   });
 });
