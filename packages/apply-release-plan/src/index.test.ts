@@ -425,6 +425,8 @@ describe("apply release plan", () => {
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
+      console.log(gitCmd.stdout.toString());
+
       expect(
         gitCmd.stdout
           .toString()
