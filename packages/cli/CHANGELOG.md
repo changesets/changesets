@@ -14,7 +14,9 @@ Quickest summary of the most exciting changes:
 
 ### Major Changes
 
-- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)! - #### Changed command line argument names
+- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)!
+
+  #### Changed command line argument names
 
   We have removed command line arguments that overrwrite the config. The following commands can no longer
   be passed in:
@@ -27,7 +29,9 @@ Quickest summary of the most exciting changes:
   This has been done to avoid overloading the number of ways you can pass options, as within any single
   repository, there should be a single consistent way in which these values are always provided.
 
-- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)! - #### Changed how Config works
+- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)!
+
+  #### Changed how Config works
 
   The Changesets config is now written in JSON with fewer options. The new defaults are shown below.
 
@@ -52,7 +56,9 @@ Quickest summary of the most exciting changes:
   1. If you use `commit` and `skipCI` in `versionOptions` or `publishOptions`, set commit to `true`, all commits will include a skip ci message. if you have a use case for only using commit on one command or not including a skip ci message by default
   1. Delete `.changeset/config.js`
 
-- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)! - #### Changelog generation functions have minor changes
+- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)!
+
+  #### Changelog generation functions have minor changes
 
   In addition to how these functions are defined (see changes to config), the data that is passed through
   to these functions is notably different to what it was before. For the most part, the changelog functions
@@ -70,7 +76,9 @@ Quickest summary of the most exciting changes:
   including opening up more flexibility, and access to things such as the underlying release plan. This will likely require
   a breaking change in the future, but we thought we were changing enough this release that we didn't want too much turmoil. 😁
 
-- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)! - #### Renamed commands
+- [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)!
+
+  #### Renamed commands
 
   - `bump` has been renamed to `version`
   - `release` has been renamed to `publish`
