@@ -91,10 +91,17 @@ export default async function applyReleasePlan(
   let changesetFolder = path.resolve(cwd, ".changeset");
 
   await Promise.all(
-    changesets.map(changeset => {
+    changesets.map(async changeset => {
       let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
-      touchedFiles.push(changesetPath);
-      return fs.remove(changesetPath);
+      let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
+      if (await fs.pathExists(changesetPath)) {
+        touchedFiles.push(changesetPath);
+        await fs.remove(changesetPath);
+        // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
+      } else if (await fs.pathExists(changesetFolderPath)) {
+        touchedFiles.push(changesetFolderPath);
+        await fs.remove(changesetFolderPath);
+      }
     })
   );
 
@@ -152,13 +159,24 @@ async function getNewChangelogEntry(
 
   return Promise.all(
     releaseWithWorkspaces.map(async release => {
-      let changelog = await getChangelogEntry(
-        release,
-        releaseWithWorkspaces,
-        moddedChangesets,
-        getChangelogFuncs,
-        changelogOpts
-      );
+      let changelog: string;
+      try {
+        changelog = await getChangelogEntry(
+          release,
+          releaseWithWorkspaces,
+          moddedChangesets,
+          getChangelogFuncs,
+          changelogOpts
+        );
+      } catch (e) {
+        console.error(
+          "The following error was encountered while generating changelog entries"
+        );
+        console.error(
+          "We have escaped applying the changesets, and no files should have been affected"
+        );
+        throw e;
+      }
 
       return {
         ...release,

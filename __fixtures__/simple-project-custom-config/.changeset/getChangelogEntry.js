@@ -21,28 +21,13 @@ const getDependencyReleaseLine = async (changesets, dependenciesUpdated) => {
   );
 
   const updatedDepenenciesList = dependenciesUpdated.map(
-    dependency => `  - ${dependency.name}@${dependency.version}`
+    dependency => `  - ${dependency.name}@${dependency.newVersion}`
   );
 
   return [...changesetLinks, ...updatedDepenenciesList].join("\n");
 };
 
-const changesetOptions = {
-  commit: true
-};
-const versionOptions = {
-  commit: true,
-  skipCI: true,
+module.exports = {
   getReleaseLine,
   getDependencyReleaseLine
-};
-
-const publishOptions = {
-  public: true
-};
-
-module.exports = {
-  versionOptions,
-  changesetOptions,
-  publishOptions
 };

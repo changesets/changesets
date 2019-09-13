@@ -58,7 +58,8 @@ class FakeReleasePlan {
 async function testSetup(
   fixtureName: string,
   releasePlan: ReleasePlan,
-  config?: Config
+  config?: Config,
+  setupFunc?: (tempDir: string) => Promise<any>
 ) {
   if (!config)
     config = {
@@ -69,6 +70,9 @@ async function testSetup(
     };
 
   let tempDir = await copyFixtureIntoTempDir(__dirname, fixtureName);
+  if (setupFunc) {
+    await setupFunc(tempDir);
+  }
 
   if (config.commit) {
     await git.add(".", tempDir);
@@ -100,7 +104,41 @@ describe("apply release plan", () => {
         version: "1.1.0"
       });
     });
-    it.skip("should update a version for five packages with different new versions", () => {});
+    it("should update a version for two packages with different new versions", async () => {
+      const releasePlan = new FakeReleasePlan();
+      releasePlan.releases = [
+        ...releasePlan.releases,
+        {
+          name: "pkg-b",
+          type: "major",
+          oldVersion: "1.0.0",
+          newVersion: "2.0.0",
+          changesets: []
+        }
+      ];
+
+      let { changedFiles } = await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        releasePlan.config
+      );
+      let pkgPathA = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
+      let pkgPathB = changedFiles.find(b => b.endsWith("pkg-b/package.json"));
+
+      if (!pkgPathA || !pkgPathB)
+        throw new Error(`could not find an updated package json`);
+      let pkgJSONA = await fs.readJSON(pkgPathA);
+      let pkgJSONB = await fs.readJSON(pkgPathB);
+
+      expect(pkgJSONA).toMatchObject({
+        name: "pkg-a",
+        version: "1.1.0"
+      });
+      expect(pkgJSONB).toMatchObject({
+        name: "pkg-b",
+        version: "2.0.0"
+      });
+    });
   });
   describe("changelogs", () => {
     it("should update a changelog for one package", async () => {
@@ -129,9 +167,56 @@ describe("apply release plan", () => {
 
       - Hey, let's have fun with testing!`);
     });
-    it.skip("should update a changelog for two packages", () => {});
+    it("should update a changelog for two packages", async () => {
+      const releasePlan = new FakeReleasePlan();
+      releasePlan.releases = [
+        ...releasePlan.releases,
+        {
+          name: "pkg-b",
+          type: "major",
+          oldVersion: "1.0.0",
+          newVersion: "2.0.0",
+          changesets: []
+        }
+      ];
+
+      let { changedFiles } = await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        {
+          ...releasePlan.config,
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null
+          ]
+        }
+      );
+
+      let readmePath = changedFiles.find(a => a.endsWith("pkg-a/CHANGELOG.md"));
+      let readmePathB = changedFiles.find(a =>
+        a.endsWith("pkg-b/CHANGELOG.md")
+      );
+
+      if (!readmePath || !readmePathB)
+        throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+      let readmeB = await fs.readFile(readmePathB, "utf-8");
+
+      expect(readme.trim()).toEqual(outdent`# pkg-a
+
+      ## 1.1.0
+      ### Minor Changes
+
+      - Hey, let's have fun with testing!
+
+        - pkg-b@2.0.0`);
+
+      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+      
+      ## 2.0.0`);
+    });
   });
-  describe.skip("should error and not write if", () => {
+  describe("should error and not write if", () => {
     // This is skipped as *for now* we are assuming we have been passed
     // valid releasePlans - this may get work done on it in the future
     it.skip("a package appears twice", async () => {
@@ -188,35 +273,140 @@ describe("apply release plan", () => {
           }
         ]
       );
-      let changedFiles;
+
+      let tempDir = await copyFixtureIntoTempDir(__dirname, "with-git");
+
+      await git.add(".", tempDir);
+      await git.commit("first commit", tempDir);
+
       try {
-        let testResults = await testSetup(
-          "simple-project",
+        await applyReleasePlan(
           releasePlan.getReleasePlan(),
+          tempDir,
           releasePlan.config
         );
-        changedFiles = testResults.changedFiles;
       } catch (e) {
         expect(e.message).toEqual(
           "Could not find matching package for release of: impossible-package"
         );
+
+        let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+
+        expect(
+          gitCmd.stdout
+            .toString()
+            .includes("nothing to commit, working tree clean")
+        ).toEqual(true);
         return;
       }
 
-      throw new Error(
-        `Expected test to exit before this point but instead got changedFiles ${changedFiles}`
-      );
+      throw new Error("Expected test to exit before this point");
     });
-    it.skip("a provided changelog function fails", async () => {
-      throw new Error("test not written");
-    });
-    it.skip("a changelog write fails", async () => {
-      throw new Error("test not written");
+    it("a provided changelog function fails", async () => {
+      let releasePlan = new FakeReleasePlan();
+
+      let tempDir = await copyFixtureIntoTempDir(__dirname, "with-git");
+
+      await git.add(".", tempDir);
+      await git.commit("first commit", tempDir);
+
+      try {
+        await applyReleasePlan(releasePlan.getReleasePlan(), tempDir, {
+          ...releasePlan.config,
+          changelog: [
+            path.resolve(__dirname, "test-utils/failing-functions"),
+            null
+          ]
+        });
+      } catch (e) {
+        expect(e.message).toEqual("no chance");
+
+        let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+
+        expect(
+          gitCmd.stdout
+            .toString()
+            .includes("nothing to commit, working tree clean")
+        ).toEqual(true);
+        return;
+      }
+
+      throw new Error("Expected test to exit before this point");
     });
   });
-  describe.skip("changesets", () => {
-    it("should delete one changeset after it is applied", () => {});
-    it("should delete five changesets after they are applied", () => {});
+  describe("changesets", () => {
+    it("should delete one changeset after it is applied", async () => {
+      const releasePlan = new FakeReleasePlan();
+
+      let changesetPath: string;
+
+      const setupFunc = (tempDir: string) =>
+        Promise.all(
+          releasePlan.getReleasePlan().changesets.map(({ id, summary }) => {
+            const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
+            changesetPath = thisPath;
+            const content = `---\n---\n${summary}`;
+            fs.writeFile(thisPath, content);
+          })
+        );
+
+      await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        releasePlan.config,
+        setupFunc
+      );
+
+      // @ts-ignore this is possibly bad
+      let pathExists = await fs.pathExists(changesetPath);
+      expect(pathExists).toEqual(false);
+    });
+    it("should delete an old format changeset if it is applied", async () => {
+      const releasePlan = new FakeReleasePlan();
+
+      let changesetMDPath: string;
+      let changesetJSONPath: string;
+
+      const setupFunc = (tempDir: string) =>
+        Promise.all(
+          releasePlan
+            .getReleasePlan()
+            .changesets.map(async ({ id, summary }) => {
+              changesetMDPath = path.resolve(
+                tempDir,
+                ".changeset",
+                id,
+                `changes.md`
+              );
+              changesetJSONPath = path.resolve(
+                tempDir,
+                ".changeset",
+                id,
+                `changes.json`
+              );
+              await fs.outputFile(changesetMDPath, summary);
+              await fs.outputFile(
+                changesetJSONPath,
+                JSON.stringify({ id, summary })
+              );
+            })
+        );
+
+      await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        releasePlan.config,
+        setupFunc
+      );
+
+      // @ts-ignore this is possibly bad
+      let mdPathExists = await fs.pathExists(changesetMDPath);
+      // @ts-ignore this is possibly bad
+      let JSONPathExists = await fs.pathExists(changesetMDPath);
+
+      expect(mdPathExists).toEqual(false);
+      expect(JSONPathExists).toEqual(false);
+    });
   });
   describe("git", () => {
     it("should commit updating files from packages", async () => {
@@ -246,7 +436,41 @@ describe("apply release plan", () => {
           .includes("RELEASING: Releasing 1 package(s)")
       ).toBe(true);
     });
-    it("should commit removing applied changesets", () => {});
+    it("should commit removing applied changesets", async () => {
+      const releasePlan = new FakeReleasePlan();
+
+      let changesetPath: string;
+
+      const setupFunc = (tempDir: string) =>
+        Promise.all(
+          releasePlan.getReleasePlan().changesets.map(({ id, summary }) => {
+            const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
+            changesetPath = thisPath;
+            const content = `---\n---\n${summary}`;
+            fs.writeFile(thisPath, content);
+          })
+        );
+
+      let { tempDir } = await testSetup(
+        "with-git",
+        releasePlan.getReleasePlan(),
+        { ...releasePlan.config, commit: true },
+        setupFunc
+      );
+
+      // @ts-ignore this is possibly bad
+      let pathExists = await fs.pathExists(changesetPath);
+
+      expect(pathExists).toEqual(false);
+
+      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+
+      expect(
+        gitCmd.stdout
+          .toString()
+          .includes("nothing to commit, working tree clean")
+      ).toBe(true);
+    });
   });
 });
 

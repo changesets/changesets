@@ -106,18 +106,6 @@ describe("running version in a simple project", () => {
     });
   });
 
-  it.skip("should respect config file", async () => {
-    // We have used the atlaskit config. Its two differences are it has skipCI and commit as true
-    const cwd2 = await copyFixtureIntoTempDir(
-      __dirname,
-      "simple-project-custom-config"
-    );
-    await writeChangesets([simpleChangeset2], cwd2);
-    await versionCommand(cwd2, modifiedDefaultConfig);
-
-    expect(git.commit).toHaveBeenCalledTimes(1);
-  });
-
   it("should bump packages to the correct versions when packages are linked", async () => {
     const cwd2 = await copyFixtureIntoTempDir(__dirname, "linked-packages");
     await writeChangesets([simpleChangeset2], cwd2);
@@ -189,18 +177,6 @@ describe("running version in a simple project", () => {
 
       const dirs = await fs.readdir(path.resolve(cwd, ".changeset"));
       expect(dirs.length).toBe(2);
-    });
-  });
-
-  describe.skip("v1 legacy changesets are still processed", () => {
-    it("should still apply a legacy changeset", () => {
-      throw new Error("write this test before shipping v2");
-    });
-    it("should still remove a legacy changeset", () => {
-      throw new Error("write this test before shipping v2");
-    });
-    it("should still commit removing a legacy changeset when that makes sense", () => {
-      throw new Error("write this test before shipping v2");
     });
   });
 });
