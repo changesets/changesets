@@ -59,32 +59,32 @@ and answers the provided questions.
 When the maintainer wants to release packages, they should run
 
 ```
-yarn changeset bump
+yarn changeset version
 ```
 
 or
 
 ```
-npx changeset bump
+npx changeset version
 ```
 
 and then
 
 ```
-yarn changeset release
+yarn changeset publish
 ```
 
 or
 
 ```
-npx changeset release
+npx changeset publish
 ```
 
 The commands are explained further below.
 
 ## Commands
 
-### initialize
+### init
 
 ```
 changeset init
@@ -95,69 +95,54 @@ This command sets up the `.changeset` folder. It generates a readme and a config
 ### add
 
 ```
-changeset [--commit]
+changeset
 ```
 
 or
 
 ```
-changeset add [--commit]
+changeset add
 ```
 
-This command will ask you a series of questions, first about what packages you want to release, then what version for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
+This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
 
-Once confirmed, the changeset will be written into two files:
+Once confirmed, the changeset will be write a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semester bump types for them.
 
-- `.changeset/{HASH}/changes.md` - this includes the summary message, and is safe to edit and expand on.
-- `.changeset/{HASH}/changes.json` - this is the intent to update and should not be manually edited.
+A changeset that major bumps `@changesets/cli` would look like this:
 
-The information in the `changes.json` will look like:
+```md
+---
+"@changesets/cli": major
+---
 
-```json
-{
-  "releases": [
-    { "name": "@atlaskit/analytics-listeners", "type": "major" },
-    { "name": "@atlaskit/website", "type": "patch" }
-  ],
-  "dependents": [
-    {
-      "name": "@atlaskit/global-navigation",
-      "type": "patch",
-      "dependencies": ["@atlaskit/analytics-listeners"]
-    }
-  ]
-}
+A description of the major changes.
 ```
 
-You can pass the option `--commit`, or provide this in the config. Commit is false by default. If it is true, the command will add the updated changeset files and then commit them.
+If you want to modify this file after it's generated, that's completely fine or if you want to write changeset files yourself, that's also fine.
 
-### bump
+If you set the `commit` option in the config, the command will add the updated changeset files and then commit them.
+
+### version
 
 ```
-changeset bump [--update-changelog] [--commit]
+changeset version
 ```
 
-Updates the versions for all packages (and depdendencies) described in changesets since last release.
+Updates the versions for all packages described in changesets since last release along with any dependents inside the repo that are out of range.
 
 Will also create/append to a CHANGELOG file for each package using the summaries from the changesets.
 
-We recommend making sure changes made from this commmand are merged back into master before you run `release.
+We recommend making sure changes made from this commmand are merged back into master before you run `publish`.
 
 This command will read then delete changesets on disk, ensuring that they are only used once.
 
-`--update-changelog` (default true) - Sets whether you want changesets to write out changelog files.
-
-`--commit` (default false) - If true, running this command will automatically commit the changes it made. Note this will cause CI to be skipped.
-
-### release
+### publish
 
 ```
-changeset release [--public] [--otp={token}]
+changeset publish [--otp={token}]
 ```
 
-Publishes to NPM repo, and creates tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is acurate.
-
-`--public` - enables the `--access-public` flag when publishing. This is required if trying to publish public scoped packages.
+Publishes to NPM repo, and creates git tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is acurate.
 
 `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the `--otp` option.
 

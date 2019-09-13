@@ -4,9 +4,9 @@ This file is a discussion of some of the rules and design decisions that have go
 
 ## How changesets are combined
 
-Changesets are designed to be as easy to accumulate as possible. As such, when changesets are consumed, we flatten the version bumps into one single bump at the highest semver range specified.
+Changesets are designed to be as easy to accumulate as possible. As such, when changesets are consumed with `version`, we flatten the version bumps into one single bump at the highest semver range specified.
 
-For example: if you run `consume`, and a we have `packageA` at `1.1.1`, which has two `minor` changesets, and one `patch` changeset, we will bump `packageA` to `1.2.1`.
+For example: if you run `version`, and a we have `packageA` at `1.1.1`, which has two `minor` changesets, and one `patch` changeset, we will bump `packageA` to `1.2.1`.
 
 This allows changesets to be added and accumulated safely, with the knowledged that packages will only be released once at an appropriate version for the combined set of changesets, while still ensuring each change is captured in the changelog, with an indication of what kind of change it is.
 
@@ -54,3 +54,7 @@ Currently, if you list a package as a peerDependency of another package, this ca
 be released as a `major` change. This is because peerDependency changes will not be caught by package installation.
 
 This decision is open for discussion.
+
+## How Changesets interacts with Git
+
+Changesets core flow of adding changesets, versioning packages/writing changelogs and publishing packages should work without Git. Using Git in a way where the user doesn't explicitly ask to do something that involves Git such as showing changed packages in the add command shouldn't show an error if Git fails for any reason. Using Git in a way where the user explicitly chooses to use Git such as using the commit option or `status --since-master`, Changesets should log an error and fail with a non-zero exit code.

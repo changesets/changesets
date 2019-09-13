@@ -21,6 +21,8 @@ Several of these have associated type definitions, which you can find in [our ty
 - **release plan** - A calculated object that shows everything a collection of changesets will release, and at what version, and how. This object includes a calculation of dependencies, and considerations for `linked` packages.
 - **absolutely correct semver** - making semver versioning decisions to ensure nothing less than major is capable of breaking a consumer's code. Because literally any change is technically capable of breaking a user's code, absolutely correct semver requires that all changes are major changes.
 - **pragmatically correct semver** - Making semver decisions that you believe to be correct, but may be in error. A pragmatic assessment is likely to change with the number of users of a project, and the API surface area of the project. Whenever we talk about 'correct semver', we are referring to 'pragmatically correct semver'
+- **dependency** - A package that is depended upon by another given package.
+- **dependent** - A package which depends on another given package. This is frequently used in the context of the getting the dependents of a package so they can be released.
 
 ## Things that we haven't figured out how to explain well yet
 
