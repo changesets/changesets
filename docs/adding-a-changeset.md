@@ -13,39 +13,18 @@ A changeset is a piece of information about changes made in a branch or commit. 
 ## I am in a multi-package repository (a mono-repo)
 
 1. Run the command line script `npx changeset` or `yarn changeset`.
-2. Select the packages you want to include in the changeset using ↑	and ↓ to navigate to packages, and :space: to select a package. Hit enter when all desired packages are selected.
-3. You will be prompted to select a bump type for each selected package. Select an appropriate bump type for the changes made. See [here](https://semver.org/) for informaiton on semver versioning
+2. Select the packages you want to include in the changeset using <kbd>↑</kbd> and <kbd>↓</kbd> to navigate to packages, and <kbd>space</kbd> to select a package. Hit enter when all desired packages are selected.
+3. You will be prompted to select a bump type for each selected package. Select an appropriate bump type for the changes made. See [here](https://semver.org/) for information on semver versioning
 4. Your final prompt will be to provide a message to go alongside the changeset. This will be written into the changelog when the next release occurs.
 
-After this, you will have new files added to your repository. These will be:
+After this, a new changeset will be added which is a markdown file with YAML front matter.
 
 ```
 -| .changeset/
--|-| UNIQUE_ID/
--|-|-| changes.json
--|-|-| changes.md
+-|-| UNIQUE_ID.md
 ```
 
-The message you typed can now be found in the `changes.md` file. If you want to expand on it, you can write as much markdown as you want, which will all be added to the the changelog on publish.
-
-5. Once you are happy with the changeset message, commit the .changeset files to your branch.
-
-## I am in a single-package repository
-
-1. Run the command line script `npx changeset` or `yarn changeset`.
-2. Select an appropriate bump type for the changes made. See [here](https://semver.org/) for informaiton on semver versioning
-3. Your final prompt will be to provide a message to go alongside the changeset. This will be written into the changelog when the next release occurs.
-
-After this, you will have new files added to your repository. These will be:
-
-```
--| .changeset/
--|-| UNIQUE_ID/
--|-|-| changes.json
--|-|-| changes.md
-```
-
-The message you typed can now be found in the `changes.md` file. If you want to expand on it, you can write as much markdown as you want, which will all be added to the the changelog on publish.
+The message you typed can be found in the markdown file. If you want to expand on it, you can write as much markdown as you want, which will all be added to the changelog on publish. If you want to add more packages or change the bump types of any packages, that's also fine.
 
 While not every changeset is going to need a huge amount of detail, a good idea of what should be in a changeset is:
 
@@ -53,7 +32,30 @@ While not every changeset is going to need a huge amount of detail, a good idea 
 - WHY the change was made
 - HOW a consumer should update their code
 
-4. Once you are happy with the changeset message, commit the .changeset files to your branch.
+5. Once you are happy with the changeset, commit the file to your branch.
+
+## I am in a single-package repository
+
+1. Run the command line script `npx changeset` or `yarn changeset`.
+2. Select an appropriate bump type for the changes made. See [here](https://semver.org/) for informaiton on semver versioning
+3. Your final prompt will be to provide a message to go alongside the changeset. This will be written into the changelog when the next release occurs.
+
+After this, a new changeset will be added which is a markdown file with YAML front matter.
+
+```
+-| .changeset/
+-|-| UNIQUE_ID.md
+```
+
+The message you typed can be found in the markdown file. If you want to expand on it, you can write as much markdown as you want, which will all be added to the changelog on publish. If you want to change the bump type for the changeset, that's also fine.
+
+While not every changeset is going to need a huge amount of detail, a good idea of what should be in a changeset is:
+
+- WHAT the change is
+- WHY the change was made
+- HOW a consumer should update their code
+
+4. Once you are happy with the changeset, commit the file to your branch.
 
 ## Tips on adding changesets
 
