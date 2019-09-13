@@ -60,6 +60,10 @@ const cwd = process.cwd();
       "We could not resolve workspaces - check you are running this command from the correct directory"
     );
   }
+  if (input[0] === "init") {
+    await init(cwd);
+    return;
+  }
   let config: Config;
   try {
     config = await read(cwd, workspaces);
@@ -113,59 +117,55 @@ const cwd = process.cwd();
     // config file. For this reason, we only assign them to this
     // object as and when they exist.
 
-    try {
-      switch (input[0]) {
-        case "init": {
-          await init(cwd);
-          return;
-        }
-        case "add": {
-          // @ts-ignore if this is undefined, we have already exited
-          await add(cwd, config);
-          return;
-        }
-        case "version": {
-          // @ts-ignore if this is undefined, we have already exited
-          await version(cwd, config);
-          return;
-        }
-        case "publish": {
-          // @ts-ignore if this is undefined, we have already exited
-          await publish(cwd, { otp }, config);
-          return;
-        }
-        case "status": {
-          // @ts-ignore if this is undefined, we have already exited
-          await status(cwd, { sinceMaster, verbose, output }, config);
-          return;
-        }
-        case "bump": {
-          logger.error(
-            'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation'
-          );
-          logger.error(
-            "To fix this, use `changeset version` instead, and update any scripts that use changesets"
-          );
-          throw new ExitError(1);
-        }
-        case "release": {
-          logger.error(
-            'In version 2 of changesets, "release" has been renamed to "publish" - see our changelog for an explanation'
-          );
-          logger.error(
-            "To fix this, use `changeset publish` instead, and update any scripts that use changesets"
-          );
-          throw new ExitError(1);
-        }
-        default: {
-          logger.error(`Invalid command ${input[0]} was provided`);
-        }
+    switch (input[0]) {
+      case "add": {
+        // @ts-ignore if this is undefined, we have already exited
+        await add(cwd, config);
+        return;
       }
-    } catch (err) {
-      if (err instanceof ExitError) {
-        return process.exit(err.code);
+      case "version": {
+        // @ts-ignore if this is undefined, we have already exited
+        await version(cwd, config);
+        return;
       }
-      throw err;
+      case "publish": {
+        // @ts-ignore if this is undefined, we have already exited
+        await publish(cwd, { otp }, config);
+        return;
+      }
+      case "status": {
+        // @ts-ignore if this is undefined, we have already exited
+        await status(cwd, { sinceMaster, verbose, output }, config);
+        return;
+      }
+      case "bump": {
+        logger.error(
+          'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation'
+        );
+        logger.error(
+          "To fix this, use `changeset version` instead, and update any scripts that use changesets"
+        );
+        throw new ExitError(1);
+      }
+      case "release": {
+        logger.error(
+          'In version 2 of changesets, "release" has been renamed to "publish" - see our changelog for an explanation'
+        );
+        logger.error(
+          "To fix this, use `changeset publish` instead, and update any scripts that use changesets"
+        );
+        throw new ExitError(1);
+      }
+      default: {
+        logger.error(`Invalid command ${input[0]} was provided`);
+        throw new ExitError(1);
+      }
     }
   }
-})();
+})().catch(err => {
+  if (err instanceof ExitError) {
+    return process.exit(err.code);
+  }
+  logger.error(err);
+  process.exit(1);
+});
