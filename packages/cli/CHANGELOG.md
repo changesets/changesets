@@ -53,7 +53,7 @@ Quickest summary of the most exciting changes:
   1. If you're using changelogs, move `getReleaseLine` and `getDependencyReleaseLine` to their own module and set the changelog option to the path to the module. If you're not using changelogs, set the changelog option to `false`. In the future, we will be providing packages to write changelogs for common use cases
   1. Set `access` to `"public"` if `publishOptions.public` is `true`, otherwise set it to `"private"`
   1. If you use `linked`, copy your linked package groups from the JS config to the the JSON file
-  1. If you use `commit` and `skipCI` in `versionOptions` or `publishOptions`, set commit to `true`, all commits will include a skip ci message. if you have a use case for only using commit on one command or not including a skip ci message by default
+  1. If you use `commit` and `skipCI` in `versionOptions` or `publishOptions`, set commit to `true`, all commits will include a skip ci message. if you have a use case for only using commit on one command or not including a skip ci message by default, contact us and we will talk about re-implementing these features.
   1. Delete `.changeset/config.js`
 
 - [ca8ff585](https://github.com/atlassian/changesets/commit/ca8ff585) [#147](https://github.com/atlassian/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)!
