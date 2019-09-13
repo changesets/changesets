@@ -118,18 +118,22 @@ const cwd = process.cwd();
           return;
         }
         case "add": {
+          // @ts-ignore if this is undefined, we have already exited
           await add(cwd, config);
           return;
         }
         case "version": {
+          // @ts-ignore if this is undefined, we have already exited
           await version(cwd, config);
           return;
         }
         case "publish": {
+          // @ts-ignore if this is undefined, we have already exited
           await publish(cwd, { otp }, config);
           return;
         }
         case "status": {
+          // @ts-ignore if this is undefined, we have already exited
           await status(cwd, { sinceMaster, verbose, output }, config);
           return;
         }
