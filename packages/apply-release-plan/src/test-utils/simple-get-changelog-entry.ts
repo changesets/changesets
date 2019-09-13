@@ -1,43 +1,12 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import startCase from "lodash.startcase";
-import {
-  ComprehensiveRelease,
-  VersionType,
-  NewChangeset
-} from "@changesets/types/src";
-import { RelevantChangesets } from "../types";
+/*
+BAD CODE ALERT!
 
-async function getReleaseLine(changeset: NewChangeset) {
-  const [firstLine, ...futureLines] = changeset.summary
-    .split("\n")
-    .map(l => l.trimRight());
+You should never reach out of one package and into another in a multi-package repository.
+(doing so is a leading cause of 'works on my machine' but then failure when the packages are published)
 
-  return `- ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
-}
+We are doing it here to avoide adding a circular dependency and as this is only used in testing.
 
-async function getReleaseLines(obj: RelevantChangesets, type: VersionType) {
-  const releaseLines = obj[type].map(getReleaseLine);
-  if (!releaseLines.length) return "";
-  const resolvedLines = await Promise.all(releaseLines);
+This is wicked, and please don't copy us.
+*/
 
-  return `### ${startCase(type)} Changes\n\n${resolvedLines.join("")}`;
-}
-
-export default async function defaultChangelogGetter(
-  release: ComprehensiveRelease,
-  relevantChangesets: RelevantChangesets
-) {
-  // First, we construct the release lines, summaries of changesets that caused us to be released
-  const majorReleaseLines = await getReleaseLines(relevantChangesets, "major");
-  const minorReleaseLines = await getReleaseLines(relevantChangesets, "minor");
-  const patchReleaseLines = await getReleaseLines(relevantChangesets, "patch");
-
-  return [
-    `## ${release.newVersion}`,
-    majorReleaseLines,
-    minorReleaseLines,
-    patchReleaseLines
-  ]
-    .filter(line => line)
-    .join("\n");
-}
+export { default } from "../../../cli/changelog";

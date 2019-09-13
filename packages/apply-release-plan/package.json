@@ -9,17 +9,19 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@changesets/config": "^0.1.2",
-    "@changesets/get-version-range-type": "^0.0.2",
+    "@changesets/git": "^0.1.2",
     "@changesets/types": "^0.1.2",
+    "@changesets/get-version-range-type": "^0.0.2",
     "fs-extra": "^7.0.1",
     "get-workspaces": "^0.4.2",
     "prettier": "^1.14.3",
-    "resolve-from": "^5.0.0"
+    "resolve-from": "^5.0.0",
+    "lodash.startcase": "^4.4.0",
+    "outdent": "^0.5.0"
   },
   "devDependencies": {
     "@changesets/git": "^0.1.2",
     "jest-fixtures": "^0.5.0",
-    "lodash.startcase": "^4.4.0",
-    "outdent": "^0.5.0"
+    "spawndamnit": "^2.0.0"
   }
 }
