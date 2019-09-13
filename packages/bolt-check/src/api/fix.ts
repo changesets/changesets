@@ -2,14 +2,9 @@ import fs from "fs-extra";
 import path from "path";
 import detectIndent from "detect-indent";
 import getWorkspaces from "get-workspaces";
+import versionRangeToRangeType from "@changesets/get-version-range-type";
 import { PkgErrors, MissingDep, Config, ErrorObj } from "../types";
 import { DEPENDENCY_TYPES } from "../constants";
-
-function versionRangeToRangeType(versionRange: string) {
-  if (versionRange.charAt(0) === "^") return "^";
-  if (versionRange.charAt(0) === "~") return "~";
-  return "";
-}
 
 const fixPkgErrors = async (errors: PkgErrors[], pkgDir: string) => {
   let pkgPath = path.resolve(pkgDir, "package.json");

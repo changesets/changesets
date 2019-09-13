@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
+    "@changesets/get-version-range-type": "^0.0.2",
     "chalk": "^2.1.0",
     "detect-indent": "^6.0.0",
     "fs-extra": "^7.0.1",

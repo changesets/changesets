@@ -1,14 +1,14 @@
 import {
   ReleasePlan,
   Config,
-  ComprehensiveRelease,
+  ChangelogFunctions,
   NewChangeset,
-  ChangelogFunction
+  ModCompWithWorkspace
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
-
-import getWorksaces, { PackageJSON } from "get-workspaces";
+import * as git from "@changesets/git";
+import getWorksaces from "get-workspaces";
 import resolveFrom from "resolve-from";
 
 import fs from "fs-extra";
@@ -16,7 +16,8 @@ import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
-import { RelevantChangesets } from "./types";
+import createVersionCommit from "./createVersionCommit";
+import getChangelogEntry from "./get-changelog-entry";
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
@@ -32,6 +33,8 @@ export default async function applyReleasePlan(
   if (!workspaces) throw new Error(`could not find any workspaces in ${cwd}`);
 
   let { releases, changesets } = releasePlan;
+
+  const versionCommit = createVersionCommit(releasePlan, config.commit);
 
   let releaseWithWorkspaces = releases.map(release => {
     // @ts-ignore we already threw if workspaces wasn't defined
@@ -88,69 +91,97 @@ export default async function applyReleasePlan(
   let changesetFolder = path.resolve(cwd, ".changeset");
 
   await Promise.all(
-    changesets.map(changeset => {
+    changesets.map(async changeset => {
       let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
-      touchedFiles.push(changesetPath);
-      return fs.remove(changesetPath);
+      let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
+      if (await fs.pathExists(changesetPath)) {
+        touchedFiles.push(changesetPath);
+        await fs.remove(changesetPath);
+        // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
+      } else if (await fs.pathExists(changesetFolderPath)) {
+        touchedFiles.push(changesetFolderPath);
+        await fs.remove(changesetFolderPath);
+      }
     })
   );
 
-  // We return the touched files so things such as the CLI can commit them
-  // if they want
+  if (config.commit) {
+    let newTouchedFilesArr = [...touchedFiles];
+    // Note, git gets angry if you try and have two git actions running at once
+    // So we need to be careful that these iterations are properly sequential
+    while (newTouchedFilesArr.length > 0) {
+      let file = newTouchedFilesArr.shift();
+      await git.add(path.relative(cwd, file!), cwd);
+    }
+
+    let commit = await git.commit(versionCommit, cwd);
+
+    if (!commit) {
+      console.error("Changesets ran into trouble committing your files");
+    }
+  }
+
+  // We return the touched files mostly for testing purposes
   return touchedFiles;
 }
 
-type ModCompWithWorkspace = ComprehensiveRelease & {
-  config: PackageJSON;
-  dir: string;
-};
-
-function getNewChangelogEntry(
+async function getNewChangelogEntry(
   releaseWithWorkspaces: ModCompWithWorkspace[],
   changesets: NewChangeset[],
   changelogConfig: false | readonly [string, any],
   cwd: string
 ) {
-  let getChangelogFunc: ChangelogFunction = () => Promise.resolve("");
+  let getChangelogFuncs: ChangelogFunctions = {
+    getReleaseLine: () => Promise.resolve(""),
+    getDependencyReleaseLine: () => Promise.resolve("")
+  };
   let changelogOpts: any;
   if (changelogConfig) {
     let changesetPath = path.join(cwd, ".changeset");
     let changelogPath = resolveFrom(changesetPath, changelogConfig[0]);
 
     let possibleChangelogFunc = require(changelogPath);
-    if (typeof possibleChangelogFunc === "function") {
-      getChangelogFunc = possibleChangelogFunc;
-    } else if (typeof possibleChangelogFunc.default === "function") {
-      getChangelogFunc = possibleChangelogFunc.default;
+    if (possibleChangelogFunc.default) {
+      possibleChangelogFunc = possibleChangelogFunc.default;
+    }
+    if (
+      typeof possibleChangelogFunc.getReleaseLine === "function" &&
+      typeof possibleChangelogFunc.getDependencyReleaseLine === "function"
+    ) {
+      getChangelogFuncs = possibleChangelogFunc;
     } else {
-      throw new Error("Could not resolve changelog generation function");
+      throw new Error("Could not resolve changelog generation functions");
     }
   }
 
+  let moddedChangesets = await Promise.all(
+    changesets.map(async cs => ({
+      ...cs,
+      commit: await git.getCommitThatAddsFile(`.changeset/${cs.id}.md`, cwd)
+    }))
+  );
+
   return Promise.all(
     releaseWithWorkspaces.map(async release => {
-      let relevantChangesets: RelevantChangesets = {
-        major: [],
-        minor: [],
-        patch: []
-      };
-
-      for (let changeset of changesets) {
-        if (release.changesets.includes(changeset.id)) {
-          let csRelease = changeset.releases.find(
-            rel => rel.name === release.name
-          )!;
-          relevantChangesets[csRelease.type].push(changeset);
-        }
+      let changelog: string;
+      try {
+        changelog = await getChangelogEntry(
+          release,
+          releaseWithWorkspaces,
+          moddedChangesets,
+          getChangelogFuncs,
+          changelogOpts
+        );
+      } catch (e) {
+        console.error(
+          "The following error was encountered while generating changelog entries"
+        );
+        console.error(
+          "We have escaped applying the changesets, and no files should have been affected"
+        );
+        throw e;
       }
 
-      let changelog = await getChangelogFunc(
-        release,
-        relevantChangesets,
-        { cwd, ...changelogOpts },
-        releaseWithWorkspaces,
-        changesets
-      );
       return {
         ...release,
         changelog
@@ -188,7 +219,7 @@ async function prependFile(
   // if the file exists but doesn't have the header, we'll add it in
   if (!fileData) {
     const completelyNewChangelog = `# ${name}${data}`;
-    fs.writeFileSync(
+    await fs.writeFile(
       filePath,
       prettier.format(completelyNewChangelog, {
         ...prettierConfig,
@@ -199,7 +230,7 @@ async function prependFile(
   }
   const newChangelog = fileData.replace("\n", data);
 
-  fs.writeFileSync(
+  await fs.writeFile(
     filePath,
     prettier.format(newChangelog, { ...prettierConfig, parser: "markdown" })
   );

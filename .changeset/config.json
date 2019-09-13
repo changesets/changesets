@@ -1,0 +1,4 @@
+{
+  "changelog": "./getChangelogEntry.js",
+  "commit": false
+}

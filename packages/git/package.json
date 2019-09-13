@@ -8,6 +8,7 @@
   "repository": "https://github.com/changesets/changesets/tree/master/packages/git",
   "dependencies": {
     "@babel/runtime": "^7.4.4",
+    "@changesets/types": "^0.1.2",
     "spawndamnit": "^2.0.0",
     "get-workspaces": "^0.4.2",
     "pkg-dir": "^4.1.0"
