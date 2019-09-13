@@ -4,6 +4,8 @@
 
 ### Patch Changes
 
+- [62873042](https://github.com/atlassian/changesets/commit/62873042) [#153](https://github.com/atlassian/changesets/pull/153) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Make init write the default config file if it doesn't exist with a special message if an old config file exists
+
 - [85f837a7](https://github.com/atlassian/changesets/commit/85f837a7) [#150](https://github.com/atlassian/changesets/pull/150) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix init command from crashing because it was trying to access a config that doesn't exist
 
 * [709493b4](https://github.com/atlassian/changesets/commit/709493b4) - Fix version always removing legacy changesets even when the commit option is false
