@@ -9,7 +9,8 @@
   "files": [
     "default-files",
     "dist",
-    "bin.js"
+    "bin.js",
+    "changelog"
   ],
   "main": "dist/cli.cjs.js",
   "module": "dist/cli.esm.js",
