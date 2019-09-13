@@ -76,7 +76,8 @@ export default async function applyReleasePlan(
 
     let parsedConfig = prettier.format(JSON.stringify(config), {
       ...prettierConfig,
-      parser: "json"
+      parser: "json",
+      printWidth: 20
     });
 
     await fs.writeFile(pkgJSONPath, parsedConfig);
