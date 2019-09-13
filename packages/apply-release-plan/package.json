@@ -1,6 +1,6 @@
 {
   "name": "@changesets/apply-release-plan",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Takes a release plan and applies it to packages",
   "main": "dist/apply-release-plan.cjs.js",
   "module": "dist/apply-release-plan.esm.js",
@@ -8,19 +8,19 @@
   "repository": "https://github.com/changesets/changesets/tree/master/packages/apply-release-plan",
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@changesets/config": "^0.1.2",
-    "@changesets/git": "^0.1.2",
-    "@changesets/types": "^0.1.2",
-    "@changesets/get-version-range-type": "^0.0.2",
+    "@changesets/config": "^0.2.0",
+    "@changesets/git": "^0.2.0",
+    "@changesets/types": "^0.2.0",
+    "@changesets/get-version-range-type": "^0.1.0",
     "fs-extra": "^7.0.1",
-    "get-workspaces": "^0.4.2",
+    "get-workspaces": "^0.5.0",
     "prettier": "^1.14.3",
     "resolve-from": "^5.0.0",
     "lodash.startcase": "^4.4.0",
     "outdent": "^0.5.0"
   },
   "devDependencies": {
-    "@changesets/git": "^0.1.2",
+    "@changesets/git": "^0.2.0",
     "jest-fixtures": "^0.5.0",
     "spawndamnit": "^2.0.0"
   }
