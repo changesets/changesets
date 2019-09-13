@@ -54,14 +54,15 @@ async function getOldChangesetsAndWarn(
 }
 // this function only exists while we wait for v1 changesets to be obsoleted
 // and should be deleted before v3
-async function cleanupOldChangesets(cwd: string) {
+async function cleanupOldChangesets(cwd: string, config: Config) {
   let changesetBase = await getChangesetBase(cwd);
   removeFolders(changesetBase);
+  if (config.commit) {
+    await git.add(changesetBase, cwd);
 
-  await git.add(changesetBase, cwd);
-
-  logger.log("Committing removing old changesets...");
-  await git.commit(`removing legacy changesets`, cwd);
+    logger.log("Committing removing old changesets...");
+    await git.commit(`removing legacy changesets`, cwd);
+  }
 }
 
 export default async function version(cwd: string, config: Config) {
@@ -98,7 +99,7 @@ export default async function version(cwd: string, config: Config) {
   await applyReleasePlan(releasePlan, cwd, config);
 
   if (oldChangesets.length > 0) {
-    await cleanupOldChangesets(cwd);
+    await cleanupOldChangesets(cwd, config);
   }
 
   if (config.commit) {
