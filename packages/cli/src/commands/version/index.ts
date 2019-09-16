@@ -13,7 +13,7 @@ import getOldChangesets from "../../utils/v1-legacy/getChangesets";
 import getChangesetBase from "../../utils/getChangesetBase";
 
 let importantSeparator = chalk.red(
-  "═══════════════════════════IMPORTANT!═══════════════════════════════"
+  "===============================IMPORTANT!==============================="
 );
 
 // this function only exists while we wait for v1 changesets to be obsoleted
@@ -37,7 +37,7 @@ async function getOldChangesetsAndWarn(
     "In a future major version, we will no longer apply these old changesets, and will instead throw here"
   );
   logger.warn(
-    "──────────────────────────────────────────────────────────────────────"
+    "----------------------------------------------------------------------"
   );
 
   let thing = unreleasedChangesets.map(({ releases, id, summary }) => ({
