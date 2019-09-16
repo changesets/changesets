@@ -410,6 +410,71 @@ describe("apply release plan", () => {
       expect(JSONPathExists).toEqual(false);
     });
   });
+
+  it("should get the commit for an old changeset", async () => {
+    const releasePlan = new FakeReleasePlan();
+
+    let changesetMDPath: string;
+    let changesetJSONPath: string;
+
+    const setupFunc = (tempDir: string) =>
+      Promise.all(
+        releasePlan.getReleasePlan().changesets.map(async ({ id, summary }) => {
+          changesetMDPath = path.resolve(
+            tempDir,
+            ".changeset",
+            id,
+            `changes.md`
+          );
+          changesetJSONPath = path.resolve(
+            tempDir,
+            ".changeset",
+            id,
+            `changes.json`
+          );
+          await fs.outputFile(changesetMDPath, summary);
+          await fs.outputFile(
+            changesetJSONPath,
+            JSON.stringify({ id, summary })
+          );
+        })
+      );
+
+    let { tempDir } = await testSetup(
+      "simple-project",
+      releasePlan.getReleasePlan(),
+      {
+        ...releasePlan.config,
+        changelog: [
+          path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+          null
+        ],
+        commit: true
+      },
+      setupFunc
+    );
+
+    let thing = await spawn("git", ["rev-list", "HEAD"], { cwd: tempDir });
+    let commits = thing.stdout
+      .toString("utf8")
+      .split("\n")
+      .filter(x => x);
+
+    let lastCommit = commits[commits.length - 1].substring(0, 7);
+
+    expect(
+      await fs.readFile(
+        path.join(tempDir, "packages", "pkg-a", "CHANGELOG.md"),
+        "utf8"
+      )
+    ).toBe(`# pkg-a
+
+## 1.1.0
+### Minor Changes
+
+- ${lastCommit}: Hey, let's have fun with testing!
+`);
+  });
   describe("git", () => {
     it("should commit updating files from packages", async () => {
       const releasePlan = new FakeReleasePlan();
@@ -421,8 +486,6 @@ describe("apply release plan", () => {
       );
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
-
-      console.log(gitCmd.stdout.toString());
 
       expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
 
