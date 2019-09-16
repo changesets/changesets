@@ -12,9 +12,35 @@ export default async function init(cwd: string) {
   const changesetBase = await getChangesetBase(cwd);
 
   if (fs.existsSync(changesetBase)) {
-    logger.warn(
-      "It looks like you already have changesets initialized. You should be able to run changeset commands no problems."
-    );
+    if (!fs.existsSync(path.join(changesetBase, "config.json"))) {
+      if (fs.existsSync(path.join(changesetBase, "config.js"))) {
+        logger.error(
+          "It looks like you're using the version 1 `.changeset/config.js` file"
+        );
+        logger.error(
+          "The format of the config object has significantly changed in v2 as well"
+        );
+        logger.error(
+          " - we thoroughly recommend looking at the changelog for this package for what has changed"
+        );
+        logger.error(
+          "Changesets will write the defaults for the new config, remember to transfer your options into the new config at `.changeset/config.json`"
+        );
+      } else {
+        logger.error("It looks like you don't have a config file");
+        logger.error(
+          "The default config file will be written at `.changeset/config.json`"
+        );
+      }
+      await fs.writeFile(
+        path.resolve(changesetBase, "config.json"),
+        JSON.stringify(defaultWrittenConfig, null, 2)
+      );
+    } else {
+      logger.warn(
+        "It looks like you already have changesets initialized. You should be able to run changeset commands no problems."
+      );
+    }
   } else {
     await fs.copy(path.resolve(pkgPath, "./default-files"), changesetBase);
     await fs.writeFile(
