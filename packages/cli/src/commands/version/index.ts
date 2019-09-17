@@ -7,11 +7,7 @@ import assembleReleasePlan from "@changesets/assemble-release-plan";
 import getWorkspaces from "get-workspaces";
 
 import logger from "../../utils/logger";
-import * as git from "@changesets/git";
-import {
-  removeFolders,
-  removeEmptyFolders
-} from "../../utils/v1-legacy/removeFolders";
+import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import getOldChangesets from "../../utils/v1-legacy/getChangesets";
 
 import getChangesetBase from "../../utils/getChangesetBase";
@@ -38,7 +34,7 @@ async function getOldChangesetsAndWarn(
   );
   logger.warn("Make sure you validate all your dependencies");
   logger.warn(
-    "In a future version, we will no longer apply these old changesets, and will instead throw here"
+    "In a future major version, we will no longer apply these old changesets, and will instead throw here"
   );
   logger.warn(
     "----------------------------------------------------------------------"
@@ -51,18 +47,6 @@ async function getOldChangesetsAndWarn(
   }));
 
   return thing;
-}
-// this function only exists while we wait for v1 changesets to be obsoleted
-// and should be deleted before v3
-async function cleanupOldChangesets(cwd: string, config: Config) {
-  let changesetBase = await getChangesetBase(cwd);
-  removeFolders(changesetBase);
-  if (config.commit) {
-    await git.add(changesetBase, cwd);
-
-    logger.log("Committing removing old changesets...");
-    await git.commit(`removing legacy changesets`, cwd);
-  }
 }
 
 export default async function version(cwd: string, config: Config) {
@@ -83,7 +67,7 @@ export default async function version(cwd: string, config: Config) {
 
   if (!workspaces)
     throw new Error(
-      "Could not resolve workspaes for current working directory"
+      "Could not resolve workspaces for current working directory"
     );
 
   let dependentsGraph = await getDependentsgraph({ cwd });
@@ -98,10 +82,6 @@ export default async function version(cwd: string, config: Config) {
 
   await applyReleasePlan(releasePlan, cwd, config);
 
-  if (oldChangesets.length > 0) {
-    await cleanupOldChangesets(cwd, config);
-  }
-
   if (config.commit) {
     logger.log(
       "All files have been updated and committed. You're ready to publish!"
@@ -111,7 +91,4 @@ export default async function version(cwd: string, config: Config) {
       "All files have been updated. Review them and commit at your leisure"
     );
   }
-  logger.warn(
-    "If you alter version changes in package.jsons, make sure to run bolt before publishing to ensure the repo is in a valid state"
-  );
 }
