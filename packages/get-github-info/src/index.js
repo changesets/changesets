@@ -1,30 +1,42 @@
 import fetch from "node-fetch";
 import DataLoader from "dataloader";
 
-function makeQuery(requests) {
+function makeQuery(repos) {
   return `
       query {
-        ${requests
+        ${Object.keys(repos)
           .map(
-            ({ commit, repo }, i) =>
-              `a${i}: search(
-            type: ISSUE
-            query: "sha:${commit}+repo:${repo}"
-            first: 1
+            (repo, i) =>
+              `a${i}: repository(
+            owner: ${JSON.stringify(repo.split("/")[0])}
+            name: ${JSON.stringify(repo.split("/")[1])}
           ) {
-            edges {
-              node {
-                ... on PullRequest {
-                  number
-                  author {
-                    login
-                  }
-                }
+            ${repos[repo]
+              .map(
+                commit => `a${commit}: object(expression: ${JSON.stringify(
+                  commit
+                )}) {
+            ... on Commit {
+            commitUrl
+            associatedPullRequests(first: 1) {
+              nodes {
+                number
+                url
               }
             }
+            author {
+              user {
+                login
+                url
+              }
+            }
+          }}`
+              )
+              .join("\n")}
           }`
           )
-          .join("\n")}}
+          .join("\n")}
+        }
     `;
 }
 
@@ -43,11 +55,19 @@ const GHDataLoader = new DataLoader(async requests => {
       "Please create a GitHub personal access token at https://github.com/settings/tokens/new and add it as the GITHUB_TOKEN environment variable"
     );
   }
+  let repos = {};
+  requests.forEach(({ commit, repo }) => {
+    if (repos[repo] === undefined) {
+      repos[repo] = [];
+    }
+    repos[repo].push(commit);
+  });
+
   const data = await fetch(
     `https://api.github.com/graphql?access_token=${process.env.GITHUB_TOKEN}`,
     {
       method: "POST",
-      body: JSON.stringify({ query: makeQuery(requests) })
+      body: JSON.stringify({ query: makeQuery(repos) })
     }
   ).then(x => x.json());
 
@@ -59,21 +79,18 @@ const GHDataLoader = new DataLoader(async requests => {
       )}`
     );
   }
-  return Object.values(data.data).map(({ edges }) => {
-    if (
-      edges[0] &&
-      edges[0].node &&
-      typeof edges[0].node.number === "number" &&
-      edges[0].node.author &&
-      typeof edges[0].node.author.login === "string"
-    ) {
-      return {
-        user: edges[0].node.author.login,
-        number: edges[0].node.number
-      };
+
+  let cleanedData = {};
+  let dataKeys = Object.keys(data.data);
+  Object.keys(repos).forEach((repo, index) => {
+    cleanedData[repo] = {};
+    for (let nearlyCommit in data.data[dataKeys[index]]) {
+      cleanedData[repo][nearlyCommit.substring(1)] =
+        data.data[dataKeys[index]][nearlyCommit];
     }
-    return null;
   });
+
+  return requests.map(({ repo, commit }) => cleanedData[repo][commit]);
 });
 
 export async function getInfo(request) {
@@ -89,24 +106,27 @@ export async function getInfo(request) {
 
   const data = await GHDataLoader.load(request);
   return {
-    // TODO: fetch the username some other way if there is no PR
-    // since there should generally be a GH username
-    user: data === null ? null : data.user,
-    pull: data === null ? null : data.number,
+    user: data.author && data.author.user ? data.author.user.login : null,
+    pull:
+      data.associatedPullRequests &&
+      data.associatedPullRequests.nodes &&
+      data.associatedPullRequests.nodes[0]
+        ? data.associatedPullRequests.nodes[0].number
+        : null,
     links: {
-      commit: `[${request.commit}](https://github.com/${request.repo}/commit/${
-        request.commit
-      })`,
+      commit: `[${request.commit}](${data.commitUrl})`,
       pull:
-        data === null
-          ? null
-          : `[#${data.number}](https://github.com/${request.repo}/pull/${
-              data.number
-            })`,
+        data.associatedPullRequests &&
+        data.associatedPullRequests.nodes &&
+        data.associatedPullRequests.nodes[0]
+          ? `[#${data.associatedPullRequests.nodes[0].number}](${
+              data.associatedPullRequests.nodes[0].url
+            })`
+          : null,
       user:
-        data === null
-          ? null
-          : `[@${data.user}](https://github.com/${data.user})`
+        data.author && data.author.user
+          ? `[@${data.author.user.login}](${data.author.user.url})`
+          : null
     }
   };
 }
