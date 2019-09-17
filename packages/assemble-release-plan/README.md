@@ -37,5 +37,5 @@ This package exists so assembling a release plan can be done without reading fro
 This is useful primarily for testing within the changesets project, and when you cannot
 run commands within the repository you want a release plan for (some CI cases).
 
-For most cases, you should use `@changesets/get-release-plan` which will read local changelog
+For most cases, you should use `@changesets/get-release-plan` which will read local changeset
 files, config, and workspaces, to assemble the release plan from.
