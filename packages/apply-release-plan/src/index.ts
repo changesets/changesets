@@ -8,7 +8,7 @@ import {
 
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import getWorksaces from "get-workspaces";
+import getWorkspaces from "get-workspaces";
 import resolveFrom from "resolve-from";
 
 import fs from "fs-extra";
@@ -19,13 +19,30 @@ import versionPackage from "./version-package";
 import createVersionCommit from "./createVersionCommit";
 import getChangelogEntry from "./get-changelog-entry";
 
+async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
+  let commit = await git.getCommitThatAddsFile(
+    `.changeset/${changesetId}.md`,
+    cwd
+  );
+  if (commit) {
+    return commit;
+  }
+  let commitForOldChangeset = await git.getCommitThatAddsFile(
+    `.changeset/${changesetId}/changes.json`,
+    cwd
+  );
+  if (commitForOldChangeset) {
+    return commitForOldChangeset;
+  }
+}
+
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   cwd: string,
   config: Config = defaultConfig
 ) {
   let touchedFiles = [];
-  let workspaces = await getWorksaces({
+  let workspaces = await getWorkspaces({
     cwd,
     tools: ["yarn", "bolt", "root"]
   });
@@ -158,7 +175,7 @@ async function getNewChangelogEntry(
   let moddedChangesets = await Promise.all(
     changesets.map(async cs => ({
       ...cs,
-      commit: await git.getCommitThatAddsFile(`.changeset/${cs.id}.md`, cwd)
+      commit: await getCommitThatAddsChangeset(cs.id, cwd)
     }))
   );
 

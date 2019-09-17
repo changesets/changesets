@@ -23,14 +23,6 @@ export type ComprehensiveRelease = {
   changesets: string[];
 };
 
-export type Changeset = {
-  id: string;
-  commit?: string;
-  summary: string;
-  releases: Array<Release>;
-  dependents: Array<Release>;
-};
-
 export type NewChangeset = {
   id: string;
   summary: string;
@@ -69,7 +61,7 @@ export type WrittenConfig = {
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };
 
-export type NewChangesetWithCommit = NewChangeset & { commit: string };
+export type NewChangesetWithCommit = NewChangeset & { commit?: string };
 
 export type ModCompWithWorkspace = ComprehensiveRelease & {
   config: PackageJSON;

@@ -2,13 +2,13 @@ import fs from "fs-extra";
 import path from "path";
 
 import * as git from "@changesets/git";
-import { Changeset } from "@changesets/types";
+import { NewChangeset } from "@changesets/types";
 
 // TODO take in cwd, and fetch changesetBase ourselves
 export default async function getChangesets(
   changesetBase: string,
   sinceMasterOnly: boolean
-): Promise<Array<Changeset>> {
+): Promise<Array<NewChangeset>> {
   if (!fs.existsSync(changesetBase)) {
     throw new Error("There is no .changeset directory in this project");
   }
@@ -35,8 +35,7 @@ export default async function getChangesets(
     );
     const jsonPath = path.join(changesetBase, changesetDir, "changes.json");
     const json = require(jsonPath);
-    const commit = await git.getCommitThatAddsFile(jsonPath, changesetBase);
-    return { ...json, summary, commit, id: changesetDir };
+    return { releases: json.releases, summary, id: changesetDir };
   });
   return Promise.all(changesetContents);
 }

@@ -6,5 +6,5 @@ declare module "spawndamnit" {
     cmd: string,
     args: Array<string>,
     opts?: SpawnOptions
-  ): Promise<{ stdout: string; code: number; stderr: string }> & EventEmitter;
+  ): Promise<{ stdout: Buffer; code: number; stderr: Buffer }> & EventEmitter;
 }
