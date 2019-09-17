@@ -1,1 +1,0 @@
-Fix 2FA check on release

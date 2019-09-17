@@ -11,15 +11,10 @@ Linked packages allow you to specify a group or groups of packages that should b
 
 I have three packages, `pkg-a`, `pkg-b` and `pkg-c`. `pkg-a` and `pkg-b` are linked but `pkg-c` is not so the config looks like this.
 
-```jsx
-// stuff...
-
-const versionOptions = {
-  ...otherStuff,
-  linked: [["pkg-a", "pkg-b"]]
-};
-
-// stuff...
+```json
+{
+  "linked": [["pkg-a", "pkg-b"]]
+}
 ```
 
 - `pkg-a` is at `1.0.0`
@@ -54,15 +49,10 @@ I now have another changeset with patches for all three packages and I do a rele
 
 I have two packages, `pkg-a`, `pkg-b` which are linked. `pkg-a` has a dependency on `pkg-b`.
 
-```jsx
-// stuff...
-
-const versionOptions = {
-  ...otherStuff,
-  linked: [["pkg-a", "pkg-b"]]
-};
-
-// stuff...
+```json
+{
+  "linked": [["pkg-a", "pkg-b"]]
+}
 ```
 
 - `pkg-a` is at `1.0.0`

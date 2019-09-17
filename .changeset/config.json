@@ -1,0 +1,5 @@
+{
+  "changelog": "./getChangelogEntry.js",
+  "commit": false,
+  "access": "public"
+}

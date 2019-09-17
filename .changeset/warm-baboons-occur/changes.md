@@ -1,1 +1,0 @@
-Move `git` module to be its own external module

@@ -1,9 +1,0 @@
-{
-  "releases": [
-    { "name": "@changesets/git", "type": "minor" },
-    { "name": "@changesets/parse", "type": "minor" },
-    { "name": "@changesets/read", "type": "minor" },
-    { "name": "@changesets/types", "type": "minor" }
-  ],
-  "dependents": []
-}

@@ -1,1 +1,0 @@
-Add WrittenConfig type and include all properties in Config type

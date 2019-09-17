@@ -15,7 +15,7 @@
     "prettier": "prettier --write \"**/*.{js,ts,tsx}\"",
     "changeset": "packages/cli/bin.js",
     "check-all": "yarn test && yarn lint && yarn types:check",
-    "release": "yarn build && changeset release --public"
+    "release": "yarn build && changeset publish"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
   "workspaces": [
     "packages/*"
   ],
-  "author": "Atlassian Pty Ltd",
+  "author": "Ben Conolly",
   "license": "MIT",
   "dependencies": {
     "@babel/cli": "^7.4.4",
@@ -80,7 +80,7 @@
     "outdent": "^0.5.0",
     "p-limit": "^2.2.0",
     "pkg-dir": "^4.1.0",
-    "preconstruct": "^0.0.89",
+    "preconstruct": "^0.1.2",
     "prettier": "^1.14.3",
     "resolve-from": "^5.0.0",
     "semver": "^5.4.1",
