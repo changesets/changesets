@@ -23,6 +23,7 @@ Several of these have associated type definitions, which you can find in [our ty
 - **pragmatically correct semver** - Making semver decisions that you believe to be correct, but may be in error. A pragmatic assessment is likely to change with the number of users of a project, and the API surface area of the project. Whenever we talk about 'correct semver', we are referring to 'pragmatically correct semver'
 - **dependency** - A package that is depended upon by another given package.
 - **dependent** - A package which depends on another given package. This is frequently used in the context of the getting the dependents of a package so they can be released.
+- **release** - The combination of versioning and publishing a package or packages which may include a build process before publishing
 
 ## Things that we haven't figured out how to explain well yet
 
