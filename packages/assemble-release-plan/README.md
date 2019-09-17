@@ -38,4 +38,4 @@ This is useful primarily for testing within the changesets project, and when you
 run commands within the repository you want a release plan for (some CI cases).
 
 For most cases, you should use `@changesets/get-release-plan` which will read local changelog
-files, config, and workspaces, to assemble the changeset from.
+files, config, and workspaces, to assemble the release plan from.
