@@ -9,9 +9,9 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@changesets/types": "^0.2.0",
-    "spawndamnit": "^2.0.0",
     "get-workspaces": "^0.5.0",
-    "pkg-dir": "^4.1.0"
+    "pkg-dir": "^4.1.0",
+    "spawndamnit": "^2.0.0"
   },
   "devDependencies": {
     "jest-fixtures": "^0.5.0"
