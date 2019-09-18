@@ -17,6 +17,6 @@ The directory to run `getReleasePlan` in - most often `process.cwd()`
 Sets whether to use all changests present, or only those changesets that are new since the branch
 diverged from master.
 
-## passedConfig: Config
+## passedConfig?: Config
 
-The changeset config options as defined in `@changesets/types`
+The changeset config options as defined in `@changesets/types`. This is optional, and can be used to overrwrite any written config options.
