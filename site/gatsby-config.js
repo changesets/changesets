@@ -1,3 +1,7 @@
+const path = require("path");
+
+const pagesPath = path.resolve(__dirname, "../");
+
 module.exports = {
   plugins: [
     "gatsby-theme-sidebar",
@@ -5,13 +9,13 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `pages`,
-        path: `${__dirname}/src/pages/`
+        path: pagesPath
       }
     },
     {
       resolve: "gatsby-plugin-page-creator",
       options: {
-        path: `${__dirname}/src/pages/`
+        path: pagesPath
       }
     },
     "gatsby-plugin-mdx",

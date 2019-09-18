@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@preconstruct/site",
+  "name": "@changesets/site",
   "version": "1.0.0",
   "scripts": {
     "clean": "rm -rf node_modules .cache public",
