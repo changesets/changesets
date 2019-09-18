@@ -22,7 +22,8 @@
     "url": "https://github.com/changesets/changesets.git"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "site"
   ],
   "author": "Ben Conolly",
   "license": "MIT",
