@@ -1,28 +1,25 @@
 {
-  "private": true,
   "name": "@changesets/site",
-  "version": "1.0.0",
-  "scripts": {
-    "clean": "rm -rf node_modules .cache public",
-    "start": "gatsby develop",
-    "build": "gatsby build"
-  },
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "license": "MIT",
   "dependencies": {
-    "@mdx-js/mdx": "^1.0.18",
-    "@mdx-js/react": "^1.0.16",
-    "gatsby": "^2.15.11",
-    "gatsby-plugin-emotion": "^4.1.5",
-    "gatsby-plugin-google-analytics": "^2.1.15",
-    "gatsby-plugin-manifest": "^2.2.16",
-    "gatsby-plugin-mdx": "^1.0.39",
-    "gatsby-plugin-page-creator": "^2.1.17",
-    "gatsby-plugin-typography": "^2.3.6",
-    "gatsby-source-filesystem": "^2.1.22",
-    "gatsby-theme-sidebar": "^0.0.2",
-    "prism-react-renderer": "^0.1.7",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.6.0",
+    "@babel/preset-env": "^7.6.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.6.0",
+    "@design-system/textfield": "^0.1.2",
+    "babel-plugin-macros": "^2.6.1",
+    "magical-types": "^0.0.8",
+    "next": "^9.0.0",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-typography": "^0.16.19",
-    "typography": "^0.16.19"
+    "react-dom": "^16.8.6"
+  },
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
   }
 }

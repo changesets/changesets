@@ -3,3 +3,5 @@ node_modules/
 scratchings.js
 dist/
 .env
+.cache
+.next
