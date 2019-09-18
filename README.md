@@ -21,6 +21,14 @@ of changesets, check out our [detailed-explanation](./docs/detailed-explanation.
 
 We also have a [spec](./docs/spec.md)
 
+## Integrating with CI
+
+While changesets can be an entirely manual process, we recommend integrating it with how your CI works.
+
+To check that PRs contain a changeset, we recommend using [this check github action](https://github.com/changesets/check-action), or if you want to fail builds on a changesets failure, run `yarn changeset status` in CI.
+
+To make releasing easier, you can use [this changesets github action](https://github.com/changesets/action) to automate creating versioning pull requests, and optionally publishing packages.
+
 ## Cool Projects already using Changesets for versioning and changelogs
 
 - [atlaskit](https://atlaskit.atlassian.com/)
