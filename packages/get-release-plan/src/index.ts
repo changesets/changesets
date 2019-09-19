@@ -8,7 +8,7 @@ import { Config, ReleasePlan } from "@changesets/types";
 export default async function getReleasePlan(
   cwd: string,
   sinceMaster: boolean = false,
-  passedConfig: Config
+  passedConfig?: Config
 ): Promise<ReleasePlan> {
   const workspaces = await getWorkspaces({
     cwd,
@@ -22,7 +22,7 @@ export default async function getReleasePlan(
 
   const dependentsGraph = await getDependentsgraph({ cwd });
   const readConfig = await read(cwd, workspaces);
-  const config = { ...readConfig, ...passedConfig };
+  const config = passedConfig ? { ...readConfig, ...passedConfig } : readConfig;
   const changesets = await readChangesets(cwd, sinceMaster);
 
   return assembleReleasePlan(changesets, workspaces, dependentsGraph, config);
