@@ -1,0 +1,14 @@
+name: Changeset Check
+
+on: pull_request
+
+jobs:
+  check:
+    name: Changeset Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Comment on PR
+        uses: changesets/check-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
