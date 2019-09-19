@@ -1,5 +1,14 @@
 # bolt-check
 
+## 0.4.4
+
+### Patch Changes
+
+- [0320391](https://github.com/atlassian/changesets/commit/0320391699a73621d0e51ce031062a06cbdefadc) [#163](https://github.com/atlassian/changesets/pull/163) Thanks [@Noviny](https://github.com/Noviny)! - Reordered dependencies in the package json (this should have no impact)
+
+- Updated dependencies [8c43fa0]:
+  - @changesets/get-version-range-type@0.1.1
+
 ## 0.4.3
 
 ### Patch Changes

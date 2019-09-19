@@ -1,5 +1,12 @@
 # @changesets/config
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [8c43fa0, 1ff73b7]:
+  - @changesets/types@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

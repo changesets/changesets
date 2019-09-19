@@ -1,1 +1,0 @@
-Change query so it works on GitHub Actions and can get the author of a commit even if there isn't an associated pull request

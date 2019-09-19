@@ -1,5 +1,24 @@
 # @changesets/cli
 
+## 2.0.2
+
+### Patch Changes
+
+- [1ff73b7](https://github.com/atlassian/changesets/commit/1ff73b74f414031e49c6fd5a0f68e9974900d381) [#156](https://github.com/atlassian/changesets/pull/156) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix commits not being obtained for old changesets
+
+* [0320391](https://github.com/atlassian/changesets/commit/0320391699a73621d0e51ce031062a06cbdefadc) [#163](https://github.com/atlassian/changesets/pull/163) Thanks [@Noviny](https://github.com/Noviny)! - Reordered dependencies in the package json (this should have no impact)
+
+* Updated dependencies [3dd003c, 1ff73b7, 8c43fa0, 0320391, 1ff73b7]:
+  - @changesets/get-release-plan@0.1.1
+  - @changesets/apply-release-plan@0.2.1
+  - @changesets/assemble-release-plan@0.2.1
+  - get-dependents-graph@0.1.1
+  - @changesets/git@0.2.1
+  - @changesets/parse@0.2.1
+  - @changesets/read@0.2.1
+  - @changesets/types@0.3.0
+  - @changesets/config@0.2.1
+
 ## 2.0.1
 
 ### Patch Changes
