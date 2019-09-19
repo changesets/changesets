@@ -1,5 +1,15 @@
 # @changesets/assemble-release-plan
 
+## 0.2.1
+
+### Patch Changes
+
+- [8c43fa0](https://github.com/atlassian/changesets/commit/8c43fa061e2a5a01e4f32504ed351d261761c8dc) [#155](https://github.com/atlassian/changesets/pull/155) Thanks [@Noviny](https://github.com/Noviny)! - Add Readme
+
+- Updated dependencies [8c43fa0, 1ff73b7]:
+  - @changesets/types@0.3.0
+  - @changesets/config@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes

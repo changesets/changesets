@@ -1,5 +1,15 @@
 # @changesets/types
 
+## 0.3.0
+
+### Minor Changes
+
+- [1ff73b7](https://github.com/atlassian/changesets/commit/1ff73b74f414031e49c6fd5a0f68e9974900d381) [#156](https://github.com/atlassian/changesets/pull/156) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Remove `Changeset` type because it isn't used and make commit optional on NewChangesetWithCommit because the commit won't always exist
+
+### Patch Changes
+
+- [8c43fa0](https://github.com/atlassian/changesets/commit/8c43fa061e2a5a01e4f32504ed351d261761c8dc) [#155](https://github.com/atlassian/changesets/pull/155) Thanks [@Noviny](https://github.com/Noviny)! - Add Readme
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @changesets/get-github-info
 
+## 0.2.1
+
+### Patch Changes
+
+- [179433e](https://github.com/atlassian/changesets/commit/179433e3275dc73f6913e2fc2c9134958e084302) [#143](https://github.com/atlassian/changesets/pull/143) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Change query so it works on GitHub Actions and can get the author of a commit even if there isn't an associated pull request
+
 ## 0.2.0
 
 ### Minor Changes
