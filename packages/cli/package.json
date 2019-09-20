@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
     "changeset": "bin.js"
@@ -27,9 +27,9 @@
     "@changesets/apply-release-plan": "^0.2.1",
     "@changesets/assemble-release-plan": "^0.2.1",
     "@changesets/config": "^0.2.1",
-    "@changesets/get-release-plan": "^0.1.1",
-    "@changesets/git": "^0.2.1",
-    "@changesets/read": "^0.2.1",
+    "@changesets/get-release-plan": "^0.1.2",
+    "@changesets/git": "^0.2.2",
+    "@changesets/read": "^0.2.2",
     "@changesets/types": "^0.3.0",
     "@types/semver": "^6.0.0",
     "@types/uuid": "^3.4.4",

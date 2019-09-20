@@ -1,5 +1,14 @@
 # @changesets/get-release-plan
 
+## 0.1.2
+
+### Patch Changes
+
+- [89c0894](https://github.com/atlassian/changesets/commit/89c08944fac84f71241305e359e9717ad4ec1b62) [#167](https://github.com/atlassian/changesets/pull/167) Thanks [@Noviny](https://github.com/Noviny)! - Fix broken `sinceMaster` arg - which was not working with v2 changesets
+
+- Updated dependencies [89c0894]:
+  - @changesets/read@0.2.2
+
 ## 0.1.1
 
 ### Patch Changes
