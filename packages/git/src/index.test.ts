@@ -242,16 +242,18 @@ describe("git", () => {
       await add(".changeset", cwd);
 
       const files = await getChangedChangesetFilesSinceMaster(cwd);
-      expect(files).toHaveLength(1);
-      expect(files[0]).toEqual(".changeset/changes.json");
+      expect(files).toHaveLength(2);
+      expect(files[1]).toEqual(".changeset/quick-lions-devour.md");
     });
 
     it("should get the absolute path to the changeset file", async () => {
       await add(".changeset", cwd);
 
       const files = await getChangedChangesetFilesSinceMaster(cwd, true);
-      expect(files).toHaveLength(1);
-      expect(files[0]).toEqual(path.resolve(cwd, ".changeset/changes.json"));
+      expect(files).toHaveLength(2);
+      expect(files[1]).toEqual(
+        path.resolve(cwd, ".changeset/quick-lions-devour.md")
+      );
     });
   });
 });
