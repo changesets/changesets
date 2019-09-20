@@ -92,11 +92,13 @@ async function getChangedChangesetFilesSinceMaster(
     { cwd }
   );
 
+  let tester = /.changeset\/[^/]+\.md$/;
+
   const files = cmd.stdout
     .toString()
     .trim()
     .split("\n")
-    .filter(file => file.includes("changes.json"));
+    .filter(file => tester.test(file));
   if (!fullPath) return files;
   return files.map(file => path.resolve(cwd, file));
 }

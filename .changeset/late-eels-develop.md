@@ -1,5 +1,5 @@
 ---
-"@changesets/git": patch
+"@changesets/cli": patch
 ---
 
-Fix broken `sinceMaster` flags/arguments
+Fix broken `--since-master` flag (which was broken by the move to v2 changesets)
