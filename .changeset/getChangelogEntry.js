@@ -24,8 +24,6 @@ const getReleaseLine = async (changeset, type) => {
 const getDependencyReleaseLine = async (changesets, dependenciesUpdated) => {
   if (dependenciesUpdated.length === 0) return "";
 
-  changesets.map(cs => cs.commit).filter(_ => _);
-
   const changesetLink = `- Updated dependencies [${changesets
     .map(cs => cs.commit)
     .filter(_ => _)
