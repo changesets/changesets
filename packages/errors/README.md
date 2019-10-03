@@ -1,3 +1,3 @@
-# @changesets/error
+# @changesets/errors
 
 Error classes for Changesets.
