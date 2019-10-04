@@ -1,0 +1,9 @@
+{
+  "name": "@changesets/errors",
+  "version": "0.0.0",
+  "description": "Error classes for @changesets",
+  "main": "dist/errors.cjs.js",
+  "module": "dist/errors.esm.js",
+  "license": "MIT",
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/errors"
+}
