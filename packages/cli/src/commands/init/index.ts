@@ -28,7 +28,7 @@ export default async function init(cwd: string) {
         );
       } else {
         logger.error("It looks like you don't have a config file");
-        logger.error(
+        logger.info(
           "The default config file will be written at `.changeset/config.json`"
         );
       }
