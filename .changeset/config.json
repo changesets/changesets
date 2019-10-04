@@ -1,5 +1,8 @@
 {
-  "changelog": "./getChangelogEntry.js",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "atlassian/changesets" }
+  ],
   "commit": false,
   "access": "public"
 }

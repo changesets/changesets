@@ -1,7 +1,8 @@
+// @ts-ignore
 import fetch from "node-fetch";
 import DataLoader from "dataloader";
 
-function makeQuery(repos) {
+function makeQuery(repos: any) {
   return `
       query {
         ${Object.keys(repos)
@@ -13,7 +14,9 @@ function makeQuery(repos) {
           ) {
             ${repos[repo]
               .map(
-                commit => `a${commit}: object(expression: ${JSON.stringify(
+                (
+                  commit: string
+                ) => `a${commit}: object(expression: ${JSON.stringify(
                   commit
                 )}) {
             ... on Commit {
@@ -49,13 +52,13 @@ function makeQuery(repos) {
 // 2. batching
 // getReleaseLine will be called a large number of times but it'll be called at the same time
 // so instead of doing a bunch of network requests, we can do a single one.
-const GHDataLoader = new DataLoader(async requests => {
+const GHDataLoader = new DataLoader(async (requests: any[]) => {
   if (!process.env.GITHUB_TOKEN) {
     throw new Error(
       "Please create a GitHub personal access token at https://github.com/settings/tokens/new and add it as the GITHUB_TOKEN environment variable"
     );
   }
-  let repos = {};
+  let repos: Record<any, any> = {};
   requests.forEach(({ commit, repo }) => {
     if (repos[repo] === undefined) {
       repos[repo] = [];
@@ -69,7 +72,7 @@ const GHDataLoader = new DataLoader(async requests => {
       method: "POST",
       body: JSON.stringify({ query: makeQuery(repos) })
     }
-  ).then(x => x.json());
+  ).then((x: any) => x.json());
 
   // this is mainly for the case where there's an authentication problem
   if (!data.data) {
@@ -80,7 +83,7 @@ const GHDataLoader = new DataLoader(async requests => {
     );
   }
 
-  let cleanedData = {};
+  let cleanedData: Record<any, any> = {};
   let dataKeys = Object.keys(data.data);
   Object.keys(repos).forEach((repo, index) => {
     cleanedData[repo] = {};
@@ -93,7 +96,18 @@ const GHDataLoader = new DataLoader(async requests => {
   return requests.map(({ repo, commit }) => cleanedData[repo][commit]);
 });
 
-export async function getInfo(request) {
+export async function getInfo(request: {
+  commit: string;
+  repo: string;
+}): Promise<{
+  user: string | null;
+  pull: number | null;
+  links: {
+    commit: string;
+    pull: string | null;
+    user: string | null;
+  };
+}> {
   if (!request.commit) {
     throw new Error("Please pass a commit SHA to getInfo");
   }
@@ -114,7 +128,7 @@ export async function getInfo(request) {
         ? data.associatedPullRequests.nodes[0].number
         : null,
     links: {
-      commit: `[${request.commit}](${data.commitUrl})`,
+      commit: `[\`${request.commit}\`](${data.commitUrl})`,
       pull:
         data.associatedPullRequests &&
         data.associatedPullRequests.nodes &&
