@@ -155,6 +155,7 @@ async function getNewChangelogEntry(
   };
   let changelogOpts: any;
   if (changelogConfig) {
+    changelogOpts = changelogConfig[1];
     let changesetPath = path.join(cwd, ".changeset");
     let changelogPath = resolveFrom(changesetPath, changelogConfig[0]);
 
