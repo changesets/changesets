@@ -32,7 +32,6 @@
     "@changesets/read": "^0.2.2",
     "@changesets/types": "^0.3.0",
     "@types/semver": "^6.0.0",
-    "@types/uuid": "^3.4.4",
     "boxen": "^1.3.0",
     "chalk": "^2.1.0",
     "cli-table": "^0.3.1",
@@ -54,8 +53,7 @@
     "semver": "^5.4.1",
     "spawndamnit": "^2.0.0",
     "term-size": "^2.1.0",
-    "tty-table": "^2.7.0",
-    "uuid": "^3.3.2"
+    "tty-table": "^2.7.0"
   },
   "devDependencies": {
     "@changesets/parse": "^0.2.1",
