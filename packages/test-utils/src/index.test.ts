@@ -1,4 +1,4 @@
-import {log} from "@changesets/logger";
+import { log } from "@changesets/logger";
 import { temporarilySilenceLogs } from "./";
 
 describe("temporarilySilenceLogs", () => {
@@ -12,8 +12,8 @@ describe("temporarilySilenceLogs", () => {
       console.log = originalConsoleLog;
     });
     it("should not call console.log", () => {
-        log('Console logging message');
-        expect(console.log).not.toHaveBeenCalled();
+      log("Log message");
+      expect(console.log).not.toHaveBeenCalled();
     });
   });
 });

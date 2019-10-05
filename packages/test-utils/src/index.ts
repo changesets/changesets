@@ -5,21 +5,25 @@ export const temporarilySilenceLogs = () => {
   const originalInfo = logger.info;
   const originalLog = logger.log;
   const originalWarn = logger.warn;
-  beforeAll(() => {
+  const originalSuccess = logger.success;
+  beforeEach(() => {
     // @ts-ignore: We need to re-assign function since mocking is per file therefore with mocking this
     // function will be mocked only for called int his file and not for in the other test files
-    logger.error = () => {};
+    logger.error = jest.fn();
     // @ts-ignore: We need to re-assign function since mocking is per file therefore with mocking this
     // function will be mocked only for called int his file and not for in the other test files
-    logger.info = () => {};
+    logger.info = jest.fn();
     // @ts-ignore: We need to re-assign function since mocking is per file therefore with mocking this
     // function will be mocked only for called int his file and not for in the other test files
-    logger.log = () => {};
+    logger.log = jest.fn();
     // @ts-ignore: We need to re-assign function since mocking is per file therefore with mocking this
     // function will be mocked only for called int his file and not for in the other test files
-    logger.warn = () => {};
+    logger.warn = jest.fn();
+    // @ts-ignore: We need to re-assign function since mocking is per file therefore with mocking this
+    // function will be mocked only for called int his file and not for in the other test files
+    logger.success = jest.fn();
   });
-  afterAll(() => {
+  afterEach(() => {
     // @ts-ignore restoring the function back to its original implementation
     logger.error = originalError;
     // @ts-ignore restoring the function back to its original implementation
@@ -28,5 +32,7 @@ export const temporarilySilenceLogs = () => {
     logger.log = originalLog;
     // @ts-ignore restoring the function back to its original implementation
     logger.warn = originalWarn;
+    // @ts-ignore restoring the function back to its original implementation
+    logger.success = originalSuccess;
   });
 };
