@@ -1,5 +1,14 @@
 # @changesets/apply-release-plan
 
+## 0.2.2
+
+### Patch Changes
+
+- [`72babcb`](https://github.com/atlassian/changesets/commit/72babcbccbdd41618d9cb90b2a8871fe63643601) [#178](https://github.com/atlassian/changesets/pull/178) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix changelog generator options not being provided
+
+- Updated dependencies []:
+  - @changesets/git@0.2.3
+
 ## 0.2.1
 
 ### Patch Changes
