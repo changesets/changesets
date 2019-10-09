@@ -2,6 +2,7 @@ import publishPackages from "./publishPackages";
 import logger from "../../utils/logger";
 import * as git from "@changesets/git";
 import { ExitError } from "../../utils/errors";
+import { readPreState } from "../../utils/read-pre-state";
 import { Config } from "@changesets/types";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
@@ -14,11 +15,14 @@ export default async function run(
   { otp }: { otp?: string },
   config: Config
 ) {
+  let preState = await readPreState(cwd);
+
   const response = await publishPackages({
     cwd: cwd,
     // if not public, we wont pass the access, and it works as normal
     access: config.access,
-    otp: otp
+    otp: otp,
+    preState: preState
   });
 
   const successful = response.filter(p => p.published);

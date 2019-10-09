@@ -5,17 +5,21 @@ import { Workspace } from "get-workspaces";
 import * as npmUtils from "./npm-utils";
 import logger from "../../utils/logger";
 import { TwoFactorState } from "../../utils/types";
+import { PreState } from "@changesets/types";
 
 export default async function publishPackages({
   cwd,
   access,
-  otp
+  otp,
+  preState
 }: {
   cwd: string;
   access: "public" | "private";
   otp?: string;
+  preState?: PreState;
 }) {
   const packages = await getWorkspaces({ cwd });
+  const workspacesByName = new Map(packages.map(x => [x.name, x]));
   const publicPackages = packages.filter(pkg => !pkg.config.private);
   let twoFactorState: TwoFactorState =
     otp === undefined
@@ -29,25 +33,46 @@ export default async function publishPackages({
           isRequired: Promise.resolve(true)
         };
   const unpublishedPackagesInfo = await getUnpublishedPackages(publicPackages);
-  const unpublishedPackages = publicPackages.filter(pkg => {
-    return unpublishedPackagesInfo.some(p => pkg.name === p.name);
-  });
 
   if (unpublishedPackagesInfo.length === 0) {
     logger.warn("No unpublished packages to publish");
   }
 
-  const publishedPackages = await Promise.all(
-    unpublishedPackages.map(pkg => publishAPackage(pkg, access, twoFactorState))
-  );
+  workspacesByName;
+  const unpublishedPackages = publicPackages.filter(pkg => {
+    return unpublishedPackagesInfo.some(p => pkg.name === p.name);
+  });
 
-  return publishedPackages;
+  let promises: Promise<{
+    name: string;
+    newVersion: string;
+    published: boolean;
+  }>[] = [];
+
+  for (let pkgInfo of unpublishedPackagesInfo) {
+    let pkg = workspacesByName.get(pkgInfo.name)!;
+    promises.push(
+      publishAPackage(
+        pkg,
+        access,
+        twoFactorState,
+        preState === undefined
+          ? "latest"
+          : pkgInfo.isPublished
+          ? preState.tag
+          : "latest"
+      )
+    );
+  }
+
+  return Promise.all(promises);
 }
 
 async function publishAPackage(
   pkg: Workspace,
   access: "public" | "private",
-  twoFactorState: TwoFactorState
+  twoFactorState: TwoFactorState,
+  tag: string
 ) {
   const { name, version } = pkg.config;
   logger.info(
@@ -60,7 +85,8 @@ async function publishAPackage(
     name,
     {
       cwd: publishDir,
-      access
+      access,
+      tag
     },
     twoFactorState
   );
