@@ -20,13 +20,15 @@ function assembleReleasePlan(
   let updatedPreState: PreState | undefined =
     preState === undefined
       ? undefined
-      : {
+      : preState.mode === "pre"
+      ? {
           ...preState,
           initialVersions: {
             ...preState.initialVersions
           },
           version: preState.version + 1
-        };
+        }
+      : undefined;
   if (preState !== undefined) {
     workspaces = workspaces.map(workspace => {
       if (preState.initialVersions[workspace.name] === undefined) {
