@@ -34,7 +34,8 @@ export default async function prerelease(
     let newPreState: PreState = {
       mode: "pre",
       tag,
-      initialVersions: {}
+      initialVersions: {},
+      version: -1
     };
     for (let workspace of workspaces) {
       newPreState.initialVersions[workspace.name] = workspace.config.version;

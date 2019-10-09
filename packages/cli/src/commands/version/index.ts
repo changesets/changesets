@@ -11,6 +11,7 @@ import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import getOldChangesets from "../../utils/v1-legacy/getChangesets";
 
 import getChangesetBase from "../../utils/getChangesetBase";
+import { readPreState } from "../../utils/read-pre-state";
 
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
@@ -77,7 +78,8 @@ export default async function version(cwd: string, config: Config) {
     changesets,
     workspaces,
     dependentsGraph,
-    config
+    config,
+    await readPreState(cwd)
   );
 
   await applyReleasePlan(releasePlan, cwd, config);

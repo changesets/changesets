@@ -4,9 +4,11 @@ import {
   Workspace,
   DependencyType,
   PackageJSON,
-  VersionType
+  VersionType,
+  PreState
 } from "@changesets/types";
 import { InternalRelease } from "./types";
+import { incrementVersion } from "./increment";
 
 /*
   WARNING:
@@ -23,7 +25,8 @@ import { InternalRelease } from "./types";
 export default function getDependents(
   releases: InternalRelease[],
   workspaces: Workspace[],
-  dependencyGraph: Map<string, string[]>
+  dependencyGraph: Map<string, string[]>,
+  preState: PreState | undefined
 ): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
@@ -76,7 +79,11 @@ export default function getDependents(
             // TODO validate this - I don't think it's right anymore
             !releases.some(dep => dep.name === dependent) &&
             !semver.satisfies(
-              semver.inc(nextRelease.oldVersion, nextRelease.type)!,
+              incrementVersion(
+                nextRelease.oldVersion,
+                nextRelease.type,
+                preState
+              ),
               versionRange
             )
           ) {

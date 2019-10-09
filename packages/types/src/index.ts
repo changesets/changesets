@@ -32,6 +32,7 @@ export type NewChangeset = {
 export type ReleasePlan = {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
+  preState?: PreState;
 };
 
 export type PackageJSON = {
@@ -89,4 +90,6 @@ export type PreState = {
   mode: "pre" | "exit";
   tag: string;
   initialVersions: Record<string, string>;
+  // this is the x in 1.0.0-next.x
+  version: number;
 };
