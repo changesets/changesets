@@ -84,3 +84,9 @@ export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
   getDependencyReleaseLine: GetDependencyReleaseLine;
 };
+
+export type PreState = {
+  mode: "pre" | "exit";
+  tag: string;
+  initialVersions: Record<string, string>;
+};

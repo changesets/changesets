@@ -12,6 +12,7 @@ import add from "./commands/add";
 import version from "./commands/version";
 import publish from "./commands/publish";
 import status from "./commands/status";
+import prerelease from "./commands/prerelease";
 import { ExitError } from "./utils/errors";
 import { CliOptions } from "./types";
 
@@ -25,7 +26,8 @@ const { input, flags } = meow(
     version
     publish [--otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
-  `,
+    prerelease <tag>
+    `,
   {
     flags: {
       sinceMaster: {
@@ -84,14 +86,13 @@ const cwd = process.cwd();
       logger.error(
         " - we thoroughly recommend looking at the changelog for this package for what has changed"
       );
-      process.exit(1);
+      throw new ExitError(1);
     } else {
       throw e;
     }
   }
 
   if (input.length < 1) {
-    // @ts-ignore if this is undefined, we have already exited
     await add(cwd, config);
   } else if (input.length > 1) {
     logger.error(
@@ -119,23 +120,23 @@ const cwd = process.cwd();
 
     switch (input[0]) {
       case "add": {
-        // @ts-ignore if this is undefined, we have already exited
         await add(cwd, config);
         return;
       }
       case "version": {
-        // @ts-ignore if this is undefined, we have already exited
         await version(cwd, config);
         return;
       }
       case "publish": {
-        // @ts-ignore if this is undefined, we have already exited
         await publish(cwd, { otp }, config);
         return;
       }
       case "status": {
-        // @ts-ignore if this is undefined, we have already exited
         await status(cwd, { sinceMaster, verbose, output }, config);
+        return;
+      }
+      case "prerelease": {
+        await prerelease(cwd, { tag: input[1] }, config);
         return;
       }
       case "bump": {
