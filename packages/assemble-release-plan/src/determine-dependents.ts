@@ -79,11 +79,7 @@ export default function getDependents(
             // TODO validate this - I don't think it's right anymore
             !releases.some(dep => dep.name === dependent) &&
             !semver.satisfies(
-              incrementVersion(
-                nextRelease.oldVersion,
-                nextRelease.type,
-                preState
-              ),
+              incrementVersion(nextRelease, preState),
               versionRange
             )
           ) {

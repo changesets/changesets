@@ -9,6 +9,7 @@ import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
+import * as semver from "semver";
 
 function assembleReleasePlan(
   changesets: NewChangeset[],
@@ -29,25 +30,33 @@ function assembleReleasePlan(
           version: preState.version + 1
         }
       : undefined;
+
   if (preState !== undefined) {
-    workspaces = workspaces.map(workspace => {
+    for (let workspace of workspaces) {
       if (preState.initialVersions[workspace.name] === undefined) {
         preState.initialVersions[workspace.name] = workspace.config.version;
-        return workspace;
       }
-      return {
-        ...workspace,
-        config: {
-          ...workspace.config,
-          version: preState.initialVersions[workspace.name]
-        }
-      };
-    });
+    }
   }
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
   let releases = flattenReleases(changesets, workspaces);
+
+  if (preState !== undefined && preState.mode === "exit") {
+    for (let workspace of workspaces) {
+      if (semver.parse(workspace.config.version)!.prerelease.length) {
+        if (!releases.some(x => x.name === workspace.name)) {
+          releases.push({
+            type: "patch",
+            name: workspace.name,
+            changesets: [],
+            oldVersion: preState.initialVersions[workspace.name]
+          });
+        }
+      }
+    }
+  }
 
   let releaseObjectValidated = false;
   while (releaseObjectValidated === false) {
@@ -70,11 +79,7 @@ function assembleReleasePlan(
     releases: releases.map(incompleteRelease => {
       return {
         ...incompleteRelease,
-        newVersion: incrementVersion(
-          incompleteRelease.oldVersion,
-          incompleteRelease.type,
-          updatedPreState
-        )!
+        newVersion: incrementVersion(incompleteRelease, updatedPreState)!
       };
     }),
     preState: updatedPreState
