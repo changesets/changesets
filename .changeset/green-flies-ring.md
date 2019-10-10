@@ -3,6 +3,6 @@
 "@changesets/assemble-release-plan": minor
 ---
 
-Only bump dependents which depend on the given dependency as a peerDependency
+Only bump peer dependents when the peer dependency is out of range.
 
 If you want to restore the old behaviour, you should change your peerDependencies from using a caret(`^`) to a tilde(`~`)
