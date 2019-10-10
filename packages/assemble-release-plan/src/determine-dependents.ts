@@ -65,6 +65,10 @@ export default function getDependents(
         if (
           depTypes.includes("peerDependencies") &&
           nextRelease.type !== "patch" &&
+          !semver.satisfies(
+            semver.inc(nextRelease.oldVersion, nextRelease.type)!,
+            versionRange
+          ) &&
           (!releases.some(dep => dep.name === dependent) ||
             releases.some(
               dep => dep.name === dependent && dep.type !== "major"
@@ -83,6 +87,7 @@ export default function getDependents(
             type = "patch";
           }
         }
+
         return { name: dependent, type, pkgJSON: dependentPkgJSON };
       })
       .filter(({ type }) => type)

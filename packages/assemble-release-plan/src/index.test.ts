@@ -430,8 +430,8 @@ describe("bumping peerDeps", () => {
     expect(releases[0].name).toEqual("pkg-a");
     expect(releases[0].newVersion).toEqual("1.0.1");
   });
-  it("should major bump dependent when bumping caret peerDep by minor", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+  it("should major bump dependent when leaving range", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
       releases: [{ name: "pkg-a", type: "minor" }]
@@ -471,7 +471,7 @@ describe("bumping peerDeps", () => {
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
   it("should patch bump transitive dep that is only affected by peerDep bump", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
     setup.addWorkspace("pkg-c", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
     setup.addChangeset({
