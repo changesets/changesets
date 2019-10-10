@@ -18,7 +18,7 @@ export default async function add(cwd: string, config: Config) {
   if (!fs.existsSync(changesetBase)) {
     logger.warn("There is no .changeset folder. ");
     logger.warn(
-      "If this is the first time `changesets` have been used in this project, run `yarn changesets init` to get set up."
+      "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
     );
     logger.warn(
       "If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration."
