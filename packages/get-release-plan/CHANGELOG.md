@@ -1,5 +1,12 @@
 # @changesets/get-release-plan
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [[`8dce96f`](https://github.com/atlassian/changesets/commit/8dce96f8aec43f82b35e65f54b06cbeed3275885)]:
+  - @changesets/read@0.3.0
+
 ## 0.1.2
 
 ### Patch Changes
