@@ -2,6 +2,7 @@ import spawn from "spawndamnit";
 import path from "path";
 import getWorkspaces from "get-workspaces";
 import pkgDir from "pkg-dir";
+import { GitError } from "@changesets/errors";
 import { Workspace } from "@changesets/types";
 
 // TODO: Currently getting this working, need to decide how to
@@ -16,6 +17,8 @@ async function getProjectDirectory(cwd: string) {
 
 async function getMasterRef(cwd: string) {
   const gitCmd = await spawn("git", ["rev-parse", "master"], { cwd });
+  if (gitCmd.code !== 0)
+    throw new GitError(gitCmd.code, gitCmd.stderr.toString());
   return gitCmd.stdout
     .toString()
     .trim()
@@ -82,25 +85,30 @@ async function getChangedChangesetFilesSinceMaster(
   cwd: string,
   fullPath = false
 ): Promise<Array<string>> {
-  const ref = await getMasterRef(cwd);
-  // First we need to find the commit where we diverged from `ref` at using `git merge-base`
-  let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
-  // Now we can find which files we added
-  cmd = await spawn(
-    "git",
-    ["diff", "--name-only", "--diff-filter=d", "master"],
-    { cwd }
-  );
+  try {
+    const ref = await getMasterRef(cwd);
+    // First we need to find the commit where we diverged from `ref` at using `git merge-base`
+    let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
+    // Now we can find which files we added
+    cmd = await spawn(
+      "git",
+      ["diff", "--name-only", "--diff-filter=d", "master"],
+      { cwd }
+    );
 
-  let tester = /.changeset\/[^/]+\.md$/;
+    let tester = /.changeset\/[^/]+\.md$/;
 
-  const files = cmd.stdout
-    .toString()
-    .trim()
-    .split("\n")
-    .filter(file => tester.test(file));
-  if (!fullPath) return files;
-  return files.map(file => path.resolve(cwd, file));
+    const files = cmd.stdout
+      .toString()
+      .trim()
+      .split("\n")
+      .filter(file => tester.test(file));
+    if (!fullPath) return files;
+    return files.map(file => path.resolve(cwd, file));
+  } catch (err) {
+    if (err instanceof GitError) return [];
+    throw err;
+  }
 }
 
 async function getChangedPackagesSinceCommit(commitHash: string, cwd: string) {
@@ -140,8 +148,13 @@ async function getChangedPackagesSinceCommit(commitHash: string, cwd: string) {
 //
 // Don't use this function in master branch as it returns nothing in that case.
 async function getChangedPackagesSinceMaster(cwd: string) {
-  const masterRef = await getMasterRef(cwd);
-  return getChangedPackagesSinceCommit(masterRef, cwd);
+  try {
+    const masterRef = await getMasterRef(cwd);
+    return getChangedPackagesSinceCommit(masterRef, cwd);
+  } catch (err) {
+    if (err instanceof GitError) return [];
+    throw err;
+  }
 }
 
 export {

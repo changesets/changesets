@@ -25,7 +25,7 @@ We also have a [spec](./docs/spec.md)
 
 While changesets can be an entirely manual process, we recommend integrating it with how your CI works.
 
-To check that PRs contain a changeset, we recommend using [this check github action](https://github.com/changesets/check-action), or if you want to fail builds on a changesets failure, run `yarn changeset status` in CI.
+To check that PRs contain a changeset, we recommend using [the changeset bot](https://github.com/apps/changeset-bot), or if you want to fail builds on a changesets failure, run `yarn changeset status` in CI.
 
 To make releasing easier, you can use [this changesets github action](https://github.com/changesets/action) to automate creating versioning pull requests, and optionally publishing packages.
 

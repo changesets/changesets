@@ -1,4 +1,3 @@
-import uuid from "uuid/v1";
 // @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
 import termSize from "term-size";
 import logger, { prefix } from "./logger";
@@ -8,8 +7,12 @@ import { prompt } from "enquirer";
 /* Notes on using inquirer:
  * Each question needs a key, as inquirer is assembling an object behind-the-scenes.
  * At each call, the entire responses object is returned, so we need a unique
- * identifier for the name every time. This is why we are using UUIDs.
+ * identifier for the name every time. This is why we are using serial IDs
  */
+const serialId: () => number = (function() {
+  let id = 0;
+  return () => id++;
+})();
 
 const limit = Math.max(termSize().rows - 5, 10);
 
@@ -23,7 +26,7 @@ async function askCheckboxPlus(
   choices: Array<any>,
   format?: (arg: any) => any
 ): Promise<Array<string>> {
-  const name = `CheckboxPlus-${uuid()}`;
+  const name = `CheckboxPlus-${serialId()}`;
 
   return prompt({
     type: "autocomplete",
@@ -44,7 +47,7 @@ async function askCheckboxPlus(
 }
 
 async function askQuestion(message: string): Promise<string> {
-  const name = `Question-${uuid()}`;
+  const name = `Question-${serialId()}`;
 
   return prompt([
     {
@@ -63,7 +66,7 @@ async function askQuestion(message: string): Promise<string> {
 }
 
 async function askConfirm(message: string): Promise<boolean> {
-  const name = `Confirm-${uuid()}`;
+  const name = `Confirm-${serialId()}`;
 
   return prompt([
     {
@@ -86,7 +89,7 @@ async function askList(
   message: string,
   choices: Array<string>
 ): Promise<string> {
-  const name = `List-${uuid()}`;
+  const name = `List-${serialId()}`;
 
   return prompt([
     {

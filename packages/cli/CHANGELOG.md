@@ -1,5 +1,21 @@
 # @changesets/cli
 
+## 2.0.4
+
+### Patch Changes
+
+- [`f63b652`](https://github.com/atlassian/changesets/commit/f63b6521d2b20c61526c7e31ddf18c4b480b456f) [#176](https://github.com/atlassian/changesets/pull/176) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Change the log type of the default config writing message from `error` to `info` because the message isn't an error
+
+* [`df35f32`](https://github.com/atlassian/changesets/commit/df35f32f3844d34ed2bb2ee4a41495a88fd191a9) [#179](https://github.com/atlassian/changesets/pull/179) Thanks [@ryanbraganza](https://github.com/ryanbraganza)! - Remove dependency on uuid
+
+- [`94de7c1`](https://github.com/atlassian/changesets/commit/94de7c1df278d63f98b599c08271ba4ef26bc3f8) [#173](https://github.com/atlassian/changesets/pull/173) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Catch errors from git being absent and continue on as best possible
+
+* [`72babcb`](https://github.com/atlassian/changesets/commit/72babcbccbdd41618d9cb90b2a8871fe63643601) [#178](https://github.com/atlassian/changesets/pull/178) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix changelog generator options not being provided
+
+* Updated dependencies [[`72babcb`](https://github.com/atlassian/changesets/commit/72babcbccbdd41618d9cb90b2a8871fe63643601)]:
+  - @changesets/apply-release-plan@0.2.2
+  - @changesets/git@0.2.3
+
 ## 2.0.3
 
 ### Patch Changes

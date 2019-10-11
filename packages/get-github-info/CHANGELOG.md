@@ -1,5 +1,15 @@
 # @changesets/get-github-info
 
+## 0.3.0
+
+### Minor Changes
+
+- [`bb855a8`](https://github.com/atlassian/changesets/commit/bb855a869b2d1c4454929b62c3b768546c30d3a3) [#170](https://github.com/atlassian/changesets/pull/170) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add backticks around commits to be more similar to how commits are shown in GitHub comments
+
+### Patch Changes
+
+- [`bb855a8`](https://github.com/atlassian/changesets/commit/bb855a869b2d1c4454929b62c3b768546c30d3a3) [#170](https://github.com/atlassian/changesets/pull/170) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Convert internals to TypeScript
+
 ## 0.2.1
 
 ### Patch Changes
