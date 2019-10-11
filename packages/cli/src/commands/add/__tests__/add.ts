@@ -89,7 +89,11 @@ describe("Changesets", () => {
     );
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(cwd, { empty: false }, { ...defaultConfig, commit: true });
+    await addChangeset(
+      cwd,
+      { empty: false },
+      { ...defaultConfig, commit: true }
+    );
     expect(git.add).toHaveBeenCalledTimes(1);
   });
   it("should create empty changeset when empty flag is passed in", async () => {

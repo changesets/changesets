@@ -45,9 +45,7 @@ export default async function add(
     newChangeset = await createChangeset(changePackagesName, cwd);
     printConfirmationMessage(newChangeset);
 
-    confirmChangeset = await cli.askConfirm(
-      "Is this your desired changeset?"
-    );
+    confirmChangeset = await cli.askConfirm("Is this your desired changeset?");
   }
 
   if (confirmChangeset) {
@@ -58,9 +56,15 @@ export default async function add(
         `CHANGESET: ${changesetID}. ${newChangeset.summary}`,
         cwd
       );
-      logger.log(chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`));
+      logger.log(
+        chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`)
+      );
     } else {
-      logger.log(chalk.green(`${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`));
+      logger.log(
+        chalk.green(
+          `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`
+        )
+      );
     }
 
     let hasMajorChange = [...newChangeset.releases].find(
