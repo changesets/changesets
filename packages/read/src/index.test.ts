@@ -94,7 +94,7 @@ describe("read changesets from disc", () => {
       Everything is wrong`
     );
   });
-  it("ahould return no releases when the changeset is emtpy", async () => {
+  it("should return no releases and empty summary when the changeset is emtpy", async () => {
     const changesetPath = f.find("empty-changeset");
 
     const changesets = await read(changesetPath);
