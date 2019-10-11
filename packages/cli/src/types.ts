@@ -6,6 +6,7 @@ export type CliOptions = {
   verbose?: boolean;
   output?: string;
   otp?: string;
+  empty?: boolean;
 };
 
 export type CommandOptions = CliOptions & {

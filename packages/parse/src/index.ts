@@ -1,7 +1,7 @@
 import yaml from "js-yaml";
 import { Release, VersionType } from "@changesets/types";
 
-const mdRegex = /\s*---([^]+?)\n\s*---\n([^]+)/;
+const mdRegex = /\s*---([^]*?)\n\s*---\n([^]*)/;
 
 export default function parseChangesetFile(
   contents: string
@@ -23,10 +23,14 @@ export default function parseChangesetFile(
     const yamlStuff: { [key: string]: VersionType } = yaml.safeLoad(
       roughReleases
     );
-    releases = Object.entries(yamlStuff).map(([name, type]) => ({
-      name,
-      type
-    }));
+    if (yamlStuff) {
+      releases = Object.entries(yamlStuff).map(([name, type]) => ({
+        name,
+        type
+      }));
+    } else {
+      releases = [];
+    }
   } catch (e) {
     throw new Error(
       `could not parse changeset - invalid frontmatter: ${contents}`

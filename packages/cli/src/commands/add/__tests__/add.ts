@@ -70,8 +70,9 @@ describe("Changesets", () => {
 
   it("should generate changeset to patch a single package", async () => {
     const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(cwd, defaultConfig);
+    await addChangeset(cwd, { empty: false }, defaultConfig);
 
     const expectedChangeset = {
       summary: "summary message mock",
@@ -88,7 +89,24 @@ describe("Changesets", () => {
     );
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(cwd, { ...defaultConfig, commit: true });
+    await addChangeset(
+      cwd,
+      { empty: false },
+      { ...defaultConfig, commit: true }
+    );
     expect(git.add).toHaveBeenCalledTimes(1);
+  });
+  it("should create empty changeset when empty flag is passed in", async () => {
+    const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+
+    await addChangeset(cwd, { empty: true }, defaultConfig);
+
+    const expectedChangeset = {
+      releases: [],
+      summary: ""
+    };
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(expectedChangeset);
   });
 });

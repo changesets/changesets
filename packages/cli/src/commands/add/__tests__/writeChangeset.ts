@@ -15,6 +15,11 @@ const simpleChangeset: { summary: string; releases: Release[] } = {
   releases: [{ name: "pkg-a", type: "minor" }]
 };
 
+const emptyChangeset: { summary: string; releases: Release[] } = {
+  summary: "",
+  releases: []
+};
+
 describe("simple project", () => {
   let cwd: string;
 
@@ -33,9 +38,20 @@ describe("simple project", () => {
     await writeChangeset(simpleChangeset, cwd);
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
-
     const mdContent = await fs.readFile(mdPath, "utf-8");
 
     expect(parse(mdContent)).toEqual(simpleChangeset);
+  });
+  it("should write an empty changeset", async () => {
+    const changesetID = "ascii";
+    // @ts-ignore
+    humanId.mockReturnValueOnce(changesetID);
+
+    await writeChangeset(emptyChangeset, cwd);
+
+    const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
+    const mdContent = await fs.readFile(mdPath, "utf-8");
+
+    expect(parse(mdContent)).toEqual(emptyChangeset);
   });
 });

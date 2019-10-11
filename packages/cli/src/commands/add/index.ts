@@ -12,7 +12,11 @@ import createChangeset from "./createChangeset";
 import getChangesetBase from "../../utils/getChangesetBase";
 import printConfirmationMessage from "./messages";
 
-export default async function add(cwd: string, config: Config) {
+export default async function add(
+  cwd: string,
+  { empty }: { empty?: boolean },
+  config: Config
+) {
   const changesetBase = await getChangesetBase(cwd);
 
   if (!fs.existsSync(changesetBase)) {
@@ -26,16 +30,23 @@ export default async function add(cwd: string, config: Config) {
     return;
   }
 
-  const changedPackages = await git.getChangedPackagesSinceMaster(cwd);
-  const changePackagesName = changedPackages
-    .filter(a => a)
-    .map(pkg => pkg.name);
-  const newChangeset = await createChangeset(changePackagesName, cwd);
-  printConfirmationMessage(newChangeset);
+  let newChangeset, confirmChangeset;
+  if (empty) {
+    newChangeset = {
+      releases: [],
+      summary: ``
+    };
+    confirmChangeset = true;
+  } else {
+    const changedPackages = await git.getChangedPackagesSinceMaster(cwd);
+    const changePackagesName = changedPackages
+      .filter(a => a)
+      .map(pkg => pkg.name);
+    newChangeset = await createChangeset(changePackagesName, cwd);
+    printConfirmationMessage(newChangeset);
 
-  const confirmChangeset = await cli.askConfirm(
-    "Is this your desired changeset?"
-  );
+    confirmChangeset = await cli.askConfirm("Is this your desired changeset?");
+  }
 
   if (confirmChangeset) {
     const changesetID = await writeChangeset(newChangeset, cwd);
@@ -45,9 +56,15 @@ export default async function add(cwd: string, config: Config) {
         `CHANGESET: ${changesetID}. ${newChangeset.summary}`,
         cwd
       );
-      logger.log(chalk.green("Changeset added and committed"));
+      logger.log(
+        chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`)
+      );
     } else {
-      logger.log(chalk.green("Changeset added! - you can now commit it\n"));
+      logger.log(
+        chalk.green(
+          `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`
+        )
+      );
     }
 
     let hasMajorChange = [...newChangeset.releases].find(
