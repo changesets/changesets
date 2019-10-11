@@ -37,7 +37,12 @@ In some cases, you may *want* to merge a change without doing any releases (such
 
 ## How do I run the version and publish commands?
 
-The manual workflow we recommend for running the `version` and `publish` commands is:
+We have a [github action](https://github.com/changesets/action) that
+
+* creates a `version` PR, then keeps it up to date, recreating it when merged. This PR always has an up-to-date run of `changeset version
+* Optionally allows you to do releases when changes are merged to master.
+
+If you don't want to use this action, the manual workflow we recommend for running the `version` and `publish` commands is:
 
 * A release coordinator (RC) calls to stop any merging to master
 * The RC pull down `master`, runs `changeset version`, then make a new PR with the versioning changes
@@ -46,6 +51,4 @@ The manual workflow we recommend for running the `version` and `publish` command
 * The RC runs `git push --follow-tags` to push the release tags back
 * The RC unblocks merging to master
 
-This is a lot of steps, and is quite finnicky (we have to pull from master twice).
-
-We have a [github action](https://github.com/changesets/action) that replaces all these steps with merging a single automatically generated (and updated) version pull request. It has options to run `version` or `version` and `publish`.
+This is a lot of steps, and is quite finnicky (we have to pull from master twice). Feel free to finesse it to your own circumstances.
