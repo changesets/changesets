@@ -21,7 +21,7 @@ const { input, flags } = meow(
     $ changesets [command]
   Commands
     init
-    add
+    add [--empty]
     version
     publish [--otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
@@ -42,6 +42,9 @@ const { input, flags } = meow(
       otp: {
         type: "string",
         default: undefined
+      },
+      empty: {
+        type: "boolean"
       }
     }
   }
@@ -91,14 +94,15 @@ const cwd = process.cwd();
   }
 
   if (input.length < 1) {
+    const { empty }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
-    await add(cwd, config);
+    await add(cwd, { empty }, config);
   } else if (input.length > 1) {
     logger.error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
   } else {
-    const { sinceMaster, verbose, output, otp }: CliOptions = flags;
+    const { sinceMaster, verbose, output, otp, empty }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
     deadFlags.forEach(flag => {
@@ -120,7 +124,7 @@ const cwd = process.cwd();
     switch (input[0]) {
       case "add": {
         // @ts-ignore if this is undefined, we have already exited
-        await add(cwd, config);
+        await add(cwd, { empty }, config);
         return;
       }
       case "version": {
