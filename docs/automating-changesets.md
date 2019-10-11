@@ -1,4 +1,4 @@
-# Automating Releases
+# Automating Changesets
 
 While changesets is designed to work with a fully manual process, it also provides tools to help automate these releases. These can be broken into two major decisions:
 
