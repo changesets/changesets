@@ -3,8 +3,11 @@ import {
   Config,
   ChangelogFunctions,
   NewChangeset,
-  ModCompWithWorkspace
+  ModCompWithWorkspace,
+  PreState,
+  VersionType
 } from "@changesets/types";
+import startCase from "lodash.startcase";
 
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
@@ -39,7 +42,8 @@ async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   cwd: string,
-  config: Config = defaultConfig
+  config: Config = defaultConfig,
+  preState: PreState | undefined
 ) {
   let touchedFiles = [];
   let workspaces = await getWorkspaces({
@@ -49,13 +53,14 @@ export default async function applyReleasePlan(
 
   if (!workspaces) throw new Error(`could not find any workspaces in ${cwd}`);
 
+  const workspacesByName = new Map(workspaces.map(x => [x.name, x]));
+
   let { releases, changesets } = releasePlan;
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
   let releaseWithWorkspaces = releases.map(release => {
-    // @ts-ignore we already threw if workspaces wasn't defined
-    let workspace = workspaces.find(ws => ws.name === release.name);
+    let workspace = workspacesByName.get(release.name);
     if (!workspace)
       throw new Error(
         `Could not find matching package for release of: ${release.name}`
@@ -64,17 +69,32 @@ export default async function applyReleasePlan(
   });
 
   // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
-  let releaseWithChangelogs = await getNewChangelogEntry(
+  let {
+    releaseWithChangelogs,
+    preState: updatedPreState
+  } = await getNewChangelogEntry(
     releaseWithWorkspaces,
     changesets,
     config.changelog,
-    cwd
+    cwd,
+    preState
   );
 
-  let versionsToUpdate = releases.map(
-    ({ name, newVersion }) => ({ name, version: newVersion }),
-    {}
-  );
+  if (updatedPreState !== undefined) {
+    if (updatedPreState.mode === "exit") {
+      await fs.remove(path.join(cwd, ".changeset", "pre.json"));
+    } else {
+      await fs.writeFile(
+        path.join(cwd, ".changeset", "pre.json"),
+        updatedPreState
+      );
+    }
+  }
+
+  let versionsToUpdate = releases.map(({ name, newVersion }) => ({
+    name,
+    version: newVersion
+  }));
 
   // iterate over releases updating packages
   let finalisedRelease = await Promise.all(
@@ -143,11 +163,23 @@ export default async function applyReleasePlan(
   return touchedFiles;
 }
 
+async function smallHelper(
+  obj: { major: string[]; minor: string[]; patch: string[] },
+  type: VersionType
+) {
+  const releaseLines = obj[type];
+  if (!releaseLines.length) return "";
+  const resolvedLines = await Promise.all(releaseLines);
+
+  return `### ${startCase(type)} Changes\n\n${resolvedLines.join("")}`;
+}
+
 async function getNewChangelogEntry(
   releaseWithWorkspaces: ModCompWithWorkspace[],
   changesets: NewChangeset[],
   changelogConfig: false | readonly [string, any],
-  cwd: string
+  cwd: string,
+  preState: PreState | undefined
 ) {
   let getChangelogFuncs: ChangelogFunctions = {
     getReleaseLine: () => Promise.resolve(""),
@@ -180,33 +212,69 @@ async function getNewChangelogEntry(
     }))
   );
 
-  return Promise.all(
-    releaseWithWorkspaces.map(async release => {
-      let changelog: string;
-      try {
-        changelog = await getChangelogEntry(
-          release,
-          releaseWithWorkspaces,
-          moddedChangesets,
-          getChangelogFuncs,
-          changelogOpts
-        );
-      } catch (e) {
-        console.error(
-          "The following error was encountered while generating changelog entries"
-        );
-        console.error(
-          "We have escaped applying the changesets, and no files should have been affected"
-        );
-        throw e;
-      }
+  let preStatePackages =
+    preState === undefined
+      ? undefined
+      : {
+          ...preState.packages
+        };
 
-      return {
-        ...release,
-        changelog
-      };
-    })
-  );
+  return {
+    releaseWithChangelogs: await Promise.all(
+      releaseWithWorkspaces.map(async release => {
+        try {
+          let releaseLines = await getChangelogEntry(
+            release,
+            releaseWithWorkspaces,
+            moddedChangesets,
+            getChangelogFuncs,
+            changelogOpts,
+            preState
+          );
+          if (preStatePackages) {
+            preStatePackages[release.name] = {
+              ...preStatePackages[release.name],
+              releaseLines: {
+                major: preStatePackages[release.name].releaseLines.major.concat(
+                  releaseLines.major
+                ),
+                minor: preStatePackages[release.name].releaseLines.minor.concat(
+                  releaseLines.minor
+                ),
+                patch: preStatePackages[release.name].releaseLines.patch.concat(
+                  releaseLines.patch
+                )
+              }
+            };
+          }
+
+          return {
+            ...release,
+            changelog: [
+              `## ${release.newVersion}`,
+              smallHelper(releaseLines, "major"),
+              smallHelper(releaseLines, "minor"),
+              smallHelper(releaseLines, "patch")
+            ]
+              .filter(line => line)
+              .join("\n")
+          };
+        } catch (e) {
+          console.error(
+            "The following error was encountered while generating changelog entries"
+          );
+          console.error(
+            "We have escaped applying the changesets, and no files should have been affected"
+          );
+          throw e;
+        }
+      })
+    ),
+    preState:
+      preState === undefined
+        ? undefined
+        : { ...preState, packages: preStatePackages }
+  };
 }
 
 async function updateChangelog(

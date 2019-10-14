@@ -87,9 +87,18 @@ export type ChangelogFunctions = {
 };
 
 export type PreState = {
-  mode: "pre" | "exit";
-  tag: string;
-  initialVersions: Record<string, string>;
+  readonly mode: "pre" | "exit";
+  readonly tag: string;
+  readonly packages: {
+    readonly [pkgName: string]: {
+      readonly initialVersion: string;
+      readonly releaseLines: {
+        readonly major: readonly string[];
+        readonly minor: readonly string[];
+        readonly patch: readonly string[];
+      };
+    };
+  };
   // this is the x in 1.0.0-next.x
-  version: number;
+  readonly version: number;
 };

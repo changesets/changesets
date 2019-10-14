@@ -34,11 +34,18 @@ export default async function prerelease(
     let newPreState: PreState = {
       mode: "pre",
       tag,
-      initialVersions: {},
+      packages: {},
       version: -1
     };
     for (let workspace of workspaces) {
-      newPreState.initialVersions[workspace.name] = workspace.config.version;
+      newPreState.packages[workspace.name] = {
+        initialVersion: workspace.config.version,
+        releaseLines: {
+          major: [],
+          minor: [],
+          patch: []
+        }
+      };
     }
     await fs.writeFile(
       preStatePath,

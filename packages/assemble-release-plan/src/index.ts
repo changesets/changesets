@@ -21,20 +21,25 @@ function assembleReleasePlan(
   let updatedPreState: PreState | undefined =
     preState === undefined
       ? undefined
-      : preState.mode === "pre"
-      ? {
+      : {
           ...preState,
-          initialVersions: {
-            ...preState.initialVersions
+          packages: {
+            ...preState.packages
           },
           version: preState.version + 1
-        }
-      : undefined;
+        };
 
-  if (preState !== undefined) {
+  if (updatedPreState !== undefined) {
     for (let workspace of workspaces) {
-      if (preState.initialVersions[workspace.name] === undefined) {
-        preState.initialVersions[workspace.name] = workspace.config.version;
+      if (updatedPreState.packages[workspace.name] === undefined) {
+        updatedPreState.packages[workspace.name] = {
+          initialVersion: workspace.config.version,
+          releaseLines: {
+            major: [],
+            minor: [],
+            patch: []
+          }
+        };
       }
     }
   }
@@ -43,7 +48,7 @@ function assembleReleasePlan(
   // changesets, and with a calculated new versions
   let releases = flattenReleases(changesets, workspaces);
 
-  if (preState !== undefined && preState.mode === "exit") {
+  if (updatedPreState !== undefined && updatedPreState.mode === "exit") {
     for (let workspace of workspaces) {
       if (semver.parse(workspace.config.version)!.prerelease.length) {
         if (!releases.some(x => x.name === workspace.name)) {
@@ -51,7 +56,7 @@ function assembleReleasePlan(
             type: "patch",
             name: workspace.name,
             changesets: [],
-            oldVersion: preState.initialVersions[workspace.name]
+            oldVersion: updatedPreState.packages[workspace.name].initialVersion
           });
         }
       }

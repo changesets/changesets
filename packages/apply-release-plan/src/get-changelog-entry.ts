@@ -1,26 +1,17 @@
-import startCase from "lodash.startcase";
-
 import {
   ChangelogFunctions,
   NewChangesetWithCommit,
-  VersionType
+  VersionType,
+  PreState
 } from "@changesets/types";
 
 import { ModCompWithWorkspace } from "@changesets/types";
 
 type ChangelogLines = {
-  major: Array<Promise<string>>;
-  minor: Array<Promise<string>>;
-  patch: Array<Promise<string>>;
+  major: Array<Promise<string> | string>;
+  minor: Array<Promise<string> | string>;
+  patch: Array<Promise<string> | string>;
 };
-
-async function smallHelper(obj: ChangelogLines, type: VersionType) {
-  const releaseLines = obj[type];
-  if (!releaseLines.length) return "";
-  const resolvedLines = await Promise.all(releaseLines);
-
-  return `### ${startCase(type)} Changes\n\n${resolvedLines.join("")}`;
-}
 
 // release is the package and version we are releasing
 export default async function generateMarkdown(
@@ -28,13 +19,23 @@ export default async function generateMarkdown(
   releases: ModCompWithWorkspace[],
   changesets: NewChangesetWithCommit[],
   changelogFuncs: ChangelogFunctions,
-  changelogOpts: any
+  changelogOpts: any,
+  preState: PreState | undefined
 ) {
   const releaseObj: ChangelogLines = {
     major: [],
     minor: [],
     patch: []
   };
+
+  if (preState !== undefined && preState.mode === "exit") {
+    let pkg = preState.packages[release.name];
+    if (pkg) {
+      releaseObj.major.push(...pkg.releaseLines.major);
+      releaseObj.minor.push(...pkg.releaseLines.minor);
+      releaseObj.patch.push(...pkg.releaseLines.patch);
+    }
+  }
 
   // I sort of feel we can do better, as ComprehensiveReleases have an array
   // of the relevant changesets but since we need the version type for the
@@ -48,11 +49,6 @@ export default async function generateMarkdown(
       );
     }
   });
-
-  // First, we construct the release lines, summaries of changesets that caused us to be released
-  const majorReleaseLines = await smallHelper(releaseObj, "major");
-  const minorReleaseLines = await smallHelper(releaseObj, "minor");
-  const patchReleaseLines = await smallHelper(releaseObj, "patch");
 
   let dependentReleases = releases.filter(rel => {
     return (
@@ -76,22 +72,17 @@ export default async function generateMarkdown(
     relevantChangesetIds.has(cs.id)
   );
 
-  const dependencyReleaseLine = await changelogFuncs.getDependencyReleaseLine(
-    relevantChangesets,
-    dependentReleases,
-    changelogOpts
+  releaseObj.patch.push(
+    changelogFuncs.getDependencyReleaseLine(
+      relevantChangesets,
+      dependentReleases,
+      changelogOpts
+    )
   );
 
-  return [
-    `## ${release.newVersion}`,
-    majorReleaseLines,
-    minorReleaseLines,
-    patchReleaseLines,
-    patchReleaseLines.length < 1 && dependencyReleaseLine.length > 0
-      ? "### Patch Changes"
-      : "",
-    dependencyReleaseLine
-  ]
-    .filter(line => line)
-    .join("\n");
+  return {
+    patch: await Promise.all(releaseObj.patch),
+    minor: await Promise.all(releaseObj.minor),
+    major: await Promise.all(releaseObj.major)
+  };
 }
