@@ -1,5 +1,16 @@
 # @changesets/read
 
+## 0.3.0
+
+### Minor Changes
+
+- [`8dce96f`](https://github.com/atlassian/changesets/commit/8dce96f8aec43f82b35e65f54b06cbeed3275885) [#187](https://github.com/atlassian/changesets/pull/187) Thanks [@gardnerjack](https://github.com/gardnerjack)! - Added --empty flag to the add command for empty changeset files. New tests for adding, writing, parsing, and reading empty changesets.
+
+### Patch Changes
+
+- Updated dependencies [[`8dce96f`](https://github.com/atlassian/changesets/commit/8dce96f8aec43f82b35e65f54b06cbeed3275885)]:
+  - @changesets/parse@0.3.0
+
 ## 0.2.2
 
 ### Patch Changes
