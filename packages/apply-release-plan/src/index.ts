@@ -163,15 +163,14 @@ export default async function applyReleasePlan(
   return touchedFiles;
 }
 
-async function smallHelper(
+function smallHelper(
   obj: { major: string[]; minor: string[]; patch: string[] },
   type: VersionType
 ) {
   const releaseLines = obj[type];
   if (!releaseLines.length) return "";
-  const resolvedLines = await Promise.all(releaseLines);
 
-  return `### ${startCase(type)} Changes\n\n${resolvedLines.join("")}`;
+  return `### ${startCase(type)} Changes\n\n${releaseLines.join("")}`;
 }
 
 async function getNewChangelogEntry(

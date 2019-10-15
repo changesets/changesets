@@ -136,7 +136,17 @@ const cwd = process.cwd();
         return;
       }
       case "prerelease": {
-        await prerelease(cwd, { tag: input[1] }, config);
+        let command = input[1];
+        if (command !== "enter" && command !== "exit") {
+          logger.error("`enter` or `exit` must be passed after prerelease");
+          throw new ExitError(1);
+        }
+        let tag = input[2];
+        if (command === "enter" && typeof tag !== "string") {
+          logger.error("A tag must be passed when using prerelese enter");
+          throw new ExitError(1);
+        }
+        await prerelease(cwd, { command, tag }, config);
         return;
       }
       case "bump": {

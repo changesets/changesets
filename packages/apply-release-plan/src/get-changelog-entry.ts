@@ -81,8 +81,8 @@ export default async function generateMarkdown(
   );
 
   return {
-    patch: await Promise.all(releaseObj.patch),
-    minor: await Promise.all(releaseObj.minor),
-    major: await Promise.all(releaseObj.major)
+    patch: (await Promise.all(releaseObj.patch)).filter(x => x),
+    minor: (await Promise.all(releaseObj.minor)).filter(x => x),
+    major: (await Promise.all(releaseObj.major)).filter(x => x)
   };
 }

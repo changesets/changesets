@@ -217,6 +217,7 @@ describe("apply release plan", () => {
       - Hey, let's have fun with testing!
 
       ### Patch Changes
+      
         - pkg-b@2.0.0`);
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b

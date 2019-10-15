@@ -17,29 +17,36 @@ import { readPreState } from "../../utils/read-pre-state";
 
 export default async function prerelease(
   cwd: string,
-  { tag }: { tag?: string },
+  options:
+    | { tag: string; command: "enter" }
+    | { command: "exit"; tag?: string },
   config: Config
 ) {
   let workspaces = await getWorkspaces({ cwd });
   let preStatePath = path.resolve(cwd, ".changeset", "pre.json");
   // TODO: verify that the pre state isn't broken
   let preState = await readPreState(cwd);
-  if (preState === undefined) {
-    if (!tag) {
+  if (options.command === "enter") {
+    if (preState !== undefined) {
       logger.error(
-        `Please pass a tag to the prerelease command, for example \`next\``
+        "`changeset prerelease enter` cannot be run when in prerelease mode"
+      );
+      logger.info(
+        "If you're trying to exit prerelease mode, run `changeset prerelease exit`"
       );
       throw new ExitError(1);
     }
     let newPreState: PreState = {
       mode: "pre",
-      tag,
+      tag: options.tag,
       packages: {},
       version: -1
     };
     for (let workspace of workspaces) {
+      // @ts-ignore
       newPreState.packages[workspace.name] = {
         initialVersion: workspace.config.version,
+        highestVersionType: null,
         releaseLines: {
           major: [],
           minor: [],
@@ -52,7 +59,19 @@ export default async function prerelease(
       JSON.stringify(newPreState, null, 2) + "\n"
     );
   } else {
-    preState.mode = "exit";
-    await fs.writeFile(preStatePath, JSON.stringify(preState, null, 2) + "\n");
+    if (preState === undefined) {
+      logger.error(
+        "`changeset prerelease exit` can only be run when in prerelease mode"
+      );
+      logger.info(
+        "If you're trying to enter prerelease mode, run `changeset prerelease enter`"
+      );
+      throw new ExitError(1);
+    }
+
+    await fs.writeFile(
+      preStatePath,
+      JSON.stringify({ ...preState, mode: "exit" }, null, 2) + "\n"
+    );
   }
 }

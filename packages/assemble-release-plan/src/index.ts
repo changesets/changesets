@@ -3,13 +3,20 @@ import {
   Workspace,
   Config,
   NewChangeset,
-  PreState
+  PreState,
+  VersionType
 } from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
+
+function highestVersionType(versionTypes: (VersionType)[]) {
+  if (versionTypes.includes("major")) return "major";
+  if (versionTypes.includes("minor")) return "minor";
+  return "patch";
+}
 
 function assembleReleasePlan(
   changesets: NewChangeset[],
@@ -34,6 +41,7 @@ function assembleReleasePlan(
       if (updatedPreState.packages[workspace.name] === undefined) {
         updatedPreState.packages[workspace.name] = {
           initialVersion: workspace.config.version,
+          highestVersionType: null,
           releaseLines: {
             major: [],
             minor: [],
@@ -82,6 +90,20 @@ function assembleReleasePlan(
   return {
     changesets,
     releases: releases.map(incompleteRelease => {
+      if (updatedPreState !== undefined) {
+        let currentHighestVersionType =
+          updatedPreState.packages[incompleteRelease.name].highestVersionType;
+        updatedPreState.packages[incompleteRelease.name] = {
+          ...updatedPreState.packages[incompleteRelease.name],
+          highestVersionType:
+            currentHighestVersionType === null
+              ? incompleteRelease.type
+              : highestVersionType([
+                  incompleteRelease.type,
+                  currentHighestVersionType
+                ])
+        };
+      }
       return {
         ...incompleteRelease,
         newVersion: incrementVersion(incompleteRelease, updatedPreState)!
