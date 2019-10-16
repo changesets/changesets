@@ -16,7 +16,7 @@ export default async function pre(
 ) {
   if (options.command === "enter") {
     try {
-      enterPre(cwd, options.tag);
+      await enterPre(cwd, options.tag);
     } catch (err) {
       if (err instanceof PreEnterButInPreModeError) {
         logger.error(
@@ -31,7 +31,7 @@ export default async function pre(
     }
   } else {
     try {
-      exitPre(cwd);
+      await exitPre(cwd);
     } catch (err) {
       if (err instanceof PreExitButNotInPreModeError) {
         logger.error(
