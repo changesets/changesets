@@ -1,5 +1,5 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
-import prerelease from "./index";
+import pre from "./index";
 import { defaultConfig } from "@changesets/config";
 import * as fs from "fs-extra";
 import path from "path";
@@ -19,7 +19,7 @@ afterEach(async () => {
 });
 
 it("should work", async () => {
-  await prerelease(cwd, { tag: "next", command: "enter" }, defaultConfig);
+  await pre(cwd, { tag: "next", command: "enter" }, defaultConfig);
 
   expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
     .toMatchInlineSnapshot(`

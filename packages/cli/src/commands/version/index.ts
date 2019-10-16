@@ -11,7 +11,7 @@ import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import getOldChangesets from "../../utils/v1-legacy/getChangesets";
 
 import getChangesetBase from "../../utils/getChangesetBase";
-import { readPreState } from "../../utils/read-pre-state";
+import { readPreState } from "@changesets/pre";
 
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
@@ -73,16 +73,18 @@ export default async function version(cwd: string, config: Config) {
 
   let dependentsGraph = await getDependentsgraph({ cwd });
 
+  let preState = await readPreState(cwd);
+
   // NOTE: in v3 when we are not support the old changeset format we can use `getReleasePlan` here
   let releasePlan = await assembleReleasePlan(
     changesets,
     workspaces,
     dependentsGraph,
     config,
-    await readPreState(cwd)
+    preState
   );
 
-  await applyReleasePlan(releasePlan, cwd, config);
+  await applyReleasePlan(releasePlan, cwd, config, preState);
 
   if (config.commit) {
     logger.log(

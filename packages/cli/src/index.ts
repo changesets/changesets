@@ -12,7 +12,7 @@ import add from "./commands/add";
 import version from "./commands/version";
 import publish from "./commands/publish";
 import status from "./commands/status";
-import prerelease from "./commands/prerelease";
+import pre from "./commands/pre";
 import { ExitError } from "./utils/errors";
 import { CliOptions } from "./types";
 
@@ -135,7 +135,7 @@ const cwd = process.cwd();
         await status(cwd, { sinceMaster, verbose, output }, config);
         return;
       }
-      case "prerelease": {
+      case "pre": {
         let command = input[1];
         if (command !== "enter" && command !== "exit") {
           logger.error("`enter` or `exit` must be passed after prerelease");
@@ -146,7 +146,8 @@ const cwd = process.cwd();
           logger.error("A tag must be passed when using prerelese enter");
           throw new ExitError(1);
         }
-        await prerelease(cwd, { command, tag }, config);
+        // @ts-ignore
+        await pre(cwd, { command, tag }, config);
         return;
       }
       case "bump": {

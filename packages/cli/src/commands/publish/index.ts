@@ -2,7 +2,7 @@ import publishPackages from "./publishPackages";
 import logger from "../../utils/logger";
 import * as git from "@changesets/git";
 import { ExitError } from "../../utils/errors";
-import { readPreState } from "../../utils/read-pre-state";
+import { readPreState } from "@changesets/pre";
 import { Config } from "@changesets/types";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
