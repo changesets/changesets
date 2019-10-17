@@ -42,8 +42,7 @@ async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   cwd: string,
-  config: Config = defaultConfig,
-  preState: PreState | undefined
+  config: Config = defaultConfig
 ) {
   let touchedFiles = [];
   let workspaces = await getWorkspaces({
@@ -77,7 +76,7 @@ export default async function applyReleasePlan(
     changesets,
     config.changelog,
     cwd,
-    preState
+    releasePlan.preState
   );
 
   if (updatedPreState !== undefined) {
@@ -86,7 +85,7 @@ export default async function applyReleasePlan(
     } else {
       await fs.writeFile(
         path.join(cwd, ".changeset", "pre.json"),
-        updatedPreState
+        JSON.stringify(updatedPreState, null, 2) + "\n"
       );
     }
   }

@@ -12,7 +12,15 @@ export async function readPreState(cwd: string) {
   // TODO: verify that the pre state isn't broken
   let preState: PreState | undefined;
   try {
-    preState = await fs.readJson(preStatePath);
+    let contents = await fs.readFile(preStatePath, "utf8");
+    try {
+      preState = JSON.parse(contents);
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        console.error("error parsing json:", contents);
+        throw err;
+      }
+    }
   } catch (err) {
     if (err.code !== "ENOENT") {
       throw err;
