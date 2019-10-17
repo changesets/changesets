@@ -18,8 +18,8 @@ export async function readPreState(cwd: string) {
     } catch (err) {
       if (err instanceof SyntaxError) {
         console.error("error parsing json:", contents);
-        throw err;
       }
+      throw err;
     }
   } catch (err) {
     if (err.code !== "ENOENT") {
