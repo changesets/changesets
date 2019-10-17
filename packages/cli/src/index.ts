@@ -147,7 +147,7 @@ const cwd = process.cwd();
           throw new ExitError(1);
         }
         // @ts-ignore
-        await pre(cwd, { command, tag }, config);
+        await pre(cwd, { command, tag });
         return;
       }
       case "bump": {

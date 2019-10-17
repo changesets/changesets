@@ -1,25 +1,20 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixturez from "fixturez";
 import pre from "./index";
-import { defaultConfig } from "@changesets/config";
 import * as fs from "fs-extra";
 import path from "path";
 
-let cwd: string;
-
 const consoleError = console.error;
-
-beforeEach(async () => {
-  cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
-  console.error = jest.fn();
-});
 
 afterEach(async () => {
   jest.clearAllMocks();
   console.error = consoleError;
 });
 
+let f = fixturez(__dirname);
+
 it("should work", async () => {
-  await pre(cwd, { tag: "next", command: "enter" }, defaultConfig);
+  let cwd = f.copy("simple-project");
+  await pre(cwd, { tag: "next", command: "enter" });
 
   expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
     .toMatchInlineSnapshot(`

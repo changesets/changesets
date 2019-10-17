@@ -9,10 +9,7 @@ import {
 
 export default async function pre(
   cwd: string,
-  options:
-    | { tag: string; command: "enter" }
-    | { command: "exit"; tag?: string },
-  config: Config
+  options: { tag: string; command: "enter" } | { command: "exit"; tag?: string }
 ) {
   if (options.command === "enter") {
     try {
@@ -20,10 +17,10 @@ export default async function pre(
     } catch (err) {
       if (err instanceof PreEnterButInPreModeError) {
         logger.error(
-          "`changeset prerelease enter` cannot be run when in prerelease mode"
+          "`changeset pre enter` cannot be run when in prerelease mode"
         );
         logger.info(
-          "If you're trying to exit prerelease mode, run `changeset prerelease exit`"
+          "If you're trying to exit pre mode, run `changeset pre exit`"
         );
         throw new ExitError(1);
       }
@@ -34,11 +31,9 @@ export default async function pre(
       await exitPre(cwd);
     } catch (err) {
       if (err instanceof PreExitButNotInPreModeError) {
-        logger.error(
-          "`changeset prerelease exit` can only be run when in prerelease mode"
-        );
+        logger.error("`changeset pre exit` can only be run when in pre mode");
         logger.info(
-          "If you're trying to enter prerelease mode, run `changeset prerelease enter`"
+          "If you're trying to enter pre mode, run `changeset pre enter`"
         );
         throw new ExitError(1);
       }

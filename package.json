@@ -88,7 +88,10 @@
     "strip-ansi": "^5.2.0",
     "term-size": "^2.1.0",
     "tty-table": "^2.7.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.4.5",
+    "verdaccio": "^4.3.3",
+    "verdaccio-auth-memory": "^8.1.2",
+    "verdaccio-memory": "^8.1.2"
   },
   "preconstruct": {
     "packages": [

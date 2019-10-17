@@ -4,10 +4,13 @@ declare module "jest-fixtures" {
   // because checking for null in every usage of these things would be ridiculous
   // or we could use fixturez which IMO has a better API and throws when fixtures
   // can't be found
-  export function getFixturePath(dir: string, fixtureName: string): string;
+  export function getFixturePath(
+    dir: string,
+    fixtureName: string
+  ): Promise<string>;
 
   export function copyFixtureIntoTempDir(
     dir: string,
     fixtureName: string
-  ): string;
+  ): Promise<string>;
 }

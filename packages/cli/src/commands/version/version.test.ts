@@ -2,12 +2,16 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 
 import fs from "fs-extra";
 import path from "path";
+import fixturez from "fixturez";
 import versionCommand from "./index";
 import * as git from "@changesets/git";
 import logger from "../../utils/logger";
 import writeChangeset from "../add/writeChangeset";
 import { NewChangeset, Config } from "@changesets/types";
 import { defaultConfig } from "@changesets/config";
+import pre from "../pre";
+import version from "./index";
+import getWorkspaces from "get-workspaces";
 
 let changelogPath = path.resolve(__dirname, "../../changelog");
 let modifiedDefaultConfig: Config = {
@@ -178,5 +182,41 @@ describe("running version in a simple project", () => {
       const dirs = await fs.readdir(path.resolve(cwd, ".changeset"));
       expect(dirs.length).toBe(2);
     });
+  });
+});
+
+const f = fixturez(__dirname);
+
+describe("pre", () => {
+  it("should work", async () => {
+    let cwd = f.copy("simple-project");
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangesets(
+      [
+        {
+          id: "some-id",
+          releases: [{ name: "pkg-b", type: "patch" }],
+          summary: "a very useful summary"
+        }
+      ],
+      cwd
+    );
+    await version(cwd, modifiedDefaultConfig);
+    let workspaces = (await getWorkspaces({ cwd }))!;
+    expect(workspaces.map(x => x.config)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "dependencies": Object {
+            "pkg-b": "1.0.1-next.0",
+          },
+          "name": "pkg-a",
+          "version": "1.0.1-next.0",
+        },
+        Object {
+          "name": "pkg-b",
+          "version": "1.0.1-next.0",
+        },
+      ]
+    `);
   });
 });

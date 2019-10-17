@@ -1,10 +1,9 @@
 declare module "spawndamnit" {
-  import { SpawnOptions } from "child_process";
-  import { EventEmitter } from "events";
+  import { SpawnOptions, ChildProcess } from "child_process";
 
   export default function spawn(
     cmd: string,
     args: Array<string>,
     opts?: SpawnOptions
-  ): Promise<{ stdout: Buffer; code: number; stderr: Buffer }> & EventEmitter;
+  ): Promise<{ stdout: Buffer; code: number; stderr: Buffer }> & ChildProcess;
 }
