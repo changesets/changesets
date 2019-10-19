@@ -131,7 +131,8 @@ async function internalPublish(
   let json = JSON.parse(stdout.toString().replace(/[^{]*/, ""));
 
   if (json.error) {
-    if (json.error.code === "EOTP" && !isCI) {
+    // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
+    if ((json.error.code === "EOTP" || (json.error.code === 'E401' && json.error.detail.includes('--otp=<code>')  )) && !isCI) {
       if (twoFactorState.token !== null) {
         // the current otp code must be invalid since it errored
         twoFactorState.token = null;

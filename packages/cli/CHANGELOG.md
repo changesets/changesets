@@ -1,5 +1,12 @@
 # @changesets/cli
 
+## 2.1.2
+
+### Patch Changes
+
+- Remove console log
+- When 2fa token is wrong (ie, it has expired) reprompt instead of failing
+
 ## 2.1.1
 
 ### Patch Changes
