@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
     "changeset": "bin.js"

@@ -1,5 +1,13 @@
 # @changesets/cli
 
+## 2.1.1
+
+### Patch Changes
+
+- [`71a0193`](https://github.com/atlassian/changesets/commit/71a0193939b13f693d3652c01a82a67a6be5e104) [#197](https://github.com/atlassian/changesets/pull/197) Thanks [@Noviny](https://github.com/Noviny)! - Close off error when running publish where individual packages have pre or post hooks.
+
+  Under the previous behaviour, JSON parsing the response to publish failed, causing git tags to not be created.
+
 ## 2.1.0
 
 ### Minor Changes
