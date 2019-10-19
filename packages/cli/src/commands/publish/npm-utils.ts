@@ -124,8 +124,12 @@ async function internalPublish(
     cwd: opts.cwd,
     env: Object.assign({}, process.env, envOverride)
   });
+  // New error handling. NPM's --json option is included alongside the `prepublish and
+  // `postpublish` contents in terminal. We want to handle this as best we can but it has
+  // some struggles
+  // Note that both pre and post publish hooks are printed before the json out, so this works.
+  let json = JSON.parse(stdout.toString().replace(/[^{]*/, ""));
 
-  let json = JSON.parse(stdout.toString());
   if (json.error) {
     if (json.error.code === "EOTP" && !isCI) {
       if (twoFactorState.token !== null) {
