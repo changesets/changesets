@@ -3,12 +3,13 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 import { askCheckboxPlus, askConfirm, askQuestion } from "../../../utils/cli";
 import addChangeset from "..";
 import writeChangeset from "../writeChangeset";
 
-jest.mock("../../../utils/logger");
+temporarilySilenceLogs();
 jest.mock("../../../utils/cli");
 jest.mock("@changesets/git");
 jest.mock("../writeChangeset");

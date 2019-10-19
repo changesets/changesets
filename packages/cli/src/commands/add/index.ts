@@ -4,8 +4,8 @@ import fs from "fs-extra";
 
 import * as cli from "../../utils/cli";
 import * as git from "@changesets/git";
+import { info, log, warn } from "@changesets/logger";
 import { Config } from "@changesets/types";
-import logger from "../../utils/logger";
 
 import writeChangeset from "./writeChangeset";
 import createChangeset from "./createChangeset";
@@ -20,11 +20,11 @@ export default async function add(
   const changesetBase = await getChangesetBase(cwd);
 
   if (!fs.existsSync(changesetBase)) {
-    logger.warn("There is no .changeset folder. ");
-    logger.warn(
+    warn("There is no .changeset folder. ");
+    warn(
       "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
     );
-    logger.warn(
+    warn(
       "If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration."
     );
     return;
@@ -56,11 +56,9 @@ export default async function add(
         `CHANGESET: ${changesetID}. ${newChangeset.summary}`,
         cwd
       );
-      logger.log(
-        chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`)
-      );
+      log(chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`));
     } else {
-      logger.log(
+      log(
         chalk.green(
           `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`
         )
@@ -72,19 +70,19 @@ export default async function add(
     );
 
     if (hasMajorChange) {
-      logger.warn(
+      warn(
         "This Changeset includes a major change and we STRONGLY recommend adding more information to the changeset:"
       );
-      logger.warn("WHAT the breaking change is");
-      logger.warn("WHY the change was made");
-      logger.warn("HOW a consumer should update their code");
+      warn("WHAT the breaking change is");
+      warn("WHY the change was made");
+      warn("HOW a consumer should update their code");
     } else {
-      logger.log(
+      log(
         chalk.green(
           "If you want to modify or expand on the changeset summary, you can find it here"
         )
       );
     }
-    logger.info(chalk.blue(path.resolve(changesetBase, `${changesetID}.md`)));
+    info(chalk.blue(path.resolve(changesetBase, `${changesetID}.md`)));
   }
 }

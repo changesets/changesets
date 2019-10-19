@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import boxen from "boxen";
 import outdent from "outdent";
+import { log } from "@changesets/logger";
 import { Release, VersionType } from "@changesets/types";
-import logger from "../../utils/logger";
 
 export default function printConfirmationMessage(changeset: {
   releases: Array<Release>;
@@ -13,17 +13,17 @@ export default function printConfirmationMessage(changeset: {
       .filter(release => release.type === type)
       .map(release => release.name);
   }
-  logger.log("=== Releasing the following packages ===");
+  log("=== Releasing the following packages ===");
   const majorReleases = getReleasesOfType("major");
   const minorReleases = getReleasesOfType("minor");
   const patchReleases = getReleasesOfType("patch");
 
   if (majorReleases.length > 0)
-    logger.log(`${chalk.green("[Major]")}\n  ${majorReleases.join(", ")}`);
+    log(`${chalk.green("[Major]")}\n  ${majorReleases.join(", ")}`);
   if (minorReleases.length > 0)
-    logger.log(`${chalk.green("[Minor]")}\n  ${minorReleases.join(", ")}`);
+    log(`${chalk.green("[Minor]")}\n  ${minorReleases.join(", ")}`);
   if (patchReleases.length > 0)
-    logger.log(`${chalk.green("[Patch]")}\n  ${patchReleases.join(", ")}`);
+    log(`${chalk.green("[Patch]")}\n  ${patchReleases.join(", ")}`);
 
   const message = outdent`
       ${chalk.red("========= NOTE ========")}
@@ -34,5 +34,5 @@ export default function printConfirmationMessage(changeset: {
     borderStyle: "double",
     align: "center"
   });
-  logger.log(prettyMessage);
+  log(prettyMessage);
 }

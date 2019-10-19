@@ -1,11 +1,10 @@
 import meow from "meow";
 import { read } from "@changesets/config";
+import { error } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import fs from "fs-extra";
 import path from "path";
 import getWorkspaces from "get-workspaces";
-
-import logger from "./utils/logger";
 
 import init from "./commands/init";
 import add from "./commands/add";
@@ -75,16 +74,14 @@ const cwd = process.cwd();
       path.resolve(cwd, ".changeset/config.js")
     );
     if (oldConfigExists) {
-      logger.error(
+      error(
         "It looks like you're using the version 1 `.changeset/config.js` file"
       );
-      logger.error(
-        "You'll need to convert it to a `.changeset/config.json` file"
-      );
-      logger.error(
+      error("You'll need to convert it to a `.changeset/config.json` file");
+      error(
         "The format of the config object has significantly changed in v2 as well"
       );
-      logger.error(
+      error(
         " - we thoroughly recommend looking at the changelog for this package for what has changed"
       );
       process.exit(1);
@@ -98,7 +95,7 @@ const cwd = process.cwd();
     // @ts-ignore if this is undefined, we have already exited
     await add(cwd, { empty }, config);
   } else if (input.length > 1) {
-    logger.error(
+    error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
   } else {
@@ -107,11 +104,11 @@ const cwd = process.cwd();
 
     deadFlags.forEach(flag => {
       if (flags[flag]) {
-        logger.error(
+        error(
           `the flag ${flag} has been removed from changesets for version 2`
         );
-        logger.error(`Please encode the desired value into your config`);
-        logger.error(`See our changelog for more details`);
+        error(`Please encode the desired value into your config`);
+        error(`See our changelog for more details`);
         throw new ExitError(1);
       }
     });
@@ -143,25 +140,25 @@ const cwd = process.cwd();
         return;
       }
       case "bump": {
-        logger.error(
+        error(
           'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation'
         );
-        logger.error(
+        error(
           "To fix this, use `changeset version` instead, and update any scripts that use changesets"
         );
         throw new ExitError(1);
       }
       case "release": {
-        logger.error(
+        error(
           'In version 2 of changesets, "release" has been renamed to "publish" - see our changelog for an explanation'
         );
-        logger.error(
+        error(
           "To fix this, use `changeset publish` instead, and update any scripts that use changesets"
         );
         throw new ExitError(1);
       }
       default: {
-        logger.error(`Invalid command ${input[0]} was provided`);
+        error(`Invalid command ${input[0]} was provided`);
         throw new ExitError(1);
       }
     }
@@ -170,6 +167,6 @@ const cwd = process.cwd();
   if (err instanceof ExitError) {
     return process.exit(err.code);
   }
-  logger.error(err);
+  error(err);
   process.exit(1);
 });

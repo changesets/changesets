@@ -5,8 +5,8 @@ import chalk from "chalk";
 import semver from "semver";
 
 import * as cli from "../../utils/cli";
-import logger from "../../utils/logger";
 import getWorkspaces from "../../utils/getWorkspaces";
+import { error, log } from "@changesets/logger";
 import { Release, Workspace } from "@changesets/types";
 
 const { green, yellow, red, bold, blue, cyan } = chalk;
@@ -55,8 +55,8 @@ async function getPackagesToRelease(
 
     if (packagesToRelease.length === 0) {
       do {
-        logger.error("You must select at least one package to release");
-        logger.error("(You most likely hit enter instead of space!)");
+        error("You must select at least one package to release");
+        error("(You most likely hit enter instead of space!)");
 
         packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
       } while (packagesToRelease.length === 0);
@@ -111,8 +111,8 @@ export default async function createChangeset(
     let { version } = pkgJsonsByName.get(pkgName)!;
     if (semver.lt(version, "1.0.0")) {
       // prettier-ignore
-      logger.log(yellow(`WARNING: Releasing a major version for ${green(pkgName)} will be its ${red('first major release')}.`))
-      logger.log(
+      log(yellow(`WARNING: Releasing a major version for ${green(pkgName)} will be its ${red('first major release')}.`))
+      log(
         yellow(
           `If you are unsure if this is correct, contact the package's maintainers$ ${red(
             "before committing this changeset"
@@ -158,9 +158,9 @@ export default async function createChangeset(
   }
 
   if (pkgsLeftToGetBumpTypeFor.size !== 0) {
-    logger.log(`The following packages will be ${blue("patch")} bumped:`);
+    log(`The following packages will be ${blue("patch")} bumped:`);
     pkgsLeftToGetBumpTypeFor.forEach(pkgName => {
-      logger.log(
+      log(
         formatPkgNameAndVersion(pkgName, pkgJsonsByName.get(pkgName)!.version)
       );
     });
@@ -170,13 +170,13 @@ export default async function createChangeset(
     }
   }
 
-  logger.log(
+  log(
     "Please enter a summary for this change (this will be in the changelogs)"
   );
 
   let summary = await cli.askQuestion("Summary");
   while (summary.length === 0) {
-    logger.error("A summary is required for the changelog! 😪");
+    error("A summary is required for the changelog! 😪");
     summary = await cli.askQuestion("Summary");
   }
 
