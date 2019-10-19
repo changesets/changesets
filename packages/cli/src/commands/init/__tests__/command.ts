@@ -6,14 +6,13 @@ import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 import initializeCommand from "..";
 
-temporarilySilenceLogs();
-
 const getPaths = (cwd: string) => ({
   readmePath: path.join(cwd, ".changeset/README.md"),
   configPath: path.join(cwd, ".changeset/config.json")
 });
 
 describe("init", () => {
+  temporarilySilenceLogs();
   it("should initialize in a project without a .changeset folder", async () => {
     const cwd = await copyFixtureIntoTempDir(
       __dirname,

@@ -1,4 +1,4 @@
-import { log, error, info } from "./index";
+import { log, error, info, warn, success } from "./index";
 
 describe("@changesets/logger", () => {
   const logMessageOne = "Message 1";
@@ -52,17 +52,33 @@ describe("@changesets/logger", () => {
     });
   });
 
-  describe("info", () => {
-    let originalConsoleInfo = console.info;
+  describe("warn", () => {
+    let originalConsoleWarn = console.warn;
     beforeEach(() => {
-      console.info = jest.fn();
+      console.warn = jest.fn();
     });
     afterEach(() => {
-      console.info = originalConsoleInfo;
+      console.warn = originalConsoleWarn;
     });
     it("should  call console.info", () => {
-      info(logMessageOne, logMessageTwo);
-      expect(console.info).toHaveBeenCalledWith(
+      warn(logMessageOne, logMessageTwo);
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringMatching(expectedLoggedRegex)
+      );
+    });
+  });
+
+  describe("success", () => {
+    let originalConsoleLog = console.log;
+    beforeEach(() => {
+      console.log = jest.fn();
+    });
+    afterEach(() => {
+      console.log = originalConsoleLog;
+    });
+    it("should  call console.info", () => {
+      success(logMessageOne, logMessageTwo);
+      expect(console.log).toHaveBeenCalledWith(
         expect.stringMatching(expectedLoggedRegex)
       );
     });

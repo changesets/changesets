@@ -9,7 +9,6 @@ import { askCheckboxPlus, askConfirm, askQuestion } from "../../../utils/cli";
 import addChangeset from "..";
 import writeChangeset from "../writeChangeset";
 
-temporarilySilenceLogs();
 jest.mock("../../../utils/cli");
 jest.mock("@changesets/git");
 jest.mock("../writeChangeset");
@@ -65,6 +64,7 @@ const mockUserResponses = mockResponses => {
 };
 
 describe("Changesets", () => {
+  temporarilySilenceLogs();
   afterEach(() => {
     jest.clearAllMocks();
   });
