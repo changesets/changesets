@@ -2,7 +2,7 @@
 
 ### Usage
 
-```
+```js
 import { error } from '@changesets/logger";
 
 error('message part 1', 'message part 2');
