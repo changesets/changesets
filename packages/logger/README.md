@@ -27,7 +27,7 @@ Use the `test-utils` package to silence the logs in test cases.
 For example:
 
 ```
-import { temporarilySilenceLogs } from "@changesets/logger";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 import { log } from "@changesets/logger";
 
 temporarilySilenceLogs();
