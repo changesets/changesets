@@ -10,7 +10,7 @@ error('message part 1', 'message part 2');
 
 ### Package Exports
 
-**error**: Use `error` to print error messages upon which users which immidiately action to complete the task.
+**error**: Use `error` to print error messages upon which users which immediately action to complete the task.
 
 **info**: Use  `info` to print informational messages to user.
 
