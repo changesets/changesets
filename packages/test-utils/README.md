@@ -1,6 +1,6 @@
 ## @changesets/test-utils
 
-> Utilities for testing @chagesets/* packages
+> Utilities for testing @changesets/* packages
 
 ### Utilities
 
