@@ -1,4 +1,4 @@
-import * as logger from "@changesets/logger";
+const logger = require("@changesets/logger");
 
 export const temporarilySilenceLogs = () => {
   const originalError = logger.error;
