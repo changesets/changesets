@@ -1,3 +1,11 @@
+/**
+ * Reason for eslint disable import/no-commonjs
+ * Technically reassigning imports is not allowed and
+ * Rollup errors at compile time on this(but the Babel
+ * transform that's running in jest makes it work there),
+ * making this a require should be fine.
+ */
+// eslint-disable-next-line import/no-commonjs
 const logger = require("@changesets/logger");
 
 export const temporarilySilenceLogs = () => {
