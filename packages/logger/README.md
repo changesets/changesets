@@ -22,7 +22,7 @@ error('message part 1', 'message part 2');
 
 ### Silencing Messages In Tests
 
-Use the `test-utils` package to silence the logs in test cases.
+Use the `@changesets/test-utils` package to silence the logs in test cases.
 
 For example:
 
