@@ -11,6 +11,7 @@ import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
+import { InternalError } from "@changesets/errors";
 
 function highestVersionType(versionTypes: (VersionType)[]) {
   if (versionTypes.includes("major")) return "major";
@@ -63,7 +64,9 @@ function assembleReleasePlan(
           let versionType =
             updatedPreState.packages[workspace.name].highestVersionType;
           if (versionType === null) {
-            throw new Error("highestVersionType");
+            throw new InternalError(
+              "highestVersionType does not exist for a package that has versioned while in pre mode"
+            );
           }
           releases.set(workspace.name, {
             type: versionType,
