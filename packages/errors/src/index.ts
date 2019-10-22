@@ -15,3 +15,9 @@ export class PreEnterButInPreModeError extends Error {
     super("pre mode cannot be entered when in pre mode");
   }
 }
+
+export class InternalError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}

@@ -10,6 +10,8 @@ export function incrementVersion(
     semver.inc(release.oldVersion, release.type)! +
     // why are we adding this ourselves rather than passing 'pre' + versionType to semver.inc?
     // we want to make the prerelease version(the number at the end) across all packages the name
-    (preState === undefined ? "" : `-${preState.tag}.${preState.version}`)
+    (preState === undefined || preState.mode === "exit"
+      ? ""
+      : `-${preState.tag}.${preState.version}`)
   );
 }

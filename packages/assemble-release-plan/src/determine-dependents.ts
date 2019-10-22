@@ -23,14 +23,14 @@ import { incrementVersion } from "./increment";
   modified array, but we decided both of those are worse than this solution.
 */
 export default function getDependents(
-  releases: InternalRelease[],
+  releases: Map<string, InternalRelease>,
   workspaces: Workspace[],
   dependencyGraph: Map<string, string[]>,
   preState: PreState | undefined
 ): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
-  let pkgsToSearch = [...releases];
+  let pkgsToSearch = [...releases.values()];
 
   let pkgJsonsByName = new Map(
     // TODO this seems an inefficient use of getting the whole workspaces
@@ -68,16 +68,15 @@ export default function getDependents(
         if (
           depTypes.includes("peerDependencies") &&
           nextRelease.type !== "patch" &&
-          (!releases.some(dep => dep.name === dependent) ||
-            releases.some(
-              dep => dep.name === dependent && dep.type !== "major"
-            ))
+          (!releases.has(dependent) ||
+            (releases.has(dependent) &&
+              releases.get(dependent)!.type !== "major"))
         ) {
           type = "major";
         } else {
           if (
             // TODO validate this - I don't think it's right anymore
-            !releases.some(dep => dep.name === dependent) &&
+            !releases.has(dependent) &&
             !semver.satisfies(
               incrementVersion(nextRelease, preState),
               versionRange
@@ -95,7 +94,7 @@ export default function getDependents(
           // At this point, we know if we are making a change
           updated = true;
 
-          const existing = releases.find(dep => dep.name === name);
+          const existing = releases.get(name);
           // For things that are being given a major bump, we check if we have already
           // added them here. If we have, we update the existing item instead of pushing it on to search.
           // It is safe to not add it to pkgsToSearch because it should have already been searched at the
@@ -114,7 +113,7 @@ export default function getDependents(
             };
 
             pkgsToSearch.push(newDependent);
-            releases.push(newDependent);
+            releases.set(name, newDependent);
           }
         }
       );

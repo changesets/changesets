@@ -55,8 +55,12 @@ export default async function version(cwd: string, config: Config) {
   let newChangesets = await readChangesets(cwd, false);
 
   let changesets = [...oldChangesets, ...newChangesets];
+  let preState = await readPreState(cwd);
 
-  if (changesets.length === 0) {
+  if (
+    changesets.length === 0 &&
+    (preState === undefined || preState.mode !== "exit")
+  ) {
     logger.warn("No unreleased changesets found, exiting.");
     return;
   }
@@ -73,10 +77,8 @@ export default async function version(cwd: string, config: Config) {
 
   let dependentsGraph = await getDependentsgraph({ cwd });
 
-  let preState = await readPreState(cwd);
-
   // NOTE: in v3 when we are not support the old changeset format we can use `getReleasePlan` here
-  let releasePlan = await assembleReleasePlan(
+  let releasePlan = assembleReleasePlan(
     changesets,
     workspaces,
     dependentsGraph,
@@ -84,7 +86,7 @@ export default async function version(cwd: string, config: Config) {
     preState
   );
 
-  await applyReleasePlan(releasePlan, cwd, config, preState);
+  await applyReleasePlan(releasePlan, cwd, config);
 
   if (config.commit) {
     logger.log(

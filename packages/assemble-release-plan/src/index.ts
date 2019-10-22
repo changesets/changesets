@@ -59,9 +59,14 @@ function assembleReleasePlan(
   if (updatedPreState !== undefined && updatedPreState.mode === "exit") {
     for (let workspace of workspaces) {
       if (semver.parse(workspace.config.version)!.prerelease.length) {
-        if (!releases.some(x => x.name === workspace.name)) {
-          releases.push({
-            type: "patch",
+        if (!releases.has(workspace.name)) {
+          let versionType =
+            updatedPreState.packages[workspace.name].highestVersionType;
+          if (versionType === null) {
+            throw new Error("highestVersionType");
+          }
+          releases.set(workspace.name, {
+            type: versionType,
             name: workspace.name,
             changesets: [],
             oldVersion: updatedPreState.packages[workspace.name].initialVersion
@@ -89,7 +94,7 @@ function assembleReleasePlan(
 
   return {
     changesets,
-    releases: releases.map(incompleteRelease => {
+    releases: [...releases.values()].map(incompleteRelease => {
       if (updatedPreState !== undefined) {
         let currentHighestVersionType =
           updatedPreState.packages[incompleteRelease.name].highestVersionType;

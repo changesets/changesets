@@ -12,6 +12,9 @@ import { defaultConfig } from "@changesets/config";
 import pre from "../pre";
 import version from "./index";
 import getWorkspaces from "get-workspaces";
+import { readPreState } from "@changesets/pre";
+
+jest.setTimeout(30000000);
 
 let changelogPath = path.resolve(__dirname, "../../changelog");
 let modifiedDefaultConfig: Config = {
@@ -307,14 +310,14 @@ describe("pre", () => {
       Array [
         Object {
           "dependencies": Object {
-            "pkg-b": "1.0.1-next.0",
+            "pkg-b": "1.0.1",
           },
           "name": "pkg-a",
-          "version": "1.1.0-next.3",
+          "version": "1.1.0",
         },
         Object {
           "name": "pkg-b",
-          "version": "1.0.1-next.0",
+          "version": "1.0.1",
         },
       ]
     `);

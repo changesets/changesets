@@ -15,6 +15,8 @@ import status from "./commands/status";
 import pre from "./commands/pre";
 import { ExitError } from "./utils/errors";
 import { CliOptions } from "./types";
+import { InternalError } from "@changesets/errors/src";
+import { format } from "util";
 
 const { input, flags } = meow(
   `
@@ -175,6 +177,31 @@ const cwd = process.cwd();
     }
   }
 })().catch(err => {
+  if (err instanceof InternalError) {
+    logger.error(
+      "The following error is an internal unexpected error, these should never happen."
+    );
+    logger.error("Please open an issue with the following link");
+    logger.error(
+      `https://github.com/atlassian/changesets/issues/new?title=${encodeURIComponent(
+        `Unexpected error during ${input[0] || "add"} command`
+      )}&body=${encodeURIComponent(`## Error
+
+\`\`\`
+${format("", err).replace(process.cwd(), "<cwd>")}
+\`\`\`
+
+## Versions
+
+- @changesets/cli@${require("@changesets/cli/package.json").version}
+- node@${process.version}
+      
+## Extra details
+
+<!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->
+`)}`
+    );
+  }
   if (err instanceof ExitError) {
     return process.exit(err.code);
   }
