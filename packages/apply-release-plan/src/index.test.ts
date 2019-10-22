@@ -81,12 +81,7 @@ async function testSetup(
   }
 
   return {
-    changedFiles: await applyReleasePlan(
-      releasePlan,
-      tempDir,
-      config,
-      undefined
-    ),
+    changedFiles: await applyReleasePlan(releasePlan, tempDir, config),
     tempDir
   };
 }
@@ -294,8 +289,7 @@ describe("apply release plan", () => {
         await applyReleasePlan(
           releasePlan.getReleasePlan(),
           tempDir,
-          releasePlan.config,
-          undefined
+          releasePlan.config
         );
       } catch (e) {
         expect(e.message).toEqual(
@@ -323,18 +317,13 @@ describe("apply release plan", () => {
       await git.commit("first commit", tempDir);
 
       try {
-        await applyReleasePlan(
-          releasePlan.getReleasePlan(),
-          tempDir,
-          {
-            ...releasePlan.config,
-            changelog: [
-              path.resolve(__dirname, "test-utils/failing-functions"),
-              null
-            ]
-          },
-          undefined
-        );
+        await applyReleasePlan(releasePlan.getReleasePlan(), tempDir, {
+          ...releasePlan.config,
+          changelog: [
+            path.resolve(__dirname, "test-utils/failing-functions"),
+            null
+          ]
+        });
       } catch (e) {
         expect(e.message).toEqual("no chance");
 
