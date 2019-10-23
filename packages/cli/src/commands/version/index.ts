@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { log, warn } from "@changesets/logger";
 import { Config, NewChangeset } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
@@ -6,7 +7,6 @@ import getDependentsgraph from "get-dependents-graph";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
 import getWorkspaces from "get-workspaces";
 
-import logger from "../../utils/logger";
 import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import getOldChangesets from "../../utils/v1-legacy/getChangesets";
 
@@ -27,16 +27,16 @@ async function getOldChangesetsAndWarn(
   if (unreleasedChangesets.length === 0) {
     return [];
   }
-  logger.warn(importantSeparator);
-  logger.warn("There were old changesets from version 1 found");
-  logger.warn(
+  warn(importantSeparator);
+  warn("There were old changesets from version 1 found");
+  warn(
     "Theses are being applied now but the dependents graph may have changed"
   );
-  logger.warn("Make sure you validate all your dependencies");
-  logger.warn(
+  warn("Make sure you validate all your dependencies");
+  warn(
     "In a future major version, we will no longer apply these old changesets, and will instead throw here"
   );
-  logger.warn(
+  warn(
     "----------------------------------------------------------------------"
   );
 
@@ -56,7 +56,7 @@ export default async function version(cwd: string, config: Config) {
   let changesets = [...oldChangesets, ...newChangesets];
 
   if (changesets.length === 0) {
-    logger.warn("No unreleased changesets found, exiting.");
+    warn("No unreleased changesets found, exiting.");
     return;
   }
 
@@ -83,12 +83,8 @@ export default async function version(cwd: string, config: Config) {
   await applyReleasePlan(releasePlan, cwd, config);
 
   if (config.commit) {
-    logger.log(
-      "All files have been updated and committed. You're ready to publish!"
-    );
+    log("All files have been updated and committed. You're ready to publish!");
   } else {
-    logger.log(
-      "All files have been updated. Review them and commit at your leisure"
-    );
+    log("All files have been updated. Review them and commit at your leisure");
   }
 }

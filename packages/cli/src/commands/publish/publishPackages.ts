@@ -3,7 +3,7 @@ import chalk from "chalk";
 import getWorkspaces from "../../utils/getWorkspaces";
 import { Workspace } from "get-workspaces";
 import * as npmUtils from "./npm-utils";
-import logger from "../../utils/logger";
+import { info, warn } from "@changesets/logger";
 import { TwoFactorState } from "../../utils/types";
 
 export default async function publishPackages({
@@ -34,7 +34,7 @@ export default async function publishPackages({
   });
 
   if (unpublishedPackagesInfo.length === 0) {
-    logger.warn("No unpublished packages to publish");
+    warn("No unpublished packages to publish");
   }
 
   const publishedPackages = await Promise.all(
@@ -50,7 +50,7 @@ async function publishAPackage(
   twoFactorState: TwoFactorState
 ) {
   const { name, version } = pkg.config;
-  logger.info(
+  info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
   );
 
@@ -101,12 +101,12 @@ async function getUnpublishedPackages(packages: Array<Workspace>) {
       packagesToPublish.push(pkgInfo);
     } else if (semver.gt(localVersion, publishedVersion)) {
       packagesToPublish.push(pkgInfo);
-      logger.info(
+      info(
         `${name} is being published because our local version (${localVersion}) is ahead of npm's (${publishedVersion})`
       );
     } else if (semver.lt(localVersion, publishedVersion)) {
       // If the local version is behind npm, something is wrong, we warn here, and by not getting published later, it will fail
-      logger.warn(
+      warn(
         `${name} is not being published because version ${publishedVersion} is already published on npm and we are trying to publish version ${localVersion}`
       );
     }

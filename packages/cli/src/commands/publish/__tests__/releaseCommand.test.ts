@@ -3,11 +3,11 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 import publishPackages from "../publishPackages";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 import runRelease from "..";
 
 jest.mock("../../../utils/cli");
 jest.mock("@changesets/git");
-jest.mock("../../../utils/logger");
 jest.mock("../publishPackages");
 
 // @ts-ignore
@@ -27,6 +27,7 @@ publishPackages.mockImplementation(() =>
 );
 
 describe("running release", () => {
+  temporarilySilenceLogs();
   let cwd: string;
 
   beforeEach(async () => {

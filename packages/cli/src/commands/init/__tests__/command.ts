@@ -2,10 +2,9 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 import fs from "fs-extra";
 import path from "path";
 import { defaultWrittenConfig } from "@changesets/config";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 import initializeCommand from "..";
-
-jest.mock("../../../utils/logger");
 
 const getPaths = (cwd: string) => ({
   readmePath: path.join(cwd, ".changeset/README.md"),
@@ -13,6 +12,7 @@ const getPaths = (cwd: string) => ({
 });
 
 describe("init", () => {
+  temporarilySilenceLogs();
   it("should initialize in a project without a .changeset folder", async () => {
     const cwd = await copyFixtureIntoTempDir(
       __dirname,

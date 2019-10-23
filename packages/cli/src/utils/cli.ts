@@ -1,6 +1,6 @@
 // @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
 import termSize from "term-size";
-import logger, { prefix } from "./logger";
+import { error, prefix, success } from "@changesets/logger";
 // @ts-ignore
 import { prompt } from "enquirer";
 
@@ -17,7 +17,7 @@ const serialId: () => number = (function() {
 const limit = Math.max(termSize().rows - 5, 10);
 
 let cancelFlow = () => {
-  logger.success("Cancelled... 👋 ");
+  success("Cancelled... 👋 ");
   process.exit();
 };
 
@@ -42,7 +42,7 @@ async function askCheckboxPlus(
   })
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
-      logger.error(err);
+      error(err);
     });
 }
 
@@ -61,7 +61,7 @@ async function askQuestion(message: string): Promise<string> {
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
-      logger.error(err);
+      error(err);
     });
 }
 
@@ -81,7 +81,7 @@ async function askConfirm(message: string): Promise<boolean> {
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
-      logger.error(err);
+      error(err);
     });
 }
 
@@ -104,7 +104,7 @@ async function askList(
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
-      logger.error(err);
+      error(err);
     });
 }
 

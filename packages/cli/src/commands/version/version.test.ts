@@ -4,7 +4,8 @@ import fs from "fs-extra";
 import path from "path";
 import versionCommand from "./index";
 import * as git from "@changesets/git";
-import logger from "../../utils/logger";
+import { warn } from "@changesets/logger";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 import writeChangeset from "../add/writeChangeset";
 import { NewChangeset, Config } from "@changesets/types";
 import { defaultConfig } from "@changesets/config";
@@ -21,7 +22,6 @@ const consoleError = console.error;
 
 jest.mock("../../utils/cli");
 jest.mock("@changesets/git");
-jest.mock("../../utils/logger");
 
 // @ts-ignore
 git.add.mockImplementation(() => Promise.resolve(true));
@@ -65,6 +65,7 @@ const getPkgJSON = (pkgName: string, calls: any) => {
 const writeEmptyChangeset = (cwd: string) => writeChangesets([], cwd);
 
 describe("running version in a simple project", () => {
+  temporarilySilenceLogs();
   let cwd: string;
 
   beforeEach(async () => {
@@ -82,7 +83,7 @@ describe("running version in a simple project", () => {
       await writeEmptyChangeset(cwd);
       await versionCommand(cwd, modifiedDefaultConfig);
       // @ts-ignore
-      const loggerWarnCalls = logger.warn.mock.calls;
+      const loggerWarnCalls = warn.mock.calls;
       expect(loggerWarnCalls.length).toEqual(1);
       expect(loggerWarnCalls[0][0]).toEqual(
         "No unreleased changesets found, exiting."
