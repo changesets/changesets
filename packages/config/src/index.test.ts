@@ -121,7 +121,7 @@ describe("parser errors", () => {
     expect(() => {
       unsafeParse({ changelog: {} });
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The \`changelog\` option is set as {} when the only valid values are undefined, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
 `);
   });
@@ -129,7 +129,7 @@ The \`changelog\` option is set as {} when the only valid values are undefined, 
     expect(() => {
       unsafeParse({ changelog: ["some-module", "something", "other"] });
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The \`changelog\` option is set as [
   \\"some-module\\",
   \\"something\\",
@@ -141,7 +141,7 @@ The \`changelog\` option is set as [
     expect(() => {
       unsafeParse({ changelog: [false, "something"] });
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The \`changelog\` option is set as [
   false,
   \\"something\\"
@@ -152,7 +152,7 @@ The \`changelog\` option is set as [
     expect(() => {
       unsafeParse({ access: "something" });
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The \`access\` option is set as \\"something\\" when the only valid values are undefined, \\"public\\" or \\"private\\""
 `);
   });
@@ -160,7 +160,7 @@ The \`access\` option is set as \\"something\\" when the only valid values are u
     expect(() => {
       unsafeParse({ commit: "something" });
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The \`commit\` option is set as \\"something\\" when the only valid values are undefined or a boolean"
 `);
   });
@@ -168,7 +168,7 @@ The \`commit\` option is set as \\"something\\" when the only valid values are u
     expect(() => {
       unsafeParse({ linked: {} });
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The \`linked\` option is set as {} when the only valid values are undefined or an array of arrays of package names"
 `);
   });
@@ -176,7 +176,7 @@ The \`linked\` option is set as {} when the only valid values are undefined or a
     expect(() => {
       unsafeParse({ linked: [{}] });
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The \`linked\` option is set as [
   {}
 ] when the only valid values are undefined or an array of arrays of package names"
@@ -186,7 +186,7 @@ The \`linked\` option is set as [
     expect(() => {
       unsafeParse({ linked: [[{}]] });
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The \`linked\` option is set as [
   [
     {}
@@ -198,7 +198,7 @@ The \`linked\` option is set as [
     expect(() => {
       parse({ linked: [["pkg-a"]] }, []);
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The package \\"pkg-a\\" is specified in the \`linked\` option but it is not found in the project. You may have misspelled the package name."
 `);
   });
@@ -208,7 +208,7 @@ The package \\"pkg-a\\" is specified in the \`linked\` option but it is not foun
         { config: { name: "pkg-a", version: "" }, name: "pkg-a", dir: "dir" }
       ]);
     }).toThrowErrorMatchingInlineSnapshot(`
-"Validation Error: Some errors occurred when validating the changesets config:
+"Some errors occurred when validating the changesets config:
 The package \\"pkg-a\\" is in multiple sets of linked packages. Packages can only be in a single set of linked packages."
 `);
   });
