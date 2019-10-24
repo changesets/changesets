@@ -1,7 +1,7 @@
 import publishPackages from "./publishPackages";
+import { ExitError } from "@changesets/errors";
 import { error, log, success } from "@changesets/logger";
 import * as git from "@changesets/git";
-import { ExitError } from "../../utils/errors";
 import { Config } from "@changesets/types";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {

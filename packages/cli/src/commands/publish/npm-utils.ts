@@ -1,3 +1,4 @@
+import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import pLimit from "p-limit";
 import chalk from "chalk";
@@ -5,7 +6,6 @@ import spawn from "spawndamnit";
 import { askQuestion } from "../../utils/cli";
 // @ts-ignore
 import isCI from "is-ci";
-import { ExitError } from "../../utils/errors";
 import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);
