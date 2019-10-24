@@ -1,5 +1,6 @@
 import * as fs from "fs-extra";
 import path from "path";
+import { ValidationError } from "@changesets/errors";
 import { Config, WrittenConfig, Workspace } from "@changesets/types";
 import packageJson from "../package.json";
 
@@ -122,7 +123,10 @@ export let parse = (
     }
   }
   if (messages.length) {
-    throw new ValidationError(messages);
+    throw new ValidationError(
+      `Some errors occurred when validating the changesets config:\n` +
+        messages.join("\n")
+    );
   }
 
   let config: Config = {
@@ -142,12 +146,3 @@ export let parse = (
 };
 
 export let defaultConfig = parse(defaultWrittenConfig, []);
-
-export class ValidationError extends Error {
-  constructor(messages: Array<string>) {
-    super(
-      `Some errors occurred when validating the changesets config:\n` +
-        messages.join("\n")
-    );
-  }
-}

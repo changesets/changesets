@@ -11,6 +11,7 @@
     "schema.json"
   ],
   "dependencies": {
+    "@changesets/errors": "^0.1.0",
     "@changesets/types": "^0.3.0",
     "fs-extra": "^7.0.1"
   },

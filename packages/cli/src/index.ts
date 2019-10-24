@@ -1,5 +1,6 @@
 import meow from "meow";
 import { read } from "@changesets/config";
+import { ExitError } from "@changesets/errors";
 import { error } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import fs from "fs-extra";
@@ -11,7 +12,6 @@ import add from "./commands/add";
 import version from "./commands/version";
 import publish from "./commands/publish";
 import status from "./commands/status";
-import { ExitError } from "./utils/errors";
 import { CliOptions } from "./types";
 
 const { input, flags } = meow(
