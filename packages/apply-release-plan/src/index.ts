@@ -240,7 +240,7 @@ async function getNewChangelogEntry(
                   releaseLines.minor
                 ),
                 patch: preStatePackages[release.name].releaseLines.patch.concat(
-                  releaseLines.patch
+                  releaseLines.patchWithoutDepReleaseLine
                 )
               }
             };

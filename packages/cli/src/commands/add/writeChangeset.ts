@@ -43,7 +43,6 @@ ${summary}
     })
   );
 
-  throw new InternalError("Something something, yada yada");
   return changesetID;
 }
 

@@ -72,6 +72,8 @@ export default async function generateMarkdown(
     relevantChangesetIds.has(cs.id)
   );
 
+  let patchWithoutDepReleaseLine = [...releaseObj.patch];
+
   releaseObj.patch.push(
     changelogFuncs.getDependencyReleaseLine(
       relevantChangesets,
@@ -82,6 +84,9 @@ export default async function generateMarkdown(
 
   return {
     patch: (await Promise.all(releaseObj.patch)).filter(x => x),
+    patchWithoutDepReleaseLine: (await Promise.all(
+      patchWithoutDepReleaseLine
+    )).filter(x => x),
     minor: (await Promise.all(releaseObj.minor)).filter(x => x),
     major: (await Promise.all(releaseObj.major)).filter(x => x)
   };
