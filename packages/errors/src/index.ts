@@ -18,13 +18,13 @@ export class ExitError extends ExtendableError {
   }
 }
 
-export class PreExitButNotInPreModeError extends Error {
+export class PreExitButNotInPreModeError extends ExtendableError {
   constructor() {
     super("pre mode cannot be exited when not in pre mode");
   }
 }
 
-export class PreEnterButInPreModeError extends Error {
+export class PreEnterButInPreModeError extends ExtendableError {
   constructor() {
     super("pre mode cannot be entered when in pre mode");
   }
