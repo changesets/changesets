@@ -12,6 +12,6 @@
     "semver": "^5.4.1"
   },
   "devDependencies": {
-    "@changesets/config": "^0.2.1"
+    "@changesets/config": "*"
   }
 }
