@@ -1,4 +1,4 @@
-import { VersionType, PreState } from "@changesets/types";
+import { PreState } from "@changesets/types";
 import * as semver from "semver";
 import { InternalRelease } from "./types";
 

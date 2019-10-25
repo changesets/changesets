@@ -26,7 +26,6 @@ export async function readPreState(cwd: string) {
       throw err;
     }
   }
-  debugger;
   return preState;
 }
 

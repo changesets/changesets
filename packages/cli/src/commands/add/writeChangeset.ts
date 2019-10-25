@@ -4,7 +4,6 @@ import prettier from "prettier";
 import humanId from "human-id";
 import getChangesetBase from "../../utils/getChangesetBase";
 import { Release } from "@changesets/types";
-import { InternalError } from "@changesets/errors";
 
 async function writeChangeset(
   changeset: { summary: string; releases: Array<Release> },

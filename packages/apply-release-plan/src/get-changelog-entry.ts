@@ -1,7 +1,6 @@
 import {
   ChangelogFunctions,
   NewChangesetWithCommit,
-  VersionType,
   PreState
 } from "@changesets/types";
 

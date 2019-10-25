@@ -13,7 +13,6 @@ import { defaultConfig } from "@changesets/config";
 import pre from "../pre";
 import version from "./index";
 import getWorkspaces from "get-workspaces";
-import { readPreState } from "@changesets/pre";
 
 jest.setTimeout(30000000);
 

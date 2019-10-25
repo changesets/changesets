@@ -38,11 +38,6 @@ export default async function publishPackages({
     warn("No unpublished packages to publish");
   }
 
-  workspacesByName;
-  const unpublishedPackages = publicPackages.filter(pkg => {
-    return unpublishedPackagesInfo.some(p => pkg.name === p.name);
-  });
-
   let promises: Promise<{
     name: string;
     newVersion: string;

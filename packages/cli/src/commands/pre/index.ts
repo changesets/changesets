@@ -1,10 +1,9 @@
-import { Config } from "@changesets/types";
-import logger from "../../utils/logger";
-import { ExitError } from "../../utils/errors";
+import * as logger from "@changesets/logger";
 import { exitPre, enterPre } from "@changesets/pre";
 import {
   PreExitButNotInPreModeError,
-  PreEnterButInPreModeError
+  PreEnterButInPreModeError,
+  ExitError
 } from "@changesets/errors";
 
 export default async function pre(

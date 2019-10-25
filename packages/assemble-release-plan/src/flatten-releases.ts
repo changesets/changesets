@@ -1,7 +1,7 @@
 // This function takes in changesets and returns one release per
 // package listed in the changesets
 
-import { NewChangeset, Workspace, VersionType } from "@changesets/types";
+import { NewChangeset, Workspace } from "@changesets/types";
 import { InternalRelease } from "./types";
 
 export default function flattenReleases(
