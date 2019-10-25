@@ -11,7 +11,7 @@ export let defaultWrittenConfig = {
   changelog: "@changesets/cli/changelog",
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
-  access: "private"
+  access: "restricted"
 } as const;
 
 function getNormalisedChangelogOption(
@@ -57,7 +57,7 @@ export let parse = (
 
   if (
     json.access !== undefined &&
-    json.access !== "private" &&
+    json.access !== "restricted" &&
     json.access !== "public"
   ) {
     messages.push(
@@ -65,7 +65,7 @@ export let parse = (
         json.access,
         null,
         2
-      )} when the only valid values are undefined, "public" or "private"`
+      )} when the only valid values are undefined, "public" or "restricted"`
     );
   }
 

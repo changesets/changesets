@@ -11,7 +11,7 @@ test("read reads the config", async () => {
     linked: [],
     changelog: false,
     commit: true,
-    access: "private"
+    access: "restricted"
   });
 });
 
@@ -19,7 +19,7 @@ let defaults = {
   linked: [],
   changelog: ["@changesets/cli/changelog", null],
   commit: false,
-  access: "private"
+  access: "restricted"
 } as const;
 
 let correctCases = {
@@ -74,11 +74,11 @@ let correctCases = {
   },
   "access private": {
     input: {
-      access: "private"
+      access: "restricted"
     },
     output: {
       ...defaults,
-      access: "private"
+      access: "restricted"
     }
   },
   "access public": {
@@ -153,7 +153,7 @@ The \`changelog\` option is set as [
       unsafeParse({ access: "something" });
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The \`access\` option is set as \\"something\\" when the only valid values are undefined, \\"public\\" or \\"private\\""
+The \`access\` option is set as \\"something\\" when the only valid values are undefined, \\"public\\" or \\"restricted\\""
 `);
   });
   test("commit non-boolean", () => {

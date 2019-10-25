@@ -5,20 +5,11 @@
 import fs from "fs-extra";
 import path from "path";
 import globby from "globby";
+import { PackageJSON } from "@changesets/types";
 
 type Options = {
   cwd?: string;
   tools?: Array<"yarn" | "bolt" | "root">;
-};
-
-export type PackageJSON = {
-  name: string;
-  version: string;
-  dependencies?: { [key: string]: string };
-  peerDependencies?: { [key: string]: string };
-  devDependencies?: { [key: string]: string };
-  optionalDependencies?: { [key: string]: string };
-  private?: boolean;
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };

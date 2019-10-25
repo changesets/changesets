@@ -11,6 +11,8 @@ export type VersionType = "major" | "minor" | "patch";
 
 export type DependencyType = typeof DEPENDENCY_TYPES[number];
 
+export type AccessType = "public" | "restricted";
+
 export type Release = { name: string; type: VersionType };
 
 // This is a release that has been modified to include all relevant information
@@ -41,6 +43,10 @@ export type PackageJSON = {
   peerDependencies?: { [key: string]: string };
   devDependencies?: { [key: string]: string };
   optionalDependencies?: { [key: string]: string };
+  private?: boolean;
+  publishConfig?: {
+    access?: AccessType;
+  };
 };
 
 export type Linked = ReadonlyArray<ReadonlyArray<string>>;
@@ -49,14 +55,14 @@ export type Config = {
   changelog: false | readonly [string, any];
   commit: boolean;
   linked: Linked;
-  access: "public" | "private";
+  access: AccessType;
 };
 
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
   commit?: boolean;
   linked?: Linked;
-  access?: "public" | "private";
+  access?: AccessType;
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };
