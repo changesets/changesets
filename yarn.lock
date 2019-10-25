@@ -814,10 +814,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
-"@manypkg/cli@^0.5.0":
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/@manypkg/cli/-/cli-0.5.2.tgz#40d7bd1d587dc5918eec777659cf56f125953b49"
-  integrity sha512-7tdZyiDDMH7pf84JYR6iN8JOKnQUO9tEhQZZ4fGBlhCt1yv+12N+vj9QIZFzZpYXG0NAsi4LOPxIXvPaybdUKA==
+"@manypkg/cli@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@manypkg/cli/-/cli-0.8.0.tgz#eb19b2ca406c3861a1ddded8cc082b51ae6c74c6"
+  integrity sha512-svaovvlTN1dDVPNZKZV6E3Tgsc0QxnJTp3UWSVBFa3GaNvX8a/O2eKMCTBSqqdrMUxGVeGZjKDErQMNgtx3R4Q==
   dependencies:
     "@babel/runtime" "^7.5.5"
     chalk "^2.4.2"
@@ -825,9 +825,10 @@
     find-up "^4.1.0"
     find-workspaces-root "^0.1.0"
     fs-extra "^8.1.0"
-    get-workspaces "^0.4.0"
+    get-workspaces "^0.5.0"
     meow "^5.0.0"
-    sembear "^0.3.0"
+    p-limit "^2.2.1"
+    sembear "^0.4.1"
     semver "^6.3.0"
     spawndamnit "^2.0.0"
     validate-npm-package-name "^3.0.0"
@@ -2475,14 +2476,6 @@ get-value@^2.0.3, get-value@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/get-value/-/get-value-2.0.6.tgz#dc15ca1c672387ca76bd37ac0a395ba2042a2c28"
 
-get-workspaces@^0.4.0:
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/get-workspaces/-/get-workspaces-0.4.2.tgz#b887b9632bc5dcc2001c0ba124f00581453597b4"
-  integrity sha512-TZtSe6nltU8BEeJt9Te5BQpY0A1NpW4SK3syIsorRiXEiwfu1KYpvaljefReY44AO96AztUyxy+qTFQhMgwXkQ==
-  dependencies:
-    fs-extra "^7.0.1"
-    globby "^9.2.0"
-
 getpass@^0.1.1:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/getpass/-/getpass-0.1.7.tgz#5eff8e3e684d569ae4cb2b1282604e8ba62149fa"
@@ -4104,6 +4097,13 @@ p-limit@^2.0.0, p-limit@^2.2.0:
   dependencies:
     p-try "^2.0.0"
 
+p-limit@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/p-limit/-/p-limit-2.2.1.tgz#aa07a788cc3151c939b5131f63570f0dd2009537"
+  integrity sha512-85Tk+90UCVWvbDavCLKPOLC9vvY8OwEX/RtKF+/1OADJMVlFfEHOiMTPVyxg7mk/dKa+ipdHm0OUkTvCpMTuwg==
+  dependencies:
+    p-try "^2.0.0"
+
 p-locate@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/p-locate/-/p-locate-2.0.0.tgz#20a0103b222a70c8fd39cc2e580680f3dde5ec43"
@@ -4772,10 +4772,10 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-sembear@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/sembear/-/sembear-0.3.0.tgz#8af905c16d6c7a9c5ccabdb03f0c3da717f2b34e"
-  integrity sha512-IP39etFscpOV8i8EC+kyu8g8sx3o3IelMM6zZDvzuFlKbnS18jogM+GdwtqeeiOxMJJpqw8WmV9BU+iwHhstsA==
+sembear@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/sembear/-/sembear-0.4.1.tgz#c1599bba0fd29cce68a25382576891e5fae84990"
+  integrity sha512-q3LJepi7qgDbkR9eDe1OVYfbD8A14vuC8TtETtEvpAQ4GxynA9B0fhG6ts8scBMDe/GwLlVUeU+Icnl1oidH7g==
   dependencies:
     "@types/semver" "^6.0.1"
     semver "^6.3.0"
