@@ -97,7 +97,7 @@ const cwd = process.cwd();
     const { empty }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
     await add(cwd, { empty }, config);
-  } else if (input.length > 1) {
+  } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );

@@ -2,12 +2,12 @@
 
 You might want to release a version of your packages before you do an actual release, Changesets lets you do this but there are some caveats because of the complexity that monorepos add that are important to understand.
 
-When you want to do a prerelease, you need to enter prerelease mode. You can do that with the `prerelease command <tag>`. The tag that you need to pass is used in versions(e.g. `1.0.0-beta.0`) and for the npm dist tag.
+When you want to do a prerelease, you need to enter prerelease mode. You can do that with the `pre enter <tag>`. The tag that you need to pass is used in versions(e.g. `1.0.0-beta.0`) and for the npm dist tag.
 
 A pre-release workflow might look something like this:
 
 ```bash
-yarn changeset prerelease next
+yarn changeset pre enter next
 yarn changeset version
 git add .
 git commit -m "Enter prerelease mode and version packages"
@@ -102,10 +102,7 @@ This command will publish to npm just like it does for the first prerelease exce
 When you're ready to do the final release, your workflow would look something like this:
 
 ```bash
-# should we make this prerelease exit?
-# my reasoning behind having it only be prerelease
-# is that there would be nothing else you would want to do with the command
-yarn changeset prerelease
+yarn changeset pre exit
 yarn changeset version
 git add .
 git commit -m "Exit prerelease mode and bersion packages"
@@ -114,7 +111,7 @@ git push --follow-tags
 ```
 
 ```
-yarn changeset prerelease
+yarn changeset pre exit
 ```
 
 This command will set an intent to exit prerelease mode in the `pre.json` file though it won't do any actual versioning.
