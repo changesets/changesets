@@ -1,11 +1,11 @@
-import logger from "../../utils/logger";
+import { ExitError } from "@changesets/errors";
+import { error, info, warn } from "@changesets/logger";
 import pLimit from "p-limit";
 import chalk from "chalk";
 import spawn from "spawndamnit";
 import { askQuestion } from "../../utils/cli";
 // @ts-ignore
 import isCI from "is-ci";
-import { ExitError } from "../../utils/errors";
 import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);
@@ -29,19 +29,19 @@ export async function getTokenIsRequired() {
   });
   let json = JSON.parse(result.stdout.toString());
   if (json.error) {
-    logger.error(
+    error(
       `an error occurred while running \`npm profile get\`: ${json.error.code}`
     );
-    logger.error(json.error.summary);
-    if (json.error.summary) logger.error(json.error.summary);
+    error(json.error.summary);
+    if (json.error.summary) error(json.error.summary);
     throw new ExitError(1);
   }
   return json.tfa.mode === "auth-and-writes";
 }
 
-export function info(pkgName: string) {
+export function getPackageInfo(pkgName: string) {
   return npmRequestLimit(async () => {
-    logger.info(`npm info ${pkgName}`);
+    info(`npm info ${pkgName}`);
 
     // Due to a couple of issues with yarnpkg, we also want to override the npm registry when doing
     // npm info.
@@ -62,19 +62,19 @@ export function info(pkgName: string) {
 }
 
 export async function infoAllow404(pkgName: string) {
-  let pkgInfo = await info(pkgName);
+  let pkgInfo = await getPackageInfo(pkgName);
   if (pkgInfo.error && pkgInfo.error.code === "E404") {
-    logger.warn(`Recieved 404 for npm info ${chalk.cyan(`"${pkgName}"`)}`);
+    warn(`Recieved 404 for npm info ${chalk.cyan(`"${pkgName}"`)}`);
     return { published: false, pkgInfo: {} };
   }
   if (pkgInfo.error) {
-    logger.error(
+    error(
       `Recieved an unknown error code: ${
         pkgInfo.error.code
       } for npm info ${chalk.cyan(`"${pkgName}"`)}`
     );
-    logger.error(pkgInfo.error.summary);
-    if (pkgInfo.error.detail) logger.error(pkgInfo.error.detail);
+    error(pkgInfo.error.summary);
+    if (pkgInfo.error.detail) error(pkgInfo.error.detail);
 
     throw new ExitError(1);
   }
@@ -86,7 +86,7 @@ let otpAskLimit = pLimit(1);
 let askForOtpCode = (twoFactorState: TwoFactorState) =>
   otpAskLimit(async () => {
     if (twoFactorState.token !== null) return twoFactorState.token;
-    logger.info(
+    info(
       "This operation requires a one-time password from your authenticator."
     );
 
@@ -125,10 +125,20 @@ async function internalPublish(
     cwd: opts.cwd,
     env: Object.assign({}, process.env, envOverride)
   });
+  // New error handling. NPM's --json option is included alongside the `prepublish and
+  // `postpublish` contents in terminal. We want to handle this as best we can but it has
+  // some struggles
+  // Note that both pre and post publish hooks are printed before the json out, so this works.
+  let json = JSON.parse(stdout.toString().replace(/[^{]*/, ""));
 
-  let json = JSON.parse(stdout.toString());
   if (json.error) {
-    if (json.error.code === "EOTP" && !isCI) {
+    // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
+    if (
+      (json.error.code === "EOTP" ||
+        (json.error.code === "E401" &&
+          json.error.detail.includes("--otp=<code>"))) &&
+      !isCI
+    ) {
       if (twoFactorState.token !== null) {
         // the current otp code must be invalid since it errored
         twoFactorState.token = null;
@@ -137,7 +147,7 @@ async function internalPublish(
       twoFactorState.isRequired = Promise.resolve(true);
       return internalPublish(pkgName, opts, twoFactorState);
     }
-    logger.error(
+    error(
       `an error occurred while publishing ${pkgName}: ${json.error.code}`,
       json.error.summary,
       json.error.detail ? "\n" + json.error.detail : ""

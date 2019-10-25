@@ -95,13 +95,13 @@ This command sets up the `.changeset` folder. It generates a readme and a config
 ### add
 
 ```
-changeset
+changeset [--empty]
 ```
 
 or
 
 ```
-changeset add
+changeset add [--empty]
 ```
 
 This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
@@ -119,6 +119,16 @@ A description of the major changes.
 ```
 
 If you want to modify this file after it's generated, that's completely fine or if you want to write changeset files yourself, that's also fine.
+
+- `--empty` - allows you to create an empty changeset if no packages are being bumped, usually only required if you have CI that blocks merges without a changeset.
+
+A changeset created with the `empty` flag would look like this:
+
+```md
+---
+---
+
+```
 
 If you set the `commit` option in the config, the command will add the updated changeset files and then commit them.
 
@@ -144,7 +154,7 @@ changeset publish [--otp={token}]
 
 Publishes to NPM repo, and creates git tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is acurate.
 
-`--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the `--otp` option.
+- `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the `--otp` option.
 
 **NOTE:** You will still need to push your changes back to master after this
 
@@ -160,11 +170,11 @@ status [--verbose] [--output={filePath}] [--since-master]
 
 The status command provides information about the changesets that currently exist. If there are no changesets present, it exits with an error status code.
 
-Use verbose if you want to know the new versions, and get a link to the relevant changeset summary.
+- `--verbose` - use if you want to know the new versions, and get a link to the relevant changeset summary.
 
-You can use `output` to write the json object of the status out, for consumption by other tools, such as CI.
+- `--output` - allows you to write the json object of the status out, for consumption by other tools, such as CI.
 
-You can use the `since-master flag to only display information about changesets since the master branch. While this can be
+- `--since-master` - to only display information about changesets since the master branch. While this can be
 used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot)
 to detect pull requests missing changesets, as not all pull requests need one.
 

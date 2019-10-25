@@ -1,5 +1,35 @@
 # @changesets/cli
 
+## 2.1.2
+
+### Patch Changes
+
+- Remove console log
+- When 2fa token is wrong (ie, it has expired) reprompt instead of failing
+
+## 2.1.1
+
+### Patch Changes
+
+- [`71a0193`](https://github.com/atlassian/changesets/commit/71a0193939b13f693d3652c01a82a67a6be5e104) [#197](https://github.com/atlassian/changesets/pull/197) Thanks [@Noviny](https://github.com/Noviny)! - Close off error when running publish where individual packages have pre or post hooks.
+
+  Under the previous behaviour, JSON parsing the response to publish failed, causing git tags to not be created.
+
+## 2.1.0
+
+### Minor Changes
+
+- [`8dce96f`](https://github.com/atlassian/changesets/commit/8dce96f8aec43f82b35e65f54b06cbeed3275885) [#187](https://github.com/atlassian/changesets/pull/187) Thanks [@gardnerjack](https://github.com/gardnerjack)! - Added --empty flag to the add command for empty changeset files. New tests for adding, writing, parsing, and reading empty changesets.
+
+### Patch Changes
+
+- [`7e2fc8e`](https://github.com/atlassian/changesets/commit/7e2fc8ee58be3be3452358cc7852412fbec0f995) [#184](https://github.com/atlassian/changesets/pull/184) Thanks [@Noviny](https://github.com/Noviny)! - Fix message on warning if 'add' command is run before changesets has been initialised.
+
+- Updated dependencies [[`8dce96f`](https://github.com/atlassian/changesets/commit/8dce96f8aec43f82b35e65f54b06cbeed3275885)]:
+  - @changesets/parse@0.3.0
+  - @changesets/read@0.3.0
+  - @changesets/get-release-plan@0.1.3
+
 ## 2.0.4
 
 ### Patch Changes

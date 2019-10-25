@@ -2,6 +2,7 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 import fs from "fs-extra";
 import path from "path";
 import { defaultConfig } from "@changesets/config";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 import writeChangeset from "../../add/writeChangeset";
 import status from "..";
@@ -46,7 +47,6 @@ const simpleReleasePlan: ReleasePlan = {
   ]
 };
 
-jest.mock("../../../utils/logger");
 jest.mock("@changesets/git");
 
 const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
@@ -54,6 +54,7 @@ const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
 };
 
 describe("status", () => {
+  temporarilySilenceLogs();
   let cwd: string;
 
   beforeEach(async () => {

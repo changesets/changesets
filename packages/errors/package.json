@@ -5,5 +5,8 @@
   "main": "dist/errors.cjs.js",
   "module": "dist/errors.esm.js",
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/errors"
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/errors",
+  "dependencies": {
+    "extendable-error": "^0.1.5"
+  }
 }

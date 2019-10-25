@@ -1,11 +1,11 @@
 import meow from "meow";
 import { read } from "@changesets/config";
+import { ExitError, InternalError } from "@changesets/errors";
+import { error } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import fs from "fs-extra";
 import path from "path";
 import getWorkspaces from "get-workspaces";
-
-import logger from "./utils/logger";
 
 import init from "./commands/init";
 import add from "./commands/add";
@@ -13,9 +13,7 @@ import version from "./commands/version";
 import publish from "./commands/publish";
 import status from "./commands/status";
 import pre from "./commands/pre";
-import { ExitError } from "./utils/errors";
 import { CliOptions } from "./types";
-import { InternalError } from "@changesets/errors/src";
 import { format } from "util";
 
 const { input, flags } = meow(
@@ -24,7 +22,7 @@ const { input, flags } = meow(
     $ changesets [command]
   Commands
     init
-    add
+    add [--empty]
     version
     publish [--otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
@@ -46,6 +44,9 @@ const { input, flags } = meow(
       otp: {
         type: "string",
         default: undefined
+      },
+      empty: {
+        type: "boolean"
       }
     }
   }
@@ -76,16 +77,14 @@ const cwd = process.cwd();
       path.resolve(cwd, ".changeset/config.js")
     );
     if (oldConfigExists) {
-      logger.error(
+      error(
         "It looks like you're using the version 1 `.changeset/config.js` file"
       );
-      logger.error(
-        "You'll need to convert it to a `.changeset/config.json` file"
-      );
-      logger.error(
+      error("You'll need to convert it to a `.changeset/config.json` file");
+      error(
         "The format of the config object has significantly changed in v2 as well"
       );
-      logger.error(
+      error(
         " - we thoroughly recommend looking at the changelog for this package for what has changed"
       );
       throw new ExitError(1);
@@ -95,22 +94,24 @@ const cwd = process.cwd();
   }
 
   if (input.length < 1) {
-    await add(cwd, config);
+    const { empty }: CliOptions = flags;
+    // @ts-ignore if this is undefined, we have already exited
+    await add(cwd, { empty }, config);
   } else if (input.length > 1) {
-    logger.error(
+    error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
   } else {
-    const { sinceMaster, verbose, output, otp }: CliOptions = flags;
+    const { sinceMaster, verbose, output, otp, empty }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
     deadFlags.forEach(flag => {
       if (flags[flag]) {
-        logger.error(
+        error(
           `the flag ${flag} has been removed from changesets for version 2`
         );
-        logger.error(`Please encode the desired value into your config`);
-        logger.error(`See our changelog for more details`);
+        error(`Please encode the desired value into your config`);
+        error(`See our changelog for more details`);
         throw new ExitError(1);
       }
     });
@@ -122,7 +123,8 @@ const cwd = process.cwd();
 
     switch (input[0]) {
       case "add": {
-        await add(cwd, config);
+        // @ts-ignore if this is undefined, we have already exited
+        await add(cwd, { empty }, config);
         return;
       }
       case "version": {
@@ -140,12 +142,12 @@ const cwd = process.cwd();
       case "pre": {
         let command = input[1];
         if (command !== "enter" && command !== "exit") {
-          logger.error("`enter` or `exit` must be passed after prerelease");
+          error("`enter` or `exit` must be passed after prerelease");
           throw new ExitError(1);
         }
         let tag = input[2];
         if (command === "enter" && typeof tag !== "string") {
-          logger.error("A tag must be passed when using prerelese enter");
+          error("A tag must be passed when using prerelese enter");
           throw new ExitError(1);
         }
         // @ts-ignore
@@ -153,36 +155,36 @@ const cwd = process.cwd();
         return;
       }
       case "bump": {
-        logger.error(
+        error(
           'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation'
         );
-        logger.error(
+        error(
           "To fix this, use `changeset version` instead, and update any scripts that use changesets"
         );
         throw new ExitError(1);
       }
       case "release": {
-        logger.error(
+        error(
           'In version 2 of changesets, "release" has been renamed to "publish" - see our changelog for an explanation'
         );
-        logger.error(
+        error(
           "To fix this, use `changeset publish` instead, and update any scripts that use changesets"
         );
         throw new ExitError(1);
       }
       default: {
-        logger.error(`Invalid command ${input[0]} was provided`);
+        error(`Invalid command ${input[0]} was provided`);
         throw new ExitError(1);
       }
     }
   }
 })().catch(err => {
   if (err instanceof InternalError) {
-    logger.error(
+    error(
       "The following error is an internal unexpected error, these should never happen."
     );
-    logger.error("Please open an issue with the following link");
-    logger.error(
+    error("Please open an issue with the following link");
+    error(
       `https://github.com/atlassian/changesets/issues/new?title=${encodeURIComponent(
         `Unexpected error during ${input[0] || "add"} command`
       )}&body=${encodeURIComponent(`## Error
@@ -205,6 +207,6 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
   if (err instanceof ExitError) {
     return process.exit(err.code);
   }
-  logger.error(err);
+  error(err);
   process.exit(1);
 });

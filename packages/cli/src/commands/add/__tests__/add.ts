@@ -3,12 +3,12 @@ import { copyFixtureIntoTempDir } from "jest-fixtures";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 import { askCheckboxPlus, askConfirm, askQuestion } from "../../../utils/cli";
 import addChangeset from "..";
 import writeChangeset from "../writeChangeset";
 
-jest.mock("../../../utils/logger");
 jest.mock("../../../utils/cli");
 jest.mock("@changesets/git");
 jest.mock("../writeChangeset");
@@ -64,14 +64,16 @@ const mockUserResponses = mockResponses => {
 };
 
 describe("Changesets", () => {
+  temporarilySilenceLogs();
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it("should generate changeset to patch a single package", async () => {
     const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(cwd, defaultConfig);
+    await addChangeset(cwd, { empty: false }, defaultConfig);
 
     const expectedChangeset = {
       summary: "summary message mock",
@@ -88,7 +90,24 @@ describe("Changesets", () => {
     );
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(cwd, { ...defaultConfig, commit: true });
+    await addChangeset(
+      cwd,
+      { empty: false },
+      { ...defaultConfig, commit: true }
+    );
     expect(git.add).toHaveBeenCalledTimes(1);
+  });
+  it("should create empty changeset when empty flag is passed in", async () => {
+    const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+
+    await addChangeset(cwd, { empty: true }, defaultConfig);
+
+    const expectedChangeset = {
+      releases: [],
+      summary: ""
+    };
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(expectedChangeset);
   });
 });

@@ -3,13 +3,13 @@ import table from "tty-table";
 import fs from "fs-extra";
 import path from "path";
 import getReleasePlan from "@changesets/get-release-plan";
+import { error, log, info } from "@changesets/logger";
 import {
   VersionType,
   Release,
   ComprehensiveRelease,
   Config
 } from "@changesets/types";
-import logger from "../../utils/logger";
 
 export default async function getStatus(
   cwd: string,
@@ -26,7 +26,7 @@ export default async function getStatus(
   const { changesets, releases } = releasePlan;
 
   if (changesets.length < 1) {
-    logger.error("No changesets present");
+    error("No changesets present");
     process.exit(1);
   }
 
@@ -40,9 +40,9 @@ export default async function getStatus(
 
   const print = verbose ? verbosePrint : SimplePrint;
   print("patch", releases);
-  logger.log("---");
+  log("---");
   print("minor", releases);
-  logger.log("---");
+  log("---");
   print("major", releases);
 
   return releasePlan;
@@ -51,12 +51,12 @@ export default async function getStatus(
 function SimplePrint(type: VersionType, releases: Array<Release>) {
   const packages = releases.filter(r => r.type === type);
   if (packages.length) {
-    logger.info(chalk`Packages to be bumped at {green ${type}}:\n`);
+    info(chalk`Packages to be bumped at {green ${type}}:\n`);
 
     const pkgs = packages.map(({ name }) => `- ${name}`).join("\n");
-    logger.log(chalk.green(pkgs));
+    log(chalk.green(pkgs));
   } else {
-    logger.info(chalk`{red NO} packages to be bumped at {green ${type}}`);
+    info(chalk`{red NO} packages to be bumped at {green ${type}}`);
   }
 }
 
@@ -66,7 +66,7 @@ function verbosePrint(
 ) {
   const packages = releases.filter(r => r.type === type);
   if (packages.length) {
-    logger.info(chalk`Packages to be bumped at {green ${type}}`);
+    info(chalk`Packages to be bumped at {green ${type}}`);
 
     const columns = packages.map(
       ({ name, newVersion: version, changesets }) => [
@@ -87,9 +87,9 @@ function verbosePrint(
       columns,
       { paddingLeft: 1, paddingRight: 0, headerAlign: "center", align: "left" }
     );
-    logger.log(t1.render() + "\n");
+    log(t1.render() + "\n");
   } else {
-    logger.info(
+    info(
       chalk`Running release would release {red NO} packages as a {green ${type}}`
     );
   }
