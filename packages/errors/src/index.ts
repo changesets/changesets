@@ -30,7 +30,7 @@ export class PreEnterButInPreModeError extends ExtendableError {
   }
 }
 
-export class InternalError extends Error {
+export class InternalError extends ExtendableError {
   constructor(message: string) {
     super(message);
   }
