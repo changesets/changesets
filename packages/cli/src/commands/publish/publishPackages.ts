@@ -12,7 +12,7 @@ export default async function publishPackages({
   otp
 }: {
   cwd: string;
-  access: "public" | "private";
+  access: "public" | "restricted";
   otp?: string;
 }) {
   const packages = await getWorkspaces({ cwd });
@@ -46,10 +46,10 @@ export default async function publishPackages({
 
 async function publishAPackage(
   pkg: Workspace,
-  access: "public" | "private",
+  access: "public" | "restricted",
   twoFactorState: TwoFactorState
 ) {
-  const { name, version } = pkg.config;
+  const { name, version, access: localAccess } = pkg.config;
   info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
   );
@@ -60,7 +60,7 @@ async function publishAPackage(
     name,
     {
       cwd: publishDir,
-      access
+      access: localAccess || access
     },
     twoFactorState
   );

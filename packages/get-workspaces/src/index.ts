@@ -19,6 +19,7 @@ export type PackageJSON = {
   devDependencies?: { [key: string]: string };
   optionalDependencies?: { [key: string]: string };
   private?: boolean;
+  access?: "restricted" | "public";
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };

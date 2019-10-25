@@ -41,6 +41,7 @@ export type PackageJSON = {
   peerDependencies?: { [key: string]: string };
   devDependencies?: { [key: string]: string };
   optionalDependencies?: { [key: string]: string };
+  access?: "restricted" | "public";
 };
 
 export type Linked = ReadonlyArray<ReadonlyArray<string>>;
@@ -49,14 +50,14 @@ export type Config = {
   changelog: false | readonly [string, any];
   commit: boolean;
   linked: Linked;
-  access: "public" | "private";
+  access: "public" | "restricted";
 };
 
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
   commit?: boolean;
   linked?: Linked;
-  access?: "public" | "private";
+  access?: "public" | "restricted";
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };
