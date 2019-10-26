@@ -105,6 +105,43 @@ describe("apply release plan", () => {
         version: "1.1.0"
       });
     });
+    it("should not update ranges set to *", async () => {
+      const releasePlan = new FakeReleasePlan(
+        [
+          {
+            id: "some-id",
+            releases: [{ name: "pkg-b", type: "minor" }],
+            summary: "a very useful summary"
+          }
+        ],
+        [
+          {
+            changesets: ["some-id"],
+            name: "pkg-b",
+            newVersion: "1.1.0",
+            oldVersion: "1.0.0",
+            type: "minor"
+          }
+        ]
+      );
+      let { changedFiles } = await testSetup(
+        "simple-star-dep",
+        releasePlan.getReleasePlan(),
+        releasePlan.config
+      );
+      let pkgPath = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
+
+      if (!pkgPath) throw new Error(`could not find an updated package json`);
+      let pkgJSON = await fs.readJSON(pkgPath);
+
+      expect(pkgJSON).toEqual({
+        name: "pkg-a",
+        version: "1.1.0",
+        dependencies: {
+          "pkg-b": "*"
+        }
+      });
+    });
     it("should update a version for two packages with different new versions", async () => {
       const releasePlan = new FakeReleasePlan();
       releasePlan.releases = [

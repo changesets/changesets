@@ -17,7 +17,8 @@
     "lodash.startcase": "^4.4.0",
     "outdent": "^0.5.0",
     "prettier": "^1.14.3",
-    "resolve-from": "^5.0.0"
+    "resolve-from": "^5.0.0",
+    "semver": "^5.4.1"
   },
   "devDependencies": {
     "jest-fixtures": "^0.5.0",
