@@ -77,11 +77,9 @@ export default async function applyReleasePlan(
   );
 
   // iterate over releases updating packages
-  let finalisedRelease = await Promise.all(
-    releaseWithChangelogs.map(release => {
-      return versionPackage(release, versionsToUpdate);
-    })
-  );
+  let finalisedRelease = releaseWithChangelogs.map(release => {
+    return versionPackage(release, versionsToUpdate);
+  });
 
   let prettierConfig = await prettier.resolveConfig(cwd);
 

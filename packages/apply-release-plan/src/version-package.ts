@@ -9,7 +9,7 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies"
 ] as const;
 
-export default async function versionPackage(
+export default function versionPackage(
   release: ComprehensiveRelease & {
     changelog: string | null;
     config: PackageJSON;
