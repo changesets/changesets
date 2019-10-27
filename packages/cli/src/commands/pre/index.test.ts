@@ -6,7 +6,6 @@ import path from "path";
 const consoleError = console.error;
 
 afterEach(async () => {
-  jest.clearAllMocks();
   console.error = consoleError;
 });
 

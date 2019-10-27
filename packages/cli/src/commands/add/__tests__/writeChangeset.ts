@@ -27,9 +27,6 @@ describe("simple project", () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
   it("should write a changeset", async () => {
     const changesetID = "ascii";
     // @ts-ignore

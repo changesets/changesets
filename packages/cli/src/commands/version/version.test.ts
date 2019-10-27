@@ -80,7 +80,6 @@ describe("running version in a simple project", () => {
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
     console.error = consoleError;
   });
 
