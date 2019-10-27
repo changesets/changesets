@@ -89,18 +89,10 @@ export type ChangelogFunctions = {
 export type PreState = {
   mode: "pre" | "exit";
   tag: string;
-  packages: {
-    [pkgName: string]: {
-      initialVersion: string;
-      highestVersionType: null | VersionType;
-
-      releaseLines: {
-        major: readonly string[];
-        minor: readonly string[];
-        patch: readonly string[];
-      };
-    };
+  initialVersions: {
+    [pkgName: string]: string;
   };
+  changesets: string[];
   // this is the x in 1.0.0-next.x
   version: number;
 };

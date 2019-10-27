@@ -19,27 +19,12 @@ it("should work", async () => {
   expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
     .toMatchInlineSnapshot(`
     Object {
-      "mode": "pre",
-      "packages": Object {
-        "pkg-a": Object {
-          "highestVersionType": null,
-          "initialVersion": "1.0.0",
-          "releaseLines": Object {
-            "major": Array [],
-            "minor": Array [],
-            "patch": Array [],
-          },
-        },
-        "pkg-b": Object {
-          "highestVersionType": null,
-          "initialVersion": "1.0.0",
-          "releaseLines": Object {
-            "major": Array [],
-            "minor": Array [],
-            "patch": Array [],
-          },
-        },
+      "changesets": Array [],
+      "initialVersions": Object {
+        "pkg-a": "1.0.0",
+        "pkg-b": "1.0.0",
       },
+      "mode": "pre",
       "tag": "next",
       "version": -1,
     }

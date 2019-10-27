@@ -11,13 +11,6 @@ import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
-import { InternalError } from "@changesets/errors";
-
-function highestVersionType(versionTypes: (VersionType)[]) {
-  if (versionTypes.includes("major")) return "major";
-  if (versionTypes.includes("minor")) return "minor";
-  return "patch";
-}
 
 function assembleReleasePlan(
   changesets: NewChangeset[],
@@ -31,25 +24,25 @@ function assembleReleasePlan(
       ? undefined
       : {
           ...preState,
-          packages: {
-            ...preState.packages
+          initialVersions: {
+            ...preState.initialVersions
           },
           version: preState.version + 1
         };
 
   if (updatedPreState !== undefined) {
     for (let workspace of workspaces) {
-      if (updatedPreState.packages[workspace.name] === undefined) {
-        updatedPreState.packages[workspace.name] = {
-          initialVersion: workspace.config.version,
-          highestVersionType: null,
-          releaseLines: {
-            major: [],
-            minor: [],
-            patch: []
-          }
-        };
+      if (updatedPreState.initialVersions[workspace.name] === undefined) {
+        updatedPreState.initialVersions[workspace.name] =
+          workspace.config.version;
       }
+    }
+    if (updatedPreState.mode !== "exit") {
+      let usedChangesetIds = new Set(updatedPreState.changesets);
+      updatedPreState.changesets = changesets.map(x => x.id);
+      changesets = changesets.filter(
+        changeset => !usedChangesetIds.has(changeset.id)
+      );
     }
   }
   // releases is, at this point a list of all packages we are going to releases,
@@ -61,18 +54,11 @@ function assembleReleasePlan(
     for (let workspace of workspaces) {
       if (semver.parse(workspace.config.version)!.prerelease.length) {
         if (!releases.has(workspace.name)) {
-          let versionType =
-            updatedPreState.packages[workspace.name].highestVersionType;
-          if (versionType === null) {
-            throw new InternalError(
-              "highestVersionType does not exist for a package that has versioned while in pre mode"
-            );
-          }
           releases.set(workspace.name, {
-            type: versionType,
+            type: "patch",
             name: workspace.name,
             changesets: [],
-            oldVersion: updatedPreState.packages[workspace.name].initialVersion
+            oldVersion: updatedPreState.initialVersions[workspace.name]
           });
         }
       }
@@ -98,20 +84,6 @@ function assembleReleasePlan(
   return {
     changesets,
     releases: [...releases.values()].map(incompleteRelease => {
-      if (updatedPreState !== undefined) {
-        let currentHighestVersionType =
-          updatedPreState.packages[incompleteRelease.name].highestVersionType;
-        updatedPreState.packages[incompleteRelease.name] = {
-          ...updatedPreState.packages[incompleteRelease.name],
-          highestVersionType:
-            currentHighestVersionType === null
-              ? incompleteRelease.type
-              : highestVersionType([
-                  incompleteRelease.type,
-                  currentHighestVersionType
-                ])
-        };
-      }
       return {
         ...incompleteRelease,
         newVersion: incrementVersion(incompleteRelease, updatedPreState)!

@@ -58,19 +58,12 @@ export async function enterPre(cwd: string, tag: string) {
   let newPreState: PreState = {
     mode: "pre",
     tag,
-    packages: {},
-    version: -1
+    initialVersions: {},
+    version: -1,
+    changesets: []
   };
   for (let workspace of workspaces) {
-    newPreState.packages[workspace.name] = {
-      initialVersion: workspace.config.version,
-      highestVersionType: null,
-      releaseLines: {
-        major: [],
-        minor: [],
-        patch: []
-      }
-    };
+    newPreState.initialVersions[workspace.name] = workspace.config.version;
   }
   await fs.writeFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
 }

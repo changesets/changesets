@@ -207,20 +207,20 @@ describe("pre", () => {
     await version(cwd, modifiedDefaultConfig);
     let workspaces = (await getWorkspaces({ cwd }))!;
     expect(workspaces.map(x => x.config)).toMatchInlineSnapshot(`
-                        Array [
-                          Object {
-                            "dependencies": Object {
-                              "pkg-b": "1.0.1-next.0",
-                            },
-                            "name": "pkg-a",
-                            "version": "1.0.1-next.0",
-                          },
-                          Object {
-                            "name": "pkg-b",
-                            "version": "1.0.1-next.0",
-                          },
-                        ]
-                `);
+                              Array [
+                                Object {
+                                  "dependencies": Object {
+                                    "pkg-b": "1.0.1-next.0",
+                                  },
+                                  "name": "pkg-a",
+                                  "version": "1.0.1-next.0",
+                                },
+                                Object {
+                                  "name": "pkg-b",
+                                  "version": "1.0.1-next.0",
+                                },
+                              ]
+                    `);
     await writeChangesets(
       [
         {
@@ -235,20 +235,20 @@ describe("pre", () => {
     await version(cwd, modifiedDefaultConfig);
     workspaces = (await getWorkspaces({ cwd }))!;
     expect(workspaces.map(x => x.config)).toMatchInlineSnapshot(`
-                        Array [
-                          Object {
-                            "dependencies": Object {
-                              "pkg-b": "1.0.1-next.0",
-                            },
-                            "name": "pkg-a",
-                            "version": "1.0.1-next.1",
-                          },
-                          Object {
-                            "name": "pkg-b",
-                            "version": "1.0.1-next.0",
-                          },
-                        ]
-                `);
+                              Array [
+                                Object {
+                                  "dependencies": Object {
+                                    "pkg-b": "1.0.1-next.0",
+                                  },
+                                  "name": "pkg-a",
+                                  "version": "1.0.1-next.1",
+                                },
+                                Object {
+                                  "name": "pkg-b",
+                                  "version": "1.0.1-next.0",
+                                },
+                              ]
+                    `);
     await writeChangesets(
       [
         {
@@ -262,20 +262,20 @@ describe("pre", () => {
     await version(cwd, modifiedDefaultConfig);
     workspaces = (await getWorkspaces({ cwd }))!;
     expect(workspaces.map(x => x.config)).toMatchInlineSnapshot(`
-                        Array [
-                          Object {
-                            "dependencies": Object {
-                              "pkg-b": "1.0.1-next.0",
-                            },
-                            "name": "pkg-a",
-                            "version": "1.0.1-next.2",
-                          },
-                          Object {
-                            "name": "pkg-b",
-                            "version": "1.0.1-next.0",
-                          },
-                        ]
-                `);
+                              Array [
+                                Object {
+                                  "dependencies": Object {
+                                    "pkg-b": "1.0.1-next.0",
+                                  },
+                                  "name": "pkg-a",
+                                  "version": "1.0.1-next.2",
+                                },
+                                Object {
+                                  "name": "pkg-b",
+                                  "version": "1.0.1-next.0",
+                                },
+                              ]
+                    `);
     await writeChangesets(
       [
         {
@@ -289,98 +289,99 @@ describe("pre", () => {
     await version(cwd, modifiedDefaultConfig);
     workspaces = (await getWorkspaces({ cwd }))!;
     expect(workspaces.map(x => x.config)).toMatchInlineSnapshot(`
-                        Array [
-                          Object {
-                            "dependencies": Object {
-                              "pkg-b": "1.0.1-next.0",
-                            },
-                            "name": "pkg-a",
-                            "version": "1.1.0-next.3",
-                          },
-                          Object {
-                            "name": "pkg-b",
-                            "version": "1.0.1-next.0",
-                          },
-                        ]
-                `);
+                              Array [
+                                Object {
+                                  "dependencies": Object {
+                                    "pkg-b": "1.0.1-next.0",
+                                  },
+                                  "name": "pkg-a",
+                                  "version": "1.1.0-next.3",
+                                },
+                                Object {
+                                  "name": "pkg-b",
+                                  "version": "1.0.1-next.0",
+                                },
+                              ]
+                    `);
     await pre(cwd, { command: "exit" });
     await version(cwd, modifiedDefaultConfig);
     workspaces = (await getWorkspaces({ cwd }))!;
     expect(workspaces.map(x => x.config)).toMatchInlineSnapshot(`
-                        Array [
-                          Object {
-                            "dependencies": Object {
-                              "pkg-b": "1.0.1",
-                            },
-                            "name": "pkg-a",
-                            "version": "1.1.0",
-                          },
-                          Object {
-                            "name": "pkg-b",
-                            "version": "1.0.1",
-                          },
-                        ]
-                `);
+                              Array [
+                                Object {
+                                  "dependencies": Object {
+                                    "pkg-b": "1.0.1",
+                                  },
+                                  "name": "pkg-a",
+                                  "version": "1.1.0",
+                                },
+                                Object {
+                                  "name": "pkg-b",
+                                  "version": "1.0.1",
+                                },
+                              ]
+                    `);
     expect(
       await fs.readFile(path.join(workspaces[0].dir, "CHANGELOG.md"), "utf8")
     ).toMatchInlineSnapshot(`
-            "# pkg-a
+      "# pkg-a
 
-            ## 1.1.0
+      ## 1.1.0
 
-            ### Minor Changes
+      ### Minor Changes
 
-            - a very useful summary for the third change
-
-            ### Patch Changes
-
-            - a very useful summary
-            - a very useful summary for the second change
-              - pkg-b@1.0.1
-
-            ## 1.1.0-next.3
-
-            ### Minor Changes
-
-            - a very useful summary for the third change
-
-            ## 1.0.1-next.2
-
-            ### Patch Changes
-
-            - a very useful summary for the second change
-
-            ## 1.0.1-next.1
-
-            ### Patch Changes
-
-            - a very useful summary
-
-            ## 1.0.1-next.0
-
-            ### Patch Changes
-
-            - Updated dependencies [undefined]
-              - pkg-b@1.0.1-next.0
-            "
-        `);
-    expect(
-      await fs.readFile(path.join(workspaces[1].dir, "CHANGELOG.md"), "utf8")
-    ).toMatchInlineSnapshot(`
-      "# pkg-b
-
-      ## 1.0.1
+      - a very useful summary for the third change
 
       ### Patch Changes
 
-      - a very useful summary for the first change
+      - a very useful summary
+      - a very useful summary for the second change
+      - Updated dependencies [undefined]
+        - pkg-b@1.0.1
+
+      ## 1.1.0-next.3
+
+      ### Minor Changes
+
+      - a very useful summary for the third change
+
+      ## 1.0.1-next.2
+
+      ### Patch Changes
+
+      - a very useful summary for the second change
+
+      ## 1.0.1-next.1
+
+      ### Patch Changes
+
+      - a very useful summary
 
       ## 1.0.1-next.0
 
       ### Patch Changes
 
-      - a very useful summary for the first change
+      - Updated dependencies [undefined]
+        - pkg-b@1.0.1-next.0
       "
     `);
+    expect(
+      await fs.readFile(path.join(workspaces[1].dir, "CHANGELOG.md"), "utf8")
+    ).toMatchInlineSnapshot(`
+            "# pkg-b
+
+            ## 1.0.1
+
+            ### Patch Changes
+
+            - a very useful summary for the first change
+
+            ## 1.0.1-next.0
+
+            ### Patch Changes
+
+            - a very useful summary for the first change
+            "
+        `);
   });
 });

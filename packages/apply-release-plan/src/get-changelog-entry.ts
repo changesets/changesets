@@ -1,16 +1,28 @@
 import {
   ChangelogFunctions,
   NewChangesetWithCommit,
-  PreState
+  VersionType
 } from "@changesets/types";
 
 import { ModCompWithWorkspace } from "@changesets/types";
+import startCase from "lodash.startcase";
 
 type ChangelogLines = {
-  major: Array<Promise<string> | string>;
-  minor: Array<Promise<string> | string>;
-  patch: Array<Promise<string> | string>;
+  major: Array<Promise<string>>;
+  minor: Array<Promise<string>>;
+  patch: Array<Promise<string>>;
 };
+
+async function generateChangesForVersionTypeMarkdown(
+  obj: ChangelogLines,
+  type: VersionType
+) {
+  let releaseLines = await Promise.all(obj[type]);
+  releaseLines = releaseLines.filter(x => x);
+  if (releaseLines.length) {
+    return `### ${startCase(type)} Changes\n\n${releaseLines.join("")}`;
+  }
+}
 
 // release is the package and version we are releasing
 export default async function generateMarkdown(
@@ -18,23 +30,13 @@ export default async function generateMarkdown(
   releases: ModCompWithWorkspace[],
   changesets: NewChangesetWithCommit[],
   changelogFuncs: ChangelogFunctions,
-  changelogOpts: any,
-  preState: PreState | undefined
+  changelogOpts: any
 ) {
   const releaseObj: ChangelogLines = {
     major: [],
     minor: [],
     patch: []
   };
-
-  if (preState !== undefined && preState.mode === "exit") {
-    let pkg = preState.packages[release.name];
-    if (pkg) {
-      releaseObj.major.push(...pkg.releaseLines.major);
-      releaseObj.minor.push(...pkg.releaseLines.minor);
-      releaseObj.patch.push(...pkg.releaseLines.patch);
-    }
-  }
 
   // I sort of feel we can do better, as ComprehensiveReleases have an array
   // of the relevant changesets but since we need the version type for the
@@ -71,8 +73,6 @@ export default async function generateMarkdown(
     relevantChangesetIds.has(cs.id)
   );
 
-  let patchWithoutDepReleaseLine = [...releaseObj.patch];
-
   releaseObj.patch.push(
     changelogFuncs.getDependencyReleaseLine(
       relevantChangesets,
@@ -81,12 +81,12 @@ export default async function generateMarkdown(
     )
   );
 
-  return {
-    patch: (await Promise.all(releaseObj.patch)).filter(x => x),
-    patchWithoutDepReleaseLine: (await Promise.all(
-      patchWithoutDepReleaseLine
-    )).filter(x => x),
-    minor: (await Promise.all(releaseObj.minor)).filter(x => x),
-    major: (await Promise.all(releaseObj.major)).filter(x => x)
-  };
+  return [
+    `## ${release.newVersion}`,
+    await generateChangesForVersionTypeMarkdown(releaseObj, "major"),
+    await generateChangesForVersionTypeMarkdown(releaseObj, "minor"),
+    await generateChangesForVersionTypeMarkdown(releaseObj, "patch")
+  ]
+    .filter(line => line)
+    .join("\n");
 }
