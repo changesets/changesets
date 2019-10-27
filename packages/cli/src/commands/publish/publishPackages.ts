@@ -16,7 +16,7 @@ export default async function publishPackages({
   cwd: string;
   access: "public" | "private";
   otp?: string;
-  preState?: PreState;
+  preState: PreState | undefined;
 }) {
   const packages = await getWorkspaces({ cwd });
   const workspacesByName = new Map(packages.map(x => [x.name, x]));

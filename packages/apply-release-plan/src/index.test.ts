@@ -50,7 +50,8 @@ class FakeReleasePlan {
   getReleasePlan(): ReleasePlan {
     return {
       changesets: this.changesets,
-      releases: this.releases
+      releases: this.releases,
+      preState: undefined
     };
   }
 }
@@ -286,7 +287,8 @@ describe("apply release plan", () => {
               newVersion: "1.1.0",
               changesets: ["quick-lions-devour"]
             }
-          ]
+          ],
+          preState: undefined
         });
         changedFiles = testResults.changedFiles;
       } catch (e) {

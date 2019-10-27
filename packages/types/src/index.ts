@@ -32,7 +32,7 @@ export type NewChangeset = {
 export type ReleasePlan = {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
-  preState?: PreState;
+  preState: PreState | undefined;
 };
 
 export type PackageJSON = {

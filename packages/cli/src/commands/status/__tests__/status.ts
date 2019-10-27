@@ -44,7 +44,8 @@ const simpleReleasePlan: ReleasePlan = {
       ],
       id: "ascii"
     }
-  ]
+  ],
+  preState: undefined
 };
 
 jest.mock("@changesets/git");

@@ -17,7 +17,7 @@ function assembleReleasePlan(
   workspaces: Workspace[],
   dependentsGraph: Map<string, string[]>,
   config: Config,
-  preState?: PreState
+  preState: PreState | undefined
 ): ReleasePlan {
   let updatedPreState: PreState | undefined =
     preState === undefined
