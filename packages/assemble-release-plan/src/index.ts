@@ -3,8 +3,7 @@ import {
   Workspace,
   Config,
   NewChangeset,
-  PreState,
-  VersionType
+  PreState
 } from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
