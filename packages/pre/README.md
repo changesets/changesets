@@ -1,6 +1,6 @@
 # @changesets/pre
 
-Enter and exit prerelease mode in a Changesets repo.
+Enter and exit pre mode in a Changesets repo.
 
 ## Usage
 

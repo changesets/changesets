@@ -4,7 +4,7 @@ You might want to release a version of your packages before you do an actual rel
 
 When you want to do a prerelease, you need to enter prerelease mode. You can do that with the `pre enter <tag>`. The tag that you need to pass is used in versions(e.g. `1.0.0-beta.0`) and for the npm dist tag.
 
-A pre-release workflow might look something like this:
+A prerelease workflow might look something like this:
 
 ```bash
 yarn changeset pre enter next
@@ -30,13 +30,13 @@ packages/
 yarn changeset prerelease next
 ```
 
-This command changes Changesets into prerelease mode which creates a `pre.json` file in the `.changeset` directory which stores Some Information Which I Haven't Totally Figured Out Yet.
+This command changes Changesets into prerelease mode which creates a `pre.json` file in the `.changeset` directory which stores information about the state the prerelease is in. For the specific data stored in the `pre.json` file, see the type definition of `PreState` in [`@changesets/types`](https://github.com/atlassian/changesets/tree/master/packages/types).
 
 ```
 yarn changeset version
 ```
 
-This command will version packages as you would normally expect but append `-the-tag-your-specified.0`. An important note is that this will bump dependent packages that wouldn't be bumped in normal releases because prerelease versions are not satisfied by most semver ranges(most semver ranges is a bad way to explain it)
+This command will version packages as you would normally expect but append `-next.0`. An important note is that this will bump dependent packages that wouldn't be bumped in normal releases because prerelease versions are not satisfied by most semver ranges.(e.g. `^5.0.0` is not satisfied by `5.1.0-next.0`)
 
 The repo would now look like this:
 
@@ -83,7 +83,7 @@ packages/
 yarn changeset version
 ```
 
-The version command will behave just like it does for the first versioning of a pre-release except the number at the end will be updated. The repo would now look like this:
+The version command will behave just like it does for the first versioning of a prerelease except the number at the end will be updated. The repo would now look like this:
 
 ```
 packages/
@@ -105,7 +105,7 @@ When you're ready to do the final release, your workflow would look something li
 yarn changeset pre exit
 yarn changeset version
 git add .
-git commit -m "Exit prerelease mode and bersion packages"
+git commit -m "Exit prerelease mode and version packages"
 yarn changeset publish
 git push --follow-tags
 ```

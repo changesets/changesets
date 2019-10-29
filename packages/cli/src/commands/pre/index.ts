@@ -1,4 +1,5 @@
 import * as logger from "@changesets/logger";
+import chalk from "chalk";
 import { exitPre, enterPre } from "@changesets/pre";
 import {
   PreExitButNotInPreModeError,
@@ -13,6 +14,10 @@ export default async function pre(
   if (options.command === "enter") {
     try {
       await enterPre(cwd, options.tag);
+      logger.success(`Entered pre mode with tag ${chalk.cyan(options.tag)}`);
+      logger.info(
+        "Run `changeset version` to version packages with prerelease versions"
+      );
     } catch (err) {
       if (err instanceof PreEnterButInPreModeError) {
         logger.error(
@@ -28,6 +33,10 @@ export default async function pre(
   } else {
     try {
       await exitPre(cwd);
+      logger.success(`Exited pre mode`);
+      logger.info(
+        "Run `changeset version` to version packages with normal versions"
+      );
     } catch (err) {
       if (err instanceof PreExitButNotInPreModeError) {
         logger.error("`changeset pre exit` can only be run when in pre mode");
