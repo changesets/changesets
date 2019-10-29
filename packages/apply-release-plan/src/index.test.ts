@@ -40,7 +40,7 @@ class FakeReleasePlan {
       changelog: false,
       commit: false,
       linked: [],
-      access: "private"
+      access: "restricted"
     };
 
     this.changesets = [this.baseChangeset, ...changesets];
@@ -66,7 +66,7 @@ async function testSetup(
       changelog: false,
       commit: false,
       linked: [],
-      access: "private"
+      access: "restricted"
     };
 
   let tempDir = await copyFixtureIntoTempDir(__dirname, fixtureName);
@@ -251,7 +251,7 @@ describe("apply release plan", () => {
         - pkg-b@2.0.0`);
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
-      
+
       ## 2.0.0`);
     });
   });

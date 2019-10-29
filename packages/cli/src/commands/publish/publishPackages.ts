@@ -1,5 +1,6 @@
 import semver from "semver";
 import chalk from "chalk";
+import { AccessType } from "@changesets/types";
 import getWorkspaces from "../../utils/getWorkspaces";
 import { Workspace } from "get-workspaces";
 import * as npmUtils from "./npm-utils";
@@ -12,7 +13,7 @@ export default async function publishPackages({
   otp
 }: {
   cwd: string;
-  access: "public" | "private";
+  access: AccessType;
   otp?: string;
 }) {
   const packages = await getWorkspaces({ cwd });
@@ -46,10 +47,11 @@ export default async function publishPackages({
 
 async function publishAPackage(
   pkg: Workspace,
-  access: "public" | "private",
+  access: AccessType,
   twoFactorState: TwoFactorState
 ) {
-  const { name, version } = pkg.config;
+  const { name, version, publishConfig } = pkg.config;
+  const localAccess = publishConfig && publishConfig.access;
   info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
   );
@@ -60,7 +62,7 @@ async function publishAPackage(
     name,
     {
       cwd: publishDir,
-      access
+      access: localAccess || access
     },
     twoFactorState
   );
