@@ -1,5 +1,5 @@
 import fixturez from "fixturez";
-import { read, parse, defaultConfig } from "./";
+import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 
