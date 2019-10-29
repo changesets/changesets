@@ -58,13 +58,15 @@ export default async function version(cwd: string, config: Config) {
   let changesets = [...oldChangesets, ...newChangesets];
   let preState = await readPreState(cwd);
 
-  warn(importantSeparator);
-  warn("You are in prerelease mode");
-  warn(
-    "If you meant to do a normal release you should revert these changes and run `changeset pre exits`"
-  );
-  warn("You can then run `changeset version` again to do a normal release");
-  warn(importantEnd);
+  if (preState === undefined) {
+    warn(importantSeparator);
+    warn("You are in prerelease mode");
+    warn(
+      "If you meant to do a normal release you should revert these changes and run `changeset pre exits`"
+    );
+    warn("You can then run `changeset version` again to do a normal release");
+    warn(importantEnd);
+  }
 
   if (
     changesets.length === 0 &&
