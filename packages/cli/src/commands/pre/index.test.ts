@@ -4,11 +4,7 @@ import * as fs from "fs-extra";
 import path from "path";
 import { PreState } from "@changesets/types";
 import * as logger from "@changesets/logger";
-import {
-  PreEnterButInPreModeError,
-  PreExitButNotInPreModeError,
-  ExitError
-} from "@changesets/errors";
+import { ExitError } from "@changesets/errors";
 import chalk from "chalk";
 
 let f = fixturez(__dirname);
