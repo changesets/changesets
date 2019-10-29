@@ -58,7 +58,7 @@ export default async function version(cwd: string, config: Config) {
   let changesets = [...oldChangesets, ...newChangesets];
   let preState = await readPreState(cwd);
 
-  if (preState === undefined) {
+  if (preState !== undefined) {
     warn(importantSeparator);
     warn("You are in prerelease mode");
     warn(
