@@ -1,7 +1,9 @@
+import { AccessType } from "@changesets/types";
+
 export type CliOptions = {
   commit?: boolean;
   changelog?: string;
-  access?: "public" | "private";
+  access?: AccessType;
   sinceMaster?: boolean;
   verbose?: boolean;
   output?: string;

@@ -44,10 +44,10 @@
       "default": false
     },
     "access": {
-      "enum": ["private", "public"],
+      "enum": ["restricted", "public"],
       "type": "string",
-      "description": "Determines whether changesets should publish packages to the registry publicly or privately",
-      "default": "private"
+      "description": "Determines whether changesets should publish packages to the registry publicly or to a restricted scope",
+      "default": "restricted"
     }
   }
 }

@@ -1,6 +1,7 @@
 import * as fs from "fs-extra";
 import path from "path";
 import { ValidationError } from "@changesets/errors";
+import { warn } from "@changesets/logger";
 import { Config, WrittenConfig, Workspace } from "@changesets/types";
 import packageJson from "../package.json";
 
@@ -11,7 +12,7 @@ export let defaultWrittenConfig = {
   changelog: "@changesets/cli/changelog",
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
-  access: "private"
+  access: "restricted"
 } as const;
 
 function getNormalisedChangelogOption(
@@ -55,17 +56,24 @@ export let parse = (
     );
   }
 
+  let normalizedAccess: WrittenConfig["access"] = json.access;
+  if ((json.access as string) === "private") {
+    normalizedAccess = "restricted";
+    warn(
+      'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".'
+    );
+  }
   if (
-    json.access !== undefined &&
-    json.access !== "private" &&
-    json.access !== "public"
+    normalizedAccess !== undefined &&
+    normalizedAccess !== "restricted" &&
+    normalizedAccess !== "public"
   ) {
     messages.push(
       `The \`access\` option is set as ${JSON.stringify(
-        json.access,
+        normalizedAccess,
         null,
         2
-      )} when the only valid values are undefined, "public" or "private"`
+      )} when the only valid values are undefined, "public" or "restricted"`
     );
   }
 
@@ -136,7 +144,9 @@ export let parse = (
         : json.changelog
     ),
     access:
-      json.access === undefined ? defaultWrittenConfig.access : json.access,
+      normalizedAccess === undefined
+        ? defaultWrittenConfig.access
+        : normalizedAccess,
     commit:
       json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
     linked:
