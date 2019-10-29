@@ -35,6 +35,7 @@ const consoleError = console.error;
 jest.mock("../../utils/cli");
 jest.mock("@changesets/git");
 jest.mock("human-id");
+jest.mock("@changesets/logger");
 
 // @ts-ignore
 git.add.mockImplementation(() => Promise.resolve(true));

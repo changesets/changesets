@@ -20,9 +20,7 @@ export default async function pre(
       );
     } catch (err) {
       if (err instanceof PreEnterButInPreModeError) {
-        logger.error(
-          "`changeset pre enter` cannot be run when in prerelease mode"
-        );
+        logger.error("`changeset pre enter` cannot be run when in pre mode");
         logger.info(
           "If you're trying to exit pre mode, run `changeset pre exit`"
         );
