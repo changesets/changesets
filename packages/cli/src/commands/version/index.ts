@@ -17,6 +17,9 @@ let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
 );
 
+let importantEnd =
+  "----------------------------------------------------------------------";
+
 // this function only exists while we wait for v1 changesets to be obsoleted
 // and should be deleted before v3
 async function getOldChangesetsAndWarn(
@@ -37,9 +40,7 @@ async function getOldChangesetsAndWarn(
   warn(
     "In a future major version, we will no longer apply these old changesets, and will instead throw here"
   );
-  warn(
-    "----------------------------------------------------------------------"
-  );
+  warn(importantEnd);
 
   let thing = unreleasedChangesets.map(({ releases, id, summary }) => ({
     releases,
@@ -56,6 +57,14 @@ export default async function version(cwd: string, config: Config) {
 
   let changesets = [...oldChangesets, ...newChangesets];
   let preState = await readPreState(cwd);
+
+  warn(importantSeparator);
+  warn("You are in prerelease mode");
+  warn(
+    "If you meant to do a normal release you should revert these changes and run `changeset pre exits`"
+  );
+  warn("You can then run `changeset version` again to do a normal release");
+  warn(importantEnd);
 
   if (
     changesets.length === 0 &&

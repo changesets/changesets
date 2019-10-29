@@ -1,4 +1,4 @@
-import semver from "semver";
+import semver, { SemVer } from "semver";
 import chalk from "chalk";
 import getWorkspaces from "../../utils/getWorkspaces";
 import { Workspace } from "get-workspaces";
@@ -32,7 +32,10 @@ export default async function publishPackages({
           token: otp,
           isRequired: Promise.resolve(true)
         };
-  const unpublishedPackagesInfo = await getUnpublishedPackages(publicPackages);
+  const unpublishedPackagesInfo = await getUnpublishedPackages(
+    publicPackages,
+    preState
+  );
 
   if (unpublishedPackagesInfo.length === 0) {
     warn("No unpublished packages to publish");
@@ -53,9 +56,9 @@ export default async function publishPackages({
         twoFactorState,
         preState === undefined
           ? "latest"
-          : pkgInfo.isPublished
-          ? preState.tag
-          : "latest"
+          : pkgInfo.publishedState === "only-pre"
+          ? "latest"
+          : preState.tag
       )
     );
   }
@@ -93,22 +96,43 @@ async function publishAPackage(
   };
 }
 
+type PublishedState = "never" | "published" | "only-pre";
+
 type PkgInfo = {
   name: string;
   localVersion: string;
-  isPublished: boolean;
+  publishedState: PublishedState;
   publishedVersion: string;
 };
 
-async function getUnpublishedPackages(packages: Array<Workspace>) {
+async function getUnpublishedPackages(
+  packages: Array<Workspace>,
+  preState: PreState | undefined
+) {
   const results: Array<PkgInfo> = await Promise.all(
     packages.map(async pkg => {
       const config = pkg.config;
       const response = await npmUtils.infoAllow404(config.name);
+      let publishedState: PublishedState = "never";
+      if (response.published) {
+        publishedState = "published";
+        if (preState !== undefined) {
+          if (
+            response.pkgInfo.versions &&
+            response.pkgInfo.versions.every(
+              (version: string) =>
+                new SemVer(version).prerelease[0] === preState.tag
+            )
+          ) {
+            publishedState = "only-pre";
+          }
+        }
+      }
+
       return {
         name: config.name,
         localVersion: config.version,
-        isPublished: response.published,
+        publishedState: publishedState,
         publishedVersion: response.pkgInfo.version || ""
       };
     })
@@ -117,14 +141,23 @@ async function getUnpublishedPackages(packages: Array<Workspace>) {
   const packagesToPublish: Array<PkgInfo> = [];
 
   for (const pkgInfo of results) {
-    const { name, isPublished, localVersion, publishedVersion } = pkgInfo;
-    if (!isPublished) {
+    const { name, publishedState, localVersion, publishedVersion } = pkgInfo;
+    if (publishedState === "never") {
       packagesToPublish.push(pkgInfo);
     } else if (semver.gt(localVersion, publishedVersion)) {
       packagesToPublish.push(pkgInfo);
       info(
         `${name} is being published because our local version (${localVersion}) is ahead of npm's (${publishedVersion})`
       );
+      if (preState !== undefined && publishedState === "only-pre") {
+        info(
+          `${name} is being published to ${chalk.cyan(
+            "latest"
+          )} rather than ${chalk.cyan(
+            preState.tag
+          )} because there has not been a regular release of it yet`
+        );
+      }
     } else if (semver.lt(localVersion, publishedVersion)) {
       // If the local version is behind npm, something is wrong, we warn here, and by not getting published later, it will fail
       warn(
