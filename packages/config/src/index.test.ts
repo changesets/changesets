@@ -1,6 +1,9 @@
 import fixturez from "fixturez";
-import { read, parse } from "./";
+import { read, parse, defaultConfig } from "./";
 import jestInCase from "jest-in-case";
+import * as logger from "@changesets/logger";
+
+jest.mock("@changesets/logger");
 
 let f = fixturez(__dirname);
 
@@ -211,5 +214,17 @@ The package \\"pkg-a\\" is specified in the \`linked\` option but it is not foun
 "Some errors occurred when validating the changesets config:
 The package \\"pkg-a\\" is in multiple sets of linked packages. Packages can only be in a single set of linked packages."
 `);
+  });
+  test("access private warns and sets to restricted", () => {
+    let config = unsafeParse({ access: "private" }, []);
+    expect(config).toEqual({
+      linked: [],
+      changelog: ["@changesets/cli/changelog", null],
+      commit: false,
+      access: "restricted"
+    });
+    expect(logger.warn).toBeCalledWith(
+      'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".'
+    );
   });
 });
