@@ -24,6 +24,9 @@ Several of these have associated type definitions, which you can find in [our ty
 - **dependency** - A package that is depended upon by another given package.
 - **dependent** - A package which depends on another given package. This is frequently used in the context of the getting the dependents of a package so they can be released.
 - **release** - The combination of versioning and publishing a package or packages which may include a build process before publishing
+- **prereleases** - A pre-release is a release that uses a tag, and is not published as `latest` on npm. This is designed for when you want to share code, but are not yet ready for it to be the main package used by everyone. Pre-releases for packages are common, but pre-releases within a monorepo presents unique problems. You can see our exhaustive pre-release documentation [in our prereleases documentation](./preleases.md). In addition, there are two different approaches to pre-releases which are defined for use separately.
+- **RC prerelease** - An RC prerelease is done before an intended important release, likely a major release. It includes semver information about what the next intended release version is, a tag, and an iterated number for the prerelease. The output of this is intended to be committed, and then further work done on the branch. RC prereleases are always published to the `next` tag on npm
+- **snapshot prerelease** - A snapshot pre-release is intended to make it easy to test all changes at a particular git commit. It is published at `0.0.0` and uses the git hash as the tag. This should be used as a less formal method than a release candidate to make it easy to install and test changes.
 
 ## Things that we haven't figured out how to explain well yet
 
