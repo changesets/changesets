@@ -17,7 +17,6 @@ let preStateForSimpleProject: PreState = {
     "pkg-b": "1.0.0"
   },
   mode: "pre",
-  version: -1,
   tag: "next"
 };
 

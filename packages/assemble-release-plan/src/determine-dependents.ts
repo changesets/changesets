@@ -4,8 +4,7 @@ import {
   Workspace,
   DependencyType,
   PackageJSON,
-  VersionType,
-  PreState
+  VersionType
 } from "@changesets/types";
 import { InternalRelease, PreInfo } from "./types";
 import { incrementVersion } from "./increment";

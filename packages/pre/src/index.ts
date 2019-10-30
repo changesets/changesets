@@ -59,7 +59,6 @@ export async function enterPre(cwd: string, tag: string) {
     mode: "pre",
     tag,
     initialVersions: {},
-    version: -1,
     changesets: []
   };
   for (let workspace of workspaces) {
