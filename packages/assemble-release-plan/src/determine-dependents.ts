@@ -7,7 +7,7 @@ import {
   VersionType,
   PreState
 } from "@changesets/types";
-import { InternalRelease } from "./types";
+import { InternalRelease, PreInfo } from "./types";
 import { incrementVersion } from "./increment";
 
 /*
@@ -26,7 +26,7 @@ export default function getDependents(
   releases: Map<string, InternalRelease>,
   workspaces: Workspace[],
   dependencyGraph: Map<string, string[]>,
-  preState: PreState | undefined
+  preInfo: PreInfo | undefined
 ): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
@@ -78,7 +78,7 @@ export default function getDependents(
             // TODO validate this - I don't think it's right anymore
             !releases.has(dependent) &&
             !semver.satisfies(
-              incrementVersion(nextRelease, preState),
+              incrementVersion(nextRelease, preInfo),
               versionRange
             )
           ) {

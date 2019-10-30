@@ -99,6 +99,4 @@ export type PreState = {
     [pkgName: string]: string;
   };
   changesets: string[];
-  // this is the x in 1.0.0-next.x
-  version: number;
 };
