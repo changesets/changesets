@@ -89,8 +89,8 @@ The version command will behave just like it does for the first versioning of a 
 packages/
   pkg-a@1.1.0-next.1 has dep on pkg-b@^2.0.1
   pkg-b@2.1.0-next.0 has no deps
-  pkg-c@3.0.1-next.1 has no deps
-  pkg-d@1.0.0-next.1 has no deps
+  pkg-c@3.0.1-next.0 has no deps
+  pkg-d@1.0.0-next.0 has no deps
 ```
 
 ```
