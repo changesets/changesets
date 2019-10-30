@@ -198,7 +198,7 @@ describe("running version in a simple project", () => {
 const f = fixturez(__dirname);
 
 describe("pre", () => {
-  it.only("should work", async () => {
+  it("should work", async () => {
     let cwd = f.copy("simple-project");
     await pre(cwd, { command: "enter", tag: "next" });
     await writeChangeset(
