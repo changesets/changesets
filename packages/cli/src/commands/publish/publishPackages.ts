@@ -104,7 +104,7 @@ type PkgInfo = {
   name: string;
   localVersion: string;
   publishedState: PublishedState;
-  publishedVersion: string;
+  publishedVersions: string[];
 };
 
 async function getUnpublishedPackages(
@@ -135,7 +135,7 @@ async function getUnpublishedPackages(
         name: config.name,
         localVersion: config.version,
         publishedState: publishedState,
-        publishedVersion: response.pkgInfo.version || ""
+        publishedVersions: response.pkgInfo.versions || []
       };
     })
   );
@@ -143,13 +143,11 @@ async function getUnpublishedPackages(
   const packagesToPublish: Array<PkgInfo> = [];
 
   for (const pkgInfo of results) {
-    const { name, publishedState, localVersion, publishedVersion } = pkgInfo;
-    if (publishedState === "never") {
-      packagesToPublish.push(pkgInfo);
-    } else if (semver.gt(localVersion, publishedVersion)) {
+    const { name, publishedState, localVersion, publishedVersions } = pkgInfo;
+    if (!publishedVersions.includes(localVersion)) {
       packagesToPublish.push(pkgInfo);
       info(
-        `${name} is being published because our local version (${localVersion}) is ahead of npm's (${publishedVersion})`
+        `${name} is being published because our local version (${localVersion}) has not been published on npm`
       );
       if (preState !== undefined && publishedState === "only-pre") {
         info(
@@ -160,10 +158,10 @@ async function getUnpublishedPackages(
           )} because there has not been a regular release of it yet`
         );
       }
-    } else if (semver.lt(localVersion, publishedVersion)) {
+    } else {
       // If the local version is behind npm, something is wrong, we warn here, and by not getting published later, it will fail
       warn(
-        `${name} is not being published because version ${publishedVersion} is already published on npm and we are trying to publish version ${localVersion}`
+        `${name} is not being published because version ${localVersion} is already published on npm`
       );
     }
   }
