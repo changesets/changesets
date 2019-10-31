@@ -29,34 +29,24 @@ const getAllDependencies = (config: PackageJSON) => {
   return allDependencies;
 };
 
-export default async function getDependencyGraph(
-  packages: Array<Workspace>,
-  cwd: string
-): Promise<{
+export default function getDependencyGraph(
+  rootWorkspace: Workspace,
+  packages: Array<Workspace>
+): {
   graph: Map<string, { pkg: Workspace; dependencies: Array<string> }>;
   valid: boolean;
-}> {
+} {
   const graph = new Map<
     string,
     { pkg: Workspace; dependencies: Array<string> }
   >();
   let valid = true;
 
-  const pkgRoot = await fs
-    .readFile(path.resolve(cwd, "package.json"), "utf8")
-    .then(JSON.parse);
-
-  const pkgRootConfigged = {
-    config: pkgRoot,
-    name: pkgRoot.name,
-    dir: path.resolve(cwd)
-  };
-
   const packagesByName: { [key: string]: Workspace } = {
-    [pkgRoot.name]: pkgRootConfigged
+    [rootWorkspace.name]: rootWorkspace
   };
 
-  const queue = [pkgRootConfigged];
+  const queue = [rootWorkspace];
 
   for (const pkg of packages) {
     queue.push(pkg);

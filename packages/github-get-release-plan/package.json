@@ -1,0 +1,14 @@
+{
+  "name": "@changesets/github-get-release-plan",
+  "version": "0.0.0",
+  "main": "dist/github-get-release-plan.cjs.js",
+  "module": "dist/github-get-release-plan.esm.js",
+  "license": "MIT",
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/github-get-release-plan",
+  "dependencies": {
+    "@octokit/rest": "^16.34.0",
+    "@types/micromatch": "^3.1.0",
+    "globby": "^9.2.0",
+    "micromatch": "^4.0.2"
+  }
+}
