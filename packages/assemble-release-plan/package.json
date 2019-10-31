@@ -8,6 +8,7 @@
   "repository": "https://github.com/changesets/changesets/tree/master/packages/assemble-release-plan",
   "dependencies": {
     "@babel/runtime": "^7.4.4",
+    "@changesets/errors": "^0.1.0",
     "@changesets/types": "^0.3.0",
     "semver": "^5.4.1"
   },

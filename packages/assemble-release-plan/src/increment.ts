@@ -1,0 +1,23 @@
+import * as semver from "semver";
+import { InternalRelease, PreInfo } from "./types";
+import { InternalError } from "@changesets/errors";
+
+export function incrementVersion(
+  release: InternalRelease,
+  preInfo: PreInfo | undefined
+) {
+  let version = semver.inc(release.oldVersion, release.type)!;
+  if (preInfo !== undefined && preInfo.state.mode !== "exit") {
+    let preVersion = preInfo.preVersions.get(release.name);
+    if (preVersion === undefined) {
+      console.log(preInfo.preVersions.entries());
+      throw new InternalError(
+        `preVersion for ${release.name} does not exis when preState is defined`
+      );
+    }
+    // why are we adding this ourselves rather than passing 'pre' + versionType to semver.inc?
+    // because semver.inc with prereleases is confusing and this seems easier
+    version += `-${preInfo.state.tag}.${preVersion}`;
+  }
+  return version;
+}

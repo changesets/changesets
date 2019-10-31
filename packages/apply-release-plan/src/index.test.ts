@@ -50,7 +50,8 @@ class FakeReleasePlan {
   getReleasePlan(): ReleasePlan {
     return {
       changesets: this.changesets,
-      releases: this.releases
+      releases: this.releases,
+      preState: undefined
     };
   }
 }
@@ -163,8 +164,9 @@ describe("apply release plan", () => {
       let pkgPathA = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
       let pkgPathB = changedFiles.find(b => b.endsWith("pkg-b/package.json"));
 
-      if (!pkgPathA || !pkgPathB)
+      if (!pkgPathA || !pkgPathB) {
         throw new Error(`could not find an updated package json`);
+      }
       let pkgJSONA = await fs.readJSON(pkgPathA);
       let pkgJSONB = await fs.readJSON(pkgPathB);
 
@@ -248,6 +250,7 @@ describe("apply release plan", () => {
       - Hey, let's have fun with testing!
 
       ### Patch Changes
+      
         - pkg-b@2.0.0`);
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
@@ -284,7 +287,8 @@ describe("apply release plan", () => {
               newVersion: "1.1.0",
               changesets: ["quick-lions-devour"]
             }
-          ]
+          ],
+          preState: undefined
         });
         changedFiles = testResults.changedFiles;
       } catch (e) {

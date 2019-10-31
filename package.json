@@ -95,5 +95,8 @@
     "packages": [
       "packages/*"
     ]
+  },
+  "jest": {
+    "clearMocks": true
   }
 }
