@@ -15,8 +15,9 @@ let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
 );
 
-let importantEnd =
-  "----------------------------------------------------------------------";
+let importantEnd = chalk.red(
+  "----------------------------------------------------------------------"
+);
 
 export default async function run(
   cwd: string,

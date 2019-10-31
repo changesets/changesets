@@ -17,8 +17,9 @@ let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
 );
 
-let importantEnd =
-  "----------------------------------------------------------------------";
+let importantEnd = chalk.red(
+  "----------------------------------------------------------------------"
+);
 
 // this function only exists while we wait for v1 changesets to be obsoleted
 // and should be deleted before v3
@@ -58,7 +59,7 @@ export default async function version(cwd: string, config: Config) {
   let changesets = [...oldChangesets, ...newChangesets];
   let preState = await readPreState(cwd);
 
-  if (preState !== undefined) {
+  if (preState !== undefined && preState.mode === "pre") {
     warn(importantSeparator);
     warn("You are in prerelease mode");
     warn(
