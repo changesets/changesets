@@ -6,7 +6,7 @@ dotenv.config();
 import Octokit from "@octokit/rest";
 import nodePath from "path";
 import micromatch from "micromatch";
-import { Workspace, NewChangeset } from "@changesets/types";
+import { Workspace, NewChangeset, PreState } from "@changesets/types";
 import parseChangeset from "@changesets/parse";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
 import { parse as parseConfig } from "@changesets/config";
@@ -63,6 +63,7 @@ async function fetchChangeset({
   let changeset = parseChangeset(changesetContent);
   // @ts-ignore
   changeset.id = nodePath.basename(path).replace(".md", "");
+  // @ts-ignore
   return changeset;
 }
 
@@ -94,6 +95,9 @@ let getReleasePlanFromGitHub = async ({
     recursive: "1",
     tree_sha: ref
   });
+  let preJsonContentPromise: Promise<undefined | PreState> = Promise.resolve(
+    undefined
+  );
   let itemsByDirPath = new Map();
   let potentialWorkspaceDirectories: string[] = [];
   let changesetPromises: (Promise<NewChangeset>)[] = [];
@@ -110,6 +114,13 @@ let getReleasePlanFromGitHub = async ({
       changesetPromises.push(
         fetchChangeset({ owner, repo, path: item.path, ref })
       );
+    } else if (item.path === ".changeset/pre.json") {
+      preJsonContentPromise = fetchJsonFile({
+        owner,
+        repo,
+        path: ".changeset/pre.json",
+        ref
+      });
     }
   }
   let rootPackageJsonContent = await rootPackageJsonContentsPromise;
@@ -153,7 +164,8 @@ let getReleasePlanFromGitHub = async ({
     await Promise.all(changesetPromises),
     workspaces,
     getDependentsGraphFromWorkspaces(workspaces, rootWorkspace),
-    parseConfig(await configJsonPromise, workspaces)
+    parseConfig(await configJsonPromise, workspaces),
+    await preJsonContentPromise
   );
 
   return releasePlan;
