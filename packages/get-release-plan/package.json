@@ -10,6 +10,7 @@
     "@babel/runtime": "^7.4.4",
     "@changesets/assemble-release-plan": "^0.2.1",
     "@changesets/config": "^0.2.1",
+    "@changesets/pre": "^0.0.0",
     "@changesets/read": "^0.3.0",
     "@changesets/types": "^0.3.0",
     "get-dependents-graph": "^0.1.1",

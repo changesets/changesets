@@ -17,7 +17,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(1);
@@ -43,7 +44,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(4);
@@ -66,7 +68,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toEqual(1);
@@ -85,7 +88,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toEqual(2);
@@ -105,7 +109,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"]] }
+      { ...defaultConfig, linked: [["pkg-a", "pkg-b"]] },
+      undefined
     );
 
     expect(releases.length).toEqual(2);
@@ -127,7 +132,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b", "pkg-c"]] }
+      { ...defaultConfig, linked: [["pkg-a", "pkg-b", "pkg-c"]] },
+      undefined
     );
 
     expect(releases.length).toEqual(2);
@@ -157,7 +163,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] }
+      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
+      undefined
     );
 
     expect(releases.length).toEqual(4);
@@ -171,7 +178,8 @@ describe("assemble-release-plan", () => {
       [],
       setup.workspaces,
       setup.dependentsGraph,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] }
+      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
+      undefined
     );
 
     expect(releases).toEqual([]);
@@ -184,7 +192,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] }
+      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
+      undefined
     );
 
     expect(releases.length).toEqual(3);
@@ -203,7 +212,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] }
+      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
+      undefined
     );
 
     expect(releases.length).toEqual(3);
@@ -227,7 +237,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-c"]] }
+      { ...defaultConfig, linked: [["pkg-a", "pkg-c"]] },
+      undefined
     );
 
     expect(releases).toMatchObject([
@@ -256,7 +267,8 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toEqual(2);
@@ -285,7 +297,8 @@ describe("version update thoroughness", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
     expect(releases.length).toEqual(2);
     expect(releases[0].name).toEqual("pkg-a");
@@ -303,7 +316,8 @@ describe("version update thoroughness", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toEqual(3);
@@ -324,7 +338,8 @@ describe("version update thoroughness", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toEqual(4);
@@ -353,7 +368,8 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(2);
@@ -369,7 +385,8 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(1);
@@ -387,7 +404,8 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(2);
@@ -407,7 +425,8 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(2);
@@ -423,7 +442,8 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(1);
@@ -441,7 +461,8 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(2);
@@ -461,7 +482,8 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(2);
@@ -483,7 +505,8 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.workspaces,
       setup.dependentsGraph,
-      defaultConfig
+      defaultConfig,
+      undefined
     );
 
     expect(releases.length).toBe(3);

@@ -1,22 +1,14 @@
 // This function takes in changesets and returns one release per
 // package listed in the changesets
 
-import { NewChangeset, Workspace, VersionType } from "@changesets/types";
+import { NewChangeset, Workspace } from "@changesets/types";
 import { InternalRelease } from "./types";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
   workspaces: Workspace[]
-): InternalRelease[] {
-  let releases: Map<
-    string,
-    {
-      name: string;
-      type: VersionType;
-      oldVersion: string;
-      changesets: string[];
-    }
-  > = new Map();
+): Map<string, InternalRelease> {
+  let releases: Map<string, InternalRelease> = new Map();
 
   changesets.forEach(changeset => {
     changeset.releases.forEach(({ name, type }) => {
@@ -53,5 +45,5 @@ export default function flattenReleases(
     });
   });
 
-  return [...releases.values()];
+  return releases;
 }

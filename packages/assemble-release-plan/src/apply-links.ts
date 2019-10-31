@@ -15,7 +15,7 @@ import { InternalRelease } from "./types";
   modified array, but we decided both of those are worse than this solution.
 */
 function applyLinks(
-  releases: InternalRelease[],
+  releases: Map<string, InternalRelease>,
   workspaces: Workspace[],
   linked: Linked
 ): boolean {
@@ -25,7 +25,7 @@ function applyLinks(
   // We do this for each set of linked packages
   for (let linkedPackages of linked) {
     // First we filter down to all the relevent releases for one set of linked packages
-    let releasingLinkedPackages = releases.filter(release =>
+    let releasingLinkedPackages = [...releases.values()].filter(release =>
       linkedPackages.includes(release.name)
     );
 

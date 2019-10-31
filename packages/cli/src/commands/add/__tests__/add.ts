@@ -65,9 +65,6 @@ const mockUserResponses = mockResponses => {
 
 describe("Changesets", () => {
   temporarilySilenceLogs();
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
 
   it("should generate changeset to patch a single package", async () => {
     const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");

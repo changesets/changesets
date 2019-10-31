@@ -106,10 +106,11 @@ export let getOtpCode = async (twoFactorState: TwoFactorState) => {
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
   pkgName: string,
-  opts: { cwd: string; access?: string },
+  opts: { cwd: string; access?: string; tag: string },
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   let publishFlags = opts.access ? ["--access", opts.access] : [];
+  publishFlags.push("--tag", opts.tag);
   if ((await twoFactorState.isRequired) && !isCI) {
     let otpCode = await getOtpCode(twoFactorState);
     publishFlags.push("--otp", otpCode);
@@ -158,7 +159,7 @@ async function internalPublish(
 
 export function publish(
   pkgName: string,
-  opts: { cwd: string; access?: string },
+  opts: { cwd: string; access?: string; tag: string },
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   return npmRequestLimit(() => {

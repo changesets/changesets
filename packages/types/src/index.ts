@@ -34,6 +34,7 @@ export type NewChangeset = {
 export type ReleasePlan = {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
+  preState: PreState | undefined;
 };
 
 export type PackageJSON = {
@@ -89,4 +90,13 @@ export type GetDependencyReleaseLine = (
 export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
   getDependencyReleaseLine: GetDependencyReleaseLine;
+};
+
+export type PreState = {
+  mode: "pre" | "exit";
+  tag: string;
+  initialVersions: {
+    [pkgName: string]: string;
+  };
+  changesets: string[];
 };

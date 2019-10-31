@@ -1,5 +1,3 @@
-import startCase from "lodash.startcase";
-
 import {
   ChangelogFunctions,
   NewChangesetWithCommit,
@@ -7,6 +5,7 @@ import {
 } from "@changesets/types";
 
 import { ModCompWithWorkspace } from "@changesets/types";
+import startCase from "lodash.startcase";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -14,12 +13,15 @@ type ChangelogLines = {
   patch: Array<Promise<string>>;
 };
 
-async function smallHelper(obj: ChangelogLines, type: VersionType) {
-  const releaseLines = obj[type];
-  if (!releaseLines.length) return "";
-  const resolvedLines = await Promise.all(releaseLines);
-
-  return `### ${startCase(type)} Changes\n\n${resolvedLines.join("")}`;
+async function generateChangesForVersionTypeMarkdown(
+  obj: ChangelogLines,
+  type: VersionType
+) {
+  let releaseLines = await Promise.all(obj[type]);
+  releaseLines = releaseLines.filter(x => x);
+  if (releaseLines.length) {
+    return `### ${startCase(type)} Changes\n\n${releaseLines.join("")}`;
+  }
 }
 
 // release is the package and version we are releasing
@@ -49,11 +51,6 @@ export default async function generateMarkdown(
     }
   });
 
-  // First, we construct the release lines, summaries of changesets that caused us to be released
-  const majorReleaseLines = await smallHelper(releaseObj, "major");
-  const minorReleaseLines = await smallHelper(releaseObj, "minor");
-  const patchReleaseLines = await smallHelper(releaseObj, "patch");
-
   let dependentReleases = releases.filter(rel => {
     return (
       (release.config.dependencies && release.config.dependencies[rel.name]) ||
@@ -76,21 +73,19 @@ export default async function generateMarkdown(
     relevantChangesetIds.has(cs.id)
   );
 
-  const dependencyReleaseLine = await changelogFuncs.getDependencyReleaseLine(
-    relevantChangesets,
-    dependentReleases,
-    changelogOpts
+  releaseObj.patch.push(
+    changelogFuncs.getDependencyReleaseLine(
+      relevantChangesets,
+      dependentReleases,
+      changelogOpts
+    )
   );
 
   return [
     `## ${release.newVersion}`,
-    majorReleaseLines,
-    minorReleaseLines,
-    patchReleaseLines,
-    patchReleaseLines.length < 1 && dependencyReleaseLine.length > 0
-      ? "### Patch Changes"
-      : "",
-    dependencyReleaseLine
+    await generateChangesForVersionTypeMarkdown(releaseObj, "major"),
+    await generateChangesForVersionTypeMarkdown(releaseObj, "minor"),
+    await generateChangesForVersionTypeMarkdown(releaseObj, "patch")
   ]
     .filter(line => line)
     .join("\n");
