@@ -16,57 +16,6 @@ let octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN
 });
 
-async function fetchJsonFile({
-  owner,
-  repo,
-  path,
-  ref
-}: {
-  owner: string;
-  repo: string;
-  path: string;
-  ref: string;
-}) {
-  let output = await octokit.repos.getContents({
-    owner,
-    repo,
-    path,
-    ref
-  });
-  // @ts-ignore
-  let buffer = Buffer.from(output.data.content, "base64");
-  return JSON.parse(buffer.toString("utf8"));
-}
-
-async function fetchChangeset({
-  owner,
-  repo,
-  path,
-  ref
-}: {
-  owner: string;
-  repo: string;
-  path: string;
-  ref: string;
-}): Promise<NewChangeset> {
-  let output = await octokit.repos.getContents({
-    owner,
-    repo,
-    path,
-    ref
-  });
-  let changesetContent = Buffer.from(
-    // @ts-ignore
-    output.data.content,
-    "base64"
-  ).toString("utf8");
-  let changeset = parseChangeset(changesetContent);
-  // @ts-ignore
-  changeset.id = nodePath.basename(path).replace(".md", "");
-  // @ts-ignore
-  return changeset;
-}
-
 let getReleasePlanFromGitHub = async ({
   owner,
   repo,
@@ -76,18 +25,38 @@ let getReleasePlanFromGitHub = async ({
   repo: string;
   ref: string;
 }) => {
-  let rootPackageJsonContentsPromise = fetchJsonFile({
-    owner,
-    repo,
-    path: "package.json",
-    ref
-  });
-  let configJsonPromise = fetchJsonFile({
-    owner,
-    repo,
-    path: ".changeset/config.json",
-    ref
-  });
+  async function fetchJsonFile(path: string) {
+    let output = await octokit.repos.getContents({
+      owner,
+      repo,
+      path,
+      ref
+    });
+    // @ts-ignore
+    let buffer = Buffer.from(output.data.content, "base64");
+    return JSON.parse(buffer.toString("utf8"));
+  }
+
+  async function fetchChangeset(path: string): Promise<NewChangeset> {
+    let output = await octokit.repos.getContents({
+      owner,
+      repo,
+      path,
+      ref
+    });
+    let changesetContent = Buffer.from(
+      // @ts-ignore
+      output.data.content,
+      "base64"
+    ).toString("utf8");
+    let changeset = parseChangeset(changesetContent);
+    // @ts-ignore
+    changeset.id = nodePath.basename(path).replace(".md", "");
+    // @ts-ignore
+    return changeset;
+  }
+  let rootPackageJsonContentsPromise = fetchJsonFile("package.json");
+  let configJsonPromise = fetchJsonFile(".changeset/config.json");
 
   let tree = await octokit.git.getTree({
     owner,
@@ -111,16 +80,9 @@ let getReleasePlanFromGitHub = async ({
       item.path.endsWith(".md") &&
       item.path !== ".changeset/README.md"
     ) {
-      changesetPromises.push(
-        fetchChangeset({ owner, repo, path: item.path, ref })
-      );
+      changesetPromises.push(fetchChangeset(item.path));
     } else if (item.path === ".changeset/pre.json") {
-      preJsonContentPromise = fetchJsonFile({
-        owner,
-        repo,
-        path: ".changeset/pre.json",
-        ref
-      });
+      preJsonContentPromise = fetchJsonFile(".changeset/pre.json");
     }
   }
   let rootPackageJsonContent = await rootPackageJsonContentsPromise;
@@ -147,12 +109,7 @@ let getReleasePlanFromGitHub = async ({
     let matches = micromatch(potentialWorkspaceDirectories, globs);
     workspaces = await Promise.all(
       matches.map(async dir => {
-        let config = await fetchJsonFile({
-          owner,
-          repo,
-          path: dir + "/package.json",
-          ref
-        });
+        let config = await fetchJsonFile(dir + "/package.json");
         return { dir, config, name: config.name };
       })
     );
