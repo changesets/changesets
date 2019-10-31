@@ -1,5 +1,14 @@
 # @changesets/read
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [[`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0)]:
+  - @changesets/types@0.4.0
+  - @changesets/git@0.2.4
+  - @changesets/parse@0.3.1
+
 ## 0.3.0
 
 ### Minor Changes

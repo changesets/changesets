@@ -1,5 +1,32 @@
 # @changesets/cli
 
+## 2.3.0
+
+### Minor Changes
+
+- [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add support for prereleases. Prereleases work with two new commands, `pre enter` and `pre exit` along with changes to `version` and `exit`. For more information, see [the docs on prereleases](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md).
+
+### Patch Changes
+
+- [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add `InternalError` for errors which are unexpected and if they occur, an issue should be opened. The CLI catches the error and logs a link for users to open an issue with the error and versions of Node and Changesets filled in
+
+* [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Always publish packages if they don't exist on npm rather than only if they are a greater version than the latest version on npm
+* Updated dependencies [[`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0)]:
+  - @changesets/assemble-release-plan@0.3.0
+  - @changesets/apply-release-plan@0.3.0
+  - @changesets/get-release-plan@0.2.0
+  - @changesets/types@0.4.0
+  - @changesets/errors@0.1.2
+  - @changesets/pre@0.1.0
+  - @changesets/config@0.2.3
+  - get-dependents-graph@0.1.2
+  - get-workspaces@0.5.2
+  - @changesets/git@0.2.4
+  - @changesets/logger@0.0.2
+  - @changesets/parse@0.3.1
+  - @changesets/read@0.3.1
+  - @changesets/test-utils@0.0.2
+
 ## 2.2.0
 
 ### Minor Changes

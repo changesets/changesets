@@ -1,5 +1,14 @@
 # @changesets/config
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [[`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0)]:
+  - @changesets/types@0.4.0
+  - @changesets/errors@0.1.2
+  - @changesets/logger@0.0.2
+
 ## 0.2.2
 
 ### Patch Changes
