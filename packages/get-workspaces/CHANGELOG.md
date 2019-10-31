@@ -1,5 +1,12 @@
 # get-workspaces
 
+## 0.5.2
+
+### Patch Changes
+
+- Updated dependencies [[`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0)]:
+  - @changesets/types@0.4.0
+
 ## 0.5.1
 
 ### Patch Changes
