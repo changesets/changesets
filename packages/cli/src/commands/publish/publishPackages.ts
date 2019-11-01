@@ -7,6 +7,8 @@ import * as npmUtils from "./npm-utils";
 import { info, warn } from "@changesets/logger";
 import { TwoFactorState } from "../../utils/types";
 import { PreState } from "@changesets/types";
+// @ts-ignore
+import isCI from "is-ci";
 
 export default async function publishPackages({
   cwd,
@@ -26,8 +28,10 @@ export default async function publishPackages({
     otp === undefined
       ? {
           token: null,
-          // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
-          isRequired: npmUtils.getTokenIsRequired()
+          isRequired: isCI
+            ? Promise.resolve(false)
+            : // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
+              npmUtils.getTokenIsRequired()
         }
       : {
           token: otp,
