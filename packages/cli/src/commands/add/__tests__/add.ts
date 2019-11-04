@@ -1,4 +1,3 @@
-// @flow
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";

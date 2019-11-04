@@ -133,9 +133,7 @@ export async function getInfo(request: {
         data.associatedPullRequests &&
         data.associatedPullRequests.nodes &&
         data.associatedPullRequests.nodes[0]
-          ? `[#${data.associatedPullRequests.nodes[0].number}](${
-              data.associatedPullRequests.nodes[0].url
-            })`
+          ? `[#${data.associatedPullRequests.nodes[0].number}](${data.associatedPullRequests.nodes[0].url})`
           : null,
       user:
         data.author && data.author.user
