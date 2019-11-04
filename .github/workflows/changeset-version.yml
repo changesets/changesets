@@ -1,4 +1,4 @@
-name: Version
+name: Release
 
 on:
   push:
@@ -18,13 +18,14 @@ jobs:
         with:
           version: 10.x
 
-      - name: Install Yarn
-        run: npm install --global yarn
-
       - name: Install Dependencies
         run: yarn
 
-      - name: Create Release Pull Request
+      - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@master
+        with:
+          # this expects you to have a script called release which does a build for your packages and calls changeset publish
+          publish: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
