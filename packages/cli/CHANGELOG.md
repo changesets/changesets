@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.3.2
+
+### Patch Changes
+
+- [`7c1269de`](https://github.com/atlassian/changesets/commit/7c1269de31f02c731fdb69d7be037b83e12a0445) Thanks [@Noviny](https://github.com/Noviny)! - Fix previous version not having correctly built dists
+
 ## 2.3.1
 
 ### Patch Changes
