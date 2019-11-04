@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.3.1
+
+### Patch Changes
+
+- [`a0b5dba`](https://github.com/atlassian/changesets/commit/a0b5dba3fe59d2b2e856173e40b936e56ab74ac6) [#209](https://github.com/atlassian/changesets/pull/209) Thanks [@ryanbraganza](https://github.com/ryanbraganza)! - Skip OTP check during isCI
+
 ## 2.3.0
 
 ### Minor Changes
