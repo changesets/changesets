@@ -1,5 +1,11 @@
 # @changesets/logger
 
+## 0.0.3
+
+### Patch Changes
+
+- [`9cd1eaf`](https://github.com/atlassian/changesets/commit/9cd1eafc1620894a39fe10d3e393ad8f812df53a) [#214](https://github.com/atlassian/changesets/pull/214) Thanks [@Noviny](https://github.com/Noviny)! - Remove unused dependencies
+
 ## 0.0.2
 
 ### Patch Changes

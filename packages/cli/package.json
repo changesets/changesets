@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
     "changeset": "bin.js"
@@ -26,12 +26,12 @@
     "@babel/runtime": "^7.4.4",
     "@changesets/apply-release-plan": "^0.3.0",
     "@changesets/assemble-release-plan": "^0.3.0",
-    "@changesets/config": "^0.2.3",
+    "@changesets/config": "^0.2.4",
     "@changesets/errors": "^0.1.2",
     "@changesets/get-release-plan": "^0.2.0",
-    "@changesets/git": "^0.2.4",
-    "@changesets/logger": "^0.0.2",
-    "@changesets/pre": "^0.1.0",
+    "@changesets/git": "^0.2.5",
+    "@changesets/logger": "^0.0.3",
+    "@changesets/pre": "^0.1.1",
     "@changesets/read": "^0.3.1",
     "@changesets/types": "^0.4.0",
     "@types/semver": "^6.0.0",
