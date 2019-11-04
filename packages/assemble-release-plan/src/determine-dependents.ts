@@ -45,9 +45,7 @@ export default function getDependents(
     const pkgDependents = dependencyGraph.get(nextRelease.name);
     if (!pkgDependents) {
       throw new Error(
-        `Error in determining dependents - could not find package in repository: ${
-          nextRelease.name
-        }`
+        `Error in determining dependents - could not find package in repository: ${nextRelease.name}`
       );
     }
     // For each dependent we are going to see whether it needs to be bumped because it's dependency

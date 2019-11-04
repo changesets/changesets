@@ -6,9 +6,7 @@ import { Config, WrittenConfig, Workspace } from "@changesets/types";
 import packageJson from "../package.json";
 
 export let defaultWrittenConfig = {
-  $schema: `https://unpkg.com/@changesets/config@${
-    packageJson.version
-  }/schema.json`,
+  $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
   changelog: "@changesets/cli/changelog",
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,

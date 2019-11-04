@@ -9,6 +9,7 @@
   "rules": {
     "prettier/prettier": "error",
     "standard/computed-property-even-spacing": "off",
+    "lines-between-class-members": "off",
     "no-template-curly-in-string": "off",
     "camelcase": "off",
     "import/no-duplicates": "off",
@@ -31,7 +32,13 @@
   },
   "overrides": [
     {
-      "files": ["*.test.js", "**/__tests__/**", "*.test.ts"],
+      "files": [
+        "*.test.js",
+        "**/__tests__/**",
+        "*.test.ts",
+        "**/test.ts",
+        "**/test-utils/**/*"
+      ],
       "env": {
         "jest": true
       }
