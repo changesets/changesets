@@ -7,12 +7,6 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/master/packages/logger",
   "dependencies": {
-    "@changesets/types": "^0.4.0",
-    "@types/node": "^12.7.11",
     "chalk": "^2.1.0"
-  },
-  "devDependencies": {
-    "jest-fixtures": "^0.5.0",
-    "outdent": "^0.5.0"
   }
 }
