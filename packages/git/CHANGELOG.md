@@ -1,5 +1,11 @@
 # @changesets/git
 
+## 0.2.5
+
+### Patch Changes
+
+- [`b17ed74`](https://github.com/atlassian/changesets/commit/b17ed7411ea57e38b20e646321d5053b213d198a) [#216](https://github.com/atlassian/changesets/pull/216) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Get commit from the creation of a changeset rather than the last modification
+
 ## 0.2.4
 
 ### Patch Changes
