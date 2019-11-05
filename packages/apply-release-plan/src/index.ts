@@ -49,13 +49,14 @@ export default async function applyReleasePlan(
 
   if (!workspaces) throw new Error(`could not find any workspaces in ${cwd}`);
 
+  const workspacesByName = new Map(workspaces.map(x => [x.name, x]));
+
   let { releases, changesets } = releasePlan;
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
   let releaseWithWorkspaces = releases.map(release => {
-    // @ts-ignore we already threw if workspaces wasn't defined
-    let workspace = workspaces.find(ws => ws.name === release.name);
+    let workspace = workspacesByName.get(release.name);
     if (!workspace)
       throw new Error(
         `Could not find matching package for release of: ${release.name}`
@@ -71,10 +72,21 @@ export default async function applyReleasePlan(
     cwd
   );
 
-  let versionsToUpdate = releases.map(
-    ({ name, newVersion }) => ({ name, version: newVersion }),
-    {}
-  );
+  if (releasePlan.preState !== undefined) {
+    if (releasePlan.preState.mode === "exit") {
+      await fs.remove(path.join(cwd, ".changeset", "pre.json"));
+    } else {
+      await fs.writeFile(
+        path.join(cwd, ".changeset", "pre.json"),
+        JSON.stringify(releasePlan.preState, null, 2) + "\n"
+      );
+    }
+  }
+
+  let versionsToUpdate = releases.map(({ name, newVersion }) => ({
+    name,
+    version: newVersion
+  }));
 
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map(release => {
@@ -104,22 +116,26 @@ export default async function applyReleasePlan(
     }
   }
 
-  let changesetFolder = path.resolve(cwd, ".changeset");
-
-  await Promise.all(
-    changesets.map(async changeset => {
-      let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
-      let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
-      if (await fs.pathExists(changesetPath)) {
-        touchedFiles.push(changesetPath);
-        await fs.remove(changesetPath);
-        // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
-      } else if (await fs.pathExists(changesetFolderPath)) {
-        touchedFiles.push(changesetFolderPath);
-        await fs.remove(changesetFolderPath);
-      }
-    })
-  );
+  if (
+    releasePlan.preState === undefined ||
+    releasePlan.preState.mode === "exit"
+  ) {
+    let changesetFolder = path.resolve(cwd, ".changeset");
+    await Promise.all(
+      changesets.map(async changeset => {
+        let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
+        let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
+        if (await fs.pathExists(changesetPath)) {
+          touchedFiles.push(changesetPath);
+          await fs.remove(changesetPath);
+          // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
+        } else if (await fs.pathExists(changesetFolderPath)) {
+          touchedFiles.push(changesetFolderPath);
+          await fs.remove(changesetFolderPath);
+        }
+      })
+    );
+  }
 
   if (config.commit) {
     let newTouchedFilesArr = [...touchedFiles];
@@ -180,15 +196,19 @@ async function getNewChangelogEntry(
 
   return Promise.all(
     releaseWithWorkspaces.map(async release => {
-      let changelog: string;
       try {
-        changelog = await getChangelogEntry(
+        let changelog = await getChangelogEntry(
           release,
           releaseWithWorkspaces,
           moddedChangesets,
           getChangelogFuncs,
           changelogOpts
         );
+
+        return {
+          ...release,
+          changelog
+        };
       } catch (e) {
         console.error(
           "The following error was encountered while generating changelog entries"
@@ -198,11 +218,6 @@ async function getNewChangelogEntry(
         );
         throw e;
       }
-
-      return {
-        ...release,
-        changelog
-      };
     })
   );
 }

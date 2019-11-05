@@ -1,5 +1,93 @@
 # @changesets/cli
 
+## 2.3.3
+
+### Patch Changes
+
+- [`9cd1eaf`](https://github.com/atlassian/changesets/commit/9cd1eafc1620894a39fe10d3e393ad8f812df53a) [#214](https://github.com/atlassian/changesets/pull/214) Thanks [@Noviny](https://github.com/Noviny)! - Remove unused dependencies
+- Updated dependencies [[`9cd1eaf`](https://github.com/atlassian/changesets/commit/9cd1eafc1620894a39fe10d3e393ad8f812df53a), [`b17ed74`](https://github.com/atlassian/changesets/commit/b17ed7411ea57e38b20e646321d5053b213d198a)]:
+  - @changesets/logger@0.0.3
+  - @changesets/pre@0.1.1
+  - @changesets/test-utils@0.0.3
+  - @changesets/git@0.2.5
+  - @changesets/config@0.2.4
+
+## 2.3.2
+
+### Patch Changes
+
+- [`7c1269de`](https://github.com/atlassian/changesets/commit/7c1269de31f02c731fdb69d7be037b83e12a0445) Thanks [@Noviny](https://github.com/Noviny)! - Fix previous version not having correctly built dists
+
+## 2.3.1
+
+### Patch Changes
+
+- [`a0b5dba`](https://github.com/atlassian/changesets/commit/a0b5dba3fe59d2b2e856173e40b936e56ab74ac6) [#209](https://github.com/atlassian/changesets/pull/209) Thanks [@ryanbraganza](https://github.com/ryanbraganza)! - Skip OTP check during isCI
+
+## 2.3.0
+
+### Minor Changes
+
+- [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add support for prereleases. Prereleases work with two new commands, `pre enter` and `pre exit` along with changes to `version` and `exit`. For more information, see [the docs on prereleases](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md).
+
+### Patch Changes
+
+- [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add `InternalError` for errors which are unexpected and if they occur, an issue should be opened. The CLI catches the error and logs a link for users to open an issue with the error and versions of Node and Changesets filled in
+
+* [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Always publish packages if they don't exist on npm rather than only if they are a greater version than the latest version on npm
+* Updated dependencies [[`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0)]:
+  - @changesets/assemble-release-plan@0.3.0
+  - @changesets/apply-release-plan@0.3.0
+  - @changesets/get-release-plan@0.2.0
+  - @changesets/types@0.4.0
+  - @changesets/errors@0.1.2
+  - @changesets/pre@0.1.0
+  - @changesets/config@0.2.3
+  - get-dependents-graph@0.1.2
+  - get-workspaces@0.5.2
+  - @changesets/git@0.2.4
+  - @changesets/logger@0.0.2
+  - @changesets/parse@0.3.1
+  - @changesets/read@0.3.1
+  - @changesets/test-utils@0.0.2
+
+## 2.2.0
+
+### Minor Changes
+
+- [`a679b1d`](https://github.com/atlassian/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62) [#204](https://github.com/atlassian/changesets/pull/204) Thanks [@Andarist](https://github.com/Andarist)! - Respect `publishConfig.access` in workspace package.jsons
+
+  Previously, every package in your repository had one 'public' or 'restricted' setting.
+
+  Now, if a workspace has `publishConfig.access` in its package.json, we will prioritize it over the global changesets config.
+
+- [`51a0d76`](https://github.com/atlassian/changesets/commit/51a0d766c7064b4c6a9d1490593522c6fcd02929) [#182](https://github.com/atlassian/changesets/pull/182) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Updated the package to use the new `@changesets/logger` for logging.
+
+### Patch Changes
+
+- [`5ababa0`](https://github.com/atlassian/changesets/commit/5ababa08c8ea5ee3b4ff92253e2e752a5976cd27) [#201](https://github.com/atlassian/changesets/pull/201) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Updated to use the Error classes from the @changesets/errors package
+
+* [`a679b1d`](https://github.com/atlassian/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62) [#204](https://github.com/atlassian/changesets/pull/204) Thanks [@Andarist](https://github.com/Andarist)! - Correctly handle the 'access' flag for packages
+
+  Previously, we had access as "public" or "private", access "private" isn't valid. This was a confusing because there are three states for publishing a package:
+
+  - `private: true` - the package will not be published to npm (worked)
+  - `access: public` - the package will be publicly published to npm (even if it uses a scope) (worked)
+  - `access: restricted` - the package will be published to npm, but only visible/accessible by those who are part of the scope. This technically worked, but we were passing the wrong bit of information in.
+
+  Now, we pass the correct access options `public` or `restricted`.
+
+* [`da11ab8`](https://github.com/atlassian/changesets/commit/da11ab8a4e4324a7023d12f990beec8c3b6ae35f) [#205](https://github.com/atlassian/changesets/pull/205) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Don't update ranges set to \*/x/X when versioning
+
+* Updated dependencies [[`51a0d76`](https://github.com/atlassian/changesets/commit/51a0d766c7064b4c6a9d1490593522c6fcd02929), [`5ababa0`](https://github.com/atlassian/changesets/commit/5ababa08c8ea5ee3b4ff92253e2e752a5976cd27), [`a679b1d`](https://github.com/atlassian/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62), [`5ababa0`](https://github.com/atlassian/changesets/commit/5ababa08c8ea5ee3b4ff92253e2e752a5976cd27), [`da11ab8`](https://github.com/atlassian/changesets/commit/da11ab8a4e4324a7023d12f990beec8c3b6ae35f)]:
+  - @changesets/logger@0.0.1
+  - @changesets/test-utils@0.0.1
+  - @changesets/config@0.2.2
+  - @changesets/apply-release-plan@0.2.3
+  - get-workspaces@0.5.1
+  - @changesets/types@0.3.1
+  - @changesets/errors@0.1.1
+
 ## 2.1.2
 
 ### Patch Changes

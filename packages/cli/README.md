@@ -127,7 +127,6 @@ A changeset created with the `empty` flag would look like this:
 ```md
 ---
 ---
-
 ```
 
 If you set the `commit` option in the config, the command will add the updated changeset files and then commit them.
@@ -175,8 +174,16 @@ The status command provides information about the changesets that currently exis
 - `--output` - allows you to write the json object of the status out, for consumption by other tools, such as CI.
 
 - `--since-master` - to only display information about changesets since the master branch. While this can be
-used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot)
-to detect pull requests missing changesets, as not all pull requests need one.
+  used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot)
+  to detect pull requests missing changesets, as not all pull requests need one.
+
+### pre
+
+```
+pre [exit|enter {tag}]
+```
+
+The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md)
 
 ### Bumping peerDependencies
 

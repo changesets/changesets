@@ -17,3 +17,21 @@ export class ExitError extends ExtendableError {
     this.code = code;
   }
 }
+
+export class PreExitButNotInPreModeError extends ExtendableError {
+  constructor() {
+    super("pre mode cannot be exited when not in pre mode");
+  }
+}
+
+export class PreEnterButInPreModeError extends ExtendableError {
+  constructor() {
+    super("pre mode cannot be entered when in pre mode");
+  }
+}
+
+export class InternalError extends ExtendableError {
+  constructor(message: string) {
+    super(message);
+  }
+}

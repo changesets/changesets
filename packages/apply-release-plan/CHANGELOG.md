@@ -1,5 +1,40 @@
 # @changesets/apply-release-plan
 
+## 0.3.0
+
+### Minor Changes
+
+- [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add support for prereleases. For more information, see [the docs on prereleases](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md).
+
+### Patch Changes
+
+- Updated dependencies [[`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0)]:
+  - @changesets/types@0.4.0
+  - @changesets/config@0.2.3
+  - get-workspaces@0.5.2
+  - @changesets/git@0.2.4
+
+## 0.2.3
+
+### Patch Changes
+
+- [`a679b1d`](https://github.com/atlassian/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62) [#204](https://github.com/atlassian/changesets/pull/204) Thanks [@Andarist](https://github.com/Andarist)! - Correctly handle the 'access' flag for packages
+
+  Previously, we had access as "public" or "private", access "private" isn't valid. This was a confusing because there are three states for publishing a package:
+
+  - `private: true` - the package will not be published to npm (worked)
+  - `access: public` - the package will be publicly published to npm (even if it uses a scope) (worked)
+  - `access: restricted` - the package will be published to npm, but only visible/accessible by those who are part of the scope. This technically worked, but we were passing the wrong bit of information in.
+
+  Now, we pass the correct access options `public` or `restricted`.
+
+- [`da11ab8`](https://github.com/atlassian/changesets/commit/da11ab8a4e4324a7023d12f990beec8c3b6ae35f) [#205](https://github.com/atlassian/changesets/pull/205) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Don't update ranges set to \*/x/X when versioning
+
+- Updated dependencies [[`5ababa0`](https://github.com/atlassian/changesets/commit/5ababa08c8ea5ee3b4ff92253e2e752a5976cd27), [`a679b1d`](https://github.com/atlassian/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62)]:
+  - @changesets/config@0.2.2
+  - get-workspaces@0.5.1
+  - @changesets/types@0.3.1
+
 ## 0.2.2
 
 ### Patch Changes

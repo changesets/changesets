@@ -54,12 +54,10 @@ async function tag(tagStr: string, cwd: string) {
 async function getCommitThatAddsFile(gitPath: string, cwd: string) {
   const gitCmd = await spawn(
     "git",
-    ["log", "--reverse", "--max-count=1", "--pretty=format:%h", "-p", gitPath],
+    ["log", "--diff-filter=A", "--max-count=1", "--pretty=format:%h", gitPath],
     { cwd }
   );
-  // For reasons I do not understand, passing pretty format through this is not working
-  // The slice below is aimed at achieving the same thing.
-  return gitCmd.stdout.toString().split("\n")[0];
+  return gitCmd.stdout.toString();
 }
 
 async function getChangedFilesSince(

@@ -1,4 +1,3 @@
-// @flow
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
@@ -65,9 +64,6 @@ const mockUserResponses = mockResponses => {
 
 describe("Changesets", () => {
   temporarilySilenceLogs();
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
 
   it("should generate changeset to patch a single package", async () => {
     const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");

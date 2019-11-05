@@ -1,5 +1,22 @@
 # @changesets/get-release-plan
 
+## 0.2.0
+
+### Minor Changes
+
+- [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add support for prereleases. For more information, see [the docs on prereleases](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md).
+
+### Patch Changes
+
+- Updated dependencies [[`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0)]:
+  - @changesets/assemble-release-plan@0.3.0
+  - @changesets/types@0.4.0
+  - @changesets/pre@0.1.0
+  - @changesets/config@0.2.3
+  - get-dependents-graph@0.1.2
+  - get-workspaces@0.5.2
+  - @changesets/read@0.3.1
+
 ## 0.1.3
 
 ### Patch Changes

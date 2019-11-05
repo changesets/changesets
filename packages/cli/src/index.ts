@@ -1,6 +1,6 @@
 import meow from "meow";
 import { read } from "@changesets/config";
-import { ExitError } from "@changesets/errors";
+import { ExitError, InternalError } from "@changesets/errors";
 import { error } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import fs from "fs-extra";
@@ -12,7 +12,9 @@ import add from "./commands/add";
 import version from "./commands/version";
 import publish from "./commands/publish";
 import status from "./commands/status";
+import pre from "./commands/pre";
 import { CliOptions } from "./types";
+import { format } from "util";
 
 const { input, flags } = meow(
   `
@@ -24,7 +26,8 @@ const { input, flags } = meow(
     version
     publish [--otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
-  `,
+    prerelease <tag>
+    `,
   {
     flags: {
       sinceMaster: {
@@ -84,7 +87,7 @@ const cwd = process.cwd();
       error(
         " - we thoroughly recommend looking at the changelog for this package for what has changed"
       );
-      process.exit(1);
+      throw new ExitError(1);
     } else {
       throw e;
     }
@@ -94,7 +97,7 @@ const cwd = process.cwd();
     const { empty }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
     await add(cwd, { empty }, config);
-  } else if (input.length > 1) {
+  } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
@@ -125,18 +128,30 @@ const cwd = process.cwd();
         return;
       }
       case "version": {
-        // @ts-ignore if this is undefined, we have already exited
         await version(cwd, config);
         return;
       }
       case "publish": {
-        // @ts-ignore if this is undefined, we have already exited
         await publish(cwd, { otp }, config);
         return;
       }
       case "status": {
-        // @ts-ignore if this is undefined, we have already exited
         await status(cwd, { sinceMaster, verbose, output }, config);
+        return;
+      }
+      case "pre": {
+        let command = input[1];
+        if (command !== "enter" && command !== "exit") {
+          error("`enter` or `exit` must be passed after prerelease");
+          throw new ExitError(1);
+        }
+        let tag = input[2];
+        if (command === "enter" && typeof tag !== "string") {
+          error("A tag must be passed when using prerelese enter");
+          throw new ExitError(1);
+        }
+        // @ts-ignore
+        await pre(cwd, { command, tag });
         return;
       }
       case "bump": {
@@ -164,6 +179,34 @@ const cwd = process.cwd();
     }
   }
 })().catch(err => {
+  if (err instanceof InternalError) {
+    error(
+      "The following error is an internal unexpected error, these should never happen."
+    );
+    error("Please open an issue with the following link");
+    error(
+      `https://github.com/atlassian/changesets/issues/new?title=${encodeURIComponent(
+        `Unexpected error during ${input[0] || "add"} command`
+      )}&body=${encodeURIComponent(`## Error
+
+\`\`\`
+${format("", err).replace(process.cwd(), "<cwd>")}
+\`\`\`
+
+## Versions
+
+- @changesets/cli@${
+        // eslint-disable-next-line import/no-extraneous-dependencies
+        require("@changesets/cli/package.json").version
+      }
+- node@${process.version}
+      
+## Extra details
+
+<!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->
+`)}`
+    );
+  }
   if (err instanceof ExitError) {
     return process.exit(err.code);
   }

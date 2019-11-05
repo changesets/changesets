@@ -11,9 +11,14 @@ import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import getOldChangesets from "../../utils/v1-legacy/getChangesets";
 
 import getChangesetBase from "../../utils/getChangesetBase";
+import { readPreState } from "@changesets/pre";
 
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
+);
+
+let importantEnd = chalk.red(
+  "----------------------------------------------------------------------"
 );
 
 // this function only exists while we wait for v1 changesets to be obsoleted
@@ -36,9 +41,7 @@ async function getOldChangesetsAndWarn(
   warn(
     "In a future major version, we will no longer apply these old changesets, and will instead throw here"
   );
-  warn(
-    "----------------------------------------------------------------------"
-  );
+  warn(importantEnd);
 
   let thing = unreleasedChangesets.map(({ releases, id, summary }) => ({
     releases,
@@ -54,8 +57,22 @@ export default async function version(cwd: string, config: Config) {
   let newChangesets = await readChangesets(cwd, false);
 
   let changesets = [...oldChangesets, ...newChangesets];
+  let preState = await readPreState(cwd);
 
-  if (changesets.length === 0) {
+  if (preState !== undefined && preState.mode === "pre") {
+    warn(importantSeparator);
+    warn("You are in prerelease mode");
+    warn(
+      "If you meant to do a normal release you should revert these changes and run `changeset pre exits`"
+    );
+    warn("You can then run `changeset version` again to do a normal release");
+    warn(importantEnd);
+  }
+
+  if (
+    changesets.length === 0 &&
+    (preState === undefined || preState.mode !== "exit")
+  ) {
     warn("No unreleased changesets found, exiting.");
     return;
   }
@@ -73,11 +90,12 @@ export default async function version(cwd: string, config: Config) {
   let dependentsGraph = await getDependentsgraph({ cwd });
 
   // NOTE: in v3 when we are not support the old changeset format we can use `getReleasePlan` here
-  let releasePlan = await assembleReleasePlan(
+  let releasePlan = assembleReleasePlan(
     changesets,
     workspaces,
     dependentsGraph,
-    config
+    config,
+    preState
   );
 
   await applyReleasePlan(releasePlan, cwd, config);

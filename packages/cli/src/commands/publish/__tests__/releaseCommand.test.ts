@@ -34,10 +34,6 @@ describe("running release", () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe("When there is no changeset commits", () => {
     // we make sure we still do this so that a later build can clean up after a previously
     // failed one (where the change was pushed back but not released and the next build has no
