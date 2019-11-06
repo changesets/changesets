@@ -15,8 +15,8 @@ async function getProjectDirectory(cwd: string) {
   return projectDir;
 }
 
-async function getMasterRef(cwd: string) {
-  const gitCmd = await spawn("git", ["rev-parse", "master"], { cwd });
+async function getBranchRef(cwd: string, branch: string) {
+  const gitCmd = await spawn("git", ["rev-parse", branch], { cwd });
   if (gitCmd.code !== 0)
     throw new GitError(gitCmd.code, gitCmd.stderr.toString());
   return gitCmd.stdout
@@ -84,7 +84,7 @@ async function getChangedChangesetFilesSinceMaster(
   fullPath = false
 ): Promise<Array<string>> {
   try {
-    const ref = await getMasterRef(cwd);
+    const ref = await getBranchRef(cwd, "master");
     // First we need to find the commit where we diverged from `ref` at using `git merge-base`
     let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
     // Now we can find which files we added
@@ -145,9 +145,9 @@ async function getChangedPackagesSinceCommit(commitHash: string, cwd: string) {
 // it wont include staged/unstaged changes
 //
 // Don't use this function in master branch as it returns nothing in that case.
-async function getChangedPackagesSinceMaster(cwd: string) {
+async function getChangedPackagesSinceBranch(cwd: string, branch: string) {
   try {
-    const masterRef = await getMasterRef(cwd);
+    const masterRef = await getBranchRef(cwd, branch);
     return getChangedPackagesSinceCommit(masterRef, cwd);
   } catch (err) {
     if (err instanceof GitError) return [];
@@ -161,6 +161,6 @@ export {
   add,
   commit,
   tag,
-  getChangedPackagesSinceMaster,
+  getChangedPackagesSinceBranch,
   getChangedChangesetFilesSinceMaster
 };

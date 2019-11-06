@@ -40,14 +40,19 @@
     },
     "commit": {
       "type": "boolean",
-      "description": "Determines whether changesets should commit the results of the add and bump command",
+      "description": "Determines whether Changesets should commit the results of the add and version command",
       "default": false
     },
     "access": {
       "enum": ["restricted", "public"],
       "type": "string",
-      "description": "Determines whether changesets should publish packages to the registry publicly or to a restricted scope",
+      "description": "Determines whether Changesets should publish packages to the registry publicly or to a restricted scope",
       "default": "restricted"
+    },
+    "baseBranch": {
+      "type": "string",
+      "default": "master",
+      "description": "Determines the branch that Changesets uses when finding what packages have changed"
     }
   }
 }
