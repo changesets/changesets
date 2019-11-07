@@ -73,11 +73,9 @@ async function getChangedChangesetFilesSinceRef({
     // First we need to find the commit where we diverged from `ref` at using `git merge-base`
     let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
     // Now we can find which files we added
-    cmd = await spawn(
-      "git",
-      ["diff", "--name-only", "--diff-filter=d", "master"],
-      { cwd }
-    );
+    cmd = await spawn("git", ["diff", "--name-only", "--diff-filter=d", ref], {
+      cwd
+    });
 
     let tester = /.changeset\/[^/]+\.md$/;
 
