@@ -203,7 +203,10 @@ describe("git", () => {
 
     it("should return an empty list if no packages have changed", async () => {
       await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
-      const changedPackages = await getChangedPackagesSinceRef(cwd, "master");
+      const changedPackages = await getChangedPackagesSinceRef({
+        cwd,
+        ref: "master"
+      });
       expect(changedPackages).toHaveLength(0);
     });
 
@@ -216,7 +219,10 @@ describe("git", () => {
       await add("packages/pkg-b/package.json", cwd);
       await commit("added packageB files", cwd);
 
-      const changedPackages = await getChangedPackagesSinceRef(cwd, "master");
+      const changedPackages = await getChangedPackagesSinceRef({
+        cwd,
+        ref: "master"
+      });
 
       expect(changedPackages).toHaveLength(2);
       // @ts-ignore
@@ -231,7 +237,10 @@ describe("git", () => {
       await add("packages/pkg-a/package.json", cwd);
       await commit("added packageA package.json", cwd);
 
-      const files = await getChangedChangesetFilesSinceRef(cwd, "master");
+      const files = await getChangedChangesetFilesSinceRef({
+        cwd,
+        ref: "master"
+      });
       expect(files).toHaveLength(0);
     });
 
@@ -240,7 +249,10 @@ describe("git", () => {
       await commit("added packageA package.json", cwd);
       await add(".changeset", cwd);
 
-      const files = await getChangedChangesetFilesSinceRef(cwd, "master");
+      const files = await getChangedChangesetFilesSinceRef({
+        cwd,
+        ref: "master"
+      });
       expect(files).toHaveLength(2);
       expect(files[1]).toEqual(".changeset/quick-lions-devour.md");
     });
@@ -250,7 +262,10 @@ describe("git", () => {
       await commit("added packageA package.json", cwd);
       await add(".changeset", cwd);
 
-      const files = await getChangedChangesetFilesSinceRef(cwd, "some-branch");
+      const files = await getChangedChangesetFilesSinceRef({
+        cwd,
+        ref: "some-branch"
+      });
       expect(files).toHaveLength(2);
       expect(files[1]).toEqual(".changeset/quick-lions-devour.md");
     });

@@ -41,8 +41,8 @@ async function getCommitThatAddsFile(gitPath: string, cwd: string) {
 }
 
 async function getChangedFilesSince(
-  ref: string,
   cwd: string,
+  ref: string,
   fullPath = false
 ): Promise<Array<string>> {
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
@@ -59,10 +59,13 @@ async function getChangedFilesSince(
 }
 
 // below are less generic functions that we use in combination with other things we are doing
-async function getChangedChangesetFilesSinceRef(
-  cwd: string,
-  ref: string
-): Promise<Array<string>> {
+async function getChangedChangesetFilesSinceRef({
+  cwd,
+  ref
+}: {
+  cwd: string;
+  ref: string;
+}): Promise<Array<string>> {
   try {
     // First we need to find the commit where we diverged from `ref` at using `git merge-base`
     let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
@@ -87,7 +90,13 @@ async function getChangedChangesetFilesSinceRef(
   }
 }
 
-async function getChangedPackagesSinceRef(ref: string, cwd: string) {
+async function getChangedPackagesSinceRef({
+  cwd,
+  ref
+}: {
+  cwd: string;
+  ref: string;
+}) {
   const changedFiles = await getChangedFilesSince(ref, cwd, true);
   let workspaces = await getWorkspaces({
     cwd,

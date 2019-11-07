@@ -10,10 +10,10 @@ async function filterChangesetsSinceRef(
   changesetBase: string,
   sinceRef: string
 ) {
-  const newChangesets = await git.getChangedChangesetFilesSinceRef(
-    changesetBase,
-    sinceRef
-  );
+  const newChangesets = await git.getChangedChangesetFilesSinceRef({
+    cwd: changesetBase,
+    ref: sinceRef
+  });
   const newHahses = newChangesets.map(c => c.split("/")[1]);
 
   return changesets.filter(dir => newHahses.includes(dir));

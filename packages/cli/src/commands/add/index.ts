@@ -25,10 +25,10 @@ export default async function add(
     };
     confirmChangeset = true;
   } else {
-    const changedPackages = await git.getChangedPackagesSinceRef(
-      cwd,
-      config.baseBranch
-    );
+    const changedPackages = await git.getChangedPackagesSinceRef({
+      cwd: cwd,
+      ref: config.baseBranch
+    });
     const changePackagesName = changedPackages
       .filter(a => a)
       .map(pkg => pkg.name);
