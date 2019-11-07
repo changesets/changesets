@@ -2,14 +2,13 @@ import path from "path";
 import fs from "fs-extra";
 import chalk from "chalk";
 
-import getChangesetBase from "../../utils/getChangesetBase";
 import { defaultWrittenConfig } from "@changesets/config";
 import { info, log, warn, error } from "@changesets/logger";
 
 const pkgPath = path.dirname(require.resolve("@changesets/cli/package.json"));
 
 export default async function init(cwd: string) {
-  const changesetBase = await getChangesetBase(cwd);
+  const changesetBase = path.resolve(cwd, ".changeset");
 
   if (fs.existsSync(changesetBase)) {
     if (!fs.existsSync(path.join(changesetBase, "config.json"))) {

@@ -40,7 +40,8 @@ class FakeReleasePlan {
       changelog: false,
       commit: false,
       linked: [],
-      access: "restricted"
+      access: "restricted",
+      baseBranch: "master"
     };
 
     this.changesets = [this.baseChangeset, ...changesets];
@@ -62,14 +63,15 @@ async function testSetup(
   config?: Config,
   setupFunc?: (tempDir: string) => Promise<any>
 ) {
-  if (!config)
+  if (!config) {
     config = {
       changelog: false,
       commit: false,
       linked: [],
-      access: "restricted"
+      access: "restricted",
+      baseBranch: "master"
     };
-
+  }
   let tempDir = await copyFixtureIntoTempDir(__dirname, fixtureName);
   if (setupFunc) {
     await setupFunc(tempDir);

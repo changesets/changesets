@@ -1,32 +1,26 @@
 import path from "path";
 import fs from "fs-extra";
 
-// These two helpers are designed to operate on the .changeset
+// This helper is designed to operate on the .changeset
 // folder, and tidy up the subfolders
+// THIS SHOULD BE REMOVED WHEN SUPPORT FOR CHANGESETS FROM V1 IS DROPPED
 
-const removeEmptyFolders = (folderPath: string) => {
+const removeEmptyFolders = async (folderPath: string) => {
   const dirContents = fs.readdirSync(folderPath);
-  dirContents.forEach(contentPath => {
-    const singleChangesetPath = path.resolve(folderPath, contentPath);
-    if (
-      fs.statSync(singleChangesetPath).isDirectory() &&
-      fs.readdirSync(singleChangesetPath).length < 1
-    ) {
-      fs.rmdirSync(singleChangesetPath);
-    }
-  });
+  return Promise.all(
+    dirContents.map(async contentPath => {
+      const singleChangesetPath = path.resolve(folderPath, contentPath);
+      try {
+        if ((await fs.readdir(singleChangesetPath)).length < 1) {
+          await fs.rmdir(singleChangesetPath);
+        }
+      } catch (err) {
+        if (err.code !== "ENOTDIR") {
+          throw err;
+        }
+      }
+    })
+  );
 };
 
-const removeFolders = (folderPath: string) => {
-  if (!fs.existsSync(folderPath)) return;
-  const dirContents = fs.readdirSync(folderPath);
-  dirContents.forEach(contentPath => {
-    const singleChangesetPath = path.resolve(folderPath, contentPath);
-    if (fs.statSync(singleChangesetPath).isDirectory()) {
-      fs.emptyDirSync(singleChangesetPath);
-      fs.rmdirSync(singleChangesetPath);
-    }
-  });
-};
-
-export { removeEmptyFolders, removeFolders };
+export { removeEmptyFolders };

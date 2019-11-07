@@ -3,7 +3,7 @@ import table from "tty-table";
 import fs from "fs-extra";
 import path from "path";
 import getReleasePlan from "@changesets/get-release-plan";
-import { error, log, info } from "@changesets/logger";
+import { error, log, info, warn } from "@changesets/logger";
 import {
   VersionType,
   Release,
@@ -15,13 +15,28 @@ export default async function getStatus(
   cwd: string,
   {
     sinceMaster,
+    since,
     verbose,
     output
-  }: { sinceMaster?: boolean; verbose?: boolean; output?: string },
+  }: {
+    sinceMaster?: boolean;
+    since?: string;
+    verbose?: boolean;
+    output?: string;
+  },
   config: Config
 ) {
-  // TODO: Check if we are no master and give a different error message if we are
-  const releasePlan = await getReleasePlan(cwd, sinceMaster, config);
+  if (sinceMaster) {
+    warn(
+      "--sinceMaster is deprecated and will be removed in a future major version"
+    );
+    warn("Use --since=master instead");
+  }
+  const releasePlan = await getReleasePlan(
+    cwd,
+    since === undefined ? (sinceMaster ? "master" : undefined) : since,
+    config
+  );
 
   const { changesets, releases } = releasePlan;
 

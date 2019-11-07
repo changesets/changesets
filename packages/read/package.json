@@ -9,11 +9,15 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@changesets/git": "^0.2.4",
+    "@changesets/logger": "^0.0.3",
     "@changesets/parse": "^0.3.1",
     "@changesets/types": "^0.4.0",
-    "fs-extra": "^7.0.1"
+    "chalk": "^2.1.0",
+    "fs-extra": "^7.0.1",
+    "p-filter": "^2.1.0"
   },
   "devDependencies": {
+    "@changesets/test-utils": "*",
     "fixturez": "^1.1.0",
     "outdent": "^0.5.0"
   }

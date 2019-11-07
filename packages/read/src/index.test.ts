@@ -2,8 +2,11 @@ import fixtures from "fixturez";
 import outdent from "outdent";
 
 import read from "./";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 const f = fixtures(__dirname);
+
+temporarilySilenceLogs();
 
 describe("read changesets from disc", () => {
   it("should read a changeset from disc", async () => {
@@ -103,6 +106,18 @@ describe("read changesets from disc", () => {
         releases: [],
         summary: "",
         id: "empty-changeset"
+      }
+    ]);
+  });
+  it("should read an old changeset", async () => {
+    const changesetPath = f.find("old-changeset");
+
+    const changesets = await read(changesetPath);
+    expect(changesets).toEqual([
+      {
+        releases: [{ name: "cool-package", type: "minor" }],
+        summary: "Nice simple summary\n",
+        id: "basic-changeset"
       }
     ]);
   });
