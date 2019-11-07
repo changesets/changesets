@@ -1,6 +1,5 @@
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import spawn from "spawndamnit";
-import path from "path";
 
 import {
   getCommitThatAddsFile,
@@ -8,8 +7,8 @@ import {
   add,
   commit,
   tag,
-  getChangedPackagesSinceMaster,
-  getChangedChangesetFilesSinceMaster
+  getChangedPackagesSinceRef,
+  getChangedChangesetFilesSinceRef
 } from "./";
 
 describe("git", () => {
@@ -196,7 +195,7 @@ describe("git", () => {
     });
   });
 
-  describe("getChangedPackagesSinceMaster", () => {
+  describe("getChangedPackagesSinceRef", () => {
     beforeEach(async () => {
       await add("packages/pkg-a/package.json", cwd);
       await commit("added packageA package.json", cwd);
@@ -204,7 +203,7 @@ describe("git", () => {
 
     it("should return an empty list if no packages have changed", async () => {
       await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
-      const changedPackages = await getChangedPackagesSinceMaster(cwd);
+      const changedPackages = await getChangedPackagesSinceRef(cwd, "master");
       expect(changedPackages).toHaveLength(0);
     });
 
@@ -217,7 +216,7 @@ describe("git", () => {
       await add("packages/pkg-b/package.json", cwd);
       await commit("added packageB files", cwd);
 
-      const changedPackages = await getChangedPackagesSinceMaster(cwd);
+      const changedPackages = await getChangedPackagesSinceRef(cwd, "master");
 
       expect(changedPackages).toHaveLength(2);
       // @ts-ignore
@@ -227,33 +226,33 @@ describe("git", () => {
     });
   });
 
-  describe("getChangedChangesetFilesSinceMaster", () => {
-    beforeEach(async () => {
+  describe("getChangedChangesetFilesSinceRef", () => {
+    it("should be empty if no changeset files have been added", async () => {
       await add("packages/pkg-a/package.json", cwd);
       await commit("added packageA package.json", cwd);
-    });
 
-    it("should be empty if no changeset files have been added", async () => {
-      const files = await getChangedChangesetFilesSinceMaster(cwd);
+      const files = await getChangedChangesetFilesSinceRef(cwd, "master");
       expect(files).toHaveLength(0);
     });
 
     it("should get the relative path to the changeset file", async () => {
+      await add("packages/pkg-a/package.json", cwd);
+      await commit("added packageA package.json", cwd);
       await add(".changeset", cwd);
 
-      const files = await getChangedChangesetFilesSinceMaster(cwd);
+      const files = await getChangedChangesetFilesSinceRef(cwd, "master");
       expect(files).toHaveLength(2);
       expect(files[1]).toEqual(".changeset/quick-lions-devour.md");
     });
-
-    it("should get the absolute path to the changeset file", async () => {
+    it("should work on a ref that isn't master", async () => {
+      await spawn("git", ["checkout", "-b", "some-branch"], { cwd });
+      await add("packages/pkg-a/package.json", cwd);
+      await commit("added packageA package.json", cwd);
       await add(".changeset", cwd);
 
-      const files = await getChangedChangesetFilesSinceMaster(cwd, true);
+      const files = await getChangedChangesetFilesSinceRef(cwd, "some-branch");
       expect(files).toHaveLength(2);
-      expect(files[1]).toEqual(
-        path.resolve(cwd, ".changeset/quick-lions-devour.md")
-      );
+      expect(files[1]).toEqual(".changeset/quick-lions-devour.md");
     });
   });
 });

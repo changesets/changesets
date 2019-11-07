@@ -69,6 +69,17 @@ const cwd = process.cwd();
     await init(cwd);
     return;
   }
+
+  if (!fs.existsSync(path.resolve(cwd, ".changeset"))) {
+    error("There is no .changeset folder. ");
+    error(
+      "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
+    );
+    error(
+      "If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration."
+    );
+    throw new ExitError(1);
+  }
   let config: Config;
   try {
     config = await read(cwd, workspaces);
