@@ -17,7 +17,10 @@ writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 git.commit.mockImplementation(() => Promise.resolve(true));
 
 // @ts-ignore
-git.getChangedPackagesSinceMaster.mockReturnValue([]);
+git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
+  expect(ref).toBe("master");
+  return [];
+});
 
 // @ts-ignore
 const mockUserResponses = mockResponses => {
