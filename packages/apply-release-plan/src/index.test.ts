@@ -12,7 +12,6 @@ import outdent from "outdent";
 import spawn from "spawndamnit";
 
 import applyReleasePlan from "./";
-import { defaultConfig } from "@changesets/config";
 
 class FakeReleasePlan {
   changesets: NewChangeset[];

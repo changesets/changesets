@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import path from "path";
 import { log, warn } from "@changesets/logger";
-import { Config, NewChangeset } from "@changesets/types";
+import { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
 import getDependentsgraph from "get-dependents-graph";

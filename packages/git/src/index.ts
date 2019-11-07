@@ -1,7 +1,6 @@
 import spawn from "spawndamnit";
 import path from "path";
 import getWorkspaces from "get-workspaces";
-import pkgDir from "pkg-dir";
 import { GitError } from "@changesets/errors";
 import { Workspace } from "@changesets/types";
 
