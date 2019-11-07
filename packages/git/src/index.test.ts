@@ -157,10 +157,10 @@ describe("git", () => {
 
     it("should be empty if no changes", async () => {
       const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
-      const changedFiles = await getChangedFilesSince(
-        head.stdout.toString().trim(),
+      const changedFiles = await getChangedFilesSince({
+        ref: head.stdout.toString().trim(),
         cwd
-      );
+      });
       expect(changedFiles.filter(a => a)).toHaveLength(0);
     });
 
@@ -174,20 +174,20 @@ describe("git", () => {
       await add("packages/pkg-b/package.json", cwd);
       await commit("added packageB files", cwd);
 
-      const filesChangedSinceFirstRef = await getChangedFilesSince(
-        firstRef.stdout.toString().trim(),
+      const filesChangedSinceFirstRef = await getChangedFilesSince({
+        ref: firstRef.stdout.toString().trim(),
         cwd
-      );
+      });
       expect(filesChangedSinceFirstRef[0]).toEqual("packages/pkg-a/index.js");
       expect(filesChangedSinceFirstRef[1]).toEqual("packages/pkg-b/index.js");
       expect(filesChangedSinceFirstRef[2]).toEqual(
         "packages/pkg-b/package.json"
       );
 
-      const filesChangedSinceSecondRef = await getChangedFilesSince(
-        secondRef.stdout.toString().trim(),
+      const filesChangedSinceSecondRef = await getChangedFilesSince({
+        ref: secondRef.stdout.toString().trim(),
         cwd
-      );
+      });
       expect(filesChangedSinceSecondRef[0]).toEqual("packages/pkg-b/index.js");
       expect(filesChangedSinceSecondRef[1]).toEqual(
         "packages/pkg-b/package.json"
