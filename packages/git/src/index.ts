@@ -40,11 +40,15 @@ async function getCommitThatAddsFile(gitPath: string, cwd: string) {
   return gitCmd.stdout.toString();
 }
 
-async function getChangedFilesSince(
-  cwd: string,
-  ref: string,
+async function getChangedFilesSince({
+  cwd,
+  ref,
   fullPath = false
-): Promise<Array<string>> {
+}: {
+  cwd: string;
+  ref: string;
+  fullPath: boolean;
+}): Promise<Array<string>> {
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
   const divergedAt = cmd.stdout.toString().trim();
@@ -97,7 +101,7 @@ async function getChangedPackagesSinceRef({
   cwd: string;
   ref: string;
 }) {
-  const changedFiles = await getChangedFilesSince(ref, cwd, true);
+  const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
   let workspaces = await getWorkspaces({
     cwd,
     tools: ["yarn", "bolt", "root"]
