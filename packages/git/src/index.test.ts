@@ -225,9 +225,7 @@ describe("git", () => {
       });
 
       expect(changedPackages).toHaveLength(2);
-      // @ts-ignore
       expect(changedPackages[0].name).toEqual("pkg-a");
-      // @ts-ignore
       expect(changedPackages[1].name).toEqual("pkg-b");
     });
   });

@@ -47,6 +47,10 @@ const { input, flags } = meow(
       },
       empty: {
         type: "boolean"
+      },
+      since: {
+        type: "string",
+        default: undefined
       }
     }
   }
@@ -113,7 +117,14 @@ const cwd = process.cwd();
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
   } else {
-    const { sinceMaster, verbose, output, otp, empty }: CliOptions = flags;
+    const {
+      sinceMaster,
+      since,
+      verbose,
+      output,
+      otp,
+      empty
+    }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
     deadFlags.forEach(flag => {
@@ -147,7 +158,7 @@ const cwd = process.cwd();
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, verbose, output }, config);
+        await status(cwd, { sinceMaster, since, verbose, output }, config);
         return;
       }
       case "pre": {
