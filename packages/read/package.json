@@ -1,6 +1,6 @@
 {
   "name": "@changesets/read",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Read changesets from disc, and return the information as JSON",
   "main": "dist/read.cjs.js",
   "module": "dist/read.esm.js",
@@ -8,7 +8,7 @@
   "repository": "https://github.com/changesets/changesets/tree/master/packages/read",
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@changesets/git": "^0.2.4",
+    "@changesets/git": "^0.3.0",
     "@changesets/logger": "^0.0.3",
     "@changesets/parse": "^0.3.1",
     "@changesets/types": "^0.4.0",

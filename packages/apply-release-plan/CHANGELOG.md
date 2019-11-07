@@ -1,5 +1,13 @@
 # @changesets/apply-release-plan
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [[`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2), [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2)]:
+  - @changesets/config@0.3.0
+  - @changesets/git@0.3.0
+
 ## 0.3.0
 
 ### Minor Changes
