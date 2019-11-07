@@ -1,5 +1,18 @@
 # @changesets/read
 
+## 0.4.0
+
+### Minor Changes
+
+- [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Added support for reading old changesets from v1
+
+* [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Replaced sinceMaster parameter with sinceRef parameter which can be any git ref such as a branch, tag, commit or etc.
+
+### Patch Changes
+
+- Updated dependencies [[`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2)]:
+  - @changesets/git@0.3.0
+
 ## 0.3.1
 
 ### Patch Changes
