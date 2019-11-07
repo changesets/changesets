@@ -10,9 +10,14 @@ const removeEmptyFolders = async (folderPath: string) => {
   return Promise.all(
     dirContents.map(async contentPath => {
       const singleChangesetPath = path.resolve(folderPath, contentPath);
-
-      if ((await fs.readdir(singleChangesetPath)).length < 1) {
-        await fs.rmdir(singleChangesetPath);
+      try {
+        if ((await fs.readdir(singleChangesetPath)).length < 1) {
+          await fs.rmdir(singleChangesetPath);
+        }
+      } catch (err) {
+        if (err.code !== "ENOTDIR") {
+          throw err;
+        }
       }
     })
   );
