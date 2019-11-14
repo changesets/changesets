@@ -12,7 +12,7 @@ import {
 import addChangeset from "..";
 import writeChangeset from "../writeChangeset";
 
-jest.mock("../../../utils/cli");
+jest.mock("../../../utils/cli-utilities");
 jest.mock("@changesets/git");
 jest.mock("../writeChangeset");
 // @ts-ignore
