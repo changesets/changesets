@@ -21,10 +21,11 @@ function makeQuery(repos: any) {
                 )}) {
             ... on Commit {
             commitUrl
-            associatedPullRequests(first: 1) {
+            associatedPullRequests(first: 50) {
               nodes {
                 number
                 url
+                mergedAt
               }
             }
             author {
@@ -119,26 +120,42 @@ export async function getInfo(request: {
   }
 
   const data = await GHDataLoader.load(request);
+  let user = null;
+  if (data.author && data.author.user) {
+    user = data.author.user;
+  }
+
+  let associatedPullRequest =
+    data.associatedPullRequests &&
+    data.associatedPullRequests.nodes &&
+    data.associatedPullRequests.nodes.length
+      ? (data.associatedPullRequests.nodes as any[]).sort((a, b) => {
+          if (a.mergedAt === null && b.mergedAt === null) {
+            return 0;
+          }
+          if (a.mergedAt === null) {
+            return 1;
+          }
+          if (b.mergedAt === null) {
+            return -1;
+          }
+          a = new Date(a.mergedAt);
+          b = new Date(b.mergedAt);
+          return a > b ? 1 : a < b ? -1 : 0;
+        })[0]
+      : null;
+  if (associatedPullRequest) {
+    user = associatedPullRequest.author;
+  }
   return {
-    user: data.author && data.author.user ? data.author.user.login : null,
-    pull:
-      data.associatedPullRequests &&
-      data.associatedPullRequests.nodes &&
-      data.associatedPullRequests.nodes[0]
-        ? data.associatedPullRequests.nodes[0].number
-        : null,
+    user: user ? user.login : null,
+    pull: associatedPullRequest ? associatedPullRequest.number : null,
     links: {
       commit: `[\`${request.commit}\`](${data.commitUrl})`,
-      pull:
-        data.associatedPullRequests &&
-        data.associatedPullRequests.nodes &&
-        data.associatedPullRequests.nodes[0]
-          ? `[#${data.associatedPullRequests.nodes[0].number}](${data.associatedPullRequests.nodes[0].url})`
-          : null,
-      user:
-        data.author && data.author.user
-          ? `[@${data.author.user.login}](${data.author.user.url})`
-          : null
+      pull: associatedPullRequest
+        ? `[#${associatedPullRequest.number}](${associatedPullRequest.url})`
+        : null,
+      user: user ? `[@${user.login}](${user.url})` : null
     }
   };
 }
