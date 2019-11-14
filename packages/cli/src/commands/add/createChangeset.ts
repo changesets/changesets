@@ -2,7 +2,7 @@ import chalk from "chalk";
 
 import semver from "semver";
 
-import * as cli from "../../utils/cli";
+import * as cli from "../../utils/cli-utilities";
 import getWorkspaces from "../../utils/getWorkspaces";
 import { error, log } from "@changesets/logger";
 import { Release, Workspace } from "@changesets/types";

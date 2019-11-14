@@ -2,7 +2,7 @@ import chalk from "chalk";
 import path from "path";
 import fs from "fs-extra";
 
-import * as cli from "../../utils/cli";
+import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
 import { Config } from "@changesets/types";
