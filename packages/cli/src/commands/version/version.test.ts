@@ -32,7 +32,7 @@ beforeEach(() => {
 // This is from bolt's error log
 const consoleError = console.error;
 
-jest.mock("../../utils/cli");
+jest.mock("../../utils/cli-utilities");
 jest.mock("@changesets/git");
 jest.mock("human-id");
 jest.mock("@changesets/logger");

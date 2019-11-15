@@ -3,7 +3,7 @@ import { error, info, warn } from "@changesets/logger";
 import pLimit from "p-limit";
 import chalk from "chalk";
 import spawn from "spawndamnit";
-import { askQuestion } from "../../utils/cli";
+import { askQuestion } from "../../utils/cli-utilities";
 // @ts-ignore
 import isCI from "is-ci";
 import { TwoFactorState } from "../../utils/types";
