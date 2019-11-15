@@ -10,7 +10,8 @@ export let defaultWrittenConfig = {
   changelog: "@changesets/cli/changelog",
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
-  access: "restricted"
+  access: "restricted",
+  baseBranch: "master"
 } as const;
 
 function getNormalisedChangelogOption(
@@ -84,6 +85,15 @@ export let parse = (
       )} when the only valid values are undefined or a boolean`
     );
   }
+  if (json.baseBranch !== undefined && typeof json.baseBranch !== "string") {
+    messages.push(
+      `The \`baseBranch\` option is set as ${JSON.stringify(
+        json.baseBranch,
+        null,
+        2
+      )} but the \`baseBranch\` option can only be set as a string`
+    );
+  }
   if (json.linked !== undefined) {
     if (
       !(
@@ -134,7 +144,6 @@ export let parse = (
         messages.join("\n")
     );
   }
-
   let config: Config = {
     changelog: getNormalisedChangelogOption(
       json.changelog === undefined
@@ -148,7 +157,11 @@ export let parse = (
     commit:
       json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
     linked:
-      json.linked === undefined ? defaultWrittenConfig.linked : json.linked
+      json.linked === undefined ? defaultWrittenConfig.linked : json.linked,
+    baseBranch:
+      json.baseBranch === undefined
+        ? defaultWrittenConfig.baseBranch
+        : json.baseBranch
   };
   return config;
 };

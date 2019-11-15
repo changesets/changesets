@@ -1,5 +1,25 @@
 # @changesets/cli
 
+## 2.4.0
+
+### Minor Changes
+
+- [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Added support for `baseBranch` option which specifies what branch Changesets should use when determining what packages have changed
+
+* [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Added support for `--since` option to the `status` command which shows the release plan since the git ref(branch, tag, commit, etc.) specified with `--since` and deprecate `--sinceMaster` option
+
+### Patch Changes
+
+- [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Moved error advising users to run changeset init when a .changeset directory from the add command to all commands except init
+
+* [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fixed old changesets not being read in status command
+* Updated dependencies [[`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2), [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2), [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2), [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2)]:
+  - @changesets/get-release-plan@0.3.0
+  - @changesets/read@0.4.0
+  - @changesets/config@0.3.0
+  - @changesets/git@0.3.0
+  - @changesets/apply-release-plan@0.3.1
+
 ## 2.3.3
 
 ### Patch Changes

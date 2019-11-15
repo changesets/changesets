@@ -1,29 +1,8 @@
 import spawn from "spawndamnit";
 import path from "path";
 import getWorkspaces from "get-workspaces";
-import pkgDir from "pkg-dir";
 import { GitError } from "@changesets/errors";
 import { Workspace } from "@changesets/types";
-
-// TODO: Currently getting this working, need to decide how to
-// share projectDir between packages if that's what we need
-async function getProjectDirectory(cwd: string) {
-  const projectDir = await pkgDir(cwd);
-  if (!projectDir) {
-    throw new Error("Could not find project directory");
-  }
-  return projectDir;
-}
-
-async function getMasterRef(cwd: string) {
-  const gitCmd = await spawn("git", ["rev-parse", "master"], { cwd });
-  if (gitCmd.code !== 0)
-    throw new GitError(gitCmd.code, gitCmd.stderr.toString());
-  return gitCmd.stdout
-    .toString()
-    .trim()
-    .split("\n")[0];
-}
 
 async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
@@ -60,11 +39,15 @@ async function getCommitThatAddsFile(gitPath: string, cwd: string) {
   return gitCmd.stdout.toString();
 }
 
-async function getChangedFilesSince(
-  ref: string,
-  cwd: string,
+async function getChangedFilesSince({
+  cwd,
+  ref,
   fullPath = false
-): Promise<Array<string>> {
+}: {
+  cwd: string;
+  ref: string;
+  fullPath?: boolean;
+}): Promise<Array<string>> {
   // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
   const divergedAt = cmd.stdout.toString().trim();
@@ -79,20 +62,20 @@ async function getChangedFilesSince(
 }
 
 // below are less generic functions that we use in combination with other things we are doing
-async function getChangedChangesetFilesSinceMaster(
-  cwd: string,
-  fullPath = false
-): Promise<Array<string>> {
+async function getChangedChangesetFilesSinceRef({
+  cwd,
+  ref
+}: {
+  cwd: string;
+  ref: string;
+}): Promise<Array<string>> {
   try {
-    const ref = await getMasterRef(cwd);
     // First we need to find the commit where we diverged from `ref` at using `git merge-base`
     let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
     // Now we can find which files we added
-    cmd = await spawn(
-      "git",
-      ["diff", "--name-only", "--diff-filter=d", "master"],
-      { cwd }
-    );
+    cmd = await spawn("git", ["diff", "--name-only", "--diff-filter=d", ref], {
+      cwd
+    });
 
     let tester = /.changeset\/[^/]+\.md$/;
 
@@ -101,17 +84,21 @@ async function getChangedChangesetFilesSinceMaster(
       .trim()
       .split("\n")
       .filter(file => tester.test(file));
-    if (!fullPath) return files;
-    return files.map(file => path.resolve(cwd, file));
+    return files;
   } catch (err) {
     if (err instanceof GitError) return [];
     throw err;
   }
 }
 
-async function getChangedPackagesSinceCommit(commitHash: string, cwd: string) {
-  const changedFiles = await getChangedFilesSince(commitHash, cwd, true);
-  const projectDir = await getProjectDirectory(cwd);
+async function getChangedPackagesSinceRef({
+  cwd,
+  ref
+}: {
+  cwd: string;
+  ref: string;
+}) {
+  const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
   let workspaces = await getWorkspaces({
     cwd,
     tools: ["yarn", "bolt", "root"]
@@ -122,7 +109,7 @@ async function getChangedPackagesSinceCommit(commitHash: string, cwd: string) {
 
   const allPackages = workspaces.map(pkg => ({
     ...pkg,
-    relativeDir: path.relative(projectDir, pkg.dir)
+    relativeDir: path.relative(cwd, pkg.dir)
   }));
 
   const fileNameToPackage = (fileName: string): Workspace =>
@@ -141,26 +128,12 @@ async function getChangedPackagesSinceCommit(commitHash: string, cwd: string) {
   );
 }
 
-// Note: This returns the packages that have changed AND been committed since master,
-// it wont include staged/unstaged changes
-//
-// Don't use this function in master branch as it returns nothing in that case.
-async function getChangedPackagesSinceMaster(cwd: string) {
-  try {
-    const masterRef = await getMasterRef(cwd);
-    return getChangedPackagesSinceCommit(masterRef, cwd);
-  } catch (err) {
-    if (err instanceof GitError) return [];
-    throw err;
-  }
-}
-
 export {
   getCommitThatAddsFile,
   getChangedFilesSince,
   add,
   commit,
   tag,
-  getChangedPackagesSinceMaster,
-  getChangedChangesetFilesSinceMaster
+  getChangedPackagesSinceRef,
+  getChangedChangesetFilesSinceRef
 };
