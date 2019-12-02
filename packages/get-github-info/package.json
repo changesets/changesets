@@ -9,5 +9,9 @@
   "dependencies": {
     "dataloader": "^1.4.0",
     "node-fetch": "^2.5.0"
+  },
+  "devDependencies": {
+    "nock": "^11.7.0",
+    "prettier": "^1.18.2"
   }
 }
