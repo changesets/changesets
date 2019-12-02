@@ -64,12 +64,12 @@ export function getPackageInfo(pkgName: string) {
 export async function infoAllow404(pkgName: string) {
   let pkgInfo = await getPackageInfo(pkgName);
   if (pkgInfo.error && pkgInfo.error.code === "E404") {
-    warn(`Recieved 404 for npm info ${chalk.cyan(`"${pkgName}"`)}`);
+    warn(`Received 404 for npm info ${chalk.cyan(`"${pkgName}"`)}`);
     return { published: false, pkgInfo: {} };
   }
   if (pkgInfo.error) {
     error(
-      `Recieved an unknown error code: ${
+      `Received an unknown error code: ${
         pkgInfo.error.code
       } for npm info ${chalk.cyan(`"${pkgName}"`)}`
     );

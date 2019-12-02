@@ -1,3 +1,3 @@
 # Spec (WIP)
 
-Spec is cancelle - please see [./dictionary.md] instead.
+Spec is cancelle - please see [dictonary](./dictionary.md) instead.
