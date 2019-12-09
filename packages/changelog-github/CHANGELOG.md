@@ -1,5 +1,17 @@
 # @changesets/changelog-github
 
+## 0.2.0
+
+### Minor Changes
+
+- [`938823f`](https://github.com/atlassian/changesets/commit/938823f6fa0277869f0aecc3345c3812d1e44bba) [#224](https://github.com/atlassian/changesets/pull/224) - Show the PR author of a change rather than the author of the commit that added a changeset to account for cases when maintainers add a changeset to a PR and merge the PR with a merge commit
+
+### Patch Changes
+
+- [`938823f`](https://github.com/atlassian/changesets/commit/938823f6fa0277869f0aecc3345c3812d1e44bba) [#224](https://github.com/atlassian/changesets/pull/224) - Fix cases where the wrong PR is returned when a commit is associated with multiple PRs
+- Updated dependencies [[`938823f`](https://github.com/atlassian/changesets/commit/938823f6fa0277869f0aecc3345c3812d1e44bba), [`938823f`](https://github.com/atlassian/changesets/commit/938823f6fa0277869f0aecc3345c3812d1e44bba)]:
+  - @changesets/get-github-info@0.4.0
+
 ## 0.1.1
 
 ### Patch Changes

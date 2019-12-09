@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.4.1
+
+### Patch Changes
+
+- [`6c0b53d`](https://github.com/atlassian/changesets/commit/6c0b53da63f287dfa9af45532f1f1d628b518b25) [#227](https://github.com/atlassian/changesets/pull/227) - Fix received typo
+
 ## 2.4.0
 
 ### Minor Changes
