@@ -21,6 +21,12 @@ test("associated with multiple PRs with only one merged", async () => {
                     number
                     url
                     mergedAt
+                    author {
+                      user {
+                        login
+                        url
+                      }
+                    }
                   }
                 }
                 author {
@@ -124,6 +130,12 @@ test("associated with multiple PRs with multiple merged gets the one that was me
                     number
                     url
                     mergedAt
+                    author {
+                      user {
+                        login
+                        url
+                      }
+                    }
                   }
                 }
                 author {
@@ -227,6 +239,12 @@ test("gets the author of the associated pull request if it exists rather than th
                     number
                     url
                     mergedAt
+                    author {
+                      user {
+                        login
+                        url
+                      }
+                    }
                   }
                 }
                 author {
