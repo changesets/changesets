@@ -46,7 +46,7 @@ export default async function version(cwd: string, config: Config) {
 
   let workspaces = await getWorkspaces({
     cwd,
-    tools: ["yarn", "bolt", "root"]
+    tools: ["yarn", "bolt", "pnpm", "root"]
   });
 
   if (!workspaces)
