@@ -5,11 +5,12 @@
 import fs from "fs-extra";
 import path from "path";
 import globby from "globby";
+import readYamlFile from "read-yaml-file";
 import { PackageJSON } from "@changesets/types";
 
 type Options = {
   cwd?: string;
-  tools?: Array<"yarn" | "bolt" | "root">;
+  tools?: Array<"yarn" | "bolt" | "pnpm" | "root">;
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };
@@ -18,7 +19,7 @@ export default async function getWorkspaces(
   opts: Options = {}
 ): Promise<Array<Workspace> | null> {
   const cwd = opts.cwd || process.cwd();
-  const tools = opts.tools || ["yarn", "bolt"]; // We also support root, but don't do it by default
+  const tools = opts.tools || ["yarn", "bolt", "pnpm"]; // We also support root, but don't do it by default
 
   const pkg = await fs
     .readFile(path.join(cwd, "package.json"), "utf-8")
@@ -34,6 +35,19 @@ export default async function getWorkspaces(
     }
   } else if (tools.includes("bolt") && pkg.bolt && pkg.bolt.workspaces) {
     workspaces = pkg.bolt.workspaces;
+  } else if (tools.includes("pnpm")) {
+    try {
+      const manifest = await readYamlFile<{ packages?: string[] }>(
+        path.join(cwd, "pnpm-workspace.yaml")
+      );
+      if (manifest && manifest.packages) {
+        workspaces = manifest.packages;
+      }
+    } catch (err) {
+      if (err.code !== "ENOENT") {
+        throw err;
+      }
+    }
   }
 
   if (!workspaces) {
