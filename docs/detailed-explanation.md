@@ -1,7 +1,7 @@
 # A Detailed Explanation of Changesets
 
 Below, you will find a detailed explanation of what changesets are, and how they are being thought about.
-If you want to build tools that use changesets, I recommend checking out our [changesets spec](./spec.md)
+If you want to build tools that use changesets, I recommend checking out our [changesets spec](./spec.md).
 
 ## The problem:
 
@@ -43,7 +43,7 @@ Change all the things
 
 This is useful because it breaks versioning into two steps:
 
-1. Adding a changeset - can be done in a PR, by a contributor, while the change is fresh in their mind
+1. Adding a changeset - can be done in a PR, by a contributor, while the change is fresh in their mind.
 2. Versioning - combines all changesets, creates one version bump for each package based on the maximum version bump of each package, and updates dependencies where needed, write changelogs. Can then be reviewed as an aggregate.
 
 ## The tooling that makes this worthwhile
@@ -54,7 +54,7 @@ This is useful because it breaks versioning into two steps:
 
 A tool to publish multiple packages from a mono-repo is also important, however does not need to be linked to this.
 
-See this blog post [I need to write this this link goes nowhere]()
+See this blog post [I need to write this, this link goes nowhere]()
 
 ## Benefits to single-package repos
 
