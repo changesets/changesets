@@ -183,7 +183,7 @@ The status command provides information about the changesets that currently exis
 pre [exit|enter {tag}]
 ```
 
-The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md)
+The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md).
 
 ### Bumping peerDependencies
 
