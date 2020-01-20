@@ -16,7 +16,11 @@ const getReleaseLine = async (
 
   let returnVal = `- ${
     changeset.commit ? `${changeset.commit}: ` : ""
-  }${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+  }${firstLine}`;
+
+  if (futureLines.length > 0) {
+    returnVal += `\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+  }
 
   return returnVal;
 };
