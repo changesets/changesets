@@ -44,7 +44,7 @@ export default async function applyReleasePlan(
   let touchedFiles = [];
   let workspaces = await getWorkspaces({
     cwd,
-    tools: ["yarn", "bolt", "root"]
+    tools: ["yarn", "bolt", "pnpm", "root"]
   });
 
   if (!workspaces) throw new Error(`could not find any workspaces in ${cwd}`);

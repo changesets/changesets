@@ -47,7 +47,7 @@ export async function exitPre(cwd: string) {
 export async function enterPre(cwd: string, tag: string) {
   let workspaces = (await getWorkspaces({
     cwd,
-    tools: ["bolt", "root", "yarn"]
+    tools: ["yarn", "bolt", "pnpm", "root"]
   }))!;
   let preStatePath = path.resolve(cwd, ".changeset", "pre.json");
   // TODO: verify that the pre state isn't broken
