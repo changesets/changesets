@@ -1,3 +1,5 @@
+import fs from "fs-extra";
+import path from "path";
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import pLimit from "p-limit";
@@ -16,6 +18,18 @@ function getCorrectRegistry() {
       ? undefined
       : process.env.npm_config_registry;
   return registry;
+}
+
+async function getPublishTool(cwd: string): Promise<"npm" | "pnpm"> {
+  try {
+    await fs.access(path.join(cwd, "pnpm-lock.yaml"));
+    return "pnpm";
+  } catch (err) {
+    if (err.code !== "ENOENT") {
+      throw err;
+    }
+    return "npm";
+  }
 }
 
 export async function getTokenIsRequired() {
@@ -109,6 +123,7 @@ async function internalPublish(
   opts: { cwd: string; access?: string; tag: string },
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
+  let publishTool = await getPublishTool(opts.cwd);
   let publishFlags = opts.access ? ["--access", opts.access] : [];
   publishFlags.push("--tag", opts.tag);
   if ((await twoFactorState.isRequired) && !isCI) {
@@ -121,10 +136,14 @@ async function internalPublish(
   const envOverride = {
     npm_config_registry: getCorrectRegistry()
   };
-  let { stdout } = await spawn("npm", ["publish", "--json", ...publishFlags], {
-    cwd: opts.cwd,
-    env: Object.assign({}, process.env, envOverride)
-  });
+  let { stdout } = await spawn(
+    publishTool,
+    ["publish", "--json", ...publishFlags],
+    {
+      cwd: opts.cwd,
+      env: Object.assign({}, process.env, envOverride)
+    }
+  );
   // New error handling. NPM's --json option is included alongside the `prepublish and
   // `postpublish` contents in terminal. We want to handle this as best we can but it has
   // some struggles

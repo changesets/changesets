@@ -17,9 +17,9 @@ The **@changesets/cli** package allows you to write `changeset` files as you mak
 If you just want to jump in to using changesets, the [@changesets/cli](./packages/cli/README.md) docs are where you should head.
 
 If you want a detailed explanation of the the concepts behind changesets, or to understand how you would build on top
-of changesets, check out our [detailed-explanation](./docs/detailed-explanation.md)
+of changesets, check out our [detailed-explanation](./docs/detailed-explanation.md).
 
-We also have a [spec](./docs/spec.md)
+We also have a [spec](./docs/spec.md).
 
 ## Integrating with CI
 
@@ -41,4 +41,4 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [bolt](https://github.com/boltpkg/bolt) - Brought us a strong concept of how packages in a mono-repo should be able to interconnect, and provided the initial infrastructure to get inter-package information.
 - [atlaskit](https://atlaskit.atlassian.com) - The original home of the changesets code, and where many of the ideas and processes were fermented.
 - [lerna-semantic-release](https://github.com/atlassian/lerna-semantic-release) - put down many of the initial patterns around updating packages within a multi-package-repository, and started us thinking about how to manage dependent packages.
-- [Thinkmill](https://www.thinkmill.com.au) - For sponsoring the focused open sourcing of this project, and the version two rearchitecture
+- [Thinkmill](https://www.thinkmill.com.au) - For sponsoring the focused open sourcing of this project, and the version two rearchitecture.

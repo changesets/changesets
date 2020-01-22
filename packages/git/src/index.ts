@@ -101,7 +101,7 @@ async function getChangedPackagesSinceRef({
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
   let workspaces = await getWorkspaces({
     cwd,
-    tools: ["yarn", "bolt", "root"]
+    tools: ["yarn", "bolt", "pnpm", "root"]
   });
   if (workspaces === null) {
     workspaces = [];
