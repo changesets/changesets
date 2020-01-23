@@ -20,7 +20,7 @@ async function generateChangesForVersionTypeMarkdown(
   let releaseLines = await Promise.all(obj[type]);
   releaseLines = releaseLines.filter(x => x);
   if (releaseLines.length) {
-    return `### ${startCase(type)} Changes\n\n${releaseLines.join("")}`;
+    return `### ${startCase(type)} Changes\n\n${releaseLines.join("\n")}\n`;
   }
 }
 
