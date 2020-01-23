@@ -37,9 +37,13 @@ const getReleaseLine = async (changeset, type) => {
     repo: "Noviny/changesets",
     commit: changeset.commit
   });
-  return `- ${links.commit}${links.pull === null ? "" : ` ${links.pull}`}${
-    links.user === null ? "" : ` Thanks ${links.user}!`
-  }: ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+  let returnVal = `- ${links.commit}${
+    links.pull === null ? "" : ` ${links.pull}`
+  }${links.user === null ? "" : ` Thanks ${links.user}!`}: ${firstLine}`;
+  if (futureLines.length > 0) {
+    returnVal += `\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+  }
+  return returnVal;
 };
 
 // ...
