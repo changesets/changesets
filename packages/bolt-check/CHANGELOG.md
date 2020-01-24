@@ -1,5 +1,12 @@
 # bolt-check
 
+## 0.4.5
+
+### Patch Changes
+
+- Updated dependencies [[`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3), [`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3)]:
+  - get-workspaces@0.6.0
+
 ## 0.4.4
 
 ### Patch Changes

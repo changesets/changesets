@@ -1,5 +1,30 @@
 # @changesets/cli
 
+## 2.5.0
+
+### Minor Changes
+
+- [`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3) [#236](https://github.com/atlassian/changesets/pull/236) Thanks [@Andarist](https://github.com/Andarist)! - When in pnpm-managed project use pnpm for publishing.
+
+* [`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3) [#236](https://github.com/atlassian/changesets/pull/236) Thanks [@Andarist](https://github.com/Andarist)! - Read also pnpm workspace packages when searching for packages.
+
+### Patch Changes
+
+- [`cc64ad52`](https://github.com/atlassian/changesets/commit/cc64ad52ef334ba77efb61ed8cd4b2f4abd2a668) [#254](https://github.com/atlassian/changesets/pull/254) Thanks [@Andarist](https://github.com/Andarist)! - Added GitHub Actions support to CI detection.
+
+* [`4af2a78b`](https://github.com/atlassian/changesets/commit/4af2a78b22a2d22b557fe21603c83cc99959773d) [#232](https://github.com/atlassian/changesets/pull/232) Thanks [@harrysolovay](https://github.com/harrysolovay)! - Change format of the automatic commit messages to be in line with conventional commits.
+
+- [`ef6402c9`](https://github.com/atlassian/changesets/commit/ef6402c9d8dc1832126732dbbafb015b71f57f83) [#252](https://github.com/atlassian/changesets/pull/252) Thanks [@Andarist](https://github.com/Andarist)! - Avoid trailing newline for single-line changesets to avoid double newline between release lines when generating final markdown for changelog.
+
+- Updated dependencies [[`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3), [`ef6402c9`](https://github.com/atlassian/changesets/commit/ef6402c9d8dc1832126732dbbafb015b71f57f83), [`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3), [`503154db`](https://github.com/atlassian/changesets/commit/503154db39fe8ab88a1176e4569c48078bcf5569)]:
+  - get-workspaces@0.6.0
+  - @changesets/apply-release-plan@0.4.0
+  - get-dependents-graph@0.2.0
+  - @changesets/get-release-plan@0.4.0
+  - @changesets/git@0.4.0
+  - @changesets/pre@0.2.0
+  - @changesets/read@0.4.1
+
 ## 2.4.1
 
 ### Patch Changes

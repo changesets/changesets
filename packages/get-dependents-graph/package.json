@@ -1,6 +1,6 @@
 {
   "name": "get-dependents-graph",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Get the graph of dependents in a mono-repo",
   "main": "dist/get-dependents-graph.cjs.js",
   "module": "dist/get-dependents-graph.esm.js",
@@ -10,7 +10,7 @@
     "@changesets/types": "^0.4.0",
     "chalk": "^2.1.0",
     "fs-extra": "^7.0.1",
-    "get-workspaces": "^0.5.2",
+    "get-workspaces": "^0.6.0",
     "semver": "^5.4.1"
   }
 }

@@ -1,5 +1,13 @@
 # @changesets/get-github-info
 
+## 0.4.1
+
+### Patch Changes
+
+- [`503154db`](https://github.com/atlassian/changesets/commit/503154db39fe8ab88a1176e4569c48078bcf5569) [#257](https://github.com/atlassian/changesets/pull/257) Thanks [@Noviny](https://github.com/Noviny)! - Modify the Author query to match github's changes to their graphql
+
+* [`16bf3017`](https://github.com/atlassian/changesets/commit/16bf3017dbf25d498fee028bf9806d15edd61be9) [#229](https://github.com/atlassian/changesets/pull/229) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix the author of a PR not being queried
+
 ## 0.4.0
 
 ### Minor Changes

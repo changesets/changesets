@@ -1,5 +1,14 @@
 # @changesets/changelog-github
 
+## 0.2.1
+
+### Patch Changes
+
+- [`16bf3017`](https://github.com/atlassian/changesets/commit/16bf3017dbf25d498fee028bf9806d15edd61be9) [#229](https://github.com/atlassian/changesets/pull/229) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix the author of a PR not being queried
+
+- Updated dependencies [[`503154db`](https://github.com/atlassian/changesets/commit/503154db39fe8ab88a1176e4569c48078bcf5569), [`16bf3017`](https://github.com/atlassian/changesets/commit/16bf3017dbf25d498fee028bf9806d15edd61be9)]:
+  - @changesets/get-github-info@0.4.1
+
 ## 0.2.0
 
 ### Minor Changes
