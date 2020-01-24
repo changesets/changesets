@@ -3,7 +3,8 @@
   "version": "2.5.0",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
-    "changeset": "bin.js"
+    "changeset": "bin.js",
+    "changesets": "bin.js"
   },
   "repository": "https://github.com/changesets/changesets/tree/master/packages/cli",
   "files": [
