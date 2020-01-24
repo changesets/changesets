@@ -6,8 +6,7 @@ import pLimit from "p-limit";
 import chalk from "chalk";
 import spawn from "spawndamnit";
 import { askQuestion } from "../../utils/cli-utilities";
-// @ts-ignore
-import isCI from "is-ci";
+import isCI from "../../utils/isCI";
 import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);

@@ -7,8 +7,7 @@ import * as npmUtils from "./npm-utils";
 import { info, warn } from "@changesets/logger";
 import { TwoFactorState } from "../../utils/types";
 import { PreState } from "@changesets/types";
-// @ts-ignore
-import isCI from "is-ci";
+import isCI from "../../utils/isCI";
 
 export default async function publishPackages({
   cwd,
