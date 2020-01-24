@@ -1,6 +1,6 @@
 {
   "name": "get-workspaces",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Get workspaces for yarn workspaces, bolt workspaces, or the root package for building repo-agnostic tools",
   "main": "dist/get-workspaces.cjs.js",
   "module": "dist/get-workspaces.esm.js",

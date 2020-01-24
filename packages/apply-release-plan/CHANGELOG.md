@@ -1,5 +1,21 @@
 # @changesets/apply-release-plan
 
+## 0.4.0
+
+### Minor Changes
+
+- [`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3) [#236](https://github.com/atlassian/changesets/pull/236) Thanks [@Andarist](https://github.com/Andarist)! - Read also pnpm workspace packages when searching for packages.
+
+### Patch Changes
+
+- [`ef6402c9`](https://github.com/atlassian/changesets/commit/ef6402c9d8dc1832126732dbbafb015b71f57f83) [#252](https://github.com/atlassian/changesets/pull/252) Thanks [@Andarist](https://github.com/Andarist)! - Ensure there is a newline between release lines so the final markdown preserves correct formatting.
+
+* [`503154db`](https://github.com/atlassian/changesets/commit/503154db39fe8ab88a1176e4569c48078bcf5569) [#257](https://github.com/atlassian/changesets/pull/257) Thanks [@Noviny](https://github.com/Noviny)! - Move catch statement so errors are less spammy
+
+* Updated dependencies [[`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3), [`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3)]:
+  - get-workspaces@0.6.0
+  - @changesets/git@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes
