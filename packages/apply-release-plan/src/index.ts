@@ -196,30 +196,28 @@ async function getNewChangelogEntry(
 
   return Promise.all(
     releaseWithWorkspaces.map(async release => {
-      try {
-        let changelog = await getChangelogEntry(
-          release,
-          releaseWithWorkspaces,
-          moddedChangesets,
-          getChangelogFuncs,
-          changelogOpts
-        );
+      let changelog = await getChangelogEntry(
+        release,
+        releaseWithWorkspaces,
+        moddedChangesets,
+        getChangelogFuncs,
+        changelogOpts
+      );
 
-        return {
-          ...release,
-          changelog
-        };
-      } catch (e) {
-        console.error(
-          "The following error was encountered while generating changelog entries"
-        );
-        console.error(
-          "We have escaped applying the changesets, and no files should have been affected"
-        );
-        throw e;
-      }
+      return {
+        ...release,
+        changelog
+      };
     })
-  );
+  ).catch(e => {
+    console.error(
+      "The following error was encountered while generating changelog entries"
+    );
+    console.error(
+      "We have escaped applying the changesets, and no files should have been affected"
+    );
+    throw e;
+  });
 }
 
 async function updateChangelog(

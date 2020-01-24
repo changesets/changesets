@@ -27,10 +27,8 @@ function makeQuery(repos: any) {
                 url
                 mergedAt
                 author {
-                  user {
-                    login
-                    url
-                  }
+                  login
+                  url
                 }
               }
             }
