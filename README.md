@@ -35,6 +35,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [emotion](https://emotion.sh/docs/introduction)
 - [keystone](https://v5.keystonejs.com/)
 - [react-select](https://react-select.com/home)
+- [XState](https://xstate.js.org/)
 
 # Thanks/Inspiration
 
