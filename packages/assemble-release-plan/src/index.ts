@@ -43,6 +43,8 @@ function assembleReleasePlan(
 
   let workspacesByName = new Map(workspaces.map(x => [x.name, x]));
 
+  let unfilteredChangesets = changesets;
+
   if (updatedPreState !== undefined) {
     for (let workspace of workspaces) {
       if (updatedPreState.initialVersions[workspace.name] === undefined) {
@@ -62,6 +64,36 @@ function assembleReleasePlan(
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
   let releases = flattenReleases(changesets, workspaces);
+
+  // for every release in pre mode, we want versions to be bumped to the highest bump type
+  // across all the changesets even if the package doesn't have a changeset that releases
+  // to the highest bump type in a given release in pre mode and importantly
+  // we don't want to add any new releases, we only want to update ones that will already happen
+  // because if they're not being released, the version will already have been bumped with the highest bump type
+  if (updatedPreState !== undefined && updatedPreState.mode !== "exit") {
+    let releasesFromUnfilteredChangesets = flattenReleases(
+      unfilteredChangesets,
+      workspaces
+    );
+
+    releases.forEach((value, key) => {
+      let releaseFromUnfilteredChangesets = releasesFromUnfilteredChangesets.get(
+        key
+      );
+      if (releaseFromUnfilteredChangesets === undefined) {
+        throw new InternalError("releaseFromUnfilteredChangesets is undefined");
+      }
+      releases.set(key, {
+        ...value,
+        // note that we're only setting the type, not the changesets which could be different(the name and oldVersion would be the same so they don't matter)
+        // because the changesets on a given release refer to why a given package is being released
+        // NOT why it's being released with a given bump type
+        // (the bump type could change because of this, linked or peer dependencies)
+        type: releaseFromUnfilteredChangesets.type
+      });
+    });
+  }
+
   let preVersions = new Map();
   if (updatedPreState !== undefined) {
     for (let [name, release] of releases) {
