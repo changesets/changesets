@@ -3,6 +3,6 @@ export default function getVersionRangeType(
 ): "^" | "~" | ">=" | "" {
   if (versionRange.charAt(0) === "^") return "^";
   if (versionRange.charAt(0) === "~") return "~";
-  if (versionRange.charAt(0) === ">=") return ">=";
+  if (versionRange.startsWith(">=")) return ">=";
   return "";
 }
