@@ -6,14 +6,14 @@ import { InternalRelease } from "./types";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
-  workspaces: Workspace[]
+  workspacesByName: Map<string, Workspace>
 ): Map<string, InternalRelease> {
   let releases: Map<string, InternalRelease> = new Map();
 
   changesets.forEach(changeset => {
     changeset.releases.forEach(({ name, type }) => {
       let release = releases.get(name);
-      let ws = workspaces.find(ws => ws.name === name);
+      let ws = workspacesByName.get(name);
       if (!ws) {
         throw new Error(`Could not find package information for ${name}`);
       }

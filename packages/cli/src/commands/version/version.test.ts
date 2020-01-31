@@ -586,7 +586,7 @@ describe("pre", () => {
       }
     ]);
   });
-  it("should use the highest bump type for between all prereleases for every prerelease", async () => {
+  it.only("should use the highest bump type for between all prereleases for every prerelease", async () => {
     let cwd = f.copy("simple-project");
     await writeChangeset(
       {
