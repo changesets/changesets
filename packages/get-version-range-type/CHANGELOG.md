@@ -1,5 +1,11 @@
 # @changesets/get-version-range-type
 
+## 0.2.0
+
+### Minor Changes
+
+- [`1282ef6`](https://github.com/atlassian/changesets/commit/1282ef698761c1f634fb409842cc7de6b4d03da4) [#263](https://github.com/atlassian/changesets/pull/263) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - add ">=" to get-version-range-type
+
 ## 0.1.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "bolt-check",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Run the two major checks that the bolt package does in yarn workspaces",
   "main": "dist/bolt-check.cjs.js",
   "module": "dist/bolt-check.esm.js",
@@ -17,7 +17,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@changesets/get-version-range-type": "^0.1.1",
+    "@changesets/get-version-range-type": "^0.2.0",
     "chalk": "^2.1.0",
     "detect-indent": "^6.0.0",
     "fs-extra": "^7.0.1",

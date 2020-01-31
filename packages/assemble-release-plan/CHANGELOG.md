@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 0.3.1
+
+### Patch Changes
+
+- [`1282ef6`](https://github.com/atlassian/changesets/commit/1282ef698761c1f634fb409842cc7de6b4d03da4) [#263](https://github.com/atlassian/changesets/pull/263) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fixed a bug where only the unreleased pre-release changesets were taken into account when calculating the new version, not previously released changesets.
+
 ## 0.3.0
 
 ### Minor Changes
