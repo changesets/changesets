@@ -6,7 +6,6 @@ export function incrementVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined
 ) {
-  console.log(release);
   let version = semver.inc(release.oldVersion, release.type)!;
   if (preInfo !== undefined && preInfo.state.mode !== "exit") {
     let preVersion = preInfo.preVersions.get(release.name);
