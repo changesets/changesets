@@ -1,5 +1,11 @@
 # @changesets/changelog-git
 
+## 0.1.2
+
+### Patch Changes
+
+- [`ef6402c9`](https://github.com/atlassian/changesets/commit/ef6402c9d8dc1832126732dbbafb015b71f57f83) [#252](https://github.com/atlassian/changesets/pull/252) Thanks [@Andarist](https://github.com/Andarist)! - Avoid trailing newline for single-line changesets to avoid double newline between release lines when generating final markdown for changelog.
+
 ## 0.1.1
 
 ### Patch Changes

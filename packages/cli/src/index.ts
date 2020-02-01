@@ -61,7 +61,7 @@ const cwd = process.cwd();
 (async () => {
   const workspaces = await getWorkspaces({
     cwd,
-    tools: ["yarn", "bolt", "root"]
+    tools: ["yarn", "bolt", "pnpm", "root"]
   });
 
   if (!workspaces) {
@@ -222,7 +222,7 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
         require("@changesets/cli/package.json").version
       }
 - node@${process.version}
-      
+
 ## Extra details
 
 <!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->

@@ -106,7 +106,7 @@ changeset add [--empty]
 
 This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
 
-Once confirmed, the changeset will be write a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semester bump types for them.
+Once confirmed, the changeset will be write a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semver bump types for them.
 
 A changeset that major bumps `@changesets/cli` would look like this:
 
@@ -183,7 +183,7 @@ The status command provides information about the changesets that currently exis
 pre [exit|enter {tag}]
 ```
 
-The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md)
+The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md).
 
 ### Bumping peerDependencies
 

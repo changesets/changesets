@@ -16,20 +16,18 @@ import applyReleasePlan from "./";
 class FakeReleasePlan {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
-  baseChangeset: NewChangeset;
-  baseRelease: ComprehensiveRelease;
   config: Config;
 
   constructor(
     changesets: NewChangeset[] = [],
     releases: ComprehensiveRelease[] = []
   ) {
-    this.baseChangeset = {
+    const baseChangeset: NewChangeset = {
       id: "quick-lions-devour",
       summary: "Hey, let's have fun with testing!",
       releases: [{ name: "pkg-a", type: "minor" }]
     };
-    this.baseRelease = {
+    const baseRelease: ComprehensiveRelease = {
       name: "pkg-a",
       type: "minor",
       oldVersion: "1.0.0",
@@ -44,8 +42,8 @@ class FakeReleasePlan {
       baseBranch: "master"
     };
 
-    this.changesets = [this.baseChangeset, ...changesets];
-    this.releases = [this.baseRelease, ...releases];
+    this.changesets = [baseChangeset, ...changesets];
+    this.releases = [baseRelease, ...releases];
   }
 
   getReleasePlan(): ReleasePlan {
@@ -146,17 +144,18 @@ describe("apply release plan", () => {
       });
     });
     it("should update a version for two packages with different new versions", async () => {
-      const releasePlan = new FakeReleasePlan();
-      releasePlan.releases = [
-        ...releasePlan.releases,
-        {
-          name: "pkg-b",
-          type: "major",
-          oldVersion: "1.0.0",
-          newVersion: "2.0.0",
-          changesets: []
-        }
-      ];
+      const releasePlan = new FakeReleasePlan(
+        [],
+        [
+          {
+            name: "pkg-b",
+            type: "major",
+            oldVersion: "1.0.0",
+            newVersion: "2.0.0",
+            changesets: []
+          }
+        ]
+      );
 
       let { changedFiles } = await testSetup(
         "simple-project",
@@ -210,17 +209,18 @@ describe("apply release plan", () => {
       - Hey, let's have fun with testing!`);
     });
     it("should update a changelog for two packages", async () => {
-      const releasePlan = new FakeReleasePlan();
-      releasePlan.releases = [
-        ...releasePlan.releases,
-        {
-          name: "pkg-b",
-          type: "major",
-          oldVersion: "1.0.0",
-          newVersion: "2.0.0",
-          changesets: []
-        }
-      ];
+      const releasePlan = new FakeReleasePlan(
+        [],
+        [
+          {
+            name: "pkg-b",
+            type: "major",
+            oldVersion: "1.0.0",
+            newVersion: "2.0.0",
+            changesets: []
+          }
+        ]
+      );
 
       let { changedFiles } = await testSetup(
         "simple-project",
@@ -252,12 +252,57 @@ describe("apply release plan", () => {
       - Hey, let's have fun with testing!
 
       ### Patch Changes
-      
+
         - pkg-b@2.0.0`);
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 2.0.0`);
+    });
+
+    test("should list multi-line same-type summaries correctly", async () => {
+      const releasePlan = new FakeReleasePlan([
+        {
+          id: "some-id-1",
+          summary: "Random stuff\n\nget it while it's hot!",
+          releases: [{ name: "pkg-a", type: "minor" }]
+        },
+        {
+          id: "some-id-2",
+          summary: "New feature, much wow\n\nlook at this shiny stuff!",
+          releases: [{ name: "pkg-a", type: "minor" }]
+        }
+      ]);
+      releasePlan.releases[0].changesets.push("some-id-1", "some-id-2");
+
+      let { changedFiles } = await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        {
+          ...releasePlan.config,
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null
+          ]
+        }
+      );
+
+      let readmePath = changedFiles.find(a => a.endsWith("pkg-a/CHANGELOG.md"));
+
+      if (!readmePath) throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+      expect(readme.trim()).toEqual(
+        [
+          "# pkg-a\n",
+          "## 1.1.0",
+          "### Minor Changes\n",
+          "- Hey, let's have fun with testing!",
+          "- Random stuff",
+          "  \n  get it while it's hot!",
+          "- New feature, much wow",
+          "  \n  look at this shiny stuff!"
+        ].join("\n")
+      );
     });
   });
   describe("should error and not write if", () => {

@@ -29,6 +29,15 @@ describe("get-workspaces", () => {
     expect(workspaces[0].name).toEqual("bolt-workspace-pkg-a");
     expect(workspaces[1].name).toEqual("bolt-workspace-pkg-b");
   });
+  it("should resolve pnpm workspaces if the pnpm option is passed", async () => {
+    let cwd = await getFixturePath(__dirname, "pnpm-workspace-base");
+    const workspaces = await getWorkspaces({ cwd, tools: ["pnpm"] });
+    if (workspaces === null) {
+      return expect(workspaces).not.toBeNull();
+    }
+    expect(workspaces[0].name).toEqual("pnpm-workspace-base-pkg-a");
+    expect(workspaces[1].name).toEqual("pnpm-workspace-base-pkg-b");
+  });
   it("should resolve main package if root option is passed", async () => {
     let cwd = await getFixturePath(__dirname, "root-only");
     const workspaces = await getWorkspaces({ cwd, tools: ["root"] });
@@ -55,6 +64,15 @@ describe("get-workspaces", () => {
     }
     expect(workspaces[0].name).toEqual("bolt-workspace-pkg-a");
     expect(workspaces[1].name).toEqual("bolt-workspace-pkg-b");
+  });
+  it("should by default resolve pnpm workspaces if yarn & bolt workspaces are absent", async () => {
+    let cwd = await getFixturePath(__dirname, "pnpm-workspace-base");
+    const workspaces = await getWorkspaces({ cwd });
+    if (workspaces === null) {
+      return expect(workspaces).not.toBeNull();
+    }
+    expect(workspaces[0].name).toEqual("pnpm-workspace-base-pkg-a");
+    expect(workspaces[1].name).toEqual("pnpm-workspace-base-pkg-b");
   });
   it("should return an empty array if no workspaces are found", async () => {
     let cwd = await getFixturePath(__dirname, "root-only");

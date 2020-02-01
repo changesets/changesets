@@ -13,7 +13,7 @@ export default async function getReleasePlan(
 ): Promise<ReleasePlan> {
   const workspaces = await getWorkspaces({
     cwd,
-    tools: ["yarn", "bolt", "root"]
+    tools: ["yarn", "bolt", "pnpm", "root"]
   });
 
   if (!workspaces)

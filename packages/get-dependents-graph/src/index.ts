@@ -5,7 +5,7 @@ import getDependencyGraph from "./get-dependency-graph";
 export default async function getDependentsGraph({ cwd }: { cwd: string }) {
   const packages = await getWorkspaces({
     cwd,
-    tools: ["yarn", "bolt", "root"]
+    tools: ["yarn", "bolt", "pnpm", "root"]
   });
 
   if (!packages) {

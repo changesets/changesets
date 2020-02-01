@@ -33,9 +33,9 @@ the package will scan for.
 const workspaces = await getWorkspaces({ cwd, tools });
 ```
 
-The tools supported are `yarn`, `bolt`, and `root`, which returns the root package as a single workspace if passed.
+The tools supported are `yarn`, `bolt`, `pnpm` and `root`, which returns the root package as a single workspace if passed.
 Tools is an array, so you can try for one type of workspace and then another, so you could do:
 
 ```javascript
-getWorkspaces({ tools: ["bolt", "yarn", "root"] });
+getWorkspaces({ tools: ["bolt", "yarn", "pnpm", "root"] });
 ```

@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "name": "pnpm-workspace-base",
+  "description": "Base pnpm workspace work",
+  "version": "1.0.0"
+}
