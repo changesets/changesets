@@ -1,5 +1,12 @@
 # bolt-check
 
+## 0.4.6
+
+### Patch Changes
+
+- Updated dependencies [[`1282ef6`](https://github.com/atlassian/changesets/commit/1282ef698761c1f634fb409842cc7de6b4d03da4)]:
+  - @changesets/get-version-range-type@0.2.0
+
 ## 0.4.5
 
 ### Patch Changes
