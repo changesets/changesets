@@ -33,6 +33,7 @@
     "@babel/preset-typescript": "^7.3.3",
     "@babel/runtime": "^7.4.4",
     "@manypkg/cli": "^0.8.1",
+    "@preconstruct/cli": "^1.1.4",
     "@types/fs-extra": "^5.1.0",
     "@types/jest": "^24.0.12",
     "@types/jest-in-case": "^1.0.1",
@@ -57,7 +58,6 @@
     "jest-fixtures": "^0.5.0",
     "jest-junit": "^6.4.0",
     "jest-watch-typeahead": "^0.4.2",
-    "preconstruct": "^0.1.2",
     "prettier": "^1.18.2",
     "typescript": "^3.7.4"
   },
