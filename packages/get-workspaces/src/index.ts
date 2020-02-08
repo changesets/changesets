@@ -17,7 +17,7 @@ export type Workspace = { config: PackageJSON; name: string; dir: string };
 
 export default async function getWorkspaces(
   opts: Options = {}
-): Promise<Array<Workspace> | null> {
+): Promise<Array<Workspace>> {
   const cwd = opts.cwd || process.cwd();
   const tools = opts.tools || ["yarn", "bolt", "pnpm"]; // We also support root, but don't do it by default
 
@@ -54,7 +54,7 @@ export default async function getWorkspaces(
     if (tools.includes("root")) {
       return [{ config: pkg, dir: cwd, name: pkg.name }];
     }
-    return null;
+    return [];
   }
 
   const folders = await globby(workspaces, {
