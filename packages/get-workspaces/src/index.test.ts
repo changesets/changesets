@@ -77,7 +77,7 @@ describe("get-workspaces", () => {
   it("should return an empty array if package.json is missing", async () => {
     let cwd = await getFixturePath(__dirname, "empty");
     const workspaces = await getWorkspaces({ cwd });
-    expect(workspaces).toEqual(null);
+    expect(workspaces).toEqual([]);
   });
   it("should return an empty array if no workspaces are found", async () => {
     let cwd = await getFixturePath(__dirname, "root-only");
