@@ -22,7 +22,7 @@ export default async function getWorkspaces(
   const tools = opts.tools || ["yarn", "bolt", "pnpm"]; // We also support root, but don't do it by default
 
   if (!fs.existsSync(path.join(cwd, "package.json"))) {
-    return null
+    return null;
   }
 
   const pkg = await fs
