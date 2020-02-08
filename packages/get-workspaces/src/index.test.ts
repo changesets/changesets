@@ -74,6 +74,11 @@ describe("get-workspaces", () => {
     expect(workspaces[0].name).toEqual("pnpm-workspace-base-pkg-a");
     expect(workspaces[1].name).toEqual("pnpm-workspace-base-pkg-b");
   });
+  it("should return an empty array if package.json is missing", async () => {
+    let cwd = await getFixturePath(__dirname, "empty");
+    const workspaces = await getWorkspaces({ cwd });
+    expect(workspaces).toEqual(null);
+  });
   it("should return an empty array if no workspaces are found", async () => {
     let cwd = await getFixturePath(__dirname, "root-only");
     const workspaces = await getWorkspaces({ cwd });

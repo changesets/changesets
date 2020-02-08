@@ -21,6 +21,10 @@ export default async function getWorkspaces(
   const cwd = opts.cwd || process.cwd();
   const tools = opts.tools || ["yarn", "bolt", "pnpm"]; // We also support root, but don't do it by default
 
+  if (!fs.existsSync(path.join(cwd, "package.json"))) {
+    return null
+  }
+
   const pkg = await fs
     .readFile(path.join(cwd, "package.json"), "utf-8")
     .then(JSON.parse);
