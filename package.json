@@ -44,7 +44,7 @@
     "@types/semver": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^2.6.0",
     "@typescript-eslint/parser": "^2.6.0",
-    "codecov": "^3.5.0",
+    "codecov": "^3.6.5",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.5.0",
     "eslint-config-standard": "^14.1.0",
