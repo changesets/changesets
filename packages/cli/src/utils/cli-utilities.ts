@@ -85,10 +85,10 @@ async function askConfirm(message: string): Promise<boolean> {
     });
 }
 
-async function askList(
+async function askList<Choice extends string>(
   message: string,
-  choices: Array<string>
-): Promise<string> {
+  choices: readonly Choice[]
+): Promise<Choice> {
   const name = `List-${serialId()}`;
 
   return prompt([
