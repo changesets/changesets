@@ -1,5 +1,13 @@
 # @changesets/cli
 
+## 2.5.2
+
+### Patch Changes
+
+- [`184a653`](https://github.com/atlassian/changesets/commit/184a653de2d050f877b91d0ad319f00683bbc7ff) [#278](https://github.com/atlassian/changesets/pull/278) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Use a single prompt for the semver version type when there is only a single package in the repo in `changeset add`
+
+  ![changeset add command with single package repo](https://user-images.githubusercontent.com/11481355/75123292-40f78f00-56fa-11ea-9e16-fe3f5e2d9cf5.gif)
+
 ## 2.5.1
 
 ### Patch Changes
