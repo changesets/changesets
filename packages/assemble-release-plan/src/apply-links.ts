@@ -16,7 +16,7 @@ import { InternalRelease } from "./types";
 */
 function applyLinks(
   releases: Map<string, InternalRelease>,
-  workspaces: Workspace[],
+  workspacesByName: Map<string, Workspace>,
   linked: Linked
 ): boolean {
   let updated = false;
@@ -49,9 +49,7 @@ function applyLinks(
 
     // Next we determine what the highest version among the linked packages will be
     for (let linkedPackage of linkedPackages) {
-      let workspace = workspaces.find(
-        workspace => workspace.name === linkedPackage
-      );
+      let workspace = workspacesByName.get(linkedPackage);
 
       if (workspace) {
         if (

@@ -8,12 +8,12 @@ import { readPreState } from "@changesets/pre";
 
 export default async function getReleasePlan(
   cwd: string,
-  sinceMaster: boolean = false,
+  sinceRef?: string,
   passedConfig?: Config
 ): Promise<ReleasePlan> {
   const workspaces = await getWorkspaces({
     cwd,
-    tools: ["yarn", "bolt", "root"]
+    tools: ["yarn", "bolt", "pnpm", "root"]
   });
 
   if (!workspaces)
@@ -25,7 +25,7 @@ export default async function getReleasePlan(
   const dependentsGraph = await getDependentsgraph({ cwd });
   const readConfig = await read(cwd, workspaces);
   const config = passedConfig ? { ...readConfig, ...passedConfig } : readConfig;
-  const changesets = await readChangesets(cwd, sinceMaster);
+  const changesets = await readChangesets(cwd, sinceRef);
 
   return assembleReleasePlan(
     changesets,

@@ -6,7 +6,7 @@ import { defaultConfig } from "@changesets/config";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 import runRelease from "..";
 
-jest.mock("../../../utils/cli");
+jest.mock("../../../utils/cli-utilities");
 jest.mock("@changesets/git");
 jest.mock("../publishPackages");
 

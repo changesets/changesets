@@ -1,6 +1,7 @@
 import chalk from "chalk";
+import path from "path";
 import { log, warn } from "@changesets/logger";
-import { Config, NewChangeset } from "@changesets/types";
+import { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
 import getDependentsgraph from "get-dependents-graph";
@@ -8,9 +9,6 @@ import assembleReleasePlan from "@changesets/assemble-release-plan";
 import getWorkspaces from "get-workspaces";
 
 import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
-import getOldChangesets from "../../utils/v1-legacy/getChangesets";
-
-import getChangesetBase from "../../utils/getChangesetBase";
 import { readPreState } from "@changesets/pre";
 
 let importantSeparator = chalk.red(
@@ -21,43 +19,16 @@ let importantEnd = chalk.red(
   "----------------------------------------------------------------------"
 );
 
-// this function only exists while we wait for v1 changesets to be obsoleted
-// and should be deleted before v3
-async function getOldChangesetsAndWarn(
-  cwd: string
-): Promise<Array<NewChangeset>> {
-  let changesetBase = await getChangesetBase(cwd);
-  removeEmptyFolders(changesetBase);
-  let unreleasedChangesets = await getOldChangesets(changesetBase, false);
-  if (unreleasedChangesets.length === 0) {
-    return [];
-  }
-  warn(importantSeparator);
-  warn("There were old changesets from version 1 found");
-  warn(
-    "Theses are being applied now but the dependents graph may have changed"
-  );
-  warn("Make sure you validate all your dependencies");
-  warn(
-    "In a future major version, we will no longer apply these old changesets, and will instead throw here"
-  );
-  warn(importantEnd);
-
-  let thing = unreleasedChangesets.map(({ releases, id, summary }) => ({
-    releases,
-    id,
-    summary
-  }));
-
-  return thing;
-}
-
 export default async function version(cwd: string, config: Config) {
-  let oldChangesets = await getOldChangesetsAndWarn(cwd);
-  let newChangesets = await readChangesets(cwd, false);
+  let [_changesets, _preState] = await Promise.all([
+    readChangesets(cwd),
+    readPreState(cwd),
+    removeEmptyFolders(path.resolve(cwd, ".changeset"))
+  ]);
 
-  let changesets = [...oldChangesets, ...newChangesets];
-  let preState = await readPreState(cwd);
+  // temporarily needed because of TS 3.7 regression - https://github.com/microsoft/TypeScript/issues/33752
+  const changesets = _changesets as NonNullable<typeof _changesets>;
+  const preState = _preState as NonNullable<typeof _preState>;
 
   if (preState !== undefined && preState.mode === "pre") {
     warn(importantSeparator);
@@ -79,7 +50,7 @@ export default async function version(cwd: string, config: Config) {
 
   let workspaces = await getWorkspaces({
     cwd,
-    tools: ["yarn", "bolt", "root"]
+    tools: ["yarn", "bolt", "pnpm", "root"]
   });
 
   if (!workspaces)

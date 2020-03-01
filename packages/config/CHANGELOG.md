@@ -1,5 +1,27 @@
 # @changesets/config
 
+## 0.3.0
+
+### Minor Changes
+
+- [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Added support for `baseBranch` option which specifies what branch Changesets should use when determining what packages have changed
+
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [[`9cd1eaf`](https://github.com/atlassian/changesets/commit/9cd1eafc1620894a39fe10d3e393ad8f812df53a)]:
+  - @changesets/logger@0.0.3
+
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [[`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0)]:
+  - @changesets/types@0.4.0
+  - @changesets/errors@0.1.2
+  - @changesets/logger@0.0.2
+
 ## 0.2.2
 
 ### Patch Changes

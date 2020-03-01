@@ -57,6 +57,7 @@ export type Config = {
   commit: boolean;
   linked: Linked;
   access: AccessType;
+  baseBranch: string;
 };
 
 export type WrittenConfig = {
@@ -64,6 +65,7 @@ export type WrittenConfig = {
   commit?: boolean;
   linked?: Linked;
   access?: AccessType;
+  baseBranch?: string;
 };
 
 export type Workspace = { config: PackageJSON; name: string; dir: string };

@@ -1,5 +1,125 @@
 # @changesets/cli
 
+## 2.5.2
+
+### Patch Changes
+
+- [`184a653`](https://github.com/atlassian/changesets/commit/184a653de2d050f877b91d0ad319f00683bbc7ff) [#278](https://github.com/atlassian/changesets/pull/278) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Use a single prompt for the semver version type when there is only a single package in the repo in `changeset add`
+
+  ![changeset add command with single package repo](https://user-images.githubusercontent.com/11481355/75123292-40f78f00-56fa-11ea-9e16-fe3f5e2d9cf5.gif)
+
+## 2.5.1
+
+### Patch Changes
+
+- [`1282ef6`](https://github.com/atlassian/changesets/commit/1282ef698761c1f634fb409842cc7de6b4d03da4) [#263](https://github.com/atlassian/changesets/pull/263) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fixed a bug where only the unreleased pre-release changesets were taken into account when calculating the new version, not previously released changesets.
+
+- Updated dependencies [[`1282ef6`](https://github.com/atlassian/changesets/commit/1282ef698761c1f634fb409842cc7de6b4d03da4)]:
+  - @changesets/assemble-release-plan@0.3.1
+  - @changesets/apply-release-plan@0.4.1
+
+## 2.5.0
+
+### Minor Changes
+
+- [`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3) [#236](https://github.com/atlassian/changesets/pull/236) Thanks [@Andarist](https://github.com/Andarist)! - When in pnpm-managed project use pnpm for publishing.
+
+* [`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3) [#236](https://github.com/atlassian/changesets/pull/236) Thanks [@Andarist](https://github.com/Andarist)! - Read also pnpm workspace packages when searching for packages.
+
+### Patch Changes
+
+- [`cc64ad52`](https://github.com/atlassian/changesets/commit/cc64ad52ef334ba77efb61ed8cd4b2f4abd2a668) [#254](https://github.com/atlassian/changesets/pull/254) Thanks [@Andarist](https://github.com/Andarist)! - Added GitHub Actions support to CI detection.
+
+* [`4af2a78b`](https://github.com/atlassian/changesets/commit/4af2a78b22a2d22b557fe21603c83cc99959773d) [#232](https://github.com/atlassian/changesets/pull/232) Thanks [@harrysolovay](https://github.com/harrysolovay)! - Change format of the automatic commit messages to be in line with conventional commits.
+
+- [`ef6402c9`](https://github.com/atlassian/changesets/commit/ef6402c9d8dc1832126732dbbafb015b71f57f83) [#252](https://github.com/atlassian/changesets/pull/252) Thanks [@Andarist](https://github.com/Andarist)! - Avoid trailing newline for single-line changesets to avoid double newline between release lines when generating final markdown for changelog.
+
+- Updated dependencies [[`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3), [`ef6402c9`](https://github.com/atlassian/changesets/commit/ef6402c9d8dc1832126732dbbafb015b71f57f83), [`fe0d9192`](https://github.com/atlassian/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3), [`503154db`](https://github.com/atlassian/changesets/commit/503154db39fe8ab88a1176e4569c48078bcf5569)]:
+  - get-workspaces@0.6.0
+  - @changesets/apply-release-plan@0.4.0
+  - get-dependents-graph@0.2.0
+  - @changesets/get-release-plan@0.4.0
+  - @changesets/git@0.4.0
+  - @changesets/pre@0.2.0
+  - @changesets/read@0.4.1
+
+## 2.4.1
+
+### Patch Changes
+
+- [`6c0b53d`](https://github.com/atlassian/changesets/commit/6c0b53da63f287dfa9af45532f1f1d628b518b25) [#227](https://github.com/atlassian/changesets/pull/227) - Fix received typo
+
+## 2.4.0
+
+### Minor Changes
+
+- [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Added support for `baseBranch` option which specifies what branch Changesets should use when determining what packages have changed
+
+* [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Added support for `--since` option to the `status` command which shows the release plan since the git ref(branch, tag, commit, etc.) specified with `--since` and deprecate `--sinceMaster` option
+
+### Patch Changes
+
+- [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Moved error advising users to run changeset init when a .changeset directory from the add command to all commands except init
+
+* [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/atlassian/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fixed old changesets not being read in status command
+* Updated dependencies [[`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2), [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2), [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2), [`bca8865`](https://github.com/atlassian/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2)]:
+  - @changesets/get-release-plan@0.3.0
+  - @changesets/read@0.4.0
+  - @changesets/config@0.3.0
+  - @changesets/git@0.3.0
+  - @changesets/apply-release-plan@0.3.1
+
+## 2.3.3
+
+### Patch Changes
+
+- [`9cd1eaf`](https://github.com/atlassian/changesets/commit/9cd1eafc1620894a39fe10d3e393ad8f812df53a) [#214](https://github.com/atlassian/changesets/pull/214) Thanks [@Noviny](https://github.com/Noviny)! - Remove unused dependencies
+- Updated dependencies [[`9cd1eaf`](https://github.com/atlassian/changesets/commit/9cd1eafc1620894a39fe10d3e393ad8f812df53a), [`b17ed74`](https://github.com/atlassian/changesets/commit/b17ed7411ea57e38b20e646321d5053b213d198a)]:
+  - @changesets/logger@0.0.3
+  - @changesets/pre@0.1.1
+  - @changesets/test-utils@0.0.3
+  - @changesets/git@0.2.5
+  - @changesets/config@0.2.4
+
+## 2.3.2
+
+### Patch Changes
+
+- [`7c1269de`](https://github.com/atlassian/changesets/commit/7c1269de31f02c731fdb69d7be037b83e12a0445) Thanks [@Noviny](https://github.com/Noviny)! - Fix previous version not having correctly built dists
+
+## 2.3.1
+
+### Patch Changes
+
+- [`a0b5dba`](https://github.com/atlassian/changesets/commit/a0b5dba3fe59d2b2e856173e40b936e56ab74ac6) [#209](https://github.com/atlassian/changesets/pull/209) Thanks [@ryanbraganza](https://github.com/ryanbraganza)! - Skip OTP check during isCI
+
+## 2.3.0
+
+### Minor Changes
+
+- [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add support for prereleases. Prereleases work with two new commands, `pre enter` and `pre exit` along with changes to `version` and `exit`. For more information, see [the docs on prereleases](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md).
+
+### Patch Changes
+
+- [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add `InternalError` for errors which are unexpected and if they occur, an issue should be opened. The CLI catches the error and logs a link for users to open an issue with the error and versions of Node and Changesets filled in
+
+* [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0) [#183](https://github.com/atlassian/changesets/pull/183) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Always publish packages if they don't exist on npm rather than only if they are a greater version than the latest version on npm
+* Updated dependencies [[`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0), [`8f0a1ef`](https://github.com/atlassian/changesets/commit/8f0a1ef327563512f471677ef0ca99d30da009c0)]:
+  - @changesets/assemble-release-plan@0.3.0
+  - @changesets/apply-release-plan@0.3.0
+  - @changesets/get-release-plan@0.2.0
+  - @changesets/types@0.4.0
+  - @changesets/errors@0.1.2
+  - @changesets/pre@0.1.0
+  - @changesets/config@0.2.3
+  - get-dependents-graph@0.1.2
+  - get-workspaces@0.5.2
+  - @changesets/git@0.2.4
+  - @changesets/logger@0.0.2
+  - @changesets/parse@0.3.1
+  - @changesets/read@0.3.1
+  - @changesets/test-utils@0.0.2
+
 ## 2.2.0
 
 ### Minor Changes

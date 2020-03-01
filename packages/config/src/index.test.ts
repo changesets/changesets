@@ -14,7 +14,8 @@ test("read reads the config", async () => {
     linked: [],
     changelog: false,
     commit: true,
-    access: "restricted"
+    access: "restricted",
+    baseBranch: "master"
   });
 });
 
@@ -22,7 +23,8 @@ let defaults = {
   linked: [],
   changelog: ["@changesets/cli/changelog", null],
   commit: false,
-  access: "restricted"
+  access: "restricted",
+  baseBranch: "master"
 } as const;
 
 let correctCases = {
@@ -217,12 +219,7 @@ The package \\"pkg-a\\" is in multiple sets of linked packages. Packages can onl
   });
   test("access private warns and sets to restricted", () => {
     let config = unsafeParse({ access: "private" }, []);
-    expect(config).toEqual({
-      linked: [],
-      changelog: ["@changesets/cli/changelog", null],
-      commit: false,
-      access: "restricted"
-    });
+    expect(config).toEqual(defaults);
     expect(logger.warn).toBeCalledWith(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".'
     );

@@ -1,15 +1,19 @@
-// @flow
 import { copyFixtureIntoTempDir } from "jest-fixtures";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 
-import { askCheckboxPlus, askConfirm, askQuestion } from "../../../utils/cli";
+import {
+  askCheckboxPlus,
+  askConfirm,
+  askQuestion,
+  askList
+} from "../../../utils/cli-utilities";
 import addChangeset from "..";
 import writeChangeset from "../writeChangeset";
 
-jest.mock("../../../utils/cli");
+jest.mock("../../../utils/cli-utilities");
 jest.mock("@changesets/git");
 jest.mock("../writeChangeset");
 // @ts-ignore
@@ -18,7 +22,10 @@ writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 git.commit.mockImplementation(() => Promise.resolve(true));
 
 // @ts-ignore
-git.getChangedPackagesSinceMaster.mockReturnValue([]);
+git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
+  expect(ref).toBe("master");
+  return [];
+});
 
 // @ts-ignore
 const mockUserResponses = mockResponses => {
@@ -75,6 +82,40 @@ describe("Changesets", () => {
     const expectedChangeset = {
       summary: "summary message mock",
       releases: [{ name: "pkg-a", type: "patch" }]
+    };
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(expectedChangeset);
+  });
+  it("should generate a changeset in a single package repo", async () => {
+    const cwd = await copyFixtureIntoTempDir(__dirname, "single-package");
+
+    const summary = "summary message mock";
+
+    // @ts-ignore
+    askList.mockReturnValueOnce(Promise.resolve("minor"));
+
+    let confirmAnswers = {
+      "Is this your desired changeset?": true
+    };
+    // @ts-ignore
+    askQuestion.mockReturnValueOnce(summary);
+    // @ts-ignore
+    askConfirm.mockImplementation(question => {
+      question = stripAnsi(question);
+      // @ts-ignore
+      if (confirmAnswers[question]) {
+        // @ts-ignore
+        return confirmAnswers[question];
+      }
+      throw new Error(`An answer could not be found for ${question}`);
+    });
+
+    await addChangeset(cwd, { empty: false }, defaultConfig);
+
+    const expectedChangeset = {
+      summary: "summary message mock",
+      releases: [{ name: "single-package", type: "minor" }]
     };
     // @ts-ignore
     const call = writeChangeset.mock.calls[0][0];

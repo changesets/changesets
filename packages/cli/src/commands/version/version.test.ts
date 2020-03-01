@@ -32,7 +32,7 @@ beforeEach(() => {
 // This is from bolt's error log
 const consoleError = console.error;
 
-jest.mock("../../utils/cli");
+jest.mock("../../utils/cli-utilities");
 jest.mock("@changesets/git");
 jest.mock("human-id");
 jest.mock("@changesets/logger");
@@ -583,6 +583,54 @@ describe("pre", () => {
       {
         name: "pkg-b",
         version: "1.1.1-next.0"
+      }
+    ]);
+  });
+  it.only("should use the highest bump type for between all prereleases for every prerelease", async () => {
+    let cwd = f.copy("simple-project");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await pre(cwd, { command: "enter", tag: "next" });
+    await version(cwd, modifiedDefaultConfig);
+    let workspaces = (await getWorkspaces({ cwd }))!;
+
+    expect(workspaces.map(x => x.config)).toEqual([
+      {
+        dependencies: { "pkg-b": "1.0.0" },
+        name: "pkg-a",
+        version: "2.0.0-next.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.0"
+      }
+    ]);
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "minor" }],
+        summary: "a very useful summary for the second change"
+      },
+      cwd
+    );
+    await version(cwd, modifiedDefaultConfig);
+    workspaces = (await getWorkspaces({ cwd }))!;
+
+    expect(workspaces.map(x => x.config)).toEqual([
+      {
+        dependencies: { "pkg-b": "1.0.0" },
+        name: "pkg-a",
+        version: "2.0.0-next.1"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.0"
       }
     ]);
   });

@@ -2,7 +2,6 @@ import fs from "fs-extra";
 import path from "path";
 import prettier from "prettier";
 import humanId from "human-id";
-import getChangesetBase from "../../utils/getChangesetBase";
 import { Release } from "@changesets/types";
 
 async function writeChangeset(
@@ -11,7 +10,7 @@ async function writeChangeset(
 ) {
   const { summary, releases } = changeset;
 
-  const changesetBase = await getChangesetBase(cwd);
+  const changesetBase = path.resolve(cwd, ".changeset");
 
   // Worth understanding that the ID merely needs to be a unique hash to avoid git conflicts
   // experimenting with human readable ids to make finding changesets easier

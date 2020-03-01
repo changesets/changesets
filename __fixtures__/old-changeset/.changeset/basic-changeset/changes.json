@@ -1,0 +1,9 @@
+{
+  "releases": [
+    {
+      "name": "cool-package",
+      "type": "minor"
+    }
+  ],
+  "dependents": []
+}

@@ -3,15 +3,17 @@ import path from "path";
 import parse from "@changesets/parse";
 import { NewChangeset } from "@changesets/types";
 import * as git from "@changesets/git";
+import getOldChangesetsAndWarn from "./legacy";
 
-async function filterChangetsSinceMaster(
+async function filterChangesetsSinceRef(
   changesets: Array<string>,
-  changesetBase: string
+  changesetBase: string,
+  sinceRef: string
 ) {
-  const newChangesets = await git.getChangedChangesetFilesSinceMaster(
-    changesetBase
-  );
-
+  const newChangesets = await git.getChangedChangesetFilesSinceRef({
+    cwd: changesetBase,
+    ref: sinceRef
+  });
   const newHahses = newChangesets.map(c => c.split("/")[1]);
 
   return changesets.filter(dir => newHahses.includes(dir));
@@ -19,23 +21,32 @@ async function filterChangetsSinceMaster(
 
 export default async function getChangesets(
   cwd: string,
-  sinceMasterOnly?: boolean
+  sinceRef?: string
 ): Promise<Array<NewChangeset>> {
   let changesetBase = path.join(cwd, ".changeset");
-
-  if (!fs.existsSync(changesetBase)) {
-    throw new Error("There is no .changeset directory in this project");
+  let contents: string[];
+  try {
+    contents = await fs.readdir(changesetBase);
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      throw new Error("There is no .changeset directory in this project");
+    }
+    throw err;
   }
 
-  let files = fs.readdirSync(changesetBase);
+  if (sinceRef !== undefined) {
+    contents = await filterChangesetsSinceRef(
+      contents,
+      changesetBase,
+      sinceRef
+    );
+  }
 
-  let changesets = files.filter(
+  let oldChangesetsPromise = getOldChangesetsAndWarn(changesetBase, contents);
+
+  let changesets = contents.filter(
     file => file.endsWith(".md") && file !== "README.md"
   );
-
-  if (sinceMasterOnly) {
-    changesets = await filterChangetsSinceMaster(changesets, changesetBase);
-  }
 
   const changesetContents = changesets.map(async file => {
     const changeset = await fs.readFile(
@@ -45,5 +56,8 @@ export default async function getChangesets(
 
     return { ...parse(changeset), id: file.replace(".md", "") };
   });
-  return Promise.all(changesetContents);
+  return [
+    ...(await oldChangesetsPromise),
+    ...(await Promise.all(changesetContents))
+  ];
 }

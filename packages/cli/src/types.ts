@@ -9,6 +9,7 @@ export type CliOptions = {
   output?: string;
   otp?: string;
   empty?: boolean;
+  since?: string;
 };
 
 export type CommandOptions = CliOptions & {
