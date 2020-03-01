@@ -6,85 +6,25 @@ dotenv.config();
 import Octokit from "@octokit/rest";
 import nodePath from "path";
 import micromatch from "micromatch";
-import {
-  Workspace,
-  NewChangeset,
-  PreState,
-  VersionType
-} from "@changesets/types";
+import { Workspace, NewChangeset, PreState } from "@changesets/types";
 import parseChangeset from "@changesets/parse";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
 import { parse as parseConfig } from "@changesets/config";
 import { getDependentsGraphFromWorkspaces } from "get-dependents-graph";
 
-let depTypes = [
-  "dependencies",
-  "devDependencies",
-  "peerDependencies",
-  "optionalDependencies"
-] as const;
-
 let octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN
 });
 
-// we're optimising for size of the cache here
-
-type Deps = { [pkgName: string]: string };
-
-enum WorkspaceContentKeys {
-  dependencies = "1",
-  devDependencies = "2",
-  peerDependencies = "3",
-  optionalDependencies = "4",
-  version = "5",
-  sha = "6",
-  name = "7"
-}
-
-type Sha = string & { __sha: string };
-
-type CachedRelease = [string, VersionType];
-
-type CachedReleases = CachedRelease[];
-
-type CachedChangeset = [Sha, CachedReleases, string];
-
-type CachedWorkspace = {
-  [WorkspaceContentKeys.name]: string;
-  [WorkspaceContentKeys.sha]: Sha;
-  [WorkspaceContentKeys.version]: string;
-  [WorkspaceContentKeys.dependencies]?: Deps;
-  [WorkspaceContentKeys.devDependencies]?: Deps;
-  [WorkspaceContentKeys.peerDependencies]?: Deps;
-  [WorkspaceContentKeys.optionalDependencies]?: Deps;
-};
-
-type WorkspacesCache = {
-  [pkgPath: string]: CachedWorkspace;
-};
-
-type ChangesetCache = {
-  [changesetPath: string]: CachedChangeset;
-};
-
-type CacheContent = [WorkspacesCache, ChangesetCache];
-
-let defaultCache: CacheContent = [{}, {}];
-
 let getReleasePlanFromGitHub = async ({
   owner,
   repo,
-  ref,
-  cache = defaultCache
+  ref
 }: {
   owner: string;
   repo: string;
   ref: string;
-  cache?: CacheContent;
 }) => {
-  let [{ ...workspaceCache }, { ...changesetCache }] = cache;
-
   async function fetchJsonFile(path: string) {
     let output = await octokit.repos.getContents({
       owner,
@@ -98,8 +38,6 @@ let getReleasePlanFromGitHub = async ({
   }
 
   async function fetchChangeset(path: string): Promise<NewChangeset> {
-    if (f) {
-    }
     let output = await octokit.repos.getContents({
       owner,
       repo,
@@ -117,41 +55,6 @@ let getReleasePlanFromGitHub = async ({
     // @ts-ignore
     return changeset;
   }
-
-  // I'm assuming that a workspace will only be requested once per call to getReleasePlanFromGitHub
-  // If that's an incorrect assumption, this should change
-  async function getWorkspace(pkgPath: string, currentPkgSha: Sha) {
-    let cachedWorkspace = workspaceCache[pkgPath];
-    if (
-      cachedWorkspace === undefined ||
-      currentPkgSha !== cachedWorkspace[WorkspaceContentKeys.sha]
-    ) {
-      let jsonContent = await fetchJsonFile(pkgPath + "package.json");
-      return {
-        name: jsonContent.name,
-        config: jsonContent,
-        dir: pkgPath
-      };
-    }
-
-    let name = cachedWorkspace[WorkspaceContentKeys.name];
-    let workspace: Workspace = {
-      name,
-      dir: pkgPath,
-      config: {
-        name,
-        version: cachedWorkspace[WorkspaceContentKeys.version]
-      }
-    };
-    for (let depType of depTypes) {
-      if (cachedWorkspace[WorkspaceContentKeys[depType]] !== undefined) {
-        workspace.config[depType] =
-          cachedWorkspace[WorkspaceContentKeys[depType]];
-      }
-    }
-    return workspace;
-  }
-
   let rootPackageJsonContentsPromise = fetchJsonFile("package.json");
   let configJsonPromise = fetchJsonFile(".changeset/config.json");
 
@@ -164,7 +67,7 @@ let getReleasePlanFromGitHub = async ({
   let preJsonContentPromise: Promise<undefined | PreState> = Promise.resolve(
     undefined
   );
-  let itemsByDirPath = new Map<string, { path: string; sha: Sha }>();
+  let itemsByDirPath = new Map();
   let potentialWorkspaceDirectories: string[] = [];
   let changesetPromises: (Promise<NewChangeset>)[] = [];
   for (let item of tree.data.tree) {
@@ -205,33 +108,13 @@ let getReleasePlanFromGitHub = async ({
   if (globs) {
     let matches = micromatch(potentialWorkspaceDirectories, globs);
     workspaces = await Promise.all(
-      matches.map(dir => getWorkspace(dir, itemsByDirPath.get(dir)!.sha))
+      matches.map(async dir => {
+        let config = await fetchJsonFile(dir + "/package.json");
+        return { dir, config, name: config.name };
+      })
     );
   } else {
     workspaces = [rootWorkspace];
-  }
-
-  let workspaceNames = new Set(workspaces.map(x => x.name));
-  for (let workspace of workspaces) {
-    let cachedWorkspace: CachedWorkspace = {
-      [WorkspaceContentKeys.name]: workspace.name,
-      [WorkspaceContentKeys.sha]: itemsByDirPath.get(workspace.dir)!.sha,
-      [WorkspaceContentKeys.version]: workspace.config.version
-    };
-    for (let depType of depTypes) {
-      if (workspace.config[depType]) {
-        for (let dep in workspace.config[depType]) {
-          if (workspaceNames.has(dep)) {
-            if (cachedWorkspace[WorkspaceContentKeys[depType]] === undefined) {
-              cachedWorkspace[WorkspaceContentKeys[depType]] = {};
-            }
-            cachedWorkspace[WorkspaceContentKeys[depType]]![
-              dep
-            ] = workspace.config[depType]![dep];
-          }
-        }
-      }
-    }
   }
 
   let releasePlan = assembleReleasePlan(
