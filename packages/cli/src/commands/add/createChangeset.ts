@@ -113,30 +113,22 @@ export default async function createChangeset(
 
     let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 
-    let unchangedPackages = allPackages
-      .map(({ name }) => name)
-      .filter(name => !changedPackages.includes(name));
-
-    // Display changed packages
-    cli.showList(
-      bold("Changed packages"),
-      changedPackages.map(({ name }) => name)
-    );
-
-    // Display unchanged packages
-    cli.showList(bold("Unchanged packages"), unchangedPackages);
-
     let pkgsThatShouldBeMajorBumped = await cli.askCheckboxPlus(
       bold(`Which packages should have a ${red("major")} bump?`),
-      packagesToRelease.map(pkgName => {
-        return {
-          name: pkgName,
-          message: formatPkgNameAndVersion(
-            pkgName,
-            pkgJsonsByName.get(pkgName)!.version
-          )
-        };
-      })
+      [
+        {
+          name: "all packages",
+          choices: packagesToRelease.map(pkgName => {
+            return {
+              name: pkgName,
+              message: formatPkgNameAndVersion(
+                pkgName,
+                pkgJsonsByName.get(pkgName)!.version
+              )
+            };
+          })
+        }
+      ]
     );
 
     for (const pkgName of pkgsThatShouldBeMajorBumped) {
@@ -156,15 +148,20 @@ export default async function createChangeset(
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
       let pkgsThatShouldBeMinorBumped = await cli.askCheckboxPlus(
         bold(`Which packages should have a ${green("minor")} bump?`),
-        [...pkgsLeftToGetBumpTypeFor].map(pkgName => {
-          return {
-            name: pkgName,
-            message: formatPkgNameAndVersion(
-              pkgName,
-              pkgJsonsByName.get(pkgName)!.version
-            )
-          };
-        })
+        [
+          {
+            name: "all packages",
+            choices: [...pkgsLeftToGetBumpTypeFor].map(pkgName => {
+              return {
+                name: pkgName,
+                message: formatPkgNameAndVersion(
+                  pkgName,
+                  pkgJsonsByName.get(pkgName)!.version
+                )
+              };
+            })
+          }
+        ]
       );
 
       for (const pkgName of pkgsThatShouldBeMinorBumped) {
