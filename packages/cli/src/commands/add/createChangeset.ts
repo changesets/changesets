@@ -118,10 +118,13 @@ export default async function createChangeset(
       .filter(name => !changedPackages.includes(name));
 
     // Display changed packages
-    await cli.askCheckboxPlus(bold("Changed packages"), changedPackages);
+    cli.showList(
+      bold("Changed packages"),
+      changedPackages.map(({ name }) => name)
+    );
 
     // Display unchanged packages
-    await cli.askCheckboxPlus(bold("Unchanged packages"), unchangedPackages);
+    cli.showList(bold("Unchanged packages"), unchangedPackages);
 
     let pkgsThatShouldBeMajorBumped = await cli.askCheckboxPlus(
       bold(`Which packages should have a ${red("major")} bump?`),

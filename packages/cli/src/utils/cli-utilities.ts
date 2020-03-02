@@ -1,6 +1,6 @@
 // @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
 import termSize from "term-size";
-import { error, prefix, success } from "@changesets/logger";
+import { error, prefix, success, log } from "@changesets/logger";
 // @ts-ignore
 import { prompt } from "enquirer";
 
@@ -108,4 +108,11 @@ async function askList<Choice extends string>(
     });
 }
 
-export { askCheckboxPlus, askQuestion, askConfirm, askList };
+async function showList(message: string, choices: Array<any>) {
+  return log({
+    message,
+    choices
+  });
+}
+
+export { askCheckboxPlus, askQuestion, askConfirm, askList, showList };
