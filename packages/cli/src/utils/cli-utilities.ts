@@ -1,6 +1,6 @@
 // @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
 import termSize from "term-size";
-import { error, prefix, success, log } from "@changesets/logger";
+import { error, prefix, success } from "@changesets/logger";
 import { prompt } from "enquirer";
 
 /* Notes on using inquirer:
