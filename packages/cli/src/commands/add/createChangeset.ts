@@ -113,6 +113,16 @@ export default async function createChangeset(
 
     let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 
+    let unchangedPackages = allPackages
+      .map(({ name }) => name)
+      .filter(name => !changedPackages.includes(name));
+
+    // Display changed packages
+    await cli.askCheckboxPlus(bold("Changed packages"), changedPackages);
+
+    // Display unchanged packages
+    await cli.askCheckboxPlus(bold("Unchanged packages"), unchangedPackages);
+
     let pkgsThatShouldBeMajorBumped = await cli.askCheckboxPlus(
       bold(`Which packages should have a ${red("major")} bump?`),
       packagesToRelease.map(pkgName => {
