@@ -115,15 +115,20 @@ export default async function createChangeset(
 
     let pkgsThatShouldBeMajorBumped = await cli.askCheckboxPlus(
       bold(`Which packages should have a ${red("major")} bump?`),
-      packagesToRelease.map(pkgName => {
-        return {
-          name: pkgName,
-          message: formatPkgNameAndVersion(
-            pkgName,
-            pkgJsonsByName.get(pkgName)!.version
-          )
-        };
-      })
+      [
+        {
+          name: "all packages",
+          choices: packagesToRelease.map(pkgName => {
+            return {
+              name: pkgName,
+              message: formatPkgNameAndVersion(
+                pkgName,
+                pkgJsonsByName.get(pkgName)!.version
+              )
+            };
+          })
+        }
+      ]
     );
 
     for (const pkgName of pkgsThatShouldBeMajorBumped) {
@@ -143,15 +148,20 @@ export default async function createChangeset(
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
       let pkgsThatShouldBeMinorBumped = await cli.askCheckboxPlus(
         bold(`Which packages should have a ${green("minor")} bump?`),
-        [...pkgsLeftToGetBumpTypeFor].map(pkgName => {
-          return {
-            name: pkgName,
-            message: formatPkgNameAndVersion(
-              pkgName,
-              pkgJsonsByName.get(pkgName)!.version
-            )
-          };
-        })
+        [
+          {
+            name: "all packages",
+            choices: [...pkgsLeftToGetBumpTypeFor].map(pkgName => {
+              return {
+                name: pkgName,
+                message: formatPkgNameAndVersion(
+                  pkgName,
+                  pkgJsonsByName.get(pkgName)!.version
+                )
+              };
+            })
+          }
+        ]
       );
 
       for (const pkgName of pkgsThatShouldBeMinorBumped) {
