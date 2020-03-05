@@ -23,19 +23,13 @@ import { incrementVersion } from "./increment";
 */
 export default function getDependents(
   releases: Map<string, InternalRelease>,
-  workspaces: Workspace[],
+  workspacesByName: Map<string, Workspace>,
   dependencyGraph: Map<string, string[]>,
   preInfo: PreInfo | undefined
 ): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
   let pkgsToSearch = [...releases.values()];
-
-  let pkgJsonsByName = new Map(
-    // TODO this seems an inefficient use of getting the whole workspaces
-    // Should we ask for this to be simplified 'above'?
-    workspaces.map(({ name, config }) => [name, config])
-  );
 
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
@@ -54,10 +48,10 @@ export default function getDependents(
       .map(dependent => {
         let type: VersionType | undefined;
 
-        const dependentPkgJSON = pkgJsonsByName.get(dependent);
-        if (!dependentPkgJSON) throw new Error("Dependency map is incorrect");
+        const dependentWorkspace = workspacesByName.get(dependent);
+        if (!dependentWorkspace) throw new Error("Dependency map is incorrect");
         const { depTypes, versionRange } = getDependencyVersionRange(
-          dependentPkgJSON,
+          dependentWorkspace.config,
           nextRelease.name
         );
 
@@ -82,7 +76,7 @@ export default function getDependents(
             type = "patch";
           }
         }
-        return { name: dependent, type, pkgJSON: dependentPkgJSON };
+        return { name: dependent, type, pkgJSON: dependentWorkspace.config };
       })
       .filter(({ type }) => type)
       .forEach(

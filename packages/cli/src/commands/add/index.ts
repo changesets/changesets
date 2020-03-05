@@ -9,12 +9,14 @@ import { Config } from "@changesets/types";
 import writeChangeset from "./writeChangeset";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
+import getWorkspaces from "../../utils/getWorkspaces";
 
 export default async function add(
   cwd: string,
   { empty }: { empty?: boolean },
   config: Config
 ) {
+  const allPackages = await getWorkspaces({ cwd });
   const changesetBase = path.resolve(cwd, ".changeset");
 
   let newChangeset, confirmChangeset;
@@ -32,8 +34,8 @@ export default async function add(
     const changePackagesName = changedPackages
       .filter(a => a)
       .map(pkg => pkg.name);
-    newChangeset = await createChangeset(changePackagesName, cwd);
-    printConfirmationMessage(newChangeset);
+    newChangeset = await createChangeset(changePackagesName, allPackages);
+    printConfirmationMessage(newChangeset, allPackages.length > 1);
 
     confirmChangeset = await cli.askConfirm("Is this your desired changeset?");
   }

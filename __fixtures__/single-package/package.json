@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "name": "single-package",
+  "description": "Nothing but the root project, a non-mono-repo",
+  "version": "1.0.0"
+}
