@@ -27,10 +27,25 @@ export default async function publishPackages({
     otp === undefined
       ? {
           token: null,
-          isRequired: isCI
-            ? Promise.resolve(false)
-            : // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
-              npmUtils.getTokenIsRequired()
+          isRequired:
+            isCI ||
+            publicPackages.some(
+              x =>
+                x.config.publishConfig &&
+                (x.config.publishConfig as any).registry &&
+                (x.config.publishConfig as any).registry !==
+                  "https://registry.npmjs.org" &&
+                (x.config.publishConfig as any).registry !==
+                  "https://registry.yarnpkg.com"
+            ) ||
+            (process.env.npm_config_registry !== undefined &&
+              process.env.npm_config_registry !==
+                "https://registry.npmjs.org" &&
+              process.env.npm_config_registry !==
+                "https://registry.yarnpkg.com")
+              ? Promise.resolve(false)
+              : // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
+                npmUtils.getTokenIsRequired()
         }
       : {
           token: otp,

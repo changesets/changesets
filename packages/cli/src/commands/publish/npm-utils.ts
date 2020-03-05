@@ -41,13 +41,8 @@ export async function getTokenIsRequired() {
     env: Object.assign({}, process.env, envOverride)
   });
   let json = JSON.parse(result.stdout.toString());
-  if (json.error) {
-    error(
-      `an error occurred while running \`npm profile get\`: ${json.error.code}`
-    );
-    error(json.error.summary);
-    if (json.error.summary) error(json.error.summary);
-    throw new ExitError(1);
+  if (json.error || !json.tfa || !json.tfa.mode) {
+    return false;
   }
   return json.tfa.mode === "auth-and-writes";
 }
