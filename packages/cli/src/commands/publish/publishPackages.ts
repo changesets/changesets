@@ -29,6 +29,15 @@ export default async function publishPackages({
           token: null,
           isRequired:
             isCI ||
+            publicPackages.some(
+              x =>
+                x.config.publishConfig &&
+                (x.config.publishConfig as any).registry &&
+                (x.config.publishConfig as any).registry !==
+                  "https://registry.npmjs.org" &&
+                (x.config.publishConfig as any).registry !==
+                  "https://registry.yarnpkg.com"
+            ) ||
             (process.env.npm_config_registry !== undefined &&
               process.env.npm_config_registry !==
                 "https://registry.npmjs.org" &&
