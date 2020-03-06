@@ -1,5 +1,18 @@
 # @changesets/cli
 
+## 2.6.0
+
+### Minor Changes
+
+- [`ca934d7`](https://github.com/atlassian/changesets/commit/ca934d7b9dcd3203f27a4a2cefb19e9cb90cb083) [#282](https://github.com/atlassian/changesets/pull/282) Thanks [@tarang9211](https://github.com/tarang9211)! - Add all packages option to major and minor selects
+
+### Patch Changes
+
+- [`2adfe66`](https://github.com/atlassian/changesets/commit/2adfe66252f9b8b7a6a0c261f608dcb3c9294bfb) [#288](https://github.com/atlassian/changesets/pull/288) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Stop running `npm profile get` when using non-npm registries
+
+- Updated dependencies []:
+  - @changesets/apply-release-plan@0.4.2
+
 ## 2.5.2
 
 ### Patch Changes

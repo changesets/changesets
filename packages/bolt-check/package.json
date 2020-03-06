@@ -1,6 +1,6 @@
 {
   "name": "bolt-check",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "private": true,
   "description": "Run the two major checks that the bolt package does in yarn workspaces",
   "main": "dist/bolt-check.cjs.js",
@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@changesets/get-version-range-type": "^0.2.0",
+    "@changesets/get-version-range-type": "^0.3.0",
     "chalk": "^2.1.0",
     "detect-indent": "^6.0.0",
     "fs-extra": "^7.0.1",

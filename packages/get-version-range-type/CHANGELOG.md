@@ -1,5 +1,11 @@
 # @changesets/get-version-range-type
 
+## 0.3.0
+
+### Minor Changes
+
+- [`d08c3b3`](https://github.com/atlassian/changesets/commit/d08c3b309d38090ce4f1b8f62cc6b78a5a04efcf) [#281](https://github.com/atlassian/changesets/pull/281) Thanks [@tarang9211](https://github.com/tarang9211)! - Add support for other range types
+
 ## 0.2.0
 
 ### Minor Changes

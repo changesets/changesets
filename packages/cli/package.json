@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
     "changeset": "bin.js"
@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@changesets/apply-release-plan": "^0.4.1",
+    "@changesets/apply-release-plan": "^0.4.2",
     "@changesets/assemble-release-plan": "^0.3.1",
     "@changesets/config": "^0.3.0",
     "@changesets/errors": "^0.1.2",
