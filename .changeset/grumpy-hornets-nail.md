@@ -1,6 +1,5 @@
 ---
-"all packages": minor
 "@changesets/cli": minor
 ---
 
-modified display to allow selecting all packages
+Add all packages option to major and minor selects

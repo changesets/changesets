@@ -113,7 +113,7 @@ export default async function createChangeset(
 
     let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 
-    let pkgsThatShouldBeMajorBumped = await cli.askCheckboxPlus(
+    let pkgsThatShouldBeMajorBumped = (await cli.askCheckboxPlus(
       bold(`Which packages should have a ${red("major")} bump?`),
       [
         {
@@ -129,7 +129,7 @@ export default async function createChangeset(
           })
         }
       ]
-    );
+    )).filter(x => x !== "all packages");
 
     for (const pkgName of pkgsThatShouldBeMajorBumped) {
       // for packages that are under v1, we want to make sure major releases are intended,
@@ -146,7 +146,7 @@ export default async function createChangeset(
     }
 
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
-      let pkgsThatShouldBeMinorBumped = await cli.askCheckboxPlus(
+      let pkgsThatShouldBeMinorBumped = (await cli.askCheckboxPlus(
         bold(`Which packages should have a ${green("minor")} bump?`),
         [
           {
@@ -162,7 +162,7 @@ export default async function createChangeset(
             })
           }
         ]
-      );
+      )).filter(x => x !== "all packages");
 
       for (const pkgName of pkgsThatShouldBeMinorBumped) {
         pkgsLeftToGetBumpTypeFor.delete(pkgName);
