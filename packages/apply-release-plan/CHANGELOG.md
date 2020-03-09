@@ -1,5 +1,12 @@
 # @changesets/apply-release-plan
 
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [[`d08c3b3`](https://github.com/atlassian/changesets/commit/d08c3b309d38090ce4f1b8f62cc6b78a5a04efcf)]:
+  - @changesets/get-version-range-type@0.3.0
+
 ## 0.4.1
 
 ### Patch Changes
