@@ -3015,17 +3015,6 @@ get-caller-file@^2.0.1:
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
 
-get-dependents-graph@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/get-dependents-graph/-/get-dependents-graph-0.2.0.tgz#737f66dec35f222323d5cbce734e7012523c7c3a"
-  integrity sha512-NgzJ0APaQOix88TjHmRjNJzq/tjKALBMPLJ35A/PmWUY9ThB8UQtiMM+I2oHWjAXjQBXoxusw/aPcw8hut96Yg==
-  dependencies:
-    "@changesets/types" "^0.4.0"
-    chalk "^2.1.0"
-    fs-extra "^7.0.1"
-    get-workspaces "^0.6.0"
-    semver "^5.4.1"
-
 get-func-name@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/get-func-name/-/get-func-name-2.0.0.tgz#ead774abee72e20409433a066366023dd6887a41"
