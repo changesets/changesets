@@ -10,7 +10,6 @@ import {
   getChangedPackagesSinceRef,
   getChangedChangesetFilesSinceRef
 } from "./";
-import { getPackages } from "@manypkg/get-packages";
 
 describe("git", () => {
   let cwd: string;

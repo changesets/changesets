@@ -1,6 +1,6 @@
 import spawn from "spawndamnit";
 import path from "path";
-import { Packages, getPackages } from "@manypkg/get-packages";
+import { getPackages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 
 async function add(pathToFile: string, cwd: string) {
