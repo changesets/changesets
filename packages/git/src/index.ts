@@ -1,6 +1,6 @@
 import spawn from "spawndamnit";
 import path from "path";
-import { Packages } from "@manypkg/get-packages";
+import { Packages, getPackages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 
 async function add(pathToFile: string, cwd: string) {
@@ -91,12 +91,14 @@ async function getChangedChangesetFilesSinceRef({
 }
 
 async function getChangedPackagesSinceRef({
-  packages,
+  cwd,
   ref
 }: {
-  packages: Packages;
+  cwd: string;
   ref: string;
 }) {
+  let packages = await getPackages(cwd);
+
   const changedFiles = await getChangedFilesSince({
     ref,
     cwd: packages.root.dir,

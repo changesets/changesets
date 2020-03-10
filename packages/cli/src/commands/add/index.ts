@@ -28,7 +28,7 @@ export default async function add(
     confirmChangeset = true;
   } else {
     const changedPackages = await git.getChangedPackagesSinceRef({
-      packages,
+      cwd,
       ref: config.baseBranch
     });
     const changePackagesName = changedPackages

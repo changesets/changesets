@@ -205,7 +205,7 @@ describe("git", () => {
     it("should return an empty list if no packages have changed", async () => {
       await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
       const changedPackages = await getChangedPackagesSinceRef({
-        packages: await getPackages(cwd),
+        cwd,
         ref: "master"
       });
       expect(changedPackages).toHaveLength(0);
@@ -221,7 +221,7 @@ describe("git", () => {
       await commit("added packageB files", cwd);
 
       const changedPackages = await getChangedPackagesSinceRef({
-        packages: await getPackages(cwd),
+        cwd,
         ref: "master"
       });
 
