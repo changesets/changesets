@@ -97,13 +97,8 @@ async function getChangedPackagesSinceRef({
   cwd: string;
   ref: string;
 }) {
+  const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
   let packages = await getPackages(cwd);
-
-  const changedFiles = await getChangedFilesSince({
-    ref,
-    cwd: packages.root.dir,
-    fullPath: true
-  });
 
   const fileNameToPackage = (fileName: string) =>
     packages.packages.find(pkg => fileName.startsWith(pkg.dir + path.sep))!;
