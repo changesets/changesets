@@ -7,7 +7,6 @@ import {
   PreEnterButInPreModeError,
   PreExitButNotInPreModeError
 } from "@changesets/errors/src";
-import { getPackages } from "@manypkg/get-packages";
 
 let f = fixturez(__dirname);
 
@@ -24,7 +23,7 @@ let preStateForSimpleProject: PreState = {
 describe("enterPre", () => {
   it("should enter", async () => {
     let cwd = f.copy("simple-project");
-    await enterPre(await getPackages(cwd), "next");
+    await enterPre(cwd, "next");
 
     expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
       preStateForSimpleProject
@@ -36,9 +35,9 @@ describe("enterPre", () => {
       path.join(cwd, ".changeset", "pre.json"),
       preStateForSimpleProject
     );
-    await expect(
-      enterPre(await getPackages(cwd), "some-tag")
-    ).rejects.toBeInstanceOf(PreEnterButInPreModeError);
+    await expect(enterPre(cwd, "some-tag")).rejects.toBeInstanceOf(
+      PreEnterButInPreModeError
+    );
   });
 });
 
