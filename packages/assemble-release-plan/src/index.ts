@@ -1,16 +1,12 @@
-import {
-  ReleasePlan,
-  Workspace,
-  Config,
-  NewChangeset,
-  PreState
-} from "@changesets/types";
+import { ReleasePlan, Config, NewChangeset, PreState } from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
 import { InternalError } from "@changesets/errors";
+import { Packages } from "@manypkg/get-packages";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo } from "./types";
 
 function getPreVersion(version: string) {
@@ -26,8 +22,7 @@ function getPreVersion(version: string) {
 
 function assembleReleasePlan(
   changesets: NewChangeset[],
-  workspaces: Workspace[],
-  dependentsGraph: Map<string, string[]>,
+  packages: Packages,
   config: Config,
   preState: PreState | undefined
 ): ReleasePlan {
@@ -41,16 +36,18 @@ function assembleReleasePlan(
           }
         };
 
-  let workspacesByName = new Map(workspaces.map(x => [x.name, x]));
+  let packagesByName = new Map(
+    packages.packages.map(x => [x.packageJson.name, x])
+  );
 
   let unfilteredChangesets = changesets;
 
   let preVersions = new Map();
   if (updatedPreState !== undefined) {
-    for (let workspace of workspaces) {
-      if (updatedPreState.initialVersions[workspace.name] === undefined) {
-        updatedPreState.initialVersions[workspace.name] =
-          workspace.config.version;
+    for (let pkg of packages.packages) {
+      if (updatedPreState.initialVersions[pkg.packageJson.name] === undefined) {
+        updatedPreState.initialVersions[pkg.packageJson.name] =
+          pkg.packageJson.version;
       }
     }
     if (updatedPreState.mode !== "exit") {
@@ -59,17 +56,19 @@ function assembleReleasePlan(
       changesets = changesets.filter(
         changeset => !usedChangesetIds.has(changeset.id)
       );
-      for (let workspace of workspaces) {
+      for (let pkg of packages.packages) {
         preVersions.set(
-          workspace.name,
-          getPreVersion(workspace.config.version)
+          pkg.packageJson.name,
+          getPreVersion(pkg.packageJson.version)
         );
       }
       for (let linkedGroup of config.linked) {
         let highestPreVersion = 0;
         for (let linkedPackage of linkedGroup) {
           highestPreVersion = Math.max(
-            getPreVersion(workspacesByName.get(linkedPackage)!.config.version),
+            getPreVersion(
+              packagesByName.get(linkedPackage)!.packageJson.version
+            ),
             highestPreVersion
           );
         }
@@ -78,12 +77,12 @@ function assembleReleasePlan(
         }
       }
     }
-    for (let workspace of workspaces) {
-      workspacesByName.set(workspace.name, {
-        ...workspace,
-        config: {
-          ...workspace.config,
-          version: updatedPreState.initialVersions[workspace.name]
+    for (let pkg of packages.packages) {
+      packagesByName.set(pkg.packageJson.name, {
+        ...pkg,
+        packageJson: {
+          ...pkg.packageJson,
+          version: updatedPreState.initialVersions[pkg.packageJson.name]
         }
       });
     }
@@ -92,18 +91,18 @@ function assembleReleasePlan(
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(changesets, workspacesByName);
+  let releases = flattenReleases(changesets, packagesByName);
 
   if (updatedPreState !== undefined) {
     if (updatedPreState.mode === "exit") {
-      for (let workspace of workspaces) {
-        if (preVersions.get(workspace.name) !== -1) {
-          if (!releases.has(workspace.name)) {
-            releases.set(workspace.name, {
+      for (let pkg of packages.packages) {
+        if (preVersions.get(pkg.packageJson.name) !== -1) {
+          if (!releases.has(pkg.packageJson.name)) {
+            releases.set(pkg.packageJson.name, {
               type: "patch",
-              name: workspace.name,
+              name: pkg.packageJson.name,
               changesets: [],
-              oldVersion: workspace.config.version
+              oldVersion: pkg.packageJson.version
             });
           }
         }
@@ -116,7 +115,7 @@ function assembleReleasePlan(
       // because if they're not being released, the version will already have been bumped with the highest bump type
       let releasesFromUnfilteredChangesets = flattenReleases(
         unfilteredChangesets,
-        workspacesByName
+        packagesByName
       );
 
       releases.forEach((value, key) => {
@@ -149,18 +148,20 @@ function assembleReleasePlan(
           preVersions
         };
 
+  let dependentsGraph = getDependentsGraph(packages);
+
   let releaseObjectValidated = false;
   while (releaseObjectValidated === false) {
     // The map passed in to determineDependents will be mutated
     let dependentAdded = determineDependents(
       releases,
-      workspacesByName,
+      packagesByName,
       dependentsGraph,
       preInfo
     );
 
     // The map passed in to determineDependents will be mutated
-    let linksUpdated = applyLinks(releases, workspacesByName, config.linked);
+    let linksUpdated = applyLinks(releases, packagesByName, config.linked);
 
     releaseObjectValidated = !linksUpdated && !dependentAdded;
   }

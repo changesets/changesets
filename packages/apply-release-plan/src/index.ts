@@ -3,13 +3,13 @@ import {
   Config,
   ChangelogFunctions,
   NewChangeset,
-  ModCompWithWorkspace
+  ModCompWithPackage
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import getWorkspaces from "get-workspaces";
 import resolveFrom from "resolve-from";
+import { Packages } from "@manypkg/get-packages";
 
 import fs from "fs-extra";
 import path from "path";
@@ -38,46 +38,45 @@ async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
-  cwd: string,
+  packages: Packages,
   config: Config = defaultConfig
 ) {
   let touchedFiles = [];
-  let workspaces = await getWorkspaces({
-    cwd,
-    tools: ["yarn", "bolt", "pnpm", "root"]
-  });
 
-  if (!workspaces) throw new Error(`could not find any workspaces in ${cwd}`);
-
-  const workspacesByName = new Map(workspaces.map(x => [x.name, x]));
+  const packagesByName = new Map(
+    packages.packages.map(x => [x.packageJson.name, x])
+  );
 
   let { releases, changesets } = releasePlan;
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
-  let releaseWithWorkspaces = releases.map(release => {
-    let workspace = workspacesByName.get(release.name);
-    if (!workspace)
+  let releaseWithPackages = releases.map(release => {
+    let pkg = packagesByName.get(release.name);
+    if (!pkg)
       throw new Error(
         `Could not find matching package for release of: ${release.name}`
       );
-    return { ...release, config: workspace.config, dir: workspace.dir };
+    return {
+      ...release,
+      ...pkg
+    };
   });
 
   // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
   let releaseWithChangelogs = await getNewChangelogEntry(
-    releaseWithWorkspaces,
+    releaseWithPackages,
     changesets,
     config.changelog,
-    cwd
+    packages.root.dir
   );
 
   if (releasePlan.preState !== undefined) {
     if (releasePlan.preState.mode === "exit") {
-      await fs.remove(path.join(cwd, ".changeset", "pre.json"));
+      await fs.remove(path.join(packages.root.dir, ".changeset", "pre.json"));
     } else {
       await fs.writeFile(
-        path.join(cwd, ".changeset", "pre.json"),
+        path.join(packages.root.dir, ".changeset", "pre.json"),
         JSON.stringify(releasePlan.preState, null, 2) + "\n"
       );
     }
@@ -93,15 +92,15 @@ export default async function applyReleasePlan(
     return versionPackage(release, versionsToUpdate);
   });
 
-  let prettierConfig = await prettier.resolveConfig(cwd);
+  let prettierConfig = await prettier.resolveConfig(packages.root.dir);
 
   for (let release of finalisedRelease) {
-    let { changelog, config, dir, name } = release;
+    let { changelog, packageJson, dir, name } = release;
     let pkgJSONPath = path.resolve(dir, "package.json");
 
     let changelogPath = path.resolve(dir, "CHANGELOG.md");
 
-    let parsedConfig = prettier.format(JSON.stringify(config), {
+    let parsedConfig = prettier.format(JSON.stringify(packageJson), {
       ...prettierConfig,
       parser: "json",
       printWidth: 20
@@ -120,7 +119,7 @@ export default async function applyReleasePlan(
     releasePlan.preState === undefined ||
     releasePlan.preState.mode === "exit"
   ) {
-    let changesetFolder = path.resolve(cwd, ".changeset");
+    let changesetFolder = path.resolve(packages.root.dir, ".changeset");
     await Promise.all(
       changesets.map(async changeset => {
         let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
@@ -143,10 +142,10 @@ export default async function applyReleasePlan(
     // So we need to be careful that these iterations are properly sequential
     while (newTouchedFilesArr.length > 0) {
       let file = newTouchedFilesArr.shift();
-      await git.add(path.relative(cwd, file!), cwd);
+      await git.add(path.relative(packages.root.dir, file!), packages.root.dir);
     }
 
-    let commit = await git.commit(versionCommit, cwd);
+    let commit = await git.commit(versionCommit, packages.root.dir);
 
     if (!commit) {
       console.error("Changesets ran into trouble committing your files");
@@ -158,7 +157,7 @@ export default async function applyReleasePlan(
 }
 
 async function getNewChangelogEntry(
-  releaseWithWorkspaces: ModCompWithWorkspace[],
+  releasesWithPackage: ModCompWithPackage[],
   changesets: NewChangeset[],
   changelogConfig: false | readonly [string, any],
   cwd: string
@@ -195,10 +194,10 @@ async function getNewChangelogEntry(
   );
 
   return Promise.all(
-    releaseWithWorkspaces.map(async release => {
+    releasesWithPackage.map(async release => {
       let changelog = await getChangelogEntry(
         release,
-        releaseWithWorkspaces,
+        releasesWithPackage,
         moddedChangesets,
         getChangelogFuncs,
         changelogOpts

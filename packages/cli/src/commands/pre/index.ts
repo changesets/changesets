@@ -6,6 +6,7 @@ import {
   PreEnterButInPreModeError,
   ExitError
 } from "@changesets/errors";
+import { getPackages } from "@manypkg/get-packages";
 
 export default async function pre(
   cwd: string,
@@ -13,7 +14,7 @@ export default async function pre(
 ) {
   if (options.command === "enter") {
     try {
-      await enterPre(cwd, options.tag);
+      await enterPre(await getPackages(cwd), options.tag);
       logger.success(`Entered pre mode with tag ${chalk.cyan(options.tag)}`);
       logger.info(
         "Run `changeset version` to version packages with prerelease versions"

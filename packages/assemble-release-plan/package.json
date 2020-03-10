@@ -9,7 +9,9 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@changesets/errors": "^0.1.2",
+    "@changesets/get-dependents-graph": "^0.0.0",
     "@changesets/types": "^0.4.0",
+    "@manypkg/get-packages": "^1.0.0",
     "semver": "^5.4.1"
   },
   "devDependencies": {

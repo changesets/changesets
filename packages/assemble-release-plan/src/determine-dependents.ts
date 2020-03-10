@@ -1,11 +1,11 @@
 import semver from "semver";
 import {
   Release,
-  Workspace,
   DependencyType,
   PackageJSON,
   VersionType
 } from "@changesets/types";
+import { Package } from "@manypkg/get-packages";
 import { InternalRelease, PreInfo } from "./types";
 import { incrementVersion } from "./increment";
 
@@ -23,7 +23,7 @@ import { incrementVersion } from "./increment";
 */
 export default function getDependents(
   releases: Map<string, InternalRelease>,
-  workspacesByName: Map<string, Workspace>,
+  packagesByName: Map<string, Package>,
   dependencyGraph: Map<string, string[]>,
   preInfo: PreInfo | undefined
 ): boolean {
@@ -48,10 +48,10 @@ export default function getDependents(
       .map(dependent => {
         let type: VersionType | undefined;
 
-        const dependentWorkspace = workspacesByName.get(dependent);
-        if (!dependentWorkspace) throw new Error("Dependency map is incorrect");
+        const dependentPackage = packagesByName.get(dependent);
+        if (!dependentPackage) throw new Error("Dependency map is incorrect");
         const { depTypes, versionRange } = getDependencyVersionRange(
-          dependentWorkspace.config,
+          dependentPackage.packageJson,
           nextRelease.name
         );
 
@@ -76,7 +76,7 @@ export default function getDependents(
             type = "patch";
           }
         }
-        return { name: dependent, type, pkgJSON: dependentWorkspace.config };
+        return { name: dependent, type, pkgJSON: dependentPackage.packageJson };
       })
       .filter(({ type }) => type)
       .forEach(

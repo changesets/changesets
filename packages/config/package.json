@@ -14,6 +14,7 @@
     "@changesets/errors": "^0.1.2",
     "@changesets/logger": "^0.0.3",
     "@changesets/types": "^0.4.0",
+    "@manypkg/get-packages": "^1.0.0",
     "fs-extra": "^7.0.1"
   },
   "devDependencies": {

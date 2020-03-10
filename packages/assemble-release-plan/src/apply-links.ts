@@ -1,5 +1,6 @@
 import semver from "semver";
-import { Linked, Workspace, VersionType } from "@changesets/types";
+import { Package } from "@manypkg/get-packages";
+import { Linked, VersionType } from "@changesets/types";
 import { InternalRelease } from "./types";
 
 /*
@@ -16,7 +17,7 @@ import { InternalRelease } from "./types";
 */
 function applyLinks(
   releases: Map<string, InternalRelease>,
-  workspacesByName: Map<string, Workspace>,
+  packagesByName: Map<string, Package>,
   linked: Linked
 ): boolean {
   let updated = false;
@@ -49,14 +50,14 @@ function applyLinks(
 
     // Next we determine what the highest version among the linked packages will be
     for (let linkedPackage of linkedPackages) {
-      let workspace = workspacesByName.get(linkedPackage);
+      let pkg = packagesByName.get(linkedPackage);
 
-      if (workspace) {
+      if (pkg) {
         if (
           highestVersion === undefined ||
-          semver.gt(workspace.config.version, highestVersion)
+          semver.gt(pkg.packageJson.version, highestVersion)
         ) {
-          highestVersion = workspace.config.version;
+          highestVersion = pkg.packageJson.version;
         }
       } else {
         console.error(

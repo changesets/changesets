@@ -12,6 +12,7 @@ import outdent from "outdent";
 import spawn from "spawndamnit";
 
 import applyReleasePlan from "./";
+import { getPackages } from "@manypkg/get-packages";
 
 class FakeReleasePlan {
   changesets: NewChangeset[];
@@ -82,7 +83,11 @@ async function testSetup(
   }
 
   return {
-    changedFiles: await applyReleasePlan(releasePlan, tempDir, config),
+    changedFiles: await applyReleasePlan(
+      releasePlan,
+      await getPackages(tempDir),
+      config
+    ),
     tempDir
   };
 }
@@ -374,7 +379,7 @@ describe("apply release plan", () => {
       try {
         await applyReleasePlan(
           releasePlan.getReleasePlan(),
-          tempDir,
+          await getPackages(tempDir),
           releasePlan.config
         );
       } catch (e) {
@@ -403,13 +408,17 @@ describe("apply release plan", () => {
       await git.commit("first commit", tempDir);
 
       try {
-        await applyReleasePlan(releasePlan.getReleasePlan(), tempDir, {
-          ...releasePlan.config,
-          changelog: [
-            path.resolve(__dirname, "test-utils/failing-functions"),
-            null
-          ]
-        });
+        await applyReleasePlan(
+          releasePlan.getReleasePlan(),
+          await getPackages(tempDir),
+          {
+            ...releasePlan.config,
+            changelog: [
+              path.resolve(__dirname, "test-utils/failing-functions"),
+              null
+            ]
+          }
+        );
       } catch (e) {
         expect(e.message).toEqual("no chance");
 

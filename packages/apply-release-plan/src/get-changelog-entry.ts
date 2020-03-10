@@ -4,7 +4,7 @@ import {
   VersionType
 } from "@changesets/types";
 
-import { ModCompWithWorkspace } from "@changesets/types";
+import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
 
 type ChangelogLines = {
@@ -26,8 +26,8 @@ async function generateChangesForVersionTypeMarkdown(
 
 // release is the package and version we are releasing
 export default async function generateMarkdown(
-  release: ModCompWithWorkspace,
-  releases: ModCompWithWorkspace[],
+  release: ModCompWithPackage,
+  releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
   changelogFuncs: ChangelogFunctions,
   changelogOpts: any
@@ -53,11 +53,12 @@ export default async function generateMarkdown(
 
   let dependentReleases = releases.filter(rel => {
     return (
-      (release.config.dependencies && release.config.dependencies[rel.name]) ||
-      (release.config.devDependencies &&
-        release.config.devDependencies[rel.name]) ||
-      (release.config.peerDependencies &&
-        release.config.peerDependencies[rel.name])
+      (release.packageJson.dependencies &&
+        release.packageJson.dependencies[rel.name]) ||
+      (release.packageJson.devDependencies &&
+        release.packageJson.devDependencies[rel.name]) ||
+      (release.packageJson.peerDependencies &&
+        release.packageJson.peerDependencies[rel.name])
     );
   });
 

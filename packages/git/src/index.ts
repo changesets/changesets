@@ -1,8 +1,7 @@
 import spawn from "spawndamnit";
 import path from "path";
-import getWorkspaces from "get-workspaces";
+import { Packages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
-import { Workspace } from "@changesets/types";
 
 async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
@@ -92,28 +91,20 @@ async function getChangedChangesetFilesSinceRef({
 }
 
 async function getChangedPackagesSinceRef({
-  cwd,
+  packages,
   ref
 }: {
-  cwd: string;
+  packages: Packages;
   ref: string;
 }) {
-  const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
-  let workspaces = await getWorkspaces({
-    cwd,
-    tools: ["yarn", "bolt", "pnpm", "root"]
+  const changedFiles = await getChangedFilesSince({
+    ref,
+    cwd: packages.root.dir,
+    fullPath: true
   });
-  if (workspaces === null) {
-    workspaces = [];
-  }
 
-  const allPackages = workspaces.map(pkg => ({
-    ...pkg,
-    relativeDir: path.relative(cwd, pkg.dir)
-  }));
-
-  const fileNameToPackage = (fileName: string): Workspace =>
-    allPackages.find(pkg => fileName.startsWith(pkg.dir + path.sep))!;
+  const fileNameToPackage = (fileName: string) =>
+    packages.packages.find(pkg => fileName.startsWith(pkg.dir + path.sep))!;
 
   const fileExistsInPackage = (fileName: string) =>
     !!fileNameToPackage(fileName);

@@ -10,6 +10,7 @@ import {
   getChangedPackagesSinceRef,
   getChangedChangesetFilesSinceRef
 } from "./";
+import { getPackages } from "@manypkg/get-packages";
 
 describe("git", () => {
   let cwd: string;
@@ -204,7 +205,7 @@ describe("git", () => {
     it("should return an empty list if no packages have changed", async () => {
       await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
       const changedPackages = await getChangedPackagesSinceRef({
-        cwd,
+        packages: await getPackages(cwd),
         ref: "master"
       });
       expect(changedPackages).toHaveLength(0);
@@ -220,13 +221,13 @@ describe("git", () => {
       await commit("added packageB files", cwd);
 
       const changedPackages = await getChangedPackagesSinceRef({
-        cwd,
+        packages: await getPackages(cwd),
         ref: "master"
       });
 
       expect(changedPackages).toHaveLength(2);
-      expect(changedPackages[0].name).toEqual("pkg-a");
-      expect(changedPackages[1].name).toEqual("pkg-b");
+      expect(changedPackages[0].packageJson.name).toEqual("pkg-a");
+      expect(changedPackages[1].packageJson.name).toEqual("pkg-b");
     });
   });
 

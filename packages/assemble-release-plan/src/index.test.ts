@@ -7,16 +7,15 @@ describe("assemble-release-plan", () => {
   beforeEach(() => {
     setup = new FakeFullState();
 
-    setup.addWorkspace("pkg-b", "1.0.0");
-    setup.addWorkspace("pkg-c", "1.0.0");
-    setup.addWorkspace("pkg-d", "1.0.0");
+    setup.addPackage("pkg-b", "1.0.0");
+    setup.addPackage("pkg-c", "1.0.0");
+    setup.addPackage("pkg-d", "1.0.0");
   });
 
   it("should assemble release plan for basic setup", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -42,8 +41,7 @@ describe("assemble-release-plan", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -66,8 +64,7 @@ describe("assemble-release-plan", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -86,8 +83,7 @@ describe("assemble-release-plan", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -107,8 +103,7 @@ describe("assemble-release-plan", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       { ...defaultConfig, linked: [["pkg-a", "pkg-b"]] },
       undefined
     );
@@ -126,12 +121,11 @@ describe("assemble-release-plan", () => {
       ]
     });
 
-    setup.updateWorkspace("pkg-c", "2.0.0");
+    setup.updatePackage("pkg-c", "2.0.0");
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       { ...defaultConfig, linked: [["pkg-a", "pkg-b", "pkg-c"]] },
       undefined
     );
@@ -161,8 +155,7 @@ describe("assemble-release-plan", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
       undefined
     );
@@ -176,8 +169,7 @@ describe("assemble-release-plan", () => {
   it("should return an empty release array when no chnages will occur", () => {
     let { releases } = assembleReleasePlan(
       [],
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
       undefined
     );
@@ -190,8 +182,7 @@ describe("assemble-release-plan", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
       undefined
     );
@@ -210,8 +201,7 @@ describe("assemble-release-plan", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
       undefined
     );
@@ -235,8 +225,7 @@ describe("assemble-release-plan", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       { ...defaultConfig, linked: [["pkg-a", "pkg-c"]] },
       undefined
     );
@@ -265,8 +254,7 @@ describe("assemble-release-plan", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -284,9 +272,9 @@ describe("version update thoroughness", () => {
   beforeEach(() => {
     setup = new FakeFullState();
 
-    setup.addWorkspace("pkg-b", "1.0.0");
-    setup.addWorkspace("pkg-c", "1.0.0");
-    setup.addWorkspace("pkg-d", "1.0.0");
+    setup.addPackage("pkg-b", "1.0.0");
+    setup.addPackage("pkg-c", "1.0.0");
+    setup.addPackage("pkg-d", "1.0.0");
     setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-a", "~1.0.0");
     setup.updateDependency("pkg-d", "pkg-a", "^1.0.0");
@@ -295,8 +283,7 @@ describe("version update thoroughness", () => {
   it("should patch a single pinned dependent", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -314,8 +301,7 @@ describe("version update thoroughness", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -336,8 +322,7 @@ describe("version update thoroughness", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -358,7 +343,7 @@ describe("bumping peerDeps", () => {
   let setup: FakeFullState;
   beforeEach(() => {
     setup = new FakeFullState();
-    setup.addWorkspace("pkg-b", "1.0.0");
+    setup.addPackage("pkg-b", "1.0.0");
   });
 
   it("should patch a pinned peerDep", () => {
@@ -366,8 +351,7 @@ describe("bumping peerDeps", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -383,8 +367,7 @@ describe("bumping peerDeps", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -402,8 +385,7 @@ describe("bumping peerDeps", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -423,8 +405,7 @@ describe("bumping peerDeps", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -440,8 +421,7 @@ describe("bumping peerDeps", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -459,8 +439,7 @@ describe("bumping peerDeps", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -480,8 +459,7 @@ describe("bumping peerDeps", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );
@@ -494,7 +472,7 @@ describe("bumping peerDeps", () => {
   });
   it("should patch bump transitive dep that is only affected by peerDep bump", () => {
     setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
-    setup.addWorkspace("pkg-c", "1.0.0");
+    setup.addPackage("pkg-c", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
@@ -503,8 +481,7 @@ describe("bumping peerDeps", () => {
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
-      setup.workspaces,
-      setup.dependentsGraph,
+      setup.packages,
       defaultConfig,
       undefined
     );

@@ -1,8 +1,7 @@
 import semver from "semver";
 import chalk from "chalk";
 import { AccessType } from "@changesets/types";
-import getWorkspaces from "../../utils/getWorkspaces";
-import { Workspace } from "get-workspaces";
+import { getPackages, Package } from "@manypkg/get-packages";
 import * as npmUtils from "./npm-utils";
 import { info, warn } from "@changesets/logger";
 import { TwoFactorState } from "../../utils/types";
@@ -20,9 +19,13 @@ export default async function publishPackages({
   otp?: string;
   preState: PreState | undefined;
 }) {
-  const packages = await getWorkspaces({ cwd });
-  const workspacesByName = new Map(packages.map(x => [x.name, x]));
-  const publicPackages = packages.filter(pkg => !pkg.config.private);
+  const packages = await getPackages(cwd);
+  const packagesByName = new Map(
+    packages.packages.map(x => [x.packageJson.name, x])
+  );
+  const publicPackages = packages.packages.filter(
+    pkg => !pkg.packageJson.private
+  );
   let twoFactorState: TwoFactorState =
     otp === undefined
       ? {
@@ -31,11 +34,11 @@ export default async function publishPackages({
             isCI ||
             publicPackages.some(
               x =>
-                x.config.publishConfig &&
-                (x.config.publishConfig as any).registry &&
-                (x.config.publishConfig as any).registry !==
+                x.packageJson.publishConfig &&
+                (x.packageJson.publishConfig as any).registry &&
+                (x.packageJson.publishConfig as any).registry !==
                   "https://registry.npmjs.org" &&
-                (x.config.publishConfig as any).registry !==
+                (x.packageJson.publishConfig as any).registry !==
                   "https://registry.yarnpkg.com"
             ) ||
             (process.env.npm_config_registry !== undefined &&
@@ -67,7 +70,7 @@ export default async function publishPackages({
   }>[] = [];
 
   for (let pkgInfo of unpublishedPackagesInfo) {
-    let pkg = workspacesByName.get(pkgInfo.name)!;
+    let pkg = packagesByName.get(pkgInfo.name)!;
     promises.push(
       publishAPackage(
         pkg,
@@ -86,12 +89,12 @@ export default async function publishPackages({
 }
 
 async function publishAPackage(
-  pkg: Workspace,
+  pkg: Package,
   access: AccessType,
   twoFactorState: TwoFactorState,
   tag: string
 ) {
-  const { name, version, publishConfig } = pkg.config;
+  const { name, version, publishConfig } = pkg.packageJson;
   const localAccess = publishConfig && publishConfig.access;
   info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
@@ -126,12 +129,12 @@ type PkgInfo = {
 };
 
 async function getUnpublishedPackages(
-  packages: Array<Workspace>,
+  packages: Array<Package>,
   preState: PreState | undefined
 ) {
   const results: Array<PkgInfo> = await Promise.all(
     packages.map(async pkg => {
-      const config = pkg.config;
+      const config = pkg.packageJson;
       const response = await npmUtils.infoAllow404(config.name);
       let publishedState: PublishedState = "never";
       if (response.published) {

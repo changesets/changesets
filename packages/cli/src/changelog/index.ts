@@ -2,7 +2,7 @@ import {
   NewChangesetWithCommit,
   VersionType,
   ChangelogFunctions,
-  ModCompWithWorkspace
+  ModCompWithPackage
 } from "@changesets/types";
 
 const getReleaseLine = async (
@@ -27,7 +27,7 @@ const getReleaseLine = async (
 
 const getDependencyReleaseLine = async (
   changesets: NewChangesetWithCommit[],
-  dependenciesUpdated: ModCompWithWorkspace[]
+  dependenciesUpdated: ModCompWithPackage[]
 ) => {
   if (dependenciesUpdated.length === 0) return "";
 
