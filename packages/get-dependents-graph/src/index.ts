@@ -2,9 +2,6 @@ import { Packages, Package } from "@manypkg/get-packages";
 import getDependencyGraph from "./get-dependency-graph";
 
 export function getDependentsGraph(packages: Packages) {
-  if (!packages) {
-    throw new Error("could not get packages");
-  }
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
   const { graph: dependencyGraph } = getDependencyGraph(packages);
