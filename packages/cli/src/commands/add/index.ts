@@ -5,8 +5,8 @@ import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
 import { Config } from "@changesets/types";
+import writeChangeset from "@changesets/write";
 
-import writeChangeset from "./writeChangeset";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 import getWorkspaces from "../../utils/getWorkspaces";

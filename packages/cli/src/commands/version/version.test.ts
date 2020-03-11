@@ -7,7 +7,7 @@ import versionCommand from "./index";
 import * as git from "@changesets/git";
 import { warn } from "@changesets/logger";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
-import writeChangeset from "../add/writeChangeset";
+import writeChangeset from "@changesets/write";
 import { NewChangeset, Config } from "@changesets/types";
 import { defaultConfig } from "@changesets/config";
 import pre from "../pre";
