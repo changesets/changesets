@@ -3,8 +3,8 @@ import fs from "fs-extra";
 import path from "path";
 import { defaultConfig } from "@changesets/config";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
+import writeChangeset from "@changesets/write";
 
-import writeChangeset from "../../add/writeChangeset";
 import status from "..";
 
 import humanId from "human-id";

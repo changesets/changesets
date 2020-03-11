@@ -2,12 +2,12 @@ import fs from "fs-extra";
 import path from "path";
 import prettier from "prettier";
 import humanId from "human-id";
-import { Release } from "@changesets/types";
+import { Changeset } from "@changesets/types";
 
 async function writeChangeset(
-  changeset: { summary: string; releases: Array<Release> },
+  changeset: Changeset,
   cwd: string
-) {
+): Promise<string> {
   const { summary, releases } = changeset;
 
   const changesetBase = path.resolve(cwd, ".changeset");

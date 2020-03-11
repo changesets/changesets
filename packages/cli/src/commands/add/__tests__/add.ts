@@ -3,6 +3,7 @@ import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
+import writeChangeset from "@changesets/write";
 
 import {
   askCheckboxPlus,
@@ -11,11 +12,10 @@ import {
   askList
 } from "../../../utils/cli-utilities";
 import addChangeset from "..";
-import writeChangeset from "../writeChangeset";
 
 jest.mock("../../../utils/cli-utilities");
 jest.mock("@changesets/git");
-jest.mock("../writeChangeset");
+jest.mock("@changesets/write");
 // @ts-ignore
 writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 // @ts-ignore
