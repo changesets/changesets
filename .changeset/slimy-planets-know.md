@@ -2,4 +2,4 @@
 "@changesets/types": patch
 ---
 
-add baseBranch to config
+Add `baseBranch` to `Config` type

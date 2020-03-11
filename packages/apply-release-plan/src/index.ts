@@ -41,6 +41,8 @@ export default async function applyReleasePlan(
   packages: Packages,
   config: Config = defaultConfig
 ) {
+  let cwd = packages.root.dir;
+
   let touchedFiles = [];
 
   const packagesByName = new Map(
@@ -68,15 +70,15 @@ export default async function applyReleasePlan(
     releaseWithPackages,
     changesets,
     config.changelog,
-    packages.root.dir
+    cwd
   );
 
   if (releasePlan.preState !== undefined) {
     if (releasePlan.preState.mode === "exit") {
-      await fs.remove(path.join(packages.root.dir, ".changeset", "pre.json"));
+      await fs.remove(path.join(cwd, ".changeset", "pre.json"));
     } else {
       await fs.writeFile(
-        path.join(packages.root.dir, ".changeset", "pre.json"),
+        path.join(cwd, ".changeset", "pre.json"),
         JSON.stringify(releasePlan.preState, null, 2) + "\n"
       );
     }
@@ -92,7 +94,7 @@ export default async function applyReleasePlan(
     return versionPackage(release, versionsToUpdate);
   });
 
-  let prettierConfig = await prettier.resolveConfig(packages.root.dir);
+  let prettierConfig = await prettier.resolveConfig(cwd);
 
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;
@@ -119,7 +121,7 @@ export default async function applyReleasePlan(
     releasePlan.preState === undefined ||
     releasePlan.preState.mode === "exit"
   ) {
-    let changesetFolder = path.resolve(packages.root.dir, ".changeset");
+    let changesetFolder = path.resolve(cwd, ".changeset");
     await Promise.all(
       changesets.map(async changeset => {
         let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
@@ -142,10 +144,10 @@ export default async function applyReleasePlan(
     // So we need to be careful that these iterations are properly sequential
     while (newTouchedFilesArr.length > 0) {
       let file = newTouchedFilesArr.shift();
-      await git.add(path.relative(packages.root.dir, file!), packages.root.dir);
+      await git.add(path.relative(cwd, file!), cwd);
     }
 
-    let commit = await git.commit(versionCommit, packages.root.dir);
+    let commit = await git.commit(versionCommit, cwd);
 
     if (!commit) {
       console.error("Changesets ran into trouble committing your files");

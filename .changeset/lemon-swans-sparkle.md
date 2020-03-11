@@ -1,6 +1,6 @@
 ---
-"@changesets/pre": patch
-"@changesets/get-release-plan": patch
+"@changesets/pre": major
+"@changesets/get-release-plan": major
 "@changesets/cli": patch
 ---
 
