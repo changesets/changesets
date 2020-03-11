@@ -13,7 +13,7 @@ const changeset = {
   ]
 };
 
-const uniqueId = await write(changeset);
+const uniqueId = await write(changeset, cwd);
 console.log(uniqueId); // orange-foxes-waggle
 ```
 
