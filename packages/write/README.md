@@ -31,7 +31,7 @@ For example, it can convert:
 
 to
 
-```yaml
+```markdown
 ---
 "@changesets/something": minor
 "@changesets/something-else": patch
