@@ -2,4 +2,4 @@
 "@changesets/write": minor
 ---
 
-add new package @changesets/write
+Initial release

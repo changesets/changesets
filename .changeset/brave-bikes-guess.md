@@ -2,4 +2,4 @@
 "@changesets/types": minor
 ---
 
-add new type `Changeset`
+Add new `Changeset` type

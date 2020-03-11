@@ -2,4 +2,4 @@
 "@changesets/cli": patch
 ---
 
-use new package @changesets/write
+Use `@changesets/write` for writing changesets internally
