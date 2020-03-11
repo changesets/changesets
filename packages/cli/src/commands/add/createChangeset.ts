@@ -4,7 +4,8 @@ import semver from "semver";
 
 import * as cli from "../../utils/cli-utilities";
 import { error, log } from "@changesets/logger";
-import { Release, Workspace, PackageJSON } from "@changesets/types";
+import { Release, PackageJSON } from "@changesets/types";
+import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
 
 const { green, yellow, red, bold, blue, cyan } = chalk;
@@ -35,7 +36,7 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
 
 async function getPackagesToRelease(
   changedPackages: Array<string>,
-  allPackages: Array<Workspace>
+  allPackages: Array<Package>
 ) {
   function askInitialReleaseQuestion(defaultChoiceList: Array<any>) {
     return cli.askCheckboxPlus(
@@ -59,7 +60,7 @@ async function getPackagesToRelease(
 
   if (allPackages.length > 1) {
     const unchangedPackagesNames = allPackages
-      .map(({ name }) => name)
+      .map(({ packageJson }) => packageJson.name)
       .filter(name => !changedPackages.includes(name));
 
     const defaultChoiceList = [
@@ -88,7 +89,7 @@ async function getPackagesToRelease(
         pkgName !== "changed packages" && pkgName !== "unchanged packages"
     );
   }
-  return [allPackages[0].name];
+  return [allPackages[0].packageJson.name];
 }
 
 function formatPkgNameAndVersion(pkgName: string, version: string) {
@@ -97,7 +98,7 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Workspace[]
+  allPackages: Package[]
 ): Promise<{ summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
@@ -108,7 +109,7 @@ export default async function createChangeset(
     );
 
     let pkgJsonsByName = new Map(
-      allPackages.map(({ name, config }) => [name, config])
+      allPackages.map(({ packageJson }) => [packageJson.name, packageJson])
     );
 
     let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
@@ -128,7 +129,18 @@ export default async function createChangeset(
             };
           })
         }
-      ]
+      ],
+      x => {
+        // this removes changed packages and unchanged packages from the list
+        // of packages shown after selection
+        if (Array.isArray(x)) {
+          return x
+            .filter(x => x !== "all packages")
+            .map(x => cyan(x))
+            .join(", ");
+        }
+        return x;
+      }
     )).filter(x => x !== "all packages");
 
     for (const pkgName of pkgsThatShouldBeMajorBumped) {
@@ -161,7 +173,18 @@ export default async function createChangeset(
               };
             })
           }
-        ]
+        ],
+        x => {
+          // this removes changed packages and unchanged packages from the list
+          // of packages shown after selection
+          if (Array.isArray(x)) {
+            return x
+              .filter(x => x !== "all packages")
+              .map(x => cyan(x))
+              .join(", ");
+          }
+          return x;
+        }
       )).filter(x => x !== "all packages");
 
       for (const pkgName of pkgsThatShouldBeMinorBumped) {
@@ -187,18 +210,18 @@ export default async function createChangeset(
     let pkg = allPackages[0];
     let type = await cli.askList(
       `What kind of change is this for ${green(
-        pkg.name
-      )}? (current version is ${pkg.config.version})`,
+        pkg.packageJson.name
+      )}? (current version is ${pkg.packageJson.version})`,
       ["patch", "minor", "major"]
     );
     console.log(type);
     if (type === "major") {
-      let shouldReleaseAsMajor = await confirmMajorRelease(pkg.config);
+      let shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
       if (!shouldReleaseAsMajor) {
         throw new ExitError(1);
       }
     }
-    releases.push({ name: pkg.name, type });
+    releases.push({ name: pkg.packageJson.name, type });
   }
 
   log(

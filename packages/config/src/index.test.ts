@@ -2,14 +2,24 @@ import fixturez from "fixturez";
 import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
+import { Packages } from "@manypkg/get-packages";
 
 jest.mock("@changesets/logger");
 
 let f = fixturez(__dirname);
 
+let defaultPackages: Packages = {
+  root: {
+    packageJson: { name: "", version: "" },
+    dir: "/"
+  },
+  packages: [],
+  tool: "yarn"
+};
+
 test("read reads the config", async () => {
   let dir = f.find("new-config");
-  let config = await read(dir, []);
+  let config = await read(dir, defaultPackages);
   expect(config).toEqual({
     linked: [],
     changelog: false,
@@ -110,10 +120,19 @@ jestInCase(
   "parse",
   testCase => {
     expect(
-      parse(testCase.input, [
-        { config: { name: "pkg-a", version: "" }, name: "pkg-a", dir: "dir" },
-        { config: { name: "pkg-b", version: "" }, name: "pkg-b", dir: "dir" }
-      ])
+      parse(testCase.input, {
+        ...defaultPackages,
+        packages: [
+          {
+            packageJson: { name: "pkg-a", version: "" },
+            dir: "dir"
+          },
+          {
+            packageJson: { name: "pkg-b", version: "" },
+            dir: "dir"
+          }
+        ]
+      })
     ).toEqual(testCase.output);
   },
   correctCases
@@ -201,7 +220,7 @@ The \`linked\` option is set as [
   });
   test("linked pacakge that does not exist", () => {
     expect(() => {
-      parse({ linked: [["pkg-a"]] }, []);
+      parse({ linked: [["pkg-a"]] }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The package \\"pkg-a\\" is specified in the \`linked\` option but it is not found in the project. You may have misspelled the package name."
@@ -209,9 +228,18 @@ The package \\"pkg-a\\" is specified in the \`linked\` option but it is not foun
   });
   test("linked package in two linked groups", () => {
     expect(() => {
-      parse({ linked: [["pkg-a"], ["pkg-a"]] }, [
-        { config: { name: "pkg-a", version: "" }, name: "pkg-a", dir: "dir" }
-      ]);
+      parse(
+        { linked: [["pkg-a"], ["pkg-a"]] },
+        {
+          ...defaultPackages,
+          packages: [
+            {
+              packageJson: { name: "pkg-a", version: "" },
+              dir: "dir"
+            }
+          ]
+        }
+      );
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The package \\"pkg-a\\" is in multiple sets of linked packages. Packages can only be in a single set of linked packages."

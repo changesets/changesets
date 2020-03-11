@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 import path from "path";
 import { PreState } from "@changesets/types";
-import getWorkspaces from "get-workspaces";
+import { getPackages } from "@manypkg/get-packages";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError
@@ -45,13 +45,10 @@ export async function exitPre(cwd: string) {
 }
 
 export async function enterPre(cwd: string, tag: string) {
-  let workspaces = (await getWorkspaces({
-    cwd,
-    tools: ["yarn", "bolt", "pnpm", "root"]
-  }))!;
-  let preStatePath = path.resolve(cwd, ".changeset", "pre.json");
+  let packages = await getPackages(cwd);
+  let preStatePath = path.resolve(packages.root.dir, ".changeset", "pre.json");
   // TODO: verify that the pre state isn't broken
-  let preState = await readPreState(cwd);
+  let preState = await readPreState(packages.root.dir);
   if (preState !== undefined) {
     throw new PreEnterButInPreModeError();
   }
@@ -61,8 +58,8 @@ export async function enterPre(cwd: string, tag: string) {
     initialVersions: {},
     changesets: []
   };
-  for (let workspace of workspaces) {
-    newPreState.initialVersions[workspace.name] = workspace.config.version;
+  for (let pkg of packages.packages) {
+    newPreState.initialVersions[pkg.packageJson.name] = pkg.packageJson.version;
   }
   await fs.writeFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
 }

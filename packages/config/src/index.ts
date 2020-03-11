@@ -2,7 +2,8 @@ import * as fs from "fs-extra";
 import path from "path";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
-import { Config, WrittenConfig, Workspace } from "@changesets/types";
+import { Packages } from "@manypkg/get-packages";
+import { Config, WrittenConfig } from "@changesets/types";
 import packageJson from "../package.json";
 
 export let defaultWrittenConfig = {
@@ -26,15 +27,12 @@ function getNormalisedChangelogOption(
   return thing;
 }
 
-export let read = async (cwd: string, workspaces: Array<Workspace>) => {
+export let read = async (cwd: string, packages: Packages) => {
   let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
-  return parse(json, workspaces);
+  return parse(json, packages);
 };
 
-export let parse = (
-  json: WrittenConfig,
-  workspaces: Array<Workspace>
-): Config => {
+export let parse = (json: WrittenConfig, packages: Packages): Config => {
   let messages = [];
   if (
     json.changelog !== undefined &&
@@ -113,7 +111,9 @@ export let parse = (
         )} when the only valid values are undefined or an array of arrays of package names`
       );
     } else {
-      let pkgNames = new Set(workspaces.map(({ name }) => name));
+      let pkgNames = new Set(
+        packages.packages.map(({ packageJson }) => packageJson.name)
+      );
       let foundPkgNames = new Set<string>();
       let duplicatedPkgNames = new Set<string>();
       for (let linkedGroup of json.linked) {
@@ -166,4 +166,16 @@ export let parse = (
   return config;
 };
 
-export let defaultConfig = parse(defaultWrittenConfig, []);
+let fakePackage = {
+  dir: "",
+  packageJson: {
+    name: "",
+    version: ""
+  }
+};
+
+export let defaultConfig = parse(defaultWrittenConfig, {
+  root: fakePackage,
+  tool: "root",
+  packages: [fakePackage]
+});

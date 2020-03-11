@@ -71,12 +71,10 @@ export type WrittenConfig = {
   baseBranch?: string;
 };
 
-export type Workspace = { config: PackageJSON; name: string; dir: string };
-
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
 
-export type ModCompWithWorkspace = ComprehensiveRelease & {
-  config: PackageJSON;
+export type ModCompWithPackage = ComprehensiveRelease & {
+  packageJson: PackageJSON;
   dir: string;
 };
 
@@ -88,7 +86,7 @@ export type GetReleaseLine = (
 
 export type GetDependencyReleaseLine = (
   changesets: NewChangesetWithCommit[],
-  dependenciesUpdated: ModCompWithWorkspace[],
+  dependenciesUpdated: ModCompWithPackage[],
   changelogOpts: any
 ) => Promise<string>;
 

@@ -1,11 +1,8 @@
 // This is a modified version of the graph-getting in bolt
-
-import fs from "fs-extra";
-import path from "path";
 import semver from "semver";
 import chalk from "chalk";
-import { PackageJSON, Workspace } from "@changesets/types";
-// @ts-ignore
+import { Packages, Package } from "@manypkg/get-packages";
+import { PackageJSON } from "@changesets/types";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -29,52 +26,41 @@ const getAllDependencies = (config: PackageJSON) => {
   return allDependencies;
 };
 
-export default async function getDependencyGraph(
-  packages: Array<Workspace>,
-  cwd: string
-): Promise<{
-  graph: Map<string, { pkg: Workspace; dependencies: Array<string> }>;
+export default function getDependencyGraph(
+  packages: Packages
+): {
+  graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
   valid: boolean;
-}> {
+} {
   const graph = new Map<
     string,
-    { pkg: Workspace; dependencies: Array<string> }
+    { pkg: Package; dependencies: Array<string> }
   >();
   let valid = true;
 
-  const pkgRoot = await fs
-    .readFile(path.resolve(cwd, "package.json"), "utf8")
-    .then(JSON.parse);
-
-  const pkgRootConfigged = {
-    config: pkgRoot,
-    name: pkgRoot.name,
-    dir: path.resolve(cwd)
+  const packagesByName: { [key: string]: Package } = {
+    [packages.root.packageJson.name]: packages.root
   };
 
-  const packagesByName: { [key: string]: Workspace } = {
-    [pkgRoot.name]: pkgRootConfigged
-  };
+  const queue = [packages.root];
 
-  const queue = [pkgRootConfigged];
-
-  for (const pkg of packages) {
+  for (const pkg of packages.packages) {
     queue.push(pkg);
-    packagesByName[pkg.name] = pkg;
+    packagesByName[pkg.packageJson.name] = pkg;
   }
 
   for (const pkg of queue) {
-    const { name } = pkg.config;
+    const { name } = pkg.packageJson;
     const dependencies = [];
-    const allDependencies = getAllDependencies(pkg.config);
+    const allDependencies = getAllDependencies(pkg.packageJson);
 
     for (const [depName, depVersion] of allDependencies) {
       const match = packagesByName[depName];
       if (!match) continue;
 
-      const expected = match.config.version;
+      const expected = match.packageJson.version;
 
-      // Workspace dependencies only need to semver satisfy, not '==='
+      // internal dependencies only need to semver satisfy, not '==='
       if (!semver.satisfies(expected, depVersion)) {
         valid = false;
         console.error(

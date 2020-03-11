@@ -10,8 +10,8 @@
     "@babel/runtime": "^7.4.4",
     "@changesets/errors": "^0.1.2",
     "@changesets/types": "^0.4.0",
-    "fs-extra": "^7.0.1",
-    "get-workspaces": "^0.6.0"
+    "@manypkg/get-packages": "^1.0.0",
+    "fs-extra": "^7.0.1"
   },
   "devDependencies": {
     "fixturez": "^1.1.0"

@@ -1,9 +1,8 @@
 import assembleReleasePlan from "@changesets/assemble-release-plan";
 import readChangesets from "@changesets/read";
-import getWorkspaces from "get-workspaces";
-import getDependentsgraph from "get-dependents-graph";
 import { read } from "@changesets/config";
 import { Config, ReleasePlan } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 
 export default async function getReleasePlan(
@@ -11,27 +10,11 @@ export default async function getReleasePlan(
   sinceRef?: string,
   passedConfig?: Config
 ): Promise<ReleasePlan> {
-  const workspaces = await getWorkspaces({
-    cwd,
-    tools: ["yarn", "bolt", "pnpm", "root"]
-  });
-
-  if (!workspaces)
-    throw new Error(
-      "Could not resolve workspaces for current working directory"
-    );
-
+  const packages = await getPackages(cwd);
   const preState = await readPreState(cwd);
-  const dependentsGraph = await getDependentsgraph({ cwd });
-  const readConfig = await read(cwd, workspaces);
+  const readConfig = await read(cwd, packages);
   const config = passedConfig ? { ...readConfig, ...passedConfig } : readConfig;
   const changesets = await readChangesets(cwd, sinceRef);
 
-  return assembleReleasePlan(
-    changesets,
-    workspaces,
-    dependentsGraph,
-    config,
-    preState
-  );
+  return assembleReleasePlan(changesets, packages, config, preState);
 }

@@ -1,36 +1,24 @@
-import getWorkspaces from "get-workspaces";
-import { Workspace } from "@changesets/types";
+import { Packages, Package } from "@manypkg/get-packages";
 import getDependencyGraph from "./get-dependency-graph";
 
-export default async function getDependentsGraph({ cwd }: { cwd: string }) {
-  const packages = await getWorkspaces({
-    cwd,
-    tools: ["yarn", "bolt", "pnpm", "root"]
-  });
+export function getDependentsGraph(packages: Packages) {
+  const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
-  if (!packages) {
-    throw new Error("could not get packages");
-  }
-  const graph: Map<
-    string,
-    { pkg: Workspace; dependents: string[] }
-  > = new Map();
-
-  const { graph: dependencyGraph } = await getDependencyGraph(packages, cwd);
+  const { graph: dependencyGraph } = getDependencyGraph(packages);
 
   const dependentsLookup: {
-    [key: string]: { pkg: Workspace; dependents: Array<string> };
+    [key: string]: { pkg: Package; dependents: Array<string> };
   } = {};
 
-  packages.forEach(pkg => {
-    dependentsLookup[pkg.config.name] = {
+  packages.packages.forEach(pkg => {
+    dependentsLookup[pkg.packageJson.name] = {
       pkg,
       dependents: []
     };
   });
 
-  packages.forEach(pkg => {
-    const dependent = pkg.config.name;
+  packages.packages.forEach(pkg => {
+    const dependent = pkg.packageJson.name;
     const valFromDependencyGraph = dependencyGraph.get(dependent);
     if (valFromDependencyGraph) {
       const dependencies = valFromDependencyGraph.dependencies;

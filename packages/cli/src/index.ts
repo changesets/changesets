@@ -5,7 +5,7 @@ import { error } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import fs from "fs-extra";
 import path from "path";
-import getWorkspaces from "get-workspaces";
+import { getPackages } from "@manypkg/get-packages";
 
 import init from "./commands/init";
 import add from "./commands/add";
@@ -59,16 +59,8 @@ const { input, flags } = meow(
 const cwd = process.cwd();
 
 (async () => {
-  const workspaces = await getWorkspaces({
-    cwd,
-    tools: ["yarn", "bolt", "pnpm", "root"]
-  });
+  const packages = await getPackages(cwd);
 
-  if (!workspaces) {
-    throw new Error(
-      "We could not resolve workspaces - check you are running this command from the correct directory"
-    );
-  }
   if (input[0] === "init") {
     await init(cwd);
     return;
@@ -86,7 +78,7 @@ const cwd = process.cwd();
   }
   let config: Config;
   try {
-    config = await read(cwd, workspaces);
+    config = await read(cwd, packages);
   } catch (e) {
     let oldConfigExists = await fs.pathExists(
       path.resolve(cwd, ".changeset/config.js")

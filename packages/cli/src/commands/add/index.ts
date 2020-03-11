@@ -5,18 +5,18 @@ import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
 import { Config } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
 
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
-import getWorkspaces from "../../utils/getWorkspaces";
 
 export default async function add(
   cwd: string,
   { empty }: { empty?: boolean },
   config: Config
 ) {
-  const allPackages = await getWorkspaces({ cwd });
+  const packages = await getPackages(cwd);
   const changesetBase = path.resolve(cwd, ".changeset");
 
   let newChangeset, confirmChangeset;
@@ -28,14 +28,14 @@ export default async function add(
     confirmChangeset = true;
   } else {
     const changedPackages = await git.getChangedPackagesSinceRef({
-      cwd: cwd,
+      cwd,
       ref: config.baseBranch
     });
     const changePackagesName = changedPackages
       .filter(a => a)
-      .map(pkg => pkg.name);
-    newChangeset = await createChangeset(changePackagesName, allPackages);
-    printConfirmationMessage(newChangeset, allPackages.length > 1);
+      .map(pkg => pkg.packageJson.name);
+    newChangeset = await createChangeset(changePackagesName, packages.packages);
+    printConfirmationMessage(newChangeset, packages.packages.length > 1);
 
     confirmChangeset = await cli.askConfirm("Is this your desired changeset?");
   }

@@ -1,39 +1,12 @@
-import {
-  NewChangeset,
-  Workspace,
-  Config,
-  Release,
-  VersionType
-} from "@changesets/types";
+import { NewChangeset, Release, VersionType } from "@changesets/types";
+import { Package, Packages } from "@manypkg/get-packages";
 
-function getFakeData(
-  data: {
-    changesets?: NewChangeset[];
-    workspaces?: Workspace[];
-    dependentsGraph?: Map<string, string[]>;
-    config?: Config;
-  } = {}
-) {
-  let changesets = data.changesets || [];
-  let workspaces = data.workspaces || [];
-  let dependentsGraph = data.dependentsGraph || new Map();
-  let config = data.config || {};
-
-  return {
-    changesets,
-    workspaces,
-    dependentsGraph,
-    config
-  };
-}
-
-function getWorkspace(
+function getPackage(
   name: string = "pkg-a",
   version: string = "1.0.0"
-): Workspace {
+): Package {
   return {
-    name,
-    config: {
+    packageJson: {
       name,
       version
     },
@@ -65,46 +38,29 @@ function getRelease(data: { name?: string; type?: VersionType } = {}): Release {
   return { name, type };
 }
 
-function getDependentsGraph(
-  thing: [[string, Array<String>]] = [["pkg-a", []]]
-) {
-  let map = new Map();
-  for (let acity of thing) {
-    let [name, depenents] = acity;
-    map.set(name, depenents);
-  }
-  return map;
-}
-
-function getSimpleSetup(
-  custom: {
-    workspaces?: Workspace[];
-    changesets?: NewChangeset[];
-    dependentsGraph?: Map<string, string[]>;
-  } = {}
-) {
-  return getFakeData({
-    workspaces: [getWorkspace()],
-    changesets: [getChangeset({ releases: [getRelease()] })],
-    dependentsGraph: getDependentsGraph(),
-    ...custom
-  });
-}
+let getSimpleSetup = () => ({
+  packages: {
+    root: {
+      packageJson: {
+        name: "root",
+        version: "0.0.0"
+      },
+      dir: "/"
+    },
+    packages: [getPackage()],
+    tool: "yarn" as const
+  },
+  changesets: [getChangeset({ releases: [getRelease()] })]
+});
 
 class FakeFullState {
-  workspaces: Workspace[];
+  packages: Packages;
   changesets: NewChangeset[];
-  dependentsGraph: Map<string, string[]>;
 
-  constructor(custom?: {
-    workspaces?: Workspace[];
-    changesets?: NewChangeset[];
-    dependentsGraph?: Map<string, string[]>;
-  }) {
-    let { workspaces, changesets, dependentsGraph } = getSimpleSetup(custom);
-    this.workspaces = workspaces;
+  constructor(custom?: { packages?: Packages; changesets?: NewChangeset[] }) {
+    let { packages, changesets } = { ...getSimpleSetup(), ...custom };
+    this.packages = packages;
     this.changesets = changesets;
-    this.dependentsGraph = dependentsGraph;
   }
 
   addChangeset(
@@ -124,44 +80,43 @@ class FakeFullState {
   }
 
   updateDependency(pkgA: string, pkgB: string, version: string) {
-    let ws = this.workspaces.find(a => a.name === pkgA);
-    if (!ws) throw new Error("no ws");
-    if (!ws.config.dependencies) ws.config.dependencies = {};
-    ws.config.dependencies[pkgB] = version;
-
-    let depList = this.dependentsGraph.get(pkgB);
-    if (!depList) throw new Error("could not add dependency");
-    this.dependentsGraph.set(pkgB, [...depList, pkgA]);
+    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
+    if (!pkg) throw new Error("no pkg");
+    if (!pkg.packageJson.dependencies) {
+      pkg.packageJson.dependencies = {};
+    }
+    pkg.packageJson.dependencies[pkgB] = version;
   }
   updatePeerDep(pkgA: string, pkgB: string, version: string) {
-    let ws = this.workspaces.find(a => a.name === pkgA);
-    if (!ws) throw new Error("no ws");
-    if (!ws.config.peerDependencies) ws.config.peerDependencies = {};
-    ws.config.peerDependencies[pkgB] = version;
-
-    let depList = this.dependentsGraph.get(pkgB);
-    if (!depList) throw new Error("could not add dependency");
-    this.dependentsGraph.set(pkgB, [...depList, pkgA]);
+    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
+    if (!pkg) throw new Error("no pkg");
+    if (!pkg.packageJson.peerDependencies) {
+      pkg.packageJson.peerDependencies = {};
+    }
+    pkg.packageJson.peerDependencies[pkgB] = version;
   }
 
-  addWorkspace(name: string, version: string) {
-    let ws = getWorkspace(name, version);
-    if (this.workspaces.find(c => c.name === ws.name)) {
+  addPackage(name: string, version: string) {
+    let pkg = getPackage(name, version);
+    if (
+      this.packages.packages.find(
+        c => c.packageJson.name === pkg.packageJson.name
+      )
+    ) {
       throw new Error(
-        `tried to add a second workspace with same name': ${ws.name}`
+        `tried to add a second package with same name': ${pkg.packageJson.name}`
       );
     }
-    this.workspaces.push(ws);
-    this.dependentsGraph.set(name, []);
+    this.packages.packages.push(pkg);
   }
-  updateWorkspace(name: string, version: string) {
-    let ws = this.workspaces.find(c => c.name === name);
-    if (!ws) {
+  updatePackage(name: string, version: string) {
+    let pkg = this.packages.packages.find(c => c.packageJson.name === name);
+    if (!pkg) {
       throw new Error(
-        `could not update workspace ${name} because it doesn't exist - try addWorskpace`
+        `could not update package ${name} because it doesn't exist - try addWorskpace`
       );
     }
-    ws.config.version = version;
+    pkg.packageJson.version = version;
   }
 }
 

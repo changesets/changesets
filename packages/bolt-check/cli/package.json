@@ -1,7 +1,0 @@
-{
-  "main": "dist/bolt-check.cjs.js",
-  "module": "dist/bolt-check.esm.js",
-  "preconstruct": {
-    "source": "../src/cli"
-  }
-}

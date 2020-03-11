@@ -4,9 +4,8 @@ import { log, warn } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
-import getDependentsgraph from "get-dependents-graph";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
-import getWorkspaces from "get-workspaces";
+import { getPackages } from "@manypkg/get-packages";
 
 import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
@@ -48,28 +47,11 @@ export default async function version(cwd: string, config: Config) {
     return;
   }
 
-  let workspaces = await getWorkspaces({
-    cwd,
-    tools: ["yarn", "bolt", "pnpm", "root"]
-  });
+  let packages = await getPackages(cwd);
 
-  if (!workspaces)
-    throw new Error(
-      "Could not resolve workspaces for current working directory"
-    );
+  let releasePlan = assembleReleasePlan(changesets, packages, config, preState);
 
-  let dependentsGraph = await getDependentsgraph({ cwd });
-
-  // NOTE: in v3 when we are not support the old changeset format we can use `getReleasePlan` here
-  let releasePlan = assembleReleasePlan(
-    changesets,
-    workspaces,
-    dependentsGraph,
-    config,
-    preState
-  );
-
-  await applyReleasePlan(releasePlan, cwd, config);
+  await applyReleasePlan(releasePlan, packages, config);
 
   if (config.commit) {
     log("All files have been updated and committed. You're ready to publish!");

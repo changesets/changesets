@@ -10,9 +10,9 @@ import { temporarilySilenceLogs } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 import { NewChangeset, Config } from "@changesets/types";
 import { defaultConfig } from "@changesets/config";
+import { getPackages } from "@manypkg/get-packages";
 import pre from "../pre";
 import version from "./index";
-import getWorkspaces from "get-workspaces";
 import humanId from "human-id";
 
 let changelogPath = path.resolve(__dirname, "../../changelog");
@@ -209,8 +209,8 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, modifiedDefaultConfig);
-    let workspaces = (await getWorkspaces({ cwd }))!;
-    expect(workspaces.map(x => x.config)).toEqual([
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: {
           "pkg-b": "1.0.1-next.0"
@@ -232,8 +232,8 @@ describe("pre", () => {
     );
 
     await version(cwd, modifiedDefaultConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
-    expect(workspaces.map(x => x.config)).toEqual([
+    packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: {
           "pkg-b": "1.0.1-next.0"
@@ -254,8 +254,8 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, modifiedDefaultConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
-    expect(workspaces.map(x => x.config)).toEqual([
+    packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: {
           "pkg-b": "1.0.1-next.0"
@@ -276,8 +276,8 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, modifiedDefaultConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
-    expect(workspaces.map(x => x.config)).toMatchInlineSnapshot(
+    packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toMatchInlineSnapshot(
       [
         {
           dependencies: {
@@ -309,8 +309,8 @@ describe("pre", () => {
     );
     await pre(cwd, { command: "exit" });
     await version(cwd, modifiedDefaultConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
-    expect(workspaces.map(x => x.config)).toEqual([
+    packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: {
           "pkg-b": "1.0.1"
@@ -324,7 +324,10 @@ describe("pre", () => {
       }
     ]);
     expect(
-      await fs.readFile(path.join(workspaces[0].dir, "CHANGELOG.md"), "utf8")
+      await fs.readFile(
+        path.join(packages.packages[0].dir, "CHANGELOG.md"),
+        "utf8"
+      )
     ).toMatchInlineSnapshot(`
                                     "# pkg-a
 
@@ -368,7 +371,10 @@ describe("pre", () => {
                                     "
                         `);
     expect(
-      await fs.readFile(path.join(workspaces[1].dir, "CHANGELOG.md"), "utf8")
+      await fs.readFile(
+        path.join(packages.packages[1].dir, "CHANGELOG.md"),
+        "utf8"
+      )
     ).toMatchInlineSnapshot(`
                                                             "# pkg-b
 
@@ -398,8 +404,8 @@ describe("pre", () => {
     );
 
     await version(cwd, modifiedDefaultConfig);
-    let workspaces = (await getWorkspaces({ cwd }))!;
-    expect(workspaces.map(x => x.config)).toEqual([
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: {
           "pkg-b": "1.0.1-next.0"
@@ -428,9 +434,9 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, modifiedDefaultConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
+    packages = (await getPackages(cwd))!;
 
-    expect(workspaces.map(x => x.config)).toEqual([
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: {
           "pkg-b": "2.0.0-next.1"
@@ -458,9 +464,9 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, modifiedDefaultConfig);
-    let workspaces = (await getWorkspaces({ cwd }))!;
+    let packages = (await getPackages(cwd))!;
 
-    expect(workspaces.map(x => x.config)).toEqual([
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: { "pkg-b": "1.0.0" },
         name: "pkg-a",
@@ -481,9 +487,9 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, modifiedDefaultConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
+    packages = (await getPackages(cwd))!;
 
-    expect(workspaces.map(x => x.config)).toEqual([
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: { "pkg-b": "1.0.0" },
         name: "pkg-a",
@@ -509,9 +515,9 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, linkedConfig);
-    let workspaces = (await getWorkspaces({ cwd }))!;
+    let packages = (await getPackages(cwd))!;
 
-    expect(workspaces.map(x => x.config)).toEqual([
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: { "pkg-b": "1.0.0" },
         name: "pkg-a",
@@ -532,9 +538,9 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, linkedConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
+    packages = (await getPackages(cwd))!;
 
-    expect(workspaces.map(x => x.config)).toEqual([
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: { "pkg-b": "1.1.1-next.0" },
         name: "pkg-a",
@@ -553,8 +559,8 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, linkedConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
-    expect(workspaces.map(x => x.config)).toEqual([
+    packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: { "pkg-b": "1.1.1-next.0" },
         name: "pkg-a",
@@ -573,8 +579,8 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, linkedConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
-    expect(workspaces.map(x => x.config)).toEqual([
+    packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: { "pkg-b": "1.1.1-next.0" },
         name: "pkg-a",
@@ -598,9 +604,9 @@ describe("pre", () => {
 
     await pre(cwd, { command: "enter", tag: "next" });
     await version(cwd, modifiedDefaultConfig);
-    let workspaces = (await getWorkspaces({ cwd }))!;
+    let packages = (await getPackages(cwd))!;
 
-    expect(workspaces.map(x => x.config)).toEqual([
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: { "pkg-b": "1.0.0" },
         name: "pkg-a",
@@ -620,9 +626,9 @@ describe("pre", () => {
       cwd
     );
     await version(cwd, modifiedDefaultConfig);
-    workspaces = (await getWorkspaces({ cwd }))!;
+    packages = (await getPackages(cwd))!;
 
-    expect(workspaces.map(x => x.config)).toEqual([
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
         dependencies: { "pkg-b": "1.0.0" },
         name: "pkg-a",

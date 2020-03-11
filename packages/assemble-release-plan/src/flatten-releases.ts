@@ -1,28 +1,28 @@
 // This function takes in changesets and returns one release per
 // package listed in the changesets
 
-import { NewChangeset, Workspace } from "@changesets/types";
+import { NewChangeset } from "@changesets/types";
+import { Package } from "@manypkg/get-packages";
 import { InternalRelease } from "./types";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
-  workspacesByName: Map<string, Workspace>
+  packagesByName: Map<string, Package>
 ): Map<string, InternalRelease> {
   let releases: Map<string, InternalRelease> = new Map();
 
   changesets.forEach(changeset => {
     changeset.releases.forEach(({ name, type }) => {
       let release = releases.get(name);
-      let ws = workspacesByName.get(name);
-      if (!ws) {
+      let pkg = packagesByName.get(name);
+      if (!pkg) {
         throw new Error(`Could not find package information for ${name}`);
       }
-      let { config } = ws;
       if (!release) {
         release = {
           name,
           type,
-          oldVersion: config.version,
+          oldVersion: pkg.packageJson.version,
           changesets: [changeset.id]
         };
       } else {

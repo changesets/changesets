@@ -13,7 +13,6 @@
     "@changesets/pre": "^0.2.0",
     "@changesets/read": "^0.4.1",
     "@changesets/types": "^0.4.0",
-    "get-dependents-graph": "^0.2.0",
-    "get-workspaces": "^0.6.0"
+    "@manypkg/get-packages": "^1.0.0"
   }
 }
