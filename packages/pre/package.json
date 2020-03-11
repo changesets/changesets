@@ -1,6 +1,6 @@
 {
   "name": "@changesets/pre",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Utils to make a Changesets repo enter and exit pre mode",
   "main": "dist/pre.cjs.js",
   "module": "dist/pre.esm.js",
@@ -9,7 +9,7 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@changesets/errors": "^0.1.2",
-    "@changesets/types": "^0.4.0",
+    "@changesets/types": "^1.0.0",
     "@manypkg/get-packages": "^1.0.0",
     "fs-extra": "^7.0.1"
   },

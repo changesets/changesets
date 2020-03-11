@@ -1,5 +1,21 @@
 # @changesets/types
 
+## 1.0.0
+
+### Major Changes
+
+- [`cc8c921`](https://github.com/atlassian/changesets/commit/cc8c92143d4c4b7cca8b9917dfc830a40b5cda20) [#290](https://github.com/atlassian/changesets/pull/290) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Rename `ModCompWithWorkspace` to `ModCompWithPackage` and change `config` key with `packageJson`
+
+* [`cc8c921`](https://github.com/atlassian/changesets/commit/cc8c92143d4c4b7cca8b9917dfc830a40b5cda20) [#290](https://github.com/atlassian/changesets/pull/290) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Remove `Workspace` type. You should use the `Package` type from `@manypkg/get-packages` instead.
+
+### Minor Changes
+
+- [`41e2e3d`](https://github.com/atlassian/changesets/commit/41e2e3dd1053ff2f35a1a07e60793c9099f26997) [#292](https://github.com/atlassian/changesets/pull/292) Thanks [@acheronfail](https://github.com/acheronfail)! - Add new `Changeset` type
+
+### Patch Changes
+
+- [`2363366`](https://github.com/atlassian/changesets/commit/2363366756d1b15bddf6d803911baccfca03cbdf) [#291](https://github.com/atlassian/changesets/pull/291) Thanks [@acheronfail](https://github.com/acheronfail)! - Add `baseBranch` to `Config` type
+
 ## 0.4.0
 
 ### Minor Changes
