@@ -129,7 +129,18 @@ export default async function createChangeset(
             };
           })
         }
-      ]
+      ],
+      x => {
+        // this removes changed packages and unchanged packages from the list
+        // of packages shown after selection
+        if (Array.isArray(x)) {
+          return x
+            .filter(x => x !== "all packages")
+            .map(x => cyan(x))
+            .join(", ");
+        }
+        return x;
+      }
     )).filter(x => x !== "all packages");
 
     for (const pkgName of pkgsThatShouldBeMajorBumped) {
@@ -162,7 +173,18 @@ export default async function createChangeset(
               };
             })
           }
-        ]
+        ],
+        x => {
+          // this removes changed packages and unchanged packages from the list
+          // of packages shown after selection
+          if (Array.isArray(x)) {
+            return x
+              .filter(x => x !== "all packages")
+              .map(x => cyan(x))
+              .join(", ");
+          }
+          return x;
+        }
       )).filter(x => x !== "all packages");
 
       for (const pkgName of pkgsThatShouldBeMinorBumped) {
