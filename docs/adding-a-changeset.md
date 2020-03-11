@@ -1,6 +1,6 @@
 # Adding a changeset
 
-Hi! You might be here because a person or a bot has asked you to 'add a changeset' to a project. Let's walk through adding a changesets. But first, what is a changeset?
+Hi! You might be here because a person or a bot has asked you to 'add a changeset' to a project. Let's walk through adding a changeset. But first, what is a changeset?
 
 ## What is a changeset?
 
