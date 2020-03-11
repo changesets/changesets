@@ -1,13 +1,13 @@
 {
   "name": "@changesets/get-dependents-graph",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Get the graph of dependents in a monorepo",
   "main": "dist/get-dependents-graph.cjs.js",
   "module": "dist/get-dependents-graph.esm.js",
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/master/packages/get-dependents-graph",
   "dependencies": {
-    "@changesets/types": "^0.4.0",
+    "@changesets/types": "^1.0.0",
     "@manypkg/get-packages": "^1.0.0",
     "chalk": "^2.1.0",
     "fs-extra": "^7.0.1",
