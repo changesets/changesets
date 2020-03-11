@@ -6,8 +6,8 @@ import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
+import writeChangeset from "@changesets/write";
 
-import writeChangeset from "./writeChangeset";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 

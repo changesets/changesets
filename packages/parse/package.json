@@ -5,7 +5,7 @@
   "main": "dist/parse.cjs.js",
   "module": "dist/parse.esm.js",
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/read",
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/parse",
   "dependencies": {
     "@changesets/types": "^0.4.0",
     "js-yaml": "^3.13.1"

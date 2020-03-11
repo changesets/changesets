@@ -25,10 +25,13 @@ export type ComprehensiveRelease = {
   changesets: string[];
 };
 
-export type NewChangeset = {
-  id: string;
+export type Changeset = {
   summary: string;
   releases: Array<Release>;
+};
+
+export type NewChangeset = Changeset & {
+  id: string;
 };
 
 export type ReleasePlan = {

@@ -4,7 +4,7 @@ import fs from "fs-extra";
 import path from "path";
 import parse from "@changesets/parse";
 import { Release } from "@changesets/types";
-import writeChangeset from "../writeChangeset";
+import writeChangeset from "./";
 
 import humanId from "human-id";
 
