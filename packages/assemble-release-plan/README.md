@@ -6,29 +6,28 @@ Usage
 
 ```ts
 import assembleReleasePlan from "@changesets/assemble-release-plan";
+import readChangesets from "@changesets/read";
+import { read } from "@changesets/config";
+import { getPackages } from "@manypkg/get-packages";
+import { readPreState } from "@changesets/pre";
 
-const releasePlan = await assembleReleasePlan(
-  changesets,
-  workspaces,
-  dependentsGraph,
-  config
-);
+const packages = await getPackages(cwd);
+const preState = await readPreState(cwd);
+const config = await read(cwd, packages);
+const changesets = await readChangesets(cwd, sinceRef);
+
+const releasePlan = assembleReleasePlan(changesets, packages, config, preState);
 ```
 
 Signature
 
 ```ts
-import {
-  NewChangeset,
-  Workspace,
-  Config,
-  ReleasePlan
-} from "@changesets/types";
+import { NewChangeset, Config, ReleasePlan } from "@changesets/types";
+import { Packages } from "@manypkg/get-packages";
 
 assembleReleasePlan = (
   changesets: NewChangeset[],
-  workspaces: Workspace[],
-  dependentsGraph: Map<string, string[]>,
+  packages: Packages,
   config: Config
 ) => ReleasePlan;
 ```
