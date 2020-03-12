@@ -1,5 +1,0 @@
----
-"@changesets/cli": patch
----
-
-Replace multi-package repo with monorepo in README
