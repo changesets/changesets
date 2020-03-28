@@ -81,7 +81,7 @@ export type ModCompWithPackage = ComprehensiveRelease & {
 export type GetReleaseLine = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
-  changelogOpts: any
+  changelogOpts: null | Record<string, any>
 ) => Promise<string>;
 
 export type GetDependencyReleaseLine = (
