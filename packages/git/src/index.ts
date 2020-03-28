@@ -29,6 +29,12 @@ async function tag(tagStr: string, cwd: string) {
   return gitCmd.code === 0;
 }
 
+export async function getDivergedCommit(cwd: string, ref: string) {
+  // First we need to find the commit where we diverged from `ref` at using `git merge-base`
+  const cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
+  return cmd.stdout.toString().trim();
+}
+
 async function getCommitThatAddsFile(gitPath: string, cwd: string) {
   const gitCmd = await spawn(
     "git",
@@ -47,11 +53,9 @@ async function getChangedFilesSince({
   ref: string;
   fullPath?: boolean;
 }): Promise<Array<string>> {
-  // First we need to find the commit where we diverged from `ref` at using `git merge-base`
-  let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
-  const divergedAt = cmd.stdout.toString().trim();
+  const divergedAt = await getDivergedCommit(cwd, ref);
   // Now we can find which files we added
-  cmd = await spawn("git", ["diff", "--name-only", divergedAt], { cwd });
+  const cmd = await spawn("git", ["diff", "--name-only", divergedAt], { cwd });
   const files = cmd.stdout
     .toString()
     .trim()
@@ -69,12 +73,15 @@ async function getChangedChangesetFilesSinceRef({
   ref: string;
 }): Promise<Array<string>> {
   try {
-    // First we need to find the commit where we diverged from `ref` at using `git merge-base`
-    let cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
+    const divergedAt = await getDivergedCommit(cwd, ref);
     // Now we can find which files we added
-    cmd = await spawn("git", ["diff", "--name-only", "--diff-filter=d", ref], {
-      cwd
-    });
+    const cmd = await spawn(
+      "git",
+      ["diff", "--name-only", "--diff-filter=d", divergedAt],
+      {
+        cwd
+      }
+    );
 
     let tester = /.changeset\/[^/]+\.md$/;
 
