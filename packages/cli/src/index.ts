@@ -59,8 +59,6 @@ const { input, flags } = meow(
 const cwd = process.cwd();
 
 (async () => {
-  const packages = await getPackages(cwd);
-
   if (input[0] === "init") {
     await init(cwd);
     return;
@@ -76,6 +74,9 @@ const cwd = process.cwd();
     );
     throw new ExitError(1);
   }
+
+  const packages = await getPackages(cwd);
+
   let config: Config;
   try {
     config = await read(cwd, packages);
