@@ -7,15 +7,61 @@ import {
   add,
   commit,
   tag,
+  getDivergedCommit,
   getChangedPackagesSinceRef,
   getChangedChangesetFilesSinceRef
 } from "./";
+
+async function getCurrentCommit(cwd: string) {
+  const cmd = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+  return cmd.stdout.toString().trim();
+}
 
 describe("git", () => {
   let cwd: string;
   beforeEach(async () => {
     cwd = await copyFixtureIntoTempDir(__dirname, "with-git");
     await spawn("git", ["init"], { cwd });
+    await spawn("git", ["config", "user.email", "x@y.z"], { cwd });
+    await spawn("git", ["config", "user.name", "xyz"], { cwd });
+  });
+
+  describe("getDivergedCommit", () => {
+    it("should return same commit when branches have not diverged", async () => {
+      await add("packages/pkg-a/package.json", cwd);
+      await commit("added packageA package.json", cwd);
+
+      const firstSha = await getCurrentCommit(cwd);
+
+      await add("packages/pkg-b/package.json", cwd);
+      await commit("added packageB package.json", cwd);
+
+      const secondSha = await getCurrentCommit(cwd);
+      const divergedSha = await getDivergedCommit(cwd, "master");
+      expect(firstSha).not.toBe(secondSha);
+      expect(divergedSha).toBe(secondSha);
+    });
+
+    it("should find commit where branch diverged", async () => {
+      await add("packages/pkg-a/package.json", cwd);
+      await commit("added packageA package.json", cwd);
+
+      // This is the first commit. We branch (diverge) from here.
+      const masterSha = await getCurrentCommit(cwd);
+
+      // Create a new branch, and add a commit to it.
+      await spawn("git", ["checkout", "-b", "my-branch"], { cwd });
+      await add("packages/pkg-b/package.json", cwd);
+      await commit("added packageB package.json", cwd);
+
+      // Now, get the latest commit from our new branch.
+      const branchSha = await getCurrentCommit(cwd);
+
+      // Finally, get the divergent commit.
+      const divergedSha = await getDivergedCommit(cwd, "master");
+      expect(masterSha).not.toBe(branchSha);
+      expect(divergedSha).toBe(masterSha);
+    });
   });
 
   describe("add", () => {
