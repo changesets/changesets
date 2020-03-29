@@ -12,7 +12,7 @@
     "@changesets/get-version-range-type": "^0.3.0",
     "@changesets/git": "^1.0.0",
     "@changesets/types": "^1.0.0",
-    "@manypkg/get-packages": "^1.0.0",
+    "@manypkg/get-packages": "^1.0.1",
     "fs-extra": "^7.0.1",
     "lodash.startcase": "^4.4.0",
     "outdent": "^0.5.0",

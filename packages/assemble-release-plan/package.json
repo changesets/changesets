@@ -11,7 +11,7 @@
     "@changesets/errors": "^0.1.2",
     "@changesets/get-dependents-graph": "^1.0.0",
     "@changesets/types": "^1.0.0",
-    "@manypkg/get-packages": "^1.0.0",
+    "@manypkg/get-packages": "^1.0.1",
     "semver": "^5.4.1"
   },
   "devDependencies": {

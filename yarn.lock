@@ -1011,10 +1011,10 @@
     find-up "^4.1.0"
     fs-extra "^8.1.0"
 
-"@manypkg/get-packages@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@manypkg/get-packages/-/get-packages-1.0.0.tgz#857f1a40661525cc188fc7379e96c59f2140b9ea"
-  integrity sha512-aY9Xp6YXpO1bShEhm0GFd8y8BRWNSbJSUf4p1nTb0t280ONrarwMFEzkF4oqb62KzkR70FMymPKEXXnfTE9egA==
+"@manypkg/get-packages@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@manypkg/get-packages/-/get-packages-1.0.1.tgz#0b46907555626ae773abb828e6c1cb313aa44777"
+  integrity sha512-paGfOt9yW+4/kkK9pM5DlnZDfrP7pp75TDimA8VJQlfxxD7/yHpRsBQZh+soqArr9uqwnCw2XkDggG7BlPdQ3Q==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@manypkg/find-root" "^1.0.0"

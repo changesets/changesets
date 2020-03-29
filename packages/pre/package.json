@@ -10,7 +10,7 @@
     "@babel/runtime": "^7.4.4",
     "@changesets/errors": "^0.1.2",
     "@changesets/types": "^1.0.0",
-    "@manypkg/get-packages": "^1.0.0",
+    "@manypkg/get-packages": "^1.0.1",
     "fs-extra": "^7.0.1"
   },
   "devDependencies": {

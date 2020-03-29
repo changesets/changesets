@@ -13,6 +13,6 @@
     "@changesets/pre": "^1.0.0",
     "@changesets/read": "^0.4.2",
     "@changesets/types": "^1.0.0",
-    "@manypkg/get-packages": "^1.0.0"
+    "@manypkg/get-packages": "^1.0.1"
   }
 }
