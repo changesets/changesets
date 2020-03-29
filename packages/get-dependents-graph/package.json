@@ -8,7 +8,7 @@
   "repository": "https://github.com/changesets/changesets/tree/master/packages/get-dependents-graph",
   "dependencies": {
     "@changesets/types": "^1.0.0",
-    "@manypkg/get-packages": "^1.0.0",
+    "@manypkg/get-packages": "^1.0.1",
     "chalk": "^2.1.0",
     "fs-extra": "^7.0.1",
     "semver": "^5.4.1"
