@@ -1,5 +1,7 @@
 # @changesets/parse
 
+[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/parse)
+
 Parses a changeset from its written format to a data object.
 
 ```js

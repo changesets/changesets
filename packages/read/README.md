@@ -1,5 +1,7 @@
 # @changesets/read
 
+[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/read)
+
 Read in all changesets from a repository.
 
 ```js

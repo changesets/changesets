@@ -1,5 +1,7 @@
 # Apply Release Plan
 
+[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/apply-release-plan)
+
 This takes a `releasePlan` object for changesets and applies the expected changes from that
 release. This includes updating package versions, and updating changelogs.
 
