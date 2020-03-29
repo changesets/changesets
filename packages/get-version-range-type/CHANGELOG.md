@@ -1,5 +1,11 @@
 # @changesets/get-version-range-type
 
+## 0.3.1
+
+### Patch Changes
+
+- [`04ddfd7`](https://github.com/atlassian/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c) [#305](https://github.com/atlassian/changesets/pull/305) Thanks [@Noviny](https://github.com/Noviny)! - Add link to changelog in readme
+
 ## 0.3.0
 
 ### Minor Changes

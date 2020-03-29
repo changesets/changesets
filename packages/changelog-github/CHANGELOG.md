@@ -1,5 +1,15 @@
 # @changesets/changelog-github
 
+## 0.2.3
+
+### Patch Changes
+
+- [`e56928b`](https://github.com/atlassian/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1) [#298](https://github.com/atlassian/changesets/pull/298) Thanks [@eps1lon](https://github.com/eps1lon)! - In changelog-github, throw more descriptive error when no options are provided.
+
+- Updated dependencies [[`04ddfd7`](https://github.com/atlassian/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c), [`e56928b`](https://github.com/atlassian/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1)]:
+  - @changesets/get-github-info@0.4.2
+  - @changesets/types@1.0.1
+
 ## 0.2.2
 
 ### Patch Changes
