@@ -1,12 +1,12 @@
 {
   "name": "@changesets/test-utils",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Utils for testing changesets packages",
   "main": "dist/test-utils.cjs.js",
   "module": "dist/test-utils.esm.js",
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/master/packages/test-utils",
   "dependencies": {
-    "@changesets/logger": "^0.0.3"
+    "@changesets/logger": "^0.0.4"
   }
 }
