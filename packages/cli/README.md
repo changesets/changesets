@@ -1,5 +1,7 @@
 ## @changeset/cli 🦋
 
+[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/cli)
+
 The primary implementation of [changesets](https://github.com/Noviny/changesets). Helps you manage the versioning
 and changelog entries for your packages, with a focus on versioning within a mono-repository (though we support
 single-package repositories too).

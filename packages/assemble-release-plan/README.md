@@ -1,5 +1,7 @@
 # Assemble Release Plan
 
+[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/assemble-release-plan)
+
 Assemble a release plan for changesets from data about a repository.
 
 Usage

@@ -1,5 +1,7 @@
 # Get Dependents Graph
 
+[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/get-dependents-graph)
+
 Small helper utility extracted from bolt to get a graph of relationships between packages.
 
 ```ts
