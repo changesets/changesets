@@ -26,10 +26,10 @@ export default function versionPackage(
     if (deps) {
       for (let { name, version } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
-        if (!depCurrentVersion) continue
-        const usesWorkspaceRange = depCurrentVersion.startsWith('workspace:')
+        if (!depCurrentVersion) continue;
+        const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
         if (usesWorkspaceRange) {
-          depCurrentVersion = depCurrentVersion.substr(10)
+          depCurrentVersion = depCurrentVersion.substr(10);
         }
         if (
           // an empty string is the normalised version of x/X/*
@@ -40,7 +40,7 @@ export default function versionPackage(
         ) {
           let rangeType = getVersionRangeType(depCurrentVersion);
           let newNewRange = `${rangeType}${version}`;
-          if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`
+          if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`;
           deps[name] = newNewRange;
         }
       }

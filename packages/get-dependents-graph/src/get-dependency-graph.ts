@@ -60,8 +60,8 @@ export default function getDependencyGraph(
 
       const expected = match.packageJson.version;
 
-      if (depVersion.startsWith('workspace:')) {
-        depVersion = depVersion.substr(10)
+      if (depVersion.startsWith("workspace:")) {
+        depVersion = depVersion.substr(10);
       }
 
       // internal dependencies only need to semver satisfy, not '==='
