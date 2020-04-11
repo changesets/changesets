@@ -1,6 +1,5 @@
 ---
 "@changesets/apply-release-plan": minor
-"@changesets/get-dependents-graph": minor
 ---
 
-Support workspace ranges
+Added support for workspace ranges. They are now correctly kept and updated when applying a release plan.
