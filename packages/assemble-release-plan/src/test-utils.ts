@@ -87,6 +87,14 @@ class FakeFullState {
     }
     pkg.packageJson.dependencies[pkgB] = version;
   }
+  updateDevDependency(pkgA: string, pkgB: string, version: string) {
+    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
+    if (!pkg) throw new Error("no pkg");
+    if (!pkg.packageJson.devDependencies) {
+      pkg.packageJson.devDependencies = {};
+    }
+    pkg.packageJson.devDependencies[pkgB] = version;
+  }
   updatePeerDep(pkgA: string, pkgB: string, version: string) {
     let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
     if (!pkg) throw new Error("no pkg");
