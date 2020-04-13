@@ -67,7 +67,8 @@ export default function getDependents(
         } else {
           if (
             // We don't need a version bump if the package is only in the devDependencies of the dependent package
-            (depTypes.includes('dependencies') || depTypes.includes('optionalDependencies')) &&
+            (depTypes.includes("dependencies") ||
+              depTypes.includes("optionalDependencies")) &&
             // TODO validate this - I don't think it's right anymore
             !releases.has(dependent) &&
             !semver.satisfies(
