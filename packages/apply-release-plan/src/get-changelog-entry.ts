@@ -55,8 +55,6 @@ export default async function generateMarkdown(
     return (
       (release.packageJson.dependencies &&
         release.packageJson.dependencies[rel.name]) ||
-      (release.packageJson.devDependencies &&
-        release.packageJson.devDependencies[rel.name]) ||
       (release.packageJson.peerDependencies &&
         release.packageJson.peerDependencies[rel.name])
     );
