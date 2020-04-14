@@ -109,9 +109,11 @@ describe("assemble-release-plan", () => {
       undefined
     );
 
-    expect(releases.length).toEqual(1);
+    expect(releases.length).toEqual(2);
     expect(releases[0].name).toEqual("pkg-a");
     expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.0");
   });
   it("should assemble release plan for linked packages", () => {
     setup.addChangeset({

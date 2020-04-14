@@ -1,11 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import startCase from "lodash.startcase";
 import { getCommitThatAddsFile } from "@changesets/git";
-import {
-  ComprehensiveRelease,
-  NewChangeset,
-  VersionType
-} from "@changesets/types";
+import { ComprehensiveRelease, NewChangeset } from "@changesets/types";
 
 import { RelevantChangesets } from "../types";
 
@@ -26,7 +22,7 @@ async function getReleaseLine(changeset: NewChangeset, cwd: string) {
 
 async function getReleaseLines(
   obj: RelevantChangesets,
-  type: VersionType,
+  type: keyof RelevantChangesets,
   cwd: string
 ) {
   const releaseLines = obj[type].map(changeset =>

@@ -222,6 +222,68 @@ describe("apply release plan", () => {
         version: "2.0.0"
       });
     });
+    it("should not update the version of the dependent package if the released dep is a dev dep", async () => {
+      let { changedFiles } = await testSetup(
+        "simple-dev-dep",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [
+                { name: "pkg-a", type: "none" },
+                { name: "pkg-b", type: "minor" }
+              ]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-a",
+              type: "none",
+              oldVersion: "1.0.0",
+              newVersion: "1.0.0",
+              changesets: ["quick-lions-devour"]
+            },
+            {
+              name: "pkg-b",
+              type: "minor",
+              oldVersion: "1.0.0",
+              newVersion: "1.1.0",
+              changesets: ["quick-lions-devour"]
+            }
+          ],
+          preState: undefined
+        },
+        {
+          changelog: false,
+          commit: false,
+          linked: [],
+          access: "restricted",
+          baseBranch: "master"
+        }
+      );
+      let pkgPathA = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
+      let pkgPathB = changedFiles.find(b => b.endsWith("pkg-b/package.json"));
+
+      if (!pkgPathA || !pkgPathB) {
+        throw new Error(`could not find an updated package json`);
+      }
+      let pkgJSONA = await fs.readJSON(pkgPathA);
+      let pkgJSONB = await fs.readJSON(pkgPathB);
+
+      expect(pkgJSONA).toMatchObject({
+        name: "pkg-a",
+        version: "1.0.0",
+
+        devDependencies: {
+          "pkg-b": "1.1.0"
+        }
+      });
+      expect(pkgJSONB).toMatchObject({
+        name: "pkg-b",
+        version: "1.1.0"
+      });
+    });
   });
   describe("changelogs", () => {
     it("should update a changelog for one package", async () => {

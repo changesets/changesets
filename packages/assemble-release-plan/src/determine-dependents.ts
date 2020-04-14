@@ -66,10 +66,6 @@ export default function getDependents(
           type = "major";
         } else {
           if (
-            // We don't need a version bump if the package is only in the devDependencies of the dependent package
-            (depTypes.includes("dependencies") ||
-              depTypes.includes("optionalDependencies") ||
-              depTypes.includes("peerDependencies")) &&
             // TODO validate this - I don't think it's right anymore
             !releases.has(dependent) &&
             !semver.satisfies(
@@ -77,7 +73,16 @@ export default function getDependents(
               versionRange
             )
           ) {
-            type = "patch";
+            if (
+              depTypes.includes("dependencies") ||
+              depTypes.includes("optionalDependencies") ||
+              depTypes.includes("peerDependencies")
+            ) {
+              type = "patch";
+            } else {
+              // We don't need a version bump if the package is only in the devDependencies of the dependent package
+              type = "none";
+            }
           }
         }
         return { name: dependent, type, pkgJSON: dependentPackage.packageJson };

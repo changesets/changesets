@@ -7,7 +7,7 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies"
 ] as const;
 
-export type VersionType = "major" | "minor" | "patch";
+export type VersionType = "major" | "minor" | "patch" | "none";
 
 export type DependencyType = typeof DEPENDENCY_TYPES[number];
 
