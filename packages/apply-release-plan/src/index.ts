@@ -1,15 +1,9 @@
-import {
-  ReleasePlan,
-  Config,
-  ChangelogFunctions,
-  NewChangeset,
-  ModCompWithPackage
-} from "@changesets/types";
+import { ReleasePlan, Config, ChangelogFunctions } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import resolveFrom from "resolve-from";
-import { Packages } from "@manypkg/get-packages";
+import { Packages, Package } from "@manypkg/get-packages";
 
 import fs from "fs-extra";
 import path from "path";
@@ -45,30 +39,14 @@ export default async function applyReleasePlan(
 
   let touchedFiles = [];
 
-  const packagesByName = new Map(
-    packages.packages.map(x => [x.packageJson.name, x])
-  );
-
   let { releases, changesets } = releasePlan;
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
-  let releaseWithPackages = releases.map(release => {
-    let pkg = packagesByName.get(release.name);
-    if (!pkg)
-      throw new Error(
-        `Could not find matching package for release of: ${release.name}`
-      );
-    return {
-      ...release,
-      ...pkg
-    };
-  });
-
   // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
-  let releaseWithChangelogs = await getNewChangelogEntry(
-    releaseWithPackages,
-    changesets,
+  let releaseWithChangelogs = await getReleasesWithChangelogs(
+    releasePlan,
+    packages.packages,
     config.changelog,
     cwd
   );
@@ -158,12 +136,29 @@ export default async function applyReleasePlan(
   return touchedFiles;
 }
 
-async function getNewChangelogEntry(
-  releasesWithPackage: ModCompWithPackage[],
-  changesets: NewChangeset[],
+/**
+ * Retrieves the releases from `releasePlan` with their generated markdown changelog entries
+ */
+export async function getReleasesWithChangelogs(
+  releasePlan: ReleasePlan,
+  packages: Package[],
   changelogConfig: false | readonly [string, any],
   cwd: string
 ) {
+  const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]));
+
+  let releasesWithPackage = releasePlan.releases.map(release => {
+    let pkg = packagesByName.get(release.name);
+    if (!pkg)
+      throw new Error(
+        `Could not find matching package for release of: ${release.name}`
+      );
+    return {
+      ...release,
+      ...pkg
+    };
+  });
+
   let getChangelogFuncs: ChangelogFunctions = {
     getReleaseLine: () => Promise.resolve(""),
     getDependencyReleaseLine: () => Promise.resolve("")
@@ -189,7 +184,7 @@ async function getNewChangelogEntry(
   }
 
   let moddedChangesets = await Promise.all(
-    changesets.map(async cs => ({
+    releasePlan.changesets.map(async cs => ({
       ...cs,
       commit: await getCommitThatAddsChangeset(cs.id, cwd)
     }))
