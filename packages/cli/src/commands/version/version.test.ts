@@ -195,6 +195,40 @@ describe("running version in a simple project", () => {
   });
 });
 
+describe("running version in a simple project with workspace range", () => {
+  temporarilySilenceLogs();
+  let cwd: string;
+
+  beforeEach(async () => {
+    cwd = await copyFixtureIntoTempDir(__dirname, "simple-workspace-range-dep");
+    console.error = jest.fn();
+  });
+
+  afterEach(async () => {
+    console.error = consoleError;
+  });
+
+  describe("When there is a changeset commit", () => {
+    it("should bump releasedPackages", async () => {
+      await writeChangesets([simpleChangeset2], cwd);
+      const spy = jest.spyOn(fs, "writeFile");
+
+      await versionCommand(cwd, modifiedDefaultConfig);
+
+      expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+        expect.objectContaining({
+          name: "pkg-a",
+          version: "1.1.0",
+          dependencies: { "pkg-b": "workspace:1.0.1" }
+        })
+      );
+      expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+        expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
+      );
+    });
+  });
+});
+
 const f = fixturez(__dirname);
 
 describe("pre", () => {
@@ -592,7 +626,7 @@ describe("pre", () => {
       }
     ]);
   });
-  it.only("should use the highest bump type for between all prereleases for every prerelease", async () => {
+  it("should use the highest bump type for between all prereleases for every prerelease", async () => {
     let cwd = f.copy("simple-project");
     await writeChangeset(
       {
