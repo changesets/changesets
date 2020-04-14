@@ -92,18 +92,18 @@
 
 ### Minor Changes
 
-- [355b4d00](https://github.com/Noviny/changesets/commit/355b4d00) [#41](https://github.com/Noviny/changesets/pulls/41) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Throw when the name field is missing in a package.json
+- [355b4d00](https://github.com/Noviny/changesets/commit/355b4d00) [#41](https://github.com/Noviny/changesets/pull/41) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Throw when the name field is missing in a package.json
 
 ### Patch Changes
 
-- [c6f1c7b7](https://github.com/Noviny/changesets/commit/c6f1c7b7) [#46](https://github.com/Noviny/changesets/pulls/46) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Distribute TypeScript types
-- [355b4d00](https://github.com/Noviny/changesets/commit/355b4d00) [#41](https://github.com/Noviny/changesets/pulls/41) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Convert package to TypeScript
+- [c6f1c7b7](https://github.com/Noviny/changesets/commit/c6f1c7b7) [#46](https://github.com/Noviny/changesets/pull/46) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Distribute TypeScript types
+- [355b4d00](https://github.com/Noviny/changesets/commit/355b4d00) [#41](https://github.com/Noviny/changesets/pull/41) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Convert package to TypeScript
 
 ## 0.1.1
 
 ### Patch Changes
 
-- [bed96aa2](https://github.com/Noviny/changesets/commit/bed96aa2) [#35](https://github.com/Noviny/changesets/pulls/35) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Use workspaces.packages instead of the incorrect workspaces.package field for resolving yarn workspaces
+- [bed96aa2](https://github.com/Noviny/changesets/commit/bed96aa2) [#35](https://github.com/Noviny/changesets/pull/35) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Use workspaces.packages instead of the incorrect workspaces.package field for resolving yarn workspaces
 
 ## 0.1.0
 
