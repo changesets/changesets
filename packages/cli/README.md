@@ -166,7 +166,7 @@ git push --follow-tags
 ### status
 
 ```
-status [--verbose] [--output={filePath}] [--since-master]
+status [--verbose] [--output={filePath}] [--since={gitTag}]
 ```
 
 The status command provides information about the changesets that currently exist. If there are no changesets present, it exits with an error status code.
@@ -175,7 +175,7 @@ The status command provides information about the changesets that currently exis
 
 - `--output` - allows you to write the json object of the status out, for consumption by other tools, such as CI.
 
-- `--since-master` - to only display information about changesets since the master branch. While this can be
+- `--since` - to only display information about changesets since a specific branch or git tag. While this can be
   used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot)
   to detect pull requests missing changesets, as not all pull requests need one.
 
