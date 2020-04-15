@@ -363,6 +363,55 @@ describe("apply release plan", () => {
 
       ## 2.0.0`);
     });
+    it("should not update the changelog if only devDeps changed", async () => {
+      let { changedFiles } = await testSetup(
+        "simple-dev-dep",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [
+                { name: "pkg-a", type: "none" },
+                { name: "pkg-b", type: "minor" }
+              ]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-a",
+              type: "none",
+              oldVersion: "1.0.0",
+              newVersion: "1.0.0",
+              changesets: []
+            },
+            {
+              name: "pkg-b",
+              type: "minor",
+              oldVersion: "1.0.0",
+              newVersion: "1.1.0",
+              changesets: ["quick-lions-devour"]
+            }
+          ],
+          preState: undefined
+        },
+        {
+          commit: false,
+          linked: [],
+          access: "restricted",
+          baseBranch: "master",
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null
+          ]
+        }
+      );
+      let pkgAChangelogPath = changedFiles.find(a =>
+        a.endsWith("pkg-a/CHANGELOG.md")
+      );
+
+      expect(pkgAChangelogPath).toBeUndefined();
+    });
 
     test("should list multi-line same-type summaries correctly", async () => {
       const releasePlan = new FakeReleasePlan([
