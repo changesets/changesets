@@ -28,6 +28,8 @@ export default async function generateMarkdown(
   changelogFuncs: ChangelogFunctions,
   changelogOpts: any
 ) {
+  if (release.type === "none") return null;
+
   const releaseObj: ChangelogLines = {
     major: [],
     minor: [],
