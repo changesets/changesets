@@ -19,7 +19,15 @@ const getAllDependencies = (config: PackageJSON) => {
     if (!deps) continue;
 
     for (const name of Object.keys(deps)) {
-      allDependencies.set(name, deps[name]);
+      const depVersion = deps[name];
+      if (
+        (depVersion.startsWith("link:") || depVersion.startsWith("file:")) &&
+        type === "devDependencies"
+      ) {
+        continue;
+      }
+
+      allDependencies.set(name, depVersion);
     }
   }
 

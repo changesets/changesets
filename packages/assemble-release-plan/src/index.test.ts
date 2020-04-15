@@ -115,6 +115,42 @@ describe("assemble-release-plan", () => {
     expect(releases[1].name).toEqual("pkg-b");
     expect(releases[1].newVersion).toEqual("1.0.0");
   });
+  it("should assemble release plan without dependent through the link protocol", () => {
+    setup.updateDevDependency("pkg-b", "pkg-a", "link:../pkg-a");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(1);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+  });
+  it("should assemble release plan without dependent through the file protocol", () => {
+    setup.updateDevDependency("pkg-b", "pkg-a", "file:../pkg-a");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(1);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+  });
   it("should assemble release plan for linked packages", () => {
     setup.addChangeset({
       id: "just-some-umbrellas",
