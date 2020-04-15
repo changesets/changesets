@@ -54,11 +54,15 @@ export default function getDependencyGraph(
     const dependencies = [];
     const allDependencies = getAllDependencies(pkg.packageJson);
 
-    for (const [depName, depVersion] of allDependencies) {
+    for (let [depName, depVersion] of allDependencies) {
       const match = packagesByName[depName];
       if (!match) continue;
 
       const expected = match.packageJson.version;
+
+      if (depVersion.startsWith("workspace:")) {
+        depVersion = depVersion.substr(10);
+      }
 
       // internal dependencies only need to semver satisfy, not '==='
       if (!semver.satisfies(expected, depVersion)) {

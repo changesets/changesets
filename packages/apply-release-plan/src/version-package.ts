@@ -26,8 +26,12 @@ export default function versionPackage(
     if (deps) {
       for (let { name, version } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
+        if (!depCurrentVersion) continue;
+        const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
+        if (usesWorkspaceRange) {
+          depCurrentVersion = depCurrentVersion.substr(10);
+        }
         if (
-          depCurrentVersion &&
           // an empty string is the normalised version of x/X/*
           // we don't want to change these versions because they will match
           // any version and if someone makes the range that
@@ -36,6 +40,7 @@ export default function versionPackage(
         ) {
           let rangeType = getVersionRangeType(depCurrentVersion);
           let newNewRange = `${rangeType}${version}`;
+          if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`;
           deps[name] = newNewRange;
         }
       }
