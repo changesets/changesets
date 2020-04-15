@@ -1,8 +1,4 @@
-import {
-  ChangelogFunctions,
-  NewChangesetWithCommit,
-  VersionType
-} from "@changesets/types";
+import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
 
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
@@ -15,7 +11,7 @@ type ChangelogLines = {
 
 async function generateChangesForVersionTypeMarkdown(
   obj: ChangelogLines,
-  type: VersionType
+  type: keyof ChangelogLines
 ) {
   let releaseLines = await Promise.all(obj[type]);
   releaseLines = releaseLines.filter(x => x);
@@ -44,7 +40,7 @@ export default async function generateMarkdown(
   // We can filter here, but that just adds another iteration over this list
   changesets.forEach(cs => {
     const rls = cs.releases.find(r => r.name === release.name);
-    if (rls) {
+    if (rls && rls.type !== "none") {
       releaseObj[rls.type].push(
         changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts)
       );
@@ -55,8 +51,6 @@ export default async function generateMarkdown(
     return (
       (release.packageJson.dependencies &&
         release.packageJson.dependencies[rel.name]) ||
-      (release.packageJson.devDependencies &&
-        release.packageJson.devDependencies[rel.name]) ||
       (release.packageJson.peerDependencies &&
         release.packageJson.peerDependencies[rel.name])
     );

@@ -6,7 +6,10 @@ export function incrementVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined
 ) {
-  let version = semver.inc(release.oldVersion, release.type)!;
+  let version =
+    release.type === "none"
+      ? release.oldVersion
+      : semver.inc(release.oldVersion, release.type)!;
   if (preInfo !== undefined && preInfo.state.mode !== "exit") {
     let preVersion = preInfo.preVersions.get(release.name);
     if (preVersion === undefined) {
