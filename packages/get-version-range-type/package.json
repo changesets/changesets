@@ -1,6 +1,6 @@
 {
   "name": "@changesets/get-version-range-type",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Common get-version-range-type shared between changeset packages",
   "main": "dist/get-version-range-type.cjs.js",
   "module": "dist/get-version-range-type.esm.js",
