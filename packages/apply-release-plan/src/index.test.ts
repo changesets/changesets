@@ -399,7 +399,11 @@ describe("apply release plan", () => {
           commit: false,
           linked: [],
           access: "restricted",
-          baseBranch: "master"
+          baseBranch: "master",
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null
+          ]
         }
       );
       let pkgAChangelogPath = changedFiles.find(a =>
