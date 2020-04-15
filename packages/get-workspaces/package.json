@@ -1,13 +1,13 @@
 {
   "name": "get-workspaces",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Get workspaces for yarn workspaces, bolt workspaces, or the root package for building repo-agnostic tools",
   "main": "dist/get-workspaces.cjs.js",
   "module": "dist/get-workspaces.esm.js",
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/master/packages/get-workspaces",
   "dependencies": {
-    "@changesets/types": "^1.0.0",
+    "@changesets/types": "^2.0.0",
     "fs-extra": "^7.0.1",
     "globby": "^9.2.0",
     "read-yaml-file": "^1.1.0"

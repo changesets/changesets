@@ -1,5 +1,30 @@
 # @changesets/apply-release-plan
 
+## 2.0.0
+
+### Major Changes
+
+- [`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e) [#313](https://github.com/atlassian/changesets/pull/313) Thanks [@zkochan](https://github.com/zkochan)! - Bumping `devDependencies` no longer bumps the packages that they depend on.
+
+  This is a pretty big "quality of life" update, which means we will do fewer releases of packages overall, as there is no change of installed packages.
+
+  This has been made a breaking chage as it changes the behaviour of what will be published. It should only be for the better, but we didn't want to surprise you with it.
+
+* [`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e) [#313](https://github.com/atlassian/changesets/pull/313) Thanks [@zkochan](https://github.com/zkochan)! - Updates to devDependencies are not affecting the end users of a package. So we are not listing these changes in the changelog file.
+
+### Minor Changes
+
+- [`c3cc232`](https://github.com/atlassian/changesets/commit/c3cc23204c6cb80487aced1b37ebe8ffde0e2111) [#311](https://github.com/atlassian/changesets/pull/311) Thanks [@zkochan](https://github.com/zkochan)! - Added support for workspace ranges. They are now correctly kept and updated when applying a release plan.
+
+### Patch Changes
+
+- [`44555b4`](https://github.com/atlassian/changesets/commit/44555b44cac843d973d31adbfc7703f45117d204) [#315](https://github.com/atlassian/changesets/pull/315) Thanks [@maraisr](https://github.com/maraisr)! - Allows prettier to know about filepaths so it can apply file overrides
+
+- Updated dependencies [[`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e)]:
+  - @changesets/types@2.0.0
+  - @changesets/config@1.0.2
+  - @changesets/git@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes

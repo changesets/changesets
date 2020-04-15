@@ -1,5 +1,22 @@
 # @changesets/cli
 
+## 2.6.3
+
+### Patch Changes
+
+- [`9cdfa36`](https://github.com/atlassian/changesets/commit/9cdfa36f831cca2b11593881671410a6d2f0b546) [#318](https://github.com/atlassian/changesets/pull/318) Thanks [@Noviny](https://github.com/Noviny)! - Typo fix in prerelease warning message
+
+- Updated dependencies [[`44555b4`](https://github.com/atlassian/changesets/commit/44555b44cac843d973d31adbfc7703f45117d204), [`c3cc232`](https://github.com/atlassian/changesets/commit/c3cc23204c6cb80487aced1b37ebe8ffde0e2111), [`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e), [`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e), [`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e), [`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e)]:
+  - @changesets/apply-release-plan@2.0.0
+  - @changesets/assemble-release-plan@2.0.0
+  - @changesets/types@2.0.0
+  - @changesets/get-release-plan@1.0.2
+  - @changesets/config@1.0.2
+  - @changesets/git@1.0.2
+  - @changesets/pre@1.0.2
+  - @changesets/read@0.4.4
+  - @changesets/write@0.1.1
+
 ## 2.6.2
 
 ### Patch Changes
