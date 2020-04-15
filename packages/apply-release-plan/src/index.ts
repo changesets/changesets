@@ -104,6 +104,7 @@ export default async function applyReleasePlan(
 
     let parsedConfig = prettier.format(JSON.stringify(packageJson), {
       ...prettierConfig,
+      filepath: pkgJSONPath,
       parser: "json",
       printWidth: 20
     });
@@ -254,6 +255,7 @@ async function prependFile(
       filePath,
       prettier.format(completelyNewChangelog, {
         ...prettierConfig,
+        filepath: filePath,
         parser: "markdown"
       })
     );
@@ -263,6 +265,10 @@ async function prependFile(
 
   await fs.writeFile(
     filePath,
-    prettier.format(newChangelog, { ...prettierConfig, parser: "markdown" })
+    prettier.format(newChangelog, {
+      ...prettierConfig,
+      filepath: filePath,
+      parser: "markdown"
+    })
   );
 }
