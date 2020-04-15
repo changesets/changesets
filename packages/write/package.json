@@ -1,6 +1,6 @@
 {
   "name": "@changesets/write",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Writes a changeset to a file",
   "main": "dist/write.cjs.js",
   "module": "dist/write.esm.js",
@@ -8,7 +8,7 @@
   "repository": "https://github.com/changesets/changesets/tree/master/packages/write",
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@changesets/types": "^1.0.0",
+    "@changesets/types": "^2.0.0",
     "fs-extra": "^7.0.1",
     "human-id": "^1.0.2",
     "prettier": "^1.18.2"

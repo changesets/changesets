@@ -1,5 +1,16 @@
 # @changesets/get-dependents-graph
 
+## 1.1.0
+
+### Minor Changes
+
+- [`c3cc232`](https://github.com/atlassian/changesets/commit/c3cc23204c6cb80487aced1b37ebe8ffde0e2111) [#311](https://github.com/atlassian/changesets/pull/311) Thanks [@zkochan](https://github.com/zkochan)! - Added support for workspace ranges. Package graph validation understands them now and allows them to satisfy dependents' required ranges.
+
+### Patch Changes
+
+- Updated dependencies [[`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e)]:
+  - @changesets/types@2.0.0
+
 ## 1.0.1
 
 ### Patch Changes

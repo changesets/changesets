@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 2.0.0
+
+### Major Changes
+
+- [`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e) [#313](https://github.com/atlassian/changesets/pull/313) Thanks [@zkochan](https://github.com/zkochan)! - Add in `none` as a potential option for bumpType in release plans. Note that this is experimental and is internal, not a possible user option
+
 ## 1.0.1
 
 ### Patch Changes

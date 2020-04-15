@@ -1,5 +1,17 @@
 # @changesets/assemble-release-plan
 
+## 2.0.0
+
+### Major Changes
+
+- [`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e) [#313](https://github.com/atlassian/changesets/pull/313) Thanks [@zkochan](https://github.com/zkochan)! - When the released package is only used as a dev dependency, the dependent package's version should not be bumped.
+
+### Patch Changes
+
+- Updated dependencies [[`c3cc232`](https://github.com/atlassian/changesets/commit/c3cc23204c6cb80487aced1b37ebe8ffde0e2111), [`011d57f`](https://github.com/atlassian/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e)]:
+  - @changesets/get-dependents-graph@1.1.0
+  - @changesets/types@2.0.0
+
 ## 1.0.1
 
 ### Patch Changes
