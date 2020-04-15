@@ -1,5 +1,11 @@
 # @changesets/errors
 
+## 0.1.4
+
+### Patch Changes
+
+- [`1706fb7`](https://github.com/atlassian/changesets/commit/1706fb751ecc2f5a792c42f467b2063078d58716) [#321](https://github.com/atlassian/changesets/pull/321) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix TypeScript declarations
+
 ## 0.1.3
 
 ### Patch Changes

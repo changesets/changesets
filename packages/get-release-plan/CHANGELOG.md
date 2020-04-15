@@ -1,5 +1,18 @@
 # @changesets/get-release-plan
 
+## 1.0.3
+
+### Patch Changes
+
+- [`1706fb7`](https://github.com/atlassian/changesets/commit/1706fb751ecc2f5a792c42f467b2063078d58716) [#321](https://github.com/atlassian/changesets/pull/321) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix TypeScript declarations
+
+- Updated dependencies [[`1706fb7`](https://github.com/atlassian/changesets/commit/1706fb751ecc2f5a792c42f467b2063078d58716)]:
+  - @changesets/assemble-release-plan@2.0.1
+  - @changesets/config@1.0.3
+  - @changesets/pre@1.0.3
+  - @changesets/read@0.4.5
+  - @changesets/types@2.0.1
+
 ## 1.0.2
 
 ### Patch Changes
