@@ -1,7 +1,11 @@
-import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
+import {
+  ChangelogFunctions,
+  NewChangesetWithCommit,
+  ModCompWithPackage
+} from "@changesets/types";
 
-import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
+import { Packages } from "@manypkg/get-packages";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -21,10 +25,11 @@ async function generateChangesForVersionTypeMarkdown(
 }
 
 // release is the package and version we are releasing
-export default async function generateMarkdown(
+export default async function getChangelogEntry(
   release: ModCompWithPackage,
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
+  packages: Packages,
   changelogFuncs: ChangelogFunctions,
   changelogOpts: any
 ) {
@@ -50,11 +55,20 @@ export default async function generateMarkdown(
   });
 
   let dependentReleases = releases.filter(rel => {
+    let foundPackage = packages.packages.find(
+      ({ packageJson }) => packageJson.name === release.name
+    );
+
+    if (!foundPackage)
+      throw new Error(
+        `Trouble assembling changelog - there was a release for a package that does not exist: ${release.name}`
+      );
+
+    let { packageJson } = foundPackage;
+
     return (
-      (release.packageJson.dependencies &&
-        release.packageJson.dependencies[rel.name]) ||
-      (release.packageJson.peerDependencies &&
-        release.packageJson.peerDependencies[rel.name])
+      (packageJson.dependencies && packageJson.dependencies[rel.name]) ||
+      (packageJson.peerDependencies && packageJson.peerDependencies[rel.name])
     );
   });
 

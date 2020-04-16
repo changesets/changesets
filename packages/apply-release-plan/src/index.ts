@@ -3,38 +3,23 @@ import {
   Config,
   ChangelogFunctions,
   NewChangeset,
-  ModCompWithPackage
+  ComprehensiveRelease
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import resolveFrom from "resolve-from";
+import getChangelogEntries, {
+  addCommitToChangesets,
+  resolveChangelogFunctions
+} from "@changesets/generate-changelogs";
 import { Packages } from "@manypkg/get-packages";
 
 import fs from "fs-extra";
 import path from "path";
 import prettier from "prettier";
 
-import versionPackage from "./version-package";
+import updatePackageJson from "./version-package";
 import createVersionCommit from "./createVersionCommit";
-import getChangelogEntry from "./get-changelog-entry";
-
-async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
-  let commit = await git.getCommitThatAddsFile(
-    `.changeset/${changesetId}.md`,
-    cwd
-  );
-  if (commit) {
-    return commit;
-  }
-  let commitForOldChangeset = await git.getCommitThatAddsFile(
-    `.changeset/${changesetId}/changes.json`,
-    cwd
-  );
-  if (commitForOldChangeset) {
-    return commitForOldChangeset;
-  }
-}
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
@@ -53,23 +38,11 @@ export default async function applyReleasePlan(
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
-  let releaseWithPackages = releases.map(release => {
-    let pkg = packagesByName.get(release.name);
-    if (!pkg)
-      throw new Error(
-        `Could not find matching package for release of: ${release.name}`
-      );
-    return {
-      ...release,
-      ...pkg
-    };
-  });
-
-  // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
-  let releaseWithChangelogs = await getNewChangelogEntry(
-    releaseWithPackages,
+  let changelogEntries = await getNewChangelogEntry(
+    releases,
     changesets,
     config.changelog,
+    packages,
     cwd
   );
 
@@ -89,18 +62,26 @@ export default async function applyReleasePlan(
     version: newVersion
   }));
 
-  // iterate over releases updating packages
-  let finalisedRelease = releaseWithChangelogs.map(release => {
-    return versionPackage(release, versionsToUpdate);
-  });
-
   let prettierConfig = await prettier.resolveConfig(cwd);
 
-  for (let release of finalisedRelease) {
-    let { changelog, packageJson, dir, name } = release;
-    let pkgJSONPath = path.resolve(dir, "package.json");
+  for (let release of releases) {
+    let { name } = release;
+    let changelog = changelogEntries.get(name);
+    let pkg = packagesByName.get(release.name);
+    if (!pkg)
+      throw new Error(
+        `Could not find matching package for release of: ${release.name}`
+      );
 
-    let changelogPath = path.resolve(dir, "CHANGELOG.md");
+    let packageJson = updatePackageJson(
+      release,
+      versionsToUpdate,
+      pkg.packageJson
+    );
+
+    let pkgJSONPath = path.resolve(pkg.dir, "package.json");
+
+    let changelogPath = path.resolve(pkg.dir, "CHANGELOG.md");
 
     let parsedConfig = prettier.format(JSON.stringify(packageJson), {
       ...prettierConfig,
@@ -160,66 +141,36 @@ export default async function applyReleasePlan(
 }
 
 async function getNewChangelogEntry(
-  releasesWithPackage: ModCompWithPackage[],
+  releasesWithPackage: ComprehensiveRelease[],
   changesets: NewChangeset[],
   changelogConfig: false | readonly [string, any],
+  packages: Packages,
   cwd: string
 ) {
-  let getChangelogFuncs: ChangelogFunctions = {
+  // Quick note, this is deliberately setting this to resolve as empty so
+  // even when we are not generating changelogs, this still works
+  let changelogFunctions: ChangelogFunctions = {
     getReleaseLine: () => Promise.resolve(""),
     getDependencyReleaseLine: () => Promise.resolve("")
   };
   let changelogOpts: any;
   if (changelogConfig) {
     changelogOpts = changelogConfig[1];
-    let changesetPath = path.join(cwd, ".changeset");
-    let changelogPath = resolveFrom(changesetPath, changelogConfig[0]);
-
-    let possibleChangelogFunc = require(changelogPath);
-    if (possibleChangelogFunc.default) {
-      possibleChangelogFunc = possibleChangelogFunc.default;
-    }
-    if (
-      typeof possibleChangelogFunc.getReleaseLine === "function" &&
-      typeof possibleChangelogFunc.getDependencyReleaseLine === "function"
-    ) {
-      getChangelogFuncs = possibleChangelogFunc;
-    } else {
-      throw new Error("Could not resolve changelog generation functions");
-    }
+    changelogFunctions = await resolveChangelogFunctions(
+      changelogConfig[0],
+      cwd
+    );
   }
 
-  let moddedChangesets = await Promise.all(
-    changesets.map(async cs => ({
-      ...cs,
-      commit: await getCommitThatAddsChangeset(cs.id, cwd)
-    }))
+  let moddedChangesets = await addCommitToChangesets(changesets, cwd);
+
+  return getChangelogEntries(
+    releasesWithPackage,
+    moddedChangesets,
+    packages,
+    changelogFunctions,
+    changelogOpts
   );
-
-  return Promise.all(
-    releasesWithPackage.map(async release => {
-      let changelog = await getChangelogEntry(
-        release,
-        releasesWithPackage,
-        moddedChangesets,
-        getChangelogFuncs,
-        changelogOpts
-      );
-
-      return {
-        ...release,
-        changelog
-      };
-    })
-  ).catch(e => {
-    console.error(
-      "The following error was encountered while generating changelog entries"
-    );
-    console.error(
-      "We have escaped applying the changesets, and no files should have been affected"
-    );
-    throw e;
-  });
 }
 
 async function updateChangelog(

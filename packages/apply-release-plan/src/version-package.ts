@@ -10,14 +10,11 @@ const DEPENDENCY_TYPES = [
 ] as const;
 
 export default function versionPackage(
-  release: ComprehensiveRelease & {
-    changelog: string | null;
-    packageJson: PackageJSON;
-    dir: string;
-  },
-  versionsToUpdate: Array<{ name: string; version: string }>
+  release: ComprehensiveRelease,
+  versionsToUpdate: Array<{ name: string; version: string }>,
+  packageJson: PackageJSON
 ) {
-  let { newVersion, packageJson } = release;
+  let { newVersion } = release;
 
   packageJson.version = newVersion;
 
@@ -47,5 +44,5 @@ export default function versionPackage(
     }
   }
 
-  return { ...release, packageJson };
+  return packageJson;
 }
