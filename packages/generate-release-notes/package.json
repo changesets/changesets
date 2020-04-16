@@ -1,0 +1,19 @@
+{
+  "name": "@changesets/release-notes",
+  "version": "0.0.0",
+  "description": "Get release notes for all packages as an aggregate",
+  "main": "dist/release-notes.cjs.js",
+  "module": "dist/release-notes.esm.js",
+  "license": "MIT",
+  "repository": "https://github.com/changesets/changesets/tree/master/packages/changelog-git",
+  "dependencies": {
+    "@changesets/config": "^1.0.1",
+    "@changesets/generate-changelogs": "^0.0.0",
+    "@changesets/get-release-plan": "^1.0.1",
+    "@changesets/types": "^1.0.0",
+    "@manypkg/get-packages": "^1.0.1"
+  },
+  "devDependencies": {
+    "jest-fixtures": "^0.5.0"
+  }
+}
