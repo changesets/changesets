@@ -12,12 +12,26 @@ export let defaultWrittenConfig = {
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
-  baseBranch: "master"
+  baseBranch: "master",
+  latestRelease: false,
+  getNextReleaseName: false
 } as const;
 
 function getNormalisedChangelogOption(
   thing: false | readonly [string, any] | string
 ): Config["changelog"] {
+  if (thing === false) {
+    return false;
+  }
+  if (typeof thing === "string") {
+    return [thing, null];
+  }
+  return thing;
+}
+
+function getNormalisedReleaseOption(
+  thing: false | readonly [string, any] | string
+): Config["getNextReleaseName"] {
   if (thing === false) {
     return false;
   }
@@ -150,6 +164,15 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.changelog
         : json.changelog
     ),
+    getNextReleaseName: getNormalisedReleaseOption(
+      json.getNextReleaseName === undefined
+        ? defaultWrittenConfig.getNextReleaseName
+        : json.getNextReleaseName
+    ),
+    latestRelease:
+      json.latestRelease === undefined
+        ? defaultWrittenConfig.latestRelease
+        : json.latestRelease,
     access:
       normalizedAccess === undefined
         ? defaultWrittenConfig.access

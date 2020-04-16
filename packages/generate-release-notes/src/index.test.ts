@@ -25,7 +25,6 @@ describe("generate-release-notes", () => {
     );
 
     let releasePlan = await generateReleaseNotes(cwd, modifiedDefaultConfig);
-    console.log(releasePlan);
 
     expect(true).toBeFalsy();
   });

@@ -57,6 +57,8 @@ export type Linked = ReadonlyArray<ReadonlyArray<string>>;
 
 export type Config = {
   changelog: false | readonly [string, any];
+  latestRelease: false | string;
+  getNextReleaseName: false | readonly [string, any];
   commit: boolean;
   linked: Linked;
   access: AccessType;
@@ -65,6 +67,8 @@ export type Config = {
 
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
+  latestRelease?: false | string;
+  getNextReleaseName?: false | readonly [string, any] | string;
   commit?: boolean;
   linked?: Linked;
   access?: AccessType;

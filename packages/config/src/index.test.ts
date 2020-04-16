@@ -23,6 +23,8 @@ test("read reads the config", async () => {
   expect(config).toEqual({
     linked: [],
     changelog: false,
+    getNextReleaseName: false,
+    latestRelease: false,
     commit: true,
     access: "restricted",
     baseBranch: "master"
@@ -32,6 +34,8 @@ test("read reads the config", async () => {
 let defaults = {
   linked: [],
   changelog: ["@changesets/cli/changelog", null],
+  getNextReleaseName: false,
+  latestRelease: false,
   commit: false,
   access: "restricted",
   baseBranch: "master"

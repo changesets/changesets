@@ -10,9 +10,22 @@ import fs from "fs-extra";
 import path from "path";
 import outdent from "outdent";
 import spawn from "spawndamnit";
+import { parse } from "@changesets/config";
 
 import applyReleasePlan from "./";
-import { getPackages } from "@manypkg/get-packages";
+import { getPackages, Packages } from "@manypkg/get-packages";
+
+const fakePackageObj: Packages = {
+  packages: [],
+  tool: "yarn",
+  root: {
+    dir: "abc",
+    packageJson: {
+      name: "nope",
+      version: "1.0.0"
+    }
+  }
+};
 
 class FakeReleasePlan {
   changesets: NewChangeset[];
@@ -35,13 +48,17 @@ class FakeReleasePlan {
       newVersion: "1.1.0",
       changesets: ["quick-lions-devour"]
     };
-    this.config = {
-      changelog: false,
-      commit: false,
-      linked: [],
-      access: "restricted",
-      baseBranch: "master"
-    };
+    this.config = parse({ changelog: false }, fakePackageObj);
+
+    // {
+
+    //   commit: false,
+    //   latestRelease: false,
+    //   getNextReleaseName: false,
+    //   linked: [],
+    //   access: "restricted",
+    //   baseBranch: "master"
+    // };
 
     this.changesets = [baseChangeset, ...changesets];
     this.releases = [baseRelease, ...releases];
@@ -63,13 +80,7 @@ async function testSetup(
   setupFunc?: (tempDir: string) => Promise<any>
 ) {
   if (!config) {
-    config = {
-      changelog: false,
-      commit: false,
-      linked: [],
-      access: "restricted",
-      baseBranch: "master"
-    };
+    config = parse({ changelog: false }, fakePackageObj);
   }
   let tempDir = await copyFixtureIntoTempDir(__dirname, fixtureName);
   if (setupFunc) {
@@ -264,13 +275,7 @@ describe("apply release plan", () => {
           ],
           preState: undefined
         },
-        {
-          changelog: false,
-          commit: false,
-          linked: [],
-          access: "restricted",
-          baseBranch: "master"
-        }
+        parse({ changelog: false }, fakePackageObj)
       );
       let pkgPathA = changedFiles.find(a =>
         a.endsWith(`pkg-a${path.sep}package.json`)
