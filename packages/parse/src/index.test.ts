@@ -148,4 +148,20 @@ describe("parsing a changeset", () => {
       summary: ""
     });
   });
+  describe("parsing a release changeset", () => {
+    it("should parse a release changeset", () => {
+      const changesetMd = outdent`---
+      "@changesets/secret-global-release": "some-id-here"
+      ---
+
+      So a summary`;
+
+      const changeset = parse(changesetMd);
+      expect(changeset).toEqual({
+        name: "some-id-here",
+        summary: "So a summary"
+      });
+    });
+    it.todo("should error if there are releases in a release changeset");
+  });
 });

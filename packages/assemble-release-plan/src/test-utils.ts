@@ -1,4 +1,9 @@
-import { NewChangeset, Release, VersionType } from "@changesets/types";
+import {
+  NewChangeset,
+  Release,
+  VersionType,
+  MixedChangesets
+} from "@changesets/types";
 import { Package, Packages } from "@manypkg/get-packages";
 
 function getPackage(
@@ -55,11 +60,12 @@ let getSimpleSetup = () => ({
 
 class FakeFullState {
   packages: Packages;
-  changesets: NewChangeset[];
+  changesets: MixedChangesets;
 
-  constructor(custom?: { packages?: Packages; changesets?: NewChangeset[] }) {
+  constructor(custom?: { packages?: Packages; changesets?: MixedChangesets }) {
     let { packages, changesets } = { ...getSimpleSetup(), ...custom };
     this.packages = packages;
+    // @ts-ignore
     this.changesets = changesets;
   }
 
@@ -76,6 +82,7 @@ class FakeFullState {
         `tried to add a second changeset with same id: ${changeset.id}`
       );
     }
+    // @ts-ignore
     this.changesets.push(changeset);
   }
 

@@ -2,17 +2,18 @@ import {
   ReleasePlan,
   Config,
   PreState,
-  GlobalChangeset,
-  NewChangeset
+  MixedChangesets
 } from "@changesets/types";
+import { InternalError } from "@changesets/errors";
+import { Packages } from "@manypkg/get-packages";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { separateChangesets } from "@changesets/read";
+
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
-import { InternalError } from "@changesets/errors";
-import { Packages } from "@manypkg/get-packages";
-import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo } from "./types";
 
 function getPreVersion(version: string) {
@@ -27,11 +28,10 @@ function getPreVersion(version: string) {
 }
 
 function assembleReleasePlan(
-  changesets: NewChangeset[],
+  changesets: MixedChangesets,
   packages: Packages,
   config: Config,
-  preState: PreState | undefined,
-  globalChangeset?: GlobalChangeset
+  preState: PreState | undefined
 ): ReleasePlan {
   let updatedPreState: PreState | undefined =
     preState === undefined
@@ -43,11 +43,15 @@ function assembleReleasePlan(
           }
         };
 
+  let { changesets: newChangesets, globalChangeset } = separateChangesets(
+    changesets
+  );
+
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
 
-  let unfilteredChangesets = changesets;
+  let unfilteredChangesets = newChangesets;
 
   let preVersions = new Map();
   if (updatedPreState !== undefined) {
@@ -59,8 +63,8 @@ function assembleReleasePlan(
     }
     if (updatedPreState.mode !== "exit") {
       let usedChangesetIds = new Set(updatedPreState.changesets);
-      updatedPreState.changesets = changesets.map(x => x.id);
-      changesets = changesets.filter(
+      updatedPreState.changesets = newChangesets.map(x => x.id);
+      newChangesets = newChangesets.filter(
         changeset => !usedChangesetIds.has(changeset.id)
       );
       for (let pkg of packages.packages) {
@@ -98,7 +102,7 @@ function assembleReleasePlan(
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(changesets, packagesByName);
+  let releases = flattenReleases(newChangesets, packagesByName);
 
   if (updatedPreState !== undefined) {
     if (updatedPreState.mode === "exit") {
@@ -174,7 +178,7 @@ function assembleReleasePlan(
   }
 
   return {
-    changesets,
+    changesets: newChangesets,
     releases: [...releases.values()].map(incompleteRelease => {
       return {
         ...incompleteRelease,

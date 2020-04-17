@@ -39,11 +39,10 @@ export default async function applyReleasePlan(
   };
   let changelogOpts: any;
   if (config.changelog) {
-    changelogOpts = config.changelog[1];
-    changelogFunctions = await resolveChangelogFunctions(
-      config.changelog[0],
-      cwd
-    );
+    let something;
+    [something, changelogOpts] = config.changelog.generator;
+
+    changelogFunctions = await resolveChangelogFunctions(something, cwd);
   }
 
   let moddedChangesets = await addCommitToChangesets(changesets, cwd);
@@ -141,10 +140,10 @@ export default async function applyReleasePlan(
     );
   }
 
-  if (globalReleaseNotes) {
+  if (config.changelog && globalReleaseNotes) {
     let globalReleaseNotesPath = path.resolve(
       cwd,
-      config.globalReleaseNotesFileName
+      config.changelog.globalFilename
     );
     await updateFile(
       globalReleaseNotesPath,

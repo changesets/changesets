@@ -9,7 +9,7 @@ import { warn } from "@changesets/logger";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 import { NewChangeset, Config } from "@changesets/types";
-import { defaultConfig } from "@changesets/config";
+import { defaultConfig, defaultWrittenConfig } from "@changesets/config";
 import { getPackages } from "@manypkg/get-packages";
 import pre from "../pre";
 import version from "./index";
@@ -18,7 +18,10 @@ import humanId from "human-id";
 let changelogPath = path.resolve(__dirname, "../../changelog");
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
-  changelog: [changelogPath, null]
+  changelog: {
+    ...defaultWrittenConfig.changelog,
+    generator: [changelogPath, null]
+  }
 };
 
 beforeEach(() => {

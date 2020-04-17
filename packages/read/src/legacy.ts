@@ -1,6 +1,10 @@
 import chalk from "chalk";
 import path from "path";
-import { NewChangeset } from "@changesets/types";
+import {
+  NewChangeset,
+  MixedChangesets,
+  GlobalChangeset
+} from "@changesets/types";
 import * as fs from "fs-extra";
 import pFilter from "p-filter";
 import { warn } from "@changesets/logger";
@@ -45,7 +49,7 @@ async function getOldChangesets(
 export default async function getOldChangesetsAndWarn(
   changesetBase: string,
   dirs: string[]
-): Promise<Array<NewChangeset>> {
+): Promise<Array<GlobalChangeset | NewChangeset>> {
   let oldChangesets = await getOldChangesets(changesetBase, dirs);
   if (oldChangesets.length === 0) {
     return [];

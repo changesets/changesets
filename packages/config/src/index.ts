@@ -35,13 +35,17 @@ function getNormalisedChangelogOption(
 
   if (Array.isArray(thing)) {
     return {
-      generator: thing,
+      generator: thing as readonly [string, null],
       filename: defaultWrittenConfig.changelog.filename,
       globalFilename: defaultWrittenConfig.changelog.globalFilename
     };
   }
 
-  let { generator, filename, globalFilename } = thing;
+  let { generator, filename, globalFilename } = thing as {
+    generator: readonly [string, any] | string;
+    globalFilename?: string;
+    filename?: string;
+  };
 
   return {
     generator: typeof generator === "string" ? [generator, null] : generator,
@@ -56,6 +60,12 @@ export let read = async (cwd: string, packages: Packages) => {
   return parse(json, packages);
 };
 
+type writtenChangelogObj = {
+  generator: readonly [string, any] | string;
+  globalFilename?: string;
+  filename?: string;
+};
+
 export let parse = (json: WrittenConfig, packages: Packages): Config => {
   let messages = [];
   if (
@@ -66,7 +76,15 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       Array.isArray(json.changelog) &&
       json.changelog.length === 2 &&
       typeof json.changelog[0] === "string"
-    )
+    ) &&
+    (!(json.changelog as writtenChangelogObj).generator ||
+      (typeof (json.changelog as writtenChangelogObj).generator !== "string" &&
+        !(
+          Array.isArray((json.changelog as writtenChangelogObj).generator) &&
+          (json.changelog as writtenChangelogObj).generator.length === 2 &&
+          typeof (json.changelog as writtenChangelogObj).generator[0] ===
+            "string"
+        )))
   ) {
     messages.push(
       `The \`changelog\` option is set as ${JSON.stringify(
@@ -168,6 +186,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.join("\n")
     );
   }
+
   let config: Config = {
     changelog: getNormalisedChangelogOption(
       json.changelog === undefined
@@ -185,15 +204,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     baseBranch:
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch
-        : json.baseBranch,
-    changelogFileName:
-      json.changelogFileName === undefined
-        ? defaultWrittenConfig.changelogFileName
-        : json.changelogFileName,
-    globalReleaseNotesFileName:
-      json.globalReleaseNotesFilename === undefined
-        ? defaultWrittenConfig.globalReleaseNotesFileName
-        : json.globalReleaseNotesFilename
+        : json.baseBranch
   };
   return config;
 };

@@ -5,10 +5,15 @@ const mdRegex = /\s*---([^]*?)\n\s*---\n([^]*)/;
 
 export default function parseChangesetFile(
   contents: string
-): {
-  summary: string;
-  releases: Release[];
-} {
+):
+  | {
+      summary: string;
+      releases: Release[];
+    }
+  | {
+      summary: string;
+      name: string;
+    } {
   const execResult = mdRegex.exec(contents);
   if (!execResult) {
     throw new Error(
@@ -17,6 +22,7 @@ export default function parseChangesetFile(
   }
   let [, roughReleases, roughSummary] = execResult;
   let summary = roughSummary.trim();
+  let name: string;
 
   let releases: Release[];
   try {
@@ -41,5 +47,20 @@ export default function parseChangesetFile(
     throw new Error(`could not parse changeset - unknown error: ${contents}`);
   }
 
-  return { releases, summary };
+  let globalRelease = releases.find(
+    ({ name }) => name === "@changesets/secret-global-release"
+  );
+
+  if (globalRelease) {
+    // check there is only one release
+    if (releases.length > 1) {
+      throw new Error(
+        `could not parse changeset - global release changeset included additional information: ${contents}`
+      );
+    }
+
+    return { name: globalRelease.type, summary };
+  } else {
+    return { releases, summary };
+  }
 }

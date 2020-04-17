@@ -25,20 +25,20 @@ test("read reads the config", async () => {
     changelog: false,
     commit: true,
     access: "restricted",
-    baseBranch: "master",
-    changelogFileName: "CHANGELOG.md",
-    globalReleaseNotesFileName: "RELEASE_NOTES.md"
+    baseBranch: "master"
   });
 });
 
 let defaults = {
   linked: [],
-  changelog: ["@changesets/cli/changelog", null],
+  changelog: {
+    generator: ["@changesets/cli/changelog", null],
+    filename: "CHANGELOG.md",
+    globalFilename: "RELEASE_NOTES.md"
+  },
   commit: false,
   access: "restricted",
-  baseBranch: "master",
-  changelogFileName: "CHANGELOG.md",
-  globalReleaseNotesFileName: "RELEASE_NOTES.md"
+  baseBranch: "master"
 } as const;
 
 let correctCases = {
@@ -52,7 +52,11 @@ let correctCases = {
     },
     output: {
       ...defaults,
-      changelog: ["some-module", null]
+      changelog: {
+        generator: ["some-module", null],
+        filename: "CHANGELOG.md",
+        globalFilename: "RELEASE_NOTES.md"
+      }
     }
   },
   "changelog false": {
@@ -70,7 +74,69 @@ let correctCases = {
     },
     output: {
       ...defaults,
-      changelog: ["some-module", { something: true }]
+      changelog: {
+        generator: ["some-module", { something: true }],
+        filename: "CHANGELOG.md",
+        globalFilename: "RELEASE_NOTES.md"
+      }
+    }
+  },
+  "changelog object with generator string": {
+    input: {
+      changelog: { generator: "some-module" }
+    },
+    output: {
+      ...defaults,
+      changelog: {
+        generator: ["some-module", null],
+        filename: "CHANGELOG.md",
+        globalFilename: "RELEASE_NOTES.md"
+      }
+    }
+  },
+  "changelog object with generator tuple": {
+    input: {
+      changelog: { generator: ["some-module", { something: true }] }
+    },
+    output: {
+      ...defaults,
+      changelog: {
+        generator: ["some-module", { something: true }],
+        filename: "CHANGELOG.md",
+        globalFilename: "RELEASE_NOTES.md"
+      }
+    }
+  },
+  "changelog object with filename": {
+    input: {
+      changelog: {
+        generator: "some-module",
+        filename: "somewhere/someplace.md"
+      }
+    },
+    output: {
+      ...defaults,
+      changelog: {
+        generator: ["some-module", null],
+        filename: "somewhere/someplace.md",
+        globalFilename: "RELEASE_NOTES.md"
+      }
+    }
+  },
+  "changelog object with glboalFilename": {
+    input: {
+      changelog: {
+        generator: "some-module",
+        globalFilename: "somewhere/someplace.md"
+      }
+    },
+    output: {
+      ...defaults,
+      changelog: {
+        generator: ["some-module", null],
+        filename: "CHANGELOG.md",
+        globalFilename: "somewhere/someplace.md"
+      }
     }
   },
   "commit false": {

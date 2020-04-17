@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "jest-fixtures": "^0.5.0",
-    "spawndamnit": "^2.0.0"
+    "spawndamnit": "^2.0.0",
+    "outdent": "^0.5.0"
   }
 }

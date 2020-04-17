@@ -34,7 +34,14 @@ export type NewChangeset = Changeset & {
   id: string;
 };
 
-export type GlobalChangeset = { summary: string; name: string };
+export type GlobalChangesetName = "@changesets/secret-global-release";
+export type GlobalChangesetId = "aaa-global-changeset";
+
+export type GlobalChangeset = {
+  summary: string;
+  id: GlobalChangesetId;
+  name: string;
+};
 
 export type ReleasePlan = {
   changesets: NewChangeset[];

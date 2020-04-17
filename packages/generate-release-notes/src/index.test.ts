@@ -110,8 +110,9 @@ describe("generate-release-notes", () => {
       ...simpleReleasePlan,
       globalChangeset: {
         name: "alpha",
-        summary: "This is our alpha release!"
-      }
+        summary: "This is our alpha release!",
+        id: "aaa-global-changeset"
+      } as const
     };
 
     let releaseNotes = await generateReleaseNotes(
@@ -137,8 +138,9 @@ describe("generate-release-notes", () => {
       ...twoPackageReleasePlan,
       globalChangeset: {
         name: "alpha",
-        summary: "This is our alpha release!"
-      }
+        summary: "This is our alpha release!",
+        id: "aaa-global-changeset"
+      } as const
     };
 
     let releaseNotes = await generateReleaseNotes(
@@ -167,8 +169,9 @@ describe("generate-release-notes", () => {
       ...simpleReleasePlan,
       globalChangeset: {
         name: "alpha",
-        summary: ""
-      }
+        summary: "",
+        id: "aaa-global-changeset"
+      } as const
     };
 
     let releaseNotes = await generateReleaseNotes(
@@ -192,8 +195,9 @@ describe("generate-release-notes", () => {
       ...simpleReleasePlan,
       globalChangeset: {
         name: "",
-        summary: ""
-      }
+        summary: "",
+        id: "aaa-global-changeset"
+      } as const
     };
 
     let releaseNotes = await generateReleaseNotes(
@@ -215,8 +219,9 @@ describe("generate-release-notes", () => {
       ...allRangeTypeReleasePlan,
       globalChangeset: {
         name: "alpha",
-        summary: "This is our alpha release!"
-      }
+        summary: "This is our alpha release!",
+        id: "aaa-global-changeset"
+      } as const
     };
 
     let releaseNotes = await generateReleaseNotes(
