@@ -1,8 +1,7 @@
-import fs from "fs-extra";
-import path from "path";
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import pLimit from "p-limit";
+import preferredPM from "preferred-pm";
 import chalk from "chalk";
 import spawn from "spawndamnit";
 import { askQuestion } from "../../utils/cli-utilities";
@@ -20,15 +19,9 @@ function getCorrectRegistry() {
 }
 
 async function getPublishTool(cwd: string): Promise<"npm" | "pnpm"> {
-  try {
-    await fs.access(path.join(cwd, "pnpm-lock.yaml"));
-    return "pnpm";
-  } catch (err) {
-    if (err.code !== "ENOENT") {
-      throw err;
-    }
-    return "npm";
-  }
+  const pm = await preferredPM(cwd);
+  if (!pm) return "npm";
+  return pm.name === "pnpm" ? "pnpm" : "npm";
 }
 
 export async function getTokenIsRequired() {
