@@ -101,7 +101,9 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
-      let pkgPath = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
+      let pkgPath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
       let pkgJSON = await fs.readJSON(pkgPath);
@@ -135,7 +137,9 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
-      let pkgPath = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
+      let pkgPath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
       let pkgJSON = await fs.readJSON(pkgPath);
@@ -172,7 +176,9 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
-      let pkgPath = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
+      let pkgPath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
       let pkgJSON = await fs.readJSON(pkgPath);
@@ -204,8 +210,12 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
-      let pkgPathA = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
-      let pkgPathB = changedFiles.find(b => b.endsWith("pkg-b/package.json"));
+      let pkgPathA = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
+      let pkgPathB = changedFiles.find(b =>
+        b.endsWith(`pkg-b${path.sep}package.json`)
+      );
 
       if (!pkgPathA || !pkgPathB) {
         throw new Error(`could not find an updated package json`);
@@ -262,8 +272,12 @@ describe("apply release plan", () => {
           baseBranch: "master"
         }
       );
-      let pkgPathA = changedFiles.find(a => a.endsWith("pkg-a/package.json"));
-      let pkgPathB = changedFiles.find(b => b.endsWith("pkg-b/package.json"));
+      let pkgPathA = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
+      let pkgPathB = changedFiles.find(b =>
+        b.endsWith(`pkg-b${path.sep}package.json`)
+      );
 
       if (!pkgPathA || !pkgPathB) {
         throw new Error(`could not find an updated package json`);
@@ -300,7 +314,9 @@ describe("apply release plan", () => {
         }
       );
 
-      let readmePath = changedFiles.find(a => a.endsWith("pkg-a/CHANGELOG.md"));
+      let readmePath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+      );
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       let readme = await fs.readFile(readmePath, "utf-8");
@@ -338,9 +354,11 @@ describe("apply release plan", () => {
         }
       );
 
-      let readmePath = changedFiles.find(a => a.endsWith("pkg-a/CHANGELOG.md"));
+      let readmePath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+      );
       let readmePathB = changedFiles.find(a =>
-        a.endsWith("pkg-b/CHANGELOG.md")
+        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
       );
 
       if (!readmePath || !readmePathB)
@@ -407,7 +425,7 @@ describe("apply release plan", () => {
         }
       );
       let pkgAChangelogPath = changedFiles.find(a =>
-        a.endsWith("pkg-a/CHANGELOG.md")
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
       );
 
       expect(pkgAChangelogPath).toBeUndefined();
@@ -440,7 +458,9 @@ describe("apply release plan", () => {
         }
       );
 
-      let readmePath = changedFiles.find(a => a.endsWith("pkg-a/CHANGELOG.md"));
+      let readmePath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+      );
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       let readme = await fs.readFile(readmePath, "utf-8");
