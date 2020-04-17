@@ -12,7 +12,7 @@ export default async function addChangelogEntries(
   packages: Packages,
   changelogFuncs: ChangelogFunctions,
   changelogOpts: any
-): Promise<Map<string, string | void>> {
+): Promise<Map<string, string>> {
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
@@ -29,7 +29,7 @@ export default async function addChangelogEntries(
     };
   });
 
-  let changelogEntries: Map<string, string | void> = new Map();
+  let changelogEntries: Map<string, string> = new Map();
 
   for (let release of releaseWithPackages) {
     let changelog = await getChangelogEntry(

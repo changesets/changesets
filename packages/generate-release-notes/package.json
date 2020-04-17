@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@changesets/write": "*",
-    "jest-fixtures": "^0.5.0"
+    "jest-fixtures": "^0.5.0",
+    "outdent": "^0.5.0"
   }
 }

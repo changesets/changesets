@@ -3,7 +3,8 @@ import {
   ReleasePlan,
   Config,
   NewChangeset,
-  ComprehensiveRelease
+  ComprehensiveRelease,
+  GlobalReleaseChangeset
 } from "@changesets/types";
 import * as git from "@changesets/git";
 import fs from "fs-extra";
@@ -31,10 +32,12 @@ class FakeReleasePlan {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
   config: Config;
+  globalReleaseChangeset: GlobalReleaseChangeset | undefined;
 
   constructor(
     changesets: NewChangeset[] = [],
-    releases: ComprehensiveRelease[] = []
+    releases: ComprehensiveRelease[] = [],
+    globalReleaseChangeset: GlobalReleaseChangeset | undefined = undefined
   ) {
     const baseChangeset: NewChangeset = {
       id: "quick-lions-devour",
@@ -50,25 +53,17 @@ class FakeReleasePlan {
     };
     this.config = parse({ changelog: false }, fakePackageObj);
 
-    // {
-
-    //   commit: false,
-    //   latestRelease: false,
-    //   getNextReleaseName: false,
-    //   linked: [],
-    //   access: "restricted",
-    //   baseBranch: "master"
-    // };
-
     this.changesets = [baseChangeset, ...changesets];
     this.releases = [baseRelease, ...releases];
+    this.globalReleaseChangeset = globalReleaseChangeset;
   }
 
   getReleasePlan(): ReleasePlan {
     return {
       changesets: this.changesets,
       releases: this.releases,
-      preState: undefined
+      preState: undefined,
+      globalReleaseChangeset: this.globalReleaseChangeset
     };
   }
 }
@@ -273,7 +268,8 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"]
             }
           ],
-          preState: undefined
+          preState: undefined,
+          globalReleaseChangeset: undefined
         },
         parse({ changelog: false }, fakePackageObj)
       );
@@ -513,7 +509,8 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"]
             }
           ],
-          preState: undefined
+          preState: undefined,
+          globalReleaseChangeset: undefined
         });
         changedFiles = testResults.changedFiles;
       } catch (e) {
@@ -799,6 +796,37 @@ describe("apply release plan", () => {
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
       expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
+    });
+  });
+  describe("release changeset is present", () => {
+    it("should write the release file", async () => {
+      let { changedFiles } = await testSetup("simple-project", {
+        changesets: [
+          {
+            id: "some-fake-name",
+            summary: "look, what a fake summary this is",
+            releases: [{ name: "pkg-a", type: "patch" }]
+          }
+        ],
+        releases: [
+          {
+            name: "pkg-a",
+            newVersion: "1.0.1",
+            oldVersion: "1.0.0",
+            changesets: ["some-fake-name"],
+            type: "patch"
+          }
+        ],
+        preState: undefined,
+        globalReleaseChangeset: {
+          name: "some-fake-id",
+          summary: "Holy heck this might just work"
+        }
+      });
+
+      let releaseNotes = changedFiles.find(f => f.includes("RELEASE_NOTES.md"));
+
+      expect(releaseNotes).toEqual("some string here");
     });
   });
 });

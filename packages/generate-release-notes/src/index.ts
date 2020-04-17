@@ -1,80 +1,87 @@
-import { Config } from "@changesets/types";
-import getChangelogEntries, {
-  addCommitToChangesets,
-  resolveChangelogFunctions
-} from "@changesets/generate-changelogs";
-import { getPackages } from "@manypkg/get-packages";
-import getReleasePlan from "@changesets/get-release-plan";
-import { read } from "@changesets/config";
+import {
+  ReleasePlan,
+  ChangelogFunctions,
+  NewChangesetWithCommit,
+  GlobalReleaseChangeset
+} from "@changesets/types";
+import getChangelogEntries from "@changesets/generate-changelogs";
+import { Packages } from "@manypkg/get-packages";
 
-export default async function getReleaseNotes(
-  cwd: string,
-  passedConfig?: Config
+const typeToLevel = {
+  major: 3,
+  minor: 2,
+  patch: 1,
+  none: 0
+} as const;
+
+function sortTheThings(
+  a: { private: boolean; highestLevel: number },
+  b: { private: boolean; highestLevel: number }
 ) {
-  let packages = await getPackages(cwd);
+  if (a.private === b.private) {
+    return b.highestLevel - a.highestLevel;
+  }
+  if (a.private) {
+    return 1;
+  }
+  return -1;
+}
 
-  const readConfig = await read(cwd, packages);
-  const config: Config = passedConfig
-    ? { ...readConfig, ...passedConfig }
-    : readConfig;
+export default async function generateReleaseNotes(
+  releasePlan: ReleasePlan,
+  changesetWCommit: NewChangesetWithCommit[],
+  packages: Packages,
+  resolvedChangelogConfig: [ChangelogFunctions, any]
+) {
+  let { releases, globalReleaseChangeset } = releasePlan;
 
-  let { changesets, releases } = await getReleasePlan(cwd, undefined, config);
-
-  let changelogConfig = config.changelog;
-
-  if (!changelogConfig) {
+  if (!globalReleaseChangeset) {
     throw new Error(
-      "We can't generate release notes right now, as generating changelogs is switched off!"
+      "For assembling release notes, you should have a release changeset: run `changeset add --release` to generate one"
     );
   }
-
-  let changesetWCommit = await addCommitToChangesets(
-    changesets,
-    packages.root.dir
-  );
-
-  let changelogFuncs = await resolveChangelogFunctions(
-    changelogConfig[0],
-    packages.root.dir
-  );
-
-  console.log(releases);
-  console.log(changesetWCommit);
-  console.log(packages);
 
   let changelogEntries = await getChangelogEntries(
     releases,
     changesetWCommit,
     packages,
-    changelogFuncs,
-    changelogConfig[1]
+    resolvedChangelogConfig[0],
+    resolvedChangelogConfig[1]
   );
 
-  return changelogEntries;
+  return (
+    getReleaseText(globalReleaseChangeset) +
+    [...changelogEntries]
+      .map(([name, entry]) => {
+        let { type } = releases.find(r => r.name === name)!;
+        let { packageJson } = packages.packages.find(
+          pkg => pkg.packageJson.name === name
+        )!;
 
-  // await Promise.all(
-  //     changedWorkspaces.map(async workspace => {
-  //       let changelogContents = await fs.readFile(
-  //         path.join(workspace.dir, "CHANGELOG.md"),
-  //         "utf8"
-  //       );
+        return {
+          name,
+          entry: modifyChangelogEntry(entry, name),
+          highestLevel: typeToLevel[type],
+          private: !!packageJson.private
+        };
+      })
+      .filter(x => x)
+      .sort(sortTheThings)
+      .map(x => x.entry)
+      .join("\n---\n\n")
+  );
+}
 
-  //       let entry = getChangelogEntry(
-  //         changelogContents,
-  //         workspace.config.version
-  //       );
-  //       return {
-  //         highestLevel: entry.highestLevel,
-  //         private: !!workspace.config.private,
-  //         content:
-  //           `## ${workspace.name}@${workspace.config.version}\n\n` +
-  //           entry.content
-  //       };
-  //     })
-  //   )
-  // )
-  //   .filter(x => x)
-  //   .sort(sortTheThings)
-  //   .map(x => x.content)
-  //   .join("\n ")
+function getReleaseText({ name, summary }: GlobalReleaseChangeset) {
+  return `${name.length > 0 ? `## ${name}\n\n` : ``}${
+    summary.trim().length > 0 ? `${summary}\n\n` : ""
+  }`;
+}
+
+function modifyChangelogEntry(entry: string, name: string) {
+  return entry
+    .replace("## ", `### ${name}@`)
+    .replace("### Major Changes", `#### Major Changes`)
+    .replace("### Minor Changes", `#### Minor Changes`)
+    .replace("### Patch Changes", `#### Patch Changes`);
 }

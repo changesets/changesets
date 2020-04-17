@@ -28,7 +28,8 @@ let simpleReleasePlan: ReleasePlan = {
       changesets: [simpleChangeset.id]
     }
   ],
-  preState: undefined
+  preState: undefined,
+  globalReleaseChangeset: undefined
 };
 
 let secondReleasePlan: ReleasePlan = {
@@ -49,7 +50,8 @@ let secondReleasePlan: ReleasePlan = {
       changesets: [simpleChangeset2.id]
     }
   ],
-  preState: undefined
+  preState: undefined,
+  globalReleaseChangeset: undefined
 };
 
 describe("createReleaseCommit", () => {
@@ -96,7 +98,8 @@ describe("createReleaseCommit", () => {
           changesets: [simpleChangeset2.id]
         }
       ],
-      preState: undefined
+      preState: undefined,
+      globalReleaseChangeset: undefined
     };
     const commitStr = createReleaseCommit(releasePlan, false);
     expect(commitStr).toEqual(outdent`

@@ -13,25 +13,13 @@ export let defaultWrittenConfig = {
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
   baseBranch: "master",
-  latestRelease: false,
-  getNextReleaseName: false
+  changelogFileName: "CHANGELOG.md",
+  globalReleaseNotesFileName: "RELEASE_NOTES.md"
 } as const;
 
 function getNormalisedChangelogOption(
   thing: false | readonly [string, any] | string
 ): Config["changelog"] {
-  if (thing === false) {
-    return false;
-  }
-  if (typeof thing === "string") {
-    return [thing, null];
-  }
-  return thing;
-}
-
-function getNormalisedReleaseOption(
-  thing: false | readonly [string, any] | string
-): Config["getNextReleaseName"] {
   if (thing === false) {
     return false;
   }
@@ -164,15 +152,6 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.changelog
         : json.changelog
     ),
-    getNextReleaseName: getNormalisedReleaseOption(
-      json.getNextReleaseName === undefined
-        ? defaultWrittenConfig.getNextReleaseName
-        : json.getNextReleaseName
-    ),
-    latestRelease:
-      json.latestRelease === undefined
-        ? defaultWrittenConfig.latestRelease
-        : json.latestRelease,
     access:
       normalizedAccess === undefined
         ? defaultWrittenConfig.access
@@ -184,7 +163,15 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     baseBranch:
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch
-        : json.baseBranch
+        : json.baseBranch,
+    changelogFileName:
+      json.changelogFileName === undefined
+        ? defaultWrittenConfig.changelogFileName
+        : json.changelogFileName,
+    globalReleaseNotesFileName:
+      json.globalReleaseNotesFilename === undefined
+        ? defaultWrittenConfig.globalReleaseNotesFileName
+        : json.globalReleaseNotesFilename
   };
   return config;
 };

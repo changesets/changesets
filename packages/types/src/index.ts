@@ -34,10 +34,13 @@ export type NewChangeset = Changeset & {
   id: string;
 };
 
+export type GlobalReleaseChangeset = { summary: string; name: string };
+
 export type ReleasePlan = {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
   preState: PreState | undefined;
+  globalReleaseChangeset: GlobalReleaseChangeset | undefined;
 };
 
 export type PackageJSON = {
@@ -57,8 +60,8 @@ export type Linked = ReadonlyArray<ReadonlyArray<string>>;
 
 export type Config = {
   changelog: false | readonly [string, any];
-  latestRelease: false | string;
-  getNextReleaseName: false | readonly [string, any];
+  changelogFileName: string;
+  globalReleaseNotesFileName: string;
   commit: boolean;
   linked: Linked;
   access: AccessType;
@@ -67,8 +70,8 @@ export type Config = {
 
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
-  latestRelease?: false | string;
-  getNextReleaseName?: false | readonly [string, any] | string;
+  changelogFileName?: string;
+  globalReleaseNotesFilename?: string;
   commit?: boolean;
   linked?: Linked;
   access?: AccessType;
@@ -77,6 +80,11 @@ export type WrittenConfig = {
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
 
+export type MixedChangesets =
+  | [GlobalReleaseChangeset | Changeset, ...Changeset[]]
+  | [];
+
+/* TODO see if we can refactor this out of existence */
 export type ModCompWithPackage = ComprehensiveRelease & {
   packageJson: PackageJSON;
   dir: string;

@@ -10,6 +10,7 @@
     "@babel/runtime": "^7.4.4",
     "@changesets/config": "^1.0.3",
     "@changesets/generate-changelogs": "^0.0.0",
+    "@changesets/generate-release-notes": "^0.0.0",
     "@changesets/get-version-range-type": "^0.3.2",
     "@changesets/git": "^1.0.3",
     "@changesets/types": "^2.0.1",

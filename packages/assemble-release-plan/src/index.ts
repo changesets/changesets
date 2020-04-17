@@ -1,4 +1,10 @@
-import { ReleasePlan, Config, NewChangeset, PreState } from "@changesets/types";
+import {
+  ReleasePlan,
+  Config,
+  PreState,
+  GlobalReleaseChangeset,
+  NewChangeset
+} from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
@@ -24,7 +30,8 @@ function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
   config: Config,
-  preState: PreState | undefined
+  preState: PreState | undefined,
+  globalReleaseChangeset?: GlobalReleaseChangeset
 ): ReleasePlan {
   let updatedPreState: PreState | undefined =
     preState === undefined
@@ -174,7 +181,8 @@ function assembleReleasePlan(
         newVersion: incrementVersion(incompleteRelease, preInfo)!
       };
     }),
-    preState: updatedPreState
+    preState: updatedPreState,
+    globalReleaseChangeset
   };
 }
 
