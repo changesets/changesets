@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import path from "path";
+import fs from "fs-extra";
 
 import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
@@ -11,11 +12,17 @@ import writeChangeset from "@changesets/write";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 
+import addGlobalChangeset from "./addGlobalChangeset";
+
 export default async function add(
   cwd: string,
-  { empty }: { empty?: boolean },
+  { empty, globalChangeset }: { empty?: boolean; globalChangeset?: boolean },
   config: Config
 ) {
+  if (globalChangeset) {
+    return addGlobalChangeset(cwd);
+  }
+
   const packages = await getPackages(cwd);
   const changesetBase = path.resolve(cwd, ".changeset");
 
