@@ -46,6 +46,7 @@
     "meow": "^5.0.0",
     "outdent": "^0.5.0",
     "p-limit": "^2.2.0",
+    "preferred-pm": "^3.0.0",
     "semver": "^5.4.1",
     "spawndamnit": "^2.0.0",
     "term-size": "^2.1.0",
