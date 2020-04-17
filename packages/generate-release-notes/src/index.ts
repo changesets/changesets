@@ -32,7 +32,7 @@ export default async function generateReleaseNotes(
   changesetWCommit: NewChangesetWithCommit[],
   packages: Packages,
   resolvedChangelogConfig: [ChangelogFunctions, any]
-) {
+): Promise<string> {
   let { releases, globalReleaseChangeset } = releasePlan;
 
   if (!globalReleaseChangeset) {

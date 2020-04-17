@@ -1,10 +1,4 @@
-import {
-  ReleasePlan,
-  Config,
-  ChangelogFunctions,
-  NewChangeset,
-  ComprehensiveRelease
-} from "@changesets/types";
+import { ReleasePlan, Config, ChangelogFunctions } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
@@ -12,6 +6,7 @@ import getChangelogEntries, {
   addCommitToChangesets,
   resolveChangelogFunctions
 } from "@changesets/generate-changelogs";
+import generateReleaseNotes from "@changesets/generate-release-notes";
 import { Packages } from "@manypkg/get-packages";
 
 import fs from "fs-extra";
@@ -34,17 +29,43 @@ export default async function applyReleasePlan(
     packages.packages.map(x => [x.packageJson.name, x])
   );
 
-  let { releases, changesets } = releasePlan;
+  let { releases, changesets, globalReleaseChangeset } = releasePlan;
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
-  let changelogEntries = await getNewChangelogEntry(
+  let changelogFunctions: ChangelogFunctions = {
+    getReleaseLine: () => Promise.resolve(""),
+    getDependencyReleaseLine: () => Promise.resolve("")
+  };
+  let changelogOpts: any;
+  if (config.changelog) {
+    changelogOpts = config.changelog[1];
+    changelogFunctions = await resolveChangelogFunctions(
+      config.changelog[0],
+      cwd
+    );
+  }
+
+  let moddedChangesets = await addCommitToChangesets(changesets, cwd);
+
+  let changelogEntries = await getChangelogEntries(
     releases,
-    changesets,
-    config.changelog,
+    moddedChangesets,
     packages,
-    cwd
+    changelogFunctions,
+    changelogOpts
   );
+
+  let globalReleaseNotes;
+
+  if (globalReleaseChangeset) {
+    globalReleaseNotes = await generateReleaseNotes(
+      releasePlan,
+      moddedChangesets,
+      packages,
+      [changelogFunctions, changelogOpts]
+    );
+  }
 
   if (releasePlan.preState !== undefined) {
     if (releasePlan.preState.mode === "exit") {
@@ -94,7 +115,7 @@ export default async function applyReleasePlan(
     touchedFiles.push(pkgJSONPath);
 
     if (changelog && changelog.length > 0) {
-      await updateChangelog(changelogPath, changelog, name, prettierConfig);
+      await updateFile(changelogPath, changelog, name, prettierConfig);
       touchedFiles.push(changelogPath);
     }
   }
@@ -120,6 +141,21 @@ export default async function applyReleasePlan(
     );
   }
 
+  if (globalReleaseNotes) {
+    let globalReleaseNotesPath = path.resolve(
+      cwd,
+      config.globalReleaseNotesFileName
+    );
+    await updateFile(
+      globalReleaseNotesPath,
+      globalReleaseNotes,
+      packages.root.packageJson.name,
+      prettierConfig
+    );
+
+    touchedFiles.push(globalReleaseNotesPath);
+  }
+
   if (config.commit) {
     let newTouchedFilesArr = [...touchedFiles];
     // Note, git gets angry if you try and have two git actions running at once
@@ -140,52 +176,19 @@ export default async function applyReleasePlan(
   return touchedFiles;
 }
 
-async function getNewChangelogEntry(
-  releasesWithPackage: ComprehensiveRelease[],
-  changesets: NewChangeset[],
-  changelogConfig: false | readonly [string, any],
-  packages: Packages,
-  cwd: string
-) {
-  // Quick note, this is deliberately setting this to resolve as empty so
-  // even when we are not generating changelogs, this still works
-  let changelogFunctions: ChangelogFunctions = {
-    getReleaseLine: () => Promise.resolve(""),
-    getDependencyReleaseLine: () => Promise.resolve("")
-  };
-  let changelogOpts: any;
-  if (changelogConfig) {
-    changelogOpts = changelogConfig[1];
-    changelogFunctions = await resolveChangelogFunctions(
-      changelogConfig[0],
-      cwd
-    );
-  }
-
-  let moddedChangesets = await addCommitToChangesets(changesets, cwd);
-
-  return getChangelogEntries(
-    releasesWithPackage,
-    moddedChangesets,
-    packages,
-    changelogFunctions,
-    changelogOpts
-  );
-}
-
-async function updateChangelog(
-  changelogPath: string,
-  changelog: string,
+async function updateFile(
+  thisPath: string,
+  newContents: string,
   name: string,
   prettierConfig: prettier.Options | null
 ) {
-  let templateString = `\n\n${changelog.trim()}\n`;
+  let templateString = `\n\n${newContents.trim()}\n`;
 
   try {
-    if (fs.existsSync(changelogPath)) {
-      await prependFile(changelogPath, templateString, name, prettierConfig);
+    if (fs.existsSync(thisPath)) {
+      await prependFile(thisPath, templateString, name, prettierConfig);
     } else {
-      await fs.writeFile(changelogPath, `# ${name}${templateString}`);
+      await fs.writeFile(thisPath, `# ${name}${templateString}`);
     }
   } catch (e) {
     console.warn(e);

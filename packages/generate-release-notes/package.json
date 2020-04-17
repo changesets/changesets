@@ -1,9 +1,9 @@
 {
-  "name": "@changesets/release-notes",
+  "name": "@changesets/generate-release-notes",
   "version": "0.0.0",
   "description": "Get release notes for all packages as an aggregate",
-  "main": "dist/release-notes.cjs.js",
-  "module": "dist/release-notes.esm.js",
+  "main": "dist/generate-release-notes.cjs.js",
+  "module": "dist/generate-release-notes.esm.js",
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/master/packages/changelog-git",
   "dependencies": {

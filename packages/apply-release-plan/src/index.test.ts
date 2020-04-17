@@ -800,33 +800,63 @@ describe("apply release plan", () => {
   });
   describe("release changeset is present", () => {
     it("should write the release file", async () => {
-      let { changedFiles } = await testSetup("simple-project", {
-        changesets: [
-          {
-            id: "some-fake-name",
-            summary: "look, what a fake summary this is",
-            releases: [{ name: "pkg-a", type: "patch" }]
+      let { changedFiles } = await testSetup(
+        "simple-project",
+        {
+          changesets: [
+            {
+              id: "some-fake-name",
+              summary: "look, what a fake summary this is",
+              releases: [{ name: "pkg-a", type: "patch" }]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-a",
+              newVersion: "1.0.1",
+              oldVersion: "1.0.0",
+              changesets: ["some-fake-name"],
+              type: "patch"
+            }
+          ],
+          preState: undefined,
+          globalReleaseChangeset: {
+            name: "some-fake-release-name",
+            summary: "Holy heck this might just work"
           }
-        ],
-        releases: [
+        },
+        parse(
           {
-            name: "pkg-a",
-            newVersion: "1.0.1",
-            oldVersion: "1.0.0",
-            changesets: ["some-fake-name"],
-            type: "patch"
-          }
-        ],
-        preState: undefined,
-        globalReleaseChangeset: {
-          name: "some-fake-id",
-          summary: "Holy heck this might just work"
-        }
-      });
+            changelog: [
+              path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+              null
+            ]
+          },
+          fakePackageObj
+        )
+      );
 
-      let releaseNotes = changedFiles.find(f => f.includes("RELEASE_NOTES.md"));
+      let releaseNotesPath = changedFiles.find(f =>
+        f.includes("RELEASE_NOTES.md")
+      );
+      if (!releaseNotesPath)
+        throw new Error(`could not find an updated release notes file`);
 
-      expect(releaseNotes).toEqual("some string here");
+      let releaseNotes = await fs.readFile(releaseNotesPath, "utf-8");
+
+      expect(releaseNotes).toEqual(outdent`
+      # simple-project
+
+      ## some-fake-release-name
+
+      Holy heck this might just work
+
+      ### pkg-a@1.0.1
+      #### Patch Changes
+
+      - look, what a fake summary this is
+
+      `);
     });
   });
 });
