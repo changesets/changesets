@@ -24,6 +24,9 @@ describe("git", () => {
     await spawn("git", ["init"], { cwd });
     await spawn("git", ["config", "user.email", "x@y.z"], { cwd });
     await spawn("git", ["config", "user.name", "xyz"], { cwd });
+    await spawn("git", ["config", "commit.gpgSign", "false"], { cwd });
+    await spawn("git", ["config", "tag.gpgSign", "false"], { cwd });
+    await spawn("git", ["config", "tag.forceSignAnnotated", "false"], { cwd });
   });
 
   describe("getDivergedCommit", () => {

@@ -68,7 +68,7 @@ const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
 const getPkgJSON = (pkgName: string, calls: any) => {
   let castCalls: [string, string][] = calls;
   const foundCall = castCalls.find(call =>
-    call[0].endsWith(`${pkgName}/package.json`)
+    call[0].endsWith(`${pkgName}${path.sep}package.json`)
   );
   if (!foundCall)
     throw new Error(`could not find writing of package.json: ${pkgName}`);
