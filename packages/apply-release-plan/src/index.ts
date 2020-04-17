@@ -29,7 +29,7 @@ export default async function applyReleasePlan(
     packages.packages.map(x => [x.packageJson.name, x])
   );
 
-  let { releases, changesets, globalReleaseChangeset } = releasePlan;
+  let { releases, changesets, globalChangeset } = releasePlan;
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
@@ -58,7 +58,7 @@ export default async function applyReleasePlan(
 
   let globalReleaseNotes;
 
-  if (globalReleaseChangeset) {
+  if (globalChangeset) {
     globalReleaseNotes = await generateReleaseNotes(
       releasePlan,
       moddedChangesets,

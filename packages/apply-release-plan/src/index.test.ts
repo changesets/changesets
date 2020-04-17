@@ -4,7 +4,7 @@ import {
   Config,
   NewChangeset,
   ComprehensiveRelease,
-  GlobalReleaseChangeset
+  GlobalChangeset
 } from "@changesets/types";
 import * as git from "@changesets/git";
 import fs from "fs-extra";
@@ -32,12 +32,12 @@ class FakeReleasePlan {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
   config: Config;
-  globalReleaseChangeset: GlobalReleaseChangeset | undefined;
+  globalChangeset: GlobalChangeset | undefined;
 
   constructor(
     changesets: NewChangeset[] = [],
     releases: ComprehensiveRelease[] = [],
-    globalReleaseChangeset: GlobalReleaseChangeset | undefined = undefined
+    globalChangeset: GlobalChangeset | undefined = undefined
   ) {
     const baseChangeset: NewChangeset = {
       id: "quick-lions-devour",
@@ -55,7 +55,7 @@ class FakeReleasePlan {
 
     this.changesets = [baseChangeset, ...changesets];
     this.releases = [baseRelease, ...releases];
-    this.globalReleaseChangeset = globalReleaseChangeset;
+    this.globalChangeset = globalChangeset;
   }
 
   getReleasePlan(): ReleasePlan {
@@ -63,7 +63,7 @@ class FakeReleasePlan {
       changesets: this.changesets,
       releases: this.releases,
       preState: undefined,
-      globalReleaseChangeset: this.globalReleaseChangeset
+      globalChangeset: this.globalChangeset
     };
   }
 }
@@ -269,7 +269,7 @@ describe("apply release plan", () => {
             }
           ],
           preState: undefined,
-          globalReleaseChangeset: undefined
+          globalChangeset: undefined
         },
         parse({ changelog: false }, fakePackageObj)
       );
@@ -510,7 +510,7 @@ describe("apply release plan", () => {
             }
           ],
           preState: undefined,
-          globalReleaseChangeset: undefined
+          globalChangeset: undefined
         });
         changedFiles = testResults.changedFiles;
       } catch (e) {
@@ -820,7 +820,7 @@ describe("apply release plan", () => {
             }
           ],
           preState: undefined,
-          globalReleaseChangeset: {
+          globalChangeset: {
             name: "some-fake-release-name",
             summary: "Holy heck this might just work"
           }

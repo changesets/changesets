@@ -29,7 +29,7 @@ let simpleReleasePlan: ReleasePlan = {
     }
   ],
   preState: undefined,
-  globalReleaseChangeset: undefined
+  globalChangeset: undefined
 };
 
 let secondReleasePlan: ReleasePlan = {
@@ -51,7 +51,7 @@ let secondReleasePlan: ReleasePlan = {
     }
   ],
   preState: undefined,
-  globalReleaseChangeset: undefined
+  globalChangeset: undefined
 };
 
 describe("createReleaseCommit", () => {
@@ -99,7 +99,7 @@ describe("createReleaseCommit", () => {
         }
       ],
       preState: undefined,
-      globalReleaseChangeset: undefined
+      globalChangeset: undefined
     };
     const commitStr = createReleaseCommit(releasePlan, false);
     expect(commitStr).toEqual(outdent`

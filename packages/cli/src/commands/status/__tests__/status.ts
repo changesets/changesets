@@ -46,7 +46,7 @@ const simpleReleasePlan: ReleasePlan = {
     }
   ],
   preState: undefined,
-  globalReleaseChangeset: undefined
+  globalChangeset: undefined
 };
 
 jest.mock("@changesets/git");

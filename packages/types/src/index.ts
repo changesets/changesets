@@ -34,13 +34,13 @@ export type NewChangeset = Changeset & {
   id: string;
 };
 
-export type GlobalReleaseChangeset = { summary: string; name: string };
+export type GlobalChangeset = { summary: string; name: string };
 
 export type ReleasePlan = {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
   preState: PreState | undefined;
-  globalReleaseChangeset: GlobalReleaseChangeset | undefined;
+  globalChangeset: GlobalChangeset | undefined;
 };
 
 export type PackageJSON = {
@@ -59,9 +59,13 @@ export type PackageJSON = {
 export type Linked = ReadonlyArray<ReadonlyArray<string>>;
 
 export type Config = {
-  changelog: false | readonly [string, any];
-  changelogFileName: string;
-  globalReleaseNotesFileName: string;
+  changelog:
+    | false
+    | {
+        generator: readonly [string, any];
+        filename: string;
+        globalFilename: string;
+      };
   commit: boolean;
   linked: Linked;
   access: AccessType;
@@ -69,9 +73,15 @@ export type Config = {
 };
 
 export type WrittenConfig = {
-  changelog?: false | readonly [string, any] | string;
-  changelogFileName?: string;
-  globalReleaseNotesFilename?: string;
+  changelog?:
+    | false
+    | readonly [string, any]
+    | string
+    | {
+        generator: readonly [string, any] | string;
+        globalFilename?: string;
+        filename?: string;
+      };
   commit?: boolean;
   linked?: Linked;
   access?: AccessType;
@@ -81,7 +91,7 @@ export type WrittenConfig = {
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
 
 export type MixedChangesets =
-  | [GlobalReleaseChangeset | Changeset, ...Changeset[]]
+  | [GlobalChangeset | NewChangeset, ...NewChangeset[]]
   | [];
 
 /* TODO see if we can refactor this out of existence */

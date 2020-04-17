@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import path from "path";
 import parse from "@changesets/parse";
-import { NewChangeset } from "@changesets/types";
+import { NewChangeset, MixedChangesets } from "@changesets/types";
 import * as git from "@changesets/git";
 import getOldChangesetsAndWarn from "./legacy";
 
@@ -22,7 +22,7 @@ async function filterChangesetsSinceRef(
 export default async function getChangesets(
   cwd: string,
   sinceRef?: string
-): Promise<Array<NewChangeset>> {
+): Promise<Array<MixedChangesets>> {
   let changesetBase = path.join(cwd, ".changeset");
   let contents: string[];
   try {
@@ -60,4 +60,21 @@ export default async function getChangesets(
     ...(await oldChangesetsPromise),
     ...(await Promise.all(changesetContents))
   ];
+}
+
+export function separateChangesets(
+  changesets: MixedChangesets
+): {
+  changesets: NewChangeset[];
+  globalChangeset?: GlobalChangeset;
+} {
+
+
+  let [possibleGlobalChangeset, ...otherChangesets] = changesets;
+
+  if (!possibleGlobalChangeset) return {
+    changesets: [],
+  };
+
+  if (possibleGlobalChangeset.releases)
 }

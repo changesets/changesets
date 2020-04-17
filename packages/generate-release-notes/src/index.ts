@@ -2,7 +2,7 @@ import {
   ReleasePlan,
   ChangelogFunctions,
   NewChangesetWithCommit,
-  GlobalReleaseChangeset
+  GlobalChangeset
 } from "@changesets/types";
 import getChangelogEntries from "@changesets/generate-changelogs";
 import { Packages } from "@manypkg/get-packages";
@@ -33,9 +33,9 @@ export default async function generateReleaseNotes(
   packages: Packages,
   resolvedChangelogConfig: [ChangelogFunctions, any]
 ): Promise<string> {
-  let { releases, globalReleaseChangeset } = releasePlan;
+  let { releases, globalChangeset } = releasePlan;
 
-  if (!globalReleaseChangeset) {
+  if (!globalChangeset) {
     throw new Error(
       "For assembling release notes, you should have a release changeset: run `changeset add --release` to generate one"
     );
@@ -50,7 +50,7 @@ export default async function generateReleaseNotes(
   );
 
   return (
-    getReleaseText(globalReleaseChangeset) +
+    getReleaseText(globalChangeset) +
     [...changelogEntries]
       .map(([name, entry]) => {
         let { type } = releases.find(r => r.name === name)!;
@@ -72,7 +72,7 @@ export default async function generateReleaseNotes(
   );
 }
 
-function getReleaseText({ name, summary }: GlobalReleaseChangeset) {
+function getReleaseText({ name, summary }: GlobalChangeset) {
   return `${name.length > 0 ? `## ${name}\n\n` : ``}${
     summary.trim().length > 0 ? `${summary}\n\n` : ""
   }`;

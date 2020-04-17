@@ -2,7 +2,7 @@ import {
   ReleasePlan,
   Config,
   PreState,
-  GlobalReleaseChangeset,
+  GlobalChangeset,
   NewChangeset
 } from "@changesets/types";
 import determineDependents from "./determine-dependents";
@@ -31,7 +31,7 @@ function assembleReleasePlan(
   packages: Packages,
   config: Config,
   preState: PreState | undefined,
-  globalReleaseChangeset?: GlobalReleaseChangeset
+  globalChangeset?: GlobalChangeset
 ): ReleasePlan {
   let updatedPreState: PreState | undefined =
     preState === undefined
@@ -182,7 +182,7 @@ function assembleReleasePlan(
       };
     }),
     preState: updatedPreState,
-    globalReleaseChangeset
+    globalChangeset
   };
 }
 

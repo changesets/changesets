@@ -8,25 +8,47 @@ import packageJson from "../package.json";
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
-  changelog: "@changesets/cli/changelog",
+  changelog: {
+    generator: ["@changesets/cli/changelog", null],
+    filename: "CHANGELOG.md",
+    globalFilename: "RELEASE_NOTES.md"
+  },
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
-  baseBranch: "master",
-  changelogFileName: "CHANGELOG.md",
-  globalReleaseNotesFileName: "RELEASE_NOTES.md"
+  baseBranch: "master"
 } as const;
 
 function getNormalisedChangelogOption(
-  thing: false | readonly [string, any] | string
+  thing: WrittenConfig["changelog"]
 ): Config["changelog"] {
-  if (thing === false) {
+  if (thing === false || thing === undefined) {
     return false;
   }
   if (typeof thing === "string") {
-    return [thing, null];
+    return {
+      generator: [thing, null],
+      filename: defaultWrittenConfig.changelog.filename,
+      globalFilename: defaultWrittenConfig.changelog.globalFilename
+    };
   }
-  return thing;
+
+  if (Array.isArray(thing)) {
+    return {
+      generator: thing,
+      filename: defaultWrittenConfig.changelog.filename,
+      globalFilename: defaultWrittenConfig.changelog.globalFilename
+    };
+  }
+
+  let { generator, filename, globalFilename } = thing;
+
+  return {
+    generator: typeof generator === "string" ? [generator, null] : generator,
+    filename: filename || defaultWrittenConfig.changelog.filename,
+    globalFilename:
+      globalFilename || defaultWrittenConfig.changelog.globalFilename
+  };
 }
 
 export let read = async (cwd: string, packages: Packages) => {

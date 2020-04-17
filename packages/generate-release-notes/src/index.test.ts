@@ -50,7 +50,7 @@ let simpleReleasePlan: ReleasePlan = {
     }
   ],
   preState: undefined,
-  globalReleaseChangeset: undefined
+  globalChangeset: undefined
 };
 
 let twoPackageReleasePlan: ReleasePlan = {
@@ -72,7 +72,7 @@ let twoPackageReleasePlan: ReleasePlan = {
     }
   ],
   preState: undefined,
-  globalReleaseChangeset: undefined
+  globalChangeset: undefined
 };
 
 let threeChangeset: NewChangesetWithCommit[] = [
@@ -101,14 +101,14 @@ let allRangeTypeReleasePlan: ReleasePlan = {
     }
   ],
   preState: undefined,
-  globalReleaseChangeset: undefined
+  globalChangeset: undefined
 };
 
 describe("generate-release-notes", () => {
   it("should generate basic release notes", async () => {
     let releasePlan = {
       ...simpleReleasePlan,
-      globalReleaseChangeset: {
+      globalChangeset: {
         name: "alpha",
         summary: "This is our alpha release!"
       }
@@ -135,7 +135,7 @@ describe("generate-release-notes", () => {
   it("should generate basic release notes for two packages", async () => {
     let releasePlan = {
       ...twoPackageReleasePlan,
-      globalReleaseChangeset: {
+      globalChangeset: {
         name: "alpha",
         summary: "This is our alpha release!"
       }
@@ -165,7 +165,7 @@ describe("generate-release-notes", () => {
   it("should be fine if no summary is an empty string", async () => {
     let releasePlan = {
       ...simpleReleasePlan,
-      globalReleaseChangeset: {
+      globalChangeset: {
         name: "alpha",
         summary: ""
       }
@@ -190,7 +190,7 @@ describe("generate-release-notes", () => {
   it("should be fine FOR GENERATING A SUMMARY if no name is provided", async () => {
     let releasePlan = {
       ...simpleReleasePlan,
-      globalReleaseChangeset: {
+      globalChangeset: {
         name: "",
         summary: ""
       }
@@ -213,7 +213,7 @@ describe("generate-release-notes", () => {
   it("should generate basic release notes for major minor and patch for a single package", async () => {
     let releasePlan = {
       ...allRangeTypeReleasePlan,
-      globalReleaseChangeset: {
+      globalChangeset: {
         name: "alpha",
         summary: "This is our alpha release!"
       }
