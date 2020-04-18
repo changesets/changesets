@@ -18,6 +18,7 @@ import prettier from "prettier";
 import versionPackage from "./version-package";
 import createVersionCommit from "./createVersionCommit";
 import getChangelogEntry from "./get-changelog-entry";
+import spawn from "spawndamnit";
 
 async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
   let commit = await git.getCommitThatAddsFile(
@@ -89,28 +90,38 @@ export default async function applyReleasePlan(
     version: newVersion
   }));
 
+  let customCommands = []
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map(release => {
-    return versionPackage(release, versionsToUpdate);
+    if (!!config.packageLifecycleCommands && !!config.packageLifecycleCommands[release.name]) {
+      customCommands.push(spawn(`${config.packageLifecycleCommands[release.name].version} ${release.type}`, { cwd: release.dir }))
+      return { ...release, packageJson: null }
+    } else {
+      return versionPackage(release, versionsToUpdate);
+    }
   });
+
+  await Promise.all(customCommands)
 
   let prettierConfig = await prettier.resolveConfig(cwd);
 
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;
-    let pkgJSONPath = path.resolve(dir, "package.json");
-
     let changelogPath = path.resolve(dir, "CHANGELOG.md");
 
-    let parsedConfig = prettier.format(JSON.stringify(packageJson), {
-      ...prettierConfig,
-      filepath: pkgJSONPath,
-      parser: "json",
-      printWidth: 20
-    });
+    if (packageJson) {
+      let pkgJSONPath = path.resolve(dir, "package.json");
 
-    await fs.writeFile(pkgJSONPath, parsedConfig);
-    touchedFiles.push(pkgJSONPath);
+      let parsedConfig = prettier.format(JSON.stringify(packageJson), {
+        ...prettierConfig,
+        filepath: pkgJSONPath,
+        parser: "json",
+        printWidth: 20
+      });
+
+      await fs.writeFile(pkgJSONPath, parsedConfig);
+      touchedFiles.push(pkgJSONPath);
+    }
 
     if (changelog && changelog.length > 0) {
       await updateChangelog(changelogPath, changelog, name, prettierConfig);

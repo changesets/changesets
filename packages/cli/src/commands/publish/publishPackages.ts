@@ -8,6 +8,8 @@ import { TwoFactorState } from "../../utils/types";
 import { PreState } from "@changesets/types";
 import isCI from "../../utils/isCI";
 
+
+// this is what does the package publishing, check config first for this one
 export default async function publishPackages({
   cwd,
   access,
