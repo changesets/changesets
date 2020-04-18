@@ -147,6 +147,8 @@ We recommend making sure changes made from this commmand are merged back into ma
 
 This command will read then delete changesets on disk, ensuring that they are only used once.
 
+The config options also accept a package config to have custom scripts run during this lifecycle.
+
 ### publish
 
 ```
@@ -156,6 +158,8 @@ changeset publish [--otp={token}]
 Publishes to NPM repo, and creates git tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is acurate.
 
 - `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the `--otp` option.
+
+The config options also accept a package config to have custom scripts run during this lifecycle.
 
 **NOTE:** You will still need to push your changes back to master after this
 
