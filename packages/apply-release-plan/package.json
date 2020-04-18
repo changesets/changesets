@@ -16,12 +16,12 @@
     "@changesets/types": "^2.0.1",
     "@manypkg/get-packages": "^1.0.1",
     "fs-extra": "^7.0.1",
+    "outdent": "^0.5.0",
     "prettier": "^1.18.2",
     "semver": "^5.4.1"
   },
   "devDependencies": {
     "jest-fixtures": "^0.5.0",
-    "spawndamnit": "^2.0.0",
-    "outdent": "^0.5.0"
+    "spawndamnit": "^2.0.0"
   }
 }

@@ -22,7 +22,6 @@ export default function parseChangesetFile(
   }
   let [, roughReleases, roughSummary] = execResult;
   let summary = roughSummary.trim();
-  let name: string;
 
   let releases: Release[];
   try {

@@ -1,6 +1,5 @@
 import chalk from "chalk";
 import path from "path";
-import fs from "fs-extra";
 
 import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";

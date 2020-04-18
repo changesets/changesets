@@ -10,6 +10,7 @@
     "@babel/runtime": "^7.4.4",
     "@changesets/errors": "^0.1.4",
     "@changesets/get-dependents-graph": "^1.1.2",
+    "@changesets/read": "^0.4.3",
     "@changesets/types": "^2.0.1",
     "@manypkg/get-packages": "^1.0.1",
     "semver": "^5.4.1"
