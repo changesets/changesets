@@ -159,8 +159,6 @@ Publishes to NPM repo, and creates git tags. Because this command assumes that l
 
 - `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the `--otp` option.
 
-The config options also accept a package config to have custom scripts run during this lifecycle.
-
 **NOTE:** You will still need to push your changes back to master after this
 
 ```
