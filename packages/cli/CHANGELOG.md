@@ -1,5 +1,14 @@
 # @changesets/cli
 
+## 2.6.5
+
+### Patch Changes
+
+- [`d570a24`](https://github.com/atlassian/changesets/commit/d570a24740a374a9547dd7d931e6ac854e36a9fb) [#328](https://github.com/atlassian/changesets/pull/328) Thanks [@zkochan](https://github.com/zkochan)! - Use pnpm inside a pnpm workspace. Previously, pnpm was detected properly only in projects that use one lockfile per project. However, by default pnpm creates a single lockfile per workspace.
+
+- Updated dependencies [[`d678da5`](https://github.com/atlassian/changesets/commit/d678da5e9936862bb66e5edb538c5b8be23d4ffe)]:
+  - @changesets/assemble-release-plan@2.0.2
+
 ## 2.6.4
 
 ### Patch Changes
