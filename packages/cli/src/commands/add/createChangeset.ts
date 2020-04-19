@@ -16,7 +16,7 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
     log(yellow(`WARNING: Releasing a major version for ${green(pkgJSON.name)} will be its ${red('first major release')}.`))
     log(
       yellow(
-        `If you are unsure if this is correct, contact the package's maintainers$ ${red(
+        `If you are unsure if this is correct, contact the package's maintainers ${red(
           "before committing this changeset"
         )}.`
       )
