@@ -79,6 +79,6 @@ export default async function run(
     (await getLatestTag(cwd, config.changelog.globalFilename));
 
   if (latestTag && !preState) {
-    distTagPackages({ otp, packages, tag: latestTag });
+    await distTagPackages({ otp, packages, tag: latestTag });
   }
 }

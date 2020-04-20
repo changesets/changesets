@@ -11,7 +11,7 @@ export default async function addChangelogEntries(
   changesets: NewChangesetWithCommit[],
   packages: Packages,
   changelogFuncs: ChangelogFunctions,
-  changelogOpts: any
+  changelogOpts?: any
 ): Promise<Map<string, string>> {
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
