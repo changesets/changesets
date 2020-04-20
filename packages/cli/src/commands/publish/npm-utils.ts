@@ -62,6 +62,36 @@ export function getPackageInfo(pkgName: string) {
   });
 }
 
+export function distTag(
+  pkgName: string,
+  pkgVersion: string,
+  tag: string,
+  twoFactorState: TwoFactorState
+) {
+  return npmRequestLimit(async () => {
+    // Due to a super annoying issue in yarn, we have to manually override this env variable
+    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
+    const envOverride = {
+      npm_config_registry: getCorrectRegistry()
+    };
+
+    let flags = [];
+
+    if ((await twoFactorState.isRequired) && !isCI) {
+      let otpCode = await getOtpCode(twoFactorState);
+      flags.push("--otp", otpCode);
+    }
+
+    await spawn(
+      "npm",
+      ["dist-tag", "add", `${pkgName}@${pkgVersion}`, tag, ...flags],
+      {
+        env: Object.assign({}, process.env, envOverride)
+      }
+    );
+  });
+}
+
 export async function infoAllow404(pkgName: string) {
   let pkgInfo = await getPackageInfo(pkgName);
   if (pkgInfo.error && pkgInfo.error.code === "E404") {

@@ -5,6 +5,9 @@ import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import { Config } from "@changesets/types";
 import chalk from "chalk";
+import { getPackages } from "@manypkg/get-packages";
+import getLatestTag from "./getLatestGlobalTag";
+import distTagPackages from "./distTagPackages";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map(p => `${p.name}@${p.newVersion}`).join("\n");
@@ -37,12 +40,14 @@ export default async function run(
     warn(importantEnd);
   }
 
+  const packages = await getPackages(cwd);
+
   const response = await publishPackages({
-    cwd,
     // if not public, we wont pass the access, and it works as normal
     access: config.access,
     otp,
-    preState
+    preState,
+    packages
   });
 
   const successful = response.filter(p => p.published);
@@ -54,7 +59,7 @@ export default async function run(
     // We create the tags after the push above so that we know that HEAD wont change and that pushing
     // wont suffer from a race condition if another merge happens in the mean time (pushing tags wont
     // fail if we are behind master).
-    log("Creating tags...");
+    log("Creating git tags...");
     for (const pkg of successful) {
       const tag = `${pkg.name}@${pkg.newVersion}`;
       log("New tag: ", tag);
@@ -67,5 +72,13 @@ export default async function run(
 
     logReleases(unsuccessful);
     throw new ExitError(1);
+  }
+
+  let latestTag =
+    config.changelog &&
+    (await getLatestTag(cwd, config.changelog.globalFilename));
+
+  if (latestTag && !preState) {
+    distTagPackages({ otp, packages, tag: latestTag });
   }
 }

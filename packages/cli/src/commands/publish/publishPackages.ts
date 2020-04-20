@@ -1,7 +1,7 @@
 import semver from "semver";
 import chalk from "chalk";
 import { AccessType } from "@changesets/types";
-import { getPackages, Package } from "@manypkg/get-packages";
+import { Package, Packages } from "@manypkg/get-packages";
 import * as npmUtils from "./npm-utils";
 import { info, warn } from "@changesets/logger";
 import { TwoFactorState } from "../../utils/types";
@@ -9,17 +9,16 @@ import { PreState } from "@changesets/types";
 import isCI from "../../utils/isCI";
 
 export default async function publishPackages({
-  cwd,
   access,
   otp,
-  preState
+  preState,
+  packages
 }: {
-  cwd: string;
   access: AccessType;
   otp?: string;
   preState: PreState | undefined;
+  packages: Packages;
 }) {
-  const packages = await getPackages(cwd);
   const packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
