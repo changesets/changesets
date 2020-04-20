@@ -32,8 +32,8 @@ export default async function getChangelogEntry(
   packages: Packages,
   changelogFuncs: ChangelogFunctions,
   changelogOpts: any
-) {
-  if (release.type === "none") return null;
+): Promise<string> {
+  if (release.type === "none") return "";
 
   const releaseObj: ChangelogLines = {
     major: [],

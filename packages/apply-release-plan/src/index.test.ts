@@ -418,18 +418,18 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"]
             }
           ],
-          preState: undefined
+          preState: undefined,
+          globalChangeset: undefined
         },
-        {
-          commit: false,
-          linked: [],
-          access: "restricted",
-          baseBranch: "master",
-          changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-            null
-          ]
-        }
+        parse(
+          {
+            changelog: [
+              path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+              null
+            ]
+          },
+          fakePackageObj
+        )
       );
       let pkgAChangelogPath = changedFiles.find(a =>
         a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
