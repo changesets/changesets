@@ -10,7 +10,7 @@
     "@changesets/config": "^1.0.1",
     "@changesets/generate-changelogs": "^0.0.0",
     "@changesets/get-release-plan": "^1.0.1",
-    "@changesets/types": "^1.0.0",
+    "@changesets/types": "^2.0.1",
     "@manypkg/get-packages": "^1.0.1"
   },
   "devDependencies": {

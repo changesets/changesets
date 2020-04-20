@@ -8,7 +8,7 @@
   "repository": "https://github.com/changesets/changesets/tree/master/packages/generate-changelogs",
   "dependencies": {
     "@changesets/git": "^1.0.0",
-    "@changesets/types": "^1.0.0",
+    "@changesets/types": "^2.0.1",
     "@manypkg/get-packages": "^1.0.1",
     "lodash.startcase": "^4.4.0",
     "resolve-from": "^5.0.0"
