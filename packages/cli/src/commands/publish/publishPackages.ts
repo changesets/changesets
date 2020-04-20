@@ -53,6 +53,7 @@ export default async function publishPackages({
           token: otp,
           isRequired: Promise.resolve(true)
         };
+
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
     preState

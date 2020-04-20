@@ -7,10 +7,8 @@ jest.mock("../npm-utils");
 jest.mock("is-ci", () => true);
 
 describe("publishPackages", () => {
-  let cwd: string;
-
   beforeEach(async () => {
-    cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    await copyFixtureIntoTempDir(__dirname, "simple-project");
 
     // @ts-ignore
     npmUtils.infoAllow404.mockImplementation(() => ({
@@ -32,7 +30,18 @@ describe("publishPackages", () => {
 
   describe("when isCI", () => {
     it("does not call out to npm to see if otp is required", async () => {
-      await publishPackages({ cwd, access: "public", preState: undefined });
+      await publishPackages({
+        packages: {
+          tool: "yarn",
+          packages: [],
+          root: {
+            packageJson: { name: "nothing", version: "1.0.0" },
+            dir: "./nowhere-helpful"
+          }
+        },
+        access: "public",
+        preState: undefined
+      });
       expect(npmUtils.getTokenIsRequired).not.toHaveBeenCalled();
     });
   });
