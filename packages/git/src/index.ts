@@ -2,7 +2,7 @@ import spawn from "spawndamnit";
 import path from "path";
 import { getPackages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
-import isSubdir from 'is-subdir';
+import isSubdir from "is-subdir";
 
 async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
