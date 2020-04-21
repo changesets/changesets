@@ -12,13 +12,15 @@ export default async function distTagPackages({
   packages: Packages;
   tag: string;
 }) {
+  let cleanTag = tag.toLowerCase().replace(/ /g, "-");
+
   let publicPackages = packages.packages.filter(
     pkg => !pkg.packageJson.private
   );
 
   let existingTags = await getExistingTags(publicPackages);
 
-  if (existingTags.includes(tag)) {
+  if (existingTags.includes(cleanTag)) {
     // In the case where the global tag already exists, we want to not reapply it
     // so we can escape early
     return;
