@@ -11,6 +11,7 @@
     "@changesets/errors": "^0.1.4",
     "@changesets/types": "^2.0.1",
     "@manypkg/get-packages": "^1.0.1",
+    "is-subdir": "^1.1.1",
     "spawndamnit": "^2.0.0"
   },
   "devDependencies": {

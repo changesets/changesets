@@ -2,6 +2,7 @@ import spawn from "spawndamnit";
 import path from "path";
 import { getPackages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
+import isSubdir from "is-subdir";
 
 async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
@@ -108,7 +109,7 @@ async function getChangedPackagesSinceRef({
   let packages = await getPackages(cwd);
 
   const fileNameToPackage = (fileName: string) =>
-    packages.packages.find(pkg => fileName.startsWith(pkg.dir + path.sep))!;
+    packages.packages.find(pkg => isSubdir(pkg.dir, fileName))!;
 
   const fileExistsInPackage = (fileName: string) =>
     !!fileNameToPackage(fileName);
