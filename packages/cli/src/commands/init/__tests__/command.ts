@@ -1,10 +1,12 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixtures from "fixturez";
 import fs from "fs-extra";
 import path from "path";
 import { defaultWrittenConfig } from "@changesets/config";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 import initializeCommand from "..";
+
+const f = fixtures(__dirname);
 
 const getPaths = (cwd: string) => ({
   readmePath: path.join(cwd, ".changeset/README.md"),
@@ -14,10 +16,7 @@ const getPaths = (cwd: string) => ({
 describe("init", () => {
   temporarilySilenceLogs();
   it("should initialize in a project without a .changeset folder", async () => {
-    const cwd = await copyFixtureIntoTempDir(
-      __dirname,
-      "without-existing-changeset"
-    );
+    const cwd = await f.copy("without-existing-changeset");
     const { readmePath, configPath } = getPaths(cwd);
 
     expect(fs.pathExistsSync(readmePath)).toBe(false);
@@ -27,7 +26,7 @@ describe("init", () => {
     expect(fs.pathExistsSync(configPath)).toBe(true);
   });
   it("should write the default config if it doesn't exist", async () => {
-    const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    const cwd = await f.copy("simple-project");
     await fs.remove(path.join(cwd, ".changeset/config.json"));
 
     expect(fs.pathExistsSync(path.join(cwd, ".changeset/README.md"))).toBe(
@@ -39,7 +38,7 @@ describe("init", () => {
     );
   });
   it("shouldn't overwrite a config if it does exist", async () => {
-    const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    const cwd = await f.copy("simple-project");
     await fs.writeJson(path.join(cwd, ".changeset/config.json"), {
       changelog: false
     });

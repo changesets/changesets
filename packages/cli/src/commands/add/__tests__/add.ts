@@ -1,4 +1,4 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixtures from "fixturez";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
@@ -12,6 +12,8 @@ import {
   askList
 } from "../../../utils/cli-utilities";
 import addChangeset from "..";
+
+const f = fixtures(__dirname);
 
 jest.mock("../../../utils/cli-utilities");
 jest.mock("@changesets/git");
@@ -74,7 +76,7 @@ describe("Changesets", () => {
   temporarilySilenceLogs();
 
   it("should generate changeset to patch a single package", async () => {
-    const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    const cwd = await f.copy("simple-project");
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
@@ -88,7 +90,7 @@ describe("Changesets", () => {
     expect(call).toEqual(expectedChangeset);
   });
   it("should generate a changeset in a single package repo", async () => {
-    const cwd = await copyFixtureIntoTempDir(__dirname, "single-package");
+    const cwd = await f.copy("single-package");
 
     const summary = "summary message mock";
 
@@ -122,10 +124,7 @@ describe("Changesets", () => {
     expect(call).toEqual(expectedChangeset);
   });
   it("should commit when the commit flag is passed in", async () => {
-    const cwd = await copyFixtureIntoTempDir(
-      __dirname,
-      "simple-project-custom-config"
-    );
+    const cwd = await f.copy("simple-project-custom-config");
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(
@@ -136,7 +135,7 @@ describe("Changesets", () => {
     expect(git.add).toHaveBeenCalledTimes(1);
   });
   it("should create empty changeset when empty flag is passed in", async () => {
-    const cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    const cwd = await f.copy("simple-project");
 
     await addChangeset(cwd, { empty: true }, defaultConfig);
 

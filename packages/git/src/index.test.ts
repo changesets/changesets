@@ -1,4 +1,4 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixtures from "fixturez";
 import spawn from "spawndamnit";
 
 import {
@@ -12,6 +12,8 @@ import {
   getChangedChangesetFilesSinceRef
 } from "./";
 
+const f = fixtures(__dirname);
+
 async function getCurrentCommit(cwd: string) {
   const cmd = await spawn("git", ["rev-parse", "HEAD"], { cwd });
   return cmd.stdout.toString().trim();
@@ -20,7 +22,7 @@ async function getCurrentCommit(cwd: string) {
 describe("git", () => {
   let cwd: string;
   beforeEach(async () => {
-    cwd = await copyFixtureIntoTempDir(__dirname, "with-git");
+    cwd = await f.copy("with-git");
     await spawn("git", ["init"], { cwd });
     await spawn("git", ["config", "user.email", "x@y.z"], { cwd });
     await spawn("git", ["config", "user.name", "xyz"], { cwd });

@@ -1,4 +1,4 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixtures from "fixturez";
 
 import publishPackages from "../publishPackages";
 import * as npmUtils from "../npm-utils";
@@ -6,11 +6,13 @@ import * as npmUtils from "../npm-utils";
 jest.mock("../npm-utils");
 jest.mock("is-ci", () => true);
 
+const f = fixtures(__dirname);
+
 describe("publishPackages", () => {
   let cwd: string;
 
   beforeEach(async () => {
-    cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    cwd = await f.copy("simple-project");
 
     // @ts-ignore
     npmUtils.infoAllow404.mockImplementation(() => ({

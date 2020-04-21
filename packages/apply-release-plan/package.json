@@ -21,7 +21,7 @@
     "semver": "^5.4.1"
   },
   "devDependencies": {
-    "jest-fixtures": "^0.5.0",
+    "fixturez": "^1.1.0",
     "spawndamnit": "^2.0.0"
   }
 }

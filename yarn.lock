@@ -1665,11 +1665,6 @@ ansi-styles@^3.2.0, ansi-styles@^3.2.1:
   dependencies:
     color-convert "^1.9.0"
 
-any-promise@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/any-promise/-/any-promise-1.3.0.tgz#abc6afeedcea52e809cdc0376aed3ce39635d17f"
-  integrity sha1-q8av7tzqUugJzcA3au0845Y10X8=
-
 anymatch@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/anymatch/-/anymatch-2.0.0.tgz#bcb24b4f37934d9aa7ac17b4adaf89e7c76ef2eb"
@@ -3126,15 +3121,6 @@ fragment-cache@^0.2.1:
   dependencies:
     map-cache "^0.2.2"
 
-fs-extra@^4.0.2:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-4.0.3.tgz#0d852122e5bc5beb453fb028e9c0c9bf36340c94"
-  integrity sha512-q6rbdDd1o2mAnQreO7YADIxf/Whx4AHBiRf6d+/cVT8h44ss+lHgxf1FemcqDnQt9X3ct4McHr+JMGlYSsK7Cg==
-  dependencies:
-    graceful-fs "^4.1.2"
-    jsonfile "^4.0.0"
-    universalify "^0.1.0"
-
 fs-extra@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-5.0.0.tgz#414d0110cdd06705734d055652c5411260c31abd"
@@ -4014,15 +4000,6 @@ jest-environment-node@^24.9.0:
     "@jest/types" "^24.9.0"
     jest-mock "^24.9.0"
     jest-util "^24.9.0"
-
-jest-fixtures@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/jest-fixtures/-/jest-fixtures-0.5.0.tgz#1c337cca8850ad64cb16e638e4bb57ee11bfff48"
-  integrity sha512-HxcS6DhgNXWinKt7OH/oZjzrhFgWibYd/pUV91IeOYG7yA2EcnDGzla4Jx9AKaVq03a56S80VuTFIeHpMdQXdA==
-  dependencies:
-    find-up "^2.1.0"
-    fs-extra "^4.0.2"
-    typeable-promisify "^2.0.1"
 
 jest-get-type@^24.9.0:
   version "24.9.0"
@@ -6481,13 +6458,6 @@ type-fest@^0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.5.2.tgz#d6ef42a0356c6cd45f49485c3b6281fc148e48a2"
   integrity sha512-DWkS49EQKVX//Tbupb9TFa19c7+MK1XmzkrZUR8TAktmE/DizXoaoJV6TZ/tSIPXipqNiRI6CyAe7x69Jb6RSw==
-
-typeable-promisify@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/typeable-promisify/-/typeable-promisify-2.0.1.tgz#1baee82abaf13280198eb11e98589c881a6bd80d"
-  integrity sha1-G67oKrrxMoAZjrEemFiciBpr2A0=
-  dependencies:
-    any-promise "^1.3.0"
 
 typescript@^3.7.4:
   version "3.7.4"
