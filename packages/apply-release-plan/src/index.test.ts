@@ -1,4 +1,4 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixtures from "fixturez";
 import {
   ReleasePlan,
   Config,
@@ -13,6 +13,8 @@ import spawn from "spawndamnit";
 
 import applyReleasePlan from "./";
 import { getPackages } from "@manypkg/get-packages";
+
+const f = fixtures(__dirname);
 
 class FakeReleasePlan {
   changesets: NewChangeset[];
@@ -71,7 +73,7 @@ async function testSetup(
       baseBranch: "master"
     };
   }
-  let tempDir = await copyFixtureIntoTempDir(__dirname, fixtureName);
+  let tempDir = await f.copy(fixtureName);
   if (setupFunc) {
     await setupFunc(tempDir);
   }
@@ -537,7 +539,7 @@ describe("apply release plan", () => {
         ]
       );
 
-      let tempDir = await copyFixtureIntoTempDir(__dirname, "with-git");
+      let tempDir = await f.copy("with-git");
 
       await spawn("git", ["init"], { cwd: tempDir });
 
@@ -568,7 +570,7 @@ describe("apply release plan", () => {
     it("a provided changelog function fails", async () => {
       let releasePlan = new FakeReleasePlan();
 
-      let tempDir = await copyFixtureIntoTempDir(__dirname, "with-git");
+      let tempDir = await f.copy("with-git");
 
       await spawn("git", ["init"], { cwd: tempDir });
 

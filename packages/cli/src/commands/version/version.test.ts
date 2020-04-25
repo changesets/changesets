@@ -1,8 +1,7 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixtures from "fixturez";
 
 import fs from "fs-extra";
 import path from "path";
-import fixturez from "fixturez";
 import versionCommand from "./index";
 import * as git from "@changesets/git";
 import { warn } from "@changesets/logger";
@@ -14,6 +13,8 @@ import { getPackages } from "@manypkg/get-packages";
 import pre from "../pre";
 import version from "./index";
 import humanId from "human-id";
+
+const f = fixtures(__dirname);
 
 let changelogPath = path.resolve(__dirname, "../../changelog");
 let modifiedDefaultConfig: Config = {
@@ -83,7 +84,7 @@ describe("running version in a simple project", () => {
   let cwd: string;
 
   beforeEach(async () => {
-    cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    cwd = await f.copy("simple-project");
     console.error = jest.fn();
   });
 
@@ -121,7 +122,7 @@ describe("running version in a simple project", () => {
   });
 
   it("should bump packages to the correct versions when packages are linked", async () => {
-    const cwd2 = await copyFixtureIntoTempDir(__dirname, "linked-packages");
+    const cwd2 = await f.copy("linked-packages");
     await writeChangesets([simpleChangeset2], cwd2);
     const spy = jest.spyOn(fs, "writeFile");
 
@@ -139,7 +140,7 @@ describe("running version in a simple project", () => {
   });
 
   it("should not break when there is a linked package without a changeset", async () => {
-    const cwd2 = await copyFixtureIntoTempDir(__dirname, "linked-packages");
+    const cwd2 = await f.copy("linked-packages");
     await writeChangesets([simpleChangeset], cwd2);
     const spy = jest.spyOn(fs, "writeFile");
 
@@ -200,7 +201,7 @@ describe("running version in a simple project with workspace range", () => {
   let cwd: string;
 
   beforeEach(async () => {
-    cwd = await copyFixtureIntoTempDir(__dirname, "simple-workspace-range-dep");
+    cwd = await f.copy("simple-workspace-range-dep");
     console.error = jest.fn();
   });
 
@@ -228,8 +229,6 @@ describe("running version in a simple project with workspace range", () => {
     });
   });
 });
-
-const f = fixturez(__dirname);
 
 describe("pre", () => {
   it("should work", async () => {

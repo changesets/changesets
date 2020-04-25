@@ -56,7 +56,6 @@
     "@changesets/parse": "*",
     "@changesets/test-utils": "*",
     "fixturez": "^1.1.0",
-    "jest-fixtures": "^0.5.0",
     "strip-ansi": "^5.2.0"
   }
 }

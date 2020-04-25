@@ -1,4 +1,4 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixtures from "fixturez";
 
 import publishPackages from "../publishPackages";
 import * as git from "@changesets/git";
@@ -9,6 +9,8 @@ import runRelease from "..";
 jest.mock("../../../utils/cli-utilities");
 jest.mock("@changesets/git");
 jest.mock("../publishPackages");
+
+const f = fixtures(__dirname);
 
 // @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
@@ -31,7 +33,7 @@ describe("running release", () => {
   let cwd: string;
 
   beforeEach(async () => {
-    cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    cwd = await f.copy("simple-project");
   });
 
   describe("When there is no changeset commits", () => {
