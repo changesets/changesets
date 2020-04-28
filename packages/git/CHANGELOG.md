@@ -1,5 +1,11 @@
 # @changesets/git
 
+## 1.0.4
+
+### Patch Changes
+
+- [`aa840db`](https://github.com/atlassian/changesets/commit/aa840db824c321159e3b1c66ea663b4036084bd7) [#336](https://github.com/atlassian/changesets/pull/336) Thanks [@MichaelKapustey](https://github.com/MichaelKapustey)! - Changed packages detection fixed on Windows.
+
 ## 1.0.3
 
 ### Patch Changes
