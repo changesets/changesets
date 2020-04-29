@@ -12,7 +12,7 @@ We use random human readable names by default for these files to avoid collision
 
 ## Changesets are automatically removed
 
-When `changeset bump` or equivalent command is run, all the changeset folders are removed. This is so we only ever use a changeset once. This makes this a very bad place to store any other information.
+When `changeset version` or equivalent command is run, all the changeset folders are removed. This is so we only ever use a changeset once. This makes this a very bad place to store any other information.
 
 ## Changesets are markdown files with YAML front matter
 
