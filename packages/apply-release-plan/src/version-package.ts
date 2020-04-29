@@ -26,7 +26,7 @@ export default function versionPackage(
     if (deps) {
       for (let { name, version } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
-        if (!depCurrentVersion) continue;
+        if (!depCurrentVersion || name === packageJson.name) continue;
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
         if (usesWorkspaceRange) {
           depCurrentVersion = depCurrentVersion.substr(10);
