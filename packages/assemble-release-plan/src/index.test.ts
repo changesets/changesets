@@ -115,6 +115,33 @@ describe("assemble-release-plan", () => {
     expect(releases[1].name).toEqual("pkg-b");
     expect(releases[1].newVersion).toEqual("1.0.0");
   });
+  it("should assemble release plan with dependent when the dependent has both a changed prod and dev dependency", () => {
+    setup.updateDevDependency("pkg-b", "pkg-a", "^1.0.0");
+    setup.updateDependency("pkg-b", "pkg-c", "^1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [
+        { name: "pkg-a", type: "major" },
+        { name: "pkg-c", type: "major" }
+      ]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(3);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-c");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+    expect(releases[2].name).toEqual("pkg-b");
+    expect(releases[2].oldVersion).toEqual("1.0.0");
+    expect(releases[2].newVersion).toEqual("1.0.1");
+  });
   it("should assemble release plan without dependent through the link protocol", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "link:../pkg-a");
     setup.addChangeset({
