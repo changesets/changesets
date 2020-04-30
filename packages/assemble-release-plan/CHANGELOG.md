@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 2.0.3
+
+### Patch Changes
+
+- [`8469636`](https://github.com/atlassian/changesets/commit/8469636414cb2475547bba3140e3df1927b5926b) [#344](https://github.com/atlassian/changesets/pull/344) Thanks [@zkochan](https://github.com/zkochan)! - When both a dev dep and a prod dep of a dependent package are published, the version of the dependent package should be bumped. This fixes a regression introduced by #313.
+
 ## 2.0.2
 
 ### Patch Changes
