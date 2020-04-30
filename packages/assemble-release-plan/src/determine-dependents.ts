@@ -67,7 +67,8 @@ export default function getDependents(
         } else {
           if (
             // TODO validate this - I don't think it's right anymore
-            !releases.has(dependent) &&
+            (!releases.has(dependent) ||
+              releases.get(dependent)!.type === "none") &&
             !semver.satisfies(
               incrementVersion(nextRelease, preInfo),
               versionRange
@@ -84,6 +85,9 @@ export default function getDependents(
               type = "none";
             }
           }
+        }
+        if (releases.has(dependent) && releases.get(dependent)!.type === type) {
+          type = undefined;
         }
         return { name: dependent, type, pkgJSON: dependentPackage.packageJson };
       })
