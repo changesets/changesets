@@ -300,6 +300,51 @@ describe("apply release plan", () => {
         version: "1.1.0"
       });
     });
+    it("should skip dependencies that have the same name as the package", async () => {
+      let { changedFiles } = await testSetup(
+        "self-referenced",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [{ name: "self-referenced", type: "minor" }]
+            }
+          ],
+          releases: [
+            {
+              name: "self-referenced",
+              type: "minor",
+              oldVersion: "1.0.0",
+              newVersion: "1.1.0",
+              changesets: ["quick-lions-devour"]
+            }
+          ],
+          preState: undefined
+        },
+        {
+          changelog: false,
+          commit: false,
+          linked: [],
+          access: "restricted",
+          baseBranch: "master"
+        }
+      );
+      let pkgPath = changedFiles.find(a =>
+        a.endsWith(`self-referenced${path.sep}package.json`)
+      );
+
+      if (!pkgPath) throw new Error(`could not find an updated package json`);
+      let pkgJSON = await fs.readJSON(pkgPath);
+
+      expect(pkgJSON).toMatchObject({
+        name: "self-referenced",
+        version: "1.1.0",
+        devDependencies: {
+          "self-referenced": "file:"
+        }
+      });
+    });
   });
   describe("changelogs", () => {
     it("should update a changelog for one package", async () => {

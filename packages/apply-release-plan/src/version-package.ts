@@ -26,7 +26,12 @@ export default function versionPackage(
     if (deps) {
       for (let { name, version } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
-        if (!depCurrentVersion) continue;
+        if (
+          !depCurrentVersion ||
+          depCurrentVersion.startsWith("file:") ||
+          depCurrentVersion.startsWith("link:")
+        )
+          continue;
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
         if (usesWorkspaceRange) {
           depCurrentVersion = depCurrentVersion.substr(10);
