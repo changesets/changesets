@@ -1,5 +1,11 @@
 # @changesets/apply-release-plan
 
+## 2.0.2
+
+### Patch Changes
+
+- [`3dbab2e`](https://github.com/atlassian/changesets/commit/3dbab2e80d9a8a0cccc02d74c6d8150f603219e6) [#343](https://github.com/atlassian/changesets/pull/343) Thanks [@zkochan](https://github.com/zkochan)! - Self-references should be skipped when bumping versions. A self-reference is a dev dep that has the same name as the package. Some projects use self-references as a convinient way to require files using relative paths from the root directory.
+
 ## 2.0.1
 
 ### Patch Changes
