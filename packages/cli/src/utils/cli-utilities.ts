@@ -2,6 +2,7 @@
 import termSize from "term-size";
 import { error, prefix, success } from "@changesets/logger";
 import { prompt } from "enquirer";
+import { edit } from "external-editor";
 
 /* Notes on using inquirer:
  * Each question needs a key, as inquirer is assembling an object behind-the-scenes.
@@ -64,6 +65,14 @@ async function askQuestion(message: string): Promise<string> {
     });
 }
 
+function askQuestionWithEditor(message: string): string {
+  const response = edit(message, { postfix: ".md" });
+  return response
+    .replace(/^#.*\n?/gm, "")
+    .replace(/\n+$/g, "")
+    .trim();
+}
+
 async function askConfirm(message: string): Promise<boolean> {
   const name = `Confirm-${serialId()}`;
 
@@ -107,4 +116,10 @@ async function askList<Choice extends string>(
     });
 }
 
-export { askCheckboxPlus, askQuestion, askConfirm, askList };
+export {
+  askCheckboxPlus,
+  askQuestion,
+  askQuestionWithEditor,
+  askConfirm,
+  askList
+};

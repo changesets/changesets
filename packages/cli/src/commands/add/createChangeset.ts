@@ -228,10 +228,11 @@ export default async function createChangeset(
     "Please enter a summary for this change (this will be in the changelogs)"
   );
 
-  let summary = await cli.askQuestion("Summary");
+  let summary = await cli.askQuestionWithEditor("");
   while (summary.length === 0) {
-    error("A summary is required for the changelog! 😪");
-    summary = await cli.askQuestion("Summary");
+    summary = await cli.askQuestionWithEditor(
+      "\n\n# A summary is required for the changelog! 😪"
+    );
   }
 
   return {

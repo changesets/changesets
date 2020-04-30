@@ -8,7 +8,7 @@ import writeChangeset from "@changesets/write";
 import {
   askCheckboxPlus,
   askConfirm,
-  askQuestion,
+  askQuestionWithEditor,
   askList
 } from "../../../utils/cli-utilities";
 import addChangeset from "..";
@@ -59,7 +59,7 @@ const mockUserResponses = mockResponses => {
     "Is this your desired changeset?": true
   };
   // @ts-ignore
-  askQuestion.mockReturnValueOnce(summary);
+  askQuestionWithEditor.mockReturnValueOnce(summary);
   // @ts-ignore
   askConfirm.mockImplementation(question => {
     question = stripAnsi(question);
@@ -101,7 +101,7 @@ describe("Changesets", () => {
       "Is this your desired changeset?": true
     };
     // @ts-ignore
-    askQuestion.mockReturnValueOnce(summary);
+    askQuestionWithEditor.mockReturnValueOnce(summary);
     // @ts-ignore
     askConfirm.mockImplementation(question => {
       question = stripAnsi(question);
