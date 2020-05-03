@@ -156,13 +156,22 @@ const cwd = process.cwd();
       }
       case "pre": {
         let command = input[1];
-        if (command !== "enter" && command !== "exit") {
-          error("`enter` or `exit` must be passed after prerelease");
+        if (
+          command !== "enter" &&
+          command !== "exit" &&
+          command !== "snapshot"
+        ) {
+          error(
+            "`enter`, `exit` or `snapshot` must be passed after prerelease"
+          );
           throw new ExitError(1);
         }
         let tag = input[2];
-        if (command === "enter" && typeof tag !== "string") {
-          error("A tag must be passed when using prerelese enter");
+        if (
+          (command === "snapshot" || command === "enter") &&
+          typeof tag !== "string"
+        ) {
+          error(`A tag must be passed when using prerelese ${command}`);
           throw new ExitError(1);
         }
         // @ts-ignore
@@ -213,7 +222,7 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
 - @changesets/cli@${
         // eslint-disable-next-line import/no-extraneous-dependencies
         require("@changesets/cli/package.json").version
-      }
+        }
 - node@${process.version}
 
 ## Extra details

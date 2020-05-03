@@ -6,10 +6,17 @@ import {
   PreEnterButInPreModeError,
   ExitError
 } from "@changesets/errors";
+import { getLastCommitHash } from "@changesets/git";
+import { read } from "@changesets/config";
+import { getPackages } from "@manypkg/get-packages";
+import version from "../version";
 
 export default async function pre(
   cwd: string,
-  options: { tag: string; command: "enter" } | { command: "exit"; tag?: string }
+  options:
+    | { command: "enter"; tag: string }
+    | { command: "exit"; tag?: string }
+    | { command: "snapshot"; tag: string }
 ) {
   if (options.command === "enter") {
     try {
@@ -28,7 +35,7 @@ export default async function pre(
       }
       throw err;
     }
-  } else {
+  } else if (options.command === "exit") {
     try {
       await exitPre(cwd);
       logger.success(`Exited pre mode`);
@@ -45,5 +52,42 @@ export default async function pre(
       }
       throw err;
     }
+  } else {
+    /**
+     * Snapshot command:
+     * Assemble the release plan
+     * Apply the release plan
+     */
+
+    // Get latest commit hash to get unique version
+    const lastCommitHash = await getLastCommitHash(cwd);
+
+    if (lastCommitHash === false) {
+      logger.error(`Unable to get last git commit hash for snapshot version.`);
+      logger.error(
+        `To fix this please make sure you have git installed, and this is a git repository.`
+      );
+      throw new ExitError(1);
+    }
+
+    // Get the first 7 characters of the commit hash to identify version
+    const readableCommitHash = lastCommitHash.slice(0, 7);
+
+    const packages = await getPackages(cwd);
+    let config = await read(cwd, packages);
+
+    // We should not commit the snapshot version
+    let updatedConfig = {
+      ...config,
+      commit: false
+    };
+
+    await version(cwd, updatedConfig, {
+      tag: options.tag,
+      commitHash: readableCommitHash
+    });
+
+    logger.log("All the files have been updated with snapshot release.");
+    logger.log("Please run `changesets publish` to release the packages");
   }
 }
