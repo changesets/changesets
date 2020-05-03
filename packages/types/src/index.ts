@@ -107,3 +107,8 @@ export type PreState = {
   };
   changesets: string[];
 };
+
+export type SnapshotConfig = {
+  tag: string;
+  commitHash: string;
+};

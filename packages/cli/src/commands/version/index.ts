@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import path from "path";
 import { log, warn } from "@changesets/logger";
-import { Config } from "@changesets/types";
+import { Config, SnapshotConfig } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
@@ -18,7 +18,11 @@ let importantEnd = chalk.red(
   "----------------------------------------------------------------------"
 );
 
-export default async function version(cwd: string, config: Config) {
+export default async function version(
+  cwd: string,
+  config: Config,
+  snapshotConfig: SnapshotConfig | undefined
+) {
   let [_changesets, _preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
@@ -49,9 +53,17 @@ export default async function version(cwd: string, config: Config) {
 
   let packages = await getPackages(cwd);
 
-  let releasePlan = assembleReleasePlan(changesets, packages, config, preState);
+  let releasePlan = assembleReleasePlan(
+    changesets,
+    packages,
+    config,
+    preState,
+    snapshotConfig
+  );
 
-  await applyReleasePlan(releasePlan, packages, config);
+  await applyReleasePlan(releasePlan, packages, config, snapshotConfig);
+
+  if (snapshotConfig === undefined) return;
 
   if (config.commit) {
     log("All files have been updated and committed. You're ready to publish!");

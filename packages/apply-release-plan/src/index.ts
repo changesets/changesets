@@ -3,7 +3,8 @@ import {
   Config,
   ChangelogFunctions,
   NewChangeset,
-  ModCompWithPackage
+  ModCompWithPackage,
+  SnapshotConfig
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
@@ -39,7 +40,8 @@ async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
-  config: Config = defaultConfig
+  config: Config = defaultConfig,
+  snapshotConfig: SnapshotConfig | undefined,
 ) {
   let cwd = packages.root.dir;
 
@@ -117,7 +119,7 @@ export default async function applyReleasePlan(
     await fs.writeFile(pkgJSONPath, parsedConfig);
     touchedFiles.push(pkgJSONPath);
 
-    if (changelog && changelog.length > 0) {
+    if (changelog && changelog.length > 0 && snapshotConfig === undefined) {
       await updateChangelog(changelogPath, changelog, name, prettierConfig);
       touchedFiles.push(changelogPath);
     }
