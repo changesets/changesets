@@ -2,7 +2,7 @@
 
 This is a list of some words and phrases that are used in changesets which are helpful to know so that contributors to changesets have a shared understanding of various concepts in the project.
 
-Several of these have associated type definitions, which you can find in [our types package](./packages/types)
+Several of these have associated type definitions, which you can find in [our types package](../packages/types).
 
 - **changeset** - an intent to release a set of packages at particular bump types with a summary of the changes made. Changesets are stackable, that is running `bump` will apply any number of changesets correctly. Changesets are used to generate further information, such as the `release information`, and the `release plan`.
 - **summary** - Information about the changes the changeset represents - this is written out to the `CHANGELOG.md` file of every package mentioned in the changeset.
