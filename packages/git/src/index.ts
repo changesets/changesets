@@ -1,8 +1,10 @@
 import spawn from "spawndamnit";
 import path from "path";
-import { getPackages } from "@manypkg/get-packages";
+import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
+
+const isInDir = (dir: string) => (subdir: string) => isSubdir(dir, subdir);
 
 async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
@@ -108,17 +110,17 @@ async function getChangedPackagesSinceRef({
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
   let packages = await getPackages(cwd);
 
-  const fileNameToPackage = (fileName: string) =>
-    packages.packages.find(pkg => isSubdir(pkg.dir, fileName))!;
+  const fileToPackage: Record<string, Package> = {};
 
-  const fileExistsInPackage = (fileName: string) =>
-    !!fileNameToPackage(fileName);
+  packages.packages.forEach(pkg =>
+    changedFiles.filter(isInDir(pkg.dir)).forEach(fileName => {
+      const prevPkg = fileToPackage[fileName] || { dir: "" };
+      if (pkg.dir.length > prevPkg.dir.length) fileToPackage[fileName] = pkg;
+    })
+  );
 
   return (
-    changedFiles
-      // ignore deleted files
-      .filter(fileExistsInPackage)
-      .map(fileNameToPackage)
+    Object.values(fileToPackage)
       // filter, so that we have only unique packages
       .filter((pkg, idx, packages) => packages.indexOf(pkg) === idx)
   );
