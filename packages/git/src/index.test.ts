@@ -115,11 +115,13 @@ describe("git", () => {
         .split("\n")
         .filter(a => a);
 
-      expect(stagedFiles).toHaveLength(4);
-      expect(stagedFiles[0]).toEqual("packages/pkg-a/index.js");
-      expect(stagedFiles[1]).toEqual("packages/pkg-a/package.json");
-      expect(stagedFiles[2]).toEqual("packages/pkg-b/index.js");
-      expect(stagedFiles[3]).toEqual("packages/pkg-b/package.json");
+      expect(stagedFiles).toEqual([
+        "packages/package.json",
+        "packages/pkg-a/index.js",
+        "packages/pkg-a/package.json",
+        "packages/pkg-b/index.js",
+        "packages/pkg-b/package.json"
+      ]);
     });
   });
 
