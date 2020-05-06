@@ -2,4 +2,4 @@
 "@changesets/git": patch
 ---
 
-Previously monorepo package may be considered as changed package instead of actually changed one. Now git package is looking for the longest package.dir path that satisfies condition
+Previously packages nested inside of other packages would show both the nested package and the outer package as changed. Now, only the nested package will show as changed.
