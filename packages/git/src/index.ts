@@ -32,9 +32,14 @@ async function tag(tagStr: string, cwd: string) {
   return gitCmd.code === 0;
 }
 
+// Find the commit where we diverged from `ref` at using `git merge-base`
 export async function getDivergedCommit(cwd: string, ref: string) {
-  // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   const cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
+  if (cmd.code !== 0) {
+    throw new Error(
+      `Failed to find where HEAD diverged from ${ref}. Does ${ref} exist?`
+    );
+  }
   return cmd.stdout.toString().trim();
 }
 
@@ -59,6 +64,12 @@ async function getChangedFilesSince({
   const divergedAt = await getDivergedCommit(cwd, ref);
   // Now we can find which files we added
   const cmd = await spawn("git", ["diff", "--name-only", divergedAt], { cwd });
+  if (cmd.code !== 0) {
+    throw new Error(
+      `Failed to diff against ${divergedAt}. Is ${divergedAt} a valid ref?`
+    );
+  }
+
   const files = cmd.stdout
     .toString()
     .trim()
