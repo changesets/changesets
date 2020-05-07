@@ -57,7 +57,19 @@
     "packageLifecycleCommands": {
       "type": "object",
       "default": {},
-      "description": "Allows one to specify a custom command for the version and publish lifecycles."
+      "description": "Allows one to specify a custom command for the version and publish lifecycles.",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "description": "Specifies lifecycle commands for a given package.",
+          "properties": {
+            "version": {
+              "type": "string",
+              "description": "Specifies a command to run during the `changeset version` lifecycle command."
+            }
+          }
+        }
+      }
     }
   }
 }
