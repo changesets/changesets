@@ -12,7 +12,8 @@ export let defaultWrittenConfig = {
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
-  baseBranch: "master"
+  baseBranch: "master",
+  interLinkAutoBump: "patch"
 } as const;
 
 function getNormalisedChangelogOption(
@@ -138,6 +139,18 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       }
     }
   }
+  if (
+    json.interLinkAutoBump !== undefined &&
+    !["patch", "minor"].includes(json.interLinkAutoBump)
+  ) {
+    messages.push(
+      `The \`interLinkAutoBump\` option is set as ${JSON.stringify(
+        json.interLinkAutoBump,
+        null,
+        2
+      )} but can only be 'patch' or 'minor'`
+    );
+  }
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
@@ -161,7 +174,12 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     baseBranch:
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch
-        : json.baseBranch
+        : json.baseBranch,
+
+    interLinkAutoBump:
+      json.interLinkAutoBump === undefined
+        ? defaultWrittenConfig.interLinkAutoBump
+        : json.interLinkAutoBump
   };
   return config;
 };

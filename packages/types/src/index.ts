@@ -61,6 +61,8 @@ export type Config = {
   linked: Linked;
   access: AccessType;
   baseBranch: string;
+  /** Whether to auto bump inter-linked dependencies part of the same release on patch bumps and above (default) or minor bumps and above. */
+  interLinkAutoBump: "patch" | "minor";
 };
 
 export type WrittenConfig = {
@@ -69,6 +71,8 @@ export type WrittenConfig = {
   linked?: Linked;
   access?: AccessType;
   baseBranch?: string;
+  /** Whether to auto bump inter-linked dependencies part of the same release on patch bumps and above (default) or minor bumps and above. */
+  interLinkAutoBump?: "patch" | "minor";
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
