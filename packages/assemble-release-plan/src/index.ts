@@ -31,7 +31,7 @@ function assembleReleasePlan(
   packages: Packages,
   config: Config,
   preState: PreState | undefined,
-  snapshotConfig: SnapshotReleaseConfig | undefined
+  snapshotConfig?: SnapshotReleaseConfig
 ): ReleasePlan {
   // Making copy of preState object
   let updatedPreState: PreState | undefined =

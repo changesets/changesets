@@ -4,7 +4,7 @@ import {
   ChangelogFunctions,
   NewChangeset,
   ModCompWithPackage,
-  SnapshotConfig
+  SnapshotReleaseConfig
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
@@ -41,7 +41,7 @@ export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
   config: Config = defaultConfig,
-  snapshotConfig: SnapshotConfig | undefined
+  snapshotConfig?: SnapshotReleaseConfig
 ) {
   let cwd = packages.root.dir;
 
