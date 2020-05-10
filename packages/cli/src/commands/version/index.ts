@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import path from "path";
 import { log, warn } from "@changesets/logger";
-import { Config, SnapshotConfig } from "@changesets/types";
+import { Config, SnapshotReleaseConfig } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
@@ -21,7 +21,7 @@ let importantEnd = chalk.red(
 export default async function version(
   cwd: string,
   config: Config,
-  snapshotConfig: SnapshotConfig | undefined
+  snapshotReleaseConfig?: SnapshotReleaseConfig
 ) {
   let [_changesets, _preState] = await Promise.all([
     readChangesets(cwd),
@@ -33,7 +33,11 @@ export default async function version(
   const changesets = _changesets as NonNullable<typeof _changesets>;
   const preState = _preState as NonNullable<typeof _preState>;
 
-  if (preState !== undefined && preState.mode === "pre") {
+  if (
+    snapshotReleaseConfig === undefined &&
+    preState !== undefined &&
+    preState.mode === "pre"
+  ) {
     warn(importantSeparator);
     warn("You are in prerelease mode");
     warn(
@@ -58,12 +62,12 @@ export default async function version(
     packages,
     config,
     preState,
-    snapshotConfig
+    snapshotReleaseConfig
   );
 
-  await applyReleasePlan(releasePlan, packages, config, snapshotConfig);
+  await applyReleasePlan(releasePlan, packages, config, snapshotReleaseConfig);
 
-  if (snapshotConfig === undefined) return;
+  if (snapshotReleaseConfig === undefined) return;
 
   if (config.commit) {
     log("All files have been updated and committed. You're ready to publish!");

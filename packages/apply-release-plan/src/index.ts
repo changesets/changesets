@@ -41,7 +41,7 @@ export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
   config: Config = defaultConfig,
-  snapshotConfig: SnapshotConfig | undefined,
+  snapshotConfig: SnapshotConfig | undefined
 ) {
   let cwd = packages.root.dir;
 
@@ -75,7 +75,7 @@ export default async function applyReleasePlan(
     cwd
   );
 
-  if (releasePlan.preState !== undefined) {
+  if (releasePlan.preState !== undefined && snapshotConfig === undefined) {
     if (releasePlan.preState.mode === "exit") {
       await fs.remove(path.join(cwd, ".changeset", "pre.json"));
     } else {
@@ -119,7 +119,7 @@ export default async function applyReleasePlan(
     await fs.writeFile(pkgJSONPath, parsedConfig);
     touchedFiles.push(pkgJSONPath);
 
-    if (changelog && changelog.length > 0 && snapshotConfig === undefined) {
+    if (changelog && changelog.length > 0) {
       await updateChangelog(changelogPath, changelog, name, prettierConfig);
       touchedFiles.push(changelogPath);
     }

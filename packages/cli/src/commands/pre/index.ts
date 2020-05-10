@@ -10,13 +10,15 @@ import { getLastCommitHash } from "@changesets/git";
 import { read } from "@changesets/config";
 import { getPackages } from "@manypkg/get-packages";
 import version from "../version";
+import publish from "../publish";
+import { Config } from "@changesets/types";
 
 export default async function pre(
   cwd: string,
   options:
     | { command: "enter"; tag: string }
     | { command: "exit"; tag?: string }
-    | { command: "snapshot"; tag: string }
+    | { command: "snapshot"; tag: string; otp?: string }
 ) {
   if (options.command === "enter") {
     try {
@@ -57,6 +59,7 @@ export default async function pre(
      * Snapshot command:
      * Assemble the release plan
      * Apply the release plan
+     * Publish packages
      */
 
     // Get latest commit hash to get unique version
@@ -70,24 +73,27 @@ export default async function pre(
       throw new ExitError(1);
     }
 
-    // Get the first 7 characters of the commit hash to identify version
-    const readableCommitHash = lastCommitHash.slice(0, 7);
-
     const packages = await getPackages(cwd);
-    let config = await read(cwd, packages);
+    const config = await read(cwd, packages);
 
-    // We should not commit the snapshot version
-    let updatedConfig = {
+    // We should not commit the snapshot version and need changelog
+    const updatedConfig: Config = {
       ...config,
+      // changelog: false,
       commit: false
     };
 
-    await version(cwd, updatedConfig, {
+    const snapshotReleaseConfig = {
       tag: options.tag,
-      commitHash: readableCommitHash
-    });
+      commitHash: lastCommitHash
+    };
+
+    await version(cwd, updatedConfig, snapshotReleaseConfig);
 
     logger.log("All the files have been updated with snapshot release.");
-    logger.log("Please run `changesets publish` to release the packages");
+
+    await publish(cwd, { otp: options.otp, tag: options.tag }, updatedConfig);
+
+    logger.log("Snapshot release successfully completed.");
   }
 }

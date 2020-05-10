@@ -12,12 +12,14 @@ export default async function publishPackages({
   cwd,
   access,
   otp,
-  preState
+  preState,
+  tag
 }: {
   cwd: string;
   access: AccessType;
   otp?: string;
   preState: PreState | undefined;
+  tag?: string;
 }) {
   const packages = await getPackages(cwd);
   const packagesByName = new Map(
@@ -76,11 +78,12 @@ export default async function publishPackages({
         pkg,
         access,
         twoFactorState,
-        preState === undefined
-          ? "latest"
-          : pkgInfo.publishedState === "only-pre"
-          ? "latest"
-          : preState.tag
+        tag ||
+          (preState === undefined
+            ? "latest"
+            : pkgInfo.publishedState === "only-pre"
+            ? "latest"
+            : preState.tag)
       )
     );
   }

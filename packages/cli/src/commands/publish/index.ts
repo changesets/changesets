@@ -3,7 +3,7 @@ import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
-import { Config } from "@changesets/types";
+import { Config, PreState } from "@changesets/types";
 import chalk from "chalk";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
@@ -19,22 +19,27 @@ let importantEnd = chalk.red(
   "----------------------------------------------------------------------"
 );
 
+function showNonLatestTagWarning(tag?: string, preState?: PreState) {
+  warn(importantSeparator);
+  warn(
+    `You are in prerelease mode so packages will be published to the ${chalk.cyan(
+      tag || preState!.tag
+    )}
+      dist tag except for packages that have not had normal releases which will be published to ${chalk.cyan(
+        "latest"
+      )}`
+  );
+  warn(importantEnd);
+}
+
 export default async function run(
   cwd: string,
-  { otp }: { otp?: string },
+  { otp, tag }: { otp?: string; tag?: string },
   config: Config
 ) {
   let preState = await readPreState(cwd);
-  if (preState) {
-    warn(importantSeparator);
-    warn(
-      `You are in prerelease mode so packages will be published to the ${chalk.cyan(
-        preState.tag
-      )} dist tag except for packages that have not had normal releases which will be published to ${chalk.cyan(
-        "latest"
-      )}`
-    );
-    warn(importantEnd);
+  if (tag || preState) {
+    showNonLatestTagWarning(tag, preState);
   }
 
   const response = await publishPackages({
@@ -42,7 +47,8 @@ export default async function run(
     // if not public, we wont pass the access, and it works as normal
     access: config.access,
     otp,
-    preState
+    preState,
+    tag
   });
 
   const successful = response.filter(p => p.published);

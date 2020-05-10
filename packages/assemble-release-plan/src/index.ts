@@ -1,4 +1,10 @@
-import { ReleasePlan, Config, NewChangeset, PreState, SnapshotConfig } from "@changesets/types";
+import {
+  ReleasePlan,
+  Config,
+  NewChangeset,
+  PreState,
+  SnapshotReleaseConfig
+} from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
@@ -25,26 +31,24 @@ function assembleReleasePlan(
   packages: Packages,
   config: Config,
   preState: PreState | undefined,
-  snapshotConfig: SnapshotConfig | undefined
+  snapshotConfig: SnapshotReleaseConfig | undefined
 ): ReleasePlan {
   // Making copy of preState object
   let updatedPreState: PreState | undefined =
     preState === undefined
       ? undefined
       : {
-        ...preState,
-        initialVersions: {
-          ...preState.initialVersions
-        }
-      };
+          ...preState,
+          initialVersions: {
+            ...preState.initialVersions
+          }
+        };
 
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
 
   let unfilteredChangesets = changesets;
-
-  console.log(unfilteredChangesets);
 
   let preVersions = new Map();
   if (updatedPreState !== undefined) {
@@ -148,9 +152,9 @@ function assembleReleasePlan(
     updatedPreState === undefined
       ? undefined
       : {
-        state: updatedPreState,
-        preVersions
-      };
+          state: updatedPreState,
+          preVersions
+        };
 
   let dependentsGraph = getDependentsGraph(packages);
 

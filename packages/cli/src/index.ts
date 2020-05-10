@@ -175,7 +175,7 @@ const cwd = process.cwd();
           throw new ExitError(1);
         }
         // @ts-ignore
-        await pre(cwd, { command, tag });
+        await pre(cwd, { command, tag, otp });
         return;
       }
       case "bump": {

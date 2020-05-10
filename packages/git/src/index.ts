@@ -7,7 +7,7 @@ import isSubdir from "is-subdir";
 const isInDir = (dir: string) => (subdir: string) => isSubdir(dir, subdir);
 
 async function getLastCommitHash(cwd: string) {
-  const gitCmd = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+  const gitCmd = await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd });
 
   if (gitCmd.code !== 0) {
     console.log(
@@ -16,7 +16,7 @@ async function getLastCommitHash(cwd: string) {
     return false;
   }
 
-  return gitCmd.stdout.toString();
+  return gitCmd.stdout.toString().trim();
 }
 
 async function add(pathToFile: string, cwd: string) {
