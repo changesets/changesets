@@ -1,4 +1,4 @@
-import { ReleasePlan, Config, NewChangeset, PreState, SnapshotConfig } from "@changesets/types";
+import { ReleasePlan, Config, NewChangeset, PreState } from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
@@ -20,31 +20,42 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
+/**
+ * Using version as 0.0.0 so that it does not hinder with other version release
+ * For example;
+ * if user has a regular pre-release at 1.0.0-beta.0 and then you had a snapshot pre-release at 1.0.0-canary-git-hash
+ * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
+ * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
+ */
+function getSnapshotReleaseVersion(snapshotConfig?: string | boolean) {
+  let tag = "";
+  if (typeof snapshotConfig === "string") tag = `-${snapshotConfig}`;
+  return `0.0.0${tag}-${"00000"}`;
+}
+
 function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
   config: Config,
   preState: PreState | undefined,
-  snapshotConfig: SnapshotConfig | undefined
+  snapshotConfig?: string | boolean
 ): ReleasePlan {
   // Making copy of preState object
   let updatedPreState: PreState | undefined =
     preState === undefined
       ? undefined
       : {
-        ...preState,
-        initialVersions: {
-          ...preState.initialVersions
-        }
-      };
+          ...preState,
+          initialVersions: {
+            ...preState.initialVersions
+          }
+        };
 
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
 
   let unfilteredChangesets = changesets;
-
-  console.log(unfilteredChangesets);
 
   let preVersions = new Map();
   if (updatedPreState !== undefined) {
@@ -148,9 +159,9 @@ function assembleReleasePlan(
     updatedPreState === undefined
       ? undefined
       : {
-        state: updatedPreState,
-        preVersions
-      };
+          state: updatedPreState,
+          preVersions
+        };
 
   let dependentsGraph = getDependentsGraph(packages);
 
@@ -178,7 +189,7 @@ function assembleReleasePlan(
         newVersion:
           snapshotConfig === undefined
             ? incrementVersion(incompleteRelease, preInfo)!
-            : `0.0.0-${snapshotConfig.tag}-${snapshotConfig.commitHash}`
+            : getSnapshotReleaseVersion(snapshotConfig)
       };
     }),
     preState: updatedPreState

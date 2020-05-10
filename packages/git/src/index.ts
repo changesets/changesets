@@ -3,20 +3,19 @@ import path from "path";
 import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
+import { error } from "@changesets/logger";
 
 const isInDir = (dir: string) => (subdir: string) => isSubdir(dir, subdir);
 
 async function getLastCommitHash(cwd: string) {
-  const gitCmd = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+  const gitCmd = await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd });
 
   if (gitCmd.code !== 0) {
-    console.log(
-      `Could not get the commit hash due to ${gitCmd.stderr.toString()}`
-    );
+    error(`Could not get the commit hash due to ${gitCmd.stderr.toString()}`);
     return false;
   }
 
-  return gitCmd.stdout.toString();
+  return gitCmd.stdout.toString().trim();
 }
 
 async function add(pathToFile: string, cwd: string) {

@@ -51,6 +51,9 @@ const { input, flags } = meow(
       since: {
         type: "string",
         default: undefined
+      },
+      tag: {
+        type: "string"
       }
     }
   }
@@ -116,7 +119,9 @@ const cwd = process.cwd();
       verbose,
       output,
       otp,
-      empty
+      empty,
+      snapshot,
+      tag
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -143,11 +148,11 @@ const cwd = process.cwd();
         return;
       }
       case "version": {
-        await version(cwd, config);
+        await version(cwd, { snapshot }, config);
         return;
       }
       case "publish": {
-        await publish(cwd, { otp }, config);
+        await publish(cwd, { otp, tag }, config);
         return;
       }
       case "status": {
@@ -175,7 +180,7 @@ const cwd = process.cwd();
           throw new ExitError(1);
         }
         // @ts-ignore
-        await pre(cwd, { command, tag });
+        await pre(cwd, { command, tag, otp });
         return;
       }
       case "bump": {
@@ -222,7 +227,7 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
 - @changesets/cli@${
         // eslint-disable-next-line import/no-extraneous-dependencies
         require("@changesets/cli/package.json").version
-        }
+      }
 - node@${process.version}
 
 ## Extra details
