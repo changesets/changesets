@@ -230,6 +230,38 @@ describe("running version in a simple project with workspace range", () => {
   });
 });
 
+describe("snapshot release", () => {
+  it("should update the packge to unique version no matter the kind of version bump it is", async () => {
+    let cwd = f.copy("simple-project");
+    await writeChangesets([simpleChangeset2], cwd);
+    const spy = jest.spyOn(fs, "writeFile");
+    await versionCommand(
+      cwd,
+      {
+        ...modifiedDefaultConfig,
+        commit: false
+      },
+      {
+        tag: "exprimental",
+        commitHash: "7b4a8h"
+      }
+    );
+    expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-a",
+        version: "0.0.0-exprimental-7b4a8h"
+      })
+    );
+
+    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-b",
+        version: "0.0.0-exprimental-7b4a8h"
+      })
+    );
+  });
+});
+
 describe("pre", () => {
   it("should work", async () => {
     let cwd = f.copy("simple-project");
