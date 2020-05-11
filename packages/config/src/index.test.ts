@@ -115,6 +115,24 @@ let correctCases = {
       ...defaults,
       linked: [["pkg-a", "pkg-b"]]
     }
+  },
+  "update internal dependencies minor": {
+    input: {
+      updateInternalDependencies: "minor"
+    },
+    output: {
+      ...defaults,
+      updateInternalDependencies: "minor"
+    }
+  },
+  "update internal dependencies patch": {
+    input: {
+      updateInternalDependencies: "patch"
+    },
+    output: {
+      ...defaults,
+      updateInternalDependencies: "patch"
+    }
   }
 } as const;
 
@@ -253,5 +271,13 @@ The package \\"pkg-a\\" is in multiple sets of linked packages. Packages can onl
     expect(logger.warn).toBeCalledWith(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".'
     );
+  });
+  test("updateInternalDependencies not patch or minor", () => {
+    expect(() => {
+      unsafeParse({ updateInternalDependencies: "major" });
+    }).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The \`updateInternalDependencies\` option is set as \\"major\\" but can only be 'patch' or 'minor'"
+`);
   });
 });
