@@ -1,5 +1,16 @@
 # @changesets/git
 
+## 1.0.5
+
+### Patch Changes
+
+- [`89f0c49`](https://github.com/atlassian/changesets/commit/89f0c497ac21b8d008da67caff8032947836c7b1) [#352](https://github.com/atlassian/changesets/pull/352) Thanks [@MichaelKapustey](https://github.com/MichaelKapustey)! - Previously packages nested inside of other packages would show both the nested package and the outer package as changed. Now, only the nested package will show as changed.
+
+* [`09f62f9`](https://github.com/atlassian/changesets/commit/09f62f9c822f31899a48cbd93c7801d72a80b97e) [#355](https://github.com/atlassian/changesets/pull/355) Thanks [@acheronfail](https://github.com/acheronfail)! - Fix an issue where refs that didn't exist were silently ignored
+
+* Updated dependencies [[`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d)]:
+  - @changesets/types@3.0.0
+
 ## 1.0.4
 
 ### Patch Changes
