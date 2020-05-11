@@ -84,14 +84,19 @@ export default async function applyReleasePlan(
     }
   }
 
-  let versionsToUpdate = releases.map(({ name, newVersion }) => ({
+  let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
     name,
-    version: newVersion
+    version: newVersion,
+    type
   }));
 
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map(release => {
-    return versionPackage(release, versionsToUpdate);
+    return versionPackage(
+      release,
+      versionsToUpdate,
+      config.updateInternalDependencies
+    );
   });
 
   let prettierConfig = await prettier.resolveConfig(cwd);

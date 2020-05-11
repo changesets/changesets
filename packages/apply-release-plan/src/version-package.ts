@@ -1,4 +1,8 @@
-import { ComprehensiveRelease, PackageJSON } from "@changesets/types";
+import {
+  ComprehensiveRelease,
+  PackageJSON,
+  VersionType
+} from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
 
@@ -9,27 +13,42 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies"
 ] as const;
 
+const bumpTypes = ["none", "patch", "minor", "major"];
+
+/* Converts a bump type into a numeric level to indicate order */
+function getBumpLevel(type: VersionType) {
+  const level = bumpTypes.indexOf(type);
+  if (level < 0) {
+    throw new Error(`Unrecognised bump type ${type}`);
+  }
+  return level;
+}
+
 export default function versionPackage(
   release: ComprehensiveRelease & {
     changelog: string | null;
     packageJson: PackageJSON;
     dir: string;
   },
-  versionsToUpdate: Array<{ name: string; version: string }>
+  versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
+  updateInternalDependencies: "patch" | "minor"
 ) {
   let { newVersion, packageJson } = release;
 
+  const minLevel = getBumpLevel(updateInternalDependencies);
   packageJson.version = newVersion;
 
   for (let type of DEPENDENCY_TYPES) {
     let deps = packageJson[type];
     if (deps) {
-      for (let { name, version } of versionsToUpdate) {
+      for (let { name, version, type } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
+        const bumpLevel = getBumpLevel(type);
         if (
           !depCurrentVersion ||
           depCurrentVersion.startsWith("file:") ||
-          depCurrentVersion.startsWith("link:")
+          depCurrentVersion.startsWith("link:") ||
+          bumpLevel < minLevel
         )
           continue;
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
