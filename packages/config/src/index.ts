@@ -13,7 +13,7 @@ export let defaultWrittenConfig = {
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
   baseBranch: "master",
-  interLinkAutoBump: "patch"
+  updateInternalDependencies: "patch"
 } as const;
 
 function getNormalisedChangelogOption(
@@ -140,12 +140,12 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
   if (
-    json.interLinkAutoBump !== undefined &&
-    !["patch", "minor"].includes(json.interLinkAutoBump)
+    json.updateInternalDependencies !== undefined &&
+    !["patch", "minor"].includes(json.updateInternalDependencies)
   ) {
     messages.push(
-      `The \`interLinkAutoBump\` option is set as ${JSON.stringify(
-        json.interLinkAutoBump,
+      `The \`updateInternalDependencies\` option is set as ${JSON.stringify(
+        json.updateInternalDependencies,
         null,
         2
       )} but can only be 'patch' or 'minor'`
@@ -176,10 +176,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.baseBranch
         : json.baseBranch,
 
-    interLinkAutoBump:
-      json.interLinkAutoBump === undefined
-        ? defaultWrittenConfig.interLinkAutoBump
-        : json.interLinkAutoBump
+    updateInternalDependencies:
+      json.updateInternalDependencies === undefined
+        ? defaultWrittenConfig.updateInternalDependencies
+        : json.updateInternalDependencies
   };
   return config;
 };

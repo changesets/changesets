@@ -31,11 +31,11 @@ export default function versionPackage(
     dir: string;
   },
   versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
-  interLinkAutoBump: "patch" | "minor"
+  updateInternalDependencies: "patch" | "minor"
 ) {
   let { newVersion, packageJson } = release;
 
-  const minLevel = getBumpLevel(interLinkAutoBump);
+  const minLevel = getBumpLevel(updateInternalDependencies);
   packageJson.version = newVersion;
 
   for (let type of DEPENDENCY_TYPES) {

@@ -26,7 +26,7 @@ test("read reads the config", async () => {
     commit: true,
     access: "restricted",
     baseBranch: "master",
-    interLinkAutoBump: "patch"
+    updateInternalDependencies: "patch"
   });
 });
 
@@ -36,7 +36,7 @@ let defaults = {
   commit: false,
   access: "restricted",
   baseBranch: "master",
-  interLinkAutoBump: "patch"
+  updateInternalDependencies: "patch"
 } as const;
 
 let correctCases = {

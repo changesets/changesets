@@ -43,7 +43,7 @@ class FakeReleasePlan {
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      interLinkAutoBump: "patch"
+      updateInternalDependencies: "patch"
     };
 
     this.changesets = [baseChangeset, ...changesets];
@@ -72,7 +72,7 @@ async function testSetup(
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      interLinkAutoBump: "patch"
+      updateInternalDependencies: "patch"
     };
   }
   let tempDir = await f.copy(fixtureName);
@@ -274,7 +274,7 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          interLinkAutoBump: "patch"
+          updateInternalDependencies: "patch"
         }
       );
       let pkgPathA = changedFiles.find(a =>
@@ -330,7 +330,7 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          interLinkAutoBump: "patch"
+          updateInternalDependencies: "patch"
         }
       );
       let pkgPath = changedFiles.find(a =>
@@ -349,12 +349,12 @@ describe("apply release plan", () => {
       });
     });
 
-    describe("interlinked dependency bumping", () => {
-      describe("interLinkAutoBump set to patch", () => {
-        const interLinkAutoBump = "patch";
-        it("should update min version ranges of patch bumped interlinked dependencies", async () => {
+    describe("internal dependency bumping", () => {
+      describe("updateInternalDependencies set to patch", () => {
+        const updateInternalDependencies = "patch";
+        it("should update min version ranges of patch bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "interlinked-dependencies",
+            "internal-dependencies",
             {
               changesets: [
                 {
@@ -387,7 +387,7 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              interLinkAutoBump
+              updateInternalDependencies
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -419,9 +419,9 @@ describe("apply release plan", () => {
             }
           });
         });
-        it("should update min version ranges of minor bumped interlinked dependencies", async () => {
+        it("should update min version ranges of minor bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "interlinked-dependencies",
+            "internal-dependencies",
             {
               changesets: [
                 {
@@ -454,7 +454,7 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              interLinkAutoBump
+              updateInternalDependencies
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -486,9 +486,9 @@ describe("apply release plan", () => {
             }
           });
         });
-        it("should update min version ranges of major bumped interlinked dependencies", async () => {
+        it("should update min version ranges of major bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "interlinked-dependencies",
+            "internal-dependencies",
             {
               changesets: [
                 {
@@ -521,7 +521,7 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              interLinkAutoBump
+              updateInternalDependencies
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -554,11 +554,11 @@ describe("apply release plan", () => {
           });
         });
       });
-      describe("interLinkAutoBump set to minor", () => {
-        const interLinkAutoBump = "minor";
-        it("should NOT update min version ranges of patch bumped interlinked dependencies", async () => {
+      describe("updateInternalDependencies set to minor", () => {
+        const updateInternalDependencies = "minor";
+        it("should NOT update min version ranges of patch bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "interlinked-dependencies",
+            "internal-dependencies",
             {
               changesets: [
                 {
@@ -591,7 +591,7 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              interLinkAutoBump
+              updateInternalDependencies
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -623,9 +623,9 @@ describe("apply release plan", () => {
             }
           });
         });
-        it("should update min version ranges of minor bumped interlinked dependencies", async () => {
+        it("should update min version ranges of minor bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "interlinked-dependencies",
+            "internal-dependencies",
             {
               changesets: [
                 {
@@ -658,7 +658,7 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              interLinkAutoBump
+              updateInternalDependencies
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -690,9 +690,9 @@ describe("apply release plan", () => {
             }
           });
         });
-        it("should update min version ranges of major bumped interlinked dependencies", async () => {
+        it("should update min version ranges of major bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "interlinked-dependencies",
+            "internal-dependencies",
             {
               changesets: [
                 {
@@ -725,7 +725,7 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              interLinkAutoBump
+              updateInternalDependencies
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -883,7 +883,7 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
-          interLinkAutoBump: "patch"
+          updateInternalDependencies: "patch"
         }
       );
       let pkgAChangelogPath = changedFiles.find(a =>

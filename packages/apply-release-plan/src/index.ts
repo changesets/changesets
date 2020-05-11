@@ -92,7 +92,11 @@ export default async function applyReleasePlan(
 
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map(release => {
-    return versionPackage(release, versionsToUpdate, config.interLinkAutoBump);
+    return versionPackage(
+      release,
+      versionsToUpdate,
+      config.updateInternalDependencies
+    );
   });
 
   let prettierConfig = await prettier.resolveConfig(cwd);
