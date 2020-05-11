@@ -25,7 +25,8 @@ test("read reads the config", async () => {
     changelog: false,
     commit: true,
     access: "restricted",
-    baseBranch: "master"
+    baseBranch: "master",
+    interLinkAutoBump: "patch"
   });
 });
 
@@ -34,7 +35,8 @@ let defaults = {
   changelog: ["@changesets/cli/changelog", null],
   commit: false,
   access: "restricted",
-  baseBranch: "master"
+  baseBranch: "master",
+  interLinkAutoBump: "patch"
 } as const;
 
 let correctCases = {
