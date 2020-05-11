@@ -5,6 +5,7 @@ import {
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
+import { shouldUpdateInternalDependencies } from "./utils";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -12,17 +13,6 @@ const DEPENDENCY_TYPES = [
   "peerDependencies",
   "optionalDependencies"
 ] as const;
-
-const bumpTypes = ["none", "patch", "minor", "major"];
-
-/* Converts a bump type into a numeric level to indicate order */
-function getBumpLevel(type: VersionType) {
-  const level = bumpTypes.indexOf(type);
-  if (level < 0) {
-    throw new Error(`Unrecognised bump type ${type}`);
-  }
-  return level;
-}
 
 export default function versionPackage(
   release: ComprehensiveRelease & {
@@ -35,7 +25,6 @@ export default function versionPackage(
 ) {
   let { newVersion, packageJson } = release;
 
-  const minLevel = getBumpLevel(updateInternalDependencies);
   packageJson.version = newVersion;
 
   for (let type of DEPENDENCY_TYPES) {
@@ -43,12 +32,11 @@ export default function versionPackage(
     if (deps) {
       for (let { name, version, type } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
-        const bumpLevel = getBumpLevel(type);
         if (
           !depCurrentVersion ||
           depCurrentVersion.startsWith("file:") ||
           depCurrentVersion.startsWith("link:") ||
-          bumpLevel < minLevel
+          !shouldUpdateInternalDependencies(updateInternalDependencies, type)
         )
           continue;
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
