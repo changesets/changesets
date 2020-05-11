@@ -1,5 +1,13 @@
 # @changesets/assemble-release-plan
 
+## 2.0.4
+
+### Patch Changes
+
+- Updated dependencies [[`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d)]:
+  - @changesets/types@3.0.0
+  - @changesets/get-dependents-graph@1.1.3
+
 ## 2.0.3
 
 ### Patch Changes

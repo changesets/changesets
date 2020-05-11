@@ -1,5 +1,18 @@
 # @changesets/apply-release-plan
 
+## 3.0.0
+
+### Major Changes
+
+- [`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d) [#358](https://github.com/atlassian/changesets/pull/358) Thanks [@Blasz](https://github.com/Blasz)! - Add new updateInternalDependencies config option to disable auto bumping of internal dependencies in the same release if the dependency was only patch bumped
+
+### Patch Changes
+
+- Updated dependencies [[`89f0c49`](https://github.com/atlassian/changesets/commit/89f0c497ac21b8d008da67caff8032947836c7b1), [`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d), [`09f62f9`](https://github.com/atlassian/changesets/commit/09f62f9c822f31899a48cbd93c7801d72a80b97e)]:
+  - @changesets/git@1.0.5
+  - @changesets/types@3.0.0
+  - @changesets/config@1.1.0
+
 ## 2.0.2
 
 ### Patch Changes
