@@ -69,7 +69,7 @@ export default async function applyReleasePlan(
   let releaseWithChangelogs = await getNewChangelogEntry(
     releaseWithPackages,
     changesets,
-    config.changelog,
+    config,
     cwd
   );
 
@@ -167,7 +167,7 @@ export default async function applyReleasePlan(
 async function getNewChangelogEntry(
   releasesWithPackage: ModCompWithPackage[],
   changesets: NewChangeset[],
-  changelogConfig: false | readonly [string, any],
+  config: Config,
   cwd: string
 ) {
   let getChangelogFuncs: ChangelogFunctions = {
@@ -175,10 +175,10 @@ async function getNewChangelogEntry(
     getDependencyReleaseLine: () => Promise.resolve("")
   };
   let changelogOpts: any;
-  if (changelogConfig) {
-    changelogOpts = changelogConfig[1];
+  if (config.changelog) {
+    changelogOpts = config.changelog[1];
     let changesetPath = path.join(cwd, ".changeset");
-    let changelogPath = resolveFrom(changesetPath, changelogConfig[0]);
+    let changelogPath = resolveFrom(changesetPath, config.changelog[0]);
 
     let possibleChangelogFunc = require(changelogPath);
     if (possibleChangelogFunc.default) {
@@ -208,7 +208,8 @@ async function getNewChangelogEntry(
         releasesWithPackage,
         moddedChangesets,
         getChangelogFuncs,
-        changelogOpts
+        changelogOpts,
+        config.updateInternalDependencies
       );
 
       return {

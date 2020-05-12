@@ -360,7 +360,10 @@ describe("apply release plan", () => {
                 {
                   id: "quick-lions-devour",
                   summary: "Hey, let's have fun with testing!",
-                  releases: [{ name: "pkg-a", type: "patch" }]
+                  releases: [
+                    { name: "pkg-a", type: "patch" },
+                    { name: "pkg-b", type: "patch" }
+                  ]
                 }
               ],
               releases: [
@@ -427,7 +430,10 @@ describe("apply release plan", () => {
                 {
                   id: "quick-lions-devour",
                   summary: "Hey, let's have fun with testing!",
-                  releases: [{ name: "pkg-a", type: "patch" }]
+                  releases: [
+                    { name: "pkg-a", type: "minor" },
+                    { name: "pkg-b", type: "patch" }
+                  ]
                 }
               ],
               releases: [
@@ -494,7 +500,10 @@ describe("apply release plan", () => {
                 {
                   id: "quick-lions-devour",
                   summary: "Hey, let's have fun with testing!",
-                  releases: [{ name: "pkg-a", type: "patch" }]
+                  releases: [
+                    { name: "pkg-a", type: "major" },
+                    { name: "pkg-b", type: "patch" }
+                  ]
                 }
               ],
               releases: [
@@ -564,7 +573,10 @@ describe("apply release plan", () => {
                 {
                   id: "quick-lions-devour",
                   summary: "Hey, let's have fun with testing!",
-                  releases: [{ name: "pkg-a", type: "patch" }]
+                  releases: [
+                    { name: "pkg-a", type: "patch" },
+                    { name: "pkg-b", type: "patch" }
+                  ]
                 }
               ],
               releases: [
@@ -631,7 +643,10 @@ describe("apply release plan", () => {
                 {
                   id: "quick-lions-devour",
                   summary: "Hey, let's have fun with testing!",
-                  releases: [{ name: "pkg-a", type: "patch" }]
+                  releases: [
+                    { name: "pkg-a", type: "minor" },
+                    { name: "pkg-b", type: "patch" }
+                  ]
                 }
               ],
               releases: [
@@ -698,7 +713,10 @@ describe("apply release plan", () => {
                 {
                   id: "quick-lions-devour",
                   summary: "Hey, let's have fun with testing!",
-                  releases: [{ name: "pkg-a", type: "patch" }]
+                  releases: [
+                    { name: "pkg-a", type: "major" },
+                    { name: "pkg-b", type: "patch" }
+                  ]
                 }
               ],
               releases: [
@@ -938,6 +956,247 @@ describe("apply release plan", () => {
           "  \n  look at this shiny stuff!"
         ].join("\n")
       );
+    });
+
+    it("should add an updated dependencies line when dependencies have been updated", async () => {
+      let { changedFiles } = await testSetup(
+        "internal-dependencies",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [
+                { name: "pkg-a", type: "patch" },
+                { name: "pkg-b", type: "patch" }
+              ]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-a",
+              type: "patch",
+              oldVersion: "1.0.3",
+              newVersion: "1.0.4",
+              changesets: ["quick-lions-devour"]
+            },
+            {
+              name: "pkg-b",
+              type: "patch",
+              oldVersion: "1.2.0",
+              newVersion: "1.2.1",
+              changesets: ["quick-lions-devour"]
+            }
+          ],
+          preState: undefined
+        },
+        {
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null
+          ],
+          commit: false,
+          linked: [],
+          access: "restricted",
+          baseBranch: "master",
+          updateInternalDependencies: "patch"
+        }
+      );
+
+      let readmePath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+      );
+      let readmePathB = changedFiles.find(a =>
+        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
+      );
+
+      if (!readmePath || !readmePathB)
+        throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+      let readmeB = await fs.readFile(readmePathB, "utf-8");
+
+      expect(readme.trim()).toEqual(outdent`# pkg-a
+
+      ## 1.0.4
+      ### Patch Changes
+
+      - Hey, let's have fun with testing!
+      - Updated dependencies [undefined]
+        - pkg-b@1.2.1`);
+
+      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+
+      ## 1.2.1
+      ### Patch Changes
+      
+      - Hey, let's have fun with testing!
+      - Updated dependencies [undefined]
+        - pkg-a@1.0.4`);
+    });
+
+    it("should NOT add updated dependencies line if dependencies have NOT been updated", async () => {
+      let { changedFiles } = await testSetup(
+        "internal-dependencies",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [
+                { name: "pkg-a", type: "patch" },
+                { name: "pkg-b", type: "patch" }
+              ]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-a",
+              type: "patch",
+              oldVersion: "1.0.3",
+              newVersion: "1.0.4",
+              changesets: ["quick-lions-devour"]
+            },
+            {
+              name: "pkg-b",
+              type: "patch",
+              oldVersion: "1.2.0",
+              newVersion: "1.2.1",
+              changesets: ["quick-lions-devour"]
+            }
+          ],
+          preState: undefined
+        },
+        {
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null
+          ],
+          commit: false,
+          linked: [],
+          access: "restricted",
+          baseBranch: "master",
+          updateInternalDependencies: "minor"
+        }
+      );
+
+      let readmePath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+      );
+      let readmePathB = changedFiles.find(a =>
+        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
+      );
+
+      if (!readmePath || !readmePathB)
+        throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+      let readmeB = await fs.readFile(readmePathB, "utf-8");
+
+      expect(readme.trim()).toEqual(outdent`# pkg-a
+
+      ## 1.0.4
+      ### Patch Changes
+
+      - Hey, let's have fun with testing!`);
+
+      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+
+      ## 1.2.1
+      ### Patch Changes
+      
+      - Hey, let's have fun with testing!`);
+    });
+
+    it("should only add updated dependencies line for dependencies that have been updated", async () => {
+      let { changedFiles } = await testSetup(
+        "internal-dependencies",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [
+                { name: "pkg-a", type: "patch" },
+                { name: "pkg-b", type: "patch" },
+                { name: "pkg-c", type: "minor" }
+              ]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-a",
+              type: "patch",
+              oldVersion: "1.0.3",
+              newVersion: "1.0.4",
+              changesets: ["quick-lions-devour"]
+            },
+            {
+              name: "pkg-b",
+              type: "patch",
+              oldVersion: "1.2.0",
+              newVersion: "1.2.1",
+              changesets: ["quick-lions-devour"]
+            },
+            {
+              name: "pkg-c",
+              type: "minor",
+              oldVersion: "2.0.0",
+              newVersion: "2.1.0",
+              changesets: ["quick-lions-devour"]
+            }
+          ],
+          preState: undefined
+        },
+        {
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null
+          ],
+          commit: false,
+          linked: [],
+          access: "restricted",
+          baseBranch: "master",
+          updateInternalDependencies: "minor"
+        }
+      );
+
+      let readmePath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+      );
+      let readmePathB = changedFiles.find(a =>
+        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
+      );
+      let readmePathC = changedFiles.find(a =>
+        a.endsWith(`pkg-c${path.sep}CHANGELOG.md`)
+      );
+
+      if (!readmePath || !readmePathB || !readmePathC)
+        throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+      let readmeB = await fs.readFile(readmePathB, "utf-8");
+      let readmeC = await fs.readFile(readmePathC, "utf-8");
+
+      expect(readme.trim()).toEqual(outdent`# pkg-a
+
+      ## 1.0.4
+      ### Patch Changes
+
+      - Hey, let's have fun with testing!`);
+
+      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+
+      ## 1.2.1
+      ### Patch Changes
+      
+      - Hey, let's have fun with testing!
+      - Updated dependencies [undefined]
+        - pkg-c@2.1.0`);
+
+      expect(readmeC.trim()).toEqual(outdent`# pkg-c
+
+      ## 2.1.0
+      ### Minor Changes
+      
+      - Hey, let's have fun with testing!`);
     });
   });
   describe("should error and not write if", () => {
