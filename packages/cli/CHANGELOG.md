@@ -1,5 +1,14 @@
 # @changesets/cli
 
+## 2.7.1
+
+### Patch Changes
+
+- [`52a88ce`](https://github.com/atlassian/changesets/commit/52a88ce816692f6b18fa8f3f67d707b78b0b8210) [#361](https://github.com/atlassian/changesets/pull/361) Thanks [@Blasz](https://github.com/Blasz)! - Fix dependency release lines being output when they were skipped via the updateInternalDependencies config option
+
+- Updated dependencies [[`52a88ce`](https://github.com/atlassian/changesets/commit/52a88ce816692f6b18fa8f3f67d707b78b0b8210)]:
+  - @changesets/apply-release-plan@3.0.1
+
 ## 2.7.0
 
 ### Minor Changes
