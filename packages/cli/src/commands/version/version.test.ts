@@ -126,10 +126,14 @@ describe("running version in a simple project", () => {
     await writeChangesets([simpleChangeset2], cwd2);
     const spy = jest.spyOn(fs, "writeFile");
 
-    await versionCommand(cwd2, {}, {
-      ...modifiedDefaultConfig,
-      linked: [["pkg-a", "pkg-b"]]
-    });
+    await versionCommand(
+      cwd2,
+      {},
+      {
+        ...modifiedDefaultConfig,
+        linked: [["pkg-a", "pkg-b"]]
+      }
+    );
 
     expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
       expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
@@ -248,14 +252,14 @@ describe("snapshot release", () => {
     expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
       expect.objectContaining({
         name: "pkg-a",
-        version: "0.0.0-exprimental-7b4a8h"
+        version: expect.stringContaining("0.0.0-exprimental-")
       })
     );
 
     expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
       expect.objectContaining({
         name: "pkg-b",
-        version: "0.0.0-exprimental-7b4a8h"
+        version: expect.stringContaining("0.0.0-exprimental-")
       })
     );
   });

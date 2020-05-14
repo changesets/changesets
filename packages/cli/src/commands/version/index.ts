@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import path from "path";
 import { log, warn } from "@changesets/logger";
-import { Config, SnapshotReleaseConfig } from "@changesets/types";
+import { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
@@ -67,7 +67,15 @@ export default async function version(
     options.snapshot
   );
 
-  await applyReleasePlan(releasePlan, packages, { ...config, commit: false });
+  await applyReleasePlan(
+    releasePlan,
+    packages,
+    {
+      ...config,
+      commit: false
+    },
+    options.snapshot
+  );
 
   if (options.snapshot !== undefined && config.commit) {
     log("All files have been updated and committed. You're ready to publish!");
