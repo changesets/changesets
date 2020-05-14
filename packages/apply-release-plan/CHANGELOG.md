@@ -1,5 +1,11 @@
 # @changesets/apply-release-plan
 
+## 3.0.2
+
+### Patch Changes
+
+- [`8fe77b6`](https://github.com/atlassian/changesets/commit/8fe77b614b726b861900e69c015c8876f64ed04f) [#366](https://github.com/atlassian/changesets/pull/366) Thanks [@Blasz](https://github.com/Blasz)! - Fix release version commit including dev dependent packages with release type 'none'
+
 ## 3.0.1
 
 ### Patch Changes
