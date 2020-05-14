@@ -3,3 +3,4 @@ node_modules/
 scratchings.js
 dist/
 .env
+coverage/

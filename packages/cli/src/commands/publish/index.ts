@@ -41,6 +41,8 @@ export default async function run(
   let preState = await readPreState(cwd);
 
   if (releaseTag && preState) {
+    error("Snapshot release is not allowed in pre mode");
+    log("To resolve this exit the pre mode by running `changeset pre exit`");
     throw new ExitError(1);
   }
 
