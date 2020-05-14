@@ -1485,6 +1485,64 @@ describe("apply release plan", () => {
           .includes("RELEASING: Releasing 1 package(s)")
       ).toBe(true);
     });
+    it("should not mention unreleased devDependents in release commit message", async () => {
+      let { tempDir } = await testSetup(
+        "simple-dev-dep",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [
+                { name: "pkg-a", type: "none" },
+                { name: "pkg-b", type: "minor" }
+              ]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-a",
+              type: "none",
+              oldVersion: "1.0.0",
+              newVersion: "1.0.0",
+              changesets: ["quick-lions-devour"]
+            },
+            {
+              name: "pkg-b",
+              type: "minor",
+              oldVersion: "1.0.0",
+              newVersion: "1.1.0",
+              changesets: ["quick-lions-devour"]
+            }
+          ],
+          preState: undefined
+        },
+        {
+          changelog: false,
+          commit: true,
+          linked: [],
+          access: "restricted",
+          baseBranch: "master",
+          updateInternalDependencies: "patch"
+        }
+      );
+
+      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+
+      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
+
+      let lastCommit = await spawn(
+        "git",
+        ["log", "-1", '--format=format:"%s%n%n%b"'],
+        { cwd: tempDir }
+      );
+
+      const commitMessage = lastCommit.stdout.toString();
+
+      expect(commitMessage).toMatch("RELEASING: Releasing 1 package(s)");
+      expect(commitMessage).toMatch("pkg-b@1.1.0");
+      expect(commitMessage).not.toMatch("pkg-a");
+    });
     it("should commit removing applied changesets", async () => {
       const releasePlan = new FakeReleasePlan();
 
