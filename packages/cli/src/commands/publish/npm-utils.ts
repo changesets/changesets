@@ -172,3 +172,14 @@ export function publish(
     return internalPublish(pkgName, opts, twoFactorState);
   });
 }
+
+export function distTag(
+  pkgName: string,
+  opts: { cwd: string; version: string; tag: string },
+  twoFactorState: TwoFactorState
+): Promise<{ published: boolean }> {
+  return npmRequestLimit(() => {
+    /* TODO: actually implement this */
+    return { published: true };
+  });
+}

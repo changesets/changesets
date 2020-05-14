@@ -76,11 +76,8 @@ export default async function publishPackages({
         pkg,
         access,
         twoFactorState,
-        preState === undefined
-          ? "latest"
-          : pkgInfo.publishedState === "only-pre"
-          ? "latest"
-          : preState.tag
+        pkgInfo.publishedState,
+        preState
       )
     );
   }
@@ -92,7 +89,8 @@ async function publishAPackage(
   pkg: Package,
   access: AccessType,
   twoFactorState: TwoFactorState,
-  tag: string
+  publishedState: PublishedState,
+  preState?: PreState
 ) {
   const { name, version, publishConfig } = pkg.packageJson;
   const localAccess = publishConfig && publishConfig.access;
@@ -101,6 +99,13 @@ async function publishAPackage(
   );
 
   const publishDir = pkg.dir;
+
+  const tag =
+    preState === undefined
+      ? "latest"
+      : publishedState === "only-pre" || publishedState === "never"
+      ? "latest"
+      : preState.tag;
 
   const publishConfirmation = await npmUtils.publish(
     name,
@@ -111,6 +116,18 @@ async function publishAPackage(
     },
     twoFactorState
   );
+
+  if (preState !== undefined && publishedState === "only-pre") {
+    await npmUtils.distTag(
+      name,
+      {
+        cwd: publishDir,
+        version,
+        tag
+      },
+      twoFactorState
+    );
+  }
 
   return {
     name,
