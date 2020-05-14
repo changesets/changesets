@@ -4,7 +4,7 @@ import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
-import { InternalError } from "@changesets/errors";
+import { InternalError, ExitError } from "@changesets/errors";
 import { Packages } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo } from "./types";
@@ -28,9 +28,19 @@ function getPreVersion(version: string) {
  * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
  */
 function getSnapshotReleaseVersion(snapshotConfig?: string | boolean) {
+  const now = new Date();
+  const uniqueHash = [
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds()
+  ].join("");
+
   let tag = "";
   if (typeof snapshotConfig === "string") tag = `-${snapshotConfig}`;
-  return `0.0.0${tag}-${"00000"}`;
+  return `0.0.0${tag}-${uniqueHash}`;
 }
 
 function assembleReleasePlan(
