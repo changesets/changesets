@@ -61,6 +61,7 @@ export type Config = {
   linked: Linked;
   access: AccessType;
   baseBranch: string;
+  packageLifecycleCommands?: Record<string, PackageLifecycleCommands>;
 };
 
 export type WrittenConfig = {
@@ -69,6 +70,7 @@ export type WrittenConfig = {
   linked?: Linked;
   access?: AccessType;
   baseBranch?: string;
+  packageLifecycleCommands?: Record<string, PackageLifecycleCommands>;
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
@@ -102,4 +104,8 @@ export type PreState = {
     [pkgName: string]: string;
   };
   changesets: string[];
+};
+
+export type PackageLifecycleCommands = {
+  version?: string;
 };

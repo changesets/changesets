@@ -12,8 +12,7 @@ export let defaultWrittenConfig = {
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
-  baseBranch: "master",
-  packageLifecycleCommands: {}
+  baseBranch: "master"
 } as const;
 
 function getNormalisedChangelogOption(
