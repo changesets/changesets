@@ -12,8 +12,7 @@ export let defaultWrittenConfig = {
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
-  baseBranch: "master",
-  packageLifecycleCommands: {}
+  baseBranch: "master"
 } as const;
 
 function getNormalisedChangelogOption(
@@ -142,7 +141,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
-      messages.join("\n")
+        messages.join("\n")
     );
   }
   let config: Config = {
@@ -163,8 +162,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch
         : json.baseBranch,
-    packageLifecycleCommands: json.packageLifecycleCommands === undefined ?
-      defaultWrittenConfig.packageLifecycleCommands : json.packageLifecycleCommands
+    packageLifecycleCommands:
+      json.packageLifecycleCommands === undefined
+        ? defaultWrittenConfig.packageLifecycleCommands
+        : json.packageLifecycleCommands
   };
   return config;
 };

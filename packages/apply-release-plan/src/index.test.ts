@@ -825,8 +825,8 @@ class FakeReleasePlanCustomCommand {
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      packageLifecycleCommmands: {
-        "pkg-a": {version: 'cargo release'}
+      packageLifecycleCommands: {
+        "pkg-a": { version: "cargo release" }
       }
     };
 
@@ -846,7 +846,6 @@ class FakeReleasePlanCustomCommand {
 describe("apply release plan considering custom command", () => {
   it("will return a null packageJson", async () => {
     const releasePlan = new FakeReleasePlanCustomCommand();
-  
     let { changedFiles } = await testSetup(
       "simple-project-custom-command",
       releasePlan.getReleasePlan(),
@@ -858,8 +857,8 @@ describe("apply release plan considering custom command", () => {
     );
 
     if (!readmePath) throw new Error(`could not find an updated changelog`);
-  })
-})
+  });
+});
 
 // MAKE SURE BOTH OF THESE ARE COVERED
 
