@@ -5,7 +5,6 @@
   "version": "1.0.0",
   "bolt": {
     "workspaces": [
-      "packages",
       "packages/*"
     ]
   }

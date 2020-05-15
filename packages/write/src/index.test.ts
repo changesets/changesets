@@ -1,4 +1,4 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixtures from "fixturez";
 
 import fs from "fs-extra";
 import path from "path";
@@ -7,6 +7,8 @@ import { Release } from "@changesets/types";
 import writeChangeset from "./";
 
 import humanId from "human-id";
+
+const f = fixtures(__dirname);
 
 jest.mock("human-id");
 
@@ -24,7 +26,7 @@ describe("simple project", () => {
   let cwd: string;
 
   beforeEach(async () => {
-    cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    cwd = await f.copy("simple-project");
   });
 
   it("should write a changeset", async () => {

@@ -54,7 +54,7 @@ export default async function run(
     // We create the tags after the push above so that we know that HEAD wont change and that pushing
     // wont suffer from a race condition if another merge happens in the mean time (pushing tags wont
     // fail if we are behind master).
-    log("Creating tags...");
+    log("Creating git tags...");
     for (const pkg of successful) {
       const tag = `${pkg.name}@${pkg.newVersion}`;
       log("New tag: ", tag);

@@ -1,7 +1,10 @@
 import spawn from "spawndamnit";
 import path from "path";
-import { getPackages } from "@manypkg/get-packages";
+import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
+import isSubdir from "is-subdir";
+
+const isInDir = (dir: string) => (subdir: string) => isSubdir(dir, subdir);
 
 async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
@@ -29,9 +32,14 @@ async function tag(tagStr: string, cwd: string) {
   return gitCmd.code === 0;
 }
 
+// Find the commit where we diverged from `ref` at using `git merge-base`
 export async function getDivergedCommit(cwd: string, ref: string) {
-  // First we need to find the commit where we diverged from `ref` at using `git merge-base`
   const cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
+  if (cmd.code !== 0) {
+    throw new Error(
+      `Failed to find where HEAD diverged from ${ref}. Does ${ref} exist?`
+    );
+  }
   return cmd.stdout.toString().trim();
 }
 
@@ -56,6 +64,12 @@ async function getChangedFilesSince({
   const divergedAt = await getDivergedCommit(cwd, ref);
   // Now we can find which files we added
   const cmd = await spawn("git", ["diff", "--name-only", divergedAt], { cwd });
+  if (cmd.code !== 0) {
+    throw new Error(
+      `Failed to diff against ${divergedAt}. Is ${divergedAt} a valid ref?`
+    );
+  }
+
   const files = cmd.stdout
     .toString()
     .trim()
@@ -107,17 +121,17 @@ async function getChangedPackagesSinceRef({
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
   let packages = await getPackages(cwd);
 
-  const fileNameToPackage = (fileName: string) =>
-    packages.packages.find(pkg => fileName.startsWith(pkg.dir + path.sep))!;
+  const fileToPackage: Record<string, Package> = {};
 
-  const fileExistsInPackage = (fileName: string) =>
-    !!fileNameToPackage(fileName);
+  packages.packages.forEach(pkg =>
+    changedFiles.filter(isInDir(pkg.dir)).forEach(fileName => {
+      const prevPkg = fileToPackage[fileName] || { dir: "" };
+      if (pkg.dir.length > prevPkg.dir.length) fileToPackage[fileName] = pkg;
+    })
+  );
 
   return (
-    changedFiles
-      // ignore deleted files
-      .filter(fileExistsInPackage)
-      .map(fileNameToPackage)
+    Object.values(fileToPackage)
       // filter, so that we have only unique packages
       .filter((pkg, idx, packages) => packages.indexOf(pkg) === idx)
   );

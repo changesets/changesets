@@ -1,5 +1,18 @@
 # @changesets/get-dependents-graph
 
+## 1.1.3
+
+### Patch Changes
+
+- Updated dependencies [[`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d)]:
+  - @changesets/types@3.0.0
+
+## 1.1.2
+
+### Patch Changes
+
+- [`d678da5`](https://github.com/atlassian/changesets/commit/d678da5e9936862bb66e5edb538c5b8be23d4ffe) [#324](https://github.com/atlassian/changesets/pull/324) Thanks [@zkochan](https://github.com/zkochan)! - Dev dependencies that are installed via the link or file protocol are ignored.
+
 ## 1.1.1
 
 ### Patch Changes

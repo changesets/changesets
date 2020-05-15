@@ -62,6 +62,8 @@ export type Config = {
   access: AccessType;
   baseBranch: string;
   packageLifecycleCommands?: Record<string, PackageLifecycleCommands>;
+  /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
+  updateInternalDependencies: "patch" | "minor";
 };
 
 export type WrittenConfig = {
@@ -71,6 +73,8 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   packageLifecycleCommands?: Record<string, PackageLifecycleCommands>;
+  /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
+  updateInternalDependencies?: "patch" | "minor";
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };

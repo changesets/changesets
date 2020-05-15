@@ -12,7 +12,8 @@ export let defaultWrittenConfig = {
   commit: false,
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
-  baseBranch: "master"
+  baseBranch: "master",
+  updateInternalDependencies: "patch"
 } as const;
 
 function getNormalisedChangelogOption(
@@ -138,6 +139,18 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       }
     }
   }
+  if (
+    json.updateInternalDependencies !== undefined &&
+    !["patch", "minor"].includes(json.updateInternalDependencies)
+  ) {
+    messages.push(
+      `The \`updateInternalDependencies\` option is set as ${JSON.stringify(
+        json.updateInternalDependencies,
+        null,
+        2
+      )} but can only be 'patch' or 'minor'`
+    );
+  }
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
@@ -165,7 +178,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     packageLifecycleCommands:
       json.packageLifecycleCommands === undefined
         ? defaultWrittenConfig.packageLifecycleCommands
-        : json.packageLifecycleCommands
+        : json.packageLifecycleCommands,
+    updateInternalDependencies:
+      json.updateInternalDependencies === undefined
+        ? defaultWrittenConfig.updateInternalDependencies
+        : json.updateInternalDependencies
   };
   return config;
 };

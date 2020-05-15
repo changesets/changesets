@@ -21,7 +21,8 @@ If you just want to jump in to using changesets, the [@changesets/cli](./package
 If you want a detailed explanation of the the concepts behind changesets, or to understand how you would build on top
 of changesets, check out our [detailed-explanation](./docs/detailed-explanation.md).
 
-We also have a [spec](./docs/spec.md).
+We also have a [dictionary](./docs/dictionary.md).
+
 
 ## Integrating with CI
 
@@ -38,6 +39,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [keystone](https://v5.keystonejs.com/)
 - [react-select](https://react-select.com/home)
 - [XState](https://xstate.js.org/)
+- [pnpm](https://pnpm.js.org/)
 
 # Thanks/Inspiration
 

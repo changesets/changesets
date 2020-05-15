@@ -1,5 +1,36 @@
 # @changesets/apply-release-plan
 
+## 3.0.2
+
+### Patch Changes
+
+- [`8fe77b6`](https://github.com/atlassian/changesets/commit/8fe77b614b726b861900e69c015c8876f64ed04f) [#366](https://github.com/atlassian/changesets/pull/366) Thanks [@Blasz](https://github.com/Blasz)! - Fix release version commit including dev dependent packages with release type 'none'
+
+## 3.0.1
+
+### Patch Changes
+
+- [`52a88ce`](https://github.com/atlassian/changesets/commit/52a88ce816692f6b18fa8f3f67d707b78b0b8210) [#361](https://github.com/atlassian/changesets/pull/361) Thanks [@Blasz](https://github.com/Blasz)! - Fix dependency release lines being output when they were skipped via the updateInternalDependencies config option
+
+## 3.0.0
+
+### Major Changes
+
+- [`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d) [#358](https://github.com/atlassian/changesets/pull/358) Thanks [@Blasz](https://github.com/Blasz)! - Add new updateInternalDependencies config option to disable auto bumping of internal dependencies in the same release if the dependency was only patch bumped
+
+### Patch Changes
+
+- Updated dependencies [[`89f0c49`](https://github.com/atlassian/changesets/commit/89f0c497ac21b8d008da67caff8032947836c7b1), [`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d), [`09f62f9`](https://github.com/atlassian/changesets/commit/09f62f9c822f31899a48cbd93c7801d72a80b97e)]:
+  - @changesets/git@1.0.5
+  - @changesets/types@3.0.0
+  - @changesets/config@1.1.0
+
+## 2.0.2
+
+### Patch Changes
+
+- [`3dbab2e`](https://github.com/atlassian/changesets/commit/3dbab2e80d9a8a0cccc02d74c6d8150f603219e6) [#343](https://github.com/atlassian/changesets/pull/343) Thanks [@zkochan](https://github.com/zkochan)! - Self-references should be skipped when bumping versions. A self-reference is a dev dep that has the same name as the package. Some projects use self-references as a convinient way to require files using relative paths from the root directory.
+
 ## 2.0.1
 
 ### Patch Changes

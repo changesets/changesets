@@ -1,0 +1,7 @@
+{
+  "name": "self-referenced",
+  "version": "0.0.0",
+  "devDependencies": {
+    "self-referenced": "file:"
+  }
+}

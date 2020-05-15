@@ -1,4 +1,4 @@
-import { copyFixtureIntoTempDir } from "jest-fixtures";
+import fixtures from "fixturez";
 import fs from "fs-extra";
 import path from "path";
 import { defaultConfig } from "@changesets/config";
@@ -11,6 +11,8 @@ import humanId from "human-id";
 import { NewChangeset, ReleasePlan } from "@changesets/types";
 
 jest.mock("human-id");
+
+const f = fixtures(__dirname);
 
 const simpleChangeset: NewChangeset = {
   id: "fake-ids-abound",
@@ -59,7 +61,7 @@ describe("status", () => {
   let cwd: string;
 
   beforeEach(async () => {
-    cwd = await copyFixtureIntoTempDir(__dirname, "simple-project");
+    cwd = await f.copy("simple-project");
   });
 
   it("should get the status for a simple changeset and return the release object", async () => {
