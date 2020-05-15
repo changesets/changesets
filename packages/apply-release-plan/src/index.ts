@@ -90,18 +90,26 @@ export default async function applyReleasePlan(
     version: newVersion
   }));
 
-  let customCommands = []
+  let customCommands = [];
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map(release => {
-    if (!!config.packageLifecycleCommands && !!config.packageLifecycleCommands[release.name]) {
-      customCommands.push(spawn(`${config.packageLifecycleCommands[release.name].version} ${release.type}`, { cwd: release.dir }))
-      return { ...release, packageJson: null }
+    if (
+      !!config.packageLifecycleCommands &&
+      !!config.packageLifecycleCommands[release.name]
+    ) {
+      customCommands.push(
+        spawn(
+          `${config.packageLifecycleCommands[release.name].version} ${release.type}`,
+          { cwd: release.dir }
+        )
+      );
+      return { ...release, packageJson: null };
     } else {
       return versionPackage(release, versionsToUpdate);
     }
   });
 
-  await Promise.all(customCommands)
+  await Promise.all(customCommands);
 
   let prettierConfig = await prettier.resolveConfig(cwd);
 
