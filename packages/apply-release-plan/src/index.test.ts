@@ -825,7 +825,7 @@ class FakeReleasePlanCustomCommand {
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      packageLifecycleCommmands: {
+      packageLifecycleCommands: {
         "pkg-a": { version: "cargo release" }
       }
     };
@@ -846,7 +846,6 @@ class FakeReleasePlanCustomCommand {
 describe("apply release plan considering custom command", () => {
   it("will return a null packageJson", async () => {
     const releasePlan = new FakeReleasePlanCustomCommand();
-
     let { changedFiles } = await testSetup(
       "simple-project-custom-command",
       releasePlan.getReleasePlan(),
