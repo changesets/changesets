@@ -22,7 +22,6 @@
     "spawndamnit": "^2.0.0"
   },
   "devDependencies": {
-    "fixturez": "^1.1.0",
-    "spawndamnit": "^2.0.0"
+    "fixturez": "^1.1.0"
   }
 }
