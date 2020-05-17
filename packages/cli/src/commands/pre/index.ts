@@ -9,10 +9,7 @@ import {
 
 export default async function pre(
   cwd: string,
-  options:
-    | { command: "enter"; tag: string }
-    | { command: "exit"; tag?: string }
-    | { command: "snapshot"; tag: string; otp?: string }
+  options: { command: "enter"; tag: string } | { command: "exit"; tag?: string }
 ) {
   if (options.command === "enter") {
     try {
