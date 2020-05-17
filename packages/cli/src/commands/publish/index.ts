@@ -21,14 +21,18 @@ let importantEnd = chalk.red(
 
 function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   warn(importantSeparator);
-  warn(
-    `You are in prerelease mode so packages will be published to the ${chalk.cyan(
-      tag || preState!.tag
-    )}
-      dist tag except for packages that have not had normal releases which will be published to ${chalk.cyan(
-        "latest"
-      )}`
-  );
+  if (preState) {
+    warn(
+      `You are in prerelease mode so packages will be published to the ${chalk.cyan(
+        preState.tag
+      )}
+        dist tag except for packages that have not had normal releases which will be published to ${chalk.cyan(
+          "latest"
+        )}`
+    );
+  } else if (tag !== "latest") {
+    warn(`Packages will be released under the ${tag} tag`);
+  }
   warn(importantEnd);
 }
 

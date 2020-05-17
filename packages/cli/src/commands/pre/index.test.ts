@@ -21,9 +21,6 @@ let preStateForSimpleProject: PreState = {
 };
 
 jest.mock("@changesets/logger");
-jest.mock("@changesets/git");
-jest.mock("../version");
-jest.mock("../publish");
 
 let mockedLogger = logger as jest.Mocked<typeof logger>;
 

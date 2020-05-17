@@ -27,9 +27,16 @@ function getPreVersion(version: string) {
  * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
  * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
  */
+// Creating cache of hash since this function is called for every release the value of second may change
+let uniqueHash: string;
 function getSnapshotReleaseVersion(snapshot: string | boolean) {
+  if (uniqueHash) return uniqueHash;
   const now = new Date();
-  const uniqueHash = [
+  let tag = "";
+
+  if (typeof snapshot === "string") tag = `-${snapshot}`;
+
+  let dateAndTime = [
     now.getFullYear(),
     now.getMonth(),
     now.getDate(),
@@ -38,9 +45,8 @@ function getSnapshotReleaseVersion(snapshot: string | boolean) {
     now.getSeconds()
   ].join("");
 
-  let tag = "";
-  if (typeof snapshot === "string") tag = `-${snapshot}`;
-  return `0.0.0${tag}-${uniqueHash}`;
+  uniqueHash = `0.0.0${tag}-${dateAndTime}`;
+  return uniqueHash;
 }
 
 function assembleReleasePlan(
@@ -50,7 +56,6 @@ function assembleReleasePlan(
   preState: PreState | undefined,
   snapshot?: string | boolean
 ): ReleasePlan {
-  // Making copy of preState object
   let updatedPreState: PreState | undefined =
     preState === undefined
       ? undefined
