@@ -26,6 +26,8 @@ function assembleReleasePlan(
   config: Config,
   preState: PreState | undefined
 ): ReleasePlan {
+  validateChangesets(changesets, config.ignored);
+
   let updatedPreState: PreState | undefined =
     preState === undefined
       ? undefined
@@ -179,6 +181,32 @@ function assembleReleasePlan(
     }),
     preState: updatedPreState
   };
+}
+
+// Changesets that contains both ignored and not ignored packages are not allowed
+function validateChangesets(changesets: NewChangeset[], ignored: Readonly<string[]>): void {
+  for(const changeset of changesets) {
+    // Using the following 2 arrays to decide whether a changeset 
+    // contains both ignored and not ignored packages
+    const ignoredPackages = [];
+    const notIgnoredPackages = [];
+    for (const release of changeset.releases) {
+      if (ignored.find(ignoredPackageName => ignoredPackageName === release.name)) {
+        ignoredPackages.push(release.name);
+      } else {
+        notIgnoredPackages.push(release.name);
+      }
+    }
+
+    if (ignoredPackages.length > 0 && notIgnoredPackages.length > 0) {
+      throw new Error(`
+        Found mixed changeset ${changeset.id}
+        Found ignored packages: ${ignoredPackages.join(' ')}
+        Found not Ignored packages: ${notIgnoredPackages.join(' ')} 
+        Mixed changesets that contain both ignored and not ignored packages are not allowed
+      `);
+    }
+  }
 }
 
 export default assembleReleasePlan;
