@@ -13,7 +13,8 @@ export let defaultWrittenConfig = {
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
   baseBranch: "master",
-  updateInternalDependencies: "patch"
+  updateInternalDependencies: "patch",
+  ignored: [] as ReadonlyArray<string>
 } as const;
 
 function getNormalisedChangelogOption(
@@ -157,6 +158,12 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.join("\n")
     );
   }
+
+  if (json.ignored) {
+    // TODO: input validation
+    // TODO: ignored package should not appear in linked array
+  }
+
   let config: Config = {
     changelog: getNormalisedChangelogOption(
       json.changelog === undefined
@@ -179,7 +186,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     updateInternalDependencies:
       json.updateInternalDependencies === undefined
         ? defaultWrittenConfig.updateInternalDependencies
-        : json.updateInternalDependencies
+        : json.updateInternalDependencies,
+
+    ignored: 
+      json.ignored === undefined ? defaultWrittenConfig.ignored : json.ignored
   };
   return config;
 };

@@ -63,6 +63,7 @@ export type Config = {
   baseBranch: string;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
+  ignored: ReadonlyArray<string>;
 };
 
 export type WrittenConfig = {
@@ -73,6 +74,7 @@ export type WrittenConfig = {
   baseBranch?: string;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
+  ignored?: ReadonlyArray<string>;
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
