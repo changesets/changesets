@@ -7,7 +7,8 @@ import { InternalRelease } from "./types";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
-  packagesByName: Map<string, Package>
+  packagesByName: Map<string, Package>,
+  ignoredPackages: Readonly<string[]>,
 ): Map<string, InternalRelease> {
   let releases: Map<string, InternalRelease> = new Map();
 
@@ -39,6 +40,11 @@ export default function flattenReleases(
         // If the bumpType has changed recalc newVersion
         // push new changeset to releases
         release.changesets.push(changeset.id);
+      }
+
+      // ignored packages will not trigger a release, so set the release type to "none"
+      if (!!ignoredPackages.find(ignoredPackageName => ignoredPackageName === name)) {
+        release.type = "none";
       }
 
       releases.set(name, release);

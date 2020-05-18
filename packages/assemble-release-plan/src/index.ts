@@ -43,6 +43,7 @@ function assembleReleasePlan(
   let unfilteredChangesets = changesets;
 
   let preVersions = new Map();
+  // TODO: handle ignored in prerelease
   if (updatedPreState !== undefined) {
     for (let pkg of packages.packages) {
       if (updatedPreState.initialVersions[pkg.packageJson.name] === undefined) {
@@ -91,7 +92,7 @@ function assembleReleasePlan(
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(changesets, packagesByName);
+  let releases = flattenReleases(changesets, packagesByName, config.ignored);
 
   if (updatedPreState !== undefined) {
     if (updatedPreState.mode === "exit") {
@@ -115,7 +116,8 @@ function assembleReleasePlan(
       // because if they're not being released, the version will already have been bumped with the highest bump type
       let releasesFromUnfilteredChangesets = flattenReleases(
         unfilteredChangesets,
-        packagesByName
+        packagesByName,
+        config.ignored
       );
 
       releases.forEach((value, key) => {
@@ -157,7 +159,8 @@ function assembleReleasePlan(
       releases,
       packagesByName,
       dependentsGraph,
-      preInfo
+      preInfo,
+      config.ignored
     );
 
     // The map passed in to determineDependents will be mutated
