@@ -44,8 +44,8 @@ export default async function run(
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
   let preState = await readPreState(cwd);
 
-  if (releaseTag && preState) {
-    error("Snapshot release is not allowed in pre mode");
+  if (releaseTag && preState && preState.mode === "pre") {
+    error("Releasing under custom tag is not allowed in pre mode");
     log("To resolve this exit the pre mode by running `changeset pre exit`");
     throw new ExitError(1);
   }

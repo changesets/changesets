@@ -27,26 +27,22 @@ function getPreVersion(version: string) {
  * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
  * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
  */
-// Creating cache of hash since this function is called for every release the value of second may change
-let uniqueHash: string;
-function getSnapshotReleaseVersion(snapshot: string | boolean) {
-  if (uniqueHash) return uniqueHash;
+function getSnapshotReleaseVersion(snapshot?: string | boolean) {
   const now = new Date();
-  let tag = "";
-
-  if (typeof snapshot === "string") tag = `-${snapshot}`;
 
   let dateAndTime = [
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours(),
-    now.getMinutes(),
-    now.getSeconds()
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    now.getUTCHours(),
+    now.getUTCMinutes(),
+    now.getUTCSeconds()
   ].join("");
 
-  uniqueHash = `0.0.0${tag}-${dateAndTime}`;
-  return uniqueHash;
+  let tag = "";
+  if (typeof snapshot === "string") tag = `-${snapshot}`;
+
+  return `0.0.0${tag}-${dateAndTime}`;
 }
 
 function assembleReleasePlan(
@@ -65,6 +61,12 @@ function assembleReleasePlan(
             ...preState.initialVersions
           }
         };
+
+  // Caching the snapshot version here and use this if it is snapshot release
+  let snapshotVersion: string;
+  if (snapshot !== undefined) {
+    snapshotVersion = getSnapshotReleaseVersion(snapshot);
+  }
 
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
@@ -204,7 +206,7 @@ function assembleReleasePlan(
         newVersion:
           snapshot === undefined
             ? incrementVersion(incompleteRelease, preInfo)!
-            : getSnapshotReleaseVersion(snapshot)
+            : snapshotVersion
       };
     }),
     preState: updatedPreState
