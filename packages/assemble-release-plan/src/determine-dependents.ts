@@ -9,6 +9,8 @@ import { Package } from "@manypkg/get-packages";
 import { InternalRelease, PreInfo } from "./types";
 import { incrementVersion } from "./increment";
 
+type ReleaseWithPkg = Release & { pkgJSON: PackageJSON };
+
 /*
   WARNING:
   Important note for understanding how this package works:
@@ -91,36 +93,33 @@ export default function getDependents(
         }
         return { name: dependent, type, pkgJSON: dependentPackage.packageJson };
       })
-      .filter(({ type }) => type)
-      .forEach(
-        // @ts-ignore - I don't know how to make typescript understand that the filter above guarantees this and I got sick of trying
-        ({ name, type, pkgJSON }: Release & { pkgJSON: PackageJSON }) => {
-          // At this point, we know if we are making a change
-          updated = true;
+      .filter((release): release is ReleaseWithPkg => !!release.type)
+      .forEach(({ name, type, pkgJSON }) => {
+        // At this point, we know if we are making a change
+        updated = true;
 
-          const existing = releases.get(name);
-          // For things that are being given a major bump, we check if we have already
-          // added them here. If we have, we update the existing item instead of pushing it on to search.
-          // It is safe to not add it to pkgsToSearch because it should have already been searched at the
-          // largest possible bump type.
+        const existing = releases.get(name);
+        // For things that are being given a major bump, we check if we have already
+        // added them here. If we have, we update the existing item instead of pushing it on to search.
+        // It is safe to not add it to pkgsToSearch because it should have already been searched at the
+        // largest possible bump type.
 
-          if (existing && type === "major" && existing.type !== "major") {
-            existing.type = "major";
+        if (existing && type === "major" && existing.type !== "major") {
+          existing.type = "major";
 
-            pkgsToSearch.push(existing);
-          } else {
-            let newDependent: InternalRelease = {
-              name,
-              type,
-              oldVersion: pkgJSON.version,
-              changesets: []
-            };
+          pkgsToSearch.push(existing);
+        } else {
+          let newDependent: InternalRelease = {
+            name,
+            type,
+            oldVersion: pkgJSON.version,
+            changesets: []
+          };
 
-            pkgsToSearch.push(newDependent);
-            releases.set(name, newDependent);
-          }
+          pkgsToSearch.push(newDependent);
+          releases.set(name, newDependent);
         }
-      );
+      });
   }
 
   return updated;

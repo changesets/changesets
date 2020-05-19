@@ -11,6 +11,7 @@
     "node-fetch": "^2.5.0"
   },
   "devDependencies": {
+    "@types/node-fetch": "^2.5.7",
     "nock": "^11.7.0",
     "prettier": "^1.18.2"
   }

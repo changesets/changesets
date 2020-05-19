@@ -103,7 +103,6 @@ const cwd = process.cwd();
 
   if (input.length < 1) {
     const { empty }: CliOptions = flags;
-    // @ts-ignore if this is undefined, we have already exited
     await add(cwd, { empty }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
@@ -138,7 +137,6 @@ const cwd = process.cwd();
 
     switch (input[0]) {
       case "add": {
-        // @ts-ignore if this is undefined, we have already exited
         await add(cwd, { empty }, config);
         return;
       }
@@ -165,7 +163,6 @@ const cwd = process.cwd();
           error("A tag must be passed when using prerelese enter");
           throw new ExitError(1);
         }
-        // @ts-ignore
         await pre(cwd, { command, tag });
         return;
       }

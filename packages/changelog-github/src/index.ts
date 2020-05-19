@@ -1,5 +1,4 @@
 import { ChangelogFunctions } from "@changesets/types";
-// @ts-ignore
 import { config } from "dotenv";
 import { getInfo } from "@changesets/get-github-info";
 
