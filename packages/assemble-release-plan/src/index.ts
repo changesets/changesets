@@ -99,7 +99,7 @@ function assembleReleasePlan(
   if (updatedPreState !== undefined) {
     if (updatedPreState.mode === "exit") {
       for (let pkg of packages.packages) {
-        if (preVersions.get(pkg.packageJson.name) !== -1) {
+        if (preVersions.get(pkg.packageJson.name)) {
           if (!releases.has(pkg.packageJson.name)) {
             releases.set(pkg.packageJson.name, {
               type: "patch",
