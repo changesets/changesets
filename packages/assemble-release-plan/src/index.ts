@@ -46,7 +46,6 @@ function assembleReleasePlan(
   let unfilteredChangesets = changesets;
 
   let preVersions = new Map();
-  // TODO: handle ignored in prerelease
   if (updatedPreState !== undefined) {
     for (let pkg of packages.packages) {
       if (updatedPreState.initialVersions[pkg.packageJson.name] === undefined) {

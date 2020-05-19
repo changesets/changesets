@@ -152,16 +152,38 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but can only be 'patch' or 'minor'`
     );
   }
+  if (json.ignored) {
+    if (
+      !(
+        Array.isArray(json.ignored) &&
+        json.ignored.every(pkgName => typeof pkgName === "string")
+      )
+    ) {
+      messages.push(
+        `The \`ignored\` option is set as ${JSON.stringify(
+          json.ignored,
+          null,
+          2
+        )} when the only valid values are undefined or an array package names`
+      );
+    } else {
+      let pkgNames = new Set(
+        packages.packages.map(({ packageJson }) => packageJson.name)
+      );
+      for (let pkgName of json.ignored) {
+        if (!pkgNames.has(pkgName)) {
+          messages.push(
+            `The package "${pkgName}" is specified in the \`ignored\` option but it is not found in the project. You may have misspelled the package name.`
+          );
+        }
+      }
+    }
+  }
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
-        messages.join("\n")
+      messages.join("\n")
     );
-  }
-
-  if (json.ignored) {
-    // TODO: input validation
-    // TODO: ignored package should not appear in linked array
   }
 
   let config: Config = {
@@ -188,7 +210,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.updateInternalDependencies
         : json.updateInternalDependencies,
 
-    ignored: 
+    ignored:
       json.ignored === undefined ? defaultWrittenConfig.ignored : json.ignored
   };
   return config;
