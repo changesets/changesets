@@ -8,6 +8,7 @@ import { InternalError } from "@changesets/errors";
 import { Packages } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo } from "./types";
+import isIgnoredPackage from "./is-ignored";
 
 function getPreVersion(version: string) {
   let parsed = semver.parse(version)!;
@@ -32,11 +33,11 @@ function assembleReleasePlan(
     preState === undefined
       ? undefined
       : {
-          ...preState,
-          initialVersions: {
-            ...preState.initialVersions
-          }
-        };
+        ...preState,
+        initialVersions: {
+          ...preState.initialVersions
+        }
+      };
 
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
@@ -148,9 +149,9 @@ function assembleReleasePlan(
     updatedPreState === undefined
       ? undefined
       : {
-          state: updatedPreState,
-          preVersions
-        };
+        state: updatedPreState,
+        preVersions
+      };
 
   let dependentsGraph = getDependentsGraph(packages);
 
@@ -174,10 +175,20 @@ function assembleReleasePlan(
   return {
     changesets,
     releases: [...releases.values()].map(incompleteRelease => {
-      return {
-        ...incompleteRelease,
-        newVersion: incrementVersion(incompleteRelease, preInfo)!
-      };
+      // For ignored packages, the newVersion is the same as the old version
+      // in both prereleased and regular releases
+      if (isIgnoredPackage(incompleteRelease.name, config.ignored)) {
+        return {
+          ...incompleteRelease,
+          newVersion: incompleteRelease.oldVersion
+        }
+      } else {
+        return {
+          ...incompleteRelease,
+          newVersion: incrementVersion(incompleteRelease, preInfo)!
+        };
+      }
+
     }),
     preState: updatedPreState
   };
@@ -185,7 +196,7 @@ function assembleReleasePlan(
 
 // Changesets that contains both ignored and not ignored packages are not allowed
 function validateChangesets(changesets: NewChangeset[], ignored: Readonly<string[]>): void {
-  for(const changeset of changesets) {
+  for (const changeset of changesets) {
     // Using the following 2 arrays to decide whether a changeset 
     // contains both ignored and not ignored packages
     const ignoredPackages = [];

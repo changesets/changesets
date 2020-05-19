@@ -4,6 +4,7 @@
 import { NewChangeset } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease } from "./types";
+import isIgnoredPackage from "./is-ignored";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
@@ -43,7 +44,7 @@ export default function flattenReleases(
       }
 
       // ignored packages will not trigger a release, so set the release type to "none"
-      if (!!ignoredPackages.find(ignoredPackageName => ignoredPackageName === name)) {
+      if (isIgnoredPackage(name, ignoredPackages)) {
         release.type = "none";
       }
 
