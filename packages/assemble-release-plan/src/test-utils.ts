@@ -79,29 +79,29 @@ class FakeFullState {
     this.changesets.push(changeset);
   }
 
-  updateDependency(pkgA: string, pkgB: string, version: string) {
-    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
+  updateDependency(pkgName: string, dependency: string, version: string) {
+    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgName);
     if (!pkg) throw new Error("no pkg");
     if (!pkg.packageJson.dependencies) {
       pkg.packageJson.dependencies = {};
     }
-    pkg.packageJson.dependencies[pkgB] = version;
+    pkg.packageJson.dependencies[dependency] = version;
   }
-  updateDevDependency(pkgA: string, pkgB: string, version: string) {
-    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
+  updateDevDependency(pkgName: string, dependency: string, version: string) {
+    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgName);
     if (!pkg) throw new Error("no pkg");
     if (!pkg.packageJson.devDependencies) {
       pkg.packageJson.devDependencies = {};
     }
-    pkg.packageJson.devDependencies[pkgB] = version;
+    pkg.packageJson.devDependencies[dependency] = version;
   }
-  updatePeerDep(pkgA: string, pkgB: string, version: string) {
-    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
+  updatePeerDep(pkgName: string, dependency: string, version: string) {
+    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgName);
     if (!pkg) throw new Error("no pkg");
     if (!pkg.packageJson.peerDependencies) {
       pkg.packageJson.peerDependencies = {};
     }
-    pkg.packageJson.peerDependencies[pkgB] = version;
+    pkg.packageJson.peerDependencies[dependency] = version;
   }
 
   addPackage(name: string, version: string) {

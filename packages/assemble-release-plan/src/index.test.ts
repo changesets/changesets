@@ -89,11 +89,18 @@ describe("assemble-release-plan", () => {
     );
 
     expect(releases.length).toEqual(2);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("2.0.0");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("1.0.1");
-    expect(releases[1].changesets).toEqual([]);
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "2.0.0"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "1.0.1",
+        changesets: [],
+        dependenciesLeavingRange: ["pkg-a"]
+      }
+    ]);
   });
   it("should assemble release plan without dependent through dev dependency", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "^1.0.0");
@@ -249,7 +256,7 @@ describe("assemble-release-plan", () => {
     expect(releases[2].newVersion).toEqual("1.1.0");
     expect(releases[3].newVersion).toEqual("1.1.0");
   });
-  it("should return an empty release array when no chnages will occur", () => {
+  it("should return an empty release array when no changes will occur", () => {
     let { releases } = assembleReleasePlan(
       [],
       setup.packages,
@@ -271,12 +278,22 @@ describe("assemble-release-plan", () => {
     );
 
     expect(releases.length).toEqual(3);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.0.1");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("1.0.1");
-    expect(releases[2].name).toEqual("pkg-c");
-    expect(releases[2].newVersion).toEqual("1.0.1");
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "1.0.1"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-a"]
+      },
+      {
+        name: "pkg-c",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-a"]
+      }
+    ]);
   });
   it("should update a second dependent based on updating a first dependant", () => {
     setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
@@ -290,12 +307,22 @@ describe("assemble-release-plan", () => {
     );
 
     expect(releases.length).toEqual(3);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.0.1");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("1.0.1");
-    expect(releases[2].name).toEqual("pkg-c");
-    expect(releases[2].newVersion).toEqual("1.0.1");
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "1.0.1"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-a"]
+      },
+      {
+        name: "pkg-c",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-b"]
+      }
+    ]);
   });
 
   it("should bump peer dependents where the version is updated because of linked", () => {
@@ -324,7 +351,8 @@ describe("assemble-release-plan", () => {
       },
       {
         name: "pkg-b",
-        newVersion: "2.0.0"
+        newVersion: "2.0.0",
+        dependenciesLeavingRange: ["pkg-a"]
       }
     ]);
   });
@@ -343,10 +371,91 @@ describe("assemble-release-plan", () => {
     );
 
     expect(releases.length).toEqual(2);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.1.0");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("2.0.0");
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "1.1.0"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "2.0.0",
+        dependenciesLeavingRange: ["pkg-a"]
+      }
+    ]);
+  });
+  it("should only set dependenciesLeavingRange to packages that would be auto bumped to update min dependency version ranges", () => {
+    setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
+    setup.updateDependency("pkg-b", "pkg-c", "^1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [
+        { name: "pkg-a", type: "major" },
+        { name: "pkg-c", type: "patch" }
+      ]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(3);
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "2.0.0"
+      },
+      {
+        name: "pkg-c",
+        newVersion: "1.0.1"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "1.0.1",
+        changesets: [],
+        dependenciesLeavingRange: ["pkg-a"]
+      }
+    ]);
+    expect(releases[0].dependenciesLeavingRange).toBeUndefined();
+  });
+  it("should still set dependenciesLeavingRange for packages that will be released regardless of auto bump", () => {
+    setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
+    setup.updateDependency("pkg-b", "pkg-c", "^1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [
+        { name: "pkg-a", type: "major" },
+        { name: "pkg-b", type: "minor" },
+        { name: "pkg-c", type: "patch" }
+      ]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(3);
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "2.0.0"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "1.1.0",
+        dependenciesLeavingRange: ["pkg-a"]
+      },
+      {
+        name: "pkg-c",
+        newVersion: "1.0.1"
+      }
+    ]);
+    expect(releases[0].dependenciesLeavingRange).toBeUndefined();
   });
 });
 
@@ -371,10 +480,17 @@ describe("version update thoroughness", () => {
       undefined
     );
     expect(releases.length).toEqual(2);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.0.1");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("1.0.1");
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "1.0.1"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-a"]
+      }
+    ]);
   });
   it("should path a pinned and tilde dependents when minor versioning", () => {
     setup.addChangeset({
@@ -390,12 +506,22 @@ describe("version update thoroughness", () => {
     );
 
     expect(releases.length).toEqual(3);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.1.0");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("1.0.1");
-    expect(releases[2].name).toEqual("pkg-c");
-    expect(releases[2].newVersion).toEqual("1.0.1");
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "1.1.0"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-a"]
+      },
+      {
+        name: "pkg-c",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-a"]
+      }
+    ]);
   });
   it("should patch pinned, tilde and caret dependents when a major versioning", () => {
     setup.addChangeset({
@@ -411,14 +537,27 @@ describe("version update thoroughness", () => {
     );
 
     expect(releases.length).toEqual(4);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("2.0.0");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("1.0.1");
-    expect(releases[2].name).toEqual("pkg-c");
-    expect(releases[2].newVersion).toEqual("1.0.1");
-    expect(releases[3].name).toEqual("pkg-d");
-    expect(releases[3].newVersion).toEqual("1.0.1");
+    expect(releases).toMatchObject([
+      {
+        name: "pkg-a",
+        newVersion: "2.0.0"
+      },
+      {
+        name: "pkg-b",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-a"]
+      },
+      {
+        name: "pkg-c",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-a"]
+      },
+      {
+        name: "pkg-d",
+        newVersion: "1.0.1",
+        dependenciesLeavingRange: ["pkg-a"]
+      }
+    ]);
   });
 });
 

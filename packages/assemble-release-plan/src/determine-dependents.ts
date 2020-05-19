@@ -56,6 +56,7 @@ export default function getDependents(
           dependentPackage.packageJson,
           nextRelease.name
         );
+        const existingRelease = releases.get(dependent);
 
         // Firstly we check if it is a peerDependency because if it is, our dependent bump type needs to be major.
         if (
@@ -66,16 +67,13 @@ export default function getDependents(
               releases.get(dependent)!.type !== "major"))
         ) {
           type = "major";
-        } else {
-          if (
-            // TODO validate this - I don't think it's right anymore
-            (!releases.has(dependent) ||
-              releases.get(dependent)!.type === "none") &&
-            !semver.satisfies(
-              incrementVersion(nextRelease, preInfo),
-              versionRange
-            )
-          ) {
+        } else if (
+          !semver.satisfies(
+            incrementVersion(nextRelease, preInfo),
+            versionRange
+          )
+        ) {
+          if (!existingRelease || existingRelease.type === "none") {
             if (
               depTypes.includes("dependencies") ||
               depTypes.includes("optionalDependencies") ||
@@ -86,12 +84,28 @@ export default function getDependents(
               // We don't need a version bump if the package is only in the devDependencies of the dependent package
               type = "none";
             }
+          } else {
+            // Update the existing release object to mark that one or more of its dependencies have been updated to be compatible
+            // with their new version and so should always be updated regardless of the `updateInternalDependencies` setting
+            existingRelease.dependenciesLeavingRange =
+              existingRelease.dependenciesLeavingRange || [];
+            if (
+              !existingRelease.dependenciesLeavingRange.includes(
+                nextRelease.name
+              )
+            ) {
+              existingRelease.dependenciesLeavingRange.push(nextRelease.name);
+            }
           }
         }
-        if (releases.has(dependent) && releases.get(dependent)!.type === type) {
+        if (existingRelease && existingRelease.type === type) {
           type = undefined;
         }
-        return { name: dependent, type, pkgJSON: dependentPackage.packageJson };
+        return {
+          name: dependent,
+          type,
+          pkgJSON: dependentPackage.packageJson
+        };
       })
       .filter((release): release is ReleaseWithPkg => !!release.type)
       .forEach(({ name, type, pkgJSON }) => {
@@ -113,7 +127,8 @@ export default function getDependents(
             name,
             type,
             oldVersion: pkgJSON.version,
-            changesets: []
+            changesets: [],
+            dependenciesLeavingRange: [nextRelease.name]
           };
 
           pkgsToSearch.push(newDependent);

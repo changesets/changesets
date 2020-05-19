@@ -160,7 +160,7 @@ function assembleReleasePlan(
       preInfo
     );
 
-    // The map passed in to determineDependents will be mutated
+    // The map passed in to applyLinks will be mutated
     let linksUpdated = applyLinks(releases, packagesByName, config.linked);
 
     releaseObjectValidated = !linksUpdated && !dependentAdded;

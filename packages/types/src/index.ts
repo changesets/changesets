@@ -23,6 +23,8 @@ export type ComprehensiveRelease = {
   oldVersion: string;
   newVersion: string;
   changesets: string[];
+  /** Whether any dependency versions were updated to be compatible with the new version in their release */
+  dependenciesLeavingRange?: string[];
 };
 
 export type Changeset = {

@@ -5,6 +5,7 @@ export type InternalRelease = {
   type: VersionType;
   oldVersion: string;
   changesets: string[];
+  dependenciesLeavingRange?: string[];
 };
 
 export type PreInfo = {
