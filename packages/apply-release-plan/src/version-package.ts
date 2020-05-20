@@ -5,7 +5,7 @@ import {
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
-import { shouldUpdateInternalDependencies } from "./utils";
+import { shouldUpdateInternalDependency } from "./utils";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -36,7 +36,11 @@ export default function versionPackage(
           !depCurrentVersion ||
           depCurrentVersion.startsWith("file:") ||
           depCurrentVersion.startsWith("link:") ||
-          !shouldUpdateInternalDependencies(updateInternalDependencies, type)
+          !shouldUpdateInternalDependency(
+            updateInternalDependencies,
+            { version, type },
+            depCurrentVersion
+          )
         )
           continue;
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
