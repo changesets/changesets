@@ -27,7 +27,8 @@ const simpleReleasePlan: ReleasePlan = {
       type: "minor",
       changesets: ["ascii"],
       oldVersion: "1.0.0",
-      newVersion: "1.1.0"
+      newVersion: "1.1.0",
+      dependenciesLeavingRange: ["pkg-b"]
     },
     {
       name: "pkg-b",
