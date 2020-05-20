@@ -2,7 +2,7 @@ import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
 
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
-import { shouldUpdateInternalDependencies } from "./utils";
+import { shouldUpdateInternalDependency } from "./utils";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -60,7 +60,11 @@ export default async function generateMarkdown(
       release.packageJson.peerDependencies[rel.name];
     return (
       (isDependency || isPeerDependency) &&
-      shouldUpdateInternalDependencies(updateInternalDependencies, rel.type)
+      shouldUpdateInternalDependency(
+        updateInternalDependencies,
+        rel,
+        release.dependenciesLeavingRange
+      )
     );
   });
 

@@ -14,10 +14,15 @@ function getBumpLevel(type: VersionType) {
   return level;
 }
 
-export function shouldUpdateInternalDependencies(
+export function shouldUpdateInternalDependency(
   minReleaseType: "patch" | "minor",
-  releaseType: VersionType
+  dependency: { name: string; type: VersionType },
+  dependenciesLeavingRange: string[] = []
 ) {
+  if (dependenciesLeavingRange.includes(dependency.name)) {
+    // Dependencies leaving semver range should always be updated regardless of bump type
+    return true;
+  }
   const minLevel = getBumpLevel(minReleaseType);
-  return getBumpLevel(releaseType) >= minLevel;
+  return getBumpLevel(dependency.type) >= minLevel;
 }
