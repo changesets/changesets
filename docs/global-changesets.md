@@ -36,7 +36,7 @@ You add a global changset by running
 changeset add --global
 ```
 
-This will ask your for the name of this release, as well as a summary. We strongly recommend you open the changeset and modify it.
+This will ask you for the name of this release, as well as a summary. We strongly recommend you open the changeset and modify it.
 
 > When naming releases, having a pattern that you follow can help consumers trying to upgrade to it, such as picking a theme and then moving through the alphabet with one item for each theme. For changesets, we are working through each pokemon in order.
 
