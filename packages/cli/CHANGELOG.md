@@ -1,5 +1,16 @@
 # @changesets/cli
 
+## 2.7.2
+
+### Patch Changes
+
+- [`8040173`](https://github.com/atlassian/changesets/commit/80401737fddfc687f15e3d71dec967a6498317ea) [#368](https://github.com/atlassian/changesets/pull/368) Thanks [@Andarist](https://github.com/Andarist)! - When logging successful releases and creating tags include an information about those being git tags.
+
+* [`90f3b65`](https://github.com/atlassian/changesets/commit/90f3b651f9c0403920b17801b84a2fbe6f190e2a) [#373](https://github.com/atlassian/changesets/pull/373) Thanks [@Blasz](https://github.com/Blasz)! - Fix patch bumped dependencies not being updated in dependents package.json when leaving semver range with `updateInternalDependencies` set to minor.
+
+* Updated dependencies [[`90f3b65`](https://github.com/atlassian/changesets/commit/90f3b651f9c0403920b17801b84a2fbe6f190e2a)]:
+  - @changesets/apply-release-plan@3.0.3
+
 ## 2.7.1
 
 ### Patch Changes

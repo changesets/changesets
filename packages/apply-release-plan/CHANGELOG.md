@@ -1,5 +1,11 @@
 # @changesets/apply-release-plan
 
+## 3.0.3
+
+### Patch Changes
+
+- [`90f3b65`](https://github.com/atlassian/changesets/commit/90f3b651f9c0403920b17801b84a2fbe6f190e2a) [#373](https://github.com/atlassian/changesets/pull/373) Thanks [@Blasz](https://github.com/Blasz)! - Fix patch bumped dependencies not being updated in dependents package.json when leaving semver range with `updateInternalDependencies` set to minor.
+
 ## 3.0.2
 
 ### Patch Changes
