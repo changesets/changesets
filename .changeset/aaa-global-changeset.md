@@ -4,7 +4,7 @@
 
 ### Named Releases
 
-Have you ever sat down to upgrade all packages from a monorepo, only to find you don't know all the individual versions? Or have you ever wished for all the packages you could reference a single changelog-like file? We have, so we are adding to changesets the ability to add a global changeset. This feature works alongside something such as [linked packages](https://github.com/atlassian/changesets/blob/master/docs/linked-packages.md), but approaches the problem in a different Adding a global changeset does two things:
+Have you ever sat down to upgrade all packages from a monorepo, only to find you don't know all the individual versions? Or have you ever wished for all the packages you could reference a single changelog-like file? We have, so we are adding to changesets the ability to add a global changeset. This feature works alongside something such as [linked packages](https://github.com/atlassian/changesets/blob/master/docs/linked-packages.md), but approaches the problem in a different way. Adding a global changeset does two things:
 
 1. When you `version` your packages, you will also get a `RELEASE_NOTES.md` at the root of your repository (you can change the filename - see below)
 2. When you run `publish` it will `dist-tag` all the published packages, so consumers can consume using the new tag name.
