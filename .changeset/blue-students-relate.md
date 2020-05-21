@@ -12,6 +12,6 @@
 
 Move package into having a major version (no actual change)
 
-Hi! We here on the changesets team have a passion (obsession?) for doing semver correctly, so much so that we have had multiple debates about what the pharse 'semver correctly' even means (ask us about it sometime). As part of this, we wanted to use the full proper semver range for our packages.
+Hi! We here on the changesets team have a passion (obsession?) for doing semver correctly, so much so that we have had multiple debates about what the phrase 'semver correctly' even means (ask us about it sometime). As part of this, we wanted to use the full proper semver range for our packages.
 
 Several packages were sitting in minor, but which we weren't really going to work on soon, so here's a major release for those.
