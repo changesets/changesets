@@ -1,11 +1,12 @@
 import fixturez from "fixturez";
-import pre from "./index";
-import * as fs from "fs-extra";
 import path from "path";
+import chalk from "chalk";
+import * as fs from "fs-extra";
 import { PreState } from "@changesets/types";
 import * as logger from "@changesets/logger";
 import { ExitError } from "@changesets/errors";
-import chalk from "chalk";
+
+import pre from "./index";
 
 let f = fixturez(__dirname);
 

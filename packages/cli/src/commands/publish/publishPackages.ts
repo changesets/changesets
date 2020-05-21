@@ -8,16 +8,28 @@ import { TwoFactorState } from "../../utils/types";
 import { PreState } from "@changesets/types";
 import isCI from "../../utils/isCI";
 
+function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
+  if (tag) return tag;
+
+  if (preState !== undefined && pkgInfo.publishedState !== "only-pre") {
+    return preState.tag;
+  }
+
+  return "latest";
+}
+
 export default async function publishPackages({
   cwd,
   access,
   otp,
-  preState
+  preState,
+  tag
 }: {
   cwd: string;
   access: AccessType;
   otp?: string;
   preState: PreState | undefined;
+  tag?: string;
 }) {
   const packages = await getPackages(cwd);
   const packagesByName = new Map(
@@ -76,11 +88,7 @@ export default async function publishPackages({
         pkg,
         access,
         twoFactorState,
-        preState === undefined
-          ? "latest"
-          : pkgInfo.publishedState === "only-pre"
-          ? "latest"
-          : preState.tag
+        getReleaseTag(pkgInfo, preState, tag)
       )
     );
   }

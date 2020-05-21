@@ -20,11 +20,37 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
+/**
+ * Using version as 0.0.0 so that it does not hinder with other version release
+ * For example;
+ * if user has a regular pre-release at 1.0.0-beta.0 and then you had a snapshot pre-release at 1.0.0-canary-git-hash
+ * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
+ * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
+ */
+function getSnapshotReleaseVersion(snapshot?: string | boolean) {
+  const now = new Date();
+
+  let dateAndTime = [
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    now.getUTCHours(),
+    now.getUTCMinutes(),
+    now.getUTCSeconds()
+  ].join("");
+
+  let tag = "";
+  if (typeof snapshot === "string") tag = `-${snapshot}`;
+
+  return `0.0.0${tag}-${dateAndTime}`;
+}
+
 function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
   config: Config,
-  preState: PreState | undefined
+  preState: PreState | undefined,
+  snapshot?: string | boolean
 ): ReleasePlan {
   let updatedPreState: PreState | undefined =
     preState === undefined
@@ -35,6 +61,12 @@ function assembleReleasePlan(
             ...preState.initialVersions
           }
         };
+
+  // Caching the snapshot version here and use this if it is snapshot release
+  let snapshotVersion: string;
+  if (snapshot !== undefined) {
+    snapshotVersion = getSnapshotReleaseVersion(snapshot);
+  }
 
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
@@ -171,7 +203,10 @@ function assembleReleasePlan(
     releases: [...releases.values()].map(incompleteRelease => {
       return {
         ...incompleteRelease,
-        newVersion: incrementVersion(incompleteRelease, preInfo)!
+        newVersion:
+          snapshot === undefined
+            ? incrementVersion(incompleteRelease, preInfo)!
+            : snapshotVersion
       };
     }),
     preState: updatedPreState

@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import path from "path";
-import { log, warn } from "@changesets/logger";
+import { log, warn, error } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
@@ -9,6 +9,7 @@ import { getPackages } from "@manypkg/get-packages";
 
 import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
+import { ExitError } from "@changesets/errors";
 
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
@@ -18,7 +19,13 @@ let importantEnd = chalk.red(
   "----------------------------------------------------------------------"
 );
 
-export default async function version(cwd: string, config: Config) {
+export default async function version(
+  cwd: string,
+  options: {
+    snapshot?: string | boolean;
+  },
+  config: Config
+) {
   let [_changesets, _preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
@@ -31,11 +38,17 @@ export default async function version(cwd: string, config: Config) {
 
   if (preState !== undefined && preState.mode === "pre") {
     warn(importantSeparator);
-    warn("You are in prerelease mode");
-    warn(
-      "If you meant to do a normal release you should revert these changes and run `changeset pre exit`"
-    );
-    warn("You can then run `changeset version` again to do a normal release");
+    if (options.snapshot !== undefined) {
+      error("Snapshot release is not allowed in pre mode");
+      log("To resolve this exit the pre mode by running `changeset pre exit`");
+      throw new ExitError(1);
+    } else {
+      warn("You are in prerelease mode");
+      warn(
+        "If you meant to do a normal release you should revert these changes and run `changeset pre exit`"
+      );
+      warn("You can then run `changeset version` again to do a normal release");
+    }
     warn(importantEnd);
   }
 
@@ -49,11 +62,25 @@ export default async function version(cwd: string, config: Config) {
 
   let packages = await getPackages(cwd);
 
-  let releasePlan = assembleReleasePlan(changesets, packages, config, preState);
+  let releasePlan = assembleReleasePlan(
+    changesets,
+    packages,
+    config,
+    preState,
+    options.snapshot
+  );
 
-  await applyReleasePlan(releasePlan, packages, config);
+  await applyReleasePlan(
+    releasePlan,
+    packages,
+    {
+      ...config,
+      commit: false
+    },
+    options.snapshot
+  );
 
-  if (config.commit) {
+  if (options.snapshot !== undefined && config.commit) {
     log("All files have been updated and committed. You're ready to publish!");
   } else {
     log("All files have been updated. Review them and commit at your leisure");

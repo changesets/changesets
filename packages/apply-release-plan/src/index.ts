@@ -39,7 +39,8 @@ async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
-  config: Config = defaultConfig
+  config: Config = defaultConfig,
+  snapshot?: string | boolean
 ) {
   let cwd = packages.root.dir;
 
@@ -73,7 +74,7 @@ export default async function applyReleasePlan(
     cwd
   );
 
-  if (releasePlan.preState !== undefined) {
+  if (releasePlan.preState !== undefined && snapshot === undefined) {
     if (releasePlan.preState.mode === "exit") {
       await fs.remove(path.join(cwd, ".changeset", "pre.json"));
     } else {
