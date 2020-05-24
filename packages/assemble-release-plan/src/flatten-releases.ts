@@ -4,7 +4,6 @@
 import { NewChangeset } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease } from "./types";
-import isIgnoredPackage from "./is-ignored";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
@@ -15,9 +14,9 @@ export default function flattenReleases(
 
   changesets.forEach(changeset => {
     changeset.releases
-     // Filter out Ignored packages because they will not trigger a release
+     // Filter out ignored packages because they should not trigger a release
      // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
-    .filter(({name}) => !isIgnoredPackage(name, ignoredPackages))
+    .filter(({name}) => !ignoredPackages.includes(name))
     .forEach(({ name, type }) => {
       let release = releases.get(name);
       let pkg = packagesByName.get(name);

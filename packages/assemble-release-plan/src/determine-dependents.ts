@@ -8,7 +8,6 @@ import {
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease, PreInfo } from "./types";
 import { incrementVersion } from "./increment";
-import isIgnoredPackage from "./is-ignored";
 
 /*
   WARNING:
@@ -58,7 +57,7 @@ export default function getDependents(
         );
 
         // If the dependent is an ignored package, we want to bump its dependencies without a release, so setting type to "none"
-        if (isIgnoredPackage(dependent, ignoredPackages)) {
+        if (ignoredPackages.includes(dependent)) {
           type = "none";
         }
         // we check if it is a peerDependency because if it is, our dependent bump type needs to be major.

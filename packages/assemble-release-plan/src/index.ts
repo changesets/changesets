@@ -8,7 +8,6 @@ import { InternalError } from "@changesets/errors";
 import { Packages } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo } from "./types";
-import isIgnoredPackage from "./is-ignored";
 
 function getPreVersion(version: string) {
   let parsed = semver.parse(version)!;
@@ -176,7 +175,7 @@ function assembleReleasePlan(
     releases: [...releases.values()].map(incompleteRelease => {
       // For ignored packages, the newVersion is the same as the old version
       // in both prereleased and regular releases
-      if (isIgnoredPackage(incompleteRelease.name, config.ignored)) {
+      if (config.ignored.includes(incompleteRelease.name)) {
         return {
           ...incompleteRelease,
           newVersion: incompleteRelease.oldVersion
