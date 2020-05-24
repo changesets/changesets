@@ -1,7 +1,7 @@
 import semver from "semver";
 import chalk from "chalk";
 import { AccessType } from "@changesets/types";
-import { getPackages, Package } from "@manypkg/get-packages";
+import { Package } from "@manypkg/get-packages";
 import * as npmUtils from "./npm-utils";
 import { info, warn } from "@changesets/logger";
 import { TwoFactorState } from "../../utils/types";
@@ -19,25 +19,20 @@ function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
 }
 
 export default async function publishPackages({
-  cwd,
+  packages,
   access,
   otp,
   preState,
   tag
 }: {
-  cwd: string;
+  packages: Package[];
   access: AccessType;
   otp?: string;
   preState: PreState | undefined;
   tag?: string;
 }) {
-  const packages = await getPackages(cwd);
-  const packagesByName = new Map(
-    packages.packages.map(x => [x.packageJson.name, x])
-  );
-  const publicPackages = packages.packages.filter(
-    pkg => !pkg.packageJson.private
-  );
+  const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]));
+  const publicPackages = packages.filter(pkg => !pkg.packageJson.private);
   let twoFactorState: TwoFactorState =
     otp === undefined
       ? {

@@ -4,6 +4,7 @@ import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import { Config, PreState } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 import chalk from "chalk";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
@@ -54,8 +55,10 @@ export default async function run(
     showNonLatestTagWarning(tag, preState);
   }
 
+  const { packages } = await getPackages(cwd);
+
   const response = await publishPackages({
-    cwd,
+    packages,
     // if not public, we wont pass the access, and it works as normal
     access: config.access,
     otp,
@@ -72,9 +75,15 @@ export default async function run(
     // We create the tags after the push above so that we know that HEAD wont change and that pushing
     // wont suffer from a race condition if another merge happens in the mean time (pushing tags wont
     // fail if we are behind master).
-    log("Creating git tags...");
-    for (const pkg of successful) {
-      const tag = `${pkg.name}@${pkg.newVersion}`;
+    log(`Creating git tag${successful.length > 1 ? "s" : ""}...`);
+    if (packages.length > 1) {
+      for (const pkg of successful) {
+        const tag = `${pkg.name}@${pkg.newVersion}`;
+        log("New tag: ", tag);
+        await git.tag(tag, cwd);
+      }
+    } else {
+      const tag = `v${successful[0].newVersion}`;
       log("New tag: ", tag);
       await git.tag(tag, cwd);
     }
