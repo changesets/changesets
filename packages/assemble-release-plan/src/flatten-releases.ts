@@ -14,7 +14,11 @@ export default function flattenReleases(
   let releases: Map<string, InternalRelease> = new Map();
 
   changesets.forEach(changeset => {
-    changeset.releases.forEach(({ name, type }) => {
+    changeset.releases
+     // Filter out Ignored packages because they will not trigger a release
+     // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
+    .filter(({name}) => !isIgnoredPackage(name, ignoredPackages))
+    .forEach(({ name, type }) => {
       let release = releases.get(name);
       let pkg = packagesByName.get(name);
       if (!pkg) {
@@ -41,11 +45,6 @@ export default function flattenReleases(
         // If the bumpType has changed recalc newVersion
         // push new changeset to releases
         release.changesets.push(changeset.id);
-      }
-
-      // ignored packages will not trigger a release, so set the release type to "none"
-      if (isIgnoredPackage(name, ignoredPackages)) {
-        release.type = "none";
       }
 
       releases.set(name, release);
