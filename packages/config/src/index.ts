@@ -164,7 +164,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           json.ignored,
           null,
           2
-        )} when the only valid values are undefined or an array package names`
+        )} when the only valid values are undefined or an array of package names`
       );
     } else {
       let pkgNames = new Set(
