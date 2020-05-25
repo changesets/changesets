@@ -26,7 +26,7 @@ function assembleReleasePlan(
   config: Config,
   preState: PreState | undefined
 ): ReleasePlan {
-  validateChangesets(changesets, config.ignored);
+  validateChangesets(changesets, config.ignore);
 
   let updatedPreState: PreState | undefined =
     preState === undefined
@@ -93,7 +93,7 @@ function assembleReleasePlan(
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(changesets, packagesByName, config.ignored);
+  let releases = flattenReleases(changesets, packagesByName, config.ignore);
 
   if (updatedPreState !== undefined) {
     if (updatedPreState.mode === "exit") {
@@ -118,7 +118,7 @@ function assembleReleasePlan(
       let releasesFromUnfilteredChangesets = flattenReleases(
         unfilteredChangesets,
         packagesByName,
-        config.ignored
+        config.ignore
       );
 
       releases.forEach((value, key) => {
@@ -161,7 +161,7 @@ function assembleReleasePlan(
       packagesByName,
       dependentsGraph,
       preInfo,
-      config.ignored
+      config.ignore
     );
 
     // The map passed in to determineDependents will be mutated
@@ -175,7 +175,7 @@ function assembleReleasePlan(
     releases: [...releases.values()].map(incompleteRelease => {
       // For ignored packages, the newVersion is the same as the old version
       // in both prereleased and regular releases
-      if (config.ignored.includes(incompleteRelease.name)) {
+      if (config.ignore.includes(incompleteRelease.name)) {
         return {
           ...incompleteRelease,
           newVersion: incompleteRelease.oldVersion

@@ -14,7 +14,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  ignored: [] as ReadonlyArray<string>
+  ignore: [] as ReadonlyArray<string>
 } as const;
 
 function getNormalisedChangelogOption(
@@ -152,16 +152,16 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but can only be 'patch' or 'minor'`
     );
   }
-  if (json.ignored) {
+  if (json.ignore) {
     if (
       !(
-        Array.isArray(json.ignored) &&
-        json.ignored.every(pkgName => typeof pkgName === "string")
+        Array.isArray(json.ignore) &&
+        json.ignore.every(pkgName => typeof pkgName === "string")
       )
     ) {
       messages.push(
         `The \`ignored\` option is set as ${JSON.stringify(
-          json.ignored,
+          json.ignore,
           null,
           2
         )} when the only valid values are undefined or an array of package names`
@@ -170,7 +170,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       let pkgNames = new Set(
         packages.packages.map(({ packageJson }) => packageJson.name)
       );
-      for (let pkgName of json.ignored) {
+      for (let pkgName of json.ignore) {
         if (!pkgNames.has(pkgName)) {
           messages.push(
             `The package "${pkgName}" is specified in the \`ignored\` option but it is not found in the project. You may have misspelled the package name.`
@@ -210,8 +210,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.updateInternalDependencies
         : json.updateInternalDependencies,
 
-    ignored:
-      json.ignored === undefined ? defaultWrittenConfig.ignored : json.ignored
+    ignore:
+      json.ignore === undefined ? defaultWrittenConfig.ignore : json.ignore
   };
   return config;
 };

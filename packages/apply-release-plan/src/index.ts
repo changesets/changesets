@@ -141,7 +141,7 @@ export default async function applyReleasePlan(
           // Ignored list is added in v2, so we don't need to do it for v1 changesets
           if (
             !changeset.releases.find(
-              release => config.ignored.find(ignoredPackageName => ignoredPackageName === release.name)
+              release => config.ignore.includes(release.name)
             )
           ) {
             touchedFiles.push(changesetPath);
