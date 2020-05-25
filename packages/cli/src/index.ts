@@ -23,7 +23,7 @@ const { input, flags } = meow(
   Commands
     init
     add [--empty]
-    version
+    version [--ignore]
     publish [--otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
     prerelease <tag>
@@ -51,6 +51,11 @@ const { input, flags } = meow(
       since: {
         type: "string",
         default: undefined
+      },
+      ignore: {
+        type: "string",
+        default: undefined,
+        isMultiple: true
       }
     }
   }
@@ -116,7 +121,8 @@ const cwd = process.cwd();
       verbose,
       output,
       otp,
-      empty
+      empty,
+      ignore
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -143,7 +149,27 @@ const cwd = process.cwd();
         return;
       }
       case "version": {
-        await version(cwd, config);
+        let ignoreArrayFromCmd: undefined | string[] = undefined;
+        if (typeof ignore === 'string') {
+          ignoreArrayFromCmd = [ignore];
+        } else { // undefined or an array
+          ignoreArrayFromCmd = ignore;
+        }
+
+        // Validate that items in ignoreArrayFromCmd are valid project names
+        let pkgNames = new Set(
+          packages.packages.map(({ packageJson }) => packageJson.name)
+        );
+        for (let pkgName of ignoreArrayFromCmd || []) {
+          if (!pkgNames.has(pkgName)) {
+            error(
+              `The package "${pkgName}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`
+            );
+            throw new ExitError(1);
+          }
+        }
+
+        await version(cwd, { ignore: ignoreArrayFromCmd }, config);
         return;
       }
       case "publish": {

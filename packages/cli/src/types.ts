@@ -10,6 +10,7 @@ export type CliOptions = {
   otp?: string;
   empty?: boolean;
   since?: string;
+  ignore?: string | string[];
 };
 
 export type CommandOptions = CliOptions & {
