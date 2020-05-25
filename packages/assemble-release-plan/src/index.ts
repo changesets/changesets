@@ -173,20 +173,10 @@ function assembleReleasePlan(
   return {
     changesets,
     releases: [...releases.values()].map(incompleteRelease => {
-      // For ignored packages, the newVersion is the same as the old version
-      // in both prereleased and regular releases
-      if (config.ignore.includes(incompleteRelease.name)) {
-        return {
-          ...incompleteRelease,
-          newVersion: incompleteRelease.oldVersion
-        }
-      } else {
         return {
           ...incompleteRelease,
           newVersion: incrementVersion(incompleteRelease, preInfo)!
         };
-      }
-
     }),
     preState: updatedPreState
   };
