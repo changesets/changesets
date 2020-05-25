@@ -43,7 +43,8 @@ class FakeReleasePlan {
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      updateInternalDependencies: "patch"
+      updateInternalDependencies: "patch",
+      ignore: []
     };
 
     this.changesets = [baseChangeset, ...changesets];
@@ -72,7 +73,8 @@ async function testSetup(
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      updateInternalDependencies: "patch"
+      updateInternalDependencies: "patch",
+      ignore: []
     };
   }
   let tempDir = await f.copy(fixtureName);
@@ -274,7 +276,8 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ignore: []
         }
       );
       let pkgPathA = changedFiles.find(a =>
@@ -330,7 +333,8 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ignore: []
         }
       );
       let pkgPath = changedFiles.find(a =>
@@ -390,7 +394,8 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ignore: []
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -460,7 +465,8 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ignore: []
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -530,7 +536,8 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ignore: []
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -603,7 +610,8 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ignore: []
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -673,7 +681,8 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ignore: []
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -743,7 +752,8 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ignore: []
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -901,7 +911,8 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ignore: []
         }
       );
       let pkgAChangelogPath = changedFiles.find(a =>
@@ -999,7 +1010,8 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ignore: []
         }
       );
 
@@ -1075,7 +1087,8 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "minor"
+          updateInternalDependencies: "minor",
+          ignore: []
         }
       );
 
@@ -1155,7 +1168,8 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "minor"
+          updateInternalDependencies: "minor",
+          ignore: []
         }
       );
 
@@ -1349,6 +1363,32 @@ describe("apply release plan", () => {
       let pathExists = await fs.pathExists(changesetPath);
       expect(pathExists).toEqual(false);
     });
+    it("should NOT delete changesets for ignored packages", async () => {
+      const releasePlan = new FakeReleasePlan();
+
+      let changesetPath: string;
+
+      const setupFunc = (tempDir: string) =>
+        Promise.all(
+          releasePlan.getReleasePlan().changesets.map(({ id, summary }) => {
+            const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
+            changesetPath = thisPath;
+            const content = `---\n---\n${summary}`;
+            fs.writeFile(thisPath, content);
+          })
+        );
+
+      await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        {...releasePlan.config, ignore: ["pkg-a"]},
+        setupFunc
+      );
+
+      // @ts-ignore this is possibly bad
+      let pathExists = await fs.pathExists(changesetPath);
+      expect(pathExists).toEqual(true);
+    });
     it("should delete an old format changeset if it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
 
@@ -1523,7 +1563,8 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ignore: []
         }
       );
 
