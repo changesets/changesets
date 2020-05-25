@@ -348,6 +348,137 @@ describe("assemble-release-plan", () => {
     expect(releases[1].name).toEqual("pkg-b");
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
+  it("should assemble release plan without ignored packages", () => {
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+    setup.addChangeset({
+      id: "small-dogs-sad",
+      releases: [{ name: "pkg-b", type: "minor" }]
+    });
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig,
+        ignore: ["pkg-b"]
+      },
+      undefined
+    );
+
+    expect(releases.length).toEqual(1);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+  });
+  it("should generate 'none' release type for ignored packages through dependencies", () => {
+    setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+    setup.addChangeset({
+      id: "small-dogs-sad",
+      releases: [{ name: "pkg-b", type: "minor" }]
+    });
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig,
+        ignore: ["pkg-b"]
+      },
+      undefined
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].type).toEqual("none");
+    expect(releases[1].newVersion).toEqual("1.0.0");
+  });
+  it("should generate 'none' release type for ignored packages through peerDependencies", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+    setup.addChangeset({
+      id: "small-dogs-sad",
+      releases: [{ name: "pkg-b", type: "minor" }]
+    });
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig,
+        ignore: ["pkg-b"]
+      },
+      undefined
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].type).toEqual("none");
+    expect(releases[1].newVersion).toEqual("1.0.0");
+  });
+  it("should generate 'none' release type for ignored packages through devDependencies", () => {
+    setup.updateDevDependency("pkg-b", "pkg-a", "1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+    setup.addChangeset({
+      id: "small-dogs-sad",
+      releases: [{ name: "pkg-b", type: "minor" }]
+    });
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig,
+        ignore: ["pkg-b"]
+      },
+      undefined
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].type).toEqual("none");
+    expect(releases[1].newVersion).toEqual("1.0.0");
+  });
+  // Mixed changesets are the ones that contains both ignored packages and not ignored packages
+  it("should throw for mixed changesets", () => {
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [
+        { name: "pkg-a", type: "major" },
+        { name: "pkg-b", type: "minor" }
+      ]
+    });
+
+    expect(() =>
+      assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ignore: ["pkg-b"]
+        },
+        undefined
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+"Found mixed changeset big-cats-delight
+Found ignored packages: pkg-b
+Found not Ignored packages: pkg-a
+Mixed changesets that contain both ignored and not ignored packages are not allowed"
+`);
+  });
 });
 
 describe("version update thoroughness", () => {
