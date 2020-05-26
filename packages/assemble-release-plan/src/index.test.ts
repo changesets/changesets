@@ -357,7 +357,7 @@ describe("assemble-release-plan", () => {
       id: "small-dogs-sad",
       releases: [{ name: "pkg-b", type: "minor" }]
     });
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
@@ -371,7 +371,7 @@ describe("assemble-release-plan", () => {
     expect(releases[0].name).toEqual("pkg-a");
     expect(releases[0].newVersion).toEqual("2.0.0");
   });
-  it("should generate 'none' release type for ignored packages through dependencies", () => {
+  it("should generate releases with 'none' release type for ignored packages through dependencies", () => {
     setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
@@ -381,7 +381,7 @@ describe("assemble-release-plan", () => {
       id: "small-dogs-sad",
       releases: [{ name: "pkg-b", type: "minor" }]
     });
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
@@ -398,7 +398,7 @@ describe("assemble-release-plan", () => {
     expect(releases[1].type).toEqual("none");
     expect(releases[1].newVersion).toEqual("1.0.0");
   });
-  it("should generate 'none' release type for ignored packages through peerDependencies", () => {
+  it("should generate releases with 'none' release type for ignored packages through peerDependencies", () => {
     setup.updatePeerDep("pkg-b", "pkg-a", "1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
@@ -408,7 +408,7 @@ describe("assemble-release-plan", () => {
       id: "small-dogs-sad",
       releases: [{ name: "pkg-b", type: "minor" }]
     });
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
@@ -425,7 +425,7 @@ describe("assemble-release-plan", () => {
     expect(releases[1].type).toEqual("none");
     expect(releases[1].newVersion).toEqual("1.0.0");
   });
-  it("should generate 'none' release type for ignored packages through devDependencies", () => {
+  it("should generate releases with 'none' release type for ignored packages through devDependencies", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
@@ -435,7 +435,7 @@ describe("assemble-release-plan", () => {
       id: "small-dogs-sad",
       releases: [{ name: "pkg-b", type: "minor" }]
     });
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
@@ -478,6 +478,25 @@ Found ignored packages: pkg-b
 Found not Ignored packages: pkg-a
 Mixed changesets that contain both ignored and not ignored packages are not allowed"
 `);
+  });
+  it("should not generate a release for package that doesn't have changeset and is not a dependent in pre exit mode", () => {
+    const { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig
+      },
+      {
+        changesets: [],
+        tag: "next",
+        initialVersions: {},
+        mode: "exit"
+      }
+    );
+
+    expect(releases.length).toEqual(1);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
   });
 });
 
