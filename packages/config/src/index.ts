@@ -182,7 +182,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
-      messages.join("\n")
+        messages.join("\n")
     );
   }
 

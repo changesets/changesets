@@ -62,11 +62,9 @@ const simpleChangeset2: NewChangeset = {
 
 const simpleChangeset3: NewChangeset = {
   summary: "This is not a summary",
-  releases: [
-    { name: "pkg-b", type: "patch" }
-  ],
+  releases: [{ name: "pkg-b", type: "patch" }],
   id: "hot-day-today"
-}
+};
 
 const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
   return Promise.all(
@@ -134,10 +132,14 @@ describe("running version in a simple project", () => {
     await writeChangesets([simpleChangeset2], cwd2);
     const spy = jest.spyOn(fs, "writeFile");
 
-    await versionCommand(cwd2, {}, {
-      ...modifiedDefaultConfig,
-      linked: [["pkg-a", "pkg-b"]]
-    });
+    await versionCommand(
+      cwd2,
+      {},
+      {
+        ...modifiedDefaultConfig,
+        linked: [["pkg-a", "pkg-b"]]
+      }
+    );
 
     expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
       expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
@@ -163,10 +165,14 @@ describe("running version in a simple project", () => {
     await writeChangesets([simpleChangeset], cwd);
     const spy = jest.spyOn(fs, "writeFile");
 
-    await versionCommand(cwd, {}, {
-      ...modifiedDefaultConfig,
-      ignore: ["pkg-a"]
-    });
+    await versionCommand(
+      cwd,
+      {},
+      {
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"]
+      }
+    );
 
     const bumpedPackageA = !!spy.mock.calls.find((call: string[]) =>
       call[0].endsWith(`pkg-a${path.sep}package.json`)
@@ -179,10 +185,14 @@ describe("running version in a simple project", () => {
     await writeChangesets([simpleChangeset, simpleChangeset3], cwd);
     const spy = jest.spyOn(fs, "writeFile");
 
-    await versionCommand(cwd, {}, {
-      ...modifiedDefaultConfig,
-      ignore: ["pkg-a"]
-    });
+    await versionCommand(
+      cwd,
+      {},
+      {
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"]
+      }
+    );
 
     expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
       expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
@@ -196,12 +206,16 @@ describe("running version in a simple project", () => {
     await writeChangesets([simpleChangeset, simpleChangeset3], cwd);
     const spy = jest.spyOn(fs, "writeFile");
 
-    await versionCommand(cwd, {
-      ignore: ["pkg-b"]
-    }, {
-      ...modifiedDefaultConfig,
-      ignore: ["pkg-a"]
-    });
+    await versionCommand(
+      cwd,
+      {
+        ignore: ["pkg-b"]
+      },
+      {
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"]
+      }
+    );
 
     const bumpedPackageB = !!spy.mock.calls.find((call: string[]) =>
       call[0].endsWith(`pkg-b${path.sep}package.json`)

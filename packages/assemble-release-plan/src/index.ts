@@ -32,11 +32,11 @@ function assembleReleasePlan(
     preState === undefined
       ? undefined
       : {
-        ...preState,
-        initialVersions: {
-          ...preState.initialVersions
-        }
-      };
+          ...preState,
+          initialVersions: {
+            ...preState.initialVersions
+          }
+        };
 
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
@@ -147,9 +147,9 @@ function assembleReleasePlan(
     updatedPreState === undefined
       ? undefined
       : {
-        state: updatedPreState,
-        preVersions
-      };
+          state: updatedPreState,
+          preVersions
+        };
 
   let dependentsGraph = getDependentsGraph(packages);
 
@@ -173,24 +173,29 @@ function assembleReleasePlan(
   return {
     changesets,
     releases: [...releases.values()].map(incompleteRelease => {
-        return {
-          ...incompleteRelease,
-          newVersion: incrementVersion(incompleteRelease, preInfo)!
-        };
+      return {
+        ...incompleteRelease,
+        newVersion: incrementVersion(incompleteRelease, preInfo)!
+      };
     }),
     preState: updatedPreState
   };
 }
 
 // Changesets that contains both ignored and not ignored packages are not allowed
-function validateChangesets(changesets: NewChangeset[], ignored: Readonly<string[]>): void {
+function validateChangesets(
+  changesets: NewChangeset[],
+  ignored: Readonly<string[]>
+): void {
   for (const changeset of changesets) {
-    // Using the following 2 arrays to decide whether a changeset 
+    // Using the following 2 arrays to decide whether a changeset
     // contains both ignored and not ignored packages
     const ignoredPackages = [];
     const notIgnoredPackages = [];
     for (const release of changeset.releases) {
-      if (ignored.find(ignoredPackageName => ignoredPackageName === release.name)) {
+      if (
+        ignored.find(ignoredPackageName => ignoredPackageName === release.name)
+      ) {
         ignoredPackages.push(release.name);
       } else {
         notIgnoredPackages.push(release.name);
@@ -199,10 +204,10 @@ function validateChangesets(changesets: NewChangeset[], ignored: Readonly<string
 
     if (ignoredPackages.length > 0 && notIgnoredPackages.length > 0) {
       throw new Error(
-        `Found mixed changeset ${changeset.id}\n` 
-      + `Found ignored packages: ${ignoredPackages.join(' ')}\n`
-      + `Found not Ignored packages: ${notIgnoredPackages.join(' ')}\n` 
-      + 'Mixed changesets that contain both ignored and not ignored packages are not allowed'
+        `Found mixed changeset ${changeset.id}\n` +
+          `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
+          `Found not Ignored packages: ${notIgnoredPackages.join(" ")}\n` +
+          "Mixed changesets that contain both ignored and not ignored packages are not allowed"
       );
     }
   }

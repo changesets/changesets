@@ -1381,7 +1381,7 @@ describe("apply release plan", () => {
       await testSetup(
         "simple-project",
         releasePlan.getReleasePlan(),
-        {...releasePlan.config, ignore: ["pkg-a"]},
+        { ...releasePlan.config, ignore: ["pkg-a"] },
         setupFunc
       );
 

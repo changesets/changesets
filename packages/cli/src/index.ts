@@ -149,10 +149,11 @@ const cwd = process.cwd();
         return;
       }
       case "version": {
-        let ignoreArrayFromCmd: undefined | string[] = undefined;
-        if (typeof ignore === 'string') {
+        let ignoreArrayFromCmd: undefined | string[];
+        if (typeof ignore === "string") {
           ignoreArrayFromCmd = [ignore];
-        } else { // undefined or an array
+        } else {
+          // undefined or an array
           ignoreArrayFromCmd = ignore;
         }
 
@@ -160,18 +161,18 @@ const cwd = process.cwd();
         let pkgNames = new Set(
           packages.packages.map(({ packageJson }) => packageJson.name)
         );
-        
+
         const messages = [];
         for (let pkgName of ignoreArrayFromCmd || []) {
           if (!pkgNames.has(pkgName)) {
-            messages.push(`The package "${pkgName}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`);
+            messages.push(
+              `The package "${pkgName}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`
+            );
           }
         }
 
         if (messages.length > 0) {
-          error(
-            messages.join("\n")
-          );
+          error(messages.join("\n"));
 
           throw new ExitError(1);
         }

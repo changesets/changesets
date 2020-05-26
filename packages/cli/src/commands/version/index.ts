@@ -19,12 +19,13 @@ let importantEnd = chalk.red(
 );
 
 export default async function version(
-  cwd: string, 
+  cwd: string,
   { ignore }: { ignore?: string[] },
-  config: Config) {
+  config: Config
+) {
   // Commandline arguments take precedence over config object,
   // so we replace the ignored packages with the ones passed from commandline if they exist
-  if(ignore && ignore.length > 0) {
+  if (ignore && ignore.length > 0) {
     config.ignore = ignore;
   }
 
