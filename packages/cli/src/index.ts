@@ -160,13 +160,20 @@ const cwd = process.cwd();
         let pkgNames = new Set(
           packages.packages.map(({ packageJson }) => packageJson.name)
         );
+        
+        const messages = [];
         for (let pkgName of ignoreArrayFromCmd || []) {
           if (!pkgNames.has(pkgName)) {
-            error(
-              `The package "${pkgName}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`
-            );
-            throw new ExitError(1);
+            messages.push(`The package "${pkgName}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`);
           }
+        }
+
+        if (messages.length > 0) {
+          error(
+            messages.join("\n")
+          );
+
+          throw new ExitError(1);
         }
 
         await version(cwd, { ignore: ignoreArrayFromCmd }, config);
