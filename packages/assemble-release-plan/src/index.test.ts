@@ -479,25 +479,28 @@ Found not Ignored packages: pkg-a
 Mixed changesets that contain both ignored and not ignored packages are not allowed"
 `);
   });
-  it("should not generate a release for package that doesn't have changeset and is not a dependent in pre exit mode", () => {
-    const { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      {
-        ...defaultConfig
-      },
-      {
-        changesets: [],
-        tag: "next",
-        initialVersions: {},
-        mode: "exit"
-      }
-    );
 
-    expect(releases.length).toEqual(1);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.0.1");
-  });
+  describe("pre mode exit", () => {
+    it("should not generate a release for package that has no changesets and is not a dependent of any packages being released", () => {
+      const { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig
+        },
+        {
+          changesets: [],
+          tag: "next",
+          initialVersions: {},
+          mode: "exit"
+        }
+      );
+  
+      expect(releases.length).toEqual(1);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+    });
+  })
 });
 
 describe("version update thoroughness", () => {
