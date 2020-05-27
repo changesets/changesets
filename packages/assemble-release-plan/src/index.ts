@@ -32,11 +32,11 @@ function assembleReleasePlan(
     preState === undefined
       ? undefined
       : {
-          ...preState,
-          initialVersions: {
-            ...preState.initialVersions
-          }
-        };
+        ...preState,
+        initialVersions: {
+          ...preState.initialVersions
+        }
+      };
 
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
@@ -147,21 +147,23 @@ function assembleReleasePlan(
     updatedPreState === undefined
       ? undefined
       : {
-          state: updatedPreState,
-          preVersions
-        };
+        state: updatedPreState,
+        preVersions
+      };
 
-  let dependentsGraph = getDependentsGraph(packages);
+  let dependencyGraph = getDependentsGraph(packages);
 
   let releaseObjectValidated = false;
   while (releaseObjectValidated === false) {
     // The map passed in to determineDependents will be mutated
     let dependentAdded = determineDependents(
-      releases,
-      packagesByName,
-      dependentsGraph,
-      preInfo,
-      config.ignore
+      {
+        releases,
+        packagesByName,
+        dependencyGraph,
+        preInfo,
+        ignoredPackages: config.ignore
+      }
     );
 
     // The map passed in to determineDependents will be mutated
@@ -205,9 +207,9 @@ function validateChangesets(
     if (ignoredPackages.length > 0 && notIgnoredPackages.length > 0) {
       throw new Error(
         `Found mixed changeset ${changeset.id}\n` +
-          `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
-          `Found not Ignored packages: ${notIgnoredPackages.join(" ")}\n` +
-          "Mixed changesets that contain both ignored and not ignored packages are not allowed"
+        `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
+        `Found not Ignored packages: ${notIgnoredPackages.join(" ")}\n` +
+        "Mixed changesets that contain both ignored and not ignored packages are not allowed"
       );
     }
   }
