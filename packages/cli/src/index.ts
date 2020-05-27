@@ -171,6 +171,12 @@ const cwd = process.cwd();
           }
         }
 
+        if (config.ignore.length > 0 && ignoreArrayFromCmd) {
+          messages.push(
+            `It looks like you are trying to use the \`--ignore\` cmd flag while ignore is defined in the config file. It is currently not allowed and you can use only one of them at a time.`
+          );
+        }
+
         if (messages.length > 0) {
           error(messages.join("\n"));
 
