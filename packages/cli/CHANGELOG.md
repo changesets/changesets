@@ -15,6 +15,8 @@
 
 * [`6d0790a`](https://github.com/atlassian/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a) [#359](https://github.com/atlassian/changesets/pull/359) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Add support for tag flag to publish command. Usage: `changeset publish --tag <tag>`. This will publish the packages under passed npm tag.
 
+* [`5dc389f`](https://github.com/atlassian/changesets/commit/5dc389f9cc03a59ef44f34243efe8ad00e35d465) [#376](https://github.com/atlassian/changesets/pull/376) Thanks [@Andarist](https://github.com/Andarist)! - Changed what git tag is generated for single-package repositories after successful publish. The package name is being skipped and the scheme matches what `npm version` generates, so for example `v2.8.0`.
+
 ### Patch Changes
 
 - Updated dependencies [[`6d0790a`](https://github.com/atlassian/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a)]:
