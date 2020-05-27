@@ -175,6 +175,9 @@ const cwd = process.cwd();
           messages.push(
             `It looks like you are trying to use the \`--ignore\` cmd flag while ignore is defined in the config file. It is currently not allowed and you can use only one of them at a time.`
           );
+        } else if (ignoreArrayFromCmd) {
+          // use the ignore flags from cli
+          config.ignore = ignoreArrayFromCmd;
         }
 
         if (messages.length > 0) {
@@ -183,7 +186,7 @@ const cwd = process.cwd();
           throw new ExitError(1);
         }
 
-        await version(cwd, { ignore: ignoreArrayFromCmd }, config);
+        await version(cwd, config);
         return;
       }
       case "publish": {
