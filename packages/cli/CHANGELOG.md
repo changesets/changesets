@@ -1,5 +1,26 @@
 # @changesets/cli
 
+## 2.8.0
+
+### Minor Changes
+
+- [`6d0790a`](https://github.com/atlassian/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a) [#359](https://github.com/atlassian/changesets/pull/359) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Add support for snapshot flag to version command. Usage: `changeset version --snapshot [tag]`. The updated version of the packages looks like `0.0.0[-tag]-YYYYMMDDHHMMSS` where YYYY, MM, DD, HH, MM, and SS is the date and time of when the snapshot version is created. You can use this feature with the tag option in the publish command to publish packages under experimental tags from feature branches. To publish a snapshot version of a package under an experimental tag you can do:
+
+  ```
+  $ # Version packages to snapshot version
+  $ changeset version --snapshot
+  $ # Publish packages under exprimental tag, keeping next and latest tag clean
+  $ changeset publish --tag exprimental
+  ```
+
+* [`6d0790a`](https://github.com/atlassian/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a) [#359](https://github.com/atlassian/changesets/pull/359) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Add support for tag flag to publish command. Usage: `changeset publish --tag <tag>`. This will publish the packages under passed npm tag.
+
+### Patch Changes
+
+- Updated dependencies [[`6d0790a`](https://github.com/atlassian/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a)]:
+  - @changesets/apply-release-plan@3.1.0
+  - @changesets/assemble-release-plan@2.1.0
+
 ## 2.7.2
 
 ### Patch Changes
