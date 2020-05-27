@@ -22,11 +22,19 @@ import { incrementVersion } from "./increment";
   modified array, but we decided both of those are worse than this solution.
 */
 export default function getDependents(
-  releases: Map<string, InternalRelease>,
-  packagesByName: Map<string, Package>,
-  dependencyGraph: Map<string, string[]>,
-  preInfo: PreInfo | undefined,
-  ignoredPackages: Readonly<string[]>
+  {  
+    releases,
+    packagesByName,
+    dependencyGraph,
+    preInfo,
+    ignoredPackages
+  } : {
+    releases: Map<string, InternalRelease>,
+    packagesByName: Map<string, Package>,
+    dependencyGraph: Map<string, string[]>,
+    preInfo: PreInfo | undefined,
+    ignoredPackages: Readonly<string[]>
+  }
 ): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
