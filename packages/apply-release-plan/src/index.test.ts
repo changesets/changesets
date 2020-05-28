@@ -473,7 +473,8 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ignore: []
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -767,7 +768,8 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ignore: []
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -1418,7 +1420,8 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "minor"
+          updateInternalDependencies: "minor",
+          ignore: []
         }
       );
 

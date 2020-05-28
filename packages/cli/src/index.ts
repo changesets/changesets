@@ -104,7 +104,11 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
 });
 
 // export only for testing
-export async function run(input: string[], flags: {[name:string]: any}, cwd: string) {
+export async function run(
+  input: string[],
+  flags: { [name: string]: any },
+  cwd: string
+) {
   if (input[0] === "init") {
     await init(cwd);
     return;
