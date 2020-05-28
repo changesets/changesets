@@ -6,6 +6,7 @@ import { Config } from "@changesets/types";
 import fs from "fs-extra";
 import path from "path";
 import { getPackages } from "@manypkg/get-packages";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
 
 import init from "./commands/init";
 import add from "./commands/add";
@@ -168,7 +169,7 @@ const cwd = process.cwd();
         );
 
         const messages = [];
-        for (let pkgName of ignoreArrayFromCmd || []) {
+        for (const pkgName of ignoreArrayFromCmd || []) {
           if (!pkgNames.has(pkgName)) {
             messages.push(
               `The package "${pkgName}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`
@@ -183,6 +184,19 @@ const cwd = process.cwd();
         } else if (ignoreArrayFromCmd) {
           // use the ignore flags from cli
           config.ignore = ignoreArrayFromCmd;
+        }
+
+        // Validate that all dependents of ignored packages are listed in the ignore list
+        const dependentsGraph = getDependentsGraph(packages);
+        for (const ignoredPackage of config.ignore) {
+          const dependents = dependentsGraph.get(ignoredPackage) || [];
+          for (const dependent of dependents) {
+            if (!config.ignore.includes(dependent)) {
+              messages.push(
+                `the package \"${dependent}\" depends on the ignored package \"${ignoredPackage}\", but itself is not ignored. Please add it to the ignore array in the config file or pass it to the \`--ignore\` flag when using cli.`
+              );
+            }
+          }
         }
 
         if (messages.length > 0) {
