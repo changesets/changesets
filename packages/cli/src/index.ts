@@ -67,7 +67,44 @@ const { input, flags } = meow(
 
 const cwd = process.cwd();
 
-(async () => {
+run(input, flags, cwd).catch(err => {
+  if (err instanceof InternalError) {
+    error(
+      "The following error is an internal unexpected error, these should never happen."
+    );
+    error("Please open an issue with the following link");
+    error(
+      `https://github.com/atlassian/changesets/issues/new?title=${encodeURIComponent(
+        `Unexpected error during ${input[0] || "add"} command`
+      )}&body=${encodeURIComponent(`## Error
+
+\`\`\`
+${format("", err).replace(process.cwd(), "<cwd>")}
+\`\`\`
+
+## Versions
+
+- @changesets/cli@${
+        // eslint-disable-next-line import/no-extraneous-dependencies
+        require("@changesets/cli/package.json").version
+      }
+- node@${process.version}
+
+## Extra details
+
+<!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->
+`)}`
+    );
+  }
+  if (err instanceof ExitError) {
+    return process.exit(err.code);
+  }
+  error(err);
+  process.exit(1);
+});
+
+// export only for testing
+export async function run(input: string[], flags: {[name:string]: any}, cwd: string) {
   if (input[0] === "init") {
     await init(cwd);
     return;
@@ -193,7 +230,7 @@ const cwd = process.cwd();
           for (const dependent of dependents) {
             if (!config.ignore.includes(dependent)) {
               messages.push(
-                `the package "${dependent}" depends on the ignored package "${ignoredPackage}", but itself is not ignored. Please add it to the ignore array in the config file or pass it to the \`--ignore\` flag when using cli.`
+                `the package "${dependent}" depends on the ignored package "${ignoredPackage}", but itself is not being ignored. Please add it to the ignore array in the config file or pass it to the \`--ignore\` flag when using cli.`
               );
             }
           }
@@ -257,38 +294,4 @@ const cwd = process.cwd();
       }
     }
   }
-})().catch(err => {
-  if (err instanceof InternalError) {
-    error(
-      "The following error is an internal unexpected error, these should never happen."
-    );
-    error("Please open an issue with the following link");
-    error(
-      `https://github.com/atlassian/changesets/issues/new?title=${encodeURIComponent(
-        `Unexpected error during ${input[0] || "add"} command`
-      )}&body=${encodeURIComponent(`## Error
-
-\`\`\`
-${format("", err).replace(process.cwd(), "<cwd>")}
-\`\`\`
-
-## Versions
-
-- @changesets/cli@${
-        // eslint-disable-next-line import/no-extraneous-dependencies
-        require("@changesets/cli/package.json").version
-      }
-- node@${process.version}
-
-## Extra details
-
-<!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->
-`)}`
-    );
-  }
-  if (err instanceof ExitError) {
-    return process.exit(err.code);
-  }
-  error(err);
-  process.exit(1);
-});
+}
