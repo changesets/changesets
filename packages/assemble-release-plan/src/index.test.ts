@@ -475,7 +475,7 @@ describe("assemble-release-plan", () => {
     ).toThrowErrorMatchingInlineSnapshot(`
 "Found mixed changeset big-cats-delight
 Found ignored packages: pkg-b
-Found not Ignored packages: pkg-a
+Found not ignored packages: pkg-a
 Mixed changesets that contain both ignored and not ignored packages are not allowed"
 `);
   });
