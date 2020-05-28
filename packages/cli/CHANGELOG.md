@@ -1,5 +1,39 @@
 # @changesets/cli
 
+## 2.8.0
+
+### Minor Changes
+
+- [`6d0790a`](https://github.com/atlassian/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a) [#359](https://github.com/atlassian/changesets/pull/359) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Add support for snapshot flag to version command. Usage: `changeset version --snapshot [tag]`. The updated version of the packages looks like `0.0.0[-tag]-YYYYMMDDHHMMSS` where YYYY, MM, DD, HH, MM, and SS is the date and time of when the snapshot version is created. You can use this feature with the tag option in the publish command to publish packages under experimental tags from feature branches. To publish a snapshot version of a package under an experimental tag you can do:
+
+  ```
+  $ # Version packages to snapshot version
+  $ changeset version --snapshot
+  $ # Publish packages under exprimental tag, keeping next and latest tag clean
+  $ changeset publish --tag exprimental
+  ```
+
+* [`6d0790a`](https://github.com/atlassian/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a) [#359](https://github.com/atlassian/changesets/pull/359) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Add support for tag flag to publish command. Usage: `changeset publish --tag <tag>`. This will publish the packages under passed npm tag.
+
+* [`5dc389f`](https://github.com/atlassian/changesets/commit/5dc389f9cc03a59ef44f34243efe8ad00e35d465) [#376](https://github.com/atlassian/changesets/pull/376) Thanks [@Andarist](https://github.com/Andarist)! - Changed what git tag is generated for single-package repositories after successful publish. The package name is being skipped and the scheme matches what `npm version` generates, so for example `v2.8.0`.
+
+### Patch Changes
+
+- Updated dependencies [[`6d0790a`](https://github.com/atlassian/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a)]:
+  - @changesets/apply-release-plan@3.1.0
+  - @changesets/assemble-release-plan@2.1.0
+
+## 2.7.2
+
+### Patch Changes
+
+- [`8040173`](https://github.com/atlassian/changesets/commit/80401737fddfc687f15e3d71dec967a6498317ea) [#368](https://github.com/atlassian/changesets/pull/368) Thanks [@Andarist](https://github.com/Andarist)! - When logging successful releases and creating tags include an information about those being git tags.
+
+* [`90f3b65`](https://github.com/atlassian/changesets/commit/90f3b651f9c0403920b17801b84a2fbe6f190e2a) [#373](https://github.com/atlassian/changesets/pull/373) Thanks [@Blasz](https://github.com/Blasz)! - Fix patch bumped dependencies not being updated in dependents package.json when leaving semver range with `updateInternalDependencies` set to minor.
+
+* Updated dependencies [[`90f3b65`](https://github.com/atlassian/changesets/commit/90f3b651f9c0403920b17801b84a2fbe6f190e2a)]:
+  - @changesets/apply-release-plan@3.0.3
+
 ## 2.7.1
 
 ### Patch Changes

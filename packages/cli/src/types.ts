@@ -11,6 +11,8 @@ export type CliOptions = {
   empty?: boolean;
   since?: string;
   ignore?: string | string[];
+  snapshot?: string | boolean;
+  tag?: string;
 };
 
 export type CommandOptions = CliOptions & {

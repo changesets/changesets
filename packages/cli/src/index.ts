@@ -56,6 +56,9 @@ const { input, flags } = meow(
         type: "string",
         default: undefined,
         isMultiple: true
+      },
+      tag: {
+        type: "string"
       }
     }
   }
@@ -122,7 +125,9 @@ const cwd = process.cwd();
       output,
       otp,
       empty,
-      ignore
+      ignore,
+      snapshot,
+      tag
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -186,11 +191,11 @@ const cwd = process.cwd();
           throw new ExitError(1);
         }
 
-        await version(cwd, config);
+        await version(cwd, { snapshot }, config);
         return;
       }
       case "publish": {
-        await publish(cwd, { otp }, config);
+        await publish(cwd, { otp, tag }, config);
         return;
       }
       case "status": {
@@ -200,12 +205,14 @@ const cwd = process.cwd();
       case "pre": {
         let command = input[1];
         if (command !== "enter" && command !== "exit") {
-          error("`enter` or `exit` must be passed after prerelease");
+          error(
+            "`enter`, `exit` or `snapshot` must be passed after prerelease"
+          );
           throw new ExitError(1);
         }
         let tag = input[2];
         if (command === "enter" && typeof tag !== "string") {
-          error("A tag must be passed when using prerelese enter");
+          error(`A tag must be passed when using prerelese enter`);
           throw new ExitError(1);
         }
         // @ts-ignore
