@@ -495,12 +495,12 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
           mode: "exit"
         }
       );
-  
+
       expect(releases.length).toEqual(1);
       expect(releases[0].name).toEqual("pkg-a");
       expect(releases[0].newVersion).toEqual("1.0.1");
     });
-  })
+  });
 });
 
 describe("version update thoroughness", () => {

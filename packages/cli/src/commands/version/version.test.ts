@@ -165,14 +165,10 @@ describe("running version in a simple project", () => {
     await writeChangesets([simpleChangeset], cwd);
     const spy = jest.spyOn(fs, "writeFile");
 
-    await versionCommand(
-      cwd,
-      defaultOptions,
-      {
-        ...modifiedDefaultConfig,
-        ignore: ["pkg-a"]
-      }
-    );
+    await versionCommand(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ignore: ["pkg-a"]
+    });
 
     const bumpedPackageA = !!spy.mock.calls.find((call: string[]) =>
       call[0].endsWith(`pkg-a${path.sep}package.json`)
@@ -185,14 +181,10 @@ describe("running version in a simple project", () => {
     await writeChangesets([simpleChangeset, simpleChangeset3], cwd);
     const spy = jest.spyOn(fs, "writeFile");
 
-    await versionCommand(
-      cwd,
-      defaultOptions,
-      {
-        ...modifiedDefaultConfig,
-        ignore: ["pkg-a"]
-      }
-    );
+    await versionCommand(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ignore: ["pkg-a"]
+    });
 
     expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
       expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
@@ -201,7 +193,6 @@ describe("running version in a simple project", () => {
       expect.objectContaining({ name: "pkg-a", version: "1.0.0" })
     );
   });
-
 
   describe("when there are multiple changeset commits", () => {
     it("should bump releasedPackages", async () => {

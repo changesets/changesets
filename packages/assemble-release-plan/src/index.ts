@@ -58,11 +58,11 @@ function assembleReleasePlan(
     preState === undefined
       ? undefined
       : {
-        ...preState,
-        initialVersions: {
-          ...preState.initialVersions
-        }
-      };
+          ...preState,
+          initialVersions: {
+            ...preState.initialVersions
+          }
+        };
 
   // Caching the snapshot version here and use this if it is snapshot release
   let snapshotVersion: string;
@@ -179,24 +179,22 @@ function assembleReleasePlan(
     updatedPreState === undefined
       ? undefined
       : {
-        state: updatedPreState,
-        preVersions
-      };
+          state: updatedPreState,
+          preVersions
+        };
 
   let dependencyGraph = getDependentsGraph(packages);
 
   let releaseObjectValidated = false;
   while (releaseObjectValidated === false) {
     // The map passed in to determineDependents will be mutated
-    let dependentAdded = determineDependents(
-      {
-        releases,
-        packagesByName,
-        dependencyGraph,
-        preInfo,
-        ignoredPackages: config.ignore
-      }
-    );
+    let dependentAdded = determineDependents({
+      releases,
+      packagesByName,
+      dependencyGraph,
+      preInfo,
+      ignoredPackages: config.ignore
+    });
 
     // The map passed in to determineDependents will be mutated
     let linksUpdated = applyLinks(releases, packagesByName, config.linked);

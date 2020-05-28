@@ -21,21 +21,19 @@ import { incrementVersion } from "./increment";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-export default function getDependents(
-  {  
-    releases,
-    packagesByName,
-    dependencyGraph,
-    preInfo,
-    ignoredPackages
-  } : {
-    releases: Map<string, InternalRelease>,
-    packagesByName: Map<string, Package>,
-    dependencyGraph: Map<string, string[]>,
-    preInfo: PreInfo | undefined,
-    ignoredPackages: Readonly<string[]>
-  }
-): boolean {
+export default function getDependents({
+  releases,
+  packagesByName,
+  dependencyGraph,
+  preInfo,
+  ignoredPackages
+}: {
+  releases: Map<string, InternalRelease>;
+  packagesByName: Map<string, Package>;
+  dependencyGraph: Map<string, string[]>;
+  preInfo: PreInfo | undefined;
+  ignoredPackages: Readonly<string[]>;
+}): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
   let pkgsToSearch = [...releases.values()];
