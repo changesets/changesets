@@ -242,9 +242,9 @@ function validateChangesets(
     if (ignoredPackages.length > 0 && notIgnoredPackages.length > 0) {
       throw new Error(
         `Found mixed changeset ${changeset.id}\n` +
-        `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
-        `Found not Ignored packages: ${notIgnoredPackages.join(" ")}\n` +
-        "Mixed changesets that contain both ignored and not ignored packages are not allowed"
+          `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
+          `Found not ignored packages: ${notIgnoredPackages.join(" ")}\n` +
+          "Mixed changesets that contain both ignored and not ignored packages are not allowed"
       );
     }
   }
