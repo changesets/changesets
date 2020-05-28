@@ -1,7 +1,7 @@
 import fixtures from "fixturez";
 import { error } from "@changesets/logger";
 
-import { run } from ".";
+import { run } from "./run";
 
 const f = fixtures(__dirname);
 jest.mock("@changesets/logger");
@@ -12,7 +12,6 @@ describe("cli", () => {
     let cwd: string;
     beforeEach(async () => {
       cwd = await f.copy("simple-project");
-      console.error = jest.fn();
     });
 
     it("should validate package name passed in from --ignore flag", async () => {
