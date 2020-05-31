@@ -747,4 +747,57 @@ describe("pre", () => {
       }
     ]);
   });
+  it("should not bump packages through devDependencies", async() => {
+    let cwd = f.copy("simple-dev-dep");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await pre(cwd, { command: "enter", tag: "next" });
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    let packages = (await getPackages(cwd))!;
+
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        devDependencies: { "pkg-b": "2.0.0-next.0" },
+        name: "pkg-a",
+        version: "1.0.0"
+      },
+      {
+        name: "pkg-b",
+        version: "2.0.0-next.0"
+      }
+    ]);
+  });
+  it("should not bump ignored packages through dependencies", async() => {
+    let cwd = f.copy("simple-project-with-ignore-config");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "major" }, { name: "pkg-b", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await pre(cwd, { command: "enter", tag: "next" });
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    let packages = (await getPackages(cwd))!;
+
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        devDependencies: { "pkg-b": "2.0.0-next.0" },
+        name: "pkg-a",
+        version: "1.0.0"
+      },
+      {
+        name: "pkg-b",
+        version: "2.0.0-next.0"
+      }
+    ]);
+
+  });
 });
