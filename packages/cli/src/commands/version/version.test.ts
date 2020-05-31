@@ -774,22 +774,30 @@ describe("pre", () => {
     ]);
   });
   it("should not bump ignored packages through dependencies", async() => {
-    let cwd = f.copy("simple-project-with-ignore-config");
+    let cwd = f.copy("simple-project");
     await writeChangeset(
       {
-        releases: [{ name: "pkg-a", type: "major" }, { name: "pkg-b", type: "major" }],
+        releases: [{ name: "pkg-a", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
         summary: "a very useful summary for the first change"
       },
       cwd
     );
 
     await pre(cwd, { command: "enter", tag: "next" });
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version(cwd, defaultOptions, {...modifiedDefaultConfig, ignore: ['pkg-a']});
     let packages = (await getPackages(cwd))!;
 
     expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
-        devDependencies: { "pkg-b": "2.0.0-next.0" },
+        dependencies: { "pkg-b": "2.0.0-next.0" },
         name: "pkg-a",
         version: "1.0.0"
       },
