@@ -747,7 +747,7 @@ describe("pre", () => {
       }
     ]);
   });
-  it("should not bump packages through devDependencies", async() => {
+  it("should not bump packages through devDependencies", async () => {
     let cwd = f.copy("simple-dev-dep");
     await writeChangeset(
       {
@@ -773,7 +773,7 @@ describe("pre", () => {
       }
     ]);
   });
-  it("should not bump ignored packages through dependencies", async() => {
+  it("should not bump ignored packages through dependencies", async () => {
     let cwd = f.copy("simple-project");
     await writeChangeset(
       {
@@ -792,7 +792,10 @@ describe("pre", () => {
     );
 
     await pre(cwd, { command: "enter", tag: "next" });
-    await version(cwd, defaultOptions, {...modifiedDefaultConfig, ignore: ['pkg-a']});
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ignore: ["pkg-a"]
+    });
     let packages = (await getPackages(cwd))!;
 
     expect(packages.packages.map(x => x.packageJson)).toEqual([
@@ -806,6 +809,5 @@ describe("pre", () => {
         version: "2.0.0-next.0"
       }
     ]);
-
   });
 });
