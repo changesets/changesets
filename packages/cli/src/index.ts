@@ -87,6 +87,5 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
     return process.exit(err.code);
   }
   error(err);
-  // console.log("what's going on?", err)
   process.exit(1);
 });
