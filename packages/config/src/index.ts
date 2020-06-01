@@ -13,7 +13,10 @@ export let defaultWrittenConfig = {
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
   baseBranch: "master",
-  updateInternalDependencies: "patch"
+  updateInternalDependencies: "patch",
+  _experimentalUnsafeOptions: {
+    onlyUpdatePeerDependentsWhenOutOfRange: false
+  }
 } as const;
 
 function getNormalisedChangelogOption(
@@ -151,6 +154,22 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but can only be 'patch' or 'minor'`
     );
   }
+
+  if (json._experimentalUnsafeOptions !== undefined) {
+    const {onlyUpdatePeerDependentsWhenOutOfRange} = json._experimentalUnsafeOptions;
+    if(
+      onlyUpdatePeerDependentsWhenOutOfRange !== undefined
+      && typeof onlyUpdatePeerDependentsWhenOutOfRange !== 'boolean'
+    ) {
+        messages.push(
+          `The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as ${JSON.stringify(
+            onlyUpdatePeerDependentsWhenOutOfRange,
+            null,
+            2
+          )} when the only valid values are undefined or a boolean`
+        );
+    }
+  }
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
@@ -179,7 +198,15 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     updateInternalDependencies:
       json.updateInternalDependencies === undefined
         ? defaultWrittenConfig.updateInternalDependencies
-        : json.updateInternalDependencies
+        : json.updateInternalDependencies,
+
+    _experimentalUnsafeOptions: {
+      onlyUpdatePeerDependentsWhenOutOfRange: 
+      json._experimentalUnsafeOptions === undefined || json._experimentalUnsafeOptions.onlyUpdatePeerDependentsWhenOutOfRange === undefined
+      ? defaultWrittenConfig._experimentalUnsafeOptions.onlyUpdatePeerDependentsWhenOutOfRange
+      : json._experimentalUnsafeOptions.onlyUpdatePeerDependentsWhenOutOfRange
+    }
+    
   };
   return config;
 };
