@@ -173,7 +173,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       for (let pkgName of json.ignore) {
         if (!pkgNames.has(pkgName)) {
           messages.push(
-            `The package "${pkgName}" is specified in the \`ignored\` option but it is not found in the project. You may have misspelled the package name.`
+            `The package "${pkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name.`
           );
         }
       }
