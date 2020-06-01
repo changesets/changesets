@@ -83,6 +83,10 @@ export type ExperimentalOptions = {
   onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
 };
 
+export type ExperimentalOptions = {
+  onlyUpdatePeerDependentsWhenOutOfRange: boolean
+}
+
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
 
 export type ModCompWithPackage = ComprehensiveRelease & {
