@@ -160,7 +160,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )
     ) {
       messages.push(
-        `The \`ignored\` option is set as ${JSON.stringify(
+        `The \`ignore\` option is set as ${JSON.stringify(
           json.ignore,
           null,
           2
