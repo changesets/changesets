@@ -1,5 +1,7 @@
 ---
 "@changesets/assemble-release-plan": patch
+"@changesets/config": patch
+"@changesets/types": patch
 ---
 
-Only bump peer dependents when leaving range when `onlyUpdatePeerDependentsWhenOutOfRange` is set to `true`.
+Added an experimental flag `onlyUpdatePeerDependentsWhenOutOfRange`. When set to `true`, we only bump peer dependents when peerDependencies are leaving range.
