@@ -131,7 +131,7 @@ export async function run(
 
         if (config.ignore.length > 0 && ignoreArrayFromCmd) {
           messages.push(
-            `It looks like you are trying to use the \`--ignore\` cmd flag while ignore is defined in the config file. It is currently not allowed and you can use only one of them at a time.`
+            `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`
           );
         } else if (ignoreArrayFromCmd) {
           // use the ignore flags from cli
