@@ -145,7 +145,7 @@ export async function run(
           for (const dependent of dependents) {
             if (!config.ignore.includes(dependent)) {
               messages.push(
-                `the package "${dependent}" depends on the ignored package "${ignoredPackage}", but itself is not being ignored. Please add it to the ignore array in the config file or pass it to the \`--ignore\` flag when using cli.`
+                `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}"  is not being ignored. Please pass "${dependent}" to the \`--ignore\` flag.`
               );
             }
           }
