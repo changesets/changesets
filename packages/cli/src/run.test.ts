@@ -38,7 +38,7 @@ describe("cli", () => {
       const loggerErrorCalls = (error as any).mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toEqual(
-        `the package "pkg-a" depends on the ignored package "pkg-b", but itself is not being ignored. Please add it to the ignore array in the config file or pass it to the \`--ignore\` flag when using cli.`
+        `The package "pkg-a" depends on the ignored package "pkg-b", but "pkg-a" is not being ignored. Please pass "pkg-a" to the \`--ignore\` flag.`
       );
     });
 
@@ -53,7 +53,7 @@ describe("cli", () => {
       const loggerErrorCalls = (error as any).mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toEqual(
-        `It looks like you are trying to use the \`--ignore\` cmd flag while ignore is defined in the config file. It is currently not allowed and you can use only one of them at a time.`
+        `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`
       );
     });
   });

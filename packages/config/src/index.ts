@@ -5,6 +5,7 @@ import { warn } from "@changesets/logger";
 import { Packages } from "@manypkg/get-packages";
 import { Config, WrittenConfig } from "@changesets/types";
 import packageJson from "../package.json";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
@@ -175,6 +176,19 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           messages.push(
             `The package "${pkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name.`
           );
+        }
+      }
+
+      // Validate that all dependents of ignored packages are listed in the ignore list
+      const dependentsGraph = getDependentsGraph(packages);
+      for (const ignoredPackage of json.ignore) {
+        const dependents = dependentsGraph.get(ignoredPackage) || [];
+        for (const dependent of dependents) {
+          if (!json.ignore.includes(dependent)) {
+            messages.push(
+              `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please add "${dependent}" to the \`ignore\` option.`
+            );
+          }
         }
       }
     }
