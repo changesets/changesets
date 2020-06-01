@@ -43,7 +43,10 @@ class FakeReleasePlan {
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      updateInternalDependencies: "patch"
+      updateInternalDependencies: "patch",
+      _experimentalUnsafeOptions: {
+        onlyUpdatePeerDependentsWhenOutOfRange: false
+      }
     };
 
     this.changesets = [baseChangeset, ...changesets];
@@ -72,7 +75,10 @@ async function testSetup(
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      updateInternalDependencies: "patch"
+      updateInternalDependencies: "patch",
+      _experimentalUnsafeOptions: {
+        onlyUpdatePeerDependentsWhenOutOfRange: false
+      }
     };
   }
   let tempDir = await f.copy(fixtureName);
@@ -274,7 +280,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          _experimentalUnsafeOptions: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
       let pkgPathA = changedFiles.find(a =>
@@ -330,7 +339,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          _experimentalUnsafeOptions: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
       let pkgPath = changedFiles.find(a =>
@@ -390,7 +402,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              _experimentalUnsafeOptions: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -468,7 +483,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              _experimentalUnsafeOptions: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -538,7 +556,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              _experimentalUnsafeOptions: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -608,7 +629,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              _experimentalUnsafeOptions: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -681,7 +705,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              _experimentalUnsafeOptions: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -759,7 +786,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              _experimentalUnsafeOptions: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -829,7 +859,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              _experimentalUnsafeOptions: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -899,7 +932,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              _experimentalUnsafeOptions: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -1057,7 +1093,10 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          _experimentalUnsafeOptions: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
       let pkgAChangelogPath = changedFiles.find(a =>
@@ -1155,7 +1194,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          _experimentalUnsafeOptions: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
@@ -1231,7 +1273,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "minor"
+          updateInternalDependencies: "minor",
+          _experimentalUnsafeOptions: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
@@ -1311,7 +1356,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "minor"
+          updateInternalDependencies: "minor",
+          _experimentalUnsafeOptions: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
@@ -1404,7 +1452,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "minor"
+          updateInternalDependencies: "minor",
+          _experimentalUnsafeOptions: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
@@ -1772,7 +1823,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          _experimentalUnsafeOptions: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
