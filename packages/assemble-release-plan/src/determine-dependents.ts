@@ -22,10 +22,19 @@ import { incrementVersion } from "./increment";
   modified array, but we decided both of those are worse than this solution.
 */
 export default function getDependents(
-  releases: Map<string, InternalRelease>,
-  packagesByName: Map<string, Package>,
-  dependencyGraph: Map<string, string[]>,
-  preInfo: PreInfo | undefined
+  {
+    releases,
+    packagesByName,
+    dependencyGraph,
+    preInfo,
+    onlyUpdatePeerDependentsWhenOutOfRange
+  }: {
+    releases: Map<string, InternalRelease>;
+    packagesByName: Map<string, Package>;
+    dependencyGraph: Map<string, string[]>;
+    preInfo: PreInfo | undefined;
+    onlyUpdatePeerDependentsWhenOutOfRange: boolean
+  }
 ): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
@@ -59,6 +68,12 @@ export default function getDependents(
         if (
           depTypes.includes("peerDependencies") &&
           nextRelease.type !== "patch" &&
+          (!onlyUpdatePeerDependentsWhenOutOfRange ||
+            !semver.satisfies(
+              incrementVersion(nextRelease, preInfo),
+              versionRange
+            )
+          ) &&
           (!releases.has(dependent) ||
             (releases.has(dependent) &&
               releases.get(dependent)!.type !== "major"))
