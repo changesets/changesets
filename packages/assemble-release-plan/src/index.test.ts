@@ -612,7 +612,6 @@ describe("bumping peerDeps", () => {
         id: "anyway-the-windblows",
         releases: [{ name: "pkg-a", type: "minor" }]
       });
-
       let { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
@@ -624,7 +623,6 @@ describe("bumping peerDeps", () => {
         },
         undefined
       );
-
       expect(releases.length).toBe(1);
       expect(releases[0].name).toEqual("pkg-a");
       expect(releases[0].newVersion).toEqual("1.1.0");
