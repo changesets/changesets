@@ -156,18 +156,20 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   if (json._experimentalUnsafeOptions !== undefined) {
-    const {onlyUpdatePeerDependentsWhenOutOfRange} = json._experimentalUnsafeOptions;
-    if(
-      onlyUpdatePeerDependentsWhenOutOfRange !== undefined
-      && typeof onlyUpdatePeerDependentsWhenOutOfRange !== 'boolean'
+    const {
+      onlyUpdatePeerDependentsWhenOutOfRange
+    } = json._experimentalUnsafeOptions;
+    if (
+      onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
+      typeof onlyUpdatePeerDependentsWhenOutOfRange !== "boolean"
     ) {
-        messages.push(
-          `The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as ${JSON.stringify(
-            onlyUpdatePeerDependentsWhenOutOfRange,
-            null,
-            2
-          )} when the only valid values are undefined or a boolean`
-        );
+      messages.push(
+        `The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as ${JSON.stringify(
+          onlyUpdatePeerDependentsWhenOutOfRange,
+          null,
+          2
+        )} when the only valid values are undefined or a boolean`
+      );
     }
   }
   if (messages.length) {
@@ -201,12 +203,15 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         : json.updateInternalDependencies,
 
     _experimentalUnsafeOptions: {
-      onlyUpdatePeerDependentsWhenOutOfRange: 
-      json._experimentalUnsafeOptions === undefined || json._experimentalUnsafeOptions.onlyUpdatePeerDependentsWhenOutOfRange === undefined
-      ? defaultWrittenConfig._experimentalUnsafeOptions.onlyUpdatePeerDependentsWhenOutOfRange
-      : json._experimentalUnsafeOptions.onlyUpdatePeerDependentsWhenOutOfRange
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        json._experimentalUnsafeOptions === undefined ||
+        json._experimentalUnsafeOptions
+          .onlyUpdatePeerDependentsWhenOutOfRange === undefined
+          ? defaultWrittenConfig._experimentalUnsafeOptions
+              .onlyUpdatePeerDependentsWhenOutOfRange
+          : json._experimentalUnsafeOptions
+              .onlyUpdatePeerDependentsWhenOutOfRange
     }
-    
   };
   return config;
 };

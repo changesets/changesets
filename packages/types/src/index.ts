@@ -78,8 +78,8 @@ export type WrittenConfig = {
 };
 
 export type ExperimentalOptions = {
-  onlyUpdatePeerDependentsWhenOutOfRange: boolean
-}
+  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+};
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
 

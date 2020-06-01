@@ -190,7 +190,8 @@ function assembleReleasePlan(
       packagesByName,
       dependencyGraph,
       preInfo,
-      onlyUpdatePeerDependentsWhenOutOfRange: config._experimentalUnsafeOptions.onlyUpdatePeerDependentsWhenOutOfRange
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        config._experimentalUnsafeOptions.onlyUpdatePeerDependentsWhenOutOfRange
     });
 
     // The map passed in to determineDependents will be mutated
