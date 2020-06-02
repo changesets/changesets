@@ -45,7 +45,8 @@ class FakeReleasePlan {
       baseBranch: "master",
       updateInternalDependencies: "patch",
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        onlyUpdatePeerDependentsWhenOutOfRange: false
+        onlyUpdatePeerDependentsWhenOutOfRange: false,
+        useCalculatedVersionForSnapshots: false
       }
     };
 
