@@ -28,7 +28,8 @@ test("read reads the config", async () => {
     baseBranch: "master",
     updateInternalDependencies: "patch",
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-      onlyUpdatePeerDependentsWhenOutOfRange: false
+      onlyUpdatePeerDependentsWhenOutOfRange: false,
+      useCalculatedVersionForSnapshots: false
     }
   });
 });
@@ -41,7 +42,8 @@ let defaults = {
   baseBranch: "master",
   updateInternalDependencies: "patch",
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-    onlyUpdatePeerDependentsWhenOutOfRange: false
+    onlyUpdatePeerDependentsWhenOutOfRange: false,
+    useCalculatedVersionForSnapshots: false
   }
 } as const;
 
