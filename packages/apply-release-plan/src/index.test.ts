@@ -44,7 +44,7 @@ class FakeReleasePlan {
       access: "restricted",
       baseBranch: "master",
       updateInternalDependencies: "patch",
-      _experimentalUnsafeOptions: {
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false
       }
     };
@@ -76,7 +76,7 @@ async function testSetup(
       access: "restricted",
       baseBranch: "master",
       updateInternalDependencies: "patch",
-      _experimentalUnsafeOptions: {
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false
       }
     };
@@ -281,7 +281,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "patch",
-          _experimentalUnsafeOptions: {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false
           }
         }
@@ -340,7 +340,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "patch",
-          _experimentalUnsafeOptions: {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false
           }
         }
@@ -403,7 +403,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
-              _experimentalUnsafeOptions: {
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false
               }
             }
@@ -484,7 +484,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
-              _experimentalUnsafeOptions: {
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false
               }
             }
@@ -557,7 +557,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
-              _experimentalUnsafeOptions: {
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false
               }
             }
@@ -630,7 +630,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
-              _experimentalUnsafeOptions: {
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false
               }
             }
@@ -706,7 +706,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
-              _experimentalUnsafeOptions: {
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false
               }
             }
@@ -787,7 +787,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
-              _experimentalUnsafeOptions: {
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false
               }
             }
@@ -860,7 +860,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
-              _experimentalUnsafeOptions: {
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false
               }
             }
@@ -933,7 +933,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
-              _experimentalUnsafeOptions: {
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false
               }
             }
@@ -1094,7 +1094,7 @@ describe("apply release plan", () => {
             null
           ],
           updateInternalDependencies: "patch",
-          _experimentalUnsafeOptions: {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false
           }
         }
@@ -1195,7 +1195,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "patch",
-          _experimentalUnsafeOptions: {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false
           }
         }
@@ -1274,7 +1274,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "minor",
-          _experimentalUnsafeOptions: {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false
           }
         }
@@ -1357,7 +1357,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "minor",
-          _experimentalUnsafeOptions: {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false
           }
         }
@@ -1453,7 +1453,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "minor",
-          _experimentalUnsafeOptions: {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false
           }
         }
@@ -1824,7 +1824,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "patch",
-          _experimentalUnsafeOptions: {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false
           }
         }

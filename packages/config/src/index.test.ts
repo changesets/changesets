@@ -27,7 +27,7 @@ test("read reads the config", async () => {
     access: "restricted",
     baseBranch: "master",
     updateInternalDependencies: "patch",
-    _experimentalUnsafeOptions: {
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false
     }
   });
@@ -40,7 +40,7 @@ let defaults = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  _experimentalUnsafeOptions: {
+  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false
   }
 } as const;
@@ -290,7 +290,7 @@ The \`updateInternalDependencies\` option is set as \\"major\\" but can only be 
   test("onlyUpdatePeerDependentsWhenOutOfRange non-boolean", () => {
     expect(() => {
       unsafeParse({
-        _experimentalUnsafeOptions: {
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
           onlyUpdatePeerDependentsWhenOutOfRange: "not true"
         }
       });

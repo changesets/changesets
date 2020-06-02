@@ -14,7 +14,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  _experimentalUnsafeOptions: {
+  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false
   }
 } as const;
@@ -155,10 +155,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
-  if (json._experimentalUnsafeOptions !== undefined) {
+  if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
     const {
       onlyUpdatePeerDependentsWhenOutOfRange
-    } = json._experimentalUnsafeOptions;
+    } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
     if (
       onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
       typeof onlyUpdatePeerDependentsWhenOutOfRange !== "boolean"
@@ -202,14 +202,14 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.updateInternalDependencies
         : json.updateInternalDependencies,
 
-    _experimentalUnsafeOptions: {
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange:
-        json._experimentalUnsafeOptions === undefined ||
-        json._experimentalUnsafeOptions
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .onlyUpdatePeerDependentsWhenOutOfRange === undefined
-          ? defaultWrittenConfig._experimentalUnsafeOptions
+          ? defaultWrittenConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange
-          : json._experimentalUnsafeOptions
+          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange
     }
   };

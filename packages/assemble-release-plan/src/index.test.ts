@@ -597,7 +597,7 @@ describe("bumping peerDeps", () => {
         setup.packages,
         {
           ...defaultConfig,
-          _experimentalUnsafeOptions: {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: true
           }
         },
@@ -622,7 +622,7 @@ describe("bumping peerDeps", () => {
       setup.packages,
       {
         ...defaultConfig,
-        _experimentalUnsafeOptions: {
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
           onlyUpdatePeerDependentsWhenOutOfRange: true
         }
       },
