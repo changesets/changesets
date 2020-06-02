@@ -63,7 +63,7 @@ export type Config = {
   baseBranch: string;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
-  _experimentalUnsafeOptions: ExperimentalOptions;
+  _experimentalUnsafeOptions: Required<ExperimentalOptions>;
 };
 
 export type WrittenConfig = {
@@ -78,7 +78,7 @@ export type WrittenConfig = {
 };
 
 export type ExperimentalOptions = {
-  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+  onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
