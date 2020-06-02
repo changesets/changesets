@@ -618,7 +618,8 @@ describe("bumping peerDeps", () => {
         {
           ...defaultConfig,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: true
+            onlyUpdatePeerDependentsWhenOutOfRange: true,
+            useCalculatedVersionForSnapshots: false
           }
         },
         undefined
@@ -642,7 +643,8 @@ describe("bumping peerDeps", () => {
       {
         ...defaultConfig,
         ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-          onlyUpdatePeerDependentsWhenOutOfRange: true
+          onlyUpdatePeerDependentsWhenOutOfRange: true,
+          useCalculatedVersionForSnapshots: false
         }
       },
       undefined

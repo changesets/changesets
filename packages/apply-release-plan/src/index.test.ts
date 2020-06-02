@@ -78,7 +78,8 @@ async function testSetup(
       baseBranch: "master",
       updateInternalDependencies: "patch",
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        onlyUpdatePeerDependentsWhenOutOfRange: false
+        onlyUpdatePeerDependentsWhenOutOfRange: false,
+        useCalculatedVersionForSnapshots: false
       }
     };
   }
@@ -283,7 +284,8 @@ describe("apply release plan", () => {
           baseBranch: "master",
           updateInternalDependencies: "patch",
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: false
           }
         }
       );
@@ -342,7 +344,8 @@ describe("apply release plan", () => {
           baseBranch: "master",
           updateInternalDependencies: "patch",
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: false
           }
         }
       );
@@ -405,7 +408,8 @@ describe("apply release plan", () => {
               baseBranch: "master",
               updateInternalDependencies,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-                onlyUpdatePeerDependentsWhenOutOfRange: false
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                useCalculatedVersionForSnapshots: false
               }
             }
           );
@@ -486,7 +490,8 @@ describe("apply release plan", () => {
               baseBranch: "master",
               updateInternalDependencies,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-                onlyUpdatePeerDependentsWhenOutOfRange: false
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                useCalculatedVersionForSnapshots: false
               }
             }
           );
@@ -559,7 +564,8 @@ describe("apply release plan", () => {
               baseBranch: "master",
               updateInternalDependencies,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-                onlyUpdatePeerDependentsWhenOutOfRange: false
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                useCalculatedVersionForSnapshots: false
               }
             }
           );
@@ -632,7 +638,8 @@ describe("apply release plan", () => {
               baseBranch: "master",
               updateInternalDependencies,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-                onlyUpdatePeerDependentsWhenOutOfRange: false
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                useCalculatedVersionForSnapshots: false
               }
             }
           );
@@ -708,7 +715,8 @@ describe("apply release plan", () => {
               baseBranch: "master",
               updateInternalDependencies,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-                onlyUpdatePeerDependentsWhenOutOfRange: false
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                useCalculatedVersionForSnapshots: false
               }
             }
           );
@@ -789,7 +797,8 @@ describe("apply release plan", () => {
               baseBranch: "master",
               updateInternalDependencies,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-                onlyUpdatePeerDependentsWhenOutOfRange: false
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                useCalculatedVersionForSnapshots: false
               }
             }
           );
@@ -862,7 +871,8 @@ describe("apply release plan", () => {
               baseBranch: "master",
               updateInternalDependencies,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-                onlyUpdatePeerDependentsWhenOutOfRange: false
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                useCalculatedVersionForSnapshots: false
               }
             }
           );
@@ -935,7 +945,8 @@ describe("apply release plan", () => {
               baseBranch: "master",
               updateInternalDependencies,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-                onlyUpdatePeerDependentsWhenOutOfRange: false
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                useCalculatedVersionForSnapshots: false
               }
             }
           );
@@ -1168,7 +1179,8 @@ describe("apply release plan", () => {
           ],
           updateInternalDependencies: "patch",
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: false
           }
         }
       );
@@ -1269,7 +1281,8 @@ describe("apply release plan", () => {
           baseBranch: "master",
           updateInternalDependencies: "patch",
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: false
           }
         }
       );
@@ -1348,7 +1361,8 @@ describe("apply release plan", () => {
           baseBranch: "master",
           updateInternalDependencies: "minor",
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: false
           }
         }
       );
@@ -1431,7 +1445,8 @@ describe("apply release plan", () => {
           baseBranch: "master",
           updateInternalDependencies: "minor",
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: false
           }
         }
       );
@@ -1527,7 +1542,8 @@ describe("apply release plan", () => {
           baseBranch: "master",
           updateInternalDependencies: "minor",
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: false
           }
         }
       );
@@ -1898,7 +1914,8 @@ describe("apply release plan", () => {
           baseBranch: "master",
           updateInternalDependencies: "patch",
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: false
           }
         }
       );
