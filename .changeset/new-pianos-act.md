@@ -1,5 +1,7 @@
 ---
-"@changesets/assemble-release-plan": patch
+"@changesets/assemble-release-plan": major
+"@changesets/apply-release-plan": major
+"@changesets/get-release-plan": major
 "@changesets/config": patch
 "@changesets/types": patch
 ---
