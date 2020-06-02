@@ -207,7 +207,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .onlyUpdatePeerDependentsWhenOutOfRange === undefined
-          ? defaultWrittenConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          ? defaultWrittenConfig
+              .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange
           : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange
