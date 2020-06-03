@@ -198,6 +198,44 @@ describe("running version in a simple project", () => {
       expect(dirs.length).toBe(2);
     });
   });
+
+  describe("onlyUpdatePeerDependentsWhenOutOfRange", () => {
+    it("should not bump peerDependencies if they are still in range", async () => {
+      let cwd = f.copy("simple-caret-peer-dep");
+      await writeChangeset(
+        {
+          releases: [
+            { name: "has-peer-dep", type: "patch" },
+            { name: "depended-upon", type: "patch" }
+          ],
+          summary: "a very useful summary for the first change"
+        },
+        cwd
+      );
+
+      await version(cwd, defaultOptions, {
+        ...modifiedDefaultConfig,
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          onlyUpdatePeerDependentsWhenOutOfRange: true
+        }
+      });
+
+      let packages = (await getPackages(cwd))!;
+      expect(packages.packages.map(x => x.packageJson)).toEqual([
+        {
+          name: "depended-upon",
+          version: "1.0.1"
+        },
+        {
+          peerDependencies: {
+            "depended-upon": "^1.0.0"
+          },
+          name: "has-peer-dep",
+          version: "1.0.1"
+        }
+      ]);
+    });
+  });
 });
 
 describe("running version in a simple project with workspace range", () => {

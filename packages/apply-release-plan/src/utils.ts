@@ -28,3 +28,16 @@ export function shouldUpdateInternalDependency(
   const minLevel = getBumpLevel(minReleaseType);
   return getBumpLevel(release.type) >= minLevel;
 }
+
+export function shouldUpdatePeerDependency(
+  onlyUpdatePeerDependentsWhenOutOfRange: boolean,
+  release: { version: string; type: VersionType },
+  depVersionRange: string
+): boolean {
+  if (!semver.satisfies(release.version, depVersionRange)) {
+    // Dependencies leaving semver range should always be updated
+    return true;
+  }
+
+  return !onlyUpdatePeerDependentsWhenOutOfRange;
+}
