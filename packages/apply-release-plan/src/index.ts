@@ -93,14 +93,12 @@ export default async function applyReleasePlan(
 
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map(release => {
-    return versionPackage(
-      release,
-      versionsToUpdate,
-      {
-        updateInternalDependencies: config.updateInternalDependencies,
-        onlyUpdatePeerDependentsWhenOutOfRange: config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.onlyUpdatePeerDependentsWhenOutOfRange
-      }
-    );
+    return versionPackage(release, versionsToUpdate, {
+      updateInternalDependencies: config.updateInternalDependencies,
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .onlyUpdatePeerDependentsWhenOutOfRange
+    });
   });
 
   let prettierConfig = await prettier.resolveConfig(cwd);

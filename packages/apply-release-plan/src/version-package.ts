@@ -5,7 +5,10 @@ import {
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
-import { shouldUpdateInternalDependency, shouldUpdatePeerDependency } from "./utils";
+import {
+  shouldUpdateInternalDependency,
+  shouldUpdatePeerDependency
+} from "./utils";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -25,10 +28,9 @@ export default function versionPackage(
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange
   }: {
-    updateInternalDependencies: "patch" | "minor",
-    onlyUpdatePeerDependentsWhenOutOfRange: boolean
+    updateInternalDependencies: "patch" | "minor";
+    onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
-
 ) {
   let { newVersion, packageJson } = release;
 
@@ -48,13 +50,12 @@ export default function versionPackage(
             { version, type },
             depCurrentVersion
           ) ||
-          (
-            depType === 'peerDependencies' && !shouldUpdatePeerDependency(
+          (depType === "peerDependencies" &&
+            !shouldUpdatePeerDependency(
               onlyUpdatePeerDependentsWhenOutOfRange,
               { version, type },
               depCurrentVersion
-            )
-          )
+            ))
         )
           continue;
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
