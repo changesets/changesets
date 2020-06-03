@@ -102,9 +102,7 @@ function assembleReleasePlan(
       let highestPreVersion = 0;
       for (let linkedPackage of linkedGroup) {
         highestPreVersion = Math.max(
-          getPreVersion(
-            packagesByName.get(linkedPackage)!.packageJson.version
-          ),
+          getPreVersion(packagesByName.get(linkedPackage)!.packageJson.version),
           highestPreVersion
         );
       }
@@ -133,7 +131,7 @@ function assembleReleasePlan(
     if (updatedPreState.mode === "exit") {
       for (let pkg of packages.packages) {
         // If a package had a prerelease, but didn't trigger a version bump in the regular release,
-        // we want to give it a patch release. 
+        // we want to give it a patch release.
         // Detailed explaination at https://github.com/atlassian/changesets/pull/382#discussion_r434434182
         if (preVersions.get(pkg.packageJson.name) !== 0) {
           if (!releases.has(pkg.packageJson.name)) {

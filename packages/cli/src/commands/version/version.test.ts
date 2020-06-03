@@ -212,7 +212,7 @@ describe("running version in a simple project with caret dependencies", () => {
       cwd
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
-    
+
     let packages = (await getPackages(cwd))!;
     expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
@@ -230,7 +230,7 @@ describe("running version in a simple project with caret dependencies", () => {
 
     await pre(cwd, { command: "exit" });
     await version(cwd, defaultOptions, modifiedDefaultConfig);
-    
+
     packages = (await getPackages(cwd))!;
     expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
@@ -247,7 +247,6 @@ describe("running version in a simple project with caret dependencies", () => {
     ]);
   });
 });
-
 
 describe("running version in a simple project with workspace range", () => {
   temporarilySilenceLogs();
