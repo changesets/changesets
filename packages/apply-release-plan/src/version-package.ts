@@ -5,9 +5,7 @@ import {
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
-import {
-  shouldUpdateDependencyBasedOnConfig
-} from "./utils";
+import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
 const DEPENDENCY_TYPES = [
   "dependencies",

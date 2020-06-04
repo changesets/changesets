@@ -32,8 +32,8 @@ export default async function generateMarkdown(
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange
   }: {
-    updateInternalDependencies: "patch" | "minor",
-    onlyUpdatePeerDependentsWhenOutOfRange: boolean
+    updateInternalDependencies: "patch" | "minor";
+    onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
 ) {
   if (release.type === "none") return null;
@@ -72,7 +72,7 @@ export default async function generateMarkdown(
         { type: rel.type, version: rel.newVersion },
         {
           depVersionRange: versionRange,
-          depType: dependencyVersionRange ? 'dependencies' : 'peerDependencies'
+          depType: dependencyVersionRange ? "dependencies" : "peerDependencies"
         },
         {
           minReleaseType: updateInternalDependencies,

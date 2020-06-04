@@ -17,19 +17,23 @@ function getBumpLevel(type: VersionType) {
 
 export function shouldUpdateDependencyBasedOnConfig(
   release: { version: string; type: VersionType },
-  { 
-    depVersionRange, 
-    depType 
+  {
+    depVersionRange,
+    depType
   }: {
-    depVersionRange: string,
-    depType: "dependencies" | "devDependencies" | "peerDependencies" | "optionalDependencies",
+    depVersionRange: string;
+    depType:
+      | "dependencies"
+      | "devDependencies"
+      | "peerDependencies"
+      | "optionalDependencies";
   },
   {
     minReleaseType,
     onlyUpdatePeerDependentsWhenOutOfRange
   }: {
-    minReleaseType: "patch" | "minor",
-    onlyUpdatePeerDependentsWhenOutOfRange: boolean
+    minReleaseType: "patch" | "minor";
+    onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
 ): boolean {
   if (!semver.satisfies(release.version, depVersionRange)) {
@@ -40,7 +44,7 @@ export function shouldUpdateDependencyBasedOnConfig(
   const minLevel = getBumpLevel(minReleaseType);
   let shouldUpdate = getBumpLevel(release.type) >= minLevel;
 
-  if (depType === 'peerDependencies') {
+  if (depType === "peerDependencies") {
     shouldUpdate = !onlyUpdatePeerDependentsWhenOutOfRange;
   }
 
