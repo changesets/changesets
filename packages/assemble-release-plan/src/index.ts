@@ -88,27 +88,29 @@ function assembleReleasePlan(
       changesets = changesets.filter(
         changeset => !usedChangesetIds.has(changeset.id)
       );
-      for (let pkg of packages.packages) {
-        preVersions.set(
-          pkg.packageJson.name,
-          getPreVersion(pkg.packageJson.version)
+    }
+
+    // Populate preVersion
+    // preVersion is the map between package name and its next pre version number.
+    for (let pkg of packages.packages) {
+      preVersions.set(
+        pkg.packageJson.name,
+        getPreVersion(pkg.packageJson.version)
+      );
+    }
+    for (let linkedGroup of config.linked) {
+      let highestPreVersion = 0;
+      for (let linkedPackage of linkedGroup) {
+        highestPreVersion = Math.max(
+          getPreVersion(packagesByName.get(linkedPackage)!.packageJson.version),
+          highestPreVersion
         );
       }
-      for (let linkedGroup of config.linked) {
-        let highestPreVersion = 0;
-        for (let linkedPackage of linkedGroup) {
-          highestPreVersion = Math.max(
-            getPreVersion(
-              packagesByName.get(linkedPackage)!.packageJson.version
-            ),
-            highestPreVersion
-          );
-        }
-        for (let linkedPackage of linkedGroup) {
-          preVersions.set(linkedPackage, highestPreVersion);
-        }
+      for (let linkedPackage of linkedGroup) {
+        preVersions.set(linkedPackage, highestPreVersion);
       }
     }
+
     for (let pkg of packages.packages) {
       packagesByName.set(pkg.packageJson.name, {
         ...pkg,
@@ -128,7 +130,10 @@ function assembleReleasePlan(
   if (updatedPreState !== undefined) {
     if (updatedPreState.mode === "exit") {
       for (let pkg of packages.packages) {
-        if (preVersions.get(pkg.packageJson.name) !== -1) {
+        // If a package had a prerelease, but didn't trigger a version bump in the regular release,
+        // we want to give it a patch release.
+        // Detailed explaination at https://github.com/atlassian/changesets/pull/382#discussion_r434434182
+        if (preVersions.get(pkg.packageJson.name) !== 0) {
           if (!releases.has(pkg.packageJson.name)) {
             releases.set(pkg.packageJson.name, {
               type: "patch",
