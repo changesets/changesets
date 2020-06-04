@@ -969,6 +969,78 @@ describe("apply release plan", () => {
         });
       });
     });
+
+    describe("onlyUpdatePeerDependentsWhenOutOfRange set to true", () => {
+      it("should not bump peerDependencies if they are still in range", async () => {
+        let { changedFiles } = await testSetup(
+          "simple-caret-peer-dep",
+          {
+            changesets: [
+              {
+                id: "quick-lions-devour",
+                summary: "Hey, let's have fun with testing!",
+                releases: [
+                  { name: "has-peer-dep", type: "patch" },
+                  { name: "depended-upon", type: "patch" }
+                ]
+              }
+            ],
+            releases: [
+              {
+                name: "has-peer-dep",
+                type: "patch",
+                oldVersion: "1.0.0",
+                newVersion: "1.0.1",
+                changesets: ["quick-lions-devour"]
+              },
+              {
+                name: "depended-upon",
+                type: "patch",
+                oldVersion: "1.0.0",
+                newVersion: "1.0.1",
+                changesets: ["quick-lions-devour"]
+              }
+            ],
+            preState: undefined
+          },
+          {
+            changelog: false,
+            commit: false,
+            linked: [],
+            access: "restricted",
+            baseBranch: "master",
+            updateInternalDependencies: "patch",
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+              onlyUpdatePeerDependentsWhenOutOfRange: true
+            }
+          }
+        );
+        let pkgPathDependent = changedFiles.find(a =>
+          a.endsWith(`has-peer-dep${path.sep}package.json`)
+        );
+        let pkgPathDepended = changedFiles.find(b =>
+          b.endsWith(`depended-upon${path.sep}package.json`)
+        );
+
+        if (!pkgPathDependent || !pkgPathDepended) {
+          throw new Error(`could not find an updated package json`);
+        }
+        let pkgJSONDependent = await fs.readJSON(pkgPathDependent);
+        let pkgJSONDepended = await fs.readJSON(pkgPathDepended);
+
+        expect(pkgJSONDependent).toMatchObject({
+          name: "has-peer-dep",
+          version: "1.0.1",
+          peerDependencies: {
+            "depended-upon": "^1.0.0"
+          }
+        });
+        expect(pkgJSONDepended).toMatchObject({
+          name: "depended-upon",
+          version: "1.0.1"
+        });
+      });
+    });
   });
   describe("changelogs", () => {
     it("should update a changelog for one package", async () => {

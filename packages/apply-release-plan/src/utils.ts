@@ -15,29 +15,34 @@ function getBumpLevel(type: VersionType) {
   return level;
 }
 
-export function shouldUpdateInternalDependency(
-  minReleaseType: "patch" | "minor",
+export function shouldUpdateDependencyBasedOnConfig(
   release: { version: string; type: VersionType },
-  depVersionRange: string
-) {
-  if (!semver.satisfies(release.version, depVersionRange)) {
-    // Dependencies leaving semver range should always be updated regardless of bump type
-    return true;
+  { 
+    depVersionRange, 
+    depType 
+  }: {
+    depVersionRange: string,
+    depType: "dependencies" | "devDependencies" | "peerDependencies" | "optionalDependencies",
+  },
+  {
+    minReleaseType,
+    onlyUpdatePeerDependentsWhenOutOfRange
+  }: {
+    minReleaseType: "patch" | "minor",
+    onlyUpdatePeerDependentsWhenOutOfRange: boolean
   }
-
-  const minLevel = getBumpLevel(minReleaseType);
-  return getBumpLevel(release.type) >= minLevel;
-}
-
-export function shouldUpdatePeerDependency(
-  onlyUpdatePeerDependentsWhenOutOfRange: boolean,
-  release: { version: string; type: VersionType },
-  depVersionRange: string
 ): boolean {
   if (!semver.satisfies(release.version, depVersionRange)) {
     // Dependencies leaving semver range should always be updated
     return true;
   }
 
-  return !onlyUpdatePeerDependentsWhenOutOfRange;
+  const minLevel = getBumpLevel(minReleaseType);
+  let shouldUpdate = getBumpLevel(release.type) >= minLevel;
+
+  if (depType === 'peerDependencies') {
+    shouldUpdate = !onlyUpdatePeerDependentsWhenOutOfRange;
+  }
+
+  return shouldUpdate;
 }

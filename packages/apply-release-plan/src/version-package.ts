@@ -6,8 +6,7 @@ import {
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
 import {
-  shouldUpdateInternalDependency,
-  shouldUpdatePeerDependency
+  shouldUpdateDependencyBasedOnConfig
 } from "./utils";
 
 const DEPENDENCY_TYPES = [
@@ -45,17 +44,17 @@ export default function versionPackage(
           !depCurrentVersion ||
           depCurrentVersion.startsWith("file:") ||
           depCurrentVersion.startsWith("link:") ||
-          !shouldUpdateInternalDependency(
-            updateInternalDependencies,
+          !shouldUpdateDependencyBasedOnConfig(
             { version, type },
-            depCurrentVersion
-          ) ||
-          (depType === "peerDependencies" &&
-            !shouldUpdatePeerDependency(
-              onlyUpdatePeerDependentsWhenOutOfRange,
-              { version, type },
-              depCurrentVersion
-            ))
+            {
+              depVersionRange: depCurrentVersion,
+              depType
+            },
+            {
+              minReleaseType: updateInternalDependencies,
+              onlyUpdatePeerDependentsWhenOutOfRange
+            }
+          )
         )
           continue;
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");

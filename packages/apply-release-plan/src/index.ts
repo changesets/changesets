@@ -211,7 +211,10 @@ async function getNewChangelogEntry(
         moddedChangesets,
         getChangelogFuncs,
         changelogOpts,
-        config.updateInternalDependencies
+        {
+          updateInternalDependencies: config.updateInternalDependencies,
+          onlyUpdatePeerDependentsWhenOutOfRange: config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.onlyUpdatePeerDependentsWhenOutOfRange
+        }
       );
 
       return {
