@@ -1,5 +1,49 @@
 # @changesets/apply-release-plan
 
+## 3.1.0
+
+### Minor Changes
+
+- [`6d0790a`](https://github.com/atlassian/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a) [#359](https://github.com/atlassian/changesets/pull/359) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Add support for snapshot flag to version command. Usage: `changeset version --snapshot [tag]`. The updated version of the packages looks like `0.0.0[-tag]-YYYYMMDDHHMMSS` where YYYY, MM, DD, HH, MM, and SS is the date and time of when the snapshot version is created. You can use this feature with the tag option in the publish command to publish packages under experimental tags from feature branches. To publish a snapshot version of a package under an experimental tag you can do:
+
+  ```
+  $ # Version packages to snapshot version
+  $ changeset version --snapshot
+  $ # Publish packages under exprimental tag, keeping next and latest tag clean
+  $ changeset publish --tag exprimental
+  ```
+
+## 3.0.3
+
+### Patch Changes
+
+- [`90f3b65`](https://github.com/atlassian/changesets/commit/90f3b651f9c0403920b17801b84a2fbe6f190e2a) [#373](https://github.com/atlassian/changesets/pull/373) Thanks [@Blasz](https://github.com/Blasz)! - Fix patch bumped dependencies not being updated in dependents package.json when leaving semver range with `updateInternalDependencies` set to minor.
+
+## 3.0.2
+
+### Patch Changes
+
+- [`8fe77b6`](https://github.com/atlassian/changesets/commit/8fe77b614b726b861900e69c015c8876f64ed04f) [#366](https://github.com/atlassian/changesets/pull/366) Thanks [@Blasz](https://github.com/Blasz)! - Fix release version commit including dev dependent packages with release type 'none'
+
+## 3.0.1
+
+### Patch Changes
+
+- [`52a88ce`](https://github.com/atlassian/changesets/commit/52a88ce816692f6b18fa8f3f67d707b78b0b8210) [#361](https://github.com/atlassian/changesets/pull/361) Thanks [@Blasz](https://github.com/Blasz)! - Fix dependency release lines being output when they were skipped via the updateInternalDependencies config option
+
+## 3.0.0
+
+### Major Changes
+
+- [`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d) [#358](https://github.com/atlassian/changesets/pull/358) Thanks [@Blasz](https://github.com/Blasz)! - Add new updateInternalDependencies config option to disable auto bumping of internal dependencies in the same release if the dependency was only patch bumped
+
+### Patch Changes
+
+- Updated dependencies [[`89f0c49`](https://github.com/atlassian/changesets/commit/89f0c497ac21b8d008da67caff8032947836c7b1), [`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d), [`09f62f9`](https://github.com/atlassian/changesets/commit/09f62f9c822f31899a48cbd93c7801d72a80b97e)]:
+  - @changesets/git@1.0.5
+  - @changesets/types@3.0.0
+  - @changesets/config@1.1.0
+
 ## 2.0.2
 
 ### Patch Changes

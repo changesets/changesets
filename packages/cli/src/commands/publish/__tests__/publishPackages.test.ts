@@ -2,6 +2,7 @@ import fixtures from "fixturez";
 
 import publishPackages from "../publishPackages";
 import * as npmUtils from "../npm-utils";
+import { getPackages } from "@manypkg/get-packages";
 
 jest.mock("../npm-utils");
 jest.mock("is-ci", () => true);
@@ -34,7 +35,11 @@ describe("publishPackages", () => {
 
   describe("when isCI", () => {
     it("does not call out to npm to see if otp is required", async () => {
-      await publishPackages({ cwd, access: "public", preState: undefined });
+      await publishPackages({
+        packages: (await getPackages(cwd)).packages,
+        access: "public",
+        preState: undefined
+      });
       expect(npmUtils.getTokenIsRequired).not.toHaveBeenCalled();
     });
   });

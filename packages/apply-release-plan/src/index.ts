@@ -39,7 +39,8 @@ async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
-  config: Config = defaultConfig
+  config: Config = defaultConfig,
+  snapshot?: string | boolean
 ) {
   let cwd = packages.root.dir;
 
@@ -69,11 +70,11 @@ export default async function applyReleasePlan(
   let releaseWithChangelogs = await getNewChangelogEntry(
     releaseWithPackages,
     changesets,
-    config.changelog,
+    config,
     cwd
   );
 
-  if (releasePlan.preState !== undefined) {
+  if (releasePlan.preState !== undefined && snapshot === undefined) {
     if (releasePlan.preState.mode === "exit") {
       await fs.remove(path.join(cwd, ".changeset", "pre.json"));
     } else {
@@ -84,14 +85,19 @@ export default async function applyReleasePlan(
     }
   }
 
-  let versionsToUpdate = releases.map(({ name, newVersion }) => ({
+  let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
     name,
-    version: newVersion
+    version: newVersion,
+    type
   }));
 
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map(release => {
-    return versionPackage(release, versionsToUpdate);
+    return versionPackage(
+      release,
+      versionsToUpdate,
+      config.updateInternalDependencies
+    );
   });
 
   let prettierConfig = await prettier.resolveConfig(cwd);
@@ -162,7 +168,7 @@ export default async function applyReleasePlan(
 async function getNewChangelogEntry(
   releasesWithPackage: ModCompWithPackage[],
   changesets: NewChangeset[],
-  changelogConfig: false | readonly [string, any],
+  config: Config,
   cwd: string
 ) {
   let getChangelogFuncs: ChangelogFunctions = {
@@ -170,10 +176,10 @@ async function getNewChangelogEntry(
     getDependencyReleaseLine: () => Promise.resolve("")
   };
   let changelogOpts: any;
-  if (changelogConfig) {
-    changelogOpts = changelogConfig[1];
+  if (config.changelog) {
+    changelogOpts = config.changelog[1];
     let changesetPath = path.join(cwd, ".changeset");
-    let changelogPath = resolveFrom(changesetPath, changelogConfig[0]);
+    let changelogPath = resolveFrom(changesetPath, config.changelog[0]);
 
     let possibleChangelogFunc = require(changelogPath);
     if (possibleChangelogFunc.default) {
@@ -203,7 +209,8 @@ async function getNewChangelogEntry(
         releasesWithPackage,
         moddedChangesets,
         getChangelogFuncs,
-        changelogOpts
+        changelogOpts,
+        config.updateInternalDependencies
       );
 
       return {

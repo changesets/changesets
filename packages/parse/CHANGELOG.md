@@ -1,5 +1,12 @@
 # @changesets/parse
 
+## 0.3.6
+
+### Patch Changes
+
+- Updated dependencies [[`2b49d66`](https://github.com/atlassian/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d)]:
+  - @changesets/types@3.0.0
+
 ## 0.3.5
 
 ### Patch Changes

@@ -2,6 +2,7 @@ import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
 
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
+import { shouldUpdateInternalDependency } from "./utils";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -26,7 +27,8 @@ export default async function generateMarkdown(
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
   changelogFuncs: ChangelogFunctions,
-  changelogOpts: any
+  changelogOpts: any,
+  updateInternalDependencies: "patch" | "minor"
 ) {
   if (release.type === "none") return null;
 
@@ -50,11 +52,21 @@ export default async function generateMarkdown(
   });
 
   let dependentReleases = releases.filter(rel => {
+    const dependencyVersionRange = release.packageJson.dependencies
+      ? release.packageJson.dependencies[rel.name]
+      : null;
+    const peerDependencyVersionRange = release.packageJson.peerDependencies
+      ? release.packageJson.peerDependencies[rel.name]
+      : null;
+
+    const versionRange = dependencyVersionRange || peerDependencyVersionRange;
     return (
-      (release.packageJson.dependencies &&
-        release.packageJson.dependencies[rel.name]) ||
-      (release.packageJson.peerDependencies &&
-        release.packageJson.peerDependencies[rel.name])
+      versionRange &&
+      shouldUpdateInternalDependency(
+        updateInternalDependencies,
+        { type: rel.type, version: rel.newVersion },
+        versionRange
+      )
     );
   });
 

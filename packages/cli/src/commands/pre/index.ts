@@ -9,7 +9,7 @@ import {
 
 export default async function pre(
   cwd: string,
-  options: { tag: string; command: "enter" } | { command: "exit"; tag?: string }
+  options: { command: "enter"; tag: string } | { command: "exit"; tag?: string }
 ) {
   if (options.command === "enter") {
     try {
