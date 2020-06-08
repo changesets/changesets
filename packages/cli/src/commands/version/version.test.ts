@@ -200,6 +200,54 @@ describe("running version in a simple project", () => {
   });
 });
 
+describe("running version in a simple project with caret dependencies", () => {
+  it("should bump patch version for packages that had prereleases, but dependencies are still in range", async () => {
+    let cwd = f.copy("simple-project-caret-dep");
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        dependencies: {
+          "pkg-b": "^1.0.1-next.0"
+        },
+        name: "pkg-a",
+        version: "1.0.1-next.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1-next.0"
+      }
+    ]);
+
+    await pre(cwd, { command: "exit" });
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        dependencies: {
+          "pkg-b": "^1.0.1"
+        },
+        name: "pkg-a",
+        version: "1.0.1"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
+      }
+    ]);
+  });
+});
+
 describe("running version in a simple project with workspace range", () => {
   temporarilySilenceLogs();
   let cwd: string;
