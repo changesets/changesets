@@ -2,7 +2,7 @@ import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
 
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
-import { shouldUpdateInternalDependency } from "./utils";
+import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -28,7 +28,13 @@ export default async function generateMarkdown(
   changesets: NewChangesetWithCommit[],
   changelogFuncs: ChangelogFunctions,
   changelogOpts: any,
-  updateInternalDependencies: "patch" | "minor"
+  {
+    updateInternalDependencies,
+    onlyUpdatePeerDependentsWhenOutOfRange
+  }: {
+    updateInternalDependencies: "patch" | "minor";
+    onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+  }
 ) {
   if (release.type === "none") return null;
 
@@ -62,10 +68,16 @@ export default async function generateMarkdown(
     const versionRange = dependencyVersionRange || peerDependencyVersionRange;
     return (
       versionRange &&
-      shouldUpdateInternalDependency(
-        updateInternalDependencies,
+      shouldUpdateDependencyBasedOnConfig(
         { type: rel.type, version: rel.newVersion },
-        versionRange
+        {
+          depVersionRange: versionRange,
+          depType: dependencyVersionRange ? "dependencies" : "peerDependencies"
+        },
+        {
+          minReleaseType: updateInternalDependencies,
+          onlyUpdatePeerDependentsWhenOutOfRange
+        }
       )
     );
   });

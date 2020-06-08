@@ -604,6 +604,58 @@ describe("bumping peerDeps", () => {
       newVersion: "1.0.1"
     });
   });
+
+  describe("onlyUpdatePeerDependentsWhenOutOfRange: true", () => {
+    it("should not bump dependent when still in range", () => {
+      setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+      setup.addChangeset({
+        id: "anyway-the-windblows",
+        releases: [{ name: "pkg-a", type: "minor" }]
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: true
+          }
+        },
+        undefined
+      );
+
+      expect(releases.length).toBe(1);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.1.0");
+    });
+  });
+
+  it("should major bump dependent when leaving range", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "minor" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig,
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          onlyUpdatePeerDependentsWhenOutOfRange: true
+        }
+      },
+      undefined
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.1.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+  });
 });
 
 /*

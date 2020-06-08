@@ -185,17 +185,20 @@ function assembleReleasePlan(
           preVersions
         };
 
-  let dependentsGraph = getDependentsGraph(packages);
+  let dependencyGraph = getDependentsGraph(packages);
 
   let releaseObjectValidated = false;
   while (releaseObjectValidated === false) {
     // The map passed in to determineDependents will be mutated
-    let dependentAdded = determineDependents(
+    let dependentAdded = determineDependents({
       releases,
       packagesByName,
-      dependentsGraph,
-      preInfo
-    );
+      dependencyGraph,
+      preInfo,
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .onlyUpdatePeerDependentsWhenOutOfRange
+    });
 
     // The map passed in to determineDependents will be mutated
     let linksUpdated = applyLinks(releases, packagesByName, config.linked);

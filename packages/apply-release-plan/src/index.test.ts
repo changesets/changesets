@@ -43,7 +43,10 @@ class FakeReleasePlan {
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      updateInternalDependencies: "patch"
+      updateInternalDependencies: "patch",
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        onlyUpdatePeerDependentsWhenOutOfRange: false
+      }
     };
 
     this.changesets = [baseChangeset, ...changesets];
@@ -72,7 +75,10 @@ async function testSetup(
       linked: [],
       access: "restricted",
       baseBranch: "master",
-      updateInternalDependencies: "patch"
+      updateInternalDependencies: "patch",
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        onlyUpdatePeerDependentsWhenOutOfRange: false
+      }
     };
   }
   let tempDir = await f.copy(fixtureName);
@@ -274,7 +280,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
       let pkgPathA = changedFiles.find(a =>
@@ -330,7 +339,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
       let pkgPath = changedFiles.find(a =>
@@ -390,7 +402,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -468,7 +483,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -538,7 +556,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -608,7 +629,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -681,7 +705,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -759,7 +786,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -829,7 +859,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -899,7 +932,10 @@ describe("apply release plan", () => {
               linked: [],
               access: "restricted",
               baseBranch: "master",
-              updateInternalDependencies
+              updateInternalDependencies,
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false
+              }
             }
           );
           let pkgPathA = changedFiles.find(a =>
@@ -930,6 +966,78 @@ describe("apply release plan", () => {
               "pkg-a": "^2.0.0"
             }
           });
+        });
+      });
+    });
+
+    describe("onlyUpdatePeerDependentsWhenOutOfRange set to true", () => {
+      it("should not bump peerDependencies if they are still in range", async () => {
+        let { changedFiles } = await testSetup(
+          "simple-caret-peer-dep",
+          {
+            changesets: [
+              {
+                id: "quick-lions-devour",
+                summary: "Hey, let's have fun with testing!",
+                releases: [
+                  { name: "has-peer-dep", type: "patch" },
+                  { name: "depended-upon", type: "patch" }
+                ]
+              }
+            ],
+            releases: [
+              {
+                name: "has-peer-dep",
+                type: "patch",
+                oldVersion: "1.0.0",
+                newVersion: "1.0.1",
+                changesets: ["quick-lions-devour"]
+              },
+              {
+                name: "depended-upon",
+                type: "patch",
+                oldVersion: "1.0.0",
+                newVersion: "1.0.1",
+                changesets: ["quick-lions-devour"]
+              }
+            ],
+            preState: undefined
+          },
+          {
+            changelog: false,
+            commit: false,
+            linked: [],
+            access: "restricted",
+            baseBranch: "master",
+            updateInternalDependencies: "patch",
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+              onlyUpdatePeerDependentsWhenOutOfRange: true
+            }
+          }
+        );
+        let pkgPathDependent = changedFiles.find(a =>
+          a.endsWith(`has-peer-dep${path.sep}package.json`)
+        );
+        let pkgPathDepended = changedFiles.find(b =>
+          b.endsWith(`depended-upon${path.sep}package.json`)
+        );
+
+        if (!pkgPathDependent || !pkgPathDepended) {
+          throw new Error(`could not find an updated package json`);
+        }
+        let pkgJSONDependent = await fs.readJSON(pkgPathDependent);
+        let pkgJSONDepended = await fs.readJSON(pkgPathDepended);
+
+        expect(pkgJSONDependent).toMatchObject({
+          name: "has-peer-dep",
+          version: "1.0.1",
+          peerDependencies: {
+            "depended-upon": "^1.0.0"
+          }
+        });
+        expect(pkgJSONDepended).toMatchObject({
+          name: "depended-upon",
+          version: "1.0.1"
         });
       });
     });
@@ -1057,7 +1165,10 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
       let pkgAChangelogPath = changedFiles.find(a =>
@@ -1155,7 +1266,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
@@ -1231,7 +1345,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "minor"
+          updateInternalDependencies: "minor",
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
@@ -1311,7 +1428,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "minor"
+          updateInternalDependencies: "minor",
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
@@ -1404,7 +1524,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "minor"
+          updateInternalDependencies: "minor",
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
@@ -1772,7 +1895,10 @@ describe("apply release plan", () => {
           linked: [],
           access: "restricted",
           baseBranch: "master",
-          updateInternalDependencies: "patch"
+          updateInternalDependencies: "patch",
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false
+          }
         }
       );
 
