@@ -195,6 +195,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         }
       }
     }
+  }
 
   if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
     const {
