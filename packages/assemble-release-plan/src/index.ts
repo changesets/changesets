@@ -198,7 +198,10 @@ function assembleReleasePlan(
       packagesByName,
       dependencyGraph,
       preInfo,
-      ignoredPackages: config.ignore
+      ignoredPackages: config.ignore,
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .onlyUpdatePeerDependentsWhenOutOfRange
     });
 
     // The map passed in to determineDependents will be mutated

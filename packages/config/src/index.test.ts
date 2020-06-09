@@ -27,7 +27,10 @@ test("read reads the config", async () => {
     access: "restricted",
     baseBranch: "master",
     updateInternalDependencies: "patch",
-    ignore: []
+    ignore: [],
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+      onlyUpdatePeerDependentsWhenOutOfRange: false
+    }
   });
 });
 
@@ -38,7 +41,10 @@ let defaults = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  ignore: []
+  ignore: [],
+  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+    onlyUpdatePeerDependentsWhenOutOfRange: false
+  }
 } as const;
 
 let correctCases = {
@@ -354,6 +360,19 @@ The package \\"pkg-a\\" is specified in the \`ignore\` option but it is not foun
     ).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The package \\"pkg-a\\" depends on the ignored package \\"pkg-b\\", but \\"pkg-a\\" is not being ignored. Please add \\"pkg-a\\" to the \`ignore\` option."
+`);
+  });
+
+  test("onlyUpdatePeerDependentsWhenOutOfRange non-boolean", () => {
+    expect(() => {
+      unsafeParse({
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          onlyUpdatePeerDependentsWhenOutOfRange: "not true"
+        }
+      });
+    }).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
 `);
   });
 });

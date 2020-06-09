@@ -26,13 +26,15 @@ export default function getDependents({
   packagesByName,
   dependencyGraph,
   preInfo,
-  ignoredPackages
+  ignoredPackages,
+  onlyUpdatePeerDependentsWhenOutOfRange
 }: {
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
   dependencyGraph: Map<string, string[]>;
   preInfo: PreInfo | undefined;
   ignoredPackages: Readonly<string[]>;
+  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
 }): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
@@ -70,6 +72,11 @@ export default function getDependents({
         else if (
           depTypes.includes("peerDependencies") &&
           nextRelease.type !== "patch" &&
+          (!onlyUpdatePeerDependentsWhenOutOfRange ||
+            !semver.satisfies(
+              incrementVersion(nextRelease, preInfo),
+              versionRange
+            )) &&
           (!releases.has(dependent) ||
             (releases.has(dependent) &&
               releases.get(dependent)!.type !== "major"))

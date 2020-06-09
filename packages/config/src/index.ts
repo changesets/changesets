@@ -15,7 +15,10 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  ignore: [] as ReadonlyArray<string>
+  ignore: [] as ReadonlyArray<string>,
+  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+    onlyUpdatePeerDependentsWhenOutOfRange: false
+  }
 } as const;
 
 function getNormalisedChangelogOption(
@@ -192,6 +195,23 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         }
       }
     }
+
+  if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
+    const {
+      onlyUpdatePeerDependentsWhenOutOfRange
+    } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
+    if (
+      onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
+      typeof onlyUpdatePeerDependentsWhenOutOfRange !== "boolean"
+    ) {
+      messages.push(
+        `The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as ${JSON.stringify(
+          onlyUpdatePeerDependentsWhenOutOfRange,
+          null,
+          2
+        )} when the only valid values are undefined or a boolean`
+      );
+    }
   }
   if (messages.length) {
     throw new ValidationError(
@@ -225,7 +245,19 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         : json.updateInternalDependencies,
 
     ignore:
-      json.ignore === undefined ? defaultWrittenConfig.ignore : json.ignore
+      json.ignore === undefined ? defaultWrittenConfig.ignore : json.ignore,
+
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .onlyUpdatePeerDependentsWhenOutOfRange === undefined
+          ? defaultWrittenConfig
+              .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              .onlyUpdatePeerDependentsWhenOutOfRange
+          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              .onlyUpdatePeerDependentsWhenOutOfRange
+    }
   };
   return config;
 };
