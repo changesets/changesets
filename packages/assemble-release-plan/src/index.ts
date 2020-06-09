@@ -8,7 +8,6 @@ import { InternalError } from "@changesets/errors";
 import { Packages } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
-import pre from "../../cli/src/commands/pre";
 
 function getPreVersion(version: string) {
   let parsed = semver.parse(version)!;
