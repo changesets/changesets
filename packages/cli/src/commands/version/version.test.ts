@@ -337,7 +337,7 @@ describe("snapshot release", () => {
           version: expect.stringContaining("1.1.0-exprimental-")
         })
       );
-  
+
       expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
         expect.objectContaining({
           name: "pkg-b",
