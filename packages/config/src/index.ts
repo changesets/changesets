@@ -173,7 +173,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or a boolean`
       );
     }
-    if (useCalculatedVersionForSnapshots !== undefined &&
+    if (
+      useCalculatedVersionForSnapshots !== undefined &&
       typeof useCalculatedVersionForSnapshots !== "boolean"
     ) {
       messages.push(
@@ -188,7 +189,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
-      messages.join("\n")
+        messages.join("\n")
     );
   }
   let config: Config = {
@@ -227,13 +228,14 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
               .onlyUpdatePeerDependentsWhenOutOfRange,
 
       useCalculatedVersionForSnapshots:
-      json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .useCalculatedVersionForSnapshots === undefined
-        ? defaultWrittenConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .useCalculatedVersionForSnapshots
-        : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .useCalculatedVersionForSnapshots
+          ? defaultWrittenConfig
+              .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              .useCalculatedVersionForSnapshots
+          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              .useCalculatedVersionForSnapshots
     }
   };
   return config;

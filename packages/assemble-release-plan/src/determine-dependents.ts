@@ -75,10 +75,6 @@ export default function getDependents({
             (releases.has(dependent) &&
               releases.get(dependent)!.type !== "major"))
         ) {
-          console.log("really?", versionRange, incrementVersion(nextRelease, preInfo), semver.satisfies(
-            incrementVersion(nextRelease, preInfo),
-            versionRange
-          ));
           type = "major";
         } else {
           if (

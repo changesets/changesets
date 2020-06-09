@@ -52,7 +52,7 @@ function getNewVersion(
    * if user has a regular pre-release at 1.0.0-beta.0 and then you had a snapshot pre-release at 1.0.0-canary-git-hash
    * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
    * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
-   * 
+   *
    * You can set `useCalculatedVersionForSnapshots` flag to true to use calculated versions if you don't care about the above problem.
    */
   if (snapshot && !useCalculatedVersionForSnapshots) {
@@ -62,7 +62,7 @@ function getNewVersion(
   const calculatedVersion = incrementVersion(release, preInfo);
 
   if (snapshot && useCalculatedVersionForSnapshots) {
-    return `${calculatedVersion}${snapshotSuffix}`
+    return `${calculatedVersion}${snapshotSuffix}`;
   }
 
   return calculatedVersion;
@@ -79,11 +79,11 @@ function assembleReleasePlan(
     preState === undefined
       ? undefined
       : {
-        ...preState,
-        initialVersions: {
-          ...preState.initialVersions
-        }
-      };
+          ...preState,
+          initialVersions: {
+            ...preState.initialVersions
+          }
+        };
 
   // Caching the snapshot version here and use this if it is snapshot release
   let snapshotSuffix: string;
@@ -204,9 +204,9 @@ function assembleReleasePlan(
     updatedPreState === undefined
       ? undefined
       : {
-        state: updatedPreState,
-        preVersions
-      };
+          state: updatedPreState,
+          preVersions
+        };
 
   let dependencyGraph = getDependentsGraph(packages);
 
@@ -239,7 +239,8 @@ function assembleReleasePlan(
           preInfo,
           snapshot,
           snapshotSuffix,
-          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.useCalculatedVersionForSnapshots
+          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+            .useCalculatedVersionForSnapshots
         )
       };
     }),
