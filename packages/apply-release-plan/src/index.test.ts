@@ -1022,6 +1022,7 @@ describe("apply release plan", () => {
             access: "restricted",
             baseBranch: "master",
             updateInternalDependencies: "patch",
+            ignore: [],
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               onlyUpdatePeerDependentsWhenOutOfRange: true
             }
