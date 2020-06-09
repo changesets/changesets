@@ -239,7 +239,7 @@ function assembleReleasePlan(
           preInfo,
           snapshot,
           snapshotSuffix,
-          config._experimentalUnsafeOptions.onlyUpdatePeerDependentsWhenOutOfRange
+          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.useCalculatedVersionForSnapshots
         )
       };
     }),

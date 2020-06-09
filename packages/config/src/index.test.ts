@@ -303,7 +303,7 @@ The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as \\"not true\\" w
   test("useCalculatedVersionForSnapshots non-boolean", () => {
     expect(() => {
       unsafeParse({
-        _experimentalUnsafeOptions: {
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
           useCalculatedVersionForSnapshots: "not true"
         }
       });

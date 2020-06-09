@@ -1023,7 +1023,8 @@ describe("apply release plan", () => {
             baseBranch: "master",
             updateInternalDependencies: "patch",
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-              onlyUpdatePeerDependentsWhenOutOfRange: true
+              onlyUpdatePeerDependentsWhenOutOfRange: true,
+              useCalculatedVersionForSnapshots: false
             }
           }
         );

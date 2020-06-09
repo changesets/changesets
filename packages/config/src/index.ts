@@ -227,8 +227,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
               .onlyUpdatePeerDependentsWhenOutOfRange,
 
       useCalculatedVersionForSnapshots:
-      json._experimentalUnsafeOptions === undefined ||
-        json._experimentalUnsafeOptions
+      json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .useCalculatedVersionForSnapshots === undefined
         ? defaultWrittenConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .useCalculatedVersionForSnapshots
