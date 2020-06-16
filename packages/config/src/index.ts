@@ -17,7 +17,8 @@ export let defaultWrittenConfig = {
   updateInternalDependencies: "patch",
   ignore: [] as ReadonlyArray<string>,
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-    onlyUpdatePeerDependentsWhenOutOfRange: false
+    onlyUpdatePeerDependentsWhenOutOfRange: false,
+    useCalculatedVersionForSnapshots: false
   }
 } as const;
 
@@ -199,7 +200,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
   if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
     const {
-      onlyUpdatePeerDependentsWhenOutOfRange
+      onlyUpdatePeerDependentsWhenOutOfRange,
+      useCalculatedVersionForSnapshots
     } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
     if (
       onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
@@ -208,6 +210,18 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       messages.push(
         `The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as ${JSON.stringify(
           onlyUpdatePeerDependentsWhenOutOfRange,
+          null,
+          2
+        )} when the only valid values are undefined or a boolean`
+      );
+    }
+    if (
+      useCalculatedVersionForSnapshots !== undefined &&
+      typeof useCalculatedVersionForSnapshots !== "boolean"
+    ) {
+      messages.push(
+        `The \`useCalculatedVersionForSnapshots\` option is set as ${JSON.stringify(
+          useCalculatedVersionForSnapshots,
           null,
           2
         )} when the only valid values are undefined or a boolean`
@@ -257,7 +271,17 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
               .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange
           : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              .onlyUpdatePeerDependentsWhenOutOfRange
+              .onlyUpdatePeerDependentsWhenOutOfRange,
+
+      useCalculatedVersionForSnapshots:
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .useCalculatedVersionForSnapshots === undefined
+          ? defaultWrittenConfig
+              .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              .useCalculatedVersionForSnapshots
+          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              .useCalculatedVersionForSnapshots
     }
   };
   return config;

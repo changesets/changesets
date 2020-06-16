@@ -29,7 +29,8 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-      onlyUpdatePeerDependentsWhenOutOfRange: false
+      onlyUpdatePeerDependentsWhenOutOfRange: false,
+      useCalculatedVersionForSnapshots: false
     }
   });
 });
@@ -43,7 +44,8 @@ let defaults = {
   updateInternalDependencies: "patch",
   ignore: [],
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-    onlyUpdatePeerDependentsWhenOutOfRange: false
+    onlyUpdatePeerDependentsWhenOutOfRange: false,
+    useCalculatedVersionForSnapshots: false
   }
 } as const;
 
@@ -373,6 +375,18 @@ The package \\"pkg-a\\" depends on the ignored package \\"pkg-b\\", but \\"pkg-a
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
+`);
+  });
+  test("useCalculatedVersionForSnapshots non-boolean", () => {
+    expect(() => {
+      unsafeParse({
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          useCalculatedVersionForSnapshots: "not true"
+        }
+      });
+    }).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The \`useCalculatedVersionForSnapshots\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
 `);
   });
 });
