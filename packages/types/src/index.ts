@@ -81,6 +81,7 @@ export type WrittenConfig = {
 
 export type ExperimentalOptions = {
   onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
+  useCalculatedVersionForSnapshots?: boolean;
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };

@@ -311,6 +311,41 @@ describe("snapshot release", () => {
       })
     );
   });
+
+  describe("useCalculatedVersionForSnapshots: true", () => {
+    it("should update packages using calculated version", async () => {
+      let cwd = f.copy("simple-project");
+      await writeChangesets([simpleChangeset2], cwd);
+      const spy = jest.spyOn(fs, "writeFile");
+      await versionCommand(
+        cwd,
+        {
+          snapshot: "exprimental"
+        },
+        {
+          ...modifiedDefaultConfig,
+          commit: false,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: true
+          }
+        }
+      );
+      expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+        expect.objectContaining({
+          name: "pkg-a",
+          version: expect.stringContaining("1.1.0-exprimental-")
+        })
+      );
+
+      expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+        expect.objectContaining({
+          name: "pkg-b",
+          version: expect.stringContaining("1.0.1-exprimental-")
+        })
+      );
+    });
+  });
 });
 
 describe("pre", () => {

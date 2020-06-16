@@ -612,19 +612,18 @@ describe("bumping peerDeps", () => {
         id: "anyway-the-windblows",
         releases: [{ name: "pkg-a", type: "minor" }]
       });
-
       let { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
           ...defaultConfig,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: true
+            onlyUpdatePeerDependentsWhenOutOfRange: true,
+            useCalculatedVersionForSnapshots: false
           }
         },
         undefined
       );
-
       expect(releases.length).toBe(1);
       expect(releases[0].name).toEqual("pkg-a");
       expect(releases[0].newVersion).toEqual("1.1.0");
@@ -644,7 +643,8 @@ describe("bumping peerDeps", () => {
       {
         ...defaultConfig,
         ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-          onlyUpdatePeerDependentsWhenOutOfRange: true
+          onlyUpdatePeerDependentsWhenOutOfRange: true,
+          useCalculatedVersionForSnapshots: false
         }
       },
       undefined

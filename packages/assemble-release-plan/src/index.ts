@@ -7,7 +7,7 @@ import * as semver from "semver";
 import { InternalError } from "@changesets/errors";
 import { Packages } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { PreInfo } from "./types";
+import { PreInfo, InternalRelease } from "./types";
 
 function getPreVersion(version: string) {
   let parsed = semver.parse(version)!;
@@ -20,14 +20,7 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
-/**
- * Using version as 0.0.0 so that it does not hinder with other version release
- * For example;
- * if user has a regular pre-release at 1.0.0-beta.0 and then you had a snapshot pre-release at 1.0.0-canary-git-hash
- * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
- * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
- */
-function getSnapshotReleaseVersion(snapshot?: string | boolean) {
+function getSnapshotSuffix(snapshot?: string | boolean): string {
   const now = new Date();
 
   let dateAndTime = [
@@ -42,7 +35,36 @@ function getSnapshotReleaseVersion(snapshot?: string | boolean) {
   let tag = "";
   if (typeof snapshot === "string") tag = `-${snapshot}`;
 
-  return `0.0.0${tag}-${dateAndTime}`;
+  return `${tag}-${dateAndTime}`;
+}
+
+function getNewVersion(
+  release: InternalRelease,
+  preInfo: PreInfo | undefined,
+  snapshot: string | boolean | undefined,
+  snapshotSuffix: string,
+  useCalculatedVersionForSnapshots: boolean
+): string {
+  /**
+   * Using version as 0.0.0 so that it does not hinder with other version release
+   * For example;
+   * if user has a regular pre-release at 1.0.0-beta.0 and then you had a snapshot pre-release at 1.0.0-canary-git-hash
+   * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
+   * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
+   *
+   * You can set `useCalculatedVersionForSnapshots` flag to true to use calculated versions if you don't care about the above problem.
+   */
+  if (snapshot && !useCalculatedVersionForSnapshots) {
+    return `0.0.0${snapshotSuffix}`;
+  }
+
+  const calculatedVersion = incrementVersion(release, preInfo);
+
+  if (snapshot && useCalculatedVersionForSnapshots) {
+    return `${calculatedVersion}${snapshotSuffix}`;
+  }
+
+  return calculatedVersion;
 }
 
 function assembleReleasePlan(
@@ -63,9 +85,9 @@ function assembleReleasePlan(
         };
 
   // Caching the snapshot version here and use this if it is snapshot release
-  let snapshotVersion: string;
+  let snapshotSuffix: string;
   if (snapshot !== undefined) {
-    snapshotVersion = getSnapshotReleaseVersion(snapshot);
+    snapshotSuffix = getSnapshotSuffix(snapshot);
   }
 
   let packagesByName = new Map(
@@ -211,10 +233,14 @@ function assembleReleasePlan(
     releases: [...releases.values()].map(incompleteRelease => {
       return {
         ...incompleteRelease,
-        newVersion:
-          snapshot === undefined
-            ? incrementVersion(incompleteRelease, preInfo)!
-            : snapshotVersion
+        newVersion: getNewVersion(
+          incompleteRelease,
+          preInfo,
+          snapshot,
+          snapshotSuffix,
+          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+            .useCalculatedVersionForSnapshots
+        )
       };
     }),
     preState: updatedPreState
