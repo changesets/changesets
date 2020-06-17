@@ -15,11 +15,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  ignore: [] as ReadonlyArray<string>,
-  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-    onlyUpdatePeerDependentsWhenOutOfRange: false,
-    useCalculatedVersionForSnapshots: false
-  }
+  ignore: [] as ReadonlyArray<string>
 } as const;
 
 function getNormalisedChangelogOption(
@@ -267,9 +263,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .onlyUpdatePeerDependentsWhenOutOfRange === undefined
-          ? defaultWrittenConfig
-              .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              .onlyUpdatePeerDependentsWhenOutOfRange
+          ? false
           : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange,
 
@@ -277,9 +271,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .useCalculatedVersionForSnapshots === undefined
-          ? defaultWrittenConfig
-              .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              .useCalculatedVersionForSnapshots
+          ? false
           : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .useCalculatedVersionForSnapshots
     }
