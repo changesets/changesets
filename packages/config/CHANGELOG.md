@@ -1,5 +1,15 @@
 # @changesets/config
 
+## 1.3.0
+
+### Minor Changes
+
+- [`377f5c3`](https://github.com/atlassian/changesets/commit/377f5c385ad9db4ff8458f159e2d452c39828567) [#393](https://github.com/atlassian/changesets/pull/393) Thanks [@Andarist](https://github.com/Andarist)! - Added `updateInternalDependencies` and `ignore` options to the JSON schema.
+
+### Patch Changes
+
+- [`377f5c3`](https://github.com/atlassian/changesets/commit/377f5c385ad9db4ff8458f159e2d452c39828567) [#393](https://github.com/atlassian/changesets/pull/393) Thanks [@Andarist](https://github.com/Andarist)! - Removed experimental flags from `defaultWrittenConfig`. They were added there by mistake.
+
 ## 1.2.0
 
 ### Minor Changes

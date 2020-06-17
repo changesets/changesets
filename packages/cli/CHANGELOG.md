@@ -1,5 +1,14 @@
 # @changesets/cli
 
+## 2.9.1
+
+### Patch Changes
+
+- [`377f5c3`](https://github.com/atlassian/changesets/commit/377f5c385ad9db4ff8458f159e2d452c39828567) [#393](https://github.com/atlassian/changesets/pull/393) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with experimental flags being written to disk as part of the default config when initializing Changesets.
+
+- Updated dependencies [[`377f5c3`](https://github.com/atlassian/changesets/commit/377f5c385ad9db4ff8458f159e2d452c39828567), [`377f5c3`](https://github.com/atlassian/changesets/commit/377f5c385ad9db4ff8458f159e2d452c39828567)]:
+  - @changesets/config@1.3.0
+
 ## 2.9.0
 
 ### Minor Changes
