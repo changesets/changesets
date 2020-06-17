@@ -44,6 +44,7 @@ class FakeReleasePlan {
       access: "restricted",
       baseBranch: "master",
       updateInternalDependencies: "patch",
+      ignore: [],
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
         useCalculatedVersionForSnapshots: false
@@ -77,6 +78,7 @@ async function testSetup(
       access: "restricted",
       baseBranch: "master",
       updateInternalDependencies: "patch",
+      ignore: [],
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
         useCalculatedVersionForSnapshots: false
@@ -283,6 +285,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "patch",
+          ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             useCalculatedVersionForSnapshots: false
@@ -343,6 +346,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "patch",
+          ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             useCalculatedVersionForSnapshots: false
@@ -407,6 +411,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
+              ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 useCalculatedVersionForSnapshots: false
@@ -489,6 +494,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
+              ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 useCalculatedVersionForSnapshots: false
@@ -563,6 +569,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
+              ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 useCalculatedVersionForSnapshots: false
@@ -637,6 +644,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
+              ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 useCalculatedVersionForSnapshots: false
@@ -714,6 +722,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
+              ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 useCalculatedVersionForSnapshots: false
@@ -796,6 +805,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
+              ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 useCalculatedVersionForSnapshots: false
@@ -870,6 +880,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
+              ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 useCalculatedVersionForSnapshots: false
@@ -944,6 +955,7 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "master",
               updateInternalDependencies,
+              ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 useCalculatedVersionForSnapshots: false
@@ -1022,6 +1034,7 @@ describe("apply release plan", () => {
             access: "restricted",
             baseBranch: "master",
             updateInternalDependencies: "patch",
+            ignore: [],
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               onlyUpdatePeerDependentsWhenOutOfRange: true,
               useCalculatedVersionForSnapshots: false
@@ -1179,6 +1192,7 @@ describe("apply release plan", () => {
             null
           ],
           updateInternalDependencies: "patch",
+          ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             useCalculatedVersionForSnapshots: false
@@ -1281,6 +1295,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "patch",
+          ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             useCalculatedVersionForSnapshots: false
@@ -1361,6 +1376,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "minor",
+          ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             useCalculatedVersionForSnapshots: false
@@ -1445,6 +1461,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "minor",
+          ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             useCalculatedVersionForSnapshots: false
@@ -1542,6 +1559,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "minor",
+          ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             useCalculatedVersionForSnapshots: false
@@ -1739,6 +1757,32 @@ describe("apply release plan", () => {
       let pathExists = await fs.pathExists(changesetPath);
       expect(pathExists).toEqual(false);
     });
+    it("should NOT delete changesets for ignored packages", async () => {
+      const releasePlan = new FakeReleasePlan();
+
+      let changesetPath: string;
+
+      const setupFunc = (tempDir: string) =>
+        Promise.all(
+          releasePlan.getReleasePlan().changesets.map(({ id, summary }) => {
+            const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
+            changesetPath = thisPath;
+            const content = `---\n---\n${summary}`;
+            fs.writeFile(thisPath, content);
+          })
+        );
+
+      await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        { ...releasePlan.config, ignore: ["pkg-a"] },
+        setupFunc
+      );
+
+      // @ts-ignore this is possibly bad
+      let pathExists = await fs.pathExists(changesetPath);
+      expect(pathExists).toEqual(true);
+    });
     it("should delete an old format changeset if it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
 
@@ -1914,6 +1958,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "master",
           updateInternalDependencies: "patch",
+          ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             useCalculatedVersionForSnapshots: false

@@ -63,6 +63,7 @@ export type Config = {
   baseBranch: string;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
+  ignore: ReadonlyArray<string>;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<
     ExperimentalOptions
   >;
@@ -76,6 +77,7 @@ export type WrittenConfig = {
   baseBranch?: string;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
+  ignore?: ReadonlyArray<string>;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?: ExperimentalOptions;
 };
 

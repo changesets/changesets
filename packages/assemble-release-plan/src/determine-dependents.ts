@@ -26,12 +26,14 @@ export default function getDependents({
   packagesByName,
   dependencyGraph,
   preInfo,
+  ignoredPackages,
   onlyUpdatePeerDependentsWhenOutOfRange
 }: {
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
   dependencyGraph: Map<string, string[]>;
   preInfo: PreInfo | undefined;
+  ignoredPackages: Readonly<string[]>;
   onlyUpdatePeerDependentsWhenOutOfRange: boolean;
 }): boolean {
   let updated = false;
@@ -62,8 +64,12 @@ export default function getDependents({
           nextRelease.name
         );
 
-        // Firstly we check if it is a peerDependency because if it is, our dependent bump type needs to be major.
-        if (
+        // If the dependent is an ignored package, we want to bump its dependencies without a release, so setting type to "none"
+        if (ignoredPackages.includes(dependent)) {
+          type = "none";
+        }
+        // we check if it is a peerDependency because if it is, our dependent bump type needs to be major.
+        else if (
           depTypes.includes("peerDependencies") &&
           nextRelease.type !== "patch" &&
           (!onlyUpdatePeerDependentsWhenOutOfRange ||

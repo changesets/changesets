@@ -27,6 +27,7 @@ test("read reads the config", async () => {
     access: "restricted",
     baseBranch: "master",
     updateInternalDependencies: "patch",
+    ignore: [],
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
       useCalculatedVersionForSnapshots: false
@@ -41,6 +42,7 @@ let defaults = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
+  ignore: [],
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
     useCalculatedVersionForSnapshots: false
@@ -140,6 +142,15 @@ let correctCases = {
     output: {
       ...defaults,
       updateInternalDependencies: "patch"
+    }
+  },
+  ignore: {
+    input: {
+      ignore: ["pkg-a", "pkg-b"]
+    },
+    output: {
+      ...defaults,
+      ignore: ["pkg-a", "pkg-b"]
     }
   }
 } as const;
@@ -288,6 +299,72 @@ The package \\"pkg-a\\" is in multiple sets of linked packages. Packages can onl
 The \`updateInternalDependencies\` option is set as \\"major\\" but can only be 'patch' or 'minor'"
 `);
   });
+  test("ignore non-array", () => {
+    expect(() =>
+      unsafeParse({
+        ignore: "string value"
+      })
+    ).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The \`ignore\` option is set as \\"string value\\" when the only valid values are undefined or an array of package names"
+`);
+  });
+  test("ignore array of non-string", () => {
+    expect(() =>
+      unsafeParse({
+        ignore: [123, "pkg-a"]
+      })
+    ).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The \`ignore\` option is set as [
+  123,
+  \\"pkg-a\\"
+] when the only valid values are undefined or an array of package names"
+`);
+  });
+  test("ignore package that does not exist", () => {
+    expect(() =>
+      parse(
+        {
+          ignore: ["pkg-a"]
+        },
+        defaultPackages
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The package \\"pkg-a\\" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name."
+`);
+  });
+  test("ingore missing dependent packages", async () => {
+    expect(() =>
+      parse(
+        {
+          ignore: ["pkg-b"]
+        },
+        {
+          ...defaultPackages,
+          packages: [
+            {
+              packageJson: {
+                name: "pkg-a",
+                version: "1.0.0",
+                dependencies: { "pkg-b": "1.0.0" }
+              },
+              dir: "dir"
+            },
+            {
+              packageJson: { name: "pkg-b", version: "1.0.0" },
+              dir: "dir"
+            }
+          ]
+        }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The package \\"pkg-a\\" depends on the ignored package \\"pkg-b\\", but \\"pkg-a\\" is not being ignored. Please add \\"pkg-a\\" to the \`ignore\` option."
+`);
+  });
+
   test("onlyUpdatePeerDependentsWhenOutOfRange non-boolean", () => {
     expect(() => {
       unsafeParse({

@@ -135,8 +135,19 @@ export default async function applyReleasePlan(
         let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
         let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
         if (await fs.pathExists(changesetPath)) {
-          touchedFiles.push(changesetPath);
-          await fs.remove(changesetPath);
+          // DO NOT remove changeset for ignored packages
+          // Mixed changeset that contains both ignored packages and not ignored packages are disallowed
+          // At this point, we know there is no such changeset, because otherwise the program would've already failed,
+          // so we just check if any ignored package exists in this changeset, and only remove it if none exists
+          // Ignored list is added in v2, so we don't need to do it for v1 changesets
+          if (
+            !changeset.releases.find(release =>
+              config.ignore.includes(release.name)
+            )
+          ) {
+            touchedFiles.push(changesetPath);
+            await fs.remove(changesetPath);
+          }
           // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
         } else if (await fs.pathExists(changesetFolderPath)) {
           touchedFiles.push(changesetFolderPath);

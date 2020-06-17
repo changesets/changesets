@@ -28,6 +28,7 @@
     "@changesets/assemble-release-plan": "^2.1.0",
     "@changesets/config": "^1.1.0",
     "@changesets/errors": "^0.1.4",
+    "@changesets/get-dependents-graph": "^1.1.3",
     "@changesets/get-release-plan": "^1.0.4",
     "@changesets/git": "^1.0.5",
     "@changesets/logger": "^0.0.5",

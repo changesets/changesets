@@ -74,6 +74,8 @@ function assembleReleasePlan(
   preState: PreState | undefined,
   snapshot?: string | boolean
 ): ReleasePlan {
+  validateChangesets(changesets, config.ignore);
+
   let updatedPreState: PreState | undefined =
     preState === undefined
       ? undefined
@@ -147,7 +149,7 @@ function assembleReleasePlan(
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(changesets, packagesByName);
+  let releases = flattenReleases(changesets, packagesByName, config.ignore);
 
   if (updatedPreState !== undefined) {
     if (updatedPreState.mode === "exit") {
@@ -174,7 +176,8 @@ function assembleReleasePlan(
       // because if they're not being released, the version will already have been bumped with the highest bump type
       let releasesFromUnfilteredChangesets = flattenReleases(
         unfilteredChangesets,
-        packagesByName
+        packagesByName,
+        config.ignore
       );
 
       releases.forEach((value, key) => {
@@ -217,6 +220,7 @@ function assembleReleasePlan(
       packagesByName,
       dependencyGraph,
       preInfo,
+      ignoredPackages: config.ignore,
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .onlyUpdatePeerDependentsWhenOutOfRange
@@ -245,6 +249,37 @@ function assembleReleasePlan(
     }),
     preState: updatedPreState
   };
+}
+
+// Changesets that contains both ignored and not ignored packages are not allowed
+function validateChangesets(
+  changesets: NewChangeset[],
+  ignored: Readonly<string[]>
+): void {
+  for (const changeset of changesets) {
+    // Using the following 2 arrays to decide whether a changeset
+    // contains both ignored and not ignored packages
+    const ignoredPackages = [];
+    const notIgnoredPackages = [];
+    for (const release of changeset.releases) {
+      if (
+        ignored.find(ignoredPackageName => ignoredPackageName === release.name)
+      ) {
+        ignoredPackages.push(release.name);
+      } else {
+        notIgnoredPackages.push(release.name);
+      }
+    }
+
+    if (ignoredPackages.length > 0 && notIgnoredPackages.length > 0) {
+      throw new Error(
+        `Found mixed changeset ${changeset.id}\n` +
+          `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
+          `Found not ignored packages: ${notIgnoredPackages.join(" ")}\n` +
+          "Mixed changesets that contain both ignored and not ignored packages are not allowed"
+      );
+    }
+  }
 }
 
 export default assembleReleasePlan;
