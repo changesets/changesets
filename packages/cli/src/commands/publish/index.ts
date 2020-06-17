@@ -55,7 +55,7 @@ export default async function run(
     showNonLatestTagWarning(tag, preState);
   }
 
-  const { packages } = await getPackages(cwd);
+  const { packages, tool } = await getPackages(cwd);
 
   const response = await publishPackages({
     packages,
@@ -76,7 +76,7 @@ export default async function run(
     // wont suffer from a race condition if another merge happens in the mean time (pushing tags wont
     // fail if we are behind master).
     log(`Creating git tag${successful.length > 1 ? "s" : ""}...`);
-    if (packages.length > 1) {
+    if (tool !== "root") {
       for (const pkg of successful) {
         const tag = `${pkg.name}@${pkg.newVersion}`;
         log("New tag: ", tag);
