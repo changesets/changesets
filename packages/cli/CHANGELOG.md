@@ -1,5 +1,36 @@
 # @changesets/cli
 
+## 2.9.0
+
+### Minor Changes
+
+- [`9006375`](https://github.com/atlassian/changesets/commit/90063752a4c4f187fcb3dc30c833405f209d9c84) [#392](https://github.com/atlassian/changesets/pull/392) Thanks [@Andarist](https://github.com/Andarist)! - Changed condition based on which single-package repositories are identified when creating tags after successful publish. It is now based on whether we have recognized the repository to be managed by monorepo tooling or not.
+
+* [`9dcc364`](https://github.com/atlassian/changesets/commit/9dcc364bf19e48f8f2824ebaf967d9ef41b6fc04) [#371](https://github.com/atlassian/changesets/pull/371) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Added support for ignoring packages in the `version` command. The version of ignored packages will not be bumped, but their dependencies will still be bumped normally. This is useful when you have private packages, e.g. packages under development. It allows you to make releases for the public packages without changing the version of your private packages. To use the feature, you can define the `ignore` array in the config file with the name of the packages:
+
+  ```
+  {
+    ...
+    "ignore": ["pkg-a", "pkg-b"]
+    ...
+  }
+  ```
+
+  or you can pass the package names to the `--ignore` flag when using cli:
+
+  ```
+  yarn changeset version --ignore pkg-a --ignore --pkg-b
+  ```
+
+### Patch Changes
+
+- Updated dependencies [[`00e768e`](https://github.com/atlassian/changesets/commit/00e768e4af921a894debb900f944d4c9a4e27997), [`addd725`](https://github.com/atlassian/changesets/commit/addd7256d9251d999251a7c16c0a0b068d557b5d), [`9dcc364`](https://github.com/atlassian/changesets/commit/9dcc364bf19e48f8f2824ebaf967d9ef41b6fc04), [`9dcc364`](https://github.com/atlassian/changesets/commit/9dcc364bf19e48f8f2824ebaf967d9ef41b6fc04)]:
+  - @changesets/assemble-release-plan@3.0.0
+  - @changesets/apply-release-plan@4.0.0
+  - @changesets/get-release-plan@2.0.0
+  - @changesets/config@1.2.0
+  - @changesets/types@3.1.0
+
 ## 2.8.0
 
 ### Minor Changes
