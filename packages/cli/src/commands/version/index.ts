@@ -10,6 +10,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
+import { CliOptions } from "../../types";
 
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
@@ -21,9 +22,7 @@ let importantEnd = chalk.red(
 
 export default async function version(
   cwd: string,
-  options: {
-    snapshot?: string | boolean;
-  },
+  options: Pick<CliOptions, "snapshot" | "date">,
   config: Config
 ) {
   let [_changesets, _preState] = await Promise.all([
@@ -77,7 +76,8 @@ export default async function version(
       ...config,
       commit: false
     },
-    options.snapshot
+    options.snapshot,
+    options.date ? new Date(Date.now()) : undefined
   );
 
   if (options.snapshot !== undefined && config.commit) {
