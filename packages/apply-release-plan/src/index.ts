@@ -107,8 +107,6 @@ export default async function applyReleasePlan(
     let { changelog, packageJson, dir, name } = release;
     let pkgJSONPath = path.resolve(dir, "package.json");
 
-    let changelogPath = path.resolve(dir, "CHANGELOG.md");
-
     let parsedConfig = prettier.format(JSON.stringify(packageJson), {
       ...prettierConfig,
       filepath: pkgJSONPath,
@@ -120,7 +118,12 @@ export default async function applyReleasePlan(
     touchedFiles.push(pkgJSONPath);
 
     if (changelog && changelog.length > 0) {
-      await updateChangelog(changelogPath, changelog, name, prettierConfig);
+      let changelogPath = await updateChangelog(
+        dir,
+        changelog,
+        name,
+        prettierConfig
+      );
       touchedFiles.push(changelogPath);
     }
   }
@@ -247,7 +250,7 @@ async function getNewChangelogEntry(
 }
 
 async function updateChangelog(
-  changelogPath: string,
+  dir: string,
   changelog: string,
   name: string,
   prettierConfig: prettier.Options | null
@@ -255,13 +258,26 @@ async function updateChangelog(
   let templateString = `\n\n${changelog.trim()}\n`;
 
   try {
-    if (fs.existsSync(changelogPath)) {
-      await prependFile(changelogPath, templateString, name, prettierConfig);
+    let existingChangelogName = (await fs.readdir(dir)).find(fileName =>
+      /^changelog\.md$/i.test(fileName)
+    );
+    if (existingChangelogName) {
+      let existingChangelogPath = path.resolve(dir, existingChangelogName);
+      await prependFile(
+        existingChangelogPath,
+        templateString,
+        name,
+        prettierConfig
+      );
+      return existingChangelogPath;
     } else {
-      await fs.writeFile(changelogPath, `# ${name}${templateString}`);
+      let defaultChangelogPath = path.resolve(dir, "CHANGELOG.md");
+      await fs.writeFile(defaultChangelogPath, `# ${name}${templateString}`);
+      return defaultChangelogPath;
     }
   } catch (e) {
     console.warn(e);
+    return path.resolve(dir, "CHANGELOG.md");
   }
 }
 
