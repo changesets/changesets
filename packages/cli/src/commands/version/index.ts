@@ -74,8 +74,8 @@ export default async function version(
     releasePlan,
     packages,
     {
-      ...config,
-      commit: false
+      commit: false,
+      ...config
     },
     options.snapshot
   );
