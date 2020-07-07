@@ -31,12 +31,15 @@ export default async function version(
     readPreState(cwd),
     removeEmptyFolders(path.resolve(cwd, ".changeset"))
   ]);
+  let releaseConfig = config;
 
   // temporarily needed because of TS 3.7 regression - https://github.com/microsoft/TypeScript/issues/33752
   const changesets = _changesets as NonNullable<typeof _changesets>;
   const preState = _preState as NonNullable<typeof _preState>;
 
   if (preState !== undefined && preState.mode === "pre") {
+    releaseConfig = { ...releaseConfig, commit: false };
+
     warn(importantSeparator);
     if (options.snapshot !== undefined) {
       error("Snapshot release is not allowed in pre mode");
@@ -65,7 +68,7 @@ export default async function version(
   let releasePlan = assembleReleasePlan(
     changesets,
     packages,
-    config,
+    releaseConfig,
     preState,
     options.snapshot
   );
@@ -73,14 +76,11 @@ export default async function version(
   await applyReleasePlan(
     releasePlan,
     packages,
-    {
-      ...config,
-      commit: false
-    },
+    releaseConfig,
     options.snapshot
   );
 
-  if (options.snapshot !== undefined && config.commit) {
+  if (options.snapshot !== undefined && releaseConfig.commit) {
     log("All files have been updated and committed. You're ready to publish!");
   } else {
     log("All files have been updated. Review them and commit at your leisure");
