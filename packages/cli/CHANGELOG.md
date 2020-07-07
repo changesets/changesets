@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.9.2
+
+### Patch Changes
+
+- [`213de26`](https://github.com/atlassian/changesets/commit/213de26502c702b9e25ac3f4a04ea8e9099a5185) [#409](https://github.com/atlassian/changesets/pull/409) Thanks [@Andarist](https://github.com/Andarist)! - Add logs for failed `JSON.parse` calls.
+
 ## 2.9.1
 
 ### Patch Changes
