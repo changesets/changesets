@@ -103,7 +103,11 @@ export default function getDependents({
                   }
                 } else {
                   // We don't need a version bump if the package is only in the devDependencies of the dependent package
-                  if (type !== "major" && type !== "minor" && type !== "patch") {
+                  if (
+                    type !== "major" &&
+                    type !== "minor" &&
+                    type !== "patch"
+                  ) {
                     type = "none";
                   }
                 }
@@ -111,7 +115,6 @@ export default function getDependents({
             }
           }
         }
-        console.log('Fei', type);
         if (releases.has(dependent) && releases.get(dependent)!.type === type) {
           type = undefined;
         }
