@@ -4,7 +4,7 @@
   "private": true,
   "description": "A tool to help manage the versioning and changelogs for open source packages",
   "scripts": {
-    "test": "jest",
+    "test": "jest -t 'declared multiple times'",
     "build": "preconstruct build",
     "watch": "preconstruct watch",
     "postinstall": "preconstruct dev && manypkg check",

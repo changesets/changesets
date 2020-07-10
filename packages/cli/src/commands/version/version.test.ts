@@ -287,6 +287,42 @@ describe("running version in a simple project with caret dependencies", () => {
   });
 });
 
+describe.only("running version in a simple project with the same dependency declared multiple times (e.g. in both dependencies and devDependencies) with different version range", () => {
+  it("should bump dependency version if it leaves any version range", async () => {
+    let cwd = f.copy("simple-project-same-dep-diff-range");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        dependencies: {
+          "pkg-b": "^1.0.1"
+        },
+        devDependencies: {
+          "pkg-b": "1.0.1"
+        },
+        peerDependencies: {
+          "pkg-b": "^1.0.0"
+        },
+        name: "pkg-a",
+        version: "1.0.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
+      }
+    ]);
+  });
+});
+
 describe("running version in a simple project with workspace range", () => {
   temporarilySilenceLogs();
   let cwd: string;

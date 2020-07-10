@@ -59,7 +59,7 @@ export default function getDependents({
 
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
-        const { depTypes, versionRange } = getDependencyVersionRange(
+        const dependencyVersionRanges = getDependencyVersionRanges(
           dependentPackage.packageJson,
           nextRelease.name
         );
@@ -67,43 +67,51 @@ export default function getDependents({
         // If the dependent is an ignored package, we want to bump its dependencies without a release, so setting type to "none"
         if (ignoredPackages.includes(dependent)) {
           type = "none";
-        }
-        // we check if it is a peerDependency because if it is, our dependent bump type needs to be major.
-        else if (
-          depTypes.includes("peerDependencies") &&
-          nextRelease.type !== "patch" &&
-          (!onlyUpdatePeerDependentsWhenOutOfRange ||
-            !semver.satisfies(
-              incrementVersion(nextRelease, preInfo),
-              versionRange
-            )) &&
-          (!releases.has(dependent) ||
-            (releases.has(dependent) &&
-              releases.get(dependent)!.type !== "major"))
-        ) {
-          type = "major";
         } else {
-          if (
-            // TODO validate this - I don't think it's right anymore
-            (!releases.has(dependent) ||
-              releases.get(dependent)!.type === "none") &&
-            !semver.satisfies(
-              incrementVersion(nextRelease, preInfo),
-              versionRange
-            )
-          ) {
+          for (const { depType, versionRange } of dependencyVersionRanges) {
+            // we check if it is a peerDependency because if it is, our dependent bump type needs to be major.
             if (
-              depTypes.includes("dependencies") ||
-              depTypes.includes("optionalDependencies") ||
-              depTypes.includes("peerDependencies")
+              depType === "peerDependencies" &&
+              nextRelease.type !== "patch" &&
+              (!onlyUpdatePeerDependentsWhenOutOfRange ||
+                !semver.satisfies(
+                  incrementVersion(nextRelease, preInfo),
+                  versionRange
+                )) &&
+              (!releases.has(dependent) ||
+                (releases.has(dependent) &&
+                  releases.get(dependent)!.type !== "major"))
             ) {
-              type = "patch";
+              type = "major";
             } else {
-              // We don't need a version bump if the package is only in the devDependencies of the dependent package
-              type = "none";
+              if (
+                // TODO validate this - I don't think it's right anymore
+                (!releases.has(dependent) ||
+                  releases.get(dependent)!.type === "none") &&
+                !semver.satisfies(
+                  incrementVersion(nextRelease, preInfo),
+                  versionRange
+                )
+              ) {
+                if (
+                  depType === "dependencies" ||
+                  depType === "optionalDependencies" ||
+                  depType === "peerDependencies"
+                ) {
+                  if (type !== "major" && type !== "minor") {
+                    type = "patch";
+                  }
+                } else {
+                  // We don't need a version bump if the package is only in the devDependencies of the dependent package
+                  if (type !== "major" && type !== "minor" && type !== "patch") {
+                    type = "none";
+                  }
+                }
+              }
             }
           }
         }
+        console.log('Fei', type);
         if (releases.has(dependent) && releases.get(dependent)!.type === type) {
           type = undefined;
         }
@@ -149,7 +157,7 @@ export default function getDependents({
   matched ('dependencies', 'peerDependencies', etc) and the versionRange itself ('^1.0.0')
 */
 
-function getDependencyVersionRange(
+function getDependencyVersionRanges(
   dependentPkgJSON: PackageJSON,
   dependencyName: string
 ) {
@@ -159,21 +167,19 @@ function getDependencyVersionRange(
     "peerDependencies",
     "optionalDependencies"
   ] as const;
-  const dependencyVersionRange: {
-    depTypes: DependencyType[];
+  const dependencyVersionRanges: {
+    depType: DependencyType;
     versionRange: string;
-  } = {
-    depTypes: [],
-    versionRange: ""
-  };
+  }[] = [];
   for (const type of DEPENDENCY_TYPES) {
     const deps = dependentPkgJSON[type];
     if (!deps) continue;
     if (deps[dependencyName]) {
-      dependencyVersionRange.depTypes.push(type);
-      // We'll just override this each time, *hypothetically* it *should* be the same...
-      dependencyVersionRange.versionRange = deps[dependencyName];
+      dependencyVersionRanges.push({
+        depType: type,
+        versionRange: deps[dependencyName]
+      });
     }
   }
-  return dependencyVersionRange;
+  return dependencyVersionRanges;
 }
