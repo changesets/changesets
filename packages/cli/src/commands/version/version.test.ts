@@ -310,7 +310,7 @@ describe.only("running version in a simple project with the same dependency decl
           "pkg-b": "1.0.1"
         },
         peerDependencies: {
-          "pkg-b": "^1.0.0"
+          "pkg-b": "^1.0.1"
         },
         name: "pkg-a",
         version: "1.0.0"
