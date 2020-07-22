@@ -1,5 +1,4 @@
 ---
-"@changesets/apply-release-plan": patch
 "@changesets/assemble-release-plan": patch
 "@changesets/cli": patch
 ---
