@@ -287,7 +287,7 @@ describe("running version in a simple project with caret dependencies", () => {
   });
 });
 
-describe.only("running version in a simple project with the same dependency declared multiple times (e.g. in both dependencies and devDependencies) with different version range", () => {
+describe("running version in a simple project with the same dependency declared multiple times (e.g. in both dependencies and devDependencies) with different version range", () => {
   it("should bump dependency version if it leaves any version range", async () => {
     let cwd = f.copy("simple-project-same-dep-diff-range");
     await writeChangeset(
