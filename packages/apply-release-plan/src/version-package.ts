@@ -6,6 +6,7 @@ import {
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
+import * as jsonParser from "jsonc-parser";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -14,11 +15,15 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies"
 ] as const;
 
+/**
+ * Change a release's `packageJson` and `pkgJSONText` fields based on versionsToUpdate
+ */
 export default function versionPackage(
   release: ComprehensiveRelease & {
     changelog: string | null;
     packageJson: PackageJSON;
     dir: string;
+    pkgJSONText: string;
   },
   versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
   {
@@ -31,7 +36,12 @@ export default function versionPackage(
 ) {
   let { newVersion, packageJson } = release;
 
+  const edits = [];
+
   packageJson.version = newVersion;
+  edits.push(
+    ...jsonParser.modify(release.pkgJSONText, ["version"], newVersion, {})
+  );
 
   for (let depType of DEPENDENCY_TYPES) {
     let deps = packageJson[depType];
@@ -70,10 +80,20 @@ export default function versionPackage(
           let newNewRange = `${rangeType}${version}`;
           if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`;
           deps[name] = newNewRange;
+          edits.push(
+            ...jsonParser.modify(
+              release.pkgJSONText,
+              [depType, name],
+              newNewRange,
+              {}
+            )
+          );
         }
       }
     }
   }
 
-  return { ...release, packageJson };
+  const pkgJSONText = jsonParser.applyEdits(release.pkgJSONText, edits);
+
+  return { ...release, packageJson, pkgJSONText };
 }

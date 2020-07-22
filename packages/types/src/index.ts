@@ -90,6 +90,7 @@ export type NewChangesetWithCommit = NewChangeset & { commit?: string };
 
 export type ModCompWithPackage = ComprehensiveRelease & {
   packageJson: PackageJSON;
+  pkgJSONText: string;
   dir: string;
 };
 

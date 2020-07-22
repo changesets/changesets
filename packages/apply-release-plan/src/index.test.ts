@@ -108,6 +108,58 @@ async function testSetup(
 
 describe("apply release plan", () => {
   describe("versioning", () => {
+    describe("formatting", () => {
+      it("should not reformat a package.json with a small array", async () => {
+        const releasePlan = new FakeReleasePlan();
+        let { changedFiles } = await testSetup(
+          "simple-project-with-small-array",
+          releasePlan.getReleasePlan(),
+          releasePlan.config
+        );
+        let pkgPath = changedFiles.find(a =>
+          a.endsWith(`pkg-a${path.sep}package.json`)
+        );
+
+        if (!pkgPath) throw new Error(`could not find an updated package json`);
+        let pkgJSON = await fs.readFile(pkgPath, { encoding: "utf-8" });
+
+        expect(pkgJSON).toStrictEqual(`{
+  "name": "pkg-a",
+  "version": "1.1.0",
+  "dependencies": {
+    "pkg-b": "1.0.0"
+  },
+  "files": [
+    "lib"
+  ]
+}
+`);
+      });
+      it("should not reformat a package.json with strange indentation", async () => {
+        const releasePlan = new FakeReleasePlan();
+        let { changedFiles } = await testSetup(
+          "simple-project-with-strange-indentation",
+          releasePlan.getReleasePlan(),
+          releasePlan.config
+        );
+        let pkgPath = changedFiles.find(a =>
+          a.endsWith(`pkg-a${path.sep}package.json`)
+        );
+
+        if (!pkgPath) throw new Error(`could not find an updated package json`);
+        let pkgJSON = await fs.readFile(pkgPath, { encoding: "utf-8" });
+
+        expect(pkgJSON).toStrictEqual(`{
+  "name": "pkg-a",
+  "version": "1.1.0",
+  "dependencies": {
+      "pkg-b": "1.0.0"
+  }
+}
+`);
+      });
+    });
+
     it("should update a version for one package", async () => {
       const releasePlan = new FakeReleasePlan();
       let { changedFiles } = await testSetup(

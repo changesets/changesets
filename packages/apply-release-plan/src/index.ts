@@ -60,9 +60,14 @@ export default async function applyReleasePlan(
       throw new Error(
         `Could not find matching package for release of: ${release.name}`
       );
+
+    const pkgJSONPath = path.resolve(pkg.dir, "package.json");
+    const pkgJSONText = fs.readFileSync(pkgJSONPath, { encoding: "utf-8" });
+
     return {
       ...release,
-      ...pkg
+      ...pkg,
+      pkgJSONText
     };
   });
 
@@ -104,19 +109,13 @@ export default async function applyReleasePlan(
   let prettierConfig = await prettier.resolveConfig(cwd);
 
   for (let release of finalisedRelease) {
-    let { changelog, packageJson, dir, name } = release;
-    let pkgJSONPath = path.resolve(dir, "package.json");
+    let { changelog, pkgJSONText, dir, name } = release;
 
-    let changelogPath = path.resolve(dir, "CHANGELOG.md");
-
-    let parsedConfig = prettier.format(JSON.stringify(packageJson), {
-      ...prettierConfig,
-      filepath: pkgJSONPath
-    });
-
-    await fs.writeFile(pkgJSONPath, parsedConfig);
+    const pkgJSONPath = path.resolve(dir, "package.json");
+    await fs.writeFile(pkgJSONPath, pkgJSONText);
     touchedFiles.push(pkgJSONPath);
 
+    const changelogPath = path.resolve(dir, "CHANGELOG.md");
     if (changelog && changelog.length > 0) {
       await updateChangelog(changelogPath, changelog, name, prettierConfig);
       touchedFiles.push(changelogPath);

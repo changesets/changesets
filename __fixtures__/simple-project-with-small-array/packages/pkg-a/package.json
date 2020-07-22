@@ -1,0 +1,10 @@
+{
+  "name": "pkg-a",
+  "version": "1.0.0",
+  "dependencies": {
+    "pkg-b": "1.0.0"
+  },
+  "files": [
+    "lib"
+  ]
+}
