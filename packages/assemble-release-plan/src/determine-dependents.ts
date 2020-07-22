@@ -156,14 +156,17 @@ export default function getDependents({
 }
 
 /*
-  Returns an object in the shape { depTypes: [], versionRange: '' } with a list of different depTypes
-  matched ('dependencies', 'peerDependencies', etc) and the versionRange itself ('^1.0.0')
+  Returns an array of objects in the shape { depType: DependencyType, versionRange: string }
+  The array can contain more than one elements in case a dependency appears in multiple
+  dependency lists. For example, a package that is both a peerDepenency and a devDependency.
 */
-
 function getDependencyVersionRanges(
   dependentPkgJSON: PackageJSON,
   dependencyName: string
-) {
+): {
+  depType: DependencyType;
+  versionRange: string;
+}[] {
   const DEPENDENCY_TYPES = [
     "dependencies",
     "devDependencies",
