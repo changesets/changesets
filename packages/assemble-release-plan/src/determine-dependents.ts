@@ -79,7 +79,8 @@ export default function getDependents({
                 nextRelease,
                 preInfo,
                 onlyUpdatePeerDependentsWhenOutOfRange
-              })) {
+              })
+            ) {
               type = "major";
             } else {
               if (
@@ -94,11 +95,11 @@ export default function getDependents({
                 switch (depType) {
                   case "dependencies":
                   case "optionalDependencies":
-                  case "peerDependencies": {
+                  case "peerDependencies":
                     if (type !== "major" && type !== "minor") {
                       type = "patch";
                     }
-                  }
+                    break;
                   case "devDependencies": {
                     // We don't need a version bump if the package is only in the devDependencies of the dependent package
                     if (
@@ -189,27 +190,26 @@ function getDependencyVersionRanges(
   return dependencyVersionRanges;
 }
 
-function shouldBumpMajor(
-  {
-    dependent,
-    depType,
-    versionRange,
-    releases,
-    nextRelease,
-    preInfo,
-    onlyUpdatePeerDependentsWhenOutOfRange
-  }: {
-    dependent: string;
-    depType: DependencyType;
-    versionRange: string;
-    releases: Map<string, InternalRelease>;
-    nextRelease: InternalRelease;
-    preInfo: PreInfo | undefined;
-    onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-  }
-) {
+function shouldBumpMajor({
+  dependent,
+  depType,
+  versionRange,
+  releases,
+  nextRelease,
+  preInfo,
+  onlyUpdatePeerDependentsWhenOutOfRange
+}: {
+  dependent: string;
+  depType: DependencyType;
+  versionRange: string;
+  releases: Map<string, InternalRelease>;
+  nextRelease: InternalRelease;
+  preInfo: PreInfo | undefined;
+  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+}) {
   // we check if it is a peerDependency because if it is, our dependent bump type might need to be major.
-  return depType === "peerDependencies" &&
+  return (
+    depType === "peerDependencies" &&
     nextRelease.type !== "patch" &&
     // 1. If onlyUpdatePeerDependentsWhenOutOfRange set to true, bump major if the version is leaving the range.
     // 2. If onlyUpdatePeerDependentsWhenOutOfRange set to false, bump major regardless whether or not the version is leaving the range.
@@ -220,6 +220,6 @@ function shouldBumpMajor(
       )) &&
     // bump major only if the dependent doesn't already has a major release.
     (!releases.has(dependent) ||
-      (releases.has(dependent) &&
-        releases.get(dependent)!.type !== "major"));
+      (releases.has(dependent) && releases.get(dependent)!.type !== "major"))
+  );
 }
