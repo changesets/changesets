@@ -10,6 +10,7 @@ import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import resolveFrom from "resolve-from";
 import { Packages } from "@manypkg/get-packages";
+import * as jsonParser from "jsonc-parser";
 
 import fs from "fs-extra";
 import path from "path";
@@ -61,13 +62,9 @@ export default async function applyReleasePlan(
         `Could not find matching package for release of: ${release.name}`
       );
 
-    const pkgJSONPath = path.resolve(pkg.dir, "package.json");
-    const pkgJSONText = fs.readFileSync(pkgJSONPath, { encoding: "utf-8" });
-
     return {
       ...release,
-      ...pkg,
-      pkgJSONText
+      ...pkg
     };
   });
 
@@ -109,10 +106,17 @@ export default async function applyReleasePlan(
   let prettierConfig = await prettier.resolveConfig(cwd);
 
   for (let release of finalisedRelease) {
-    let { changelog, pkgJSONText, dir, name } = release;
+    let { changelog, packageJsonPatches, dir, name } = release;
 
     const pkgJSONPath = path.resolve(dir, "package.json");
-    await fs.writeFile(pkgJSONPath, pkgJSONText);
+    
+    const pkgJSONText = fs.readFileSync(pkgJSONPath, { encoding: "utf-8" });
+    const edits = packageJsonPatches.flatMap(patch =>
+      jsonParser.modify(pkgJSONText, patch.path, patch.value, {})
+    );
+    const newPkgJSONText = jsonParser.applyEdits(pkgJSONText, edits);
+
+    await fs.writeFile(pkgJSONPath, newPkgJSONText);
     touchedFiles.push(pkgJSONPath);
 
     const changelogPath = path.resolve(dir, "CHANGELOG.md");
@@ -179,7 +183,7 @@ async function getNewChangelogEntry(
   changesets: NewChangeset[],
   config: Config,
   cwd: string
-) {
+): Promise<ModCompWithPackage[]> {
   let getChangelogFuncs: ChangelogFunctions = {
     getReleaseLine: () => Promise.resolve(""),
     getDependencyReleaseLine: () => Promise.resolve("")

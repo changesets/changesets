@@ -1,12 +1,12 @@
 import {
   ComprehensiveRelease,
   PackageJSON,
-  VersionType
+  VersionType,
+  Patch
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
-import * as jsonParser from "jsonc-parser";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -16,14 +16,14 @@ const DEPENDENCY_TYPES = [
 ] as const;
 
 /**
- * Change a release's `packageJson` and `pkgJSONText` fields based on versionsToUpdate
+ * Create a list of patches for a release's `packageJSON`.
+ * The returned release will contain both the patches, and a patched `packageJson`
  */
 export default function versionPackage(
   release: ComprehensiveRelease & {
-    changelog: string | null;
+    changelog?: string;
     packageJson: PackageJSON;
     dir: string;
-    pkgJSONText: string;
   },
   versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
   {
@@ -33,15 +33,21 @@ export default function versionPackage(
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
-) {
+): ComprehensiveRelease & {
+  changelog?: string;
+  packageJson: PackageJSON;
+  dir: string;
+  packageJsonPatches: Patch[];
+} {
   let { newVersion, packageJson } = release;
 
-  const edits = [];
+  const packageJsonPatches = [];
 
   packageJson.version = newVersion;
-  edits.push(
-    ...jsonParser.modify(release.pkgJSONText, ["version"], newVersion, {})
-  );
+  packageJsonPatches.push({
+    path: ["version"],
+    value: newVersion
+  });
 
   for (let depType of DEPENDENCY_TYPES) {
     let deps = packageJson[depType];
@@ -80,20 +86,14 @@ export default function versionPackage(
           let newNewRange = `${rangeType}${version}`;
           if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`;
           deps[name] = newNewRange;
-          edits.push(
-            ...jsonParser.modify(
-              release.pkgJSONText,
-              [depType, name],
-              newNewRange,
-              {}
-            )
-          );
+          packageJsonPatches.push({
+            path: [depType, name],
+            value: newNewRange
+          });
         }
       }
     }
   }
 
-  const pkgJSONText = jsonParser.applyEdits(release.pkgJSONText, edits);
-
-  return { ...release, packageJson, pkgJSONText };
+  return { ...release, packageJson, packageJsonPatches };
 }

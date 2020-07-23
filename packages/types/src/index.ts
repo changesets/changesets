@@ -88,10 +88,15 @@ export type ExperimentalOptions = {
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
 
+export type Patch = {
+  path: string[];
+  value: string;
+};
+
 export type ModCompWithPackage = ComprehensiveRelease & {
   packageJson: PackageJSON;
-  pkgJSONText: string;
   dir: string;
+  packageJsonPatches?: Patch[];
 };
 
 export type GetReleaseLine = (
