@@ -10,6 +10,17 @@ import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);
 
+function jsonParse(input: string) {
+  try {
+    return JSON.parse(input);
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      console.error("error parsing json:", input);
+    }
+    throw err;
+  }
+}
+
 function getCorrectRegistry() {
   let registry =
     process.env.npm_config_registry === "https://registry.yarnpkg.com"
@@ -33,7 +44,7 @@ export async function getTokenIsRequired() {
   let result = await spawn("npm", ["profile", "get", "--json"], {
     env: Object.assign({}, process.env, envOverride)
   });
-  let json = JSON.parse(result.stdout.toString());
+  let json = jsonParse(result.stdout.toString());
   if (json.error || !json.tfa || !json.tfa.mode) {
     return false;
   }
@@ -58,7 +69,7 @@ export function getPackageInfo(pkgName: string) {
       env: Object.assign({}, process.env, envOverride)
     });
 
-    return JSON.parse(result.stdout.toString());
+    return jsonParse(result.stdout.toString());
   });
 }
 
@@ -135,7 +146,7 @@ async function internalPublish(
   // `postpublish` contents in terminal. We want to handle this as best we can but it has
   // some struggles
   // Note that both pre and post publish hooks are printed before the json out, so this works.
-  let json = JSON.parse(stdout.toString().replace(/[^{]*/, ""));
+  let json = jsonParse(stdout.toString().replace(/[^{]*/, ""));
 
   if (json.error) {
     // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
