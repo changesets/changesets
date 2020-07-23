@@ -149,13 +149,13 @@ describe("apply release plan", () => {
         if (!pkgPath) throw new Error(`could not find an updated package json`);
         let pkgJSON = await fs.readFile(pkgPath, { encoding: "utf-8" });
 
-        expect(pkgJSON).toStrictEqual(`{
-  "name": "pkg-a",
-  "version": "1.1.0",
+        expect(pkgJSON).toStrictEqual(`               {
+      "name":                             "pkg-a",
+           "version":          "1.1.0",
   "dependencies": {
-      "pkg-b": "1.0.0"
-  }
-}
+      "pkg-b":                    "1.0.0"
+                 }
+   }
 `);
       });
     });
