@@ -1,9 +1,4 @@
-import {
-  ComprehensiveRelease,
-  PackageJSON,
-  VersionType,
-  Patch
-} from "@changesets/types";
+import { VersionType, ModCompWithPackage, Patch } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
@@ -20,11 +15,7 @@ const DEPENDENCY_TYPES = [
  * The returned release will contain both the patches, and a patched `packageJson`
  */
 export default function versionPackage(
-  release: ComprehensiveRelease & {
-    changelog?: string;
-    packageJson: PackageJSON;
-    dir: string;
-  },
+  release: ModCompWithPackage & { changelog?: string },
   versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
   {
     updateInternalDependencies,
@@ -33,11 +24,9 @@ export default function versionPackage(
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
-): ComprehensiveRelease & {
-  changelog?: string;
-  packageJson: PackageJSON;
-  dir: string;
+): ModCompWithPackage & {
   packageJsonPatches: Patch[];
+  changelog?: string;
 } {
   let { newVersion, packageJson } = release;
 

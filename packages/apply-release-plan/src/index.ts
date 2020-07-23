@@ -109,7 +109,7 @@ export default async function applyReleasePlan(
     let { changelog, packageJsonPatches, dir, name } = release;
 
     const pkgJSONPath = path.resolve(dir, "package.json");
-    
+
     const pkgJSONText = fs.readFileSync(pkgJSONPath, { encoding: "utf-8" });
     const edits = packageJsonPatches.flatMap(patch =>
       jsonParser.modify(pkgJSONText, patch.path, patch.value, {})
