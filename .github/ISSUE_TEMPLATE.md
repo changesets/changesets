@@ -8,4 +8,4 @@
 
 ## Proposed solution
 
-<!-- If you have an idea of how to solve it, otherwise that's fine as well. We may edit this desciption to add details later -->
+<!-- If you have an idea of how to solve it, otherwise that's fine as well. We may edit this description to add details later -->
