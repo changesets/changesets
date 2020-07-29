@@ -73,7 +73,8 @@ async function getChangedFilesSince({
   const files = cmd.stdout
     .toString()
     .trim()
-    .split("\n");
+    .split("\n")
+    .filter(a => a);
   if (!fullPath) return files;
   return files.map(file => path.resolve(cwd, file));
 }
