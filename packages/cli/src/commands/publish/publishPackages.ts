@@ -7,6 +7,7 @@ import { info, warn } from "@changesets/logger";
 import { TwoFactorState } from "../../utils/types";
 import { PreState } from "@changesets/types";
 import isCI from "../../utils/isCI";
+import spawn from "spawndamnit";
 
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   if (tag) return tag;
@@ -33,6 +34,7 @@ export default async function publishPackages({
 }) {
   const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]));
   const publicPackages = packages.filter(pkg => !pkg.packageJson.private);
+  const privatePackages = packages.filter(pkg => pkg.packageJson.private);
   let twoFactorState: TwoFactorState =
     otp === undefined
       ? {
@@ -66,15 +68,26 @@ export default async function publishPackages({
     preState
   );
 
-  if (unpublishedPackagesInfo.length === 0) {
-    warn("No unpublished packages to publish");
-  }
-
   let promises: Promise<{
     name: string;
     newVersion: string;
     published: boolean;
   }>[] = [];
+
+  for (let privatePkg of privatePackages) {
+    const tagName = `${privatePkg.packageJson.name}@${privatePkg.packageJson.version}`;
+    const isMissingTag = !(await tagExists(tagName));
+    if (isMissingTag) {
+      promises.push(
+        Promise.resolve({
+          name: privatePkg.packageJson.name,
+          newVersion: privatePkg.packageJson.version,
+          // Private packages do not need to be published
+          published: true
+        })
+      );
+    }
+  }
 
   for (let pkgInfo of unpublishedPackagesInfo) {
     let pkg = packagesByName.get(pkgInfo.name)!;
@@ -86,6 +99,10 @@ export default async function publishPackages({
         getReleaseTag(pkgInfo, preState, tag)
       )
     );
+  }
+
+  if (promises.length === 0) {
+    warn("No unpublished packages to publish");
   }
 
   return Promise.all(promises);
@@ -191,4 +208,11 @@ async function getUnpublishedPackages(
   }
 
   return packagesToPublish;
+}
+
+async function tagExists(tagStr: string) {
+  const gitCmd = await spawn("git", ["tag", "-l", tagStr]);
+  const output = gitCmd.stdout.toString().trim();
+  const tagExists = !!output;
+  return tagExists;
 }
