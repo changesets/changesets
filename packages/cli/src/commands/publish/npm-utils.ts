@@ -10,17 +10,6 @@ import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);
 
-function jsonParse(input: string) {
-  try {
-    return JSON.parse(input);
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      console.error("error parsing json:", input);
-    }
-    throw err;
-  }
-}
-
 function getCorrectRegistry() {
   let registry =
     process.env.npm_config_registry === "https://registry.yarnpkg.com"
@@ -48,9 +37,9 @@ export async function getTokenIsRequired() {
   let profile;
   if (json) {
     try {
-      profile = jsonParse(json);
+      profile = JSON.parse(json);
     } catch (err) {
-      // Handling the error is unnecessary since profile will be falsy.
+      console.error(err, { json });
     }
   }
   return profile && profile.tfa && profile.tfa.mode === "auth-and-writes";
@@ -74,7 +63,12 @@ export function getPackageInfo(pkgName: string) {
       env: Object.assign({}, process.env, envOverride)
     });
 
-    return jsonParse(result.stdout.toString());
+    const json = result.stdout.toString();
+    try {
+      return JSON.parse(json);
+    } catch (err) {
+      console.error(err, { json });
+    }
   });
 }
 
@@ -151,14 +145,20 @@ async function internalPublish(
   // `postpublish` contents in terminal. We want to handle this as best we can but it has
   // some struggles
   // Note that both pre and post publish hooks are printed before the json out, so this works.
-  let json = jsonParse(stdout.toString().replace(/[^{]*/, ""));
+  const json = stdout.toString().replace(/[^{]*/, "");
+  let response;
+  try {
+    response = JSON.parse(json);
+  } catch (err) {
+    console.error(err, { stdout, json });
+  }
 
-  if (json.error) {
+  if (!response || (response && response.error)) {
     // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
     if (
-      (json.error.code === "EOTP" ||
-        (json.error.code === "E401" &&
-          json.error.detail.includes("--otp=<code>"))) &&
+      (response.error.code === "EOTP" ||
+        (response.error.code === "E401" &&
+          response.error.detail.includes("--otp=<code>"))) &&
       !isCI
     ) {
       if (twoFactorState.token !== null) {
@@ -170,9 +170,9 @@ async function internalPublish(
       return internalPublish(pkgName, opts, twoFactorState);
     }
     error(
-      `an error occurred while publishing ${pkgName}: ${json.error.code}`,
-      json.error.summary,
-      json.error.detail ? "\n" + json.error.detail : ""
+      `an error occurred while publishing ${pkgName}: ${response.error.code}`,
+      response.error.summary,
+      response.error.detail ? "\n" + response.error.detail : ""
     );
     return { published: false };
   }
