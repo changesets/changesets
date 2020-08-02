@@ -10,6 +10,17 @@ import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);
 
+function jsonParse(input: string) {
+  try {
+    return JSON.parse(input);
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      console.error("error parsing json:", input);
+    }
+    throw err;
+  }
+}
+
 function getCorrectRegistry() {
   let registry =
     process.env.npm_config_registry === "https://registry.yarnpkg.com"
@@ -37,7 +48,7 @@ export async function getTokenIsRequired() {
   let profile;
   if (json) {
     try {
-      profile = JSON.parse(json);
+      profile = jsonParse(json);
     } catch (err) {
       // Handling the error is unnecessary since profile will be falsy.
     }
