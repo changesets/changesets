@@ -10,17 +10,6 @@ import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);
 
-function jsonParse(input: string) {
-  try {
-    return JSON.parse(input);
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      console.error("error parsing json:", input);
-    }
-    throw err;
-  }
-}
-
 function getCorrectRegistry() {
   let registry =
     process.env.npm_config_registry === "https://registry.yarnpkg.com"
@@ -44,11 +33,16 @@ export async function getTokenIsRequired() {
   let result = await spawn("npm", ["profile", "get", "--json"], {
     env: Object.assign({}, process.env, envOverride)
   });
-  let json = jsonParse(result.stdout.toString());
-  if (json.error || !json.tfa || !json.tfa.mode) {
-    return false;
+  let json = result.stdout.toString();
+  let profile;
+  if (json) {
+    try {
+      profile = JSON.parse(json);
+    } catch (err) {
+      // Handling the error is unnecessary since profile will be falsy.
+    }
   }
-  return json.tfa.mode === "auth-and-writes";
+  return profile && profile.tfa && profile.tfa.mode === "auth-and-writes";
 }
 
 export function getPackageInfo(pkgName: string) {
