@@ -30,7 +30,7 @@ export async function getTokenIsRequired() {
   const envOverride = {
     npm_config_registry: getCorrectRegistry()
   };
-  let result = await spawn("npm", ["profile", "get", "--json"], {
+  let result = await spawn("npm", ["profile", "get", "--json", "--silent"], {
     env: Object.assign({}, process.env, envOverride)
   });
   let json = result.stdout.toString();
@@ -59,7 +59,7 @@ export function getPackageInfo(pkgName: string) {
       npm_config_registry: getCorrectRegistry()
     };
 
-    let result = await spawn("npm", ["info", pkgName, "--json"], {
+    let result = await spawn("npm", ["info", pkgName, "--json", "--silent"], {
       env: Object.assign({}, process.env, envOverride)
     });
 
@@ -135,7 +135,7 @@ async function internalPublish(
   };
   let { stdout } = await spawn(
     publishTool,
-    ["publish", "--json", ...publishFlags],
+    ["publish", "--json", "--silent", ...publishFlags],
     {
       cwd: opts.cwd,
       env: Object.assign({}, process.env, envOverride)
