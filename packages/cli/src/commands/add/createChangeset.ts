@@ -229,13 +229,27 @@ export default async function createChangeset(
   }
 
   log(
-    "Please enter a summary for this change (this will be in the changelogs)"
+    "Please enter a summary for this change (this will be in the changelogs). Submit empty line to open external editor"
   );
 
   let summary = await cli.askQuestion("Summary");
-  while (summary.length === 0) {
-    error("A summary is required for the changelog! 😪");
-    summary = await cli.askQuestion("Summary");
+  if (summary.length === 0) summary = cli.askQuestionWithEditor("");
+  try {
+    while (summary.length === 0) {
+      summary = await cli.askQuestionWithEditor(
+        "\n\n# A summary is required for the changelog! 😪"
+      );
+    }
+  } catch (err) {
+    log(
+      "An error happened using external editor. Please type your summary here:"
+    );
+    summary = await cli.askQuestion("");
+    while (summary.length === 0) {
+      summary = await cli.askQuestion(
+        "\n\n# A summary is required for the changelog! 😪"
+      );
+    }
   }
 
   return {
