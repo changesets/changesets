@@ -50,6 +50,7 @@ export type PackageJSON = {
   private?: boolean;
   publishConfig?: {
     access?: AccessType;
+    directory?: string;
   };
 };
 
