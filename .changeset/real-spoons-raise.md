@@ -1,5 +1,5 @@
 ---
-"@changesets/cli": patch
+"@changesets/cli": minor
 "@changesets/types": patch
 ---
 
