@@ -17,7 +17,10 @@ const f = fixtures(__dirname);
 const simpleChangeset: NewChangeset = {
   id: "fake-ids-abound",
   summary: "This is a summary",
-  releases: [{ name: "pkg-a", type: "minor" }, { name: "pkg-b", type: "patch" }]
+  releases: [
+    { name: "pkg-a", type: "minor" },
+    { name: "pkg-b", type: "patch" }
+  ]
 };
 
 const simpleReleasePlan: ReleasePlan = {

@@ -16,7 +16,7 @@
     "fs-extra": "^7.0.1",
     "lodash.startcase": "^4.4.0",
     "outdent": "^0.5.0",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "resolve-from": "^5.0.0",
     "semver": "^5.4.1"
   },

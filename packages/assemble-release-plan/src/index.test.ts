@@ -239,7 +239,13 @@ describe("assemble-release-plan", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
+      {
+        ...defaultConfig,
+        linked: [
+          ["pkg-a", "pkg-b"],
+          ["pkg-c", "pkg-d"]
+        ]
+      },
       undefined
     );
 
@@ -253,7 +259,13 @@ describe("assemble-release-plan", () => {
     let { releases } = assembleReleasePlan(
       [],
       setup.packages,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
+      {
+        ...defaultConfig,
+        linked: [
+          ["pkg-a", "pkg-b"],
+          ["pkg-c", "pkg-d"]
+        ]
+      },
       undefined
     );
 
@@ -266,7 +278,13 @@ describe("assemble-release-plan", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
+      {
+        ...defaultConfig,
+        linked: [
+          ["pkg-a", "pkg-b"],
+          ["pkg-c", "pkg-d"]
+        ]
+      },
       undefined
     );
 
@@ -285,7 +303,13 @@ describe("assemble-release-plan", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]] },
+      {
+        ...defaultConfig,
+        linked: [
+          ["pkg-a", "pkg-b"],
+          ["pkg-c", "pkg-d"]
+        ]
+      },
       undefined
     );
 
