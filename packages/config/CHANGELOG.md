@@ -1,5 +1,28 @@
 # @changesets/config
 
+## 1.3.0
+
+### Minor Changes
+
+- [`377f5c3`](https://github.com/atlassian/changesets/commit/377f5c385ad9db4ff8458f159e2d452c39828567) [#393](https://github.com/atlassian/changesets/pull/393) Thanks [@Andarist](https://github.com/Andarist)! - Added `updateInternalDependencies` and `ignore` options to the JSON schema.
+
+### Patch Changes
+
+- [`377f5c3`](https://github.com/atlassian/changesets/commit/377f5c385ad9db4ff8458f159e2d452c39828567) [#393](https://github.com/atlassian/changesets/pull/393) Thanks [@Andarist](https://github.com/Andarist)! - Removed experimental flags from `defaultWrittenConfig`. They were added there by mistake.
+
+## 1.2.0
+
+### Minor Changes
+
+- [`9dcc364`](https://github.com/atlassian/changesets/commit/9dcc364bf19e48f8f2824ebaf967d9ef41b6fc04) [#371](https://github.com/atlassian/changesets/pull/371) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Add `ignore` config option to configure ignored packages. The versions of ignored packages will not be bumped during a release, but their dependencies will still be bumped normally.
+
+### Patch Changes
+
+- [`addd725`](https://github.com/atlassian/changesets/commit/addd7256d9251d999251a7c16c0a0b068d557b5d) [#383](https://github.com/atlassian/changesets/pull/383) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Added an experimental flag `onlyUpdatePeerDependentsWhenOutOfRange`. When set to `true`, we only bump peer dependents when peerDependencies are leaving range.
+
+- Updated dependencies [[`addd725`](https://github.com/atlassian/changesets/commit/addd7256d9251d999251a7c16c0a0b068d557b5d), [`9dcc364`](https://github.com/atlassian/changesets/commit/9dcc364bf19e48f8f2824ebaf967d9ef41b6fc04)]:
+  - @changesets/types@3.1.0
+
 ## 1.1.0
 
 ### Minor Changes

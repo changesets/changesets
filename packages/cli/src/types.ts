@@ -10,6 +10,7 @@ export type CliOptions = {
   otp?: string;
   empty?: boolean;
   since?: string;
+  ignore?: string | string[];
   snapshot?: string | boolean;
   tag?: string;
 };

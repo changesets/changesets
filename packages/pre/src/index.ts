@@ -7,7 +7,7 @@ import {
   PreEnterButInPreModeError
 } from "@changesets/errors";
 
-export async function readPreState(cwd: string) {
+export async function readPreState(cwd: string): Promise<PreState | undefined> {
   let preStatePath = path.resolve(cwd, ".changeset", "pre.json");
   // TODO: verify that the pre state isn't broken
   let preState: PreState | undefined;

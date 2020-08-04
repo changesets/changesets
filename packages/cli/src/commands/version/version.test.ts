@@ -64,6 +64,12 @@ const simpleChangeset2: NewChangeset = {
   id: "wouldnit-be-nice"
 };
 
+const simpleChangeset3: NewChangeset = {
+  summary: "This is not a summary",
+  releases: [{ name: "pkg-b", type: "patch" }],
+  id: "hot-day-today"
+};
+
 const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
   return Promise.all(
     changesets.map(changeset => writeChangeset(changeset, cwd))
@@ -152,6 +158,39 @@ describe("running version in a simple project", () => {
 
     expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
       expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
+    );
+  });
+
+  it("should not touch package.json of an ignored package when it is not a dependent of any releasedPackages ", async () => {
+    await writeChangesets([simpleChangeset], cwd);
+    const spy = jest.spyOn(fs, "writeFile");
+
+    await versionCommand(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ignore: ["pkg-a"]
+    });
+
+    const bumpedPackageA = !!spy.mock.calls.find((call: string[]) =>
+      call[0].endsWith(`pkg-a${path.sep}package.json`)
+    );
+
+    expect(bumpedPackageA).toBe(false);
+  });
+
+  it("should not bump ignored packages", async () => {
+    await writeChangesets([simpleChangeset, simpleChangeset3], cwd);
+    const spy = jest.spyOn(fs, "writeFile");
+
+    await versionCommand(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ignore: ["pkg-a"]
+    });
+
+    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+      expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
+    );
+    expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+      expect.objectContaining({ name: "pkg-a", version: "1.0.0" })
     );
   });
 
@@ -310,6 +349,41 @@ describe("snapshot release", () => {
         version: expect.stringContaining("0.0.0-exprimental-")
       })
     );
+  });
+
+  describe("useCalculatedVersionForSnapshots: true", () => {
+    it("should update packages using calculated version", async () => {
+      let cwd = f.copy("simple-project");
+      await writeChangesets([simpleChangeset2], cwd);
+      const spy = jest.spyOn(fs, "writeFile");
+      await versionCommand(
+        cwd,
+        {
+          snapshot: "exprimental"
+        },
+        {
+          ...modifiedDefaultConfig,
+          commit: false,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            useCalculatedVersionForSnapshots: true
+          }
+        }
+      );
+      expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+        expect.objectContaining({
+          name: "pkg-a",
+          version: expect.stringContaining("1.1.0-exprimental-")
+        })
+      );
+
+      expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+        expect.objectContaining({
+          name: "pkg-b",
+          version: expect.stringContaining("1.0.1-exprimental-")
+        })
+      );
+    });
   });
 });
 
@@ -753,6 +827,69 @@ describe("pre", () => {
       {
         name: "pkg-b",
         version: "1.0.0"
+      }
+    ]);
+  });
+  it("should not bump packages through devDependencies", async () => {
+    let cwd = f.copy("simple-dev-dep");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await pre(cwd, { command: "enter", tag: "next" });
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    let packages = (await getPackages(cwd))!;
+
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        devDependencies: { "pkg-b": "2.0.0-next.0" },
+        name: "pkg-a",
+        version: "1.0.0"
+      },
+      {
+        name: "pkg-b",
+        version: "2.0.0-next.0"
+      }
+    ]);
+  });
+  it("should not bump ignored packages through dependencies", async () => {
+    let cwd = f.copy("simple-project");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await pre(cwd, { command: "enter", tag: "next" });
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ignore: ["pkg-a"]
+    });
+    let packages = (await getPackages(cwd))!;
+
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        dependencies: { "pkg-b": "2.0.0-next.0" },
+        name: "pkg-a",
+        version: "1.0.0"
+      },
+      {
+        name: "pkg-b",
+        version: "2.0.0-next.0"
       }
     ]);
   });

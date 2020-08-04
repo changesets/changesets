@@ -40,19 +40,33 @@
     },
     "commit": {
       "type": "boolean",
-      "description": "Determines whether Changesets should commit the results of the add and version command",
+      "description": "Determines whether Changesets should commit the results of the add and version command.",
       "default": false
     },
     "access": {
       "enum": ["restricted", "public"],
       "type": "string",
-      "description": "Determines whether Changesets should publish packages to the registry publicly or to a restricted scope",
+      "description": "Determines whether Changesets should publish packages to the registry publicly or to a restricted scope.",
       "default": "restricted"
     },
     "baseBranch": {
       "type": "string",
       "default": "master",
-      "description": "Determines the branch that Changesets uses when finding what packages have changed"
+      "description": "Determines the branch that Changesets uses when finding what packages have changed."
+    },
+    "ignore": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Packages that should not be released.",
+      "default": []
+    },
+    "updateInternalDependencies": {
+      "enum": ["patch", "minor"],
+      "type": "string",
+      "description": "The minimum bump type to trigger automatic update of internal dependencies that are part of the same release.",
+      "default": "patch"
     }
   }
 }

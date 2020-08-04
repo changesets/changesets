@@ -63,6 +63,10 @@ export type Config = {
   baseBranch: string;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
+  ignore: ReadonlyArray<string>;
+  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<
+    ExperimentalOptions
+  >;
 };
 
 export type WrittenConfig = {
@@ -73,6 +77,13 @@ export type WrittenConfig = {
   baseBranch?: string;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
+  ignore?: ReadonlyArray<string>;
+  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?: ExperimentalOptions;
+};
+
+export type ExperimentalOptions = {
+  onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
+  useCalculatedVersionForSnapshots?: boolean;
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
