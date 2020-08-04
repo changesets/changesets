@@ -1,5 +1,11 @@
 # @changesets/pre
 
+## 1.0.5
+
+### Patch Changes
+
+- [`cdfbe16`](https://github.com/atlassian/changesets/commit/cdfbe166341479380e601f6e2ff9c282ad550fab) [#402](https://github.com/atlassian/changesets/pull/402) Thanks [@Andarist](https://github.com/Andarist)! - Fixed return type of the `readPreState` function. It is now properly annotated as `Promise<PreState | undefined>` instead of just `Promise<PreState>`.
+
 ## 1.0.4
 
 ### Patch Changes
