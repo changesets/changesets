@@ -2,6 +2,7 @@
 import termSize from "term-size";
 import { error, prefix, success } from "@changesets/logger";
 import { prompt } from "enquirer";
+import { edit } from "external-editor";
 
 // those types are not exported from `enquirer` so we extract them here
 // so we can make type assertions using them because `enquirer` types do no support `prefix` right now
@@ -85,6 +86,14 @@ async function askQuestion(message: string): Promise<string> {
     });
 }
 
+function askQuestionWithEditor(message: string): string {
+  const response = edit(message, { postfix: ".md" });
+  return response
+    .replace(/^#.*\n?/gm, "")
+    .replace(/\n+$/g, "")
+    .trim();
+}
+
 async function askConfirm(message: string): Promise<boolean> {
   const name = `Confirm-${serialId()}`;
 
@@ -126,4 +135,10 @@ async function askList<Choice extends string>(
     });
 }
 
-export { askCheckboxPlus, askQuestion, askConfirm, askList };
+export {
+  askCheckboxPlus,
+  askQuestion,
+  askQuestionWithEditor,
+  askConfirm,
+  askList
+};
