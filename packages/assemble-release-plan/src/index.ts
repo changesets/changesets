@@ -7,7 +7,7 @@ import * as semver from "semver";
 import { InternalError } from "@changesets/errors";
 import { Packages } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { PreInfo } from "./types";
+import { PreInfo, InternalRelease } from "./types";
 
 function getPreVersion(version: string) {
   let parsed = semver.parse(version)!;
@@ -20,14 +20,7 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
-/**
- * Using version as 0.0.0 so that it does not hinder with other version release
- * For example;
- * if user has a regular pre-release at 1.0.0-beta.0 and then you had a snapshot pre-release at 1.0.0-canary-git-hash
- * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
- * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
- */
-function getSnapshotReleaseVersion(snapshot?: string | boolean) {
+function getSnapshotSuffix(snapshot?: string | boolean): string {
   const now = new Date();
 
   let dateAndTime = [
@@ -42,7 +35,36 @@ function getSnapshotReleaseVersion(snapshot?: string | boolean) {
   let tag = "";
   if (typeof snapshot === "string") tag = `-${snapshot}`;
 
-  return `0.0.0${tag}-${dateAndTime}`;
+  return `${tag}-${dateAndTime}`;
+}
+
+function getNewVersion(
+  release: InternalRelease,
+  preInfo: PreInfo | undefined,
+  snapshot: string | boolean | undefined,
+  snapshotSuffix: string,
+  useCalculatedVersionForSnapshots: boolean
+): string {
+  /**
+   * Using version as 0.0.0 so that it does not hinder with other version release
+   * For example;
+   * if user has a regular pre-release at 1.0.0-beta.0 and then you had a snapshot pre-release at 1.0.0-canary-git-hash
+   * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
+   * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
+   *
+   * You can set `useCalculatedVersionForSnapshots` flag to true to use calculated versions if you don't care about the above problem.
+   */
+  if (snapshot && !useCalculatedVersionForSnapshots) {
+    return `0.0.0${snapshotSuffix}`;
+  }
+
+  const calculatedVersion = incrementVersion(release, preInfo);
+
+  if (snapshot && useCalculatedVersionForSnapshots) {
+    return `${calculatedVersion}${snapshotSuffix}`;
+  }
+
+  return calculatedVersion;
 }
 
 function assembleReleasePlan(
@@ -52,6 +74,8 @@ function assembleReleasePlan(
   preState: PreState | undefined,
   snapshot?: string | boolean
 ): ReleasePlan {
+  validateChangesets(changesets, config.ignore);
+
   let updatedPreState: PreState | undefined =
     preState === undefined
       ? undefined
@@ -63,9 +87,9 @@ function assembleReleasePlan(
         };
 
   // Caching the snapshot version here and use this if it is snapshot release
-  let snapshotVersion: string;
+  let snapshotSuffix: string;
   if (snapshot !== undefined) {
-    snapshotVersion = getSnapshotReleaseVersion(snapshot);
+    snapshotSuffix = getSnapshotSuffix(snapshot);
   }
 
   let packagesByName = new Map(
@@ -125,7 +149,7 @@ function assembleReleasePlan(
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(changesets, packagesByName);
+  let releases = flattenReleases(changesets, packagesByName, config.ignore);
 
   if (updatedPreState !== undefined) {
     if (updatedPreState.mode === "exit") {
@@ -152,7 +176,8 @@ function assembleReleasePlan(
       // because if they're not being released, the version will already have been bumped with the highest bump type
       let releasesFromUnfilteredChangesets = flattenReleases(
         unfilteredChangesets,
-        packagesByName
+        packagesByName,
+        config.ignore
       );
 
       releases.forEach((value, key) => {
@@ -185,17 +210,21 @@ function assembleReleasePlan(
           preVersions
         };
 
-  let dependentsGraph = getDependentsGraph(packages);
+  let dependencyGraph = getDependentsGraph(packages);
 
   let releaseObjectValidated = false;
   while (releaseObjectValidated === false) {
     // The map passed in to determineDependents will be mutated
-    let dependentAdded = determineDependents(
+    let dependentAdded = determineDependents({
       releases,
       packagesByName,
-      dependentsGraph,
-      preInfo
-    );
+      dependencyGraph,
+      preInfo,
+      ignoredPackages: config.ignore,
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .onlyUpdatePeerDependentsWhenOutOfRange
+    });
 
     // The map passed in to determineDependents will be mutated
     let linksUpdated = applyLinks(releases, packagesByName, config.linked);
@@ -208,14 +237,49 @@ function assembleReleasePlan(
     releases: [...releases.values()].map(incompleteRelease => {
       return {
         ...incompleteRelease,
-        newVersion:
-          snapshot === undefined
-            ? incrementVersion(incompleteRelease, preInfo)!
-            : snapshotVersion
+        newVersion: getNewVersion(
+          incompleteRelease,
+          preInfo,
+          snapshot,
+          snapshotSuffix,
+          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+            .useCalculatedVersionForSnapshots
+        )
       };
     }),
     preState: updatedPreState
   };
+}
+
+// Changesets that contains both ignored and not ignored packages are not allowed
+function validateChangesets(
+  changesets: NewChangeset[],
+  ignored: Readonly<string[]>
+): void {
+  for (const changeset of changesets) {
+    // Using the following 2 arrays to decide whether a changeset
+    // contains both ignored and not ignored packages
+    const ignoredPackages = [];
+    const notIgnoredPackages = [];
+    for (const release of changeset.releases) {
+      if (
+        ignored.find(ignoredPackageName => ignoredPackageName === release.name)
+      ) {
+        ignoredPackages.push(release.name);
+      } else {
+        notIgnoredPackages.push(release.name);
+      }
+    }
+
+    if (ignoredPackages.length > 0 && notIgnoredPackages.length > 0) {
+      throw new Error(
+        `Found mixed changeset ${changeset.id}\n` +
+          `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
+          `Found not ignored packages: ${notIgnoredPackages.join(" ")}\n` +
+          "Mixed changesets that contain both ignored and not ignored packages are not allowed"
+      );
+    }
+  }
 }
 
 export default assembleReleasePlan;

@@ -1,5 +1,15 @@
 # @changesets/types
 
+## 3.1.0
+
+### Minor Changes
+
+- [`9dcc364`](https://github.com/atlassian/changesets/commit/9dcc364bf19e48f8f2824ebaf967d9ef41b6fc04) [#371](https://github.com/atlassian/changesets/pull/371) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Add `ignore` config option to configure ignored packages. The versions of ignored packages will not be bumped during a release, but their dependencies will still be bumped normally.
+
+### Patch Changes
+
+- [`addd725`](https://github.com/atlassian/changesets/commit/addd7256d9251d999251a7c16c0a0b068d557b5d) [#383](https://github.com/atlassian/changesets/pull/383) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Added an experimental flag `onlyUpdatePeerDependentsWhenOutOfRange`. When set to `true`, we only bump peer dependents when peerDependencies are leaving range.
+
 ## 3.0.0
 
 ### Major Changes

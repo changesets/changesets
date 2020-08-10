@@ -21,12 +21,21 @@ import { incrementVersion } from "./increment";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-export default function getDependents(
-  releases: Map<string, InternalRelease>,
-  packagesByName: Map<string, Package>,
-  dependencyGraph: Map<string, string[]>,
-  preInfo: PreInfo | undefined
-): boolean {
+export default function getDependents({
+  releases,
+  packagesByName,
+  dependencyGraph,
+  preInfo,
+  ignoredPackages,
+  onlyUpdatePeerDependentsWhenOutOfRange
+}: {
+  releases: Map<string, InternalRelease>;
+  packagesByName: Map<string, Package>;
+  dependencyGraph: Map<string, string[]>;
+  preInfo: PreInfo | undefined;
+  ignoredPackages: Readonly<string[]>;
+  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+}): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
   let pkgsToSearch = [...releases.values()];
@@ -55,10 +64,19 @@ export default function getDependents(
           nextRelease.name
         );
 
-        // Firstly we check if it is a peerDependency because if it is, our dependent bump type needs to be major.
-        if (
+        // If the dependent is an ignored package, we want to bump its dependencies without a release, so setting type to "none"
+        if (ignoredPackages.includes(dependent)) {
+          type = "none";
+        }
+        // we check if it is a peerDependency because if it is, our dependent bump type needs to be major.
+        else if (
           depTypes.includes("peerDependencies") &&
           nextRelease.type !== "patch" &&
+          (!onlyUpdatePeerDependentsWhenOutOfRange ||
+            !semver.satisfies(
+              incrementVersion(nextRelease, preInfo),
+              versionRange
+            )) &&
           (!releases.has(dependent) ||
             (releases.has(dependent) &&
               releases.get(dependent)!.type !== "major"))

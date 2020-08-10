@@ -5,6 +5,7 @@ import { warn } from "@changesets/logger";
 import { Packages } from "@manypkg/get-packages";
 import { Config, WrittenConfig } from "@changesets/types";
 import packageJson from "../package.json";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
@@ -13,7 +14,8 @@ export let defaultWrittenConfig = {
   linked: [] as ReadonlyArray<ReadonlyArray<string>>,
   access: "restricted",
   baseBranch: "master",
-  updateInternalDependencies: "patch"
+  updateInternalDependencies: "patch",
+  ignore: [] as ReadonlyArray<string>
 } as const;
 
 function getNormalisedChangelogOption(
@@ -151,12 +153,84 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but can only be 'patch' or 'minor'`
     );
   }
+  if (json.ignore) {
+    if (
+      !(
+        Array.isArray(json.ignore) &&
+        json.ignore.every(pkgName => typeof pkgName === "string")
+      )
+    ) {
+      messages.push(
+        `The \`ignore\` option is set as ${JSON.stringify(
+          json.ignore,
+          null,
+          2
+        )} when the only valid values are undefined or an array of package names`
+      );
+    } else {
+      let pkgNames = new Set(
+        packages.packages.map(({ packageJson }) => packageJson.name)
+      );
+      for (let pkgName of json.ignore) {
+        if (!pkgNames.has(pkgName)) {
+          messages.push(
+            `The package "${pkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name.`
+          );
+        }
+      }
+
+      // Validate that all dependents of ignored packages are listed in the ignore list
+      const dependentsGraph = getDependentsGraph(packages);
+      for (const ignoredPackage of json.ignore) {
+        const dependents = dependentsGraph.get(ignoredPackage) || [];
+        for (const dependent of dependents) {
+          if (!json.ignore.includes(dependent)) {
+            messages.push(
+              `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please add "${dependent}" to the \`ignore\` option.`
+            );
+          }
+        }
+      }
+    }
+  }
+
+  if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
+    const {
+      onlyUpdatePeerDependentsWhenOutOfRange,
+      useCalculatedVersionForSnapshots
+    } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
+    if (
+      onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
+      typeof onlyUpdatePeerDependentsWhenOutOfRange !== "boolean"
+    ) {
+      messages.push(
+        `The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as ${JSON.stringify(
+          onlyUpdatePeerDependentsWhenOutOfRange,
+          null,
+          2
+        )} when the only valid values are undefined or a boolean`
+      );
+    }
+    if (
+      useCalculatedVersionForSnapshots !== undefined &&
+      typeof useCalculatedVersionForSnapshots !== "boolean"
+    ) {
+      messages.push(
+        `The \`useCalculatedVersionForSnapshots\` option is set as ${JSON.stringify(
+          useCalculatedVersionForSnapshots,
+          null,
+          2
+        )} when the only valid values are undefined or a boolean`
+      );
+    }
+  }
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
         messages.join("\n")
     );
   }
+
   let config: Config = {
     changelog: getNormalisedChangelogOption(
       json.changelog === undefined
@@ -179,7 +253,28 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     updateInternalDependencies:
       json.updateInternalDependencies === undefined
         ? defaultWrittenConfig.updateInternalDependencies
-        : json.updateInternalDependencies
+        : json.updateInternalDependencies,
+
+    ignore:
+      json.ignore === undefined ? defaultWrittenConfig.ignore : json.ignore,
+
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .onlyUpdatePeerDependentsWhenOutOfRange === undefined
+          ? false
+          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              .onlyUpdatePeerDependentsWhenOutOfRange,
+
+      useCalculatedVersionForSnapshots:
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .useCalculatedVersionForSnapshots === undefined
+          ? false
+          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              .useCalculatedVersionForSnapshots
+    }
   };
   return config;
 };

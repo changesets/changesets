@@ -1,5 +1,18 @@
 # @changesets/get-release-plan
 
+## 2.0.0
+
+### Major Changes
+
+- [`addd725`](https://github.com/atlassian/changesets/commit/addd7256d9251d999251a7c16c0a0b068d557b5d) [#383](https://github.com/atlassian/changesets/pull/383) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Added an experimental flag `onlyUpdatePeerDependentsWhenOutOfRange`. When set to `true`, we only bump peer dependents when peerDependencies are leaving range.
+
+### Patch Changes
+
+- Updated dependencies [[`00e768e`](https://github.com/atlassian/changesets/commit/00e768e4af921a894debb900f944d4c9a4e27997), [`addd725`](https://github.com/atlassian/changesets/commit/addd7256d9251d999251a7c16c0a0b068d557b5d), [`9dcc364`](https://github.com/atlassian/changesets/commit/9dcc364bf19e48f8f2824ebaf967d9ef41b6fc04), [`9dcc364`](https://github.com/atlassian/changesets/commit/9dcc364bf19e48f8f2824ebaf967d9ef41b6fc04)]:
+  - @changesets/assemble-release-plan@3.0.0
+  - @changesets/config@1.2.0
+  - @changesets/types@3.1.0
+
 ## 1.0.4
 
 ### Patch Changes

@@ -1,20 +1,8 @@
 import meow from "meow";
-import { read } from "@changesets/config";
 import { ExitError, InternalError } from "@changesets/errors";
 import { error } from "@changesets/logger";
-import { Config } from "@changesets/types";
-import fs from "fs-extra";
-import path from "path";
-import { getPackages } from "@manypkg/get-packages";
-
-import init from "./commands/init";
-import add from "./commands/add";
-import version from "./commands/version";
-import publish from "./commands/publish";
-import status from "./commands/status";
-import pre from "./commands/pre";
-import { CliOptions } from "./types";
 import { format } from "util";
+import { run } from "./run";
 
 const { input, flags } = meow(
   `
@@ -23,7 +11,7 @@ const { input, flags } = meow(
   Commands
     init
     add [--empty]
-    version
+    version [--ignore]
     publish [--otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
     prerelease <tag>
@@ -52,6 +40,11 @@ const { input, flags } = meow(
         type: "string",
         default: undefined
       },
+      ignore: {
+        type: "string",
+        default: undefined,
+        isMultiple: true
+      },
       tag: {
         type: "string"
       }
@@ -61,146 +54,7 @@ const { input, flags } = meow(
 
 const cwd = process.cwd();
 
-(async () => {
-  if (input[0] === "init") {
-    await init(cwd);
-    return;
-  }
-
-  if (!fs.existsSync(path.resolve(cwd, ".changeset"))) {
-    error("There is no .changeset folder. ");
-    error(
-      "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
-    );
-    error(
-      "If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration."
-    );
-    throw new ExitError(1);
-  }
-
-  const packages = await getPackages(cwd);
-
-  let config: Config;
-  try {
-    config = await read(cwd, packages);
-  } catch (e) {
-    let oldConfigExists = await fs.pathExists(
-      path.resolve(cwd, ".changeset/config.js")
-    );
-    if (oldConfigExists) {
-      error(
-        "It looks like you're using the version 1 `.changeset/config.js` file"
-      );
-      error("You'll need to convert it to a `.changeset/config.json` file");
-      error(
-        "The format of the config object has significantly changed in v2 as well"
-      );
-      error(
-        " - we thoroughly recommend looking at the changelog for this package for what has changed"
-      );
-      throw new ExitError(1);
-    } else {
-      throw e;
-    }
-  }
-
-  if (input.length < 1) {
-    const { empty }: CliOptions = flags;
-    // @ts-ignore if this is undefined, we have already exited
-    await add(cwd, { empty }, config);
-  } else if (input[0] !== "pre" && input.length > 1) {
-    error(
-      "Too many arguments passed to changesets - we only accept the command name as an argument"
-    );
-  } else {
-    const {
-      sinceMaster,
-      since,
-      verbose,
-      output,
-      otp,
-      empty,
-      snapshot,
-      tag
-    }: CliOptions = flags;
-    const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
-
-    deadFlags.forEach(flag => {
-      if (flags[flag]) {
-        error(
-          `the flag ${flag} has been removed from changesets for version 2`
-        );
-        error(`Please encode the desired value into your config`);
-        error(`See our changelog for more details`);
-        throw new ExitError(1);
-      }
-    });
-
-    // Command line options need to be undefined, otherwise their
-    // default value overrides the user's provided config in their
-    // config file. For this reason, we only assign them to this
-    // object as and when they exist.
-
-    switch (input[0]) {
-      case "add": {
-        // @ts-ignore if this is undefined, we have already exited
-        await add(cwd, { empty }, config);
-        return;
-      }
-      case "version": {
-        await version(cwd, { snapshot }, config);
-        return;
-      }
-      case "publish": {
-        await publish(cwd, { otp, tag }, config);
-        return;
-      }
-      case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
-        return;
-      }
-      case "pre": {
-        let command = input[1];
-        if (command !== "enter" && command !== "exit") {
-          error(
-            "`enter`, `exit` or `snapshot` must be passed after prerelease"
-          );
-          throw new ExitError(1);
-        }
-        let tag = input[2];
-        if (command === "enter" && typeof tag !== "string") {
-          error(`A tag must be passed when using prerelese enter`);
-          throw new ExitError(1);
-        }
-        // @ts-ignore
-        await pre(cwd, { command, tag });
-        return;
-      }
-      case "bump": {
-        error(
-          'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation'
-        );
-        error(
-          "To fix this, use `changeset version` instead, and update any scripts that use changesets"
-        );
-        throw new ExitError(1);
-      }
-      case "release": {
-        error(
-          'In version 2 of changesets, "release" has been renamed to "publish" - see our changelog for an explanation'
-        );
-        error(
-          "To fix this, use `changeset publish` instead, and update any scripts that use changesets"
-        );
-        throw new ExitError(1);
-      }
-      default: {
-        error(`Invalid command ${input[0]} was provided`);
-        throw new ExitError(1);
-      }
-    }
-  }
-})().catch(err => {
+run(input, flags, cwd).catch(err => {
   if (err instanceof InternalError) {
     error(
       "The following error is an internal unexpected error, these should never happen."

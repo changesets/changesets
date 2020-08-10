@@ -114,56 +114,13 @@ export default async function createChangeset(
 
     let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 
-    let pkgsThatShouldBeMajorBumped = (await cli.askCheckboxPlus(
-      bold(`Which packages should have a ${red("major")} bump?`),
-      [
-        {
-          name: "all packages",
-          choices: packagesToRelease.map(pkgName => {
-            return {
-              name: pkgName,
-              message: formatPkgNameAndVersion(
-                pkgName,
-                pkgJsonsByName.get(pkgName)!.version
-              )
-            };
-          })
-        }
-      ],
-      x => {
-        // this removes changed packages and unchanged packages from the list
-        // of packages shown after selection
-        if (Array.isArray(x)) {
-          return x
-            .filter(x => x !== "all packages")
-            .map(x => cyan(x))
-            .join(", ");
-        }
-        return x;
-      }
-    )).filter(x => x !== "all packages");
-
-    for (const pkgName of pkgsThatShouldBeMajorBumped) {
-      // for packages that are under v1, we want to make sure major releases are intended,
-      // as some repo-wide sweeping changes have mistakenly release first majors
-      // of packages.
-      let pkgJson = pkgJsonsByName.get(pkgName)!;
-
-      let shouldReleaseFirstMajor = await confirmMajorRelease(pkgJson);
-      if (shouldReleaseFirstMajor) {
-        pkgsLeftToGetBumpTypeFor.delete(pkgName);
-
-        releases.push({ name: pkgName, type: "major" });
-      }
-    }
-
-    if (pkgsLeftToGetBumpTypeFor.size !== 0) {
-      let pkgsThatShouldBeMinorBumped = (await cli.askCheckboxPlus(
-        bold(`Which packages should have a ${green("minor")} bump?`),
+    let pkgsThatShouldBeMajorBumped = (
+      await cli.askCheckboxPlus(
+        bold(`Which packages should have a ${red("major")} bump?`),
         [
           {
             name: "all packages",
-            choices: [...pkgsLeftToGetBumpTypeFor].map(pkgName => {
+            choices: packagesToRelease.map(pkgName => {
               return {
                 name: pkgName,
                 message: formatPkgNameAndVersion(
@@ -185,7 +142,54 @@ export default async function createChangeset(
           }
           return x;
         }
-      )).filter(x => x !== "all packages");
+      )
+    ).filter(x => x !== "all packages");
+
+    for (const pkgName of pkgsThatShouldBeMajorBumped) {
+      // for packages that are under v1, we want to make sure major releases are intended,
+      // as some repo-wide sweeping changes have mistakenly release first majors
+      // of packages.
+      let pkgJson = pkgJsonsByName.get(pkgName)!;
+
+      let shouldReleaseFirstMajor = await confirmMajorRelease(pkgJson);
+      if (shouldReleaseFirstMajor) {
+        pkgsLeftToGetBumpTypeFor.delete(pkgName);
+
+        releases.push({ name: pkgName, type: "major" });
+      }
+    }
+
+    if (pkgsLeftToGetBumpTypeFor.size !== 0) {
+      let pkgsThatShouldBeMinorBumped = (
+        await cli.askCheckboxPlus(
+          bold(`Which packages should have a ${green("minor")} bump?`),
+          [
+            {
+              name: "all packages",
+              choices: [...pkgsLeftToGetBumpTypeFor].map(pkgName => {
+                return {
+                  name: pkgName,
+                  message: formatPkgNameAndVersion(
+                    pkgName,
+                    pkgJsonsByName.get(pkgName)!.version
+                  )
+                };
+              })
+            }
+          ],
+          x => {
+            // this removes changed packages and unchanged packages from the list
+            // of packages shown after selection
+            if (Array.isArray(x)) {
+              return x
+                .filter(x => x !== "all packages")
+                .map(x => cyan(x))
+                .join(", ");
+            }
+            return x;
+          }
+        )
+      ).filter(x => x !== "all packages");
 
       for (const pkgName of pkgsThatShouldBeMinorBumped) {
         pkgsLeftToGetBumpTypeFor.delete(pkgName);
@@ -225,13 +229,27 @@ export default async function createChangeset(
   }
 
   log(
-    "Please enter a summary for this change (this will be in the changelogs)"
+    "Please enter a summary for this change (this will be in the changelogs). Submit empty line to open external editor"
   );
 
   let summary = await cli.askQuestion("Summary");
-  while (summary.length === 0) {
-    error("A summary is required for the changelog! 😪");
-    summary = await cli.askQuestion("Summary");
+  if (summary.length === 0) summary = cli.askQuestionWithEditor("");
+  try {
+    while (summary.length === 0) {
+      summary = await cli.askQuestionWithEditor(
+        "\n\n# A summary is required for the changelog! 😪"
+      );
+    }
+  } catch (err) {
+    log(
+      "An error happened using external editor. Please type your summary here:"
+    );
+    summary = await cli.askQuestion("");
+    while (summary.length === 0) {
+      summary = await cli.askQuestion(
+        "\n\n# A summary is required for the changelog! 😪"
+      );
+    }
   }
 
   return {
