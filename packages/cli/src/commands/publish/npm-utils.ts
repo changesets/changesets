@@ -4,6 +4,7 @@ import pLimit from "p-limit";
 import preferredPM from "preferred-pm";
 import chalk from "chalk";
 import spawn from "spawndamnit";
+import semver from "semver";
 import { askQuestion } from "../../utils/cli-utilities";
 import isCI from "../../utils/isCI";
 import { TwoFactorState } from "../../utils/types";
@@ -29,10 +30,26 @@ function getCorrectRegistry() {
   return registry;
 }
 
-async function getPublishTool(cwd: string): Promise<"npm" | "pnpm"> {
+async function getPublishTool(
+  cwd: string
+): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
   const pm = await preferredPM(cwd);
-  if (!pm) return "npm";
-  return pm.name === "pnpm" ? "pnpm" : "npm";
+  if (!pm || pm.name !== "pnpm") return { name: "npm" };
+  try {
+    let result = await spawn("pnpm", ["--version"], { cwd });
+    let version = result.stdout.toString().trim();
+    let parsed = semver.parse(version);
+    return {
+      name: "pnpm",
+      shouldAddNoGitChecks:
+        parsed?.major === undefined ? false : parsed.major >= 5
+    };
+  } catch (e) {
+    return {
+      name: "pnpm",
+      shouldAddNoGitChecks: false
+    };
+  }
 }
 
 export async function getTokenIsRequired() {
@@ -128,6 +145,9 @@ async function internalPublish(
     let otpCode = await getOtpCode(twoFactorState);
     publishFlags.push("--otp", otpCode);
   }
+  if (publishTool.name === "pnpm" && publishTool.shouldAddNoGitChecks) {
+    publishFlags.push("--no-git-checks");
+  }
 
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
@@ -135,7 +155,7 @@ async function internalPublish(
     npm_config_registry: getCorrectRegistry()
   };
   let { stdout } = await spawn(
-    publishTool,
+    publishTool.name,
     ["publish", "--json", ...publishFlags],
     {
       cwd: opts.cwd,
