@@ -26,17 +26,13 @@ export default async function version(
   },
   config: Config
 ) {
-  let [_changesets, _preState] = await Promise.all([
+  const [changesets, preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
     removeEmptyFolders(path.resolve(cwd, ".changeset"))
   ]);
 
-  // temporarily needed because of TS 3.7 regression - https://github.com/microsoft/TypeScript/issues/33752
-  const changesets = _changesets as NonNullable<typeof _changesets>;
-  const preState = _preState as NonNullable<typeof _preState>;
-
-  if (preState !== undefined && preState.mode === "pre") {
+  if (preState?.mode === "pre") {
     warn(importantSeparator);
     if (options.snapshot !== undefined) {
       error("Snapshot release is not allowed in pre mode");
