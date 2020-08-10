@@ -40,6 +40,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [react-select](https://react-select.com/home)
 - [XState](https://xstate.js.org/)
 - [pnpm](https://pnpm.js.org/)
+- [filbert-js](https://github.com/kuldeepkeshwar/filbert-js)
 
 # Thanks/Inspiration
 
