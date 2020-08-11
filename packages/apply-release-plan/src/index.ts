@@ -40,7 +40,8 @@ export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
   config: Config = defaultConfig,
-  snapshot?: string | boolean
+  snapshot?: string | boolean,
+  date?: Date
 ) {
   let cwd = packages.root.dir;
 
@@ -71,7 +72,8 @@ export default async function applyReleasePlan(
     releaseWithPackages,
     changesets,
     config,
-    cwd
+    cwd,
+    date
   );
 
   if (releasePlan.preState !== undefined && snapshot === undefined) {
@@ -181,7 +183,8 @@ async function getNewChangelogEntry(
   releasesWithPackage: ModCompWithPackage[],
   changesets: NewChangeset[],
   config: Config,
-  cwd: string
+  cwd: string,
+  date?: Date
 ) {
   let getChangelogFuncs: ChangelogFunctions = {
     getReleaseLine: () => Promise.resolve(""),
@@ -227,7 +230,8 @@ async function getNewChangelogEntry(
           onlyUpdatePeerDependentsWhenOutOfRange:
             config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange
-        }
+        },
+        date
       );
 
       return {

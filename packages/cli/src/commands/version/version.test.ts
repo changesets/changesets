@@ -23,7 +23,8 @@ let modifiedDefaultConfig: Config = {
 };
 
 let defaultOptions = {
-  snapshot: undefined
+  snapshot: undefined,
+  date: undefined
 };
 
 beforeEach(() => {
@@ -318,6 +319,65 @@ describe("running version in a simple project with workspace range", () => {
         expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
       );
     });
+  });
+});
+
+describe("`date` command line option", () => {
+  it("should include dates when passed as a command line flag", async () => {
+    let cwd = f.copy("simple-project");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "patch" }],
+        summary: "a very useful summary"
+      },
+      cwd
+    );
+
+    jest.spyOn(Date, "now").mockImplementation(() => 1593490842000);
+
+    await version(cwd, { date: true }, modifiedDefaultConfig);
+
+    const packages = (await getPackages(cwd))!;
+
+    expect(
+      await fs.readFile(
+        path.join(packages.packages[0].dir, "CHANGELOG.md"),
+        "utf8"
+      )
+    ).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.0.1 - 2020-06-30
+      ### Patch Changes
+
+      - a very useful summary
+      - Updated dependencies [undefined]
+        - pkg-b@1.0.1
+      "
+    `);
+
+    expect(
+      await fs.readFile(
+        path.join(packages.packages[1].dir, "CHANGELOG.md"),
+        "utf8"
+      )
+    ).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.0.1 - 2020-06-30
+      ### Patch Changes
+
+      - a very useful summary for the first change
+      "
+    `);
   });
 });
 

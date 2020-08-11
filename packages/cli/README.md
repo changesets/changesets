@@ -147,6 +147,26 @@ We recommend making sure changes made from this commmand are merged back into ma
 
 This command will read then delete changesets on disk, ensuring that they are only used once.
 
+If you want your changelogs to include their creation date then add the `--date` flag.
+
+```
+changeset version --date
+```
+
+This will lead to a changelog looking like this.
+
+```md
+# pkg-a
+
+## 1.0.1 - 2020-06-30
+
+### Patch Changes
+
+- a very useful summary
+- Updated dependencies [undefined]
+  - pkg-b@1.0.1
+```
+
 ### publish
 
 ```

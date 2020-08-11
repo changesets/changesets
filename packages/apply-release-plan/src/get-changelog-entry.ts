@@ -34,7 +34,8 @@ export default async function generateMarkdown(
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-  }
+  },
+  date?: Date
 ) {
   if (release.type === "none") return null;
 
@@ -103,11 +104,25 @@ export default async function generateMarkdown(
   );
 
   return [
-    `## ${release.newVersion}`,
+    date
+      ? `## ${release.newVersion} - ${getDate(date)}`
+      : `## ${release.newVersion}`,
     await generateChangesForVersionTypeMarkdown(releaseObj, "major"),
     await generateChangesForVersionTypeMarkdown(releaseObj, "minor"),
     await generateChangesForVersionTypeMarkdown(releaseObj, "patch")
   ]
     .filter(line => line)
     .join("\n");
+}
+
+/**
+ * Get the release date
+ */
+function getDate(date: Date = new Date()) {
+  return `${date.getFullYear()}-${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${date
+    .getDate()
+    .toString()
+    .padStart(2, "0")}`;
 }
