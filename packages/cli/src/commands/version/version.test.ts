@@ -205,7 +205,7 @@ describe("running version in a simple project", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it("should not commit the result if commit config is not set", async () => {
+  it("should commit the result if commit config is set", async () => {
     await writeChangesets([simpleChangeset2], cwd);
     const spy = jest.spyOn(git, "commit");
 
