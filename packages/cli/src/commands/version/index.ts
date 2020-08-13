@@ -26,6 +26,11 @@ export default async function version(
   },
   config: Config
 ) {
+  const releaseConfig = {
+    ...config,
+    // Disable committing when in snapshot mode
+    commit: options.snapshot ? false : config.commit
+  };
   const [changesets, preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
@@ -61,7 +66,7 @@ export default async function version(
   let releasePlan = assembleReleasePlan(
     changesets,
     packages,
-    config,
+    releaseConfig,
     preState,
     options.snapshot
   );
@@ -69,14 +74,11 @@ export default async function version(
   await applyReleasePlan(
     releasePlan,
     packages,
-    {
-      ...config,
-      commit: false
-    },
+    releaseConfig,
     options.snapshot
   );
 
-  if (options.snapshot !== undefined && config.commit) {
+  if (releaseConfig.commit) {
     log("All files have been updated and committed. You're ready to publish!");
   } else {
     log("All files have been updated. Review them and commit at your leisure");

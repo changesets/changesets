@@ -194,6 +194,41 @@ describe("running version in a simple project", () => {
     );
   });
 
+  it("should not commit the result if commit config is not set", async () => {
+    await writeChangesets([simpleChangeset2], cwd);
+    const spy = jest.spyOn(git, "commit");
+
+    expect(spy).not.toHaveBeenCalled();
+
+    await versionCommand(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it("should commit the result if commit config is set", async () => {
+    await writeChangesets([simpleChangeset2], cwd);
+    const spy = jest.spyOn(git, "commit");
+
+    expect(spy).not.toHaveBeenCalled();
+
+    await versionCommand(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      commit: true
+    });
+
+    expect(spy).toHaveBeenCalled();
+    expect(spy.mock.calls[0][0]).toMatchInlineSnapshot(`
+      "RELEASING: Releasing 2 package(s)
+
+      Releases:
+        pkg-a@1.1.0
+        pkg-b@1.0.1
+
+      [skip ci]
+      "
+    `);
+  });
+
   describe("when there are multiple changeset commits", () => {
     it("should bump releasedPackages", async () => {
       await writeChangesets([simpleChangeset, simpleChangeset2], cwd);
@@ -349,6 +384,27 @@ describe("snapshot release", () => {
         version: expect.stringContaining("0.0.0-exprimental-")
       })
     );
+  });
+
+  it("should not commit the result even if commit config is set", async () => {
+    let cwd = f.copy("simple-project");
+    await writeChangesets([simpleChangeset2], cwd);
+    const spy = jest.spyOn(git, "commit");
+
+    expect(spy).not.toHaveBeenCalled();
+
+    await versionCommand(
+      cwd,
+      {
+        snapshot: "exprimental"
+      },
+      {
+        ...modifiedDefaultConfig,
+        commit: true
+      }
+    );
+
+    expect(spy).not.toHaveBeenCalled();
   });
 
   describe("useCalculatedVersionForSnapshots: true", () => {
