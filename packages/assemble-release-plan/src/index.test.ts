@@ -142,6 +142,46 @@ describe("assemble-release-plan", () => {
     expect(releases[2].oldVersion).toEqual("1.0.0");
     expect(releases[2].newVersion).toEqual("1.0.1");
   });
+  it("should assemble release plan without dependencies when the dependent has a changeset type of none", () => {
+    setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-b", type: "none" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].oldVersion).toEqual("1.0.0");
+    expect(releases[1].newVersion).toEqual("1.0.0");
+  });
+  it("should assemble release plan without workspace dependencies when the dependent has a changeset type of none", () => {
+    setup.updateDependency("pkg-c", "pkg-b", "workspace:^1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-b", type: "none" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].oldVersion).toEqual("1.0.0");
+    expect(releases[1].newVersion).toEqual("1.0.0");
+  });
   it("should assemble release plan without dependent through the link protocol", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "link:../pkg-a");
     setup.addChangeset({

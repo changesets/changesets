@@ -172,7 +172,11 @@ function getDependencyVersionRange(
     if (deps[dependencyName]) {
       dependencyVersionRange.depTypes.push(type);
       // We'll just override this each time, *hypothetically* it *should* be the same...
-      dependencyVersionRange.versionRange = deps[dependencyName];
+      // Remove any workspace protocol references so semver can match the range properly
+      dependencyVersionRange.versionRange = deps[dependencyName].replace(
+        "workspace:",
+        ""
+      );
     }
   }
   return dependencyVersionRange;
