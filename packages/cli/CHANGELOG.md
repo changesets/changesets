@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.10.1
+
+### Patch Changes
+
+- [`efd01d9`](https://github.com/atlassian/changesets/commit/efd01d9b7a46ba2a44df1f5fdb47436e9219f44b) [#437](https://github.com/atlassian/changesets/pull/437) Thanks [@Blasz](https://github.com/Blasz)! - Fix version command not committing when commit config option is set
+
 ## 2.10.0
 
 ### Minor Changes
