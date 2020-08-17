@@ -92,9 +92,10 @@ function assembleReleasePlan(
     snapshotSuffix = getSnapshotSuffix(snapshot);
   }
 
-  let packagesByName = new Map(
+  let initialPackagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
+  let packagesByName = new Map(initialPackagesByName);
 
   let unfilteredChangesets = changesets;
 
@@ -126,7 +127,9 @@ function assembleReleasePlan(
       let highestPreVersion = 0;
       for (let linkedPackage of linkedGroup) {
         highestPreVersion = Math.max(
-          getPreVersion(packagesByName.get(linkedPackage)!.packageJson.version),
+          getPreVersion(
+            initialPackagesByName.get(linkedPackage)!.packageJson.version
+          ),
           highestPreVersion
         );
       }
@@ -136,7 +139,7 @@ function assembleReleasePlan(
     }
 
     for (let pkg of packages.packages) {
-      packagesByName.set(pkg.packageJson.name, {
+      initialPackagesByName.set(pkg.packageJson.name, {
         ...pkg,
         packageJson: {
           ...pkg.packageJson,
@@ -149,7 +152,41 @@ function assembleReleasePlan(
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(changesets, packagesByName, config.ignore);
+  let releases = flattenReleases(
+    changesets,
+    initialPackagesByName,
+    config.ignore
+  );
+
+  let preInfo: PreInfo | undefined =
+    updatedPreState === undefined
+      ? undefined
+      : {
+          state: updatedPreState,
+          preVersions
+        };
+
+  let dependencyGraph = getDependentsGraph(packages);
+
+  let releasesValidated = false;
+  while (releasesValidated === false) {
+    // The map passed in to determineDependents will be mutated
+    let dependentAdded = determineDependents({
+      releases,
+      packagesByName: initialPackagesByName,
+      dependencyGraph,
+      preInfo,
+      ignoredPackages: config.ignore,
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .onlyUpdatePeerDependentsWhenOutOfRange
+    });
+
+    // The map passed in to determineDependents will be mutated
+    let linksUpdated = applyLinks(releases, packagesByName, config.linked);
+
+    releasesValidated = !linksUpdated && !dependentAdded;
+  }
 
   if (updatedPreState !== undefined) {
     if (updatedPreState.mode === "exit") {
@@ -176,7 +213,7 @@ function assembleReleasePlan(
       // because if they're not being released, the version will already have been bumped with the highest bump type
       let releasesFromUnfilteredChangesets = flattenReleases(
         unfilteredChangesets,
-        packagesByName,
+        initialPackagesByName,
         config.ignore
       );
 
@@ -185,9 +222,7 @@ function assembleReleasePlan(
           key
         );
         if (releaseFromUnfilteredChangesets === undefined) {
-          throw new InternalError(
-            "releaseFromUnfilteredChangesets is undefined"
-          );
+          return;
         }
 
         releases.set(key, {
@@ -200,36 +235,6 @@ function assembleReleasePlan(
         });
       });
     }
-  }
-
-  let preInfo: PreInfo | undefined =
-    updatedPreState === undefined
-      ? undefined
-      : {
-          state: updatedPreState,
-          preVersions
-        };
-
-  let dependencyGraph = getDependentsGraph(packages);
-
-  let releaseObjectValidated = false;
-  while (releaseObjectValidated === false) {
-    // The map passed in to determineDependents will be mutated
-    let dependentAdded = determineDependents({
-      releases,
-      packagesByName,
-      dependencyGraph,
-      preInfo,
-      ignoredPackages: config.ignore,
-      onlyUpdatePeerDependentsWhenOutOfRange:
-        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange
-    });
-
-    // The map passed in to determineDependents will be mutated
-    let linksUpdated = applyLinks(releases, packagesByName, config.linked);
-
-    releaseObjectValidated = !linksUpdated && !dependentAdded;
   }
 
   return {
