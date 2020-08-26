@@ -2,6 +2,30 @@
 import termSize from "term-size";
 import { error, prefix, success } from "@changesets/logger";
 import { prompt } from "enquirer";
+import { edit } from "external-editor";
+
+// those types are not exported from `enquirer` so we extract them here
+// so we can make type assertions using them because `enquirer` types do no support `prefix` right now
+type PromptOptions = Extract<Parameters<typeof prompt>[0], { type: string }>;
+type ArrayPromptOptions = Extract<
+  PromptOptions,
+  {
+    type:
+      | "autocomplete"
+      | "editable"
+      | "form"
+      | "multiselect"
+      | "select"
+      | "survey"
+      | "list"
+      | "scale";
+  }
+>;
+type BooleanPromptOptions = Extract<PromptOptions, { type: "confirm" }>;
+type StringPromptOptions = Extract<
+  PromptOptions,
+  { type: "input" | "invisible" | "list" | "password" | "text" }
+>;
 
 /* Notes on using inquirer:
  * Each question needs a key, as inquirer is assembling an object behind-the-scenes.
@@ -31,14 +55,13 @@ async function askCheckboxPlus(
     type: "autocomplete",
     name,
     message,
-    // @ts-ignore
     prefix,
     multiple: true,
     choices,
     format,
     limit,
     onCancel: cancelFlow
-  })
+  } as ArrayPromptOptions)
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
       error(err);
@@ -53,15 +76,22 @@ async function askQuestion(message: string): Promise<string> {
       type: "input",
       message,
       name,
-      // @ts-ignore
       prefix,
       onCancel: cancelFlow
-    }
+    } as StringPromptOptions
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
       error(err);
     });
+}
+
+function askQuestionWithEditor(message: string): string {
+  const response = edit(message, { postfix: ".md" });
+  return response
+    .replace(/^#.*\n?/gm, "")
+    .replace(/\n+$/g, "")
+    .trim();
 }
 
 async function askConfirm(message: string): Promise<boolean> {
@@ -71,12 +101,11 @@ async function askConfirm(message: string): Promise<boolean> {
     {
       message,
       name,
-      // @ts-ignore
       prefix,
       type: "confirm",
       initial: true,
       onCancel: cancelFlow
-    }
+    } as BooleanPromptOptions
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
@@ -86,7 +115,7 @@ async function askConfirm(message: string): Promise<boolean> {
 
 async function askList<Choice extends string>(
   message: string,
-  choices: readonly Choice[]
+  choices: Choice[]
 ): Promise<Choice> {
   const name = `List-${serialId()}`;
 
@@ -95,11 +124,10 @@ async function askList<Choice extends string>(
       choices,
       message,
       name,
-      // @ts-ignore
       prefix,
       type: "select",
       onCancel: cancelFlow
-    }
+    } as ArrayPromptOptions
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
@@ -107,4 +135,10 @@ async function askList<Choice extends string>(
     });
 }
 
-export { askCheckboxPlus, askQuestion, askConfirm, askList };
+export {
+  askCheckboxPlus,
+  askQuestion,
+  askQuestionWithEditor,
+  askConfirm,
+  askList
+};

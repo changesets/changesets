@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 3.1.1
+
+### Patch Changes
+
+- [`a57d163`](https://github.com/atlassian/changesets/commit/a57d16355ad7d67b18b768c8f79224d80afa507c) [#428](https://github.com/atlassian/changesets/pull/428) Thanks [@dotansimha](https://github.com/dotansimha)! - Updated signature of `PackageJSON['publishConfig']` to include `directory?: string`.
+
 ## 3.1.0
 
 ### Minor Changes

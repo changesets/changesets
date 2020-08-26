@@ -1,5 +1,14 @@
 # @changesets/git
 
+## 1.0.6
+
+### Patch Changes
+
+- [`1dd3117`](https://github.com/atlassian/changesets/commit/1dd311708c65321e1a1c99d36129190f940435ed) [#418](https://github.com/atlassian/changesets/pull/418) Thanks [@jonathanmorley](https://github.com/jonathanmorley)! - Don't return paths for unchanged packages
+
+- Updated dependencies [[`a57d163`](https://github.com/atlassian/changesets/commit/a57d16355ad7d67b18b768c8f79224d80afa507c)]:
+  - @changesets/types@3.1.1
+
 ## 1.0.5
 
 ### Patch Changes

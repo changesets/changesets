@@ -2,6 +2,11 @@
 import fetch from "node-fetch";
 import DataLoader from "dataloader";
 
+type RequestData = {
+  commit: string;
+  repo: string;
+};
+
 function makeQuery(repos: any) {
   return `
       query {
@@ -57,13 +62,13 @@ function makeQuery(repos: any) {
 // 2. batching
 // getReleaseLine will be called a large number of times but it'll be called at the same time
 // so instead of doing a bunch of network requests, we can do a single one.
-const GHDataLoader = new DataLoader(async (requests: any[]) => {
+const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   if (!process.env.GITHUB_TOKEN) {
     throw new Error(
       "Please create a GitHub personal access token at https://github.com/settings/tokens/new and add it as the GITHUB_TOKEN environment variable"
     );
   }
-  let repos: Record<any, any> = {};
+  let repos: Record<RequestData["repo"], Array<RequestData["commit"]>> = {};
   requests.forEach(({ commit, repo }) => {
     if (repos[repo] === undefined) {
       repos[repo] = [];
@@ -71,13 +76,13 @@ const GHDataLoader = new DataLoader(async (requests: any[]) => {
     repos[repo].push(commit);
   });
 
-  const data = await fetch(
-    `https://api.github.com/graphql?access_token=${process.env.GITHUB_TOKEN}`,
-    {
-      method: "POST",
-      body: JSON.stringify({ query: makeQuery(repos) })
-    }
-  ).then((x: any) => x.json());
+  const data = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: {
+      Authorization: `Token ${process.env.GITHUB_TOKEN}`
+    },
+    body: JSON.stringify({ query: makeQuery(repos) })
+  }).then((x: any) => x.json());
 
   // this is mainly for the case where there's an authentication problem
   if (!data.data) {
@@ -101,10 +106,9 @@ const GHDataLoader = new DataLoader(async (requests: any[]) => {
   return requests.map(({ repo, commit }) => cleanedData[repo][commit]);
 });
 
-export async function getInfo(request: {
-  commit: string;
-  repo: string;
-}): Promise<{
+export async function getInfo(
+  request: RequestData
+): Promise<{
   user: string | null;
   pull: number | null;
   links: {

@@ -7,6 +7,7 @@ import { info, warn } from "@changesets/logger";
 import { TwoFactorState } from "../../utils/types";
 import { PreState } from "@changesets/types";
 import isCI from "../../utils/isCI";
+import { join } from "path";
 
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   if (tag) return tag;
@@ -103,7 +104,10 @@ async function publishAPackage(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
   );
 
-  const publishDir = pkg.dir;
+  const publishDir =
+    publishConfig && publishConfig.directory
+      ? join(pkg.dir, publishConfig.directory)
+      : pkg.dir;
 
   const publishConfirmation = await npmUtils.publish(
     name,

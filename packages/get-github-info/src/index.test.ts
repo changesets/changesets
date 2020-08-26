@@ -4,10 +4,14 @@ import prettier from "prettier";
 
 process.env.GITHUB_TOKEN = "token";
 
-let apiPath = `/graphql?access_token=${process.env.GITHUB_TOKEN}`;
+let apiPath = `/graphql`;
 
 test("associated with multiple PRs with only one merged", async () => {
-  nock("https://api.github.com")
+  nock("https://api.github.com", {
+    reqheaders: {
+      Authorization: `Token ${process.env.GITHUB_TOKEN}`
+    }
+  })
     .post(apiPath, ({ query }) => {
       expect(prettier.format(query, { parser: "graphql" }))
         .toMatchInlineSnapshot(`
@@ -114,7 +118,11 @@ test("associated with multiple PRs with only one merged", async () => {
 });
 
 test("associated with multiple PRs with multiple merged gets the one that was merged first", async () => {
-  nock("https://api.github.com")
+  nock("https://api.github.com", {
+    reqheaders: {
+      Authorization: `Token ${process.env.GITHUB_TOKEN}`
+    }
+  })
     .post(apiPath, ({ query }) => {
       expect(prettier.format(query, { parser: "graphql" }))
         .toMatchInlineSnapshot(`
@@ -221,7 +229,11 @@ test("associated with multiple PRs with multiple merged gets the one that was me
 });
 
 test("gets the author of the associated pull request if it exists rather than the author of the changeset", async () => {
-  nock("https://api.github.com")
+  nock("https://api.github.com", {
+    reqheaders: {
+      Authorization: `Token ${process.env.GITHUB_TOKEN}`
+    }
+  })
     .post(apiPath, ({ query }) => {
       expect(prettier.format(query, { parser: "graphql" }))
         .toMatchInlineSnapshot(`

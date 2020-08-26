@@ -208,13 +208,24 @@ describe("git", () => {
       await commit("added packageA package.json", cwd);
     });
 
-    it("should be empty if no changes", async () => {
+    it("should be empty if no changes (partial path)", async () => {
       const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
       const changedFiles = await getChangedFilesSince({
         ref: head.stdout.toString().trim(),
-        cwd
+        cwd,
+        fullPath: false
       });
-      expect(changedFiles.filter(a => a)).toHaveLength(0);
+      expect(changedFiles).toHaveLength(0);
+    });
+
+    it("should be empty if no changes (full path)", async () => {
+      const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+      const changedFiles = await getChangedFilesSince({
+        ref: head.stdout.toString().trim(),
+        cwd,
+        fullPath: true
+      });
+      expect(changedFiles).toHaveLength(0);
     });
 
     it("should get list of files that have been committed", async () => {

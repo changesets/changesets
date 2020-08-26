@@ -18,17 +18,19 @@ const changelogFunctions: ChangelogFunctions = {
     }
     if (dependenciesUpdated.length === 0) return "";
 
-    const changesetLink = `- Updated dependencies [${(await Promise.all(
-      changesets.map(async cs => {
-        if (cs.commit) {
-          let { links } = await getInfo({
-            repo: options.repo,
-            commit: cs.commit
-          });
-          return links.commit;
-        }
-      })
-    ))
+    const changesetLink = `- Updated dependencies [${(
+      await Promise.all(
+        changesets.map(async cs => {
+          if (cs.commit) {
+            let { links } = await getInfo({
+              repo: options.repo,
+              commit: cs.commit
+            });
+            return links.commit;
+          }
+        })
+      )
+    )
       .filter(_ => _)
       .join(", ")}]:`;
 
