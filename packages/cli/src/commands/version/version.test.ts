@@ -338,9 +338,6 @@ describe("should update different range types across different dependency types 
     let packages = (await getPackages(cwd))!;
     expect(packages.packages.map(x => x.packageJson)).toEqual([
       {
-        dependencies: {
-          "pkg-b": "^1.0.1"
-        },
         devDependencies: {
           "pkg-b": "1.0.1"
         },
