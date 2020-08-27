@@ -3,4 +3,4 @@
 "@changesets/cli": patch
 ---
 
-update a dependency correctly when it's declared multiple times with different range
+Fixed an issue with the same package specified as a different dependency type with different range types not being updated correctly for all of them.
