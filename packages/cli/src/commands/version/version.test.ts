@@ -322,39 +322,6 @@ describe("running version in a simple project with caret dependencies", () => {
   });
 });
 
-describe("should update different range types across different dependency types correctly", () => {
-  it("should bump dependency version if it leaves any version range", async () => {
-    let cwd = f.copy("simple-project-same-dep-diff-range");
-    await writeChangeset(
-      {
-        releases: [{ name: "pkg-b", type: "patch" }],
-        summary: "a very useful summary for the first change"
-      },
-      cwd
-    );
-
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
-
-    let packages = (await getPackages(cwd))!;
-    expect(packages.packages.map(x => x.packageJson)).toEqual([
-      {
-        devDependencies: {
-          "pkg-b": "1.0.1"
-        },
-        peerDependencies: {
-          "pkg-b": "^1.0.1"
-        },
-        name: "pkg-a",
-        version: "1.0.0"
-      },
-      {
-        name: "pkg-b",
-        version: "1.0.1"
-      }
-    ]);
-  });
-});
-
 describe("running version in a simple project with workspace range", () => {
   temporarilySilenceLogs();
   let cwd: string;
@@ -386,6 +353,44 @@ describe("running version in a simple project with workspace range", () => {
         expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
       );
     });
+  });
+});
+
+describe("same package in different dependency types", () => {
+  it("should update different range types correctly", async () => {
+    let cwd = f.copy("simple-project-same-dep-diff-range");
+    await writeChangeset(
+      {
+        releases: [
+          {
+            name: "pkg-b",
+            type: "patch"
+          }
+        ],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        devDependencies: {
+          "pkg-b": "1.0.1"
+        },
+        peerDependencies: {
+          "pkg-b": "^1.0.1"
+        },
+        name: "pkg-a",
+        version: "1.0.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
+      }
+    ]);
   });
 });
 
