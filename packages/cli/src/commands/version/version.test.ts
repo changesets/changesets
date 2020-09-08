@@ -356,6 +356,44 @@ describe("running version in a simple project with workspace range", () => {
   });
 });
 
+describe("same package in different dependency types", () => {
+  it("should update different range types correctly", async () => {
+    let cwd = f.copy("simple-project-same-dep-diff-range");
+    await writeChangeset(
+      {
+        releases: [
+          {
+            name: "pkg-b",
+            type: "patch"
+          }
+        ],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        devDependencies: {
+          "pkg-b": "1.0.1"
+        },
+        peerDependencies: {
+          "pkg-b": "^1.0.1"
+        },
+        name: "pkg-a",
+        version: "1.0.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
+      }
+    ]);
+  });
+});
+
 describe("snapshot release", () => {
   it("should update the packge to unique version no matter the kind of version bump it is", async () => {
     let cwd = f.copy("simple-project");
