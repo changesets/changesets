@@ -92,10 +92,12 @@ function assembleReleasePlan(
     snapshotSuffix = getSnapshotSuffix(snapshot);
   }
 
-  let initialPackagesByName = new Map(
+  let packagesByNameWithVersionsFromBeforePreModeIfInPreMode = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
-  let packagesByName = new Map(initialPackagesByName);
+  let packagesByName = new Map(
+    packagesByNameWithVersionsFromBeforePreModeIfInPreMode
+  );
 
   let unfilteredChangesets = changesets;
 
@@ -128,7 +130,9 @@ function assembleReleasePlan(
       for (let linkedPackage of linkedGroup) {
         highestPreVersion = Math.max(
           getPreVersion(
-            initialPackagesByName.get(linkedPackage)!.packageJson.version
+            packagesByNameWithVersionsFromBeforePreModeIfInPreMode.get(
+              linkedPackage
+            )!.packageJson.version
           ),
           highestPreVersion
         );
@@ -139,13 +143,16 @@ function assembleReleasePlan(
     }
 
     for (let pkg of packages.packages) {
-      initialPackagesByName.set(pkg.packageJson.name, {
-        ...pkg,
-        packageJson: {
-          ...pkg.packageJson,
-          version: updatedPreState.initialVersions[pkg.packageJson.name]
+      packagesByNameWithVersionsFromBeforePreModeIfInPreMode.set(
+        pkg.packageJson.name,
+        {
+          ...pkg,
+          packageJson: {
+            ...pkg.packageJson,
+            version: updatedPreState.initialVersions[pkg.packageJson.name]
+          }
         }
-      });
+      );
     }
   }
 
@@ -154,7 +161,7 @@ function assembleReleasePlan(
   // changesets, and with a calculated new versions
   let releases = flattenReleases(
     changesets,
-    initialPackagesByName,
+    packagesByNameWithVersionsFromBeforePreModeIfInPreMode,
     config.ignore
   );
 
@@ -173,7 +180,7 @@ function assembleReleasePlan(
     // The map passed in to determineDependents will be mutated
     let dependentAdded = determineDependents({
       releases,
-      packagesByName: initialPackagesByName,
+      packagesByName: packagesByNameWithVersionsFromBeforePreModeIfInPreMode,
       dependencyGraph,
       preInfo,
       ignoredPackages: config.ignore,
@@ -213,7 +220,7 @@ function assembleReleasePlan(
       // because if they're not being released, the version will already have been bumped with the highest bump type
       let releasesFromUnfilteredChangesets = flattenReleases(
         unfilteredChangesets,
-        initialPackagesByName,
+        packagesByNameWithVersionsFromBeforePreModeIfInPreMode,
         config.ignore
       );
 
