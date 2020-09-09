@@ -1,5 +1,42 @@
 # @changesets/cli
 
+## 2.10.2
+
+### Patch Changes
+
+- [`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d) [#412](https://github.com/atlassian/changesets/pull/412) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Fixed an issue with the same package specified as a different dependency type with different range types not being updated correctly for all of them.
+
+- Updated dependencies [[`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d)]:
+  - @changesets/assemble-release-plan@3.0.1
+
+## 2.10.1
+
+### Patch Changes
+
+- [`efd01d9`](https://github.com/atlassian/changesets/commit/efd01d9b7a46ba2a44df1f5fdb47436e9219f44b) [#437](https://github.com/atlassian/changesets/pull/437) Thanks [@Blasz](https://github.com/Blasz)! - Fix version command not committing when commit config option is set
+
+## 2.10.0
+
+### Minor Changes
+
+- [`dca4a91`](https://github.com/atlassian/changesets/commit/dca4a91506dfca46915f7d4e833205ad3a685aa0) [#357](https://github.com/atlassian/changesets/pull/357) Thanks [@zkochan](https://github.com/zkochan)! - Open an editor when no message is given when creating a changeset
+
+* [`a57d163`](https://github.com/atlassian/changesets/commit/a57d16355ad7d67b18b768c8f79224d80afa507c) [#428](https://github.com/atlassian/changesets/pull/428) Thanks [@dotansimha](https://github.com/dotansimha)! - Added support for publishing from a subdirectory of packages, using `publishConfig.directory` field
+
+### Patch Changes
+
+- [`868eb1e`](https://github.com/atlassian/changesets/commit/868eb1e68ee91aabefa04a9abf13a7fc22eef019) [#434](https://github.com/atlassian/changesets/pull/434) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add `--no-git-checks` to `pnpm publish` in `changeset publish` to resolve issues with publishing on CI
+
+- Updated dependencies [[`1dd3117`](https://github.com/atlassian/changesets/commit/1dd311708c65321e1a1c99d36129190f940435ed), [`a57d163`](https://github.com/atlassian/changesets/commit/a57d16355ad7d67b18b768c8f79224d80afa507c)]:
+  - @changesets/git@1.0.6
+  - @changesets/types@3.1.1
+
+## 2.9.2
+
+### Patch Changes
+
+- [`213de26`](https://github.com/atlassian/changesets/commit/213de26502c702b9e25ac3f4a04ea8e9099a5185) [#409](https://github.com/atlassian/changesets/pull/409) Thanks [@Andarist](https://github.com/Andarist)! - Add logs for failed `JSON.parse` calls.
+
 ## 2.9.1
 
 ### Patch Changes

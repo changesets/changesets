@@ -8,6 +8,7 @@ import writeChangeset from "@changesets/write";
 import {
   askCheckboxPlus,
   askConfirm,
+  askQuestionWithEditor,
   askQuestion,
   askList
 } from "../../../utils/cli-utilities";
@@ -58,8 +59,21 @@ const mockUserResponses = mockResponses => {
   let confirmAnswers = {
     "Is this your desired changeset?": true
   };
-  // @ts-ignore
-  askQuestion.mockReturnValueOnce(summary);
+
+  if (mockResponses.consoleSummaries && mockResponses.editorSummaries) {
+    let i = 0;
+    let j = 0;
+    // @ts-ignore
+    askQuestion.mockImplementation(() => mockResponses.consoleSummaries[i++]);
+    // @ts-ignore
+    askQuestionWithEditor.mockImplementation(
+      () => mockResponses.editorSummaries[j++]
+    );
+  } else {
+    // @ts-ignore
+    askQuestion.mockReturnValueOnce(summary);
+  }
+
   // @ts-ignore
   askConfirm.mockImplementation(question => {
     question = stripAnsi(question);
@@ -89,6 +103,36 @@ describe("Changesets", () => {
     const call = writeChangeset.mock.calls[0][0];
     expect(call).toEqual(expectedChangeset);
   });
+
+  it.each`
+    consoleSummaries               | editorSummaries                           | expectedSummary
+    ${["summary on step 1"]}       | ${[]}                                     | ${"summary on step 1"}
+    ${[""]}                        | ${["summary in external editor"]}         | ${"summary in external editor"}
+    ${[""]}                        | ${["", "", "summary in external editor"]} | ${"summary in external editor"}
+    ${["", "summary after error"]} | ${1 /* mock implementation will throw */} | ${"summary after error"}
+  `(
+    "should read summary",
+    // @ts-ignore
+    async ({ consoleSummaries, editorSummaries, expectedSummary }) => {
+      const cwd = await f.copy("simple-project");
+
+      mockUserResponses({
+        releases: { "pkg-a": "patch" },
+        consoleSummaries,
+        editorSummaries
+      });
+      await addChangeset(cwd, { empty: false }, defaultConfig);
+
+      const expectedChangeset = {
+        summary: expectedSummary,
+        releases: [{ name: "pkg-a", type: "patch" }]
+      };
+      // @ts-ignore
+      const call = writeChangeset.mock.calls[0][0];
+      expect(call).toEqual(expectedChangeset);
+    }
+  );
+
   it("should generate a changeset in a single package repo", async () => {
     const cwd = await f.copy("single-package");
 
@@ -101,7 +145,9 @@ describe("Changesets", () => {
       "Is this your desired changeset?": true
     };
     // @ts-ignore
-    askQuestion.mockReturnValueOnce(summary);
+    askQuestion.mockReturnValueOnce("");
+    // @ts-ignore
+    askQuestionWithEditor.mockReturnValueOnce(summary);
     // @ts-ignore
     askConfirm.mockImplementation(question => {
       question = stripAnsi(question);

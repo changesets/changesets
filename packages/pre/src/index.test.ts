@@ -50,9 +50,9 @@ describe("exitPre", () => {
     );
     await exitPre(cwd);
 
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
-      { ...preStateForSimpleProject, mode: "exit" }
-    );
+    expect(
+      await fs.readJson(path.join(cwd, ".changeset", "pre.json"))
+    ).toEqual({ ...preStateForSimpleProject, mode: "exit" });
   });
   it("should throw if not in pre", async () => {
     let cwd = f.copy("simple-project");

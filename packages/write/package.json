@@ -7,11 +7,11 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/master/packages/write",
   "dependencies": {
-    "@babel/runtime": "^7.4.4",
+    "@babel/runtime": "^7.10.4",
     "@changesets/types": "^3.0.0",
     "fs-extra": "^7.0.1",
     "human-id": "^1.0.2",
-    "prettier": "^1.18.2"
+    "prettier": "^1.19.1"
   },
   "devDependencies": {
     "@changesets/parse": "*",

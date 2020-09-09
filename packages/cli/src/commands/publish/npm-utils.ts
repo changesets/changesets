@@ -4,11 +4,23 @@ import pLimit from "p-limit";
 import preferredPM from "preferred-pm";
 import chalk from "chalk";
 import spawn from "spawndamnit";
+import semver from "semver";
 import { askQuestion } from "../../utils/cli-utilities";
 import isCI from "../../utils/isCI";
 import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);
+
+function jsonParse(input: string) {
+  try {
+    return JSON.parse(input);
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      console.error("error parsing json:", input);
+    }
+    throw err;
+  }
+}
 
 function getCorrectRegistry() {
   let registry =
@@ -18,10 +30,26 @@ function getCorrectRegistry() {
   return registry;
 }
 
-async function getPublishTool(cwd: string): Promise<"npm" | "pnpm"> {
+async function getPublishTool(
+  cwd: string
+): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
   const pm = await preferredPM(cwd);
-  if (!pm) return "npm";
-  return pm.name === "pnpm" ? "pnpm" : "npm";
+  if (!pm || pm.name !== "pnpm") return { name: "npm" };
+  try {
+    let result = await spawn("pnpm", ["--version"], { cwd });
+    let version = result.stdout.toString().trim();
+    let parsed = semver.parse(version);
+    return {
+      name: "pnpm",
+      shouldAddNoGitChecks:
+        parsed?.major === undefined ? false : parsed.major >= 5
+    };
+  } catch (e) {
+    return {
+      name: "pnpm",
+      shouldAddNoGitChecks: false
+    };
+  }
 }
 
 export async function getTokenIsRequired() {
@@ -33,7 +61,7 @@ export async function getTokenIsRequired() {
   let result = await spawn("npm", ["profile", "get", "--json"], {
     env: Object.assign({}, process.env, envOverride)
   });
-  let json = JSON.parse(result.stdout.toString());
+  let json = jsonParse(result.stdout.toString());
   if (json.error || !json.tfa || !json.tfa.mode) {
     return false;
   }
@@ -58,7 +86,7 @@ export function getPackageInfo(pkgName: string) {
       env: Object.assign({}, process.env, envOverride)
     });
 
-    return JSON.parse(result.stdout.toString());
+    return jsonParse(result.stdout.toString());
   });
 }
 
@@ -117,6 +145,9 @@ async function internalPublish(
     let otpCode = await getOtpCode(twoFactorState);
     publishFlags.push("--otp", otpCode);
   }
+  if (publishTool.name === "pnpm" && publishTool.shouldAddNoGitChecks) {
+    publishFlags.push("--no-git-checks");
+  }
 
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
@@ -124,7 +155,7 @@ async function internalPublish(
     npm_config_registry: getCorrectRegistry()
   };
   let { stdout } = await spawn(
-    publishTool,
+    publishTool.name,
     ["publish", "--json", ...publishFlags],
     {
       cwd: opts.cwd,
@@ -135,7 +166,7 @@ async function internalPublish(
   // `postpublish` contents in terminal. We want to handle this as best we can but it has
   // some struggles
   // Note that both pre and post publish hooks are printed before the json out, so this works.
-  let json = JSON.parse(stdout.toString().replace(/[^{]*/, ""));
+  let json = jsonParse(stdout.toString().replace(/[^{]*/, ""));
 
   if (json.error) {
     // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)

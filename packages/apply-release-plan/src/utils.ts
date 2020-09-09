@@ -47,6 +47,5 @@ export function shouldUpdateDependencyBasedOnConfig(
   if (depType === "peerDependencies") {
     shouldUpdate = !onlyUpdatePeerDependentsWhenOutOfRange;
   }
-
   return shouldUpdate;
 }
