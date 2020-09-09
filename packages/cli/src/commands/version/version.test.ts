@@ -322,37 +322,55 @@ describe("running version in a simple project with caret dependencies", () => {
   });
 });
 
-describe("running version in a simple project with workspace range", () => {
-  temporarilySilenceLogs();
-  let cwd: string;
+describe("workspace range", () => {
+  it("should update dependency range correctly", async () => {
+    const cwd = f.copy("simple-workspace-range-dep");
 
-  beforeEach(async () => {
-    cwd = await f.copy("simple-workspace-range-dep");
-    console.error = jest.fn();
+    await writeChangesets([simpleChangeset2], cwd);
+    await versionCommand(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.1.0",
+        dependencies: {
+          "pkg-b": "workspace:1.0.1"
+        }
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
+      }
+    ]);
   });
 
-  afterEach(async () => {
-    console.error = consoleError;
-  });
+  it("should bump dependant package when bumping a `workspace:*` dependency", async () => {
+    const cwd = f.copy("simple-workspace-wildcard-range-dep");
 
-  describe("When there is a changeset commit", () => {
-    it("should bump releasedPackages", async () => {
-      await writeChangesets([simpleChangeset2], cwd);
-      const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the change"
+      },
+      cwd
+    );
+    await versionCommand(cwd, defaultOptions, modifiedDefaultConfig);
 
-      await versionCommand(cwd, defaultOptions, modifiedDefaultConfig);
-
-      expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
-        expect.objectContaining({
-          name: "pkg-a",
-          version: "1.1.0",
-          dependencies: { "pkg-b": "workspace:1.0.1" }
-        })
-      );
-      expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
-        expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
-      );
-    });
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.1",
+        dependencies: {
+          "pkg-b": "workspace:*"
+        }
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
+      }
+    ]);
   });
 });
 
