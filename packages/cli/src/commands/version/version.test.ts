@@ -374,6 +374,44 @@ describe("workspace range", () => {
   });
 });
 
+describe("same package in different dependency types", () => {
+  it("should update different range types correctly", async () => {
+    let cwd = f.copy("simple-project-same-dep-diff-range");
+    await writeChangeset(
+      {
+        releases: [
+          {
+            name: "pkg-b",
+            type: "patch"
+          }
+        ],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        devDependencies: {
+          "pkg-b": "1.0.1"
+        },
+        peerDependencies: {
+          "pkg-b": "^1.0.1"
+        },
+        name: "pkg-a",
+        version: "1.0.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
+      }
+    ]);
+  });
+});
+
 describe("snapshot release", () => {
   it("should update the packge to unique version no matter the kind of version bump it is", async () => {
     let cwd = f.copy("simple-project");
@@ -856,7 +894,7 @@ describe("pre", () => {
       }
     ]);
   });
-  it("should use the highest bump type for between all prereleases for every prerelease", async () => {
+  it("should use the highest bump type between all prereleases when versioning a package", async () => {
     let cwd = f.copy("simple-project");
     await writeChangeset(
       {
@@ -901,6 +939,114 @@ describe("pre", () => {
       {
         name: "pkg-b",
         version: "1.0.0"
+      }
+    ]);
+  });
+  it("should use the highest bump type between all prereleases when versioning a dependant package", async () => {
+    let cwd = f.copy("simple-project");
+    await pre(cwd, { command: "enter", tag: "next" });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    let packages = (await getPackages(cwd))!;
+
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        dependencies: { "pkg-b": "1.0.0" },
+        name: "pkg-a",
+        version: "2.0.0-next.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.0"
+      }
+    ]);
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "minor" }],
+        summary: "a very useful summary for the second change"
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    packages = (await getPackages(cwd))!;
+
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "2.0.0-next.1",
+        dependencies: { "pkg-b": "1.1.0-next.0" }
+      },
+      {
+        name: "pkg-b",
+        version: "1.1.0-next.0"
+      }
+    ]);
+  });
+  it("should use the highest bump type between all prereleases for a linked package when versioning a dependant package", async () => {
+    let linkedConfig = {
+      ...modifiedDefaultConfig,
+      linked: [["pkg-a", "pkg-b"]]
+    };
+    let cwd = f.copy("linked-and-not-linked-packages");
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "minor" }],
+        summary: "a very useful summary"
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, linkedConfig);
+    let packages = (await getPackages(cwd))!;
+
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.1.0-next.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.0",
+        dependencies: { "pkg-c": "0.1.0" }
+      },
+      {
+        name: "pkg-c",
+        version: "0.1.0"
+      }
+    ]);
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-c", type: "patch" }],
+        summary: "a very useful summary"
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, linkedConfig);
+    packages = (await getPackages(cwd))!;
+
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.1.0-next.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.1.0-next.1",
+        dependencies: { "pkg-c": "0.1.1-next.0" }
+      },
+      {
+        name: "pkg-c",
+        version: "0.1.1-next.0"
       }
     ]);
   });

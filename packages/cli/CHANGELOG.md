@@ -1,5 +1,14 @@
 # @changesets/cli
 
+## 2.10.2
+
+### Patch Changes
+
+- [`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d) [#412](https://github.com/atlassian/changesets/pull/412) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Fixed an issue with the same package specified as a different dependency type with different range types not being updated correctly for all of them.
+
+- Updated dependencies [[`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d)]:
+  - @changesets/assemble-release-plan@3.0.1
+
 ## 2.10.1
 
 ### Patch Changes
