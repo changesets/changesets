@@ -1050,6 +1050,34 @@ describe("pre", () => {
       }
     ]);
   });
+  it("should not bump a linked package if its linked devDep gets released", async () => {
+    let linkedConfig = {
+      ...modifiedDefaultConfig,
+      linked: [["pkg-a", "pkg-b"]]
+    };
+    let cwd = f.copy("linked-packages-with-linked-dev-dep");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary"
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, linkedConfig);
+    let packages = (await getPackages(cwd))!;
+
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.0",
+        devDependencies: { "pkg-b": "1.0.1" }
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
+      }
+    ]);
+  });
   it("should not bump packages through devDependencies", async () => {
     let cwd = f.copy("simple-dev-dep");
     await writeChangeset(
