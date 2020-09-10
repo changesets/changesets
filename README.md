@@ -41,6 +41,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [XState](https://xstate.js.org/)
 - [pnpm](https://pnpm.js.org/)
 - [filbert-js](https://github.com/kuldeepkeshwar/filbert-js)
+- [tinyhttp](https://github.com/talentlessguy/tinyhttp)
 
 # Thanks/Inspiration
 
