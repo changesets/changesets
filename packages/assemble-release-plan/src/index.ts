@@ -129,11 +129,7 @@ function assembleReleasePlan(
       let highestPreVersion = 0;
       for (let linkedPackage of linkedGroup) {
         highestPreVersion = Math.max(
-          getPreVersion(
-            packagesByNameWithVersionsFromBeforePreModeIfInPreMode.get(
-              linkedPackage
-            )!.packageJson.version
-          ),
+          getPreVersion(packagesByName.get(linkedPackage)!.packageJson.version),
           highestPreVersion
         );
       }
@@ -159,11 +155,7 @@ function assembleReleasePlan(
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(
-    changesets,
-    packagesByNameWithVersionsFromBeforePreModeIfInPreMode,
-    config.ignore
-  );
+  let releases = flattenReleases(changesets, packagesByName, config.ignore);
 
   let preInfo: PreInfo | undefined =
     updatedPreState === undefined
@@ -180,7 +172,7 @@ function assembleReleasePlan(
     // The map passed in to determineDependents will be mutated
     let dependentAdded = determineDependents({
       releases,
-      packagesByName: packagesByNameWithVersionsFromBeforePreModeIfInPreMode,
+      packagesByName,
       dependencyGraph,
       preInfo,
       ignoredPackages: config.ignore,
