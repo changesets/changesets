@@ -92,14 +92,9 @@ function assembleReleasePlan(
     snapshotSuffix = getSnapshotSuffix(snapshot);
   }
 
-  let packagesByNameWithVersionsFromBeforePreModeIfInPreMode = new Map(
+  let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
-  let packagesByName = new Map(
-    packagesByNameWithVersionsFromBeforePreModeIfInPreMode
-  );
-
-  let unfilteredChangesets = changesets;
 
   let preVersions = new Map();
   if (updatedPreState !== undefined) {
@@ -129,11 +124,7 @@ function assembleReleasePlan(
       let highestPreVersion = 0;
       for (let linkedPackage of linkedGroup) {
         highestPreVersion = Math.max(
-          getPreVersion(
-            packagesByNameWithVersionsFromBeforePreModeIfInPreMode.get(
-              linkedPackage
-            )!.packageJson.version
-          ),
+          getPreVersion(packagesByName.get(linkedPackage)!.packageJson.version),
           highestPreVersion
         );
       }
@@ -141,29 +132,12 @@ function assembleReleasePlan(
         preVersions.set(linkedPackage, highestPreVersion);
       }
     }
-
-    for (let pkg of packages.packages) {
-      packagesByNameWithVersionsFromBeforePreModeIfInPreMode.set(
-        pkg.packageJson.name,
-        {
-          ...pkg,
-          packageJson: {
-            ...pkg.packageJson,
-            version: updatedPreState.initialVersions[pkg.packageJson.name]
-          }
-        }
-      );
-    }
   }
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(
-    changesets,
-    packagesByNameWithVersionsFromBeforePreModeIfInPreMode,
-    config.ignore
-  );
+  let releases = flattenReleases(changesets, packagesByName, config.ignore);
 
   let preInfo: PreInfo | undefined =
     updatedPreState === undefined
@@ -180,7 +154,7 @@ function assembleReleasePlan(
     // The map passed in to determineDependents will be mutated
     let dependentAdded = determineDependents({
       releases,
-      packagesByName: packagesByNameWithVersionsFromBeforePreModeIfInPreMode,
+      packagesByName,
       dependencyGraph,
       preInfo,
       ignoredPackages: config.ignore,
@@ -212,35 +186,6 @@ function assembleReleasePlan(
           }
         }
       }
-    } else {
-      // for every release in pre mode, we want versions to be bumped to the highest bump type
-      // across all the changesets even if the package doesn't have a changeset that releases
-      // to the highest bump type in a given release in pre mode and importantly
-      // we don't want to add any new releases, we only want to update ones that will already happen
-      // because if they're not being released, the version will already have been bumped with the highest bump type
-      let releasesFromUnfilteredChangesets = flattenReleases(
-        unfilteredChangesets,
-        packagesByNameWithVersionsFromBeforePreModeIfInPreMode,
-        config.ignore
-      );
-
-      releases.forEach((value, key) => {
-        let releaseFromUnfilteredChangesets = releasesFromUnfilteredChangesets.get(
-          key
-        );
-        if (releaseFromUnfilteredChangesets === undefined) {
-          return;
-        }
-
-        releases.set(key, {
-          ...value,
-          // note that we're only setting the type, not the changesets which could be different(the name and oldVersion would be the same so they don't matter)
-          // because the changesets on a given release refer to why a given package is being released
-          // NOT why it's being released with a given bump type
-          // (the bump type could change because of this, linked or peer dependencies)
-          type: releaseFromUnfilteredChangesets.type
-        });
-      });
     }
   }
 
