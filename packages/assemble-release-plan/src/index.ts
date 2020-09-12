@@ -5,7 +5,7 @@ import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
 import { InternalError } from "@changesets/errors";
-import { Packages } from "@manypkg/get-packages";
+import { Packages, Package } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
 
@@ -20,7 +20,10 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
-function getSnapshotSuffix(snapshot?: string | boolean): string {
+function getSnapshotSuffix(snapshot?: string | boolean): string | undefined {
+  if (snapshot === undefined) {
+    return;
+  }
   const now = new Date();
 
   let dateAndTime = [
@@ -41,8 +44,7 @@ function getSnapshotSuffix(snapshot?: string | boolean): string {
 function getNewVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined,
-  snapshot: string | boolean | undefined,
-  snapshotSuffix: string,
+  snapshotSuffix: string | undefined,
   useCalculatedVersionForSnapshots: boolean
 ): string {
   /**
@@ -54,13 +56,13 @@ function getNewVersion(
    *
    * You can set `useCalculatedVersionForSnapshots` flag to true to use calculated versions if you don't care about the above problem.
    */
-  if (snapshot && !useCalculatedVersionForSnapshots) {
+  if (snapshotSuffix && !useCalculatedVersionForSnapshots) {
     return `0.0.0${snapshotSuffix}`;
   }
 
   const calculatedVersion = incrementVersion(release, preInfo);
 
-  if (snapshot && useCalculatedVersionForSnapshots) {
+  if (snapshotSuffix && useCalculatedVersionForSnapshots) {
     return `${calculatedVersion}${snapshotSuffix}`;
   }
 
@@ -74,78 +76,29 @@ function assembleReleasePlan(
   preState: PreState | undefined,
   snapshot?: string | boolean
 ): ReleasePlan {
-  validateChangesets(changesets, config.ignore);
-
-  let updatedPreState: PreState | undefined =
-    preState === undefined
-      ? undefined
-      : {
-          ...preState,
-          initialVersions: {
-            ...preState.initialVersions
-          }
-        };
-
-  // Caching the snapshot version here and use this if it is snapshot release
-  let snapshotSuffix: string;
-  if (snapshot !== undefined) {
-    snapshotSuffix = getSnapshotSuffix(snapshot);
-  }
-
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
 
-  let preVersions = new Map();
-  if (updatedPreState !== undefined) {
-    for (let pkg of packages.packages) {
-      if (updatedPreState.initialVersions[pkg.packageJson.name] === undefined) {
-        updatedPreState.initialVersions[pkg.packageJson.name] =
-          pkg.packageJson.version;
-      }
-    }
-    if (updatedPreState.mode !== "exit") {
-      let usedChangesetIds = new Set(updatedPreState.changesets);
-      updatedPreState.changesets = changesets.map(x => x.id);
-      changesets = changesets.filter(
-        changeset => !usedChangesetIds.has(changeset.id)
-      );
-    }
+  const relevantChangesets = getRelevantChangesets(
+    changesets,
+    config.ignore,
+    preState
+  );
 
-    // Populate preVersion
-    // preVersion is the map between package name and its next pre version number.
-    for (let pkg of packages.packages) {
-      preVersions.set(
-        pkg.packageJson.name,
-        getPreVersion(pkg.packageJson.version)
-      );
-    }
-    for (let linkedGroup of config.linked) {
-      let highestPreVersion = 0;
-      for (let linkedPackage of linkedGroup) {
-        highestPreVersion = Math.max(
-          getPreVersion(packagesByName.get(linkedPackage)!.packageJson.version),
-          highestPreVersion
-        );
-      }
-      for (let linkedPackage of linkedGroup) {
-        preVersions.set(linkedPackage, highestPreVersion);
-      }
-    }
-  }
+  const preInfo = getPreInfo(changesets, packagesByName, config, preState);
+
+  // Caching the snapshot version here and use this if it is snapshot release
+  const snapshotSuffix = getSnapshotSuffix(snapshot);
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(changesets, packagesByName, config.ignore);
-
-  let preInfo: PreInfo | undefined =
-    updatedPreState === undefined
-      ? undefined
-      : {
-          state: updatedPreState,
-          preVersions
-        };
+  let releases = flattenReleases(
+    relevantChangesets,
+    packagesByName,
+    config.ignore
+  );
 
   let dependencyGraph = getDependentsGraph(packages);
 
@@ -169,50 +122,47 @@ function assembleReleasePlan(
     releasesValidated = !linksUpdated && !dependentAdded;
   }
 
-  if (updatedPreState !== undefined) {
-    if (updatedPreState.mode === "exit") {
-      for (let pkg of packages.packages) {
-        // If a package had a prerelease, but didn't trigger a version bump in the regular release,
-        // we want to give it a patch release.
-        // Detailed explaination at https://github.com/atlassian/changesets/pull/382#discussion_r434434182
-        if (preVersions.get(pkg.packageJson.name) !== 0) {
-          if (!releases.has(pkg.packageJson.name)) {
-            releases.set(pkg.packageJson.name, {
-              type: "patch",
-              name: pkg.packageJson.name,
-              changesets: [],
-              oldVersion: pkg.packageJson.version
-            });
-          }
+  if (preInfo?.state.mode === "exit") {
+    for (let pkg of packages.packages) {
+      // If a package had a prerelease, but didn't trigger a version bump in the regular release,
+      // we want to give it a patch release.
+      // Detailed explaination at https://github.com/atlassian/changesets/pull/382#discussion_r434434182
+      if (preInfo.preVersions.get(pkg.packageJson.name) !== 0) {
+        if (!releases.has(pkg.packageJson.name)) {
+          releases.set(pkg.packageJson.name, {
+            type: "patch",
+            name: pkg.packageJson.name,
+            changesets: [],
+            oldVersion: pkg.packageJson.version
+          });
         }
       }
     }
   }
 
   return {
-    changesets,
+    changesets: relevantChangesets,
     releases: [...releases.values()].map(incompleteRelease => {
       return {
         ...incompleteRelease,
         newVersion: getNewVersion(
           incompleteRelease,
           preInfo,
-          snapshot,
           snapshotSuffix,
           config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
             .useCalculatedVersionForSnapshots
         )
       };
     }),
-    preState: updatedPreState
+    preState: preInfo?.state
   };
 }
 
-// Changesets that contains both ignored and not ignored packages are not allowed
-function validateChangesets(
+function getRelevantChangesets(
   changesets: NewChangeset[],
-  ignored: Readonly<string[]>
-): void {
+  ignored: Readonly<string[]>,
+  preState: PreState | undefined
+): NewChangeset[] {
   for (const changeset of changesets) {
     // Using the following 2 arrays to decide whether a changeset
     // contains both ignored and not ignored packages
@@ -237,6 +187,68 @@ function validateChangesets(
       );
     }
   }
+
+  if (preState && preState.mode !== "exit") {
+    let usedChangesetIds = new Set(preState.changesets);
+    return changesets.filter(changeset => !usedChangesetIds.has(changeset.id));
+  }
+
+  return changesets;
+}
+
+function getPreInfo(
+  changesets: NewChangeset[],
+  packagesByName: Map<string, Package>,
+  config: Config,
+  preState: PreState | undefined
+): PreInfo | undefined {
+  if (preState === undefined) {
+    return;
+  }
+
+  let updatedPreState = {
+    ...preState,
+    initialVersions: {
+      ...preState.initialVersions
+    }
+  };
+
+  let preVersions = new Map<string, number>();
+  if (updatedPreState !== undefined) {
+    for (const [, pkg] of packagesByName) {
+      if (updatedPreState.initialVersions[pkg.packageJson.name] === undefined) {
+        updatedPreState.initialVersions[pkg.packageJson.name] =
+          pkg.packageJson.version;
+      }
+    }
+    // Populate preVersion
+    // preVersion is the map between package name and its next pre version number.
+    for (const [, pkg] of packagesByName) {
+      preVersions.set(
+        pkg.packageJson.name,
+        getPreVersion(pkg.packageJson.version)
+      );
+    }
+    for (let linkedGroup of config.linked) {
+      let highestPreVersion = 0;
+      for (let linkedPackage of linkedGroup) {
+        highestPreVersion = Math.max(
+          getPreVersion(packagesByName.get(linkedPackage)!.packageJson.version),
+          highestPreVersion
+        );
+      }
+      for (let linkedPackage of linkedGroup) {
+        preVersions.set(linkedPackage, highestPreVersion);
+      }
+    }
+
+    updatedPreState.changesets = changesets.map(changeset => changeset.id);
+  }
+
+  return {
+    state: updatedPreState,
+    preVersions
+  };
 }
 
 export default assembleReleasePlan;
