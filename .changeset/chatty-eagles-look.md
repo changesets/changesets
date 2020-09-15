@@ -3,4 +3,4 @@
 "@changesets/assemble-release-plan": patch
 ---
 
-fix: remove workspace: prefix from dependent version ranges so they can be semver evaluated
+Fixed an issue with determining dependent updates for dependencies using `workspace:` protocol.
