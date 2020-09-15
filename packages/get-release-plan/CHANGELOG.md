@@ -1,5 +1,12 @@
 # @changesets/get-release-plan
 
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [[`ab98fe3`](https://github.com/atlassian/changesets/commit/ab98fe33814867ba740fc04733602be80771915c), [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f), [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76)]:
+  - @changesets/assemble-release-plan@4.0.0
+
 ## 2.0.0
 
 ### Major Changes
