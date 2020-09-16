@@ -1141,4 +1141,80 @@ describe("pre", () => {
       }
     ]);
   });
+  it("test test test", async () => {
+    let cwd = f.copy("simple-project-caret-dep");
+    await pre(cwd, { command: "enter", tag: "next" });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = (await getPackages(cwd))!;
+    expect(
+      packages.packages
+        .map(x => x.packageJson)
+        .map(pkg => ({
+          name: pkg.name,
+          version: pkg.version,
+          depedencies: pkg.dependencies
+        }))
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "depedencies": Object {
+            "pkg-b": "^2.0.0-next.0",
+          },
+          "name": "pkg-a",
+          "version": "1.0.1-next.0",
+        },
+        Object {
+          "depedencies": undefined,
+          "name": "pkg-b",
+          "version": "2.0.0-next.0",
+        },
+      ]
+    `);
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    packages = (await getPackages(cwd))!;
+    expect(
+      packages.packages
+        .map(x => x.packageJson)
+        .map(pkg => ({
+          name: pkg.name,
+          version: pkg.version,
+          depedencies: pkg.dependencies
+        }))
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "depedencies": Object {
+            "pkg-b": "^2.0.0-next.1",
+          },
+          "name": "pkg-a",
+          "version": "1.0.1-next.1",
+        },
+        Object {
+          "depedencies": undefined,
+          "name": "pkg-b",
+          "version": "2.0.0-next.1",
+        },
+      ]
+    `);
+  });
 });
