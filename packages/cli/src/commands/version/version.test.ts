@@ -1204,10 +1204,10 @@ describe("pre", () => {
       Array [
         Object {
           "depedencies": Object {
-            "pkg-b": "^2.0.0-next.1",
+            "pkg-b": "^2.0.0-next.0",
           },
           "name": "pkg-a",
-          "version": "1.0.1-next.1",
+          "version": "1.0.1-next.0",
         },
         Object {
           "depedencies": undefined,
