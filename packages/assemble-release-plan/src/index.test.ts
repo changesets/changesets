@@ -504,8 +504,8 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 `);
   });
 
-  describe("pre mode exit", () => {
-    it("should not generate a release for package that has no changesets and is not a dependent of any packages being released", () => {
+  describe("pre mode", () => {
+    it("should not generate a release for package that has no changesets and is not a dependent of any packages being released when exiting pre mode", () => {
       const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
@@ -523,6 +523,53 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases.length).toEqual(1);
       expect(releases[0].name).toEqual("pkg-a");
       expect(releases[0].newVersion).toEqual("1.0.1");
+    });
+
+    it("should return a release with the highest bump type within the current release despite of having a higher release among previous prereleases", () => {
+      // previous release
+      setup.addChangeset({
+        id: "major-bumping-one",
+        releases: [
+          {
+            name: "pkg-a",
+            type: "major"
+          }
+        ]
+      });
+      setup.updatePackage("pkg-a", "2.0.0-next.0");
+
+      // current release
+      setup.addChangeset({
+        id: "minor-bumping-one",
+        releases: [
+          {
+            name: "pkg-a",
+            type: "minor"
+          }
+        ]
+      });
+      const { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig
+        },
+        {
+          changesets: ["major-bumping-one"],
+          tag: "next",
+          initialVersions: {
+            "pkg-a": "1.0.0",
+            "pkg-b": "1.0.0",
+            "pkg-c": "1.0.0"
+          },
+          mode: "pre"
+        }
+      );
+
+      expect(releases.length).toEqual(1);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("2.0.0-next.1");
+      expect(releases[0].type).toEqual("minor");
     });
   });
 });
