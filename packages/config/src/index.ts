@@ -1,6 +1,6 @@
 import * as fs from "fs-extra";
 import path from "path";
-import minimatch from "minimatch";
+import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
 import { Packages } from "@manypkg/get-packages";
@@ -38,10 +38,12 @@ function normalizePackageNames(
   // Resolve and expand possible glob esxpressions.
   return listOfPackageNamesOrGlob.reduce<string[]>(
     (allResolvedPackageNames, pkgNameOrGlob) => {
-      const matchingPackages = pkgNames.filter(minimatch.filter(pkgNameOrGlob));
+      const matchingPackages = pkgNames.filter(pkgName =>
+        micromatch.isMatch(pkgName, pkgNameOrGlob)
+      );
       return [
         ...allResolvedPackageNames,
-        // If there are no matching packages as a result of the minimatch filter,
+        // If there are no matching packages as a result of the micromatch filter,
         // it is most likely the case when a package defined in the linked config
         // does not exist.
         // To be able to show a correct validation message, we pass the value as-is.
@@ -150,7 +152,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         for (let linkedPkgName of normalizedLinkedGroup) {
           if (!pkgNames.some(pkgName => pkgName === linkedPkgName)) {
             messages.push(
-              `The package or glob expression "${linkedPkgName}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/minimatch.`
+              `The package or glob expression "${linkedPkgName}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
             );
           }
           if (foundPkgNames.has(linkedPkgName)) {
@@ -162,7 +164,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach(pkgName => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/minimatch.`
+            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
           );
         });
       }
@@ -199,7 +201,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       for (let ignoredPkgName of normalizedIgnore) {
         if (!pkgNames.some(pkgName => pkgName === ignoredPkgName)) {
           messages.push(
-            `The package or glob expression "${ignoredPkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/minimatch.`
+            `The package or glob expression "${ignoredPkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
           );
         }
       }

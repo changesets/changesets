@@ -71,7 +71,7 @@ let correctCases: {
   },
   "changelog string": {
     input: {
-      changelog: ["some-module", null]
+      changelog: "some-module"
     },
     output: {
       ...defaults,
@@ -298,7 +298,7 @@ The \`linked\` option is set as [
       parse({ linked: [["not-existing"]] }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The package or glob expression \\"not-existing\\" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/minimatch."
+The package or glob expression \\"not-existing\\" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
 `);
   });
   test("linked package that does not exist (using glob expressions)", () => {
@@ -306,7 +306,7 @@ The package or glob expression \\"not-existing\\" specified in the \`linked\` op
       parse({ linked: [["pkg-a", "foo/*"]] }, withPackages(["pkg-a"]));
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The package or glob expression \\"foo/*\\" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/minimatch."
+The package or glob expression \\"foo/*\\" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
 `);
   });
   test("linked package in two linked groups", () => {
@@ -314,7 +314,7 @@ The package or glob expression \\"foo/*\\" specified in the \`linked\` option do
       parse({ linked: [["pkg-a"], ["pkg-a"]] }, withPackages(["pkg-a"]));
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The package \\"pkg-a\\" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/minimatch."
+The package \\"pkg-a\\" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch."
 `);
   });
   test("linked package in two linked groups (using glob expressions)", () => {
@@ -325,8 +325,8 @@ The package \\"pkg-a\\" is defined in multiple sets of linked packages. Packages
       );
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The package \\"pkg-a\\" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/minimatch.
-The package \\"pkg-b\\" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/minimatch."
+The package \\"pkg-a\\" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.
+The package \\"pkg-b\\" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch."
 `);
   });
   test("access private warns and sets to restricted", () => {
@@ -365,14 +365,14 @@ The \`ignore\` option is set as [
     expect(() => unsafeParse({ ignore: ["pkg-a"] }, defaultPackages))
       .toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The package or glob expression \\"pkg-a\\" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/minimatch."
+The package or glob expression \\"pkg-a\\" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
 `);
   });
   test("ignore package that does not exist (using glob expressions)", () => {
     expect(() => unsafeParse({ ignore: ["pkg-*"] }, defaultPackages))
       .toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The package or glob expression \\"pkg-*\\" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/minimatch."
+The package or glob expression \\"pkg-*\\" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
 `);
   });
   test("ingore missing dependent packages", async () => {

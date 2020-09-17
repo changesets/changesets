@@ -49,7 +49,7 @@ There are two caveats to this.
 
 These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos).
 
-> NOTE: you can also provide glob expressions to match the packages, according to the [minimatch](https://www.npmjs.com/package/minimatch) format.
+> NOTE: you can also provide glob expressions to match the packages, according to the [micromatch](https://www.npmjs.com/package/micromatch) format.
 
 ## `linked` (array of package names)
 
