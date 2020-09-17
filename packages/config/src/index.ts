@@ -1,9 +1,10 @@
 import * as fs from "fs-extra";
 import path from "path";
+import minimatch from "minimatch";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
 import { Packages } from "@manypkg/get-packages";
-import { Config, WrittenConfig } from "@changesets/types";
+import { Config, WrittenConfig, Linked } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 
@@ -11,7 +12,7 @@ export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
   changelog: "@changesets/cli/changelog",
   commit: false,
-  linked: [] as ReadonlyArray<ReadonlyArray<string>>,
+  linked: [] as Linked,
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
@@ -30,6 +31,27 @@ function getNormalisedChangelogOption(
   return thing;
 }
 
+function normalizePackageNames(
+  listOfPackageNamesOrGlob: readonly string[],
+  pkgNames: readonly string[]
+): string[] {
+  // Resolve and expand possible glob esxpressions.
+  return listOfPackageNamesOrGlob.reduce<string[]>(
+    (allResolvedPackageNames, pkgNameOrGlob) => {
+      const matchingPackages = pkgNames.filter(minimatch.filter(pkgNameOrGlob));
+      return [
+        ...allResolvedPackageNames,
+        // If there are no matching packages as a result of the minimatch filter,
+        // it is most likely the case when a package defined in the linked config
+        // does not exist.
+        // To be able to show a correct validation message, we pass the value as-is.
+        ...(matchingPackages.length > 0 ? matchingPackages : [pkgNameOrGlob])
+      ];
+    },
+    []
+  );
+}
+
 export let read = async (cwd: string, packages: Packages) => {
   let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
   return parse(json, packages);
@@ -37,6 +59,10 @@ export let read = async (cwd: string, packages: Packages) => {
 
 export let parse = (json: WrittenConfig, packages: Packages): Config => {
   let messages = [];
+  let pkgNames: readonly string[] = packages.packages.map(
+    ({ packageJson }) => packageJson.name
+  );
+
   if (
     json.changelog !== undefined &&
     json.changelog !== false &&
@@ -114,16 +140,17 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or an array of arrays of package names`
       );
     } else {
-      let pkgNames = new Set(
-        packages.packages.map(({ packageJson }) => packageJson.name)
-      );
       let foundPkgNames = new Set<string>();
       let duplicatedPkgNames = new Set<string>();
-      for (let linkedGroup of json.linked) {
-        for (let linkedPkgName of linkedGroup) {
-          if (!pkgNames.has(linkedPkgName)) {
+      for (let linkedGroup of json.linked as Linked) {
+        let normalizedLinkedGroup = normalizePackageNames(
+          linkedGroup,
+          pkgNames
+        );
+        for (let linkedPkgName of normalizedLinkedGroup) {
+          if (!pkgNames.some(pkgName => pkgName === linkedPkgName)) {
             messages.push(
-              `The package "${linkedPkgName}" is specified in the \`linked\` option but it is not found in the project. You may have misspelled the package name.`
+              `The package or glob expression "${linkedPkgName}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/minimatch.`
             );
           }
           if (foundPkgNames.has(linkedPkgName)) {
@@ -135,7 +162,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach(pkgName => {
           messages.push(
-            `The package "${pkgName}" is in multiple sets of linked packages. Packages can only be in a single set of linked packages.`
+            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/minimatch.`
           );
         });
       }
@@ -168,13 +195,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or an array of package names`
       );
     } else {
-      let pkgNames = new Set(
-        packages.packages.map(({ packageJson }) => packageJson.name)
-      );
-      for (let pkgName of json.ignore) {
-        if (!pkgNames.has(pkgName)) {
+      let normalizedIgnore = normalizePackageNames(json.ignore, pkgNames);
+      for (let ignoredPkgName of normalizedIgnore) {
+        if (!pkgNames.some(pkgName => pkgName === ignoredPkgName)) {
           messages.push(
-            `The package "${pkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name.`
+            `The package or glob expression "${ignoredPkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/minimatch.`
           );
         }
       }
@@ -244,7 +269,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     commit:
       json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
     linked:
-      json.linked === undefined ? defaultWrittenConfig.linked : json.linked,
+      json.linked === undefined
+        ? defaultWrittenConfig.linked
+        : (json.linked as Linked).map(linkedGroup =>
+            normalizePackageNames(linkedGroup, pkgNames)
+          ),
     baseBranch:
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch
@@ -256,7 +285,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         : json.updateInternalDependencies,
 
     ignore:
-      json.ignore === undefined ? defaultWrittenConfig.ignore : json.ignore,
+      json.ignore === undefined
+        ? defaultWrittenConfig.ignore
+        : normalizePackageNames(json.ignore, pkgNames),
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange:
