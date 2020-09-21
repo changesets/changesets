@@ -1,5 +1,19 @@
 # @changesets/cli
 
+## 2.10.3
+
+### Patch Changes
+
+- [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f) [#455](https://github.com/atlassian/changesets/pull/455) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with linked package being bumped when its dev dependency from the linked set was bumped during the versioning.
+
+* [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76) [#446](https://github.com/atlassian/changesets/pull/446) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages not being updated to their highest bump type in pre mode sometimes. This could happen when dependant packages were only versioned because of their dependencies being upgraded and not because of a dedicated changeset for those dependant packages.
+
+  For the very same reason linked packages were also not always bumped correctly in pre mode to the highest bump type in a linked group.
+
+* Updated dependencies [[`ab98fe3`](https://github.com/atlassian/changesets/commit/ab98fe33814867ba740fc04733602be80771915c), [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f), [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76)]:
+  - @changesets/assemble-release-plan@4.0.0
+  - @changesets/get-release-plan@2.0.1
+
 ## 2.10.2
 
 ### Patch Changes
