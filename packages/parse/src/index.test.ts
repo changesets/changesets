@@ -148,4 +148,56 @@ describe("parsing a changeset", () => {
       summary: ""
     });
   });
+  it("should be fine if the frontmatter is followed by a whitespace on the same line", () => {
+    const changesetMd = outdent`---
+    "cool-package": minor
+    ---${
+      "  " /* this prevents auto-formatters from removing the trailing whitespace */
+    }
+
+    Nice simple summary
+    `;
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "cool-package", type: "minor" }],
+      summary: "Nice simple summary"
+    });
+  });
+  it("should be fine when md contains Windows new lines", () => {
+    const changesetMd = outdent`---
+    "cool-package": minor
+    "best-package": patch
+    ---
+
+    Nice simple summary
+    `
+      .split("\n")
+      .join("\r\n");
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [
+        { name: "cool-package", type: "minor" },
+        { name: "best-package", type: "patch" }
+      ],
+      summary: "Nice simple summary"
+    });
+  });
+  it("should throw if the frontmatter is followed by non-whitespace characters on the same line", () => {
+    const changesetMd = outdent`---
+    "cool-package": minor
+    ---  fail
+
+    Nice simple summary
+    `;
+
+    expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
+"could not parse changeset - invalid frontmatter: ---
+\\"cool-package\\": minor
+---  fail
+
+Nice simple summary"
+`);
+  });
 });
