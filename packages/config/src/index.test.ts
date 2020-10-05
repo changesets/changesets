@@ -7,6 +7,12 @@ import { Packages } from "@manypkg/get-packages";
 
 jest.mock("@changesets/logger");
 
+type CorrectCase = {
+  packages?: string[];
+  input: WrittenConfig;
+  output: Config;
+};
+
 let f = fixturez(__dirname);
 
 let defaultPackages: Packages = {
@@ -58,13 +64,7 @@ let defaults = {
   }
 } as const;
 
-let correctCases: {
-  [caseName: string]: {
-    packages?: string[];
-    input: WrittenConfig;
-    output: Config;
-  };
-} = {
+let correctCases: Record<string, CorrectCase> = {
   defaults: {
     input: {},
     output: defaults
