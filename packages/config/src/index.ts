@@ -50,6 +50,18 @@ function normalizePackageNames(
   return [matchingPackages, nonExistingPackages];
 }
 
+// TODO: replace usage with Array.isArray when TS 4.1 gets released
+// source: https://github.com/microsoft/TypeScript/pull/39258/files#diff-a6b488d9bd802977827b535a3011c1f3R1379
+function isArray<T>(
+  arg: T | {}
+): arg is T extends readonly any[]
+  ? unknown extends T
+    ? never
+    : readonly any[]
+  : any[] {
+  return Array.isArray(arg);
+}
+
 export let read = async (cwd: string, packages: Packages) => {
   let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
   return parse(json, packages);
@@ -66,7 +78,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     json.changelog !== false &&
     typeof json.changelog !== "string" &&
     !(
-      Array.isArray(json.changelog) &&
+      isArray(json.changelog) &&
       json.changelog.length === 2 &&
       typeof json.changelog[0] === "string"
     )
@@ -122,7 +134,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (json.linked !== undefined) {
     if (
       !(
-        Array.isArray(json.linked) &&
+        isArray(json.linked) &&
         json.linked.every(
           arr =>
             Array.isArray(arr) &&
@@ -140,7 +152,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     } else {
       let foundPkgNames = new Set<string>();
       let duplicatedPkgNames = new Set<string>();
-      for (let linkedGroup of json.linked as Linked) {
+      for (let linkedGroup of json.linked) {
         let [
           normalizedLinkedGroup,
           nonExistingPackages
@@ -184,7 +196,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (json.ignore) {
     if (
       !(
-        Array.isArray(json.ignore) &&
+        isArray(json.ignore) &&
         json.ignore.every(pkgName => typeof pkgName === "string")
       )
     ) {
@@ -275,7 +287,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     linked:
       json.linked === undefined
         ? defaultWrittenConfig.linked
-        : (json.linked as Linked).map(
+        : json.linked.map(
             linkedGroup => normalizePackageNames(linkedGroup, pkgNames)[0]
           ),
     baseBranch:
