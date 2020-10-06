@@ -14,7 +14,7 @@ const { input, flags } = meow(
     version [--ignore]
     publish [--otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
-    prerelease <tag>
+    pre <enter|exit> <tag>
     `,
   {
     flags: {
