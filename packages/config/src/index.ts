@@ -34,24 +34,20 @@ function getNormalisedChangelogOption(
 function normalizePackageNames(
   listOfPackageNamesOrGlob: readonly string[],
   pkgNames: readonly string[]
-): string[] {
-  // Resolve and expand possible glob esxpressions.
-  return listOfPackageNamesOrGlob.reduce<string[]>(
-    (allResolvedPackageNames, pkgNameOrGlob) => {
-      const matchingPackages = pkgNames.filter(pkgName =>
-        micromatch.isMatch(pkgName, pkgNameOrGlob)
-      );
-      return [
-        ...allResolvedPackageNames,
-        // If there are no matching packages as a result of the micromatch filter,
-        // it is most likely the case when a package defined in the linked config
-        // does not exist.
-        // To be able to show a correct validation message, we pass the value as-is.
-        ...(matchingPackages.length > 0 ? matchingPackages : [pkgNameOrGlob])
-      ];
-    },
-    []
+): [string[], string[]] {
+  const matchingPackages = micromatch(pkgNames, listOfPackageNamesOrGlob);
+
+  // Go through the list of given package globs (again) in order to find out
+  // which packages didn't match so that we can show a validation message.
+  const nonExistingPackages = listOfPackageNamesOrGlob.filter(
+    pkgNameOrGlob =>
+      !pkgNames.some(pkgName => micromatch.isMatch(pkgName, pkgNameOrGlob))
   );
+
+  // Since the validation happens in subsequent steps, we need to return a tuple
+  // with the list of non-existing packages.
+  // TODO: refactor the validation logic to exit early when something is not valid.
+  return [matchingPackages, nonExistingPackages];
 }
 
 export let read = async (cwd: string, packages: Packages) => {
@@ -145,20 +141,23 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       let foundPkgNames = new Set<string>();
       let duplicatedPkgNames = new Set<string>();
       for (let linkedGroup of json.linked as Linked) {
-        let normalizedLinkedGroup = normalizePackageNames(
-          linkedGroup,
-          pkgNames
-        );
+        let [
+          normalizedLinkedGroup,
+          nonExistingPackages
+        ] = normalizePackageNames(linkedGroup, pkgNames);
         for (let linkedPkgName of normalizedLinkedGroup) {
-          if (!pkgNames.some(pkgName => pkgName === linkedPkgName)) {
-            messages.push(
-              `The package or glob expression "${linkedPkgName}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
-            );
-          }
           if (foundPkgNames.has(linkedPkgName)) {
             duplicatedPkgNames.add(linkedPkgName);
           }
           foundPkgNames.add(linkedPkgName);
+        }
+        // Show validation message for each non-existing package
+        if (nonExistingPackages.length > 0) {
+          nonExistingPackages.forEach(nonExistingPkgName => {
+            messages.push(
+              `The package or glob expression "${nonExistingPkgName}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+            );
+          });
         }
       }
       if (duplicatedPkgNames.size) {
@@ -197,13 +196,16 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or an array of package names`
       );
     } else {
-      let normalizedIgnore = normalizePackageNames(json.ignore, pkgNames);
-      for (let ignoredPkgName of normalizedIgnore) {
-        if (!pkgNames.some(pkgName => pkgName === ignoredPkgName)) {
+      let [, nonExistingPackages] = normalizePackageNames(
+        json.ignore,
+        pkgNames
+      );
+      if (nonExistingPackages.length > 0) {
+        nonExistingPackages.forEach(nonExistingPkgName => {
           messages.push(
-            `The package or glob expression "${ignoredPkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+            `The package or glob expression "${nonExistingPkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
           );
-        }
+        });
       }
 
       // Validate that all dependents of ignored packages are listed in the ignore list
@@ -273,8 +275,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     linked:
       json.linked === undefined
         ? defaultWrittenConfig.linked
-        : (json.linked as Linked).map(linkedGroup =>
-            normalizePackageNames(linkedGroup, pkgNames)
+        : (json.linked as Linked).map(
+            linkedGroup => normalizePackageNames(linkedGroup, pkgNames)[0]
           ),
     baseBranch:
       json.baseBranch === undefined
@@ -289,7 +291,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     ignore:
       json.ignore === undefined
         ? defaultWrittenConfig.ignore
-        : normalizePackageNames(json.ignore, pkgNames),
+        : normalizePackageNames(json.ignore, pkgNames)[0],
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange:

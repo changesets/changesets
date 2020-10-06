@@ -158,6 +158,23 @@ let correctCases: Record<string, CorrectCase> = {
       linked: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]]
     }
   },
+  linkedWithGlobsAndExclusion: {
+    packages: [
+      "pkg-a",
+      "pkg-b",
+      "@pkg/a",
+      "@pkg/b",
+      "@pkg-other/a",
+      "@pkg-other/b"
+    ],
+    input: {
+      linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]]
+    },
+    output: {
+      ...defaults,
+      linked: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]]
+    }
+  },
   "update internal dependencies minor": {
     input: {
       updateInternalDependencies: "minor"
@@ -193,6 +210,16 @@ let correctCases: Record<string, CorrectCase> = {
     output: {
       ...defaults,
       ignore: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"]
+    }
+  },
+  ignoreWithGlobsAndExclusions: {
+    packages: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"],
+    input: {
+      ignore: ["pkg-*", "!pkg-b", "@pkg/*"]
+    },
+    output: {
+      ...defaults,
+      ignore: ["pkg-a", "@pkg/a", "@pkg/b"]
     }
   }
 };
