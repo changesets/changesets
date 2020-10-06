@@ -16,9 +16,11 @@
     "@changesets/logger": "^0.0.5",
     "@changesets/types": "^3.1.0",
     "@manypkg/get-packages": "^1.0.1",
-    "fs-extra": "^7.0.1"
+    "fs-extra": "^7.0.1",
+    "micromatch": "^4.0.2"
   },
   "devDependencies": {
+    "@types/micromatch": "^4.0.1",
     "fixturez": "^1.1.0",
     "jest-in-case": "^1.0.2"
   }
