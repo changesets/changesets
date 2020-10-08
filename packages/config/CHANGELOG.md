@@ -1,5 +1,16 @@
 # @changesets/config
 
+## 1.4.0
+
+### Minor Changes
+
+- [`e33e4ca`](https://github.com/atlassian/changesets/commit/e33e4ca7e71ba7747e21af5011057f11ddfab939) [#458](https://github.com/atlassian/changesets/pull/458) Thanks [@emmenko](https://github.com/emmenko)! - Allow glob expressions to be provided for the `linked` and `ignore` options
+
+### Patch Changes
+
+- Updated dependencies [[`f4973a2`](https://github.com/atlassian/changesets/commit/f4973a25ec6a837f36d64c1fb4b108ace3bc1f9d)]:
+  - @changesets/types@3.2.0
+
 ## 1.3.0
 
 ### Minor Changes

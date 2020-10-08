@@ -1,5 +1,19 @@
 # @changesets/cli
 
+## 2.11.0
+
+### Minor Changes
+
+- [`e33e4ca`](https://github.com/atlassian/changesets/commit/e33e4ca7e71ba7747e21af5011057f11ddfab939) [#458](https://github.com/atlassian/changesets/pull/458) Thanks [@emmenko](https://github.com/emmenko)! - Allow glob expressions to be provided for the `linked` and `ignore` options
+
+### Patch Changes
+
+- [`a60c0e1`](https://github.com/atlassian/changesets/commit/a60c0e1557ccdc3a9e7f665dd679c223f64450fe) [#465](https://github.com/atlassian/changesets/pull/465) Thanks [@Andarist](https://github.com/Andarist)! - Fixed the printed description of how `pre` command can be used.
+
+- Updated dependencies [[`f4973a2`](https://github.com/atlassian/changesets/commit/f4973a25ec6a837f36d64c1fb4b108ace3bc1f9d), [`e33e4ca`](https://github.com/atlassian/changesets/commit/e33e4ca7e71ba7747e21af5011057f11ddfab939)]:
+  - @changesets/types@3.2.0
+  - @changesets/config@1.4.0
+
 ## 2.10.3
 
 ### Patch Changes
