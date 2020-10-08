@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 3.2.0
+
+### Minor Changes
+
+- [`f4973a2`](https://github.com/atlassian/changesets/commit/f4973a25ec6a837f36d64c1fb4b108ace3bc1f9d) [#467](https://github.com/atlassian/changesets/pull/467) Thanks [@Andarist](https://github.com/Andarist)! - Exported a new `Linked` type for convenience - it's an alias for `ReadonlyArray<ReadonlyArray<string>>`.`
+
 ## 3.1.1
 
 ### Patch Changes
