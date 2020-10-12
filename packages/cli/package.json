@@ -37,27 +37,27 @@
     "@changesets/types": "^3.2.0",
     "@changesets/write": "^0.1.3",
     "@manypkg/get-packages": "^1.0.1",
-    "@types/semver": "^6.0.0",
-    "boxen": "^1.3.0",
-    "chalk": "^2.1.0",
+    "@types/semver": "^7.3.4",
+    "boxen": "^4.2.0",
+    "chalk": "^4.1.0",
     "enquirer": "^2.3.0",
     "external-editor": "^3.1.0",
-    "fs-extra": "^7.0.1",
-    "human-id": "^1.0.2",
+    "fs-extra": "^9.0.1",
+    "human-id": "^2.0.1",
     "is-ci": "^2.0.0",
-    "meow": "^5.0.0",
-    "outdent": "^0.5.0",
-    "p-limit": "^2.2.0",
+    "meow": "^7.1.1",
+    "outdent": "^0.7.1",
+    "p-limit": "^3.0.2",
     "preferred-pm": "^3.0.0",
-    "semver": "^5.4.1",
+    "semver": "^7.3.2",
     "spawndamnit": "^2.0.0",
     "term-size": "^2.1.0",
-    "tty-table": "^2.7.0"
+    "tty-table": "^4.1.3"
   },
   "devDependencies": {
     "@changesets/parse": "*",
     "@changesets/test-utils": "*",
     "fixturez": "^1.1.0",
-    "strip-ansi": "^5.2.0"
+    "strip-ansi": "^6.0.0"
   }
 }
