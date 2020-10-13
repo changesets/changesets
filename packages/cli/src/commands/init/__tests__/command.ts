@@ -10,7 +10,7 @@ const f = fixtures(__dirname);
 
 const getPaths = (cwd: string) => ({
   readmePath: path.join(cwd, ".changeset/README.md"),
-  configPath: path.join(cwd, ".changeset/config.json")
+  configPath: path.join(cwd, ".changeset/config.json"),
 });
 
 describe("init", () => {
@@ -40,7 +40,7 @@ describe("init", () => {
   it("shouldn't overwrite a config if it does exist", async () => {
     const cwd = await f.copy("simple-project");
     await fs.writeJson(path.join(cwd, ".changeset/config.json"), {
-      changelog: false
+      changelog: false,
     });
 
     expect(fs.pathExistsSync(path.join(cwd, ".changeset/README.md"))).toBe(
@@ -49,7 +49,7 @@ describe("init", () => {
     await initializeCommand(cwd);
     expect(await fs.readJson(path.join(cwd, ".changeset/config.json"))).toEqual(
       {
-        changelog: false
+        changelog: false,
       }
     );
   });

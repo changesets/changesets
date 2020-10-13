@@ -5,7 +5,7 @@ import path from "path";
 import { PreState } from "@changesets/types";
 import {
   PreEnterButInPreModeError,
-  PreExitButNotInPreModeError
+  PreExitButNotInPreModeError,
 } from "@changesets/errors/src";
 
 let f = fixturez(__dirname);
@@ -14,10 +14,10 @@ let preStateForSimpleProject: PreState = {
   changesets: [],
   initialVersions: {
     "pkg-a": "1.0.0",
-    "pkg-b": "1.0.0"
+    "pkg-b": "1.0.0",
   },
   mode: "pre",
-  tag: "next"
+  tag: "next",
 };
 
 describe("enterPre", () => {

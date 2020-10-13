@@ -32,7 +32,7 @@ type StringPromptOptions = Extract<
  * At each call, the entire responses object is returned, so we need a unique
  * identifier for the name every time. This is why we are using serial IDs
  */
-const serialId: () => number = (function() {
+const serialId: () => number = (function () {
   let id = 0;
   return () => id++;
 })();
@@ -60,7 +60,7 @@ async function askCheckboxPlus(
     choices,
     format,
     limit,
-    onCancel: cancelFlow
+    onCancel: cancelFlow,
   } as ArrayPromptOptions)
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
@@ -77,8 +77,8 @@ async function askQuestion(message: string): Promise<string> {
       message,
       name,
       prefix,
-      onCancel: cancelFlow
-    } as StringPromptOptions
+      onCancel: cancelFlow,
+    } as StringPromptOptions,
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
@@ -104,8 +104,8 @@ async function askConfirm(message: string): Promise<boolean> {
       prefix,
       type: "confirm",
       initial: true,
-      onCancel: cancelFlow
-    } as BooleanPromptOptions
+      onCancel: cancelFlow,
+    } as BooleanPromptOptions,
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
@@ -126,8 +126,8 @@ async function askList<Choice extends string>(
       name,
       prefix,
       type: "select",
-      onCancel: cancelFlow
-    } as ArrayPromptOptions
+      onCancel: cancelFlow,
+    } as ArrayPromptOptions,
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
@@ -140,5 +140,5 @@ export {
   askQuestion,
   askQuestionWithEditor,
   askConfirm,
-  askList
+  askList,
 };

@@ -13,8 +13,8 @@ export default function printConfirmationMessage(
 ) {
   function getReleasesOfType(type: VersionType) {
     return changeset.releases
-      .filter(release => release.type === type)
-      .map(release => release.name);
+      .filter((release) => release.type === type)
+      .map((release) => release.name);
   }
   log("=== Releasing the following packages ===");
   const majorReleases = getReleasesOfType("major");
@@ -35,7 +35,7 @@ export default function printConfirmationMessage(
       )} when this changeset is applied.`;
     const prettyMessage = boxen(message, {
       borderStyle: "double",
-      align: "center"
+      align: "center",
     });
     log(prettyMessage);
   }

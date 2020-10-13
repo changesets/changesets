@@ -14,12 +14,12 @@ jest.mock("human-id");
 
 const simpleChangeset: { summary: string; releases: Release[] } = {
   summary: "This is a summary",
-  releases: [{ name: "pkg-a", type: "minor" }]
+  releases: [{ name: "pkg-a", type: "minor" }],
 };
 
 const emptyChangeset: { summary: string; releases: Release[] } = {
   summary: "",
-  releases: []
+  releases: [],
 };
 
 describe("simple project", () => {

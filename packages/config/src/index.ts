@@ -16,7 +16,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  ignore: [] as ReadonlyArray<string>
+  ignore: [] as ReadonlyArray<string>,
 } as const;
 
 function getNormalisedChangelogOption(
@@ -40,8 +40,8 @@ function normalizePackageNames(
   // Go through the list of given package globs (again) in order to find out
   // which packages didn't match so that we can show a validation message.
   const nonExistingPackages = listOfPackageNamesOrGlob.filter(
-    pkgNameOrGlob =>
-      !pkgNames.some(pkgName => micromatch.isMatch(pkgName, pkgNameOrGlob))
+    (pkgNameOrGlob) =>
+      !pkgNames.some((pkgName) => micromatch.isMatch(pkgName, pkgNameOrGlob))
   );
 
   // Since the validation happens in subsequent steps, we need to return a tuple
@@ -136,9 +136,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       !(
         isArray(json.linked) &&
         json.linked.every(
-          arr =>
+          (arr) =>
             Array.isArray(arr) &&
-            arr.every(pkgName => typeof pkgName === "string")
+            arr.every((pkgName) => typeof pkgName === "string")
         )
       )
     ) {
@@ -155,7 +155,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       for (let linkedGroup of json.linked) {
         let [
           normalizedLinkedGroup,
-          nonExistingPackages
+          nonExistingPackages,
         ] = normalizePackageNames(linkedGroup, pkgNames);
         for (let linkedPkgName of normalizedLinkedGroup) {
           if (foundPkgNames.has(linkedPkgName)) {
@@ -165,7 +165,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         }
         // Show validation message for each non-existing package
         if (nonExistingPackages.length > 0) {
-          nonExistingPackages.forEach(nonExistingPkgName => {
+          nonExistingPackages.forEach((nonExistingPkgName) => {
             messages.push(
               `The package or glob expression "${nonExistingPkgName}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
             );
@@ -173,7 +173,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         }
       }
       if (duplicatedPkgNames.size) {
-        duplicatedPkgNames.forEach(pkgName => {
+        duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
             `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
           );
@@ -197,7 +197,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     if (
       !(
         isArray(json.ignore) &&
-        json.ignore.every(pkgName => typeof pkgName === "string")
+        json.ignore.every((pkgName) => typeof pkgName === "string")
       )
     ) {
       messages.push(
@@ -213,7 +213,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         pkgNames
       );
       if (nonExistingPackages.length > 0) {
-        nonExistingPackages.forEach(nonExistingPkgName => {
+        nonExistingPackages.forEach((nonExistingPkgName) => {
           messages.push(
             `The package or glob expression "${nonExistingPkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
           );
@@ -238,7 +238,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
     const {
       onlyUpdatePeerDependentsWhenOutOfRange,
-      useCalculatedVersionForSnapshots
+      useCalculatedVersionForSnapshots,
     } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
     if (
       onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
@@ -288,7 +288,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       json.linked === undefined
         ? defaultWrittenConfig.linked
         : json.linked.map(
-            linkedGroup => normalizePackageNames(linkedGroup, pkgNames)[0]
+            (linkedGroup) => normalizePackageNames(linkedGroup, pkgNames)[0]
           ),
     baseBranch:
       json.baseBranch === undefined
@@ -320,8 +320,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           .useCalculatedVersionForSnapshots === undefined
           ? false
           : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              .useCalculatedVersionForSnapshots
-    }
+              .useCalculatedVersionForSnapshots,
+    },
   };
   return config;
 };
@@ -330,12 +330,12 @@ let fakePackage = {
   dir: "",
   packageJson: {
     name: "",
-    version: ""
-  }
+    version: "",
+  },
 };
 
 export let defaultConfig = parse(defaultWrittenConfig, {
   root: fakePackage,
   tool: "root",
-  packages: [fakePackage]
+  packages: [fakePackage],
 });

@@ -20,22 +20,22 @@ const changelogFunctions: ChangelogFunctions = {
 
     const changesetLink = `- Updated dependencies [${(
       await Promise.all(
-        changesets.map(async cs => {
+        changesets.map(async (cs) => {
           if (cs.commit) {
             let { links } = await getInfo({
               repo: options.repo,
-              commit: cs.commit
+              commit: cs.commit,
             });
             return links.commit;
           }
         })
       )
     )
-      .filter(_ => _)
+      .filter((_) => _)
       .join(", ")}]:`;
 
     const updatedDepenenciesList = dependenciesUpdated.map(
-      dependency => `  - ${dependency.name}@${dependency.newVersion}`
+      (dependency) => `  - ${dependency.name}@${dependency.newVersion}`
     );
 
     return [changesetLink, ...updatedDepenenciesList].join("\n");
@@ -48,22 +48,24 @@ const changelogFunctions: ChangelogFunctions = {
     }
     const [firstLine, ...futureLines] = changeset.summary
       .split("\n")
-      .map(l => l.trimRight());
+      .map((l) => l.trimRight());
 
     if (changeset.commit) {
       let { links } = await getInfo({
         repo: options.repo,
-        commit: changeset.commit
+        commit: changeset.commit,
       });
       return `\n\n- ${links.commit}${
         links.pull === null ? "" : ` ${links.pull}`
       }${
         links.user === null ? "" : ` Thanks ${links.user}!`
-      } - ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+      } - ${firstLine}\n${futureLines.map((l) => `  ${l}`).join("\n")}`;
     } else {
-      return `\n\n- ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+      return `\n\n- ${firstLine}\n${futureLines
+        .map((l) => `  ${l}`)
+        .join("\n")}`;
     }
-  }
+  },
 };
 
 export default changelogFunctions;

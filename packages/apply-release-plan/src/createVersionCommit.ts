@@ -8,12 +8,12 @@ export default function createReleaseCommit(
   commit: boolean
 ) {
   const publishableReleases = releasePlan.releases.filter(
-    release => release.type !== "none"
+    (release) => release.type !== "none"
   );
   const numPackagesReleased = publishableReleases.length;
 
   const releasesLines = publishableReleases
-    .map(release => `  ${release.name}@${release.newVersion}`)
+    .map((release) => `  ${release.name}@${release.newVersion}`)
     .join("\n");
 
   return outdent`

@@ -26,7 +26,7 @@ export default function parseChangesetFile(
     if (yamlStuff) {
       releases = Object.entries(yamlStuff).map(([name, type]) => ({
         name,
-        type
+        type,
       }));
     } else {
       releases = [];

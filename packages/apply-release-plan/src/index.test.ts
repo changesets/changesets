@@ -3,7 +3,7 @@ import {
   ReleasePlan,
   Config,
   NewChangeset,
-  ComprehensiveRelease
+  ComprehensiveRelease,
 } from "@changesets/types";
 import * as git from "@changesets/git";
 import fs from "fs-extra";
@@ -28,14 +28,14 @@ class FakeReleasePlan {
     const baseChangeset: NewChangeset = {
       id: "quick-lions-devour",
       summary: "Hey, let's have fun with testing!",
-      releases: [{ name: "pkg-a", type: "minor" }]
+      releases: [{ name: "pkg-a", type: "minor" }],
     };
     const baseRelease: ComprehensiveRelease = {
       name: "pkg-a",
       type: "minor",
       oldVersion: "1.0.0",
       newVersion: "1.1.0",
-      changesets: ["quick-lions-devour"]
+      changesets: ["quick-lions-devour"],
     };
     this.config = {
       changelog: false,
@@ -47,8 +47,8 @@ class FakeReleasePlan {
       ignore: [],
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
-        useCalculatedVersionForSnapshots: false
-      }
+        useCalculatedVersionForSnapshots: false,
+      },
     };
 
     this.changesets = [baseChangeset, ...changesets];
@@ -59,7 +59,7 @@ class FakeReleasePlan {
     return {
       changesets: this.changesets,
       releases: this.releases,
-      preState: undefined
+      preState: undefined,
     };
   }
 }
@@ -81,8 +81,8 @@ async function testSetup(
       ignore: [],
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
-        useCalculatedVersionForSnapshots: false
-      }
+        useCalculatedVersionForSnapshots: false,
+      },
     };
   }
   let tempDir = await f.copy(fixtureName);
@@ -102,7 +102,7 @@ async function testSetup(
       await getPackages(tempDir),
       config
     ),
-    tempDir
+    tempDir,
   };
 }
 
@@ -115,7 +115,7 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
-      let pkgPath = changedFiles.find(a =>
+      let pkgPath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}package.json`)
       );
 
@@ -124,7 +124,7 @@ describe("apply release plan", () => {
 
       expect(pkgJSON).toMatchObject({
         name: "pkg-a",
-        version: "1.1.0"
+        version: "1.1.0",
       });
     });
     it("should not update ranges set to *", async () => {
@@ -133,8 +133,8 @@ describe("apply release plan", () => {
           {
             id: "some-id",
             releases: [{ name: "pkg-b", type: "minor" }],
-            summary: "a very useful summary"
-          }
+            summary: "a very useful summary",
+          },
         ],
         [
           {
@@ -142,8 +142,8 @@ describe("apply release plan", () => {
             name: "pkg-b",
             newVersion: "1.1.0",
             oldVersion: "1.0.0",
-            type: "minor"
-          }
+            type: "minor",
+          },
         ]
       );
       let { changedFiles } = await testSetup(
@@ -151,7 +151,7 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
-      let pkgPath = changedFiles.find(a =>
+      let pkgPath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}package.json`)
       );
 
@@ -162,8 +162,8 @@ describe("apply release plan", () => {
         name: "pkg-a",
         version: "1.1.0",
         dependencies: {
-          "pkg-b": "*"
-        }
+          "pkg-b": "*",
+        },
       });
     });
     it("should update workspace ranges", async () => {
@@ -172,8 +172,8 @@ describe("apply release plan", () => {
           {
             id: "some-id",
             releases: [{ name: "pkg-b", type: "minor" }],
-            summary: "a very useful summary"
-          }
+            summary: "a very useful summary",
+          },
         ],
         [
           {
@@ -181,8 +181,8 @@ describe("apply release plan", () => {
             name: "pkg-b",
             newVersion: "1.1.0",
             oldVersion: "1.0.0",
-            type: "minor"
-          }
+            type: "minor",
+          },
         ]
       );
       let { changedFiles } = await testSetup(
@@ -190,7 +190,7 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
-      let pkgPath = changedFiles.find(a =>
+      let pkgPath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}package.json`)
       );
 
@@ -201,8 +201,8 @@ describe("apply release plan", () => {
         name: "pkg-a",
         version: "1.1.0",
         dependencies: {
-          "pkg-b": "workspace:1.1.0"
-        }
+          "pkg-b": "workspace:1.1.0",
+        },
       });
     });
     it("should update a version for two packages with different new versions", async () => {
@@ -214,8 +214,8 @@ describe("apply release plan", () => {
             type: "major",
             oldVersion: "1.0.0",
             newVersion: "2.0.0",
-            changesets: []
-          }
+            changesets: [],
+          },
         ]
       );
 
@@ -224,10 +224,10 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
-      let pkgPathA = changedFiles.find(a =>
+      let pkgPathA = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}package.json`)
       );
-      let pkgPathB = changedFiles.find(b =>
+      let pkgPathB = changedFiles.find((b) =>
         b.endsWith(`pkg-b${path.sep}package.json`)
       );
 
@@ -239,11 +239,11 @@ describe("apply release plan", () => {
 
       expect(pkgJSONA).toMatchObject({
         name: "pkg-a",
-        version: "1.1.0"
+        version: "1.1.0",
       });
       expect(pkgJSONB).toMatchObject({
         name: "pkg-b",
-        version: "2.0.0"
+        version: "2.0.0",
       });
     });
     it("should not update the version of the dependent package if the released dep is a dev dep", async () => {
@@ -256,9 +256,9 @@ describe("apply release plan", () => {
               summary: "Hey, let's have fun with testing!",
               releases: [
                 { name: "pkg-a", type: "none" },
-                { name: "pkg-b", type: "minor" }
-              ]
-            }
+                { name: "pkg-b", type: "minor" },
+              ],
+            },
           ],
           releases: [
             {
@@ -266,17 +266,17 @@ describe("apply release plan", () => {
               type: "none",
               oldVersion: "1.0.0",
               newVersion: "1.0.0",
-              changesets: ["quick-lions-devour"]
+              changesets: ["quick-lions-devour"],
             },
             {
               name: "pkg-b",
               type: "minor",
               oldVersion: "1.0.0",
               newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"]
-            }
+              changesets: ["quick-lions-devour"],
+            },
           ],
-          preState: undefined
+          preState: undefined,
         },
         {
           changelog: false,
@@ -288,14 +288,14 @@ describe("apply release plan", () => {
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-            useCalculatedVersionForSnapshots: false
-          }
+            useCalculatedVersionForSnapshots: false,
+          },
         }
       );
-      let pkgPathA = changedFiles.find(a =>
+      let pkgPathA = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}package.json`)
       );
-      let pkgPathB = changedFiles.find(b =>
+      let pkgPathB = changedFiles.find((b) =>
         b.endsWith(`pkg-b${path.sep}package.json`)
       );
 
@@ -309,12 +309,12 @@ describe("apply release plan", () => {
         name: "pkg-a",
         version: "1.0.0",
         devDependencies: {
-          "pkg-b": "1.1.0"
-        }
+          "pkg-b": "1.1.0",
+        },
       });
       expect(pkgJSONB).toMatchObject({
         name: "pkg-b",
-        version: "1.1.0"
+        version: "1.1.0",
       });
     });
     it("should skip dependencies that have the same name as the package", async () => {
@@ -325,8 +325,8 @@ describe("apply release plan", () => {
             {
               id: "quick-lions-devour",
               summary: "Hey, let's have fun with testing!",
-              releases: [{ name: "self-referenced", type: "minor" }]
-            }
+              releases: [{ name: "self-referenced", type: "minor" }],
+            },
           ],
           releases: [
             {
@@ -334,10 +334,10 @@ describe("apply release plan", () => {
               type: "minor",
               oldVersion: "1.0.0",
               newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"]
-            }
+              changesets: ["quick-lions-devour"],
+            },
           ],
-          preState: undefined
+          preState: undefined,
         },
         {
           changelog: false,
@@ -349,11 +349,11 @@ describe("apply release plan", () => {
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-            useCalculatedVersionForSnapshots: false
-          }
+            useCalculatedVersionForSnapshots: false,
+          },
         }
       );
-      let pkgPath = changedFiles.find(a =>
+      let pkgPath = changedFiles.find((a) =>
         a.endsWith(`self-referenced${path.sep}package.json`)
       );
 
@@ -364,8 +364,8 @@ describe("apply release plan", () => {
         name: "self-referenced",
         version: "1.1.0",
         devDependencies: {
-          "self-referenced": "file:"
-        }
+          "self-referenced": "file:",
+        },
       });
     });
 
@@ -382,9 +382,9 @@ describe("apply release plan", () => {
                   summary: "Hey, let's have fun with testing!",
                   releases: [
                     { name: "pkg-a", type: "patch" },
-                    { name: "pkg-b", type: "patch" }
-                  ]
-                }
+                    { name: "pkg-b", type: "patch" },
+                  ],
+                },
               ],
               releases: [
                 {
@@ -392,17 +392,17 @@ describe("apply release plan", () => {
                   type: "patch",
                   oldVersion: "1.0.3",
                   newVersion: "1.0.4",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-b",
                   type: "patch",
                   oldVersion: "1.2.0",
                   newVersion: "1.2.1",
-                  changesets: ["quick-lions-devour"]
-                }
+                  changesets: ["quick-lions-devour"],
+                },
               ],
-              preState: undefined
+              preState: undefined,
             },
             {
               changelog: false,
@@ -414,14 +414,14 @@ describe("apply release plan", () => {
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
-                useCalculatedVersionForSnapshots: false
-              }
+                useCalculatedVersionForSnapshots: false,
+              },
             }
           );
-          let pkgPathA = changedFiles.find(a =>
+          let pkgPathA = changedFiles.find((a) =>
             a.endsWith(`pkg-a${path.sep}package.json`)
           );
-          let pkgPathB = changedFiles.find(b =>
+          let pkgPathB = changedFiles.find((b) =>
             b.endsWith(`pkg-b${path.sep}package.json`)
           );
 
@@ -435,16 +435,16 @@ describe("apply release plan", () => {
             name: "pkg-a",
             version: "1.0.4",
             dependencies: {
-              "pkg-b": "~1.2.1"
-            }
+              "pkg-b": "~1.2.1",
+            },
           });
           expect(pkgJSONB).toMatchObject({
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
               "pkg-c": "2.0.0",
-              "pkg-a": "^1.0.4"
-            }
+              "pkg-a": "^1.0.4",
+            },
           });
         });
         it("should still update min version ranges of patch bumped internal dependencies that have left semver range", async () => {
@@ -458,9 +458,9 @@ describe("apply release plan", () => {
                   releases: [
                     { name: "pkg-a", type: "patch" },
                     { name: "pkg-b", type: "patch" },
-                    { name: "pkg-c", type: "patch" }
-                  ]
-                }
+                    { name: "pkg-c", type: "patch" },
+                  ],
+                },
               ],
               releases: [
                 {
@@ -468,24 +468,24 @@ describe("apply release plan", () => {
                   type: "patch",
                   oldVersion: "1.0.3",
                   newVersion: "1.0.4",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-b",
                   type: "none",
                   oldVersion: "1.2.0",
                   newVersion: "1.2.0",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-c",
                   type: "patch",
                   oldVersion: "2.0.0",
                   newVersion: "2.0.1",
-                  changesets: ["quick-lions-devour"]
-                }
+                  changesets: ["quick-lions-devour"],
+                },
               ],
-              preState: undefined
+              preState: undefined,
             },
             {
               changelog: false,
@@ -497,14 +497,14 @@ describe("apply release plan", () => {
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
-                useCalculatedVersionForSnapshots: false
-              }
+                useCalculatedVersionForSnapshots: false,
+              },
             }
           );
-          let pkgPathA = changedFiles.find(a =>
+          let pkgPathA = changedFiles.find((a) =>
             a.endsWith(`pkg-a${path.sep}package.json`)
           );
-          let pkgPathB = changedFiles.find(b =>
+          let pkgPathB = changedFiles.find((b) =>
             b.endsWith(`pkg-b${path.sep}package.json`)
           );
 
@@ -518,16 +518,16 @@ describe("apply release plan", () => {
             name: "pkg-a",
             version: "1.0.4",
             dependencies: {
-              "pkg-b": "~1.2.0"
-            }
+              "pkg-b": "~1.2.0",
+            },
           });
           expect(pkgJSONB).toMatchObject({
             name: "pkg-b",
             version: "1.2.0",
             dependencies: {
               "pkg-c": "2.0.1",
-              "pkg-a": "^1.0.4"
-            }
+              "pkg-a": "^1.0.4",
+            },
           });
         });
         it("should update min version ranges of minor bumped internal dependencies", async () => {
@@ -540,9 +540,9 @@ describe("apply release plan", () => {
                   summary: "Hey, let's have fun with testing!",
                   releases: [
                     { name: "pkg-a", type: "minor" },
-                    { name: "pkg-b", type: "patch" }
-                  ]
-                }
+                    { name: "pkg-b", type: "patch" },
+                  ],
+                },
               ],
               releases: [
                 {
@@ -550,17 +550,17 @@ describe("apply release plan", () => {
                   type: "minor",
                   oldVersion: "1.0.3",
                   newVersion: "1.1.0",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-b",
                   type: "patch",
                   oldVersion: "1.2.0",
                   newVersion: "1.2.1",
-                  changesets: ["quick-lions-devour"]
-                }
+                  changesets: ["quick-lions-devour"],
+                },
               ],
-              preState: undefined
+              preState: undefined,
             },
             {
               changelog: false,
@@ -572,14 +572,14 @@ describe("apply release plan", () => {
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
-                useCalculatedVersionForSnapshots: false
-              }
+                useCalculatedVersionForSnapshots: false,
+              },
             }
           );
-          let pkgPathA = changedFiles.find(a =>
+          let pkgPathA = changedFiles.find((a) =>
             a.endsWith(`pkg-a${path.sep}package.json`)
           );
-          let pkgPathB = changedFiles.find(b =>
+          let pkgPathB = changedFiles.find((b) =>
             b.endsWith(`pkg-b${path.sep}package.json`)
           );
 
@@ -593,16 +593,16 @@ describe("apply release plan", () => {
             name: "pkg-a",
             version: "1.1.0",
             dependencies: {
-              "pkg-b": "~1.2.1"
-            }
+              "pkg-b": "~1.2.1",
+            },
           });
           expect(pkgJSONB).toMatchObject({
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
               "pkg-c": "2.0.0",
-              "pkg-a": "^1.1.0"
-            }
+              "pkg-a": "^1.1.0",
+            },
           });
         });
         it("should update min version ranges of major bumped internal dependencies", async () => {
@@ -615,9 +615,9 @@ describe("apply release plan", () => {
                   summary: "Hey, let's have fun with testing!",
                   releases: [
                     { name: "pkg-a", type: "major" },
-                    { name: "pkg-b", type: "patch" }
-                  ]
-                }
+                    { name: "pkg-b", type: "patch" },
+                  ],
+                },
               ],
               releases: [
                 {
@@ -625,17 +625,17 @@ describe("apply release plan", () => {
                   type: "major",
                   oldVersion: "1.0.3",
                   newVersion: "2.0.0",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-b",
                   type: "patch",
                   oldVersion: "1.2.0",
                   newVersion: "1.2.1",
-                  changesets: ["quick-lions-devour"]
-                }
+                  changesets: ["quick-lions-devour"],
+                },
               ],
-              preState: undefined
+              preState: undefined,
             },
             {
               changelog: false,
@@ -647,14 +647,14 @@ describe("apply release plan", () => {
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
-                useCalculatedVersionForSnapshots: false
-              }
+                useCalculatedVersionForSnapshots: false,
+              },
             }
           );
-          let pkgPathA = changedFiles.find(a =>
+          let pkgPathA = changedFiles.find((a) =>
             a.endsWith(`pkg-a${path.sep}package.json`)
           );
-          let pkgPathB = changedFiles.find(b =>
+          let pkgPathB = changedFiles.find((b) =>
             b.endsWith(`pkg-b${path.sep}package.json`)
           );
 
@@ -668,16 +668,16 @@ describe("apply release plan", () => {
             name: "pkg-a",
             version: "2.0.0",
             dependencies: {
-              "pkg-b": "~1.2.1"
-            }
+              "pkg-b": "~1.2.1",
+            },
           });
           expect(pkgJSONB).toMatchObject({
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
               "pkg-c": "2.0.0",
-              "pkg-a": "^2.0.0"
-            }
+              "pkg-a": "^2.0.0",
+            },
           });
         });
       });
@@ -693,9 +693,9 @@ describe("apply release plan", () => {
                   summary: "Hey, let's have fun with testing!",
                   releases: [
                     { name: "pkg-a", type: "patch" },
-                    { name: "pkg-b", type: "patch" }
-                  ]
-                }
+                    { name: "pkg-b", type: "patch" },
+                  ],
+                },
               ],
               releases: [
                 {
@@ -703,17 +703,17 @@ describe("apply release plan", () => {
                   type: "patch",
                   oldVersion: "1.0.3",
                   newVersion: "1.0.4",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-b",
                   type: "patch",
                   oldVersion: "1.2.0",
                   newVersion: "1.2.1",
-                  changesets: ["quick-lions-devour"]
-                }
+                  changesets: ["quick-lions-devour"],
+                },
               ],
-              preState: undefined
+              preState: undefined,
             },
             {
               changelog: false,
@@ -725,14 +725,14 @@ describe("apply release plan", () => {
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
-                useCalculatedVersionForSnapshots: false
-              }
+                useCalculatedVersionForSnapshots: false,
+              },
             }
           );
-          let pkgPathA = changedFiles.find(a =>
+          let pkgPathA = changedFiles.find((a) =>
             a.endsWith(`pkg-a${path.sep}package.json`)
           );
-          let pkgPathB = changedFiles.find(b =>
+          let pkgPathB = changedFiles.find((b) =>
             b.endsWith(`pkg-b${path.sep}package.json`)
           );
 
@@ -746,16 +746,16 @@ describe("apply release plan", () => {
             name: "pkg-a",
             version: "1.0.4",
             dependencies: {
-              "pkg-b": "~1.2.0"
-            }
+              "pkg-b": "~1.2.0",
+            },
           });
           expect(pkgJSONB).toMatchObject({
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
               "pkg-c": "2.0.0",
-              "pkg-a": "^1.0.3"
-            }
+              "pkg-a": "^1.0.3",
+            },
           });
         });
         it("should still update min version ranges of patch bumped internal dependencies that have left semver range", async () => {
@@ -769,9 +769,9 @@ describe("apply release plan", () => {
                   releases: [
                     { name: "pkg-a", type: "patch" },
                     { name: "pkg-b", type: "patch" },
-                    { name: "pkg-c", type: "patch" }
-                  ]
-                }
+                    { name: "pkg-c", type: "patch" },
+                  ],
+                },
               ],
               releases: [
                 {
@@ -779,24 +779,24 @@ describe("apply release plan", () => {
                   type: "patch",
                   oldVersion: "1.0.3",
                   newVersion: "1.0.4",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-b",
                   type: "patch",
                   oldVersion: "1.2.0",
                   newVersion: "1.2.1",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-c",
                   type: "patch",
                   oldVersion: "2.0.0",
                   newVersion: "2.0.1",
-                  changesets: ["quick-lions-devour"]
-                }
+                  changesets: ["quick-lions-devour"],
+                },
               ],
-              preState: undefined
+              preState: undefined,
             },
             {
               changelog: false,
@@ -808,14 +808,14 @@ describe("apply release plan", () => {
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
-                useCalculatedVersionForSnapshots: false
-              }
+                useCalculatedVersionForSnapshots: false,
+              },
             }
           );
-          let pkgPathA = changedFiles.find(a =>
+          let pkgPathA = changedFiles.find((a) =>
             a.endsWith(`pkg-a${path.sep}package.json`)
           );
-          let pkgPathB = changedFiles.find(b =>
+          let pkgPathB = changedFiles.find((b) =>
             b.endsWith(`pkg-b${path.sep}package.json`)
           );
 
@@ -829,16 +829,16 @@ describe("apply release plan", () => {
             name: "pkg-a",
             version: "1.0.4",
             dependencies: {
-              "pkg-b": "~1.2.0"
-            }
+              "pkg-b": "~1.2.0",
+            },
           });
           expect(pkgJSONB).toMatchObject({
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
               "pkg-c": "2.0.1",
-              "pkg-a": "^1.0.3"
-            }
+              "pkg-a": "^1.0.3",
+            },
           });
         });
         it("should update min version ranges of minor bumped internal dependencies", async () => {
@@ -851,9 +851,9 @@ describe("apply release plan", () => {
                   summary: "Hey, let's have fun with testing!",
                   releases: [
                     { name: "pkg-a", type: "minor" },
-                    { name: "pkg-b", type: "patch" }
-                  ]
-                }
+                    { name: "pkg-b", type: "patch" },
+                  ],
+                },
               ],
               releases: [
                 {
@@ -861,17 +861,17 @@ describe("apply release plan", () => {
                   type: "minor",
                   oldVersion: "1.0.3",
                   newVersion: "1.1.0",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-b",
                   type: "patch",
                   oldVersion: "1.2.0",
                   newVersion: "1.2.1",
-                  changesets: ["quick-lions-devour"]
-                }
+                  changesets: ["quick-lions-devour"],
+                },
               ],
-              preState: undefined
+              preState: undefined,
             },
             {
               changelog: false,
@@ -883,14 +883,14 @@ describe("apply release plan", () => {
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
-                useCalculatedVersionForSnapshots: false
-              }
+                useCalculatedVersionForSnapshots: false,
+              },
             }
           );
-          let pkgPathA = changedFiles.find(a =>
+          let pkgPathA = changedFiles.find((a) =>
             a.endsWith(`pkg-a${path.sep}package.json`)
           );
-          let pkgPathB = changedFiles.find(b =>
+          let pkgPathB = changedFiles.find((b) =>
             b.endsWith(`pkg-b${path.sep}package.json`)
           );
 
@@ -904,16 +904,16 @@ describe("apply release plan", () => {
             name: "pkg-a",
             version: "1.1.0",
             dependencies: {
-              "pkg-b": "~1.2.0"
-            }
+              "pkg-b": "~1.2.0",
+            },
           });
           expect(pkgJSONB).toMatchObject({
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
               "pkg-c": "2.0.0",
-              "pkg-a": "^1.1.0"
-            }
+              "pkg-a": "^1.1.0",
+            },
           });
         });
         it("should update min version ranges of major bumped internal dependencies", async () => {
@@ -926,9 +926,9 @@ describe("apply release plan", () => {
                   summary: "Hey, let's have fun with testing!",
                   releases: [
                     { name: "pkg-a", type: "major" },
-                    { name: "pkg-b", type: "patch" }
-                  ]
-                }
+                    { name: "pkg-b", type: "patch" },
+                  ],
+                },
               ],
               releases: [
                 {
@@ -936,17 +936,17 @@ describe("apply release plan", () => {
                   type: "major",
                   oldVersion: "1.0.3",
                   newVersion: "2.0.0",
-                  changesets: ["quick-lions-devour"]
+                  changesets: ["quick-lions-devour"],
                 },
                 {
                   name: "pkg-b",
                   type: "patch",
                   oldVersion: "1.2.0",
                   newVersion: "1.2.1",
-                  changesets: ["quick-lions-devour"]
-                }
+                  changesets: ["quick-lions-devour"],
+                },
               ],
-              preState: undefined
+              preState: undefined,
             },
             {
               changelog: false,
@@ -958,14 +958,14 @@ describe("apply release plan", () => {
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
-                useCalculatedVersionForSnapshots: false
-              }
+                useCalculatedVersionForSnapshots: false,
+              },
             }
           );
-          let pkgPathA = changedFiles.find(a =>
+          let pkgPathA = changedFiles.find((a) =>
             a.endsWith(`pkg-a${path.sep}package.json`)
           );
-          let pkgPathB = changedFiles.find(b =>
+          let pkgPathB = changedFiles.find((b) =>
             b.endsWith(`pkg-b${path.sep}package.json`)
           );
 
@@ -979,16 +979,16 @@ describe("apply release plan", () => {
             name: "pkg-a",
             version: "2.0.0",
             dependencies: {
-              "pkg-b": "~1.2.0"
-            }
+              "pkg-b": "~1.2.0",
+            },
           });
           expect(pkgJSONB).toMatchObject({
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
               "pkg-c": "2.0.0",
-              "pkg-a": "^2.0.0"
-            }
+              "pkg-a": "^2.0.0",
+            },
           });
         });
       });
@@ -1005,9 +1005,9 @@ describe("apply release plan", () => {
                 summary: "Hey, let's have fun with testing!",
                 releases: [
                   { name: "has-peer-dep", type: "patch" },
-                  { name: "depended-upon", type: "patch" }
-                ]
-              }
+                  { name: "depended-upon", type: "patch" },
+                ],
+              },
             ],
             releases: [
               {
@@ -1015,17 +1015,17 @@ describe("apply release plan", () => {
                 type: "patch",
                 oldVersion: "1.0.0",
                 newVersion: "1.0.1",
-                changesets: ["quick-lions-devour"]
+                changesets: ["quick-lions-devour"],
               },
               {
                 name: "depended-upon",
                 type: "patch",
                 oldVersion: "1.0.0",
                 newVersion: "1.0.1",
-                changesets: ["quick-lions-devour"]
-              }
+                changesets: ["quick-lions-devour"],
+              },
             ],
-            preState: undefined
+            preState: undefined,
           },
           {
             changelog: false,
@@ -1037,14 +1037,14 @@ describe("apply release plan", () => {
             ignore: [],
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               onlyUpdatePeerDependentsWhenOutOfRange: true,
-              useCalculatedVersionForSnapshots: false
-            }
+              useCalculatedVersionForSnapshots: false,
+            },
           }
         );
-        let pkgPathDependent = changedFiles.find(a =>
+        let pkgPathDependent = changedFiles.find((a) =>
           a.endsWith(`has-peer-dep${path.sep}package.json`)
         );
-        let pkgPathDepended = changedFiles.find(b =>
+        let pkgPathDepended = changedFiles.find((b) =>
           b.endsWith(`depended-upon${path.sep}package.json`)
         );
 
@@ -1058,12 +1058,12 @@ describe("apply release plan", () => {
           name: "has-peer-dep",
           version: "1.0.1",
           peerDependencies: {
-            "depended-upon": "^1.0.0"
-          }
+            "depended-upon": "^1.0.0",
+          },
         });
         expect(pkgJSONDepended).toMatchObject({
           name: "depended-upon",
-          version: "1.0.1"
+          version: "1.0.1",
         });
       });
     });
@@ -1078,12 +1078,12 @@ describe("apply release plan", () => {
           ...releasePlan.config,
           changelog: [
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-            null
-          ]
+            null,
+          ],
         }
       );
 
-      let readmePath = changedFiles.find(a =>
+      let readmePath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
       );
 
@@ -1106,8 +1106,8 @@ describe("apply release plan", () => {
             type: "major",
             oldVersion: "1.0.0",
             newVersion: "2.0.0",
-            changesets: []
-          }
+            changesets: [],
+          },
         ]
       );
 
@@ -1118,15 +1118,15 @@ describe("apply release plan", () => {
           ...releasePlan.config,
           changelog: [
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-            null
-          ]
+            null,
+          ],
         }
       );
 
-      let readmePath = changedFiles.find(a =>
+      let readmePath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
       );
-      let readmePathB = changedFiles.find(a =>
+      let readmePathB = changedFiles.find((a) =>
         a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
       );
 
@@ -1160,9 +1160,9 @@ describe("apply release plan", () => {
               summary: "Hey, let's have fun with testing!",
               releases: [
                 { name: "pkg-a", type: "none" },
-                { name: "pkg-b", type: "minor" }
-              ]
-            }
+                { name: "pkg-b", type: "minor" },
+              ],
+            },
           ],
           releases: [
             {
@@ -1170,17 +1170,17 @@ describe("apply release plan", () => {
               type: "none",
               oldVersion: "1.0.0",
               newVersion: "1.0.0",
-              changesets: []
+              changesets: [],
             },
             {
               name: "pkg-b",
               type: "minor",
               oldVersion: "1.0.0",
               newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"]
-            }
+              changesets: ["quick-lions-devour"],
+            },
           ],
-          preState: undefined
+          preState: undefined,
         },
         {
           commit: false,
@@ -1189,17 +1189,17 @@ describe("apply release plan", () => {
           baseBranch: "master",
           changelog: [
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-            null
+            null,
           ],
           updateInternalDependencies: "patch",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-            useCalculatedVersionForSnapshots: false
-          }
+            useCalculatedVersionForSnapshots: false,
+          },
         }
       );
-      let pkgAChangelogPath = changedFiles.find(a =>
+      let pkgAChangelogPath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
       );
 
@@ -1211,13 +1211,13 @@ describe("apply release plan", () => {
         {
           id: "some-id-1",
           summary: "Random stuff\n\nget it while it's hot!",
-          releases: [{ name: "pkg-a", type: "minor" }]
+          releases: [{ name: "pkg-a", type: "minor" }],
         },
         {
           id: "some-id-2",
           summary: "New feature, much wow\n\nlook at this shiny stuff!",
-          releases: [{ name: "pkg-a", type: "minor" }]
-        }
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
       ]);
       releasePlan.releases[0].changesets.push("some-id-1", "some-id-2");
 
@@ -1228,12 +1228,12 @@ describe("apply release plan", () => {
           ...releasePlan.config,
           changelog: [
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-            null
-          ]
+            null,
+          ],
         }
       );
 
-      let readmePath = changedFiles.find(a =>
+      let readmePath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
       );
 
@@ -1248,7 +1248,7 @@ describe("apply release plan", () => {
           "- Random stuff",
           "  \n  get it while it's hot!",
           "- New feature, much wow",
-          "  \n  look at this shiny stuff!"
+          "  \n  look at this shiny stuff!",
         ].join("\n")
       );
     });
@@ -1263,9 +1263,9 @@ describe("apply release plan", () => {
               summary: "Hey, let's have fun with testing!",
               releases: [
                 { name: "pkg-a", type: "patch" },
-                { name: "pkg-b", type: "patch" }
-              ]
-            }
+                { name: "pkg-b", type: "patch" },
+              ],
+            },
           ],
           releases: [
             {
@@ -1273,22 +1273,22 @@ describe("apply release plan", () => {
               type: "patch",
               oldVersion: "1.0.3",
               newVersion: "1.0.4",
-              changesets: ["quick-lions-devour"]
+              changesets: ["quick-lions-devour"],
             },
             {
               name: "pkg-b",
               type: "patch",
               oldVersion: "1.2.0",
               newVersion: "1.2.1",
-              changesets: ["quick-lions-devour"]
-            }
+              changesets: ["quick-lions-devour"],
+            },
           ],
-          preState: undefined
+          preState: undefined,
         },
         {
           changelog: [
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-            null
+            null,
           ],
           commit: false,
           linked: [],
@@ -1298,15 +1298,15 @@ describe("apply release plan", () => {
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-            useCalculatedVersionForSnapshots: false
-          }
+            useCalculatedVersionForSnapshots: false,
+          },
         }
       );
 
-      let readmePath = changedFiles.find(a =>
+      let readmePath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
       );
-      let readmePathB = changedFiles.find(a =>
+      let readmePathB = changedFiles.find((a) =>
         a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
       );
 
@@ -1344,9 +1344,9 @@ describe("apply release plan", () => {
               summary: "Hey, let's have fun with testing!",
               releases: [
                 { name: "pkg-a", type: "patch" },
-                { name: "pkg-b", type: "patch" }
-              ]
-            }
+                { name: "pkg-b", type: "patch" },
+              ],
+            },
           ],
           releases: [
             {
@@ -1354,22 +1354,22 @@ describe("apply release plan", () => {
               type: "patch",
               oldVersion: "1.0.3",
               newVersion: "1.0.4",
-              changesets: ["quick-lions-devour"]
+              changesets: ["quick-lions-devour"],
             },
             {
               name: "pkg-b",
               type: "patch",
               oldVersion: "1.2.0",
               newVersion: "1.2.1",
-              changesets: ["quick-lions-devour"]
-            }
+              changesets: ["quick-lions-devour"],
+            },
           ],
-          preState: undefined
+          preState: undefined,
         },
         {
           changelog: [
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-            null
+            null,
           ],
           commit: false,
           linked: [],
@@ -1379,15 +1379,15 @@ describe("apply release plan", () => {
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-            useCalculatedVersionForSnapshots: false
-          }
+            useCalculatedVersionForSnapshots: false,
+          },
         }
       );
 
-      let readmePath = changedFiles.find(a =>
+      let readmePath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
       );
-      let readmePathB = changedFiles.find(a =>
+      let readmePathB = changedFiles.find((a) =>
         a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
       );
 
@@ -1422,9 +1422,9 @@ describe("apply release plan", () => {
               releases: [
                 { name: "pkg-a", type: "patch" },
                 { name: "pkg-b", type: "patch" },
-                { name: "pkg-c", type: "minor" }
-              ]
-            }
+                { name: "pkg-c", type: "minor" },
+              ],
+            },
           ],
           releases: [
             {
@@ -1432,29 +1432,29 @@ describe("apply release plan", () => {
               type: "patch",
               oldVersion: "1.0.3",
               newVersion: "1.0.4",
-              changesets: ["quick-lions-devour"]
+              changesets: ["quick-lions-devour"],
             },
             {
               name: "pkg-b",
               type: "patch",
               oldVersion: "1.2.0",
               newVersion: "1.2.1",
-              changesets: ["quick-lions-devour"]
+              changesets: ["quick-lions-devour"],
             },
             {
               name: "pkg-c",
               type: "minor",
               oldVersion: "2.0.0",
               newVersion: "2.1.0",
-              changesets: ["quick-lions-devour"]
-            }
+              changesets: ["quick-lions-devour"],
+            },
           ],
-          preState: undefined
+          preState: undefined,
         },
         {
           changelog: [
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-            null
+            null,
           ],
           commit: false,
           linked: [],
@@ -1464,18 +1464,18 @@ describe("apply release plan", () => {
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-            useCalculatedVersionForSnapshots: false
-          }
+            useCalculatedVersionForSnapshots: false,
+          },
         }
       );
 
-      let readmePath = changedFiles.find(a =>
+      let readmePath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
       );
-      let readmePathB = changedFiles.find(a =>
+      let readmePathB = changedFiles.find((a) =>
         a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
       );
-      let readmePathC = changedFiles.find(a =>
+      let readmePathC = changedFiles.find((a) =>
         a.endsWith(`pkg-c${path.sep}CHANGELOG.md`)
       );
 
@@ -1520,9 +1520,9 @@ describe("apply release plan", () => {
               releases: [
                 { name: "pkg-a", type: "patch" },
                 { name: "pkg-b", type: "patch" },
-                { name: "pkg-c", type: "patch" }
-              ]
-            }
+                { name: "pkg-c", type: "patch" },
+              ],
+            },
           ],
           releases: [
             {
@@ -1530,29 +1530,29 @@ describe("apply release plan", () => {
               type: "patch",
               oldVersion: "1.0.3",
               newVersion: "1.0.4",
-              changesets: ["quick-lions-devour"]
+              changesets: ["quick-lions-devour"],
             },
             {
               name: "pkg-b",
               type: "patch",
               oldVersion: "1.2.0",
               newVersion: "1.2.1",
-              changesets: ["quick-lions-devour"]
+              changesets: ["quick-lions-devour"],
             },
             {
               name: "pkg-c",
               type: "patch",
               oldVersion: "2.0.0",
               newVersion: "2.0.1",
-              changesets: ["quick-lions-devour"]
-            }
+              changesets: ["quick-lions-devour"],
+            },
           ],
-          preState: undefined
+          preState: undefined,
         },
         {
           changelog: [
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-            null
+            null,
           ],
           commit: false,
           linked: [],
@@ -1562,18 +1562,18 @@ describe("apply release plan", () => {
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-            useCalculatedVersionForSnapshots: false
-          }
+            useCalculatedVersionForSnapshots: false,
+          },
         }
       );
 
-      let readmePath = changedFiles.find(a =>
+      let readmePath = changedFiles.find((a) =>
         a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
       );
-      let readmePathB = changedFiles.find(a =>
+      let readmePathB = changedFiles.find((a) =>
         a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
       );
-      let readmePathC = changedFiles.find(a =>
+      let readmePathC = changedFiles.find((a) =>
         a.endsWith(`pkg-c${path.sep}CHANGELOG.md`)
       );
 
@@ -1618,8 +1618,8 @@ describe("apply release plan", () => {
             {
               id: "quick-lions-devour",
               summary: "Hey, let's have fun with testing!",
-              releases: [{ name: "pkg-a", type: "minor" }]
-            }
+              releases: [{ name: "pkg-a", type: "minor" }],
+            },
           ],
           releases: [
             {
@@ -1627,17 +1627,17 @@ describe("apply release plan", () => {
               type: "minor",
               oldVersion: "1.0.0",
               newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"]
+              changesets: ["quick-lions-devour"],
             },
             {
               name: "pkg-a",
               type: "minor",
               oldVersion: "1.0.0",
               newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"]
-            }
+              changesets: ["quick-lions-devour"],
+            },
           ],
-          preState: undefined
+          preState: undefined,
         });
         changedFiles = testResults.changedFiles;
       } catch (e) {
@@ -1661,8 +1661,8 @@ describe("apply release plan", () => {
             type: "minor",
             oldVersion: "1.0.0",
             newVersion: "1.0.0",
-            changesets: []
-          }
+            changesets: [],
+          },
         ]
       );
 
@@ -1712,8 +1712,8 @@ describe("apply release plan", () => {
             ...releasePlan.config,
             changelog: [
               path.resolve(__dirname, "test-utils/failing-functions"),
-              null
-            ]
+              null,
+            ],
           }
         );
       } catch (e) {
@@ -1867,9 +1867,9 @@ describe("apply release plan", () => {
         ...releasePlan.config,
         changelog: [
           path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-          null
+          null,
         ],
-        commit: true
+        commit: true,
       },
       setupFunc
     );
@@ -1878,7 +1878,7 @@ describe("apply release plan", () => {
     let commits = thing.stdout
       .toString("utf8")
       .split("\n")
-      .filter(x => x);
+      .filter((x) => x);
 
     let lastCommit = commits[commits.length - 1].substring(0, 7);
 
@@ -1929,9 +1929,9 @@ describe("apply release plan", () => {
               summary: "Hey, let's have fun with testing!",
               releases: [
                 { name: "pkg-a", type: "none" },
-                { name: "pkg-b", type: "minor" }
-              ]
-            }
+                { name: "pkg-b", type: "minor" },
+              ],
+            },
           ],
           releases: [
             {
@@ -1939,17 +1939,17 @@ describe("apply release plan", () => {
               type: "none",
               oldVersion: "1.0.0",
               newVersion: "1.0.0",
-              changesets: ["quick-lions-devour"]
+              changesets: ["quick-lions-devour"],
             },
             {
               name: "pkg-b",
               type: "minor",
               oldVersion: "1.0.0",
               newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"]
-            }
+              changesets: ["quick-lions-devour"],
+            },
           ],
-          preState: undefined
+          preState: undefined,
         },
         {
           changelog: false,
@@ -1961,8 +1961,8 @@ describe("apply release plan", () => {
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-            useCalculatedVersionForSnapshots: false
-          }
+            useCalculatedVersionForSnapshots: false,
+          },
         }
       );
 

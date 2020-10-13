@@ -4,7 +4,7 @@ const DEPENDENCY_TYPES = [
   "dependencies",
   "devDependencies",
   "peerDependencies",
-  "optionalDependencies"
+  "optionalDependencies",
 ] as const;
 
 export type VersionType = "major" | "minor" | "patch" | "none";
@@ -14,6 +14,20 @@ export type DependencyType = typeof DEPENDENCY_TYPES[number];
 export type AccessType = "public" | "restricted";
 
 export type Release = { name: string; type: VersionType };
+
+export type ExperimentalOptions = {
+  onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
+  useCalculatedVersionForSnapshots?: boolean;
+};
+
+export type PreState = {
+  mode: "pre" | "exit";
+  tag: string;
+  initialVersions: {
+    [pkgName: string]: string;
+  };
+  changesets: string[];
+};
 
 // This is a release that has been modified to include all relevant information
 // about releasing - it is calculated and doesn't make sense as an artefact
@@ -82,11 +96,6 @@ export type WrittenConfig = {
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?: ExperimentalOptions;
 };
 
-export type ExperimentalOptions = {
-  onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
-  useCalculatedVersionForSnapshots?: boolean;
-};
-
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
 
 export type ModCompWithPackage = ComprehensiveRelease & {
@@ -109,13 +118,4 @@ export type GetDependencyReleaseLine = (
 export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
   getDependencyReleaseLine: GetDependencyReleaseLine;
-};
-
-export type PreState = {
-  mode: "pre" | "exit";
-  tag: string;
-  initialVersions: {
-    [pkgName: string]: string;
-  };
-  changesets: string[];
 };

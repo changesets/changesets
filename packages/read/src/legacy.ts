@@ -20,11 +20,11 @@ async function getOldChangesets(
   dirs: string[]
 ): Promise<Array<NewChangeset>> {
   // this needs to support just not dealing with dirs that aren't set up properly
-  let changesets = await pFilter(dirs, async dir =>
+  let changesets = await pFilter(dirs, async (dir) =>
     (await fs.lstat(path.join(changesetBase, dir))).isDirectory()
   );
 
-  const changesetContents = changesets.map(async changesetDir => {
+  const changesetContents = changesets.map(async (changesetDir) => {
     const jsonPath = path.join(changesetBase, changesetDir, "changes.json");
 
     const [summary, json] = await Promise.all([
@@ -32,7 +32,7 @@ async function getOldChangesets(
         path.join(changesetBase, changesetDir, "changes.md"),
         "utf-8"
       ),
-      fs.readJson(jsonPath)
+      fs.readJson(jsonPath),
     ]);
 
     return { releases: json.releases, summary, id: changesetDir };

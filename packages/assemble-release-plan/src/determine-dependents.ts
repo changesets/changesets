@@ -3,7 +3,7 @@ import {
   Release,
   DependencyType,
   PackageJSON,
-  VersionType
+  VersionType,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease, PreInfo } from "./types";
@@ -27,7 +27,7 @@ export default function getDependents({
   dependencyGraph,
   preInfo,
   ignoredPackages,
-  onlyUpdatePeerDependentsWhenOutOfRange
+  onlyUpdatePeerDependentsWhenOutOfRange,
 }: {
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
@@ -54,7 +54,7 @@ export default function getDependents({
     // For each dependent we are going to see whether it needs to be bumped because it's dependency
     // is leaving the version range.
     pkgDependents
-      .map(dependent => {
+      .map((dependent) => {
         let type: VersionType | undefined;
 
         const dependentPackage = packagesByName.get(dependent);
@@ -78,7 +78,7 @@ export default function getDependents({
                 releases,
                 nextRelease,
                 preInfo,
-                onlyUpdatePeerDependentsWhenOutOfRange
+                onlyUpdatePeerDependentsWhenOutOfRange,
               })
             ) {
               type = "major";
@@ -142,7 +142,7 @@ export default function getDependents({
               name,
               type,
               oldVersion: pkgJSON.version,
-              changesets: []
+              changesets: [],
             };
 
             pkgsToSearch.push(newDependent);
@@ -171,7 +171,7 @@ function getDependencyVersionRanges(
     "dependencies",
     "devDependencies",
     "peerDependencies",
-    "optionalDependencies"
+    "optionalDependencies",
   ] as const;
   const dependencyVersionRanges: {
     depType: DependencyType;
@@ -183,7 +183,7 @@ function getDependencyVersionRanges(
     if (deps[dependencyName]) {
       dependencyVersionRanges.push({
         depType: type,
-        versionRange: deps[dependencyName]
+        versionRange: deps[dependencyName],
       });
     }
   }
@@ -197,7 +197,7 @@ function shouldBumpMajor({
   releases,
   nextRelease,
   preInfo,
-  onlyUpdatePeerDependentsWhenOutOfRange
+  onlyUpdatePeerDependentsWhenOutOfRange,
 }: {
   dependent: string;
   depType: DependencyType;

@@ -9,6 +9,15 @@ import { PreState } from "@changesets/types";
 import isCI from "../../utils/isCI";
 import { join } from "path";
 
+type PublishedState = "never" | "published" | "only-pre";
+
+type PkgInfo = {
+  name: string;
+  localVersion: string;
+  publishedState: PublishedState;
+  publishedVersions: string[];
+};
+
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   if (tag) return tag;
 
@@ -24,7 +33,7 @@ export default async function publishPackages({
   access,
   otp,
   preState,
-  tag
+  tag,
 }: {
   packages: Package[];
   access: AccessType;
@@ -32,8 +41,8 @@ export default async function publishPackages({
   preState: PreState | undefined;
   tag?: string;
 }) {
-  const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]));
-  const publicPackages = packages.filter(pkg => !pkg.packageJson.private);
+  const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
+  const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
   let twoFactorState: TwoFactorState =
     otp === undefined
       ? {
@@ -41,7 +50,7 @@ export default async function publishPackages({
           isRequired:
             isCI ||
             publicPackages.some(
-              x =>
+              (x) =>
                 x.packageJson.publishConfig &&
                 (x.packageJson.publishConfig as any).registry &&
                 (x.packageJson.publishConfig as any).registry !==
@@ -56,11 +65,11 @@ export default async function publishPackages({
                 "https://registry.yarnpkg.com")
               ? Promise.resolve(false)
               : // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
-                npmUtils.getTokenIsRequired()
+                npmUtils.getTokenIsRequired(),
         }
       : {
           token: otp,
-          isRequired: Promise.resolve(true)
+          isRequired: Promise.resolve(true),
         };
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
@@ -114,7 +123,7 @@ async function publishAPackage(
     {
       cwd: publishDir,
       access: localAccess || access,
-      tag
+      tag,
     },
     twoFactorState
   );
@@ -122,25 +131,16 @@ async function publishAPackage(
   return {
     name,
     newVersion: version,
-    published: publishConfirmation.published
+    published: publishConfirmation.published,
   };
 }
-
-type PublishedState = "never" | "published" | "only-pre";
-
-type PkgInfo = {
-  name: string;
-  localVersion: string;
-  publishedState: PublishedState;
-  publishedVersions: string[];
-};
 
 async function getUnpublishedPackages(
   packages: Array<Package>,
   preState: PreState | undefined
 ) {
   const results: Array<PkgInfo> = await Promise.all(
-    packages.map(async pkg => {
+    packages.map(async (pkg) => {
       const config = pkg.packageJson;
       const response = await npmUtils.infoAllow404(config.name);
       let publishedState: PublishedState = "never";
@@ -163,7 +163,7 @@ async function getUnpublishedPackages(
         name: config.name,
         localVersion: config.version,
         publishedState: publishedState,
-        publishedVersions: response.pkgInfo.versions || []
+        publishedVersions: response.pkgInfo.versions || [],
       };
     })
   );

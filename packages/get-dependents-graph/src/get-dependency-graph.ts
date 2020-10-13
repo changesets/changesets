@@ -8,7 +8,7 @@ const DEPENDENCY_TYPES = [
   "dependencies",
   "devDependencies",
   "peerDependencies",
-  "optionalDependencies"
+  "optionalDependencies",
 ] as const;
 
 const getAllDependencies = (config: PackageJSON) => {
@@ -47,7 +47,7 @@ export default function getDependencyGraph(
   let valid = true;
 
   const packagesByName: { [key: string]: Package } = {
-    [packages.root.packageJson.name]: packages.root
+    [packages.root.packageJson.name]: packages.root,
   };
 
   const queue = [packages.root];

@@ -8,7 +8,7 @@ import {
   VersionType,
   Release,
   ComprehensiveRelease,
-  Config
+  Config,
 } from "@changesets/types";
 
 export default async function getStatus(
@@ -17,7 +17,7 @@ export default async function getStatus(
     sinceMaster,
     since,
     verbose,
-    output
+    output,
   }: {
     sinceMaster?: boolean;
     since?: string;
@@ -64,7 +64,7 @@ export default async function getStatus(
 }
 
 function SimplePrint(type: VersionType, releases: Array<Release>) {
-  const packages = releases.filter(r => r.type === type);
+  const packages = releases.filter((r) => r.type === type);
   if (packages.length) {
     info(chalk`Packages to be bumped at {green ${type}}:\n`);
 
@@ -79,7 +79,7 @@ function verbosePrint(
   type: VersionType,
   releases: Array<ComprehensiveRelease>
 ) {
-  const packages = releases.filter(r => r.type === type);
+  const packages = releases.filter((r) => r.type === type);
   if (packages.length) {
     info(chalk`Packages to be bumped at {green ${type}}`);
 
@@ -88,8 +88,8 @@ function verbosePrint(
         chalk.green(name),
         version,
         changesets
-          .map(c => chalk.blue(` .changeset/${c}/changes.md`))
-          .join(" +")
+          .map((c) => chalk.blue(` .changeset/${c}/changes.md`))
+          .join(" +"),
       ]
     );
 
@@ -97,7 +97,7 @@ function verbosePrint(
       [
         { value: "Package Name", width: 20 },
         { value: "New Version", width: 20 },
-        { value: "Related Changeset Summaries", width: 70 }
+        { value: "Related Changeset Summaries", width: 70 },
       ],
       columns,
       { paddingLeft: 1, paddingRight: 0, headerAlign: "center", align: "left" }
