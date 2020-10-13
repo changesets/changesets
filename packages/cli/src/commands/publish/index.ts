@@ -8,7 +8,7 @@ import { getPackages } from "@manypkg/get-packages";
 import chalk from "chalk";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
-  const mappedPkgs = pkgs.map(p => `${p.name}@${p.newVersion}`).join("\n");
+  const mappedPkgs = pkgs.map((p) => `${p.name}@${p.newVersion}`).join("\n");
   log(mappedPkgs);
 }
 
@@ -63,11 +63,11 @@ export default async function run(
     access: config.access,
     otp,
     preState,
-    tag: releaseTag
+    tag: releaseTag,
   });
 
-  const successful = response.filter(p => p.published);
-  const unsuccessful = response.filter(p => !p.published);
+  const successful = response.filter((p) => p.published);
+  const unsuccessful = response.filter((p) => !p.published);
 
   if (successful.length > 0) {
     success("packages published successfully:");

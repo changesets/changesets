@@ -14,10 +14,10 @@ let preStateForSimpleProject: PreState = {
   changesets: [],
   initialVersions: {
     "pkg-a": "1.0.0",
-    "pkg-b": "1.0.0"
+    "pkg-b": "1.0.0",
   },
   mode: "pre",
-  tag: "next"
+  tag: "next",
 };
 
 jest.mock("@changesets/logger");

@@ -19,8 +19,8 @@ const simpleChangeset: NewChangeset = {
   summary: "This is a summary",
   releases: [
     { name: "pkg-a", type: "minor" },
-    { name: "pkg-b", type: "patch" }
-  ]
+    { name: "pkg-b", type: "patch" },
+  ],
 };
 
 const simpleReleasePlan: ReleasePlan = {
@@ -30,33 +30,33 @@ const simpleReleasePlan: ReleasePlan = {
       type: "minor",
       changesets: ["ascii"],
       oldVersion: "1.0.0",
-      newVersion: "1.1.0"
+      newVersion: "1.1.0",
     },
     {
       name: "pkg-b",
       type: "patch",
       changesets: ["ascii"],
       oldVersion: "1.0.0",
-      newVersion: "1.0.1"
-    }
+      newVersion: "1.0.1",
+    },
   ],
   changesets: [
     {
       summary: "This is a summary",
       releases: [
         { name: "pkg-a", type: "minor" },
-        { name: "pkg-b", type: "patch" }
+        { name: "pkg-b", type: "patch" },
       ],
-      id: "ascii"
-    }
+      id: "ascii",
+    },
   ],
-  preState: undefined
+  preState: undefined,
 };
 
 jest.mock("@changesets/git");
 
 const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
-  return Promise.all(changesets.map(commit => writeChangeset(commit, cwd)));
+  return Promise.all(changesets.map((commit) => writeChangeset(commit, cwd)));
 };
 
 describe("status", () => {

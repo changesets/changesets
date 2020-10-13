@@ -12,11 +12,11 @@ async function filterChangesetsSinceRef(
 ) {
   const newChangesets = await git.getChangedChangesetFilesSinceRef({
     cwd: changesetBase,
-    ref: sinceRef
+    ref: sinceRef,
   });
-  const newHahses = newChangesets.map(c => c.split("/")[1]);
+  const newHahses = newChangesets.map((c) => c.split("/")[1]);
 
-  return changesets.filter(dir => newHahses.includes(dir));
+  return changesets.filter((dir) => newHahses.includes(dir));
 }
 
 export default async function getChangesets(
@@ -45,10 +45,10 @@ export default async function getChangesets(
   let oldChangesetsPromise = getOldChangesetsAndWarn(changesetBase, contents);
 
   let changesets = contents.filter(
-    file => file.endsWith(".md") && file !== "README.md"
+    (file) => file.endsWith(".md") && file !== "README.md"
   );
 
-  const changesetContents = changesets.map(async file => {
+  const changesetContents = changesets.map(async (file) => {
     const changeset = await fs.readFile(
       path.join(changesetBase, file),
       "utf-8"
@@ -58,6 +58,6 @@ export default async function getChangesets(
   });
   return [
     ...(await oldChangesetsPromise),
-    ...(await Promise.all(changesetContents))
+    ...(await Promise.all(changesetContents)),
   ];
 }

@@ -8,7 +8,7 @@ import { RelevantChangesets } from "../types";
 async function getReleaseLine(changeset: NewChangeset, cwd: string) {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
-    .map(l => l.trimRight());
+    .map((l) => l.trimRight());
 
   const commitThatAddsFile = await getCommitThatAddsFile(
     `.changeset/${changeset.id}.md`,
@@ -16,7 +16,7 @@ async function getReleaseLine(changeset: NewChangeset, cwd: string) {
   );
 
   return `- [${commitThatAddsFile}] ${firstLine}\n${futureLines
-    .map(l => `  ${l}`)
+    .map((l) => `  ${l}`)
     .join("\n")}`;
 }
 
@@ -25,7 +25,7 @@ async function getReleaseLines(
   type: keyof RelevantChangesets,
   cwd: string
 ) {
-  const releaseLines = obj[type].map(changeset =>
+  const releaseLines = obj[type].map((changeset) =>
     getReleaseLine(changeset, cwd)
   );
   if (!releaseLines.length) return "";
@@ -62,8 +62,8 @@ export default async function defaultChangelogGetter(
     `## ${release.newVersion}`,
     majorReleaseLines,
     minorReleaseLines,
-    patchReleaseLines
+    patchReleaseLines,
   ]
-    .filter(line => line)
+    .filter((line) => line)
     .join("\n");
 }

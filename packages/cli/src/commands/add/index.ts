@@ -23,17 +23,17 @@ export default async function add(
   if (empty) {
     newChangeset = {
       releases: [],
-      summary: ``
+      summary: ``,
     };
     confirmChangeset = true;
   } else {
     const changedPackages = await git.getChangedPackagesSinceRef({
       cwd,
-      ref: config.baseBranch
+      ref: config.baseBranch,
     });
     const changePackagesName = changedPackages
-      .filter(a => a)
-      .map(pkg => pkg.packageJson.name);
+      .filter((a) => a)
+      .map((pkg) => pkg.packageJson.name);
     newChangeset = await createChangeset(changePackagesName, packages.packages);
     printConfirmationMessage(newChangeset, packages.packages.length > 1);
 
@@ -55,7 +55,7 @@ export default async function add(
     }
 
     let hasMajorChange = [...newChangeset.releases].find(
-      c => c.type === "major"
+      (c) => c.type === "major"
     );
 
     if (hasMajorChange) {

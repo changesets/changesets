@@ -18,18 +18,18 @@ let f = fixturez(__dirname);
 let defaultPackages: Packages = {
   root: {
     packageJson: { name: "", version: "" },
-    dir: "/"
+    dir: "/",
   },
   packages: [],
-  tool: "yarn"
+  tool: "yarn",
 };
 
 const withPackages = (pkgNames: string[]) => ({
   ...defaultPackages,
-  packages: pkgNames.map(pkgName => ({
+  packages: pkgNames.map((pkgName) => ({
     packageJson: { name: pkgName, version: "" },
-    dir: "dir"
-  }))
+    dir: "dir",
+  })),
 });
 
 test("read reads the config", async () => {
@@ -45,8 +45,8 @@ test("read reads the config", async () => {
     ignore: [],
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
-      useCalculatedVersionForSnapshots: false
-    }
+      useCalculatedVersionForSnapshots: false,
+    },
   });
 });
 
@@ -60,86 +60,86 @@ let defaults = {
   ignore: [],
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
-    useCalculatedVersionForSnapshots: false
-  }
+    useCalculatedVersionForSnapshots: false,
+  },
 } as const;
 
 let correctCases: Record<string, CorrectCase> = {
   defaults: {
     input: {},
-    output: defaults
+    output: defaults,
   },
   "changelog string": {
     input: {
-      changelog: "some-module"
+      changelog: "some-module",
     },
     output: {
       ...defaults,
-      changelog: ["some-module", null]
-    }
+      changelog: ["some-module", null],
+    },
   },
   "changelog false": {
     input: {
-      changelog: false
+      changelog: false,
     },
     output: {
       ...defaults,
-      changelog: false
-    }
+      changelog: false,
+    },
   },
   "changelog tuple": {
     input: {
-      changelog: ["some-module", { something: true }]
+      changelog: ["some-module", { something: true }],
     },
     output: {
       ...defaults,
-      changelog: ["some-module", { something: true }]
-    }
+      changelog: ["some-module", { something: true }],
+    },
   },
   "commit false": {
     input: {
-      commit: false
+      commit: false,
     },
     output: {
       ...defaults,
-      commit: false
-    }
+      commit: false,
+    },
   },
   "commit true": {
     input: {
-      commit: true
+      commit: true,
     },
     output: {
       ...defaults,
-      commit: true
-    }
+      commit: true,
+    },
   },
   "access private": {
     input: {
-      access: "restricted"
+      access: "restricted",
     },
     output: {
       ...defaults,
-      access: "restricted"
-    }
+      access: "restricted",
+    },
   },
   "access public": {
     input: {
-      access: "public"
+      access: "public",
     },
     output: {
       ...defaults,
-      access: "public"
-    }
+      access: "public",
+    },
   },
   linked: {
     input: {
-      linked: [["pkg-a", "pkg-b"]]
+      linked: [["pkg-a", "pkg-b"]],
     },
     output: {
       ...defaults,
-      linked: [["pkg-a", "pkg-b"]]
-    }
+      linked: [["pkg-a", "pkg-b"]],
+    },
   },
   linkedWithGlobs: {
     packages: [
@@ -148,15 +148,15 @@ let correctCases: Record<string, CorrectCase> = {
       "@pkg/a",
       "@pkg/b",
       "@pkg-other/a",
-      "@pkg-other/b"
+      "@pkg-other/b",
     ],
     input: {
-      linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]]
+      linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]],
     },
     output: {
       ...defaults,
-      linked: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]]
-    }
+      linked: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
+    },
   },
   linkedWithGlobsAndExclusion: {
     packages: [
@@ -165,68 +165,68 @@ let correctCases: Record<string, CorrectCase> = {
       "@pkg/a",
       "@pkg/b",
       "@pkg-other/a",
-      "@pkg-other/b"
+      "@pkg-other/b",
     ],
     input: {
-      linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]]
+      linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]],
     },
     output: {
       ...defaults,
-      linked: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]]
-    }
+      linked: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
+    },
   },
   "update internal dependencies minor": {
     input: {
-      updateInternalDependencies: "minor"
+      updateInternalDependencies: "minor",
     },
     output: {
       ...defaults,
-      updateInternalDependencies: "minor"
-    }
+      updateInternalDependencies: "minor",
+    },
   },
   "update internal dependencies patch": {
     input: {
-      updateInternalDependencies: "patch"
+      updateInternalDependencies: "patch",
     },
     output: {
       ...defaults,
-      updateInternalDependencies: "patch"
-    }
+      updateInternalDependencies: "patch",
+    },
   },
   ignore: {
     input: {
-      ignore: ["pkg-a", "pkg-b"]
+      ignore: ["pkg-a", "pkg-b"],
     },
     output: {
       ...defaults,
-      ignore: ["pkg-a", "pkg-b"]
-    }
+      ignore: ["pkg-a", "pkg-b"],
+    },
   },
   ignoreWithGlobs: {
     packages: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"],
     input: {
-      ignore: ["pkg-*", "@pkg/*"]
+      ignore: ["pkg-*", "@pkg/*"],
     },
     output: {
       ...defaults,
-      ignore: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"]
-    }
+      ignore: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"],
+    },
   },
   ignoreWithGlobsAndExclusions: {
     packages: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"],
     input: {
-      ignore: ["pkg-*", "!pkg-b", "@pkg/*"]
+      ignore: ["pkg-*", "!pkg-b", "@pkg/*"],
     },
     output: {
       ...defaults,
-      ignore: ["pkg-a", "@pkg/a", "@pkg/b"]
-    }
-  }
+      ignore: ["pkg-a", "@pkg/a", "@pkg/b"],
+    },
+  },
 };
 
 jestInCase(
   "parse",
-  testCase => {
+  (testCase) => {
     expect(
       parse(
         testCase.input,
@@ -413,15 +413,15 @@ The package or glob expression \\"pkg-*\\" is specified in the \`ignore\` option
               packageJson: {
                 name: "pkg-a",
                 version: "1.0.0",
-                dependencies: { "pkg-b": "1.0.0" }
+                dependencies: { "pkg-b": "1.0.0" },
               },
-              dir: "dir"
+              dir: "dir",
             },
             {
               packageJson: { name: "pkg-b", version: "1.0.0" },
-              dir: "dir"
-            }
-          ]
+              dir: "dir",
+            },
+          ],
         }
       )
     ).toThrowErrorMatchingInlineSnapshot(`
@@ -435,8 +435,8 @@ The package \\"pkg-a\\" depends on the ignored package \\"pkg-b\\", but \\"pkg-a
       unsafeParse(
         {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: "not true"
-          }
+            onlyUpdatePeerDependentsWhenOutOfRange: "not true",
+          },
         },
         defaultPackages
       );
@@ -450,8 +450,8 @@ The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as \\"not true\\" w
       unsafeParse(
         {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            useCalculatedVersionForSnapshots: "not true"
-          }
+            useCalculatedVersionForSnapshots: "not true",
+          },
         },
         defaultPackages
       );

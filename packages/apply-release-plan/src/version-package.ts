@@ -1,7 +1,7 @@
 import {
   ComprehensiveRelease,
   PackageJSON,
-  VersionType
+  VersionType,
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
@@ -11,7 +11,7 @@ const DEPENDENCY_TYPES = [
   "dependencies",
   "devDependencies",
   "peerDependencies",
-  "optionalDependencies"
+  "optionalDependencies",
 ] as const;
 
 export default function versionPackage(
@@ -23,7 +23,7 @@ export default function versionPackage(
   versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
   {
     updateInternalDependencies,
-    onlyUpdatePeerDependentsWhenOutOfRange
+    onlyUpdatePeerDependentsWhenOutOfRange,
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
@@ -46,11 +46,11 @@ export default function versionPackage(
             { version, type },
             {
               depVersionRange: depCurrentVersion,
-              depType
+              depType,
             },
             {
               minReleaseType: updateInternalDependencies,
-              onlyUpdatePeerDependentsWhenOutOfRange
+              onlyUpdatePeerDependentsWhenOutOfRange,
             }
           )
         )

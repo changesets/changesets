@@ -12,13 +12,13 @@
     "@changesets/logger": "^0.0.5",
     "@changesets/parse": "^0.3.6",
     "@changesets/types": "^3.0.0",
-    "chalk": "^2.1.0",
-    "fs-extra": "^7.0.1",
+    "chalk": "^4.1.0",
+    "fs-extra": "^9.0.1",
     "p-filter": "^2.1.0"
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
     "fixturez": "^1.1.0",
-    "outdent": "^0.5.0"
+    "outdent": "^0.7.1"
   }
 }

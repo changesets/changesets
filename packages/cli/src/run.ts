@@ -80,11 +80,11 @@ export async function run(
       empty,
       ignore,
       snapshot,
-      tag
+      tag,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
-    deadFlags.forEach(flag => {
+    deadFlags.forEach((flag) => {
       if (flags[flag]) {
         error(
           `the flag ${flag} has been removed from changesets for version 2`

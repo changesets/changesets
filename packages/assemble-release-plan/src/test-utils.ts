@@ -8,9 +8,9 @@ function getPackage(
   return {
     packageJson: {
       name,
-      version
+      version,
     },
-    dir: "this-shouldn't-matter"
+    dir: "this-shouldn't-matter",
   };
 }
 
@@ -27,7 +27,7 @@ function getChangeset(
   return {
     id,
     summary,
-    releases
+    releases,
   };
 }
 
@@ -43,14 +43,14 @@ let getSimpleSetup = () => ({
     root: {
       packageJson: {
         name: "root",
-        version: "0.0.0"
+        version: "0.0.0",
       },
-      dir: "/"
+      dir: "/",
     },
     packages: [getPackage()],
-    tool: "yarn" as const
+    tool: "yarn" as const,
   },
-  changesets: [getChangeset({ releases: [getRelease()] })]
+  changesets: [getChangeset({ releases: [getRelease()] })],
 });
 
 class FakeFullState {
@@ -71,7 +71,7 @@ class FakeFullState {
     } = {}
   ) {
     let changeset = getChangeset(data);
-    if (this.changesets.find(c => c.id === changeset.id)) {
+    if (this.changesets.find((c) => c.id === changeset.id)) {
       throw new Error(
         `tried to add a second changeset with same id: ${changeset.id}`
       );
@@ -80,7 +80,7 @@ class FakeFullState {
   }
 
   updateDependency(pkgA: string, pkgB: string, version: string) {
-    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
+    let pkg = this.packages.packages.find((a) => a.packageJson.name === pkgA);
     if (!pkg) throw new Error("no pkg");
     if (!pkg.packageJson.dependencies) {
       pkg.packageJson.dependencies = {};
@@ -88,7 +88,7 @@ class FakeFullState {
     pkg.packageJson.dependencies[pkgB] = version;
   }
   updateDevDependency(pkgA: string, pkgB: string, version: string) {
-    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
+    let pkg = this.packages.packages.find((a) => a.packageJson.name === pkgA);
     if (!pkg) throw new Error("no pkg");
     if (!pkg.packageJson.devDependencies) {
       pkg.packageJson.devDependencies = {};
@@ -96,7 +96,7 @@ class FakeFullState {
     pkg.packageJson.devDependencies[pkgB] = version;
   }
   updatePeerDep(pkgA: string, pkgB: string, version: string) {
-    let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
+    let pkg = this.packages.packages.find((a) => a.packageJson.name === pkgA);
     if (!pkg) throw new Error("no pkg");
     if (!pkg.packageJson.peerDependencies) {
       pkg.packageJson.peerDependencies = {};
@@ -108,7 +108,7 @@ class FakeFullState {
     let pkg = getPackage(name, version);
     if (
       this.packages.packages.find(
-        c => c.packageJson.name === pkg.packageJson.name
+        (c) => c.packageJson.name === pkg.packageJson.name
       )
     ) {
       throw new Error(
@@ -118,7 +118,7 @@ class FakeFullState {
     this.packages.packages.push(pkg);
   }
   updatePackage(name: string, version: string) {
-    let pkg = this.packages.packages.find(c => c.packageJson.name === name);
+    let pkg = this.packages.packages.find((c) => c.packageJson.name === name);
     if (!pkg) {
       throw new Error(
         `could not update package ${name} because it doesn't exist - try addWorskpace`

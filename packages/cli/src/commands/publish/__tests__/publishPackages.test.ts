@@ -19,13 +19,13 @@ describe("publishPackages", () => {
     npmUtils.infoAllow404.mockImplementation(() => ({
       published: false,
       pkgInfo: {
-        version: "1.0.0"
-      }
+        version: "1.0.0",
+      },
     }));
 
     // @ts-ignore
     npmUtils.publish.mockImplementation(() => ({
-      published: true
+      published: true,
     }));
   });
 
@@ -38,7 +38,7 @@ describe("publishPackages", () => {
       await publishPackages({
         packages: (await getPackages(cwd)).packages,
         access: "public",
-        preState: undefined
+        preState: undefined,
       });
       expect(npmUtils.getTokenIsRequired).not.toHaveBeenCalled();
     });

@@ -42,12 +42,12 @@ async function getPublishTool(
     return {
       name: "pnpm",
       shouldAddNoGitChecks:
-        parsed?.major === undefined ? false : parsed.major >= 5
+        parsed?.major === undefined ? false : parsed.major >= 5,
     };
   } catch (e) {
     return {
       name: "pnpm",
-      shouldAddNoGitChecks: false
+      shouldAddNoGitChecks: false,
     };
   }
 }
@@ -56,10 +56,10 @@ export async function getTokenIsRequired() {
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry()
+    npm_config_registry: getCorrectRegistry(),
   };
   let result = await spawn("npm", ["profile", "get", "--json"], {
-    env: Object.assign({}, process.env, envOverride)
+    env: Object.assign({}, process.env, envOverride),
   });
   let json = jsonParse(result.stdout.toString());
   if (json.error || !json.tfa || !json.tfa.mode) {
@@ -79,11 +79,11 @@ export function getPackageInfo(pkgName: string) {
     // as they will always give a 404, which will tell `publish` to always try to publish.
     // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
     const envOverride = {
-      npm_config_registry: getCorrectRegistry()
+      npm_config_registry: getCorrectRegistry(),
     };
 
     let result = await spawn("npm", ["info", pkgName, "--json"], {
-      env: Object.assign({}, process.env, envOverride)
+      env: Object.assign({}, process.env, envOverride),
     });
 
     return jsonParse(result.stdout.toString());
@@ -152,14 +152,14 @@ async function internalPublish(
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry()
+    npm_config_registry: getCorrectRegistry(),
   };
   let { stdout } = await spawn(
     publishTool.name,
     ["publish", "--json", ...publishFlags],
     {
       cwd: opts.cwd,
-      env: Object.assign({}, process.env, envOverride)
+      env: Object.assign({}, process.env, envOverride),
     }
   );
   // New error handling. NPM's --json option is included alongside the `prepublish and

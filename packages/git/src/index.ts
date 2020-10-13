@@ -55,7 +55,7 @@ async function getCommitThatAddsFile(gitPath: string, cwd: string) {
 async function getChangedFilesSince({
   cwd,
   ref,
-  fullPath = false
+  fullPath = false,
 }: {
   cwd: string;
   ref: string;
@@ -74,15 +74,15 @@ async function getChangedFilesSince({
     .toString()
     .trim()
     .split("\n")
-    .filter(a => a);
+    .filter((a) => a);
   if (!fullPath) return files;
-  return files.map(file => path.resolve(cwd, file));
+  return files.map((file) => path.resolve(cwd, file));
 }
 
 // below are less generic functions that we use in combination with other things we are doing
 async function getChangedChangesetFilesSinceRef({
   cwd,
-  ref
+  ref,
 }: {
   cwd: string;
   ref: string;
@@ -94,7 +94,7 @@ async function getChangedChangesetFilesSinceRef({
       "git",
       ["diff", "--name-only", "--diff-filter=d", divergedAt],
       {
-        cwd
+        cwd,
       }
     );
 
@@ -104,7 +104,7 @@ async function getChangedChangesetFilesSinceRef({
       .toString()
       .trim()
       .split("\n")
-      .filter(file => tester.test(file));
+      .filter((file) => tester.test(file));
     return files;
   } catch (err) {
     if (err instanceof GitError) return [];
@@ -114,7 +114,7 @@ async function getChangedChangesetFilesSinceRef({
 
 async function getChangedPackagesSinceRef({
   cwd,
-  ref
+  ref,
 }: {
   cwd: string;
   ref: string;
@@ -124,8 +124,8 @@ async function getChangedPackagesSinceRef({
 
   const fileToPackage: Record<string, Package> = {};
 
-  packages.packages.forEach(pkg =>
-    changedFiles.filter(isInDir(pkg.dir)).forEach(fileName => {
+  packages.packages.forEach((pkg) =>
+    changedFiles.filter(isInDir(pkg.dir)).forEach((fileName) => {
       const prevPkg = fileToPackage[fileName] || { dir: "" };
       if (pkg.dir.length > prevPkg.dir.length) fileToPackage[fileName] = pkg;
     })
@@ -145,5 +145,5 @@ export {
   commit,
   tag,
   getChangedPackagesSinceRef,
-  getChangedChangesetFilesSinceRef
+  getChangedChangesetFilesSinceRef,
 };

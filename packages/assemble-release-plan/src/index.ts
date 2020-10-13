@@ -32,7 +32,7 @@ function getSnapshotSuffix(snapshot?: string | boolean): string | undefined {
     now.getUTCDate(),
     now.getUTCHours(),
     now.getUTCMinutes(),
-    now.getUTCSeconds()
+    now.getUTCSeconds(),
   ].join("");
 
   let tag = "";
@@ -77,7 +77,7 @@ function assembleReleasePlan(
   snapshot?: string | boolean
 ): ReleasePlan {
   let packagesByName = new Map(
-    packages.packages.map(x => [x.packageJson.name, x])
+    packages.packages.map((x) => [x.packageJson.name, x])
   );
 
   const relevantChangesets = getRelevantChangesets(
@@ -113,7 +113,7 @@ function assembleReleasePlan(
       ignoredPackages: config.ignore,
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange
+          .onlyUpdatePeerDependentsWhenOutOfRange,
     });
 
     // The map passed in to determineDependents will be mutated
@@ -133,7 +133,7 @@ function assembleReleasePlan(
             type: "patch",
             name: pkg.packageJson.name,
             changesets: [],
-            oldVersion: pkg.packageJson.version
+            oldVersion: pkg.packageJson.version,
           });
         }
       }
@@ -142,7 +142,7 @@ function assembleReleasePlan(
 
   return {
     changesets: relevantChangesets,
-    releases: [...releases.values()].map(incompleteRelease => {
+    releases: [...releases.values()].map((incompleteRelease) => {
       return {
         ...incompleteRelease,
         newVersion: getNewVersion(
@@ -151,10 +151,10 @@ function assembleReleasePlan(
           snapshotSuffix,
           config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
             .useCalculatedVersionForSnapshots
-        )
+        ),
       };
     }),
-    preState: preInfo?.state
+    preState: preInfo?.state,
   };
 }
 
@@ -170,7 +170,9 @@ function getRelevantChangesets(
     const notIgnoredPackages = [];
     for (const release of changeset.releases) {
       if (
-        ignored.find(ignoredPackageName => ignoredPackageName === release.name)
+        ignored.find(
+          (ignoredPackageName) => ignoredPackageName === release.name
+        )
       ) {
         ignoredPackages.push(release.name);
       } else {
@@ -190,7 +192,9 @@ function getRelevantChangesets(
 
   if (preState && preState.mode !== "exit") {
     let usedChangesetIds = new Set(preState.changesets);
-    return changesets.filter(changeset => !usedChangesetIds.has(changeset.id));
+    return changesets.filter(
+      (changeset) => !usedChangesetIds.has(changeset.id)
+    );
   }
 
   return changesets;
@@ -209,8 +213,8 @@ function getPreInfo(
   let updatedPreState = {
     ...preState,
     initialVersions: {
-      ...preState.initialVersions
-    }
+      ...preState.initialVersions,
+    },
   };
 
   let preVersions = new Map<string, number>();
@@ -242,12 +246,12 @@ function getPreInfo(
       }
     }
 
-    updatedPreState.changesets = changesets.map(changeset => changeset.id);
+    updatedPreState.changesets = changesets.map((changeset) => changeset.id);
   }
 
   return {
     state: updatedPreState,
-    preVersions
+    preVersions,
   };
 }
 

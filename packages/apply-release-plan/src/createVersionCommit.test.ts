@@ -5,16 +5,16 @@ import { NewChangeset, ReleasePlan } from "@changesets/types";
 const simpleChangeset: NewChangeset = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
-  id: "abc123xy"
+  id: "abc123xy",
 };
 
 const simpleChangeset2: NewChangeset = {
   summary: "This is another summary",
   releases: [
     { name: "package-a", type: "patch" },
-    { name: "package-b", type: "minor" }
+    { name: "package-b", type: "minor" },
   ],
-  id: "abc123fh"
+  id: "abc123fh",
 };
 
 let simpleReleasePlan: ReleasePlan = {
@@ -25,10 +25,10 @@ let simpleReleasePlan: ReleasePlan = {
       type: "minor",
       oldVersion: "1.0.0",
       newVersion: "1.1.0",
-      changesets: [simpleChangeset.id]
-    }
+      changesets: [simpleChangeset.id],
+    },
   ],
-  preState: undefined
+  preState: undefined,
 };
 
 let secondReleasePlan: ReleasePlan = {
@@ -39,17 +39,17 @@ let secondReleasePlan: ReleasePlan = {
       type: "minor",
       oldVersion: "1.0.0",
       newVersion: "1.1.0",
-      changesets: [simpleChangeset.id]
+      changesets: [simpleChangeset.id],
     },
     {
       name: "package-b",
       type: "minor",
       oldVersion: "1.0.0",
       newVersion: "1.1.0",
-      changesets: [simpleChangeset2.id]
-    }
+      changesets: [simpleChangeset2.id],
+    },
   ],
-  preState: undefined
+  preState: undefined,
 };
 
 describe("createReleaseCommit", () => {
@@ -86,17 +86,17 @@ describe("createReleaseCommit", () => {
           type: "patch",
           oldVersion: "1.0.0",
           newVersion: "1.0.1",
-          changesets: [simpleChangeset.id]
+          changesets: [simpleChangeset.id],
         },
         {
           name: "package-b",
           type: "minor",
           oldVersion: "1.0.0",
           newVersion: "1.1.0",
-          changesets: [simpleChangeset2.id]
-        }
+          changesets: [simpleChangeset2.id],
+        },
       ],
-      preState: undefined
+      preState: undefined,
     };
     const commitStr = createReleaseCommit(releasePlan, false);
     expect(commitStr).toEqual(outdent`

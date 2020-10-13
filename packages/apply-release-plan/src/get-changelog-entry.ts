@@ -15,7 +15,7 @@ async function generateChangesForVersionTypeMarkdown(
   type: keyof ChangelogLines
 ) {
   let releaseLines = await Promise.all(obj[type]);
-  releaseLines = releaseLines.filter(x => x);
+  releaseLines = releaseLines.filter((x) => x);
   if (releaseLines.length) {
     return `### ${startCase(type)} Changes\n\n${releaseLines.join("\n")}\n`;
   }
@@ -30,7 +30,7 @@ export default async function generateMarkdown(
   changelogOpts: any,
   {
     updateInternalDependencies,
-    onlyUpdatePeerDependentsWhenOutOfRange
+    onlyUpdatePeerDependentsWhenOutOfRange,
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
@@ -41,15 +41,15 @@ export default async function generateMarkdown(
   const releaseObj: ChangelogLines = {
     major: [],
     minor: [],
-    patch: []
+    patch: [],
   };
 
   // I sort of feel we can do better, as ComprehensiveReleases have an array
   // of the relevant changesets but since we need the version type for the
   // release in the changeset, I don't know if we can
   // We can filter here, but that just adds another iteration over this list
-  changesets.forEach(cs => {
-    const rls = cs.releases.find(r => r.name === release.name);
+  changesets.forEach((cs) => {
+    const rls = cs.releases.find((r) => r.name === release.name);
     if (rls && rls.type !== "none") {
       releaseObj[rls.type].push(
         changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts)
@@ -57,7 +57,7 @@ export default async function generateMarkdown(
     }
   });
 
-  let dependentReleases = releases.filter(rel => {
+  let dependentReleases = releases.filter((rel) => {
     const dependencyVersionRange = release.packageJson.dependencies
       ? release.packageJson.dependencies[rel.name]
       : null;
@@ -72,11 +72,11 @@ export default async function generateMarkdown(
         { type: rel.type, version: rel.newVersion },
         {
           depVersionRange: versionRange,
-          depType: dependencyVersionRange ? "dependencies" : "peerDependencies"
+          depType: dependencyVersionRange ? "dependencies" : "peerDependencies",
         },
         {
           minReleaseType: updateInternalDependencies,
-          onlyUpdatePeerDependentsWhenOutOfRange
+          onlyUpdatePeerDependentsWhenOutOfRange,
         }
       )
     );
@@ -84,13 +84,13 @@ export default async function generateMarkdown(
 
   let relevantChangesetIds: Set<string> = new Set();
 
-  dependentReleases.forEach(rel => {
-    rel.changesets.forEach(cs => {
+  dependentReleases.forEach((rel) => {
+    rel.changesets.forEach((cs) => {
       relevantChangesetIds.add(cs);
     });
   });
 
-  let relevantChangesets = changesets.filter(cs =>
+  let relevantChangesets = changesets.filter((cs) =>
     relevantChangesetIds.has(cs.id)
   );
 
@@ -106,8 +106,8 @@ export default async function generateMarkdown(
     `## ${release.newVersion}`,
     await generateChangesForVersionTypeMarkdown(releaseObj, "major"),
     await generateChangesForVersionTypeMarkdown(releaseObj, "minor"),
-    await generateChangesForVersionTypeMarkdown(releaseObj, "patch")
+    await generateChangesForVersionTypeMarkdown(releaseObj, "patch"),
   ]
-    .filter(line => line)
+    .filter((line) => line)
     .join("\n");
 }

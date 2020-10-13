@@ -12,7 +12,7 @@ If a config option isn't present here, we will fall back to the defaults.
 
 const changesetOptions = {
   // If true, we will automatically commit the changeset when the command is run
-  commit: false
+  commit: false,
 };
 
 // This function takes information about a changeset to generate an entry for it in your
@@ -28,10 +28,10 @@ const changesetOptions = {
 const getReleaseLine = async (changeset, type) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
-    .map(l => l.trimRight());
+    .map((l) => l.trimRight());
 
   return `- ${changeset.commit}: ${firstLine}\n${futureLines
-    .map(l => `  ${l}`)
+    .map((l) => `  ${l}`)
     .join("\n")}`;
 };
 
@@ -48,11 +48,11 @@ const getDependencyReleaseLine = async (changesets, dependenciesUpdated) => {
   if (dependenciesUpdated.length === 0) return "";
 
   const changesetLinks = changesets.map(
-    changeset => `- Updated dependencies [${changeset.commit}]:`
+    (changeset) => `- Updated dependencies [${changeset.commit}]:`
   );
 
   const updatedDepenenciesList = dependenciesUpdated.map(
-    dependency => `  - ${dependency.name}@${dependency.version}`
+    (dependency) => `  - ${dependency.name}@${dependency.version}`
   );
 
   return [...changesetLinks, ...updatedDepenenciesList].join("\n");
@@ -72,16 +72,16 @@ const versionOptions = {
   // An array of arrays that defines packages that are linked.
   // Linked packages are packages that should be at the same version when they're released.
   // If you've used Lerna to version packages before, this is very similar.
-  linked: [["pkg-a", "pkg-b"]]
+  linked: [["pkg-a", "pkg-b"]],
 };
 
 const publishOptions = {
   // This sets whether unpublished packages are public by default. We err on the side of caution here.
-  public: false
+  public: false,
 };
 
 module.exports = {
   versionOptions,
   changesetOptions,
-  publishOptions
+  publishOptions,
 };

@@ -3,7 +3,7 @@ import {
   Config,
   ChangelogFunctions,
   NewChangeset,
-  ModCompWithPackage
+  ModCompWithPackage,
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
@@ -47,14 +47,14 @@ export default async function applyReleasePlan(
   let touchedFiles = [];
 
   const packagesByName = new Map(
-    packages.packages.map(x => [x.packageJson.name, x])
+    packages.packages.map((x) => [x.packageJson.name, x])
   );
 
   let { releases, changesets } = releasePlan;
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
-  let releaseWithPackages = releases.map(release => {
+  let releaseWithPackages = releases.map((release) => {
     let pkg = packagesByName.get(release.name);
     if (!pkg)
       throw new Error(
@@ -62,7 +62,7 @@ export default async function applyReleasePlan(
       );
     return {
       ...release,
-      ...pkg
+      ...pkg,
     };
   });
 
@@ -88,16 +88,16 @@ export default async function applyReleasePlan(
   let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
     name,
     version: newVersion,
-    type
+    type,
   }));
 
   // iterate over releases updating packages
-  let finalisedRelease = releaseWithChangelogs.map(release => {
+  let finalisedRelease = releaseWithChangelogs.map((release) => {
     return versionPackage(release, versionsToUpdate, {
       updateInternalDependencies: config.updateInternalDependencies,
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange
+          .onlyUpdatePeerDependentsWhenOutOfRange,
     });
   });
 
@@ -113,7 +113,7 @@ export default async function applyReleasePlan(
       ...prettierConfig,
       filepath: pkgJSONPath,
       parser: "json",
-      printWidth: 20
+      printWidth: 20,
     });
 
     await fs.writeFile(pkgJSONPath, parsedConfig);
@@ -131,7 +131,7 @@ export default async function applyReleasePlan(
   ) {
     let changesetFolder = path.resolve(cwd, ".changeset");
     await Promise.all(
-      changesets.map(async changeset => {
+      changesets.map(async (changeset) => {
         let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
         let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
         if (await fs.pathExists(changesetPath)) {
@@ -141,7 +141,7 @@ export default async function applyReleasePlan(
           // so we just check if any ignored package exists in this changeset, and only remove it if none exists
           // Ignored list is added in v2, so we don't need to do it for v1 changesets
           if (
-            !changeset.releases.find(release =>
+            !changeset.releases.find((release) =>
               config.ignore.includes(release.name)
             )
           ) {
@@ -185,7 +185,7 @@ async function getNewChangelogEntry(
 ) {
   let getChangelogFuncs: ChangelogFunctions = {
     getReleaseLine: () => Promise.resolve(""),
-    getDependencyReleaseLine: () => Promise.resolve("")
+    getDependencyReleaseLine: () => Promise.resolve(""),
   };
   let changelogOpts: any;
   if (config.changelog) {
@@ -208,14 +208,14 @@ async function getNewChangelogEntry(
   }
 
   let moddedChangesets = await Promise.all(
-    changesets.map(async cs => ({
+    changesets.map(async (cs) => ({
       ...cs,
-      commit: await getCommitThatAddsChangeset(cs.id, cwd)
+      commit: await getCommitThatAddsChangeset(cs.id, cwd),
     }))
   );
 
   return Promise.all(
-    releasesWithPackage.map(async release => {
+    releasesWithPackage.map(async (release) => {
       let changelog = await getChangelogEntry(
         release,
         releasesWithPackage,
@@ -226,16 +226,16 @@ async function getNewChangelogEntry(
           updateInternalDependencies: config.updateInternalDependencies,
           onlyUpdatePeerDependentsWhenOutOfRange:
             config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              .onlyUpdatePeerDependentsWhenOutOfRange
+              .onlyUpdatePeerDependentsWhenOutOfRange,
         }
       );
 
       return {
         ...release,
-        changelog
+        changelog,
       };
     })
-  ).catch(e => {
+  ).catch((e) => {
     console.error(
       "The following error was encountered while generating changelog entries"
     );
@@ -280,7 +280,7 @@ async function prependFile(
       prettier.format(completelyNewChangelog, {
         ...prettierConfig,
         filepath: filePath,
-        parser: "markdown"
+        parser: "markdown",
       })
     );
     return;
@@ -292,7 +292,7 @@ async function prependFile(
     prettier.format(newChangelog, {
       ...prettierConfig,
       filepath: filePath,
-      parser: "markdown"
+      parser: "markdown",
     })
   );
 }

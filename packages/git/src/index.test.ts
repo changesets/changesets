@@ -9,7 +9,7 @@ import {
   tag,
   getDivergedCommit,
   getChangedPackagesSinceRef,
-  getChangedChangesetFilesSinceRef
+  getChangedChangesetFilesSinceRef,
 } from "./";
 
 const f = fixtures(__dirname);
@@ -74,12 +74,12 @@ describe("git", () => {
       await add("packages/pkg-a/package.json", cwd);
 
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
-        cwd
+        cwd,
       });
       const stagedFiles = gitCmd.stdout
         .toString()
         .split("\n")
-        .filter(a => a);
+        .filter((a) => a);
 
       expect(stagedFiles).toHaveLength(1);
       expect(stagedFiles[0]).toEqual("packages/pkg-a/package.json");
@@ -91,12 +91,12 @@ describe("git", () => {
       await add("packages/pkg-b/package.json", cwd);
 
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
-        cwd
+        cwd,
       });
       const stagedFiles = gitCmd.stdout
         .toString()
         .split("\n")
-        .filter(a => a);
+        .filter((a) => a);
 
       expect(stagedFiles).toHaveLength(3);
       expect(stagedFiles[0]).toEqual("package.json");
@@ -108,19 +108,19 @@ describe("git", () => {
       await add("packages", cwd);
 
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
-        cwd
+        cwd,
       });
       const stagedFiles = gitCmd.stdout
         .toString()
         .split("\n")
-        .filter(a => a);
+        .filter((a) => a);
 
       expect(stagedFiles).toEqual([
         "packages/package.json",
         "packages/pkg-a/index.js",
         "packages/pkg-a/package.json",
         "packages/pkg-b/index.js",
-        "packages/pkg-b/package.json"
+        "packages/pkg-b/package.json",
       ]);
     });
   });
@@ -131,7 +131,7 @@ describe("git", () => {
       await commit("added packageA package.json", cwd);
 
       const gitCmd = await spawn("git", ["log", "-1", "--pretty=%B"], {
-        cwd
+        cwd,
       });
       const commitMessage = gitCmd.stdout.toString().trim();
 
@@ -160,7 +160,7 @@ describe("git", () => {
 
     it("should create a tag, make a new commit, then create a second tag", async () => {
       const initialHead = await spawn("git", ["rev-parse", "HEAD"], {
-        cwd
+        cwd,
       });
       await tag("tag_message", cwd);
       await add("packages/pkg-b/package.json", cwd);
@@ -190,7 +190,7 @@ describe("git", () => {
       await add("packages/pkg-b/package.json", cwd);
       await commit("added packageB package.json", cwd);
       const head = await spawn("git", ["rev-parse", "--short", "HEAD"], {
-        cwd
+        cwd,
       });
 
       const commitHash = await getCommitThatAddsFile(
@@ -213,7 +213,7 @@ describe("git", () => {
       const changedFiles = await getChangedFilesSince({
         ref: head.stdout.toString().trim(),
         cwd,
-        fullPath: false
+        fullPath: false,
       });
       expect(changedFiles).toHaveLength(0);
     });
@@ -223,7 +223,7 @@ describe("git", () => {
       const changedFiles = await getChangedFilesSince({
         ref: head.stdout.toString().trim(),
         cwd,
-        fullPath: true
+        fullPath: true,
       });
       expect(changedFiles).toHaveLength(0);
     });
@@ -240,7 +240,7 @@ describe("git", () => {
 
       const filesChangedSinceFirstRef = await getChangedFilesSince({
         ref: firstRef.stdout.toString().trim(),
-        cwd
+        cwd,
       });
       expect(filesChangedSinceFirstRef[0]).toEqual("packages/pkg-a/index.js");
       expect(filesChangedSinceFirstRef[1]).toEqual("packages/pkg-b/index.js");
@@ -250,7 +250,7 @@ describe("git", () => {
 
       const filesChangedSinceSecondRef = await getChangedFilesSince({
         ref: secondRef.stdout.toString().trim(),
-        cwd
+        cwd,
       });
       expect(filesChangedSinceSecondRef[0]).toEqual("packages/pkg-b/index.js");
       expect(filesChangedSinceSecondRef[1]).toEqual(
@@ -269,7 +269,7 @@ describe("git", () => {
       await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
-        ref: "master"
+        ref: "master",
       });
       expect(changedPackages).toHaveLength(0);
     });
@@ -285,7 +285,7 @@ describe("git", () => {
 
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
-        ref: "master"
+        ref: "master",
       });
 
       expect(changedPackages).toHaveLength(2);
@@ -301,7 +301,7 @@ describe("git", () => {
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd,
-        ref: "master"
+        ref: "master",
       });
       expect(files).toHaveLength(0);
     });
@@ -313,7 +313,7 @@ describe("git", () => {
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd,
-        ref: "master"
+        ref: "master",
       });
       expect(files).toHaveLength(2);
       expect(files[1]).toEqual(".changeset/quick-lions-devour.md");
@@ -326,7 +326,7 @@ describe("git", () => {
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd,
-        ref: "some-branch"
+        ref: "some-branch",
       });
       expect(files).toHaveLength(2);
       expect(files[1]).toEqual(".changeset/quick-lions-devour.md");

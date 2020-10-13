@@ -27,7 +27,7 @@ function applyLinks(
   for (let linkedPackages of linked) {
     // First we filter down to all the relevent releases for one set of linked packages
     let releasingLinkedPackages = [...releases.values()].filter(
-      release =>
+      (release) =>
         linkedPackages.includes(release.name) && release.type !== "none"
     );
 

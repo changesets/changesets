@@ -3,9 +3,9 @@ module.exports = {
     [
       "@babel/preset-env",
       {
-        targets: { node: 8 }
-      }
-    ]
+        targets: { node: 8 },
+      },
+    ],
   ],
-  overrides: [{ test: "**/*.ts", presets: ["@babel/preset-typescript"] }]
+  overrides: [{ test: "**/*.ts", presets: ["@babel/preset-typescript"] }],
 };
