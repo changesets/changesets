@@ -52,7 +52,7 @@
     "semver": "^5.4.1",
     "spawndamnit": "^2.0.0",
     "term-size": "^2.1.0",
-    "tty-table": "^2.7.0"
+    "tty-table": "^2.8.10"
   },
   "devDependencies": {
     "@changesets/parse": "*",
