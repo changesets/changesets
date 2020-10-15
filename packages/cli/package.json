@@ -45,14 +45,14 @@
     "fs-extra": "^7.0.1",
     "human-id": "^1.0.2",
     "is-ci": "^2.0.0",
-    "meow": "^5.0.0",
+    "meow": "^6.0.0",
     "outdent": "^0.5.0",
     "p-limit": "^2.2.0",
     "preferred-pm": "^3.0.0",
     "semver": "^5.4.1",
     "spawndamnit": "^2.0.0",
     "term-size": "^2.1.0",
-    "tty-table": "^2.7.0"
+    "tty-table": "^2.8.10"
   },
   "devDependencies": {
     "@changesets/parse": "*",
