@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.11.1
+
+### Patch Changes
+
+- [`00e2602`](https://github.com/atlassian/changesets/commit/00e2602815851c8f17f1115c354d19aab6583f96) [#473](https://github.com/atlassian/changesets/pull/473) Thanks [@zzarcon](https://github.com/zzarcon)! - Upgraded [`meow`](https://github.com/sindresorhus/meow) dependency to benefit from its [`yarg-parser`](https://github.com/yargs/yargs-parser) dependency upgrade that contains a security fix.
+
 ## 2.11.0
 
 ### Minor Changes
