@@ -1,5 +1,11 @@
 # @changesets/parse
 
+## 0.3.7
+
+### Patch Changes
+
+- [`5b6005e`](https://github.com/atlassian/changesets/commit/5b6005e0349a105b3d138fccdb22d13de8949862) [#462](https://github.com/atlassian/changesets/pull/462) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with failing to parse changesets containing Windows newlines.
+
 ## 0.3.6
 
 ### Patch Changes

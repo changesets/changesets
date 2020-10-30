@@ -1,5 +1,48 @@
 # @changesets/cli
 
+## 2.11.1
+
+### Patch Changes
+
+- [`00e2602`](https://github.com/atlassian/changesets/commit/00e2602815851c8f17f1115c354d19aab6583f96) [#473](https://github.com/atlassian/changesets/pull/473) Thanks [@zzarcon](https://github.com/zzarcon)! - Upgraded [`meow`](https://github.com/sindresorhus/meow) dependency to benefit from its [`yarg-parser`](https://github.com/yargs/yargs-parser) dependency upgrade that contains a security fix.
+
+## 2.11.0
+
+### Minor Changes
+
+- [`e33e4ca`](https://github.com/atlassian/changesets/commit/e33e4ca7e71ba7747e21af5011057f11ddfab939) [#458](https://github.com/atlassian/changesets/pull/458) Thanks [@emmenko](https://github.com/emmenko)! - Allow glob expressions to be provided for the `linked` and `ignore` options
+
+### Patch Changes
+
+- [`a60c0e1`](https://github.com/atlassian/changesets/commit/a60c0e1557ccdc3a9e7f665dd679c223f64450fe) [#465](https://github.com/atlassian/changesets/pull/465) Thanks [@Andarist](https://github.com/Andarist)! - Fixed the printed description of how `pre` command can be used.
+
+- Updated dependencies [[`f4973a2`](https://github.com/atlassian/changesets/commit/f4973a25ec6a837f36d64c1fb4b108ace3bc1f9d), [`e33e4ca`](https://github.com/atlassian/changesets/commit/e33e4ca7e71ba7747e21af5011057f11ddfab939)]:
+  - @changesets/types@3.2.0
+  - @changesets/config@1.4.0
+
+## 2.10.3
+
+### Patch Changes
+
+- [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f) [#455](https://github.com/atlassian/changesets/pull/455) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with linked package being bumped when its dev dependency from the linked set was bumped during the versioning.
+
+* [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76) [#446](https://github.com/atlassian/changesets/pull/446) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages not being updated to their highest bump type in pre mode sometimes. This could happen when dependant packages were only versioned because of their dependencies being upgraded and not because of a dedicated changeset for those dependant packages.
+
+  For the very same reason linked packages were also not always bumped correctly in pre mode to the highest bump type in a linked group.
+
+* Updated dependencies [[`ab98fe3`](https://github.com/atlassian/changesets/commit/ab98fe33814867ba740fc04733602be80771915c), [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f), [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76)]:
+  - @changesets/assemble-release-plan@4.0.0
+  - @changesets/get-release-plan@2.0.1
+
+## 2.10.2
+
+### Patch Changes
+
+- [`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d) [#412](https://github.com/atlassian/changesets/pull/412) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Fixed an issue with the same package specified as a different dependency type with different range types not being updated correctly for all of them.
+
+- Updated dependencies [[`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d)]:
+  - @changesets/assemble-release-plan@3.0.1
+
 ## 2.10.1
 
 ### Patch Changes
