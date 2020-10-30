@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.11.2
+
+### Patch Changes
+
+- [`b4e4b93`](https://github.com/atlassian/changesets/commit/b4e4b938b985b4bcdd23c573bcaba81669f2cafe) [#448](https://github.com/atlassian/changesets/pull/448) Thanks [@vlad-zhukov](https://github.com/vlad-zhukov)! - Packages are now published from cwd (usually the root of the repository) rather than from the package directories. This respects `.npmrc` files put in the root directory.
+
 ## 2.11.1
 
 ### Patch Changes
