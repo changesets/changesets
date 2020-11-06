@@ -2,4 +2,4 @@
 "@changesets/assemble-release-plan": patch
 ---
 
-None bumping peerdeps should not cause major bumps
+Fixed an issue with bumping a peer dependency using a `"none"` changeset type resulting in the dependant package being major bumped.
