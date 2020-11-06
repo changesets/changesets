@@ -210,6 +210,7 @@ function shouldBumpMajor({
   // we check if it is a peerDependency because if it is, our dependent bump type might need to be major.
   return (
     depType === "peerDependencies" &&
+    nextRelease.type !== "none" &&
     nextRelease.type !== "patch" &&
     // 1. If onlyUpdatePeerDependentsWhenOutOfRange set to true, bump major if the version is leaving the range.
     // 2. If onlyUpdatePeerDependentsWhenOutOfRange set to false, bump major regardless whether or not the version is leaving the range.
