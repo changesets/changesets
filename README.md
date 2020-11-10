@@ -23,7 +23,6 @@ of changesets, check out our [detailed-explanation](./docs/detailed-explanation.
 
 We also have a [dictionary](./docs/dictionary.md).
 
-
 ## Integrating with CI
 
 While changesets can be an entirely manual process, we recommend integrating it with how your CI works.
@@ -43,6 +42,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [filbert-js](https://github.com/kuldeepkeshwar/filbert-js)
 - [tinyhttp](https://github.com/talentlessguy/tinyhttp)
 - [Firebase Javascript SDK](https://github.com/firebase/firebase-js-sdk)
+- [Formik](https://github.com/formium/formik)
 
 # Thanks/Inspiration
 
