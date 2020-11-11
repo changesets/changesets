@@ -13,6 +13,7 @@
     "lint:prettier": "prettier --list-different \"**/*.{js,ts,tsx}\"",
     "types:check": "tsc",
     "prettier": "prettier --write \"**/*.{js,ts,tsx}\"",
+    "prettier:md": "prettier --write \"**/*.md\"",
     "changeset": "packages/cli/bin.js",
     "check-all": "yarn test && yarn lint && yarn types:check",
     "release": "yarn build && changeset publish"

@@ -5,7 +5,7 @@ While changesets is designed to work with a fully manual process, it also provid
 1. How do I want to ensure pull requests have changesets?
 2. How do I run the version and publish commands?
 
-Here we have a quick-start recommended workflow, with more 
+Here we have a quick-start recommended workflow, with more
 
 ## Recommended Automation Flow
 
@@ -26,29 +26,30 @@ In this approach, a pull request may be merged if no changeset is present, and a
 
 In some cases, you may want to make CI fail if not changeset is present, to ensure no PR can be merged without a changeset. To do this:
 
-In your CI process add a step that runs: 
+In your CI process add a step that runs:
+
 ```bash
 changeset status --sinceMaster
 ```
 
 This will exit with the exit code 1 if there have been no new changesets since master.
 
-In some cases, you may *want* to merge a change without doing any releases (such as when you only change tests or build tools). In this case, you can run `changeset --empty`. This will add a special changeset that does not release anything.
+In some cases, you may _want_ to merge a change without doing any releases (such as when you only change tests or build tools). In this case, you can run `changeset --empty`. This will add a special changeset that does not release anything.
 
 ## How do I run the version and publish commands?
 
 We have a [github action](https://github.com/changesets/action) that
 
-* creates a `version` PR, then keeps it up to date, recreating it when merged. This PR always has an up-to-date run of `changeset version`
-* Optionally allows you to do releases when changes are merged to master.
+- creates a `version` PR, then keeps it up to date, recreating it when merged. This PR always has an up-to-date run of `changeset version`
+- Optionally allows you to do releases when changes are merged to master.
 
 If you don't want to use this action, the manual workflow we recommend for running the `version` and `publish` commands is:
 
-* A release coordinator (RC) calls to stop any merging to master
-* The RC pull down `master`, runs `changeset version`, then make a new PR with the versioning changes
-* The versioning changes are merged back into master
-* The RC pulls `master` again and runs `changeset publish`
-* The RC runs `git push --follow-tags` to push the release tags back
-* The RC unblocks merging to master
+- A release coordinator (RC) calls to stop any merging to master
+- The RC pull down `master`, runs `changeset version`, then make a new PR with the versioning changes
+- The versioning changes are merged back into master
+- The RC pulls `master` again and runs `changeset publish`
+- The RC runs `git push --follow-tags` to push the release tags back
+- The RC unblocks merging to master
 
 This is a lot of steps, and is quite finnicky (we have to pull from master twice). Feel free to finesse it to your own circumstances.

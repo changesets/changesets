@@ -14,7 +14,7 @@ error('message part 1', 'message part 2');
 
 **error**: Use `error` to print error messages upon which users which immediately action to complete the task.
 
-**info**: Use  `info` to print informational messages to user.
+**info**: Use `info` to print informational messages to user.
 
 **log**: Use `log` to print messages don't fall in anyother specific category. For example, message to show title of the step being performed by the changesets tool.
 
