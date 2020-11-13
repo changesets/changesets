@@ -10,9 +10,9 @@
     "postinstall": "preconstruct dev && manypkg check",
     "lint": "yarn lint:eslint && yarn lint:prettier",
     "lint:eslint": "yarn eslint . --ext .ts,.tsx,.js",
-    "lint:prettier": "prettier --list-different \"**/*.{js,ts,tsx}\"",
+    "lint:prettier": "prettier --list-different \"**/*.{js,ts,tsx,md}\"",
     "types:check": "tsc",
-    "prettier": "prettier --write \"**/*.{js,ts,tsx}\"",
+    "prettier": "prettier --write \"**/*.{js,ts,tsx,md}\"",
     "changeset": "packages/cli/bin.js",
     "check-all": "yarn test && yarn lint && yarn types:check",
     "release": "yarn build && changeset publish"
