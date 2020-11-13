@@ -90,7 +90,7 @@ These restrictions exist to ensure your repository or published code do not end 
 changeset version --snapshot
 ```
 
-Snapshot is used for a special kind of publishing for testing - it creates temporary versions with a tag, instead of updating versions from the current semver ranges. You should not use this without [reading the documentation on snapshot releases]('./snapshot-releases.md')
+Snapshot is used for a special kind of publishing for testing - it creates temporary versions with a tag, instead of updating versions from the current semver ranges. You should not use this without [reading the documentation on snapshot releases](./snapshot-releases.md)
 
 ## publish
 
@@ -104,7 +104,7 @@ Because this command assumes that last commit is the release commit you should n
 
 `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the --otp option.
 
-`--tag TAGNAME` - for packages that are published, the chosen tag will be used instead of `latest`, allowing you to publish changes intended for testing and validation, not main consumption. This will most likely be used with [snapshot releases]('./snapshot-releases.md').
+`--tag TAGNAME` - for packages that are published, the chosen tag will be used instead of `latest`, allowing you to publish changes intended for testing and validation, not main consumption. This will most likely be used with [snapshot releases](./snapshot-releases.md).
 
 ### Git Tags
 
