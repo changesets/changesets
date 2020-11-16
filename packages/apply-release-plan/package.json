@@ -13,6 +13,7 @@
     "@changesets/git": "^1.0.5",
     "@changesets/types": "^3.1.0",
     "@manypkg/get-packages": "^1.0.1",
+    "detect-indent": "^6.0.0",
     "fs-extra": "^7.0.1",
     "lodash.startcase": "^4.4.0",
     "outdent": "^0.5.0",

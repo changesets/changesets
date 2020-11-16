@@ -108,6 +108,65 @@ async function testSetup(
 
 describe("apply release plan", () => {
   describe("versioning", () => {
+    describe("formatting", () => {
+      it("should not reformat a small array in a package.json", async () => {
+        const releasePlan = new FakeReleasePlan();
+        let { changedFiles } = await testSetup(
+          "small-array",
+          releasePlan.getReleasePlan(),
+          releasePlan.config
+        );
+        let pkgPath = changedFiles.find(a => a.endsWith(`package.json`));
+
+        if (!pkgPath) throw new Error(`could not find an updated package json`);
+        let pkgJSON = await fs.readFile(pkgPath, { encoding: "utf-8" });
+
+        expect(pkgJSON).toStrictEqual(`{
+  "name": "pkg-a",
+  "version": "1.1.0",
+  "files": [
+    "lib"
+  ]
+}
+`);
+      });
+      it("should not change tab indentation in a package.json", async () => {
+        const releasePlan = new FakeReleasePlan();
+        let { changedFiles } = await testSetup(
+          "tab-indent",
+          releasePlan.getReleasePlan(),
+          releasePlan.config
+        );
+        let pkgPath = changedFiles.find(a => a.endsWith(`package.json`));
+
+        if (!pkgPath) throw new Error(`could not find an updated package json`);
+        let pkgJSON = await fs.readFile(pkgPath, { encoding: "utf-8" });
+
+        expect(pkgJSON).toStrictEqual(`{
+\t"name": "pkg-a",
+\t"version": "1.1.0"
+}
+`);
+      });
+      it("should not add trailing newlines in a package.json if they don't exist", async () => {
+        const releasePlan = new FakeReleasePlan();
+        let { changedFiles } = await testSetup(
+          "no-trailing-newline",
+          releasePlan.getReleasePlan(),
+          releasePlan.config
+        );
+        let pkgPath = changedFiles.find(a => a.endsWith(`package.json`));
+
+        if (!pkgPath) throw new Error(`could not find an updated package json`);
+        let pkgJSON = await fs.readFile(pkgPath, { encoding: "utf-8" });
+
+        expect(pkgJSON).toStrictEqual(`{
+  "name": "pkg-a",
+  "version": "1.1.0"
+}`);
+      });
+    });
+
     it("should update a version for one package", async () => {
       const releasePlan = new FakeReleasePlan();
       let { changedFiles } = await testSetup(
