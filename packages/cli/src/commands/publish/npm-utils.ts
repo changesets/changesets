@@ -1,3 +1,5 @@
+import path from "path";
+import fs from "fs-extra";
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import pLimit from "p-limit";
@@ -182,6 +184,31 @@ async function internalPublish(
       // just in case this isn't already true
       twoFactorState.isRequired = Promise.resolve(true);
       return internalPublish(pkgName, opts, twoFactorState);
+    }
+    // Sometimes NPM returns an error in case a version is already published, causing
+    // the publish script to fail and preventing changeset to finish the job.
+    // In this case, we should ignore the error:
+    // {
+    //   "error": {
+    //     "code": "E403",
+    //     "summary": "403 Forbidden - PUT https://registry.npmjs.org/<pkg_name> - You cannot publish over the previously published versions: <version>.",
+    //     "detail": "In most cases, you or one of your dependencies are requesting\na package version that is forbidden by your security policy."
+    //   }
+    // }
+    if (
+      json.error.code === "E403" &&
+      json.error.summary.includes("previously published versions")
+    ) {
+      let packageJson = await fs.readJSON(path.join(opts.cwd, "package.json"), {
+        encoding: "utf8"
+      });
+      let publishedPkgInfo = await getPackageInfo(
+        `${pkgName}@${packageJson.version}`
+      );
+      if (publishedPkgInfo.version === packageJson.version) {
+        return { published: true };
+      }
+      // The package hasn't been published apparently, let the command fail.
     }
     error(
       `an error occurred while publishing ${pkgName}: ${json.error.code}`,
