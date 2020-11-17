@@ -1,6 +1,6 @@
 {
   "name": "@changesets/apply-release-plan",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Takes a release plan and applies it to packages",
   "main": "dist/apply-release-plan.cjs.js",
   "module": "dist/apply-release-plan.esm.js",

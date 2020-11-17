@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 4.0.1
+
+### Patch Changes
+
+- [`e92cc01`](https://github.com/atlassian/changesets/commit/e92cc0138bfbc041c77e6c7d054f2aa101cece5a) [#482](https://github.com/atlassian/changesets/pull/482) Thanks [@jonathanmorley](https://github.com/jonathanmorley)! - Fixed an issue with bumping a peer dependency using a `"none"` changeset type resulting in the dependant package being major bumped.
+
 ## 4.0.0
 
 ### Major Changes
