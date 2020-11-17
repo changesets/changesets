@@ -43,6 +43,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [tinyhttp](https://github.com/talentlessguy/tinyhttp)
 - [Firebase Javascript SDK](https://github.com/firebase/firebase-js-sdk)
 - [Formik](https://github.com/formium/formik)
+- [MobX](https://github.com/mobxjs/mobx)
 
 # Thanks/Inspiration
 
