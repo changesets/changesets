@@ -6,10 +6,10 @@ Writes a changeset to a file.
 import write from "@changesets/write";
 
 const changeset = {
-  "summary": "A description of a minor change",
-  "releases": [
-    { "name": "@changesets/something", "type": "minor" },
-    { "name": "@changesets/something-else", "type": "patch" }
+  summary: "A description of a minor change",
+  releases: [
+    { name: "@changesets/something", type: "minor" },
+    { name: "@changesets/something-else", type: "patch" }
   ]
 };
 

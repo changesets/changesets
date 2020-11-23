@@ -2,7 +2,6 @@
 
 [![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/get-release-plan)
 
-
 A function that reads information about the current repository
 
 ```js

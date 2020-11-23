@@ -2,7 +2,6 @@
 
 [![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/get-github-info)
 
-
 > Get the GitHub username and PR number from a commit. Intended for use with changesets.
 
 ## Getting Started

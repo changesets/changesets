@@ -10,6 +10,7 @@ import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import resolveFrom from "resolve-from";
 import { Packages } from "@manypkg/get-packages";
+import detectIndent from "detect-indent";
 
 import fs from "fs-extra";
 import path from "path";
@@ -105,21 +106,13 @@ export default async function applyReleasePlan(
 
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;
-    let pkgJSONPath = path.resolve(dir, "package.json");
 
-    let changelogPath = path.resolve(dir, "CHANGELOG.md");
-
-    let parsedConfig = prettier.format(JSON.stringify(packageJson), {
-      ...prettierConfig,
-      filepath: pkgJSONPath,
-      parser: "json",
-      printWidth: 20
-    });
-
-    await fs.writeFile(pkgJSONPath, parsedConfig);
+    const pkgJSONPath = path.resolve(dir, "package.json");
+    await updatePackageJson(pkgJSONPath, packageJson);
     touchedFiles.push(pkgJSONPath);
 
     if (changelog && changelog.length > 0) {
+      const changelogPath = path.resolve(dir, "CHANGELOG.md");
       await updateChangelog(changelogPath, changelog, name, prettierConfig);
       touchedFiles.push(changelogPath);
     }
@@ -263,6 +256,18 @@ async function updateChangelog(
   } catch (e) {
     console.warn(e);
   }
+}
+
+async function updatePackageJson(
+  pkgJsonPath: string,
+  pkgJson: any
+): Promise<void> {
+  const pkgRaw = await fs.readFile(pkgJsonPath, "utf-8");
+  const indent = detectIndent(pkgRaw).indent || "  ";
+  const stringified =
+    JSON.stringify(pkgJson, null, indent) + (pkgRaw.endsWith("\n") ? "\n" : "");
+
+  return fs.writeFile(pkgJsonPath, stringified);
 }
 
 async function prependFile(
