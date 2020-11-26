@@ -1,5 +1,6 @@
 import fixtures from "fixturez";
 import spawn from "spawndamnit";
+import fileUrl from "file-url";
 
 import {
   getCommitThatAddsFile,
@@ -16,6 +17,11 @@ const f = fixtures(__dirname);
 
 async function getCurrentCommit(cwd: string) {
   const cmd = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+  return cmd.stdout.toString().trim();
+}
+
+async function getCurrentCommitShort(cwd: string) {
+  const cmd = await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd });
   return cmd.stdout.toString().trim();
 }
 
@@ -189,16 +195,98 @@ describe("git", () => {
     it("should commit a file and get the hash of that commit", async () => {
       await add("packages/pkg-b/package.json", cwd);
       await commit("added packageB package.json", cwd);
-      const head = await spawn("git", ["rev-parse", "--short", "HEAD"], {
-        cwd
-      });
+      const headSha = await getCurrentCommitShort(cwd);
 
       const commitHash = await getCommitThatAddsFile(
         "packages/pkg-b/package.json",
         cwd
       );
 
-      expect(commitHash).toEqual(head.stdout.toString().trim());
+      expect(commitHash).toEqual(headSha);
+    });
+
+    describe("with shallow clone", () => {
+      // We will add these three well-known files
+      // over multiple commits, then test looking up
+      // the commits at which they were added.
+      const file1 = ".changeset/quick-lions-devour.md";
+      const file2 = "packages/pkg-a/index.js";
+      const file3 = "packages/pkg-b/index.js";
+
+      // The location of our cloned repo
+      let clone: string;
+      // The SHAs of the three interesting commits
+      let commit1: string, commit2: string, commit3: string;
+
+      async function createCommits(count: number, dir: string) {
+        for (let i = 0; i < count; i++) {
+          await commit("dummy commit", dir);
+        }
+      }
+
+      beforeEach(async () => {
+        // Create some test commits.
+
+        // Test commit 1.
+        // This is an important commit for testing an edge case.
+        // It adds a file and is the very first commit in the repo, which
+        // means the commit has no parent.
+        await add(file1, cwd);
+        await commit("commit1", cwd);
+        commit1 = await getCurrentCommitShort(cwd);
+
+        // Create a big history gap
+        await createCommits(60, cwd);
+
+        // Test commit 2.
+        // This commit adds a file but is early on in the history of the repo
+        // so it won't be present in a shallow clone.
+        await add(file2, cwd);
+        await commit("commit2", cwd);
+        commit2 = await getCurrentCommitShort(cwd);
+
+        // Create a big history gap
+        await createCommits(60, cwd);
+
+        // Test commit 3.
+        // This commit adds a file and will be the head commit, so it will be
+        // present in our depth-1 clone.
+        await add(file3, cwd);
+        await commit("commit3", cwd);
+        commit3 = await getCurrentCommitShort(cwd);
+
+        // Make a 1-commit-deep shallow clone of this repo
+        clone = f.temp();
+        await spawn(
+          "git",
+          // Note: a file:// URL is needed in order to make a shallow clone of
+          // a local repo
+          ["clone", "--depth", "1", fileUrl(cwd), "."],
+          {
+            cwd: clone
+          }
+        );
+      });
+
+      it("reads the SHA of a file-add if commit already included in the clone", async () => {
+        // This file was added in the head commit, so will definitely be in our
+        // 1-commit clone.
+        const commit = await getCommitThatAddsFile(file3, clone);
+        expect(commit).toEqual(commit3);
+      });
+
+      it("reads the SHA of a file-add even if not already included in the clone", async () => {
+        // Finding this commit will require deepening the clone until it appears.
+        const commit = await getCommitThatAddsFile(file2, clone);
+        expect(commit).toEqual(commit2);
+      });
+
+      it("reads the SHA of a file-add even if the first commit of a repo", async () => {
+        // Finding this commit will require deepening the clone right to the start
+        // of the repo history, and coping with a commit that has no parent.
+        const commit = await getCommitThatAddsFile(file1, clone);
+        expect(commit).toEqual(commit1);
+      });
     });
   });
 

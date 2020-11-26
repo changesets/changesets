@@ -43,13 +43,61 @@ export async function getDivergedCommit(cwd: string, ref: string) {
   return cmd.stdout.toString().trim();
 }
 
+/**
+ * Get the short SHA for the commit that added a file, including automatically
+ * extending a shallow clone if necessary to determine the commit.
+ */
 async function getCommitThatAddsFile(gitPath: string, cwd: string) {
-  const gitCmd = await spawn(
-    "git",
-    ["log", "--diff-filter=A", "--max-count=1", "--pretty=format:%h", gitPath],
-    { cwd }
-  );
-  return gitCmd.stdout.toString();
+  do {
+    const { commitSha, parentSha } = await findCommitAndParent();
+    if (parentSha) {
+      // We have found the parent of the commit that added the file.
+      // Therefore we know that the commit is legitimate and isn't simply the boundary of a shallow clone.
+      return commitSha;
+    }
+
+    // The commit we've found may be the real commit or it may be the boundary of
+    // a shallow clone.
+
+    // Can we deepen the clone?
+    if (await isRepoShallow()) {
+      // Yes.
+      await deepenCloneBy(50);
+    } else {
+      // It's not a shallow clone, so the commit SHA we have is legitimate.
+      return commitSha;
+    }
+  } while (true);
+
+  /** Find the commit that added a file, and the parent of that commit */
+  async function findCommitAndParent() {
+    const logResult = await spawn(
+      "git",
+      [
+        "log",
+        "--diff-filter=A",
+        "--max-count=1",
+        "--pretty=format:%h:%p",
+        gitPath
+      ],
+      { cwd }
+    );
+    const [commitSha, parentSha] = logResult.stdout.toString().split(":");
+    return { commitSha, parentSha };
+  }
+
+  async function isRepoShallow() {
+    const isShallowResult = await spawn(
+      "git",
+      ["rev-parse", "--is-shallow-repository"],
+      { cwd }
+    );
+    return isShallowResult.stdout.toString().trim() === "true";
+  }
+
+  async function deepenCloneBy(by: number) {
+    await spawn("git", ["fetch", `--deepen=${by}`], { cwd });
+  }
 }
 
 async function getChangedFilesSince({
