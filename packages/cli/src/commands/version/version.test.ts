@@ -47,6 +47,8 @@ git.add.mockImplementation(() => Promise.resolve(true));
 // @ts-ignore
 git.commit.mockImplementation(() => Promise.resolve(true));
 // @ts-ignore
+git.getCommitsThatAddFiles.mockImplementation(() => Promise.resolve([]));
+// @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
 
 const simpleChangeset: NewChangeset = {

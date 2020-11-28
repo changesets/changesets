@@ -3,6 +3,7 @@ import path from "path";
 import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
+import { deprecate } from "util";
 
 const isInDir = (dir: string) => (subdir: string) => isSubdir(dir, subdir);
 
@@ -43,20 +44,56 @@ export async function getDivergedCommit(cwd: string, ref: string) {
   return cmd.stdout.toString().trim();
 }
 
+const getCommitThatAddsFile = deprecate(
+  async (gitPath: string, cwd: string) => {
+    return (await getCommitsThatAddFiles([gitPath], cwd))[0];
+  },
+  "Use the bulk getCommitsThatAddFiles function instead"
+);
+
 /**
- * Get the short SHA for the commit that added a file, including automatically
- * extending a shallow clone if necessary to determine the commit.
+ * Get the short SHAs for the commits that added files, including automatically
+ * extending a shallow clone if necessary to determine any commits.
+ * @param gitPaths - Paths to fetch
+ * @param cwd - Location of the repository
  */
-async function getCommitThatAddsFile(gitPath: string, cwd: string) {
+async function getCommitsThatAddFiles(
+  gitPaths: string[],
+  cwd: string
+): Promise<(string | undefined)[]> {
+  // Maps gitPath to short commit SHA
+  const map = new Map<string, string>();
+
+  // Paths we haven't completed processing on yet
+  let remaining = gitPaths;
+
   do {
-    const { commitSha, parentSha } = await findCommitAndParent();
-    if (parentSha) {
-      // We have found the parent of the commit that added the file.
-      // Therefore we know that the commit is legitimate and isn't simply the boundary of a shallow clone.
-      return commitSha;
+    // Fetch commit information for all paths we don't have yet
+    const commitInfos = await Promise.all(remaining.map(findCommitAndParent));
+
+    // To collect commits without parents (usually because they're absent from
+    // a shallow clone).
+    let commitsWithMissingParents = [];
+
+    for (const info of commitInfos) {
+      if (info.commitSha) {
+        if (info.parentSha) {
+          // We have found the parent of the commit that added the file.
+          // Therefore we know that the commit is legitimate and isn't simply the boundary of a shallow clone.
+          map.set(info.path, info.commitSha);
+        } else {
+          commitsWithMissingParents.push(info);
+        }
+      } else {
+        // No commit for this file, which indicates it doesn't exist.
+      }
     }
 
-    // The commit we've found may be the real commit or it may be the boundary of
+    if (commitsWithMissingParents.length === 0) {
+      break;
+    }
+
+    // The commits we've found may be the real commits or they may be the boundary of
     // a shallow clone.
 
     // Can we deepen the clone?
@@ -64,13 +101,20 @@ async function getCommitThatAddsFile(gitPath: string, cwd: string) {
       // Yes.
       await deepenCloneBy(50);
     } else {
-      // It's not a shallow clone, so the commit SHA we have is legitimate.
-      return commitSha;
+      // It's not a shallow clone, so all the commit SHAs we have are legitimate.
+      for (const unresolved of commitsWithMissingParents) {
+        map.set(unresolved.path, unresolved.commitSha);
+      }
+      break;
     }
+
+    remaining = commitsWithMissingParents.map(p => p.path);
   } while (true);
 
+  return gitPaths.map(p => map.get(p));
+
   /** Find the commit that added a file, and the parent of that commit */
-  async function findCommitAndParent() {
+  async function findCommitAndParent(gitPath: string) {
     const logResult = await spawn(
       "git",
       [
@@ -83,7 +127,7 @@ async function getCommitThatAddsFile(gitPath: string, cwd: string) {
       { cwd }
     );
     const [commitSha, parentSha] = logResult.stdout.toString().split(":");
-    return { commitSha, parentSha };
+    return { path: gitPath, commitSha, parentSha };
   }
 
   async function isRepoShallow() {
@@ -188,6 +232,7 @@ async function getChangedPackagesSinceRef({
 
 export {
   getCommitThatAddsFile,
+  getCommitsThatAddFiles,
   getChangedFilesSince,
   add,
   commit,

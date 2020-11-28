@@ -4,6 +4,7 @@ import fileUrl from "file-url";
 
 import {
   getCommitThatAddsFile,
+  getCommitsThatAddFiles,
   getChangedFilesSince,
   add,
   commit,
@@ -23,6 +24,11 @@ async function getCurrentCommit(cwd: string) {
 async function getCurrentCommitShort(cwd: string) {
   const cmd = await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd });
   return cmd.stdout.toString().trim();
+}
+
+async function getCommitCount(cwd: string) {
+  const cmd = await spawn("git", ["rev-list", "--count", "HEAD"], { cwd });
+  return parseInt(cmd.stdout.toString(), 10);
 }
 
 describe("git", () => {
@@ -191,8 +197,25 @@ describe("git", () => {
     });
   });
 
-  describe("getCommitThatAddsFile", () => {
+  describe("getCommitsThatAddFiles", () => {
     it("should commit a file and get the hash of that commit", async () => {
+      await add("packages/pkg-b/package.json", cwd);
+      await commit("added packageB package.json", cwd);
+      const headSha = await getCurrentCommitShort(cwd);
+
+      const commitHash = await getCommitsThatAddFiles(
+        ["packages/pkg-b/package.json"],
+        cwd
+      );
+
+      expect(commitHash).toEqual([headSha]);
+    });
+
+    // We have replaced the single-file version with a multi-file version
+    // which will correctly run all the file retrieves in parallel, safely
+    // deepening a shallow clone as necessary.  We've deprecated the
+    // single-file version and can remove it in a major release.
+    it("exposes a deprecated single-file call", async () => {
       await add("packages/pkg-b/package.json", cwd);
       await commit("added packageB package.json", cwd);
       const headSha = await getCurrentCommitShort(cwd);
@@ -213,79 +236,116 @@ describe("git", () => {
       const file2 = "packages/pkg-a/index.js";
       const file3 = "packages/pkg-b/index.js";
 
-      // The location of our cloned repo
-      let clone: string;
-      // The SHAs of the three interesting commits
-      let commit1: string, commit2: string, commit3: string;
+      // Roughly how many commits will the deepening algorithm
+      // deepen each time?  We use this to set up test data to
+      // check that the deepens the clone but doesn't need to *fully* unshallow
+      // the clone.
+      const shallowCloneDeepeningAmount = 50;
 
-      async function createCommits(count: number, dir: string) {
+      /**
+       * Creates a number of empty commits; this is useful to ensure
+       * that a particular commit doesn't make it into a shallow clone.
+       */
+      async function createDummyCommits(count: number) {
         for (let i = 0; i < count; i++) {
-          await commit("dummy commit", dir);
+          await commit("dummy commit", cwd);
         }
       }
 
-      beforeEach(async () => {
-        // Create some test commits.
+      async function addFileAndCommit(file: string) {
+        await add(file, cwd);
+        await commit(`add file ${file}`, cwd);
+        const commitSha = await getCurrentCommitShort(cwd);
+        return commitSha;
+      }
 
-        // Test commit 1.
-        // This is an important commit for testing an edge case.
-        // It adds a file and is the very first commit in the repo, which
-        // means the commit has no parent.
-        await add(file1, cwd);
-        await commit("commit1", cwd);
-        commit1 = await getCurrentCommitShort(cwd);
-
-        // Create a big history gap
-        await createCommits(60, cwd);
-
-        // Test commit 2.
-        // This commit adds a file but is early on in the history of the repo
-        // so it won't be present in a shallow clone.
-        await add(file2, cwd);
-        await commit("commit2", cwd);
-        commit2 = await getCurrentCommitShort(cwd);
-
-        // Create a big history gap
-        await createCommits(60, cwd);
-
-        // Test commit 3.
-        // This commit adds a file and will be the head commit, so it will be
-        // present in our depth-1 clone.
-        await add(file3, cwd);
-        await commit("commit3", cwd);
-        commit3 = await getCurrentCommitShort(cwd);
-
+      async function createShallowClone(depth: number): Promise<string> {
         // Make a 1-commit-deep shallow clone of this repo
-        clone = f.temp();
+        const cloneDir = f.temp();
         await spawn(
           "git",
           // Note: a file:// URL is needed in order to make a shallow clone of
           // a local repo
-          ["clone", "--depth", "1", fileUrl(cwd), "."],
+          ["clone", "--depth", depth.toString(), fileUrl(cwd), "."],
           {
-            cwd: clone
+            cwd: cloneDir
           }
         );
-      });
+        return cloneDir;
+      }
 
-      it("reads the SHA of a file-add if commit already included in the clone", async () => {
+      it("reads the SHA of a file-add without deepening if commit already included in the shallow clone", async () => {
+        // We create a repo that we shallow-clone;
+        // the commit we're going to scan for is the latest commit,
+        // so will be in the shallow clone immediately without deepening
+        await createDummyCommits(10);
+        const originalCommit = await addFileAndCommit(file1);
+
+        const clone = await createShallowClone(5);
+
         // This file was added in the head commit, so will definitely be in our
         // 1-commit clone.
-        const commit = await getCommitThatAddsFile(file3, clone);
-        expect(commit).toEqual(commit3);
+        const commits = await getCommitsThatAddFiles([file1], clone);
+        expect(commits).toEqual([originalCommit]);
+
+        // We should not need to have deepened the clone for this
+        expect(await getCommitCount(clone)).toEqual(5);
       });
 
-      it("reads the SHA of a file-add even if not already included in the clone", async () => {
+      it("reads the SHA of a file-add even if not already included in the shallow clone", async () => {
+        // We're going to create a repo where the commit we're looking for isn't
+        // in the shallow clone, so we'll need to deepen it to locate it.
+        await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3);
+        const originalCommit = await addFileAndCommit(file2);
+        await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3);
+
+        const clone = await createShallowClone(5);
+
         // Finding this commit will require deepening the clone until it appears.
         const commit = await getCommitThatAddsFile(file2, clone);
-        expect(commit).toEqual(commit2);
+        expect(commit).toEqual(originalCommit);
+
+        // It should not have completely unshallowed the clone; just enough.
+        const originalRepoDepth = await getCommitCount(cwd);
+        expect(await getCommitCount(clone)).toBeGreaterThan(5);
+        expect(await getCommitCount(clone)).toBeLessThan(originalRepoDepth);
       });
 
       it("reads the SHA of a file-add even if the first commit of a repo", async () => {
         // Finding this commit will require deepening the clone right to the start
         // of the repo history, and coping with a commit that has no parent.
-        const commit = await getCommitThatAddsFile(file1, clone);
-        expect(commit).toEqual(commit1);
+        const originalCommit = await addFileAndCommit(file3);
+        await createDummyCommits(shallowCloneDeepeningAmount * 2);
+        const clone = await createShallowClone(5);
+
+        // Finding this commit will require fully deepening the repo
+        const commit = await getCommitThatAddsFile(file3, clone);
+        expect(commit).toEqual(originalCommit);
+
+        // We should have fully deepened
+        const originalRepoDepth = await getCommitCount(cwd);
+        expect(await getCommitCount(clone)).toEqual(originalRepoDepth);
+      });
+
+      it("can return SHAs for multiple files including return blanks for missing files", async () => {
+        // We want to ensure that we can retrieve SHAs for multiple files at the same time,
+        // and also that requesting missing files doesn't affect the location of commits
+        // for the files that succeed.
+        await createDummyCommits(shallowCloneDeepeningAmount);
+        const originalCommit1 = await addFileAndCommit(file1);
+        await createDummyCommits(shallowCloneDeepeningAmount);
+        const originalCommit2 = await addFileAndCommit(file2);
+
+        const nonExistentFile = "this-file-does-not-exist";
+
+        const clone = await createShallowClone(5);
+
+        const commits = await getCommitsThatAddFiles(
+          [file1, nonExistentFile, file2],
+          clone
+        );
+
+        expect(commits).toEqual([originalCommit1, undefined, originalCommit2]);
       });
     });
   });
