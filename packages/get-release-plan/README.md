@@ -7,7 +7,7 @@ A function that reads information about the current repository
 ```js
 import getReleasePlan from "@changesets/get-release-plan";
 
-const releasePLan = await getReleasePlan(cwd, since, passedConfig);
+const releasePlan = await getReleasePlan(cwd, since, passedConfig);
 ```
 
 ## cwd: string
