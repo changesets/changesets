@@ -1,4 +1,4 @@
-import { getChangelogEntry, BumpLevels, sortTheThings } from "./utils";
+import { getChangelogEntry, BumpLevels, sortChangelogEntries } from "./utils";
 
 let changelog = `# @keystone-alpha/email
 
@@ -97,5 +97,5 @@ test("it sorts the things right", () => {
       private: false
     }
   ];
-  expect(things.sort(sortTheThings)).toMatchSnapshot();
+  expect(things.sort(sortChangelogEntries)).toMatchSnapshot();
 });
