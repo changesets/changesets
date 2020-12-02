@@ -100,7 +100,6 @@ type VersionOptions = {
   script?: string;
   cwd?: string;
   commitMessage?: string;
-  hasPublishScript?: boolean;
 };
 
 export async function runVersion({
