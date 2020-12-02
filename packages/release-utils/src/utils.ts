@@ -3,8 +3,8 @@ import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 // @ts-ignore
 import mdastToString from "mdast-util-to-string";
-import { exec } from "@actions/exec";
 import { getPackages, Package } from "@manypkg/get-packages";
+import spawn from "spawndamnit";
 
 export const BumpLevels = {
   dep: 0,
@@ -93,27 +93,27 @@ export function getChangelogEntry(changelog: string, version: string) {
 
 export async function execWithOutput(
   command: string,
-  args?: string[],
-  options?: { ignoreReturnCode?: boolean; cwd?: string }
+  args: string[],
+  options: { ignoreReturnCode?: boolean; cwd: string }
 ) {
-  let myOutput = "";
-  let myError = "";
-
+  console.log(`Running ${command} ${args.join(" ")}`);
+  let childProcess = spawn(command, args, {
+    cwd: options.cwd
+  });
+  childProcess.on("stdout", data => console.log(data.toString()));
+  childProcess.on("stderr", data => console.error(data.toString()));
+  let result = await childProcess;
+  if (!options?.ignoreReturnCode && result.code !== 0) {
+    throw new Error(
+      `The command "${command} ${args.join(" ")}" failed with code ${
+        result.code
+      }\n${result.stdout.toString("utf8")}\n${result.stderr.toString("utf8")}`
+    );
+  }
   return {
-    code: await exec(command, args, {
-      listeners: {
-        stdout: (data: Buffer) => {
-          myOutput += data.toString();
-        },
-        stderr: (data: Buffer) => {
-          myError += data.toString();
-        }
-      },
-
-      ...options
-    }),
-    stdout: myOutput,
-    stderr: myError
+    code: result.code,
+    stdout: result.stdout.toString("utf8"),
+    stderr: result.stderr.toString("utf8")
   };
 }
 

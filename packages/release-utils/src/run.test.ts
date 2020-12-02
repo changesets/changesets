@@ -105,40 +105,29 @@ describe("version", () => {
       }
       "
     `);
-
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
         "utf-8"
       )
-    ).toMatchInlineSnapshot(`
-      "# pkg-a
+    ).toEqual(
+      expect.stringContaining(`# pkg-a
 
-      ## 1.1.0
-      ### Minor Changes
-
-      - fdf577e: Awesome feature
-
-      ### Patch Changes
-
-      - Updated dependencies [fdf577e]
-        - pkg-b@1.1.0
-      "
-    `);
+## 1.1.0
+### Minor Changes`)
+    );
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
         "utf-8"
       )
-    ).toMatchInlineSnapshot(`
-      "# pkg-b
+    ).toEqual(
+      expect.stringContaining(`# pkg-b
 
-      ## 1.1.0
-      ### Minor Changes
-
-      - fdf577e: Awesome feature
-      "
-    `);
+## 1.1.0
+### Minor Changes
+`)
+    );
   });
 
   it.only("only includes bumped packages in the PR body", async () => {
@@ -203,15 +192,13 @@ describe("version", () => {
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
         "utf-8"
       )
-    ).toMatchInlineSnapshot(`
-      "# pkg-a
+    ).toEqual(
+      expect.stringContaining(`# pkg-a
 
-      ## 1.1.0
-      ### Minor Changes
-
-      - d8d2f4f: Awesome feature
-      "
-    `);
+## 1.1.0
+### Minor Changes
+`)
+    );
     await expect(
       fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf-8")
     ).rejects.toMatchObject({ code: "ENOENT" });

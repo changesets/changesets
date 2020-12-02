@@ -1,4 +1,3 @@
-import { exec } from "@actions/exec";
 import { getPackages, Package } from "@manypkg/get-packages";
 import path from "path";
 import * as semver from "semver";
@@ -114,7 +113,7 @@ export async function runVersion({
 
   if (script) {
     let [versionCommand, ...versionArgs] = script.split(/\s+/);
-    await exec(versionCommand, versionArgs, { cwd });
+    await execWithOutput(versionCommand, versionArgs, { cwd });
   } else {
     let changesetsCliPkgJson = await require(path.join(
       cwd,
@@ -126,7 +125,11 @@ export async function runVersion({
     let cmd = semver.lt(changesetsCliPkgJson.version, "2.0.0")
       ? "bump"
       : "version";
-    await exec("node", ["./node_modules/@changesets/cli/bin.js", cmd], { cwd });
+    await execWithOutput(
+      "node",
+      ["./node_modules/@changesets/cli/bin.js", cmd],
+      { cwd }
+    );
   }
 
   // project with `commit: true` setting could have already committed files

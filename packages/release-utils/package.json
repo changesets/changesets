@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "main": "dist/release-utils.cjs.js",
   "dependencies": {
-    "@actions/exec": "^1.0.4",
     "@changesets/pre": "^1.0.5",
     "@changesets/read": "^0.4.6",
     "@changesets/types": "^3.2.0",

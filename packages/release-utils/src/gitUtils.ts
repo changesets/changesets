@@ -1,20 +1,4 @@
-import { exec } from "@actions/exec";
 import { execWithOutput } from "./utils";
-
-export const setupUser = async () => {
-  await exec("git", [
-    "config",
-    "--global",
-    "user.name",
-    `"github-actions[bot]"`
-  ]);
-  await exec("git", [
-    "config",
-    "--global",
-    "user.email",
-    `"github-actions[bot]@users.noreply.github.com"`
-  ]);
-};
 
 export const getCurrentBranch = async (cwd: string) => {
   const { stdout } = await execWithOutput(
@@ -26,7 +10,7 @@ export const getCurrentBranch = async (cwd: string) => {
 };
 
 export const pullBranch = async (branch: string, cwd: string) => {
-  await exec("git", ["pull", "origin", branch], { cwd });
+  await execWithOutput("git", ["pull", "origin", branch], { cwd });
 };
 
 export const push = async (
@@ -37,7 +21,7 @@ export const push = async (
     cwd
   }: { force?: boolean; includeTags?: boolean; cwd: string }
 ) => {
-  await exec(
+  await execWithOutput(
     "git",
     [
       "push",
@@ -62,7 +46,7 @@ export const switchToMaybeExistingBranch = async (
     .toString()
     .includes(`Switched to a new branch '${branch}'`);
   if (isCreatingBranch) {
-    await exec("git", ["checkout", "-b", branch], { cwd });
+    await execWithOutput("git", ["checkout", "-b", branch], { cwd });
   }
 };
 
@@ -71,7 +55,7 @@ export const reset = async (
   mode: "hard" | "soft" | "mixed" = "hard",
   cwd: string
 ) => {
-  await exec("git", ["reset", `--${mode}`, pathSpec], { cwd });
+  await execWithOutput("git", ["reset", `--${mode}`, pathSpec], { cwd });
 };
 
 export const commitAll = async (message: string, cwd: string) => {
