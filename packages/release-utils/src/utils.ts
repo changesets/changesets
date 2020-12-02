@@ -117,7 +117,7 @@ export async function execWithOutput(
   };
 }
 
-export function sortTheThings(
+export function sortChangelogEntries(
   a: { private: boolean; highestLevel: number },
   b: { private: boolean; highestLevel: number }
 ) {
