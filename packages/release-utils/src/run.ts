@@ -1,7 +1,11 @@
 import { getPackages, Package } from "@manypkg/get-packages";
 import path from "path";
 import * as semver from "semver";
-import { execWithOutput } from "./utils";
+import {
+  execWithOutput,
+  getVersionsByDirectory,
+  getChangedPackages
+} from "./utils";
 import * as gitUtils from "./gitUtils";
 import { readChangesetState } from "./readChangesetState";
 
@@ -111,6 +115,8 @@ export async function runVersion({
   await gitUtils.switchToMaybeExistingBranch(versionBranch, cwd);
   await gitUtils.reset("HEAD", undefined, cwd);
 
+  let versionsByDirectory = await getVersionsByDirectory(cwd);
+
   if (script) {
     let [versionCommand, ...versionArgs] = script.split(/\s+/);
     await execWithOutput(versionCommand, versionArgs, { cwd });
@@ -132,6 +138,8 @@ export async function runVersion({
     );
   }
 
+  let changedPackages = await getChangedPackages(cwd, versionsByDirectory);
+
   // project with `commit: true` setting could have already committed files
   if (!(await gitUtils.checkIfClean(cwd))) {
     const finalCommitMessage = `${commitMessage}${
@@ -141,5 +149,5 @@ export async function runVersion({
   }
 
   await gitUtils.push(versionBranch, { force: true, cwd });
-  return { versionBranch };
+  return { versionBranch, changedPackages };
 }
