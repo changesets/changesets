@@ -1,5 +1,11 @@
 # @changesets/apply-release-plan
 
+## 4.1.0
+
+### Minor Changes
+
+- [`fd53ca2`](https://github.com/atlassian/changesets/commit/fd53ca2acb0a955bc87af090daba5aa41c2bab69) [#395](https://github.com/atlassian/changesets/pull/395) Thanks [@jonathanmorley](https://github.com/jonathanmorley)! - Use `JSON.stringify` to update package.jsons without including modifications from prettier.
+
 ## 4.0.0
 
 ### Major Changes

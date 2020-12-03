@@ -1,5 +1,66 @@
 # @changesets/cli
 
+## 2.12.0
+
+### Minor Changes
+
+- [`c6d38b5`](https://github.com/atlassian/changesets/commit/c6d38b579bdfddc22714c352c3459d04d1745326) [#469](https://github.com/atlassian/changesets/pull/469) Thanks [@camdub](https://github.com/camdub)! - Handle JSON errors for unpublished packages on the github package registry
+
+## 2.11.2
+
+### Patch Changes
+
+- [`b4e4b93`](https://github.com/atlassian/changesets/commit/b4e4b938b985b4bcdd23c573bcaba81669f2cafe) [#448](https://github.com/atlassian/changesets/pull/448) Thanks [@vlad-zhukov](https://github.com/vlad-zhukov)! - Packages are now published from cwd (usually the root of the repository) rather than from the package directories. This respects `.npmrc` files put in the root directory.
+
+## 2.11.1
+
+### Patch Changes
+
+- [`00e2602`](https://github.com/atlassian/changesets/commit/00e2602815851c8f17f1115c354d19aab6583f96) [#473](https://github.com/atlassian/changesets/pull/473) Thanks [@zzarcon](https://github.com/zzarcon)! - Upgraded [`meow`](https://github.com/sindresorhus/meow) dependency to benefit from its [`yarg-parser`](https://github.com/yargs/yargs-parser) dependency upgrade that contains a security fix.
+
+## 2.11.0
+
+### Minor Changes
+
+- [`e33e4ca`](https://github.com/atlassian/changesets/commit/e33e4ca7e71ba7747e21af5011057f11ddfab939) [#458](https://github.com/atlassian/changesets/pull/458) Thanks [@emmenko](https://github.com/emmenko)! - Allow glob expressions to be provided for the `linked` and `ignore` options
+
+### Patch Changes
+
+- [`a60c0e1`](https://github.com/atlassian/changesets/commit/a60c0e1557ccdc3a9e7f665dd679c223f64450fe) [#465](https://github.com/atlassian/changesets/pull/465) Thanks [@Andarist](https://github.com/Andarist)! - Fixed the printed description of how `pre` command can be used.
+
+- Updated dependencies [[`f4973a2`](https://github.com/atlassian/changesets/commit/f4973a25ec6a837f36d64c1fb4b108ace3bc1f9d), [`e33e4ca`](https://github.com/atlassian/changesets/commit/e33e4ca7e71ba7747e21af5011057f11ddfab939)]:
+  - @changesets/types@3.2.0
+  - @changesets/config@1.4.0
+
+## 2.10.3
+
+### Patch Changes
+
+- [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f) [#455](https://github.com/atlassian/changesets/pull/455) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with linked package being bumped when its dev dependency from the linked set was bumped during the versioning.
+
+* [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76) [#446](https://github.com/atlassian/changesets/pull/446) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages not being updated to their highest bump type in pre mode sometimes. This could happen when dependant packages were only versioned because of their dependencies being upgraded and not because of a dedicated changeset for those dependant packages.
+
+  For the very same reason linked packages were also not always bumped correctly in pre mode to the highest bump type in a linked group.
+
+* Updated dependencies [[`ab98fe3`](https://github.com/atlassian/changesets/commit/ab98fe33814867ba740fc04733602be80771915c), [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f), [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76)]:
+  - @changesets/assemble-release-plan@4.0.0
+  - @changesets/get-release-plan@2.0.1
+
+## 2.10.2
+
+### Patch Changes
+
+- [`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d) [#412](https://github.com/atlassian/changesets/pull/412) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Fixed an issue with the same package specified as a different dependency type with different range types not being updated correctly for all of them.
+
+- Updated dependencies [[`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d)]:
+  - @changesets/assemble-release-plan@3.0.1
+
+## 2.10.1
+
+### Patch Changes
+
+- [`efd01d9`](https://github.com/atlassian/changesets/commit/efd01d9b7a46ba2a44df1f5fdb47436e9219f44b) [#437](https://github.com/atlassian/changesets/pull/437) Thanks [@Blasz](https://github.com/Blasz)! - Fix version command not committing when commit config option is set
+
 ## 2.10.0
 
 ### Minor Changes

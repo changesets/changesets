@@ -1,9 +1,10 @@
 import * as fs from "fs-extra";
 import path from "path";
+import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
 import { Packages } from "@manypkg/get-packages";
-import { Config, WrittenConfig } from "@changesets/types";
+import { Config, WrittenConfig, Linked } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 
@@ -11,7 +12,7 @@ export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
   changelog: "@changesets/cli/changelog",
   commit: false,
-  linked: [] as ReadonlyArray<ReadonlyArray<string>>,
+  linked: [] as Linked,
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
@@ -30,6 +31,37 @@ function getNormalisedChangelogOption(
   return thing;
 }
 
+function normalizePackageNames(
+  listOfPackageNamesOrGlob: readonly string[],
+  pkgNames: readonly string[]
+): [string[], string[]] {
+  const matchingPackages = micromatch(pkgNames, listOfPackageNamesOrGlob);
+
+  // Go through the list of given package globs (again) in order to find out
+  // which packages didn't match so that we can show a validation message.
+  const nonExistingPackages = listOfPackageNamesOrGlob.filter(
+    pkgNameOrGlob =>
+      !pkgNames.some(pkgName => micromatch.isMatch(pkgName, pkgNameOrGlob))
+  );
+
+  // Since the validation happens in subsequent steps, we need to return a tuple
+  // with the list of non-existing packages.
+  // TODO: refactor the validation logic to exit early when something is not valid.
+  return [matchingPackages, nonExistingPackages];
+}
+
+// TODO: replace usage with Array.isArray when TS 4.1 gets released
+// source: https://github.com/microsoft/TypeScript/pull/39258/files#diff-a6b488d9bd802977827b535a3011c1f3R1379
+function isArray<T>(
+  arg: T | {}
+): arg is T extends readonly any[]
+  ? unknown extends T
+    ? never
+    : readonly any[]
+  : any[] {
+  return Array.isArray(arg);
+}
+
 export let read = async (cwd: string, packages: Packages) => {
   let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
   return parse(json, packages);
@@ -37,12 +69,16 @@ export let read = async (cwd: string, packages: Packages) => {
 
 export let parse = (json: WrittenConfig, packages: Packages): Config => {
   let messages = [];
+  let pkgNames: readonly string[] = packages.packages.map(
+    ({ packageJson }) => packageJson.name
+  );
+
   if (
     json.changelog !== undefined &&
     json.changelog !== false &&
     typeof json.changelog !== "string" &&
     !(
-      Array.isArray(json.changelog) &&
+      isArray(json.changelog) &&
       json.changelog.length === 2 &&
       typeof json.changelog[0] === "string"
     )
@@ -98,7 +134,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (json.linked !== undefined) {
     if (
       !(
-        Array.isArray(json.linked) &&
+        isArray(json.linked) &&
         json.linked.every(
           arr =>
             Array.isArray(arr) &&
@@ -114,28 +150,32 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or an array of arrays of package names`
       );
     } else {
-      let pkgNames = new Set(
-        packages.packages.map(({ packageJson }) => packageJson.name)
-      );
       let foundPkgNames = new Set<string>();
       let duplicatedPkgNames = new Set<string>();
       for (let linkedGroup of json.linked) {
-        for (let linkedPkgName of linkedGroup) {
-          if (!pkgNames.has(linkedPkgName)) {
-            messages.push(
-              `The package "${linkedPkgName}" is specified in the \`linked\` option but it is not found in the project. You may have misspelled the package name.`
-            );
-          }
+        let [
+          normalizedLinkedGroup,
+          nonExistingPackages
+        ] = normalizePackageNames(linkedGroup, pkgNames);
+        for (let linkedPkgName of normalizedLinkedGroup) {
           if (foundPkgNames.has(linkedPkgName)) {
             duplicatedPkgNames.add(linkedPkgName);
           }
           foundPkgNames.add(linkedPkgName);
         }
+        // Show validation message for each non-existing package
+        if (nonExistingPackages.length > 0) {
+          nonExistingPackages.forEach(nonExistingPkgName => {
+            messages.push(
+              `The package or glob expression "${nonExistingPkgName}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+            );
+          });
+        }
       }
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach(pkgName => {
           messages.push(
-            `The package "${pkgName}" is in multiple sets of linked packages. Packages can only be in a single set of linked packages.`
+            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
           );
         });
       }
@@ -156,7 +196,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (json.ignore) {
     if (
       !(
-        Array.isArray(json.ignore) &&
+        isArray(json.ignore) &&
         json.ignore.every(pkgName => typeof pkgName === "string")
       )
     ) {
@@ -168,15 +208,16 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or an array of package names`
       );
     } else {
-      let pkgNames = new Set(
-        packages.packages.map(({ packageJson }) => packageJson.name)
+      let [, nonExistingPackages] = normalizePackageNames(
+        json.ignore,
+        pkgNames
       );
-      for (let pkgName of json.ignore) {
-        if (!pkgNames.has(pkgName)) {
+      if (nonExistingPackages.length > 0) {
+        nonExistingPackages.forEach(nonExistingPkgName => {
           messages.push(
-            `The package "${pkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name.`
+            `The package or glob expression "${nonExistingPkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
           );
-        }
+        });
       }
 
       // Validate that all dependents of ignored packages are listed in the ignore list
@@ -244,7 +285,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     commit:
       json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
     linked:
-      json.linked === undefined ? defaultWrittenConfig.linked : json.linked,
+      json.linked === undefined
+        ? defaultWrittenConfig.linked
+        : json.linked.map(
+            linkedGroup => normalizePackageNames(linkedGroup, pkgNames)[0]
+          ),
     baseBranch:
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch
@@ -256,7 +301,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         : json.updateInternalDependencies,
 
     ignore:
-      json.ignore === undefined ? defaultWrittenConfig.ignore : json.ignore,
+      json.ignore === undefined
+        ? defaultWrittenConfig.ignore
+        : normalizePackageNames(json.ignore, pkgNames)[0],
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange:

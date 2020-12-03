@@ -86,6 +86,15 @@ export function getPackageInfo(pkgName: string) {
       env: Object.assign({}, process.env, envOverride)
     });
 
+    // Github package registry returns empty string when calling npm info
+    // for a non-existant package instead of a E404
+    if (result.stdout.toString() === "") {
+      return {
+        error: {
+          code: "E404"
+        }
+      };
+    }
     return jsonParse(result.stdout.toString());
   });
 }
@@ -156,9 +165,8 @@ async function internalPublish(
   };
   let { stdout } = await spawn(
     publishTool.name,
-    ["publish", "--json", ...publishFlags],
+    ["publish", opts.cwd, "--json", ...publishFlags],
     {
-      cwd: opts.cwd,
       env: Object.assign({}, process.env, envOverride)
     }
   );

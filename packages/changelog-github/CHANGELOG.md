@@ -1,5 +1,14 @@
 # @changesets/changelog-github
 
+## 0.2.7
+
+### Patch Changes
+
+- [`f24f722`](https://github.com/atlassian/changesets/commit/f24f7220fcc322a4a2deb26cd77c2d481ac422f0) [#444](https://github.com/atlassian/changesets/pull/444) Thanks [@Andarist](https://github.com/Andarist)! - Changed the way how requests to the GitHub API were authenticated - from a query parameter to the `Authorization` header. The previously used method has been deprecated by the GitHub and will stop working in 2021.
+
+- Updated dependencies [[`f24f722`](https://github.com/atlassian/changesets/commit/f24f7220fcc322a4a2deb26cd77c2d481ac422f0)]:
+  - @changesets/get-github-info@0.4.4
+
 ## 0.2.6
 
 ### Patch Changes

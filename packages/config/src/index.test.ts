@@ -2,9 +2,16 @@ import fixturez from "fixturez";
 import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
+import { Config, WrittenConfig } from "@changesets/types";
 import { Packages } from "@manypkg/get-packages";
 
 jest.mock("@changesets/logger");
+
+type CorrectCase = {
+  packages?: string[];
+  input: WrittenConfig;
+  output: Config;
+};
 
 let f = fixturez(__dirname);
 
@@ -16,6 +23,14 @@ let defaultPackages: Packages = {
   packages: [],
   tool: "yarn"
 };
+
+const withPackages = (pkgNames: string[]) => ({
+  ...defaultPackages,
+  packages: pkgNames.map(pkgName => ({
+    packageJson: { name: pkgName, version: "" },
+    dir: "dir"
+  }))
+});
 
 test("read reads the config", async () => {
   let dir = f.find("new-config");
@@ -49,7 +64,7 @@ let defaults = {
   }
 } as const;
 
-let correctCases = {
+let correctCases: Record<string, CorrectCase> = {
   defaults: {
     input: {},
     output: defaults
@@ -126,6 +141,40 @@ let correctCases = {
       linked: [["pkg-a", "pkg-b"]]
     }
   },
+  linkedWithGlobs: {
+    packages: [
+      "pkg-a",
+      "pkg-b",
+      "@pkg/a",
+      "@pkg/b",
+      "@pkg-other/a",
+      "@pkg-other/b"
+    ],
+    input: {
+      linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]]
+    },
+    output: {
+      ...defaults,
+      linked: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]]
+    }
+  },
+  linkedWithGlobsAndExclusion: {
+    packages: [
+      "pkg-a",
+      "pkg-b",
+      "@pkg/a",
+      "@pkg/b",
+      "@pkg-other/a",
+      "@pkg-other/b"
+    ],
+    input: {
+      linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]]
+    },
+    output: {
+      ...defaults,
+      linked: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]]
+    }
+  },
   "update internal dependencies minor": {
     input: {
       updateInternalDependencies: "minor"
@@ -152,26 +201,37 @@ let correctCases = {
       ...defaults,
       ignore: ["pkg-a", "pkg-b"]
     }
+  },
+  ignoreWithGlobs: {
+    packages: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"],
+    input: {
+      ignore: ["pkg-*", "@pkg/*"]
+    },
+    output: {
+      ...defaults,
+      ignore: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"]
+    }
+  },
+  ignoreWithGlobsAndExclusions: {
+    packages: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"],
+    input: {
+      ignore: ["pkg-*", "!pkg-b", "@pkg/*"]
+    },
+    output: {
+      ...defaults,
+      ignore: ["pkg-a", "@pkg/a", "@pkg/b"]
+    }
   }
-} as const;
+};
 
 jestInCase(
   "parse",
   testCase => {
     expect(
-      parse(testCase.input, {
-        ...defaultPackages,
-        packages: [
-          {
-            packageJson: { name: "pkg-a", version: "" },
-            dir: "dir"
-          },
-          {
-            packageJson: { name: "pkg-b", version: "" },
-            dir: "dir"
-          }
-        ]
-      })
+      parse(
+        testCase.input,
+        withPackages(testCase.packages || ["pkg-a", "pkg-b"])
+      )
     ).toEqual(testCase.output);
   },
   correctCases
@@ -182,7 +242,7 @@ let unsafeParse = parse as any;
 describe("parser errors", () => {
   test("changelog invalid value", () => {
     expect(() => {
-      unsafeParse({ changelog: {} });
+      unsafeParse({ changelog: {} }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`changelog\` option is set as {} when the only valid values are undefined, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
@@ -190,7 +250,10 @@ The \`changelog\` option is set as {} when the only valid values are undefined, 
   });
   test("changelog array with 3 values", () => {
     expect(() => {
-      unsafeParse({ changelog: ["some-module", "something", "other"] });
+      unsafeParse(
+        { changelog: ["some-module", "something", "other"] },
+        defaultPackages
+      );
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`changelog\` option is set as [
@@ -202,7 +265,7 @@ The \`changelog\` option is set as [
   });
   test("changelog array with first value not string", () => {
     expect(() => {
-      unsafeParse({ changelog: [false, "something"] });
+      unsafeParse({ changelog: [false, "something"] }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`changelog\` option is set as [
@@ -213,7 +276,7 @@ The \`changelog\` option is set as [
   });
   test("access other string", () => {
     expect(() => {
-      unsafeParse({ access: "something" });
+      unsafeParse({ access: "something" }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`access\` option is set as \\"something\\" when the only valid values are undefined, \\"public\\" or \\"restricted\\""
@@ -221,7 +284,7 @@ The \`access\` option is set as \\"something\\" when the only valid values are u
   });
   test("commit non-boolean", () => {
     expect(() => {
-      unsafeParse({ commit: "something" });
+      unsafeParse({ commit: "something" }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`commit\` option is set as \\"something\\" when the only valid values are undefined or a boolean"
@@ -229,7 +292,7 @@ The \`commit\` option is set as \\"something\\" when the only valid values are u
   });
   test("linked non-array", () => {
     expect(() => {
-      unsafeParse({ linked: {} });
+      unsafeParse({ linked: {} }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`linked\` option is set as {} when the only valid values are undefined or an array of arrays of package names"
@@ -237,7 +300,7 @@ The \`linked\` option is set as {} when the only valid values are undefined or a
   });
   test("linked array of non array", () => {
     expect(() => {
-      unsafeParse({ linked: [{}] });
+      unsafeParse({ linked: [{}] }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`linked\` option is set as [
@@ -247,7 +310,7 @@ The \`linked\` option is set as [
   });
   test("linked array of array of non-string", () => {
     expect(() => {
-      unsafeParse({ linked: [[{}]] });
+      unsafeParse({ linked: [[{}]] }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`linked\` option is set as [
@@ -257,35 +320,44 @@ The \`linked\` option is set as [
 ] when the only valid values are undefined or an array of arrays of package names"
 `);
   });
-  test("linked pacakge that does not exist", () => {
+  test("linked package that does not exist", () => {
     expect(() => {
-      parse({ linked: [["pkg-a"]] }, defaultPackages);
+      parse({ linked: [["not-existing"]] }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The package \\"pkg-a\\" is specified in the \`linked\` option but it is not found in the project. You may have misspelled the package name."
+The package or glob expression \\"not-existing\\" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+`);
+  });
+  test("linked package that does not exist (using glob expressions)", () => {
+    expect(() => {
+      parse({ linked: [["pkg-a", "foo/*"]] }, withPackages(["pkg-a"]));
+    }).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The package or glob expression \\"foo/*\\" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
 `);
   });
   test("linked package in two linked groups", () => {
     expect(() => {
+      parse({ linked: [["pkg-a"], ["pkg-a"]] }, withPackages(["pkg-a"]));
+    }).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The package \\"pkg-a\\" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch."
+`);
+  });
+  test("linked package in two linked groups (using glob expressions)", () => {
+    expect(() => {
       parse(
-        { linked: [["pkg-a"], ["pkg-a"]] },
-        {
-          ...defaultPackages,
-          packages: [
-            {
-              packageJson: { name: "pkg-a", version: "" },
-              dir: "dir"
-            }
-          ]
-        }
+        { linked: [["pkg-*"], ["pkg-*"]] },
+        withPackages(["pkg-a", "pkg-b"])
       );
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The package \\"pkg-a\\" is in multiple sets of linked packages. Packages can only be in a single set of linked packages."
+The package \\"pkg-a\\" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.
+The package \\"pkg-b\\" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch."
 `);
   });
   test("access private warns and sets to restricted", () => {
-    let config = unsafeParse({ access: "private" }, []);
+    let config = unsafeParse({ access: "private" }, defaultPackages);
     expect(config).toEqual(defaults);
     expect(logger.warn).toBeCalledWith(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".'
@@ -293,28 +365,22 @@ The package \\"pkg-a\\" is in multiple sets of linked packages. Packages can onl
   });
   test("updateInternalDependencies not patch or minor", () => {
     expect(() => {
-      unsafeParse({ updateInternalDependencies: "major" });
+      unsafeParse({ updateInternalDependencies: "major" }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`updateInternalDependencies\` option is set as \\"major\\" but can only be 'patch' or 'minor'"
 `);
   });
   test("ignore non-array", () => {
-    expect(() =>
-      unsafeParse({
-        ignore: "string value"
-      })
-    ).toThrowErrorMatchingInlineSnapshot(`
+    expect(() => unsafeParse({ ignore: "string value" }, defaultPackages))
+      .toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`ignore\` option is set as \\"string value\\" when the only valid values are undefined or an array of package names"
 `);
   });
   test("ignore array of non-string", () => {
-    expect(() =>
-      unsafeParse({
-        ignore: [123, "pkg-a"]
-      })
-    ).toThrowErrorMatchingInlineSnapshot(`
+    expect(() => unsafeParse({ ignore: [123, "pkg-a"] }, defaultPackages))
+      .toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`ignore\` option is set as [
   123,
@@ -323,24 +389,23 @@ The \`ignore\` option is set as [
 `);
   });
   test("ignore package that does not exist", () => {
-    expect(() =>
-      parse(
-        {
-          ignore: ["pkg-a"]
-        },
-        defaultPackages
-      )
-    ).toThrowErrorMatchingInlineSnapshot(`
+    expect(() => unsafeParse({ ignore: ["pkg-a"] }, defaultPackages))
+      .toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The package \\"pkg-a\\" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name."
+The package or glob expression \\"pkg-a\\" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+`);
+  });
+  test("ignore package that does not exist (using glob expressions)", () => {
+    expect(() => unsafeParse({ ignore: ["pkg-*"] }, defaultPackages))
+      .toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The package or glob expression \\"pkg-*\\" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
 `);
   });
   test("ingore missing dependent packages", async () => {
     expect(() =>
-      parse(
-        {
-          ignore: ["pkg-b"]
-        },
+      unsafeParse(
+        { ignore: ["pkg-b"] },
         {
           ...defaultPackages,
           packages: [
@@ -367,11 +432,14 @@ The package \\"pkg-a\\" depends on the ignored package \\"pkg-b\\", but \\"pkg-a
 
   test("onlyUpdatePeerDependentsWhenOutOfRange non-boolean", () => {
     expect(() => {
-      unsafeParse({
-        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-          onlyUpdatePeerDependentsWhenOutOfRange: "not true"
-        }
-      });
+      unsafeParse(
+        {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: "not true"
+          }
+        },
+        defaultPackages
+      );
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
@@ -379,11 +447,14 @@ The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as \\"not true\\" w
   });
   test("useCalculatedVersionForSnapshots non-boolean", () => {
     expect(() => {
-      unsafeParse({
-        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-          useCalculatedVersionForSnapshots: "not true"
-        }
-      });
+      unsafeParse(
+        {
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            useCalculatedVersionForSnapshots: "not true"
+          }
+        },
+        defaultPackages
+      );
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
 The \`useCalculatedVersionForSnapshots\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"

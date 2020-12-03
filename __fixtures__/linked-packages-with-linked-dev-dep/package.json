@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "linked-packages-with-linked-dev-dep",
+  "description": "linked projects where one of packages has a dev dependency on another",
+  "version": "1.0.0",
+  "bolt": {
+    "workspaces": [
+      "packages/*"
+    ]
+  }
+}

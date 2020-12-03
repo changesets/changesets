@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "simple-workspace-wildcard-range-dep",
+  "description": "2 projects, one depending on another with `workspace:*` range",
+  "version": "1.0.0",
+  "bolt": {
+    "workspaces": [
+      "packages/*"
+    ]
+  }
+}
