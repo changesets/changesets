@@ -183,7 +183,7 @@ function getDependencyVersionRanges(
     if (deps[dependencyName]) {
       dependencyVersionRanges.push({
         depType: type,
-        versionRange: deps[dependencyName]
+        versionRange: deps[dependencyName].replace("workspace:", "")
       });
     }
   }
