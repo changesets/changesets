@@ -89,7 +89,8 @@ export default function getDependents({
                   releases.get(dependent)!.type === "none") &&
                 !semver.satisfies(
                   incrementVersion(nextRelease, preInfo),
-                  versionRange
+                  // to deal with a * versionRange that comes from workspace:* dependencies as the wildcard will match anything
+                  versionRange === "*" ? nextRelease.oldVersion : versionRange
                 )
               ) {
                 switch (depType) {
