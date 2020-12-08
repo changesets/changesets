@@ -95,6 +95,31 @@ describe("assemble-release-plan", () => {
     expect(releases[1].newVersion).toEqual("1.0.1");
     expect(releases[1].changesets).toEqual([]);
   });
+  it("should assemble release plan with dependents but only those that use the workspace protocol", () => {
+    setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
+    setup.updateDependency("pkg-c", "pkg-a", "workspace:^1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig,
+        workspaceVersionsOnly: true
+      },
+      undefined
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-c");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+    expect(releases[1].changesets).toEqual([]);
+  });
   it("should assemble release plan without dependent through dev dependency", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({

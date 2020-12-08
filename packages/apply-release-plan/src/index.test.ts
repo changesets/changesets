@@ -264,6 +264,68 @@ describe("apply release plan", () => {
         }
       });
     });
+    it("should update workspace ranges only", async () => {
+      const releasePlan = new FakeReleasePlan(
+        [
+          {
+            id: "some-id",
+            releases: [{ name: "pkg-b", type: "minor" }],
+            summary: "a very useful summary"
+          }
+        ],
+        [
+          {
+            changesets: ["some-id"],
+            name: "pkg-b",
+            newVersion: "1.1.0",
+            oldVersion: "1.0.0",
+            type: "minor"
+          },
+          {
+            changesets: ["some-id"],
+            name: "pkg-c",
+            newVersion: "1.1.0",
+            oldVersion: "1.0.0",
+            type: "minor"
+          }
+        ]
+      );
+      releasePlan.config.workspaceVersionsOnly = true;
+      let { changedFiles } = await testSetup(
+        "workspace-and-other-range-dep",
+        releasePlan.getReleasePlan(),
+        releasePlan.config
+      );
+      let pkgAPath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
+
+      if (!pkgAPath) throw new Error(`could not find an updated package json`);
+      let pkgAJSON = await fs.readJSON(pkgAPath);
+
+      expect(pkgAJSON).toEqual({
+        name: "pkg-a",
+        version: "1.1.0",
+        dependencies: {
+          "pkg-b": "workspace:1.1.0"
+        }
+      });
+
+      let pkgCPath = changedFiles.find(a =>
+        a.endsWith(`pkg-c${path.sep}package.json`)
+      );
+
+      if (!pkgCPath) throw new Error(`could not find an updated package json`);
+      let pkgCJSON = await fs.readJSON(pkgCPath);
+
+      expect(pkgCJSON).toEqual({
+        name: "pkg-c",
+        version: "1.1.0",
+        dependencies: {
+          "pkg-b": "1.0.0"
+        }
+      });
+    });
     it("should update a version for two packages with different new versions", async () => {
       const releasePlan = new FakeReleasePlan(
         [],

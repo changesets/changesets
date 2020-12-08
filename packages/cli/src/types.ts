@@ -13,6 +13,7 @@ export type CliOptions = {
   ignore?: string | string[];
   snapshot?: string | boolean;
   tag?: string;
+  workspaceVersionsOnly?: boolean;
 };
 
 export type CommandOptions = CliOptions & {

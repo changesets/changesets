@@ -100,7 +100,9 @@ function assembleReleasePlan(
     config.ignore
   );
 
-  let dependencyGraph = getDependentsGraph(packages);
+  let dependencyGraph = getDependentsGraph(packages, {
+    workspaceVersionsOnly: config.workspaceVersionsOnly
+  });
 
   let releasesValidated = false;
   while (releasesValidated === false) {
