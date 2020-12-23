@@ -76,8 +76,6 @@ describe("status", () => {
   let cwd: string;
 
   beforeEach(async () => {
-    // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
     cwd = await f.copy("simple-project");
   });
 
@@ -97,6 +95,8 @@ describe("status", () => {
 
   it("should exit early with a non-zero error code when there are changed packages but no changesets", async () => {
     // @ts-ignore
+    jest.spyOn(process, "exit").mockImplementation(() => {});
+    // @ts-ignore
     git.getChangedPackagesSinceRef.mockImplementation(
       () => simpleChangedPackagesList
     );
@@ -107,6 +107,8 @@ describe("status", () => {
   });
 
   it("should not exit early with a non-zero error code when there are no changed packages", async () => {
+    // @ts-ignore
+    jest.spyOn(process, "exit").mockImplementation(() => {});
     // @ts-ignore
     git.getChangedPackagesSinceRef.mockImplementation(() => []);
 
@@ -121,6 +123,8 @@ describe("status", () => {
   });
 
   it("should not exit early with a non-zero code when there are changed packages and also a changeset", async () => {
+    // @ts-ignore
+    jest.spyOn(process, "exit").mockImplementation(() => {});
     // @ts-ignore
     git.getChangedPackagesSinceRef.mockImplementation(
       () => simpleChangedPackagesList
