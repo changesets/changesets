@@ -1,0 +1,24 @@
+{
+  "name": "@changesets/release-utils",
+  "version": "0.1.0",
+  "main": "dist/release-utils.cjs.js",
+  "dependencies": {
+    "@changesets/pre": "^1.0.5",
+    "@changesets/read": "^0.4.6",
+    "@changesets/types": "^3.2.0",
+    "@manypkg/get-packages": "^1.0.1",
+    "fs-extra": "^7.0.1",
+    "mdast-util-to-string": "^1.0.6",
+    "remark-parse": "^7.0.1",
+    "remark-stringify": "^7.0.3",
+    "semver": "^5.4.1",
+    "spawndamnit": "^2.0.0",
+    "unified": "^8.3.2"
+  },
+  "devDependencies": {
+    "@changesets/git": "*",
+    "@changesets/write": "*",
+    "file-url": "^3.0.0",
+    "fixturez": "^1.1.0"
+  }
+}
