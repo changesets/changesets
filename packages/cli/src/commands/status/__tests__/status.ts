@@ -10,6 +10,7 @@ import status from "..";
 
 import humanId from "human-id";
 import { NewChangeset, ReleasePlan } from "@changesets/types";
+import { Package } from "@manypkg/get-packages";
 
 jest.mock("human-id");
 jest.mock("@changesets/git");
@@ -55,6 +56,17 @@ const simpleReleasePlan: ReleasePlan = {
   preState: undefined
 };
 
+const simpleChangedPackagesList: Package[] = [
+  {
+    packageJson: { name: "pkg-a", version: "1.0.0", dependencies: {} },
+    dir: "/fake/folder/doesnt/matter"
+  },
+  {
+    packageJson: { name: "pkg-b", version: "1.0.0" },
+    dir: "/fake/folder/doesnt/matter"
+  }
+];
+
 const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
   return Promise.all(changesets.map(commit => writeChangeset(commit, cwd)));
 };
@@ -65,8 +77,6 @@ describe("status", () => {
 
   beforeEach(async () => {
     // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(() => []);
-    // @ts-ignore
     jest.spyOn(process, "exit").mockImplementation(() => {});
     cwd = await f.copy("simple-project");
   });
@@ -75,6 +85,10 @@ describe("status", () => {
     const changesetID = "ascii";
     // @ts-ignore
     humanId.mockReturnValueOnce(changesetID);
+    // @ts-ignore
+    git.getChangedPackagesSinceRef.mockImplementation(
+      () => simpleChangedPackagesList
+    );
 
     await writeChangesets([simpleChangeset], cwd);
     const releaseObj = await status(cwd, {}, defaultConfig);
@@ -83,12 +97,9 @@ describe("status", () => {
 
   it("should exit early with a non-zero error code when there are changed packages but no changesets", async () => {
     // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(() => [
-      {
-        name: "pkg-a",
-        version: "0.0.1"
-      }
-    ]);
+    git.getChangedPackagesSinceRef.mockImplementation(
+      () => simpleChangedPackagesList
+    );
 
     await status(cwd, {}, defaultConfig);
 
@@ -96,6 +107,9 @@ describe("status", () => {
   });
 
   it("should not exit early with a non-zero error code when there are no changed packages", async () => {
+    // @ts-ignore
+    git.getChangedPackagesSinceRef.mockImplementation(() => []);
+
     const releaseObj = await status(cwd, {}, defaultConfig);
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -108,12 +122,9 @@ describe("status", () => {
 
   it("should not exit early with a non-zero code when there are changed packages and also a changeset", async () => {
     // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(() => [
-      {
-        name: "pkg-a",
-        version: "0.0.1"
-      }
-    ]);
+    git.getChangedPackagesSinceRef.mockImplementation(
+      () => simpleChangedPackagesList
+    );
     const changesetID = "ascii";
     // @ts-ignore
     humanId.mockReturnValueOnce(changesetID);
@@ -130,6 +141,10 @@ describe("status", () => {
   it("should respect the output flag", async () => {
     const output = "nonsense.json";
 
+    // @ts-ignore
+    git.getChangedPackagesSinceRef.mockImplementation(
+      () => simpleChangedPackagesList
+    );
     const changesetID = "ascii";
     // @ts-ignore
     humanId.mockReturnValueOnce(changesetID);
