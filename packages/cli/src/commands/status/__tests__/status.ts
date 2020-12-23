@@ -66,6 +66,8 @@ describe("status", () => {
   beforeEach(async () => {
     // @ts-ignore
     git.getChangedPackagesSinceRef.mockImplementation(() => []);
+    // @ts-ignore
+    jest.spyOn(process, "exit").mockImplementation(() => {});
     cwd = await f.copy("simple-project");
   });
 
@@ -81,8 +83,6 @@ describe("status", () => {
 
   it("should exit early with a non-zero error code when there are changed packages but no changesets", async () => {
     // @ts-ignore
-    const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
-    // @ts-ignore
     git.getChangedPackagesSinceRef.mockImplementation(() => [
       {
         name: "pkg-a",
@@ -92,16 +92,13 @@ describe("status", () => {
 
     await status(cwd, {}, defaultConfig);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it("should not exit early with a non-zero error code when there are no changed packages", async () => {
-    // @ts-ignore
-    const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
-
     const releaseObj = await status(cwd, {}, defaultConfig);
 
-    expect(mockExit).not.toHaveBeenCalled();
+    expect(process.exit).not.toHaveBeenCalled();
     expect(releaseObj).toEqual({
       changesets: [],
       releases: [],
@@ -110,8 +107,6 @@ describe("status", () => {
   });
 
   it("should not exit early with a non-zero code when there are changed packages and also a changeset", async () => {
-    // @ts-ignore
-    const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
     // @ts-ignore
     git.getChangedPackagesSinceRef.mockImplementation(() => [
       {
@@ -127,7 +122,7 @@ describe("status", () => {
     const releaseObj = await status(cwd, {}, defaultConfig);
 
     expect(releaseObj).toEqual(simpleReleasePlan);
-    expect(mockExit).not.toHaveBeenCalled();
+    expect(process.exit).not.toHaveBeenCalled();
   });
 
   it.skip("should respect since master flag", () => false);
