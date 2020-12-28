@@ -15,6 +15,7 @@
     "prettier": "prettier --write \"**/*.{js,ts,tsx,md}\"",
     "changeset": "packages/cli/bin.js",
     "check-all": "yarn test && yarn lint && yarn types:check",
+    "version-packages": "changeset version && yarn prettier",
     "release": "yarn build && changeset publish"
   },
   "repository": {

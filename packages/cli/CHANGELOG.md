@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.12.0
+
+### Minor Changes
+
+- [`c6d38b5`](https://github.com/atlassian/changesets/commit/c6d38b579bdfddc22714c352c3459d04d1745326) [#469](https://github.com/atlassian/changesets/pull/469) Thanks [@camdub](https://github.com/camdub)! - Handle JSON errors for unpublished packages on the github package registry
+
 ## 2.11.2
 
 ### Patch Changes

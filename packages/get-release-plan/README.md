@@ -7,17 +7,17 @@ A function that reads information about the current repository
 ```js
 import getReleasePlan from "@changesets/get-release-plan";
 
-const releasePLan = await getReleasePlan(cwd, sinceMaster, passedConfig);
+const releasePlan = await getReleasePlan(cwd, since, passedConfig);
 ```
 
 ## cwd: string
 
 The directory to run `getReleasePlan` in - most often `process.cwd()`
 
-## sinceMaster: boolean (default false)
+## since: string
 
 Sets whether to use all changests present, or only those changesets that are new since the branch
-diverged from master.
+diverged from another one.
 
 ## passedConfig?: Config
 
