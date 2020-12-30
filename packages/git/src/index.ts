@@ -1,4 +1,5 @@
 import spawn from "spawndamnit";
+import fs from "fs";
 import path from "path";
 import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
@@ -131,12 +132,34 @@ async function getCommitsThatAddFiles(
   }
 
   async function isRepoShallow() {
-    const isShallowResult = await spawn(
+    const gitCmd = await spawn(
       "git",
       ["rev-parse", "--is-shallow-repository"],
       { cwd }
     );
-    return isShallowResult.stdout.toString().trim() === "true";
+
+    const isShallowRepoOutput = gitCmd.stdout.toString().trim();
+
+    if (isShallowRepoOutput === "--is-shallow-repository") {
+      // We have an old version of Git (<2.15) which doesn't support `rev-parse --is-shallow-repository`
+      // In that case, we'll test for the existence of .git/shallow.
+
+      // Firstly, find the .git folder for the repo; note that this will be relative to the repo dir
+      const gitDir = (
+        await spawn("git", ["rev-parse", "--git-dir"], { cwd })
+      ).stdout
+        .toString()
+        .trim();
+
+      const fullGitDir = path.resolve(cwd, gitDir);
+
+      // Check for the existence of <gitDir>/shallow
+      return fs.existsSync(path.join(fullGitDir, "shallow"));
+    } else {
+      // We have a newer Git which supports `rev-parse --is-shallow-repository`. We'll use
+      // the output of that instead of messing with .git/shallow in case that changes in the future.
+      return isShallowRepoOutput === "true";
+    }
   }
 
   async function deepenCloneBy(by: number) {
