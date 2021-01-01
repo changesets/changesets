@@ -101,6 +101,7 @@ async function getCommitsThatAddFiles(
     if (await isRepoShallow()) {
       // Yes.
       await deepenCloneBy(50);
+      remaining = commitsWithMissingParents.map(p => p.path);
     } else {
       // It's not a shallow clone, so all the commit SHAs we have are legitimate.
       for (const unresolved of commitsWithMissingParents) {
@@ -108,8 +109,6 @@ async function getCommitsThatAddFiles(
       }
       break;
     }
-
-    remaining = commitsWithMissingParents.map(p => p.path);
   } while (true);
 
   return gitPaths.map(p => map.get(p));
