@@ -128,6 +128,8 @@ export async function getInfo(
   }
 
   const data = await GHDataLoader.load(request);
+  console.log("test--- ", JSON.stringify(request));
+  console.log("test--- ", JSON.stringify(data));
   let user = null;
   if (data.author && data.author.user) {
     user = data.author.user;
