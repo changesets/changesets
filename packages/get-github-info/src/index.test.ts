@@ -307,13 +307,16 @@ test("gets the author of the associated pull request if it exists rather than th
 });
 
 test("throws error on invalid repo name", () => {
+  const request = {
+    commit: "c7e9c69",
+    repo: "https://github.com/JedWatson/react-select"
+  };
   const shouldThrow = async () => {
-    await getInfo({
-      commit: "c7e9c69",
-      repo: "https://github.com/JedWatson/react-select"
-    });
+    await getInfo(request);
   };
   expect(shouldThrow).rejects.toThrowError(
-    "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"
+    `Your Github repository name \`${
+      request.repo
+    }\` did not pass our validation (${/^[\w.-]+\/[\w.-]+$/.source})`
   );
 });

@@ -2,7 +2,7 @@
 import fetch from "node-fetch";
 import DataLoader from "dataloader";
 
-const validRepoNameRegex = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/m;
+const validRepoNameRegex = /^[\w.-]+\/[\w.-]+$/;
 
 type RequestData = {
   commit: string;
@@ -123,9 +123,15 @@ export async function getInfo(
     throw new Error("Please pass a commit SHA to getInfo");
   }
 
-  if (!request.repo || !validRepoNameRegex.test(request.repo)) {
+  if (!request.repo) {
     throw new Error(
       "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"
+    );
+  }
+
+  if (!validRepoNameRegex.test(request.repo)) {
+    throw new Error(
+      `Your Github repository name \`${request.repo}\` did not pass our validation (${validRepoNameRegex.source})`
     );
   }
 
