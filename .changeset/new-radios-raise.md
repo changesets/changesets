@@ -1,5 +1,6 @@
 ---
+"@changesets/changelog-github": patch
 "@changesets/get-github-info": patch
 ---
 
-add a more specfici check for repo name
+Added validation rule for invalid `repo` arguments.

@@ -131,7 +131,7 @@ export async function getInfo(
 
   if (!validRepoNameRegex.test(request.repo)) {
     throw new Error(
-      `Your Github repository name \`${request.repo}\` did not pass our validation (${validRepoNameRegex.source})`
+      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`
     );
   }
 
