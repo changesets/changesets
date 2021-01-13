@@ -2,6 +2,8 @@ import chalk from "chalk";
 import table from "tty-table";
 import fs from "fs-extra";
 import path from "path";
+
+import * as git from "@changesets/git";
 import getReleasePlan from "@changesets/get-release-plan";
 import { error, log, info, warn } from "@changesets/logger";
 import {
@@ -32,16 +34,22 @@ export default async function getStatus(
     );
     warn("Use --since=master instead");
   }
-  const releasePlan = await getReleasePlan(
-    cwd,
-    since === undefined ? (sinceMaster ? "master" : undefined) : since,
-    config
-  );
-
+  const sinceBranch =
+    since === undefined ? (sinceMaster ? "master" : undefined) : since;
+  const releasePlan = await getReleasePlan(cwd, sinceBranch, config);
   const { changesets, releases } = releasePlan;
+  const changedPackages = await git.getChangedPackagesSinceRef({
+    cwd,
+    ref: sinceBranch || config.baseBranch
+  });
 
-  if (changesets.length < 1) {
-    error("No changesets present");
+  if (changedPackages.length > 0 && changesets.length === 0) {
+    error(
+      "Some packages have been changed but no changesets were found. Run `changeset add` to resolve this error."
+    );
+    error(
+      "If this change doesn't need a release, run `changeset add --empty`."
+    );
     process.exit(1);
   }
 
