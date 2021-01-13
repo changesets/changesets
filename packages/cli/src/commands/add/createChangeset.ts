@@ -218,7 +218,6 @@ export default async function createChangeset(
       )}? (current version is ${pkg.packageJson.version})`,
       ["patch", "minor", "major"]
     );
-    console.log(type);
     if (type === "major") {
       let shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
       if (!shouldReleaseAsMajor) {

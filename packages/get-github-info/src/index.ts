@@ -2,6 +2,8 @@
 import fetch from "node-fetch";
 import DataLoader from "dataloader";
 
+const validRepoNameRegex = /^[\w.-]+\/[\w.-]+$/;
+
 type RequestData = {
   commit: string;
   repo: string;
@@ -124,6 +126,12 @@ export async function getInfo(
   if (!request.repo) {
     throw new Error(
       "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"
+    );
+  }
+
+  if (!validRepoNameRegex.test(request.repo)) {
+    throw new Error(
+      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`
     );
   }
 
