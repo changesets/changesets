@@ -20,21 +20,41 @@ import versionPackage from "./version-package";
 import createVersionCommit from "./createVersionCommit";
 import getChangelogEntry from "./get-changelog-entry";
 
-async function getCommitThatAddsChangeset(changesetId: string, cwd: string) {
-  let commit = await git.getCommitThatAddsFile(
-    `.changeset/${changesetId}.md`,
+function stringDefined(s: string | undefined): s is string {
+  return !!s;
+}
+async function getCommitsThatAddChangesets(
+  changesetIds: string[],
+  cwd: string
+) {
+  const paths = changesetIds.map(id => `.changeset/${id}.md`);
+  const commits = await git.getCommitsThatAddFiles(paths, cwd);
+
+  if (commits.every(stringDefined)) {
+    // We have commits for all files
+    return commits;
+  }
+
+  // Some files didn't exist. Try legacy filenames instead
+  const missingIds = changesetIds
+    .map((id, i) => (commits[i] ? undefined : id))
+    .filter(stringDefined);
+
+  const legacyPaths = missingIds.map(id => `.changeset/${id}/changes.json`);
+  const commitsForLegacyPaths = await git.getCommitsThatAddFiles(
+    legacyPaths,
     cwd
   );
-  if (commit) {
-    return commit;
-  }
-  let commitForOldChangeset = await git.getCommitThatAddsFile(
-    `.changeset/${changesetId}/changes.json`,
-    cwd
-  );
-  if (commitForOldChangeset) {
-    return commitForOldChangeset;
-  }
+
+  // Fill in the blanks in the array of commits
+  changesetIds.forEach((id, i) => {
+    if (!commits[i]) {
+      const missingIndex = missingIds.indexOf(id);
+      commits[i] = commitsForLegacyPaths[missingIndex];
+    }
+  });
+
+  return commits;
 }
 
 export default async function applyReleasePlan(
@@ -200,12 +220,14 @@ async function getNewChangelogEntry(
     }
   }
 
-  let moddedChangesets = await Promise.all(
-    changesets.map(async cs => ({
-      ...cs,
-      commit: await getCommitThatAddsChangeset(cs.id, cwd)
-    }))
+  let commits = await getCommitsThatAddChangesets(
+    changesets.map(cs => cs.id),
+    cwd
   );
+  let moddedChangesets = changesets.map((cs, i) => ({
+    ...cs,
+    commit: commits[i]
+  }));
 
   return Promise.all(
     releasesWithPackage.map(async release => {
