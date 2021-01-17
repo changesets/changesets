@@ -23,7 +23,8 @@ class FakeReleasePlan {
 
   constructor(
     changesets: NewChangeset[] = [],
-    releases: ComprehensiveRelease[] = []
+    releases: ComprehensiveRelease[] = [],
+    config: Partial<Config> = {}
   ) {
     const baseChangeset: NewChangeset = {
       id: "quick-lions-devour",
@@ -48,7 +49,8 @@ class FakeReleasePlan {
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
         useCalculatedVersionForSnapshots: false
-      }
+      },
+      ...config
     };
 
     this.changesets = [baseChangeset, ...changesets];
@@ -269,7 +271,10 @@ describe("apply release plan", () => {
         [
           {
             id: "some-id",
-            releases: [{ name: "pkg-b", type: "minor" }],
+            releases: [
+              { name: "pkg-b", type: "minor" },
+              { name: "pkg-c", type: "minor" }
+            ],
             summary: "a very useful summary"
           }
         ],
@@ -288,9 +293,11 @@ describe("apply release plan", () => {
             oldVersion: "1.0.0",
             type: "minor"
           }
-        ]
+        ],
+        {
+          workspaceVersionsOnly: true
+        }
       );
-      releasePlan.config.workspaceVersionsOnly = true;
       let { changedFiles } = await testSetup(
         "workspace-and-other-range-dep",
         releasePlan.getReleasePlan(),
