@@ -264,7 +264,7 @@ describe("apply release plan", () => {
         }
       });
     });
-    it("should update workspace ranges only", async () => {
+    it("should update workspace ranges only with workspaceVersionsOnly", async () => {
       const releasePlan = new FakeReleasePlan(
         [
           {
