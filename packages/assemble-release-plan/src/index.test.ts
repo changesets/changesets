@@ -95,7 +95,7 @@ describe("assemble-release-plan", () => {
     expect(releases[1].newVersion).toEqual("1.0.1");
     expect(releases[1].changesets).toEqual([]);
   });
-  it("should assemble release plan with dependents but only those that use the workspace protocol", () => {
+  it("should assemble the release plan only with workspace protocol dependents when using workspaceVersionsOnly", () => {
     setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.updateDependency("pkg-c", "pkg-a", "workspace:^1.0.0");
     setup.addChangeset({
