@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "2.12.0",
+  "version": "2.13.0",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
     "changeset": "bin.js"
@@ -30,7 +30,7 @@
     "@changesets/errors": "^0.1.4",
     "@changesets/get-dependents-graph": "^1.1.3",
     "@changesets/get-release-plan": "^2.0.1",
-    "@changesets/git": "^1.0.6",
+    "@changesets/git": "^1.1.0",
     "@changesets/logger": "^0.0.5",
     "@changesets/pre": "^1.0.4",
     "@changesets/read": "^0.4.6",

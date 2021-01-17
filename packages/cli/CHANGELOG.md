@@ -1,5 +1,18 @@
 # @changesets/cli
 
+## 2.13.0
+
+### Minor Changes
+
+- [`412b4b9`](https://github.com/atlassian/changesets/commit/412b4b97e53b6326e8e733eb7d4e1f5738e6fed0) [#504](https://github.com/atlassian/changesets/pull/504) Thanks [@vitorbal](https://github.com/vitorbal)! - `changeset status` command no longer errors when no packages have been changed.
+
+* [`24d7bc9`](https://github.com/atlassian/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac) [#495](https://github.com/atlassian/changesets/pull/495) Thanks [@RoystonS](https://github.com/RoystonS)! - Automatically deepen shallow clones in order to determine the correct commit at which changesets were added. This helps Git-based changelog generators to always link to the correct commit. From now on it's not required to configure `fetch-depth: 0` for your `actions/checkout` when using [Changesets GitHub action](https://github.com/changesets/action).
+
+### Patch Changes
+
+- Updated dependencies [[`24d7bc9`](https://github.com/atlassian/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac), [`24d7bc9`](https://github.com/atlassian/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac)]:
+  - @changesets/git@1.1.0
+
 ## 2.12.0
 
 ### Minor Changes

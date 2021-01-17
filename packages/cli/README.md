@@ -7,7 +7,7 @@ and changelog entries for your packages, with a focus on versioning within a mon
 single-package repositories too).
 
 This package is intended as a successor to `@atlaskit/build-releases` with a more general focus. It works in
-[bolt](https://www.npmjs.com/package/bolt) multi-package repositories, [yarn workspaces] multi-package repositories, and
+[bolt](https://www.npmjs.com/package/bolt) multi-package repositories, [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) multi-package repositories, and
 in single-package repositories.
 
 ## Getting Started
