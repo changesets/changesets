@@ -22,6 +22,7 @@ Next, change your `.changeset/config.json` to point to the new package:
 Your module need to just have **default** export with single function that implements `AssembleReleasePlan` interface.
 
 ```ts
+// your-custom-assemble-release-plan:
 import assembleReleasePlanFunction from "@changesets/assemble-release-plan";
 
 export default assembleReleasePlan: typeof assembleReleasePlanFunction = (
