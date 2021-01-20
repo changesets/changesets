@@ -24,11 +24,11 @@ export default function versionPackage(
   {
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
-    workspaceVersionsOnly
+    bumpVersionsWithWorkspaceProtocolOnly
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-    workspaceVersionsOnly?: boolean;
+    bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   }
 ) {
   let { newVersion, packageJson } = release;
@@ -60,7 +60,7 @@ export default function versionPackage(
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
         if (usesWorkspaceRange) {
           depCurrentVersion = depCurrentVersion.substr(10);
-        } else if (workspaceVersionsOnly === true) {
+        } else if (bumpVersionsWithWorkspaceProtocolOnly === true) {
           continue;
         }
         if (

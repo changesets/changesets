@@ -37,7 +37,7 @@ const getAllDependencies = (config: PackageJSON) => {
 export default function getDependencyGraph(
   packages: Packages,
   opts?: {
-    workspaceVersionsOnly?: boolean;
+    bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   }
 ): {
   graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
@@ -73,7 +73,7 @@ export default function getDependencyGraph(
 
       if (depVersion.startsWith("workspace:")) {
         depVersion = depVersion.substr(10);
-      } else if (opts?.workspaceVersionsOnly === true) {
+      } else if (opts?.bumpVersionsWithWorkspaceProtocolOnly === true) {
         continue;
       }
 

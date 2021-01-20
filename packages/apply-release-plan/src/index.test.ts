@@ -266,7 +266,7 @@ describe("apply release plan", () => {
         }
       });
     });
-    it("should update workspace ranges only with workspaceVersionsOnly", async () => {
+    it("should update workspace ranges only with bumpVersionsWithWorkspaceProtocolOnly", async () => {
       const releasePlan = new FakeReleasePlan(
         [
           {
@@ -295,7 +295,7 @@ describe("apply release plan", () => {
           }
         ],
         {
-          workspaceVersionsOnly: true
+          bumpVersionsWithWorkspaceProtocolOnly: true
         }
       );
       let { changedFiles } = await testSetup(

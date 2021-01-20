@@ -3,12 +3,12 @@ import getDependencyGraph from "./get-dependency-graph";
 
 export function getDependentsGraph(
   packages: Packages,
-  opts?: { workspaceVersionsOnly?: boolean }
+  opts?: { bumpVersionsWithWorkspaceProtocolOnly?: boolean }
 ) {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
   const { graph: dependencyGraph } = getDependencyGraph(packages, {
-    workspaceVersionsOnly: opts?.workspaceVersionsOnly === true
+    bumpVersionsWithWorkspaceProtocolOnly: opts?.bumpVersionsWithWorkspaceProtocolOnly === true
   });
 
   const dependentsLookup: {

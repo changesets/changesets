@@ -95,7 +95,7 @@ describe("assemble-release-plan", () => {
     expect(releases[1].newVersion).toEqual("1.0.1");
     expect(releases[1].changesets).toEqual([]);
   });
-  it("should assemble the release plan only with workspace protocol dependents when using workspaceVersionsOnly", () => {
+  it("should assemble the release plan only with workspace protocol dependents when using bumpVersionsWithWorkspaceProtocolOnly", () => {
     setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.updateDependency("pkg-c", "pkg-a", "workspace:^1.0.0");
     setup.addChangeset({
@@ -108,7 +108,7 @@ describe("assemble-release-plan", () => {
       setup.packages,
       {
         ...defaultConfig,
-        workspaceVersionsOnly: true
+        bumpVersionsWithWorkspaceProtocolOnly: true
       },
       undefined
     );

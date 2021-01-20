@@ -119,7 +119,7 @@ export default async function applyReleasePlan(
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .onlyUpdatePeerDependentsWhenOutOfRange,
-      workspaceVersionsOnly: config.workspaceVersionsOnly
+      bumpVersionsWithWorkspaceProtocolOnly: config.bumpVersionsWithWorkspaceProtocolOnly
     });
   });
 

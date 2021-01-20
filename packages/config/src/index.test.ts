@@ -43,7 +43,7 @@ test("read reads the config", async () => {
     baseBranch: "master",
     updateInternalDependencies: "patch",
     ignore: [],
-    workspaceVersionsOnly: false,
+    bumpVersionsWithWorkspaceProtocolOnly: false,
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
       useCalculatedVersionForSnapshots: false
@@ -63,7 +63,7 @@ let defaults = {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
     useCalculatedVersionForSnapshots: false
   },
-  workspaceVersionsOnly: false
+  bumpVersionsWithWorkspaceProtocolOnly: false
 } as const;
 
 let correctCases: Record<string, CorrectCase> = {
