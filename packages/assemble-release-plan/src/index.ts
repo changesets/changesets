@@ -101,7 +101,8 @@ function assembleReleasePlan(
   );
 
   let dependencyGraph = getDependentsGraph(packages, {
-    bumpVersionsWithWorkspaceProtocolOnly: config.bumpVersionsWithWorkspaceProtocolOnly
+    bumpVersionsWithWorkspaceProtocolOnly:
+      config.bumpVersionsWithWorkspaceProtocolOnly
   });
 
   let releasesValidated = false;

@@ -8,7 +8,8 @@ export function getDependentsGraph(
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
   const { graph: dependencyGraph } = getDependencyGraph(packages, {
-    bumpVersionsWithWorkspaceProtocolOnly: opts?.bumpVersionsWithWorkspaceProtocolOnly === true
+    bumpVersionsWithWorkspaceProtocolOnly:
+      opts?.bumpVersionsWithWorkspaceProtocolOnly === true
   });
 
   const dependentsLookup: {

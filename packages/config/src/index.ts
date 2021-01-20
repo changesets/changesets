@@ -305,7 +305,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.ignore
         : normalizePackageNames(json.ignore, pkgNames)[0],
 
-    bumpVersionsWithWorkspaceProtocolOnly: json.bumpVersionsWithWorkspaceProtocolOnly === true,
+    bumpVersionsWithWorkspaceProtocolOnly:
+      json.bumpVersionsWithWorkspaceProtocolOnly === true,
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange:
