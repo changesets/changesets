@@ -7,6 +7,7 @@ Sometimes you have special logic for bumping your packages. You can define your 
 To change the assembling logic, you use the `assembleReleasePlan` setting in the `./changeset/config.json`. This setting accepts a string, which points to a module. You can reference an npm package that you have installed, or a local file where you have written your own functions.
 
 Probably, you need to just override the logic provided by `@changesets/assemble-release-plan`, so you should add this package to your dependencies:
+
 ```
 yarn add @changesets/assemble-release-plan
 ```
@@ -21,8 +22,9 @@ Next, change your `.changeset/config.json` to point to the new package:
 
 Your module need to just have **default** export with single function that implements `AssembleReleasePlan` interface.
 
+Here is an example of `your-custom-assemble-release-plan` module:
+
 ```ts
-// your-custom-assemble-release-plan:
 import assembleReleasePlanFunction from "@changesets/assemble-release-plan";
 
 export default assembleReleasePlan: typeof assembleReleasePlanFunction = (
@@ -45,3 +47,5 @@ export default assembleReleasePlan: typeof assembleReleasePlanFunction = (
   return result;
 };
 ```
+
+Don't forget to transpile it to JavaScript.
