@@ -278,6 +278,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.changelog
         : json.changelog
     ),
+    assembleReleasePlan: json.assembleReleasePlan,
     access:
       normalizedAccess === undefined
         ? defaultWrittenConfig.access

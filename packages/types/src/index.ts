@@ -58,6 +58,10 @@ export type Linked = ReadonlyArray<ReadonlyArray<string>>;
 
 export type Config = {
   changelog: false | readonly [string, any];
+  /**
+   * Path to module to replace "@changesets/assemble-release-plan"
+   */
+  assembleReleasePlan?: string;
   commit: boolean;
   linked: Linked;
   access: AccessType;
@@ -72,6 +76,10 @@ export type Config = {
 
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
+  /**
+   * Path to module to replace "@changesets/assemble-release-plan"
+   */
+  assembleReleasePlan?: string;
   commit?: boolean;
   linked?: Linked;
   access?: AccessType;

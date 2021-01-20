@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import path from "path";
+import resolveFrom from "resolve-from";
 import { log, warn, error } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
@@ -63,7 +64,24 @@ export default async function version(
 
   let packages = await getPackages(cwd);
 
-  let releasePlan = assembleReleasePlan(
+  let assembleReleasePlanFunction = assembleReleasePlan;
+
+  if (config.assembleReleasePlan) {
+    try {
+      let changesetPath = path.join(cwd, ".changeset");
+      let assembleReleasePlanPath = resolveFrom(
+        changesetPath,
+        config.assembleReleasePlan
+      );
+      assembleReleasePlanFunction = require(assembleReleasePlanPath).default;
+    } catch {
+      throw new Error(
+        `Can't resolve provided "assembleReleasePlan" - "${config.assembleReleasePlan}"`
+      );
+    }
+  }
+
+  let releasePlan = assembleReleasePlanFunction(
     changesets,
     packages,
     releaseConfig,
