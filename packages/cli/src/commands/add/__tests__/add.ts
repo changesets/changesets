@@ -105,11 +105,11 @@ describe("Changesets", () => {
   });
 
   it.each`
-    consoleSummaries               | editorSummaries                           | expectedSummary
-    ${["summary on step 1"]}       | ${[]}                                     | ${"summary on step 1"}
-    ${[""]}                        | ${["summary in external editor"]}         | ${"summary in external editor"}
-    ${[""]}                        | ${["", "", "summary in external editor"]} | ${"summary in external editor"}
-    ${["", "summary after error"]} | ${1 /* mock implementation will throw */} | ${"summary after error"}
+    consoleSummaries                          | editorSummaries                           | expectedSummary
+    ${["summary on step 1"]}                  | ${[]}                                     | ${"summary on step 1"}
+    ${[""]}                                   | ${["summary in external editor"]}         | ${"summary in external editor"}
+    ${["", "summary after editor cancelled"]} | ${[""]}                                   | ${"summary after editor cancelled"}
+    ${["", "summary after error"]}            | ${1 /* mock implementation will throw */} | ${"summary after error"}
   `(
     "should read summary",
     // @ts-ignore
