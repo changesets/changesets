@@ -232,17 +232,23 @@ export default async function createChangeset(
   );
 
   let summary = await cli.askQuestion("Summary");
-  if (summary.length === 0) summary = cli.askQuestionWithEditor("");
-  try {
-    while (summary.length === 0) {
-      summary = await cli.askQuestionWithEditor(
-        "\n\n# A summary is required for the changelog! 😪"
+  if (summary.length === 0) {
+    try {
+      summary = cli.askQuestionWithEditor(
+        "\n\n# Please enter a summary for your changes.\n# An empty message aborts the editor."
+      );
+      if (summary.length > 0) {
+        return {
+          summary,
+          releases
+        };
+      }
+    } catch (err) {
+      log(
+        "An error happened using external editor. Please type your summary here:"
       );
     }
-  } catch (err) {
-    log(
-      "An error happened using external editor. Please type your summary here:"
-    );
+
     summary = await cli.askQuestion("");
     while (summary.length === 0) {
       summary = await cli.askQuestion(

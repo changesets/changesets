@@ -153,7 +153,7 @@ This command will read then delete changesets on disk, ensuring that they are on
 changeset publish [--otp={token}]
 ```
 
-Publishes to NPM repo, and creates git tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is acurate.
+Publishes to NPM repo, and creates git tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is accurate.
 
 - `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the `--otp` option.
 
