@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.13.1
+
+### Patch Changes
+
+- [`0d5b9e1`](https://github.com/atlassian/changesets/commit/0d5b9e1f709f568ff9c2b28d4c12674b6b8c119d) [#518](https://github.com/atlassian/changesets/pull/518) Thanks [@zkochan](https://github.com/zkochan)! - From now on, to fix issues with some auto-save configurations in IDEs, the editor won't be re-opened if one saves an empty summary. In such a scenario the CLI will prompt again for the summary to be written in the terminal.
+
 ## 2.13.0
 
 ### Minor Changes
