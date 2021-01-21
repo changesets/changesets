@@ -35,7 +35,10 @@ const getAllDependencies = (config: PackageJSON) => {
 };
 
 export default function getDependencyGraph(
-  packages: Packages
+  packages: Packages,
+  opts?: {
+    bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  }
 ): {
   graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
   valid: boolean;
@@ -70,6 +73,8 @@ export default function getDependencyGraph(
 
       if (depVersion.startsWith("workspace:")) {
         depVersion = depVersion.substr(10);
+      } else if (opts?.bumpVersionsWithWorkspaceProtocolOnly === true) {
+        continue;
       }
 
       // internal dependencies only need to semver satisfy, not '==='

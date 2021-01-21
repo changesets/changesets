@@ -100,7 +100,10 @@ function assembleReleasePlan(
     config.ignore
   );
 
-  let dependencyGraph = getDependentsGraph(packages);
+  let dependencyGraph = getDependentsGraph(packages, {
+    bumpVersionsWithWorkspaceProtocolOnly:
+      config.bumpVersionsWithWorkspaceProtocolOnly
+  });
 
   let releasesValidated = false;
   while (releasesValidated === false) {

@@ -118,7 +118,9 @@ export default async function applyReleasePlan(
       updateInternalDependencies: config.updateInternalDependencies,
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange
+          .onlyUpdatePeerDependentsWhenOutOfRange,
+      bumpVersionsWithWorkspaceProtocolOnly:
+        config.bumpVersionsWithWorkspaceProtocolOnly
     });
   });
 
