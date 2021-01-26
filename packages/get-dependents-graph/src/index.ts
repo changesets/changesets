@@ -1,10 +1,16 @@
 import { Packages, Package } from "@manypkg/get-packages";
 import getDependencyGraph from "./get-dependency-graph";
 
-export function getDependentsGraph(packages: Packages) {
+export function getDependentsGraph(
+  packages: Packages,
+  opts?: { bumpVersionsWithWorkspaceProtocolOnly?: boolean }
+) {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
-  const { graph: dependencyGraph } = getDependencyGraph(packages);
+  const { graph: dependencyGraph } = getDependencyGraph(packages, {
+    bumpVersionsWithWorkspaceProtocolOnly:
+      opts?.bumpVersionsWithWorkspaceProtocolOnly === true
+  });
 
   const dependentsLookup: {
     [key: string]: { pkg: Package; dependents: Array<string> };

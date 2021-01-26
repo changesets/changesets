@@ -23,7 +23,8 @@ class FakeReleasePlan {
 
   constructor(
     changesets: NewChangeset[] = [],
-    releases: ComprehensiveRelease[] = []
+    releases: ComprehensiveRelease[] = [],
+    config: Partial<Config> = {}
   ) {
     const baseChangeset: NewChangeset = {
       id: "quick-lions-devour",
@@ -48,7 +49,8 @@ class FakeReleasePlan {
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
         useCalculatedVersionForSnapshots: false
-      }
+      },
+      ...config
     };
 
     this.changesets = [baseChangeset, ...changesets];
@@ -261,6 +263,73 @@ describe("apply release plan", () => {
         version: "1.1.0",
         dependencies: {
           "pkg-b": "workspace:1.1.0"
+        }
+      });
+    });
+    it("should update workspace ranges only with bumpVersionsWithWorkspaceProtocolOnly", async () => {
+      const releasePlan = new FakeReleasePlan(
+        [
+          {
+            id: "some-id",
+            releases: [
+              { name: "pkg-b", type: "minor" },
+              { name: "pkg-c", type: "minor" }
+            ],
+            summary: "a very useful summary"
+          }
+        ],
+        [
+          {
+            changesets: ["some-id"],
+            name: "pkg-b",
+            newVersion: "1.1.0",
+            oldVersion: "1.0.0",
+            type: "minor"
+          },
+          {
+            changesets: ["some-id"],
+            name: "pkg-c",
+            newVersion: "1.1.0",
+            oldVersion: "1.0.0",
+            type: "minor"
+          }
+        ],
+        {
+          bumpVersionsWithWorkspaceProtocolOnly: true
+        }
+      );
+      let { changedFiles } = await testSetup(
+        "workspace-and-other-range-dep",
+        releasePlan.getReleasePlan(),
+        releasePlan.config
+      );
+      let pkgAPath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
+
+      if (!pkgAPath) throw new Error(`could not find an updated package json`);
+      let pkgAJSON = await fs.readJSON(pkgAPath);
+
+      expect(pkgAJSON).toEqual({
+        name: "pkg-a",
+        version: "1.1.0",
+        dependencies: {
+          "pkg-b": "workspace:1.1.0"
+        }
+      });
+
+      let pkgCPath = changedFiles.find(a =>
+        a.endsWith(`pkg-c${path.sep}package.json`)
+      );
+
+      if (!pkgCPath) throw new Error(`could not find an updated package json`);
+      let pkgCJSON = await fs.readJSON(pkgCPath);
+
+      expect(pkgCJSON).toEqual({
+        name: "pkg-c",
+        version: "1.1.0",
+        dependencies: {
+          "pkg-b": "1.0.0"
         }
       });
     });
