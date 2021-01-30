@@ -2,6 +2,7 @@ import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
 
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
+import { ChangelogEntry } from "./types";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
 type ChangelogLines = {
@@ -35,7 +36,7 @@ export default async function generateMarkdown(
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
-) {
+): Promise<ChangelogEntry | null> {
   if (release.type === "none") return null;
 
   const releaseObj: ChangelogLines = {
@@ -102,12 +103,22 @@ export default async function generateMarkdown(
     )
   );
 
-  return [
-    `## ${release.newVersion}`,
-    await generateChangesForVersionTypeMarkdown(releaseObj, "major"),
-    await generateChangesForVersionTypeMarkdown(releaseObj, "minor"),
-    await generateChangesForVersionTypeMarkdown(releaseObj, "patch")
-  ]
-    .filter(line => line)
-    .join("\n");
+  const title = `## ${release.newVersion}`;
+  const major = await generateChangesForVersionTypeMarkdown(
+    releaseObj,
+    "major"
+  );
+  const minor = await generateChangesForVersionTypeMarkdown(
+    releaseObj,
+    "minor"
+  );
+  const patch = await generateChangesForVersionTypeMarkdown(
+    releaseObj,
+    "patch"
+  );
+
+  return {
+    title,
+    body: [major, minor, patch].filter(line => line).join("\n")
+  };
 }

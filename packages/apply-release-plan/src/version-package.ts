@@ -6,6 +6,7 @@ import {
 import getVersionRangeType from "@changesets/get-version-range-type";
 import { Range } from "semver";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
+import { ChangelogEntry } from "./types";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -16,7 +17,7 @@ const DEPENDENCY_TYPES = [
 
 export default function versionPackage(
   release: ComprehensiveRelease & {
-    changelog: string | null;
+    changelog: ChangelogEntry;
     packageJson: PackageJSON;
     dir: string;
   },

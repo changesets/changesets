@@ -136,9 +136,14 @@ export default async function applyReleasePlan(
     await updatePackageJson(pkgJSONPath, packageJson);
     touchedFiles.push(pkgJSONPath);
 
-    if (changelog && changelog.length > 0) {
+    if (changelog && changelog.body.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
-      await updateChangelog(changelogPath, changelog, name, prettierConfig);
+      await updateChangelog(
+        changelogPath,
+        `${changelog.title}\n${changelog.body}`,
+        name,
+        prettierConfig
+      );
       touchedFiles.push(changelogPath);
     }
   }
@@ -180,15 +185,15 @@ export default async function applyReleasePlan(
 
     for (let release of finalisedRelease) {
       const { changelog, name, newVersion } = release;
-      console.log("changelog", name, changelog);
-      if (changelog && changelog.length > 0) {
-        output += `# ${name}@${newVersion}\n\n${changelog}\n`;
+      if (changelog && changelog.body.length > 0) {
+        output += `## ${name}@${newVersion}\n\n${changelog.body}\n`;
       }
     }
 
     if (output.length > 0) {
       const changelogPath = path.resolve(cwd, "CHANGELOG.md");
-      await fs.writeFile(changelogPath, output);
+      await updateChangelog(changelogPath, output, "Changelog", prettierConfig);
+      touchedFiles.push(changelogPath);
     }
   }
 
