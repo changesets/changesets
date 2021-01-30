@@ -94,6 +94,8 @@ changeset init
 
 This command sets up the `.changeset` folder. It generates a readme and a config file. The config file includes the default options, as well as comments on what these options represent. You should run this command once, when you are setting up `changesets`.
 
+To publish public packages to NPM, you'll need to edit `.changeset/config.json` and change `"access": "restricted",` to `"access": "public",`. Read more about [access in config file options](https://github.com/atlassian/changesets/blob/master/docs/config-file-options.md#access-restricted--public). The `publishConfig` of each `package.json` is also respected and takes a priority over monorepo-wide setting in `.changeset/config.json`.
+
 ### add
 
 ```
