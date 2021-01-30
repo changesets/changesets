@@ -61,7 +61,10 @@ export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
   config: Config = defaultConfig,
-  snapshot?: string | boolean
+  options: {
+    snapshot?: string | boolean;
+    output?: boolean;
+  } = {}
 ) {
   let cwd = packages.root.dir;
 
@@ -95,7 +98,7 @@ export default async function applyReleasePlan(
     cwd
   );
 
-  if (releasePlan.preState !== undefined && snapshot === undefined) {
+  if (releasePlan.preState !== undefined && options.snapshot === undefined) {
     if (releasePlan.preState.mode === "exit") {
       await fs.remove(path.join(cwd, ".changeset", "pre.json"));
     } else {
@@ -170,6 +173,23 @@ export default async function applyReleasePlan(
         }
       })
     );
+  }
+
+  if (options.output) {
+    let output = "";
+
+    for (let release of finalisedRelease) {
+      const { changelog, name, newVersion } = release;
+      console.log("changelog", name, changelog);
+      if (changelog && changelog.length > 0) {
+        output += `# ${name}@${newVersion}\n\n${changelog}\n`;
+      }
+    }
+
+    if (output.length > 0) {
+      const changelogPath = path.resolve(cwd, "CHANGELOG.md");
+      await fs.writeFile(changelogPath, output);
+    }
   }
 
   if (config.commit) {

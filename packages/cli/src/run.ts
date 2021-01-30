@@ -160,7 +160,7 @@ export async function run(
           throw new ExitError(1);
         }
 
-        await version(cwd, { snapshot }, config);
+        await version(cwd, { snapshot, output: output !== undefined }, config);
         return;
       }
       case "publish": {

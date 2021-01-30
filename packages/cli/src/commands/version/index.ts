@@ -23,6 +23,7 @@ export default async function version(
   cwd: string,
   options: {
     snapshot?: string | boolean;
+    output?: boolean;
   },
   config: Config
 ) {
@@ -71,12 +72,7 @@ export default async function version(
     options.snapshot
   );
 
-  await applyReleasePlan(
-    releasePlan,
-    packages,
-    releaseConfig,
-    options.snapshot
-  );
+  await applyReleasePlan(releasePlan, packages, releaseConfig, options);
 
   if (releaseConfig.commit) {
     log("All files have been updated and committed. You're ready to publish!");
