@@ -5,7 +5,7 @@ import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
-import pool from "@ricokahler/pool";
+import pLimit from "p-limit";
 import * as npmUtils from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
 import isCI from "../../utils/isCI";
@@ -24,6 +24,9 @@ type PublishedResult = {
   newVersion: string;
   published: boolean;
 };
+
+// TODO: make it configurable?
+const npmRequestLimit = pLimit(10);
 
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   if (tag) return tag;
@@ -87,23 +90,22 @@ export default async function publishPackages({
     warn("No unpublished packages to publish");
   }
 
-  return pool<PkgInfo, PublishedResult>({
-    collection: unpublishedPackagesInfo,
-    // If there are many packages to be published, it's better to limit the
-    // concurrency to avoid unwanted errors, for example from NPM.
-    // TODO: make it configurable?
-    maxConcurrency: 10,
-    task: async pkgInfo => {
-      let pkg = packagesByName.get(pkgInfo.name)!;
-      const publishedResult = await publishAPackage(
-        pkg,
-        access,
-        twoFactorState,
-        getReleaseTag(pkgInfo, preState, tag)
-      );
-      return publishedResult;
-    }
-  });
+  return Promise.all(
+    unpublishedPackagesInfo.map(pkgInfo =>
+      // If there are many packages to be published, it's better to limit the
+      // concurrency to avoid unwanted errors, for example from NPM.
+      npmRequestLimit(async () => {
+        let pkg = packagesByName.get(pkgInfo.name)!;
+        const publishedResult = await publishAPackage(
+          pkg,
+          access,
+          twoFactorState,
+          getReleaseTag(pkgInfo, preState, tag)
+        );
+        return publishedResult;
+      })
+    )
+  );
 }
 
 async function publishAPackage(
