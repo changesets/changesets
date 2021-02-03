@@ -26,7 +26,7 @@ type PublishedResult = {
 };
 
 // TODO: make it configurable?
-const npmRequestLimit = pLimit(10);
+const npmPublishLimit = pLimit(10);
 
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   if (tag) return tag;
@@ -94,7 +94,7 @@ export default async function publishPackages({
     unpublishedPackagesInfo.map(pkgInfo =>
       // If there are many packages to be published, it's better to limit the
       // concurrency to avoid unwanted errors, for example from NPM.
-      npmRequestLimit(async () => {
+      npmPublishLimit(async () => {
         let pkg = packagesByName.get(pkgInfo.name)!;
         const publishedResult = await publishAPackage(
           pkg,
