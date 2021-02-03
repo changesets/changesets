@@ -93,7 +93,7 @@ export default async function publishPackages({
   return Promise.all(
     unpublishedPackagesInfo.map(pkgInfo =>
       // If there are many packages to be published, it's better to limit the
-      // concurrency to avoid unwanted errors, for example from NPM.
+      // concurrency to avoid unwanted errors, for example from npm.
       npmPublishLimit(async () => {
         let pkg = packagesByName.get(pkgInfo.name)!;
         const publishedResult = await publishAPackage(
