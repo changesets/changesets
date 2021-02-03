@@ -95,6 +95,31 @@ describe("assemble-release-plan", () => {
     expect(releases[1].newVersion).toEqual("1.0.1");
     expect(releases[1].changesets).toEqual([]);
   });
+  it("should assemble the release plan only with workspace protocol dependents when using bumpVersionsWithWorkspaceProtocolOnly", () => {
+    setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
+    setup.updateDependency("pkg-c", "pkg-a", "workspace:^1.0.0");
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig,
+        bumpVersionsWithWorkspaceProtocolOnly: true
+      },
+      undefined
+    );
+
+    expect(releases.length).toEqual(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-c");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+    expect(releases[1].changesets).toEqual([]);
+  });
   it("should assemble release plan without dependent through dev dependency", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
@@ -504,8 +529,8 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 `);
   });
 
-  describe("pre mode exit", () => {
-    it("should not generate a release for package that has no changesets and is not a dependent of any packages being released", () => {
+  describe("pre mode", () => {
+    it("should not generate a release for package that has no changesets and is not a dependent of any packages being released when exiting pre mode", () => {
       const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
@@ -523,6 +548,53 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases.length).toEqual(1);
       expect(releases[0].name).toEqual("pkg-a");
       expect(releases[0].newVersion).toEqual("1.0.1");
+    });
+
+    it("should return a release with the highest bump type within the current release despite of having a higher release among previous prereleases", () => {
+      // previous release
+      setup.addChangeset({
+        id: "major-bumping-one",
+        releases: [
+          {
+            name: "pkg-a",
+            type: "major"
+          }
+        ]
+      });
+      setup.updatePackage("pkg-a", "2.0.0-next.0");
+
+      // current release
+      setup.addChangeset({
+        id: "minor-bumping-one",
+        releases: [
+          {
+            name: "pkg-a",
+            type: "minor"
+          }
+        ]
+      });
+      const { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig
+        },
+        {
+          changesets: ["major-bumping-one"],
+          tag: "next",
+          initialVersions: {
+            "pkg-a": "1.0.0",
+            "pkg-b": "1.0.0",
+            "pkg-c": "1.0.0"
+          },
+          mode: "pre"
+        }
+      );
+
+      expect(releases.length).toEqual(1);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("2.0.0-next.1");
+      expect(releases[0].type).toEqual("minor");
     });
   });
 });
@@ -622,6 +694,25 @@ describe("bumping peerDeps", () => {
     expect(releases[1].name).toEqual("pkg-b");
     expect(releases[1].newVersion).toEqual("1.0.1");
   });
+  it("should not bump the dependent when bumping a tilde peerDep by none", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.changesets = [];
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "none" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toBe(1);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.0");
+  });
   it("should not bump the dependent when bumping a tilde peerDep by a patch", () => {
     setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
 
@@ -675,6 +766,25 @@ describe("bumping peerDeps", () => {
     expect(releases[0].newVersion).toEqual("2.0.0");
     expect(releases[1].name).toEqual("pkg-b");
     expect(releases[1].newVersion).toEqual("2.0.0");
+  });
+  it("should not bump dependent when bumping caret peerDep by none", () => {
+    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.changesets = [];
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "none" }]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toBe(1);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.0");
   });
   it("should not bump dependent when bumping caret peerDep by patch", () => {
     setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");

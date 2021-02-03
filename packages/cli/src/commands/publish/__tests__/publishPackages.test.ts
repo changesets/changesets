@@ -3,6 +3,7 @@ import fixtures from "fixturez";
 import publishPackages from "../publishPackages";
 import * as npmUtils from "../npm-utils";
 import { getPackages } from "@manypkg/get-packages";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 jest.mock("../npm-utils");
 jest.mock("is-ci", () => true);
@@ -10,6 +11,7 @@ jest.mock("is-ci", () => true);
 const f = fixtures(__dirname);
 
 describe("publishPackages", () => {
+  temporarilySilenceLogs();
   let cwd: string;
 
   beforeEach(async () => {

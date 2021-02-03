@@ -1,5 +1,17 @@
 # @changesets/get-github-info
 
+## 0.4.5
+
+### Patch Changes
+
+- [`3436c53`](https://github.com/atlassian/changesets/commit/3436c53acf444c2ce19f8548920b7b73461a9c76) [#510](https://github.com/atlassian/changesets/pull/510) Thanks [@tuanddd](https://github.com/tuanddd)! - Added validation rule for invalid `repo` arguments.
+
+## 0.4.4
+
+### Patch Changes
+
+- [`f24f722`](https://github.com/atlassian/changesets/commit/f24f7220fcc322a4a2deb26cd77c2d481ac422f0) [#444](https://github.com/atlassian/changesets/pull/444) Thanks [@Andarist](https://github.com/Andarist)! - Changed the way how requests to the GitHub API were authenticated - from a query parameter to the `Authorization` header. The previously used method has been deprecated by the GitHub and will stop working in 2021.
+
 ## 0.4.3
 
 ### Patch Changes

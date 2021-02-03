@@ -23,10 +23,12 @@ export default function versionPackage(
   versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
   {
     updateInternalDependencies,
-    onlyUpdatePeerDependentsWhenOutOfRange
+    onlyUpdatePeerDependentsWhenOutOfRange,
+    bumpVersionsWithWorkspaceProtocolOnly
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+    bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   }
 ) {
   let { newVersion, packageJson } = release;
@@ -58,6 +60,8 @@ export default function versionPackage(
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
         if (usesWorkspaceRange) {
           depCurrentVersion = depCurrentVersion.substr(10);
+        } else if (bumpVersionsWithWorkspaceProtocolOnly === true) {
+          continue;
         }
         if (
           // an empty string is the normalised version of x/X/*

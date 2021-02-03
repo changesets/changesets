@@ -1,13 +1,32 @@
+import { join } from "path";
 import semver from "semver";
 import chalk from "chalk";
 import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
-import * as npmUtils from "./npm-utils";
 import { info, warn } from "@changesets/logger";
-import { TwoFactorState } from "../../utils/types";
 import { PreState } from "@changesets/types";
+import pLimit from "p-limit";
+import * as npmUtils from "./npm-utils";
+import { TwoFactorState } from "../../utils/types";
 import isCI from "../../utils/isCI";
-import { join } from "path";
+
+type PublishedState = "never" | "published" | "only-pre";
+
+type PkgInfo = {
+  name: string;
+  localVersion: string;
+  publishedState: PublishedState;
+  publishedVersions: string[];
+};
+
+type PublishedResult = {
+  name: string;
+  newVersion: string;
+  published: boolean;
+};
+
+// TODO: make it configurable?
+const npmPublishLimit = pLimit(10);
 
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   if (tag) return tag;
@@ -71,25 +90,22 @@ export default async function publishPackages({
     warn("No unpublished packages to publish");
   }
 
-  let promises: Promise<{
-    name: string;
-    newVersion: string;
-    published: boolean;
-  }>[] = [];
-
-  for (let pkgInfo of unpublishedPackagesInfo) {
-    let pkg = packagesByName.get(pkgInfo.name)!;
-    promises.push(
-      publishAPackage(
-        pkg,
-        access,
-        twoFactorState,
-        getReleaseTag(pkgInfo, preState, tag)
-      )
-    );
-  }
-
-  return Promise.all(promises);
+  return Promise.all(
+    unpublishedPackagesInfo.map(pkgInfo =>
+      // If there are many packages to be published, it's better to limit the
+      // concurrency to avoid unwanted errors, for example from npm.
+      npmPublishLimit(async () => {
+        let pkg = packagesByName.get(pkgInfo.name)!;
+        const publishedResult = await publishAPackage(
+          pkg,
+          access,
+          twoFactorState,
+          getReleaseTag(pkgInfo, preState, tag)
+        );
+        return publishedResult;
+      })
+    )
+  );
 }
 
 async function publishAPackage(
@@ -97,7 +113,7 @@ async function publishAPackage(
   access: AccessType,
   twoFactorState: TwoFactorState,
   tag: string
-) {
+): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
   const localAccess = publishConfig && publishConfig.access;
   info(
@@ -125,15 +141,6 @@ async function publishAPackage(
     published: publishConfirmation.published
   };
 }
-
-type PublishedState = "never" | "published" | "only-pre";
-
-type PkgInfo = {
-  name: string;
-  localVersion: string;
-  publishedState: PublishedState;
-  publishedVersions: string[];
-};
 
 async function getUnpublishedPackages(
   packages: Array<Package>,

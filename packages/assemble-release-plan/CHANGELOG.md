@@ -1,5 +1,43 @@
 # @changesets/assemble-release-plan
 
+## 4.1.0
+
+### Minor Changes
+
+- [`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101) [#507](https://github.com/atlassian/changesets/pull/507) Thanks [@zkochan](https://github.com/zkochan)! - New setting added: bumpVersionsWithWorkspaceProtocolOnly. When it is set to `true`, versions are bumped in `dependencies`, only if those versions are prefixed by the workspace protocol. For instance, `"foo": "workspace:^1.0.0"`.
+
+### Patch Changes
+
+- Updated dependencies [[`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101)]:
+  - @changesets/get-dependents-graph@1.2.0
+  - @changesets/types@3.3.0
+
+## 4.0.1
+
+### Patch Changes
+
+- [`e92cc01`](https://github.com/atlassian/changesets/commit/e92cc0138bfbc041c77e6c7d054f2aa101cece5a) [#482](https://github.com/atlassian/changesets/pull/482) Thanks [@jonathanmorley](https://github.com/jonathanmorley)! - Fixed an issue with bumping a peer dependency using a `"none"` changeset type resulting in the dependant package being major bumped.
+
+## 4.0.0
+
+### Major Changes
+
+- [`ab98fe3`](https://github.com/atlassian/changesets/commit/ab98fe33814867ba740fc04733602be80771915c) [#454](https://github.com/atlassian/changesets/pull/454) Thanks [@Andarist](https://github.com/Andarist)! - Returned releases in pre mode will have type of the highest bump type within the current release now, instead of having the highest bump type from among all changesets within this pre mode. So if you release a new prerelease including a major bump and later release the same package with a minor bump the assembled release will be of type minor - the final computed version will, of course, still be the next one for a major bump.
+
+### Patch Changes
+
+- [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f) [#455](https://github.com/atlassian/changesets/pull/455) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with linked package being assigned a non-none release type when another package from the linked set has been added to current releases and the package had just a none release type.
+
+* [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76) [#446](https://github.com/atlassian/changesets/pull/446) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages not being updated to their highest bump type in pre mode sometimes. This could happen when dependant packages were only versioned because of their dependencies being upgraded and not because of a dedicated changeset for those dependant packages.
+
+  For the very same reason linked packages were also not always bumped correctly in pre mode to the highest bump type in a linked group.
+
+## 3.0.1
+
+### Patch Changes
+
+- [`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d) [#412](https://github.com/atlassian/changesets/pull/412) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Fixed an issue with the same package specified as a different dependency type with different range types not being updated correctly for all of them.
+
 ## 3.0.0
 
 ### Major Changes

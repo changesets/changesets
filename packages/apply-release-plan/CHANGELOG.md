@@ -1,5 +1,23 @@
 # @changesets/apply-release-plan
 
+## 4.2.0
+
+### Minor Changes
+
+- [`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101) [#507](https://github.com/atlassian/changesets/pull/507) Thanks [@zkochan](https://github.com/zkochan)! - New setting added: bumpVersionsWithWorkspaceProtocolOnly. When it is set to `true`, versions are bumped in `dependencies`, only if those versions are prefixed by the workspace protocol. For instance, `"foo": "workspace:^1.0.0"`.
+
+### Patch Changes
+
+- Updated dependencies [[`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101)]:
+  - @changesets/config@1.5.0
+  - @changesets/types@3.3.0
+
+## 4.1.0
+
+### Minor Changes
+
+- [`fd53ca2`](https://github.com/atlassian/changesets/commit/fd53ca2acb0a955bc87af090daba5aa41c2bab69) [#395](https://github.com/atlassian/changesets/pull/395) Thanks [@jonathanmorley](https://github.com/jonathanmorley)! - Use `JSON.stringify` to update package.jsons without including modifications from prettier.
+
 ## 4.0.0
 
 ### Major Changes

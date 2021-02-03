@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "simple-project",
-  "description": "three projects, each depending on one other",
+  "description": "two linked projects",
   "version": "1.0.0",
   "bolt": {
     "workspaces": [

@@ -1,5 +1,116 @@
 # @changesets/cli
 
+## 2.14.0
+
+### Minor Changes
+
+- [`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101) [#507](https://github.com/atlassian/changesets/pull/507) Thanks [@zkochan](https://github.com/zkochan)! - New setting added: bumpVersionsWithWorkspaceProtocolOnly. When it is set to `true`, versions are bumped in `dependencies`, only if those versions are prefixed by the workspace protocol. For instance, `"foo": "workspace:^1.0.0"`.
+
+### Patch Changes
+
+- Updated dependencies [[`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101)]:
+  - @changesets/apply-release-plan@4.2.0
+  - @changesets/assemble-release-plan@4.1.0
+  - @changesets/config@1.5.0
+  - @changesets/get-dependents-graph@1.2.0
+  - @changesets/types@3.3.0
+
+## 2.13.1
+
+### Patch Changes
+
+- [`0d5b9e1`](https://github.com/atlassian/changesets/commit/0d5b9e1f709f568ff9c2b28d4c12674b6b8c119d) [#518](https://github.com/atlassian/changesets/pull/518) Thanks [@zkochan](https://github.com/zkochan)! - From now on, to fix issues with some auto-save configurations in IDEs, the editor won't be re-opened if one saves an empty summary. In such a scenario the CLI will prompt again for the summary to be written in the terminal.
+
+## 2.13.0
+
+### Minor Changes
+
+- [`412b4b9`](https://github.com/atlassian/changesets/commit/412b4b97e53b6326e8e733eb7d4e1f5738e6fed0) [#504](https://github.com/atlassian/changesets/pull/504) Thanks [@vitorbal](https://github.com/vitorbal)! - `changeset status` command no longer errors when no packages have been changed.
+
+* [`24d7bc9`](https://github.com/atlassian/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac) [#495](https://github.com/atlassian/changesets/pull/495) Thanks [@RoystonS](https://github.com/RoystonS)! - Automatically deepen shallow clones in order to determine the correct commit at which changesets were added. This helps Git-based changelog generators to always link to the correct commit. From now on it's not required to configure `fetch-depth: 0` for your `actions/checkout` when using [Changesets GitHub action](https://github.com/changesets/action).
+
+### Patch Changes
+
+- Updated dependencies [[`24d7bc9`](https://github.com/atlassian/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac), [`24d7bc9`](https://github.com/atlassian/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac)]:
+  - @changesets/git@1.1.0
+
+## 2.12.0
+
+### Minor Changes
+
+- [`c6d38b5`](https://github.com/atlassian/changesets/commit/c6d38b579bdfddc22714c352c3459d04d1745326) [#469](https://github.com/atlassian/changesets/pull/469) Thanks [@camdub](https://github.com/camdub)! - Handle JSON errors for unpublished packages on the github package registry
+
+## 2.11.2
+
+### Patch Changes
+
+- [`b4e4b93`](https://github.com/atlassian/changesets/commit/b4e4b938b985b4bcdd23c573bcaba81669f2cafe) [#448](https://github.com/atlassian/changesets/pull/448) Thanks [@vlad-zhukov](https://github.com/vlad-zhukov)! - Packages are now published from cwd (usually the root of the repository) rather than from the package directories. This respects `.npmrc` files put in the root directory.
+
+## 2.11.1
+
+### Patch Changes
+
+- [`00e2602`](https://github.com/atlassian/changesets/commit/00e2602815851c8f17f1115c354d19aab6583f96) [#473](https://github.com/atlassian/changesets/pull/473) Thanks [@zzarcon](https://github.com/zzarcon)! - Upgraded [`meow`](https://github.com/sindresorhus/meow) dependency to benefit from its [`yarg-parser`](https://github.com/yargs/yargs-parser) dependency upgrade that contains a security fix.
+
+## 2.11.0
+
+### Minor Changes
+
+- [`e33e4ca`](https://github.com/atlassian/changesets/commit/e33e4ca7e71ba7747e21af5011057f11ddfab939) [#458](https://github.com/atlassian/changesets/pull/458) Thanks [@emmenko](https://github.com/emmenko)! - Allow glob expressions to be provided for the `linked` and `ignore` options
+
+### Patch Changes
+
+- [`a60c0e1`](https://github.com/atlassian/changesets/commit/a60c0e1557ccdc3a9e7f665dd679c223f64450fe) [#465](https://github.com/atlassian/changesets/pull/465) Thanks [@Andarist](https://github.com/Andarist)! - Fixed the printed description of how `pre` command can be used.
+
+- Updated dependencies [[`f4973a2`](https://github.com/atlassian/changesets/commit/f4973a25ec6a837f36d64c1fb4b108ace3bc1f9d), [`e33e4ca`](https://github.com/atlassian/changesets/commit/e33e4ca7e71ba7747e21af5011057f11ddfab939)]:
+  - @changesets/types@3.2.0
+  - @changesets/config@1.4.0
+
+## 2.10.3
+
+### Patch Changes
+
+- [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f) [#455](https://github.com/atlassian/changesets/pull/455) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with linked package being bumped when its dev dependency from the linked set was bumped during the versioning.
+
+* [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76) [#446](https://github.com/atlassian/changesets/pull/446) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages not being updated to their highest bump type in pre mode sometimes. This could happen when dependant packages were only versioned because of their dependencies being upgraded and not because of a dedicated changeset for those dependant packages.
+
+  For the very same reason linked packages were also not always bumped correctly in pre mode to the highest bump type in a linked group.
+
+* Updated dependencies [[`ab98fe3`](https://github.com/atlassian/changesets/commit/ab98fe33814867ba740fc04733602be80771915c), [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f), [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76)]:
+  - @changesets/assemble-release-plan@4.0.0
+  - @changesets/get-release-plan@2.0.1
+
+## 2.10.2
+
+### Patch Changes
+
+- [`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d) [#412](https://github.com/atlassian/changesets/pull/412) Thanks [@Feiyang1](https://github.com/Feiyang1)! - Fixed an issue with the same package specified as a different dependency type with different range types not being updated correctly for all of them.
+
+- Updated dependencies [[`d531dbd`](https://github.com/atlassian/changesets/commit/d531dbdc9ac22faccb20356e9ea1313e5095cf9d)]:
+  - @changesets/assemble-release-plan@3.0.1
+
+## 2.10.1
+
+### Patch Changes
+
+- [`efd01d9`](https://github.com/atlassian/changesets/commit/efd01d9b7a46ba2a44df1f5fdb47436e9219f44b) [#437](https://github.com/atlassian/changesets/pull/437) Thanks [@Blasz](https://github.com/Blasz)! - Fix version command not committing when commit config option is set
+
+## 2.10.0
+
+### Minor Changes
+
+- [`dca4a91`](https://github.com/atlassian/changesets/commit/dca4a91506dfca46915f7d4e833205ad3a685aa0) [#357](https://github.com/atlassian/changesets/pull/357) Thanks [@zkochan](https://github.com/zkochan)! - Open an editor when no message is given when creating a changeset
+
+* [`a57d163`](https://github.com/atlassian/changesets/commit/a57d16355ad7d67b18b768c8f79224d80afa507c) [#428](https://github.com/atlassian/changesets/pull/428) Thanks [@dotansimha](https://github.com/dotansimha)! - Added support for publishing from a subdirectory of packages, using `publishConfig.directory` field
+
+### Patch Changes
+
+- [`868eb1e`](https://github.com/atlassian/changesets/commit/868eb1e68ee91aabefa04a9abf13a7fc22eef019) [#434](https://github.com/atlassian/changesets/pull/434) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add `--no-git-checks` to `pnpm publish` in `changeset publish` to resolve issues with publishing on CI
+
+- Updated dependencies [[`1dd3117`](https://github.com/atlassian/changesets/commit/1dd311708c65321e1a1c99d36129190f940435ed), [`a57d163`](https://github.com/atlassian/changesets/commit/a57d16355ad7d67b18b768c8f79224d80afa507c)]:
+  - @changesets/git@1.0.6
+  - @changesets/types@3.1.1
+
 ## 2.9.2
 
 ### Patch Changes

@@ -1,5 +1,23 @@
 # @changesets/types
 
+## 3.3.0
+
+### Minor Changes
+
+- [`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101) [#507](https://github.com/atlassian/changesets/pull/507) Thanks [@zkochan](https://github.com/zkochan)! - New setting added: bumpVersionsWithWorkspaceProtocolOnly. When it is set to `true`, versions are bumped in `dependencies`, only if those versions are prefixed by the workspace protocol. For instance, `"foo": "workspace:^1.0.0"`.
+
+## 3.2.0
+
+### Minor Changes
+
+- [`f4973a2`](https://github.com/atlassian/changesets/commit/f4973a25ec6a837f36d64c1fb4b108ace3bc1f9d) [#467](https://github.com/atlassian/changesets/pull/467) Thanks [@Andarist](https://github.com/Andarist)! - Exported a new `Linked` type for convenience - it's an alias for `ReadonlyArray<ReadonlyArray<string>>`.`
+
+## 3.1.1
+
+### Patch Changes
+
+- [`a57d163`](https://github.com/atlassian/changesets/commit/a57d16355ad7d67b18b768c8f79224d80afa507c) [#428](https://github.com/atlassian/changesets/pull/428) Thanks [@dotansimha](https://github.com/dotansimha)! - Updated signature of `PackageJSON['publishConfig']` to include `directory?: string`.
+
 ## 3.1.0
 
 ### Minor Changes

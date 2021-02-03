@@ -1,5 +1,9 @@
 # Prereleases
 
+> Warning! Prereleases are very complicated! Using them requires a thorough understanding of all parts of npm publishes. Mistakes can lead to repository and publish states that are very hard to fix.
+
+> Warning: If you decide to do prereleases from the main branch of your repository, without having a branch for your last stable release without the prerelease changes, you will block other changes until you are ready to exit prerelease mode. We thoroughly recommend only running prereleases from a branch other than the main branch.
+
 You might want to release a version of your packages before you do an actual release, Changesets lets you do this but there are some caveats because of the complexity that monorepos add that are important to understand.
 
 When you want to do a prerelease, you need to enter prerelease mode. You can do that with the `pre enter <tag>`. The tag that you need to pass is used in versions(e.g. `1.0.0-beta.0`) and for the npm dist tag.
@@ -27,7 +31,7 @@ packages/
 ```
 
 ```
-yarn changeset prerelease next
+yarn changeset pre enter next
 ```
 
 This command changes Changesets into prerelease mode which creates a `pre.json` file in the `.changeset` directory which stores information about the state the prerelease is in. For the specific data stored in the `pre.json` file, see the type definition of `PreState` in [`@changesets/types`](https://github.com/atlassian/changesets/tree/master/packages/types).

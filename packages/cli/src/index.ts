@@ -14,7 +14,7 @@ const { input, flags } = meow(
     version [--ignore]
     publish [--otp=code]
     status [--since-master --verbose --output=JSON_FILE.json]
-    prerelease <tag>
+    pre <enter|exit> <tag>
     `,
   {
     flags: {
@@ -30,19 +30,16 @@ const { input, flags } = meow(
         alias: "o"
       },
       otp: {
-        type: "string",
-        default: undefined
+        type: "string"
       },
       empty: {
         type: "boolean"
       },
       since: {
-        type: "string",
-        default: undefined
+        type: "string"
       },
       ignore: {
         type: "string",
-        default: undefined,
         isMultiple: true
       },
       tag: {

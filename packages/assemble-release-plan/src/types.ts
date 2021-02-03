@@ -9,5 +9,5 @@ export type InternalRelease = {
 
 export type PreInfo = {
   state: PreState;
-  preVersions: Map<string, string>;
+  preVersions: Map<string, number>;
 };

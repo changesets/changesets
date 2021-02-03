@@ -67,3 +67,21 @@ I now have another changeset with a major for `pkg-a` and I do a release, the re
 
 - `pkg-a` is at `3.0.0`
 - `pkg-b` is at `2.0.0`
+
+## Using glob expressions
+
+Sometimes you want to link many or all packages within your project (for example in a monorepository setup), in which case you would need to keep the list of linked packages up-to-date.
+
+To make it simpler to maintain that list, you can provide glob expressions in the linked list that would match and resolve to all the packages that you wish to include.
+
+For example:
+
+```json
+{
+  "linked": [["pkg-*"]]
+}
+```
+
+It will match all packages starting with `pkg-`.
+
+**The glob expressions must be defined according to the [micromatch](https://www.npmjs.com/package/micromatch) format.**
