@@ -277,6 +277,7 @@ describe("running version in a simple project", () => {
 });
 
 describe("running version in a simple project with caret dependencies", () => {
+  // https://github.com/atlassian/changesets/pull/382#discussion_r434434182
   it("should bump patch version for packages that had prereleases, but dependencies are still in range", async () => {
     let cwd = f.copy("simple-project-caret-dep");
     await pre(cwd, { command: "enter", tag: "next" });
