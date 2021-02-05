@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.14.1
+
+### Patch Changes
+
+- [`9224385`](https://github.com/atlassian/changesets/commit/92243856c1ccede60202b456e3eb1a6458a47ac7) [#522](https://github.com/atlassian/changesets/pull/522) Thanks [@emmenko](https://github.com/emmenko)! - Limit concurrency of publishing packages.
+
 ## 2.14.0
 
 ### Minor Changes
