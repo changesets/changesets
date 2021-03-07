@@ -13,6 +13,7 @@ export type CliOptions = {
   ignore?: string | string[];
   snapshot?: string | boolean;
   tag?: string;
+  globalChangelog?: boolean;
 };
 
 export type CommandOptions = CliOptions & {

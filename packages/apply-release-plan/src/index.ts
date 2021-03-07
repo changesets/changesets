@@ -63,7 +63,7 @@ export default async function applyReleasePlan(
   config: Config = defaultConfig,
   options: {
     snapshot?: string | boolean;
-    output?: boolean;
+    globalChangelog?: boolean;
   } = {}
 ) {
   let cwd = packages.root.dir;
@@ -180,7 +180,7 @@ export default async function applyReleasePlan(
     );
   }
 
-  if (options.output) {
+  if (options.globalChangelog) {
     let output = "";
 
     for (let release of finalisedRelease) {

@@ -23,7 +23,7 @@ export default async function version(
   cwd: string,
   options: {
     snapshot?: string | boolean;
-    output?: boolean;
+    globalChangelog?: boolean;
   },
   config: Config
 ) {
