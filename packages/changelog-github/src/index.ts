@@ -52,16 +52,16 @@ const changelogFunctions: ChangelogFunctions = {
     let userFromSummary: string | undefined;
 
     const replacedChangelog = changeset.summary
-      .replace(/(?:pr|pull|pull\s+request):\s*#?(\d+)/i, (_, pr) => {
+      .replace(/\n\s*(?:pr|pull|pull\s+request):\s*#?(\d+)/i, (_, pr) => {
         let num = Number(pr);
         if (!isNaN(num)) prFromSummary = num;
         return "";
       })
-      .replace(/commit:\s*([^\s]+)/i, (_, commit) => {
+      .replace(/\n\s*commit:\s*([^\s]+)/i, (_, commit) => {
         commitFromSummary = commit;
         return "";
       })
-      .replace(/(?:author|user):\s*@?([^\s]+)/i, (_, user) => {
+      .replace(/\n\s*(?:author|user):\s*@?([^\s]+)/i, (_, user) => {
         userFromSummary = user;
         return "";
       })

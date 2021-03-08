@@ -120,6 +120,8 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     };
     cleanedData[repo] = output;
     Object.entries(data.data[`a${index}`]).forEach(([field, value]) => {
+      // this is "a" because that's how it was when it was first written, "a" means it's a commit not a pr
+      // we could change it to commit__ but then we have to get new GraphQL results from the GH API to put in the tests
       if (field[0] === "a") {
         output.commit[field.substring(1)] = value;
       } else {

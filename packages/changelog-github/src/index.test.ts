@@ -71,16 +71,21 @@ const data = {
 describe.each([data.commit, "wrongcommit", undefined])(
   "with commit from changeset of %s",
   commitFromChangeset => {
-    test.each(["pr", "pull request", "pull"])(
+    describe.each(["pr", "pull request", "pull"])(
       "override pr with %s keyword",
-      async keyword => {
-        expect(
-          await getReleaseLine(
-            ...getChangeset(`${keyword}: ${data.pull}`, commitFromChangeset)
-          )
-        ).toEqual(
-          `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`
-        );
+      keyword => {
+        test.each(["with #", "without #"] as const)("%s", async kind => {
+          expect(
+            await getReleaseLine(
+              ...getChangeset(
+                `${keyword}: ${kind === "with #" ? "#" : ""}${data.pull}`,
+                commitFromChangeset
+              )
+            )
+          ).toEqual(
+            `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`
+          );
+        });
       }
     );
     test("override commit with commit keyword", async () => {
@@ -95,13 +100,20 @@ describe.each([data.commit, "wrongcommit", undefined])(
   }
 );
 
-test.each(["author", "user"])(
+describe.each(["author", "user"])(
   "override author with %s keyword",
-  async keyword => {
-    expect(
-      await getReleaseLine(...getChangeset(`${keyword}: other`, data.commit))
-    ).toEqual(
-      `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@other](https://github.com/other)! - something\n`
-    );
+  keyword => {
+    test.each(["with @", "without @"] as const)("%s", async kind => {
+      expect(
+        await getReleaseLine(
+          ...getChangeset(
+            `${keyword}: ${kind === "with @" ? "@" : ""}other`,
+            data.commit
+          )
+        )
+      ).toEqual(
+        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@other](https://github.com/other)! - something\n`
+      );
+    });
   }
 );
