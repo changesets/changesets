@@ -10,5 +10,8 @@
     "@changesets/get-github-info": "^0.4.5",
     "@changesets/types": "^3.0.0",
     "dotenv": "^8.1.0"
+  },
+  "devDependencies": {
+    "@changesets/parse": "*"
   }
 }
