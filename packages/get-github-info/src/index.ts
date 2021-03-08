@@ -218,7 +218,7 @@ export async function getInfoFromPullRequest(request: {
   };
 }> {
   if (request.pull === undefined) {
-    throw new Error("Please pass a commit SHA to getInfo");
+    throw new Error("Please pass a pull request number");
   }
 
   if (!request.repo) {
