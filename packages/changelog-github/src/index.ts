@@ -49,7 +49,7 @@ const changelogFunctions: ChangelogFunctions = {
 
     let prFromSummary: number | undefined;
     let commitFromSummary: string | undefined;
-    let userFromSummaryOverride: string | undefined;
+    let userFromSummary: string | undefined;
 
     const replacedChangelog = changeset.summary
       .replace(/(?:pr|pull|pull\s+request):\s*#?(\d+)/i, (_, pr) => {
@@ -62,7 +62,7 @@ const changelogFunctions: ChangelogFunctions = {
         return "";
       })
       .replace(/(?:author|user):\s*@?([^\s]+)/i, (_, user) => {
-        userFromSummaryOverride = `[@${user}](https://github.com/${user})`;
+        userFromSummary = user;
         return "";
       })
       .trim();
@@ -100,7 +100,9 @@ const changelogFunctions: ChangelogFunctions = {
       };
     })();
 
-    const user = userFromSummaryOverride || links.user;
+    const user = userFromSummary
+      ? `[@${userFromSummary}](https://github.com/${userFromSummary})`
+      : links.user;
 
     const prefix = [
       links.pull === null ? "" : ` ${links.pull}`,
