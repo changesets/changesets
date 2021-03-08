@@ -1,4 +1,4 @@
-import { getInfo } from ".";
+import { getInfo, getInfoFromPullRequest } from ".";
 import nock from "nock";
 import prettier from "prettier";
 
@@ -330,4 +330,70 @@ test("throws error on invalid repo name", () => {
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the \\"^[\\\\w.-]+\\\\/[\\\\w.-]+$\\" pattern)"`
   );
+});
+
+test("associated with multiple PRs with only one merged", async () => {
+  nock("https://api.github.com", {
+    reqheaders: {
+      Authorization: `Token ${process.env.GITHUB_TOKEN}`
+    }
+  })
+    .post(apiPath, ({ query }) => {
+      expect(prettier.format(query, { parser: "graphql" }))
+        .toMatchInlineSnapshot(`
+        "query {
+          a0: repository(owner: \\"emotion-js\\", name: \\"emotion\\") {
+            pr__1613: pullRequest(number: 1613) {
+              url
+              author {
+                login
+                url
+              }
+              mergeCommit {
+                commitUrl
+                abbreviatedOid
+              }
+            }
+          }
+        }
+        "
+      `);
+      return true;
+    })
+    .reply(
+      200,
+      JSON.stringify({
+        data: {
+          a0: {
+            pr__1613: {
+              url: "https://github.com/emotion-js/emotion/pull/1613",
+              author: {
+                login: "Andarist",
+                url: "https://github.com/Andarist"
+              },
+              mergeCommit: {
+                commitUrl:
+                  "https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
+                abbreviatedOid: "a085003"
+              }
+            }
+          }
+        }
+      })
+    );
+  let result = await getInfoFromPullRequest({
+    pull: 1613,
+    repo: "emotion-js/emotion"
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "commit": "a085003",
+      "links": Object {
+        "commit": "[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
+        "pull": "[#1613](https://github.com/emotion-js/emotion/pull/1613)",
+        "user": "[@Andarist](https://github.com/Andarist)",
+      },
+      "user": "Andarist",
+    }
+  `);
 });
