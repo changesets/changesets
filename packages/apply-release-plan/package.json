@@ -10,7 +10,7 @@
     "@babel/runtime": "^7.10.4",
     "@changesets/config": "^1.5.0",
     "@changesets/get-version-range-type": "^0.3.2",
-    "@changesets/git": "^1.0.5",
+    "@changesets/git": "^1.1.0",
     "@changesets/types": "^3.3.0",
     "@manypkg/get-packages": "^1.0.1",
     "detect-indent": "^6.0.0",
