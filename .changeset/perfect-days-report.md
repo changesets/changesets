@@ -2,4 +2,4 @@
 "@changesets/apply-release-plan": patch
 ---
 
-Fixed an issue where `git.getCommitsThatAddFiles` could be undefined due to wrong semver range for @changeset/git
+Bump the required dependency range of [`@changesets/git`](https://github.com/atlassian/changesets/tree/master/packages/changelog-github) package as the new version has added `getCommitsThatAddFiles` which is used here.
