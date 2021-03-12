@@ -4,12 +4,16 @@ import DataLoader from "dataloader";
 
 const validRepoNameRegex = /^[\w.-]+\/[\w.-]+$/;
 
-type RequestData = {
-  commit: string;
-  repo: string;
-};
+type RequestData =
+  | { kind: "commit"; repo: string; commit: string }
+  | { kind: "pull"; repo: string; pull: number };
 
-function makeQuery(repos: any) {
+type ReposWithCommitsAndPRsToFetch = Record<
+  string,
+  ({ kind: "commit"; commit: string } | { kind: "pull"; pull: number })[]
+>;
+
+function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
   return `
       query {
         ${Object.keys(repos)
@@ -20,12 +24,11 @@ function makeQuery(repos: any) {
             name: ${JSON.stringify(repo.split("/")[1])}
           ) {
             ${repos[repo]
-              .map(
-                (
-                  commit: string
-                ) => `a${commit}: object(expression: ${JSON.stringify(
-                  commit
-                )}) {
+              .map(data =>
+                data.kind === "commit"
+                  ? `a${data.commit}: object(expression: ${JSON.stringify(
+                      data.commit
+                    )}) {
             ... on Commit {
             commitUrl
             associatedPullRequests(first: 50) {
@@ -46,6 +49,17 @@ function makeQuery(repos: any) {
               }
             }
           }}`
+                  : `pr__${data.pull}: pullRequest(number: ${data.pull}) {
+                    url
+                    author {
+                      login
+                      url
+                    }
+                    mergeCommit {
+                      commitUrl
+                      abbreviatedOid
+                    }            
+                  }`
               )
               .join("\n")}
           }`
@@ -70,12 +84,12 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
       "Please create a GitHub personal access token at https://github.com/settings/tokens/new and add it as the GITHUB_TOKEN environment variable"
     );
   }
-  let repos: Record<RequestData["repo"], Array<RequestData["commit"]>> = {};
-  requests.forEach(({ commit, repo }) => {
+  let repos: ReposWithCommitsAndPRsToFetch = {};
+  requests.forEach(({ repo, ...data }) => {
     if (repos[repo] === undefined) {
       repos[repo] = [];
     }
-    repos[repo].push(commit);
+    repos[repo].push(data);
   });
 
   const data = await fetch("https://api.github.com/graphql", {
@@ -95,22 +109,39 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     );
   }
 
-  let cleanedData: Record<any, any> = {};
-  let dataKeys = Object.keys(data.data);
+  let cleanedData: Record<
+    string,
+    { commit: Record<string, any>; pull: Record<string, any> }
+  > = {};
   Object.keys(repos).forEach((repo, index) => {
-    cleanedData[repo] = {};
-    for (let nearlyCommit in data.data[dataKeys[index]]) {
-      cleanedData[repo][nearlyCommit.substring(1)] =
-        data.data[dataKeys[index]][nearlyCommit];
-    }
+    let output: { commit: Record<string, any>; pull: Record<string, any> } = {
+      commit: {},
+      pull: {}
+    };
+    cleanedData[repo] = output;
+    Object.entries(data.data[`a${index}`]).forEach(([field, value]) => {
+      // this is "a" because that's how it was when it was first written, "a" means it's a commit not a pr
+      // we could change it to commit__ but then we have to get new GraphQL results from the GH API to put in the tests
+      if (field[0] === "a") {
+        output.commit[field.substring(1)] = value;
+      } else {
+        output.pull[field.replace("pr__", "")] = value;
+      }
+    });
   });
 
-  return requests.map(({ repo, commit }) => cleanedData[repo][commit]);
+  return requests.map(
+    ({ repo, ...data }) =>
+      cleanedData[repo][data.kind][
+        data.kind === "pull" ? data.pull : data.commit
+      ]
+  );
 });
 
-export async function getInfo(
-  request: RequestData
-): Promise<{
+export async function getInfo(request: {
+  commit: string;
+  repo: string;
+}): Promise<{
   user: string | null;
   pull: number | null;
   links: {
@@ -135,7 +166,7 @@ export async function getInfo(
     );
   }
 
-  const data = await GHDataLoader.load(request);
+  const data = await GHDataLoader.load({ kind: "commit", ...request });
   let user = null;
   if (data.author && data.author.user) {
     user = data.author.user;
@@ -171,6 +202,52 @@ export async function getInfo(
       pull: associatedPullRequest
         ? `[#${associatedPullRequest.number}](${associatedPullRequest.url})`
         : null,
+      user: user ? `[@${user.login}](${user.url})` : null
+    }
+  };
+}
+
+export async function getInfoFromPullRequest(request: {
+  pull: number;
+  repo: string;
+}): Promise<{
+  user: string | null;
+  commit: string | null;
+  links: {
+    commit: string | null;
+    pull: string;
+    user: string | null;
+  };
+}> {
+  if (request.pull === undefined) {
+    throw new Error("Please pass a pull request number");
+  }
+
+  if (!request.repo) {
+    throw new Error(
+      "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"
+    );
+  }
+
+  if (!validRepoNameRegex.test(request.repo)) {
+    throw new Error(
+      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`
+    );
+  }
+
+  const data = await GHDataLoader.load({ kind: "pull", ...request });
+  let user = data?.author;
+
+  let commit = data?.mergeCommit;
+
+  return {
+    user: user ? user.login : null,
+    commit: commit ? commit.abbreviatedOid : null,
+    links: {
+      commit: commit
+        ? `[\`${commit.abbreviatedOid}\`](${commit.commitUrl})`
+        : null,
+      pull: `[#${request.pull}](https://github.com/${request.repo}/pull/${request.pull})`,
       user: user ? `[@${user.login}](${user.url})` : null
     }
   };
