@@ -16,7 +16,7 @@ The **@changesets/cli** package allows you to write `changeset` files as you mak
 
 ## How do I get started?
 
-If you just want to jump in to using changesets, the [@changesets/cli](./packages/cli/README.md) docs are where you should head.
+If you just want to jump in to using changesets, the [Intro to using changesets](intro-to-using-changesets.md) and [@changesets/cli](./packages/cli/README.md) docs are where you should head.
 
 If you want a detailed explanation of the the concepts behind changesets, or to understand how you would build on top
 of changesets, check out our [detailed-explanation](./docs/detailed-explanation.md).
@@ -30,6 +30,24 @@ While changesets can be an entirely manual process, we recommend integrating it 
 To check that PRs contain a changeset, we recommend using [the changeset bot](https://github.com/apps/changeset-bot), or if you want to fail builds on a changesets failure, run `yarn changeset status` in CI.
 
 To make releasing easier, you can use [this changesets github action](https://github.com/changesets/action) to automate creating versioning pull requests, and optionally publishing packages.
+
+## Documentation
+
+- [Intro to using changesets](intro-to-using-changesets.md)
+- [Detailed explanation](detailed-explanation.md)
+- [Common questions](common-questions.md)
+- [Adding a changeset](adding-a-changeset.md)
+- [Automating changesets](automating-changesets.md)
+- [Checking for changesets](checking-for-changesets.md)
+- [Command line options](command-line-options.md)
+- [Config file options](config-file-options.md)
+- [Decisions](decisions.md)
+- [Dictionary](dictionary.md)
+- [Linked packages](linked-packages.md)
+- [Modifying changelog format](modifying-changelog-format.md)
+- [Prereleases](prereleases.md)
+- [Problems publishing in monorepos](problems-publishing-in-monorepos.md)
+- [Snapshot releases](snapshot-releases.md)
 
 ## Cool Projects already using Changesets for versioning and changelogs
 
