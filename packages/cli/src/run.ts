@@ -80,7 +80,8 @@ export async function run(
       empty,
       ignore,
       snapshot,
-      tag
+      tag,
+      globalChangelog
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -160,7 +161,7 @@ export async function run(
           throw new ExitError(1);
         }
 
-        await version(cwd, { snapshot }, config);
+        await version(cwd, { snapshot, globalChangelog }, config);
         return;
       }
       case "publish": {
