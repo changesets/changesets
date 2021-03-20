@@ -140,7 +140,10 @@ export default async function applyReleasePlan(
     }
   }
 
-  if (releasePlan.preState?.mode === "exit") {
+  if (
+    releasePlan.preState === undefined ||
+    releasePlan.preState.mode === "exit"
+  ) {
     let changesetFolder = path.resolve(cwd, ".changeset");
     await Promise.all(
       changesets.map(async changeset => {

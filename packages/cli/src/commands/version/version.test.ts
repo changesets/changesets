@@ -279,8 +279,8 @@ describe("running version in a simple project", () => {
       await writeChangesets([simpleChangeset, simpleChangeset2], cwd);
       await versionCommand(cwd, defaultOptions, modifiedDefaultConfig);
 
-      const dirs = await fs.readdir(path.resolve(cwd, ".changeset"));
-      expect(dirs.length).toBe(2);
+      const files = await fs.readdir(path.resolve(cwd, ".changeset"));
+      expect(files.length).toBe(2);
     });
   });
 });
