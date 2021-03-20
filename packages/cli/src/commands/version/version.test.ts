@@ -47,7 +47,9 @@ git.add.mockImplementation(() => Promise.resolve(true));
 // @ts-ignore
 git.commit.mockImplementation(() => Promise.resolve(true));
 // @ts-ignore
-git.getCommitsThatAddFiles.mockImplementation(() => Promise.resolve([]));
+git.getCommitsThatAddFiles.mockImplementation(changesetIds =>
+  Promise.resolve(changesetIds.map(() => "g1th4sh"))
+);
 // @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
 
@@ -493,7 +495,7 @@ describe("updateInternalDependents", () => {
       ## 1.0.1
       ### Patch Changes
 
-      - Updated dependencies [undefined]
+      - Updated dependencies [g1th4sh]
         - pkg-b@1.0.1
       "
     `);
@@ -503,7 +505,7 @@ describe("updateInternalDependents", () => {
       ## 1.0.1
       ### Patch Changes
 
-      - This is not a summary
+      - g1th4sh: This is not a summary
       "
     `);
   });
@@ -641,68 +643,68 @@ describe("pre", () => {
         "utf8"
       )
     ).toMatchInlineSnapshot(`
-                                    "# pkg-a
+      "# pkg-a
 
-                                    ## 1.1.0
+      ## 1.1.0
 
-                                    ### Minor Changes
+      ### Minor Changes
 
-                                    - a very useful summary for the third change
+      - g1th4sh: a very useful summary for the third change
 
-                                    ### Patch Changes
+      ### Patch Changes
 
-                                    - a very useful summary
-                                    - a very useful summary for the second change
-                                    - Updated dependencies [undefined]
-                                      - pkg-b@1.0.1
+      - g1th4sh: a very useful summary
+      - g1th4sh: a very useful summary for the second change
+      - Updated dependencies [g1th4sh]
+        - pkg-b@1.0.1
 
-                                    ## 1.1.0-next.3
+      ## 1.1.0-next.3
 
-                                    ### Minor Changes
+      ### Minor Changes
 
-                                    - a very useful summary for the third change
+      - g1th4sh: a very useful summary for the third change
 
-                                    ## 1.0.1-next.2
+      ## 1.0.1-next.2
 
-                                    ### Patch Changes
+      ### Patch Changes
 
-                                    - a very useful summary for the second change
+      - g1th4sh: a very useful summary for the second change
 
-                                    ## 1.0.1-next.1
+      ## 1.0.1-next.1
 
-                                    ### Patch Changes
+      ### Patch Changes
 
-                                    - a very useful summary
+      - g1th4sh: a very useful summary
 
-                                    ## 1.0.1-next.0
+      ## 1.0.1-next.0
 
-                                    ### Patch Changes
+      ### Patch Changes
 
-                                    - Updated dependencies [undefined]
-                                      - pkg-b@1.0.1-next.0
-                                    "
-                        `);
+      - Updated dependencies [g1th4sh]
+        - pkg-b@1.0.1-next.0
+      "
+    `);
     expect(
       await fs.readFile(
         path.join(packages.packages[1].dir, "CHANGELOG.md"),
         "utf8"
       )
     ).toMatchInlineSnapshot(`
-                                                            "# pkg-b
+      "# pkg-b
 
-                                                            ## 1.0.1
+      ## 1.0.1
 
-                                                            ### Patch Changes
+      ### Patch Changes
 
-                                                            - a very useful summary for the first change
+      - g1th4sh: a very useful summary for the first change
 
-                                                            ## 1.0.1-next.0
+      ## 1.0.1-next.0
 
-                                                            ### Patch Changes
+      ### Patch Changes
 
-                                                            - a very useful summary for the first change
-                                                            "
-                                        `);
+      - g1th4sh: a very useful summary for the first change
+      "
+    `);
   });
   it("should work with adding a package while in pre mode", async () => {
     let cwd = f.copy("simple-project");
