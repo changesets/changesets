@@ -42,6 +42,7 @@ test("read reads the config", async () => {
     access: "restricted",
     baseBranch: "master",
     updateInternalDependencies: "patch",
+    updateInternalDependents: false,
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
