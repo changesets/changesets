@@ -73,7 +73,7 @@ function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
   config: Config,
-  preState: PreState | undefined,
+  preState?: PreState,
   snapshot?: string | boolean
 ): ReleasePlan {
   let packagesByName = new Map(
@@ -113,10 +113,7 @@ function assembleReleasePlan(
       packagesByName,
       dependencyGraph,
       preInfo,
-      ignoredPackages: config.ignore,
-      onlyUpdatePeerDependentsWhenOutOfRange:
-        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange
+      config
     });
 
     // The map passed in to determineDependents will be mutated

@@ -1,10 +1,13 @@
 import { NewChangeset, Release, VersionType } from "@changesets/types";
 import { Package, Packages } from "@manypkg/get-packages";
 
-function getPackage(
-  name: string = "pkg-a",
-  version: string = "1.0.0"
-): Package {
+function getPackage({
+  name,
+  version
+}: {
+  name: string;
+  version: string;
+}): Package {
   return {
     packageJson: {
       name,
@@ -31,10 +34,13 @@ function getChangeset(
   };
 }
 
-function getRelease(data: { name?: string; type?: VersionType } = {}): Release {
-  let name = data.name || "pkg-a";
-  let type = data.type || "patch";
-
+function getRelease({
+  name,
+  type
+}: {
+  name: string;
+  type: VersionType;
+}): Release {
   return { name, type };
 }
 
@@ -47,10 +53,12 @@ let getSimpleSetup = () => ({
       },
       dir: "/"
     },
-    packages: [getPackage()],
+    packages: [getPackage({ name: "pkg-a", version: "1.0.0" })],
     tool: "yarn" as const
   },
-  changesets: [getChangeset({ releases: [getRelease()] })]
+  changesets: [
+    getChangeset({ releases: [getRelease({ name: "pkg-a", type: "patch" })] })
+  ]
 });
 
 class FakeFullState {
@@ -79,33 +87,33 @@ class FakeFullState {
     this.changesets.push(changeset);
   }
 
-  updateDependency(pkgA: string, pkgB: string, version: string) {
+  updateDependency(pkgA: string, pkgB: string, versionRange: string) {
     let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
-    if (!pkg) throw new Error("no pkg");
+    if (!pkg) throw new Error(`No "${pkgA}" package`);
     if (!pkg.packageJson.dependencies) {
       pkg.packageJson.dependencies = {};
     }
-    pkg.packageJson.dependencies[pkgB] = version;
+    pkg.packageJson.dependencies[pkgB] = versionRange;
   }
-  updateDevDependency(pkgA: string, pkgB: string, version: string) {
+  updateDevDependency(pkgA: string, pkgB: string, versionRange: string) {
     let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
-    if (!pkg) throw new Error("no pkg");
+    if (!pkg) throw new Error(`No "${pkgA}" package`);
     if (!pkg.packageJson.devDependencies) {
       pkg.packageJson.devDependencies = {};
     }
-    pkg.packageJson.devDependencies[pkgB] = version;
+    pkg.packageJson.devDependencies[pkgB] = versionRange;
   }
-  updatePeerDep(pkgA: string, pkgB: string, version: string) {
+  updatePeerDependency(pkgA: string, pkgB: string, versionRange: string) {
     let pkg = this.packages.packages.find(a => a.packageJson.name === pkgA);
-    if (!pkg) throw new Error("no pkg");
+    if (!pkg) throw new Error(`No "${pkgA}" package`);
     if (!pkg.packageJson.peerDependencies) {
       pkg.packageJson.peerDependencies = {};
     }
-    pkg.packageJson.peerDependencies[pkgB] = version;
+    pkg.packageJson.peerDependencies[pkgB] = versionRange;
   }
 
   addPackage(name: string, version: string) {
-    let pkg = getPackage(name, version);
+    let pkg = getPackage({ name, version });
     if (
       this.packages.packages.find(
         c => c.packageJson.name === pkg.packageJson.name

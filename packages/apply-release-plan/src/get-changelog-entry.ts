@@ -22,7 +22,7 @@ async function generateChangesForVersionTypeMarkdown(
 }
 
 // release is the package and version we are releasing
-export default async function generateMarkdown(
+export default async function getChangelogEntry(
   release: ModCompWithPackage,
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
@@ -38,7 +38,7 @@ export default async function generateMarkdown(
 ) {
   if (release.type === "none") return null;
 
-  const releaseObj: ChangelogLines = {
+  const changelogLines: ChangelogLines = {
     major: [],
     minor: [],
     patch: []
@@ -51,19 +51,15 @@ export default async function generateMarkdown(
   changesets.forEach(cs => {
     const rls = cs.releases.find(r => r.name === release.name);
     if (rls && rls.type !== "none") {
-      releaseObj[rls.type].push(
+      changelogLines[rls.type].push(
         changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts)
       );
     }
   });
-
   let dependentReleases = releases.filter(rel => {
-    const dependencyVersionRange = release.packageJson.dependencies
-      ? release.packageJson.dependencies[rel.name]
-      : null;
-    const peerDependencyVersionRange = release.packageJson.peerDependencies
-      ? release.packageJson.peerDependencies[rel.name]
-      : null;
+    const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
+    const peerDependencyVersionRange =
+      release.packageJson.peerDependencies?.[rel.name];
 
     const versionRange = dependencyVersionRange || peerDependencyVersionRange;
     return (
@@ -94,7 +90,7 @@ export default async function generateMarkdown(
     relevantChangesetIds.has(cs.id)
   );
 
-  releaseObj.patch.push(
+  changelogLines.patch.push(
     changelogFuncs.getDependencyReleaseLine(
       relevantChangesets,
       dependentReleases,
@@ -104,9 +100,9 @@ export default async function generateMarkdown(
 
   return [
     `## ${release.newVersion}`,
-    await generateChangesForVersionTypeMarkdown(releaseObj, "major"),
-    await generateChangesForVersionTypeMarkdown(releaseObj, "minor"),
-    await generateChangesForVersionTypeMarkdown(releaseObj, "patch")
+    await generateChangesForVersionTypeMarkdown(changelogLines, "major"),
+    await generateChangesForVersionTypeMarkdown(changelogLines, "minor"),
+    await generateChangesForVersionTypeMarkdown(changelogLines, "patch")
   ]
     .filter(line => line)
     .join("\n");

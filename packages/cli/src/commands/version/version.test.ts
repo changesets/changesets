@@ -78,15 +78,24 @@ const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
   );
 };
 
-const getPkgJSON = (pkgName: string, calls: any) => {
+const getFile = (pkgName: string, fileName: string, calls: any) => {
   let castCalls: [string, string][] = calls;
   const foundCall = castCalls.find(call =>
-    call[0].endsWith(`${pkgName}${path.sep}package.json`)
+    call[0].endsWith(`${pkgName}${path.sep}${fileName}`)
   );
   if (!foundCall)
-    throw new Error(`could not find writing of package.json: ${pkgName}`);
+    throw new Error(`could not find writing of ${fileName} for: ${pkgName}`);
 
-  return JSON.parse(foundCall[1]);
+  // return written content
+  return foundCall[1];
+};
+
+const getPkgJSON = (pkgName: string, calls: any) => {
+  return JSON.parse(getFile(pkgName, "package.json", calls));
+};
+
+const getChangelog = (pkgName: string, calls: any) => {
+  return getFile(pkgName, "CHANGELOG.md", calls);
 };
 
 const writeEmptyChangeset = (cwd: string) => writeChangesets([], cwd);
@@ -276,55 +285,6 @@ describe("running version in a simple project", () => {
   });
 });
 
-describe("running version in a simple project with caret dependencies", () => {
-  // https://github.com/atlassian/changesets/pull/382#discussion_r434434182
-  it("should bump patch version for packages that had prereleases, but dependencies are still in range", async () => {
-    let cwd = f.copy("simple-project-caret-dep");
-    await pre(cwd, { command: "enter", tag: "next" });
-    await writeChangeset(
-      {
-        releases: [{ name: "pkg-b", type: "patch" }],
-        summary: "a very useful summary for the first change"
-      },
-      cwd
-    );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
-
-    let packages = (await getPackages(cwd))!;
-    expect(packages.packages.map(x => x.packageJson)).toEqual([
-      {
-        dependencies: {
-          "pkg-b": "^1.0.1-next.0"
-        },
-        name: "pkg-a",
-        version: "1.0.1-next.0"
-      },
-      {
-        name: "pkg-b",
-        version: "1.0.1-next.0"
-      }
-    ]);
-
-    await pre(cwd, { command: "exit" });
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
-
-    packages = (await getPackages(cwd))!;
-    expect(packages.packages.map(x => x.packageJson)).toEqual([
-      {
-        dependencies: {
-          "pkg-b": "^1.0.1"
-        },
-        name: "pkg-a",
-        version: "1.0.1"
-      },
-      {
-        name: "pkg-b",
-        version: "1.0.1"
-      }
-    ]);
-  });
-});
-
 describe("workspace range", () => {
   it("should update dependency range correctly", async () => {
     const cwd = f.copy("simple-workspace-range-dep");
@@ -499,6 +459,53 @@ describe("snapshot release", () => {
         })
       );
     });
+  });
+});
+
+describe("updateInternalDependents", () => {
+  it("should bump a direct dependent when a dependency package gets bumped", async () => {
+    const cwd = await f.copy("simple-project-caret-dep");
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(simpleChangeset3, cwd);
+    await versionCommand(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      updateInternalDependents: true
+    });
+
+    expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-a",
+        version: "1.0.1",
+        dependencies: {
+          "pkg-b": "^1.0.1"
+        }
+      })
+    );
+    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-b",
+        version: "1.0.1"
+      })
+    );
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.0.1
+      ### Patch Changes
+
+      - Updated dependencies [undefined]
+        - pkg-b@1.0.1
+      "
+    `);
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.0.1
+      ### Patch Changes
+
+      - This is not a summary
+      "
+    `);
   });
 });
 
@@ -803,6 +810,52 @@ describe("pre", () => {
       {
         name: "pkg-b",
         version: "1.0.0"
+      }
+    ]);
+  });
+  // https://github.com/atlassian/changesets/pull/382#discussion_r434434182
+  it("should bump patch version for packages that had prereleases, but caret dependencies are still in range", async () => {
+    let cwd = f.copy("simple-project-caret-dep");
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        dependencies: {
+          "pkg-b": "^1.0.1-next.0"
+        },
+        name: "pkg-a",
+        version: "1.0.1-next.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1-next.0"
+      }
+    ]);
+
+    await pre(cwd, { command: "exit" });
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        dependencies: {
+          "pkg-b": "^1.0.1"
+        },
+        name: "pkg-a",
+        version: "1.0.1"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
       }
     ]);
   });

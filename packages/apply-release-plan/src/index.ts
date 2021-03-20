@@ -75,7 +75,7 @@ export default async function applyReleasePlan(
 
   const versionCommit = createVersionCommit(releasePlan, config.commit);
 
-  let releaseWithPackages = releases.map(release => {
+  let releasesWithPackage = releases.map(release => {
     let pkg = packagesByName.get(release.name);
     if (!pkg)
       throw new Error(
@@ -89,7 +89,7 @@ export default async function applyReleasePlan(
 
   // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
   let releaseWithChangelogs = await getNewChangelogEntry(
-    releaseWithPackages,
+    releasesWithPackage,
     changesets,
     config,
     cwd
@@ -140,10 +140,7 @@ export default async function applyReleasePlan(
     }
   }
 
-  if (
-    releasePlan.preState === undefined ||
-    releasePlan.preState.mode === "exit"
-  ) {
+  if (releasePlan.preState?.mode === "exit") {
     let changesetFolder = path.resolve(cwd, ".changeset");
     await Promise.all(
       changesets.map(async changeset => {

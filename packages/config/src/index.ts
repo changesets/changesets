@@ -16,6 +16,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
+  updateInternalDependents: false,
   ignore: [] as ReadonlyArray<string>
 } as const;
 
@@ -193,6 +194,18 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but can only be 'patch' or 'minor'`
     );
   }
+  if (
+    json.updateInternalDependents !== undefined &&
+    typeof json.updateInternalDependents !== "boolean"
+  ) {
+    messages.push(
+      `The \`updateInternalDependents\` option is set as ${JSON.stringify(
+        json.updateInternalDependents,
+        null,
+        2
+      )} but can only be a boolean`
+    );
+  }
   if (json.ignore) {
     if (
       !(
@@ -299,6 +312,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       json.updateInternalDependencies === undefined
         ? defaultWrittenConfig.updateInternalDependencies
         : json.updateInternalDependencies,
+
+    updateInternalDependents:
+      json.updateInternalDependents ??
+      defaultWrittenConfig.updateInternalDependents,
 
     ignore:
       json.ignore === undefined
