@@ -58,6 +58,7 @@ let defaults = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
+  updateInternalDependents: false,
   ignore: [],
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -222,6 +223,15 @@ let correctCases: Record<string, CorrectCase> = {
     output: {
       ...defaults,
       ignore: ["pkg-a", "@pkg/a", "@pkg/b"]
+    }
+  },
+  updateInternalDependents: {
+    input: {
+      updateInternalDependents: true
+    },
+    output: {
+      ...defaults,
+      updateInternalDependents: true
     }
   }
 };
