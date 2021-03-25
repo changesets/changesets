@@ -7,7 +7,7 @@ and changelog entries for your packages, with a focus on versioning within a mon
 single-package repositories too).
 
 This package is intended as a successor to `@atlaskit/build-releases` with a more general focus. It works in
-[bolt](https://www.npmjs.com/package/bolt) multi-package repositories, [yarn workspaces] multi-package repositories, and
+[bolt](https://www.npmjs.com/package/bolt) multi-package repositories, [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) multi-package repositories, and
 in single-package repositories.
 
 ## Getting Started
@@ -94,6 +94,8 @@ changeset init
 
 This command sets up the `.changeset` folder. It generates a readme and a config file. The config file includes the default options, as well as comments on what these options represent. You should run this command once, when you are setting up `changesets`.
 
+To publish public packages to NPM, you'll need to edit `.changeset/config.json` and change `"access": "restricted",` to `"access": "public",`. Read more about [access in config file options](https://github.com/atlassian/changesets/blob/master/docs/config-file-options.md#access-restricted--public). The `publishConfig` of each `package.json` is also respected and takes a priority over monorepo-wide setting in `.changeset/config.json`.
+
 ### add
 
 ```
@@ -153,7 +155,7 @@ This command will read then delete changesets on disk, ensuring that they are on
 changeset publish [--otp={token}]
 ```
 
-Publishes to NPM repo, and creates git tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is acurate.
+Publishes to NPM repo, and creates git tags. Because this command assumes that last commit is the release commit you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if release commit is accurate.
 
 - `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the `--otp` option.
 

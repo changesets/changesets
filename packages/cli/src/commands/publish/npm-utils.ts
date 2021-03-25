@@ -10,6 +10,7 @@ import isCI from "../../utils/isCI";
 import { TwoFactorState } from "../../utils/types";
 
 const npmRequestLimit = pLimit(40);
+const npmPublishLimit = pLimit(10);
 
 function jsonParse(input: string) {
   try {
@@ -207,7 +208,9 @@ export function publish(
   opts: { cwd: string; access?: string; tag: string },
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
-  return npmRequestLimit(() => {
-    return internalPublish(pkgName, opts, twoFactorState);
-  });
+  // If there are many packages to be published, it's better to limit the
+  // concurrency to avoid unwanted errors, for example from npm.
+  return npmRequestLimit(() =>
+    npmPublishLimit(() => internalPublish(pkgName, opts, twoFactorState))
+  );
 }

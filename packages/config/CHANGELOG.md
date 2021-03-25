@@ -1,5 +1,17 @@
 # @changesets/config
 
+## 1.5.0
+
+### Minor Changes
+
+- [`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101) [#507](https://github.com/atlassian/changesets/pull/507) Thanks [@zkochan](https://github.com/zkochan)! - New setting added: bumpVersionsWithWorkspaceProtocolOnly. When it is set to `true`, versions are bumped in `dependencies`, only if those versions are prefixed by the workspace protocol. For instance, `"foo": "workspace:^1.0.0"`.
+
+### Patch Changes
+
+- Updated dependencies [[`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101)]:
+  - @changesets/get-dependents-graph@1.2.0
+  - @changesets/types@3.3.0
+
 ## 1.4.0
 
 ### Minor Changes

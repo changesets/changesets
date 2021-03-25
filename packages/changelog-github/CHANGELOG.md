@@ -1,5 +1,25 @@
 # @changesets/changelog-github
 
+## 0.3.0
+
+### Minor Changes
+
+- [#535](https://github.com/atlassian/changesets/pull/535) [`91d1ef2`](https://github.com/atlassian/changesets/commit/91d1ef2ef703be6b727650ef67a932757b97d1ef) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Allow replacing the PR/commit/author shown in the changlog line by writing `pr: some-pr-number` and similarly for `commit` and `author` in the changlog summary(not the frontmatter).
+
+### Patch Changes
+
+- Updated dependencies [[`91d1ef2`](https://github.com/atlassian/changesets/commit/91d1ef2ef703be6b727650ef67a932757b97d1ef)]:
+  - @changesets/get-github-info@0.5.0
+
+## 0.2.8
+
+### Patch Changes
+
+- [`3436c53`](https://github.com/atlassian/changesets/commit/3436c53acf444c2ce19f8548920b7b73461a9c76) [#510](https://github.com/atlassian/changesets/pull/510) Thanks [@tuanddd](https://github.com/tuanddd)! - Added validation rule for invalid `repo` arguments.
+
+- Updated dependencies [[`3436c53`](https://github.com/atlassian/changesets/commit/3436c53acf444c2ce19f8548920b7b73461a9c76)]:
+  - @changesets/get-github-info@0.4.5
+
 ## 0.2.7
 
 ### Patch Changes

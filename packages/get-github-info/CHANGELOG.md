@@ -1,5 +1,17 @@
 # @changesets/get-github-info
 
+## 0.5.0
+
+### Minor Changes
+
+- [#535](https://github.com/atlassian/changesets/pull/535) [`91d1ef2`](https://github.com/atlassian/changesets/commit/91d1ef2ef703be6b727650ef67a932757b97d1ef) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Added `getInfoFromPullRequest`
+
+## 0.4.5
+
+### Patch Changes
+
+- [`3436c53`](https://github.com/atlassian/changesets/commit/3436c53acf444c2ce19f8548920b7b73461a9c76) [#510](https://github.com/atlassian/changesets/pull/510) Thanks [@tuanddd](https://github.com/tuanddd)! - Added validation rule for invalid `repo` arguments.
+
 ## 0.4.4
 
 ### Patch Changes

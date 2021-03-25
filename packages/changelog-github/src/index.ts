@@ -1,7 +1,7 @@
 import { ChangelogFunctions } from "@changesets/types";
 // @ts-ignore
 import { config } from "dotenv";
-import { getInfo } from "@changesets/get-github-info";
+import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 
 config();
 
@@ -46,23 +46,73 @@ const changelogFunctions: ChangelogFunctions = {
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
       );
     }
-    const [firstLine, ...futureLines] = changeset.summary
+
+    let prFromSummary: number | undefined;
+    let commitFromSummary: string | undefined;
+    let userFromSummary: string | undefined;
+
+    const replacedChangelog = changeset.summary
+      .replace(/^\s*(?:pr|pull|pull\s+request):\s*#?(\d+)/im, (_, pr) => {
+        let num = Number(pr);
+        if (!isNaN(num)) prFromSummary = num;
+        return "";
+      })
+      .replace(/^\s*commit:\s*([^\s]+)/im, (_, commit) => {
+        commitFromSummary = commit;
+        return "";
+      })
+      .replace(/^\s*(?:author|user):\s*@?([^\s]+)/im, (_, user) => {
+        userFromSummary = user;
+        return "";
+      })
+      .trim();
+
+    const [firstLine, ...futureLines] = replacedChangelog
       .split("\n")
       .map(l => l.trimRight());
 
-    if (changeset.commit) {
-      let { links } = await getInfo({
-        repo: options.repo,
-        commit: changeset.commit
-      });
-      return `\n\n- ${links.commit}${
-        links.pull === null ? "" : ` ${links.pull}`
-      }${
-        links.user === null ? "" : ` Thanks ${links.user}!`
-      } - ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
-    } else {
-      return `\n\n- ${firstLine}\n${futureLines.map(l => `  ${l}`).join("\n")}`;
-    }
+    const links = await (async () => {
+      if (prFromSummary !== undefined) {
+        let { links } = await getInfoFromPullRequest({
+          repo: options.repo,
+          pull: prFromSummary
+        });
+        if (commitFromSummary) {
+          links = {
+            ...links,
+            commit: `[\`${commitFromSummary}\`](https://github.com/${options.repo}/commit/${commitFromSummary})`
+          };
+        }
+        return links;
+      }
+      const commitToFetchFrom = commitFromSummary || changeset.commit;
+      if (commitToFetchFrom) {
+        let { links } = await getInfo({
+          repo: options.repo,
+          commit: commitToFetchFrom
+        });
+        return links;
+      }
+      return {
+        commit: null,
+        pull: null,
+        user: null
+      };
+    })();
+
+    const user = userFromSummary
+      ? `[@${userFromSummary}](https://github.com/${userFromSummary})`
+      : links.user;
+
+    const prefix = [
+      links.pull === null ? "" : ` ${links.pull}`,
+      links.commit === null ? "" : ` ${links.commit}`,
+      user === null ? "" : ` Thanks ${user}!`
+    ].join("");
+
+    return `\n\n-${prefix ? `${prefix} -` : ""} ${firstLine}\n${futureLines
+      .map(l => `  ${l}`)
+      .join("\n")}`;
   }
 };
 

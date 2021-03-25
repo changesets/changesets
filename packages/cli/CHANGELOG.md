@@ -1,5 +1,45 @@
 # @changesets/cli
 
+## 2.14.1
+
+### Patch Changes
+
+- [`9224385`](https://github.com/atlassian/changesets/commit/92243856c1ccede60202b456e3eb1a6458a47ac7) [#522](https://github.com/atlassian/changesets/pull/522) Thanks [@emmenko](https://github.com/emmenko)! - Limit concurrency of publishing packages.
+
+## 2.14.0
+
+### Minor Changes
+
+- [`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101) [#507](https://github.com/atlassian/changesets/pull/507) Thanks [@zkochan](https://github.com/zkochan)! - New setting added: bumpVersionsWithWorkspaceProtocolOnly. When it is set to `true`, versions are bumped in `dependencies`, only if those versions are prefixed by the workspace protocol. For instance, `"foo": "workspace:^1.0.0"`.
+
+### Patch Changes
+
+- Updated dependencies [[`12f9a43`](https://github.com/atlassian/changesets/commit/12f9a433a6c3ac38f9405fcd77c9108c423d7101)]:
+  - @changesets/apply-release-plan@4.2.0
+  - @changesets/assemble-release-plan@4.1.0
+  - @changesets/config@1.5.0
+  - @changesets/get-dependents-graph@1.2.0
+  - @changesets/types@3.3.0
+
+## 2.13.1
+
+### Patch Changes
+
+- [`0d5b9e1`](https://github.com/atlassian/changesets/commit/0d5b9e1f709f568ff9c2b28d4c12674b6b8c119d) [#518](https://github.com/atlassian/changesets/pull/518) Thanks [@zkochan](https://github.com/zkochan)! - From now on, to fix issues with some auto-save configurations in IDEs, the editor won't be re-opened if one saves an empty summary. In such a scenario the CLI will prompt again for the summary to be written in the terminal.
+
+## 2.13.0
+
+### Minor Changes
+
+- [`412b4b9`](https://github.com/atlassian/changesets/commit/412b4b97e53b6326e8e733eb7d4e1f5738e6fed0) [#504](https://github.com/atlassian/changesets/pull/504) Thanks [@vitorbal](https://github.com/vitorbal)! - `changeset status` command no longer errors when no packages have been changed.
+
+* [`24d7bc9`](https://github.com/atlassian/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac) [#495](https://github.com/atlassian/changesets/pull/495) Thanks [@RoystonS](https://github.com/RoystonS)! - Automatically deepen shallow clones in order to determine the correct commit at which changesets were added. This helps Git-based changelog generators to always link to the correct commit. From now on it's not required to configure `fetch-depth: 0` for your `actions/checkout` when using [Changesets GitHub action](https://github.com/changesets/action).
+
+### Patch Changes
+
+- Updated dependencies [[`24d7bc9`](https://github.com/atlassian/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac), [`24d7bc9`](https://github.com/atlassian/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac)]:
+  - @changesets/git@1.1.0
+
 ## 2.12.0
 
 ### Minor Changes

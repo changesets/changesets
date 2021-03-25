@@ -31,7 +31,7 @@ packages/
 ```
 
 ```
-yarn changeset prerelease next
+yarn changeset pre enter next
 ```
 
 This command changes Changesets into prerelease mode which creates a `pre.json` file in the `.changeset` directory which stores information about the state the prerelease is in. For the specific data stored in the `pre.json` file, see the type definition of `PreState` in [`@changesets/types`](https://github.com/atlassian/changesets/tree/master/packages/types).
