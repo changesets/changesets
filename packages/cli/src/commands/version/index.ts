@@ -23,6 +23,7 @@ export default async function version(
   cwd: string,
   options: {
     snapshot?: string | boolean;
+    releasePlan?: string | boolean;
   },
   config: Config
 ) {
@@ -70,6 +71,10 @@ export default async function version(
     preState,
     options.snapshot
   );
+
+  if (options.releasePlan) {
+    return releasePlan;
+  }
 
   await applyReleasePlan(
     releasePlan,

@@ -207,6 +207,18 @@ describe("running version in a simple project", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
+  it("should output a release plan", async () => {
+    await writeChangesets([simpleChangeset2], cwd);
+
+    const releasePlan = await versionCommand(
+      cwd,
+      { ...defaultOptions, releasePlan: true },
+      modifiedDefaultConfig
+    );
+
+    expect(releasePlan?.releases.length).toEqual(2);
+  });
+
   it("should commit the result if commit config is set", async () => {
     await writeChangesets([simpleChangeset2], cwd);
     const spy = jest.spyOn(git, "commit");
