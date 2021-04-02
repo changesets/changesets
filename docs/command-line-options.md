@@ -3,7 +3,7 @@
 The command line for changesets is the main way of interracting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-changesets.md)
 
 - init
-- add [--empty]
+- add [--empty][--open]
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag]
 - status [--since-master --verbose --output=JSON_FILE.json]
@@ -48,7 +48,7 @@ A description of the major changes.
 If you want to modify this file after it's generated, that's completely fine or if you want to write changeset files yourself, that's also fine.
 ```
 
---empty - allows you to create an empty changeset if no packages are being bumped, usually only required if you have CI that blocks merges without a changeset.
+- `--empty` - allows you to create an empty changeset if no packages are being bumped, usually only required if you have CI that blocks merges without a changeset.
 
 ```
 changeset --empty
@@ -62,6 +62,8 @@ A changeset created with the empty flag would look like this:
 ```
 
 If you set the commit option in the config, the command will add the updated changeset files and then commit them.
+
+- `--open` - opens the created changeset in an external editor
 
 ## version
 

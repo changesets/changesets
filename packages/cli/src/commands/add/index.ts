@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import path from "path";
+import { spawn } from "child_process";
 
 import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
@@ -10,22 +11,24 @@ import writeChangeset from "@changesets/write";
 
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
+import { ExternalEditor } from "external-editor";
 
 export default async function add(
   cwd: string,
-  { empty }: { empty?: boolean },
+  { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
 ) {
   const packages = await getPackages(cwd);
   const changesetBase = path.resolve(cwd, ".changeset");
 
-  let newChangeset, confirmChangeset;
+  let newChangeset;
+  let changesetConfirmed = false;
   if (empty) {
     newChangeset = {
       releases: [],
       summary: ``
     };
-    confirmChangeset = true;
+    changesetConfirmed = true;
   } else {
     const changedPackages = await git.getChangedPackagesSinceRef({
       cwd,
@@ -37,10 +40,12 @@ export default async function add(
     newChangeset = await createChangeset(changePackagesName, packages.packages);
     printConfirmationMessage(newChangeset, packages.packages.length > 1);
 
-    confirmChangeset = await cli.askConfirm("Is this your desired changeset?");
+    changesetConfirmed = await cli.askConfirm(
+      "Is this your desired changeset?"
+    );
   }
 
-  if (confirmChangeset) {
+  if (changesetConfirmed) {
     const changesetID = await writeChangeset(newChangeset, cwd);
     if (config.commit) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
@@ -72,6 +77,21 @@ export default async function add(
         )
       );
     }
-    info(chalk.blue(path.resolve(changesetBase, `${changesetID}.md`)));
+    const changesetPath = path.resolve(changesetBase, `${changesetID}.md`);
+    info(chalk.blue(changesetPath));
+
+    if (open) {
+      // this is really a hack to reuse the logic embedded in `external-editor` related to determining the editor
+      const externalEditor = new ExternalEditor();
+      externalEditor.cleanup();
+      spawn(
+        externalEditor.editor.bin,
+        externalEditor.editor.args.concat([changesetPath]),
+        {
+          detached: true,
+          stdio: "inherit"
+        }
+      );
+    }
   }
 }
