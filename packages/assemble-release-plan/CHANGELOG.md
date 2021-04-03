@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 4.1.1
+
+### Patch Changes
+
+- [#441](https://github.com/atlassian/changesets/pull/441) [`8b9ac07`](https://github.com/atlassian/changesets/commit/8b9ac076a87eaf9556ec5ede0222a75182095662) Thanks [@joshlartz](https://github.com/joshlartz)! - Fixed an issue with including dependents in the release plan for dependencies using `workspace:` protocol that had a `none` changeset for them.
+
 ## 4.1.0
 
 ### Minor Changes

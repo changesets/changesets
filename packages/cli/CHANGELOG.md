@@ -1,5 +1,16 @@
 # @changesets/cli
 
+## 2.15.0
+
+### Minor Changes
+
+- [#559](https://github.com/atlassian/changesets/pull/559) [`bb7106d`](https://github.com/atlassian/changesets/commit/bb7106de901b579bff50b317f1ee81919257ee30) Thanks [@Andarist](https://github.com/Andarist)! - Added new `--open` flag to the `add` command. It opens the created changeset with an external editor.
+
+### Patch Changes
+
+- Updated dependencies [[`8b9ac07`](https://github.com/atlassian/changesets/commit/8b9ac076a87eaf9556ec5ede0222a75182095662)]:
+  - @changesets/assemble-release-plan@4.1.1
+
 ## 2.14.1
 
 ### Patch Changes
