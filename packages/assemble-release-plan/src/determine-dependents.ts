@@ -89,7 +89,8 @@ export default function getDependents({
                   releases.get(dependent)!.type === "none") &&
                 !semver.satisfies(
                   incrementVersion(nextRelease, preInfo),
-                  versionRange
+                  // to deal with a * versionRange that comes from workspace:* dependencies as the wildcard will match anything
+                  versionRange === "*" ? nextRelease.oldVersion : versionRange
                 )
               ) {
                 switch (depType) {
@@ -183,7 +184,7 @@ function getDependencyVersionRanges(
     if (deps[dependencyName]) {
       dependencyVersionRanges.push({
         depType: type,
-        versionRange: deps[dependencyName]
+        versionRange: deps[dependencyName].replace("workspace:", "")
       });
     }
   }

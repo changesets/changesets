@@ -10,6 +10,7 @@ import fs from "fs-extra";
 import path from "path";
 import outdent from "outdent";
 import spawn from "spawndamnit";
+import { defaultConfig } from "@changesets/config";
 
 import applyReleasePlan from "./";
 import { getPackages } from "@manypkg/get-packages";
@@ -494,6 +495,88 @@ describe("apply release plan", () => {
         devDependencies: {
           "self-referenced": "file:"
         }
+      });
+    });
+    it("should not update dependent versions when a package has a changeset type of none", async () => {
+      let { changedFiles } = await testSetup(
+        "simple-project-caret-dep",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [{ name: "pkg-b", type: "none" }]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-b",
+              type: "none",
+              oldVersion: "1.0.0",
+              newVersion: "1.0.0",
+              changesets: ["quick-lions-devour"]
+            }
+          ],
+          preState: undefined
+        },
+        { ...defaultConfig, changelog: false }
+      );
+      let pkgPathA = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
+      let pkgPathB = changedFiles.find(b =>
+        b.endsWith(`pkg-b${path.sep}package.json`)
+      );
+
+      expect(pkgPathA).toBeUndefined();
+      if (!pkgPathB) throw new Error(`could not find an updated package json`);
+
+      let pkgJSONB = await fs.readJSON(pkgPathB);
+
+      expect(pkgJSONB).toMatchObject({
+        name: "pkg-b",
+        version: "1.0.0"
+      });
+    });
+    it("should not update workspace dependent versions when a package has a changeset type of none", async () => {
+      let { changedFiles } = await testSetup(
+        "simple-workspace-range-dep",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [{ name: "pkg-b", type: "none" }]
+            }
+          ],
+          releases: [
+            {
+              name: "pkg-b",
+              type: "none",
+              oldVersion: "1.0.0",
+              newVersion: "1.0.0",
+              changesets: ["quick-lions-devour"]
+            }
+          ],
+          preState: undefined
+        },
+        { ...defaultConfig, changelog: false }
+      );
+      let pkgPathA = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
+      let pkgPathB = changedFiles.find(b =>
+        b.endsWith(`pkg-b${path.sep}package.json`)
+      );
+
+      expect(pkgPathA).toBeUndefined();
+      if (!pkgPathB) throw new Error(`could not find an updated package json`);
+
+      let pkgJSONB = await fs.readJSON(pkgPathB);
+
+      expect(pkgJSONB).toMatchObject({
+        name: "pkg-b",
+        version: "1.0.0"
       });
     });
 
