@@ -13,6 +13,7 @@ export type CliOptions = {
   ignore?: string | string[];
   snapshot?: string | boolean;
   tag?: string;
+  open?: boolean;
 };
 
 export type CommandOptions = CliOptions & {
