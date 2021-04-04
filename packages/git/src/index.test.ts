@@ -34,8 +34,19 @@ async function getCommitCount(cwd: string) {
 describe("git", () => {
   let cwd: string;
   beforeEach(async () => {
-    cwd = await f.copy("with-git");
-    await spawn("git", ["init", "--initial-branch", "main"], { cwd });
+    cwd = f.copy("with-git");
+    await spawn("git", ["init"], { cwd });
+    // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
+    {
+      const { stdout } = await spawn(
+        "git",
+        ["rev-parse", "--abbrev-ref", "HEAD"],
+        { cwd }
+      );
+      if (stdout.toString("utf8").trim() !== "main") {
+        await spawn("git", ["checkout", "-b", "main"], { cwd });
+      }
+    }
     await spawn("git", ["config", "user.email", "x@y.z"], { cwd });
     await spawn("git", ["config", "user.name", "xyz"], { cwd });
     await spawn("git", ["config", "commit.gpgSign", "false"], { cwd });

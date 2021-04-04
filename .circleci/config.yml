@@ -12,9 +12,6 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v2-dependencies-
       - run:
-          name: Install newer Git version
-          command: sudo apt-get update && sudo apt-get install software-properties-common && sudo add-apt-repository ppa:git-core/ppa && sudo apt-get update && DEBIAN_FRONTEND=noninteractive sudo --force-yes --yes apt-get install git
-      - run:
           name: Install
           command: yarn install --pure-lockfile
       - run:
