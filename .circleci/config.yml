@@ -15,7 +15,13 @@ jobs:
           name: Install
           command: yarn install --pure-lockfile
       - run:
-          name: GitSetup
+          name: Install newer Git version
+          command: sudo apt-get install git
+      - run:
+          name: Check Git version
+          command: git --version
+      - run:
+          name: "Git Setup"
           command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
       - run:
           name: "Jest Tests"
