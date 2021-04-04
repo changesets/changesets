@@ -5,7 +5,7 @@
   "main": "dist/read.cjs.js",
   "module": "dist/read.esm.js",
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/read",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/read",
   "dependencies": {
     "@babel/runtime": "^7.10.4",
     "@changesets/git": "^1.0.5",

@@ -5,7 +5,7 @@
   "main": "dist/get-workspaces.cjs.js",
   "module": "dist/get-workspaces.esm.js",
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/get-workspaces",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/get-workspaces",
   "dependencies": {
     "@changesets/types": "^3.0.0",
     "fs-extra": "^7.0.1",

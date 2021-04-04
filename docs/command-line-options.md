@@ -73,7 +73,7 @@ changeset version
 
 This is one of two commands responsible for releasing packages. The version command takes changesets that have been made and updates versions and dependencies of packages, as well as writing changelogs. It is responsible for all file changes to versions before publishing to npm occurs.
 
-> We recommend making sure changes made from this commmand are merged back into master before you run publish.
+> We recommend making sure changes made from this commmand are merged back into the base branch before you run publish.
 
 Version has two options, `ignore` and `snapshot`:
 

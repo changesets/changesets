@@ -34,13 +34,26 @@ async function getCommitCount(cwd: string) {
 describe("git", () => {
   let cwd: string;
   beforeEach(async () => {
-    cwd = await f.copy("with-git");
+    cwd = f.copy("with-git");
     await spawn("git", ["init"], { cwd });
+    // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
+    {
+      const { stdout } = await spawn(
+        "git",
+        ["rev-parse", "--abbrev-ref", "HEAD"],
+        { cwd }
+      );
+      if (stdout.toString("utf8").trim() !== "main") {
+        await spawn("git", ["checkout", "-b", "main"], { cwd });
+      }
+    }
     await spawn("git", ["config", "user.email", "x@y.z"], { cwd });
     await spawn("git", ["config", "user.name", "xyz"], { cwd });
     await spawn("git", ["config", "commit.gpgSign", "false"], { cwd });
     await spawn("git", ["config", "tag.gpgSign", "false"], { cwd });
-    await spawn("git", ["config", "tag.forceSignAnnotated", "false"], { cwd });
+    await spawn("git", ["config", "tag.forceSignAnnotataled", "false"], {
+      cwd
+    });
   });
 
   describe("getDivergedCommit", () => {
@@ -54,7 +67,7 @@ describe("git", () => {
       await commit("added packageB package.json", cwd);
 
       const secondSha = await getCurrentCommit(cwd);
-      const divergedSha = await getDivergedCommit(cwd, "master");
+      const divergedSha = await getDivergedCommit(cwd, "main");
       expect(firstSha).not.toBe(secondSha);
       expect(divergedSha).toBe(secondSha);
     });
@@ -64,7 +77,7 @@ describe("git", () => {
       await commit("added packageA package.json", cwd);
 
       // This is the first commit. We branch (diverge) from here.
-      const masterSha = await getCurrentCommit(cwd);
+      const mainSha = await getCurrentCommit(cwd);
 
       // Create a new branch, and add a commit to it.
       await spawn("git", ["checkout", "-b", "my-branch"], { cwd });
@@ -75,9 +88,9 @@ describe("git", () => {
       const branchSha = await getCurrentCommit(cwd);
 
       // Finally, get the divergent commit.
-      const divergedSha = await getDivergedCommit(cwd, "master");
-      expect(masterSha).not.toBe(branchSha);
-      expect(divergedSha).toBe(masterSha);
+      const divergedSha = await getDivergedCommit(cwd, "main");
+      expect(mainSha).not.toBe(branchSha);
+      expect(divergedSha).toBe(mainSha);
     });
   });
 
@@ -417,12 +430,12 @@ describe("git", () => {
       await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
-        ref: "master"
+        ref: "main"
       });
       expect(changedPackages).toHaveLength(0);
     });
 
-    it("should check changed packages on a branch against master", async () => {
+    it("should check changed packages on a branch against base branch", async () => {
       await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
       await add("packages/pkg-a/index.js", cwd);
       await commit("added packageA index", cwd);
@@ -433,7 +446,7 @@ describe("git", () => {
 
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
-        ref: "master"
+        ref: "main"
       });
 
       expect(changedPackages).toHaveLength(2);
@@ -449,7 +462,7 @@ describe("git", () => {
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd,
-        ref: "master"
+        ref: "main"
       });
       expect(files).toHaveLength(0);
     });
@@ -461,12 +474,12 @@ describe("git", () => {
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd,
-        ref: "master"
+        ref: "main"
       });
       expect(files).toHaveLength(2);
       expect(files[1]).toEqual(".changeset/quick-lions-devour.md");
     });
-    it("should work on a ref that isn't master", async () => {
+    it("should work on a ref that isn't the base branch", async () => {
       await spawn("git", ["checkout", "-b", "some-branch"], { cwd });
       await add("packages/pkg-a/package.json", cwd);
       await commit("added packageA package.json", cwd);

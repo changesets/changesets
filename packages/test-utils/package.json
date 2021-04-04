@@ -5,7 +5,7 @@
   "main": "dist/test-utils.cjs.js",
   "module": "dist/test-utils.esm.js",
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/test-utils",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/test-utils",
   "dependencies": {
     "@changesets/logger": "^0.0.5"
   }

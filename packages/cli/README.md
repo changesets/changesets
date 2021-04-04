@@ -94,7 +94,7 @@ changeset init
 
 This command sets up the `.changeset` folder. It generates a readme and a config file. The config file includes the default options, as well as comments on what these options represent. You should run this command once, when you are setting up `changesets`.
 
-To publish public packages to NPM, you'll need to edit `.changeset/config.json` and change `"access": "restricted",` to `"access": "public",`. Read more about [access in config file options](https://github.com/atlassian/changesets/blob/master/docs/config-file-options.md#access-restricted--public). The `publishConfig` of each `package.json` is also respected and takes a priority over monorepo-wide setting in `.changeset/config.json`.
+To publish public packages to NPM, you'll need to edit `.changeset/config.json` and change `"access": "restricted",` to `"access": "public",`. Read more about [access in config file options](https://github.com/atlassian/changesets/blob/main/docs/config-file-options.md#access-restricted--public). The `publishConfig` of each `package.json` is also respected and takes a priority over monorepo-wide setting in `.changeset/config.json`.
 
 ### add
 
@@ -147,7 +147,7 @@ Updates the versions for all packages described in changesets since last release
 
 Will also create/append to a CHANGELOG file for each package using the summaries from the changesets.
 
-We recommend making sure changes made from this commmand are merged back into master before you run `publish`.
+We recommend making sure changes made from this commmand are merged back into the base branch before you run `publish`.
 
 This command will read then delete changesets on disk, ensuring that they are only used once.
 
@@ -161,7 +161,7 @@ Publishes to NPM repo, and creates git tags. Because this command assumes that l
 
 - `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the `--otp` option.
 
-**NOTE:** You will still need to push your changes back to master after this
+**NOTE:** You will still need to push your changes back to the base branch after this
 
 ```
 git push --follow-tags
@@ -189,7 +189,7 @@ The status command provides information about the changesets that currently exis
 pre [exit|enter {tag}]
 ```
 
-The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md).
+The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/atlassian/changesets/blob/main/docs/prereleases.md).
 
 ### Bumping peerDependencies
 
