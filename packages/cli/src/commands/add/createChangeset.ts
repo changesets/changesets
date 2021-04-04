@@ -99,7 +99,7 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 export default async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Package[]
-): Promise<{ summary: string; releases: Array<Release> }> {
+): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
   if (allPackages.length > 1) {
@@ -239,6 +239,7 @@ export default async function createChangeset(
       );
       if (summary.length > 0) {
         return {
+          confirmed: true,
           summary,
           releases
         };
@@ -258,6 +259,7 @@ export default async function createChangeset(
   }
 
   return {
+    confirmed: false,
     summary,
     releases
   };
