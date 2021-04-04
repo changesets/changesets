@@ -16,7 +16,7 @@ jobs:
           command: yarn install --pure-lockfile
       - run:
           name: Install newer Git version
-          command: sudo apt-get update && sudo apt-get install software-properties-common && add-apt-repository ppa:git-core/ppa && sudo apt-get update && sudo apt-get install git
+          command: sudo apt-get update && sudo apt-get install software-properties-common && sudo add-apt-repository ppa:git-core/ppa && sudo apt-get update && sudo apt-get install git
       - run:
           name: Check Git version
           command: git --version
