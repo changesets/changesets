@@ -5,7 +5,7 @@
   "main": "dist/config.cjs.js",
   "module": "dist/config.esm.js",
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/config",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/config",
   "files": [
     "dist",
     "schema.json"

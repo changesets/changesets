@@ -140,7 +140,6 @@ describe("status", () => {
     expect(process.exit).not.toHaveBeenCalled();
   });
 
-  it.skip("should respect since master flag", () => false);
   it.skip("should respect the verbose flag", () => false);
   it("should respect the output flag", async () => {
     const output = "nonsense.json";

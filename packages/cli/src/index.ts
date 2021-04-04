@@ -13,7 +13,7 @@ const { input, flags } = meow(
     add [--empty] [--open]
     version [--ignore]
     publish [--otp=code]
-    status [--since-master --verbose --output=JSON_FILE.json]
+    status [--since <branch>] [--verbose] [--output=JSON_FILE.json]
     pre <enter|exit> <tag>
     `,
   {

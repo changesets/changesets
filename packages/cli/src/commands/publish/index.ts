@@ -74,7 +74,7 @@ export default async function run(
     logReleases(successful);
     // We create the tags after the push above so that we know that HEAD wont change and that pushing
     // wont suffer from a race condition if another merge happens in the mean time (pushing tags wont
-    // fail if we are behind master).
+    // fail if we are behind the base branch).
     log(`Creating git tag${successful.length > 1 ? "s" : ""}...`);
     if (tool !== "root") {
       for (const pkg of successful) {
