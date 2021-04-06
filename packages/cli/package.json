@@ -5,7 +5,7 @@
   "bin": {
     "changeset": "bin.js"
   },
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/cli",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/cli",
   "files": [
     "default-files",
     "dist",

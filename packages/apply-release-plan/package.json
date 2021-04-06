@@ -5,7 +5,7 @@
   "main": "dist/apply-release-plan.cjs.js",
   "module": "dist/apply-release-plan.esm.js",
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/apply-release-plan",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/apply-release-plan",
   "dependencies": {
     "@babel/runtime": "^7.10.4",
     "@changesets/config": "^1.5.0",

@@ -68,4 +68,4 @@ Changesets are designed to stack, so there's no problem with adding multiple. Yo
 
 ## I want to know more about changesets
 
-[here is a more in-depth explanation](https://github.com/Noviny/changesets/blob/master/docs/detailed-explanation.md)
+[here is a more in-depth explanation](https://github.com/atlassian/changesets/blob/main/docs/detailed-explanation.md)

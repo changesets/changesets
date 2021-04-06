@@ -44,7 +44,7 @@ class FakeReleasePlan {
       commit: false,
       linked: [],
       access: "restricted",
-      baseBranch: "master",
+      baseBranch: "main",
       updateInternalDependencies: "patch",
       ignore: [],
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -79,7 +79,7 @@ async function testSetup(
       commit: false,
       linked: [],
       access: "restricted",
-      baseBranch: "master",
+      baseBranch: "main",
       updateInternalDependencies: "patch",
       ignore: [],
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -412,7 +412,7 @@ describe("apply release plan", () => {
           commit: false,
           linked: [],
           access: "restricted",
-          baseBranch: "master",
+          baseBranch: "main",
           updateInternalDependencies: "patch",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -473,7 +473,7 @@ describe("apply release plan", () => {
           commit: false,
           linked: [],
           access: "restricted",
-          baseBranch: "master",
+          baseBranch: "main",
           updateInternalDependencies: "patch",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -620,7 +620,7 @@ describe("apply release plan", () => {
               commit: false,
               linked: [],
               access: "restricted",
-              baseBranch: "master",
+              baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -703,7 +703,7 @@ describe("apply release plan", () => {
               commit: false,
               linked: [],
               access: "restricted",
-              baseBranch: "master",
+              baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -778,7 +778,7 @@ describe("apply release plan", () => {
               commit: false,
               linked: [],
               access: "restricted",
-              baseBranch: "master",
+              baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -853,7 +853,7 @@ describe("apply release plan", () => {
               commit: false,
               linked: [],
               access: "restricted",
-              baseBranch: "master",
+              baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -931,7 +931,7 @@ describe("apply release plan", () => {
               commit: false,
               linked: [],
               access: "restricted",
-              baseBranch: "master",
+              baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1014,7 +1014,7 @@ describe("apply release plan", () => {
               commit: false,
               linked: [],
               access: "restricted",
-              baseBranch: "master",
+              baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1089,7 +1089,7 @@ describe("apply release plan", () => {
               commit: false,
               linked: [],
               access: "restricted",
-              baseBranch: "master",
+              baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1164,7 +1164,7 @@ describe("apply release plan", () => {
               commit: false,
               linked: [],
               access: "restricted",
-              baseBranch: "master",
+              baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1243,7 +1243,7 @@ describe("apply release plan", () => {
             commit: false,
             linked: [],
             access: "restricted",
-            baseBranch: "master",
+            baseBranch: "main",
             updateInternalDependencies: "patch",
             ignore: [],
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1397,7 +1397,7 @@ describe("apply release plan", () => {
           commit: false,
           linked: [],
           access: "restricted",
-          baseBranch: "master",
+          baseBranch: "main",
           changelog: [
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
@@ -1504,7 +1504,7 @@ describe("apply release plan", () => {
           commit: false,
           linked: [],
           access: "restricted",
-          baseBranch: "master",
+          baseBranch: "main",
           updateInternalDependencies: "patch",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1539,7 +1539,7 @@ describe("apply release plan", () => {
 
       ## 1.2.1
       ### Patch Changes
-      
+
       - Hey, let's have fun with testing!
       - Updated dependencies [undefined]
         - pkg-a@1.0.4`);
@@ -1585,7 +1585,7 @@ describe("apply release plan", () => {
           commit: false,
           linked: [],
           access: "restricted",
-          baseBranch: "master",
+          baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1618,7 +1618,7 @@ describe("apply release plan", () => {
 
       ## 1.2.1
       ### Patch Changes
-      
+
       - Hey, let's have fun with testing!`);
     });
 
@@ -1670,7 +1670,7 @@ describe("apply release plan", () => {
           commit: false,
           linked: [],
           access: "restricted",
-          baseBranch: "master",
+          baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1707,7 +1707,7 @@ describe("apply release plan", () => {
 
       ## 1.2.1
       ### Patch Changes
-      
+
       - Hey, let's have fun with testing!
       - Updated dependencies [undefined]
         - pkg-c@2.1.0`);
@@ -1716,7 +1716,7 @@ describe("apply release plan", () => {
 
       ## 2.1.0
       ### Minor Changes
-      
+
       - Hey, let's have fun with testing!`);
     });
 
@@ -1768,7 +1768,7 @@ describe("apply release plan", () => {
           commit: false,
           linked: [],
           access: "restricted",
-          baseBranch: "master",
+          baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1805,7 +1805,7 @@ describe("apply release plan", () => {
 
       ## 1.2.1
       ### Patch Changes
-      
+
       - Hey, let's have fun with testing!
       - Updated dependencies [undefined]
         - pkg-c@2.0.1`);
@@ -1814,7 +1814,7 @@ describe("apply release plan", () => {
 
       ## 2.0.1
       ### Patch Changes
-      
+
       - Hey, let's have fun with testing!`);
     });
   });
@@ -2167,7 +2167,7 @@ describe("apply release plan", () => {
           commit: true,
           linked: [],
           access: "restricted",
-          baseBranch: "master",
+          baseBranch: "main",
           updateInternalDependencies: "patch",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {

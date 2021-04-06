@@ -5,7 +5,7 @@
   "main": "dist/git.cjs.js",
   "module": "dist/git.esm.js",
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/git",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/git",
   "dependencies": {
     "@babel/runtime": "^7.10.4",
     "@changesets/errors": "^0.1.4",

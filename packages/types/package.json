@@ -5,5 +5,5 @@
   "main": "dist/types.cjs.js",
   "module": "dist/types.esm.js",
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/master/packages/types"
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/types"
 }
