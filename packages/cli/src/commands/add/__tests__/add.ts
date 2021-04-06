@@ -95,13 +95,14 @@ describe("Changesets", () => {
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
 
-    const expectedChangeset = {
-      summary: "summary message mock",
-      releases: [{ name: "pkg-a", type: "patch" }]
-    };
     // @ts-ignore
     const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(expectedChangeset);
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "summary message mock",
+        releases: [{ name: "pkg-a", type: "patch" }]
+      })
+    );
   });
 
   it.each`
@@ -123,13 +124,14 @@ describe("Changesets", () => {
       });
       await addChangeset(cwd, { empty: false }, defaultConfig);
 
-      const expectedChangeset = {
-        summary: expectedSummary,
-        releases: [{ name: "pkg-a", type: "patch" }]
-      };
       // @ts-ignore
       const call = writeChangeset.mock.calls[0][0];
-      expect(call).toEqual(expectedChangeset);
+      expect(call).toEqual(
+        expect.objectContaining({
+          summary: expectedSummary,
+          releases: [{ name: "pkg-a", type: "patch" }]
+        })
+      );
     }
   );
 
@@ -161,13 +163,14 @@ describe("Changesets", () => {
 
     await addChangeset(cwd, { empty: false }, defaultConfig);
 
-    const expectedChangeset = {
-      summary: "summary message mock",
-      releases: [{ name: "single-package", type: "minor" }]
-    };
     // @ts-ignore
     const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(expectedChangeset);
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "summary message mock",
+        releases: [{ name: "single-package", type: "minor" }]
+      })
+    );
   });
   it("should commit when the commit flag is passed in", async () => {
     const cwd = await f.copy("simple-project-custom-config");
@@ -185,12 +188,13 @@ describe("Changesets", () => {
 
     await addChangeset(cwd, { empty: true }, defaultConfig);
 
-    const expectedChangeset = {
-      releases: [],
-      summary: ""
-    };
     // @ts-ignore
     const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(expectedChangeset);
+    expect(call).toEqual(
+      expect.objectContaining({
+        releases: [],
+        summary: ""
+      })
+    );
   });
 });

@@ -13,6 +13,10 @@ import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
 
+type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer R>
+  ? R
+  : never;
+
 export default async function add(
   cwd: string,
   { empty, open }: { empty?: boolean; open?: boolean },
@@ -21,14 +25,13 @@ export default async function add(
   const packages = await getPackages(cwd);
   const changesetBase = path.resolve(cwd, ".changeset");
 
-  let newChangeset;
-  let changesetConfirmed = false;
+  let newChangeset: UnwrapPromise<ReturnType<typeof createChangeset>>;
   if (empty) {
     newChangeset = {
+      confirmed: true,
       releases: [],
       summary: ``
     };
-    changesetConfirmed = true;
   } else {
     const changedPackages = await git.getChangedPackagesSinceRef({
       cwd,
@@ -40,12 +43,15 @@ export default async function add(
     newChangeset = await createChangeset(changePackagesName, packages.packages);
     printConfirmationMessage(newChangeset, packages.packages.length > 1);
 
-    changesetConfirmed = await cli.askConfirm(
-      "Is this your desired changeset?"
-    );
+    if (!newChangeset.confirmed) {
+      newChangeset = {
+        ...newChangeset,
+        confirmed: await cli.askConfirm("Is this your desired changeset?")
+      };
+    }
   }
 
-  if (changesetConfirmed) {
+  if (newChangeset.confirmed) {
     const changesetID = await writeChangeset(newChangeset, cwd);
     if (config.commit) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
