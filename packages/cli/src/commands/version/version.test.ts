@@ -442,7 +442,7 @@ describe("snapshot release", () => {
           ...modifiedDefaultConfig,
           commit: false,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
             useCalculatedVersionForSnapshots: true
           }
         }
@@ -471,7 +471,10 @@ describe("updateInternalDependents: always", () => {
     await writeChangeset(simpleChangeset3, cwd);
     await versionCommand(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      updateInternalDependents: "always"
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always"
+      }
     });
 
     expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(

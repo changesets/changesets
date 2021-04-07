@@ -42,11 +42,11 @@ test("read reads the config", async () => {
     access: "restricted",
     baseBranch: "master",
     updateInternalDependencies: "patch",
-    updateInternalDependents: "out-of-range",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
+      updateInternalDependents: "out-of-range",
       useCalculatedVersionForSnapshots: false
     }
   });
@@ -59,10 +59,10 @@ let defaults = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  updateInternalDependents: "out-of-range",
   ignore: [],
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
+    updateInternalDependents: "out-of-range",
     useCalculatedVersionForSnapshots: false
   },
   bumpVersionsWithWorkspaceProtocolOnly: false
@@ -228,11 +228,16 @@ let correctCases: Record<string, CorrectCase> = {
   },
   updateInternalDependents: {
     input: {
-      updateInternalDependents: "always"
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        updateInternalDependents: "always"
+      }
     },
     output: {
       ...defaults,
-      updateInternalDependents: "always"
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaults.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always"
+      }
     }
   }
 };

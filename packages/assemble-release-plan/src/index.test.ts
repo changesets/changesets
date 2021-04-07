@@ -882,8 +882,8 @@ describe("bumping peerDeps", () => {
       let { releases } = assembleReleasePlan(setup.changesets, setup.packages, {
         ...defaultConfig,
         ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-          onlyUpdatePeerDependentsWhenOutOfRange: true,
-          useCalculatedVersionForSnapshots: false
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          onlyUpdatePeerDependentsWhenOutOfRange: true
         }
       });
       expect(releases.length).toBe(1);
@@ -898,7 +898,10 @@ describe("bumping peerDeps", () => {
 
       let { releases } = assembleReleasePlan(setup.changesets, setup.packages, {
         ...defaultConfig,
-        updateInternalDependents: "always"
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          updateInternalDependents: "always"
+        }
       });
 
       expect(releases.length).toBe(2);
@@ -915,7 +918,10 @@ describe("bumping peerDeps", () => {
 
       let { releases } = assembleReleasePlan(setup.changesets, setup.packages, {
         ...defaultConfig,
-        updateInternalDependents: "always"
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          updateInternalDependents: "always"
+        }
       });
 
       expect(releases.length).toBe(3);
@@ -938,8 +944,8 @@ describe("bumping peerDeps", () => {
     let { releases } = assembleReleasePlan(setup.changesets, setup.packages, {
       ...defaultConfig,
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        onlyUpdatePeerDependentsWhenOutOfRange: true,
-        useCalculatedVersionForSnapshots: false
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        onlyUpdatePeerDependentsWhenOutOfRange: true
       }
     });
 
