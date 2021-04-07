@@ -73,8 +73,6 @@ export default async function applyReleasePlan(
 
   let { releases, changesets } = releasePlan;
 
-  const versionCommit = createVersionCommit(releasePlan, config.commit);
-
   let releaseWithPackages = releases.map(release => {
     let pkg = packagesByName.get(release.name);
     if (!pkg)
@@ -176,12 +174,12 @@ export default async function applyReleasePlan(
     let newTouchedFilesArr = [...touchedFiles];
     // Note, git gets angry if you try and have two git actions running at once
     // So we need to be careful that these iterations are properly sequential
-    while (newTouchedFilesArr.length > 0) {
-      let file = newTouchedFilesArr.shift();
-      await git.add(path.relative(cwd, file!), cwd);
+    let file;
+    while ((file = newTouchedFilesArr.shift())) {
+      await git.add(path.relative(cwd, file), cwd);
     }
 
-    let commit = await git.commit(versionCommit, cwd);
+    let commit = await createVersionCommit(releasePlan, cwd);
 
     if (!commit) {
       console.error("Changesets ran into trouble committing your files");
