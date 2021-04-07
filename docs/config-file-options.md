@@ -99,7 +99,7 @@ Using `minor` allows consumers to more actively control their own deduplication 
 
 Changesets will always update the dependency if it would leave the old semver range.
 
-TODO: note that this only applies for packages released in the current release
+> ⚠ Note: this is only applied for packages which are already released in the current release. If A depends on B and we only release B then A won't be bumped.
 
 ## `changelog` (false or a path)
 
