@@ -85,7 +85,7 @@ export default function determineDependents({
                 // TODO validate this - I don't think it's right anymore
                 (!releases.has(dependent) ||
                   releases.get(dependent)!.type === "none") &&
-                (config.updateInternalDependents ||
+                (config.updateInternalDependents === "always" ||
                   !semver.satisfies(
                     incrementVersion(nextRelease, preInfo),
                     // to deal with a * versionRange that comes from workspace:* dependencies as the wildcard will match anything

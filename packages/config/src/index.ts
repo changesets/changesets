@@ -16,7 +16,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  updateInternalDependents: false,
+  updateInternalDependents: "out-of-range",
   ignore: [] as ReadonlyArray<string>
 } as const;
 
@@ -196,14 +196,14 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
   if (
     json.updateInternalDependents !== undefined &&
-    typeof json.updateInternalDependents !== "boolean"
+    !["always", "out-of-range"].includes(json.updateInternalDependents)
   ) {
     messages.push(
       `The \`updateInternalDependents\` option is set as ${JSON.stringify(
         json.updateInternalDependents,
         null,
         2
-      )} but can only be a boolean`
+      )} but can only be 'always' or 'out-of-range'`
     );
   }
   if (json.ignore) {

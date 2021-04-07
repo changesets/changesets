@@ -892,13 +892,13 @@ describe("bumping peerDeps", () => {
     });
   });
 
-  describe("updateInternalDependents", () => {
+  describe("updateInternalDependents: always", () => {
     it("should bump a direct dependent when a dependency package gets bumped", () => {
       setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
 
       let { releases } = assembleReleasePlan(setup.changesets, setup.packages, {
         ...defaultConfig,
-        updateInternalDependents: true
+        updateInternalDependents: "always"
       });
 
       expect(releases.length).toBe(2);
@@ -915,7 +915,7 @@ describe("bumping peerDeps", () => {
 
       let { releases } = assembleReleasePlan(setup.changesets, setup.packages, {
         ...defaultConfig,
-        updateInternalDependents: true
+        updateInternalDependents: "always"
       });
 
       expect(releases.length).toBe(3);

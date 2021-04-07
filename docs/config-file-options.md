@@ -6,7 +6,6 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 {
   "commit": false,
   "updateInternalDependencies": "patch",
-  "updateInternalDependents": false,
   "linked": [],
   "access": "restricted",
   "baseBranch": "master",
@@ -15,7 +14,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 }
 ```
 
-> NOTE: the `linked`, `updateInternalDependencies`, `updateInternalDependents` and `ignore` options are only for behaviour in monorepos.
+> NOTE: the `linked`, `updateInternalDependencies`, and `ignore` options are only for behaviour in monorepos.
 
 ## `commit` (`true` | `false`)
 
@@ -101,10 +100,6 @@ Using `minor` allows consumers to more actively control their own deduplication 
 Changesets will always update the dependency if it would leave the old semver range.
 
 TODO: note that this only applies for packages released in the current release
-
-## `updateInternalDependents` boolean
-
-TODO:
 
 ## `changelog` (false or a path)
 

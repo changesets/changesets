@@ -464,14 +464,14 @@ describe("snapshot release", () => {
   });
 });
 
-describe("updateInternalDependents", () => {
+describe("updateInternalDependents: always", () => {
   it("should bump a direct dependent when a dependency package gets bumped", async () => {
     const cwd = await f.copy("simple-project-caret-dep");
     const spy = jest.spyOn(fs, "writeFile");
     await writeChangeset(simpleChangeset3, cwd);
     await versionCommand(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      updateInternalDependents: true
+      updateInternalDependents: "always"
     });
 
     expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(

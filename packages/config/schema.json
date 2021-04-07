@@ -67,11 +67,6 @@
       "type": "string",
       "description": "The minimum bump type to trigger automatic update of internal dependencies that are part of the same release.",
       "default": "patch"
-    },
-    "updateInternalDependents": {
-      "type": "boolean",
-      "description": "TODO",
-      "default": false
     }
   }
 }
