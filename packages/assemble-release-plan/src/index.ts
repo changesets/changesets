@@ -1,13 +1,13 @@
-import { ReleasePlan, Config, NewChangeset, PreState } from "@changesets/types";
+import { Config, NewChangeset, PreState } from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
 import { InternalError } from "@changesets/errors";
-import { Packages, Package } from "@manypkg/get-packages";
+import { Package } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { PreInfo, InternalRelease } from "./types";
+import { PreInfo, InternalRelease, AssembleReleasePlan } from "./types";
 
 function getPreVersion(version: string) {
   let parsed = semver.parse(version)!;
@@ -69,13 +69,13 @@ function getNewVersion(
   return calculatedVersion;
 }
 
-function assembleReleasePlan(
-  changesets: NewChangeset[],
-  packages: Packages,
-  config: Config,
-  preState: PreState | undefined,
-  snapshot?: string | boolean
-): ReleasePlan {
+const assembleReleasePlan: AssembleReleasePlan = (
+  changesets,
+  packages,
+  config,
+  preState,
+  snapshot
+) => {
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
   );
@@ -159,7 +159,7 @@ function assembleReleasePlan(
     }),
     preState: preInfo?.state
   };
-}
+};
 
 function getRelevantChangesets(
   changesets: NewChangeset[],

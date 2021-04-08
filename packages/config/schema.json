@@ -27,6 +27,11 @@
       "description": "The configuration for changelog generators.",
       "default": ["@changesets/cli", null]
     },
+    "assembleReleasePlan": {
+      "type": "string",
+      "description": "Path to module to replace '@changesets/assemble-release-plan'. The module must have default export.",
+      "default": "@changesets/assemble-release-plan"
+    },
     "linked": {
       "type": "array",
       "items": {
