@@ -3,6 +3,7 @@
     "@changesets/changelog-github",
     { "repo": "atlassian/changesets" }
   ],
+  "baseBranch": "main",
   "commit": false,
   "access": "public"
 }
