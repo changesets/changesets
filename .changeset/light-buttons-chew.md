@@ -1,6 +1,6 @@
 ---
 "@changesets/cli": minor
-"@changesets/config": major
+"@changesets/config": minor
 "@changesets/types": major
 ---
 
