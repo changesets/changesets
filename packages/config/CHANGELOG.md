@@ -1,5 +1,27 @@
 # @changesets/config
 
+## 1.6.0
+
+### Minor Changes
+
+- [#542](https://github.com/atlassian/changesets/pull/542) [`de2b4a5`](https://github.com/atlassian/changesets/commit/de2b4a5a7b244a37d94625bcb70ecde9dde5b612) Thanks [@Andarist](https://github.com/Andarist)! - A new `updateInternalDependents` experimental option has been added. It can be used to add dependent packages to the release (if they are not already a part of it) with patch bumps. To use it you can add this to your config:
+
+  ```json
+  {
+    "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+      "updateInternalDependents": "always"
+    }
+  }
+  ```
+
+  This option accepts two values - `"always"` and `"out-of-range"` (the latter matches the current default behavior).
+
+### Patch Changes
+
+- Updated dependencies [[`de2b4a5`](https://github.com/atlassian/changesets/commit/de2b4a5a7b244a37d94625bcb70ecde9dde5b612)]:
+  - @changesets/types@4.0.0
+  - @changesets/get-dependents-graph@1.2.1
+
 ## 1.5.0
 
 ### Minor Changes

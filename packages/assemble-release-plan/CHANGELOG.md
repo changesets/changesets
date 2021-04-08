@@ -1,5 +1,17 @@
 # @changesets/assemble-release-plan
 
+## 5.0.0
+
+### Major Changes
+
+- [#542](https://github.com/atlassian/changesets/pull/542) [`de2b4a5`](https://github.com/atlassian/changesets/commit/de2b4a5a7b244a37d94625bcb70ecde9dde5b612) Thanks [@Andarist](https://github.com/Andarist)! - The accepted `Config` type has been changed - a new experimental option (`updateInternalDependents`) was added to it.
+
+### Patch Changes
+
+- Updated dependencies [[`de2b4a5`](https://github.com/atlassian/changesets/commit/de2b4a5a7b244a37d94625bcb70ecde9dde5b612)]:
+  - @changesets/types@4.0.0
+  - @changesets/get-dependents-graph@1.2.1
+
 ## 4.1.1
 
 ### Patch Changes
