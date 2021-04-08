@@ -16,7 +16,6 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  updateInternalDependents: "out-of-range",
   ignore: [] as ReadonlyArray<string>
 } as const;
 
@@ -333,8 +332,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
       updateInternalDependents:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          ?.updateInternalDependents ??
-        defaultWrittenConfig.updateInternalDependents,
+          ?.updateInternalDependents ?? "out-of-range",
 
       useCalculatedVersionForSnapshots:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||

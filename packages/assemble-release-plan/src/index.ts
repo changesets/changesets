@@ -73,7 +73,8 @@ function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
   config: Config,
-  preState?: PreState,
+  // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
+  preState: PreState | undefined,
   snapshot?: string | boolean
 ): ReleasePlan {
   let packagesByName = new Map(
