@@ -73,6 +73,7 @@ function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
   config: Config,
+  // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
   preState: PreState | undefined,
   snapshot?: string | boolean
 ): ReleasePlan {
@@ -113,10 +114,7 @@ function assembleReleasePlan(
       packagesByName,
       dependencyGraph,
       preInfo,
-      ignoredPackages: config.ignore,
-      onlyUpdatePeerDependentsWhenOutOfRange:
-        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange
+      config
     });
 
     // The map passed in to determineDependents will be mutated

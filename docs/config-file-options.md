@@ -14,7 +14,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 }
 ```
 
-> NOTE: the `linked`, `updateInternalDependencies` and `ignore` options are only for behaviour in monorepos.
+> NOTE: the `linked`, `updateInternalDependencies`, and `ignore` options are only for behaviour in monorepos.
 
 ## `commit` (`true` | `false`)
 
@@ -98,6 +98,8 @@ pkg-b @ version 1.0.1
 Using `minor` allows consumers to more actively control their own deduplication of packages, and will allow them to install fewer versions if you have many interconnected packages. Using `patch` will mean consumers will more often be using more updated code, but may cause problems with deduplication.
 
 Changesets will always update the dependency if it would leave the old semver range.
+
+> ⚠ Note: this is only applied for packages which are already released in the current release. If A depends on B and we only release B then A won't be bumped.
 
 ## `changelog` (false or a path)
 

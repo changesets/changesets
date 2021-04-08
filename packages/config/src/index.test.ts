@@ -46,6 +46,7 @@ test("read reads the config", async () => {
     bumpVersionsWithWorkspaceProtocolOnly: false,
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
+      updateInternalDependents: "out-of-range",
       useCalculatedVersionForSnapshots: false
     }
   });
@@ -61,6 +62,7 @@ let defaults = {
   ignore: [],
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
+    updateInternalDependents: "out-of-range",
     useCalculatedVersionForSnapshots: false
   },
   bumpVersionsWithWorkspaceProtocolOnly: false
@@ -222,6 +224,20 @@ let correctCases: Record<string, CorrectCase> = {
     output: {
       ...defaults,
       ignore: ["pkg-a", "@pkg/a", "@pkg/b"]
+    }
+  },
+  updateInternalDependents: {
+    input: {
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        updateInternalDependents: "always"
+      }
+    },
+    output: {
+      ...defaults,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaults.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always"
+      }
     }
   }
 };

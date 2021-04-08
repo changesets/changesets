@@ -47,7 +47,9 @@ git.add.mockImplementation(() => Promise.resolve(true));
 // @ts-ignore
 git.commit.mockImplementation(() => Promise.resolve(true));
 // @ts-ignore
-git.getCommitsThatAddFiles.mockImplementation(() => Promise.resolve([]));
+git.getCommitsThatAddFiles.mockImplementation(changesetIds =>
+  Promise.resolve(changesetIds.map(() => "g1th4sh"))
+);
 // @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
 
@@ -78,15 +80,24 @@ const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
   );
 };
 
-const getPkgJSON = (pkgName: string, calls: any) => {
+const getFile = (pkgName: string, fileName: string, calls: any) => {
   let castCalls: [string, string][] = calls;
   const foundCall = castCalls.find(call =>
-    call[0].endsWith(`${pkgName}${path.sep}package.json`)
+    call[0].endsWith(`${pkgName}${path.sep}${fileName}`)
   );
   if (!foundCall)
-    throw new Error(`could not find writing of package.json: ${pkgName}`);
+    throw new Error(`could not find writing of ${fileName} for: ${pkgName}`);
 
-  return JSON.parse(foundCall[1]);
+  // return written content
+  return foundCall[1];
+};
+
+const getPkgJSON = (pkgName: string, calls: any) => {
+  return JSON.parse(getFile(pkgName, "package.json", calls));
+};
+
+const getChangelog = (pkgName: string, calls: any) => {
+  return getFile(pkgName, "CHANGELOG.md", calls);
 };
 
 const writeEmptyChangeset = (cwd: string) => writeChangesets([], cwd);
@@ -270,58 +281,9 @@ describe("running version in a simple project", () => {
       await writeChangesets([simpleChangeset, simpleChangeset2], cwd);
       await versionCommand(cwd, defaultOptions, modifiedDefaultConfig);
 
-      const dirs = await fs.readdir(path.resolve(cwd, ".changeset"));
-      expect(dirs.length).toBe(2);
+      const files = await fs.readdir(path.resolve(cwd, ".changeset"));
+      expect(files.length).toBe(2);
     });
-  });
-});
-
-describe("running version in a simple project with caret dependencies", () => {
-  // https://github.com/atlassian/changesets/pull/382#discussion_r434434182
-  it("should bump patch version for packages that had prereleases, but dependencies are still in range", async () => {
-    let cwd = f.copy("simple-project-caret-dep");
-    await pre(cwd, { command: "enter", tag: "next" });
-    await writeChangeset(
-      {
-        releases: [{ name: "pkg-b", type: "patch" }],
-        summary: "a very useful summary for the first change"
-      },
-      cwd
-    );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
-
-    let packages = (await getPackages(cwd))!;
-    expect(packages.packages.map(x => x.packageJson)).toEqual([
-      {
-        dependencies: {
-          "pkg-b": "^1.0.1-next.0"
-        },
-        name: "pkg-a",
-        version: "1.0.1-next.0"
-      },
-      {
-        name: "pkg-b",
-        version: "1.0.1-next.0"
-      }
-    ]);
-
-    await pre(cwd, { command: "exit" });
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
-
-    packages = (await getPackages(cwd))!;
-    expect(packages.packages.map(x => x.packageJson)).toEqual([
-      {
-        dependencies: {
-          "pkg-b": "^1.0.1"
-        },
-        name: "pkg-a",
-        version: "1.0.1"
-      },
-      {
-        name: "pkg-b",
-        version: "1.0.1"
-      }
-    ]);
   });
 });
 
@@ -480,7 +442,7 @@ describe("snapshot release", () => {
           ...modifiedDefaultConfig,
           commit: false,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
             useCalculatedVersionForSnapshots: true
           }
         }
@@ -499,6 +461,56 @@ describe("snapshot release", () => {
         })
       );
     });
+  });
+});
+
+describe("updateInternalDependents: always", () => {
+  it("should bump a direct dependent when a dependency package gets bumped", async () => {
+    const cwd = await f.copy("simple-project-caret-dep");
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(simpleChangeset3, cwd);
+    await versionCommand(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always"
+      }
+    });
+
+    expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-a",
+        version: "1.0.1",
+        dependencies: {
+          "pkg-b": "^1.0.1"
+        }
+      })
+    );
+    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-b",
+        version: "1.0.1"
+      })
+    );
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.0.1
+      ### Patch Changes
+
+      - Updated dependencies [g1th4sh]
+        - pkg-b@1.0.1
+      "
+    `);
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.0.1
+      ### Patch Changes
+
+      - g1th4sh: This is not a summary
+      "
+    `);
   });
 });
 
@@ -634,68 +646,68 @@ describe("pre", () => {
         "utf8"
       )
     ).toMatchInlineSnapshot(`
-                                    "# pkg-a
+      "# pkg-a
 
-                                    ## 1.1.0
+      ## 1.1.0
 
-                                    ### Minor Changes
+      ### Minor Changes
 
-                                    - a very useful summary for the third change
+      - g1th4sh: a very useful summary for the third change
 
-                                    ### Patch Changes
+      ### Patch Changes
 
-                                    - a very useful summary
-                                    - a very useful summary for the second change
-                                    - Updated dependencies [undefined]
-                                      - pkg-b@1.0.1
+      - g1th4sh: a very useful summary
+      - g1th4sh: a very useful summary for the second change
+      - Updated dependencies [g1th4sh]
+        - pkg-b@1.0.1
 
-                                    ## 1.1.0-next.3
+      ## 1.1.0-next.3
 
-                                    ### Minor Changes
+      ### Minor Changes
 
-                                    - a very useful summary for the third change
+      - g1th4sh: a very useful summary for the third change
 
-                                    ## 1.0.1-next.2
+      ## 1.0.1-next.2
 
-                                    ### Patch Changes
+      ### Patch Changes
 
-                                    - a very useful summary for the second change
+      - g1th4sh: a very useful summary for the second change
 
-                                    ## 1.0.1-next.1
+      ## 1.0.1-next.1
 
-                                    ### Patch Changes
+      ### Patch Changes
 
-                                    - a very useful summary
+      - g1th4sh: a very useful summary
 
-                                    ## 1.0.1-next.0
+      ## 1.0.1-next.0
 
-                                    ### Patch Changes
+      ### Patch Changes
 
-                                    - Updated dependencies [undefined]
-                                      - pkg-b@1.0.1-next.0
-                                    "
-                        `);
+      - Updated dependencies [g1th4sh]
+        - pkg-b@1.0.1-next.0
+      "
+    `);
     expect(
       await fs.readFile(
         path.join(packages.packages[1].dir, "CHANGELOG.md"),
         "utf8"
       )
     ).toMatchInlineSnapshot(`
-                                                            "# pkg-b
+      "# pkg-b
 
-                                                            ## 1.0.1
+      ## 1.0.1
 
-                                                            ### Patch Changes
+      ### Patch Changes
 
-                                                            - a very useful summary for the first change
+      - g1th4sh: a very useful summary for the first change
 
-                                                            ## 1.0.1-next.0
+      ## 1.0.1-next.0
 
-                                                            ### Patch Changes
+      ### Patch Changes
 
-                                                            - a very useful summary for the first change
-                                                            "
-                                        `);
+      - g1th4sh: a very useful summary for the first change
+      "
+    `);
   });
   it("should work with adding a package while in pre mode", async () => {
     let cwd = f.copy("simple-project");
@@ -803,6 +815,52 @@ describe("pre", () => {
       {
         name: "pkg-b",
         version: "1.0.0"
+      }
+    ]);
+  });
+  // https://github.com/atlassian/changesets/pull/382#discussion_r434434182
+  it("should bump patch version for packages that had prereleases, but caret dependencies are still in range", async () => {
+    let cwd = f.copy("simple-project-caret-dep");
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        dependencies: {
+          "pkg-b": "^1.0.1-next.0"
+        },
+        name: "pkg-a",
+        version: "1.0.1-next.0"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1-next.0"
+      }
+    ]);
+
+    await pre(cwd, { command: "exit" });
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    packages = (await getPackages(cwd))!;
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        dependencies: {
+          "pkg-b": "^1.0.1"
+        },
+        name: "pkg-a",
+        version: "1.0.1"
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1"
       }
     ]);
   });

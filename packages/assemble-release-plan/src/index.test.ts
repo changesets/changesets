@@ -232,7 +232,10 @@ describe("assemble-release-plan", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b"]] },
+      {
+        ...defaultConfig,
+        linked: [["pkg-a", "pkg-b"]]
+      },
       undefined
     );
 
@@ -254,7 +257,10 @@ describe("assemble-release-plan", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-b", "pkg-c"]] },
+      {
+        ...defaultConfig,
+        linked: [["pkg-a", "pkg-b", "pkg-c"]]
+      },
       undefined
     );
 
@@ -368,7 +374,7 @@ describe("assemble-release-plan", () => {
   });
 
   it("should bump peer dependents where the version is updated because of linked", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "1.0.0");
 
     setup.addChangeset({
       id: "some-id",
@@ -378,7 +384,10 @@ describe("assemble-release-plan", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
-      { ...defaultConfig, linked: [["pkg-a", "pkg-c"]] },
+      {
+        ...defaultConfig,
+        linked: [["pkg-a", "pkg-c"]]
+      },
       undefined
     );
 
@@ -398,7 +407,7 @@ describe("assemble-release-plan", () => {
     ]);
   });
   it("should update a peerDep by a major bump", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
       id: "nonsense-words-combine",
       releases: [{ name: "pkg-a", type: "minor" }]
@@ -468,7 +477,7 @@ describe("assemble-release-plan", () => {
     expect(releases[1].newVersion).toEqual("1.0.0");
   });
   it("should generate releases with 'none' release type for ignored packages through peerDependencies", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
       releases: [{ name: "pkg-a", type: "major" }]
@@ -758,7 +767,7 @@ describe("bumping peerDeps", () => {
   });
 
   it("should patch a pinned peerDep", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "1.0.0");
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
@@ -774,7 +783,7 @@ describe("bumping peerDeps", () => {
     expect(releases[1].newVersion).toEqual("1.0.1");
   });
   it("should not bump the dependent when bumping a tilde peerDep by none", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
     setup.changesets = [];
     setup.addChangeset({
       id: "anyway-the-windblows",
@@ -793,7 +802,7 @@ describe("bumping peerDeps", () => {
     expect(releases[0].newVersion).toEqual("1.0.0");
   });
   it("should not bump the dependent when bumping a tilde peerDep by a patch", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
@@ -807,7 +816,7 @@ describe("bumping peerDeps", () => {
     expect(releases[0].newVersion).toEqual("1.0.1");
   });
   it("should major bump dependent when bumping a tilde peerDep by minor", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
       releases: [{ name: "pkg-a", type: "minor" }]
@@ -827,7 +836,7 @@ describe("bumping peerDeps", () => {
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
   it("should major bump dependent when bumping a tilde peerDep by major", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
       releases: [{ name: "pkg-a", type: "major" }]
@@ -847,7 +856,7 @@ describe("bumping peerDeps", () => {
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
   it("should not bump dependent when bumping caret peerDep by none", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.changesets = [];
     setup.addChangeset({
       id: "anyway-the-windblows",
@@ -866,7 +875,7 @@ describe("bumping peerDeps", () => {
     expect(releases[0].newVersion).toEqual("1.0.0");
   });
   it("should not bump dependent when bumping caret peerDep by patch", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
@@ -880,7 +889,7 @@ describe("bumping peerDeps", () => {
     expect(releases[0].newVersion).toEqual("1.0.1");
   });
   it("should major bump dependent when bumping caret peerDep by minor", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
       releases: [{ name: "pkg-a", type: "minor" }]
@@ -900,7 +909,7 @@ describe("bumping peerDeps", () => {
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
   it("should major bump dependent when bumping caret peerDep by major", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
       releases: [{ name: "pkg-a", type: "major" }]
@@ -920,7 +929,7 @@ describe("bumping peerDeps", () => {
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
   it("should patch bump transitive dep that is only affected by peerDep bump", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addPackage("pkg-c", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
     setup.addChangeset({
@@ -952,7 +961,7 @@ describe("bumping peerDeps", () => {
 
   describe("onlyUpdatePeerDependentsWhenOutOfRange: true", () => {
     it("should not bump dependent when still in range", () => {
-      setup.updatePeerDep("pkg-b", "pkg-a", "^1.0.0");
+      setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
       setup.addChangeset({
         id: "anyway-the-windblows",
         releases: [{ name: "pkg-a", type: "minor" }]
@@ -963,8 +972,8 @@ describe("bumping peerDeps", () => {
         {
           ...defaultConfig,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: true,
-            useCalculatedVersionForSnapshots: false
+            ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            onlyUpdatePeerDependentsWhenOutOfRange: true
           }
         },
         undefined
@@ -975,8 +984,60 @@ describe("bumping peerDeps", () => {
     });
   });
 
+  describe("updateInternalDependents: always", () => {
+    it("should bump a direct dependent when a dependency package gets bumped", () => {
+      setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            updateInternalDependents: "always"
+          }
+        },
+        undefined
+      );
+
+      expect(releases.length).toBe(2);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("1.0.1");
+    });
+
+    it("should bump a transitive dependent when a dependency package gets bumped", () => {
+      setup.addPackage("pkg-c", "1.0.0");
+      setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
+      setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            updateInternalDependents: "always"
+          }
+        },
+        undefined
+      );
+
+      expect(releases.length).toBe(3);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("1.0.1");
+      expect(releases[2].name).toEqual("pkg-c");
+      expect(releases[2].newVersion).toEqual("1.0.1");
+    });
+  });
+
   it("should major bump dependent when leaving range", () => {
-    setup.updatePeerDep("pkg-b", "pkg-a", "~1.0.0");
+    setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
       releases: [{ name: "pkg-a", type: "minor" }]
@@ -988,8 +1049,8 @@ describe("bumping peerDeps", () => {
       {
         ...defaultConfig,
         ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-          onlyUpdatePeerDependentsWhenOutOfRange: true,
-          useCalculatedVersionForSnapshots: false
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          onlyUpdatePeerDependentsWhenOutOfRange: true
         }
       },
       undefined

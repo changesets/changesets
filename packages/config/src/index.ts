@@ -238,6 +238,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
     const {
       onlyUpdatePeerDependentsWhenOutOfRange,
+      updateInternalDependents,
       useCalculatedVersionForSnapshots
     } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
     if (
@@ -250,6 +251,18 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           null,
           2
         )} when the only valid values are undefined or a boolean`
+      );
+    }
+    if (
+      updateInternalDependents !== undefined &&
+      !["always", "out-of-range"].includes(updateInternalDependents)
+    ) {
+      messages.push(
+        `The \`updateInternalDependents\` option is set as ${JSON.stringify(
+          updateInternalDependents,
+          null,
+          2
+        )} but can only be 'always' or 'out-of-range'`
       );
     }
     if (
@@ -316,6 +329,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           ? false
           : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange,
+
+      updateInternalDependents:
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          ?.updateInternalDependents ?? "out-of-range",
 
       useCalculatedVersionForSnapshots:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||

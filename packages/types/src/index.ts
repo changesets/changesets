@@ -86,6 +86,7 @@ export type WrittenConfig = {
 
 export type ExperimentalOptions = {
   onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
+  updateInternalDependents?: "always" | "out-of-range";
   useCalculatedVersionForSnapshots?: boolean;
 };
 

@@ -3,7 +3,8 @@ import {
   Release,
   DependencyType,
   PackageJSON,
-  VersionType
+  VersionType,
+  Config
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease, PreInfo } from "./types";
@@ -21,20 +22,18 @@ import { incrementVersion } from "./increment";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-export default function getDependents({
+export default function determineDependents({
   releases,
   packagesByName,
   dependencyGraph,
   preInfo,
-  ignoredPackages,
-  onlyUpdatePeerDependentsWhenOutOfRange
+  config
 }: {
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
   dependencyGraph: Map<string, string[]>;
   preInfo: PreInfo | undefined;
-  ignoredPackages: Readonly<string[]>;
-  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+  config: Config;
 }): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
@@ -51,8 +50,6 @@ export default function getDependents({
         `Error in determining dependents - could not find package in repository: ${nextRelease.name}`
       );
     }
-    // For each dependent we are going to see whether it needs to be bumped because it's dependency
-    // is leaving the version range.
     pkgDependents
       .map(dependent => {
         let type: VersionType | undefined;
@@ -60,8 +57,7 @@ export default function getDependents({
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
 
-        // If the dependent is an ignored package, we want to bump its dependencies without a release, so setting type to "none"
-        if (ignoredPackages.includes(dependent)) {
+        if (config.ignore.includes(dependent)) {
           type = "none";
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(
@@ -78,7 +74,9 @@ export default function getDependents({
                 releases,
                 nextRelease,
                 preInfo,
-                onlyUpdatePeerDependentsWhenOutOfRange
+                onlyUpdatePeerDependentsWhenOutOfRange:
+                  config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                    .onlyUpdatePeerDependentsWhenOutOfRange
               })
             ) {
               type = "major";
@@ -87,11 +85,13 @@ export default function getDependents({
                 // TODO validate this - I don't think it's right anymore
                 (!releases.has(dependent) ||
                   releases.get(dependent)!.type === "none") &&
-                !semver.satisfies(
-                  incrementVersion(nextRelease, preInfo),
-                  // to deal with a * versionRange that comes from workspace:* dependencies as the wildcard will match anything
-                  versionRange === "*" ? nextRelease.oldVersion : versionRange
-                )
+                (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                  .updateInternalDependents === "always" ||
+                  !semver.satisfies(
+                    incrementVersion(nextRelease, preInfo),
+                    // to deal with a * versionRange that comes from workspace:* dependencies as the wildcard will match anything
+                    versionRange === "*" ? nextRelease.oldVersion : versionRange
+                  ))
               ) {
                 switch (depType) {
                   case "dependencies":
@@ -119,7 +119,11 @@ export default function getDependents({
         if (releases.has(dependent) && releases.get(dependent)!.type === type) {
           type = undefined;
         }
-        return { name: dependent, type, pkgJSON: dependentPackage.packageJson };
+        return {
+          name: dependent,
+          type,
+          pkgJSON: dependentPackage.packageJson
+        };
       })
       .filter(({ type }) => type)
       .forEach(
