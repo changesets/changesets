@@ -1,5 +1,16 @@
 # @changesets/changelog-github
 
+## 0.4.0
+
+### Minor Changes
+
+- [#564](https://github.com/atlassian/changesets/pull/564) [`707002d`](https://github.com/atlassian/changesets/commit/707002dec9332a2c1322522a23861e747a6bff6f) Thanks [@Andarist](https://github.com/Andarist)! - It's now possible to specify multiple authors of a change by using multiple `author: @someuser` lines.
+
+### Patch Changes
+
+- Updated dependencies [[`de2b4a5`](https://github.com/atlassian/changesets/commit/de2b4a5a7b244a37d94625bcb70ecde9dde5b612)]:
+  - @changesets/types@4.0.0
+
 ## 0.3.0
 
 ### Minor Changes
