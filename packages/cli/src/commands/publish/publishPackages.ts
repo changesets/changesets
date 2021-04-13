@@ -78,7 +78,7 @@ export default async function publishPackages({
           isRequired: Promise.resolve(true)
         };
   const unpublishedPackagesInfo = await getUnpublishedPackages(
-    publicPackages,
+    packages,
     preState
   );
 
@@ -105,31 +105,39 @@ async function publishAPackage(
   twoFactorState: TwoFactorState,
   tag: string
 ): Promise<PublishedResult> {
-  const { name, version, publishConfig } = pkg.packageJson;
+  const { name, version, publishConfig, private: isPrivate } = pkg.packageJson;
   const localAccess = publishConfig && publishConfig.access;
-  info(
-    `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
-  );
 
-  const publishDir =
-    publishConfig && publishConfig.directory
-      ? join(pkg.dir, publishConfig.directory)
-      : pkg.dir;
+  let published;
+  if (!isPrivate) {
+    info(
+      `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
+    );
 
-  const publishConfirmation = await npmUtils.publish(
-    name,
-    {
-      cwd: publishDir,
-      access: localAccess || access,
-      tag
-    },
-    twoFactorState
-  );
+    const publishDir =
+      publishConfig && publishConfig.directory
+        ? join(pkg.dir, publishConfig.directory)
+        : pkg.dir;
+
+    const publishConfirmation = await npmUtils.publish(
+      name,
+      {
+        cwd: publishDir,
+        access: localAccess || access,
+        tag
+      },
+      twoFactorState
+    );
+
+    published = publishConfirmation.published;
+  } else {
+    published = true;
+  }
 
   return {
     name,
     newVersion: version,
-    published: publishConfirmation.published
+    published
   };
 }
 
