@@ -79,8 +79,13 @@ export default async function run(
     if (tool !== "root") {
       for (const pkg of successful) {
         const tag = `${pkg.name}@${pkg.newVersion}`;
-        log("New tag: ", tag);
-        await git.tag(tag, cwd);
+        const isMissingTag = !(await git.tagExists(tag));
+        if (isMissingTag) {
+          log("New tag: ", tag);
+          await git.tag(tag, cwd);
+        } else {
+          log("Skipping existing tag: ", tag);
+        }
       }
     } else {
       const tag = `v${successful[0].newVersion}`;
