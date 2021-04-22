@@ -4,7 +4,7 @@ Changesets are designed to make your workflows easier, by allowing the person ma
 
 In addition, changesets were original designed for implementation in [bolt monorepos](https://github.com/boltpkg/bolt). As such, in a mono-repo context, changesets will handle bumping dependencies of changed packages if that is required.
 
-This guide is aimed at package maintainers adding changesets as a tool. For the information relevant to contributors, see [adding a changeset](./adding-a-changeset).
+This guide is aimed at package maintainers adding changesets as a tool. For the information relevant to contributors, see [adding a changeset](./adding-a-changeset.md).
 
 The overall tool after initialisation should lead to a loop that looks like:
 
