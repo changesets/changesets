@@ -62,6 +62,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Firebase Javascript SDK](https://github.com/firebase/firebase-js-sdk)
 - [Formik](https://github.com/formium/formik)
 - [MobX](https://github.com/mobxjs/mobx)
+- [verdaccio](https://verdaccio.org/)
 
 # Thanks/Inspiration
 
