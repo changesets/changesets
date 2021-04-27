@@ -34,6 +34,13 @@ async function tag(tagStr: string, cwd: string) {
   return gitCmd.code === 0;
 }
 
+async function tagExists(tagStr: string) {
+  const gitCmd = await spawn("git", ["tag", "-l", tagStr]);
+  const output = gitCmd.stdout.toString().trim();
+  const tagExists = !!output;
+  return tagExists;
+}
+
 // Find the commit where we diverged from `ref` at using `git merge-base`
 export async function getDivergedCommit(cwd: string, ref: string) {
   const cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
@@ -259,6 +266,7 @@ export {
   add,
   commit,
   tag,
+  tagExists,
   getChangedPackagesSinceRef,
   getChangedChangesetFilesSinceRef
 };
