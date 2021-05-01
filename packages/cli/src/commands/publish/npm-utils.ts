@@ -1,5 +1,6 @@
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
+import { PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
 import preferredPM from "preferred-pm";
 import chalk from "chalk";
@@ -23,12 +24,13 @@ function jsonParse(input: string) {
   }
 }
 
-function getCorrectRegistry() {
-  let registry =
-    process.env.npm_config_registry === "https://registry.yarnpkg.com"
-      ? undefined
-      : process.env.npm_config_registry;
-  return registry;
+function getCorrectRegistry(packageJson?: PackageJSON): string {
+  const registry =
+    packageJson?.publishConfig?.registry ?? process.env.npm_config_registry;
+
+  return !registry || registry === "https://registry.yarnpkg.com"
+    ? "https://registry.npmjs.org"
+    : registry;
 }
 
 async function getPublishTool(
@@ -69,9 +71,9 @@ export async function getTokenIsRequired() {
   return json.tfa.mode === "auth-and-writes";
 }
 
-export function getPackageInfo(pkgName: string) {
+export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestLimit(async () => {
-    info(`npm info ${pkgName}`);
+    info(`npm info ${packageJson.name}`);
 
     // Due to a couple of issues with yarnpkg, we also want to override the npm registry when doing
     // npm info.
@@ -79,13 +81,13 @@ export function getPackageInfo(pkgName: string) {
     // `publish` to behave incorrectly. It can also cause issues when publishing private packages
     // as they will always give a 404, which will tell `publish` to always try to publish.
     // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-    const envOverride = {
-      npm_config_registry: getCorrectRegistry()
-    };
-
-    let result = await spawn("npm", ["info", pkgName, "--json"], {
-      env: Object.assign({}, process.env, envOverride)
-    });
+    let result = await spawn("npm", [
+      "info",
+      packageJson.name,
+      "--registry",
+      getCorrectRegistry(packageJson),
+      "--json"
+    ]);
 
     // Github package registry returns empty string when calling npm info
     // for a non-existant package instead of a E404
@@ -100,17 +102,17 @@ export function getPackageInfo(pkgName: string) {
   });
 }
 
-export async function infoAllow404(pkgName: string) {
-  let pkgInfo = await getPackageInfo(pkgName);
-  if (pkgInfo.error && pkgInfo.error.code === "E404") {
-    warn(`Received 404 for npm info ${chalk.cyan(`"${pkgName}"`)}`);
+export async function infoAllow404(packageJson: PackageJSON) {
+  let pkgInfo = await getPackageInfo(packageJson);
+  if (pkgInfo.error?.code === "E404") {
+    warn(`Received 404 for npm info ${chalk.cyan(`"${packageJson.name}"`)}`);
     return { published: false, pkgInfo: {} };
   }
   if (pkgInfo.error) {
     error(
       `Received an unknown error code: ${
         pkgInfo.error.code
-      } for npm info ${chalk.cyan(`"${pkgName}"`)}`
+      } for npm info ${chalk.cyan(`"${packageJson.name}"`)}`
     );
     error(pkgInfo.error.summary);
     if (pkgInfo.error.detail) error(pkgInfo.error.detail);
