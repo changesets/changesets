@@ -34,6 +34,45 @@ function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   return "latest";
 }
 
+const isCustomRegistry = (registry?: string): boolean =>
+  !!registry &&
+  registry !== "https://registry.npmjs.org" &&
+  registry !== "https://registry.yarnpkg.com";
+
+const getTwoFactorState = ({
+  otp,
+  publicPackages
+}: {
+  otp?: string;
+  publicPackages: Package[];
+}): TwoFactorState => {
+  if (otp) {
+    return {
+      token: otp,
+      isRequired: Promise.resolve(true)
+    };
+  }
+
+  if (
+    isCI ||
+    publicPackages.some(pkg =>
+      isCustomRegistry(pkg.packageJson.publishConfig?.registry)
+    ) ||
+    isCustomRegistry(process.env.npm_config_registry)
+  ) {
+    return {
+      token: null,
+      isRequired: Promise.resolve(false)
+    };
+  }
+
+  return {
+    token: null,
+    // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
+    isRequired: npmUtils.getTokenIsRequired()
+  };
+};
+
 export default async function publishPackages({
   packages,
   access,
@@ -49,34 +88,10 @@ export default async function publishPackages({
 }) {
   const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]));
   const publicPackages = packages.filter(pkg => !pkg.packageJson.private);
-  let twoFactorState: TwoFactorState =
-    otp === undefined
-      ? {
-          token: null,
-          isRequired:
-            isCI ||
-            publicPackages.some(
-              x =>
-                x.packageJson.publishConfig &&
-                (x.packageJson.publishConfig as any).registry &&
-                (x.packageJson.publishConfig as any).registry !==
-                  "https://registry.npmjs.org" &&
-                (x.packageJson.publishConfig as any).registry !==
-                  "https://registry.yarnpkg.com"
-            ) ||
-            (process.env.npm_config_registry !== undefined &&
-              process.env.npm_config_registry !==
-                "https://registry.npmjs.org" &&
-              process.env.npm_config_registry !==
-                "https://registry.yarnpkg.com")
-              ? Promise.resolve(false)
-              : // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
-                npmUtils.getTokenIsRequired()
-        }
-      : {
-          token: otp,
-          isRequired: Promise.resolve(true)
-        };
+  const twoFactorState: TwoFactorState = getTwoFactorState({
+    otp,
+    publicPackages
+  });
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
     preState
@@ -106,15 +121,14 @@ async function publishAPackage(
   tag: string
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-  const localAccess = publishConfig && publishConfig.access;
+  const localAccess = publishConfig?.access;
   info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
   );
 
-  const publishDir =
-    publishConfig && publishConfig.directory
-      ? join(pkg.dir, publishConfig.directory)
-      : pkg.dir;
+  const publishDir = publishConfig?.directory
+    ? join(pkg.dir, publishConfig.directory)
+    : pkg.dir;
 
   const publishConfirmation = await npmUtils.publish(
     name,
@@ -138,9 +152,8 @@ async function getUnpublishedPackages(
   preState: PreState | undefined
 ) {
   const results: Array<PkgInfo> = await Promise.all(
-    packages.map(async pkg => {
-      const config = pkg.packageJson;
-      const response = await npmUtils.infoAllow404(config.name);
+    packages.map(async ({ packageJson }) => {
+      const response = await npmUtils.infoAllow404(packageJson);
       let publishedState: PublishedState = "never";
       if (response.published) {
         publishedState = "published";
@@ -158,8 +171,8 @@ async function getUnpublishedPackages(
       }
 
       return {
-        name: config.name,
-        localVersion: config.version,
+        name: packageJson.name,
+        localVersion: packageJson.version,
         publishedState: publishedState,
         publishedVersions: response.pkgInfo.versions || []
       };

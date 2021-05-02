@@ -51,6 +51,7 @@ export type PackageJSON = {
   publishConfig?: {
     access?: AccessType;
     directory?: string;
+    registry?: string;
   };
 };
 
