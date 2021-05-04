@@ -70,9 +70,11 @@ export default function getDependencyGraph(
       if (!match) continue;
 
       const expected = match.packageJson.version;
+      const isWorkspaceProtocol = depVersion.startsWith("workspace:");
 
-      if (depVersion.startsWith("workspace:")) {
+      if (isWorkspaceProtocol) {
         const workspaceDepVersion = depVersion.substr(10);
+        // Resolve workspace version aliases
         depVersion =
           workspaceDepVersion === "^" || workspaceDepVersion === "~"
             ? "*"
@@ -81,8 +83,10 @@ export default function getDependencyGraph(
         continue;
       }
 
+      const matchesAnyVersion = isWorkspaceProtocol && depVersion === "*";
+
       // internal dependencies only need to semver satisfy, not '==='
-      if (!semver.satisfies(expected, depVersion)) {
+      if (!matchesAnyVersion && !semver.satisfies(expected, depVersion)) {
         valid = false;
         console.error(
           `Package ${chalk.cyan(
