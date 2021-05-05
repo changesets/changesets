@@ -73,20 +73,18 @@ export default function getDependencyGraph(
       const isWorkspaceProtocol = depVersion.startsWith("workspace:");
 
       if (isWorkspaceProtocol) {
-        const workspaceDepVersion = depVersion.substr(10);
-        // Resolve workspace version aliases
-        depVersion =
-          workspaceDepVersion === "^" || workspaceDepVersion === "~"
-            ? "*"
-            : workspaceDepVersion;
+        depVersion = depVersion.substr(10);
+
+        if (depVersion === "*" || depVersion === "^" || depVersion === "~") {
+          dependencies.push(depName);
+          continue;
+        }
       } else if (opts?.bumpVersionsWithWorkspaceProtocolOnly === true) {
         continue;
       }
 
-      const matchesAnyVersion = isWorkspaceProtocol && depVersion === "*";
-
       // internal dependencies only need to semver satisfy, not '==='
-      if (!matchesAnyVersion && !semver.satisfies(expected, depVersion)) {
+      if (!semver.satisfies(expected, depVersion)) {
         valid = false;
         console.error(
           `Package ${chalk.cyan(
