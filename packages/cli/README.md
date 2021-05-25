@@ -147,7 +147,7 @@ Updates the versions for all packages described in changesets since last release
 
 Will also create/append to a CHANGELOG file for each package using the summaries from the changesets.
 
-We recommend making sure changes made from this commmand are merged back into the base branch before you run `publish`.
+We recommend making sure changes made from this command are merged back into the base branch before you run `publish`.
 
 This command will read then delete changesets on disk, ensuring that they are only used once.
 
