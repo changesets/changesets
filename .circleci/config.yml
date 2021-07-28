@@ -36,7 +36,7 @@ jobs:
           paths:
             - ~/.cache/yarn
             - node_modules
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
+          key: v2-dependencies-{{ checksum "yarn.lock" }}
 
   typescript:
     docker:
