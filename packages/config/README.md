@@ -4,6 +4,12 @@
 
 [![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/config)
 
+## Available options
+
+See [the list of available options](https://github.com/atlassian/changesets/blob/main/docs/config-file-options.md) for details about the return value from parsing the config.
+
+## Usage
+
 ```tsx
 import { parse, read, ValidationError } from "@changesets/config";
 
