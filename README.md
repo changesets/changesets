@@ -69,6 +69,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Formik](https://github.com/formium/formik)
 - [MobX](https://github.com/mobxjs/mobx)
 - [verdaccio](https://verdaccio.org/)
+- [Chakra UI](https://chakra-ui.com/)
 
 # Thanks/Inspiration
 
