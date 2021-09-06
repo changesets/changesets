@@ -1,5 +1,18 @@
 # @changesets/read
 
+## 0.5.0
+
+### Minor Changes
+
+- [#626](https://github.com/atlassian/changesets/pull/626) [`bc611cf`](https://github.com/atlassian/changesets/commit/bc611cf2104ff8170e9ea8acb10952ea8cc2a784) Thanks [@Andarist](https://github.com/Andarist)! - From now on, changeset files starting with a dot (e.g. `.ignored-temporarily.md`) will be be ignored and kept around after versioning. This allows you to prepare a changeset for something that isn't supposed to be released immediately. An example use case could involve code hidden behind a feature flag.
+
+### Patch Changes
+
+- Updated dependencies [[`e89e28a`](https://github.com/atlassian/changesets/commit/e89e28a05f5fa43307db73812a6bcd269b62ddee)]:
+  - @changesets/types@4.0.1
+  - @changesets/git@1.1.2
+  - @changesets/parse@0.3.9
+
 ## 0.4.7
 
 ### Patch Changes
