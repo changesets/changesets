@@ -13,6 +13,7 @@ import version from "./commands/version";
 import publish from "./commands/publish";
 import status from "./commands/status";
 import pre from "./commands/pre";
+import tagCommand from "./commands/tag";
 import { CliOptions } from "./types";
 
 export async function run(
@@ -170,6 +171,10 @@ export async function run(
       }
       case "status": {
         await status(cwd, { sinceMaster, since, verbose, output }, config);
+        return;
+      }
+      case "tag": {
+        await tagCommand(cwd);
         return;
       }
       case "pre": {
