@@ -130,6 +130,8 @@ The status command provides information about the changesets that currently exis
 
 - `--since` - to only display information about changesets since a specific branch or git tag (such as `main`, or the git hash of latest). While this can be used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot) to detect pull requests missing changesets, as not all pull requests need one if you are on github.
 
+> NOTE: `status` will fail if you are in the middle of running `version` or `publish`. If you want to get changeset status at the time of a version increase and publish, you need to run it immediately before running `version`. 
+
 ## pre
 
 ```
