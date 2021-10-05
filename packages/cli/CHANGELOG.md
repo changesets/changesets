@@ -1,5 +1,27 @@
 # @changesets/cli
 
+## 2.17.0
+
+### Minor Changes
+
+- [#626](https://github.com/atlassian/changesets/pull/626) [`bc611cf`](https://github.com/atlassian/changesets/commit/bc611cf2104ff8170e9ea8acb10952ea8cc2a784) Thanks [@Andarist](https://github.com/Andarist)! - From now on, changeset files starting with a dot (e.g. `.ignored-temporarily.md`) will be be ignored and kept around after versioning. This allows you to prepare a changeset for something that isn't supposed to be released immediately. An example use case could involve code hidden behind a feature flag.
+
+### Patch Changes
+
+- [#582](https://github.com/atlassian/changesets/pull/582) [`e89e28a`](https://github.com/atlassian/changesets/commit/e89e28a05f5fa43307db73812a6bcd269b62ddee) Thanks [@Andarist](https://github.com/Andarist)! - Add support for publishConfig.registry
+
+- Updated dependencies [[`bc611cf`](https://github.com/atlassian/changesets/commit/bc611cf2104ff8170e9ea8acb10952ea8cc2a784), [`e89e28a`](https://github.com/atlassian/changesets/commit/e89e28a05f5fa43307db73812a6bcd269b62ddee)]:
+  - @changesets/read@0.5.0
+  - @changesets/types@4.0.1
+  - @changesets/get-release-plan@3.0.1
+  - @changesets/apply-release-plan@5.0.1
+  - @changesets/assemble-release-plan@5.0.1
+  - @changesets/config@1.6.1
+  - @changesets/get-dependents-graph@1.2.2
+  - @changesets/git@1.1.2
+  - @changesets/pre@1.0.7
+  - @changesets/write@0.1.5
+
 ## 2.16.0
 
 ### Minor Changes
