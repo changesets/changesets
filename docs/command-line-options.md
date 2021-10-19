@@ -151,4 +151,4 @@ The tag command creates git tags for the current version of all packages. The ta
 
 This is helpful in situations where a different tool, such as `pnpm publish -r`, is used to publish packages instead of changeset. For situations where `changeset publish` is executed, running `changeset tag` is unneeded. See [issue 612](https://github.com/atlassian/changesets/issues/612) for the original inspiration behind this command.
 
-The git tags are created in the format `pkg-name@version-number` and are based on the current version number of the package.json for each package. It is expected that [`changeset version`](#version) is run before `changeset tag`, so that the package.json versions are updated before the git tags are created.
+The git tags are created in the format `pkg-name@version-number` and are based on the current version number of the package.json for each package. Note that in single-package repositories, the git tag will include `v` before the version number, for example `pkg-name@v1.0.0`. It is expected that [`changeset version`](#version) is run before `changeset tag`, so that the package.json versions are updated before the git tags are created.
