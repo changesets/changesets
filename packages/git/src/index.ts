@@ -29,7 +29,11 @@ async function commit(message: string, cwd: string) {
 async function getAllTags(cwd: string): Promise<string[]> {
   const gitCmd = await spawn("git", ["tag"], { cwd });
   if (gitCmd.code === 0) {
-    const tags = gitCmd.stdout.toString().trim().split("\n").filter(Boolean);
+    const tags = gitCmd.stdout
+      .toString()
+      .trim()
+      .split("\n")
+      .filter(Boolean);
     return tags;
   } else {
     throw new Error(gitCmd.stderr.toString());
