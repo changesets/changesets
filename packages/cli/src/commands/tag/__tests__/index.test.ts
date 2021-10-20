@@ -44,7 +44,7 @@ describe("Tag command", () => {
       cwd = await f.copy("root-only");
     });
 
-    it("Tags all packages", async () => {
+    it("Includes 'v' in git tag", async () => {
       (git.getAllTags as jest.Mock).mockReturnValue([]);
 
       expect(git.tag).not.toHaveBeenCalled();
