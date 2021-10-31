@@ -32,7 +32,9 @@ const getDependencyReleaseLine = async (
   if (dependenciesUpdated.length === 0) return "";
 
   const changesetLinks = changesets.map(
-    changeset => `- Updated dependencies [${changeset.commit}]`
+    changeset => `- Updated dependencies${
+      changeset.commit ? ` [${changeset.commit}]` : ""
+    }`
   );
 
   const updatedDepenenciesList = dependenciesUpdated.map(
