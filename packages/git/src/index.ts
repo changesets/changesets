@@ -32,8 +32,7 @@ async function getAllTags(cwd: string): Promise<string[]> {
     const tags = gitCmd.stdout
       .toString()
       .trim()
-      .split("\n")
-      .filter(Boolean);
+      .split("\n");
     return tags;
   } else {
     throw new Error(gitCmd.stderr.toString());
