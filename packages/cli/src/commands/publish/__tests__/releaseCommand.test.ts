@@ -22,10 +22,15 @@ git.tag.mockImplementation(() => Promise.resolve(true));
 
 // @ts-ignore
 publishPackages.mockImplementation(() =>
-  Promise.resolve([
-    { name: "pkg-a", newVersion: "1.1.0", published: true },
-    { name: "pkg-b", newVersion: "1.0.1", published: true },
-  ])
+  Promise.resolve({
+    publishedPackages: [
+      { name: "pkg-a", newVersion: "1.1.0", published: true },
+      { name: "pkg-b", newVersion: "1.0.1", published: true },
+    ],
+    untaggedPrivatePackages: [
+      { name: "project-a", newVersion: "2.0.5", published: true },
+    ]
+  })
 );
 
 describe("running release", () => {

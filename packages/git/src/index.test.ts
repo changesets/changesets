@@ -13,6 +13,7 @@ import {
   getChangedPackagesSinceRef,
   getChangedChangesetFilesSinceRef,
   getAllTags,
+  tagExists
 } from "./";
 
 const f = fixtures(__dirname);
@@ -223,6 +224,23 @@ describe("git", () => {
 
       expect(firstTagRef).toEqual(initialHead);
       expect(secondTagRef).toEqual(newHead);
+    });
+  });
+
+  describe("tagExists", () => {
+    beforeEach(async () => {
+      await add("packages/pkg-a/package.json", cwd);
+      await commit("added packageA package.json", cwd);
+    });
+
+    it("returns false when no tag exists", async () => {
+      expect(await tagExists("tag_name")).toBe(false);
+    });
+
+    it("should create a tag for the current head", async () => {
+      await tag("tag_message", cwd);
+
+      expect(await tagExists("tag_name")).toBe(false);
     });
   });
 

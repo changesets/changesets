@@ -66,36 +66,58 @@ export default async function run(
     tag: releaseTag,
   });
 
-  const successful = response.filter((p) => p.published);
-  const unsuccessful = response.filter((p) => !p.published);
+  const successfulNpmPublishes = response.publishedPackages.filter(
+    (p) => p.published
+  );
+  const unsuccessfulNpmPublishes = response.publishedPackages.filter(
+    (p) => !p.published
+  );
+  const untaggedPrivatePackages = response.untaggedPrivatePackages;
 
-  if (successful.length > 0) {
+  if (successfulNpmPublishes.length > 0) {
     success("packages published successfully:");
-    logReleases(successful);
+    logReleases(successfulNpmPublishes);
 
     if (gitTag) {
       // We create the tags after the push above so that we know that HEAD won't change and that pushing
       // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
       // fail if we are behind the base branch).
-      log(`Creating git tag${successful.length > 1 ? "s" : ""}...`);
+      log(`Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`);
       if (tool !== "root") {
-        for (const pkg of successful) {
+        for (const pkg of successfulNpmPublishes) {
           const tag = `${pkg.name}@${pkg.newVersion}`;
           log("New tag: ", tag);
           await git.tag(tag, cwd);
         }
       } else {
-        const tag = `v${successful[0].newVersion}`;
+        const tag = `v${successfulNpmPublishes[0].newVersion}`;
         log("New tag: ", tag);
         await git.tag(tag, cwd);
       }
     }
   }
 
-  if (unsuccessful.length > 0) {
+  if (untaggedPrivatePackages.length > 0) {
+    success("found untagged projects:");
+    logReleases(untaggedPrivatePackages);
+
+    if (tool !== "root") {
+      for (const pkg of untaggedPrivatePackages) {
+        const tag = `${pkg.name}@${pkg.newVersion}`;
+        log("New tag: ", tag);
+        await git.tag(tag, cwd);
+      }
+    } else {
+      const tag = `v${untaggedPrivatePackages[0].newVersion}`;
+      log("New tag: ", tag);
+      await git.tag(tag, cwd);
+    }
+  }
+
+  if (unsuccessfulNpmPublishes.length > 0) {
     error("packages failed to publish:");
 
-    logReleases(unsuccessful);
+    logReleases(unsuccessfulNpmPublishes);
     throw new ExitError(1);
   }
 }

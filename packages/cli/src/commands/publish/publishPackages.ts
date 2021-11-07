@@ -1,6 +1,7 @@
 import { join } from "path";
 import semver from "semver";
 import chalk from "chalk";
+import * as git from "@changesets/git";
 import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { info, warn } from "@changesets/logger";
@@ -85,9 +86,13 @@ export default async function publishPackages({
   otp?: string;
   preState: PreState | undefined;
   tag?: string;
-}) {
+}): Promise<{
+  publishedPackages: PublishedResult[];
+  untaggedPrivatePackages: PublishedResult[];
+}> {
   const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
   const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
+  const privatePackages = packages.filter(pkg => pkg.packageJson.private);
   const twoFactorState: TwoFactorState = getTwoFactorState({
     otp,
     publicPackages,
@@ -97,11 +102,7 @@ export default async function publishPackages({
     preState
   );
 
-  if (unpublishedPackagesInfo.length === 0) {
-    warn("No unpublished packages to publish");
-  }
-
-  return Promise.all(
+  const npmPackagePublish = Promise.all(
     unpublishedPackagesInfo.map((pkgInfo) => {
       let pkg = packagesByName.get(pkgInfo.name)!;
       return publishAPackage(
@@ -112,6 +113,52 @@ export default async function publishPackages({
       );
     })
   );
+
+  const untaggedPrivatePackageReleases = getUntaggedPrivatePackages(
+    privatePackages
+  );
+
+  const result: {
+    publishedPackages: PublishedResult[];
+    untaggedPrivatePackages: PublishedResult[];
+  } = {
+    publishedPackages: await npmPackagePublish,
+    untaggedPrivatePackages: await untaggedPrivatePackageReleases
+  };
+
+  if (
+    result.publishedPackages.length === 0 &&
+    result.untaggedPrivatePackages.length === 0
+  ) {
+    warn("No unpublished projects to publish");
+  }
+
+  return result;
+}
+
+async function getUntaggedPrivatePackages(privatePackages: Package[]) {
+  const packageWithTags = await Promise.all(
+    privatePackages.map(async privatePkg => {
+      const tagName = `${privatePkg.packageJson.name}@${privatePkg.packageJson.version}`;
+      const isMissingTag = !(await git.tagExists(tagName));
+
+      return { pkg: privatePkg, isMissingTag };
+    })
+  );
+
+  const untagged: PublishedResult[] = [];
+
+  for (const packageWithTag of packageWithTags) {
+    if (packageWithTag.isMissingTag) {
+      untagged.push({
+        name: packageWithTag.pkg.packageJson.name,
+        newVersion: packageWithTag.pkg.packageJson.version,
+        published: false
+      });
+    }
+  }
+
+  return untagged;
 }
 
 async function publishAPackage(
