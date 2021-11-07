@@ -26,6 +26,23 @@ async function commit(message: string, cwd: string) {
   return gitCmd.code === 0;
 }
 
+async function getAllTags(cwd: string): Promise<Set<string>> {
+  const gitCmd = await spawn("git", ["tag"], { cwd });
+
+  if (gitCmd.code !== 0) {
+    throw new Error(gitCmd.stderr.toString());
+  }
+
+  const tags = gitCmd.stdout
+    .toString()
+    .trim()
+    .split("\n");
+
+  console.log("gonna return set", new Set(tags));
+
+  return new Set(tags);
+}
+
 // used to create a single tag at a time for the current head only
 async function tag(tagStr: string, cwd: string) {
   // NOTE: it's important we use the -m flag otherwise 'git push --follow-tags' wont actually push
@@ -260,5 +277,6 @@ export {
   commit,
   tag,
   getChangedPackagesSinceRef,
-  getChangedChangesetFilesSinceRef
+  getChangedChangesetFilesSinceRef,
+  getAllTags
 };

@@ -11,7 +11,8 @@ import {
   tag,
   getDivergedCommit,
   getChangedPackagesSinceRef,
-  getChangedChangesetFilesSinceRef
+  getChangedChangesetFilesSinceRef,
+  getAllTags
 } from "./";
 
 const f = fixtures(__dirname);
@@ -161,6 +162,21 @@ describe("git", () => {
       const commitMessage = gitCmd.stdout.toString().trim();
 
       expect(commitMessage).toEqual("added packageA package.json");
+    });
+  });
+
+  describe("getAllTags", () => {
+    beforeEach(async () => {
+      await add("packages/pkg-a/package.json", cwd);
+      await commit("added packageA package.json", cwd);
+    });
+
+    it("should retrieve all git tags", async () => {
+      await tag("test_tag", cwd);
+      await tag("test_tag2", cwd);
+      const tags = await getAllTags(cwd);
+      expect(tags).toContain("test_tag");
+      expect(tags).toContain("test_tag2");
     });
   });
 
