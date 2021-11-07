@@ -70,6 +70,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [MobX](https://github.com/mobxjs/mobx)
 - [verdaccio](https://verdaccio.org/)
 - [Chakra UI](https://chakra-ui.com/)
+- [Astro](https://astro.build)
 
 # Thanks/Inspiration
 
