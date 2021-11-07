@@ -3,4 +3,4 @@
 "@changesets/git": minor
 ---
 
-Add new getAllTags api to @changesets/git
+A new `getAllTags` utility has been added.

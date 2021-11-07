@@ -26,17 +26,21 @@ async function commit(message: string, cwd: string) {
   return gitCmd.code === 0;
 }
 
-async function getAllTags(cwd: string): Promise<string[]> {
+async function getAllTags(cwd: string): Promise<Set<string>> {
   const gitCmd = await spawn("git", ["tag"], { cwd });
-  if (gitCmd.code === 0) {
-    const tags = gitCmd.stdout
-      .toString()
-      .trim()
-      .split("\n");
-    return tags;
-  } else {
+
+  if (gitCmd.code !== 0) {
     throw new Error(gitCmd.stderr.toString());
   }
+
+  const tags = gitCmd.stdout
+    .toString()
+    .trim()
+    .split("\n");
+
+  console.log("gonna return set", new Set(tags));
+
+  return new Set(tags);
 }
 
 // used to create a single tag at a time for the current head only

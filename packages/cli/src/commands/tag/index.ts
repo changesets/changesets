@@ -8,10 +8,12 @@ export default async function run(cwd: string) {
   const allExistingTags = await git.getAllTags(cwd);
 
   for (const pkg of packages) {
-    const versionPrefix = tool === "root" ? "v" : "";
-    const tag = `${pkg.packageJson.name}@${versionPrefix}${pkg.packageJson.version}`;
+    const tag =
+      tool !== "root"
+        ? `${pkg.packageJson.name}@${pkg.packageJson.version}`
+        : `v${pkg.packageJson.version}`;
 
-    if (allExistingTags.includes(tag)) {
+    if (allExistingTags.has(tag)) {
       log("Skipping tag (already exists): ", tag);
     } else {
       log("New tag: ", tag);
