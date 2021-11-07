@@ -34,7 +34,7 @@ If you want a package from being published to npm at all, set `private: true` in
 
 The branch to which changesets will make comparisons. A number of internal changesets features use git to compare present changesets against another branch. This defaults what branch will be used for these comparisons. This should generally set to the major branch you merge changes into. Commands that use this information accept a `--since` option which can be used to override this.
 
-> We recommend changing the name of your `master` branch to help make coding a more inclusive experience
+> To help make coding a more inclusive experience, we recommend changing the name of your `master` branch to `main`.
 
 ## `ignore` (array of packages)
 
