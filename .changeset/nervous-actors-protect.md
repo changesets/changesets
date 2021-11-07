@@ -1,6 +1,5 @@
 ---
 "@changesets/cli": minor
-"@changesets/git": minor
 ---
 
 The new `changeset tag` command has been added. It can be used to create git tags for all packages.

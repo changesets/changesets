@@ -1,5 +1,4 @@
 ---
-"@changesets/cli": minor
 "@changesets/git": minor
 ---
 
