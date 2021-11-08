@@ -38,8 +38,6 @@ async function getAllTags(cwd: string): Promise<Set<string>> {
     .trim()
     .split("\n");
 
-  console.log("gonna return set", new Set(tags));
-
   return new Set(tags);
 }
 
