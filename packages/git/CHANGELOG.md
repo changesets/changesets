@@ -1,5 +1,11 @@
 # @changesets/git
 
+## 1.2.0
+
+### Minor Changes
+
+- [#634](https://github.com/atlassian/changesets/pull/634) [`2b49c39`](https://github.com/atlassian/changesets/commit/2b49c390a7cf24ce859ac932b432eb6d8f55c98b) Thanks [@joeldenning](https://github.com/joeldenning)! - A new `getAllTags` utility has been added.
+
 ## 1.1.2
 
 ### Patch Changes
