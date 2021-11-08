@@ -12,7 +12,7 @@ const DEPENDENCY_TYPES = [
 ] as const;
 
 const getAllDependencies = (config: PackageJSON) => {
-  const allDependencies = new Map();
+  const allDependencies = new Map<string, string>();
 
   for (const type of DEPENDENCY_TYPES) {
     const deps = config[type];
@@ -70,9 +70,15 @@ export default function getDependencyGraph(
       if (!match) continue;
 
       const expected = match.packageJson.version;
+      const usesWorkspaceRange = depVersion.startsWith("workspace:");
 
-      if (depVersion.startsWith("workspace:")) {
-        depVersion = depVersion.substr(10);
+      if (usesWorkspaceRange) {
+        depVersion = depVersion.replace(/^workspace:/, "");
+
+        if (depVersion === "*" || depVersion === "^" || depVersion === "~") {
+          dependencies.push(depName);
+          continue;
+        }
       } else if (opts?.bumpVersionsWithWorkspaceProtocolOnly === true) {
         continue;
       }

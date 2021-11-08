@@ -15,6 +15,7 @@ const { input, flags } = meow(
     publish [--otp=code]
     status [--since <branch>] [--verbose] [--output=JSON_FILE.json]
     pre <enter|exit> <tag>
+    tag
     `,
   {
     flags: {
