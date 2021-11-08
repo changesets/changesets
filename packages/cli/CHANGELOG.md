@@ -1,5 +1,30 @@
 # @changesets/cli
 
+## 2.18.0
+
+### Minor Changes
+
+- [#634](https://github.com/atlassian/changesets/pull/634) [`2b49c39`](https://github.com/atlassian/changesets/commit/2b49c390a7cf24ce859ac932b432eb6d8f55c98b) Thanks [@joeldenning](https://github.com/joeldenning)! - The new `changeset tag` command has been added. It can be used to create git tags for all packages.
+
+  This is helpful in situations where a different tool is used to publish packages instead of Changesets. For situations where `changeset publish` is executed, running `changeset tag` is not needed.
+
+  Note that it is expected that `changeset version` is run before `changeset tag`, so that the `package.json` versions are updated before the git tags are created. This command also doesn't take any configuration into account - it simply create tags for all packages with whatever version that is currently in their respective `package.json`.
+
+### Patch Changes
+
+- [#585](https://github.com/atlassian/changesets/pull/585) [`74dda8c`](https://github.com/atlassian/changesets/commit/74dda8c0d8bd1741ca7b19f0ccb37b2330dc9549) Thanks [@javier-garcia-meteologica](https://github.com/javier-garcia-meteologica)! - Add support for `workspace:^` and `workspace:~` dependency ranges.
+
+* [#660](https://github.com/atlassian/changesets/pull/660) [`5413f3e`](https://github.com/atlassian/changesets/commit/5413f3e772bf867234922b0691e3c58c1864412d) Thanks [@tmkx](https://github.com/tmkx)! - Fixed an issue with adding `[undefined]` to the generated changelog when the commit adding a changeset file could not be found. This could have happened when running `changeset add && changeset version` in a single command and when using the default changelog generator.
+
+* Updated dependencies [[`2b49c39`](https://github.com/atlassian/changesets/commit/2b49c390a7cf24ce859ac932b432eb6d8f55c98b), [`74dda8c`](https://github.com/atlassian/changesets/commit/74dda8c0d8bd1741ca7b19f0ccb37b2330dc9549)]:
+  - @changesets/git@1.2.0
+  - @changesets/apply-release-plan@5.0.2
+  - @changesets/get-dependents-graph@1.2.3
+  - @changesets/read@0.5.1
+  - @changesets/assemble-release-plan@5.0.2
+  - @changesets/config@1.6.2
+  - @changesets/get-release-plan@3.0.2
+
 ## 2.17.0
 
 ### Minor Changes

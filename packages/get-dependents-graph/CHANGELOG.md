@@ -1,5 +1,11 @@
 # @changesets/get-dependents-graph
 
+## 1.2.3
+
+### Patch Changes
+
+- [#585](https://github.com/atlassian/changesets/pull/585) [`74dda8c`](https://github.com/atlassian/changesets/commit/74dda8c0d8bd1741ca7b19f0ccb37b2330dc9549) Thanks [@javier-garcia-meteologica](https://github.com/javier-garcia-meteologica)! - Add support for `workspace:^` and `workspace:~` dependency ranges.
+
 ## 1.2.2
 
 ### Patch Changes

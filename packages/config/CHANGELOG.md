@@ -1,5 +1,12 @@
 # @changesets/config
 
+## 1.6.2
+
+### Patch Changes
+
+- Updated dependencies [[`74dda8c`](https://github.com/atlassian/changesets/commit/74dda8c0d8bd1741ca7b19f0ccb37b2330dc9549)]:
+  - @changesets/get-dependents-graph@1.2.3
+
 ## 1.6.1
 
 ### Patch Changes

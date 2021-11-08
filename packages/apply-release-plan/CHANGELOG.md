@@ -1,5 +1,15 @@
 # @changesets/apply-release-plan
 
+## 5.0.2
+
+### Patch Changes
+
+- [#585](https://github.com/atlassian/changesets/pull/585) [`74dda8c`](https://github.com/atlassian/changesets/commit/74dda8c0d8bd1741ca7b19f0ccb37b2330dc9549) Thanks [@javier-garcia-meteologica](https://github.com/javier-garcia-meteologica)! - Add support for `workspace:^` and `workspace:~` dependency ranges.
+
+- Updated dependencies [[`2b49c39`](https://github.com/atlassian/changesets/commit/2b49c390a7cf24ce859ac932b432eb6d8f55c98b)]:
+  - @changesets/git@1.2.0
+  - @changesets/config@1.6.2
+
 ## 5.0.1
 
 ### Patch Changes

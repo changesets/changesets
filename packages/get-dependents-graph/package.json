@@ -1,6 +1,6 @@
 {
   "name": "@changesets/get-dependents-graph",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Get the graph of dependents in a monorepo",
   "main": "dist/get-dependents-graph.cjs.js",
   "module": "dist/get-dependents-graph.esm.js",
