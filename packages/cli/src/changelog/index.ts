@@ -7,8 +7,7 @@ import {
 
 const getReleaseLine = async (
   changeset: NewChangesetWithCommit,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  type: VersionType
+  _type: VersionType
 ) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
