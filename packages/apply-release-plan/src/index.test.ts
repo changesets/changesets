@@ -1612,7 +1612,7 @@ describe("apply release plan", () => {
       ### Patch Changes
 
       - Hey, let's have fun with testing!
-      - Updated dependencies [undefined]
+      - Updated dependencies
         - pkg-b@1.2.1`);
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
@@ -1621,7 +1621,7 @@ describe("apply release plan", () => {
       ### Patch Changes
 
       - Hey, let's have fun with testing!
-      - Updated dependencies [undefined]
+      - Updated dependencies
         - pkg-a@1.0.4`);
     });
 
@@ -1791,7 +1791,7 @@ describe("apply release plan", () => {
       ### Patch Changes
 
       - Hey, let's have fun with testing!
-      - Updated dependencies [undefined]
+      - Updated dependencies
         - pkg-c@2.1.0`);
 
       expect(readmeC.trim()).toEqual(outdent`# pkg-c
@@ -1890,7 +1890,7 @@ describe("apply release plan", () => {
       ### Patch Changes
 
       - Hey, let's have fun with testing!
-      - Updated dependencies [undefined]
+      - Updated dependencies
         - pkg-c@2.0.1`);
 
       expect(readmeC.trim()).toEqual(outdent`# pkg-c

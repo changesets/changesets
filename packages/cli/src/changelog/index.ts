@@ -7,8 +7,7 @@ import {
 
 const getReleaseLine = async (
   changeset: NewChangesetWithCommit,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  type: VersionType
+  _type: VersionType
 ) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
@@ -32,7 +31,10 @@ const getDependencyReleaseLine = async (
   if (dependenciesUpdated.length === 0) return "";
 
   const changesetLinks = changesets.map(
-    changeset => `- Updated dependencies [${changeset.commit}]`
+    changeset =>
+      `- Updated dependencies${
+        changeset.commit ? ` [${changeset.commit}]` : ""
+      }`
   );
 
   const updatedDepenenciesList = dependenciesUpdated.map(
