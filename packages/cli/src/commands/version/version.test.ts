@@ -391,7 +391,7 @@ describe("workspace range", () => {
       },
       {
         name: "pkg-c",
-        version: "1.0.0-alpha.1"
+        version: "1.0.0"
       }
     ]);
   });
@@ -1289,7 +1289,7 @@ describe("pre", () => {
       },
       {
         name: "pkg-c",
-        version: "1.0.0-alpha.2"
+        version: "1.0.1-alpha.0"
       }
     ]);
   });

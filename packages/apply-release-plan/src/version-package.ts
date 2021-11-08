@@ -59,7 +59,10 @@ export default function versionPackage(
           continue;
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
         if (usesWorkspaceRange) {
-          const workspaceDepVersion = depCurrentVersion.substr(10);
+          const workspaceDepVersion = depCurrentVersion.replace(
+            /^workspace:/,
+            ""
+          );
           depCurrentVersion =
             workspaceDepVersion === "^" || workspaceDepVersion === "~"
               ? "*"

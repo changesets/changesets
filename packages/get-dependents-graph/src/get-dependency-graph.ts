@@ -70,10 +70,10 @@ export default function getDependencyGraph(
       if (!match) continue;
 
       const expected = match.packageJson.version;
-      const isWorkspaceProtocol = depVersion.startsWith("workspace:");
+      const usesWorkspaceRange = depVersion.startsWith("workspace:");
 
-      if (isWorkspaceProtocol) {
-        depVersion = depVersion.substr(10);
+      if (usesWorkspaceRange) {
+        depVersion = depVersion.replace(/^workspace:/, "");
 
         if (depVersion === "*" || depVersion === "^" || depVersion === "~") {
           dependencies.push(depName);

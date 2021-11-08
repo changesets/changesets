@@ -4,4 +4,4 @@
 "@changesets/get-dependents-graph": patch
 ---
 
-Add support for workspace:^ and workspace:~
+Add support for `workspace:^` and `workspace:~` dependency ranges.
