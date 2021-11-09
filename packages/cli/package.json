@@ -26,6 +26,7 @@
     "@babel/runtime": "^7.10.4",
     "@changesets/apply-release-plan": "^5.0.2",
     "@changesets/assemble-release-plan": "^5.0.2",
+    "@changesets/changelog-git": "^0.1.8",
     "@changesets/config": "^1.6.2",
     "@changesets/errors": "^0.1.4",
     "@changesets/get-dependents-graph": "^1.2.3",
