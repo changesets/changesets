@@ -5,7 +5,7 @@ The command line for changesets is the main way of interracting with it. There a
 - init
 - add [--empty][--open]
 - version [--ignore, --snapshot]
-- publish [--otp=code, --tag]
+- publish [--otp=code, --tag, --dry-run]
 - status [--since-master --verbose --output=JSON_FILE.json]
 - pre [exit|enter {tag}]
 - tag
@@ -98,16 +98,18 @@ Snapshot is used for a special kind of publishing for testing - it creates tempo
 ## publish
 
 ```
-changeset publish [--otp={token}]
+changeset publish [--otp={token}] [--tag TAGNAME] [--dry-run]
 ```
 
 This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`.
 
-Because this command assumes that last commit is the release commit you should not commit any changes between calling version and publish. These commands are separate to enable you to check if the releases changes are acurate.
+Because this command assumes that last commit is the release commit you should not commit any changes between calling version and publish. These commands are separate to enable you to check if the releases changes are accurate.
 
 `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the --otp option.
 
 `--tag TAGNAME` - for packages that are published, the chosen tag will be used instead of `latest`, allowing you to publish changes intended for testing and validation, not main consumption. This will most likely be used with [snapshot releases](./snapshot-releases.md).
+
+`--dry-run` - simulates publishing npm packages without actually publishing them to the npm registry.
 
 ### Git Tags
 

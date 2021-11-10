@@ -12,7 +12,7 @@ const { input, flags } = meow(
     init
     add [--empty] [--open]
     version [--ignore]
-    publish [--otp=code]
+    publish [--otp=code] [--tag TAGNAME] [--dry-run]
     status [--since <branch>] [--verbose] [--output=JSON_FILE.json]
     pre <enter|exit> <tag>
     tag
@@ -47,6 +47,9 @@ const { input, flags } = meow(
         type: "string"
       },
       open: {
+        type: "boolean"
+      },
+      dryRun: {
         type: "boolean"
       }
     }

@@ -39,7 +39,7 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
 
 export default async function run(
   cwd: string,
-  { otp, tag }: { otp?: string; tag?: string },
+  { otp, tag, dryRun }: { otp?: string; tag?: string; dryRun?: boolean },
   config: Config
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
@@ -63,7 +63,8 @@ export default async function run(
     access: config.access,
     otp,
     preState,
-    tag: releaseTag
+    tag: releaseTag,
+    dryRun
   });
 
   const successful = response.filter(p => p.published);

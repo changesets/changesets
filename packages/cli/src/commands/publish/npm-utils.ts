@@ -147,7 +147,7 @@ export let getOtpCode = async (twoFactorState: TwoFactorState) => {
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
   pkgName: string,
-  opts: { cwd: string; access?: string; tag: string },
+  opts: { cwd: string; access?: string; tag: string; dryRun: boolean },
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   let publishTool = await getPublishTool(opts.cwd);
@@ -159,6 +159,9 @@ async function internalPublish(
   }
   if (publishTool.name === "pnpm" && publishTool.shouldAddNoGitChecks) {
     publishFlags.push("--no-git-checks");
+  }
+  if (opts.dryRun) {
+    publishFlags.push("--dry-run");
   }
 
   // Due to a super annoying issue in yarn, we have to manually override this env variable
@@ -207,7 +210,7 @@ async function internalPublish(
 
 export function publish(
   pkgName: string,
-  opts: { cwd: string; access?: string; tag: string },
+  opts: { cwd: string; access?: string; tag: string; dryRun: boolean },
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   // If there are many packages to be published, it's better to limit the

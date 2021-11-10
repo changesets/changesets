@@ -82,7 +82,8 @@ export async function run(
       ignore,
       snapshot,
       tag,
-      open
+      open,
+      dryRun
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -166,7 +167,7 @@ export async function run(
         return;
       }
       case "publish": {
-        await publish(cwd, { otp, tag }, config);
+        await publish(cwd, { otp, tag, dryRun }, config);
         return;
       }
       case "status": {

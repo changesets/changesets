@@ -78,13 +78,15 @@ export default async function publishPackages({
   access,
   otp,
   preState,
-  tag
+  tag,
+  dryRun = false
 }: {
   packages: Package[];
   access: AccessType;
   otp?: string;
   preState: PreState | undefined;
   tag?: string;
+  dryRun?: boolean;
 }) {
   const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]));
   const publicPackages = packages.filter(pkg => !pkg.packageJson.private);
@@ -108,7 +110,8 @@ export default async function publishPackages({
         pkg,
         access,
         twoFactorState,
-        getReleaseTag(pkgInfo, preState, tag)
+        getReleaseTag(pkgInfo, preState, tag),
+        dryRun
       );
     })
   );
@@ -118,7 +121,8 @@ async function publishAPackage(
   pkg: Package,
   access: AccessType,
   twoFactorState: TwoFactorState,
-  tag: string
+  tag: string,
+  dryRun: boolean
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
   const localAccess = publishConfig?.access;
@@ -135,7 +139,8 @@ async function publishAPackage(
     {
       cwd: publishDir,
       access: localAccess || access,
-      tag
+      tag,
+      dryRun
     },
     twoFactorState
   );
