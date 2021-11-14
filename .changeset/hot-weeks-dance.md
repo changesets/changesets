@@ -2,4 +2,4 @@
 "@changesets/types": patch
 ---
 
-Add resolutions to packagejson type definition
+Add `resolutions` to the `PackageJSON` type.
