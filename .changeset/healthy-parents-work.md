@@ -10,4 +10,4 @@
 "@changesets/release-utils": patch
 ---
 
-Fixed getting correct packages in pnpm workspaces with exclude rules.
+Upgraded `@manypkg/get-packages` dependency to fix getting correct packages in pnpm workspaces with exclude rules.
