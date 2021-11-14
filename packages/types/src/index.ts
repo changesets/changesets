@@ -47,6 +47,7 @@ export type PackageJSON = {
   peerDependencies?: { [key: string]: string };
   devDependencies?: { [key: string]: string };
   optionalDependencies?: { [key: string]: string };
+  resolutions?: { [key: string]: string };
   private?: boolean;
   publishConfig?: {
     access?: AccessType;
