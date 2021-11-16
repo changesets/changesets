@@ -16,6 +16,11 @@ export function getDependentsGraph(
     [key: string]: { pkg: Package; dependents: Array<string> };
   } = {};
 
+  dependentsLookup[packages.root.packageJson.name] = {
+    dependents: [],
+    pkg: packages.root
+  };
+
   packages.packages.forEach(pkg => {
     dependentsLookup[pkg.packageJson.name] = {
       pkg,
