@@ -9,6 +9,7 @@ import semver from "semver";
 import { askQuestion } from "../../utils/cli-utilities";
 import isCI from "../../utils/isCI";
 import { TwoFactorState } from "../../utils/types";
+import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
 
 const npmRequestLimit = pLimit(40);
 const npmPublishLimit = pLimit(10);
@@ -166,41 +167,47 @@ async function internalPublish(
   const envOverride = {
     npm_config_registry: getCorrectRegistry()
   };
-  let { stdout } = await spawn(
+  let { code, stdout, stderr } = await spawn(
     publishTool.name,
     ["publish", opts.cwd, "--json", ...publishFlags],
     {
       env: Object.assign({}, process.env, envOverride)
     }
   );
-  // New error handling. NPM's --json option is included alongside the `prepublish and
-  // `postpublish` contents in terminal. We want to handle this as best we can but it has
-  // some struggles
-  // Note that both pre and post publish hooks are printed before the json out, so this works.
-  let json = jsonParse(stdout.toString().replace(/[^{]*/, ""));
+  if (code !== 0) {
+    // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
+    // We want to handle this as best we can but it has some struggles:
+    // - output of those lifecycle scripts can contain JSON
+    // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
+    // Note that the `--json` output is always printed at the end so this should work
+    let json =
+      getLastJsonObjectFromString(stderr.toString()) ||
+      getLastJsonObjectFromString(stdout.toString());
 
-  if (json.error) {
-    // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
-    if (
-      (json.error.code === "EOTP" ||
-        (json.error.code === "E401" &&
-          json.error.detail.includes("--otp=<code>"))) &&
-      !isCI
-    ) {
-      if (twoFactorState.token !== null) {
-        // the current otp code must be invalid since it errored
-        twoFactorState.token = null;
+    if (json.error) {
+      // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
+      if (
+        (json.error.code === "EOTP" ||
+          (json.error.code === "E401" &&
+            json.error.detail.includes("--otp=<code>"))) &&
+        !isCI
+      ) {
+        if (twoFactorState.token !== null) {
+          // the current otp code must be invalid since it errored
+          twoFactorState.token = null;
+        }
+        // just in case this isn't already true
+        twoFactorState.isRequired = Promise.resolve(true);
+        return internalPublish(pkgName, opts, twoFactorState);
       }
-      // just in case this isn't already true
-      twoFactorState.isRequired = Promise.resolve(true);
-      return internalPublish(pkgName, opts, twoFactorState);
+      error(
+        `an error occurred while publishing ${pkgName}: ${json.error.code}`,
+        json.error.summary,
+        json.error.detail ? "\n" + json.error.detail : ""
+      );
+      error(stderr);
+      return { published: false };
     }
-    error(
-      `an error occurred while publishing ${pkgName}: ${json.error.code}`,
-      json.error.summary,
-      json.error.detail ? "\n" + json.error.detail : ""
-    );
-    return { published: false };
   }
   return { published: true };
 }
