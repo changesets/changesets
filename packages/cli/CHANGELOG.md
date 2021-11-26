@@ -1,5 +1,27 @@
 # @changesets/cli
 
+## 2.18.1
+
+### Patch Changes
+
+- [#676](https://github.com/atlassian/changesets/pull/676) [`d8f0e68`](https://github.com/atlassian/changesets/commit/d8f0e6851bddf307b70b03e23b50e0b9410aafa7) Thanks [@Andarist](https://github.com/Andarist)! - Improved compatibility with npm 7+ since they've started to print errors to the `stderr` (where previously they were printed to `stdout`) when using `npm publish --json`.
+
+* [#676](https://github.com/atlassian/changesets/pull/676) [`d8f0e68`](https://github.com/atlassian/changesets/commit/d8f0e6851bddf307b70b03e23b50e0b9410aafa7) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an internal issue that prevented `npm publish --json`'s output to be handled properly. This makes sure that unrelated JSONs printed by lifecycle scripts don't interfere with our logic.
+
+- [#667](https://github.com/atlassian/changesets/pull/667) [`fe8db75`](https://github.com/atlassian/changesets/commit/fe8db7500f81caea9064f8bec02bcb77e0fd8fce) Thanks [@fz6m](https://github.com/fz6m)! - Upgraded `@manypkg/get-packages` dependency to fix getting correct packages in pnpm workspaces with exclude rules.
+
+- Updated dependencies [[`fe8db75`](https://github.com/atlassian/changesets/commit/fe8db7500f81caea9064f8bec02bcb77e0fd8fce), [`9a993ba`](https://github.com/atlassian/changesets/commit/9a993ba09629c1620d749432520470cec49d3a96)]:
+  - @changesets/apply-release-plan@5.0.3
+  - @changesets/assemble-release-plan@5.0.3
+  - @changesets/config@1.6.3
+  - @changesets/get-dependents-graph@1.2.4
+  - @changesets/get-release-plan@3.0.3
+  - @changesets/git@1.2.1
+  - @changesets/pre@1.0.8
+  - @changesets/types@4.0.2
+  - @changesets/read@0.5.2
+  - @changesets/write@0.1.6
+
 ## 2.18.0
 
 ### Minor Changes
