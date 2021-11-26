@@ -1,5 +1,18 @@
 # @changesets/get-release-plan
 
+## 3.0.3
+
+### Patch Changes
+
+- [#667](https://github.com/atlassian/changesets/pull/667) [`fe8db75`](https://github.com/atlassian/changesets/commit/fe8db7500f81caea9064f8bec02bcb77e0fd8fce) Thanks [@fz6m](https://github.com/fz6m)! - Upgraded `@manypkg/get-packages` dependency to fix getting correct packages in pnpm workspaces with exclude rules.
+
+- Updated dependencies [[`fe8db75`](https://github.com/atlassian/changesets/commit/fe8db7500f81caea9064f8bec02bcb77e0fd8fce), [`9a993ba`](https://github.com/atlassian/changesets/commit/9a993ba09629c1620d749432520470cec49d3a96)]:
+  - @changesets/assemble-release-plan@5.0.3
+  - @changesets/config@1.6.3
+  - @changesets/pre@1.0.8
+  - @changesets/types@4.0.2
+  - @changesets/read@0.5.2
+
 ## 3.0.2
 
 ### Patch Changes

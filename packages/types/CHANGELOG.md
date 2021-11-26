@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 4.0.2
+
+### Patch Changes
+
+- [#668](https://github.com/atlassian/changesets/pull/668) [`9a993ba`](https://github.com/atlassian/changesets/commit/9a993ba09629c1620d749432520470cec49d3a96) Thanks [@marcodejongh](https://github.com/marcodejongh)! - Add `resolutions` to the `PackageJSON` type.
+
 ## 4.0.1
 
 ### Patch Changes
