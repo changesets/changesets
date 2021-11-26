@@ -174,7 +174,11 @@ async function internalPublish(
     !isCI &&
     // yarn berry doesn't accept `--otp` and it asks for it on its own
     publishTool.name !== "yarn";
-  let publishFlags = opts.access ? ["--access", opts.access] : [];
+  let publishFlags = publishTool.name !== "yarn" ? ["--json"] : [];
+
+  if (opts.access) {
+    publishFlags.push("--access", opts.access);
+  }
   publishFlags.push("--tag", opts.tag);
 
   if (shouldHandleOtp && (await twoFactorState.isRequired)) {
@@ -189,7 +193,7 @@ async function internalPublish(
   };
   let { code, stdout, stderr } = await spawn(
     publishTool.name,
-    [...publishTool.args, "--json", ...publishFlags, ...publishTool.flags],
+    [...publishTool.args, ...publishFlags, ...publishTool.flags],
     {
       cwd: opts.cwd,
       env: Object.assign({}, process.env, envOverride)
