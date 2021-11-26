@@ -184,7 +184,7 @@ async function internalPublish(
       getLastJsonObjectFromString(stderr.toString()) ||
       getLastJsonObjectFromString(stdout.toString());
 
-    if (json.error) {
+    if (json?.error) {
       // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
       if (
         (json.error.code === "EOTP" ||
@@ -205,9 +205,10 @@ async function internalPublish(
         json.error.summary,
         json.error.detail ? "\n" + json.error.detail : ""
       );
-      error(stderr);
-      return { published: false };
     }
+
+    error(stderr);
+    return { published: false };
   }
   return { published: true };
 }
