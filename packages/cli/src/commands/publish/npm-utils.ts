@@ -189,14 +189,9 @@ async function internalPublish(
   };
   let { code, stdout, stderr } = await spawn(
     publishTool.name,
-    [
-      ...publishTool.args,
-      opts.cwd,
-      "--json",
-      ...publishFlags,
-      ...publishTool.flags
-    ],
+    [...publishTool.args, "--json", ...publishFlags, ...publishTool.flags],
     {
+      cwd: opts.cwd,
       env: Object.assign({}, process.env, envOverride)
     }
   );
