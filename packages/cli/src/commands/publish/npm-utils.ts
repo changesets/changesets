@@ -56,7 +56,7 @@ async function getPublishTool(
       }
       return { name: "pnpm", args: ["publish"], flags: ["--no-git-checks"] };
     case "yarn":
-      // classic yarn doesn't do anything special when publishing, let's stick to the npm client in such a case
+      // Yarn Classic doesn't do anything special when publishing, let's stick to the npm client in such a case
       if (parsed.major < 2) {
         return { name: "npm", args: ["publish"], flags: [] };
       }
