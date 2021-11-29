@@ -1,17 +1,14 @@
-name: Release
+name: Release PR Snapshot
 
-on:
-  push:
-    branches:
-      - main
+on: pull_request
 
 jobs:
-  release:
+  snapshot_release:
     if: github.repository == 'atlassian/changesets'
 
     timeout-minutes: 20
 
-    name: Release
+    name: Release PR Snapshot
     runs-on: ubuntu-latest
 
     steps:
@@ -26,12 +23,14 @@ jobs:
       - name: Install Dependencies
         run: yarn --frozen-lockfile
 
-      - name: Create Release Pull Request or Publish to npm
-        uses: changesets/action@v1
-        with:
-          # this expects you to have a script called release which does a build for your packages and calls changeset publish
-          publish: yarn release
-          version: yarn version-packages
+      - name: Bump to Snapshot Versions
+        run: |
+          yarn changeset version --snapshot pr${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Release a PR Snapshot
+        run: |
+          yarn changeset publish --tag pr${{ github.event.pull_request.number }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
