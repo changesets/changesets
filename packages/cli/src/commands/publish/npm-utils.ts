@@ -194,7 +194,7 @@ async function internalPublish(
 
   const args = [...publishTool.args, ...publishFlags, ...publishTool.flags];
 
-  info(`will publish with ${publishTool.name} (${args.join(" ")})`);
+  info(`will publish with '${publishTool.name} ${args.join(" ")}'`);
 
   let { code, stdout, stderr } = await spawn(
     publishTool.name,
