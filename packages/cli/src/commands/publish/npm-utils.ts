@@ -191,9 +191,14 @@ async function internalPublish(
   const envOverride = {
     npm_config_registry: getCorrectRegistry()
   };
+
+  const args = [...publishTool.args, ...publishFlags, ...publishTool.flags];
+
+  info(`will publish with ${publishTool.name} (${args.join(" ")})`);
+
   let { code, stdout, stderr } = await spawn(
     publishTool.name,
-    [...publishTool.args, ...publishFlags, ...publishTool.flags],
+    args,
     {
       cwd: opts.cwd,
       env: Object.assign({}, process.env, envOverride)
