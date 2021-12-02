@@ -59,7 +59,7 @@
     "jest-junit": "^6.4.0",
     "jest-watch-typeahead": "^0.4.2",
     "prettier": "^1.19.1",
-    "typescript": "^3.9.6"
+    "typescript": "^4.5.2"
   },
   "preconstruct": {
     "packages": [

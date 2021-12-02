@@ -77,7 +77,7 @@ describe("read changesets from disc", () => {
     try {
       await read(changesetPath);
     } catch (e) {
-      expect(e.message).toBe(
+      expect((e as Error).message).toBe(
         "There is no .changeset directory in this project"
       );
       return;

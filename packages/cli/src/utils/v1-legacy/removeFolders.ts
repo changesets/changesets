@@ -15,7 +15,7 @@ const removeEmptyFolders = async (folderPath: string) => {
           await fs.rmdir(singleChangesetPath);
         }
       } catch (err) {
-        if (err.code !== "ENOTDIR") {
+        if ((err as any).code !== "ENOTDIR") {
           throw err;
         }
       }
