@@ -31,19 +31,16 @@ export default function flattenReleases(
             changesets: [changeset.id]
           };
         } else {
-          // If the type was already major, we never need to update it
-          if (release.type === "minor" && type === "major") {
-            release.type = type;
-          } else if (
-            release.type === "patch" &&
-            (type === "major" || type === "minor")
+          if (
+            type === "major" ||
+            ((release.type === "patch" || release.type === "none") && (type === "minor" || type === "patch"))
           ) {
-            release.type = type;
-          }
-          // Check whether the bumpType will change
-          // If the bumpType has changed recalc newVersion
-          // push new changeset to releases
-          release.changesets.push(changeset.id);
+             release.type = type;
+           }
+           // Check whether the bumpType will change
+           // If the bumpType has changed recalc newVersion
+           // push new changeset to releases
+           release.changesets.push(changeset.id);
         }
 
         releases.set(name, release);
