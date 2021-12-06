@@ -33,14 +33,15 @@ export default function flattenReleases(
         } else {
           if (
             type === "major" ||
-            ((release.type === "patch" || release.type === "none") && (type === "minor" || type === "patch"))
+            ((release.type === "patch" || release.type === "none") &&
+              (type === "minor" || type === "patch"))
           ) {
-             release.type = type;
-           }
-           // Check whether the bumpType will change
-           // If the bumpType has changed recalc newVersion
-           // push new changeset to releases
-           release.changesets.push(changeset.id);
+            release.type = type;
+          }
+          // Check whether the bumpType will change
+          // If the bumpType has changed recalc newVersion
+          // push new changeset to releases
+          release.changesets.push(changeset.id);
         }
 
         releases.set(name, release);
