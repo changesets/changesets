@@ -95,6 +95,44 @@ describe("assemble-release-plan", () => {
     expect(releases[1].newVersion).toEqual("1.0.1");
     expect(releases[1].changesets).toEqual([]);
   });
+  it("should update multiple dependents of a single package", () => {
+    setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
+    setup.updateDependency("pkg-c", "pkg-a", "1.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(3);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+    expect(releases[2].name).toEqual("pkg-c");
+    expect(releases[2].newVersion).toEqual("1.0.1");
+  });
+  it("should update a second dependent based on updating a first dependant", () => {
+    setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
+    setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(3);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+    expect(releases[2].name).toEqual("pkg-c");
+    expect(releases[2].newVersion).toEqual("1.0.1");
+  });
   it("should assemble the release plan only with workspace protocol dependents when using bumpVersionsWithWorkspaceProtocolOnly", () => {
     setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.updateDependency("pkg-c", "pkg-a", "workspace:^1.0.0");
@@ -254,189 +292,7 @@ describe("assemble-release-plan", () => {
     expect(releases[0].name).toEqual("pkg-a");
     expect(releases[0].newVersion).toEqual("2.0.0");
   });
-  it("should assemble release plan for linked packages", () => {
-    setup.addChangeset({
-      id: "just-some-umbrellas",
-      releases: [{ name: "pkg-b", type: "major" }]
-    });
 
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      {
-        ...defaultConfig,
-        linked: [["pkg-a", "pkg-b"]]
-      },
-      undefined
-    );
-
-    expect(releases.length).toEqual(2);
-    expect(releases[0].newVersion).toEqual("2.0.0");
-    expect(releases[1].newVersion).toEqual("2.0.0");
-  });
-  it("should assemble a release plan where new highest version is set by an unreleased package", () => {
-    setup.addChangeset({
-      id: "just-some-umbrellas",
-      releases: [
-        { name: "pkg-b", type: "minor" },
-        { name: "pkg-a", type: "patch" }
-      ]
-    });
-
-    setup.updatePackage("pkg-c", "2.0.0");
-
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      {
-        ...defaultConfig,
-        linked: [["pkg-a", "pkg-b", "pkg-c"]]
-      },
-      undefined
-    );
-
-    expect(releases.length).toEqual(2);
-    expect(releases[0].newVersion).toEqual("2.1.0");
-    expect(releases[1].newVersion).toEqual("2.1.0");
-  });
-  it("should assemble release plan where a link causes a dependency to need changing which causes a second link to update", () => {
-    /*
-      Expected events:
-      - dependencies are checked, nothing leaves semver, nothing changes
-      - linked are checked, pkg-a is aligned with pkg-b
-      - depencencies are checked, pkg-c is now outside its dependency on pkg-a, and is given a patch
-      - linked is checked, pkg-c is aligned with pkg-d
-    */
-    setup.addChangeset({
-      id: "just-some-umbrellas",
-      releases: [{ name: "pkg-b", type: "major" }]
-    });
-    setup.addChangeset({
-      id: "totally-average-verbiage",
-      releases: [{ name: "pkg-d", type: "minor" }]
-    });
-
-    setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
-
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      {
-        ...defaultConfig,
-        linked: [
-          ["pkg-a", "pkg-b"],
-          ["pkg-c", "pkg-d"]
-        ]
-      },
-      undefined
-    );
-
-    expect(releases.length).toEqual(4);
-    expect(releases[0].newVersion).toEqual("2.0.0");
-    expect(releases[1].newVersion).toEqual("2.0.0");
-    expect(releases[2].newVersion).toEqual("1.1.0");
-    expect(releases[3].newVersion).toEqual("1.1.0");
-  });
-  it("should return an empty release array when no chnages will occur", () => {
-    let { releases } = assembleReleasePlan(
-      [],
-      setup.packages,
-      {
-        ...defaultConfig,
-        linked: [
-          ["pkg-a", "pkg-b"],
-          ["pkg-c", "pkg-d"]
-        ]
-      },
-      undefined
-    );
-
-    expect(releases).toEqual([]);
-  });
-  it("should update multiple dependencies of a single package", () => {
-    setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
-    setup.updateDependency("pkg-c", "pkg-a", "1.0.0");
-
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      {
-        ...defaultConfig,
-        linked: [
-          ["pkg-a", "pkg-b"],
-          ["pkg-c", "pkg-d"]
-        ]
-      },
-      undefined
-    );
-
-    expect(releases.length).toEqual(3);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.0.1");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("1.0.1");
-    expect(releases[2].name).toEqual("pkg-c");
-    expect(releases[2].newVersion).toEqual("1.0.1");
-  });
-  it("should update a second dependent based on updating a first dependant", () => {
-    setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
-    setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
-
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      {
-        ...defaultConfig,
-        linked: [
-          ["pkg-a", "pkg-b"],
-          ["pkg-c", "pkg-d"]
-        ]
-      },
-      undefined
-    );
-
-    expect(releases.length).toEqual(3);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.0.1");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("1.0.1");
-    expect(releases[2].name).toEqual("pkg-c");
-    expect(releases[2].newVersion).toEqual("1.0.1");
-  });
-
-  it("should bump peer dependents where the version is updated because of linked", () => {
-    setup.updatePeerDependency("pkg-b", "pkg-a", "1.0.0");
-
-    setup.addChangeset({
-      id: "some-id",
-      releases: [{ type: "minor", name: "pkg-c" }]
-    });
-
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      {
-        ...defaultConfig,
-        linked: [["pkg-a", "pkg-c"]]
-      },
-      undefined
-    );
-
-    expect(releases).toMatchObject([
-      {
-        name: "pkg-a",
-        newVersion: "1.1.0"
-      },
-      {
-        name: "pkg-c",
-        newVersion: "1.1.0"
-      },
-      {
-        name: "pkg-b",
-        newVersion: "2.0.0"
-      }
-    ]);
-  });
   it("should update a peerDep by a major bump", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
@@ -587,6 +443,319 @@ Found ignored packages: pkg-b
 Found not ignored packages: pkg-a
 Mixed changesets that contain both ignored and not ignored packages are not allowed"
 `);
+  });
+
+  describe("fixed packages", () => {
+    it("should assemble release plan for fixed packages", () => {
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [{ name: "pkg-a", type: "minor" }]
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          fixed: [["pkg-a", "pkg-b"]]
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(2);
+      expect(releases[0].newVersion).toEqual("1.1.0");
+      expect(releases[1].newVersion).toEqual("1.1.0");
+    });
+    it("should assemble a release plan where new highest version is set by an unreleased package", () => {
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [
+          { name: "pkg-b", type: "minor" },
+          { name: "pkg-a", type: "patch" }
+        ]
+      });
+
+      setup.updatePackage("pkg-c", "2.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          fixed: [["pkg-a", "pkg-b", "pkg-c"]]
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(3);
+      expect(releases[0].newVersion).toEqual("2.1.0");
+      expect(releases[1].newVersion).toEqual("2.1.0");
+      expect(releases[2].newVersion).toEqual("2.1.0");
+    });
+
+    it("should assemble release plan where a fixed constraint causes a dependency to need changing which causes a second fixed group to update", () => {
+      // Expected events:
+      // - dependencies are checked, nothing leaves semver, nothing changes
+      // - fixed are checked, pkg-a is aligned with pkg-b
+      // - depencencies are checked, in pkg-c the dependency range for pkg-a is not satisfied, so a patch bump is given to it
+      // - fixed are checked, pkg-c is aligned with pkg-d
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [{ name: "pkg-b", type: "major" }]
+      });
+      setup.addChangeset({
+        id: "totally-average-verbiage",
+        releases: [{ name: "pkg-d", type: "minor" }]
+      });
+
+      setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          fixed: [
+            ["pkg-a", "pkg-b"],
+            ["pkg-c", "pkg-d"]
+          ]
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(4);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("2.0.0");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("2.0.0");
+      expect(releases[2].name).toEqual("pkg-d");
+      expect(releases[2].newVersion).toEqual("1.1.0");
+      expect(releases[3].name).toEqual("pkg-c");
+      expect(releases[3].newVersion).toEqual("1.1.0");
+    });
+    it("should assemble release plan where a fixed constraint causes a dependency to need changing which causes a second fixed group to update 2", () => {
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [{ name: "pkg-a", type: "major" }]
+      });
+      setup.addChangeset({
+        id: "totally-average-verbiage",
+        releases: [{ name: "pkg-d", type: "minor" }]
+      });
+
+      setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          fixed: [
+            ["pkg-a", "pkg-b"],
+            ["pkg-c", "pkg-d"]
+          ]
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(4);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("2.0.0");
+      expect(releases[1].name).toEqual("pkg-d");
+      expect(releases[1].newVersion).toEqual("1.1.0");
+      expect(releases[2].name).toEqual("pkg-b");
+      expect(releases[2].newVersion).toEqual("2.0.0");
+      expect(releases[3].name).toEqual("pkg-c");
+      expect(releases[3].newVersion).toEqual("1.1.0");
+    });
+    it("should return an empty release array when no changes will occur", () => {
+      let { releases } = assembleReleasePlan(
+        [],
+        setup.packages,
+        {
+          ...defaultConfig,
+          fixed: [
+            ["pkg-a", "pkg-b"],
+            ["pkg-c", "pkg-d"]
+          ]
+        },
+        undefined
+      );
+
+      expect(releases).toEqual([]);
+    });
+
+    it("should bump peer dependents where the version is updated because of fixed", () => {
+      setup.updatePeerDependency("pkg-b", "pkg-c", "1.0.0");
+
+      setup.addChangeset({
+        id: "some-id",
+        releases: [{ type: "minor", name: "pkg-a" }]
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          fixed: [["pkg-a", "pkg-c"]]
+        },
+        undefined
+      );
+
+      expect(releases).toMatchObject([
+        {
+          name: "pkg-a",
+          newVersion: "1.1.0"
+        },
+        {
+          name: "pkg-c",
+          newVersion: "1.1.0"
+        },
+        {
+          name: "pkg-b",
+          newVersion: "2.0.0"
+        }
+      ]);
+    });
+  });
+
+  describe("linked packages", () => {
+    it("should assemble release plan for linked packages", () => {
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [{ name: "pkg-b", type: "major" }]
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          linked: [["pkg-a", "pkg-b"]]
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(2);
+      expect(releases[0].newVersion).toEqual("2.0.0");
+      expect(releases[1].newVersion).toEqual("2.0.0");
+    });
+    it("should assemble a release plan where new highest version is set by an unreleased package", () => {
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [
+          { name: "pkg-b", type: "minor" },
+          { name: "pkg-a", type: "patch" }
+        ]
+      });
+
+      setup.updatePackage("pkg-c", "2.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          linked: [["pkg-a", "pkg-b", "pkg-c"]]
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(2);
+      expect(releases[0].newVersion).toEqual("2.1.0");
+      expect(releases[1].newVersion).toEqual("2.1.0");
+    });
+    it("should assemble release plan where a link causes a dependency to need changing which causes a second link to update", () => {
+      // Expected events:
+      // - dependencies are checked, nothing leaves semver, nothing changes
+      // - linked are checked, pkg-a is aligned with pkg-b
+      // - depencencies are checked, in pkg-c the dependency range for pkg-a is not satisfied, so a patch bump is given to it
+      // - linked are checked, pkg-c is aligned with pkg-d
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [{ name: "pkg-b", type: "major" }]
+      });
+      setup.addChangeset({
+        id: "totally-average-verbiage",
+        releases: [{ name: "pkg-d", type: "minor" }]
+      });
+
+      setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          linked: [
+            ["pkg-a", "pkg-b"],
+            ["pkg-c", "pkg-d"]
+          ]
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(4);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("2.0.0");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("2.0.0");
+      expect(releases[2].name).toEqual("pkg-d");
+      expect(releases[2].newVersion).toEqual("1.1.0");
+      expect(releases[3].name).toEqual("pkg-c");
+      expect(releases[3].newVersion).toEqual("1.1.0");
+    });
+    it("should return an empty release array when no changes will occur", () => {
+      let { releases } = assembleReleasePlan(
+        [],
+        setup.packages,
+        {
+          ...defaultConfig,
+          linked: [
+            ["pkg-a", "pkg-b"],
+            ["pkg-c", "pkg-d"]
+          ]
+        },
+        undefined
+      );
+
+      expect(releases).toEqual([]);
+    });
+
+    it("should bump peer dependents where the version is updated because of linked", () => {
+      setup.updatePeerDependency("pkg-b", "pkg-a", "1.0.0");
+
+      setup.addChangeset({
+        id: "some-id",
+        releases: [{ type: "minor", name: "pkg-c" }]
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          linked: [["pkg-a", "pkg-c"]]
+        },
+        undefined
+      );
+
+      expect(releases).toMatchObject([
+        {
+          name: "pkg-a",
+          newVersion: "1.1.0"
+        },
+        {
+          name: "pkg-c",
+          newVersion: "1.1.0"
+        },
+        {
+          name: "pkg-b",
+          newVersion: "2.0.0"
+        }
+      ]);
+    });
   });
 
   describe("pre mode", () => {

@@ -27,6 +27,17 @@
       "description": "The configuration for changelog generators.",
       "default": ["@changesets/cli", null]
     },
+    "fixed": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "description": "Packages that should always be released together with the same version.",
+      "default": []
+    },
     "linked": {
       "type": "array",
       "items": {

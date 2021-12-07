@@ -56,11 +56,15 @@ export type PackageJSON = {
   };
 };
 
-export type Linked = ReadonlyArray<ReadonlyArray<string>>;
+export type PackageGroup = ReadonlyArray<string>;
+
+export type Fixed = ReadonlyArray<PackageGroup>;
+export type Linked = ReadonlyArray<PackageGroup>;
 
 export type Config = {
   changelog: false | readonly [string, any];
   commit: boolean;
+  fixed: Fixed;
   linked: Linked;
   access: AccessType;
   baseBranch: string;
@@ -76,6 +80,7 @@ export type Config = {
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
   commit?: boolean;
+  fixed?: Fixed;
   linked?: Linked;
   access?: AccessType;
   baseBranch?: string;
