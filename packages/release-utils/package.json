@@ -16,8 +16,8 @@
     "unified": "^8.3.2"
   },
   "devDependencies": {
-    "@changesets/git": "*",
-    "@changesets/write": "*",
+    "@changesets/git": "1.2.1",
+    "@changesets/write": "0.1.6",
     "file-url": "^3.0.0",
     "fixturez": "^1.1.0"
   }

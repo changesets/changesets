@@ -12,6 +12,6 @@
     "dotenv": "^8.1.0"
   },
   "devDependencies": {
-    "@changesets/parse": "*"
+    "@changesets/parse": "0.3.10"
   }
 }
