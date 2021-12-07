@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  A tool to manage versioning and changelogs <br/> 
+  A tool to manage versioning and changelogs <br/>
   with a focus on multi-package repositories
 </p>
 <br/>

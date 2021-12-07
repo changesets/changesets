@@ -876,7 +876,7 @@ describe("pre", () => {
       }
     ]);
   });
-  // https://github.com/atlassian/changesets/pull/382#discussion_r434434182
+  // https://github.com/changesets/changesets/pull/382#discussion_r434434182
   it("should bump patch version for packages that had prereleases, but caret dependencies are still in range", async () => {
     let cwd = f.copy("simple-project-caret-dep");
     await pre(cwd, { command: "enter", tag: "next" });
