@@ -24,5 +24,7 @@
     "@changesets/types": "4.0.2",
     "@changesets/write": "0.1.6"
   },
-  "changesets": []
+  "changesets": [
+    "gold-walls-mix"
+  ]
 }
