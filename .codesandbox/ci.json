@@ -1,0 +1,5 @@
+{
+  "packages": ["packages/*"],
+  "buildCommand": "codesandbox:build",
+  "node": "14"
+}
