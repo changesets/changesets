@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 4.1.0-temp.0
+
+### Minor Changes
+
+- [#696](https://github.com/changesets/changesets/pull/696) [`636c7d7`](https://github.com/changesets/changesets/commit/636c7d7c9333664c91cd4d0ff678d5acb17256ad) Thanks [@Andarist](https://github.com/Andarist)! - Fixed mode and publish refactor
+
 ## 4.0.2
 
 ### Patch Changes
