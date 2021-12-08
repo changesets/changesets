@@ -59,7 +59,7 @@
 
 ### Patch Changes
 
-- [`e92cc01`](https://github.com/atlassian/changesets/commit/e92cc0138bfbc041c77e6c7d054f2aa101cece5a) [#482](https://github.com/atlassian/changesets/pull/482) Thanks [@jonathanmorley](https://github.com/jonathanmorley)! - Fixed an issue with bumping a peer dependency using a `"none"` changeset type resulting in the dependant package being major bumped.
+- [`e92cc01`](https://github.com/atlassian/changesets/commit/e92cc0138bfbc041c77e6c7d054f2aa101cece5a) [#482](https://github.com/atlassian/changesets/pull/482) Thanks [@jonathanmorley](https://github.com/jonathanmorley)! - Fixed an issue with bumping a peer dependency using a `"none"` changeset type resulting in the dependent package being major bumped.
 
 ## 4.0.0
 
@@ -71,7 +71,7 @@
 
 - [`d1d987c`](https://github.com/atlassian/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f) [#455](https://github.com/atlassian/changesets/pull/455) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with linked package being assigned a non-none release type when another package from the linked set has been added to current releases and the package had just a none release type.
 
-* [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76) [#446](https://github.com/atlassian/changesets/pull/446) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages not being updated to their highest bump type in pre mode sometimes. This could happen when dependant packages were only versioned because of their dependencies being upgraded and not because of a dedicated changeset for those dependant packages.
+* [`9d99bd1`](https://github.com/atlassian/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76) [#446](https://github.com/atlassian/changesets/pull/446) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependent packages not being updated to their highest bump type in pre mode sometimes. This could happen when dependent packages were only versioned because of their dependencies being upgraded and not because of a dedicated changeset for those dependent packages.
 
   For the very same reason linked packages were also not always bumped correctly in pre mode to the highest bump type in a linked group.
 
@@ -121,8 +121,8 @@
   ```
   $ # Version packages to snapshot version
   $ changeset version --snapshot
-  $ # Publish packages under exprimental tag, keeping next and latest tag clean
-  $ changeset publish --tag exprimental
+  $ # Publish packages under experimental tag, keeping next and latest tag clean
+  $ changeset publish --tag experimental
   ```
 
 ## 2.0.4

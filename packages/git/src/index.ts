@@ -43,7 +43,7 @@ async function getAllTags(cwd: string): Promise<Set<string>> {
 
 // used to create a single tag at a time for the current head only
 async function tag(tagStr: string, cwd: string) {
-  // NOTE: it's important we use the -m flag otherwise 'git push --follow-tags' wont actually push
+  // NOTE: it's important we use the -m flag otherwise 'git push --follow-tags' won't actually push
   // the tags
   const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], { cwd });
   return gitCmd.code === 0;

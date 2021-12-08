@@ -304,7 +304,7 @@ describe("assemble-release-plan", () => {
       Expected events:
       - dependencies are checked, nothing leaves semver, nothing changes
       - linked are checked, pkg-a is aligned with pkg-b
-      - depencencies are checked, pkg-c is now outside its dependency on pkg-a, and is given a patch
+      - dependencies are checked, pkg-c is now outside its dependency on pkg-a, and is given a patch
       - linked is checked, pkg-c is aligned with pkg-d
     */
     setup.addChangeset({
@@ -337,7 +337,7 @@ describe("assemble-release-plan", () => {
     expect(releases[2].newVersion).toEqual("1.1.0");
     expect(releases[3].newVersion).toEqual("1.1.0");
   });
-  it("should return an empty release array when no chnages will occur", () => {
+  it("should return an empty release array when no changes will occur", () => {
     let { releases } = assembleReleasePlan(
       [],
       setup.packages,
@@ -378,7 +378,7 @@ describe("assemble-release-plan", () => {
     expect(releases[2].name).toEqual("pkg-c");
     expect(releases[2].newVersion).toEqual("1.0.1");
   });
-  it("should update a second dependent based on updating a first dependant", () => {
+  it("should update a second dependent based on updating a first dependent", () => {
     setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
 
