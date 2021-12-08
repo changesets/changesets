@@ -33,7 +33,9 @@ export default async function init(cwd: string) {
       }
       await fs.writeFile(
         path.resolve(changesetBase, "config.json"),
-        JSON.stringify(defaultWrittenConfig, null, 2)
+        // modify base branch to "main" without changing defaultWrittenConfig since it also serves as a fallback
+        // for config files that don't specify a base branch so changing that to main would be a breaking change
+        JSON.stringify({ ...defaultWrittenConfig, baseBranch: "main" }, null, 2)
       );
     } else {
       warn(
@@ -44,7 +46,7 @@ export default async function init(cwd: string) {
     await fs.copy(path.resolve(pkgPath, "./default-files"), changesetBase);
     await fs.writeFile(
       path.resolve(changesetBase, "config.json"),
-      JSON.stringify(defaultWrittenConfig, null, 2)
+      JSON.stringify({ ...defaultWrittenConfig, baseBranch: "main" }, null, 2)
     );
 
     log(
