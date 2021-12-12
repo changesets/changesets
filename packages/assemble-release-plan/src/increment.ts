@@ -5,12 +5,17 @@ import { InternalError } from "@changesets/errors";
 export function incrementVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined
-) {
+): string {
   if (release.type === "none") {
     return release.oldVersion;
   }
 
-  let version = semver.inc(release.oldVersion, release.type)!;
+  let version = semver.inc(release.oldVersion || "0.0.0", release.type);
+  if (!version) {
+    throw new Error(
+      `Could not increment version ("${release.oldVersion}") for package "${release.name}"`
+    );
+  }
   if (preInfo !== undefined && preInfo.state.mode !== "exit") {
     let preVersion = preInfo.preVersions.get(release.name);
     if (preVersion === undefined) {
