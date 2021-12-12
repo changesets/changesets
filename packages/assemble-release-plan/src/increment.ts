@@ -10,7 +10,7 @@ export function incrementVersion(
     return release.oldVersion;
   }
 
-  let version = semver.inc(release.oldVersion || "0.0.0", release.type);
+  let version = semver.inc(release.oldVersion, release.type);
   if (!version) {
     throw new Error(
       `Could not increment version ("${release.oldVersion}") for package "${release.name}"`
