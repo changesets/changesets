@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "name": "dependant-with-tag-range",
+  "description": "example depending on latest tag",
+  "version": "1.0.0",
+  "workspaces": [
+    "examples/*",
+    "packages/*"
+  ]
+}

@@ -267,6 +267,37 @@ describe("running version in a simple project", () => {
     expect(changesetDir).toContain(".ignored-temporarily.md");
   });
 
+  it("should not update a dependant that uses a tag as a dependency rage for a package that could otherwise be local", async () => {
+    const cwd = await f.copy("dependant-with-tag-range");
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "major" }],
+        summary: "a very useful summary for the change"
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "dependencies": Object {
+            "pkg-a": "latest",
+          },
+          "name": "example-a",
+          "version": "1.0.0",
+        },
+        Object {
+          "name": "pkg-a",
+          "version": "2.0.0",
+        },
+      ]
+    `);
+  });
+
   describe("when there are multiple changeset commits", () => {
     it("should bump releasedPackages", async () => {
       await writeChangesets([simpleChangeset, simpleChangeset2], cwd);
