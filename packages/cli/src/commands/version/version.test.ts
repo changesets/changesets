@@ -192,19 +192,28 @@ describe("running version in a simple project", () => {
 
   it("should not bump ignored packages", async () => {
     await writeChangesets([simpleChangeset, simpleChangeset3], cwd);
-    const spy = jest.spyOn(fs, "writeFile");
 
     await versionCommand(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
       ignore: ["pkg-a"]
     });
 
-    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
-      expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
-    );
-    expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
-      expect.objectContaining({ name: "pkg-a", version: "1.0.0" })
-    );
+    expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "dependencies": Object {
+            "pkg-b": "1.0.1",
+          },
+          "name": "pkg-a",
+          "version": "1.0.0",
+        },
+        Object {
+          "name": "pkg-b",
+          "version": "1.0.1",
+        },
+      ]
+    `);
   });
 
   it("should not commit the result if commit config is not set", async () => {
@@ -486,6 +495,72 @@ describe("snapshot release", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
+  it("should not bump version of an ignored package", async () => {
+    const originalDate = Date;
+    // eslint-disable-next-line no-global-assign
+    Date = class Date {
+      getUTCFullYear() {
+        return 2021;
+      }
+      getUTCMonth() {
+        return 12;
+      }
+      getUTCDate() {
+        return 13;
+      }
+      getUTCHours() {
+        return 0;
+      }
+      getUTCMinutes() {
+        return 7;
+      }
+      getUTCSeconds() {
+        return 30;
+      }
+    } as any;
+    try {
+      const cwd = await f.copy("simple-project");
+      await writeChangeset(
+        {
+          releases: [{ name: "pkg-b", type: "major" }],
+          summary: "a very useful summary"
+        },
+        cwd
+      );
+
+      await versionCommand(
+        cwd,
+        {
+          snapshot: true
+        },
+        {
+          ...modifiedDefaultConfig,
+          ignore: ["pkg-a"]
+        }
+      );
+
+      expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "dependencies": Object {
+              "pkg-b": "0.0.0-202112130730",
+            },
+            "name": "pkg-a",
+            "version": "1.0.0",
+          },
+          Object {
+            "name": "pkg-b",
+            "version": "0.0.0-202112130730",
+          },
+        ]
+      `);
+    } finally {
+      // eslint-disable-next-line no-global-assign
+      Date = originalDate;
+    }
+  });
+
   describe("useCalculatedVersionForSnapshots: true", () => {
     it("should update packages using calculated version", async () => {
       let cwd = f.copy("simple-project");
@@ -518,6 +593,76 @@ describe("snapshot release", () => {
           version: expect.stringContaining("1.0.1-exprimental-")
         })
       );
+    });
+
+    it("should not bump version of an ignored package", async () => {
+      const originalDate = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class Date {
+        getUTCFullYear() {
+          return 2021;
+        }
+        getUTCMonth() {
+          return 12;
+        }
+        getUTCDate() {
+          return 13;
+        }
+        getUTCHours() {
+          return 0;
+        }
+        getUTCMinutes() {
+          return 7;
+        }
+        getUTCSeconds() {
+          return 30;
+        }
+      } as any;
+      try {
+        const cwd = await f.copy("simple-project");
+        await writeChangeset(
+          {
+            releases: [{ name: "pkg-b", type: "major" }],
+            summary: "a very useful summary"
+          },
+          cwd
+        );
+
+        await versionCommand(
+          cwd,
+          {
+            snapshot: true
+          },
+          {
+            ...modifiedDefaultConfig,
+            ignore: ["pkg-a"],
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+              useCalculatedVersionForSnapshots: true
+            }
+          }
+        );
+
+        expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+          .toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "dependencies": Object {
+                "pkg-b": "2.0.0-202112130730",
+              },
+              "name": "pkg-a",
+              "version": "1.0.0",
+            },
+            Object {
+              "name": "pkg-b",
+              "version": "2.0.0-202112130730",
+            },
+          ]
+        `);
+      } finally {
+        // eslint-disable-next-line no-global-assign
+        Date = originalDate;
+      }
     });
   });
 });
