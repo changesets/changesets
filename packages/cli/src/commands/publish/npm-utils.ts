@@ -34,36 +34,25 @@ function getCorrectRegistry(packageJson?: PackageJSON): string {
     : registry;
 }
 
+const getPublishToolVersion = async (name: string, cwd: string) =>
+  (await spawn(name, ["--version"], { cwd })).stdout.toString().trim();
+
 async function getPublishTool(
   cwd: string
-): Promise<{ name: "npm" | "pnpm" | "yarn"; args: string[]; flags: string[] }> {
-  const pm = await preferredPM(cwd);
-  if (!pm) {
-    return { name: "npm", args: ["publish"], flags: [] };
-  }
-  const version = (await spawn(pm.name, ["--version"], { cwd })).stdout
-    .toString()
-    .trim();
+): Promise<{ name: "npm" | "pnpm" | "yarn"; version: string }> {
+  const name = (await preferredPM(cwd))?.name || "npm";
 
-  const parsed = semver.parse(version)!;
+  const version = await getPublishToolVersion(name, cwd);
 
-  switch (pm.name) {
-    case "npm":
-      return { name: "npm", args: ["publish"], flags: [] };
-    case "pnpm":
-      if (parsed.major < 5) {
-        return { name: "pnpm", args: ["publish"], flags: [] };
-      }
-      return { name: "pnpm", args: ["publish"], flags: ["--no-git-checks"] };
-    case "yarn":
-      // Yarn Classic doesn't do anything special when publishing, let's stick to the npm client in such a case
-      if (parsed.major < 2) {
-        return { name: "npm", args: ["publish"], flags: [] };
-      }
-      return { name: "yarn", args: ["npm", "publish"], flags: [] };
-    default:
-      return { name: "npm", args: ["publish"], flags: [] };
+  if (name === "yarn" && semver.lt(version, "2.0.0")) {
+    // Yarn Classic doesn't do anything special when publishing, let's stick to the npm client in such a case
+    return {
+      name: "npm",
+      version: await getPublishToolVersion("npm", cwd)
+    };
   }
+
+  return { name, version };
 }
 
 export async function getTokenIsRequired() {
@@ -172,13 +161,15 @@ async function internalPublish(
   let publishTool = await getPublishTool(opts.cwd);
   let shouldHandleOtp =
     !isCI &&
-    // yarn berry doesn't accept `--otp` and it asks for it on its own
-    publishTool.name !== "yarn";
+    (publishTool.name === "yarn"
+      ? semver.gte(publishTool.version, "3.2.0-rc.8")
+      : true);
   let publishFlags = publishTool.name !== "yarn" ? ["--json"] : [];
 
   if (opts.access) {
     publishFlags.push("--access", opts.access);
   }
+
   publishFlags.push("--tag", opts.tag);
 
   if (shouldHandleOtp && (await twoFactorState.isRequired)) {
@@ -186,19 +177,24 @@ async function internalPublish(
     publishFlags.push("--otp", otpCode);
   }
 
+  if (publishTool.name === "pnpm" && semver.gte(publishTool.version, "5.0.0")) {
+    publishFlags.push("--no-git-checks");
+  }
+
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
     npm_config_registry: getCorrectRegistry()
   };
-  let { code, stdout, stderr } = await spawn(
-    publishTool.name,
-    [...publishTool.args, ...publishFlags, ...publishTool.flags],
-    {
-      cwd: opts.cwd,
-      env: Object.assign({}, process.env, envOverride)
-    }
-  );
+  let { code, stdout, stderr } =
+    publishTool.name === "yarn"
+      ? await spawn("yarn", ["npm", "publish", ...publishFlags], {
+          cwd: opts.cwd,
+          env: Object.assign({}, process.env, envOverride)
+        })
+      : await spawn(publishTool.name, ["publish", opts.cwd, ...publishFlags], {
+          env: Object.assign({}, process.env, envOverride)
+        });
 
   if (code !== 0) {
     // yarn berry doesn't support --json and we don't attempt to parse its output to a machine-readable format
