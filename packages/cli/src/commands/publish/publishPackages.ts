@@ -7,7 +7,7 @@ import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
 import * as npmUtils from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
-import isCI from "../../utils/isCI";
+import isCI from "is-ci";
 
 type PublishedState = "never" | "published" | "only-pre";
 
