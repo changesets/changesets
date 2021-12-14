@@ -7,7 +7,7 @@ import chalk from "chalk";
 import spawn from "spawndamnit";
 import semver from "semver";
 import { askQuestion } from "../../utils/cli-utilities";
-import isCI from "../../utils/isCI";
+import isCI from "is-ci";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
 
