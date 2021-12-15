@@ -65,6 +65,13 @@ export async function getTokenIsRequired() {
   let result = await spawn("npm", ["profile", "get", "--json"], {
     env: Object.assign({}, process.env, envOverride)
   });
+  if (result.code !== 0) {
+    error(
+      "error while checking if token is required",
+      result.stderr.toString().trim() || result.stdout.toString().trim()
+    );
+    return false;
+  }
   let json = jsonParse(result.stdout.toString());
   if (json.error || !json.tfa || !json.tfa.mode) {
     return false;
