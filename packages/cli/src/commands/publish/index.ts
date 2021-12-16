@@ -39,7 +39,7 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
 
 export default async function run(
   cwd: string,
-  { otp, tag }: { otp?: string; tag?: string },
+  { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
   config: Config
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
@@ -72,20 +72,23 @@ export default async function run(
   if (successful.length > 0) {
     success("packages published successfully:");
     logReleases(successful);
-    // We create the tags after the push above so that we know that HEAD won't change and that pushing
-    // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
-    // fail if we are behind the base branch).
-    log(`Creating git tag${successful.length > 1 ? "s" : ""}...`);
-    if (tool !== "root") {
-      for (const pkg of successful) {
-        const tag = `${pkg.name}@${pkg.newVersion}`;
+
+    if (gitTag) {
+      // We create the tags after the push above so that we know that HEAD won't change and that pushing
+      // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
+      // fail if we are behind the base branch).
+      log(`Creating git tag${successful.length > 1 ? "s" : ""}...`);
+      if (tool !== "root") {
+        for (const pkg of successful) {
+          const tag = `${pkg.name}@${pkg.newVersion}`;
+          log("New tag: ", tag);
+          await git.tag(tag, cwd);
+        }
+      } else {
+        const tag = `v${successful[0].newVersion}`;
         log("New tag: ", tag);
         await git.tag(tag, cwd);
       }
-    } else {
-      const tag = `v${successful[0].newVersion}`;
-      log("New tag: ", tag);
-      await git.tag(tag, cwd);
     }
   }
 
