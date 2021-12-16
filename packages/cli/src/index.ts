@@ -62,7 +62,7 @@ run(input, flags, cwd).catch(err => {
     );
     error("Please open an issue with the following link");
     error(
-      `https://github.com/atlassian/changesets/issues/new?title=${encodeURIComponent(
+      `https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(
         `Unexpected error during ${input[0] || "add"} command`
       )}&body=${encodeURIComponent(`## Error
 
