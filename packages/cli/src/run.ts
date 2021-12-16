@@ -82,7 +82,8 @@ export async function run(
       ignore,
       snapshot,
       tag,
-      open
+      open,
+      gitTag
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -104,7 +105,6 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        // @ts-ignore if this is undefined, we have already exited
         await add(cwd, { empty, open }, config);
         return;
       }
@@ -166,7 +166,7 @@ export async function run(
         return;
       }
       case "publish": {
-        await publish(cwd, { otp, tag }, config);
+        await publish(cwd, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {

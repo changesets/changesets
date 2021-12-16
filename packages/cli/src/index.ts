@@ -7,13 +7,13 @@ import { run } from "./run";
 const { input, flags } = meow(
   `
   Usage
-    $ changesets [command]
+    $ changeset [command]
   Commands
     init
     add [--empty] [--open]
-    version [--ignore]
-    publish [--otp=code]
-    status [--since <branch>] [--verbose] [--output=JSON_FILE.json]
+    version [--ignore] [--snapshot <?name>]
+    publish [--tag <name>] [--otp <code>] [--no-git-tag]
+    status [--since <branch>] [--verbose] [--output JSON_FILE.json]
     pre <enter|exit> <tag>
     tag
     `,
@@ -48,7 +48,14 @@ const { input, flags } = meow(
       },
       open: {
         type: "boolean"
+      },
+      gitTag: {
+        type: "boolean",
+        default: true
       }
+      // mixed type like this is not supported by `meow`
+      // if it gets passed explicitly then it's still available on the flags with an inferred type though
+      // snapshot: { type: "boolean" | "string" },
     }
   }
 );
