@@ -4,7 +4,7 @@ import { defaultConfig } from "@changesets/config";
 import * as path from "path";
 import * as pre from "@changesets/pre";
 import { Config } from "@changesets/types";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock } from "@changesets/test-utils";
 
 let changelogPath = path.resolve(__dirname, "../../changelog");
 let modifiedDefaultConfig: Config = {
@@ -19,7 +19,7 @@ jest.mock("../publishPackages.ts");
 jest.mock("@changesets/pre");
 
 describe("Publish command", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
   let cwd: string;
 
   beforeEach(async () => {
