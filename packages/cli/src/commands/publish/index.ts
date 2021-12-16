@@ -59,7 +59,7 @@ export default async function run(
 
   const response = await publishPackages({
     packages,
-    // if not public, we wont pass the access, and it works as normal
+    // if not public, we won't pass the access, and it works as normal
     access: config.access,
     otp,
     preState,
@@ -74,8 +74,8 @@ export default async function run(
     logReleases(successful);
 
     if (gitTag) {
-      // We create the tags after the push above so that we know that HEAD wont change and that pushing
-      // wont suffer from a race condition if another merge happens in the mean time (pushing tags wont
+      // We create the tags after the push above so that we know that HEAD won't change and that pushing
+      // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
       // fail if we are behind the base branch).
       log(`Creating git tag${successful.length > 1 ? "s" : ""}...`);
       if (tool !== "root") {

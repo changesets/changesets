@@ -19,7 +19,7 @@ export let defaultWrittenConfig = {
   ignore: [] as ReadonlyArray<string>
 } as const;
 
-function getNormalisedChangelogOption(
+function getNormalizedChangelogOption(
   thing: false | readonly [string, any] | string
 ): Config["changelog"] {
   if (thing === false) {
@@ -286,7 +286,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   let config: Config = {
-    changelog: getNormalisedChangelogOption(
+    changelog: getNormalizedChangelogOption(
       json.changelog === undefined
         ? defaultWrittenConfig.changelog
         : json.changelog
