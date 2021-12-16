@@ -14,7 +14,12 @@
   ],
   "main": "dist/cli.cjs.js",
   "module": "dist/cli.esm.js",
-  "author": "Atlassian Pty Ltd",
+  "author": "Changesets Contributors",
+  "contributors": [
+    "Ben Conolly",
+    "Mitchell Hamilton <mitchell@mitchellhamilton.me>",
+    "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
+  ],
   "preconstruct": {
     "entrypoints": [
       ".",
