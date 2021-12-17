@@ -24,18 +24,13 @@ function getSnapshotSuffix(snapshot?: string | boolean): string | undefined {
   if (snapshot === undefined) {
     return;
   }
-  const now = new Date();
 
-  let dateAndTime = [
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-    now.getUTCHours(),
-    now.getUTCMinutes(),
-    now.getUTCSeconds()
-  ].join("");
-
+  let dateAndTime = new Date()
+    .toISOString()
+    .replace(/\.\d{3}Z$/, "")
+    .replace(/[^\d]/g, "");
   let tag = "";
+
   if (typeof snapshot === "string") tag = `-${snapshot}`;
 
   return `${tag}-${dateAndTime}`;
