@@ -26,6 +26,12 @@ This will instead update versions to `0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS`
 
 After running the `yarn changeset version` command, you can use the `changeset publish --tag bulbasaur` command to releases the packages. By using the `--tag` flag, you will not add it to the `latest` flag on npm. This is REALLY IMPORTANT because if you do not include a tag, people installing your package using `yarn add your-package-name` will install the snapshot version.
 
+## Using the `--no-git-tag` flag
+
+You can use the `--no-git-tag` CLI flag when running `changeset publish` if you plan to publish snapshot releases locally and you are pushing [git tags](http://npm.github.io/publishing-pkgs-docs/updating/using-tags.html) to a remote from your CI environment. 
+
+When you run `changeset publish --no-git-gag`, changesets will skip creating git tags for published packages. That means that git tags can be still be created whenever pushing stable versions, and you can safely publish snapshot releases locally, without creating unnecessary tags.
+
 ## Using a snapshot version
 
 When you want to get people to test your snapshots, they can either update their package.json to your newly published version and run an install, or use `yarn add your-package-name@YOUR_TAG_OR_VERSIONS`
