@@ -4,6 +4,7 @@ import FakeFullState from "./test-utils";
 
 describe("assemble-release-plan", () => {
   let setup: FakeFullState;
+
   beforeEach(() => {
     setup = new FakeFullState();
 
@@ -29,6 +30,33 @@ describe("assemble-release-plan", () => {
       changesets: ["strange-words-combine"]
     });
   });
+
+  it("should assemble release plan for basic setup with snapshot", () => {
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined,
+      true
+    );
+
+    expect(releases.length).toBe(1);
+    expect(/0\.0\.0-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
+  });
+
+  it("should assemble release plan for basic setup with snapshot and tag", () => {
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined,
+      "foo"
+    );
+
+    expect(releases.length).toBe(1);
+    expect(/0\.0\.0-foo-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
+  });
+
   it("should assemble release plan with multiple packages", () => {
     setup.addChangeset({
       id: "big-cats-delight",
