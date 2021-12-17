@@ -1,5 +1,6 @@
 ---
 "@changesets/cli": patch
+"@changesets/pre": patch
 ---
 
-support re-enter pre mode if already exited
+Fixed an issue with not being to reenter exited pre mode.
