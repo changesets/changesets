@@ -20,6 +20,16 @@ let preStateForSimpleProject: PreState = {
   tag: "next"
 };
 
+let preStateForExited: PreState = {
+  changesets: ["slimy-dingos-whisper"],
+  initialVersions: {
+    "pkg-a": "1.0.0",
+    "pkg-b": "1.0.0"
+  },
+  mode: "exit",
+  tag: "beta"
+};
+
 jest.mock("@changesets/logger");
 
 let mockedLogger = logger as jest.Mocked<typeof logger>;
@@ -50,6 +60,24 @@ describe("enterPre", () => {
     );
     expect(logger.info).toBeCalledWith(
       "If you're trying to exit pre mode, run `changeset pre exit`"
+    );
+  });
+  it("should enter if already exited pre mode", async () => {
+    let cwd = f.copy("simple-project");
+    await fs.writeJSON(
+      path.join(cwd, ".changeset", "pre.json"),
+      preStateForExited
+    );
+    await pre(cwd, { command: "enter", tag: "next" });
+    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
+      {
+        ...preStateForExited,
+        mode: "pre",
+        tag: "next"
+      }
+    );
+    expect(mockedLogger.success).toBeCalledWith(
+      `Entered pre mode with tag ${chalk.cyan("next")}`
     );
   });
 });
