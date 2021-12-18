@@ -1,5 +1,24 @@
 # @changesets/cli
 
+## 2.19.0
+
+### Minor Changes
+
+- [#701](https://github.com/changesets/changesets/pull/701) [`b9b6453`](https://github.com/changesets/changesets/commit/b9b6453b16ada9751e2280b5230ded72161391e9) Thanks [@Andarist](https://github.com/Andarist)! - Added support for a `--no-git-tag` CLI flag that can be used with `changeset publish` to skip creating git tags for published packages. This is mostly useful when publishing snapshot releases.
+
+### Patch Changes
+
+- [#713](https://github.com/changesets/changesets/pull/713) [`82be80e`](https://github.com/changesets/changesets/commit/82be80ecfe9288535071e850ae56f2e7a7006eba) Thanks [@zthxxx](https://github.com/zthxxx)! - Fixed an issue with not being able to reenter exited pre mode.
+
+* [#708](https://github.com/changesets/changesets/pull/708) [`ab8f2b2`](https://github.com/changesets/changesets/commit/ab8f2b29d5cf921d97987a665051b67a7ec55ed3) Thanks [@Andarist](https://github.com/Andarist)! - Updated [`is-ci`](https://github.com/watson/is-ci) dependency that helps us to check if Changesets are executed in the CI environment.
+
+- [#710](https://github.com/changesets/changesets/pull/710) [`4272cb0`](https://github.com/changesets/changesets/commit/4272cb0eca8b24857b4832df4ae7300befe6feb2) Thanks [@Andarist](https://github.com/Andarist)! - Errors received from `npm profile get --json`, that is used to check if 2FA is required, will now always be printed.
+
+- Updated dependencies [[`82be80e`](https://github.com/changesets/changesets/commit/82be80ecfe9288535071e850ae56f2e7a7006eba), [`e4c4b29`](https://github.com/changesets/changesets/commit/e4c4b2934beee9b25a927b4ae1b7280f4323d4ff)]:
+  - @changesets/pre@1.0.9
+  - @changesets/assemble-release-plan@5.0.4
+  - @changesets/get-release-plan@3.0.4
+
 ## 2.18.1
 
 ### Patch Changes

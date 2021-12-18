@@ -1,9 +1,9 @@
 {
   "name": "@changesets/release-utils",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "dist/release-utils.cjs.js",
   "dependencies": {
-    "@changesets/pre": "^1.0.8",
+    "@changesets/pre": "^1.0.9",
     "@changesets/read": "^0.5.2",
     "@changesets/types": "^4.0.2",
     "@manypkg/get-packages": "^1.1.3",

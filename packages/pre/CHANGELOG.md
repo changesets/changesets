@@ -1,5 +1,11 @@
 # @changesets/pre
 
+## 1.0.9
+
+### Patch Changes
+
+- [#713](https://github.com/changesets/changesets/pull/713) [`82be80e`](https://github.com/changesets/changesets/commit/82be80ecfe9288535071e850ae56f2e7a7006eba) Thanks [@zthxxx](https://github.com/zthxxx)! - Fixed an issue with not being able to reenter exited pre mode.
+
 ## 1.0.8
 
 ### Patch Changes

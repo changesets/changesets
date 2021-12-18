@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 5.0.4
+
+### Patch Changes
+
+- [#692](https://github.com/changesets/changesets/pull/692) [`e4c4b29`](https://github.com/changesets/changesets/commit/e4c4b2934beee9b25a927b4ae1b7280f4323d4ff) Thanks [@jakubmazanec](https://github.com/jakubmazanec)! - Fix snapshot timestamp so its date part contains the correct date and the timestamp can be used for collation.
+
 ## 5.0.3
 
 ### Patch Changes
