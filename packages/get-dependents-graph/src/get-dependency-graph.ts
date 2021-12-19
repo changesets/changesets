@@ -19,19 +19,33 @@ const getAllDependencies = (config: PackageJSON) => {
     if (!deps) continue;
 
     for (const name of Object.keys(deps)) {
-      const depVersion = deps[name];
+      const depRange = deps[name];
       if (
-        (depVersion.startsWith("link:") || depVersion.startsWith("file:")) &&
+        (depRange.startsWith("link:") || depRange.startsWith("file:")) &&
         type === "devDependencies"
       ) {
         continue;
       }
 
-      allDependencies.set(name, depVersion);
+      allDependencies.set(name, depRange);
     }
   }
 
   return allDependencies;
+};
+
+const isProtocolRange = (range: string) => range.indexOf(":") !== -1;
+
+const getValidRange = (potentialRange: string) => {
+  if (isProtocolRange(potentialRange)) {
+    return null;
+  }
+
+  try {
+    return new semver.Range(potentialRange);
+  } catch {
+    return null;
+  }
 };
 
 export default function getDependencyGraph(
@@ -65,17 +79,17 @@ export default function getDependencyGraph(
     const dependencies = [];
     const allDependencies = getAllDependencies(pkg.packageJson);
 
-    for (let [depName, depVersion] of allDependencies) {
+    for (let [depName, depRange] of allDependencies) {
       const match = packagesByName[depName];
       if (!match) continue;
 
       const expected = match.packageJson.version;
-      const usesWorkspaceRange = depVersion.startsWith("workspace:");
+      const usesWorkspaceRange = depRange.startsWith("workspace:");
 
       if (usesWorkspaceRange) {
-        depVersion = depVersion.replace(/^workspace:/, "");
+        depRange = depRange.replace(/^workspace:/, "");
 
-        if (depVersion === "*" || depVersion === "^" || depVersion === "~") {
+        if (depRange === "*" || depRange === "^" || depRange === "~") {
           dependencies.push(depName);
           continue;
         }
@@ -83,18 +97,23 @@ export default function getDependencyGraph(
         continue;
       }
 
-      // internal dependencies only need to semver satisfy, not '==='
-      if (!semver.satisfies(expected, depVersion)) {
+      const range = getValidRange(depRange);
+
+      if ((range && !range.test(expected)) || isProtocolRange(depRange)) {
         valid = false;
         console.error(
           `Package ${chalk.cyan(
             `"${name}"`
           )} must depend on the current version of ${chalk.cyan(
             `"${depName}"`
-          )}: ${chalk.green(`"${expected}"`)} vs ${chalk.red(
-            `"${depVersion}"`
-          )}`
+          )}: ${chalk.green(`"${expected}"`)} vs ${chalk.red(`"${depRange}"`)}`
         );
+        continue;
+      }
+
+      // `depRange` could have been a tag and if a tag has been used there might have been a reason for that
+      // we should not count this as a local monorepro dependant
+      if (!range) {
         continue;
       }
 
