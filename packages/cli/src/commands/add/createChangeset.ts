@@ -227,7 +227,9 @@ export default async function createChangeset(
     releases.push({ name: pkg.packageJson.name, type });
   }
 
-  log("Please enter a summary for this change (this will be in the changelogs).");
+  log(
+    "Please enter a summary for this change (this will be in the changelogs)."
+  );
   log(chalk.gray("  (submit empty line to open external editor)"));
 
   let summary = await cli.askQuestion("Summary");

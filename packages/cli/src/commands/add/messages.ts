@@ -32,7 +32,9 @@ export default function printConfirmationMessage(
   if (repoHasMultiplePackages) {
     const message = outdent`
       Note: All dependents of these packages that will be incompatible with
-      the new version will be ${chalk.redBright("patch bumped")} when this changeset is applied.
+      the new version will be ${chalk.redBright(
+        "patch bumped"
+      )} when this changeset is applied.
     `;
 
     log(message + "\n");
