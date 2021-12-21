@@ -1,5 +1,5 @@
 ---
-"@changesets/cli": patch
+"@changesets/cli": minor
 ---
 
-Make cli log message clear, reduce noise "boxen" style, unify visual style of text font, discussion in #560
+Reworked the CLI output when adding a changeset. This includes fixing broken formatting in certain terminal width, reducing visual noise and making other small adjustments.
