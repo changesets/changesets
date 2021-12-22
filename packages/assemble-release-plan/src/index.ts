@@ -13,18 +13,17 @@ import { incrementVersion } from "./increment";
 import * as semver from "semver";
 import { InternalError } from "@changesets/errors";
 import { Packages, Package } from "@manypkg/get-packages";
-import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { DependentsGraph, getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
 
-function getPreVersion(version: string) {
+function getNextPreVersion(version: string) {
   let parsed = semver.parse(version)!;
   let preVersion =
     parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
   if (typeof preVersion !== "number") {
     throw new InternalError("preVersion is not a number");
   }
-  preVersion++;
-  return preVersion;
+  return preVersion + 1;
 }
 
 function getSnapshotSuffix(snapshot?: string | boolean): string | undefined {
@@ -103,7 +102,7 @@ function assembleReleasePlan(
     config.ignore
   );
 
-  let dependencyGraph = getDependentsGraph(packages, {
+  let dependencyGraph: DependentsGraph = getDependentsGraph(packages, {
     bumpVersionsWithWorkspaceProtocolOnly:
       config.bumpVersionsWithWorkspaceProtocolOnly
   });
@@ -129,24 +128,6 @@ function assembleReleasePlan(
 
     releasesValidated =
       !linksUpdated && !dependentAdded && !fixedConstraintUpdated;
-  }
-
-  if (preInfo?.state.mode === "exit") {
-    for (let pkg of packages.packages) {
-      // If a package had a prerelease, but didn't trigger a version bump in the regular release,
-      // we want to give it a patch release.
-      // Detailed explanation at https://github.com/changesets/changesets/pull/382#discussion_r434434182
-      if (preInfo.preVersions.get(pkg.packageJson.name) !== 0) {
-        if (!releases.has(pkg.packageJson.name)) {
-          releases.set(pkg.packageJson.name, {
-            name: pkg.packageJson.name,
-            type: "patch",
-            oldVersion: pkg.packageJson.version,
-            changesets: []
-          });
-        }
-      }
-    }
   }
 
   return {
@@ -212,7 +193,7 @@ function getHighestPreVersion(
   let highestPreVersion = 0;
   for (let pkg of packageGroup) {
     highestPreVersion = Math.max(
-      getPreVersion(packagesByName.get(pkg)!.packageJson.version),
+      getNextPreVersion(packagesByName.get(pkg)!.packageJson.version),
       highestPreVersion
     );
   }
@@ -249,7 +230,7 @@ function getPreInfo(
   for (const [, pkg] of packagesByName) {
     preVersions.set(
       pkg.packageJson.name,
-      getPreVersion(pkg.packageJson.version)
+      getNextPreVersion(pkg.packageJson.version)
     );
   }
   for (let fixedGroup of config.fixed) {

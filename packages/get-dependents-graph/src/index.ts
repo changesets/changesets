@@ -1,10 +1,16 @@
 import { Packages, Package } from "@manypkg/get-packages";
 import getDependencyGraph from "./get-dependency-graph";
 
+/**
+ * DependentsGraph is a Map that
+ *   package name -> package list which depend on it
+ */
+export type DependentsGraph = Map<string, string[]>
+
 export function getDependentsGraph(
   packages: Packages,
   opts?: { bumpVersionsWithWorkspaceProtocolOnly?: boolean }
-) {
+): DependentsGraph {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
   const { graph: dependencyGraph } = getDependencyGraph(packages, {
@@ -39,7 +45,7 @@ export function getDependentsGraph(
     graph.set(key, dependentsLookup[key]);
   });
 
-  const simplifiedDependentsGraph: Map<string, string[]> = new Map();
+  const simplifiedDependentsGraph: DependentsGraph = new Map();
 
   graph.forEach((pkgInfo, pkgName) => {
     simplifiedDependentsGraph.set(pkgName, pkgInfo.dependents);

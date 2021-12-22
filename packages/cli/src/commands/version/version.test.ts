@@ -92,7 +92,6 @@ const getChangelog = (pkgName: string, calls: any) => {
   return getFile(pkgName, "CHANGELOG.md", calls);
 };
 
-const writeEmptyChangeset = (cwd: string) => writeChangesets([], cwd);
 
 beforeEach(() => {
   let i = 0;
@@ -122,7 +121,6 @@ describe("running version in a simple project", () => {
 
   describe("when there are no changeset commits", () => {
     it("should warn if no changeset commits exist", async () => {
-      await writeEmptyChangeset(cwd);
       await version(cwd, defaultOptions, modifiedDefaultConfig);
       // @ts-ignore
       const loggerWarnCalls = warn.mock.calls;
@@ -130,6 +128,20 @@ describe("running version in a simple project", () => {
       expect(loggerWarnCalls[0][0]).toEqual(
         "No unreleased changesets found, exiting."
       );
+
+      let packages = await getPackages(cwd);
+
+      expect(packages.packages.map(x => x.packageJson)).toEqual([
+        {
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: { "pkg-b": "1.0.0" }
+        },
+        {
+          name: "pkg-b",
+          version: "1.0.0"
+        }
+      ]);
     });
   });
 
@@ -1219,6 +1231,94 @@ describe("pre", () => {
       }
     ]);
   });
+
+  it("should not bump prerelease version without changesets or pre mode", async () => {
+    let cwd = f.copy("simple-project-prerelease-version");
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.0-rc.0",
+        dependencies: { "pkg-b": "1.0.0-next.0" }
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.0-next.0"
+      }
+    ]);
+  });
+
+  it("should not bump prerelease version in pre mode without changesets", async () => {
+    let cwd = f.copy("simple-project-prerelease-version");
+    await pre(cwd, { command: "enter", tag: "next" });
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.0-rc.0",
+        dependencies: { "pkg-b": "1.0.0-next.0" }
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.0-next.0"
+      }
+    ]);
+  });
+
+  it("should not bump when exited pre mode without changesets", async () => {
+    let cwd = f.copy("simple-project-prerelease-version");
+    await pre(cwd, { command: "enter", tag: "next" });
+    await pre(cwd, { command: "exit" });
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.0-rc.0",
+        dependencies: { "pkg-b": "1.0.0-next.0" }
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.0-next.0"
+      }
+    ]);
+  });
+
+  it("should not bump unrelated packages", async () => {
+    let cwd = f.copy("simple-project-prerelease-version");
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "patch" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+    await pre(cwd, { command: "exit" });
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map(x => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: { "pkg-b": "1.0.0-next.0" }
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.0-next.0"
+      }
+    ]);
+  });
+
   it("should bump dependent of prerelease package when bumping a `workspace:~` dependency", async () => {
     const cwd = f.copy("workspace-alias-range-dep");
     await pre(cwd, { command: "enter", tag: "alpha" });

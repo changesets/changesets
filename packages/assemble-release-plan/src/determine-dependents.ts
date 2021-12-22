@@ -90,6 +90,11 @@ export default function determineDependents({
                   !semver.satisfies(
                     incrementVersion(nextRelease, preInfo),
                     versionRange
+                  ) || (
+                    // If a related package had a prerelease, but didn't trigger a version bump in the regular release,
+                    // we want to bump prerelease version to normal.
+                    // Detailed explanation at https://github.com/changesets/changesets/pull/382#discussion_r434434182
+                    preInfo !== undefined && preInfo.preVersions.get(dependent) !== 0
                   ))
               ) {
                 switch (depType) {
