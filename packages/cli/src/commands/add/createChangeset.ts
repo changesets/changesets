@@ -24,8 +24,8 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
 
     let shouldReleaseFirstMajor = await cli.askConfirm(
       bold(
-        `Are you sure you want still want to release the ${red(
-          "first major release"
+        `Are you sure you want to release the ${red(
+          "first major version"
         )} of ${pkgJSON.name}?`
       )
     );
