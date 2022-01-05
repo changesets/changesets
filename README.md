@@ -71,6 +71,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [verdaccio](https://verdaccio.org/)
 - [Chakra UI](https://chakra-ui.com/)
 - [Astro](https://astro.build)
+- [Airnode](https://github.com/api3dao/airnode)
 
 # Thanks/Inspiration
 
