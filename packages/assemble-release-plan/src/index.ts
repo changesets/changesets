@@ -24,18 +24,13 @@ function getSnapshotSuffix(snapshot?: string | boolean): string | undefined {
   if (snapshot === undefined) {
     return;
   }
-  const now = new Date();
 
-  let dateAndTime = [
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-    now.getUTCHours(),
-    now.getUTCMinutes(),
-    now.getUTCSeconds()
-  ].join("");
-
+  let dateAndTime = new Date()
+    .toISOString()
+    .replace(/\.\d{3}Z$/, "")
+    .replace(/[^\d]/g, "");
   let tag = "";
+
   if (typeof snapshot === "string") tag = `-${snapshot}`;
 
   return `${tag}-${dateAndTime}`;
@@ -127,7 +122,7 @@ function assembleReleasePlan(
     for (let pkg of packages.packages) {
       // If a package had a prerelease, but didn't trigger a version bump in the regular release,
       // we want to give it a patch release.
-      // Detailed explaination at https://github.com/changesets/changesets/pull/382#discussion_r434434182
+      // Detailed explanation at https://github.com/changesets/changesets/pull/382#discussion_r434434182
       if (preInfo.preVersions.get(pkg.packageJson.name) !== 0) {
         if (!releases.has(pkg.packageJson.name)) {
           releases.set(pkg.packageJson.name, {

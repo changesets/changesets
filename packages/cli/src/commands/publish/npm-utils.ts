@@ -98,7 +98,7 @@ export function getPackageInfo(packageJson: PackageJSON) {
     ]);
 
     // Github package registry returns empty string when calling npm info
-    // for a non-existant package instead of a E404
+    // for a non-existent package instead of a E404
     if (result.stdout.toString() === "") {
       return {
         error: {
