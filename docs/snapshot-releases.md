@@ -1,10 +1,10 @@
 # Snapshot Releases
 
-Snapshot releases are a way to release your changes for testing without updating the versions. It involves both a modified `version` and a modified `publish` command are used to do this. After this, you will have a published version of packages in changesets with a version of `0.0.0-{tag}-DATETIMESTAMP`.
+Snapshot releases are a way to release your changes for testing without updating the versions. Both a modified `version` and a modified `publish` command are used to do accomplish a snapshot release. After both processes run, you will have a published version of packages in changesets with a version of `0.0.0-{tag}-DATETIMESTAMP`.
 
 ## Starting Off
 
-Create changesets as normal, and then when, you are ready to release a snapshot, you should make a branch from which to do so.
+Create changesets as normal, as described in [adding a changeset](./adding-a-changeset.md). When you are ready to release a snapshot, you should make a dedicated branch for doing so.
 
 ## Versioning your packages
 
@@ -24,7 +24,13 @@ This will instead update versions to `0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS`
 
 ## Publishing your packages
 
-After running version, you can use the `changeset publish --tag bulbasaur` command to releases the packages. By using the `--tag` flag, you will not add it to the `latest` flag on npm. This is REALLY IMPORTANT because if you do not include a tag, people installing your package using `yarn add your-package-name` will install the snapshot version.
+After running the `yarn changeset version` command, you can use the `changeset publish --tag bulbasaur` command to releases the packages. By using the `--tag` flag, you will not add it to the `latest` flag on npm. This is REALLY IMPORTANT because if you do not include a tag, people installing your package using `yarn add your-package-name` will install the snapshot version.
+
+## Using the `--no-git-tag` flag
+
+You can use the `--no-git-tag` CLI flag when running `changeset publish` if you plan to publish snapshot releases locally or you are pushing [git tags](http://npm.github.io/publishing-pkgs-docs/updating/using-tags.html) to a remote from your CI environment.
+
+When you run `changeset publish --no-git-tag --snapshot`, changesets will skip creating git tags for published snapshot packages. That means that git tags can still be created whenever pushing stable versions (with a regular `changeset publish`), and you can safely publish snapshot releases locally, without creating unnecessary tags.
 
 ## Using a snapshot version
 

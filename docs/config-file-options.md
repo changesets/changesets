@@ -28,7 +28,7 @@ By default, npm publishes scoped npm packages as `restricted` - so to ensure you
 
 This can be overridden in specific packages by setting the `access` in a package's `package.json`.
 
-If you want a package from being published to npm at all, set `private: true` in that package's `package.json`
+If you want to prevent a package from being published to npm, set `private: true` in that package's `package.json`
 
 ## `baseBranch` (git branch name)
 
