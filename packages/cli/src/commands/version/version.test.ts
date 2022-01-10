@@ -530,23 +530,8 @@ describe("snapshot release", () => {
     const originalDate = Date;
     // eslint-disable-next-line no-global-assign
     Date = class Date {
-      getUTCFullYear() {
-        return 2021;
-      }
-      getUTCMonth() {
-        return 12;
-      }
-      getUTCDate() {
-        return 13;
-      }
-      getUTCHours() {
-        return 0;
-      }
-      getUTCMinutes() {
-        return 7;
-      }
-      getUTCSeconds() {
-        return 30;
+      toISOString() {
+        return "2021-12-13T00:07:30.879Z";
       }
     } as any;
     try {
@@ -575,14 +560,14 @@ describe("snapshot release", () => {
         Array [
           Object {
             "dependencies": Object {
-              "pkg-b": "0.0.0-202112130730",
+              "pkg-b": "0.0.0-20211213000730",
             },
             "name": "pkg-a",
             "version": "1.0.0",
           },
           Object {
             "name": "pkg-b",
-            "version": "0.0.0-202112130730",
+            "version": "0.0.0-20211213000730",
           },
         ]
       `);
@@ -630,23 +615,8 @@ describe("snapshot release", () => {
       const originalDate = Date;
       // eslint-disable-next-line no-global-assign
       Date = class Date {
-        getUTCFullYear() {
-          return 2021;
-        }
-        getUTCMonth() {
-          return 12;
-        }
-        getUTCDate() {
-          return 13;
-        }
-        getUTCHours() {
-          return 0;
-        }
-        getUTCMinutes() {
-          return 7;
-        }
-        getUTCSeconds() {
-          return 30;
+        toISOString() {
+          return "2021-12-13T00:07:30.879Z";
         }
       } as any;
       try {
@@ -679,14 +649,14 @@ describe("snapshot release", () => {
           Array [
             Object {
               "dependencies": Object {
-                "pkg-b": "2.0.0-202112130730",
+                "pkg-b": "2.0.0-20211213000730",
               },
               "name": "pkg-a",
               "version": "1.0.0",
             },
             Object {
               "name": "pkg-b",
-              "version": "2.0.0-202112130730",
+              "version": "2.0.0-20211213000730",
             },
           ]
         `);
