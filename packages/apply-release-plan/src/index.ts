@@ -6,7 +6,7 @@ import {
   ModCompWithPackage
 } from "@changesets/types";
 
-import { defaultConfig } from "@changesets/config";
+import { defaultConfig, getCommitFuncs } from "@changesets/config";
 import * as git from "@changesets/git";
 import resolveFrom from "resolve-from";
 import { Packages } from "@manypkg/get-packages";
@@ -17,7 +17,6 @@ import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
-import createVersionCommit from "./createVersionCommit";
 import getChangelogEntry from "./get-changelog-entry";
 
 function stringDefined(s: string | undefined): s is string {
@@ -72,8 +71,6 @@ export default async function applyReleasePlan(
   );
 
   let { releases, changesets } = releasePlan;
-
-  const versionCommit = createVersionCommit(releasePlan, config.commit);
 
   let releasesWithPackage = releases.map(release => {
     let pkg = packagesByName.get(release.name);
@@ -181,7 +178,12 @@ export default async function applyReleasePlan(
       await git.add(path.relative(cwd, file!), cwd);
     }
 
-    let commit = await git.commit(versionCommit, cwd);
+    const [{ getVersionLine }, commitOpts] = getCommitFuncs(config.commit, cwd);
+
+    let commit = await git.commit(
+      await getVersionLine(releasePlan, commitOpts),
+      cwd
+    );
 
     if (!commit) {
       console.error("Changesets ran into trouble committing your files");

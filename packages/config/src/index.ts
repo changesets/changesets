@@ -13,6 +13,7 @@ import {
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { getCommitFuncs } from "./commit";
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
@@ -411,3 +412,5 @@ export let defaultConfig = parse(defaultWrittenConfig, {
   tool: "root",
   packages: [fakePackage]
 });
+
+export { getCommitFuncs };

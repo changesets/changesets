@@ -63,7 +63,7 @@ export type Linked = ReadonlyArray<PackageGroup>;
 
 export type Config = {
   changelog: false | readonly [string, any];
-  commit: boolean;
+  commit: boolean | readonly [string, any];
   fixed: Fixed;
   linked: Linked;
   access: AccessType;
@@ -120,6 +120,21 @@ export type GetDependencyReleaseLine = (
 export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
   getDependencyReleaseLine: GetDependencyReleaseLine;
+};
+
+export type GetAddLine = (
+  changeset: Changeset,
+  commitOptions: null | Record<string, any>
+) => Promise<string>;
+
+export type GetVersionLine = (
+  releasePlan: ReleasePlan,
+  commitOptions: null | Record<string, any>
+) => Promise<string>;
+
+export type CommitFunctions = {
+  getAddLine: GetAddLine;
+  getVersionLine: GetVersionLine;
 };
 
 export type PreState = {
