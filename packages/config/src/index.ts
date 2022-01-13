@@ -7,6 +7,11 @@ import { Packages } from "@manypkg/get-packages";
 import { Config, WrittenConfig, Linked } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import {
+  getAddLine,
+  getVersionLine,
+  getNormalizedCommitOption
+} from "./commit";
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
@@ -113,14 +118,45 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
-  if (json.commit !== undefined && typeof json.commit !== "boolean") {
+  if (
+    json.commit !== undefined &&
+    typeof json.commit !== "boolean" &&
+    typeof json.commit !== "object"
+  ) {
     messages.push(
       `The \`commit\` option is set as ${JSON.stringify(
         json.commit,
         null,
         2
-      )} when the only valid values are undefined or a boolean`
+      )} when the only valid values are undefined or a boolean or an object`
     );
+  } else if (typeof json.commit === "object") {
+    if (
+      json.commit.add !== undefined &&
+      typeof json.commit.add !== "boolean" &&
+      typeof json.commit.add !== "object"
+    ) {
+      messages.push(
+        `The \`commit.add\` option is set as ${JSON.stringify(
+          json.commit.add,
+          null,
+          2
+        )} when the only valid values are undefined or a boolean or an object`
+      );
+    }
+    if (
+      json.commit.version !== undefined &&
+      typeof json.commit.version !== "boolean" &&
+      typeof json.commit.version !== "object"
+    ) {
+      messages.push(
+        `The \`commit.version\` option is set as ${JSON.stringify(
+          json.commit.version,
+          null,
+          2
+        )} when the only valid values are undefined or a boolean or an object`
+      );
+    }
   }
   if (json.baseBranch !== undefined && typeof json.baseBranch !== "string") {
     messages.push(
@@ -296,7 +332,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.access
         : normalizedAccess,
     commit:
-      json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
+      json.commit === undefined
+        ? getNormalizedCommitOption(defaultWrittenConfig.commit)
+        : getNormalizedCommitOption(json.commit),
     linked:
       json.linked === undefined
         ? defaultWrittenConfig.linked
@@ -359,3 +397,5 @@ export let defaultConfig = parse(defaultWrittenConfig, {
   tool: "root",
   packages: [fakePackage]
 });
+
+export { getAddLine, getVersionLine };

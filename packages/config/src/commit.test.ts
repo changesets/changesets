@@ -1,5 +1,5 @@
 import outdent from "outdent";
-import createReleaseCommit from "./createVersionCommit";
+import { getAddLine, getVersionLine } from "./commit";
 import { NewChangeset, ReleasePlan } from "@changesets/types";
 
 const simpleChangeset: NewChangeset = {
@@ -52,20 +52,60 @@ let secondReleasePlan: ReleasePlan = {
   preState: undefined
 };
 
-describe("createReleaseCommit", () => {
+describe("commit functions", () => {
+  it("should handle a simple changeset", () => {
+    const commitStr = getAddLine(
+      {
+        summary: "test changeset summary commit",
+        releases: [
+          {
+            name: "package-a",
+            type: "minor"
+          }
+        ]
+      },
+      { skipCI: false }
+    );
+    expect(commitStr).toEqual(`docs(changeset): test changeset summary commit`);
+  });
+
+  it("should handle a simple changeset - skipCI", () => {
+    const commitStr = getAddLine(
+      {
+        summary: "test changeset summary commit",
+        releases: [
+          {
+            name: "package-a",
+            type: "minor"
+          }
+        ]
+      },
+      { skipCI: true }
+    );
+    expect(commitStr).toEqual(
+      outdent`docs(changeset): test changeset summary commit
+    
+      [skip ci]
+
+      `
+    );
+  });
+
   it("should handle a single simple releaseObject with one released package", () => {
-    const commitStr = createReleaseCommit(simpleReleasePlan, false);
+    const commitStr = getVersionLine(simpleReleasePlan, {
+      skipCI: false
+    });
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)
 
       Releases:
         package-a@1.1.0
-      
+    
       `);
   });
-  it("should skip CI when the flag is passed", () => {
-    const commitStr = createReleaseCommit(simpleReleasePlan, true);
 
+  it("should handle a single simple releaseObject with one released package - skipCI", () => {
+    const commitStr = getVersionLine(simpleReleasePlan, { skipCI: true });
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)
 
@@ -98,7 +138,7 @@ describe("createReleaseCommit", () => {
       ],
       preState: undefined
     };
-    const commitStr = createReleaseCommit(releasePlan, false);
+    const commitStr = getVersionLine(releasePlan, { skipCI: true });
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 2 package(s)
 
@@ -106,11 +146,13 @@ describe("createReleaseCommit", () => {
         package-a@1.0.1
         package-b@1.1.0
 
+      [skip ci]
+    
     `);
   });
 
   it("should handle a merging releases from multiple changesets", () => {
-    const commitStr = createReleaseCommit(secondReleasePlan, false);
+    const commitStr = getVersionLine(secondReleasePlan, { skipCI: true });
 
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 2 package(s)
@@ -119,6 +161,8 @@ describe("createReleaseCommit", () => {
         package-a@1.1.0
         package-b@1.1.0
 
+      [skip ci]
+    
     `);
   });
 });

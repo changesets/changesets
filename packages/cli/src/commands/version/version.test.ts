@@ -226,7 +226,12 @@ describe("running version in a simple project", () => {
 
     await versionCommand(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      commit: true
+      commit: {
+        add: false,
+        version: {
+          skipCI: true
+        }
+      }
     });
 
     expect(spy).toHaveBeenCalled();
@@ -478,7 +483,10 @@ describe("snapshot release", () => {
       },
       {
         ...modifiedDefaultConfig,
-        commit: false
+        commit: {
+          add: false,
+          version: false
+        }
       }
     );
     expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
@@ -510,7 +518,10 @@ describe("snapshot release", () => {
       },
       {
         ...modifiedDefaultConfig,
-        commit: true
+        commit: {
+          add: false,
+          version: { skipCI: true }
+        }
       }
     );
 
@@ -529,7 +540,10 @@ describe("snapshot release", () => {
         },
         {
           ...modifiedDefaultConfig,
-          commit: false,
+          commit: {
+            add: false,
+            version: false
+          },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
             useCalculatedVersionForSnapshots: true

@@ -179,7 +179,13 @@ describe("Changesets", () => {
     await addChangeset(
       cwd,
       { empty: false },
-      { ...defaultConfig, commit: true }
+      {
+        ...defaultConfig,
+        commit: {
+          add: { skipCI: false },
+          version: false
+        }
+      }
     );
     expect(git.add).toHaveBeenCalledTimes(1);
   });

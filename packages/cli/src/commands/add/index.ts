@@ -5,6 +5,7 @@ import { spawn } from "child_process";
 import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
+import { getAddLine } from "@changesets/config";
 import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
@@ -53,9 +54,9 @@ export default async function add(
 
   if (newChangeset.confirmed) {
     const changesetID = await writeChangeset(newChangeset, cwd);
-    if (config.commit) {
+    if (config.commit.add) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
-      await git.commit(`docs(changeset): ${newChangeset.summary}`, cwd);
+      await git.commit(getAddLine(newChangeset, config.commit.add), cwd);
       log(chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`));
     } else {
       log(

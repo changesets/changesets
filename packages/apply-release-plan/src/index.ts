@@ -5,8 +5,7 @@ import {
   NewChangeset,
   ModCompWithPackage
 } from "@changesets/types";
-
-import { defaultConfig } from "@changesets/config";
+import { defaultConfig, getVersionLine } from "@changesets/config";
 import * as git from "@changesets/git";
 import resolveFrom from "resolve-from";
 import { Packages } from "@manypkg/get-packages";
@@ -17,7 +16,6 @@ import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
-import createVersionCommit from "./createVersionCommit";
 import getChangelogEntry from "./get-changelog-entry";
 
 function stringDefined(s: string | undefined): s is string {
@@ -72,8 +70,6 @@ export default async function applyReleasePlan(
   );
 
   let { releases, changesets } = releasePlan;
-
-  const versionCommit = createVersionCommit(releasePlan, config.commit);
 
   let releasesWithPackage = releases.map(release => {
     let pkg = packagesByName.get(release.name);
@@ -172,7 +168,7 @@ export default async function applyReleasePlan(
     );
   }
 
-  if (config.commit) {
+  if (config.commit.version) {
     let newTouchedFilesArr = [...touchedFiles];
     // Note, git gets angry if you try and have two git actions running at once
     // So we need to be careful that these iterations are properly sequential
@@ -181,7 +177,10 @@ export default async function applyReleasePlan(
       await git.add(path.relative(cwd, file!), cwd);
     }
 
-    let commit = await git.commit(versionCommit, cwd);
+    let commit = await git.commit(
+      getVersionLine(releasePlan, config.commit.version),
+      cwd
+    );
 
     if (!commit) {
       console.error("Changesets ran into trouble committing your files");

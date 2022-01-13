@@ -58,9 +58,18 @@ export type PackageJSON = {
 
 export type Linked = ReadonlyArray<ReadonlyArray<string>>;
 
+export type CommitOptions = {
+  skipCI: boolean;
+};
+
+export type Commit = {
+  add: false | CommitOptions;
+  version: false | CommitOptions;
+};
+
 export type Config = {
   changelog: false | readonly [string, any];
-  commit: boolean;
+  commit: Commit;
   linked: Linked;
   access: AccessType;
   baseBranch: string;
@@ -74,9 +83,24 @@ export type Config = {
   >;
 };
 
+export type WrittenCommit =
+  | boolean
+  | {
+      add?:
+        | boolean
+        | {
+            skipCI: boolean;
+          };
+      version?:
+        | boolean
+        | {
+            skipCI: boolean;
+          };
+    };
+
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
-  commit?: boolean;
+  commit?: WrittenCommit;
   linked?: Linked;
   access?: AccessType;
   baseBranch?: string;

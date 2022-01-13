@@ -26,10 +26,15 @@ export default async function version(
   },
   config: Config
 ) {
-  const releaseConfig = {
+  const releaseConfig: Config = {
     ...config,
     // Disable committing when in snapshot mode
-    commit: options.snapshot ? false : config.commit
+    commit: options.snapshot
+      ? {
+          add: false,
+          version: false
+        }
+      : config.commit
   };
   const [changesets, preState] = await Promise.all([
     readChangesets(cwd),

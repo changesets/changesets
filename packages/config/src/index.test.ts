@@ -38,7 +38,14 @@ test("read reads the config", async () => {
   expect(config).toEqual({
     linked: [],
     changelog: false,
-    commit: true,
+    commit: {
+      add: {
+        skipCI: false
+      },
+      version: {
+        skipCI: true
+      }
+    },
     access: "restricted",
     baseBranch: "master",
     updateInternalDependencies: "patch",
@@ -55,7 +62,10 @@ test("read reads the config", async () => {
 let defaults = {
   linked: [],
   changelog: ["@changesets/cli/changelog", null],
-  commit: false,
+  commit: {
+    add: false,
+    version: false
+  },
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
@@ -106,7 +116,10 @@ let correctCases: Record<string, CorrectCase> = {
     },
     output: {
       ...defaults,
-      commit: false
+      commit: {
+        add: false,
+        version: false
+      }
     }
   },
   "commit true": {
@@ -115,7 +128,71 @@ let correctCases: Record<string, CorrectCase> = {
     },
     output: {
       ...defaults,
-      commit: true
+      commit: {
+        add: {
+          skipCI: false
+        },
+        version: {
+          skipCI: true
+        }
+      }
+    }
+  },
+  "commit version only": {
+    input: {
+      commit: {
+        add: false,
+        version: true
+      }
+    },
+    output: {
+      ...defaults,
+      commit: {
+        add: false,
+        version: {
+          skipCI: true
+        }
+      }
+    }
+  },
+  "commit add only": {
+    input: {
+      commit: {
+        add: true,
+        version: false
+      }
+    },
+    output: {
+      ...defaults,
+      commit: {
+        add: {
+          skipCI: false
+        },
+        version: false
+      }
+    }
+  },
+  "commit custom": {
+    input: {
+      commit: {
+        add: {
+          skipCI: true
+        },
+        version: {
+          skipCI: false
+        }
+      }
+    },
+    output: {
+      ...defaults,
+      commit: {
+        add: {
+          skipCI: true
+        },
+        version: {
+          skipCI: false
+        }
+      }
     }
   },
   "access private": {
@@ -305,7 +382,7 @@ The \`access\` option is set as \\"something\\" when the only valid values are u
       unsafeParse({ commit: "something" }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The \`commit\` option is set as \\"something\\" when the only valid values are undefined or a boolean"
+The \`commit\` option is set as \\"something\\" when the only valid values are undefined or a boolean or an object"
 `);
   });
   test("linked non-array", () => {

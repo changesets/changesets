@@ -41,7 +41,10 @@ class FakeReleasePlan {
     };
     this.config = {
       changelog: false,
-      commit: false,
+      commit: {
+        add: false,
+        version: false
+      },
       linked: [],
       access: "restricted",
       baseBranch: "main",
@@ -77,7 +80,10 @@ async function testSetup(
   if (!config) {
     config = {
       changelog: false,
-      commit: false,
+      commit: {
+        add: false,
+        version: false
+      },
       linked: [],
       access: "restricted",
       baseBranch: "main",
@@ -95,7 +101,7 @@ async function testSetup(
     await setupFunc(tempDir);
   }
 
-  if (config.commit) {
+  if (config.commit.add || config.commit.version) {
     await spawn("git", ["init"], { cwd: tempDir });
     await git.add(".", tempDir);
     await git.commit("first commit", tempDir);
@@ -476,7 +482,10 @@ describe("apply release plan", () => {
         },
         {
           changelog: false,
-          commit: false,
+          commit: {
+            add: false,
+            version: false
+          },
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -538,7 +547,10 @@ describe("apply release plan", () => {
         },
         {
           changelog: false,
-          commit: false,
+          commit: {
+            add: false,
+            version: false
+          },
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -686,7 +698,10 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
-              commit: false,
+              commit: {
+                add: false,
+                version: false
+              },
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -770,7 +785,10 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
-              commit: false,
+              commit: {
+                add: false,
+                version: false
+              },
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -846,7 +864,10 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
-              commit: false,
+              commit: {
+                add: false,
+                version: false
+              },
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -922,7 +943,10 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
-              commit: false,
+              commit: {
+                add: false,
+                version: false
+              },
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1001,7 +1025,10 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
-              commit: false,
+              commit: {
+                add: false,
+                version: false
+              },
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1085,7 +1112,10 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
-              commit: false,
+              commit: {
+                add: false,
+                version: false
+              },
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1161,7 +1191,10 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
-              commit: false,
+              commit: {
+                add: false,
+                version: false
+              },
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1237,7 +1270,10 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
-              commit: false,
+              commit: {
+                add: false,
+                version: false
+              },
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1317,7 +1353,10 @@ describe("apply release plan", () => {
           },
           {
             changelog: false,
-            commit: false,
+            commit: {
+              add: false,
+              version: false
+            },
             linked: [],
             access: "restricted",
             baseBranch: "main",
@@ -1472,7 +1511,10 @@ describe("apply release plan", () => {
           preState: undefined
         },
         {
-          commit: false,
+          commit: {
+            add: false,
+            version: false
+          },
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1580,7 +1622,10 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
-          commit: false,
+          commit: {
+            add: false,
+            version: false
+          },
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1662,7 +1707,10 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
-          commit: false,
+          commit: {
+            add: false,
+            version: false
+          },
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1748,7 +1796,10 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
-          commit: false,
+          commit: {
+            add: false,
+            version: false
+          },
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1847,7 +1898,10 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
-          commit: false,
+          commit: {
+            add: false,
+            version: false
+          },
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -2163,7 +2217,14 @@ describe("apply release plan", () => {
           path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
           null
         ],
-        commit: true
+        commit: {
+          add: {
+            skipCI: false
+          },
+          version: {
+            skipCI: true
+          }
+        }
       },
       setupFunc
     );
@@ -2196,7 +2257,17 @@ describe("apply release plan", () => {
       let { tempDir } = await testSetup(
         "with-git",
         releasePlan.getReleasePlan(),
-        { ...releasePlan.config, commit: true }
+        {
+          ...releasePlan.config,
+          commit: {
+            add: {
+              skipCI: false
+            },
+            version: {
+              skipCI: true
+            }
+          }
+        }
       );
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
@@ -2247,7 +2318,14 @@ describe("apply release plan", () => {
         },
         {
           changelog: false,
-          commit: true,
+          commit: {
+            add: {
+              skipCI: false
+            },
+            version: {
+              skipCI: true
+            }
+          },
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -2295,7 +2373,17 @@ describe("apply release plan", () => {
       let { tempDir } = await testSetup(
         "with-git",
         releasePlan.getReleasePlan(),
-        { ...releasePlan.config, commit: true },
+        {
+          ...releasePlan.config,
+          commit: {
+            add: {
+              skipCI: false
+            },
+            version: {
+              skipCI: true
+            }
+          }
+        },
         setupFunc
       );
 
@@ -2315,7 +2403,15 @@ describe("apply release plan", () => {
 
 // it("should git add the expected files (without changelog) when commit: true", async () => {
 //   await writeChangesets([simpleChangeset2], cwd);
-//   await versionCommand(cwd, { ...modifiedDefaultConfig, commit: true });
+//   await versionCommand(cwd, {
+//     ...modifiedDefaultConfig,
+//     commit: {
+//       add: false,
+//       version: {
+//         skipCI: true
+//       }
+//     }
+//   });
 
 //   const pkgAConfigPath = path.join(cwd, "packages/pkg-a/package.json");
 //   const pkgBConfigPath = path.join(cwd, "packages/pkg-b/package.json");
@@ -2331,7 +2427,14 @@ describe("apply release plan", () => {
 //   await versionCommand(cwd, {
 //     ...modifiedDefaultConfig,
 //     changelog: [changelogPath, null],
-//     commit: true
+//     commit: {
+//       add: {
+//         skipCI: false
+//       },
+//       version: {
+//         skipCI: true
+//       }
+//     }
 //   });
 //   const pkgAChangelogPath = path.join(cwd, "packages/pkg-a/CHANGELOG.md");
 //   const pkgBChangelogPath = path.join(cwd, "packages/pkg-b/CHANGELOG.md");
