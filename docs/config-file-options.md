@@ -22,7 +22,7 @@ This argument sets whether the `changeset add` command and the `changeset publis
 
 ## `access` (`restricted` | `public`)
 
-This sets how packages are published - if `access: "restricted"`, packages will be published as private, requiring log in to an npm account with access to install. If `access: "public", the packages will be made available on the public registry.
+This sets how packages are published - if `access: "restricted"`, packages will be published as private, requiring log in to an npm account with access to install. If `access: "public"`, the packages will be made available on the public registry.
 
 By default, npm publishes scoped npm packages as `restricted` - so to ensure you do not accidentally publish code publicly, we default to `restricted`. For most cases you will want to set this to `public`.
 
