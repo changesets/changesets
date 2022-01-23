@@ -1,7 +1,7 @@
 import yaml from "js-yaml";
 import { Release, VersionType } from "@changesets/types";
 
-const mdRegex = /\s*---([^]*?)\n\s*---\s*\n([^]*)/;
+const mdRegex = /\s*---([^]*?)\n\s*---(?:\s*\n([^]*))?$/;
 
 export default function parseChangesetFile(
   contents: string
@@ -16,7 +16,7 @@ export default function parseChangesetFile(
     );
   }
   let [, roughReleases, roughSummary] = execResult;
-  let summary = roughSummary.trim();
+  let summary = (roughSummary === undefined ? "" : roughSummary).trim();
 
   let releases: Release[];
   try {

@@ -148,6 +148,17 @@ describe("parsing a changeset", () => {
       summary: ""
     });
   });
+  it("should be fine if the changeset only contains frontmatter", () => {
+    const changesetMd = outdent`---
+    ---
+    `;
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [],
+      summary: ""
+    });
+  });
   it("should be fine if the frontmatter is followed by a whitespace on the same line", () => {
     const changesetMd = outdent`---
     "cool-package": minor
