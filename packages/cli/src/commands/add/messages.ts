@@ -1,5 +1,4 @@
 import chalk from "chalk";
-import boxen from "boxen";
 import outdent from "outdent";
 import { log } from "@changesets/logger";
 import { Release, VersionType } from "@changesets/types";
@@ -16,27 +15,28 @@ export default function printConfirmationMessage(
       .filter(release => release.type === type)
       .map(release => release.name);
   }
-  log("=== Releasing the following packages ===");
+  log("\n=== Summary of changesets ===");
   const majorReleases = getReleasesOfType("major");
   const minorReleases = getReleasesOfType("minor");
   const patchReleases = getReleasesOfType("patch");
 
   if (majorReleases.length > 0)
-    log(`${chalk.green("[Major]")}\n  ${majorReleases.join(", ")}`);
+    log(`${chalk.bold.green("major")}:  ${majorReleases.join(", ")}`);
   if (minorReleases.length > 0)
-    log(`${chalk.green("[Minor]")}\n  ${minorReleases.join(", ")}`);
+    log(`${chalk.bold.green("minor")}:  ${minorReleases.join(", ")}`);
   if (patchReleases.length > 0)
-    log(`${chalk.green("[Patch]")}\n  ${patchReleases.join(", ")}`);
+    log(`${chalk.bold.green("patch")}:  ${patchReleases.join(", ")}`);
+
+  log("");
+
   if (repoHasMultiplePackages) {
     const message = outdent`
-      ${chalk.red("========= NOTE ========")}
-      All dependents of these packages that will be incompatible with the new version will be ${chalk.red(
+      Note: All dependents of these packages that will be incompatible with
+      the new version will be ${chalk.redBright(
         "patch bumped"
-      )} when this changeset is applied.`;
-    const prettyMessage = boxen(message, {
-      borderStyle: "double",
-      align: "center"
-    });
-    log(prettyMessage);
+      )} when this changeset is applied.
+    `;
+
+    log(message + "\n");
   }
 }

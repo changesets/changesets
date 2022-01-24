@@ -25,7 +25,7 @@ function applyLinks(
 
   // We do this for each set of linked packages
   for (let linkedPackages of linked) {
-    // First we filter down to all the relevent releases for one set of linked packages
+    // First we filter down to all the relevant releases for one set of linked packages
     let releasingLinkedPackages = [...releases.values()].filter(
       release =>
         linkedPackages.includes(release.name) && release.type !== "none"
@@ -39,7 +39,7 @@ function applyLinks(
     let highestVersion;
 
     for (let pkg of releasingLinkedPackages) {
-      // Note that patch is implictly set here, but never needs to override another value
+      // Note that patch is implicitly set here, but never needs to override another value
       if (!highestReleaseType) {
         highestReleaseType = pkg.type;
       } else if (pkg.type === "major") {
