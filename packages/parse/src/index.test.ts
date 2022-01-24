@@ -147,7 +147,7 @@ describe("parsing a changeset", () => {
       summary: ""
     });
   });
-  it("should be fine if the summary body contains only an empty space", () => {
+  it("should be fine if there is no summary body and the frontmatter has some trailing whitespace", () => {
     const changesetMd = outdent`---
     "cool-package": minor
     --- `;
