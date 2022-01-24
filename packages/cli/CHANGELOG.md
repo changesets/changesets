@@ -1,5 +1,28 @@
 # @changesets/cli
 
+## 2.20.0
+
+### Minor Changes
+
+- [#698](https://github.com/changesets/changesets/pull/698) [`9e14a9a`](https://github.com/changesets/changesets/commit/9e14a9a89d337bfcf4c0472989ed1f46f70a2627) Thanks [@zthxxx](https://github.com/zthxxx)! - Reworked the CLI output when adding a changeset. This includes fixing broken formatting in certain terminal width, reducing visual noise and making other small adjustments.
+
+* [#704](https://github.com/changesets/changesets/pull/704) [`6f9c9d6`](https://github.com/changesets/changesets/commit/6f9c9d60c0e02c79d555c48deb01559057f1d252) Thanks [@Andarist](https://github.com/Andarist)! - Dependencies specified using a tag will no longer result in printing incorrect errors in the console.
+
+### Patch Changes
+
+- [#740](https://github.com/changesets/changesets/pull/740) [`957e39c`](https://github.com/changesets/changesets/commit/957e39c21549dd91e03faa5cd30e44e4c3d7331f) Thanks [@akphi](https://github.com/akphi)! - Fixed an issue with failing to parse changesets containing a completely empty summary.
+
+* [#693](https://github.com/changesets/changesets/pull/693) [`1be201f`](https://github.com/changesets/changesets/commit/1be201fc27903cb2f42137400b5484c4ccad3812) Thanks [@luciaquirke](https://github.com/luciaquirke)! - Fixed an issue with `none` release type sometimes overriding other release types and thus preventing a release from happening.
+
+* Updated dependencies [[`6f9c9d6`](https://github.com/changesets/changesets/commit/6f9c9d60c0e02c79d555c48deb01559057f1d252), [`77c1cef`](https://github.com/changesets/changesets/commit/77c1ceff402f390c1ededec358d914ba68a31d0d), [`1be201f`](https://github.com/changesets/changesets/commit/1be201fc27903cb2f42137400b5484c4ccad3812)]:
+  - @changesets/get-dependents-graph@1.3.0
+  - @changesets/git@1.3.0
+  - @changesets/assemble-release-plan@5.0.5
+  - @changesets/config@1.6.4
+  - @changesets/apply-release-plan@5.0.4
+  - @changesets/read@0.5.3
+  - @changesets/get-release-plan@3.0.5
+
 ## 2.19.0
 
 ### Minor Changes
