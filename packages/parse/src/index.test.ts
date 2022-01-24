@@ -136,6 +136,28 @@ describe("parsing a changeset", () => {
       summary: expectedSummary
     });
   });
+  it("should be fine if the summary body is completely empty and there is no trailing whitespace", () => {
+    const changesetMd = outdent`---
+    "cool-package": minor
+    ---`;
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "cool-package", type: "minor" }],
+      summary: ""
+    });
+  });
+  it("should be fine if there is no summary body and the frontmatter has some trailing whitespace", () => {
+    const changesetMd = outdent`---
+    "cool-package": minor
+    --- `;
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "cool-package", type: "minor" }],
+      summary: ""
+    });
+  });
   it("should be fine if the changeset is empty", () => {
     const changesetMd = outdent`---
     ---
@@ -143,6 +165,13 @@ describe("parsing a changeset", () => {
     `;
 
     const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [],
+      summary: ""
+    });
+  });
+  it("should be fine if the changeset is empty and without any trailing whitespace", () => {
+    const changeset = parse(`---\n---`);
     expect(changeset).toEqual({
       releases: [],
       summary: ""
