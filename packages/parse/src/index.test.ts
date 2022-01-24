@@ -170,7 +170,7 @@ describe("parsing a changeset", () => {
       summary: ""
     });
   });
-  it("should be fine if the changeset only contains frontmatter", () => {
+  it("should be fine if the changeset is empty and without any trailing whitespace", () => {
     const changeset = parse(`---\n---`);
     expect(changeset).toEqual({
       releases: [],
