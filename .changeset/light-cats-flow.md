@@ -1,4 +1,5 @@
 ---
+"@changesets/cli": patch
 "@changesets/parse": patch
 ---
 
