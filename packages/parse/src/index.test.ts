@@ -136,6 +136,28 @@ describe("parsing a changeset", () => {
       summary: expectedSummary
     });
   });
+  it("should be fine if the summary body is empty", () => {
+    const changesetMd = outdent`---
+    "cool-package": minor
+    ---`;
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "cool-package", type: "minor" }],
+      summary: ""
+    });
+  });
+  it("should be fine if the summary body contains only an empty space", () => {
+    const changesetMd = outdent`---
+    "cool-package": minor
+    --- `;
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "cool-package", type: "minor" }],
+      summary: ""
+    });
+  });
   it("should be fine if the changeset is empty", () => {
     const changesetMd = outdent`---
     ---
@@ -149,11 +171,7 @@ describe("parsing a changeset", () => {
     });
   });
   it("should be fine if the changeset only contains frontmatter", () => {
-    const changesetMd = outdent`---
-    ---
-    `;
-
-    const changeset = parse(changesetMd);
+    const changeset = parse(`---\n---`);
     expect(changeset).toEqual({
       releases: [],
       summary: ""
