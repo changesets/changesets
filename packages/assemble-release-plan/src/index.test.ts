@@ -102,6 +102,53 @@ describe("assemble-release-plan", () => {
     expect(releases[0].type).toEqual("major");
     expect(releases[0].newVersion).toEqual("2.0.0");
   });
+  it("`none` changeset should not override other release types", () => {
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [
+        { name: "pkg-a", type: "none" },
+        { name: "pkg-b", type: "none" },
+        { name: "pkg-c", type: "none" }
+      ]
+    });
+    setup.addChangeset({
+      id: "big-cats-wonder",
+      releases: [
+        { name: "pkg-a", type: "patch" },
+        { name: "pkg-b", type: "minor" },
+        { name: "pkg-c", type: "major" }
+      ]
+    });
+    setup.addChangeset({
+      id: "big-cats-yelp",
+      releases: [
+        { name: "pkg-a", type: "none" },
+        { name: "pkg-b", type: "none" },
+        { name: "pkg-c", type: "none" }
+      ]
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toEqual(3);
+
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].type).toEqual("patch");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].type).toEqual("minor");
+    expect(releases[1].newVersion).toEqual("1.1.0");
+
+    expect(releases[2].name).toEqual("pkg-c");
+    expect(releases[2].type).toEqual("major");
+    expect(releases[2].newVersion).toEqual("2.0.0");
+  });
   it("should assemble release plan with dependents", () => {
     setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
