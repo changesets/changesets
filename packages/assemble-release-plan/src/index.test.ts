@@ -102,7 +102,7 @@ describe("assemble-release-plan", () => {
     expect(releases[0].type).toEqual("major");
     expect(releases[0].newVersion).toEqual("2.0.0");
   });
-  it("should handle 'none' changeset types with other changeset types", () => {
+  it("`none` changeset should not override other release types", () => {
     setup.addChangeset({
       id: "big-cats-delight",
       releases: [
