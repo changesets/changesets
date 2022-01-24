@@ -1,5 +1,11 @@
 # @changesets/parse
 
+## 0.3.11
+
+### Patch Changes
+
+- [#740](https://github.com/changesets/changesets/pull/740) [`957e39c`](https://github.com/changesets/changesets/commit/957e39c21549dd91e03faa5cd30e44e4c3d7331f) Thanks [@akphi](https://github.com/akphi)! - Fixed an issue with failing to parse changesets containing a completely empty summary.
+
 ## 0.3.10
 
 ### Patch Changes

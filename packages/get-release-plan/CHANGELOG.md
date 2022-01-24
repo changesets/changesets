@@ -1,5 +1,14 @@
 # @changesets/get-release-plan
 
+## 3.0.5
+
+### Patch Changes
+
+- Updated dependencies [[`1be201f`](https://github.com/changesets/changesets/commit/1be201fc27903cb2f42137400b5484c4ccad3812)]:
+  - @changesets/assemble-release-plan@5.0.5
+  - @changesets/config@1.6.4
+  - @changesets/read@0.5.3
+
 ## 3.0.4
 
 ### Patch Changes

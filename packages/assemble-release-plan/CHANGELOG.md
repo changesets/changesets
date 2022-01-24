@@ -1,5 +1,14 @@
 # @changesets/assemble-release-plan
 
+## 5.0.5
+
+### Patch Changes
+
+- [#693](https://github.com/changesets/changesets/pull/693) [`1be201f`](https://github.com/changesets/changesets/commit/1be201fc27903cb2f42137400b5484c4ccad3812) Thanks [@luciaquirke](https://github.com/luciaquirke)! - Fixed an issue with `none` release type sometimes overriding other release types and thus preventing a release from happening.
+
+- Updated dependencies [[`6f9c9d6`](https://github.com/changesets/changesets/commit/6f9c9d60c0e02c79d555c48deb01559057f1d252)]:
+  - @changesets/get-dependents-graph@1.3.0
+
 ## 5.0.4
 
 ### Patch Changes
