@@ -12,6 +12,10 @@ function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   log(mappedPkgs);
 }
 
+function logReleasesInJSON(pkgs: Array<{ name: string; newVersion: string }>) {
+  log(JSON.stringify(pkgs));
+}
+
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
 );
@@ -97,7 +101,7 @@ export default async function run(
     }
 
     if (json) {
-      log(`--- JSON OUTPUT ---\n${JSON.stringify(successful, null, 2)}`);
+      logReleasesInJSON(successful);
     }
   }
 
@@ -105,6 +109,11 @@ export default async function run(
     error("packages failed to publish:");
 
     logReleases(unsuccessful);
+
+    if (json) {
+      logReleasesInJSON(unsuccessful);
+    }
+
     throw new ExitError(1);
   }
 }
