@@ -12,7 +12,7 @@ const { input, flags } = meow(
     init
     add [--empty] [--open]
     version [--ignore] [--snapshot <?name>]
-    publish [--tag <name>] [--otp <code>] [--no-git-tag]
+    publish [--tag <name>] [--otp <code>] [--no-git-tag] [--json]
     status [--since <branch>] [--verbose] [--output JSON_FILE.json]
     pre <enter|exit> <tag>
     tag
@@ -52,6 +52,10 @@ const { input, flags } = meow(
       gitTag: {
         type: "boolean",
         default: true
+      },
+      json: {
+        type: "boolean",
+        default: false
       }
       // mixed type like this is not supported by `meow`
       // if it gets passed explicitly then it's still available on the flags with an inferred type though

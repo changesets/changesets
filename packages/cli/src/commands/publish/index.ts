@@ -39,7 +39,12 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
 
 export default async function run(
   cwd: string,
-  { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
+  {
+    otp,
+    tag,
+    gitTag = true,
+    json = false
+  }: { otp?: string; tag?: string; gitTag?: boolean; json?: boolean },
   config: Config
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
@@ -89,6 +94,10 @@ export default async function run(
         log("New tag: ", tag);
         await git.tag(tag, cwd);
       }
+    }
+
+    if (json) {
+      log(`--- JSON OUTPUT ---\n${JSON.stringify(successful, null, 2)}`);
     }
   }
 
