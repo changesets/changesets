@@ -1900,6 +1900,82 @@ describe("apply release plan", () => {
 
       - Hey, let's have fun with testing!`);
     });
+
+    it("should add peer dependency changelog line under major", async () => {
+      let { changedFiles } = await testSetup(
+        "simple-caret-peer-dep",
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [{ name: "depended-upon", type: "minor" }]
+            }
+          ],
+          releases: [
+            {
+              name: "depended-upon",
+              type: "patch",
+              oldVersion: "1.0.0",
+              newVersion: "1.1.0",
+              changesets: ["quick-lions-devour"]
+            },
+            {
+              name: "has-peer-dep",
+              type: "patch",
+              oldVersion: "1.0.0",
+              newVersion: "2.0.0",
+              changesets: []
+            }
+          ],
+          preState: undefined
+        },
+        {
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null
+          ],
+          commit: false,
+          linked: [],
+          access: "restricted",
+          baseBranch: "main",
+          updateInternalDependencies: "patch",
+          ignore: [],
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+            updateInternalDependents: "out-of-range",
+            useCalculatedVersionForSnapshots: false
+          }
+        }
+      );
+
+      let readmePath = changedFiles.find(a =>
+        a.endsWith(`depended-upon${path.sep}CHANGELOG.md`)
+      );
+      let readmePathB = changedFiles.find(a =>
+        a.endsWith(`has-peer-dep${path.sep}CHANGELOG.md`)
+      );
+
+      if (!readmePath || !readmePathB)
+        throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+      let readmeB = await fs.readFile(readmePathB, "utf-8");
+
+      expect(readme.trim()).toEqual(outdent`# depended-upon
+
+      ## 1.1.0
+      ### Minor Changes
+
+      - Hey, let's have fun with testing!`);
+
+      expect(readmeB.trim()).toEqual(outdent`# has-peer-dep
+
+      ## 2.0.0
+      ### Major Changes
+
+      - Updated dependencies
+        - depended-upon@1.1.0`);
+    });
   });
   describe("should error and not write if", () => {
     // This is skipped as *for now* we are assuming we have been passed
