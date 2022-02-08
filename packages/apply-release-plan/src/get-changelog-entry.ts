@@ -1,6 +1,6 @@
 import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
 
-import { ModCompWithPackage } from "@changesets/types";
+import { ModCompWithPackage, DependencyType } from "@changesets/types";
 import startCase from "lodash.startcase";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
@@ -19,6 +19,20 @@ async function generateChangesForVersionTypeMarkdown(
   if (releaseLines.length) {
     return `### ${startCase(type)} Changes\n\n${releaseLines.join("\n")}\n`;
   }
+}
+
+function getRelevantChangesets(
+  releases: ModCompWithPackage[],
+  changesets: NewChangesetWithCommit[]
+) {
+  let relevantChangesetIds: Set<string> = new Set();
+  releases.forEach(rel => {
+    rel.changesets.forEach(cs => {
+      relevantChangesetIds.add(cs);
+    });
+  });
+
+  return changesets.filter(cs => relevantChangesetIds.has(cs.id));
 }
 
 // release is the package and version we are releasing
@@ -56,45 +70,56 @@ export default async function getChangelogEntry(
       );
     }
   });
-  let dependentReleases = releases.filter(rel => {
+
+  let dependentReleases: ModCompWithPackage[] = [];
+  let peerDependentReleases: ModCompWithPackage[] = [];
+  releases.forEach(rel => {
     const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
     const peerDependencyVersionRange =
       release.packageJson.peerDependencies?.[rel.name];
+    const depType: DependencyType = peerDependencyVersionRange
+      ? "peerDependencies"
+      : "dependencies";
+    const versionRange = peerDependencyVersionRange || dependencyVersionRange;
 
-    const versionRange = dependencyVersionRange || peerDependencyVersionRange;
-    return (
+    const shouldUpdate =
       versionRange &&
       shouldUpdateDependencyBasedOnConfig(
         { type: rel.type, version: rel.newVersion },
         {
           depVersionRange: versionRange,
-          depType: dependencyVersionRange ? "dependencies" : "peerDependencies"
+          depType
         },
         {
           minReleaseType: updateInternalDependencies,
           onlyUpdatePeerDependentsWhenOutOfRange
         }
-      )
-    );
+      );
+
+    if (!shouldUpdate) {
+      return;
+    }
+    if (depType === "peerDependencies") {
+      peerDependentReleases.push(rel);
+    } else {
+      dependentReleases.push(rel);
+    }
   });
 
-  let relevantChangesetIds: Set<string> = new Set();
-
-  dependentReleases.forEach(rel => {
-    rel.changesets.forEach(cs => {
-      relevantChangesetIds.add(cs);
-    });
-  });
-
-  let relevantChangesets = changesets.filter(cs =>
-    relevantChangesetIds.has(cs.id)
+  changelogLines.major.push(
+    changelogFuncs.getDependencyReleaseLine(
+      getRelevantChangesets(peerDependentReleases, changesets),
+      peerDependentReleases,
+      changelogOpts,
+      "peerDependencies"
+    )
   );
-
   changelogLines.patch.push(
     changelogFuncs.getDependencyReleaseLine(
-      relevantChangesets,
+      getRelevantChangesets(dependentReleases, changesets),
       dependentReleases,
-      changelogOpts
+      changelogOpts,
+      "dependencies"
     )
   );
 

@@ -109,7 +109,8 @@ export type GetReleaseLine = (
 export type GetDependencyReleaseLine = (
   changesets: NewChangesetWithCommit[],
   dependenciesUpdated: ModCompWithPackage[],
-  changelogOpts: any
+  changelogOpts: any,
+  dependencyType: DependencyType
 ) => Promise<string>;
 
 export type ChangelogFunctions = {
