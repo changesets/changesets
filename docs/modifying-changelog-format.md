@@ -33,7 +33,7 @@ async function getReleaseLine() {}
 
 async function getDependencyReleaseLine() {}
 
-module.exports {
+module.exports = {
     getReleaseLine,
     getDependencyReleaseLine
 }
