@@ -140,13 +140,19 @@ function assembleReleasePlan(
       // we want to give it a patch release.
       // Detailed explanation at https://github.com/changesets/changesets/pull/382#discussion_r434434182
       if (preInfo.preVersions.get(pkg.packageJson.name) !== 0) {
-        if (!releases.has(pkg.packageJson.name)) {
+        const existingRelease = releases.get(pkg.packageJson.name);
+        if (!existingRelease) {
           releases.set(pkg.packageJson.name, {
             name: pkg.packageJson.name,
             type: "patch",
             oldVersion: pkg.packageJson.version,
             changesets: []
           });
+        } else if (
+          existingRelease.type === "none" &&
+          !config.ignore.includes(pkg.packageJson.name)
+        ) {
+          existingRelease.type = "patch";
         }
       }
     }
