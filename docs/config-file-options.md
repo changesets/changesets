@@ -116,9 +116,8 @@ As well as the default one, you can use `@changesets/changelog-git`, which adds 
 
 You would specify our github changelog generator with:
 
-```
+```json
 {
-  // ...
   "changelog": [
     "@changesets/changelog-github",
     { "repo": "<org>/<repo>" }
