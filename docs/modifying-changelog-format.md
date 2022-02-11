@@ -34,9 +34,9 @@ async function getReleaseLine() {}
 async function getDependencyReleaseLine() {}
 
 module.exports = {
-    getReleaseLine,
-    getDependencyReleaseLine
-}
+  getReleaseLine,
+  getDependencyReleaseLine
+};
 ```
 
 These functions are run during the `changeset version` and are expected to return a string (or a promise with a string).
