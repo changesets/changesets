@@ -585,6 +585,7 @@ describe("updateInternalDependents: always", () => {
       "# pkg-a
 
       ## 1.0.1
+
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
@@ -595,6 +596,7 @@ describe("updateInternalDependents: always", () => {
       "# pkg-b
 
       ## 1.0.1
+
       ### Patch Changes
 
       - g1th4sh: This is not a summary
