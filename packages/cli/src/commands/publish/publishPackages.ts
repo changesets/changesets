@@ -18,7 +18,7 @@ type PkgInfo = {
   publishedVersions: string[];
 };
 
-type PublishedResult = {
+export type PublishedResult = {
   name: string;
   newVersion: string;
   published: boolean;

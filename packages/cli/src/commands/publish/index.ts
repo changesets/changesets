@@ -1,4 +1,4 @@
-import publishPackages from "./publishPackages";
+import publishPackages, { PublishedResult } from "./publishPackages";
 import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
@@ -7,13 +7,14 @@ import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import chalk from "chalk";
 
+type PublishJSONResult = {
+  published?: PublishedResult[];
+  unpublished?: PublishedResult[];
+};
+
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map(p => `${p.name}@${p.newVersion}`).join("\n");
   log(mappedPkgs);
-}
-
-function logReleasesInJSON(pkgs: Array<{ name: string; newVersion: string }>) {
-  log(JSON.stringify(pkgs));
 }
 
 let importantSeparator = chalk.red(
@@ -53,6 +54,7 @@ export default async function run(
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
   let preState = await readPreState(cwd);
+  const publishJSONResult: PublishJSONResult = {};
 
   if (releaseTag && preState && preState.mode === "pre") {
     error("Releasing under custom tag is not allowed in pre mode");
@@ -100,9 +102,7 @@ export default async function run(
       }
     }
 
-    if (json) {
-      logReleasesInJSON(successful);
-    }
+    publishJSONResult.published = successful;
   }
 
   if (unsuccessful.length > 0) {
@@ -110,10 +110,14 @@ export default async function run(
 
     logReleases(unsuccessful);
 
-    if (json) {
-      logReleasesInJSON(unsuccessful);
-    }
+    publishJSONResult.unpublished = unsuccessful;
+  }
 
+  if (json) {
+    console.log(JSON.stringify(publishJSONResult));
+  }
+
+  if (unsuccessful.length > 0) {
     throw new ExitError(1);
   }
 }
