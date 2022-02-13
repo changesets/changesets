@@ -14,6 +14,7 @@ import { defaultConfig } from "@changesets/config";
 
 import applyReleasePlan from "./";
 import { getPackages } from "@manypkg/get-packages";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 const f = fixtures(__dirname);
 
@@ -2000,41 +2001,54 @@ describe("apply release plan", () => {
 
       throw new Error("Expected test to exit before this point");
     });
-    it("a provided changelog function fails", async () => {
-      let releasePlan = new FakeReleasePlan();
+    it(
+      "a provided changelog function fails",
+      temporarilySilenceLogs(async () => {
+        let releasePlan = new FakeReleasePlan();
 
-      let tempDir = await f.copy("with-git");
+        let tempDir = await f.copy("with-git");
 
-      await spawn("git", ["init"], { cwd: tempDir });
+        await spawn("git", ["init"], { cwd: tempDir });
 
-      await git.add(".", tempDir);
-      await git.commit("first commit", tempDir);
+        await git.add(".", tempDir);
+        await git.commit("first commit", tempDir);
 
-      try {
-        await applyReleasePlan(
-          releasePlan.getReleasePlan(),
-          await getPackages(tempDir),
-          {
-            ...releasePlan.config,
-            changelog: [
-              path.resolve(__dirname, "test-utils/failing-functions"),
-              null
+        try {
+          await applyReleasePlan(
+            releasePlan.getReleasePlan(),
+            await getPackages(tempDir),
+            {
+              ...releasePlan.config,
+              changelog: [
+                path.resolve(__dirname, "test-utils/failing-functions"),
+                null
+              ]
+            }
+          );
+        } catch (e) {
+          expect(e.message).toEqual("no chance");
+
+          let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+
+          expect(
+            gitCmd.stdout.toString().includes("nothing to commit")
+          ).toEqual(true);
+          expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
+            Array [
+              Array [
+                "The following error was encountered while generating changelog entries",
+              ],
+              Array [
+                "We have escaped applying the changesets, and no files should have been affected",
+              ],
             ]
-          }
-        );
-      } catch (e) {
-        expect(e.message).toEqual("no chance");
+          `);
+          return;
+        }
 
-        let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
-
-        expect(gitCmd.stdout.toString().includes("nothing to commit")).toEqual(
-          true
-        );
-        return;
-      }
-
-      throw new Error("Expected test to exit before this point");
-    });
+        throw new Error("Expected test to exit before this point");
+      })
+    );
   });
   describe("changesets", () => {
     it("should delete one changeset after it is applied", async () => {

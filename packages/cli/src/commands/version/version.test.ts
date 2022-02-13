@@ -5,7 +5,7 @@ import path from "path";
 import versionCommand from "./index";
 import * as git from "@changesets/git";
 import { warn } from "@changesets/logger";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 import { NewChangeset, Config } from "@changesets/types";
 import { defaultConfig } from "@changesets/config";
@@ -103,7 +103,7 @@ const getChangelog = (pkgName: string, calls: any) => {
 const writeEmptyChangeset = (cwd: string) => writeChangesets([], cwd);
 
 describe("running version in a simple project", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
   let cwd: string;
 
   beforeEach(async () => {
