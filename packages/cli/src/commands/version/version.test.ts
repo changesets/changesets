@@ -525,7 +525,43 @@ describe("snapshot release", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it("should not bump version of an ignored package", async () => {
+  it("should not bump version of a package with an explicit none release type", async () => {
+    const cwd = await f.copy("simple-project");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "none" }],
+        summary: "some internal stuff"
+      },
+      cwd
+    );
+
+    await version(
+      cwd,
+      {
+        snapshot: true
+      },
+      modifiedDefaultConfig
+    );
+
+    expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "dependencies": Object {
+            "pkg-b": "1.0.0",
+          },
+          "name": "pkg-a",
+          "version": "1.0.0",
+        },
+        Object {
+          "name": "pkg-b",
+          "version": "1.0.0",
+        },
+      ]
+    `);
+  });
+
+  it("should not bump version of an ignored package when its dependency gets updated", async () => {
     const originalDate = Date;
     // eslint-disable-next-line no-global-assign
     Date = class Date {
@@ -610,7 +646,49 @@ describe("snapshot release", () => {
       );
     });
 
-    it("should not bump version of an ignored package", async () => {
+    it("should not bump version of a package with an explicit none release type", async () => {
+      const cwd = await f.copy("simple-project");
+      await writeChangeset(
+        {
+          releases: [{ name: "pkg-a", type: "none" }],
+          summary: "some internal stuff"
+        },
+        cwd
+      );
+
+      await version(
+        cwd,
+        {
+          snapshot: true
+        },
+        {
+          ...modifiedDefaultConfig,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            useCalculatedVersionForSnapshots: true
+          }
+        }
+      );
+
+      expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "dependencies": Object {
+              "pkg-b": "1.0.0",
+            },
+            "name": "pkg-a",
+            "version": "1.0.0",
+          },
+          Object {
+            "name": "pkg-b",
+            "version": "1.0.0",
+          },
+        ]
+      `);
+    });
+
+    it("should not bump version of an ignored package when its dependency gets updated", async () => {
       const originalDate = Date;
       // eslint-disable-next-line no-global-assign
       Date = class Date {
