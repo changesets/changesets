@@ -1,5 +1,13 @@
 # @changesets/apply-release-plan
 
+## 5.0.4
+
+### Patch Changes
+
+- Updated dependencies [[`77c1cef`](https://github.com/changesets/changesets/commit/77c1ceff402f390c1ededec358d914ba68a31d0d)]:
+  - @changesets/git@1.3.0
+  - @changesets/config@1.6.4
+
 ## 5.0.3
 
 ### Patch Changes
@@ -98,10 +106,10 @@
 - [`6d0790a`](https://github.com/changesets/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a) [#359](https://github.com/changesets/changesets/pull/359) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Add support for snapshot flag to version command. Usage: `changeset version --snapshot [tag]`. The updated version of the packages looks like `0.0.0[-tag]-YYYYMMDDHHMMSS` where YYYY, MM, DD, HH, MM, and SS is the date and time of when the snapshot version is created. You can use this feature with the tag option in the publish command to publish packages under experimental tags from feature branches. To publish a snapshot version of a package under an experimental tag you can do:
 
   ```
-  $ # Version packages to snapshot version
-  $ changeset version --snapshot
-  $ # Publish packages under exprimental tag, keeping next and latest tag clean
-  $ changeset publish --tag exprimental
+  # Version packages to snapshot version
+  changeset version --snapshot
+  # Publish packages under experimental tag, keeping next and latest tag clean
+  changeset publish --tag experimental
   ```
 
 ## 3.0.3
@@ -139,7 +147,7 @@
 
 ### Patch Changes
 
-- [`3dbab2e`](https://github.com/changesets/changesets/commit/3dbab2e80d9a8a0cccc02d74c6d8150f603219e6) [#343](https://github.com/changesets/changesets/pull/343) Thanks [@zkochan](https://github.com/zkochan)! - Self-references should be skipped when bumping versions. A self-reference is a dev dep that has the same name as the package. Some projects use self-references as a convinient way to require files using relative paths from the root directory.
+- [`3dbab2e`](https://github.com/changesets/changesets/commit/3dbab2e80d9a8a0cccc02d74c6d8150f603219e6) [#343](https://github.com/changesets/changesets/pull/343) Thanks [@zkochan](https://github.com/zkochan)! - Self-references should be skipped when bumping versions. A self-reference is a dev dep that has the same name as the package. Some projects use self-references as a convenient way to require files using relative paths from the root directory.
 
 ## 2.0.1
 
@@ -161,9 +169,9 @@
 
   This is a pretty big "quality of life" update, which means we will do fewer releases of packages overall, as there is no change of installed packages.
 
-  This has been made a breaking chage as it changes the behaviour of what will be published. It should only be for the better, but we didn't want to surprise you with it.
+  This has been made a breaking change as it changes the behavior of what will be published. It should only be for the better, but we didn't want to surprise you with it.
 
-* [`011d57f`](https://github.com/changesets/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e) [#313](https://github.com/changesets/changesets/pull/313) Thanks [@zkochan](https://github.com/zkochan)! - Updates to devDependencies are not affecting the end users of a package. So we are not listing these changes in the changelog file.
+- [`011d57f`](https://github.com/changesets/changesets/commit/011d57f1edf9e37f75a8bef4f918e72166af096e) [#313](https://github.com/changesets/changesets/pull/313) Thanks [@zkochan](https://github.com/zkochan)! - Updates to devDependencies are not affecting the end users of a package. So we are not listing these changes in the changelog file.
 
 ### Minor Changes
 
@@ -184,9 +192,9 @@
 
 - [`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c) [#305](https://github.com/changesets/changesets/pull/305) Thanks [@Noviny](https://github.com/Noviny)! - Add link to changelog in readme
 
-* [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3) [#306](https://github.com/changesets/changesets/pull/306) Thanks [@Andarist](https://github.com/Andarist)! - Ignore `node_modules` when glob searching for packages. This fixes an issue with package cycles.
+- [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3) [#306](https://github.com/changesets/changesets/pull/306) Thanks [@Andarist](https://github.com/Andarist)! - Ignore `node_modules` when glob searching for packages. This fixes an issue with package cycles.
 
-* Updated dependencies [[`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c), [`e56928b`](https://github.com/changesets/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1), [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3)]:
+- Updated dependencies [[`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c), [`e56928b`](https://github.com/changesets/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1), [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3)]:
   - @changesets/config@1.0.1
   - @changesets/get-version-range-type@0.3.1
   - @changesets/git@1.0.1
@@ -229,9 +237,9 @@
 
 - [`ef6402c9`](https://github.com/changesets/changesets/commit/ef6402c9d8dc1832126732dbbafb015b71f57f83) [#252](https://github.com/changesets/changesets/pull/252) Thanks [@Andarist](https://github.com/Andarist)! - Ensure there is a newline between release lines so the final markdown preserves correct formatting.
 
-* [`503154db`](https://github.com/changesets/changesets/commit/503154db39fe8ab88a1176e4569c48078bcf5569) [#257](https://github.com/changesets/changesets/pull/257) Thanks [@Noviny](https://github.com/Noviny)! - Move catch statement so errors are less spammy
+- [`503154db`](https://github.com/changesets/changesets/commit/503154db39fe8ab88a1176e4569c48078bcf5569) [#257](https://github.com/changesets/changesets/pull/257) Thanks [@Noviny](https://github.com/Noviny)! - Move catch statement so errors are less spammy
 
-* Updated dependencies [[`fe0d9192`](https://github.com/changesets/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3), [`fe0d9192`](https://github.com/changesets/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3)]:
+- Updated dependencies [[`fe0d9192`](https://github.com/changesets/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3), [`fe0d9192`](https://github.com/changesets/changesets/commit/fe0d9192544646e1a755202b87dfe850c1c200a3)]:
   - get-workspaces@0.6.0
   - @changesets/git@0.4.0
 
@@ -293,7 +301,7 @@
 
 - [1ff73b7](https://github.com/changesets/changesets/commit/1ff73b74f414031e49c6fd5a0f68e9974900d381) [#156](https://github.com/changesets/changesets/pull/156) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix commits not being obtained for old changesets
 
-* [8c43fa0](https://github.com/changesets/changesets/commit/8c43fa061e2a5a01e4f32504ed351d261761c8dc) [#155](https://github.com/changesets/changesets/pull/155) Thanks [@Noviny](https://github.com/Noviny)! - Add Readme
+- [8c43fa0](https://github.com/changesets/changesets/commit/8c43fa061e2a5a01e4f32504ed351d261761c8dc) [#155](https://github.com/changesets/changesets/pull/155) Thanks [@Noviny](https://github.com/Noviny)! - Add Readme
 
 - [0320391](https://github.com/changesets/changesets/commit/0320391699a73621d0e51ce031062a06cbdefadc) [#163](https://github.com/changesets/changesets/pull/163) Thanks [@Noviny](https://github.com/Noviny)! - Reordered dependencies in the package json (this should have no impact)
 

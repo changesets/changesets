@@ -275,7 +275,11 @@ async function updateChangelog(
     if (fs.existsSync(changelogPath)) {
       await prependFile(changelogPath, templateString, name, prettierConfig);
     } else {
-      await fs.writeFile(changelogPath, `# ${name}${templateString}`);
+      await writeFormattedMarkdownFile(
+        changelogPath,
+        `# ${name}${templateString}`,
+        prettierConfig
+      );
     }
   } catch (e) {
     console.warn(e);
@@ -304,21 +308,26 @@ async function prependFile(
   // if the file exists but doesn't have the header, we'll add it in
   if (!fileData) {
     const completelyNewChangelog = `# ${name}${data}`;
-    await fs.writeFile(
+    await writeFormattedMarkdownFile(
       filePath,
-      prettier.format(completelyNewChangelog, {
-        ...prettierConfig,
-        filepath: filePath,
-        parser: "markdown"
-      })
+      completelyNewChangelog,
+      prettierConfig
     );
     return;
   }
   const newChangelog = fileData.replace("\n", data);
 
+  await writeFormattedMarkdownFile(filePath, newChangelog, prettierConfig);
+}
+
+async function writeFormattedMarkdownFile(
+  filePath: string,
+  content: string,
+  prettierConfig?: prettier.Options | null
+) {
   await fs.writeFile(
     filePath,
-    prettier.format(newChangelog, {
+    prettier.format(content, {
       ...prettierConfig,
       filepath: filePath,
       parser: "markdown"

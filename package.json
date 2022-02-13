@@ -25,7 +25,12 @@
   "workspaces": [
     "packages/*"
   ],
-  "author": "Ben Conolly",
+  "author": "Changesets Contributors",
+  "contributors": [
+    "Ben Conolly",
+    "Mitchell Hamilton",
+    "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
+  ],
   "license": "MIT",
   "dependencies": {
     "@babel/cli": "^7.10.4",

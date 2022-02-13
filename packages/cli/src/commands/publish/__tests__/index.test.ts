@@ -32,7 +32,7 @@ describe("Publish command", () => {
     });
     it("should report error if the tag option is used in pre release", async () => {
       await expect(
-        publishCommand(cwd, { tag: "exprimental" }, modifiedDefaultConfig)
+        publishCommand(cwd, { tag: "experimental" }, modifiedDefaultConfig)
       ).rejects.toThrowError();
     });
   });

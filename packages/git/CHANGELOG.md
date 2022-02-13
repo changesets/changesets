@@ -1,5 +1,11 @@
 # @changesets/git
 
+## 1.3.0
+
+### Minor Changes
+
+- [#725](https://github.com/changesets/changesets/pull/725) [`77c1cef`](https://github.com/changesets/changesets/commit/77c1ceff402f390c1ededec358d914ba68a31d0d) Thanks [@RoystonS](https://github.com/RoystonS), [@Andarist](https://github.com/Andarist)! - New public utilities have been added: `deepenCloneBy` and `isRepoShallow`.
+
 ## 1.2.1
 
 ### Patch Changes
@@ -35,7 +41,7 @@
 
 - [`24d7bc9`](https://github.com/changesets/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac) [#495](https://github.com/changesets/changesets/pull/495) Thanks [@RoystonS](https://github.com/RoystonS)! - Automatically deepen shallow clones in order to determine the correct commit at which changesets were added.
 
-* [`24d7bc9`](https://github.com/changesets/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac) [#495](https://github.com/changesets/changesets/pull/495) Thanks [@RoystonS](https://github.com/RoystonS)! - Deprecate the `getCommitThatAddsFile` function. It's replaced with a bulk `getCommitsThatAddFiles` operation which will safely deepen a
+- [`24d7bc9`](https://github.com/changesets/changesets/commit/24d7bc9e56a6dce7c64b39e8f73e50e21762faac) [#495](https://github.com/changesets/changesets/pull/495) Thanks [@RoystonS](https://github.com/RoystonS)! - Deprecate the `getCommitThatAddsFile` function. It's replaced with a bulk `getCommitsThatAddFiles` operation which will safely deepen a
   shallow repo whilst processing multiple filenames simultaneously.
 
 ## 1.0.6
@@ -53,9 +59,9 @@
 
 - [`89f0c49`](https://github.com/changesets/changesets/commit/89f0c497ac21b8d008da67caff8032947836c7b1) [#352](https://github.com/changesets/changesets/pull/352) Thanks [@MichaelKapustey](https://github.com/MichaelKapustey)! - Previously packages nested inside of other packages would show both the nested package and the outer package as changed. Now, only the nested package will show as changed.
 
-* [`09f62f9`](https://github.com/changesets/changesets/commit/09f62f9c822f31899a48cbd93c7801d72a80b97e) [#355](https://github.com/changesets/changesets/pull/355) Thanks [@acheronfail](https://github.com/acheronfail)! - Fix an issue where refs that didn't exist were silently ignored
+- [`09f62f9`](https://github.com/changesets/changesets/commit/09f62f9c822f31899a48cbd93c7801d72a80b97e) [#355](https://github.com/changesets/changesets/pull/355) Thanks [@acheronfail](https://github.com/acheronfail)! - Fix an issue where refs that didn't exist were silently ignored
 
-* Updated dependencies [[`2b49d66`](https://github.com/changesets/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d)]:
+- Updated dependencies [[`2b49d66`](https://github.com/changesets/changesets/commit/2b49d668ecaa1333bc5c7c5be4648dda1b11528d)]:
   - @changesets/types@3.0.0
 
 ## 1.0.4
@@ -87,9 +93,9 @@
 
 - [`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c) [#305](https://github.com/changesets/changesets/pull/305) Thanks [@Noviny](https://github.com/Noviny)! - Add link to changelog in readme
 
-* [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3) [#306](https://github.com/changesets/changesets/pull/306) Thanks [@Andarist](https://github.com/Andarist)! - Ignore `node_modules` when glob searching for packages. This fixes an issue with package cycles.
+- [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3) [#306](https://github.com/changesets/changesets/pull/306) Thanks [@Andarist](https://github.com/Andarist)! - Ignore `node_modules` when glob searching for packages. This fixes an issue with package cycles.
 
-* Updated dependencies [[`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c), [`e56928b`](https://github.com/changesets/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1)]:
+- Updated dependencies [[`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c), [`e56928b`](https://github.com/changesets/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1)]:
   - @changesets/errors@0.1.3
   - @changesets/types@1.0.1
 
@@ -119,7 +125,7 @@
 
 ### Minor Changes
 
-- [`bca8865`](https://github.com/changesets/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/changesets/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Removed `getChangedPackagesSinceMaster` and `getChangedChangesetFilesSinceMaster` and replace them with `getChangedPackagesSinceRef` and `getChangedChangesetFilesSinceRef`. The new methods along with `getChangedFilesSince` also now require arguments as an object with `cwd` and `ref` properties to avoid accidentially passing `cwd` as `ref` and vice versa
+- [`bca8865`](https://github.com/changesets/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/changesets/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Removed `getChangedPackagesSinceMaster` and `getChangedChangesetFilesSinceMaster` and replace them with `getChangedPackagesSinceRef` and `getChangedChangesetFilesSinceRef`. The new methods along with `getChangedFilesSince` also now require arguments as an object with `cwd` and `ref` properties to avoid accidentally passing `cwd` as `ref` and vice versa
 
 ## 0.2.5
 
@@ -155,9 +161,9 @@
 
 - [8c43fa0](https://github.com/changesets/changesets/commit/8c43fa061e2a5a01e4f32504ed351d261761c8dc) [#155](https://github.com/changesets/changesets/pull/155) Thanks [@Noviny](https://github.com/Noviny)! - Add Readme
 
-* [0320391](https://github.com/changesets/changesets/commit/0320391699a73621d0e51ce031062a06cbdefadc) [#163](https://github.com/changesets/changesets/pull/163) Thanks [@Noviny](https://github.com/Noviny)! - Reordered dependencies in the package json (this should have no impact)
+- [0320391](https://github.com/changesets/changesets/commit/0320391699a73621d0e51ce031062a06cbdefadc) [#163](https://github.com/changesets/changesets/pull/163) Thanks [@Noviny](https://github.com/Noviny)! - Reordered dependencies in the package json (this should have no impact)
 
-* Updated dependencies [8c43fa0, 1ff73b7]:
+- Updated dependencies [8c43fa0, 1ff73b7]:
   - @changesets/types@0.3.0
 
 ## 0.2.0

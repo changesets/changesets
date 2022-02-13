@@ -1,5 +1,20 @@
 # @changesets/assemble-release-plan
 
+## 5.0.5
+
+### Patch Changes
+
+- [#693](https://github.com/changesets/changesets/pull/693) [`1be201f`](https://github.com/changesets/changesets/commit/1be201fc27903cb2f42137400b5484c4ccad3812) Thanks [@luciaquirke](https://github.com/luciaquirke)! - Fixed an issue with `none` release type sometimes overriding other release types and thus preventing a release from happening.
+
+- Updated dependencies [[`6f9c9d6`](https://github.com/changesets/changesets/commit/6f9c9d60c0e02c79d555c48deb01559057f1d252)]:
+  - @changesets/get-dependents-graph@1.3.0
+
+## 5.0.4
+
+### Patch Changes
+
+- [#692](https://github.com/changesets/changesets/pull/692) [`e4c4b29`](https://github.com/changesets/changesets/commit/e4c4b2934beee9b25a927b4ae1b7280f4323d4ff) Thanks [@jakubmazanec](https://github.com/jakubmazanec)! - Fix snapshot timestamp so its date part contains the correct date and the timestamp can be used for collation.
+
 ## 5.0.3
 
 ### Patch Changes
@@ -59,7 +74,7 @@
 
 ### Patch Changes
 
-- [`e92cc01`](https://github.com/changesets/changesets/commit/e92cc0138bfbc041c77e6c7d054f2aa101cece5a) [#482](https://github.com/changesets/changesets/pull/482) Thanks [@jonathanmorley](https://github.com/jonathanmorley)! - Fixed an issue with bumping a peer dependency using a `"none"` changeset type resulting in the dependant package being major bumped.
+- [`e92cc01`](https://github.com/changesets/changesets/commit/e92cc0138bfbc041c77e6c7d054f2aa101cece5a) [#482](https://github.com/changesets/changesets/pull/482) Thanks [@jonathanmorley](https://github.com/jonathanmorley)! - Fixed an issue with bumping a peer dependency using a `"none"` changeset type resulting in the dependent package being major bumped.
 
 ## 4.0.0
 
@@ -71,7 +86,7 @@
 
 - [`d1d987c`](https://github.com/changesets/changesets/commit/d1d987c42cddff8be5d7f04d3ebb5a262779fa9f) [#455](https://github.com/changesets/changesets/pull/455) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with linked package being assigned a non-none release type when another package from the linked set has been added to current releases and the package had just a none release type.
 
-* [`9d99bd1`](https://github.com/changesets/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76) [#446](https://github.com/changesets/changesets/pull/446) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages not being updated to their highest bump type in pre mode sometimes. This could happen when dependant packages were only versioned because of their dependencies being upgraded and not because of a dedicated changeset for those dependant packages.
+- [`9d99bd1`](https://github.com/changesets/changesets/commit/9d99bd16f2b6b3ab4fe820358d4c9f313cb2ae76) [#446](https://github.com/changesets/changesets/pull/446) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependent packages not being updated to their highest bump type in pre mode sometimes. This could happen when dependent packages were only versioned because of their dependencies being upgraded and not because of a dedicated changeset for those dependent packages.
 
   For the very same reason linked packages were also not always bumped correctly in pre mode to the highest bump type in a linked group.
 
@@ -119,10 +134,10 @@
 - [`6d0790a`](https://github.com/changesets/changesets/commit/6d0790a7aa9f00e350e9394f419e4b3c7ee7ca6a) [#359](https://github.com/changesets/changesets/pull/359) Thanks [@ajaymathur](https://github.com/ajaymathur)! - Add support for snapshot flag to version command. Usage: `changeset version --snapshot [tag]`. The updated version of the packages looks like `0.0.0[-tag]-YYYYMMDDHHMMSS` where YYYY, MM, DD, HH, MM, and SS is the date and time of when the snapshot version is created. You can use this feature with the tag option in the publish command to publish packages under experimental tags from feature branches. To publish a snapshot version of a package under an experimental tag you can do:
 
   ```
-  $ # Version packages to snapshot version
-  $ changeset version --snapshot
-  $ # Publish packages under exprimental tag, keeping next and latest tag clean
-  $ changeset publish --tag exprimental
+  # Version packages to snapshot version
+  changeset version --snapshot
+  # Publish packages under experimental tag, keeping next and latest tag clean
+  changeset publish --tag experimental
   ```
 
 ## 2.0.4
@@ -177,9 +192,9 @@
 
 - [`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c) [#305](https://github.com/changesets/changesets/pull/305) Thanks [@Noviny](https://github.com/Noviny)! - Add link to changelog in readme
 
-* [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3) [#306](https://github.com/changesets/changesets/pull/306) Thanks [@Andarist](https://github.com/Andarist)! - Ignore `node_modules` when glob searching for packages. This fixes an issue with package cycles.
+- [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3) [#306](https://github.com/changesets/changesets/pull/306) Thanks [@Andarist](https://github.com/Andarist)! - Ignore `node_modules` when glob searching for packages. This fixes an issue with package cycles.
 
-* Updated dependencies [[`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c), [`e56928b`](https://github.com/changesets/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1), [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3)]:
+- Updated dependencies [[`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c), [`e56928b`](https://github.com/changesets/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1), [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3)]:
   - @changesets/config@1.0.1
   - @changesets/errors@0.1.3
   - @changesets/get-dependents-graph@1.0.1

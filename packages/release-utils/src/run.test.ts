@@ -123,7 +123,10 @@ describe("version", () => {
       expect.stringContaining(`# pkg-a
 
 ## 1.1.0
-### Minor Changes`)
+
+### Minor Changes
+
+`)
     );
     expect(
       await fs.readFile(
@@ -134,7 +137,9 @@ describe("version", () => {
       expect.stringContaining(`# pkg-b
 
 ## 1.1.0
+
 ### Minor Changes
+
 `)
     );
     expect(changedPackages).toEqual([
@@ -223,7 +228,9 @@ describe("version", () => {
       expect.stringContaining(`# pkg-a
 
 ## 1.1.0
+
 ### Minor Changes
+
 `)
     );
     await expect(
