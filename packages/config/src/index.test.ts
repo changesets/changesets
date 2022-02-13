@@ -536,7 +536,7 @@ The package or glob expression \\"pkg-a\\" is specified in the \`ignore\` option
 The package or glob expression \\"pkg-*\\" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
 `);
   });
-  test("ingore missing dependent packages", async () => {
+  test("ignore missing dependent packages", async () => {
     expect(() =>
       unsafeParse(
         { ignore: ["pkg-b"] },

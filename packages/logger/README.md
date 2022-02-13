@@ -16,9 +16,9 @@ error('message part 1', 'message part 2');
 
 **info**: Use `info` to print informational messages to user.
 
-**log**: Use `log` to print messages don't fall in anyother specific category. For example, message to show title of the step being performed by the changesets tool.
+**log**: Use `log` to print messages don't fall in any other specific category. For example, message to show title of the step being performed by the changesets tool.
 
-**success**: Use `success` to assert to users that their instructions have completed succesfully.
+**success**: Use `success` to assert to users that their instructions have completed successfully.
 
 **warn**: Use `warn` to print warning messages, something that user could action on now or later without much impact of their work.
 
@@ -28,7 +28,7 @@ Use the `@changesets/test-utils` package to silence the logs in test cases.
 
 For example:
 
-```
+```js
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 import { log } from "@changesets/logger";
 

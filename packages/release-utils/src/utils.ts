@@ -1,10 +1,11 @@
-import unified from "unified";
-import remarkParse from "remark-parse";
-import remarkStringify from "remark-stringify";
+import { getPackages, Package } from "@manypkg/get-packages";
 // @ts-ignore
 import mdastToString from "mdast-util-to-string";
-import { getPackages, Package } from "@manypkg/get-packages";
+import os from "os";
+import remarkParse from "remark-parse";
+import remarkStringify from "remark-stringify";
 import spawn from "spawndamnit";
+import unified from "unified";
 
 export const BumpLevels = {
   dep: 0,
@@ -96,12 +97,12 @@ export async function execWithOutput(
   args: string[],
   options: { ignoreReturnCode?: boolean; cwd: string }
 ) {
-  console.log(`Running ${command} ${args.join(" ")}`);
+  process.stdout.write(`Running: ${command} ${args.join(" ")}` + os.EOL);
   let childProcess = spawn(command, args, {
     cwd: options.cwd
   });
-  childProcess.on("stdout", data => console.log(data.toString()));
-  childProcess.on("stderr", data => console.error(data.toString()));
+  childProcess.on("stdout", data => process.stdout.write(data));
+  childProcess.on("stderr", data => process.stderr.write(data));
   let result = await childProcess;
   if (!options?.ignoreReturnCode && result.code !== 0) {
     throw new Error(

@@ -34,7 +34,8 @@ A changeset is a Markdown file with YAML front matter. The contents of the Markd
 
 ```md
 ---
-"@changesets/cli": major
+"@myproject/cli": major
+"@myproject/core": minor
 ---
 
 Change all the things

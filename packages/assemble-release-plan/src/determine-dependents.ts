@@ -62,7 +62,7 @@ export default function determineDependents({
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(
             dependentPackage.packageJson,
-            nextRelease.name
+            nextRelease
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
@@ -89,8 +89,7 @@ export default function determineDependents({
                   .updateInternalDependents === "always" ||
                   !semver.satisfies(
                     incrementVersion(nextRelease, preInfo),
-                    // to deal with a * versionRange that comes from workspace:* dependencies as the wildcard will match anything
-                    versionRange === "*" ? nextRelease.oldVersion : versionRange
+                    versionRange
                   ))
               ) {
                 switch (depType) {
@@ -167,7 +166,7 @@ export default function determineDependents({
 */
 function getDependencyVersionRanges(
   dependentPkgJSON: PackageJSON,
-  dependencyName: string
+  dependencyRelease: InternalRelease
 ): {
   depType: DependencyType;
   versionRange: string;
@@ -183,12 +182,24 @@ function getDependencyVersionRanges(
     versionRange: string;
   }[] = [];
   for (const type of DEPENDENCY_TYPES) {
-    const deps = dependentPkgJSON[type];
-    if (!deps) continue;
-    if (deps[dependencyName]) {
+    const versionRange = dependentPkgJSON[type]?.[dependencyRelease.name];
+    if (!versionRange) continue;
+
+    if (versionRange.startsWith("workspace:")) {
       dependencyVersionRanges.push({
         depType: type,
-        versionRange: deps[dependencyName].replace("workspace:", "")
+        versionRange:
+          // intentionally keep other workspace ranges untouched
+          // this has to be fixed but this should only be done when adding appropriate tests
+          versionRange === "workspace:*"
+            ? // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
+              dependencyRelease.oldVersion
+            : versionRange.replace(/^workspace:/, "")
+      });
+    } else {
+      dependencyVersionRanges.push({
+        depType: type,
+        versionRange
       });
     }
   }

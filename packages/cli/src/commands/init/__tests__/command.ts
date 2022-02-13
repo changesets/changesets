@@ -2,7 +2,7 @@ import fixtures from "fixturez";
 import fs from "fs-extra";
 import path from "path";
 import { defaultWrittenConfig } from "@changesets/config";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock } from "@changesets/test-utils";
 
 import initializeCommand from "..";
 
@@ -14,7 +14,7 @@ const getPaths = (cwd: string) => ({
 });
 
 describe("init", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
   it("should initialize in a project without a .changeset folder", async () => {
     const cwd = await f.copy("without-existing-changeset");
     const { readmePath, configPath } = getPaths(cwd);

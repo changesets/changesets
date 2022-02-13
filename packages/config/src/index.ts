@@ -30,7 +30,7 @@ function flatten<T>(arr: Array<T[]>): T[] {
   return ([] as T[]).concat(...arr);
 }
 
-function getNormalisedChangelogOption(
+function getNormalizedChangelogOption(
   thing: false | readonly [string, any] | string
 ): Config["changelog"] {
   if (thing === false) {
@@ -342,7 +342,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   let config: Config = {
-    changelog: getNormalisedChangelogOption(
+    changelog: getNormalizedChangelogOption(
       json.changelog === undefined
         ? defaultWrittenConfig.changelog
         : json.changelog

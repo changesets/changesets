@@ -24,8 +24,8 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
 
     let shouldReleaseFirstMajor = await cli.askConfirm(
       bold(
-        `Are you sure you want still want to release the ${red(
-          "first major release"
+        `Are you sure you want to release the ${red(
+          "first major version"
         )} of ${pkgJSON.name}?`
       )
     );
@@ -228,8 +228,9 @@ export default async function createChangeset(
   }
 
   log(
-    "Please enter a summary for this change (this will be in the changelogs). Submit empty line to open external editor"
+    "Please enter a summary for this change (this will be in the changelogs)."
   );
+  log(chalk.gray("  (submit empty line to open external editor)"));
 
   let summary = await cli.askQuestion("Summary");
   if (summary.length === 0) {
