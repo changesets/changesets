@@ -43,6 +43,7 @@ class FakeReleasePlan {
     this.config = {
       changelog: false,
       commit: false,
+      fixed: [],
       linked: [],
       access: "restricted",
       baseBranch: "main",
@@ -79,6 +80,7 @@ async function testSetup(
     config = {
       changelog: false,
       commit: false,
+      fixed: [],
       linked: [],
       access: "restricted",
       baseBranch: "main",
@@ -478,6 +480,7 @@ describe("apply release plan", () => {
         {
           changelog: false,
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -540,6 +543,7 @@ describe("apply release plan", () => {
         {
           changelog: false,
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -688,6 +692,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -772,6 +777,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -848,6 +854,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -924,6 +931,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1003,6 +1011,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1087,6 +1096,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1163,6 +1173,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1239,6 +1250,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1319,6 +1331,7 @@ describe("apply release plan", () => {
           {
             changelog: false,
             commit: false,
+            fixed: [],
             linked: [],
             access: "restricted",
             baseBranch: "main",
@@ -1476,6 +1489,7 @@ describe("apply release plan", () => {
         },
         {
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1584,6 +1598,7 @@ describe("apply release plan", () => {
             null
           ],
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1668,6 +1683,7 @@ describe("apply release plan", () => {
             null
           ],
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1756,6 +1772,7 @@ describe("apply release plan", () => {
             null
           ],
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1858,6 +1875,7 @@ describe("apply release plan", () => {
             null
           ],
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1948,7 +1966,7 @@ describe("apply release plan", () => {
         });
         changedFiles = testResults.changedFiles;
       } catch (e) {
-        expect(e.message).toEqual("some string probably");
+        expect((e as Error).message).toEqual("some string probably");
 
         return;
       }
@@ -1987,7 +2005,7 @@ describe("apply release plan", () => {
           releasePlan.config
         );
       } catch (e) {
-        expect(e.message).toEqual(
+        expect((e as Error).message).toEqual(
           "Could not find matching package for release of: impossible-package"
         );
 
@@ -2026,7 +2044,7 @@ describe("apply release plan", () => {
             }
           );
         } catch (e) {
-          expect(e.message).toEqual("no chance");
+          expect((e as Error).message).toEqual("no chance");
 
           let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
@@ -2275,6 +2293,7 @@ describe("apply release plan", () => {
         {
           changelog: false,
           commit: true,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
