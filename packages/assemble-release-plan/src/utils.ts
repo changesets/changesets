@@ -8,11 +8,11 @@ export function getHighestReleaseType(
 ): VersionType {
   if (releases.length === 0) {
     throw new Error(
-      `Large internal changesets error in calculating when calculating highest release type in the set of releases. Please contact the maintainers`
+      `Large internal Changesets error when calculating highest release type in the set of releases. Please contact the maintainers`
     );
   }
 
-  let highestReleaseType = releases[0].type;
+  let highestReleaseType: VersionType = "none";
 
   for (let release of releases) {
     switch (release.type) {
@@ -21,7 +21,11 @@ export function getHighestReleaseType(
       case "minor":
         highestReleaseType = "minor";
         break;
-      // patch never needs to override another value
+      case "patch":
+        if (highestReleaseType === "none") {
+          highestReleaseType = "patch";
+        }
+        break;
     }
   }
 
