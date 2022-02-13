@@ -1,5 +1,11 @@
 # @changesets/git
 
+## 1.3.0
+
+### Minor Changes
+
+- [#725](https://github.com/changesets/changesets/pull/725) [`77c1cef`](https://github.com/changesets/changesets/commit/77c1ceff402f390c1ededec358d914ba68a31d0d) Thanks [@RoystonS](https://github.com/RoystonS), [@Andarist](https://github.com/Andarist)! - New public utilities have been added: `deepenCloneBy` and `isRepoShallow`.
+
 ## 1.2.1
 
 ### Patch Changes

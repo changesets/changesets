@@ -1,5 +1,11 @@
 # @changesets/get-dependents-graph
 
+## 1.3.0
+
+### Minor Changes
+
+- [#704](https://github.com/changesets/changesets/pull/704) [`6f9c9d6`](https://github.com/changesets/changesets/commit/6f9c9d60c0e02c79d555c48deb01559057f1d252) Thanks [@Andarist](https://github.com/Andarist)! - Dependencies specified using a tag will no longer mark the graph as invalid. With such dependencies the user's intent is to fetch those from the registry even if otherwise they could be linked locally.
+
 ## 1.2.4
 
 ### Patch Changes

@@ -2,7 +2,7 @@ import fixtures from "fixturez";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 
 import {
@@ -87,7 +87,7 @@ const mockUserResponses = mockResponses => {
 };
 
 describe("Changesets", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
 
   it("should generate changeset to patch a single package", async () => {
     const cwd = await f.copy("simple-project");

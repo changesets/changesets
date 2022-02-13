@@ -1,8 +1,8 @@
 import { log } from "@changesets/logger";
-import { temporarilySilenceLogs } from "./";
+import { silenceLogsInBlock } from "./";
 
 describe("temporarilySilenceLogs", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
   describe("log", () => {
     let originalConsoleLog = console.log;
     beforeEach(() => {

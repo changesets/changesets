@@ -2,11 +2,11 @@ import fixtures from "fixturez";
 import outdent from "outdent";
 
 import read from "./";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock } from "@changesets/test-utils";
 
 const f = fixtures(__dirname);
 
-temporarilySilenceLogs();
+silenceLogsInBlock();
 
 describe("read changesets from disc", () => {
   it("should read a changeset from disc", async () => {

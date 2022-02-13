@@ -3,7 +3,7 @@ import fixtures from "fixturez";
 import publishPackages from "../publishPackages";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock } from "@changesets/test-utils";
 import runRelease from "..";
 
 jest.mock("../../../utils/cli-utilities");
@@ -29,7 +29,7 @@ publishPackages.mockImplementation(() =>
 );
 
 describe("running release", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
   let cwd: string;
 
   beforeEach(async () => {
