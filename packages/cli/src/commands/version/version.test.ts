@@ -336,6 +336,81 @@ describe("fixed", () => {
       expect.objectContaining({ name: "pkg-b", version: "1.1.0" })
     );
   });
+
+  it("should update CHANGELOGs of all packages from the fixed group", async () => {
+    const cwd = await f.copy("fixed-packages");
+    const spy = jest.spyOn(fs, "writeFile");
+
+    await writeChangesets([simpleChangeset], cwd);
+
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      fixed: [["pkg-a", "pkg-b"]]
+    });
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+
+      ### Patch Changes
+
+      - pkg-b@1.1.0
+      "
+    `);
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.1.0
+      "
+    `);
+
+    spy.mockClear();
+
+    await writeChangesets([simpleChangeset], cwd);
+
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      fixed: [["pkg-a", "pkg-b"]]
+    });
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.2.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+
+      ### Patch Changes
+
+      - pkg-b@1.2.0
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+
+      ### Patch Changes
+
+      - pkg-b@1.1.0
+      "
+    `);
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.2.0
+
+      ## 1.1.0
+      "
+    `);
+  });
 });
 
 describe("linked", () => {
