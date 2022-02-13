@@ -20,6 +20,16 @@ let preStateForSimpleProject: PreState = {
   tag: "next"
 };
 
+let preStateForExited: PreState = {
+  changesets: ["slimy-dingos-whisper"],
+  initialVersions: {
+    "pkg-a": "1.0.0",
+    "pkg-b": "1.0.0"
+  },
+  mode: "exit",
+  tag: "beta"
+};
+
 describe("enterPre", () => {
   it("should enter", async () => {
     let cwd = f.copy("simple-project");
@@ -37,6 +47,21 @@ describe("enterPre", () => {
     );
     await expect(enterPre(cwd, "some-tag")).rejects.toBeInstanceOf(
       PreEnterButInPreModeError
+    );
+  });
+  it("should enter if already exited pre mode", async () => {
+    let cwd = f.copy("simple-project");
+    await fs.writeJSON(
+      path.join(cwd, ".changeset", "pre.json"),
+      preStateForExited
+    );
+    await enterPre(cwd, "next");
+    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
+      {
+        ...preStateForExited,
+        mode: "pre",
+        tag: "next"
+      }
     );
   });
 });

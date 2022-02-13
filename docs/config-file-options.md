@@ -22,13 +22,13 @@ This argument sets whether the `changeset add` command and the `changeset publis
 
 ## `access` (`restricted` | `public`)
 
-This sets how packages are published - if `access: "restricted"`, packages will be published as private, requiring log in to an npm account with access to install. If `access: "public", the packages will be made available on the public registry.
+This sets how packages are published - if `access: "restricted"`, packages will be published as private, requiring log in to an npm account with access to install. If `access: "public"`, the packages will be made available on the public registry.
 
 By default, npm publishes scoped npm packages as `restricted` - so to ensure you do not accidentally publish code publicly, we default to `restricted`. For most cases you will want to set this to `public`.
 
 This can be overridden in specific packages by setting the `access` in a package's `package.json`.
 
-If you want a package from being published to npm at all, set `private: true` in that package's `package.json`
+If you want to prevent a package from being published to npm, set `private: true` in that package's `package.json`
 
 ## `baseBranch` (git branch name)
 
@@ -114,6 +114,12 @@ This option is for setting how the changelog for packages should be generated. I
 
 As well as the default one, you can use `@changesets/changelog-git`, which adds links to commits into changelogs, or `@changesets/changelog-github`, which requires github authentication, and includes a thankyou message to the person who added the changeset as well as a link to the relevant PR.
 
-You would specify our github changelog generator with: `"changelog": "@changesets/changelog-github"`
+You would specify our github changelog generator with:
+
+```json
+{
+  "changelog": ["@changesets/changelog-github", { "repo": "<org>/<repo>" }]
+}
+```
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)

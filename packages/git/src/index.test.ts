@@ -3,7 +3,6 @@ import spawn from "spawndamnit";
 import fileUrl from "file-url";
 
 import {
-  getCommitThatAddsFile,
   getCommitsThatAddFiles,
   getChangedFilesSince,
   add,
@@ -240,23 +239,6 @@ describe("git", () => {
       expect(commitHash).toEqual([headSha]);
     });
 
-    // We have replaced the single-file version with a multi-file version
-    // which will correctly run all the file retrieves in parallel, safely
-    // deepening a shallow clone as necessary.  We've deprecated the
-    // single-file version and can remove it in a major release.
-    it("exposes a deprecated single-file call", async () => {
-      await add("packages/pkg-b/package.json", cwd);
-      await commit("added packageB package.json", cwd);
-      const headSha = await getCurrentCommitShort(cwd);
-
-      const commitHash = await getCommitThatAddsFile(
-        "packages/pkg-b/package.json",
-        cwd
-      );
-
-      expect(commitHash).toEqual(headSha);
-    });
-
     describe("with shallow clone", () => {
       // We will add these three well-known files
       // over multiple commits, then test looking up
@@ -331,7 +313,7 @@ describe("git", () => {
         const clone = await createShallowClone(5);
 
         // Finding this commit will require deepening the clone until it appears.
-        const commit = await getCommitThatAddsFile(file2, clone);
+        const commit = (await getCommitsThatAddFiles([file2], clone))[0];
         expect(commit).toEqual(originalCommit);
 
         // It should not have completely unshallowed the clone; just enough.
@@ -348,7 +330,7 @@ describe("git", () => {
         const clone = await createShallowClone(5);
 
         // Finding this commit will require fully deepening the repo
-        const commit = await getCommitThatAddsFile(file3, clone);
+        const commit = (await getCommitsThatAddFiles([file3], clone))[0];
         expect(commit).toEqual(originalCommit);
 
         // We should have fully deepened

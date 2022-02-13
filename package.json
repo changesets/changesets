@@ -25,7 +25,12 @@
   "workspaces": [
     "packages/*"
   ],
-  "author": "Ben Conolly",
+  "author": "Changesets Contributors",
+  "contributors": [
+    "Ben Conolly",
+    "Mitchell Hamilton",
+    "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
+  ],
   "license": "MIT",
   "dependencies": {
     "@babel/cli": "^7.10.4",
@@ -33,7 +38,7 @@
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",
     "@babel/runtime": "^7.10.4",
-    "@manypkg/cli": "^0.8.1",
+    "@manypkg/cli": "^0.19.1",
     "@preconstruct/cli": "^1.1.26",
     "@types/fs-extra": "^5.1.0",
     "@types/jest": "^24.0.12",
@@ -64,13 +69,6 @@
   "preconstruct": {
     "packages": [
       "packages/*"
-    ]
-  },
-  "jest": {
-    "clearMocks": true,
-    "watchPlugins": [
-      "jest-watch-typeahead/filename",
-      "jest-watch-typeahead/testname"
     ]
   },
   "prettier": {}

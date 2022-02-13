@@ -52,9 +52,7 @@ export default async function getOldChangesetsAndWarn(
   }
   warn(importantSeparator);
   warn("There were old changesets from version 1 found");
-  warn(
-    "Theses are being applied now but the dependents graph may have changed"
-  );
+  warn("These are being applied now but the dependents graph may have changed");
   warn("Make sure you validate all your dependencies");
   warn(
     "In a future major version, we will no longer apply these old changesets, and will instead throw here"
