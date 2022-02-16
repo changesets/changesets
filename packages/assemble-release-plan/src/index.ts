@@ -49,6 +49,9 @@ function getNewVersion(
   snapshotSuffix: string | undefined,
   useCalculatedVersionForSnapshots: boolean
 ): string {
+  if (release.type === "none") {
+    return release.oldVersion;
+  }
   /**
    * Using version as 0.0.0 so that it does not hinder with other version release
    * For example;
