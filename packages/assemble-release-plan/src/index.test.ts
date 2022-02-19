@@ -869,7 +869,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[0].newVersion).toEqual("1.0.1");
     });
 
-    it("should always bump dependents when exiting pre-release mode", () => {
+    it("should bump dev dependents when exiting pre-release mode", () => {
       setup.updatePackage("pkg-a", "1.0.1-next.0");
       setup.updatePackage("pkg-b", "1.0.1-next.0");
       setup.updateDevDependency("pkg-b", "pkg-a", "1.0.1-next.0");
@@ -898,7 +898,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[1].newVersion).toEqual("1.0.1");
     });
 
-    it("should not bump dependents when exiting pre-release mode if ignored", () => {
+    it("should not bump ignored dev dependents when exiting pre-release mode", () => {
       setup.updatePackage("pkg-a", "1.0.1-next.0");
       setup.updatePackage("pkg-b", "1.0.1-next.0");
       setup.updateDevDependency("pkg-b", "pkg-a", "1.0.1-next.0");
