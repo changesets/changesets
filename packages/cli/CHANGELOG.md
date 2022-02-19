@@ -1,5 +1,19 @@
 # @changesets/cli
 
+## 2.22.0-temp.0
+
+### Minor Changes
+
+- [#674](https://github.com/changesets/changesets/pull/674) [`7608211`](https://github.com/changesets/changesets/commit/760821164b4f144e7aca2bd4d410dce8c5ce641d) Thanks [@Andarist](https://github.com/Andarist)! - Refactored the publishing part of the code to invoke Yarn Berry instead of npm CLI for publishing purposes. This ensures that packages are correctly packed, so for instance workspace ranges can be correctly substituted now.
+
+### Patch Changes
+
+- [#696](https://github.com/changesets/changesets/pull/696) [`c8ab098`](https://github.com/changesets/changesets/commit/c8ab0987e75c34ff5e09e6465fe0a1918137d91b) Thanks [@Andarist](https://github.com/Andarist)! - Versioning a package without a `package.json#version` will no longer result in `null` being generated as the new version of a package (or as part of it when dealing with pre mode of snapshot releases). Instead we'll generate the minimal version - e.g. for a minor bump the `0.1.0` version will be generated.
+
+- Updated dependencies [[`c8ab098`](https://github.com/changesets/changesets/commit/c8ab0987e75c34ff5e09e6465fe0a1918137d91b)]:
+  - @changesets/assemble-release-plan@5.1.1-temp.0
+  - @changesets/get-release-plan@3.0.7-temp.0
+
 ## 2.21.0
 
 ### Minor Changes

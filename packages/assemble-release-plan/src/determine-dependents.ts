@@ -9,6 +9,7 @@ import {
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease, PreInfo } from "./types";
 import { incrementVersion } from "./increment";
+import { getPkgJsonVersion } from "./utils";
 
 /*
   WARNING:
@@ -145,7 +146,7 @@ export default function determineDependents({
             let newDependent: InternalRelease = {
               name,
               type,
-              oldVersion: pkgJSON.version,
+              oldVersion: getPkgJsonVersion(pkgJSON),
               changesets: []
             };
 

@@ -4,6 +4,7 @@
 import { NewChangeset } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease } from "./types";
+import { getPkgJsonVersion } from "./utils";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
@@ -27,7 +28,7 @@ export default function flattenReleases(
           release = {
             name,
             type,
-            oldVersion: pkg.packageJson.version,
+            oldVersion: getPkgJsonVersion(pkg.packageJson),
             changesets: [changeset.id]
           };
         } else {
