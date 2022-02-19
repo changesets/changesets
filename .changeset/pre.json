@@ -24,5 +24,8 @@
     "@changesets/types": "4.1.0",
     "@changesets/write": "0.1.7"
   },
-  "changesets": []
+  "changesets": [
+    "dry-cows-wait",
+    "wise-cars-breathe"
+  ]
 }

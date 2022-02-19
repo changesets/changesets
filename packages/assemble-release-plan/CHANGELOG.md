@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 5.1.1-temp.0
+
+### Patch Changes
+
+- [#696](https://github.com/changesets/changesets/pull/696) [`c8ab098`](https://github.com/changesets/changesets/commit/c8ab0987e75c34ff5e09e6465fe0a1918137d91b) Thanks [@Andarist](https://github.com/Andarist)! - Versioning a package without a `package.json#version` will no longer result in `null` being generated as the new version of a package (or as part of it when dealing with pre mode of snapshot releases). Instead we'll generate the minimal version - e.g. for a minor bump the `0.1.0` version will be generated.
+
 ## 5.1.0
 
 ### Minor Changes
