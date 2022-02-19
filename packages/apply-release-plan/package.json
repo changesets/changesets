@@ -22,7 +22,7 @@
     "semver": "^5.4.1"
   },
   "devDependencies": {
-    "@changesets/test-utils": "*",
+    "@changesets/test-utils": "0.0.5",
     "fixturez": "^1.1.0",
     "spawndamnit": "^2.0.0"
   }

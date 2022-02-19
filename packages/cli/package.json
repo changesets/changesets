@@ -61,8 +61,8 @@
     "tty-table": "^2.8.10"
   },
   "devDependencies": {
-    "@changesets/parse": "*",
-    "@changesets/test-utils": "*",
+    "@changesets/parse": "0.3.12",
+    "@changesets/test-utils": "0.0.5",
     "fixturez": "^1.1.0",
     "strip-ansi": "^5.2.0"
   }
