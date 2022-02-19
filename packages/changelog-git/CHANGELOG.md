@@ -1,5 +1,14 @@
 # @changesets/changelog-git
 
+## 0.1.10
+
+### Patch Changes
+
+- [#666](https://github.com/changesets/changesets/pull/666) [`0d1debd`](https://github.com/changesets/changesets/commit/0d1debd8f5d364073d627a017316a25554dec4d5) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with adding `[undefined]` to the generated changelog when the commit adding a changeset file could not be found. This could have happened when running `changeset add && changeset version` in a single command.
+
+- Updated dependencies [[`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15)]:
+  - @changesets/types@4.1.0
+
 ## 0.1.9
 
 ### Patch Changes
