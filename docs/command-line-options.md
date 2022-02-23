@@ -103,6 +103,8 @@ changeset publish [--otp={token}]
 
 This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`.
 
+**Important:** There is an unintended consequence when doing automatic snapshots on pull requests, please see [snapshot releases](./snapshot-releases.md#automatic-snapshots-on-prs) for more info.
+
 Because this command assumes that last commit is the release commit you should not commit any changes between calling version and publish. These commands are separate to enable you to check if the releases changes are acurate.
 
 `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the --otp option.
