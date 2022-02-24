@@ -50,6 +50,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Decisions](./docs/decisions.md)
 - [Dictionary](./docs/dictionary.md)
 - [Linked packages](./docs/linked-packages.md)
+- [Fixed packages](./docs/fixed-packages.md)
 - [Modifying changelog format](./docs/modifying-changelog-format.md)
 - [Prereleases](./docs/prereleases.md)
 - [Problems publishing in monorepos](./docs/problems-publishing-in-monorepos.md)

@@ -65,6 +65,18 @@ If you want to use this option, you should read the documentation on [linked pac
 
 > NOTE: This does not do what some other tools do, which is make sure when any package is published, all other packages are also published with the same version.
 
+## `fixed` (array of arrays of package names)
+
+This option can be used to declare that packages should be version-bumped and published together. As an example, if you have a `@changesets/button` component and a `@changesets/theme` component and you want to make sure that when one gets bumped to `2.0.0`, the other is also bumped to `2.0.0` regardless if it has any change or not. To achieve this you would have the config:
+
+```json
+{
+  "fixed": [["@changesets/button", "@changesets/theme"]]
+}
+```
+
+If you want to use this option, you should read the documentation on [fixed packages](./fixed-packages.md) to fully understand the implementation and implications.
+
 ## `updateInternalDependencies`
 
 This option sets whether, when a package that is being dependend upon changes, whether you should update what version it depends on. To make this more understandable, here is an example:
