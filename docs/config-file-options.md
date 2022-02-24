@@ -67,7 +67,7 @@ If you want to use this option, you should read the documentation on [linked pac
 
 ## `fixed` (array of arrays of package names)
 
-This option can be used to declare that packages should be version-bumped and published together. As an example, if you have a `@changesets/button` component and a `@changesets/theme` component and you want to make sure that when one gets bumped to `2.0.0`, the other is also bumped to `2.0.0` regardless if it has any change or not. To achieve this you would have the config:
+This option can be used to declare that packages should be version-bumped and published together. As an example, if you have a `@changesets/button` component and a `@changesets/theme` component and you want to make sure that when one gets bumped to `1.1.0`, the other is also bumped to `1.1.0` regardless if it has any change or not. To achieve this you would have the config:
 
 ```json
 {
