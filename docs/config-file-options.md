@@ -51,6 +51,18 @@ These restrictions exist to ensure your repository or published code do not end 
 
 > NOTE: you can also provide glob expressions to match the packages, according to the [micromatch](https://www.npmjs.com/package/micromatch) format.
 
+## `fixed` (array of arrays of package names)
+
+This option can be used to declare that packages should be version-bumped and published together. As an example, if you have a `@changesets/button` component and a `@changesets/theme` component and you want to make sure that when one gets bumped to `1.1.0`, the other is also bumped to `1.1.0` regardless if it has any change or not. To achieve this you would have the config:
+
+```json
+{
+  "fixed": [["@changesets/button", "@changesets/theme"]]
+}
+```
+
+If you want to use this option, you should read the documentation on [fixed packages](./fixed-packages.md) to fully understand the implementation and implications.
+
 ## `linked` (array of arrays of package names)
 
 This option can be used to declare that packages should 'share' a version, instead of being versioned completely independently. As an example, if you have a `@changesets/button` component and a `@changesets/theme` component and you want to make sure that when one gets bumped to `2.0.0`, the other is also bumped to `2.0.0`. To achieve this you would have the config:
@@ -64,18 +76,6 @@ This option can be used to declare that packages should 'share' a version, inste
 If you want to use this option, you should read the documentation on [linked packages](./linked-packages.md) to fully understand the implementation and implications.
 
 > NOTE: This does not do what some other tools do, which is make sure when any package is published, all other packages are also published with the same version.
-
-## `fixed` (array of arrays of package names)
-
-This option can be used to declare that packages should be version-bumped and published together. As an example, if you have a `@changesets/button` component and a `@changesets/theme` component and you want to make sure that when one gets bumped to `1.1.0`, the other is also bumped to `1.1.0` regardless if it has any change or not. To achieve this you would have the config:
-
-```json
-{
-  "fixed": [["@changesets/button", "@changesets/theme"]]
-}
-```
-
-If you want to use this option, you should read the documentation on [fixed packages](./fixed-packages.md) to fully understand the implementation and implications.
 
 ## `updateInternalDependencies`
 
