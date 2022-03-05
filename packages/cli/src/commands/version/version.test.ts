@@ -211,7 +211,7 @@ describe("running version in a simple project", () => {
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      commit: [commitPath]
+      commit: [commitPath, null]
     });
 
     expect(spy).toHaveBeenCalled();
@@ -622,7 +622,7 @@ describe("snapshot release", () => {
       },
       {
         ...modifiedDefaultConfig,
-        commit: true
+        commit: [commitPath, null]
       }
     );
 

@@ -1,3 +1,4 @@
+import path from "path";
 import fixtures from "fixturez";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
@@ -179,7 +180,10 @@ describe("Changesets", () => {
     await addChangeset(
       cwd,
       { empty: false },
-      { ...defaultConfig, commit: true }
+      {
+        ...defaultConfig,
+        commit: [path.resolve(__dirname, "..", "..", "..", "commit"), null]
+      }
     );
     expect(git.add).toHaveBeenCalledTimes(1);
   });
