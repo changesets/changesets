@@ -3,11 +3,19 @@ import path from "path";
 import resolveFrom from "resolve-from";
 import outdent from "outdent";
 
-const getAddMessage = async (changeset: Changeset) => {
-  return `docs(changeset): ${changeset.summary}`;
+const getAddMessage: CommitFunctions["getAddMessage"] = async (
+  changeset: Changeset,
+  options: { addSkipCI?: boolean } | null
+) => {
+  return outdent`docs(changeset): ${changeset.summary}${
+    options?.addSkipCI ? `\n\n[skip ci]\n` : ""
+  }`;
 };
 
-const getVersionMessage = async (releasePlan: ReleasePlan) => {
+const getVersionMessage: CommitFunctions["getVersionMessage"] = async (
+  releasePlan: ReleasePlan,
+  options: { versionSkipCI?: boolean } | null
+) => {
   const publishableReleases = releasePlan.releases.filter(
     release => release.type !== "none"
   );
@@ -22,9 +30,7 @@ const getVersionMessage = async (releasePlan: ReleasePlan) => {
 
     Releases:
     ${releasesLines}
-
-    [skip ci]
-
+    ${options?.versionSkipCI ? `\n[skip ci]\n` : ""}
 `;
 };
 
@@ -40,7 +46,7 @@ export function getCommitFuncs(
   cwd: string
 ): [CommitFunctions, any] {
   if (commit === true) {
-    return [defaultCommitFunctions, null];
+    return [defaultCommitFunctions, { versionSkipCI: true }];
   }
 
   let getCommitFuncs: CommitFunctions = {
