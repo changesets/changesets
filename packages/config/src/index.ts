@@ -13,7 +13,6 @@ import {
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { getCommitFuncs } from "./commit";
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
@@ -36,6 +35,21 @@ function getNormalizedChangelogOption(
 ): Config["changelog"] {
   if (thing === false) {
     return false;
+  }
+  if (typeof thing === "string") {
+    return [thing, null];
+  }
+  return thing;
+}
+
+function getNormalizedCommitOption(
+  thing: boolean | readonly [string, any] | string
+): Config["commit"] {
+  if (thing === false) {
+    return false;
+  }
+  if (thing === true) {
+    return ["@changesets/cli/commit", null];
   }
   if (typeof thing === "string") {
     return [thing, null];
@@ -127,13 +141,22 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
-  if (json.commit !== undefined && typeof json.commit !== "boolean") {
+  if (
+    json.commit !== undefined &&
+    typeof json.commit !== "boolean" &&
+    typeof json.commit !== "string" &&
+    !(
+      isArray(json.commit) &&
+      json.commit.length === 2 &&
+      typeof json.commit[0] === "string"
+    )
+  ) {
     messages.push(
       `The \`commit\` option is set as ${JSON.stringify(
         json.commit,
         null,
         2
-      )} when the only valid values are undefined or a boolean`
+      )} when the only valid values are undefined or a boolean or a module path(e.g. "@changesets/cli/commit" or "./some-module") or a tuple with a module path and config for the changelog generator(e.g. ["@changesets/cli/commit", { someOption: true }])`
     );
   }
   if (json.baseBranch !== undefined && typeof json.baseBranch !== "string") {
@@ -352,8 +375,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       normalizedAccess === undefined
         ? defaultWrittenConfig.access
         : normalizedAccess,
-    commit:
-      json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
+    commit: getNormalizedCommitOption(
+      json.commit === undefined ? defaultWrittenConfig.commit : json.commit
+    ),
     fixed,
     linked,
     baseBranch:
@@ -412,5 +436,3 @@ export let defaultConfig = parse(defaultWrittenConfig, {
   tool: "root",
   packages: [fakePackage]
 });
-
-export { getCommitFuncs };

@@ -80,7 +80,7 @@ export type Config = {
 
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
-  commit?: boolean;
+  commit?: boolean | readonly [string, any] | string;
   fixed?: Fixed;
   linked?: Linked;
   access?: AccessType;
