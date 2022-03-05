@@ -1,3 +1,4 @@
+import path from "path";
 import outdent from "outdent";
 import { getCommitFuncs } from ".";
 import { NewChangeset, ReleasePlan } from "@changesets/types";
@@ -54,7 +55,7 @@ let secondReleasePlan: ReleasePlan = {
 
 describe("defaultCommitFunctions", () => {
   const [{ getAddMessage, getVersionMessage }, commitOpts] = getCommitFuncs(
-    true,
+    [path.resolve(__dirname), { versionSkipCI: true }],
     ""
   );
 
@@ -74,7 +75,28 @@ describe("defaultCommitFunctions", () => {
     expect(commitStr).toEqual(`docs(changeset): test changeset summary commit`);
   });
 
-  it("should handle a single simple releaseObject with one released package", async () => {
+  it("should handle a simple changeset - skipCi", async () => {
+    const commitStr = await getAddMessage(
+      {
+        summary: "test changeset summary commit",
+        releases: [
+          {
+            name: "package-a",
+            type: "minor"
+          }
+        ]
+      },
+      { ...commitOpts, addSkipCI: true }
+    );
+    expect(commitStr).toEqual(outdent`
+        docs(changeset): test changeset summary commit
+    
+        [skip ci]
+        
+      `);
+  });
+
+  it("should handle a single simple releaseObject with one released package - skipCI", async () => {
     const commitStr = await getVersionMessage(simpleReleasePlan, commitOpts);
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)
@@ -83,7 +105,21 @@ describe("defaultCommitFunctions", () => {
         package-a@1.1.0
 
       [skip ci]
-    
+      
+      `);
+  });
+
+  it("should handle a single simple releaseObject with one released package", async () => {
+    const commitStr = await getVersionMessage(simpleReleasePlan, {
+      ...commitOpts,
+      versionSkipCI: false
+    });
+    expect(commitStr).toEqual(outdent`
+      RELEASING: Releasing 1 package(s)
+
+      Releases:
+        package-a@1.1.0
+      
       `);
   });
 

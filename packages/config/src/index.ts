@@ -156,7 +156,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.commit,
         null,
         2
-      )} when the only valid values are undefined or a boolean or a module path (e.g. "@changesets/cli/commit" or "./some-module") or a tuple with a module path and config for the commit message generator (e.g. ["@changesets/cli/commit", { someOption: true }])`
+      )} when the only valid values are undefined or a boolean or a module path (e.g. "@changesets/cli/commit" or "./some-module") or a tuple with a module path and config for the commit message generator (e.g. ["@changesets/cli/commit", { versionSkipCI: true }])`
     );
   }
   if (json.baseBranch !== undefined && typeof json.baseBranch !== "string") {

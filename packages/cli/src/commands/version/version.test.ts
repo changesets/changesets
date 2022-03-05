@@ -221,8 +221,6 @@ describe("running version in a simple project", () => {
       Releases:
         pkg-a@1.1.0
         pkg-b@1.0.1
-
-      [skip ci]
       "
     `);
   });

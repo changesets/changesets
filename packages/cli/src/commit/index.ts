@@ -42,13 +42,9 @@ export const defaultCommitFunctions: CommitFunctions = {
 export default defaultCommitFunctions;
 
 export function getCommitFuncs(
-  commit: true | readonly [string, any],
+  commit: readonly [string, any],
   cwd: string
 ): [CommitFunctions, any] {
-  if (commit === true) {
-    return [defaultCommitFunctions, { versionSkipCI: true }];
-  }
-
   let getCommitFuncs: CommitFunctions = {
     getAddMessage: () => Promise.resolve(""),
     getVersionMessage: () => Promise.resolve("")

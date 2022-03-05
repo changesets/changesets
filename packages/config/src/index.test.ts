@@ -39,7 +39,7 @@ test("read reads the config", async () => {
     fixed: [],
     linked: [],
     changelog: false,
-    commit: ["@changesets/cli/commit", null],
+    commit: ["@changesets/cli/commit", { versionSkipCI: true }],
     access: "restricted",
     baseBranch: "master",
     updateInternalDependencies: "patch",
@@ -117,7 +117,7 @@ let correctCases: Record<string, CorrectCase> = {
     },
     output: {
       ...defaults,
-      commit: ["@changesets/cli/commit", null]
+      commit: ["@changesets/cli/commit", { versionSkipCI: true }]
     }
   },
   "commit custom": {
@@ -359,7 +359,7 @@ The \`access\` option is set as \\"something\\" when the only valid values are u
       unsafeParse({ commit: {} }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The \`commit\` option is set as {} when the only valid values are undefined or a boolean or a module path(e.g. \\"@changesets/cli/commit\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/commit\\", { someOption: true }])"
+The \`commit\` option is set as {} when the only valid values are undefined or a boolean or a module path (e.g. \\"@changesets/cli/commit\\" or \\"./some-module\\") or a tuple with a module path and config for the commit message generator (e.g. [\\"@changesets/cli/commit\\", { versionSkipCI: true }])"
 `);
   });
   describe("fixed", () => {
