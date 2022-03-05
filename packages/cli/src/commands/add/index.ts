@@ -56,8 +56,11 @@ export default async function add(
     const changesetID = await writeChangeset(newChangeset, cwd);
     if (config.commit) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
-      const [{ getAddLine }, commitOpts] = getCommitFuncs(config.commit, cwd);
-      await git.commit(await getAddLine(newChangeset, commitOpts), cwd);
+      const [{ getAddMessage }, commitOpts] = getCommitFuncs(
+        config.commit,
+        cwd
+      );
+      await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
       log(chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`));
     } else {
       log(

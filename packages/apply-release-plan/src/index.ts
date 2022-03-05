@@ -180,8 +180,8 @@ export default async function applyReleasePlan(
     }
 
     let getCommitFuncs: CommitFunctions = {
-      getAddLine: () => Promise.resolve(""),
-      getVersionLine: () => Promise.resolve("")
+      getAddMessage: () => Promise.resolve(""),
+      getVersionMessage: () => Promise.resolve("")
     };
 
     const commitOpts = config.commit[1];
@@ -193,8 +193,8 @@ export default async function applyReleasePlan(
       possibleCommitFunc = possibleCommitFunc.default;
     }
     if (
-      typeof possibleCommitFunc.getAddLine === "function" &&
-      typeof possibleCommitFunc.getVersionLine === "function"
+      typeof possibleCommitFunc.getAddMessage === "function" &&
+      typeof possibleCommitFunc.getVersionMessage === "function"
     ) {
       getCommitFuncs = possibleCommitFunc;
     } else {
@@ -202,7 +202,7 @@ export default async function applyReleasePlan(
     }
 
     let commit = await git.commit(
-      await getCommitFuncs.getVersionLine(releasePlan, commitOpts),
+      await getCommitFuncs.getVersionMessage(releasePlan, commitOpts),
       cwd
     );
 

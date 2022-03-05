@@ -122,19 +122,19 @@ export type ChangelogFunctions = {
   getDependencyReleaseLine: GetDependencyReleaseLine;
 };
 
-export type GetAddLine = (
+export type GetAddMessage = (
   changeset: Changeset,
   commitOptions: null | Record<string, any>
 ) => Promise<string>;
 
-export type GetVersionLine = (
+export type GetVersionMessage = (
   releasePlan: ReleasePlan,
   commitOptions: null | Record<string, any>
 ) => Promise<string>;
 
 export type CommitFunctions = {
-  getAddLine: GetAddLine;
-  getVersionLine: GetVersionLine;
+  getAddMessage: GetAddMessage;
+  getVersionMessage: GetVersionMessage;
 };
 
 export type PreState = {

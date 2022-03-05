@@ -53,10 +53,13 @@ let secondReleasePlan: ReleasePlan = {
 };
 
 describe("defaultCommitFunctions", () => {
-  const [{ getAddLine, getVersionLine }, commitOpts] = getCommitFuncs(true, "");
+  const [{ getAddMessage, getVersionMessage }, commitOpts] = getCommitFuncs(
+    true,
+    ""
+  );
 
   it("should handle a simple changeset", async () => {
-    const commitStr = await getAddLine(
+    const commitStr = await getAddMessage(
       {
         summary: "test changeset summary commit",
         releases: [
@@ -72,7 +75,7 @@ describe("defaultCommitFunctions", () => {
   });
 
   it("should handle a single simple releaseObject with one released package", async () => {
-    const commitStr = await getVersionLine(simpleReleasePlan, commitOpts);
+    const commitStr = await getVersionMessage(simpleReleasePlan, commitOpts);
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)
 
@@ -105,7 +108,7 @@ describe("defaultCommitFunctions", () => {
       ],
       preState: undefined
     };
-    const commitStr = await getVersionLine(releasePlan, commitOpts);
+    const commitStr = await getVersionMessage(releasePlan, commitOpts);
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 2 package(s)
 
@@ -119,7 +122,7 @@ describe("defaultCommitFunctions", () => {
   });
 
   it("should handle a merging releases from multiple changesets", async () => {
-    const commitStr = await getVersionLine(secondReleasePlan, commitOpts);
+    const commitStr = await getVersionMessage(secondReleasePlan, commitOpts);
 
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 2 package(s)

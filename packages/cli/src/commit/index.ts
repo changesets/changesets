@@ -3,11 +3,11 @@ import path from "path";
 import resolveFrom from "resolve-from";
 import outdent from "outdent";
 
-const getAddLine = async (changeset: Changeset) => {
+const getAddMessage = async (changeset: Changeset) => {
   return `docs(changeset): ${changeset.summary}`;
 };
 
-const getVersionLine = async (releasePlan: ReleasePlan) => {
+const getVersionMessage = async (releasePlan: ReleasePlan) => {
   const publishableReleases = releasePlan.releases.filter(
     release => release.type !== "none"
   );
@@ -29,8 +29,8 @@ const getVersionLine = async (releasePlan: ReleasePlan) => {
 };
 
 export const defaultCommitFunctions: CommitFunctions = {
-  getAddLine,
-  getVersionLine
+  getAddMessage,
+  getVersionMessage
 };
 
 export default defaultCommitFunctions;
@@ -44,8 +44,8 @@ export function getCommitFuncs(
   }
 
   let getCommitFuncs: CommitFunctions = {
-    getAddLine: () => Promise.resolve(""),
-    getVersionLine: () => Promise.resolve("")
+    getAddMessage: () => Promise.resolve(""),
+    getVersionMessage: () => Promise.resolve("")
   };
   let commitOpts: any = commit[1];
   let changesetPath = path.join(cwd, ".changeset");
@@ -56,8 +56,8 @@ export function getCommitFuncs(
     possibleCommitFunc = possibleCommitFunc.default;
   }
   if (
-    typeof possibleCommitFunc.getAddLine === "function" &&
-    typeof possibleCommitFunc.getVersionLine === "function"
+    typeof possibleCommitFunc.getAddMessage === "function" &&
+    typeof possibleCommitFunc.getVersionMessage === "function"
   ) {
     getCommitFuncs = possibleCommitFunc;
   } else {
