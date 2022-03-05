@@ -3,10 +3,11 @@ import {
   Config,
   ChangelogFunctions,
   NewChangeset,
-  ModCompWithPackage
+  ModCompWithPackage,
+  CommitFunctions
 } from "@changesets/types";
 
-import { defaultConfig, getCommitFuncs } from "@changesets/config";
+import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import resolveFrom from "resolve-from";
 import { Packages } from "@manypkg/get-packages";
@@ -178,10 +179,30 @@ export default async function applyReleasePlan(
       await git.add(path.relative(cwd, file!), cwd);
     }
 
-    const [{ getVersionLine }, commitOpts] = getCommitFuncs(config.commit, cwd);
+    let getCommitFuncs: CommitFunctions = {
+      getAddLine: () => Promise.resolve(""),
+      getVersionLine: () => Promise.resolve("")
+    };
+
+    const commitOpts = config.commit[1];
+    let changesetPath = path.join(cwd, ".changeset");
+    let commitPath = resolveFrom(changesetPath, config.commit[0]);
+
+    let possibleCommitFunc = require(commitPath);
+    if (possibleCommitFunc.default) {
+      possibleCommitFunc = possibleCommitFunc.default;
+    }
+    if (
+      typeof possibleCommitFunc.getAddLine === "function" &&
+      typeof possibleCommitFunc.getVersionLine === "function"
+    ) {
+      getCommitFuncs = possibleCommitFunc;
+    } else {
+      throw new Error("Could not resolve commit generation functions");
+    }
 
     let commit = await git.commit(
-      await getVersionLine(releasePlan, commitOpts),
+      await getCommitFuncs.getVersionLine(releasePlan, commitOpts),
       cwd
     );
 

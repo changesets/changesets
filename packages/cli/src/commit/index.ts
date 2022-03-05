@@ -33,6 +33,8 @@ export const defaultCommitFunctions: CommitFunctions = {
   getVersionLine
 };
 
+export default defaultCommitFunctions;
+
 export function getCommitFuncs(
   commit: true | readonly [string, any],
   cwd: string

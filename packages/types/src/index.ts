@@ -63,7 +63,7 @@ export type Linked = ReadonlyArray<PackageGroup>;
 
 export type Config = {
   changelog: false | readonly [string, any];
-  commit: boolean | readonly [string, any];
+  commit: false | readonly [string, any];
   fixed: Fixed;
   linked: Linked;
   access: AccessType;

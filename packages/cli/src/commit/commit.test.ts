@@ -1,5 +1,5 @@
 import outdent from "outdent";
-import { getCommitFuncs } from "./commit";
+import { getCommitFuncs } from ".";
 import { NewChangeset, ReleasePlan } from "@changesets/types";
 
 const simpleChangeset: NewChangeset = {
