@@ -2207,7 +2207,10 @@ describe("apply release plan", () => {
           path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
           null
         ],
-        commit: true
+        commit: [
+          path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+          null
+        ]
       },
       setupFunc
     );
@@ -2241,7 +2244,13 @@ describe("apply release plan", () => {
       let { tempDir } = await testSetup(
         "with-git",
         releasePlan.getReleasePlan(),
-        { ...releasePlan.config, commit: true }
+        {
+          ...releasePlan.config,
+          commit: [
+            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            null
+          ]
+        }
       );
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
@@ -2292,7 +2301,10 @@ describe("apply release plan", () => {
         },
         {
           changelog: false,
-          commit: true,
+          commit: [
+            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            null
+          ],
           fixed: [],
           linked: [],
           access: "restricted",
@@ -2341,7 +2353,13 @@ describe("apply release plan", () => {
       let { tempDir } = await testSetup(
         "with-git",
         releasePlan.getReleasePlan(),
-        { ...releasePlan.config, commit: true },
+        {
+          ...releasePlan.config,
+          commit: [
+            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            null
+          ]
+        },
         setupFunc
       );
 
@@ -2359,9 +2377,12 @@ describe("apply release plan", () => {
 
 // MAKE SURE BOTH OF THESE ARE COVERED
 
-// it("should git add the expected files (without changelog) when commit: true", async () => {
+// it("should git add the expected files (without changelog) when commit: [\\"@changelog/cli/commit\\", null]", async () => {
 //   await writeChangesets([simpleChangeset2], cwd);
-//   await versionCommand(cwd, { ...modifiedDefaultConfig, commit: true });
+//   await versionCommand(cwd, {
+//     ...modifiedDefaultConfig,
+//     commit: [path.resolve(__dirname, "test-utils/simple-get-commit-entry"), null]
+//   });
 
 //   const pkgAConfigPath = path.join(cwd, "packages/pkg-a/package.json");
 //   const pkgBConfigPath = path.join(cwd, "packages/pkg-b/package.json");
@@ -2377,7 +2398,7 @@ describe("apply release plan", () => {
 //   await versionCommand(cwd, {
 //     ...modifiedDefaultConfig,
 //     changelog: [changelogPath, null],
-//     commit: true
+//     commit: [path.resolve(__dirname, "test-utils/simple-get-commit-entry"), null]
 //   });
 //   const pkgAChangelogPath = path.join(cwd, "packages/pkg-a/CHANGELOG.md");
 //   const pkgBChangelogPath = path.join(cwd, "packages/pkg-b/CHANGELOG.md");

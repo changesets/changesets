@@ -39,7 +39,7 @@ test("read reads the config", async () => {
     fixed: [],
     linked: [],
     changelog: false,
-    commit: true,
+    commit: ["@changesets/cli/commit", null],
     access: "restricted",
     baseBranch: "master",
     updateInternalDependencies: "patch",
@@ -117,7 +117,16 @@ let correctCases: Record<string, CorrectCase> = {
     },
     output: {
       ...defaults,
-      commit: true
+      commit: ["@changesets/cli/commit", null]
+    }
+  },
+  "commit custom": {
+    input: {
+      commit: ["./some-module", { customOption: true }]
+    },
+    output: {
+      ...defaults,
+      commit: ["./some-module", { customOption: true }]
     }
   },
   "access private": {
@@ -345,12 +354,12 @@ The \`changelog\` option is set as [
 The \`access\` option is set as \\"something\\" when the only valid values are undefined, \\"public\\" or \\"restricted\\""
 `);
   });
-  test("commit non-boolean", () => {
+  test("commit invalid value", () => {
     expect(() => {
-      unsafeParse({ commit: "something" }, defaultPackages);
+      unsafeParse({ commit: {} }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The \`commit\` option is set as \\"something\\" when the only valid values are undefined or a boolean"
+The \`commit\` option is set as {} when the only valid values are undefined or a boolean or a module path(e.g. \\"@changesets/cli/commit\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/commit\\", { someOption: true }])"
 `);
   });
   describe("fixed", () => {

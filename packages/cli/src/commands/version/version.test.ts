@@ -16,6 +16,7 @@ import humanId from "human-id";
 const f = fixtures(__dirname);
 
 let changelogPath = path.resolve(__dirname, "../../changelog");
+let commitPath = path.resolve(__dirname, "../../commit");
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: [changelogPath, null]
@@ -210,7 +211,7 @@ describe("running version in a simple project", () => {
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      commit: true
+      commit: [commitPath]
     });
 
     expect(spy).toHaveBeenCalled();
