@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 5.1.1
+
+### Patch Changes
+
+- [#769](https://github.com/changesets/changesets/pull/769) [`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an infinite loop involving a fixed group of packages and a package within that group that was both ignored and dependent on another package from that group.
+
 ## 5.1.0
 
 ### Minor Changes

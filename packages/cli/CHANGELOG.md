@@ -1,5 +1,17 @@
 # @changesets/cli
 
+## 2.21.1
+
+### Patch Changes
+
+- [#760](https://github.com/changesets/changesets/pull/760) [`5a2a59a`](https://github.com/changesets/changesets/commit/5a2a59a37b7fb31e17414579b470402d3016e28e) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with logging non-stringified Buffers in case of publish errors.
+
+* [#769](https://github.com/changesets/changesets/pull/769) [`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an infinite loop involving a fixed group of packages and a package within that group that was both ignored and dependent on another package from that group.
+
+* Updated dependencies [[`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f)]:
+  - @changesets/assemble-release-plan@5.1.1
+  - @changesets/get-release-plan@3.0.7
+
 ## 2.21.0
 
 ### Minor Changes
