@@ -1,4 +1,4 @@
-import { Fixed } from "@changesets/types";
+import { Config } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease } from "./types";
 import { getCurrentHighestVersion, getHighestReleaseType } from "./utils";
@@ -6,11 +6,11 @@ import { getCurrentHighestVersion, getHighestReleaseType } from "./utils";
 export default function matchFixedConstraint(
   releases: Map<string, InternalRelease>,
   packagesByName: Map<string, Package>,
-  fixed: Fixed
+  config: Config
 ): boolean {
   let updated = false;
 
-  for (let fixedPackages of fixed) {
+  for (let fixedPackages of config.fixed) {
     let releasingFixedPackages = [...releases.values()].filter(
       release => fixedPackages.includes(release.name) && release.type !== "none"
     );
@@ -25,6 +25,9 @@ export default function matchFixedConstraint(
 
     // Finally, we update the packages so all of them are on the highest version
     for (let pkgName of fixedPackages) {
+      if (config.ignore.includes(pkgName)) {
+        continue;
+      }
       let release = releases.get(pkgName);
 
       if (!release) {

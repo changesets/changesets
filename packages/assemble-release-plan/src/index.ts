@@ -126,7 +126,7 @@ function assembleReleasePlan(
     let fixedConstraintUpdated = matchFixedConstraint(
       releases,
       packagesByName,
-      config.fixed
+      config
     );
     let linksUpdated = applyLinks(releases, packagesByName, config.linked);
 

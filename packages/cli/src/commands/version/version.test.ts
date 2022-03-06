@@ -346,6 +346,34 @@ describe("fixed", () => {
     );
   });
 
+  it("should not bump an ignored fixed package that depends on a package from the group that is being released", async () => {
+    const cwd = await f.copy("fixed-packages");
+    await writeChangesets([simpleChangeset3], cwd);
+
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      fixed: [["pkg-a", "pkg-b"]],
+      ignore: ["pkg-a"]
+    });
+
+    expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "dependencies": Object {
+            "pkg-b": "1.0.1",
+          },
+          "name": "pkg-a",
+          "version": "1.0.0",
+        },
+        Object {
+          "name": "pkg-b",
+          "version": "1.0.1",
+        },
+      ]
+    `);
+  });
+
   it("should update CHANGELOGs of all packages from the fixed group", async () => {
     const cwd = await f.copy("fixed-packages");
     const spy = jest.spyOn(fs, "writeFile");
