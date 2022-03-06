@@ -55,7 +55,7 @@ let secondReleasePlan: ReleasePlan = {
 
 describe("defaultCommitFunctions", () => {
   const [{ getAddMessage, getVersionMessage }, commitOpts] = getCommitFuncs(
-    [path.resolve(__dirname), { versionSkipCI: true }],
+    [path.resolve(__dirname), { skipCI: "version" }],
     ""
   );
 
@@ -90,7 +90,7 @@ describe("defaultCommitFunctions", () => {
           }
         ]
       },
-      { ...commitOpts, addSkipCI: true }
+      { ...commitOpts, skipCI: "add" }
     );
     expect(commitStr).toEqual(outdent`
         docs(changeset): test changeset summary commit
@@ -116,7 +116,7 @@ describe("defaultCommitFunctions", () => {
   it("should handle a single simple releaseObject with one released package", async () => {
     const commitStr = await getVersionMessage(simpleReleasePlan, {
       ...commitOpts,
-      versionSkipCI: false
+      skipCI: false
     });
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)

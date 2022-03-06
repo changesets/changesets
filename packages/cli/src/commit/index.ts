@@ -3,19 +3,23 @@ import path from "path";
 import resolveFrom from "resolve-from";
 import outdent from "outdent";
 
+type SkipCI = boolean | "add" | "version";
+
 const getAddMessage: CommitFunctions["getAddMessage"] = async (
   changeset: Changeset,
-  options: { addSkipCI?: boolean } | null
+  options: { skipCI?: SkipCI } | null
 ) => {
+  const skipCI = options?.skipCI === "add" || options?.skipCI === true;
   return outdent`docs(changeset): ${changeset.summary}${
-    options?.addSkipCI ? `\n\n[skip ci]\n` : ""
+    skipCI ? `\n\n[skip ci]\n` : ""
   }`;
 };
 
 const getVersionMessage: CommitFunctions["getVersionMessage"] = async (
   releasePlan: ReleasePlan,
-  options: { versionSkipCI?: boolean } | null
+  options: { skipCI?: SkipCI } | null
 ) => {
+  const skipCI = options?.skipCI === "version" || options?.skipCI === true;
   const publishableReleases = releasePlan.releases.filter(
     release => release.type !== "none"
   );
@@ -30,7 +34,7 @@ const getVersionMessage: CommitFunctions["getVersionMessage"] = async (
 
     Releases:
     ${releasesLines}
-    ${options?.versionSkipCI ? `\n[skip ci]\n` : ""}
+    ${skipCI ? `\n[skip ci]\n` : ""}
 `;
 };
 
