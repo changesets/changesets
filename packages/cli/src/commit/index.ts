@@ -44,8 +44,8 @@ export default defaultCommitFunctions;
 export function getCommitFuncs(
   commit: false | readonly [string, any],
   cwd: string
-): [Partial<CommitFunctions>, any] {
-  let getCommitFuncs: Partial<CommitFunctions> = {};
+): [CommitFunctions, any] {
+  let getCommitFuncs: CommitFunctions = {};
   if (!commit) {
     return [getCommitFuncs, null];
   }
