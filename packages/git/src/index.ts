@@ -217,14 +217,14 @@ export async function getChangedFilesSince({
     );
   }
 
-  const repoRoot = await getRepoRoot({ cwd });
-
   const files = cmd.stdout
     .toString()
     .trim()
     .split("\n")
     .filter(a => a);
   if (!fullPath) return files;
+
+  const repoRoot = await getRepoRoot({ cwd });
   return files.map(file => path.resolve(repoRoot, file));
 }
 
