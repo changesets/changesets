@@ -2177,7 +2177,7 @@ describe("apply release plan", () => {
 
     const setupFunc = (tempDir: string) =>
       Promise.all(
-        releasePlan.getReleasePlan().changesets.map(async ({ id, summary }) => {
+        releasePlan.changesets.map(async ({ id, summary }) => {
           changesetMDPath = path.resolve(
             tempDir,
             ".changeset",
@@ -2203,12 +2203,12 @@ describe("apply release plan", () => {
       releasePlan.getReleasePlan(),
       {
         ...releasePlan.config,
-        changelog: [
-          path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
-          null
-        ],
         commit: [
           path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+          null
+        ],
+        changelog: [
+          path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
           null
         ]
       },
@@ -2314,38 +2314,8 @@ describe("apply release plan", () => {
         true as boolean
       );
 
+      expect(releasePlan.changesets.length).toBeGreaterThan(0);
       expect(changesetsDeleted).toBe(true);
     });
   });
 });
-
-// MAKE SURE BOTH OF THESE ARE COVERED
-
-// it("should git add the expected files (without changelog) when commit: [\\"@changelog/cli/commit\\", null]", async () => {
-//   await writeChangesets([simpleChangeset2], cwd);
-//   await versionCommand(cwd, {
-//     ...modifiedDefaultConfig,
-//     commit: [path.resolve(__dirname, "test-utils/simple-get-commit-entry"), null]
-//   });
-
-//   const pkgAConfigPath = path.join(cwd, "packages/pkg-a/package.json");
-//   const pkgBConfigPath = path.join(cwd, "packages/pkg-b/package.json");
-//   const changesetConfigPath = path.join(cwd, ".changeset");
-
-//   expect(git.add).toHaveBeenCalledWith(pkgAConfigPath, cwd);
-//   expect(git.add).toHaveBeenCalledWith(pkgBConfigPath, cwd);
-//   expect(git.add).toHaveBeenCalledWith(changesetConfigPath, cwd);
-// });
-// it("should git add the expected files (with changelog)", async () => {
-//   let changelogPath = path.resolve(__dirname, "../../changelogs");
-//   await writeChangesets([simpleChangeset2], cwd);
-//   await versionCommand(cwd, {
-//     ...modifiedDefaultConfig,
-//     changelog: [changelogPath, null],
-//     commit: [path.resolve(__dirname, "test-utils/simple-get-commit-entry"), null]
-//   });
-//   const pkgAChangelogPath = path.join(cwd, "packages/pkg-a/CHANGELOG.md");
-//   const pkgBChangelogPath = path.join(cwd, "packages/pkg-b/CHANGELOG.md");
-//   expect(git.add).toHaveBeenCalledWith(pkgAChangelogPath, cwd);
-//   expect(git.add).toHaveBeenCalledWith(pkgBChangelogPath, cwd);
-// });

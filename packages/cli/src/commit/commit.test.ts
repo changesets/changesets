@@ -59,6 +59,10 @@ describe("defaultCommitFunctions", () => {
     ""
   );
 
+  if (!getAddMessage || !getVersionMessage) {
+    throw new Error("Invalid default functions");
+  }
+
   it("should handle a simple changeset", async () => {
     const commitStr = await getAddMessage(
       {

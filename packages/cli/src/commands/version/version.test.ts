@@ -203,6 +203,28 @@ describe("running version in a simple project", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
+  it("should git add the expected files if commit config is set", async () => {
+    const ids = await writeChangesets([simpleChangeset2], cwd);
+    const spy = jest.spyOn(git, "add");
+
+    expect(spy).not.toHaveBeenCalled();
+
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      commit: [commitPath, null]
+    });
+
+    expect(spy).toHaveBeenCalled();
+
+    expect(spy).toHaveBeenCalledWith("packages/pkg-a/package.json", cwd);
+    expect(spy).toHaveBeenCalledWith("packages/pkg-a/CHANGELOG.md", cwd);
+
+    expect(spy).toHaveBeenCalledWith("packages/pkg-b/package.json", cwd);
+    expect(spy).toHaveBeenCalledWith("packages/pkg-b/CHANGELOG.md", cwd);
+
+    expect(spy).toHaveBeenCalledWith(`.changeset/${ids[0]}.md`, cwd);
+  });
+
   it("should commit the result if commit config is set", async () => {
     await writeChangesets([simpleChangeset2], cwd);
     const spy = jest.spyOn(git, "commit");
