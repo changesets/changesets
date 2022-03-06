@@ -1,5 +1,12 @@
 # @changesets/get-release-plan
 
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [[`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f)]:
+  - @changesets/assemble-release-plan@5.1.1
+
 ## 3.0.6
 
 ### Patch Changes
