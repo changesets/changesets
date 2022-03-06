@@ -80,7 +80,11 @@ export default async function version(
     options.snapshot
   );
 
-  if (releaseConfig.commit) {
+  const [{ getVersionMessage }, commitOpts] = getCommitFuncs(
+    releaseConfig.commit,
+    cwd
+  );
+  if (getVersionMessage) {
     let newTouchedFilesArr = [...touchedFiles];
     // Note, git gets angry if you try and have two git actions running at once
     // So we need to be careful that these iterations are properly sequential
@@ -89,10 +93,6 @@ export default async function version(
       await git.add(path.relative(cwd, file!), cwd);
     }
 
-    const [{ getVersionMessage }, commitOpts] = getCommitFuncs(
-      releaseConfig.commit,
-      cwd
-    );
     const commit = await git.commit(
       await getVersionMessage(releasePlan, commitOpts),
       cwd

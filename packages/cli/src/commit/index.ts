@@ -42,13 +42,13 @@ export const defaultCommitFunctions: CommitFunctions = {
 export default defaultCommitFunctions;
 
 export function getCommitFuncs(
-  commit: readonly [string, any],
+  commit: false | readonly [string, any],
   cwd: string
-): [CommitFunctions, any] {
-  let getCommitFuncs: CommitFunctions = {
-    getAddMessage: () => Promise.resolve(""),
-    getVersionMessage: () => Promise.resolve("")
-  };
+): [Partial<CommitFunctions>, any] {
+  let getCommitFuncs: Partial<CommitFunctions> = {};
+  if (!commit) {
+    return [getCommitFuncs, null];
+  }
   let commitOpts: any = commit[1];
   let changesetPath = path.join(cwd, ".changeset");
   let commitPath = resolveFrom(changesetPath, commit[0]);
@@ -58,7 +58,7 @@ export function getCommitFuncs(
     possibleCommitFunc = possibleCommitFunc.default;
   }
   if (
-    typeof possibleCommitFunc.getAddMessage === "function" &&
+    typeof possibleCommitFunc.getAddMessage === "function" ||
     typeof possibleCommitFunc.getVersionMessage === "function"
   ) {
     getCommitFuncs = possibleCommitFunc;
