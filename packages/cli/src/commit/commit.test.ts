@@ -171,4 +171,43 @@ describe("defaultCommitFunctions", () => {
     
     `);
   });
+
+  it("should not mention unreleased devDependents in release commit message", async () => {
+    const commitStr = await getVersionMessage(
+      {
+        changesets: [
+          {
+            id: "quick-lions-devour",
+            summary: "Hey, let's have fun with testing!",
+            releases: [
+              { name: "pkg-a", type: "none" },
+              { name: "pkg-b", type: "minor" }
+            ]
+          }
+        ],
+        releases: [
+          {
+            name: "pkg-a",
+            type: "none",
+            oldVersion: "1.0.0",
+            newVersion: "1.0.0",
+            changesets: ["quick-lions-devour"]
+          },
+          {
+            name: "pkg-b",
+            type: "minor",
+            oldVersion: "1.0.0",
+            newVersion: "1.1.0",
+            changesets: ["quick-lions-devour"]
+          }
+        ],
+        preState: undefined
+      },
+      commitOpts
+    );
+
+    expect(commitStr).toMatch("RELEASING: Releasing 1 package(s)");
+    expect(commitStr).toMatch("pkg-b@1.1.0");
+    expect(commitStr).not.toMatch("pkg-a");
+  });
 });

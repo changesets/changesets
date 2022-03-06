@@ -2237,8 +2237,9 @@ describe("apply release plan", () => {
 - ${lastCommit}: Hey, let's have fun with testing!
 `);
   });
-  describe("git", () => {
-    it("should commit updating files from packages", async () => {
+
+  describe("files", () => {
+    it("shouldn't commit updated files from packages", async () => {
       const releasePlan = new FakeReleasePlan();
 
       let { tempDir } = await testSetup(
@@ -2255,94 +2256,27 @@ describe("apply release plan", () => {
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
-      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
+      expect(gitCmd.stdout.toString()).toContain(
+        "Changes not staged for commit"
+      );
+
+      expect(gitCmd.stdout.toString()).toContain(
+        "modified:   packages/pkg-a/package.json"
+      );
 
       let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
 
-      lastCommit.stdout.toString();
-
-      expect(
-        lastCommit.stdout
-          .toString()
-          .includes("RELEASING: Releasing 1 package(s)")
-      ).toBe(true);
+      expect(lastCommit.stdout.toString()).toContain("first commit");
     });
-    it("should not mention unreleased devDependents in release commit message", async () => {
-      let { tempDir } = await testSetup(
-        "simple-dev-dep",
-        {
-          changesets: [
-            {
-              id: "quick-lions-devour",
-              summary: "Hey, let's have fun with testing!",
-              releases: [
-                { name: "pkg-a", type: "none" },
-                { name: "pkg-b", type: "minor" }
-              ]
-            }
-          ],
-          releases: [
-            {
-              name: "pkg-a",
-              type: "none",
-              oldVersion: "1.0.0",
-              newVersion: "1.0.0",
-              changesets: ["quick-lions-devour"]
-            },
-            {
-              name: "pkg-b",
-              type: "minor",
-              oldVersion: "1.0.0",
-              newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"]
-            }
-          ],
-          preState: undefined
-        },
-        {
-          changelog: false,
-          commit: [
-            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
-            null
-          ],
-          fixed: [],
-          linked: [],
-          access: "restricted",
-          baseBranch: "main",
-          updateInternalDependencies: "patch",
-          ignore: [],
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false,
-            updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
-          }
-        }
-      );
 
-      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
-
-      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
-
-      let lastCommit = await spawn(
-        "git",
-        ["log", "-1", '--format=format:"%s%n%n%b"'],
-        { cwd: tempDir }
-      );
-
-      const commitMessage = lastCommit.stdout.toString();
-
-      expect(commitMessage).toMatch("RELEASING: Releasing 1 package(s)");
-      expect(commitMessage).toMatch("pkg-b@1.1.0");
-      expect(commitMessage).not.toMatch("pkg-a");
-    });
-    it("should commit removing applied changesets", async () => {
+    it("should remove applied changesets", async () => {
       const releasePlan = new FakeReleasePlan();
 
       let changesetPath: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
-          releasePlan.getReleasePlan().changesets.map(({ id, summary }) => {
+          releasePlan.changesets.map(({ id, summary }) => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
@@ -2370,7 +2304,17 @@ describe("apply release plan", () => {
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
-      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
+      const changesetsDeleted = releasePlan.changesets.reduce(
+        (prev, { id }) => {
+          return (
+            prev &&
+            gitCmd.stdout.toString().includes(`deleted:    .changeset/${id}.md`)
+          );
+        },
+        true as boolean
+      );
+
+      expect(changesetsDeleted).toBe(true);
     });
   });
 });

@@ -173,6 +173,7 @@ describe("Changesets", () => {
       })
     );
   });
+
   it("should commit when the commit flag is passed in", async () => {
     const cwd = await f.copy("simple-project-custom-config");
 
@@ -186,7 +187,9 @@ describe("Changesets", () => {
       }
     );
     expect(git.add).toHaveBeenCalledTimes(1);
+    expect(git.commit).toHaveBeenCalledTimes(1);
   });
+
   it("should create empty changeset when empty flag is passed in", async () => {
     const cwd = await f.copy("simple-project");
 
