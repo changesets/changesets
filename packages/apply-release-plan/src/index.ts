@@ -3,8 +3,7 @@ import {
   Config,
   ChangelogFunctions,
   NewChangeset,
-  ModCompWithPackage,
-  CommitFunctions
+  ModCompWithPackage
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
@@ -170,48 +169,7 @@ export default async function applyReleasePlan(
     );
   }
 
-  if (config.commit) {
-    let newTouchedFilesArr = [...touchedFiles];
-    // Note, git gets angry if you try and have two git actions running at once
-    // So we need to be careful that these iterations are properly sequential
-    while (newTouchedFilesArr.length > 0) {
-      let file = newTouchedFilesArr.shift();
-      await git.add(path.relative(cwd, file!), cwd);
-    }
-
-    let getCommitFuncs: CommitFunctions = {
-      getAddMessage: () => Promise.resolve(""),
-      getVersionMessage: () => Promise.resolve("")
-    };
-
-    const commitOpts = config.commit[1];
-    let changesetPath = path.join(cwd, ".changeset");
-    let commitPath = resolveFrom(changesetPath, config.commit[0]);
-
-    let possibleCommitFunc = require(commitPath);
-    if (possibleCommitFunc.default) {
-      possibleCommitFunc = possibleCommitFunc.default;
-    }
-    if (
-      typeof possibleCommitFunc.getAddMessage === "function" &&
-      typeof possibleCommitFunc.getVersionMessage === "function"
-    ) {
-      getCommitFuncs = possibleCommitFunc;
-    } else {
-      throw new Error("Could not resolve commit generation functions");
-    }
-
-    let commit = await git.commit(
-      await getCommitFuncs.getVersionMessage(releasePlan, commitOpts),
-      cwd
-    );
-
-    if (!commit) {
-      console.error("Changesets ran into trouble committing your files");
-    }
-  }
-
-  // We return the touched files mostly for testing purposes
+  // We return the touched files to be committed in the cli
   return touchedFiles;
 }
 
