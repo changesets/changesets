@@ -79,7 +79,7 @@ describe("defaultCommitFunctions", () => {
     expect(commitStr).toEqual(`docs(changeset): test changeset summary commit`);
   });
 
-  it("should handle a simple changeset - skipCi", async () => {
+  it("should handle a simple changeset - skipCI", async () => {
     const commitStr = await getAddMessage(
       {
         summary: "test changeset summary commit",

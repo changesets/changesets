@@ -2311,7 +2311,7 @@ describe("apply release plan", () => {
             gitCmd.stdout.toString().includes(`deleted:    .changeset/${id}.md`)
           );
         },
-        true as boolean
+        true
       );
 
       expect(releasePlan.changesets.length).toBeGreaterThan(0);

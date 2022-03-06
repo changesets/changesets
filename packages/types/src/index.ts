@@ -133,8 +133,8 @@ export type GetVersionMessage = (
 ) => Promise<string>;
 
 export type CommitFunctions = {
-  getAddMessage: GetAddMessage;
-  getVersionMessage: GetVersionMessage;
+  getAddMessage?: GetAddMessage;
+  getVersionMessage?: GetVersionMessage;
 };
 
 export type PreState = {
