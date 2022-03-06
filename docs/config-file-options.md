@@ -16,9 +16,30 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 
 > NOTE: the `linked`, `updateInternalDependencies`, and `ignore` options are only for behaviour in monorepos.
 
-## `commit` (`true` | `false`)
+## `commit` (`true` | `false` or a module path)
 
-This argument sets whether the `changeset add` command and the `changeset publish` command will also add and commit the changed files using git. By default, we do not commit the files, and leave it to the user to commit the files.
+This option is for setting if the `changeset add` command and the `changeset publish` command will also add and commit the changed files using git, and how the commit messages should be generated for them.
+
+By default, we do not commit the files, and leave it to the user to commit the files. If it is `true`, we use the default commit message generator (`["@changesets/cli/commit", { "versionSkipCI": true }]`). Setting it to a string and options tuple specifies a path from where we will load the commit message generation functions. It expects to be a file that exports one or both of the following:
+
+```
+{
+  getAddMessage,
+  getVersionMessage
+}
+```
+
+If one of the methods is not present then we will not commit the files changed for that command.
+
+You would specify a custom commit message generator with:
+
+```json
+{
+  "commit": ["../scripts/commit.js", { "customOption": true }]
+}
+```
+
+This is similar to how the [changelog generator functions work](#changelog-false-or-a-path).
 
 ## `access` (`restricted` | `public`)
 
