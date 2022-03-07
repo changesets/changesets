@@ -103,13 +103,23 @@ changeset publish [--otp={token}]
 
 This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`.
 
-**Important:** There is an unintended consequence when doing automatic snapshots on pull requests, please see [snapshot releases](./snapshot-releases.md#automatic-snapshots-on-prs) for more info.
-
 Because this command assumes that last commit is the release commit you should not commit any changes between calling version and publish. These commands are separate to enable you to check if the releases changes are acurate.
 
 `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the --otp option.
 
 `--tag TAGNAME` - for packages that are published, the chosen tag will be used instead of `latest`, allowing you to publish changes intended for testing and validation, not main consumption. This will most likely be used with [snapshot releases](./snapshot-releases.md).
+
+### Unintended first time publish
+
+You might have a GitHub Action set up that does [automatic snapshots on pull requests](./snapshot-releases.md#automatic-snapshots-on-prs). There is an unintended consequence to this with brand new packages that have never been published to npm before.
+
+`changeset version` and `changeset publish` are decoupled in that no information is shared between them.
+
+`changeset publish` actually doesn't care if a changeset is even generated, it will still publish the version that doesn't exist on npm even if `changeset version` exits because no unreleased changesets were found.
+
+So, if you have automatic snapshots on PRs set up in the repo, and then create a PR adding a brand new package with a version of `0.0.0` in package.json (common scenario when just starting out, a throwaway version number when still in development), the GitHub Action will run on the PR and `changeset publish` will see that `0.0.0` has not been published on npm for this package, and **it will publish that version.**
+
+You can get around this by temporarily marking `private: true` in package.json while setting up the new package, and removing it when you're ready to generate a changeset.
 
 ### Git Tags
 

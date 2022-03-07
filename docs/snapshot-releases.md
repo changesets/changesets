@@ -59,16 +59,13 @@ You can automatically generate snapshots on pull requests with GitHub Actions:
 ```yaml
 name: Pre-release
 
-on:
-  pull_request:
+on: pull_request
 
 jobs:
   publish_prerelease:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Use Node.js 14.x
         uses: actions/setup-node@v2
@@ -88,21 +85,8 @@ jobs:
           yarn changeset publish --tag prerelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
 This will generate a snapshot on each commit to a PR using the commit `SHA`, and publish it under the `prerelease` tag. This is very handy if you need to incrementally test out changes in your PR and don't want to generate snapshots manually for each commit.
 
-However, there is an **unintended consequence** to this for brand new packages that have never been published to npm before.
-
-`changeset version` and `changeset publish` are decoupled in that no information is shared between them.
-
-`changeset publish` actually doesn't care if a changeset is even generated, it will still publish the version that doesn't exist on npm even if `changeset version` exits because no unreleased changesets were found.
-
-So, if you have the GitHub Action set up in the repo, and then create a PR adding a brand new package with a version of `0.0.0` in package.json (common scenario when just starting out, a throwaway version number when still in development), the GitHub Action will run on the PR and `changeset publish` will see that `0.0.0` has not been published on npm for this package, and **it will publish that version.**
-
-You can get around this in two ways:
-
-- By temporarily marking `private: true` in package.json while setting up the new package, and removing it when you're ready to generate a changeset.
-
-- By utilizing the [ignore option](https://github.com/changesets/changesets/blob/main/docs/config-file-options.md#ignore-array-of-packages) temporarily.
+There is an **unintended consequence** to this for brand new packages that have never been published to npm before. You can read more about it in the [changeset publish docs](./command-line-options#unintended-first-time-publish.md).
