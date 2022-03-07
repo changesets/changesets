@@ -89,4 +89,4 @@ jobs:
 
 This will generate a snapshot on each commit to a PR using the commit `SHA`, and publish it under the `prerelease` tag. This is very handy if you need to incrementally test out changes in your PR and don't want to generate snapshots manually for each commit.
 
-There is an **unintended consequence** to this for brand new packages that have never been published to npm before. You can read more about it in the [changeset publish docs](./command-line-options#unintended-first-time-publish.md).
+There is an **unintended consequence** to this for brand new packages that have never been published to npm before. You can read more about it in the [changeset publish docs](./command-line-options.md#unintended-first-time-publish).
