@@ -33,9 +33,9 @@ describe("init", () => {
       true
     );
     await initializeCommand(cwd);
-    expect(await fs.readJson(path.join(cwd, ".changeset/config.json"))).toEqual(
-      defaultWrittenConfig
-    );
+    expect(
+      await fs.readJson(path.join(cwd, ".changeset/config.json"))
+    ).toEqual({ ...defaultWrittenConfig, baseBranch: "main" });
   });
   it("shouldn't overwrite a config if it does exist", async () => {
     const cwd = await f.copy("simple-project");
