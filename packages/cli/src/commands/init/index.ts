@@ -9,7 +9,11 @@ const pkgPath = path.dirname(require.resolve("@changesets/cli/package.json"));
 
 // Modify base branch to "main" without changing defaultWrittenConfig since it also serves as a fallback
 // for config files that don't specify a base branch. Changing that to main would be a breaking change.
-const defaultConfig = JSON.stringify({ ...defaultWrittenConfig, baseBranch: "main" }, null, 2)
+const defaultConfig = JSON.stringify(
+  { ...defaultWrittenConfig, baseBranch: "main" },
+  null,
+  2
+);
 
 export default async function init(cwd: string) {
   const changesetBase = path.resolve(cwd, ".changeset");
@@ -35,7 +39,10 @@ export default async function init(cwd: string) {
           "The default config file will be written at `.changeset/config.json`"
         );
       }
-      await fs.writeFile(path.resolve(changesetBase, "config.json"), defaultConfig);
+      await fs.writeFile(
+        path.resolve(changesetBase, "config.json"),
+        defaultConfig
+      );
     } else {
       warn(
         "It looks like you already have changesets initialized. You should be able to run changeset commands no problems."
@@ -43,7 +50,10 @@ export default async function init(cwd: string) {
     }
   } else {
     await fs.copy(path.resolve(pkgPath, "./default-files"), changesetBase);
-    await fs.writeFile(path.resolve(changesetBase, "config.json"), defaultConfig);
+    await fs.writeFile(
+      path.resolve(changesetBase, "config.json"),
+      defaultConfig
+    );
 
     log(
       chalk`Thanks for choosing {green changesets} to help manage your versioning and publishing\n`
