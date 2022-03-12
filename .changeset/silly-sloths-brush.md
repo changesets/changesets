@@ -2,4 +2,4 @@
 "@changesets/git": patch
 ---
 
-Get correct repository root instead of `cwd`when getting absolute paths of changed files
+`getChangedFilesSince` and `getChangedPackagesSinceRef` will now return the correct absolute paths of the changed files when the passed `cwd` is different from the repository's root.
