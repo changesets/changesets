@@ -1,3 +1,4 @@
+import path from "path";
 import fixtures from "fixturez";
 import spawn from "spawndamnit";
 import fileUrl from "file-url";
@@ -414,6 +415,39 @@ describe("git", () => {
       expect(filesChangedSinceSecondRef[0]).toEqual("packages/pkg-b/index.js");
       expect(filesChangedSinceSecondRef[1]).toEqual(
         "packages/pkg-b/package.json"
+      );
+    });
+    it("should get correct full paths of changed files irrespective of cwd", async () => {
+      const ref = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+
+      await add("packages/pkg-a/index.js", cwd);
+      await commit("Add packageA index", cwd);
+
+      await add("packages/pkg-b/index.js", cwd);
+      await commit("Added packageB index", cwd);
+
+      const filesChangedSinceRef = await getChangedFilesSince({
+        ref: ref.stdout.toString().trim(),
+        cwd,
+        fullPath: true
+      });
+      expect(filesChangedSinceRef[0]).toBe(
+        path.resolve(cwd, "packages/pkg-a/index.js")
+      );
+      expect(filesChangedSinceRef[1]).toBe(
+        path.resolve(cwd, "packages/pkg-b/index.js")
+      );
+
+      const filesChangedSinceRef2 = await getChangedFilesSince({
+        ref: ref.stdout.toString().trim(),
+        cwd: path.resolve(cwd, "packages"),
+        fullPath: true
+      });
+      expect(filesChangedSinceRef2[0]).toBe(
+        path.resolve(cwd, "packages/pkg-a/index.js")
+      );
+      expect(filesChangedSinceRef2[1]).toBe(
+        path.resolve(cwd, "packages/pkg-b/index.js")
       );
     });
   });
