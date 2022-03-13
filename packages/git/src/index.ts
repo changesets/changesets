@@ -183,14 +183,14 @@ export async function deepenCloneBy({ by, cwd }: { by: number; cwd: string }) {
   await spawn("git", ["fetch", `--deepen=${by}`], { cwd });
 }
 async function getRepoRoot({ cwd }: { cwd: string }) {
-  const { stdout, code } = await spawn(
+  const { stdout, code, stderr } = await spawn(
     "git",
     ["rev-parse", "--show-toplevel"],
     { cwd }
   );
 
   if (code !== 0) {
-    return cwd;
+    throw new Error(stderr.toString());
   }
 
   return stdout
