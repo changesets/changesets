@@ -1,5 +1,23 @@
 # @changesets/get-release-plan
 
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [[`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f)]:
+  - @changesets/assemble-release-plan@5.1.1
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [[`0812858`](https://github.com/changesets/changesets/commit/0812858996045e602d22f2b7dd13e8673e3b36b0), [`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15), [`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15), [`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15), [`59c7ebc`](https://github.com/changesets/changesets/commit/59c7ebc7a5e75f69f5487e95a85cd1b7062ac39d), [`15c461d`](https://github.com/changesets/changesets/commit/15c461d5de94a274ccc8b33755a133a513339b0a)]:
+  - @changesets/assemble-release-plan@5.1.0
+  - @changesets/types@4.1.0
+  - @changesets/config@1.7.0
+  - @changesets/pre@1.0.10
+  - @changesets/read@0.5.4
+
 ## 3.0.5
 
 ### Patch Changes

@@ -49,6 +49,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Config file options](./docs/config-file-options.md)
 - [Decisions](./docs/decisions.md)
 - [Dictionary](./docs/dictionary.md)
+- [Fixed packages](./docs/fixed-packages.md)
 - [Linked packages](./docs/linked-packages.md)
 - [Modifying changelog format](./docs/modifying-changelog-format.md)
 - [Prereleases](./docs/prereleases.md)

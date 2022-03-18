@@ -1,5 +1,12 @@
 # @changesets/pre
 
+## 1.0.10
+
+### Patch Changes
+
+- Updated dependencies [[`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15)]:
+  - @changesets/types@4.1.0
+
 ## 1.0.9
 
 ### Patch Changes

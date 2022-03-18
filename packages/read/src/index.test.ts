@@ -2,11 +2,11 @@ import fixtures from "fixturez";
 import outdent from "outdent";
 
 import read from "./";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock } from "@changesets/test-utils";
 
 const f = fixtures(__dirname);
 
-temporarilySilenceLogs();
+silenceLogsInBlock();
 
 describe("read changesets from disc", () => {
   it("should read a changeset from disc", async () => {
@@ -77,7 +77,7 @@ describe("read changesets from disc", () => {
     try {
       await read(changesetPath);
     } catch (e) {
-      expect(e.message).toBe(
+      expect((e as Error).message).toBe(
         "There is no .changeset directory in this project"
       );
       return;

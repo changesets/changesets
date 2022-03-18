@@ -1,5 +1,5 @@
 import fixtures from "fixturez";
-import { temporarilySilenceLogs } from "../../../../../test-utils/src";
+import { silenceLogsInBlock } from "../../../../../test-utils/src";
 import * as git from "@changesets/git";
 import tag from "../index";
 
@@ -8,7 +8,7 @@ const f = fixtures(__dirname);
 jest.mock("@changesets/git");
 
 describe("tag command", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
   let cwd: string;
 
   describe("workspace project", () => {
