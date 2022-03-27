@@ -16,6 +16,7 @@ import humanId from "human-id";
 const f = fixtures(__dirname);
 
 let changelogPath = path.resolve(__dirname, "../../changelog");
+let commitPath = path.resolve(__dirname, "../../commit");
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: [changelogPath, null]
@@ -202,6 +203,28 @@ describe("running version in a simple project", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
+  it("should git add the expected files if commit config is set", async () => {
+    const ids = await writeChangesets([simpleChangeset2], cwd);
+    const spy = jest.spyOn(git, "add");
+
+    expect(spy).not.toHaveBeenCalled();
+
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      commit: [commitPath, null]
+    });
+
+    expect(spy).toHaveBeenCalled();
+
+    expect(spy).toHaveBeenCalledWith("packages/pkg-a/package.json", cwd);
+    expect(spy).toHaveBeenCalledWith("packages/pkg-a/CHANGELOG.md", cwd);
+
+    expect(spy).toHaveBeenCalledWith("packages/pkg-b/package.json", cwd);
+    expect(spy).toHaveBeenCalledWith("packages/pkg-b/CHANGELOG.md", cwd);
+
+    expect(spy).toHaveBeenCalledWith(`.changeset/${ids[0]}.md`, cwd);
+  });
+
   it("should commit the result if commit config is set", async () => {
     await writeChangesets([simpleChangeset2], cwd);
     const spy = jest.spyOn(git, "commit");
@@ -210,7 +233,7 @@ describe("running version in a simple project", () => {
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      commit: true
+      commit: [commitPath, null]
     });
 
     expect(spy).toHaveBeenCalled();
@@ -220,8 +243,6 @@ describe("running version in a simple project", () => {
       Releases:
         pkg-a@1.1.0
         pkg-b@1.0.1
-
-      [skip ci]
       "
     `);
   });
@@ -649,7 +670,7 @@ describe("snapshot release", () => {
       },
       {
         ...modifiedDefaultConfig,
-        commit: true
+        commit: [commitPath, null]
       }
     );
 
