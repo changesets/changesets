@@ -16,9 +16,9 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 
 > NOTE: the `linked`, `updateInternalDependencies`, and `ignore` options are only for behaviour in monorepos.
 
-## `commit` (`true` | `false` or a module path)
+## `commit` (`boolean`, or module path as a `string`, or a tuple like `[modulePath: string, options: any]`)
 
-This option is for setting if the `changeset add` command and the `changeset publish` command will also add and commit the changed files using git, and how the commit messages should be generated for them.
+This option is for setting if the `changeset add` command and the `changeset version` commands will also add and commit the changed files using git, and how the commit messages should be generated for them.
 
 By default, we do not commit the files, and leave it to the user to commit the files. If it is `true`, we use the default commit message generator (`["@changesets/cli/commit", { "skipCI": "version" }]`). Setting it to a string and options tuple specifies a path from where we will load the commit message generation functions. It expects to be a file that exports one or both of the following:
 

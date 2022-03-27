@@ -124,12 +124,12 @@ export type ChangelogFunctions = {
 
 export type GetAddMessage = (
   changeset: Changeset,
-  commitOptions: null | Record<string, any>
+  commitOptions: any
 ) => Promise<string>;
 
 export type GetVersionMessage = (
   releasePlan: ReleasePlan,
-  commitOptions: null | Record<string, any>
+  commitOptions: any
 ) => Promise<string>;
 
 export type CommitFunctions = {
