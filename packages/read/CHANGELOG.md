@@ -1,5 +1,14 @@
 # @changesets/read
 
+## 0.5.5
+
+### Patch Changes
+
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c), [`eb86652`](https://github.com/changesets/changesets/commit/eb86652cbd21c49f90d2a03caa9a578593c4d102)]:
+  - @changesets/types@5.0.0
+  - @changesets/git@1.3.2
+  - @changesets/parse@0.3.13
+
 ## 0.5.4
 
 ### Patch Changes

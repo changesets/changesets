@@ -1,5 +1,13 @@
 # @changesets/assemble-release-plan
 
+## 5.1.2
+
+### Patch Changes
+
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+  - @changesets/types@5.0.0
+  - @changesets/get-dependents-graph@1.3.2
+
 ## 5.1.1
 
 ### Patch Changes
