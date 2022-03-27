@@ -1,11 +1,5 @@
 ---
-"@changesets/apply-release-plan": major
 "@changesets/cli": minor
-"@changesets/config": minor
-"@changesets/types": minor
 ---
 
-Allow "commit" option to be configurable via CommitFunctions
-
-- Moves all git commit logic to the cli, along with resolving the commit config
-- apply-release-plan no longer commits the release info
+Allow `"commit"` option to be more configurable. You can now point to a module (using a module name or a relative path) that might contain `getAddMessage` and/or `getVersionMessage`. This allows you to configure how the commit message is generated, if `[skip ci]` gets included, etc.
