@@ -1,6 +1,4 @@
 import { Changeset, CommitFunctions, ReleasePlan } from "@changesets/types";
-import path from "path";
-import resolveFrom from "resolve-from";
 import outdent from "outdent";
 
 type SkipCI = boolean | "add" | "version";
@@ -38,36 +36,9 @@ const getVersionMessage: CommitFunctions["getVersionMessage"] = async (
 `;
 };
 
-export const defaultCommitFunctions: CommitFunctions = {
+const defaultCommitFunctions: Required<CommitFunctions> = {
   getAddMessage,
   getVersionMessage
 };
 
 export default defaultCommitFunctions;
-
-export function getCommitFuncs(
-  commit: false | readonly [string, any],
-  cwd: string
-): [CommitFunctions, any] {
-  let getCommitFuncs: CommitFunctions = {};
-  if (!commit) {
-    return [getCommitFuncs, null];
-  }
-  let commitOpts: any = commit[1];
-  let changesetPath = path.join(cwd, ".changeset");
-  let commitPath = resolveFrom(changesetPath, commit[0]);
-
-  let possibleCommitFunc = require(commitPath);
-  if (possibleCommitFunc.default) {
-    possibleCommitFunc = possibleCommitFunc.default;
-  }
-  if (
-    typeof possibleCommitFunc.getAddMessage === "function" ||
-    typeof possibleCommitFunc.getVersionMessage === "function"
-  ) {
-    getCommitFuncs = possibleCommitFunc;
-  } else {
-    throw new Error("Could not resolve commit generation functions");
-  }
-  return [getCommitFuncs, commitOpts];
-}

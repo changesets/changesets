@@ -1,6 +1,5 @@
-import path from "path";
 import outdent from "outdent";
-import { getCommitFuncs } from ".";
+import defaultCommitFunctions from ".";
 import { NewChangeset, ReleasePlan } from "@changesets/types";
 
 const simpleChangeset: NewChangeset = {
@@ -54,14 +53,7 @@ let secondReleasePlan: ReleasePlan = {
 };
 
 describe("defaultCommitFunctions", () => {
-  const [{ getAddMessage, getVersionMessage }, commitOpts] = getCommitFuncs(
-    [path.resolve(__dirname), { skipCI: "version" }],
-    ""
-  );
-
-  if (!getAddMessage || !getVersionMessage) {
-    throw new Error("Invalid default functions");
-  }
+  const { getAddMessage, getVersionMessage } = defaultCommitFunctions;
 
   it("should handle a simple changeset", async () => {
     const commitStr = await getAddMessage(
@@ -74,7 +66,7 @@ describe("defaultCommitFunctions", () => {
           }
         ]
       },
-      commitOpts
+      { skipCI: "version" }
     );
     expect(commitStr).toEqual(`docs(changeset): test changeset summary commit`);
   });
@@ -90,18 +82,20 @@ describe("defaultCommitFunctions", () => {
           }
         ]
       },
-      { ...commitOpts, skipCI: "add" }
+      { skipCI: "add" }
     );
     expect(commitStr).toEqual(outdent`
         docs(changeset): test changeset summary commit
-    
+
         [skip ci]
-        
+
       `);
   });
 
   it("should handle a single simple releaseObject with one released package - skipCI", async () => {
-    const commitStr = await getVersionMessage(simpleReleasePlan, commitOpts);
+    const commitStr = await getVersionMessage(simpleReleasePlan, {
+      skipCI: "version"
+    });
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)
 
@@ -109,13 +103,12 @@ describe("defaultCommitFunctions", () => {
         package-a@1.1.0
 
       [skip ci]
-      
+
       `);
   });
 
   it("should handle a single simple releaseObject with one released package", async () => {
     const commitStr = await getVersionMessage(simpleReleasePlan, {
-      ...commitOpts,
       skipCI: false
     });
     expect(commitStr).toEqual(outdent`
@@ -123,7 +116,7 @@ describe("defaultCommitFunctions", () => {
 
       Releases:
         package-a@1.1.0
-      
+
       `);
   });
 
@@ -148,7 +141,9 @@ describe("defaultCommitFunctions", () => {
       ],
       preState: undefined
     };
-    const commitStr = await getVersionMessage(releasePlan, commitOpts);
+    const commitStr = await getVersionMessage(releasePlan, {
+      skipCI: "version"
+    });
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 2 package(s)
 
@@ -157,12 +152,14 @@ describe("defaultCommitFunctions", () => {
         package-b@1.1.0
 
       [skip ci]
-    
+
     `);
   });
 
   it("should handle a merging releases from multiple changesets", async () => {
-    const commitStr = await getVersionMessage(secondReleasePlan, commitOpts);
+    const commitStr = await getVersionMessage(secondReleasePlan, {
+      skipCI: "version"
+    });
 
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 2 package(s)
@@ -172,7 +169,7 @@ describe("defaultCommitFunctions", () => {
         package-b@1.1.0
 
       [skip ci]
-    
+
     `);
   });
 
@@ -207,7 +204,7 @@ describe("defaultCommitFunctions", () => {
         ],
         preState: undefined
       },
-      commitOpts
+      { skipCI: "version" }
     );
 
     expect(commitStr).toMatch("RELEASING: Releasing 1 package(s)");

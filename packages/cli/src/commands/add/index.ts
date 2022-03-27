@@ -9,7 +9,7 @@ import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
 
-import { getCommitFuncs } from "../../commit";
+import { getCommitFunctions } from "../../commit/getCommitFunctions";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
@@ -54,7 +54,10 @@ export default async function add(
 
   if (newChangeset.confirmed) {
     const changesetID = await writeChangeset(newChangeset, cwd);
-    const [{ getAddMessage }, commitOpts] = getCommitFuncs(config.commit, cwd);
+    const [{ getAddMessage }, commitOpts] = getCommitFunctions(
+      config.commit,
+      cwd
+    );
     if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
       await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);

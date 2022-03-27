@@ -11,7 +11,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
-import { getCommitFuncs } from "../../commit";
+import { getCommitFunctions } from "../../commit/getCommitFunctions";
 
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
@@ -73,24 +73,23 @@ export default async function version(
     options.snapshot
   );
 
-  let touchedFiles = await applyReleasePlan(
+  let [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
     releaseConfig,
     options.snapshot
   );
 
-  const [{ getVersionMessage }, commitOpts] = getCommitFuncs(
+  const [{ getVersionMessage }, commitOpts] = getCommitFunctions(
     releaseConfig.commit,
     cwd
   );
   if (getVersionMessage) {
-    let newTouchedFilesArr = [...touchedFiles];
+    let touchedFile: string | undefined;
     // Note, git gets angry if you try and have two git actions running at once
     // So we need to be careful that these iterations are properly sequential
-    while (newTouchedFilesArr.length > 0) {
-      let file = newTouchedFilesArr.shift();
-      await git.add(path.relative(cwd, file!), cwd);
+    while ((touchedFile = touchedFiles.shift())) {
+      await git.add(path.relative(cwd, touchedFile), cwd);
     }
 
     const commit = await git.commit(
