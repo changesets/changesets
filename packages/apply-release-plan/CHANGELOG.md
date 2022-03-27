@@ -1,5 +1,18 @@
 # @changesets/apply-release-plan
 
+## 6.0.0
+
+### Major Changes
+
+- [#768](https://github.com/changesets/changesets/pull/768) [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c) Thanks [@rohit-gohri](https://github.com/rohit-gohri)! - This module is no longer responsible for commiting files - this responsibility has been moved entirely to `@changesets/cli`.
+
+### Patch Changes
+
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c), [`eb86652`](https://github.com/changesets/changesets/commit/eb86652cbd21c49f90d2a03caa9a578593c4d102), [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+  - @changesets/types@5.0.0
+  - @changesets/git@1.3.2
+  - @changesets/config@2.0.0
+
 ## 5.0.5
 
 ### Patch Changes

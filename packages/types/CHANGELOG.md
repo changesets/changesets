@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 5.0.0
+
+### Major Changes
+
+- [#768](https://github.com/changesets/changesets/pull/768) [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c) Thanks [@rohit-gohri](https://github.com/rohit-gohri)! - `commit` properties of config types were adjusted to account for this option potentially pointing to a module path.
+
 ## 4.1.0
 
 ### Minor Changes

@@ -1,5 +1,30 @@
 # @changesets/cli
 
+## 2.22.0
+
+### Minor Changes
+
+- [#768](https://github.com/changesets/changesets/pull/768) [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c) Thanks [@rohit-gohri](https://github.com/rohit-gohri)! - Allow `"commit"` option to be more configurable. You can now point to a module (using a module name or a relative path) that might contain `getAddMessage` and/or `getVersionMessage`. This allows you to configure how the commit message is generated, if `[skip ci]` gets included, etc.
+
+### Patch Changes
+
+- [#776](https://github.com/changesets/changesets/pull/776) [`ad7506d`](https://github.com/changesets/changesets/commit/ad7506dc6973293a6f913653c2a6a15ba5b8b500) Thanks [@janosh](https://github.com/janosh)! - `changeset init` will now configure `baseBranch: "main"` in the `.changeset/config.json` as the default value.
+
+* [#770](https://github.com/changesets/changesets/pull/770) [`eb86652`](https://github.com/changesets/changesets/commit/eb86652cbd21c49f90d2a03caa9a578593c4d102) Thanks [@alizeait](https://github.com/alizeait)! - `changeset add` and `changeset status` should now properly handle the situation where Changesets are managed from a directory different than the root of the repository.
+
+* Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c), [`eb86652`](https://github.com/changesets/changesets/commit/eb86652cbd21c49f90d2a03caa9a578593c4d102), [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c), [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+  - @changesets/types@5.0.0
+  - @changesets/git@1.3.2
+  - @changesets/apply-release-plan@6.0.0
+  - @changesets/config@2.0.0
+  - @changesets/assemble-release-plan@5.1.2
+  - @changesets/changelog-git@0.1.11
+  - @changesets/get-dependents-graph@1.3.2
+  - @changesets/get-release-plan@3.0.8
+  - @changesets/pre@1.0.11
+  - @changesets/read@0.5.5
+  - @changesets/write@0.1.8
+
 ## 2.21.1
 
 ### Patch Changes
