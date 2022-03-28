@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import path from "path";
+import * as git from "@changesets/git";
 import { log, warn, error } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
@@ -10,6 +11,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
+import { getCommitFunctions } from "../../commit/getCommitFunctions";
 
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
@@ -71,15 +73,37 @@ export default async function version(
     options.snapshot
   );
 
-  await applyReleasePlan(
+  let [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
     releaseConfig,
     options.snapshot
   );
 
-  if (releaseConfig.commit) {
-    log("All files have been updated and committed. You're ready to publish!");
+  const [{ getVersionMessage }, commitOpts] = getCommitFunctions(
+    releaseConfig.commit,
+    cwd
+  );
+  if (getVersionMessage) {
+    let touchedFile: string | undefined;
+    // Note, git gets angry if you try and have two git actions running at once
+    // So we need to be careful that these iterations are properly sequential
+    while ((touchedFile = touchedFiles.shift())) {
+      await git.add(path.relative(cwd, touchedFile), cwd);
+    }
+
+    const commit = await git.commit(
+      await getVersionMessage(releasePlan, commitOpts),
+      cwd
+    );
+
+    if (!commit) {
+      error("Changesets ran into trouble committing your files");
+    } else {
+      log(
+        "All files have been updated and committed. You're ready to publish!"
+      );
+    }
   } else {
     log("All files have been updated. Review them and commit at your leisure");
   }

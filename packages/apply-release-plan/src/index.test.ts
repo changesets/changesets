@@ -2177,7 +2177,7 @@ describe("apply release plan", () => {
 
     const setupFunc = (tempDir: string) =>
       Promise.all(
-        releasePlan.getReleasePlan().changesets.map(async ({ id, summary }) => {
+        releasePlan.changesets.map(async ({ id, summary }) => {
           changesetMDPath = path.resolve(
             tempDir,
             ".changeset",
@@ -2203,11 +2203,14 @@ describe("apply release plan", () => {
       releasePlan.getReleasePlan(),
       {
         ...releasePlan.config,
+        commit: [
+          path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+          null
+        ],
         changelog: [
           path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
           null
-        ],
-        commit: true
+        ]
       },
       setupFunc
     );
@@ -2234,103 +2237,46 @@ describe("apply release plan", () => {
 - ${lastCommit}: Hey, let's have fun with testing!
 `);
   });
-  describe("git", () => {
-    it("should commit updating files from packages", async () => {
+
+  describe("files", () => {
+    it("shouldn't commit updated files from packages", async () => {
       const releasePlan = new FakeReleasePlan();
 
       let { tempDir } = await testSetup(
         "with-git",
         releasePlan.getReleasePlan(),
-        { ...releasePlan.config, commit: true }
-      );
-
-      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
-
-      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
-
-      let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
-
-      lastCommit.stdout.toString();
-
-      expect(
-        lastCommit.stdout
-          .toString()
-          .includes("RELEASING: Releasing 1 package(s)")
-      ).toBe(true);
-    });
-    it("should not mention unreleased devDependents in release commit message", async () => {
-      let { tempDir } = await testSetup(
-        "simple-dev-dep",
         {
-          changesets: [
-            {
-              id: "quick-lions-devour",
-              summary: "Hey, let's have fun with testing!",
-              releases: [
-                { name: "pkg-a", type: "none" },
-                { name: "pkg-b", type: "minor" }
-              ]
-            }
-          ],
-          releases: [
-            {
-              name: "pkg-a",
-              type: "none",
-              oldVersion: "1.0.0",
-              newVersion: "1.0.0",
-              changesets: ["quick-lions-devour"]
-            },
-            {
-              name: "pkg-b",
-              type: "minor",
-              oldVersion: "1.0.0",
-              newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"]
-            }
-          ],
-          preState: undefined
-        },
-        {
-          changelog: false,
-          commit: true,
-          fixed: [],
-          linked: [],
-          access: "restricted",
-          baseBranch: "main",
-          updateInternalDependencies: "patch",
-          ignore: [],
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false,
-            updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
-          }
+          ...releasePlan.config,
+          commit: [
+            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            null
+          ]
         }
       );
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
-      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
-
-      let lastCommit = await spawn(
-        "git",
-        ["log", "-1", '--format=format:"%s%n%n%b"'],
-        { cwd: tempDir }
+      expect(gitCmd.stdout.toString()).toContain(
+        "Changes not staged for commit"
       );
 
-      const commitMessage = lastCommit.stdout.toString();
+      expect(gitCmd.stdout.toString()).toContain(
+        "modified:   packages/pkg-a/package.json"
+      );
 
-      expect(commitMessage).toMatch("RELEASING: Releasing 1 package(s)");
-      expect(commitMessage).toMatch("pkg-b@1.1.0");
-      expect(commitMessage).not.toMatch("pkg-a");
+      let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
+
+      expect(lastCommit.stdout.toString()).toContain("first commit");
     });
-    it("should commit removing applied changesets", async () => {
+
+    it("should remove applied changesets", async () => {
       const releasePlan = new FakeReleasePlan();
 
       let changesetPath: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
-          releasePlan.getReleasePlan().changesets.map(({ id, summary }) => {
+          releasePlan.changesets.map(({ id, summary }) => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
@@ -2341,7 +2287,13 @@ describe("apply release plan", () => {
       let { tempDir } = await testSetup(
         "with-git",
         releasePlan.getReleasePlan(),
-        { ...releasePlan.config, commit: true },
+        {
+          ...releasePlan.config,
+          commit: [
+            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            null
+          ]
+        },
         setupFunc
       );
 
@@ -2352,35 +2304,18 @@ describe("apply release plan", () => {
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
-      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
+      const changesetsDeleted = releasePlan.changesets.reduce(
+        (prev, { id }) => {
+          return (
+            prev &&
+            gitCmd.stdout.toString().includes(`deleted:    .changeset/${id}.md`)
+          );
+        },
+        true
+      );
+
+      expect(releasePlan.changesets.length).toBeGreaterThan(0);
+      expect(changesetsDeleted).toBe(true);
     });
   });
 });
-
-// MAKE SURE BOTH OF THESE ARE COVERED
-
-// it("should git add the expected files (without changelog) when commit: true", async () => {
-//   await writeChangesets([simpleChangeset2], cwd);
-//   await versionCommand(cwd, { ...modifiedDefaultConfig, commit: true });
-
-//   const pkgAConfigPath = path.join(cwd, "packages/pkg-a/package.json");
-//   const pkgBConfigPath = path.join(cwd, "packages/pkg-b/package.json");
-//   const changesetConfigPath = path.join(cwd, ".changeset");
-
-//   expect(git.add).toHaveBeenCalledWith(pkgAConfigPath, cwd);
-//   expect(git.add).toHaveBeenCalledWith(pkgBConfigPath, cwd);
-//   expect(git.add).toHaveBeenCalledWith(changesetConfigPath, cwd);
-// });
-// it("should git add the expected files (with changelog)", async () => {
-//   let changelogPath = path.resolve(__dirname, "../../changelogs");
-//   await writeChangesets([simpleChangeset2], cwd);
-//   await versionCommand(cwd, {
-//     ...modifiedDefaultConfig,
-//     changelog: [changelogPath, null],
-//     commit: true
-//   });
-//   const pkgAChangelogPath = path.join(cwd, "packages/pkg-a/CHANGELOG.md");
-//   const pkgBChangelogPath = path.join(cwd, "packages/pkg-b/CHANGELOG.md");
-//   expect(git.add).toHaveBeenCalledWith(pkgAChangelogPath, cwd);
-//   expect(git.add).toHaveBeenCalledWith(pkgBChangelogPath, cwd);
-// });

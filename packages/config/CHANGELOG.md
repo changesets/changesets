@@ -1,5 +1,17 @@
 # @changesets/config
 
+## 2.0.0
+
+### Major Changes
+
+- [#768](https://github.com/changesets/changesets/pull/768) [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c) Thanks [@rohit-gohri](https://github.com/rohit-gohri)! - The parsed config now normalzied the commit option to either `false` or a tuple describing what module should be loaded to resolve commit functions.
+
+### Patch Changes
+
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+  - @changesets/types@5.0.0
+  - @changesets/get-dependents-graph@1.3.2
+
 ## 1.7.0
 
 ### Minor Changes

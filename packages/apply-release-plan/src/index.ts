@@ -17,7 +17,6 @@ import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
-import createVersionCommit from "./createVersionCommit";
 import getChangelogEntry from "./get-changelog-entry";
 
 function stringDefined(s: string | undefined): s is string {
@@ -72,8 +71,6 @@ export default async function applyReleasePlan(
   );
 
   let { releases, changesets } = releasePlan;
-
-  const versionCommit = createVersionCommit(releasePlan, config.commit);
 
   let releasesWithPackage = releases.map(release => {
     let pkg = packagesByName.get(release.name);
@@ -172,23 +169,7 @@ export default async function applyReleasePlan(
     );
   }
 
-  if (config.commit) {
-    let newTouchedFilesArr = [...touchedFiles];
-    // Note, git gets angry if you try and have two git actions running at once
-    // So we need to be careful that these iterations are properly sequential
-    while (newTouchedFilesArr.length > 0) {
-      let file = newTouchedFilesArr.shift();
-      await git.add(path.relative(cwd, file!), cwd);
-    }
-
-    let commit = await git.commit(versionCommit, cwd);
-
-    if (!commit) {
-      console.error("Changesets ran into trouble committing your files");
-    }
-  }
-
-  // We return the touched files mostly for testing purposes
+  // We return the touched files to be committed in the cli
   return touchedFiles;
 }
 
