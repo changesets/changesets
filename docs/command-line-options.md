@@ -1,6 +1,6 @@
 # Command line options
 
-The command line for changesets is the main way of interracting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-changesets.md)
+The command line for changesets is the main way of interracting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-using-changesets.md)
 
 - init
 - add [--empty][--open]
