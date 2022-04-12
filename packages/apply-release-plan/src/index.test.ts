@@ -14,6 +14,7 @@ import { defaultConfig } from "@changesets/config";
 
 import applyReleasePlan from "./";
 import { getPackages } from "@manypkg/get-packages";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 const f = fixtures(__dirname);
 
@@ -42,6 +43,7 @@ class FakeReleasePlan {
     this.config = {
       changelog: false,
       commit: false,
+      fixed: [],
       linked: [],
       access: "restricted",
       baseBranch: "main",
@@ -78,6 +80,7 @@ async function testSetup(
     config = {
       changelog: false,
       commit: false,
+      fixed: [],
       linked: [],
       access: "restricted",
       baseBranch: "main",
@@ -477,6 +480,7 @@ describe("apply release plan", () => {
         {
           changelog: false,
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -539,6 +543,7 @@ describe("apply release plan", () => {
         {
           changelog: false,
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -687,6 +692,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -771,6 +777,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -847,6 +854,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -923,6 +931,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1002,6 +1011,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1086,6 +1096,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1162,6 +1173,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1238,6 +1250,7 @@ describe("apply release plan", () => {
             {
               changelog: false,
               commit: false,
+              fixed: [],
               linked: [],
               access: "restricted",
               baseBranch: "main",
@@ -1318,6 +1331,7 @@ describe("apply release plan", () => {
           {
             changelog: false,
             commit: false,
+            fixed: [],
             linked: [],
             access: "restricted",
             baseBranch: "main",
@@ -1382,6 +1396,7 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.1.0
+
       ### Minor Changes
 
       - Hey, let's have fun with testing!`);
@@ -1427,13 +1442,14 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.1.0
+
       ### Minor Changes
 
       - Hey, let's have fun with testing!
 
       ### Patch Changes
 
-        - pkg-b@2.0.0`);
+      - pkg-b@2.0.0`);
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
@@ -1473,6 +1489,7 @@ describe("apply release plan", () => {
         },
         {
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1532,13 +1549,13 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(
         [
           "# pkg-a\n",
-          "## 1.1.0",
+          "## 1.1.0\n",
           "### Minor Changes\n",
           "- Hey, let's have fun with testing!",
-          "- Random stuff",
-          "  \n  get it while it's hot!",
-          "- New feature, much wow",
-          "  \n  look at this shiny stuff!"
+          "- Random stuff\n",
+          "  get it while it's hot!\n",
+          "- New feature, much wow\n",
+          "  look at this shiny stuff!"
         ].join("\n")
       );
     });
@@ -1581,6 +1598,7 @@ describe("apply release plan", () => {
             null
           ],
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1609,6 +1627,7 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
+
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -1618,6 +1637,7 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
+
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -1663,6 +1683,7 @@ describe("apply release plan", () => {
             null
           ],
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1691,6 +1712,7 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
+
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -1698,6 +1720,7 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
+
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -1749,6 +1772,7 @@ describe("apply release plan", () => {
             null
           ],
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1781,6 +1805,7 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
+
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -1788,6 +1813,7 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
+
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -1797,6 +1823,7 @@ describe("apply release plan", () => {
       expect(readmeC.trim()).toEqual(outdent`# pkg-c
 
       ## 2.1.0
+
       ### Minor Changes
 
       - Hey, let's have fun with testing!`);
@@ -1848,6 +1875,7 @@ describe("apply release plan", () => {
             null
           ],
           commit: false,
+          fixed: [],
           linked: [],
           access: "restricted",
           baseBranch: "main",
@@ -1880,6 +1908,7 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
+
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -1887,6 +1916,7 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
+
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -1896,6 +1926,7 @@ describe("apply release plan", () => {
       expect(readmeC.trim()).toEqual(outdent`# pkg-c
 
       ## 2.0.1
+
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -2011,7 +2042,7 @@ describe("apply release plan", () => {
         });
         changedFiles = testResults.changedFiles;
       } catch (e) {
-        expect(e.message).toEqual("some string probably");
+        expect((e as Error).message).toEqual("some string probably");
 
         return;
       }
@@ -2050,7 +2081,7 @@ describe("apply release plan", () => {
           releasePlan.config
         );
       } catch (e) {
-        expect(e.message).toEqual(
+        expect((e as Error).message).toEqual(
           "Could not find matching package for release of: impossible-package"
         );
 
@@ -2064,41 +2095,54 @@ describe("apply release plan", () => {
 
       throw new Error("Expected test to exit before this point");
     });
-    it("a provided changelog function fails", async () => {
-      let releasePlan = new FakeReleasePlan();
+    it(
+      "a provided changelog function fails",
+      temporarilySilenceLogs(async () => {
+        let releasePlan = new FakeReleasePlan();
 
-      let tempDir = await f.copy("with-git");
+        let tempDir = await f.copy("with-git");
 
-      await spawn("git", ["init"], { cwd: tempDir });
+        await spawn("git", ["init"], { cwd: tempDir });
 
-      await git.add(".", tempDir);
-      await git.commit("first commit", tempDir);
+        await git.add(".", tempDir);
+        await git.commit("first commit", tempDir);
 
-      try {
-        await applyReleasePlan(
-          releasePlan.getReleasePlan(),
-          await getPackages(tempDir),
-          {
-            ...releasePlan.config,
-            changelog: [
-              path.resolve(__dirname, "test-utils/failing-functions"),
-              null
+        try {
+          await applyReleasePlan(
+            releasePlan.getReleasePlan(),
+            await getPackages(tempDir),
+            {
+              ...releasePlan.config,
+              changelog: [
+                path.resolve(__dirname, "test-utils/failing-functions"),
+                null
+              ]
+            }
+          );
+        } catch (e) {
+          expect((e as Error).message).toEqual("no chance");
+
+          let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+
+          expect(
+            gitCmd.stdout.toString().includes("nothing to commit")
+          ).toEqual(true);
+          expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
+            Array [
+              Array [
+                "The following error was encountered while generating changelog entries",
+              ],
+              Array [
+                "We have escaped applying the changesets, and no files should have been affected",
+              ],
             ]
-          }
-        );
-      } catch (e) {
-        expect(e.message).toEqual("no chance");
+          `);
+          return;
+        }
 
-        let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
-
-        expect(gitCmd.stdout.toString().includes("nothing to commit")).toEqual(
-          true
-        );
-        return;
-      }
-
-      throw new Error("Expected test to exit before this point");
-    });
+        throw new Error("Expected test to exit before this point");
+      })
+    );
   });
   describe("changesets", () => {
     it("should delete one changeset after it is applied", async () => {
@@ -2209,7 +2253,7 @@ describe("apply release plan", () => {
 
     const setupFunc = (tempDir: string) =>
       Promise.all(
-        releasePlan.getReleasePlan().changesets.map(async ({ id, summary }) => {
+        releasePlan.changesets.map(async ({ id, summary }) => {
           changesetMDPath = path.resolve(
             tempDir,
             ".changeset",
@@ -2235,11 +2279,14 @@ describe("apply release plan", () => {
       releasePlan.getReleasePlan(),
       {
         ...releasePlan.config,
+        commit: [
+          path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+          null
+        ],
         changelog: [
           path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
           null
-        ],
-        commit: true
+        ]
       },
       setupFunc
     );
@@ -2260,107 +2307,52 @@ describe("apply release plan", () => {
     ).toBe(`# pkg-a
 
 ## 1.1.0
+
 ### Minor Changes
 
 - ${lastCommit}: Hey, let's have fun with testing!
 `);
   });
-  describe("git", () => {
-    it("should commit updating files from packages", async () => {
+
+  describe("files", () => {
+    it("shouldn't commit updated files from packages", async () => {
       const releasePlan = new FakeReleasePlan();
 
       let { tempDir } = await testSetup(
         "with-git",
         releasePlan.getReleasePlan(),
-        { ...releasePlan.config, commit: true }
-      );
-
-      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
-
-      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
-
-      let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
-
-      lastCommit.stdout.toString();
-
-      expect(
-        lastCommit.stdout
-          .toString()
-          .includes("RELEASING: Releasing 1 package(s)")
-      ).toBe(true);
-    });
-    it("should not mention unreleased devDependents in release commit message", async () => {
-      let { tempDir } = await testSetup(
-        "simple-dev-dep",
         {
-          changesets: [
-            {
-              id: "quick-lions-devour",
-              summary: "Hey, let's have fun with testing!",
-              releases: [
-                { name: "pkg-a", type: "none" },
-                { name: "pkg-b", type: "minor" }
-              ]
-            }
-          ],
-          releases: [
-            {
-              name: "pkg-a",
-              type: "none",
-              oldVersion: "1.0.0",
-              newVersion: "1.0.0",
-              changesets: ["quick-lions-devour"]
-            },
-            {
-              name: "pkg-b",
-              type: "minor",
-              oldVersion: "1.0.0",
-              newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"]
-            }
-          ],
-          preState: undefined
-        },
-        {
-          changelog: false,
-          commit: true,
-          linked: [],
-          access: "restricted",
-          baseBranch: "main",
-          updateInternalDependencies: "patch",
-          ignore: [],
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            onlyUpdatePeerDependentsWhenOutOfRange: false,
-            updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
-          }
+          ...releasePlan.config,
+          commit: [
+            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            null
+          ]
         }
       );
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
-      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
-
-      let lastCommit = await spawn(
-        "git",
-        ["log", "-1", '--format=format:"%s%n%n%b"'],
-        { cwd: tempDir }
+      expect(gitCmd.stdout.toString()).toContain(
+        "Changes not staged for commit"
       );
 
-      const commitMessage = lastCommit.stdout.toString();
+      expect(gitCmd.stdout.toString()).toContain(
+        "modified:   packages/pkg-a/package.json"
+      );
 
-      expect(commitMessage).toMatch("RELEASING: Releasing 1 package(s)");
-      expect(commitMessage).toMatch("pkg-b@1.1.0");
-      expect(commitMessage).not.toMatch("pkg-a");
+      let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
+
+      expect(lastCommit.stdout.toString()).toContain("first commit");
     });
-    it("should commit removing applied changesets", async () => {
+
+    it("should remove applied changesets", async () => {
       const releasePlan = new FakeReleasePlan();
 
       let changesetPath: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
-          releasePlan.getReleasePlan().changesets.map(({ id, summary }) => {
+          releasePlan.changesets.map(({ id, summary }) => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
@@ -2371,7 +2363,13 @@ describe("apply release plan", () => {
       let { tempDir } = await testSetup(
         "with-git",
         releasePlan.getReleasePlan(),
-        { ...releasePlan.config, commit: true },
+        {
+          ...releasePlan.config,
+          commit: [
+            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            null
+          ]
+        },
         setupFunc
       );
 
@@ -2382,35 +2380,18 @@ describe("apply release plan", () => {
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
-      expect(gitCmd.stdout.toString().includes("nothing to commit")).toBe(true);
+      const changesetsDeleted = releasePlan.changesets.reduce(
+        (prev, { id }) => {
+          return (
+            prev &&
+            gitCmd.stdout.toString().includes(`deleted:    .changeset/${id}.md`)
+          );
+        },
+        true
+      );
+
+      expect(releasePlan.changesets.length).toBeGreaterThan(0);
+      expect(changesetsDeleted).toBe(true);
     });
   });
 });
-
-// MAKE SURE BOTH OF THESE ARE COVERED
-
-// it("should git add the expected files (without changelog) when commit: true", async () => {
-//   await writeChangesets([simpleChangeset2], cwd);
-//   await versionCommand(cwd, { ...modifiedDefaultConfig, commit: true });
-
-//   const pkgAConfigPath = path.join(cwd, "packages/pkg-a/package.json");
-//   const pkgBConfigPath = path.join(cwd, "packages/pkg-b/package.json");
-//   const changesetConfigPath = path.join(cwd, ".changeset");
-
-//   expect(git.add).toHaveBeenCalledWith(pkgAConfigPath, cwd);
-//   expect(git.add).toHaveBeenCalledWith(pkgBConfigPath, cwd);
-//   expect(git.add).toHaveBeenCalledWith(changesetConfigPath, cwd);
-// });
-// it("should git add the expected files (with changelog)", async () => {
-//   let changelogPath = path.resolve(__dirname, "../../changelogs");
-//   await writeChangesets([simpleChangeset2], cwd);
-//   await versionCommand(cwd, {
-//     ...modifiedDefaultConfig,
-//     changelog: [changelogPath, null],
-//     commit: true
-//   });
-//   const pkgAChangelogPath = path.join(cwd, "packages/pkg-a/CHANGELOG.md");
-//   const pkgBChangelogPath = path.join(cwd, "packages/pkg-b/CHANGELOG.md");
-//   expect(git.add).toHaveBeenCalledWith(pkgAChangelogPath, cwd);
-//   expect(git.add).toHaveBeenCalledWith(pkgBChangelogPath, cwd);
-// });

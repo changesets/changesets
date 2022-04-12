@@ -17,7 +17,6 @@ import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
-import createVersionCommit from "./createVersionCommit";
 import getChangelogEntry from "./get-changelog-entry";
 
 function stringDefined(s: string | undefined): s is string {
@@ -72,8 +71,6 @@ export default async function applyReleasePlan(
   );
 
   let { releases, changesets } = releasePlan;
-
-  const versionCommit = createVersionCommit(releasePlan, config.commit);
 
   let releasesWithPackage = releases.map(release => {
     let pkg = packagesByName.get(release.name);
@@ -172,23 +169,7 @@ export default async function applyReleasePlan(
     );
   }
 
-  if (config.commit) {
-    let newTouchedFilesArr = [...touchedFiles];
-    // Note, git gets angry if you try and have two git actions running at once
-    // So we need to be careful that these iterations are properly sequential
-    while (newTouchedFilesArr.length > 0) {
-      let file = newTouchedFilesArr.shift();
-      await git.add(path.relative(cwd, file!), cwd);
-    }
-
-    let commit = await git.commit(versionCommit, cwd);
-
-    if (!commit) {
-      console.error("Changesets ran into trouble committing your files");
-    }
-  }
-
-  // We return the touched files mostly for testing purposes
+  // We return the touched files to be committed in the cli
   return touchedFiles;
 }
 
@@ -275,7 +256,11 @@ async function updateChangelog(
     if (fs.existsSync(changelogPath)) {
       await prependFile(changelogPath, templateString, name, prettierConfig);
     } else {
-      await fs.writeFile(changelogPath, `# ${name}${templateString}`);
+      await writeFormattedMarkdownFile(
+        changelogPath,
+        `# ${name}${templateString}`,
+        prettierConfig
+      );
     }
   } catch (e) {
     console.warn(e);
@@ -304,21 +289,26 @@ async function prependFile(
   // if the file exists but doesn't have the header, we'll add it in
   if (!fileData) {
     const completelyNewChangelog = `# ${name}${data}`;
-    await fs.writeFile(
+    await writeFormattedMarkdownFile(
       filePath,
-      prettier.format(completelyNewChangelog, {
-        ...prettierConfig,
-        filepath: filePath,
-        parser: "markdown"
-      })
+      completelyNewChangelog,
+      prettierConfig
     );
     return;
   }
   const newChangelog = fileData.replace("\n", data);
 
+  await writeFormattedMarkdownFile(filePath, newChangelog, prettierConfig);
+}
+
+async function writeFormattedMarkdownFile(
+  filePath: string,
+  content: string,
+  prettierConfig?: prettier.Options | null
+) {
   await fs.writeFile(
     filePath,
-    prettier.format(newChangelog, {
+    prettier.format(content, {
       ...prettierConfig,
       filepath: filePath,
       parser: "markdown"

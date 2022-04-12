@@ -1,13 +1,14 @@
+import { add, commit } from "@changesets/git";
+import { silenceLogsInBlock } from "@changesets/test-utils";
+import { Changeset } from "@changesets/types";
+import writeChangeset from "@changesets/write";
+import fileUrl from "file-url";
 import fixturez from "fixturez";
 import fs from "fs-extra";
 import path from "path";
-import writeChangeset from "@changesets/write";
-import { Changeset } from "@changesets/types";
-import { runVersion, runPublish } from "./run";
-import { add, commit } from "@changesets/git";
 import spawn from "spawndamnit";
-import fileUrl from "file-url";
 import { getCurrentBranch } from "./gitUtils";
+import { runPublish, runVersion } from "./run";
 
 let f = fixturez(__dirname);
 
@@ -22,6 +23,7 @@ const writeChangesets = (changesets: Changeset[], cwd: string) => {
 };
 
 jest.setTimeout(10000);
+silenceLogsInBlock();
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -121,7 +123,10 @@ describe("version", () => {
       expect.stringContaining(`# pkg-a
 
 ## 1.1.0
-### Minor Changes`)
+
+### Minor Changes
+
+`)
     );
     expect(
       await fs.readFile(
@@ -132,7 +137,9 @@ describe("version", () => {
       expect.stringContaining(`# pkg-b
 
 ## 1.1.0
+
 ### Minor Changes
+
 `)
     );
     expect(changedPackages).toEqual([
@@ -221,7 +228,9 @@ describe("version", () => {
       expect.stringContaining(`# pkg-a
 
 ## 1.1.0
+
 ### Minor Changes
+
 `)
     );
     await expect(

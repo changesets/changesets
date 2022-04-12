@@ -56,11 +56,15 @@ export type PackageJSON = {
   };
 };
 
-export type Linked = ReadonlyArray<ReadonlyArray<string>>;
+export type PackageGroup = ReadonlyArray<string>;
+
+export type Fixed = ReadonlyArray<PackageGroup>;
+export type Linked = ReadonlyArray<PackageGroup>;
 
 export type Config = {
   changelog: false | readonly [string, any];
-  commit: boolean;
+  commit: false | readonly [string, any];
+  fixed: Fixed;
   linked: Linked;
   access: AccessType;
   baseBranch: string;
@@ -76,7 +80,8 @@ export type Config = {
 
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
-  commit?: boolean;
+  commit?: boolean | readonly [string, any] | string;
+  fixed?: Fixed;
   linked?: Linked;
   access?: AccessType;
   baseBranch?: string;
@@ -116,6 +121,21 @@ export type GetDependencyReleaseLine = (
 export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
   getDependencyReleaseLine: GetDependencyReleaseLine;
+};
+
+export type GetAddMessage = (
+  changeset: Changeset,
+  commitOptions: any
+) => Promise<string>;
+
+export type GetVersionMessage = (
+  releasePlan: ReleasePlan,
+  commitOptions: any
+) => Promise<string>;
+
+export type CommitFunctions = {
+  getAddMessage?: GetAddMessage;
+  getVersionMessage?: GetVersionMessage;
 };
 
 export type PreState = {

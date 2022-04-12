@@ -1,6 +1,6 @@
 # Command line options
 
-The command line for changesets is the main way of interracting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-changesets.md)
+The command line for changesets is the main way of interracting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-using-changesets.md)
 
 - init
 - add [--empty][--open]
@@ -141,7 +141,7 @@ pre [exit|enter {tag}]
 
 The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run changeset pre enter next(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with changeset version and changeset publish. For more information about the pre command, see the prereleases [the prereleases documentation](https://github.com/changesets/changesets/blob/master/docs/prereleases.md).
 
-> NOTE: pre-releases are a very complicated feature. Many of the safety rails that changesets helps you with will be taken off. We recommend that you have read both [problems publishing in monorepos](./problems-publishing-in-monorepos) as well as be clear on both exiting and entereing pre-releases before using it. You may also prefer using [snapshot releases](./snapshot-releases.md) for a slightly less involved process.
+> NOTE: pre-releases are a very complicated feature. Many of the safety rails that changesets helps you with will be taken off. We recommend that you have read both [problems publishing in monorepos](./problems-publishing-in-monorepos.md) as well as be clear on both exiting and entereing pre-releases before using it. You may also prefer using [snapshot releases](./snapshot-releases.md) for a slightly less involved process.
 
 ## tag
 

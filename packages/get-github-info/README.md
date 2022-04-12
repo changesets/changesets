@@ -57,7 +57,7 @@ You'll need to [get a GitHub personal access token](https://github.com/settings/
 GITHUB_TOKEN=token_here
 ```
 
-You can now bump your packages and changelogs with `changeset bump` and it'll have the GitHub info. 🎉
+You can now bump your packages and changelogs with `changeset version` and it'll have the GitHub info. 🎉
 
 ## API
 

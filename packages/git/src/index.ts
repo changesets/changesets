@@ -182,6 +182,22 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
 export async function deepenCloneBy({ by, cwd }: { by: number; cwd: string }) {
   await spawn("git", ["fetch", `--deepen=${by}`], { cwd });
 }
+async function getRepoRoot({ cwd }: { cwd: string }) {
+  const { stdout, code, stderr } = await spawn(
+    "git",
+    ["rev-parse", "--show-toplevel"],
+    { cwd }
+  );
+
+  if (code !== 0) {
+    throw new Error(stderr.toString());
+  }
+
+  return stdout
+    .toString()
+    .trim()
+    .replace(/\n|\r/g, "");
+}
 
 export async function getChangedFilesSince({
   cwd,
@@ -207,7 +223,9 @@ export async function getChangedFilesSince({
     .split("\n")
     .filter(a => a);
   if (!fullPath) return files;
-  return files.map(file => path.resolve(cwd, file));
+
+  const repoRoot = await getRepoRoot({ cwd });
+  return files.map(file => path.resolve(repoRoot, file));
 }
 
 // below are less generic functions that we use in combination with other things we are doing

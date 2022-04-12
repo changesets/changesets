@@ -22,7 +22,7 @@ export async function readPreState(cwd: string): Promise<PreState | undefined> {
       throw err;
     }
   } catch (err) {
-    if (err.code !== "ENOENT") {
+    if ((err as any).code !== "ENOENT") {
       throw err;
     }
   }

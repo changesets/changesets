@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import path from "path";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 
 import status from "..";
@@ -72,7 +72,7 @@ const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
 };
 
 describe("status", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
   let cwd: string;
 
   beforeEach(async () => {

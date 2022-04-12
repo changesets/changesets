@@ -1,12 +1,13 @@
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 import getDependencyGraph from "./get-dependency-graph";
 
 const consoleError = console.error;
 
-beforeEach(async () => {
+beforeEach(() => {
   console.error = jest.fn();
 });
 
-afterEach(async () => {
+afterEach(() => {
   console.error = consoleError;
 });
 
@@ -75,40 +76,43 @@ describe("getting the dependency graph", function() {
     expect((console.error as any).mock.calls).toMatchInlineSnapshot(`Array []`);
   });
 
-  it("should set valid to false if the link protocol is used in a non-dev dep", function() {
-    const { valid } = getDependencyGraph({
-      root: {
-        dir: ".",
-        packageJson: { name: "root", version: "1.0.0" }
-      },
-      packages: [
-        {
-          dir: "foo",
-          packageJson: {
-            name: "foo",
-            version: "1.0.0",
-            dependencies: {
-              bar: "link:../bar"
+  it(
+    "should set valid to false if the link protocol is used in a non-dev dep",
+    temporarilySilenceLogs(() => {
+      const { valid } = getDependencyGraph({
+        root: {
+          dir: ".",
+          packageJson: { name: "root", version: "1.0.0" }
+        },
+        packages: [
+          {
+            dir: "foo",
+            packageJson: {
+              name: "foo",
+              version: "1.0.0",
+              dependencies: {
+                bar: "link:../bar"
+              }
+            }
+          },
+          {
+            dir: "bar",
+            packageJson: {
+              name: "bar",
+              version: "1.0.0"
             }
           }
-        },
-        {
-          dir: "bar",
-          packageJson: {
-            name: "bar",
-            version: "1.0.0"
-          }
-        }
-      ],
-      tool: "pnpm"
-    });
-    expect(valid).toBeFalsy();
-    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
+        ],
+        tool: "pnpm"
+      });
+      expect(valid).toBeFalsy();
+      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           "Package [36m\\"foo\\"[39m must depend on the current version of [36m\\"bar\\"[39m: [32m\\"1.0.0\\"[39m vs [31m\\"link:../bar\\"[39m",
         ],
       ]
     `);
-  });
+    })
+  );
 });
