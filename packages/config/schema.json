@@ -50,8 +50,23 @@
       "default": []
     },
     "commit": {
-      "type": "boolean",
-      "description": "Determines whether Changesets should commit the results of the add and version command.",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": [
+            {
+              "type": "string",
+              "title": "Commit Generator Path"
+            },
+            { "title": "Commit Generator Options" }
+          ],
+          "minItems": 2
+        },
+        {
+          "type": "boolean"
+        },
+      ],
+      "description": "Determines whether Changesets should commit the results of the add and version command and how the commit messages should be generated for them.",
       "default": false
     },
     "access": {
