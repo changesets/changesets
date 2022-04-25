@@ -76,6 +76,13 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [SvelteKit](https://kit.svelte.dev/)
 - [Hydrogen](https://hydrogen.shopify.dev)
 - [react-pdf](https://github.com/diegomura/react-pdf)
+- [GraphQL Code Generator](https://github.com/dotansimha/graphql-code-generator)
+- [GraphQL Yoga](https://github.com/dotansimha/graphql-yoga)
+- [GraphQL ESLint](https://github.com/B2o5T/graphql-eslint)
+- [Envelop](https://github.com/n1ru4l/envelop)
+- [GraphQL Hive](https://github.com/kamilkisiela/graphql-hive)
+- [GraphQL-Mesh](https://github.com/Urigo/graphql-mesh)
+- [GraphiQL](https://github.com/graphql/graphiql)
 
 # Thanks/Inspiration
 
