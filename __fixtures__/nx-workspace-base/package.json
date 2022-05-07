@@ -1,0 +1,8 @@
+{
+  "name": "nx-workspace-base",
+  "version": "0.0.0",
+  "description": "NX Workspace with two apps, and two publishable (build configured) packages",
+  "devDependencies": {
+    "@nrwl/devkit": "14.1.4"
+  }
+}

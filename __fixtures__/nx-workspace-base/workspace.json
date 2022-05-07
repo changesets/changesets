@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "projects": {
+    "my-app": "apps/my-app",
+    "my-app-e2e": "apps/my-app-e2e",
+    "ui-pkg-a": "libs/ui-pkg-a",
+    "ui-pkg-b": "libs/ui-pkg-b"
+  }
+}
