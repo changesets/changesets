@@ -2,7 +2,7 @@ import { join } from "path";
 import semver from "semver";
 import chalk from "chalk";
 import { AccessType } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
+import { Package } from "@changesets/get-workspaces";
 import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
 import * as npmUtils from "./npm-utils";

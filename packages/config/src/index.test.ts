@@ -3,7 +3,7 @@ import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import { Config, WrittenConfig } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import { Packages } from "@changesets/get-workspaces";
 
 jest.mock("@changesets/logger");
 

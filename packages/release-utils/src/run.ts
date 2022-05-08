@@ -1,4 +1,4 @@
-import { getPackages, Package } from "@manypkg/get-packages";
+import { getWorkspaces, Package } from "@changesets/get-workspaces";
 import path from "path";
 import * as semver from "semver";
 import {
@@ -41,7 +41,7 @@ export async function runPublish({
   await gitUtils.pullBranch(branch, cwd);
   await gitUtils.push(branch, { includeTags: true, cwd });
 
-  let { packages, tool } = await getPackages(cwd);
+  let { packages, tool } = await getWorkspaces(cwd);
   let releasedPackages: Package[] = [];
 
   if (tool !== "root") {

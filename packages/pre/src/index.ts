@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 import path from "path";
 import { PreState } from "@changesets/types";
-import { getPackages } from "@manypkg/get-packages";
+import { getWorkspaces } from "@changesets/get-workspaces";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError
@@ -45,7 +45,7 @@ export async function exitPre(cwd: string) {
 }
 
 export async function enterPre(cwd: string, tag: string) {
-  let packages = await getPackages(cwd);
+  let packages = await getWorkspaces(cwd);
   let preStatePath = path.resolve(packages.root.dir, ".changeset", "pre.json");
   let preState: PreState | undefined = await readPreState(packages.root.dir);
   // can't reenter if pre mode still exists, but we should allow exited pre mode to be reentered

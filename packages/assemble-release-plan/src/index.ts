@@ -12,7 +12,7 @@ import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
 import { InternalError } from "@changesets/errors";
-import { Packages, Package } from "@manypkg/get-packages";
+import { Packages, Package } from "@changesets/get-workspaces";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
 

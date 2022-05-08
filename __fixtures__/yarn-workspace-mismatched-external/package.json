@@ -7,6 +7,6 @@
     "packages/*"
   ],
   "dependencies": {
-    "get-workspaces": "^0.2.0"
+    "@changesets/get-workspaces": "*"
   }
 }

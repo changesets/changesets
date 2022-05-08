@@ -13,7 +13,7 @@ import spawn from "spawndamnit";
 import { defaultConfig } from "@changesets/config";
 
 import applyReleasePlan from "./";
-import { getPackages } from "@manypkg/get-packages";
+import { getWorkspaces } from "@changesets/get-workspaces";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 const f = fixtures(__dirname);
@@ -107,7 +107,7 @@ async function testSetup(
   return {
     changedFiles: await applyReleasePlan(
       releasePlan,
-      await getPackages(tempDir),
+      await getWorkspaces(tempDir),
       config
     ),
     tempDir
@@ -2001,7 +2001,7 @@ describe("apply release plan", () => {
       try {
         await applyReleasePlan(
           releasePlan.getReleasePlan(),
-          await getPackages(tempDir),
+          await getWorkspaces(tempDir),
           releasePlan.config
         );
       } catch (e) {
@@ -2034,7 +2034,7 @@ describe("apply release plan", () => {
         try {
           await applyReleasePlan(
             releasePlan.getReleasePlan(),
-            await getPackages(tempDir),
+            await getWorkspaces(tempDir),
             {
               ...releasePlan.config,
               changelog: [

@@ -6,7 +6,7 @@ import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
 import { Config } from "@changesets/types";
-import { getPackages } from "@manypkg/get-packages";
+import { getWorkspaces } from "@changesets/get-workspaces";
 import writeChangeset from "@changesets/write";
 
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
@@ -23,7 +23,7 @@ export default async function add(
   { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
 ) {
-  const packages = await getPackages(cwd);
+  const packages = await getWorkspaces(cwd);
   const changesetBase = path.resolve(cwd, ".changeset");
 
   let newChangeset: UnwrapPromise<ReturnType<typeof createChangeset>>;

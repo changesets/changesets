@@ -1,6 +1,9 @@
-// to make ts not complain
-export {};
+import { getPackages, Package, Packages } from "@manypkg/get-packages";
 
-throw new Error(
-  "get-workspaces has been replaced by @manypkg/get-packages, please use that package instead."
-);
+const getWorkspaces = getPackages;
+
+export { getWorkspaces, Package, Packages };
+
+// throw new Error(
+//   "get-workspaces has been replaced by @manypkg/get-packages, please use that package instead."
+// );

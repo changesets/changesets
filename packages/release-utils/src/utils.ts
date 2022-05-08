@@ -1,4 +1,4 @@
-import { getPackages, Package } from "@manypkg/get-packages";
+import { getWorkspaces, Package } from "@changesets/get-workspaces";
 // @ts-ignore
 import mdastToString from "mdast-util-to-string";
 import os from "os";
@@ -15,7 +15,7 @@ export const BumpLevels = {
 } as const;
 
 export async function getVersionsByDirectory(cwd: string) {
-  let { packages } = await getPackages(cwd);
+  let { packages } = await getWorkspaces(cwd);
   return new Map(packages.map(x => [x.dir, x.packageJson.version]));
 }
 
@@ -23,7 +23,7 @@ export async function getChangedPackages(
   cwd: string,
   previousVersions: Map<string, string>
 ) {
-  let { packages } = await getPackages(cwd);
+  let { packages } = await getWorkspaces(cwd);
   let changedPackages = new Set<Package>();
 
   for (let pkg of packages) {

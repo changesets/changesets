@@ -1,7 +1,7 @@
 import { Config } from "@changesets/types";
 import fs from "fs-extra";
 import path from "path";
-import { getPackages } from "@manypkg/get-packages";
+import { getWorkspaces } from "@changesets/get-workspaces";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { error } from "@changesets/logger";
 import { read } from "@changesets/config";
@@ -37,7 +37,7 @@ export async function run(
     throw new ExitError(1);
   }
 
-  const packages = await getPackages(cwd);
+  const packages = await getWorkspaces(cwd);
 
   let config: Config;
   try {

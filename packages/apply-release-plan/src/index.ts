@@ -9,7 +9,7 @@ import {
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import resolveFrom from "resolve-from";
-import { Packages } from "@manypkg/get-packages";
+import { Packages } from "@changesets/get-workspaces";
 import detectIndent from "detect-indent";
 
 import fs from "fs-extra";

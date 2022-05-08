@@ -10,10 +10,10 @@ Usage
 import assembleReleasePlan from "@changesets/assemble-release-plan";
 import readChangesets from "@changesets/read";
 import { read } from "@changesets/config";
-import { getPackages } from "@manypkg/get-packages";
+import { getWorkspaces } from "@changesets/get-workspaces";
 import { readPreState } from "@changesets/pre";
 
-const packages = await getPackages(cwd);
+const packages = await getWorkspaces(cwd);
 const preState = await readPreState(cwd);
 const config = await read(cwd, packages);
 const changesets = await readChangesets(cwd, sinceRef);
@@ -25,7 +25,7 @@ Signature
 
 ```ts
 import { NewChangeset, Config, ReleasePlan } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import { Packages } from "@changesets/get-workspaces";
 
 assembleReleasePlan = (
   changesets: NewChangeset[],

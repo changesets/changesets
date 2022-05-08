@@ -1,7 +1,7 @@
 import spawn from "spawndamnit";
 import fs from "fs";
 import path from "path";
-import { getPackages, Package } from "@manypkg/get-packages";
+import { getWorkspaces, Package } from "@changesets/get-workspaces";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
 import { deprecate } from "util";
@@ -269,7 +269,7 @@ export async function getChangedPackagesSinceRef({
   ref: string;
 }) {
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
-  let packages = await getPackages(cwd);
+  let packages = await getWorkspaces(cwd);
 
   const fileToPackage: Record<string, Package> = {};
 

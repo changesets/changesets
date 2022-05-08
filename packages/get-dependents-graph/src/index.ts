@@ -1,4 +1,4 @@
-import { Packages, Package } from "@manypkg/get-packages";
+import { Packages, Package } from "@changesets/get-workspaces";
 import getDependencyGraph from "./get-dependency-graph";
 
 export function getDependentsGraph(

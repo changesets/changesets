@@ -5,7 +5,7 @@ import semver from "semver";
 import * as cli from "../../utils/cli-utilities";
 import { error, log } from "@changesets/logger";
 import { Release, PackageJSON } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
+import { Package } from "@changesets/get-workspaces";
 import { ExitError } from "@changesets/errors";
 
 const { green, yellow, red, bold, blue, cyan } = chalk;

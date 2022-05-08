@@ -1,9 +1,9 @@
 import * as git from "@changesets/git";
-import { getPackages } from "@manypkg/get-packages";
+import { getWorkspaces } from "@changesets/get-workspaces";
 import { log } from "@changesets/logger";
 
 export default async function run(cwd: string) {
-  const { packages, tool } = await getPackages(cwd);
+  const { packages, tool } = await getWorkspaces(cwd);
 
   const allExistingTags = await git.getAllTags(cwd);
 

@@ -2,7 +2,7 @@
 // package listed in the changesets
 
 import { NewChangeset } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
+import { Package } from "@changesets/get-workspaces";
 import { InternalRelease } from "./types";
 
 export default function flattenReleases(

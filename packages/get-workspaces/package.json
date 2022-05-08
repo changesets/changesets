@@ -1,5 +1,5 @@
 {
-  "name": "get-workspaces",
+  "name": "@changesets/get-workspaces",
   "version": "1.0.7",
   "description": "Get workspaces for yarn workspaces, bolt workspaces, or the root package for building repo-agnostic tools",
   "main": "dist/get-workspaces.cjs.js",
@@ -10,9 +10,11 @@
     "@manypkg/get-packages": "^1.1.3"
   },
   "devDependencies": {
-    "@nrwl/devkit":"*"
+    "@nrwl/devkit": "*",
+    "nx": "*"
   },
   "optionalDependencies": {
-    "@nrwl/devkit":"*"
+    "@nrwl/devkit": "*",
+    "nx": "*"
   }
 }

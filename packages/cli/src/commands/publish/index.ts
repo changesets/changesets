@@ -4,7 +4,7 @@ import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import { Config, PreState } from "@changesets/types";
-import { getPackages } from "@manypkg/get-packages";
+import { getWorkspaces } from "@changesets/get-workspaces";
 import chalk from "chalk";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
@@ -55,7 +55,7 @@ export default async function run(
     showNonLatestTagWarning(tag, preState);
   }
 
-  const { packages, tool } = await getPackages(cwd);
+  const { packages, tool } = await getWorkspaces(cwd);
 
   const response = await publishPackages({
     packages,

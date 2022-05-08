@@ -9,8 +9,8 @@
   "dependencies": {
     "@babel/runtime": "^7.10.4",
     "@changesets/errors": "^0.1.4",
+    "@changesets/get-workspaces": "^1.0.7",
     "@changesets/types": "^5.0.0",
-    "@manypkg/get-packages": "^1.1.3",
     "is-subdir": "^1.1.1",
     "spawndamnit": "^2.0.0"
   },

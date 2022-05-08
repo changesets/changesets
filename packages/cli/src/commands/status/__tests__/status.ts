@@ -10,7 +10,7 @@ import status from "..";
 
 import humanId from "human-id";
 import { NewChangeset, ReleasePlan } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
+import { Package } from "@changesets/get-workspaces";
 
 jest.mock("human-id");
 jest.mock("@changesets/git");
