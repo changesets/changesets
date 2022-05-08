@@ -7,10 +7,13 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/get-workspaces",
   "dependencies": {
-    "@manypkg/get-packages": "^1.1.3"
+    "@manypkg/get-packages": "^1.1.3",
+    "fs-extra": "^7.0.1"
   },
   "devDependencies": {
+    "@changesets/logger": "^0.0.5",
     "@nrwl/devkit": "*",
+    "fixturez": "^1.1.0",
     "nx": "*"
   },
   "optionalDependencies": {
