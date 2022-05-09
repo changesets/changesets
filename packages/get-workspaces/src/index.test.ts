@@ -6,7 +6,7 @@ import { getWorkspaces, Packages } from "./index";
 const f = fixtures(__dirname);
 
 // BAD CODE!!! -- Should not reach out of a monorepo package. This is only for a test.
-const FIXTURE_PROJECTS: string[][] = Object.entries(
+const FIXTURE_PROJECTS: [string, unknown][] = Object.entries(
   require("../../../__fixtures__/nx-workspace-base/workspace.json").projects
 ).filter(([name]) => !name.startsWith("my-app"));
 
