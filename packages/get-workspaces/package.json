@@ -11,10 +11,20 @@
     "fs-extra": "^7.0.1"
   },
   "devDependencies": {
-    "fixturez": "^1.1.0"
+    "@nrwl/devkit": "*",
+    "fixturez": "^1.1.0",
+    "nx": "*"
   },
-  "optionalDependencies": {
+  "peerDependencies": {
     "@nrwl/devkit": "*",
     "nx": "*"
+  },
+  "peerDependenciesMeta": {
+    "@nrwl/devkit": {
+      "optional": true
+    },
+    "nx":{
+      "optional": true
+    }
   }
 }
