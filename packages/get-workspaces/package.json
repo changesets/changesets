@@ -11,10 +11,7 @@
     "fs-extra": "^7.0.1"
   },
   "devDependencies": {
-    "@changesets/logger": "^0.0.5",
-    "@nrwl/devkit": "*",
-    "fixturez": "^1.1.0",
-    "nx": "*"
+    "fixturez": "^1.1.0"
   },
   "optionalDependencies": {
     "@nrwl/devkit": "*",

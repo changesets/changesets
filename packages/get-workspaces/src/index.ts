@@ -1,5 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
+import { Workspaces } from "@nrwl/devkit";
 import { getPackages, Package, Tool } from "@manypkg/get-packages";
 
 type WorkspaceTool = Tool | "nx";
@@ -9,6 +10,22 @@ export type Packages = {
   tool: WorkspaceTool;
   packages: Package[];
   root: Package;
+};
+
+const getValuesFromPackageFile = async (dir: string): Promise<Package> => {
+  const packageJsonPath = path.resolve(dir, "package.json");
+
+  const data = await fs.promises.readFile(packageJsonPath);
+  const { name, version, dependencies } = JSON.parse(data.toString());
+
+  return {
+    dir,
+    packageJson: {
+      dependencies,
+      name,
+      version
+    }
+  };
 };
 
 export const getWorkspaces = async (cwd: string): Promise<Packages> => {
@@ -24,14 +41,32 @@ export const getWorkspaces = async (cwd: string): Promise<Packages> => {
   const isNX =
     manyTool === "root" && fs.existsSync(path.resolve(cwd, "nx.json"));
 
-  if (isNX) {
-    // Do the NX devkit commands to get packages here and map over the
-    // output to create Package typed objects.
+  if (!isNX) {
+    return {
+      tool: manyTool,
+      packages: manyPackages,
+      root
+    };
+  }
+
+  // We are using native NX tools to read packages available instead of using
+  // workspace.json alone as there are multiple ways to configure NX workspaces
+  const { projects } = new Workspaces(cwd).readWorkspaceConfiguration();
+
+  const projectRoots = Object.values(projects).map(({ root }) => root);
+
+  let nxPackages = [];
+  for (let projectRoot of projectRoots) {
+    const packageDir = path.resolve(cwd, projectRoot);
+    try {
+      const data = await getValuesFromPackageFile(packageDir);
+      nxPackages.push(data);
+    } catch (e) {}
   }
 
   return {
-    tool: isNX ? "nx" : manyTool,
-    packages: manyPackages,
+    tool: "nx",
+    packages: nxPackages,
     root
   };
 };
