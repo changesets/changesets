@@ -3,6 +3,7 @@ import termSize from "term-size";
 import { error, prefix, success } from "@changesets/logger";
 import { prompt } from "enquirer";
 import { edit } from "external-editor";
+import { symbols } from "ansi-colors";
 
 // those types are not exported from `enquirer` so we extract them here
 // so we can make type assertions using them because `enquirer` types do no support `prefix` right now
@@ -60,7 +61,14 @@ async function askCheckboxPlus(
     choices,
     format,
     limit,
-    onCancel: cancelFlow
+    onCancel: cancelFlow,
+    symbols: {
+      indicator: symbols.radioOff,
+      checked: symbols.radioOn
+    },
+    indicator(state: any, choice: any) {
+      return choice.enabled ? state.symbols.checked : state.symbols.indicator;
+    }
   } as ArrayPromptOptions)
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
