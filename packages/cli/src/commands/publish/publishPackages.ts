@@ -80,19 +80,23 @@ export default async function publishPackages({
   otp,
   preState,
   tag,
+  trackPrivatePackages
 }: {
   packages: Package[];
   access: AccessType;
   otp?: string;
   preState: PreState | undefined;
   tag?: string;
+  trackPrivatePackages: boolean;
 }): Promise<{
   publishedPackages: PublishedResult[];
   untaggedPrivatePackages: PublishedResult[];
 }> {
   const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
   const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
-  const privatePackages = packages.filter(pkg => pkg.packageJson.private);
+  const privatePackages = packages.filter(
+    pkg => pkg.packageJson.private && pkg.packageJson.version
+  );
   const twoFactorState: TwoFactorState = getTwoFactorState({
     otp,
     publicPackages,
@@ -114,9 +118,9 @@ export default async function publishPackages({
     })
   );
 
-  const untaggedPrivatePackageReleases = getUntaggedPrivatePackages(
-    privatePackages
-  );
+  const untaggedPrivatePackageReleases = trackPrivatePackages
+    ? getUntaggedPrivatePackages(privatePackages)
+    : Promise.resolve([]);
 
   const result: {
     publishedPackages: PublishedResult[];

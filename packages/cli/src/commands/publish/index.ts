@@ -64,6 +64,7 @@ export default async function run(
     otp,
     preState,
     tag: releaseTag,
+    trackPrivatePackages: config.enablePrivatePackageTracking
   });
 
   const successfulNpmPublishes = response.publishedPackages.filter(

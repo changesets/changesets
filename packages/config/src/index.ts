@@ -462,7 +462,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           ?.updateInternalDependents ?? "out-of-range",
     },
+
+    // TODO default this to being enabled in the next major version
+    enablePrivatePackageTracking: json.enablePrivatePackageTracking === true
   };
+
   return config;
 };
 
