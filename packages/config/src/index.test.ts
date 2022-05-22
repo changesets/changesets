@@ -65,6 +65,7 @@ let defaults = {
   baseBranch: "master",
   updateInternalDependencies: "patch",
   ignore: [],
+  enablePrivatePackageTracking: true,
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
     updateInternalDependents: "out-of-range",
