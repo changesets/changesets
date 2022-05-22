@@ -48,7 +48,7 @@ export default async function add(
       .filter((pkg) => isListablePackage(config, pkg.packageJson))
       .map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, packages);
+    newChangeset = await createChangeset(changedPackagesName, packages, config.enablePrivateTracking);
     printConfirmationMessage(newChangeset, packages.length > 1);
 
     if (!newChangeset.confirmed) {

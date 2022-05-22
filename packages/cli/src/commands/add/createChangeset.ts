@@ -36,7 +36,8 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
 
 async function getPackagesToRelease(
   changedPackages: Array<string>,
-  allPackages: Array<Package>
+  allPackages: Array<Package>,
+  trackPrivatePackages: boolean
 ) {
   function askInitialReleaseQuestion(defaultChoiceList: Array<any>) {
     return cli.askCheckboxPlus(
@@ -59,6 +60,20 @@ async function getPackagesToRelease(
       }
     );
   }
+
+  const pkgJsonsByName = getPkgJsonByName(allPackages);
+
+  // filter out packages which changesets is not tracking
+  allPackages = allPackages.filter(
+    pkg => !isValidChangesetPackage(pkg.packageJson, trackPrivatePackages)
+  );
+  changedPackages = changedPackages.filter(
+    pkgName =>
+      !isValidChangesetPackage(
+        pkgJsonsByName.get(pkgName)!,
+        trackPrivatePackages
+      )
+  );
 
   if (allPackages.length > 1) {
     const unchangedPackagesNames = allPackages
@@ -94,6 +109,25 @@ async function getPackagesToRelease(
   return [allPackages[0].packageJson.name];
 }
 
+function getPkgJsonByName(packages: Package[]) {
+  return new Map(
+    packages.map(({ packageJson }) => [packageJson.name, packageJson])
+  );
+}
+
+function isValidChangesetPackage(
+  packageJson: PackageJSON,
+  trackPrivatePackages: boolean
+) {
+  const hasVersionField = !!packageJson.version;
+
+  if (trackPrivatePackages) {
+    return hasVersionField;
+  }
+
+  return !packageJson.private && hasVersionField;
+}
+
 function formatPkgNameAndVersion(pkgName: string, version: string) {
   return `${bold(pkgName)}@${bold(version)}`;
 }
@@ -106,14 +140,16 @@ function getPkgJsonByName(packages: Package[]) {
 
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Package[]
+  allPackages: Package[],
+  trackPrivatePackages: boolean
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
   if (allPackages.length > 1) {
     const packagesToRelease = await getPackagesToRelease(
       changedPackages,
-      allPackages
+      allPackages,
+      trackPrivatePackages
     );
 
     let pkgJsonsByName = getPkgJsonByName(allPackages);

@@ -41,6 +41,7 @@ describe("publishPackages", () => {
         packages: (await getPackages(cwd)).packages,
         access: "public",
         preState: undefined,
+        trackPrivatePackages: true
       });
       expect(npmUtils.getTokenIsRequired).not.toHaveBeenCalled();
     });
