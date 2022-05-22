@@ -64,8 +64,8 @@ async function getPackagesToRelease(
   const pkgJsonsByName = getPkgJsonByName(allPackages);
 
   // filter out packages which changesets is not tracking
-  allPackages = allPackages.filter(
-    pkg => !isValidChangesetPackage(pkg.packageJson, trackPrivatePackages)
+  allPackages = allPackages.filter(pkg =>
+    isValidChangesetPackage(pkg.packageJson, trackPrivatePackages)
   );
   changedPackages = changedPackages.filter(
     pkgName =>
