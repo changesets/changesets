@@ -97,14 +97,21 @@ export default async function publishPackages({
   const privatePackages = packages.filter(
     pkg => pkg.packageJson.private && pkg.packageJson.version
   );
-  const twoFactorState: TwoFactorState = getTwoFactorState({
-    otp,
-    publicPackages,
-  });
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
     preState
   );
+
+  const twoFactorState: TwoFactorState =
+    unpublishedPackagesInfo.length > 0
+      ? getTwoFactorState({
+          otp,
+          publicPackages
+        })
+      : {
+          token: null,
+          isRequired: Promise.resolve(false)
+        };
 
   const npmPackagePublish = Promise.all(
     unpublishedPackagesInfo.map((pkgInfo) => {
