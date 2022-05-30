@@ -58,7 +58,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
                     mergeCommit {
                       commitUrl
                       abbreviatedOid
-                    }            
+                    }
                   }`
               )
               .join("\n")}
@@ -99,6 +99,14 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     },
     body: JSON.stringify({ query: makeQuery(repos) })
   }).then((x: any) => x.json());
+
+  if (data.errors) {
+    throw new Error(
+      `An error occurred when fetching data from GitHub\n${JSON.stringify(
+        data.errors
+      )}`
+    );
+  }
 
   // this is mainly for the case where there's an authentication problem
   if (!data.data) {
