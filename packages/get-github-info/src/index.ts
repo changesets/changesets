@@ -103,7 +103,9 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   if (data.errors) {
     throw new Error(
       `An error occurred when fetching data from GitHub\n${JSON.stringify(
-        data.errors
+        data.errors,
+        null,
+        2
       )}`
     );
   }
