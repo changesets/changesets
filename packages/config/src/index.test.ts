@@ -45,6 +45,8 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
+    snapshotTimestampSeparator: "-",
+    snapshotTimestampPosition: "end",
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
       updateInternalDependents: "out-of-range",
@@ -62,6 +64,8 @@ let defaults = {
   baseBranch: "master",
   updateInternalDependencies: "patch",
   ignore: [],
+  snapshotTimestampSeparator: "-",
+  snapshotTimestampPosition: "end",
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
     updateInternalDependents: "out-of-range",

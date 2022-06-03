@@ -23,7 +23,9 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  ignore: [] as ReadonlyArray<string>
+  ignore: [] as ReadonlyArray<string>,
+  snapshotTimestampSeparator: "-",
+  snapshotTimestampPosition: "end"
 } as const;
 
 function flatten<T>(arr: Array<T[]>): T[] {
@@ -315,6 +317,32 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
+  if (
+    json.snapshotTimestampSeparator !== undefined &&
+    !["-", "."].includes(json.snapshotTimestampSeparator)
+  ) {
+    messages.push(
+      `The \`snapshotTimestampSeparator\` option is set as ${JSON.stringify(
+        json.snapshotTimestampSeparator,
+        null,
+        2
+      )} but can only be '-' or '.'`
+    );
+  }
+
+  if (
+    json.snapshotTimestampPosition !== undefined &&
+    !["start", "end"].includes(json.snapshotTimestampPosition)
+  ) {
+    messages.push(
+      `The \`snapshotTimestampPosition\` option is set as ${JSON.stringify(
+        json.snapshotTimestampPosition,
+        null,
+        2
+      )} but can only be 'start' or 'end'`
+    );
+  }
+
   if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
     const {
       onlyUpdatePeerDependentsWhenOutOfRange,
@@ -397,6 +425,15 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,
+
+    snapshotTimestampSeparator:
+      json.snapshotTimestampSeparator === undefined
+        ? defaultWrittenConfig.snapshotTimestampSeparator
+        : json.snapshotTimestampSeparator,
+    snapshotTimestampPosition:
+      json.snapshotTimestampPosition === undefined
+        ? defaultWrittenConfig.snapshotTimestampPosition
+        : json.snapshotTimestampPosition,
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange:

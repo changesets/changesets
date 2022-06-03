@@ -48,6 +48,8 @@ class FakeReleasePlan {
       access: "restricted",
       baseBranch: "main",
       updateInternalDependencies: "patch",
+      snapshotTimestampSeparator: "-",
+      snapshotTimestampPosition: "end",
       ignore: [],
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -85,6 +87,8 @@ async function testSetup(
       access: "restricted",
       baseBranch: "main",
       updateInternalDependencies: "patch",
+      snapshotTimestampSeparator: "-",
+      snapshotTimestampPosition: "end",
       ignore: [],
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -485,6 +489,8 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "main",
           updateInternalDependencies: "patch",
+          snapshotTimestampSeparator: "-",
+          snapshotTimestampPosition: "end",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -548,6 +554,8 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "main",
           updateInternalDependencies: "patch",
+          snapshotTimestampSeparator: "-",
+          snapshotTimestampPosition: "end",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -697,6 +705,8 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "main",
               updateInternalDependencies,
+              snapshotTimestampSeparator: "-",
+              snapshotTimestampPosition: "end",
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -782,6 +792,8 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "main",
               updateInternalDependencies,
+              snapshotTimestampSeparator: "-",
+              snapshotTimestampPosition: "end",
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -859,6 +871,8 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "main",
               updateInternalDependencies,
+              snapshotTimestampSeparator: "-",
+              snapshotTimestampPosition: "end",
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -936,6 +950,8 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "main",
               updateInternalDependencies,
+              snapshotTimestampSeparator: "-",
+              snapshotTimestampPosition: "end",
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1016,6 +1032,8 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "main",
               updateInternalDependencies,
+              snapshotTimestampSeparator: "-",
+              snapshotTimestampPosition: "end",
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1101,6 +1119,8 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "main",
               updateInternalDependencies,
+              snapshotTimestampSeparator: "-",
+              snapshotTimestampPosition: "end",
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1178,6 +1198,8 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "main",
               updateInternalDependencies,
+              snapshotTimestampSeparator: "-",
+              snapshotTimestampPosition: "end",
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1255,6 +1277,8 @@ describe("apply release plan", () => {
               access: "restricted",
               baseBranch: "main",
               updateInternalDependencies,
+              snapshotTimestampSeparator: "-",
+              snapshotTimestampPosition: "end",
               ignore: [],
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1336,6 +1360,8 @@ describe("apply release plan", () => {
             access: "restricted",
             baseBranch: "main",
             updateInternalDependencies: "patch",
+            snapshotTimestampSeparator: "-",
+            snapshotTimestampPosition: "end",
             ignore: [],
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               onlyUpdatePeerDependentsWhenOutOfRange: true,
@@ -1498,6 +1524,8 @@ describe("apply release plan", () => {
             null
           ],
           updateInternalDependencies: "patch",
+          snapshotTimestampSeparator: "-",
+          snapshotTimestampPosition: "end",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1603,6 +1631,8 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "main",
           updateInternalDependencies: "patch",
+          snapshotTimestampSeparator: "-",
+          snapshotTimestampPosition: "end",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1688,6 +1718,8 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "main",
           updateInternalDependencies: "minor",
+          snapshotTimestampSeparator: "-",
+          snapshotTimestampPosition: "end",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1777,6 +1809,8 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "main",
           updateInternalDependencies: "minor",
+          snapshotTimestampSeparator: "-",
+          snapshotTimestampPosition: "end",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1880,6 +1914,8 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "main",
           updateInternalDependencies: "minor",
+          snapshotTimestampSeparator: "-",
+          snapshotTimestampPosition: "end",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,

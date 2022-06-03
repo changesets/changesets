@@ -31,31 +31,109 @@ describe("assemble-release-plan", () => {
     });
   });
 
-  it("should assemble release plan for basic setup with snapshot", () => {
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      defaultConfig,
-      undefined,
-      true
-    );
+  test.each([
+    {
+      snapshot: true,
+      snapshotTimestampSeparator: undefined,
+      snapshotTimestampPosition: undefined,
+      resultRegexp: /0\.0\.0-\d{14}/
+    },
+    {
+      snapshot: "foo",
+      snapshotTimestampSeparator: undefined,
+      snapshotTimestampPosition: undefined,
+      resultRegexp: /0\.0\.0-foo-\d{14}/
+    },
+    {
+      snapshot: "foo",
+      snapshotTimestampSeparator: "." as const,
+      snapshotTimestampPosition: undefined,
+      resultRegexp: /0\.0\.0-foo\.\d{14}/
+    },
+    {
+      snapshot: "foo",
+      snapshotTimestampSeparator: "-" as const,
+      snapshotTimestampPosition: undefined,
+      resultRegexp: /0\.0\.0-foo-\d{14}/
+    },
+    {
+      snapshot: "foo",
+      snapshotTimestampSeparator: undefined,
+      snapshotTimestampPosition: "start" as const,
+      resultRegexp: /0\.0\.0-\d{14}-foo/
+    },
+    {
+      snapshot: "foo",
+      snapshotTimestampSeparator: undefined,
+      snapshotTimestampPosition: "end" as const,
+      resultRegexp: /0\.0\.0-foo-\d{14}/
+    },
+    {
+      snapshot: "foo",
+      snapshotTimestampSeparator: "-" as const,
+      snapshotTimestampPosition: "start" as const,
+      resultRegexp: /0\.0\.0-\d{14}-foo/
+    },
+    {
+      snapshot: "foo",
+      snapshotTimestampSeparator: "-" as const,
+      snapshotTimestampPosition: "end" as const,
+      resultRegexp: /0\.0\.0-foo-\d{14}/
+    },
+    {
+      snapshot: "foo",
+      snapshotTimestampSeparator: "." as const,
+      snapshotTimestampPosition: "start" as const,
+      resultRegexp: /0\.0\.0-\d{14}\.foo/
+    },
+    {
+      snapshot: "foo",
+      snapshotTimestampSeparator: "." as const,
+      snapshotTimestampPosition: "end" as const,
+      resultRegexp: /0\.0\.0-foo\.\d{14}/
+    },
+    {
+      snapshot: true,
+      snapshotTimestampSeparator: undefined,
+      snapshotTimestampPosition: "start" as const,
+      resultRegexp: /0\.0\.0-\d{14}/
+    },
+    {
+      snapshot: true,
+      snapshotTimestampSeparator: undefined,
+      snapshotTimestampPosition: "end" as const,
+      resultRegexp: /0\.0\.0-\d{14}/
+    }
+  ])(
+    "should assemble release plan for basic setup with %j",
+    ({
+      snapshot,
+      snapshotTimestampSeparator,
+      snapshotTimestampPosition,
+      resultRegexp
+    }) => {
+      let config = { ...defaultConfig };
 
-    expect(releases.length).toBe(1);
-    expect(/0\.0\.0-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
-  });
+      if (snapshotTimestampSeparator) {
+        config.snapshotTimestampSeparator = snapshotTimestampSeparator;
+      }
 
-  it("should assemble release plan for basic setup with snapshot and tag", () => {
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      defaultConfig,
-      undefined,
-      "foo"
-    );
+      if (snapshotTimestampPosition) {
+        config.snapshotTimestampPosition = snapshotTimestampPosition;
+      }
 
-    expect(releases.length).toBe(1);
-    expect(/0\.0\.0-foo-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
-  });
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        config,
+        undefined,
+        snapshot
+      );
+
+      expect(releases.length).toBe(1);
+      expect(resultRegexp.test(releases[0].newVersion)).toBeTruthy();
+    }
+  );
 
   it("should assemble release plan with multiple packages", () => {
     setup.addChangeset({

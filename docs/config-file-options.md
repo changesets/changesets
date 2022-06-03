@@ -156,3 +156,11 @@ You would specify our github changelog generator with:
 ```
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
+
+## `snapshotTimestampSeparator` (`'-'` or `'.'`)
+
+This option sets which character is used for separating timestamp part from the rest of the preid when doing [snapshot releases](./snapshot-releases.md), i.e. `0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS` `vs 0.0.0-bulbasaur.THE_TIME_YOU_DID_THIS`. The default is `-`.
+
+## `snapshotTimestampPosition` (`start` or `end`)
+
+This option sets whether timestamp part comes at the start or at the end of the preid when doing [snapshot releases](./snapshot-releases.md), i.e. `0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS` `vs 0.0.0-THE_TIME_YOU_DID_THIS-bulbasaur`. The default is `end`.

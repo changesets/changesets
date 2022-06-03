@@ -27,20 +27,36 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
-function getSnapshotSuffix(snapshot?: string | boolean): string | undefined {
+function getSnapshotSuffix(
+  snapshot: string | boolean | undefined,
+  timestampSeparator: "-" | ".",
+  timestampPosition: "start" | "end"
+): string | undefined {
   if (snapshot === undefined) {
     return;
   }
 
-  let dateAndTime = new Date()
+  const parts: string[] = [];
+  const timestamp = new Date()
     .toISOString()
     .replace(/\.\d{3}Z$/, "")
     .replace(/[^\d]/g, "");
-  let tag = "";
 
-  if (typeof snapshot === "string") tag = `-${snapshot}`;
+  if (timestampPosition === "start") {
+    parts.push(timestamp);
 
-  return `${tag}-${dateAndTime}`;
+    if (typeof snapshot === "string") {
+      parts.push(snapshot);
+    }
+  } else {
+    if (typeof snapshot === "string") {
+      parts.push(snapshot);
+    }
+
+    parts.push(timestamp);
+  }
+
+  return `-${parts.join(timestampSeparator)}`;
 }
 
 function getNewVersion(
@@ -95,7 +111,11 @@ function assembleReleasePlan(
   const preInfo = getPreInfo(changesets, packagesByName, config, preState);
 
   // Caching the snapshot version here and use this if it is snapshot release
-  const snapshotSuffix = getSnapshotSuffix(snapshot);
+  const snapshotSuffix = getSnapshotSuffix(
+    snapshot,
+    config.snapshotTimestampSeparator,
+    config.snapshotTimestampPosition
+  );
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their

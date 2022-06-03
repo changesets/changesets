@@ -73,6 +73,8 @@ export type Config = {
   ignore: ReadonlyArray<string>;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  snapshotTimestampSeparator: "-" | ".";
+  snapshotTimestampPosition: "start" | "end";
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<
     ExperimentalOptions
   >;
@@ -89,6 +91,8 @@ export type WrittenConfig = {
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  snapshotTimestampSeparator?: "-" | ".";
+  snapshotTimestampPosition?: "start" | "end";
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?: ExperimentalOptions;
 };
 
