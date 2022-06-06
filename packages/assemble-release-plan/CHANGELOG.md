@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 5.1.3
+
+### Patch Changes
+
+- [#767](https://github.com/changesets/changesets/pull/767) [`d6bfcc5`](https://github.com/changesets/changesets/commit/d6bfcc5052dcba18c521a20d62e2e67a81819112) Thanks [@Andarist](https://github.com/Andarist)! - Improve the error message when a package referenced in a changeset can't be found. The message will now also include the changeset's ID.
+
 ## 5.1.2
 
 ### Patch Changes
