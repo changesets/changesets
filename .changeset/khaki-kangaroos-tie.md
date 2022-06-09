@@ -2,4 +2,4 @@
 "@changesets/git": minor
 ---
 
-Add tagExists git helper
+Add `tagExists` git helper
