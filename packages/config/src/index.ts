@@ -463,7 +463,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           ?.updateInternalDependents ?? "out-of-range",
     },
 
-    // TODO default this to being enabled in the next major version
+    // TODO consider enabling this by default in the next major version
     enablePrivatePackageTracking: json.enablePrivatePackageTracking === true
   };
 
