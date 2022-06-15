@@ -4,7 +4,13 @@ import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
 import { Packages } from "@manypkg/get-packages";
-import { Config, WrittenConfig, Linked } from "@changesets/types";
+import {
+  Config,
+  WrittenConfig,
+  Fixed,
+  Linked,
+  PackageGroup
+} from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 
@@ -12,6 +18,7 @@ export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
   changelog: "@changesets/cli/changelog",
   commit: false,
+  fixed: [] as Fixed,
   linked: [] as Linked,
   access: "restricted",
   baseBranch: "master",
@@ -19,7 +26,11 @@ export let defaultWrittenConfig = {
   ignore: [] as ReadonlyArray<string>
 } as const;
 
-function getNormalisedChangelogOption(
+function flatten<T>(arr: Array<T[]>): T[] {
+  return ([] as T[]).concat(...arr);
+}
+
+function getNormalizedChangelogOption(
   thing: false | readonly [string, any] | string
 ): Config["changelog"] {
   if (thing === false) {
@@ -31,27 +42,44 @@ function getNormalisedChangelogOption(
   return thing;
 }
 
-function normalizePackageNames(
+function getNormalizedCommitOption(
+  thing: boolean | readonly [string, any] | string
+): Config["commit"] {
+  if (thing === false) {
+    return false;
+  }
+  if (thing === true) {
+    return ["@changesets/cli/commit", { skipCI: "version" }];
+  }
+  if (typeof thing === "string") {
+    return [thing, null];
+  }
+  return thing;
+}
+
+function getUnmatchedPatterns(
   listOfPackageNamesOrGlob: readonly string[],
   pkgNames: readonly string[]
-): [string[], string[]] {
-  const matchingPackages = micromatch(pkgNames, listOfPackageNamesOrGlob);
-
-  // Go through the list of given package globs (again) in order to find out
-  // which packages didn't match so that we can show a validation message.
-  const nonExistingPackages = listOfPackageNamesOrGlob.filter(
+): string[] {
+  return listOfPackageNamesOrGlob.filter(
     pkgNameOrGlob =>
       !pkgNames.some(pkgName => micromatch.isMatch(pkgName, pkgNameOrGlob))
   );
-
-  // Since the validation happens in subsequent steps, we need to return a tuple
-  // with the list of non-existing packages.
-  // TODO: refactor the validation logic to exit early when something is not valid.
-  return [matchingPackages, nonExistingPackages];
 }
 
-// TODO: replace usage with Array.isArray when TS 4.1 gets released
-// source: https://github.com/microsoft/TypeScript/pull/39258/files#diff-a6b488d9bd802977827b535a3011c1f3R1379
+const havePackageGroupsCorrectShape = (
+  pkgGroups: ReadonlyArray<PackageGroup>
+) => {
+  return (
+    isArray(pkgGroups) &&
+    pkgGroups.every(
+      arr => isArray(arr) && arr.every(pkgName => typeof pkgName === "string")
+    )
+  );
+};
+
+// TODO: it might be possible to remove this if improvements to `Array.isArray` ever land
+// related thread: github.com/microsoft/TypeScript/issues/36554
 function isArray<T>(
   arg: T | {}
 ): arg is T extends readonly any[]
@@ -113,13 +141,22 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
-  if (json.commit !== undefined && typeof json.commit !== "boolean") {
+  if (
+    json.commit !== undefined &&
+    typeof json.commit !== "boolean" &&
+    typeof json.commit !== "string" &&
+    !(
+      isArray(json.commit) &&
+      json.commit.length === 2 &&
+      typeof json.commit[0] === "string"
+    )
+  ) {
     messages.push(
       `The \`commit\` option is set as ${JSON.stringify(
         json.commit,
         null,
         2
-      )} when the only valid values are undefined or a boolean`
+      )} when the only valid values are undefined or a boolean or a module path (e.g. "@changesets/cli/commit" or "./some-module") or a tuple with a module path and config for the commit message generator (e.g. ["@changesets/cli/commit", { "skipCI": "version" }])`
     );
   }
   if (json.baseBranch !== undefined && typeof json.baseBranch !== "string") {
@@ -131,17 +168,53 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but the \`baseBranch\` option can only be set as a string`
     );
   }
+
+  let fixed: string[][] = [];
+  if (json.fixed !== undefined) {
+    if (!havePackageGroupsCorrectShape(json.fixed)) {
+      messages.push(
+        `The \`fixed\` option is set as ${JSON.stringify(
+          json.fixed,
+          null,
+          2
+        )} when the only valid values are undefined or an array of arrays of package names`
+      );
+    } else {
+      let foundPkgNames = new Set<string>();
+      let duplicatedPkgNames = new Set<string>();
+
+      for (let fixedGroup of json.fixed) {
+        messages.push(
+          ...getUnmatchedPatterns(fixedGroup, pkgNames).map(
+            pkgOrGlob =>
+              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+          )
+        );
+
+        let expandedFixedGroup = micromatch(pkgNames, fixedGroup);
+        fixed.push(expandedFixedGroup);
+
+        for (let fixedPkgName of expandedFixedGroup) {
+          if (foundPkgNames.has(fixedPkgName)) {
+            duplicatedPkgNames.add(fixedPkgName);
+          }
+          foundPkgNames.add(fixedPkgName);
+        }
+      }
+
+      if (duplicatedPkgNames.size) {
+        duplicatedPkgNames.forEach(pkgName => {
+          messages.push(
+            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
+          );
+        });
+      }
+    }
+  }
+
+  let linked: string[][] = [];
   if (json.linked !== undefined) {
-    if (
-      !(
-        isArray(json.linked) &&
-        json.linked.every(
-          arr =>
-            Array.isArray(arr) &&
-            arr.every(pkgName => typeof pkgName === "string")
-        )
-      )
-    ) {
+    if (!havePackageGroupsCorrectShape(json.linked)) {
       messages.push(
         `The \`linked\` option is set as ${JSON.stringify(
           json.linked,
@@ -152,26 +225,26 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     } else {
       let foundPkgNames = new Set<string>();
       let duplicatedPkgNames = new Set<string>();
+
       for (let linkedGroup of json.linked) {
-        let [
-          normalizedLinkedGroup,
-          nonExistingPackages
-        ] = normalizePackageNames(linkedGroup, pkgNames);
-        for (let linkedPkgName of normalizedLinkedGroup) {
+        messages.push(
+          ...getUnmatchedPatterns(linkedGroup, pkgNames).map(
+            pkgOrGlob =>
+              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+          )
+        );
+
+        let expandedLinkedGroup = micromatch(pkgNames, linkedGroup);
+        linked.push(expandedLinkedGroup);
+
+        for (let linkedPkgName of expandedLinkedGroup) {
           if (foundPkgNames.has(linkedPkgName)) {
             duplicatedPkgNames.add(linkedPkgName);
           }
           foundPkgNames.add(linkedPkgName);
         }
-        // Show validation message for each non-existing package
-        if (nonExistingPackages.length > 0) {
-          nonExistingPackages.forEach(nonExistingPkgName => {
-            messages.push(
-              `The package or glob expression "${nonExistingPkgName}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
-            );
-          });
-        }
       }
+
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach(pkgName => {
           messages.push(
@@ -181,6 +254,18 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       }
     }
   }
+
+  const allFixedPackages = new Set(flatten(fixed));
+  const allLinkedPackages = new Set(flatten(linked));
+
+  allFixedPackages.forEach(pkgName => {
+    if (allLinkedPackages.has(pkgName)) {
+      messages.push(
+        `The package "${pkgName}" can be found in both fixed and linked groups. A package can only be either fixed or linked.`
+      );
+    }
+  });
+
   if (
     json.updateInternalDependencies !== undefined &&
     !["patch", "minor"].includes(json.updateInternalDependencies)
@@ -208,17 +293,12 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or an array of package names`
       );
     } else {
-      let [, nonExistingPackages] = normalizePackageNames(
-        json.ignore,
-        pkgNames
+      messages.push(
+        ...getUnmatchedPatterns(json.ignore, pkgNames).map(
+          pkgOrGlob =>
+            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+        )
       );
-      if (nonExistingPackages.length > 0) {
-        nonExistingPackages.forEach(nonExistingPkgName => {
-          messages.push(
-            `The package or glob expression "${nonExistingPkgName}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
-          );
-        });
-      }
 
       // Validate that all dependents of ignored packages are listed in the ignore list
       const dependentsGraph = getDependentsGraph(packages);
@@ -286,7 +366,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   let config: Config = {
-    changelog: getNormalisedChangelogOption(
+    changelog: getNormalizedChangelogOption(
       json.changelog === undefined
         ? defaultWrittenConfig.changelog
         : json.changelog
@@ -295,14 +375,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       normalizedAccess === undefined
         ? defaultWrittenConfig.access
         : normalizedAccess,
-    commit:
-      json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
-    linked:
-      json.linked === undefined
-        ? defaultWrittenConfig.linked
-        : json.linked.map(
-            linkedGroup => normalizePackageNames(linkedGroup, pkgNames)[0]
-          ),
+    commit: getNormalizedCommitOption(
+      json.commit === undefined ? defaultWrittenConfig.commit : json.commit
+    ),
+    fixed,
+    linked,
     baseBranch:
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch
@@ -316,7 +393,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     ignore:
       json.ignore === undefined
         ? defaultWrittenConfig.ignore
-        : normalizePackageNames(json.ignore, pkgNames)[0],
+        : micromatch(pkgNames, json.ignore),
 
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,

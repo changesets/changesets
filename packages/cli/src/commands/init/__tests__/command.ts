@@ -2,7 +2,7 @@ import fixtures from "fixturez";
 import fs from "fs-extra";
 import path from "path";
 import { defaultWrittenConfig } from "@changesets/config";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock } from "@changesets/test-utils";
 
 import initializeCommand from "..";
 
@@ -14,7 +14,7 @@ const getPaths = (cwd: string) => ({
 });
 
 describe("init", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
   it("should initialize in a project without a .changeset folder", async () => {
     const cwd = await f.copy("without-existing-changeset");
     const { readmePath, configPath } = getPaths(cwd);
@@ -33,9 +33,9 @@ describe("init", () => {
       true
     );
     await initializeCommand(cwd);
-    expect(await fs.readJson(path.join(cwd, ".changeset/config.json"))).toEqual(
-      defaultWrittenConfig
-    );
+    expect(
+      await fs.readJson(path.join(cwd, ".changeset/config.json"))
+    ).toEqual({ ...defaultWrittenConfig, baseBranch: "main" });
   });
   it("shouldn't overwrite a config if it does exist", async () => {
     const cwd = await f.copy("simple-project");

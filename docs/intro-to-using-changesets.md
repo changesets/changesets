@@ -1,12 +1,12 @@
 # Using Changesets
 
-Changesets are designed to make your workflows easier, by allowing the person making contributions to make key decisisons when they are making their contribution. They hold two key bits of information, a version type (following [semver](https://semver.org/)), and change information to be added to a changelog.
+Changesets are designed to make your workflows easier, by allowing the person making contributions to make key decisions when they are making their contribution. Changesets hold two key bits of information: a version type (following [semver](https://semver.org/)), and change information to be added to a changelog.
 
-In addition, changesets were original designed for implementation in [bolt monorepos](https://github.com/boltpkg/bolt). As such, in a mono-repo context, changesets will handle bumping dependencies of changed packages if that is required.
+In addition, changesets were originally designed for implementation in [bolt monorepos](https://github.com/boltpkg/bolt). As such, in a monorepo context, changesets will handle bumping dependencies of changed packages, if that is required.
 
 This guide is aimed at package maintainers adding changesets as a tool. For the information relevant to contributors, see [adding a changeset](./adding-a-changeset.md).
 
-The overall tool after initialisation should lead to a loop that looks like:
+The overall tool after initialization should lead to a loop that looks like:
 
 1. Changesets added along with each change
 2. The version command is run when a release is ready, and the changes are verified
@@ -38,7 +38,7 @@ or
 yarn changeset
 ```
 
-> Note: You can run `changeset add` to add a changeset if you want to but running Changesets without any command works as well.
+> Note: You can run `changeset add` to add a changeset if you want to, but running Changesets without any command works as well.
 
 ## Versioning and publishing
 

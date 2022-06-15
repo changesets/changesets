@@ -14,9 +14,9 @@ async function filterChangesetsSinceRef(
     cwd: changesetBase,
     ref: sinceRef
   });
-  const newHahses = newChangesets.map(c => c.split("/")[1]);
+  const newHashes = newChangesets.map(c => c.split("/")[1]);
 
-  return changesets.filter(dir => newHahses.includes(dir));
+  return changesets.filter(dir => newHashes.includes(dir));
 }
 
 export default async function getChangesets(
@@ -28,7 +28,7 @@ export default async function getChangesets(
   try {
     contents = await fs.readdir(changesetBase);
   } catch (err) {
-    if (err.code === "ENOENT") {
+    if ((err as any).code === "ENOENT") {
       throw new Error("There is no .changeset directory in this project");
     }
     throw err;

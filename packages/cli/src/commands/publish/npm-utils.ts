@@ -7,7 +7,7 @@ import chalk from "chalk";
 import spawn from "spawndamnit";
 import semver from "semver";
 import { askQuestion } from "../../utils/cli-utilities";
-import isCI from "../../utils/isCI";
+import isCI from "is-ci";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
 
@@ -65,6 +65,13 @@ export async function getTokenIsRequired() {
   let result = await spawn("npm", ["profile", "get", "--json"], {
     env: Object.assign({}, process.env, envOverride)
   });
+  if (result.code !== 0) {
+    error(
+      "error while checking if token is required",
+      result.stderr.toString().trim() || result.stdout.toString().trim()
+    );
+    return false;
+  }
   let json = jsonParse(result.stdout.toString());
   if (json.error || !json.tfa || !json.tfa.mode) {
     return false;
@@ -91,7 +98,7 @@ export function getPackageInfo(packageJson: PackageJSON) {
     ]);
 
     // Github package registry returns empty string when calling npm info
-    // for a non-existant package instead of a E404
+    // for a non-existent package instead of a E404
     if (result.stdout.toString() === "") {
       return {
         error: {
@@ -207,7 +214,7 @@ async function internalPublish(
       );
     }
 
-    error(stderr);
+    error(stderr.toString());
     return { published: false };
   }
   return { published: true };

@@ -21,7 +21,9 @@ export default function flattenReleases(
         let release = releases.get(name);
         let pkg = packagesByName.get(name);
         if (!pkg) {
-          throw new Error(`Could not find package information for ${name}`);
+          throw new Error(
+            `"${changeset.id}" changeset mentions a release for a package "${name}" but such a package could not be found.`
+          );
         }
         if (!release) {
           release = {
@@ -31,12 +33,10 @@ export default function flattenReleases(
             changesets: [changeset.id]
           };
         } else {
-          // If the type was already major, we never need to update it
-          if (release.type === "minor" && type === "major") {
-            release.type = type;
-          } else if (
-            release.type === "patch" &&
-            (type === "major" || type === "minor")
+          if (
+            type === "major" ||
+            ((release.type === "patch" || release.type === "none") &&
+              (type === "minor" || type === "patch"))
           ) {
             release.type = type;
           }
