@@ -214,7 +214,7 @@ async function internalPublish(
       );
     }
 
-    error(stderr.toString());
+    error(stderr.toString() || stdout.toString());
     return { published: false };
   }
   return { published: true };
