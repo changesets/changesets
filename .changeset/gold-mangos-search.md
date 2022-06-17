@@ -2,4 +2,4 @@
 "@changesets/cli": patch
 ---
 
-fix: changeset filename with status verbose
+Fixed the printed filename in the verbose output of `changeset status`.
