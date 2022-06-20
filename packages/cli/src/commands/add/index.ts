@@ -5,7 +5,7 @@ import { spawn } from "child_process";
 import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
-import { Config } from "@changesets/types";
+import { Config, PrivatePackages } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
 
@@ -48,7 +48,7 @@ export default async function add(
       .filter((pkg) => isListablePackage(config, pkg.packageJson))
       .map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, packages, config.enablePrivateTracking);
+    newChangeset = await createChangeset(changedPackagesName, packages, config.privatePackages === PrivatePackages.Ignore);
     printConfirmationMessage(newChangeset, packages.length > 1);
 
     if (!newChangeset.confirmed) {

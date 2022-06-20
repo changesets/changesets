@@ -2,7 +2,7 @@ import fixturez from "fixturez";
 import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
-import { Config, WrittenConfig } from "@changesets/types";
+import { Config, PrivatePackages, WrittenConfig } from "@changesets/types";
 import { Packages } from "@manypkg/get-packages";
 
 jest.mock("@changesets/logger");
@@ -66,7 +66,7 @@ let defaults = {
   baseBranch: "master",
   updateInternalDependencies: "patch",
   ignore: [],
-  enablePrivatePackageTracking: false,
+  privatePackages: PrivatePackages.VersionAndTag,
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
     updateInternalDependents: "out-of-range",

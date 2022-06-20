@@ -80,17 +80,17 @@ export default async function publishPackages({
   otp,
   preState,
   tag,
-  trackPrivatePackages
+  tagPrivatePackages
 }: {
   packages: Package[];
   access: AccessType;
   otp?: string;
   preState: PreState | undefined;
   tag?: string;
-  trackPrivatePackages: boolean;
+  tagPrivatePackages: boolean;
 }): Promise<{
   publishedPackages: PublishedResult[];
-  untaggedPrivatePackages: PublishedResult[];
+  untaggedPrivatePackages: Omit<PublishedResult, "published">[];
 }> {
   const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
   const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
@@ -125,7 +125,7 @@ export default async function publishPackages({
     })
   );
 
-  const untaggedPrivatePackageReleases = trackPrivatePackages
+  const untaggedPrivatePackageReleases = tagPrivatePackages
     ? getUntaggedPrivatePackages(privatePackages)
     : Promise.resolve([]);
 

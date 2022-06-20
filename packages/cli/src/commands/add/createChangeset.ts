@@ -37,7 +37,7 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
 async function getPackagesToRelease(
   changedPackages: Array<string>,
   allPackages: Array<Package>,
-  trackPrivatePackages: boolean
+  ignorePrivatePackages: boolean
 ) {
   function askInitialReleaseQuestion(defaultChoiceList: Array<any>) {
     return cli.askCheckboxPlus(
@@ -61,17 +61,17 @@ async function getPackagesToRelease(
     );
   }
 
-  const pkgJsonsByName = getPkgJsonByName(allPackages);
+  const pkgJsonsByName = getPkgJsonsByName(allPackages);
 
   // filter out packages which changesets is not tracking
   allPackages = allPackages.filter(pkg =>
-    isValidChangesetPackage(pkg.packageJson, trackPrivatePackages)
+    isValidChangesetPackage(pkg.packageJson, ignorePrivatePackages)
   );
   changedPackages = changedPackages.filter(
     pkgName =>
       !isValidChangesetPackage(
         pkgJsonsByName.get(pkgName)!,
-        trackPrivatePackages
+        ignorePrivatePackages
       )
   );
 
@@ -109,7 +109,7 @@ async function getPackagesToRelease(
   return [allPackages[0].packageJson.name];
 }
 
-function getPkgJsonByName(packages: Package[]) {
+function getPkgJsonsByName(packages: Package[]) {
   return new Map(
     packages.map(({ packageJson }) => [packageJson.name, packageJson])
   );
@@ -117,15 +117,15 @@ function getPkgJsonByName(packages: Package[]) {
 
 function isValidChangesetPackage(
   packageJson: PackageJSON,
-  trackPrivatePackages: boolean
+  ignorePrivatePackages: boolean
 ) {
   const hasVersionField = !!packageJson.version;
 
-  if (trackPrivatePackages) {
-    return hasVersionField;
+  if (ignorePrivatePackages && packageJson.private) {
+    return false;
   }
 
-  return !packageJson.private && hasVersionField;
+  return hasVersionField;
 }
 
 function formatPkgNameAndVersion(pkgName: string, version: string) {
@@ -141,7 +141,7 @@ function getPkgJsonByName(packages: Package[]) {
 export default async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Package[],
-  trackPrivatePackages: boolean
+  ignorePrivatePackages: boolean
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
@@ -149,10 +149,10 @@ export default async function createChangeset(
     const packagesToRelease = await getPackagesToRelease(
       changedPackages,
       allPackages,
-      trackPrivatePackages
+      ignorePrivatePackages
     );
 
-    let pkgJsonsByName = getPkgJsonByName(allPackages);
+    let pkgJsonsByName = getPkgJsonsByName(allPackages);
 
     let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 

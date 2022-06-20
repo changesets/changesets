@@ -61,6 +61,13 @@ export type PackageGroup = ReadonlyArray<string>;
 export type Fixed = ReadonlyArray<PackageGroup>;
 export type Linked = ReadonlyArray<PackageGroup>;
 
+export const enum PrivatePackages {
+  Ignore,
+  Version = 1 << 1,
+  Tag = 1 << 2,
+  VersionAndTag = Version | Tag
+}
+
 export type Config = {
   changelog: false | readonly [string, any];
   commit: false | readonly [string, any];
@@ -68,8 +75,8 @@ export type Config = {
   linked: Linked;
   access: AccessType;
   baseBranch: string;
-  /** Opt in to tracking non-npm / private packages */
-  enablePrivatePackageTracking: boolean;
+  /** Features enabled for Private packages */
+  privatePackages: PrivatePackages;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
@@ -93,7 +100,7 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   /** Opt in to tracking non-npm / private packages */
-  enablePrivatePackageTracking?: boolean;
+  privatePackages?: "ignore" | "version-without-tag" | "version-and-tag";
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;

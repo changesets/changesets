@@ -3,7 +3,7 @@ import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
-import { Config, PreState } from "@changesets/types";
+import { Config, PreState, PrivatePackages } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import chalk from "chalk";
 
@@ -64,7 +64,10 @@ export default async function run(
     otp,
     preState,
     tag: releaseTag,
-    trackPrivatePackages: config.enablePrivatePackageTracking
+    tagPrivatePackages: isFlagEnabled(
+      config.privatePackages,
+      PrivatePackages.Tag
+    )
   });
 
   const successfulNpmPublishes = response.publishedPackages.filter(
@@ -121,4 +124,8 @@ export default async function run(
     logReleases(unsuccessfulNpmPublishes);
     throw new ExitError(1);
   }
+}
+
+function isFlagEnabled(value: number, tag: number): boolean {
+  return (value & tag) === tag;
 }

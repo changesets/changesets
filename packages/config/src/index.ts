@@ -10,6 +10,7 @@ import {
   Fixed,
   Linked,
   PackageGroup,
+  PrivatePackages
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -464,7 +465,12 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     },
 
     // TODO consider enabling this by default in the next major version
-    enablePrivatePackageTracking: json.enablePrivatePackageTracking === true
+    privatePackages:
+      json.privatePackages === "version-without-tag"
+        ? PrivatePackages.Tag
+        : json.privatePackages === "version-and-tag"
+        ? PrivatePackages.VersionAndTag
+        : PrivatePackages.Ignore
   };
 
   return config;
