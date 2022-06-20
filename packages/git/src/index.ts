@@ -297,3 +297,16 @@ export async function getCurrentCommitId({
     .toString()
     .trim();
 }
+
+export async function remoteTagExists(tagStr: string) {
+  const gitCmd = await spawn("git", [
+    "ls-remote",
+    "--tags",
+    "origin",
+    "-l",
+    tagStr
+  ]);
+  const output = gitCmd.stdout.toString().trim();
+  const tagExists = !!output;
+  return tagExists;
+}

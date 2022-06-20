@@ -151,7 +151,7 @@ async function getUntaggedPrivatePackages(privatePackages: Package[]) {
   const packageWithTags = await Promise.all(
     privatePackages.map(async privatePkg => {
       const tagName = `${privatePkg.packageJson.name}@${privatePkg.packageJson.version}`;
-      const isMissingTag = !(await git.tagExists(tagName));
+      const isMissingTag = !(await git.remoteTagExists(tagName));
 
       return { pkg: privatePkg, isMissingTag };
     })
