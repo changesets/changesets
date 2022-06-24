@@ -466,11 +466,12 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
     // TODO consider enabling this by default in the next major version
     privatePackages:
-      json.privatePackages === "version-without-tag"
-        ? PrivatePackages.Tag
+      json.privatePackages === "ignore"
+        ? PrivatePackages.Ignore
         : json.privatePackages === "version-and-tag"
         ? PrivatePackages.VersionAndTag
-        : PrivatePackages.Ignore
+        : // Default value
+          PrivatePackages.Version
   };
 
   return config;

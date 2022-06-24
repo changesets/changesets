@@ -50,7 +50,7 @@ class FakeReleasePlan {
       baseBranch: "main",
       updateInternalDependencies: "patch",
       ignore: [],
-      privatePackages: PrivatePackages.VersionAndTag,
+      privatePackages: PrivatePackages.Version,
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
         updateInternalDependents: "out-of-range",
@@ -92,7 +92,7 @@ async function testSetup(
       baseBranch: "main",
       updateInternalDependencies: "patch",
       ignore: [],
-      privatePackages: PrivatePackages.VersionAndTag,
+      privatePackages: PrivatePackages.Version,
       snapshot: {
         useCalculatedVersion: false,
         prereleaseTemplate: null,
@@ -496,7 +496,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "main",
           updateInternalDependencies: "patch",
-          privatePackages: PrivatePackages.VersionAndTag,
+          privatePackages: PrivatePackages.Version,
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -563,7 +563,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "main",
           updateInternalDependencies: "patch",
-          privatePackages: PrivatePackages.VersionAndTag,
+          privatePackages: PrivatePackages.Version,
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -758,7 +758,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              privatePackages: PrivatePackages.VersionAndTag,
+              privatePackages: PrivatePackages.Version,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
@@ -847,7 +847,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              privatePackages: PrivatePackages.VersionAndTag,
+              privatePackages: PrivatePackages.Version,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
@@ -928,7 +928,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              privatePackages: PrivatePackages.VersionAndTag,
+              privatePackages: PrivatePackages.Version,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
@@ -1009,7 +1009,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              privatePackages: PrivatePackages.VersionAndTag,
+              privatePackages: PrivatePackages.Version,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
@@ -1093,7 +1093,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              privatePackages: PrivatePackages.VersionAndTag,
+              privatePackages: PrivatePackages.Version,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
@@ -1182,7 +1182,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              privatePackages: PrivatePackages.VersionAndTag,
+              privatePackages: PrivatePackages.Version,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
@@ -1263,7 +1263,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              privatePackages: PrivatePackages.VersionAndTag,
+              privatePackages: PrivatePackages.Version,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
@@ -1344,7 +1344,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              privatePackages: PrivatePackages.VersionAndTag,
+              privatePackages: PrivatePackages.Version,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
@@ -1429,7 +1429,7 @@ describe("apply release plan", () => {
             baseBranch: "main",
             updateInternalDependencies: "patch",
             ignore: [],
-            privatePackages: PrivatePackages.VersionAndTag,
+            privatePackages: PrivatePackages.Version,
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               onlyUpdatePeerDependentsWhenOutOfRange: true,
               updateInternalDependents: "out-of-range",
@@ -1610,7 +1610,7 @@ describe("apply release plan", () => {
           ],
           updateInternalDependencies: "patch",
           ignore: [],
-          privatePackages: PrivatePackages.VersionAndTag,
+          privatePackages: PrivatePackages.Version,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
@@ -1719,7 +1719,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "patch",
           ignore: [],
-          privatePackages: PrivatePackages.VersionAndTag,
+          privatePackages: PrivatePackages.Version,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
@@ -1808,7 +1808,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
-          privatePackages: PrivatePackages.VersionAndTag,
+          privatePackages: PrivatePackages.Version,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
@@ -1901,7 +1901,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
-          privatePackages: PrivatePackages.VersionAndTag,
+          privatePackages: PrivatePackages.Version,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
@@ -2008,7 +2008,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
-          privatePackages: PrivatePackages.VersionAndTag,
+          privatePackages: PrivatePackages.Version,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",

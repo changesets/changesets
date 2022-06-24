@@ -61,12 +61,16 @@ export type PackageGroup = ReadonlyArray<string>;
 export type Fixed = ReadonlyArray<PackageGroup>;
 export type Linked = ReadonlyArray<PackageGroup>;
 
-export const enum PrivatePackages {
-  Ignore,
-  Version = 1 << 1,
-  Tag = 1 << 2,
-  VersionAndTag = Version | Tag
-}
+/**
+ * bitwise flag for private packages
+ * Check if the flag is enabled with `(flags & PrivatePackages.Version) === PrivatePackages.Version`
+ */
+export const PrivatePackages = {
+  Ignore: 0,
+  Version: 1,
+  Tag: 2,
+  VersionAndTag: 3
+} as const;
 
 export type Config = {
   changelog: false | readonly [string, any];
@@ -76,7 +80,7 @@ export type Config = {
   access: AccessType;
   baseBranch: string;
   /** Features enabled for Private packages */
-  privatePackages: PrivatePackages;
+  privatePackages: typeof PrivatePackages[keyof typeof PrivatePackages];
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
