@@ -11,8 +11,8 @@ import isCI from "is-ci";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
 
-const npmRequestLimit = pLimit(40);
-const npmPublishLimit = pLimit(10);
+const npmRequestLimit = pLimit(20);
+const npmPublishLimit = pLimit(5);
 
 function jsonParse(input: string) {
   try {
