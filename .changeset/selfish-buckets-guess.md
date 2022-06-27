@@ -2,4 +2,4 @@
 "@changesets/config": patch
 ---
 
-Fixed commit type defined in changeset config.
+Fixed the declared JSON schema type for the `commit` config option.
