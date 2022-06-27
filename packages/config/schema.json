@@ -13,7 +13,8 @@
             },
             { "title": "Changelog Generator Options" }
           ],
-          "minItems": 2
+          "minItems": 1,
+          "maxItems": 2
         },
         {
           "enum": [false],
