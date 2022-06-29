@@ -644,14 +644,14 @@ describe("snapshot release", () => {
     expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
       expect.objectContaining({
         name: "pkg-a",
-        version: expect.stringContaining("0.0.0-experimental-")
+        version: expect.stringMatching(/0\.0\.0-\d+-experimental/)
       })
     );
 
     expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
       expect.objectContaining({
         name: "pkg-b",
-        version: expect.stringContaining("0.0.0-experimental-")
+        version: expect.stringMatching(/0\.0\.0-\d+-experimental/)
       })
     );
   });
@@ -786,14 +786,14 @@ describe("snapshot release", () => {
       expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
         expect.objectContaining({
           name: "pkg-a",
-          version: expect.stringContaining("1.1.0-experimental-")
+          version: expect.stringMatching(/1\.1\.0-\d+-experimental/)
         })
       );
 
       expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
         expect.objectContaining({
           name: "pkg-b",
-          version: expect.stringContaining("1.0.1-experimental-")
+          version: expect.stringMatching(/1\.0\.1-\d+-experimental/)
         })
       );
     });
