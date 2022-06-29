@@ -92,8 +92,9 @@ export default function versionPackage(
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
           semver.prerelease(version) !== null
         ) {
-          let rangeType = getVersionRangeType(depCurrentVersion);
-          let newNewRange = snapshot ? version : `${rangeType}${version}`;
+          let newNewRange = snapshot
+            ? version
+            : `${getVersionRangeType(depCurrentVersion)}${version}`;
           if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`;
           deps[name] = newNewRange;
         }
