@@ -40,7 +40,7 @@ function getSnapshotSuffix(snapshot?: string | boolean): string | undefined {
 
   if (typeof snapshot === "string") tag = `-${snapshot}`;
 
-  return `${tag}-${dateAndTime}`;
+  return `-${dateAndTime}${tag}`;
 }
 
 function getNewVersion(

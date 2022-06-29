@@ -54,7 +54,7 @@ describe("assemble-release-plan", () => {
     );
 
     expect(releases.length).toBe(1);
-    expect(/0\.0\.0-foo-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
+    expect(/0\.0\.0-\d{14}-foo/.test(releases[0].newVersion)).toBeTruthy();
   });
 
   it("should assemble release plan with multiple packages", () => {
