@@ -74,11 +74,8 @@ async function testSetup(
   fixtureName: string,
   releasePlan: ReleasePlan,
   config?: Config,
-  setupFunc?: (tempDir: string) => Promise<any>,
-  snapshotConfig?: {
-    snapshot: string | undefined;
-    useCalculatedVersionForSnapshots: boolean;
-  }
+  snapshot?: string | undefined,
+  setupFunc?: (tempDir: string) => Promise<any>
 ) {
   if (!config) {
     config = {
@@ -93,8 +90,7 @@ async function testSetup(
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
         updateInternalDependents: "out-of-range",
-        useCalculatedVersionForSnapshots:
-          snapshotConfig?.useCalculatedVersionForSnapshots ?? false
+        useCalculatedVersionForSnapshots: false
       }
     };
   }
@@ -114,7 +110,7 @@ async function testSetup(
       releasePlan,
       await getPackages(tempDir),
       config,
-      snapshotConfig?.snapshot
+      snapshot
     ),
     tempDir
   };
@@ -682,11 +678,7 @@ describe("apply release plan", () => {
         "simple-project-caret-dep",
         releasePlan.getReleasePlan(),
         releasePlan.config,
-        undefined,
-        {
-          snapshot: "canary",
-          useCalculatedVersionForSnapshots: false
-        }
+        "canary"
       );
 
       let pkgPath = changedFiles.find(a =>
@@ -2139,6 +2131,7 @@ describe("apply release plan", () => {
         "simple-project",
         releasePlan.getReleasePlan(),
         releasePlan.config,
+        undefined,
         setupFunc
       );
 
@@ -2165,6 +2158,7 @@ describe("apply release plan", () => {
         "simple-project",
         releasePlan.getReleasePlan(),
         { ...releasePlan.config, ignore: ["pkg-a"] },
+        undefined,
         setupFunc
       );
 
@@ -2207,6 +2201,7 @@ describe("apply release plan", () => {
         "simple-project",
         releasePlan.getReleasePlan(),
         releasePlan.config,
+        undefined,
         setupFunc
       );
 
@@ -2263,6 +2258,7 @@ describe("apply release plan", () => {
           null
         ]
       },
+      undefined,
       setupFunc
     );
 
@@ -2345,6 +2341,7 @@ describe("apply release plan", () => {
             null
           ]
         },
+        undefined,
         setupFunc
       );
 

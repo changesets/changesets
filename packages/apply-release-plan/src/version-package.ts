@@ -24,13 +24,14 @@ export default function versionPackage(
   {
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
-    bumpVersionsWithWorkspaceProtocolOnly
+    bumpVersionsWithWorkspaceProtocolOnly,
+    snapshot
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-  },
-  snapshot?: string | boolean | undefined
+    snapshot?: string | boolean | undefined;
+  }
 ) {
   let { newVersion, packageJson } = release;
 
