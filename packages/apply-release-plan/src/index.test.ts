@@ -74,6 +74,7 @@ async function testSetup(
   fixtureName: string,
   releasePlan: ReleasePlan,
   config?: Config,
+  snapshot?: string | undefined,
   setupFunc?: (tempDir: string) => Promise<any>
 ) {
   if (!config) {
@@ -108,7 +109,8 @@ async function testSetup(
     changedFiles: await applyReleasePlan(
       releasePlan,
       await getPackages(tempDir),
-      config
+      config,
+      snapshot
     ),
     tempDir
   };
@@ -651,6 +653,47 @@ describe("apply release plan", () => {
       expect(pkgJSONB).toMatchObject({
         name: "pkg-b",
         version: "1.0.0"
+      });
+    });
+    it("should use exact versioning when snapshot release is applied, and ignore any range modifiers", async () => {
+      const releasePlan = new FakeReleasePlan(
+        [
+          {
+            id: "some-id",
+            releases: [{ name: "pkg-b", type: "minor" }],
+            summary: "a very useful summary"
+          }
+        ],
+        [
+          {
+            changesets: ["some-id"],
+            name: "pkg-b",
+            newVersion: "1.1.0",
+            oldVersion: "1.0.0",
+            type: "minor"
+          }
+        ]
+      );
+      let { changedFiles } = await testSetup(
+        "simple-project-caret-dep",
+        releasePlan.getReleasePlan(),
+        releasePlan.config,
+        "canary"
+      );
+
+      let pkgPath = changedFiles.find(a =>
+        a.endsWith(`pkg-a${path.sep}package.json`)
+      );
+
+      if (!pkgPath) throw new Error(`could not find an updated package json`);
+      let pkgJSON = await fs.readJSON(pkgPath);
+
+      expect(pkgJSON).toMatchObject({
+        name: "pkg-a",
+        version: "1.1.0",
+        dependencies: {
+          "pkg-b": "1.1.0"
+        }
       });
     });
 
@@ -2088,6 +2131,7 @@ describe("apply release plan", () => {
         "simple-project",
         releasePlan.getReleasePlan(),
         releasePlan.config,
+        undefined,
         setupFunc
       );
 
@@ -2114,6 +2158,7 @@ describe("apply release plan", () => {
         "simple-project",
         releasePlan.getReleasePlan(),
         { ...releasePlan.config, ignore: ["pkg-a"] },
+        undefined,
         setupFunc
       );
 
@@ -2156,6 +2201,7 @@ describe("apply release plan", () => {
         "simple-project",
         releasePlan.getReleasePlan(),
         releasePlan.config,
+        undefined,
         setupFunc
       );
 
@@ -2212,6 +2258,7 @@ describe("apply release plan", () => {
           null
         ]
       },
+      undefined,
       setupFunc
     );
 
@@ -2294,6 +2341,7 @@ describe("apply release plan", () => {
             null
           ]
         },
+        undefined,
         setupFunc
       );
 
