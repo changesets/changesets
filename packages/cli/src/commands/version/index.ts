@@ -12,6 +12,7 @@ import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
+import { getCurrentCommitId } from "@changesets/git";
 
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
@@ -33,10 +34,11 @@ export default async function version(
     // Disable committing when in snapshot mode
     commit: options.snapshot ? false : config.commit
   };
-  const [changesets, preState] = await Promise.all([
+  const [changesets, preState, , commit] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
-    removeEmptyFolders(path.resolve(cwd, ".changeset"))
+    removeEmptyFolders(path.resolve(cwd, ".changeset")),
+    getCurrentCommitId({ cwd })
   ]);
 
   if (preState?.mode === "pre") {
@@ -64,6 +66,11 @@ export default async function version(
   }
 
   let packages = await getPackages(cwd);
+  const timestamp = String(Date.now());
+  const datetime = new Date()
+    .toISOString()
+    .replace(/\.\d{3}Z$/, "")
+    .replace(/[^\d]/g, "");
 
   let releasePlan = assembleReleasePlan(
     changesets,
@@ -71,6 +78,13 @@ export default async function version(
     releaseConfig,
     preState,
     options.snapshot
+      ? {
+          tag: options.snapshot === true ? undefined : options.snapshot,
+          commit,
+          timestamp,
+          datetime
+        }
+      : undefined
   );
 
   let [...touchedFiles] = await applyReleasePlan(

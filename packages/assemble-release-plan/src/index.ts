@@ -27,51 +27,63 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
-function getSnapshotSuffix(snapshot?: string | boolean): string | undefined {
-  if (snapshot === undefined) {
-    return;
-  }
-
-  let dateAndTime = new Date()
-    .toISOString()
-    .replace(/\.\d{3}Z$/, "")
-    .replace(/[^\d]/g, "");
-  let tag = "";
-
-  if (typeof snapshot === "string") tag = `-${snapshot}`;
-
-  return `${tag}-${dateAndTime}`;
-}
-
-function getNewVersion(
+function getSnapshotVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined,
-  snapshotSuffix: string | undefined,
-  useCalculatedVersionForSnapshots: boolean
+  snapshotParameters: {
+    preidTemplate: string | null;
+    commit: string;
+    timestamp: string;
+    datetime: string;
+    tag: string | undefined;
+    useCalculatedVersion: boolean;
+  }
 ): string {
   if (release.type === "none") {
     return release.oldVersion;
   }
-  /**
-   * Using version as 0.0.0 so that it does not hinder with other version release
-   * For example;
-   * if user has a regular pre-release at 1.0.0-beta.0 and then you had a snapshot pre-release at 1.0.0-canary-git-hash
-   * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
-   * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
-   *
-   * You can set `useCalculatedVersionForSnapshots` flag to true to use calculated versions if you don't care about the above problem.
-   */
-  if (snapshotSuffix && !useCalculatedVersionForSnapshots) {
-    return `0.0.0${snapshotSuffix}`;
+
+  const baseVersion = snapshotParameters.useCalculatedVersion
+    ? incrementVersion(release, preInfo)
+    : `0.0.0`;
+
+  // This is way to handle the old behavior, where `snapshotPreidTemplate` is not in use.
+  // We need a special handling because we need to handle a case where `--snapshot` is used,
+  // and the resulting version needs to be composed without a tag.
+  if (!snapshotParameters.preidTemplate) {
+    const legacySuffix = [snapshotParameters.tag, snapshotParameters.datetime]
+      .filter(Boolean)
+      .join("-");
+
+    return [baseVersion, legacySuffix].join("-");
+  } else {
+    const composedSuffix = snapshotParameters.preidTemplate
+      .replace("{timestamp}", snapshotParameters.timestamp)
+      .replace("{datetime}", snapshotParameters.datetime)
+      .replace("{commit}", snapshotParameters.commit)
+      .replace("{tag}", () => {
+        if (snapshotParameters.tag === undefined) {
+          throw new Error(
+            'Failed to compose snapshot version: "{tag}" placeholder is used without specifying a tag name'
+          );
+        }
+
+        return snapshotParameters.tag;
+      });
+
+    return [baseVersion, composedSuffix].filter(Boolean).join("-");
+  }
+}
+
+function getNewVersion(
+  release: InternalRelease,
+  preInfo: PreInfo | undefined
+): string {
+  if (release.type === "none") {
+    return release.oldVersion;
   }
 
-  const calculatedVersion = incrementVersion(release, preInfo);
-
-  if (snapshotSuffix && useCalculatedVersionForSnapshots) {
-    return `${calculatedVersion}${snapshotSuffix}`;
-  }
-
-  return calculatedVersion;
+  return incrementVersion(release, preInfo);
 }
 
 function assembleReleasePlan(
@@ -80,7 +92,15 @@ function assembleReleasePlan(
   config: Config,
   // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
   preState: PreState | undefined,
-  snapshot?: string | boolean
+  // snapshot: undefined            ->  not using snaphot
+  // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
+  // snapsgot: { tag: "canary" }    ->  --snapshot canary
+  snapshot?: {
+    tag: string | undefined;
+    commit: string;
+    timestamp: string;
+    datetime: string;
+  }
 ): ReleasePlan {
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
@@ -93,9 +113,6 @@ function assembleReleasePlan(
   );
 
   const preInfo = getPreInfo(changesets, packagesByName, config, preState);
-
-  // Caching the snapshot version here and use this if it is snapshot release
-  const snapshotSuffix = getSnapshotSuffix(snapshot);
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
@@ -163,13 +180,20 @@ function assembleReleasePlan(
     releases: [...releases.values()].map(incompleteRelease => {
       return {
         ...incompleteRelease,
-        newVersion: getNewVersion(
-          incompleteRelease,
-          preInfo,
-          snapshotSuffix,
-          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-            .useCalculatedVersionForSnapshots
-        )
+        newVersion: snapshot
+          ? getSnapshotVersion(incompleteRelease, preInfo, {
+              commit: snapshot.commit,
+              timestamp: snapshot.timestamp,
+              datetime: snapshot.datetime,
+              tag: snapshot.tag,
+              preidTemplate:
+                config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                  .snapshotPreidTemplate,
+              useCalculatedVersion:
+                config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                  .useCalculatedVersionForSnapshots
+            })
+          : getNewVersion(incompleteRelease, preInfo)
       };
     }),
     preState: preInfo?.state

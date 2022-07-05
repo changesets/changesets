@@ -37,7 +37,12 @@ describe("assemble-release-plan", () => {
       setup.packages,
       defaultConfig,
       undefined,
-      true
+      {
+        tag: undefined,
+        timestamp: "1657013578416",
+        datetime: "20220705094844",
+        commit: "abcdef"
+      }
     );
 
     expect(releases.length).toBe(1);
@@ -50,7 +55,12 @@ describe("assemble-release-plan", () => {
       setup.packages,
       defaultConfig,
       undefined,
-      "foo"
+      {
+        tag: "foo",
+        timestamp: "1657013578416",
+        datetime: "20220705094844",
+        commit: "abcdef"
+      }
     );
 
     expect(releases.length).toBe(1);

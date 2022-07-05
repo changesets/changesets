@@ -319,7 +319,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     const {
       onlyUpdatePeerDependentsWhenOutOfRange,
       updateInternalDependents,
-      useCalculatedVersionForSnapshots
+      useCalculatedVersionForSnapshots,
+      snapshotPreidTemplate
     } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
     if (
       onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
@@ -357,7 +358,20 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or a boolean`
       );
     }
+    if (
+      snapshotPreidTemplate !== undefined &&
+      typeof snapshotPreidTemplate !== "string"
+    ) {
+      messages.push(
+        `The \`snapshotPreidTemplate\` option is set as ${JSON.stringify(
+          snapshotPreidTemplate,
+          null,
+          2
+        )} when the only valid values are undefined, or a template string.`
+      );
+    }
   }
+
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
@@ -410,6 +424,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       updateInternalDependents:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           ?.updateInternalDependents ?? "out-of-range",
+
+      snapshotPreidTemplate:
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          ?.snapshotPreidTemplate ?? null,
 
       useCalculatedVersionForSnapshots:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||

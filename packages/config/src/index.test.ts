@@ -48,7 +48,8 @@ test("read reads the config", async () => {
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
       updateInternalDependents: "out-of-range",
-      useCalculatedVersionForSnapshots: false
+      useCalculatedVersionForSnapshots: false,
+      snapshotPreidTemplate: null
     }
   });
 });
@@ -65,7 +66,8 @@ let defaults = {
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
     updateInternalDependents: "out-of-range",
-    useCalculatedVersionForSnapshots: false
+    useCalculatedVersionForSnapshots: false,
+    snapshotPreidTemplate: null
   },
   bumpVersionsWithWorkspaceProtocolOnly: false
 } as const;

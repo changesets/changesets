@@ -96,6 +96,7 @@ export type ExperimentalOptions = {
   onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
   updateInternalDependents?: "always" | "out-of-range";
   useCalculatedVersionForSnapshots?: boolean;
+  snapshotPreidTemplate?: string | null;
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };

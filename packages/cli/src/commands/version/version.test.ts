@@ -13,6 +13,16 @@ import pre from "../pre";
 import version from "./index";
 import humanId from "human-id";
 
+global.Date = class MockDate extends Date {
+  constructor() {
+    super("2021-12-13T00:07:30.879Z");
+  }
+
+  static now() {
+    return new MockDate().getTime();
+  }
+} as any;
+
 const f = fixtures(__dirname);
 
 let changelogPath = path.resolve(__dirname, "../../changelog");
@@ -43,6 +53,9 @@ git.commit.mockImplementation(() => Promise.resolve(true));
 git.getCommitsThatAddFiles.mockImplementation(changesetIds =>
   Promise.resolve(changesetIds.map(() => "g1th4sh"))
 );
+// @ts-ignore
+git.getCurrentCommitId.mockImplementation(() => Promise.resolve("abcdef"));
+
 // @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
 
@@ -714,54 +727,119 @@ describe("snapshot release", () => {
   });
 
   it("should not bump version of an ignored package when its dependency gets updated", async () => {
-    const originalDate = Date;
-    // eslint-disable-next-line no-global-assign
-    Date = class Date {
-      toISOString() {
-        return "2021-12-13T00:07:30.879Z";
+    const cwd = await f.copy("simple-project");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary"
+      },
+      cwd
+    );
+
+    await version(
+      cwd,
+      {
+        snapshot: true
+      },
+      {
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"]
       }
-    } as any;
-    try {
-      const cwd = await f.copy("simple-project");
-      await writeChangeset(
-        {
-          releases: [{ name: "pkg-b", type: "major" }],
-          summary: "a very useful summary"
-        },
-        cwd
-      );
+    );
 
-      await version(
-        cwd,
-        {
-          snapshot: true
+    expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "dependencies": Object {
+            "pkg-b": "0.0.0-20211213000730",
+          },
+          "name": "pkg-a",
+          "version": "1.0.0",
         },
-        {
-          ...modifiedDefaultConfig,
-          ignore: ["pkg-a"]
-        }
-      );
+        Object {
+          "name": "pkg-b",
+          "version": "0.0.0-20211213000730",
+        },
+      ]
+    `);
+  });
 
-      expect((await getPackages(cwd)).packages.map(x => x.packageJson))
-        .toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "dependencies": Object {
-              "pkg-b": "0.0.0-20211213000730",
-            },
-            "name": "pkg-a",
-            "version": "1.0.0",
-          },
-          Object {
-            "name": "pkg-b",
-            "version": "0.0.0-20211213000730",
-          },
-        ]
-      `);
-    } finally {
-      // eslint-disable-next-line no-global-assign
-      Date = originalDate;
-    }
+  describe("snapshotPreidTemplate", () => {
+    it('should throw an error when "{tag}" and empty snapshot is used', async () => {
+      let cwd = f.copy("simple-project");
+      await writeChangesets([simpleChangeset2], cwd);
+      jest.spyOn(fs, "writeFile");
+
+      expect(
+        version(
+          cwd,
+          { snapshot: true },
+          {
+            ...modifiedDefaultConfig,
+            commit: false,
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+              snapshotPreidTemplate: `{tag}.{commit}`
+            }
+          }
+        )
+      ).rejects.toThrow(
+        'Failed to compose snapshot version: "{tag}" placeholder is used without specifying a tag name'
+      );
+    });
+
+    it.each([
+      // Template-based
+      ["{tag}", "test", "0.0.0-test"],
+      ["{commit}", "test", "0.0.0-abcdef"],
+      ["{timestamp}", "test", "0.0.0-1639354050879"],
+      ["{datetime}", "test", "0.0.0-20211213000730"],
+      // Mixing template and static string
+      [
+        "{tag}.{timestamp}.{commit}",
+        "alpha",
+        "0.0.0-alpha.1639354050879.abcdef"
+      ],
+      ["{datetime}-{tag}", "alpha", "0.0.0-20211213000730-alpha"],
+      // Legacy support
+      ["", "test", "0.0.0-test-20211213000730"],
+      [undefined as any, "canary", "0.0.0-canary-20211213000730"],
+      [null as any, "alpha", "0.0.0-alpha-20211213000730"]
+    ])(
+      "should customize release correctly based on snapshotPreidTemplate template: %p (tag: '%p')",
+      async (snapshotTemplate, snapshotValue, expectedResult) => {
+        let cwd = f.copy("simple-project");
+        await writeChangesets([simpleChangeset2], cwd);
+        const spy = jest.spyOn(fs, "writeFile");
+        await version(
+          cwd,
+          { snapshot: snapshotValue },
+          {
+            ...modifiedDefaultConfig,
+            commit: false,
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+              snapshotPreidTemplate: snapshotTemplate as string
+            }
+          }
+        );
+
+        expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+          expect.objectContaining({
+            name: "pkg-a",
+            version: expectedResult
+          })
+        );
+
+        expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+          expect.objectContaining({
+            name: "pkg-b",
+            version: expectedResult
+          })
+        );
+      }
+    );
   });
 
   describe("useCalculatedVersionForSnapshots: true", () => {
@@ -841,58 +919,46 @@ describe("snapshot release", () => {
     });
 
     it("should not bump version of an ignored package when its dependency gets updated", async () => {
-      const originalDate = Date;
-      // eslint-disable-next-line no-global-assign
-      Date = class Date {
-        toISOString() {
-          return "2021-12-13T00:07:30.879Z";
-        }
-      } as any;
-      try {
-        const cwd = await f.copy("simple-project");
-        await writeChangeset(
-          {
-            releases: [{ name: "pkg-b", type: "major" }],
-            summary: "a very useful summary"
-          },
-          cwd
-        );
+      const cwd = await f.copy("simple-project");
+      await writeChangeset(
+        {
+          releases: [{ name: "pkg-b", type: "major" }],
+          summary: "a very useful summary"
+        },
+        cwd
+      );
 
-        await version(
-          cwd,
-          {
-            snapshot: true
-          },
-          {
-            ...modifiedDefaultConfig,
-            ignore: ["pkg-a"],
-            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-              useCalculatedVersionForSnapshots: true
-            }
+      await version(
+        cwd,
+        {
+          snapshot: true
+        },
+        {
+          ...modifiedDefaultConfig,
+          ignore: ["pkg-a"],
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            useCalculatedVersionForSnapshots: true
           }
-        );
+        }
+      );
 
-        expect((await getPackages(cwd)).packages.map(x => x.packageJson))
-          .toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "dependencies": Object {
-                "pkg-b": "2.0.0-20211213000730",
-              },
-              "name": "pkg-a",
-              "version": "1.0.0",
+      expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "dependencies": Object {
+              "pkg-b": "2.0.0-20211213000730",
             },
-            Object {
-              "name": "pkg-b",
-              "version": "2.0.0-20211213000730",
-            },
-          ]
-        `);
-      } finally {
-        // eslint-disable-next-line no-global-assign
-        Date = originalDate;
-      }
+            "name": "pkg-a",
+            "version": "1.0.0",
+          },
+          Object {
+            "name": "pkg-b",
+            "version": "2.0.0-20211213000730",
+          },
+        ]
+      `);
     });
   });
 });
