@@ -52,7 +52,8 @@ class FakeReleasePlan {
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
         updateInternalDependents: "out-of-range",
-        useCalculatedVersionForSnapshots: false
+        useCalculatedVersionForSnapshots: false,
+        snapshotPreidTemplate: null
       },
       ...config
     };
@@ -90,7 +91,8 @@ async function testSetup(
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
         updateInternalDependents: "out-of-range",
-        useCalculatedVersionForSnapshots: false
+        useCalculatedVersionForSnapshots: false,
+        snapshotPreidTemplate: null
       }
     };
   }
@@ -491,7 +493,8 @@ describe("apply release plan", () => {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
+            useCalculatedVersionForSnapshots: false,
+            snapshotPreidTemplate: null
           }
         }
       );
@@ -554,7 +557,8 @@ describe("apply release plan", () => {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
+            useCalculatedVersionForSnapshots: false,
+            snapshotPreidTemplate: null
           }
         }
       );
@@ -744,7 +748,8 @@ describe("apply release plan", () => {
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
-                useCalculatedVersionForSnapshots: false
+                useCalculatedVersionForSnapshots: false,
+                snapshotPreidTemplate: null
               }
             }
           );
@@ -829,7 +834,8 @@ describe("apply release plan", () => {
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
-                useCalculatedVersionForSnapshots: false
+                useCalculatedVersionForSnapshots: false,
+                snapshotPreidTemplate: null
               }
             }
           );
@@ -906,7 +912,8 @@ describe("apply release plan", () => {
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
-                useCalculatedVersionForSnapshots: false
+                useCalculatedVersionForSnapshots: false,
+                snapshotPreidTemplate: null
               }
             }
           );
@@ -983,7 +990,8 @@ describe("apply release plan", () => {
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
-                useCalculatedVersionForSnapshots: false
+                useCalculatedVersionForSnapshots: false,
+                snapshotPreidTemplate: null
               }
             }
           );
@@ -1063,7 +1071,8 @@ describe("apply release plan", () => {
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
-                useCalculatedVersionForSnapshots: false
+                useCalculatedVersionForSnapshots: false,
+                snapshotPreidTemplate: null
               }
             }
           );
@@ -1148,7 +1157,8 @@ describe("apply release plan", () => {
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
-                useCalculatedVersionForSnapshots: false
+                useCalculatedVersionForSnapshots: false,
+                snapshotPreidTemplate: null
               }
             }
           );
@@ -1225,7 +1235,8 @@ describe("apply release plan", () => {
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
-                useCalculatedVersionForSnapshots: false
+                useCalculatedVersionForSnapshots: false,
+                snapshotPreidTemplate: null
               }
             }
           );
@@ -1302,7 +1313,8 @@ describe("apply release plan", () => {
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
                 updateInternalDependents: "out-of-range",
-                useCalculatedVersionForSnapshots: false
+                useCalculatedVersionForSnapshots: false,
+                snapshotPreidTemplate: null
               }
             }
           );
@@ -1383,7 +1395,8 @@ describe("apply release plan", () => {
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               onlyUpdatePeerDependentsWhenOutOfRange: true,
               updateInternalDependents: "out-of-range",
-              useCalculatedVersionForSnapshots: false
+              useCalculatedVersionForSnapshots: false,
+              snapshotPreidTemplate: null
             }
           }
         );
@@ -1545,7 +1558,8 @@ describe("apply release plan", () => {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
+            useCalculatedVersionForSnapshots: false,
+            snapshotPreidTemplate: null
           }
         }
       );
@@ -1650,7 +1664,8 @@ describe("apply release plan", () => {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
+            useCalculatedVersionForSnapshots: false,
+            snapshotPreidTemplate: null
           }
         }
       );
@@ -1735,7 +1750,8 @@ describe("apply release plan", () => {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
+            useCalculatedVersionForSnapshots: false,
+            snapshotPreidTemplate: null
           }
         }
       );
@@ -1824,7 +1840,8 @@ describe("apply release plan", () => {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
+            useCalculatedVersionForSnapshots: false,
+            snapshotPreidTemplate: null
           }
         }
       );
@@ -1927,7 +1944,8 @@ describe("apply release plan", () => {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "out-of-range",
-            useCalculatedVersionForSnapshots: false
+            useCalculatedVersionForSnapshots: false,
+            snapshotPreidTemplate: null
           }
         }
       );
