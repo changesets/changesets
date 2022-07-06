@@ -58,10 +58,10 @@ function getSnapshotVersion(
     return [baseVersion, legacySuffix].join("-");
   } else {
     const composedSuffix = snapshotParameters.preidTemplate
-      .replace("{timestamp}", snapshotParameters.timestamp)
-      .replace("{datetime}", snapshotParameters.datetime)
-      .replace("{commit}", snapshotParameters.commit)
-      .replace("{tag}", () => {
+      .replace(/\{timestamp\}/g, snapshotParameters.timestamp)
+      .replace(/\{datetime\}/g, snapshotParameters.datetime)
+      .replace(/\{commit\}/g, snapshotParameters.commit)
+      .replace(/\{tag\}/g, () => {
         if (snapshotParameters.tag === undefined) {
           throw new Error(
             'Failed to compose snapshot version: "{tag}" placeholder is used without specifying a tag name'

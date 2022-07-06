@@ -792,6 +792,7 @@ describe("snapshot release", () => {
     it.each([
       // Template-based
       ["{tag}", "test", "0.0.0-test"],
+      ["{tag}-{tag}", "test", "0.0.0-test-test"],
       ["{commit}", "test", "0.0.0-abcdef"],
       ["{timestamp}", "test", "0.0.0-1639354050879"],
       ["{datetime}", "test", "0.0.0-20211213000730"],
