@@ -94,7 +94,7 @@ function assembleReleasePlan(
   preState: PreState | undefined,
   // snapshot: undefined            ->  not using snaphot
   // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
-  // snapsgot: { tag: "canary" }    ->  --snapshot canary
+  // snapshot: { tag: "canary" }    ->  --snapshot canary
   snapshot?: {
     tag: string | undefined;
     commit: string;
