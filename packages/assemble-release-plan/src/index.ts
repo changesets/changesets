@@ -57,6 +57,15 @@ function getSnapshotVersion(
 
     return [baseVersion, legacySuffix].join("-");
   } else {
+    if (
+      !snapshotParameters.preidTemplate.includes("{tag}") &&
+      snapshotParameters.tag !== undefined
+    ) {
+      throw new Error(
+        `Failed to compose snapshot version: "{tag}" placeholder is missing, but "--snapshot ${snapshotParameters.tag}" is set. Please make sure to use it to avoid versioning issues.`
+      );
+    }
+
     const composedSuffix = snapshotParameters.preidTemplate
       .replace(/\{timestamp\}/g, snapshotParameters.timestamp)
       .replace(/\{datetime\}/g, snapshotParameters.datetime)

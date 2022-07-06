@@ -805,13 +805,36 @@ describe("snapshot release", () => {
       );
     });
 
+    it('should throw an error when "{tag}" is set and named snapshot is used', async () => {
+      let cwd = f.copy("simple-project");
+      await writeChangesets([simpleChangeset2], cwd);
+      jest.spyOn(fs, "writeFile");
+
+      expect(
+        version(
+          cwd,
+          { snapshot: "test" },
+          {
+            ...modifiedDefaultConfig,
+            commit: false,
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+              snapshotPreidTemplate: `{commit}`
+            }
+          }
+        )
+      ).rejects.toThrow(
+        'Failed to compose snapshot version: "{tag}" placeholder is missing, but "--snapshot test" is set. Please make sure to use it to avoid versioning issues.'
+      );
+    });
+
     it.each([
       // Template-based
       ["{tag}", "test", "0.0.0-test"],
       ["{tag}-{tag}", "test", "0.0.0-test-test"],
-      ["{commit}", "test", "0.0.0-abcdef"],
-      ["{timestamp}", "test", "0.0.0-1639354050879"],
-      ["{datetime}", "test", "0.0.0-20211213000730"],
+      ["{commit}", true, "0.0.0-abcdef"],
+      ["{timestamp}", true, "0.0.0-1639354050879"],
+      ["{datetime}", true, "0.0.0-20211213000730"],
       // Mixing template and static string
       [
         "{tag}.{timestamp}.{commit}",
