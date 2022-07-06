@@ -13,15 +13,25 @@ import pre from "../pre";
 import version from "./index";
 import humanId from "human-id";
 
-global.Date = class MockDate extends Date {
-  constructor() {
-    super("2021-12-13T00:07:30.879Z");
+function mockGlobalDate(fixedDate: string = "2021-12-13T00:07:30.879Z") {
+  const originalDate = global.Date;
+
+  class MockedDate extends Date {
+    constructor() {
+      super(fixedDate);
+    }
+
+    static now() {
+      return new MockedDate().getTime();
+    }
   }
 
-  static now() {
-    return new MockDate().getTime();
-  }
-} as any;
+  global.Date = MockedDate as any;
+
+  return () => {
+    global.Date = originalDate;
+  };
+}
 
 const f = fixtures(__dirname);
 
@@ -727,42 +737,48 @@ describe("snapshot release", () => {
   });
 
   it("should not bump version of an ignored package when its dependency gets updated", async () => {
-    const cwd = await f.copy("simple-project");
-    await writeChangeset(
-      {
-        releases: [{ name: "pkg-b", type: "major" }],
-        summary: "a very useful summary"
-      },
-      cwd
-    );
+    const clearMock = mockGlobalDate();
 
-    await version(
-      cwd,
-      {
-        snapshot: true
-      },
-      {
-        ...modifiedDefaultConfig,
-        ignore: ["pkg-a"]
-      }
-    );
+    try {
+      const cwd = await f.copy("simple-project");
+      await writeChangeset(
+        {
+          releases: [{ name: "pkg-b", type: "major" }],
+          summary: "a very useful summary"
+        },
+        cwd
+      );
 
-    expect((await getPackages(cwd)).packages.map(x => x.packageJson))
-      .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
-            "pkg-b": "0.0.0-20211213000730",
+      await version(
+        cwd,
+        {
+          snapshot: true
+        },
+        {
+          ...modifiedDefaultConfig,
+          ignore: ["pkg-a"]
+        }
+      );
+
+      expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "dependencies": Object {
+              "pkg-b": "0.0.0-20211213000730",
+            },
+            "name": "pkg-a",
+            "version": "1.0.0",
           },
-          "name": "pkg-a",
-          "version": "1.0.0",
-        },
-        Object {
-          "name": "pkg-b",
-          "version": "0.0.0-20211213000730",
-        },
-      ]
-    `);
+          Object {
+            "name": "pkg-b",
+            "version": "0.0.0-20211213000730",
+          },
+        ]
+      `);
+    } finally {
+      clearMock();
+    }
   });
 
   describe("snapshotPreidTemplate", () => {
@@ -810,35 +826,40 @@ describe("snapshot release", () => {
     ])(
       "should customize release correctly based on snapshotPreidTemplate template: %p (tag: '%p')",
       async (snapshotTemplate, snapshotValue, expectedResult) => {
-        let cwd = f.copy("simple-project");
-        await writeChangesets([simpleChangeset2], cwd);
-        const spy = jest.spyOn(fs, "writeFile");
-        await version(
-          cwd,
-          { snapshot: snapshotValue },
-          {
-            ...modifiedDefaultConfig,
-            commit: false,
-            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-              snapshotPreidTemplate: snapshotTemplate as string
+        const clearMock = mockGlobalDate();
+        try {
+          let cwd = f.copy("simple-project");
+          await writeChangesets([simpleChangeset2], cwd);
+          const spy = jest.spyOn(fs, "writeFile");
+          await version(
+            cwd,
+            { snapshot: snapshotValue },
+            {
+              ...modifiedDefaultConfig,
+              commit: false,
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+                snapshotPreidTemplate: snapshotTemplate as string
+              }
             }
-          }
-        );
+          );
 
-        expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
-          expect.objectContaining({
-            name: "pkg-a",
-            version: expectedResult
-          })
-        );
+          expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+            expect.objectContaining({
+              name: "pkg-a",
+              version: expectedResult
+            })
+          );
 
-        expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
-          expect.objectContaining({
-            name: "pkg-b",
-            version: expectedResult
-          })
-        );
+          expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+            expect.objectContaining({
+              name: "pkg-b",
+              version: expectedResult
+            })
+          );
+        } finally {
+          clearMock();
+        }
       }
     );
   });
@@ -920,46 +941,51 @@ describe("snapshot release", () => {
     });
 
     it("should not bump version of an ignored package when its dependency gets updated", async () => {
-      const cwd = await f.copy("simple-project");
-      await writeChangeset(
-        {
-          releases: [{ name: "pkg-b", type: "major" }],
-          summary: "a very useful summary"
-        },
-        cwd
-      );
+      const clearMock = mockGlobalDate();
+      try {
+        const cwd = await f.copy("simple-project");
+        await writeChangeset(
+          {
+            releases: [{ name: "pkg-b", type: "major" }],
+            summary: "a very useful summary"
+          },
+          cwd
+        );
 
-      await version(
-        cwd,
-        {
-          snapshot: true
-        },
-        {
-          ...modifiedDefaultConfig,
-          ignore: ["pkg-a"],
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            useCalculatedVersionForSnapshots: true
+        await version(
+          cwd,
+          {
+            snapshot: true
+          },
+          {
+            ...modifiedDefaultConfig,
+            ignore: ["pkg-a"],
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+              useCalculatedVersionForSnapshots: true
+            }
           }
-        }
-      );
+        );
 
-      expect((await getPackages(cwd)).packages.map(x => x.packageJson))
-        .toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "dependencies": Object {
-              "pkg-b": "2.0.0-20211213000730",
+        expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+          .toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "dependencies": Object {
+                "pkg-b": "2.0.0-20211213000730",
+              },
+              "name": "pkg-a",
+              "version": "1.0.0",
             },
-            "name": "pkg-a",
-            "version": "1.0.0",
-          },
-          Object {
-            "name": "pkg-b",
-            "version": "2.0.0-20211213000730",
-          },
-        ]
-      `);
+            Object {
+              "name": "pkg-b",
+              "version": "2.0.0-20211213000730",
+            },
+          ]
+        `);
+      } finally {
+        clearMock();
+      }
     });
   });
 });
