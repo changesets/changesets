@@ -1,8 +1,8 @@
 # Experimental Options
 
-All experimental options are configured in `config.json` under `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH` flag. 
+All experimental options are configured in `config.json` under `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH` flag.
 
-> Please use these experimental flags with caution, and please pay attention to release notes - these config flags might change in patch versions. 
+> Please use these experimental flags with caution, and please pay attention to release notes - these config flags might change in patch versions.
 
 ## `updateInternalDependents` (type: `'out-of-range' | 'always'`)
 
@@ -16,11 +16,11 @@ Default value: `false`
 
 When set to `true`, Changesets will only bump peer dependents when `peerDependencies` are leaving the range.
 
-## `useCalculatedVersionForSnapshots` (type: `boolean`) 
+## `useCalculatedVersionForSnapshots` (type: `boolean`)
 
 Default value: `false`
 
-When `changesets version --snapshot` is used, the default behavior is to use `0.0.0` as the base version for the snapshot release. 
+When `changesets version --snapshot` is used, the default behavior is to use `0.0.0` as the base version for the snapshot release.
 
 Setting `useCalculatedVersionForSnapshots: true` will change the default behavior and will the planned version, based on the changesets files.
 

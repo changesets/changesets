@@ -6,4 +6,3 @@
 ---
 
 Added a new config option: `snapshotPreidTemplate` for customizing the way snapshot release numbers are being composed.
-
