@@ -204,4 +204,18 @@ describe("Changesets", () => {
       })
     );
   });
+  it("should not include ignored packages in the prompt", async () => {
+    const cwd = await f.copy("internal-dependencies");
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset(
+      cwd,
+      { empty: false },
+      { ...defaultConfig, ignore: ["pkg-b"] }
+    );
+
+    // @ts-ignore
+    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+  });
 });
