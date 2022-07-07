@@ -1,5 +1,13 @@
 # @changesets/config
 
+## 2.0.1
+
+### Patch Changes
+
+- [#854](https://github.com/changesets/changesets/pull/854) [`2827c7a`](https://github.com/changesets/changesets/commit/2827c7ab33af30065fafe72ede1a2a6ac88d5276) Thanks [@Andarist](https://github.com/Andarist)! - Fixed the declared JSON schema type for the `changelog` config option.
+
+* [#852](https://github.com/changesets/changesets/pull/852) [`7b1c0c1`](https://github.com/changesets/changesets/commit/7b1c0c1b73a19b50fe3a104acb440c604eab108f) Thanks [@caohuilin](https://github.com/caohuilin)! - Fixed the declared JSON schema type for the `commit` config option.
+
 ## 2.0.0
 
 ### Major Changes

@@ -1,5 +1,14 @@
 # @changesets/apply-release-plan
 
+## 6.0.1
+
+### Patch Changes
+
+- [#857](https://github.com/changesets/changesets/pull/857) [`7febb59`](https://github.com/changesets/changesets/commit/7febb599167234ae071b5d223b80cbc8a9375709) Thanks [@dotansimha](https://github.com/dotansimha)! - Fixed an issue with dependency ranges still using pre-existing range modifiers instead of fixed package versions when performing a snapshot release. This ensures that installs of snapshot versions are always reproducible.
+
+- Updated dependencies [[`2827c7a`](https://github.com/changesets/changesets/commit/2827c7ab33af30065fafe72ede1a2a6ac88d5276), [`7b1c0c1`](https://github.com/changesets/changesets/commit/7b1c0c1b73a19b50fe3a104acb440c604eab108f)]:
+  - @changesets/config@2.0.1
+
 ## 6.0.0
 
 ### Major Changes
