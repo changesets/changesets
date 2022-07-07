@@ -1,5 +1,20 @@
 # @changesets/cli
 
+## 2.23.1
+
+### Patch Changes
+
+- [#843](https://github.com/changesets/changesets/pull/843) [`101b1cb`](https://github.com/changesets/changesets/commit/101b1cb7e45f23146ce764a892a9ba04ed545cc5) Thanks [@caohuilin](https://github.com/caohuilin)! - Fixed the printed filename in the verbose output of `changeset status`.
+
+* [#857](https://github.com/changesets/changesets/pull/857) [`7febb59`](https://github.com/changesets/changesets/commit/7febb599167234ae071b5d223b80cbc8a9375709) Thanks [@dotansimha](https://github.com/dotansimha)! - Fixed an issue with dependency ranges still using pre-existing range modifiers instead of fixed package versions when performing a snapshot release. This ensures that installs of snapshot versions are always reproducible.
+
+- [#744](https://github.com/changesets/changesets/pull/744) [`84e46d1`](https://github.com/changesets/changesets/commit/84e46d19bd26c3a4ab6ff6d0543bd327dfa32a10) Thanks [@mskelton](https://github.com/mskelton)! - Ignored packages are no longer listed when adding a changeset.
+
+- Updated dependencies [[`2827c7a`](https://github.com/changesets/changesets/commit/2827c7ab33af30065fafe72ede1a2a6ac88d5276), [`7b1c0c1`](https://github.com/changesets/changesets/commit/7b1c0c1b73a19b50fe3a104acb440c604eab108f), [`7febb59`](https://github.com/changesets/changesets/commit/7febb599167234ae071b5d223b80cbc8a9375709)]:
+  - @changesets/config@2.0.1
+  - @changesets/apply-release-plan@6.0.1
+  - @changesets/get-release-plan@3.0.10
+
 ## 2.23.0
 
 ### Minor Changes
