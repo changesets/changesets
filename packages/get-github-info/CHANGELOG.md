@@ -1,5 +1,11 @@
 # @changesets/get-github-info
 
+## 0.5.1
+
+### Patch Changes
+
+- [#820](https://github.com/changesets/changesets/pull/820) [`a22eb8c`](https://github.com/changesets/changesets/commit/a22eb8c93fff7912323aa8f3d534066ce2a578fa) Thanks [@Andarist](https://github.com/Andarist)! - Errors resulting from the GitHub API calls should now be properly raised.
+
 ## 0.5.0
 
 ### Minor Changes

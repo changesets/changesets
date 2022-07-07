@@ -1,5 +1,21 @@
 # @changesets/cli
 
+## 2.23.0
+
+### Minor Changes
+
+- [#796](https://github.com/changesets/changesets/pull/796) [`745b771`](https://github.com/changesets/changesets/commit/745b7713f6ab18c8f5ec0500ddcf1ce5db2377cf) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgraded `tty-table` to fix deprecation warnings coming from its transitive dependency.
+
+### Patch Changes
+
+- [#811](https://github.com/changesets/changesets/pull/811) [`c54c25d`](https://github.com/changesets/changesets/commit/c54c25d7bbbdc055d2df97396c3b73e66f8b3b78) Thanks [@samrose3](https://github.com/samrose3)! - Improved accessibility of the CLI prompts by using selected/unselected indicators that don't rely solely on the colors.
+
+* [#767](https://github.com/changesets/changesets/pull/767) [`d6bfcc5`](https://github.com/changesets/changesets/commit/d6bfcc5052dcba18c521a20d62e2e67a81819112) Thanks [@Andarist](https://github.com/Andarist)! - Improve the error message when a package referenced in a changeset can't be found. The message will now also include the changeset's ID.
+
+* Updated dependencies [[`d6bfcc5`](https://github.com/changesets/changesets/commit/d6bfcc5052dcba18c521a20d62e2e67a81819112)]:
+  - @changesets/assemble-release-plan@5.1.3
+  - @changesets/get-release-plan@3.0.9
+
 ## 2.22.0
 
 ### Minor Changes
