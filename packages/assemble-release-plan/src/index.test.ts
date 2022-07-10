@@ -32,15 +32,13 @@ describe("assemble-release-plan", () => {
   });
 
   it("should assemble release plan for basic setup with snapshot", () => {
-    const dateRef = new Date(1657013578416);
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
       undefined,
       {
-        tag: undefined,
-        dateRef
+        tag: undefined
       }
     );
 
@@ -49,15 +47,13 @@ describe("assemble-release-plan", () => {
   });
 
   it("should assemble release plan for basic setup with snapshot and tag", () => {
-    const dateRef = new Date(1657013578416);
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
       undefined,
       {
-        tag: "foo",
-        dateRef
+        tag: "foo"
       }
     );
 

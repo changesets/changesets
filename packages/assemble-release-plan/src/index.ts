@@ -120,7 +120,6 @@ function assembleReleasePlan(
   snapshot?: {
     tag?: string | undefined;
     commit?: string | undefined;
-    dateRef?: Date | undefined;
   }
 ): ReleasePlan {
   let packagesByName = new Map(
@@ -196,7 +195,7 @@ function assembleReleasePlan(
     }
   }
 
-  let snapshotRefDate = snapshot?.dateRef || new Date();
+  let snapshotRefDate = new Date();
 
   return {
     changesets: relevantChangesets,
