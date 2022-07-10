@@ -801,7 +801,7 @@ describe("snapshot release", () => {
           }
         )
       ).rejects.toThrow(
-        'Failed to compose snapshot version: "{tag}" placeholder is used without specifying a tag name'
+        'Failed to compose snapshot version: "{tag}" placeholder is used without having a value defined!'
       );
     });
 
@@ -824,7 +824,7 @@ describe("snapshot release", () => {
           }
         )
       ).rejects.toThrow(
-        'Failed to compose snapshot version: "{tag}" placeholder is missing, but "--snapshot test" is set. Please make sure to use it to avoid versioning issues.'
+        "Failed to compose snapshot version: \"{tag}\" placeholder is missing, but the snapshot parameter is defined (value: 'test')"
       );
     });
 

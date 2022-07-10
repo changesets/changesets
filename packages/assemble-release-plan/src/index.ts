@@ -16,6 +16,15 @@ import { Packages, Package } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
 
+type SnapshotReleaseParameters = {
+  preidTemplate: string | null;
+  commit: string | undefined;
+  timestamp: string | undefined;
+  datetime: string | undefined;
+  tag: string | undefined;
+  useCalculatedVersion: boolean;
+};
+
 function getPreVersion(version: string) {
   let parsed = semver.parse(version)!;
   let preVersion =
@@ -27,17 +36,42 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
+function composeSnapshotTemplateSuffix(
+  snapshotParameters: SnapshotReleaseParameters
+): string {
+  const placeholders: Array<keyof Pick<
+    SnapshotReleaseParameters,
+    "commit" | "datetime" | "tag" | "timestamp"
+  >> = ["commit", "datetime", "tag", "timestamp"];
+
+  if (
+    !snapshotParameters.preidTemplate?.includes(`{tag}`) &&
+    snapshotParameters.tag !== undefined
+  ) {
+    throw new Error(
+      `Failed to compose snapshot version: "{tag}" placeholder is missing, but the snapshot parameter is defined (value: '${snapshotParameters.tag}')`
+    );
+  }
+
+  return placeholders.reduce((prev, key) => {
+    const rgx = new RegExp(`\\{${key}\\}`, "g");
+
+    return prev.replace(rgx, () => {
+      if (snapshotParameters[key] === undefined) {
+        throw new Error(
+          `Failed to compose snapshot version: "{${key}}" placeholder is used without having a value defined!`
+        );
+      }
+
+      return snapshotParameters[key]!;
+    });
+  }, snapshotParameters.preidTemplate!);
+}
+
 function getSnapshotVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined,
-  snapshotParameters: {
-    preidTemplate: string | null;
-    commit: string;
-    timestamp: string;
-    datetime: string;
-    tag: string | undefined;
-    useCalculatedVersion: boolean;
-  }
+  snapshotParameters: SnapshotReleaseParameters
 ): string {
   if (release.type === "none") {
     return release.oldVersion;
@@ -57,28 +91,7 @@ function getSnapshotVersion(
 
     return [baseVersion, legacySuffix].join("-");
   } else {
-    if (
-      !snapshotParameters.preidTemplate.includes("{tag}") &&
-      snapshotParameters.tag !== undefined
-    ) {
-      throw new Error(
-        `Failed to compose snapshot version: "{tag}" placeholder is missing, but "--snapshot ${snapshotParameters.tag}" is set. Please make sure to use it to avoid versioning issues.`
-      );
-    }
-
-    const composedSuffix = snapshotParameters.preidTemplate
-      .replace(/\{timestamp\}/g, snapshotParameters.timestamp)
-      .replace(/\{datetime\}/g, snapshotParameters.datetime)
-      .replace(/\{commit\}/g, snapshotParameters.commit)
-      .replace(/\{tag\}/g, () => {
-        if (snapshotParameters.tag === undefined) {
-          throw new Error(
-            'Failed to compose snapshot version: "{tag}" placeholder is used without specifying a tag name'
-          );
-        }
-
-        return snapshotParameters.tag;
-      });
+    const composedSuffix = composeSnapshotTemplateSuffix(snapshotParameters);
 
     return [baseVersion, composedSuffix].filter(Boolean).join("-");
   }
@@ -105,10 +118,9 @@ function assembleReleasePlan(
   // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
   // snapshot: { tag: "canary" }    ->  --snapshot canary
   snapshot?: {
-    tag: string | undefined;
-    commit: string;
-    timestamp: string;
-    datetime: string;
+    tag?: string | undefined;
+    commit?: string | undefined;
+    dateRef?: Date | undefined;
   }
 ): ReleasePlan {
   let packagesByName = new Map(
@@ -184,6 +196,8 @@ function assembleReleasePlan(
     }
   }
 
+  let snapshotRefDate = snapshot?.dateRef || new Date();
+
   return {
     changesets: relevantChangesets,
     releases: [...releases.values()].map(incompleteRelease => {
@@ -192,8 +206,11 @@ function assembleReleasePlan(
         newVersion: snapshot
           ? getSnapshotVersion(incompleteRelease, preInfo, {
               commit: snapshot.commit,
-              timestamp: snapshot.timestamp,
-              datetime: snapshot.datetime,
+              timestamp: snapshotRefDate.getTime().toString(),
+              datetime: snapshotRefDate
+                .toISOString()
+                .replace(/\.\d{3}Z$/, "")
+                .replace(/[^\d]/g, ""),
               tag: snapshot.tag,
               preidTemplate:
                 config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
