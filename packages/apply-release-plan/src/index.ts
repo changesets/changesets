@@ -122,8 +122,6 @@ export default async function applyReleasePlan(
     });
   });
 
-  let prettierConfig = await prettier.resolveConfig(cwd);
-
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;
 
@@ -133,6 +131,7 @@ export default async function applyReleasePlan(
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
+      const prettierConfig = await prettier.resolveConfig(changelogPath);
       await updateChangelog(changelogPath, changelog, name, prettierConfig);
       touchedFiles.push(changelogPath);
     }
