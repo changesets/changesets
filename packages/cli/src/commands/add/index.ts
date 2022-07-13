@@ -42,7 +42,7 @@ export default async function add(
     });
     const changePackagesName = changedPackages
       .map(pkg => pkg.packageJson.name)
-      .filter(pkgName => config.ignore.includes(pkgName));
+      .filter(pkgName => !config.ignore.includes(pkgName));
 
     newChangeset = await createChangeset(changePackagesName, packages);
     printConfirmationMessage(newChangeset, packages.length > 1);
