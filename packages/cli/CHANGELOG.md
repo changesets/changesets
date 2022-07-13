@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.23.2
+
+### Patch Changes
+
+- [#871](https://github.com/changesets/changesets/pull/871) [`e174172`](https://github.com/changesets/changesets/commit/e174172623854f0a86d87481222296d7bdcd9976) Thanks [@NicoKam](https://github.com/NicoKam)! - Fixed filtering of the ignored packages when adding a changeset.
+
 ## 2.23.1
 
 ### Patch Changes
