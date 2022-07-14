@@ -45,7 +45,14 @@ export async function getAllTags(cwd: string): Promise<Set<string>> {
 export async function tag(tagStr: string, cwd: string) {
   // NOTE: it's important we use the -m flag to create annotated tag otherwise 'git push --follow-tags' won't actually push
   // the tags
-  const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], { cwd });
+  const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], {
+    cwd
+  });
+
+  if (gitCmd.code !== 0) {
+    console.error(gitCmd.stderr.toString().trim());
+  }
+
   return gitCmd.code === 0;
 }
 

@@ -199,6 +199,20 @@ describe("git", () => {
       expect(tagRef).toEqual(head);
     });
 
+    it("should log error and return false if git command fails", async () => {
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementationOnce(() => {});
+
+      const resultSuccess = await tag("v1", cwd);
+      const resultFail = await tag("v1", cwd);
+
+      expect(consoleSpy).toBeCalledTimes(1);
+      expect(consoleSpy).toBeCalledWith("fatal: tag 'v1' already exists");
+      expect(resultSuccess).toBe(true);
+      expect(resultFail).toBe(false);
+    });
+
     it("should create a tag, make a new commit, then create a second tag", async () => {
       const initialHead = await spawn("git", ["rev-parse", "HEAD"], {
         cwd
