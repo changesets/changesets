@@ -9,6 +9,7 @@ export type CliOptions = {
   snapshot?: string | boolean;
   tag?: string;
   gitTag?: boolean;
+  json?: boolean;
   open?: boolean;
 };
 

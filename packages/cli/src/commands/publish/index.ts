@@ -1,4 +1,4 @@
-import publishPackages from "./publishPackages";
+import publishPackages, { PublishedResult } from "./publishPackages";
 import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
@@ -6,6 +6,11 @@ import { readPreState } from "@changesets/pre";
 import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import chalk from "chalk";
+
+type PublishJSONResult = {
+  published?: PublishedResult[];
+  unpublished?: PublishedResult[];
+};
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map(p => `${p.name}@${p.newVersion}`).join("\n");
@@ -39,11 +44,17 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
 
 export default async function run(
   cwd: string,
-  { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
+  {
+    otp,
+    tag,
+    gitTag = true,
+    json = false
+  }: { otp?: string; tag?: string; gitTag?: boolean; json?: boolean },
   config: Config
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
   let preState = await readPreState(cwd);
+  const publishJSONResult: PublishJSONResult = {};
 
   if (releaseTag && preState && preState.mode === "pre") {
     error("Releasing under custom tag is not allowed in pre mode");
@@ -90,12 +101,23 @@ export default async function run(
         await git.tag(tag, cwd);
       }
     }
+
+    publishJSONResult.published = successful;
   }
 
   if (unsuccessful.length > 0) {
     error("packages failed to publish:");
 
     logReleases(unsuccessful);
+
+    publishJSONResult.unpublished = unsuccessful;
+  }
+
+  if (json) {
+    console.log(JSON.stringify(publishJSONResult));
+  }
+
+  if (unsuccessful.length > 0) {
     throw new ExitError(1);
   }
 }
