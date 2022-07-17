@@ -319,8 +319,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     const {
       onlyUpdatePeerDependentsWhenOutOfRange,
       updateInternalDependents,
-      useCalculatedVersionForSnapshots,
-      snapshotPreidTemplate
+      snapshot
     } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
     if (
       onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
@@ -347,24 +346,26 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       );
     }
     if (
-      useCalculatedVersionForSnapshots !== undefined &&
-      typeof useCalculatedVersionForSnapshots !== "boolean"
+      snapshot &&
+      snapshot.useCalculatedVersion !== undefined &&
+      typeof snapshot.useCalculatedVersion !== "boolean"
     ) {
       messages.push(
-        `The \`useCalculatedVersionForSnapshots\` option is set as ${JSON.stringify(
-          useCalculatedVersionForSnapshots,
+        `The \`snapshot.useCalculatedVersion\` option is set as ${JSON.stringify(
+          snapshot.useCalculatedVersion,
           null,
           2
         )} when the only valid values are undefined or a boolean`
       );
     }
     if (
-      snapshotPreidTemplate !== undefined &&
-      typeof snapshotPreidTemplate !== "string"
+      snapshot &&
+      snapshot.prereleaseTemplate !== undefined &&
+      typeof snapshot.prereleaseTemplate !== "string"
     ) {
       messages.push(
-        `The \`snapshotPreidTemplate\` option is set as ${JSON.stringify(
-          snapshotPreidTemplate,
+        `The \`snapshot.prereleaseTemplate\` option is set as ${JSON.stringify(
+          snapshot.prereleaseTemplate,
           null,
           2
         )} when the only valid values are undefined, or a template string.`
@@ -425,17 +426,17 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           ?.updateInternalDependents ?? "out-of-range",
 
-      snapshotPreidTemplate:
-        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          ?.snapshotPreidTemplate ?? null,
-
-      useCalculatedVersionForSnapshots:
-        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
-        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .useCalculatedVersionForSnapshots === undefined
-          ? false
-          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              .useCalculatedVersionForSnapshots
+      snapshot: {
+        prereleaseTemplate:
+          json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?.snapshot
+            ?.prereleaseTemplate ?? null,
+        useCalculatedVersion:
+          json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?.snapshot
+            ?.useCalculatedVersion === undefined
+            ? false
+            : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot
+                .useCalculatedVersion
+      }
     }
   };
   return config;

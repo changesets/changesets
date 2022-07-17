@@ -48,8 +48,10 @@ test("read reads the config", async () => {
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
       updateInternalDependents: "out-of-range",
-      useCalculatedVersionForSnapshots: false,
-      snapshotPreidTemplate: null
+      snapshot: {
+        useCalculatedVersion: false,
+        prereleaseTemplate: null
+      }
     }
   });
 });
@@ -66,8 +68,10 @@ let defaults = {
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
     updateInternalDependents: "out-of-range",
-    useCalculatedVersionForSnapshots: false,
-    snapshotPreidTemplate: null
+    snapshot: {
+      useCalculatedVersion: false,
+      prereleaseTemplate: null
+    }
   },
   bumpVersionsWithWorkspaceProtocolOnly: false
 } as const;
@@ -590,19 +594,21 @@ The package \\"pkg-a\\" depends on the ignored package \\"pkg-b\\", but \\"pkg-a
 The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
 `);
   });
-  test("useCalculatedVersionForSnapshots non-boolean", () => {
+  test("snapshot.useCalculatedVersion non-boolean", () => {
     expect(() => {
       unsafeParse(
         {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            useCalculatedVersionForSnapshots: "not true"
+            snapshot: {
+              useCalculatedVersion: "not true"
+            }
           }
         },
         defaultPackages
       );
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The \`useCalculatedVersionForSnapshots\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
+The \`snapshot.useCalculatedVersion\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
 `);
   });
 });

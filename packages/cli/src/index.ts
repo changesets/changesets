@@ -53,7 +53,7 @@ const { input, flags } = meow(
         type: "boolean",
         default: true
       },
-      snapshotPreidTemplate: {
+      snapshotPrereleaseTemplate: {
         type: "string"
       }
       // mixed type like this is not supported by `meow`

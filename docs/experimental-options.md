@@ -16,21 +16,25 @@ Default value: `false`
 
 When set to `true`, Changesets will only bump peer dependents when `peerDependencies` are leaving the range.
 
-## `useCalculatedVersionForSnapshots` (type: `boolean`)
+## `snapshot` (type: `object`)
+
+Default value: `undefined`
+
+#### `useCalculatedVersion` (type: `boolean`)
 
 Default value: `false`
 
 When `changesets version --snapshot` is used, the default behavior is to use `0.0.0` as the base version for the snapshot release.
 
-Setting `useCalculatedVersionForSnapshots: true` will change the default behavior and will the planned version, based on the changesets files.
+Setting `useCalculatedVersion: true` will change the default behavior and will the planned version, based on the changesets files.
 
-## `snapshotPreidTemplate` (type: `string | undefined`)
+#### `prereleaseTemplate` (type: `string | undefined`)
 
 Default value: `undefined` (see note below)
 
 Configures the suffix for the snapshot releases, using a template with placeholders.
 
-### Available placeholders
+**Available placeholders:**
 
 You can use the following placeholders for customizing the snapshot release version:
 
@@ -41,10 +45,10 @@ You can use the following placeholders for customizing the snapshot release vers
 
 > Note: if you are using `--snapshot` with empty tag name, you cannot use `{tag}` as placeholder - this will result in error.
 
-### Integration with `useCalculatedVersionForSnapshots`
+### Integration with `useCalculatedVersion`
 
-You can still use and pass `useCalculatedVersionForSnapshots: boolean` if you wish to have the snapshot releases based on the planned release of changesets, instead of `0.0.0`.
+You can still use and pass `useCalculatedVersion: boolean` if you wish to have the snapshot releases based on the planned release of changesets, instead of `0.0.0`.
 
 ### Default behavior
 
-If you are not specifying `snapshotPreidTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
+If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.

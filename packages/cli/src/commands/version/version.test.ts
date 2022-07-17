@@ -781,7 +781,7 @@ describe("snapshot release", () => {
     }
   });
 
-  describe("snapshotPreidTemplate", () => {
+  describe("snapshotPrereleaseTemplate", () => {
     it('should throw an error when "{tag}" and empty snapshot is used', async () => {
       let cwd = f.copy("simple-project");
       await writeChangesets([simpleChangeset2], cwd);
@@ -796,7 +796,11 @@ describe("snapshot release", () => {
             commit: false,
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-              snapshotPreidTemplate: `{tag}.{commit}`
+              snapshot: {
+                ...modifiedDefaultConfig
+                  .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot,
+                prereleaseTemplate: `{tag}.{commit}`
+              }
             }
           }
         )
@@ -819,7 +823,11 @@ describe("snapshot release", () => {
             commit: false,
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-              snapshotPreidTemplate: `{commit}`
+              snapshot: {
+                ...modifiedDefaultConfig
+                  .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot,
+                prereleaseTemplate: `{commit}`
+              }
             }
           }
         )
@@ -847,7 +855,7 @@ describe("snapshot release", () => {
       [undefined as any, "canary", "0.0.0-canary-20211213000730"],
       [null as any, "alpha", "0.0.0-alpha-20211213000730"]
     ])(
-      "should customize release correctly based on snapshotPreidTemplate template: %p (tag: '%p')",
+      "should customize release correctly based on snapshotPrereleaseTemplate template: %p (tag: '%p')",
       async (snapshotTemplate, snapshotValue, expectedResult) => {
         const clearMock = mockGlobalDate();
         try {
@@ -862,7 +870,11 @@ describe("snapshot release", () => {
               commit: false,
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-                snapshotPreidTemplate: snapshotTemplate as string
+                snapshot: {
+                  ...modifiedDefaultConfig
+                    .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot,
+                  prereleaseTemplate: snapshotTemplate as string
+                }
               }
             }
           );
@@ -887,7 +899,7 @@ describe("snapshot release", () => {
     );
   });
 
-  describe("useCalculatedVersionForSnapshots: true", () => {
+  describe("snapshot.useCalculatedVersion: true", () => {
     it("should update packages using calculated version", async () => {
       let cwd = f.copy("simple-project");
       await writeChangesets([simpleChangeset2], cwd);
@@ -902,7 +914,10 @@ describe("snapshot release", () => {
           commit: false,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            useCalculatedVersionForSnapshots: true
+            snapshot: {
+              useCalculatedVersion: true,
+              prereleaseTemplate: null
+            }
           }
         }
       );
@@ -940,7 +955,10 @@ describe("snapshot release", () => {
           ...modifiedDefaultConfig,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            useCalculatedVersionForSnapshots: true
+            snapshot: {
+              useCalculatedVersion: true,
+              prereleaseTemplate: null
+            }
           }
         }
       );
@@ -985,7 +1003,10 @@ describe("snapshot release", () => {
             ignore: ["pkg-a"],
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-              useCalculatedVersionForSnapshots: true
+              snapshot: {
+                useCalculatedVersion: true,
+                prereleaseTemplate: null
+              }
             }
           }
         );

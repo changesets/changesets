@@ -17,7 +17,7 @@ import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
 
 type SnapshotReleaseParameters = {
-  preidTemplate: string | null;
+  preidTemplate: string | null | undefined;
   commit: string | undefined;
   timestamp: string | undefined;
   datetime: string | undefined;
@@ -81,7 +81,7 @@ function getSnapshotVersion(
     ? incrementVersion(release, preInfo)
     : `0.0.0`;
 
-  // This is way to handle the old behavior, where `snapshotPreidTemplate` is not in use.
+  // This is way to handle the old behavior, where `snapshotPrereleaseTemplate` is not in use.
   // We need a special handling because we need to handle a case where `--snapshot` is used,
   // and the resulting version needs to be composed without a tag.
   if (!snapshotParameters.preidTemplate) {
@@ -213,10 +213,10 @@ function assembleReleasePlan(
               tag: snapshot.tag,
               preidTemplate:
                 config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                  .snapshotPreidTemplate,
+                  .snapshot.prereleaseTemplate,
               useCalculatedVersion:
                 config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                  .useCalculatedVersionForSnapshots
+                  .snapshot.useCalculatedVersion
             })
           : getNewVersion(incompleteRelease, preInfo)
       };

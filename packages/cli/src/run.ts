@@ -81,7 +81,7 @@ export async function run(
       empty,
       ignore,
       snapshot,
-      snapshotPreidTemplate,
+      snapshotPrereleaseTemplate,
       tag,
       open,
       gitTag
@@ -163,8 +163,8 @@ export async function run(
           throw new ExitError(1);
         }
 
-        if (snapshotPreidTemplate) {
-          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshotPreidTemplate = snapshotPreidTemplate;
+        if (snapshotPrereleaseTemplate) {
+          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
         }
 
         await version(cwd, { snapshot }, config);

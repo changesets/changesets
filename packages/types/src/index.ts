@@ -75,7 +75,9 @@ export type Config = {
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<
     ExperimentalOptions
-  >;
+  > & {
+    snapshot: Required<ExperimentalOptions["snapshot"]>;
+  };
 };
 
 export type WrittenConfig = {
@@ -95,8 +97,10 @@ export type WrittenConfig = {
 export type ExperimentalOptions = {
   onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
   updateInternalDependents?: "always" | "out-of-range";
-  useCalculatedVersionForSnapshots?: boolean;
-  snapshotPreidTemplate?: string | null;
+  snapshot?: {
+    useCalculatedVersion?: boolean;
+    prereleaseTemplate?: string | null;
+  };
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
