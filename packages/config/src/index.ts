@@ -315,12 +315,42 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
+  const { snapshot } = json;
+
+  if (snapshot !== undefined) {
+    if (
+      snapshot.useCalculatedVersion !== undefined &&
+      typeof snapshot.useCalculatedVersion !== "boolean"
+    ) {
+      messages.push(
+        `The \`snapshot.useCalculatedVersion\` option is set as ${JSON.stringify(
+          snapshot.useCalculatedVersion,
+          null,
+          2
+        )} when the only valid values are undefined or a boolean`
+      );
+    }
+    if (
+      snapshot.prereleaseTemplate !== undefined &&
+      typeof snapshot.prereleaseTemplate !== "string"
+    ) {
+      messages.push(
+        `The \`snapshot.prereleaseTemplate\` option is set as ${JSON.stringify(
+          snapshot.prereleaseTemplate,
+          null,
+          2
+        )} when the only valid values are undefined, or a template string.`
+      );
+    }
+  }
+
   if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
     const {
       onlyUpdatePeerDependentsWhenOutOfRange,
       updateInternalDependents,
-      snapshot
+      useCalculatedVersionForSnapshots
     } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
+
     if (
       onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
       typeof onlyUpdatePeerDependentsWhenOutOfRange !== "boolean"
@@ -333,6 +363,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or a boolean`
       );
     }
+
     if (
       updateInternalDependents !== undefined &&
       !["always", "out-of-range"].includes(updateInternalDependents)
@@ -346,30 +377,22 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       );
     }
     if (
-      snapshot &&
-      snapshot.useCalculatedVersion !== undefined &&
-      typeof snapshot.useCalculatedVersion !== "boolean"
+      useCalculatedVersionForSnapshots &&
+      useCalculatedVersionForSnapshots !== undefined
     ) {
-      messages.push(
-        `The \`snapshot.useCalculatedVersion\` option is set as ${JSON.stringify(
-          snapshot.useCalculatedVersion,
-          null,
-          2
-        )} when the only valid values are undefined or a boolean`
+      console.warn(
+        `Experimental flag "useCalculatedVersionForSnapshots" is deprecated since snapshot feature became stable. Please use "snapshot.useCalculatedVersion" instead.`
       );
-    }
-    if (
-      snapshot &&
-      snapshot.prereleaseTemplate !== undefined &&
-      typeof snapshot.prereleaseTemplate !== "string"
-    ) {
-      messages.push(
-        `The \`snapshot.prereleaseTemplate\` option is set as ${JSON.stringify(
-          snapshot.prereleaseTemplate,
-          null,
-          2
-        )} when the only valid values are undefined, or a template string.`
-      );
+
+      if (typeof useCalculatedVersionForSnapshots !== "boolean") {
+        messages.push(
+          `The \`useCalculatedVersionForSnapshots\` option is set as ${JSON.stringify(
+            useCalculatedVersionForSnapshots,
+            null,
+            2
+          )} when the only valid values are undefined or a boolean`
+        );
+      }
     }
   }
 
@@ -413,6 +436,18 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,
 
+    snapshot: {
+      prereleaseTemplate: json.snapshot?.prereleaseTemplate ?? null,
+      useCalculatedVersion:
+        json.snapshot?.useCalculatedVersion !== undefined
+          ? json.snapshot.useCalculatedVersion
+          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              ?.useCalculatedVersionForSnapshots !== undefined
+          ? json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              ?.useCalculatedVersionForSnapshots
+          : false
+    },
+
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
@@ -424,19 +459,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
       updateInternalDependents:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          ?.updateInternalDependents ?? "out-of-range",
-
-      snapshot: {
-        prereleaseTemplate:
-          json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?.snapshot
-            ?.prereleaseTemplate ?? null,
-        useCalculatedVersion:
-          json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?.snapshot
-            ?.useCalculatedVersion === undefined
-            ? false
-            : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot
-                .useCalculatedVersion
-      }
+          ?.updateInternalDependents ?? "out-of-range"
     }
   };
   return config;

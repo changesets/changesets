@@ -164,7 +164,7 @@ export async function run(
         }
 
         if (snapshotPrereleaseTemplate) {
-          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
+          config.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
         }
 
         await version(cwd, { snapshot }, config);

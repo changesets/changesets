@@ -794,13 +794,9 @@ describe("snapshot release", () => {
           {
             ...modifiedDefaultConfig,
             commit: false,
-            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-              snapshot: {
-                ...modifiedDefaultConfig
-                  .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot,
-                prereleaseTemplate: `{tag}.{commit}`
-              }
+            snapshot: {
+              ...modifiedDefaultConfig.snapshot,
+              prereleaseTemplate: `{tag}.{commit}`
             }
           }
         )
@@ -821,13 +817,9 @@ describe("snapshot release", () => {
           {
             ...modifiedDefaultConfig,
             commit: false,
-            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-              snapshot: {
-                ...modifiedDefaultConfig
-                  .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot,
-                prereleaseTemplate: `{commit}`
-              }
+            snapshot: {
+              ...modifiedDefaultConfig.snapshot,
+              prereleaseTemplate: `{commit}`
             }
           }
         )
@@ -868,13 +860,9 @@ describe("snapshot release", () => {
             {
               ...modifiedDefaultConfig,
               commit: false,
-              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-                ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-                snapshot: {
-                  ...modifiedDefaultConfig
-                    .___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.snapshot,
-                  prereleaseTemplate: snapshotTemplate as string
-                }
+              snapshot: {
+                ...modifiedDefaultConfig.snapshot,
+                prereleaseTemplate: snapshotTemplate as string
               }
             }
           );
@@ -912,12 +900,9 @@ describe("snapshot release", () => {
         {
           ...modifiedDefaultConfig,
           commit: false,
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            snapshot: {
-              useCalculatedVersion: true,
-              prereleaseTemplate: null
-            }
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null
           }
         }
       );
@@ -953,12 +938,9 @@ describe("snapshot release", () => {
         },
         {
           ...modifiedDefaultConfig,
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            snapshot: {
-              useCalculatedVersion: true,
-              prereleaseTemplate: null
-            }
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null
           }
         }
       );
@@ -1001,12 +983,9 @@ describe("snapshot release", () => {
           {
             ...modifiedDefaultConfig,
             ignore: ["pkg-a"],
-            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-              snapshot: {
-                useCalculatedVersion: true,
-                prereleaseTemplate: null
-              }
+            snapshot: {
+              useCalculatedVersion: true,
+              prereleaseTemplate: null
             }
           }
         );

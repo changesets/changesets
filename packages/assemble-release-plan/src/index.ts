@@ -211,12 +211,8 @@ function assembleReleasePlan(
                 .replace(/\.\d{3}Z$/, "")
                 .replace(/[^\d]/g, ""),
               tag: snapshot.tag,
-              preidTemplate:
-                config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                  .snapshot.prereleaseTemplate,
-              useCalculatedVersion:
-                config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                  .snapshot.useCalculatedVersion
+              preidTemplate: config.snapshot.prereleaseTemplate,
+              useCalculatedVersion: config.snapshot.useCalculatedVersion
             })
           : getNewVersion(incompleteRelease, preInfo)
       };

@@ -3,13 +3,11 @@
 "@changesets/config": patch
 ---
 
-**NOTE: BREAKING CHANGE**
-
-Group snapshot config parameters under a single property called `snapshot`.
+Snapshot feature is now stable 🥳 All config parameters are grouped under a single property called `snapshot`.
 
 To migrate, make sure to update your `config.json`.
 
-Old usage:
+Old usage (still works, but comes with a deprecated warning):
 
 ```json
 {
@@ -23,10 +21,8 @@ New usage:
 
 ```json
 {
-  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
-    "snapshot": {
-      "useCalculatedVersion": true
-    }
+  "snapshot": {
+    "useCalculatedVersion": true
   }
 }
 ```
