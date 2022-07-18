@@ -72,6 +72,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Nhost](https://github.com/nhost/nhost)
 - [verdaccio](https://verdaccio.org/)
 - [Chakra UI](https://chakra-ui.com/)
+- [Polaris](https://polaris.shopify.com/)
 - [Astro](https://astro.build)
 - [SvelteKit](https://kit.svelte.dev/)
 - [Hydrogen](https://hydrogen.shopify.dev)
