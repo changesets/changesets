@@ -38,7 +38,7 @@ In some cases, you may _want_ to merge a change without doing any releases (such
 
 ## How do I run the version and publish commands?
 
-We have a [github action](https://github.com/changesets/action) that
+We have a [github action](https://github.com/changesets/action) for that
 
 - creates a `version` PR, then keeps it up to date, recreating it when merged. This PR always has an up-to-date run of `changeset version`
 - Optionally allows you to do releases when changes are merged to the base branch.
