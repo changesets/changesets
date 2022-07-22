@@ -90,6 +90,15 @@ function getSnapshotVersion(
     return release.oldVersion;
   }
 
+  /**
+   * Using version as 0.0.0 so that it does not hinder with other version release
+   * For example;
+   * if user has a regular pre-release at 1.0.0-beta.0 and then you had a snapshot pre-release at 1.0.0-canary-git-hash
+   * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
+   * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
+   *
+   * You can set `snapshot.useCalculatedVersion` flag to true to use calculated versions if you don't care about the above problem.
+   */
   const baseVersion = useCalculatedVersion
     ? incrementVersion(release, preInfo)
     : `0.0.0`;
