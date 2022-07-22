@@ -13,23 +13,34 @@ import pre from "../pre";
 import version from "./index";
 import humanId from "human-id";
 
-function mockGlobalDate(fixedDate: string = "2021-12-13T00:07:30.879Z") {
-  const originalDate = global.Date;
+function mockGlobalDate<
+  Args extends any[],
+  Return extends Promise<void> | void
+>(
+  testFn: (...args: Args) => Return,
+  fixedDate: string = "2021-12-13T00:07:30.879Z"
+) {
+  return async (...args: Args) => {
+    const originalDate = Date;
+    const MockedDate = class MockedDate extends Date {
+      constructor() {
+        super(fixedDate);
+      }
 
-  class MockedDate extends Date {
-    constructor() {
-      super(fixedDate);
+      static now() {
+        return new MockedDate().getTime();
+      }
+    } as typeof Date;
+
+    // eslint-disable-next-line no-global-assign
+    Date = MockedDate;
+
+    try {
+      await testFn(...args);
+    } finally {
+      // eslint-disable-next-line no-global-assign
+      Date = originalDate;
     }
-
-    static now() {
-      return new MockedDate().getTime();
-    }
-  }
-
-  global.Date = MockedDate as any;
-
-  return () => {
-    global.Date = originalDate;
   };
 }
 
@@ -736,10 +747,9 @@ describe("snapshot release", () => {
     `);
   });
 
-  it("should not bump version of an ignored package when its dependency gets updated", async () => {
-    const clearMock = mockGlobalDate();
-
-    try {
+  it(
+    "should not bump version of an ignored package when its dependency gets updated",
+    mockGlobalDate(async () => {
       const cwd = await f.copy("simple-project");
       await writeChangeset(
         {
@@ -776,10 +786,8 @@ describe("snapshot release", () => {
           },
         ]
       `);
-    } finally {
-      clearMock();
-    }
-  });
+    })
+  );
 
   describe("snapshotPrereleaseTemplate", () => {
     it('should throw an error when "{tag}" and empty snapshot is used', async () => {
@@ -828,7 +836,7 @@ describe("snapshot release", () => {
       );
     });
 
-    it.each([
+    it.each<[string | null | undefined, string | true, string]>([
       // Template-based
       ["{tag}", "test", "0.0.0-test"],
       ["{tag}-{tag}", "test", "0.0.0-test-test"],
@@ -844,13 +852,12 @@ describe("snapshot release", () => {
       ["{datetime}-{tag}", "alpha", "0.0.0-20211213000730-alpha"],
       // Legacy support
       ["", "test", "0.0.0-test-20211213000730"],
-      [undefined as any, "canary", "0.0.0-canary-20211213000730"],
-      [null as any, "alpha", "0.0.0-alpha-20211213000730"]
+      [undefined, "canary", "0.0.0-canary-20211213000730"],
+      [null, "alpha", "0.0.0-alpha-20211213000730"]
     ])(
       "should customize release correctly based on snapshotPrereleaseTemplate template: %p (tag: '%p')",
-      async (snapshotTemplate, snapshotValue, expectedResult) => {
-        const clearMock = mockGlobalDate();
-        try {
+      mockGlobalDate(
+        async (snapshotTemplate, snapshotValue, expectedResult) => {
           let cwd = f.copy("simple-project");
           await writeChangesets([simpleChangeset2], cwd);
           const spy = jest.spyOn(fs, "writeFile");
@@ -880,10 +887,8 @@ describe("snapshot release", () => {
               version: expectedResult
             })
           );
-        } finally {
-          clearMock();
         }
-      }
+      )
     );
   });
 
@@ -963,9 +968,9 @@ describe("snapshot release", () => {
       `);
     });
 
-    it("should not bump version of an ignored package when its dependency gets updated", async () => {
-      const clearMock = mockGlobalDate();
-      try {
+    it(
+      "should not bump version of an ignored package when its dependency gets updated",
+      mockGlobalDate(async () => {
         const cwd = await f.copy("simple-project");
         await writeChangeset(
           {
@@ -1006,10 +1011,8 @@ describe("snapshot release", () => {
             },
           ]
         `);
-      } finally {
-        clearMock();
-      }
-    });
+      })
+    );
   });
 });
 
