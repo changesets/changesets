@@ -17,12 +17,8 @@ import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
 
 type SnapshotReleaseParameters = {
-  preidTemplate: string | null | undefined;
-  commit: string | undefined;
-  timestamp: string | undefined;
-  datetime: string | undefined;
-  tag: string | undefined;
-  useCalculatedVersion: boolean;
+  tag?: string | undefined;
+  commit?: string | undefined;
 };
 
 function getPreVersion(version: string) {
@@ -36,65 +32,69 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
-function composeSnapshotTemplateSuffix(
+function getSnapshotSuffix(
+  template: Config["snapshot"]["prereleaseTemplate"],
   snapshotParameters: SnapshotReleaseParameters
 ): string {
-  const placeholders: Array<keyof Pick<
-    SnapshotReleaseParameters,
-    "commit" | "datetime" | "tag" | "timestamp"
-  >> = ["commit", "datetime", "tag", "timestamp"];
+  let snapshotRefDate = new Date();
 
-  if (
-    !snapshotParameters.preidTemplate?.includes(`{tag}`) &&
-    snapshotParameters.tag !== undefined
-  ) {
+  const placeholderValues = {
+    commit: snapshotParameters.commit,
+    tag: snapshotParameters.tag,
+    timestamp: snapshotRefDate.getTime().toString(),
+    datetime: snapshotRefDate
+      .toISOString()
+      .replace(/\.\d{3}Z$/, "")
+      .replace(/[^\d]/g, "")
+  };
+
+  // We need a special handling because we need to handle a case where `--snapshot` is used without any template,
+  // and the resulting version needs to be composed without a tag.
+  if (!template) {
+    return [placeholderValues.tag, placeholderValues.datetime]
+      .filter(Boolean)
+      .join("-");
+  }
+
+  const placeholders = Object.keys(placeholderValues) as Array<
+    keyof typeof placeholderValues
+  >;
+
+  if (!template.includes(`{tag}`) && placeholderValues.tag !== undefined) {
     throw new Error(
-      `Failed to compose snapshot version: "{tag}" placeholder is missing, but the snapshot parameter is defined (value: '${snapshotParameters.tag}')`
+      `Failed to compose snapshot version: "{tag}" placeholder is missing, but the snapshot parameter is defined (value: '${placeholderValues.tag}')`
     );
   }
 
   return placeholders.reduce((prev, key) => {
-    const rgx = new RegExp(`\\{${key}\\}`, "g");
-
-    return prev.replace(rgx, () => {
-      if (snapshotParameters[key] === undefined) {
+    return prev.replace(new RegExp(`\\{${key}\\}`, "g"), () => {
+      const value = placeholderValues[key];
+      if (value === undefined) {
         throw new Error(
           `Failed to compose snapshot version: "{${key}}" placeholder is used without having a value defined!`
         );
       }
 
-      return snapshotParameters[key]!;
+      return value;
     });
-  }, snapshotParameters.preidTemplate!);
+  }, template);
 }
 
 function getSnapshotVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined,
-  snapshotParameters: SnapshotReleaseParameters
+  useCalculatedVersion: boolean,
+  snapshotSuffix: string
 ): string {
   if (release.type === "none") {
     return release.oldVersion;
   }
 
-  const baseVersion = snapshotParameters.useCalculatedVersion
+  const baseVersion = useCalculatedVersion
     ? incrementVersion(release, preInfo)
     : `0.0.0`;
 
-  // This is way to handle the old behavior, where `snapshotPrereleaseTemplate` is not in use.
-  // We need a special handling because we need to handle a case where `--snapshot` is used,
-  // and the resulting version needs to be composed without a tag.
-  if (!snapshotParameters.preidTemplate) {
-    const legacySuffix = [snapshotParameters.tag, snapshotParameters.datetime]
-      .filter(Boolean)
-      .join("-");
-
-    return [baseVersion, legacySuffix].join("-");
-  } else {
-    const composedSuffix = composeSnapshotTemplateSuffix(snapshotParameters);
-
-    return [baseVersion, composedSuffix].filter(Boolean).join("-");
-  }
+  return `${baseVersion}-${snapshotSuffix}`;
 }
 
 function getNewVersion(
@@ -117,10 +117,7 @@ function assembleReleasePlan(
   // snapshot: undefined            ->  not using snaphot
   // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
   // snapshot: { tag: "canary" }    ->  --snapshot canary
-  snapshot?: {
-    tag?: string | undefined;
-    commit?: string | undefined;
-  }
+  snapshot?: SnapshotReleaseParameters
 ): ReleasePlan {
   let packagesByName = new Map(
     packages.packages.map(x => [x.packageJson.name, x])
@@ -195,25 +192,22 @@ function assembleReleasePlan(
     }
   }
 
-  let snapshotRefDate = new Date();
+  // Caching the snapshot version here and use this if it is snapshot release
+  const snapshotSuffix =
+    snapshot && getSnapshotSuffix(config.snapshot.prereleaseTemplate, snapshot);
 
   return {
     changesets: relevantChangesets,
     releases: [...releases.values()].map(incompleteRelease => {
       return {
         ...incompleteRelease,
-        newVersion: snapshot
-          ? getSnapshotVersion(incompleteRelease, preInfo, {
-              commit: snapshot.commit,
-              timestamp: snapshotRefDate.getTime().toString(),
-              datetime: snapshotRefDate
-                .toISOString()
-                .replace(/\.\d{3}Z$/, "")
-                .replace(/[^\d]/g, ""),
-              tag: snapshot.tag,
-              preidTemplate: config.snapshot.prereleaseTemplate,
-              useCalculatedVersion: config.snapshot.useCalculatedVersion
-            })
+        newVersion: snapshotSuffix
+          ? getSnapshotVersion(
+              incompleteRelease,
+              preInfo,
+              config.snapshot.useCalculatedVersion,
+              snapshotSuffix
+            )
           : getNewVersion(incompleteRelease, preInfo)
       };
     }),
