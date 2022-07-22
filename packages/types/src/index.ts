@@ -96,7 +96,7 @@ export type WrittenConfig = {
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   snapshot?: {
     useCalculatedVersion?: boolean;
-    prereleaseTemplate?: string | null;
+    prereleaseTemplate?: string;
   };
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?: ExperimentalOptions;
 };
