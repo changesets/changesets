@@ -1,5 +1,16 @@
 # @changesets/get-release-plan
 
+## 3.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e), [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/config@2.1.0
+  - @changesets/assemble-release-plan@5.2.0
+  - @changesets/types@5.1.0
+  - @changesets/read@0.5.6
+  - @changesets/pre@1.0.12
+
 ## 3.0.10
 
 ### Patch Changes
