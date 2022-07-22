@@ -3,7 +3,7 @@
 "@changesets/config": patch
 ---
 
-Snapshot feature is now stable 🥳 All config parameters are grouped under a single property called `snapshot`.
+A possibility to use the calculated version for snapshot releases is now stable 🥳 All snapshot-related config parameters are now grouped under a single config property called `snapshot`.
 
 To migrate, make sure to update your `config.json`.
 
