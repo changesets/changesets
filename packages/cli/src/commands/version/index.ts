@@ -74,7 +74,9 @@ export default async function version(
     options.snapshot
       ? {
           tag: options.snapshot === true ? undefined : options.snapshot,
-          commit: await getCurrentCommitId({ cwd })
+          commit: config.snapshot.prereleaseTemplate?.includes("{commit}")
+            ? await getCurrentCommitId({ cwd })
+            : undefined
         }
       : undefined
   );
