@@ -1,5 +1,14 @@
 # @changesets/read
 
+## 0.5.6
+
+### Patch Changes
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e), [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/git@1.4.0
+  - @changesets/types@5.1.0
+  - @changesets/parse@0.3.14
+
 ## 0.5.5
 
 ### Patch Changes
