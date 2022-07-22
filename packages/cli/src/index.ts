@@ -11,7 +11,7 @@ const { input, flags } = meow(
   Commands
     init
     add [--empty] [--open]
-    version [--ignore] [--snapshot <?name>] [--snapshot-preid-template <template>]
+    version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]
     status [--since <branch>] [--verbose] [--output JSON_FILE.json]
     pre <enter|exit> <tag>
