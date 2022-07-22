@@ -55,6 +55,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Prereleases](./docs/prereleases.md)
 - [Problems publishing in monorepos](./docs/problems-publishing-in-monorepos.md)
 - [Snapshot releases](./docs/snapshot-releases.md)
+- [Experimental Options](./docs/experimental-options.md)
 
 ## Cool Projects already using Changesets for versioning and changelogs
 

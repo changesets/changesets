@@ -286,3 +286,15 @@ export async function getChangedPackagesSinceRef({
       .filter((pkg, idx, packages) => packages.indexOf(pkg) === idx)
   );
 }
+
+export async function getCurrentCommitId({
+  cwd
+}: {
+  cwd: string;
+}): Promise<string> {
+  return (
+    await spawn("git", ["show", `--format="%h"`, "--no-patch"], { cwd })
+  ).stdout
+    .toString()
+    .trim();
+}

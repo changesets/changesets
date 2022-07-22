@@ -99,6 +99,25 @@
       "type": "string",
       "description": "The minimum bump type to trigger automatic update of internal dependencies that are part of the same release.",
       "default": "patch"
+    },
+    "bumpVersionsWithWorkspaceProtocolOnly": {
+      "type": "boolean",
+      "default": false,
+      "description": "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace."
+    },
+    "snapshot": {
+      "type": "object",
+      "properties": {
+        "useCalculatedVersion": {
+          "type": "boolean",
+          "description": "It can be used to make generated snapshot versions use the calculated version (based on the changeset files) as a base version, instead of 0.0.0"
+        },
+        "prereleaseTemplate": {
+          "type": "string",
+          "description": "A template for the prerelease (suffix) part of the generated snapshot version. The template can use the following variable patterns: {commit}, {tag}, {datetime}, {timestamp}.",
+          "minLength": 1
+        }
+      }
     }
   }
 }
