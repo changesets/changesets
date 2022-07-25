@@ -296,5 +296,6 @@ export async function getCurrentCommitId({
     await spawn("git", ["show", `--format="%h"`, "--no-patch"], { cwd })
   ).stdout
     .toString()
-    .trim();
+    .trim()
+    .replace(/"/g, "");
 }
