@@ -1,5 +1,12 @@
 # @changesets/apply-release-plan
 
+## 6.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`f64bc1b`](https://github.com/changesets/changesets/commit/f64bc1bb33457918eae34b22f214174ba3cf4504)]:
+  - @changesets/git@1.4.1
+
 ## 6.0.2
 
 ### Patch Changes
