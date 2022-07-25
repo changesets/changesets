@@ -2,4 +2,4 @@
 "@changesets/git": patch
 ---
 
-Fixes `getCurrentCommitId` so that the returned value doesn't contain quotation marks.
+Fixed `getCurrentCommitId` so that the returned value doesn't contain quotation marks on some Windows machines.
