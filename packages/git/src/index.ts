@@ -292,10 +292,7 @@ export async function getCurrentCommitId({
 }: {
   cwd: string;
 }): Promise<string> {
-  return (
-    await spawn("git", ["show", `--format="%h"`, "--no-patch"], { cwd })
-  ).stdout
+  return (await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd })).stdout
     .toString()
-    .trim()
-    .replace(/"/g, "");
+    .trim();
 }
