@@ -1,5 +1,15 @@
 # @changesets/cli
 
+## 2.24.1
+
+### Patch Changes
+
+- Updated dependencies [[`f64bc1b`](https://github.com/changesets/changesets/commit/f64bc1bb33457918eae34b22f214174ba3cf4504)]:
+  - @changesets/git@1.4.1
+  - @changesets/apply-release-plan@6.0.3
+  - @changesets/read@0.5.7
+  - @changesets/get-release-plan@3.0.12
+
 ## 2.24.0
 
 ### Minor Changes

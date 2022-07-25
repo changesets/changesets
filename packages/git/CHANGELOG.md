@@ -1,5 +1,11 @@
 # @changesets/git
 
+## 1.4.1
+
+### Patch Changes
+
+- [#889](https://github.com/changesets/changesets/pull/889) [`f64bc1b`](https://github.com/changesets/changesets/commit/f64bc1bb33457918eae34b22f214174ba3cf4504) Thanks [@jakubmazanec](https://github.com/jakubmazanec)! - Fixed `getCurrentCommitId` so that the returned value doesn't contain quotation marks on some Windows machines.
+
 ## 1.4.0
 
 ### Minor Changes
