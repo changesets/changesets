@@ -12,6 +12,7 @@ import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
+import { getCurrentCommitId } from "@changesets/git";
 
 let importantSeparator = chalk.red(
   "===============================IMPORTANT!==============================="
@@ -71,6 +72,13 @@ export default async function version(
     releaseConfig,
     preState,
     options.snapshot
+      ? {
+          tag: options.snapshot === true ? undefined : options.snapshot,
+          commit: config.snapshot.prereleaseTemplate?.includes("{commit}")
+            ? await getCurrentCommitId({ cwd })
+            : undefined
+        }
+      : undefined
   );
 
   let [...touchedFiles] = await applyReleasePlan(

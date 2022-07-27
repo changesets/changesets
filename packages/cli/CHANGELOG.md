@@ -1,5 +1,99 @@
 # @changesets/cli
 
+## 2.24.1
+
+### Patch Changes
+
+- Updated dependencies [[`f64bc1b`](https://github.com/changesets/changesets/commit/f64bc1bb33457918eae34b22f214174ba3cf4504)]:
+  - @changesets/git@1.4.1
+  - @changesets/apply-release-plan@6.0.3
+  - @changesets/read@0.5.7
+  - @changesets/get-release-plan@3.0.12
+
+## 2.24.0
+
+### Minor Changes
+
+- [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - Added a new config flag for `changesets version --snapshot` mode: `--snapshot-prerelease-template`
+
+* [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - Added a new config option: `snapshot.prereleaseTemplate` for customizing the way snapshot release numbers are being composed.
+
+### Patch Changes
+
+- [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - A possibility to use the calculated version for snapshot releases is now stable 🥳 All snapshot-related config parameters are now grouped under a single config property called `snapshot`.
+
+  To migrate, make sure to update your `config.json`.
+
+  Old usage (still works, but comes with a deprecated warning):
+
+  ```json
+  {
+    "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+      "useCalculatedVersionForSnapshots": true
+    }
+  }
+  ```
+
+  New usage:
+
+  ```json
+  {
+    "snapshot": {
+      "useCalculatedVersion": true
+    }
+  }
+  ```
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e), [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e), [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/config@2.1.0
+  - @changesets/git@1.4.0
+  - @changesets/assemble-release-plan@5.2.0
+  - @changesets/types@5.1.0
+  - @changesets/apply-release-plan@6.0.2
+  - @changesets/get-release-plan@3.0.11
+  - @changesets/read@0.5.6
+  - @changesets/changelog-git@0.1.12
+  - @changesets/get-dependents-graph@1.3.3
+  - @changesets/pre@1.0.12
+  - @changesets/write@0.1.9
+
+## 2.23.2
+
+### Patch Changes
+
+- [#871](https://github.com/changesets/changesets/pull/871) [`e174172`](https://github.com/changesets/changesets/commit/e174172623854f0a86d87481222296d7bdcd9976) Thanks [@NicoKam](https://github.com/NicoKam)! - Fixed filtering of the ignored packages when adding a changeset.
+
+## 2.23.1
+
+### Patch Changes
+
+- [#843](https://github.com/changesets/changesets/pull/843) [`101b1cb`](https://github.com/changesets/changesets/commit/101b1cb7e45f23146ce764a892a9ba04ed545cc5) Thanks [@caohuilin](https://github.com/caohuilin)! - Fixed the printed filename in the verbose output of `changeset status`.
+
+* [#857](https://github.com/changesets/changesets/pull/857) [`7febb59`](https://github.com/changesets/changesets/commit/7febb599167234ae071b5d223b80cbc8a9375709) Thanks [@dotansimha](https://github.com/dotansimha)! - Fixed an issue with dependency ranges still using pre-existing range modifiers instead of fixed package versions when performing a snapshot release. This ensures that installs of snapshot versions are always reproducible.
+
+- [#744](https://github.com/changesets/changesets/pull/744) [`84e46d1`](https://github.com/changesets/changesets/commit/84e46d19bd26c3a4ab6ff6d0543bd327dfa32a10) Thanks [@mskelton](https://github.com/mskelton)! - Ignored packages are no longer listed when adding a changeset.
+
+- Updated dependencies [[`2827c7a`](https://github.com/changesets/changesets/commit/2827c7ab33af30065fafe72ede1a2a6ac88d5276), [`7b1c0c1`](https://github.com/changesets/changesets/commit/7b1c0c1b73a19b50fe3a104acb440c604eab108f), [`7febb59`](https://github.com/changesets/changesets/commit/7febb599167234ae071b5d223b80cbc8a9375709)]:
+  - @changesets/config@2.0.1
+  - @changesets/apply-release-plan@6.0.1
+  - @changesets/get-release-plan@3.0.10
+
+## 2.23.0
+
+### Minor Changes
+
+- [#796](https://github.com/changesets/changesets/pull/796) [`745b771`](https://github.com/changesets/changesets/commit/745b7713f6ab18c8f5ec0500ddcf1ce5db2377cf) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgraded `tty-table` to fix deprecation warnings coming from its transitive dependency.
+
+### Patch Changes
+
+- [#811](https://github.com/changesets/changesets/pull/811) [`c54c25d`](https://github.com/changesets/changesets/commit/c54c25d7bbbdc055d2df97396c3b73e66f8b3b78) Thanks [@samrose3](https://github.com/samrose3)! - Improved accessibility of the CLI prompts by using selected/unselected indicators that don't rely solely on the colors.
+
+* [#767](https://github.com/changesets/changesets/pull/767) [`d6bfcc5`](https://github.com/changesets/changesets/commit/d6bfcc5052dcba18c521a20d62e2e67a81819112) Thanks [@Andarist](https://github.com/Andarist)! - Improve the error message when a package referenced in a changeset can't be found. The message will now also include the changeset's ID.
+
+* Updated dependencies [[`d6bfcc5`](https://github.com/changesets/changesets/commit/d6bfcc5052dcba18c521a20d62e2e67a81819112)]:
+  - @changesets/assemble-release-plan@5.1.3
+  - @changesets/get-release-plan@3.0.9
+
 ## 2.22.0
 
 ### Minor Changes
