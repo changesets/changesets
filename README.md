@@ -78,6 +78,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Hydrogen](https://hydrogen.shopify.dev)
 - [react-pdf](https://github.com/diegomura/react-pdf)
 - [wagmi](https://github.com/wagmi-dev/wagmi)
+- [refine](https://github.com/pankod/refine)
 
 # Thanks/Inspiration
 
