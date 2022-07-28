@@ -13,6 +13,37 @@ import pre from "../pre";
 import version from "./index";
 import humanId from "human-id";
 
+function mockGlobalDate<
+  Args extends any[],
+  Return extends Promise<void> | void
+>(
+  testFn: (...args: Args) => Return,
+  fixedDate: string = "2021-12-13T00:07:30.879Z"
+) {
+  return async (...args: Args) => {
+    const originalDate = Date;
+    const MockedDate = class MockedDate extends Date {
+      constructor() {
+        super(fixedDate);
+      }
+
+      static now() {
+        return new MockedDate().getTime();
+      }
+    } as typeof Date;
+
+    // eslint-disable-next-line no-global-assign
+    Date = MockedDate;
+
+    try {
+      await testFn(...args);
+    } finally {
+      // eslint-disable-next-line no-global-assign
+      Date = originalDate;
+    }
+  };
+}
+
 const f = fixtures(__dirname);
 
 let changelogPath = path.resolve(__dirname, "../../changelog");
@@ -43,6 +74,9 @@ git.commit.mockImplementation(() => Promise.resolve(true));
 git.getCommitsThatAddFiles.mockImplementation(changesetIds =>
   Promise.resolve(changesetIds.map(() => "g1th4sh"))
 );
+// @ts-ignore
+git.getCurrentCommitId.mockImplementation(() => Promise.resolve("abcdef"));
+
 // @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
 
@@ -713,15 +747,9 @@ describe("snapshot release", () => {
     `);
   });
 
-  it("should not bump version of an ignored package when its dependency gets updated", async () => {
-    const originalDate = Date;
-    // eslint-disable-next-line no-global-assign
-    Date = class Date {
-      toISOString() {
-        return "2021-12-13T00:07:30.879Z";
-      }
-    } as any;
-    try {
+  it(
+    "should not bump version of an ignored package when its dependency gets updated",
+    mockGlobalDate(async () => {
       const cwd = await f.copy("simple-project");
       await writeChangeset(
         {
@@ -758,13 +786,113 @@ describe("snapshot release", () => {
           },
         ]
       `);
-    } finally {
-      // eslint-disable-next-line no-global-assign
-      Date = originalDate;
-    }
+    })
+  );
+
+  describe("snapshotPrereleaseTemplate", () => {
+    it('should throw an error when "{tag}" and empty snapshot is used', async () => {
+      let cwd = f.copy("simple-project");
+      await writeChangesets([simpleChangeset2], cwd);
+      jest.spyOn(fs, "writeFile");
+
+      expect(
+        version(
+          cwd,
+          { snapshot: true },
+          {
+            ...modifiedDefaultConfig,
+            commit: false,
+            snapshot: {
+              ...modifiedDefaultConfig.snapshot,
+              prereleaseTemplate: `{tag}.{commit}`
+            }
+          }
+        )
+      ).rejects.toThrow(
+        'Failed to compose snapshot version: "{tag}" placeholder is used without having a value defined!'
+      );
+    });
+
+    it('should throw an error when "{tag}" is set and named snapshot is used', async () => {
+      let cwd = f.copy("simple-project");
+      await writeChangesets([simpleChangeset2], cwd);
+      jest.spyOn(fs, "writeFile");
+
+      expect(
+        version(
+          cwd,
+          { snapshot: "test" },
+          {
+            ...modifiedDefaultConfig,
+            commit: false,
+            snapshot: {
+              ...modifiedDefaultConfig.snapshot,
+              prereleaseTemplate: `{commit}`
+            }
+          }
+        )
+      ).rejects.toThrow(
+        "Failed to compose snapshot version: \"{tag}\" placeholder is missing, but the snapshot parameter is defined (value: 'test')"
+      );
+    });
+
+    it.each<[string | null | undefined, string | true, string]>([
+      // Template-based
+      ["{tag}", "test", "0.0.0-test"],
+      ["{tag}-{tag}", "test", "0.0.0-test-test"],
+      ["{commit}", true, "0.0.0-abcdef"],
+      ["{timestamp}", true, "0.0.0-1639354050879"],
+      ["{datetime}", true, "0.0.0-20211213000730"],
+      // Mixing template and static string
+      [
+        "{tag}.{timestamp}.{commit}",
+        "alpha",
+        "0.0.0-alpha.1639354050879.abcdef"
+      ],
+      ["{datetime}-{tag}", "alpha", "0.0.0-20211213000730-alpha"],
+      // Legacy support
+      ["", "test", "0.0.0-test-20211213000730"],
+      [undefined, "canary", "0.0.0-canary-20211213000730"],
+      [null, "alpha", "0.0.0-alpha-20211213000730"]
+    ])(
+      "should customize release correctly based on snapshotPrereleaseTemplate template: %p (tag: '%p')",
+      mockGlobalDate(
+        async (snapshotTemplate, snapshotValue, expectedResult) => {
+          let cwd = f.copy("simple-project");
+          await writeChangesets([simpleChangeset2], cwd);
+          const spy = jest.spyOn(fs, "writeFile");
+          await version(
+            cwd,
+            { snapshot: snapshotValue },
+            {
+              ...modifiedDefaultConfig,
+              commit: false,
+              snapshot: {
+                ...modifiedDefaultConfig.snapshot,
+                prereleaseTemplate: snapshotTemplate as string
+              }
+            }
+          );
+
+          expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+            expect.objectContaining({
+              name: "pkg-a",
+              version: expectedResult
+            })
+          );
+
+          expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+            expect.objectContaining({
+              name: "pkg-b",
+              version: expectedResult
+            })
+          );
+        }
+      )
+    );
   });
 
-  describe("useCalculatedVersionForSnapshots: true", () => {
+  describe("snapshot.useCalculatedVersion: true", () => {
     it("should update packages using calculated version", async () => {
       let cwd = f.copy("simple-project");
       await writeChangesets([simpleChangeset2], cwd);
@@ -777,9 +905,9 @@ describe("snapshot release", () => {
         {
           ...modifiedDefaultConfig,
           commit: false,
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            useCalculatedVersionForSnapshots: true
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null
           }
         }
       );
@@ -815,9 +943,9 @@ describe("snapshot release", () => {
         },
         {
           ...modifiedDefaultConfig,
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            useCalculatedVersionForSnapshots: true
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null
           }
         }
       );
@@ -840,15 +968,9 @@ describe("snapshot release", () => {
       `);
     });
 
-    it("should not bump version of an ignored package when its dependency gets updated", async () => {
-      const originalDate = Date;
-      // eslint-disable-next-line no-global-assign
-      Date = class Date {
-        toISOString() {
-          return "2021-12-13T00:07:30.879Z";
-        }
-      } as any;
-      try {
+    it(
+      "should not bump version of an ignored package when its dependency gets updated",
+      mockGlobalDate(async () => {
         const cwd = await f.copy("simple-project");
         await writeChangeset(
           {
@@ -866,9 +988,9 @@ describe("snapshot release", () => {
           {
             ...modifiedDefaultConfig,
             ignore: ["pkg-a"],
-            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-              ...modifiedDefaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-              useCalculatedVersionForSnapshots: true
+            snapshot: {
+              useCalculatedVersion: true,
+              prereleaseTemplate: null
             }
           }
         );
@@ -889,11 +1011,8 @@ describe("snapshot release", () => {
             },
           ]
         `);
-      } finally {
-        // eslint-disable-next-line no-global-assign
-        Date = originalDate;
-      }
-    });
+      })
+    );
   });
 });
 

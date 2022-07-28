@@ -55,6 +55,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Prereleases](./docs/prereleases.md)
 - [Problems publishing in monorepos](./docs/problems-publishing-in-monorepos.md)
 - [Snapshot releases](./docs/snapshot-releases.md)
+- [Experimental Options](./docs/experimental-options.md)
 
 ## Cool Projects already using Changesets for versioning and changelogs
 
@@ -77,6 +78,8 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [SvelteKit](https://kit.svelte.dev/)
 - [Hydrogen](https://hydrogen.shopify.dev)
 - [react-pdf](https://github.com/diegomura/react-pdf)
+- [wagmi](https://github.com/wagmi-dev/wagmi)
+- [refine](https://github.com/pankod/refine)
 
 # Thanks/Inspiration
 

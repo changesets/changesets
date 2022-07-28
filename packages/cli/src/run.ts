@@ -81,6 +81,7 @@ export async function run(
       empty,
       ignore,
       snapshot,
+      snapshotPrereleaseTemplate,
       tag,
       open,
       gitTag
@@ -160,6 +161,10 @@ export async function run(
           error(messages.join("\n"));
 
           throw new ExitError(1);
+        }
+
+        if (snapshotPrereleaseTemplate) {
+          config.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
         }
 
         await version(cwd, { snapshot }, config);
