@@ -1,5 +1,21 @@
 # @changesets/release-utils
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@0.5.7
+
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/types@5.1.0
+  - @changesets/read@0.5.6
+  - @changesets/pre@1.0.12
+
 ## 0.1.8
 
 ### Patch Changes

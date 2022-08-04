@@ -37,7 +37,9 @@ describe("assemble-release-plan", () => {
       setup.packages,
       defaultConfig,
       undefined,
-      true
+      {
+        tag: undefined
+      }
     );
 
     expect(releases.length).toBe(1);
@@ -50,7 +52,9 @@ describe("assemble-release-plan", () => {
       setup.packages,
       defaultConfig,
       undefined,
-      "foo"
+      {
+        tag: "foo"
+      }
     );
 
     expect(releases.length).toBe(1);

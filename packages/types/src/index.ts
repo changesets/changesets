@@ -73,9 +73,14 @@ export type Config = {
   ignore: ReadonlyArray<string>;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<
-    ExperimentalOptions
+  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Omit<
+    Required<ExperimentalOptions>,
+    "useCalculatedVersionForSnapshots"
   >;
+  snapshot: {
+    useCalculatedVersion: boolean;
+    prereleaseTemplate: string | null;
+  };
 };
 
 export type WrittenConfig = {
@@ -89,12 +94,17 @@ export type WrittenConfig = {
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  snapshot?: {
+    useCalculatedVersion?: boolean;
+    prereleaseTemplate?: string;
+  };
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?: ExperimentalOptions;
 };
 
 export type ExperimentalOptions = {
   onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
   updateInternalDependents?: "always" | "out-of-range";
+  /** @deprecated Since snapshot feature is now stable, you should migrate to use "snapshot.useCalculatedVersion". */
   useCalculatedVersionForSnapshots?: boolean;
 };
 

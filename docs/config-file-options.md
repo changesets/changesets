@@ -14,7 +14,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 }
 ```
 
-> NOTE: the `linked`, `updateInternalDependencies`, and `ignore` options are only for behaviour in monorepos.
+> NOTE: the `linked`, `fixed`, `updateInternalDependencies`, `bumpVersionsWithWorkspaceProtocolOnly`, and `ignore` options are only for behaviour in monorepos.
 
 ## `commit` (`boolean`, or module path as a `string`, or a tuple like `[modulePath: string, options: any]`)
 
@@ -156,3 +156,40 @@ You would specify our github changelog generator with:
 ```
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
+
+## `bumpVersionsWithWorkspaceProtocolOnly` (boolean)
+
+Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.
+
+## `snapshot` (object or undefined)
+
+Default value: `undefined`
+
+### `useCalculatedVersion` (optional boolean)
+
+Default value: `false`
+
+When `changesets version --snapshot` is used, the default behavior is to use `0.0.0` as the base version for the snapshot release.
+
+Setting `useCalculatedVersion: true` will change the default behavior and will use the calculated version, based on the changeset files.
+
+### `prereleaseTemplate` (optional string)
+
+Default value: `undefined` (see note below)
+
+Configures the suffix for the snapshot releases, using a template with placeholders.
+
+**Available placeholders:**
+
+You can use the following placeholders for customizing the snapshot release version:
+
+- `{tag}` - the name of the snapshot tag, as specified in `--snapshot something`
+- `{commit}` - the Git commit ID
+- `{timestamp}` - Unix timestamp of the time of the release
+- `{datetime}` - date and time of the release (14 characters, for example, `20211213000730`)
+
+> Note: if you are using `--snapshot` with empty tag name, you cannot use `{tag}` as placeholder - this will result in error.
+
+**Default behavior**
+
+If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
