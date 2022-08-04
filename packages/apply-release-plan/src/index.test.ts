@@ -1465,11 +1465,9 @@ describe("apply release plan", () => {
         }
       );
 
-      let readmePath = changedFiles.find(a =>
-        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
-      );
-
-      if (readmePath) throw new Error(`should not have found a changelog`);
+      expect(
+        changedFiles.find(a => a.endsWith(`pkg-a${path.sep}CHANGELOG.md`))
+      ).toBeUndefined();
     });
     it("should update a changelog for one package", async () => {
       const releasePlan = new FakeReleasePlan();
