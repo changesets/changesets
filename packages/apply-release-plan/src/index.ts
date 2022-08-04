@@ -180,9 +180,13 @@ async function getNewChangelogEntry(
   config: Config,
   cwd: string
 ) {
-  // Skip generating changelog entries if config.changelog is false
   if (!config.changelog) {
-    return releasesWithPackage;
+    return Promise.resolve(
+      releasesWithPackage.map(release => ({
+        ...release,
+        changelog: null
+      }))
+    );
   }
 
   let getChangelogFuncs: ChangelogFunctions = {
