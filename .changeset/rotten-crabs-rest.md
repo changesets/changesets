@@ -2,4 +2,4 @@
 "@changesets/cli": patch
 ---
 
-Cli will skip private packages without "version" field.
+Private packages without a `version` field are no longer listed when adding a changeset.
