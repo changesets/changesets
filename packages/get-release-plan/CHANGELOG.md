@@ -1,5 +1,12 @@
 # @changesets/get-release-plan
 
+## 3.0.13
+
+### Patch Changes
+
+- Updated dependencies [[`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e)]:
+  - @changesets/config@2.1.1
+
 ## 3.0.12
 
 ### Patch Changes
