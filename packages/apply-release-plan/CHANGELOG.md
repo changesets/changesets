@@ -1,5 +1,14 @@
 # @changesets/apply-release-plan
 
+## 6.0.4
+
+### Patch Changes
+
+- [#900](https://github.com/changesets/changesets/pull/900) [`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e) Thanks [@sdirosa](https://github.com/sdirosa)! - Fixed an issue with generating changelogs not being skipped when the `changelog` config option was set to `false`.
+
+- Updated dependencies [[`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e)]:
+  - @changesets/config@2.1.1
+
 ## 6.0.3
 
 ### Patch Changes

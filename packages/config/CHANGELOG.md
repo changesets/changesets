@@ -1,5 +1,11 @@
 # @changesets/config
 
+## 2.1.1
+
+### Patch Changes
+
+- [#900](https://github.com/changesets/changesets/pull/900) [`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e) Thanks [@sdirosa](https://github.com/sdirosa)! - Include the information about `false` being a valid value for the `changelog` option in the validation message for the `changelog` option.
+
 ## 2.1.0
 
 ### Minor Changes

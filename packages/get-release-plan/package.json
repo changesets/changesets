@@ -1,6 +1,6 @@
 {
   "name": "@changesets/get-release-plan",
-  "version": "3.0.12",
+  "version": "3.0.13",
   "description": "Reads changesets and adds information on dependents that need bumping",
   "main": "dist/get-release-plan.cjs.js",
   "module": "dist/get-release-plan.esm.js",
@@ -9,7 +9,7 @@
   "dependencies": {
     "@babel/runtime": "^7.10.4",
     "@changesets/assemble-release-plan": "^5.2.0",
-    "@changesets/config": "^2.1.0",
+    "@changesets/config": "^2.1.1",
     "@changesets/pre": "^1.0.12",
     "@changesets/read": "^0.5.7",
     "@changesets/types": "^5.1.0",

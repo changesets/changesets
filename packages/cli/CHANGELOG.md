@@ -1,5 +1,20 @@
 # @changesets/cli
 
+## 2.24.2
+
+### Patch Changes
+
+- [#900](https://github.com/changesets/changesets/pull/900) [`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e) Thanks [@sdirosa](https://github.com/sdirosa)! - Fixed an issue with generating changelogs not being skipped when the `changelog` config option was set to `false`.
+
+* [#720](https://github.com/changesets/changesets/pull/720) [`0fd56e1`](https://github.com/changesets/changesets/commit/0fd56e17092c7258de57adf7dd4ba08406c8e440) Thanks [@bhovhannes](https://github.com/bhovhannes)! - Private packages without a `version` field are no longer listed when adding a changeset.
+
+- [#844](https://github.com/changesets/changesets/pull/844) [`8627ec1`](https://github.com/changesets/changesets/commit/8627ec1faba53644b366c314be248e1bba48f329) Thanks [@Andarist](https://github.com/Andarist)! - Attempt to log `stdout` when publish fails if `stderr` is empty and JSON error can't be retrieved from none of those.
+
+- Updated dependencies [[`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e), [`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e)]:
+  - @changesets/config@2.1.1
+  - @changesets/apply-release-plan@6.0.4
+  - @changesets/get-release-plan@3.0.13
+
 ## 2.24.1
 
 ### Patch Changes
