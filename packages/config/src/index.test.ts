@@ -39,7 +39,7 @@ test("read reads the config", async () => {
     fixed: [],
     linked: [],
     changelog: false,
-    commit: true,
+    commit: ["@changesets/cli/commit", { skipCI: "version" }],
     access: "restricted",
     baseBranch: "master",
     updateInternalDependencies: "patch",
@@ -47,8 +47,11 @@ test("read reads the config", async () => {
     bumpVersionsWithWorkspaceProtocolOnly: false,
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
-      updateInternalDependents: "out-of-range",
-      useCalculatedVersionForSnapshots: false
+      updateInternalDependents: "out-of-range"
+    },
+    snapshot: {
+      useCalculatedVersion: false,
+      prereleaseTemplate: null
     }
   });
 });
@@ -64,8 +67,11 @@ let defaults = {
   ignore: [],
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
-    updateInternalDependents: "out-of-range",
-    useCalculatedVersionForSnapshots: false
+    updateInternalDependents: "out-of-range"
+  },
+  snapshot: {
+    useCalculatedVersion: false,
+    prereleaseTemplate: null
   },
   bumpVersionsWithWorkspaceProtocolOnly: false
 } as const;
@@ -117,7 +123,16 @@ let correctCases: Record<string, CorrectCase> = {
     },
     output: {
       ...defaults,
-      commit: true
+      commit: ["@changesets/cli/commit", { skipCI: "version" }]
+    }
+  },
+  "commit custom": {
+    input: {
+      commit: ["./some-module", { customOption: true }]
+    },
+    output: {
+      ...defaults,
+      commit: ["./some-module", { customOption: true }]
     }
   },
   "access private": {
@@ -284,6 +299,20 @@ let correctCases: Record<string, CorrectCase> = {
         updateInternalDependents: "always"
       }
     }
+  },
+  experimental_deprecated_useCalculatedVersionInSnapshot: {
+    input: {
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        useCalculatedVersionForSnapshots: true
+      }
+    },
+    output: {
+      ...defaults,
+      snapshot: {
+        useCalculatedVersion: true,
+        prereleaseTemplate: null
+      }
+    }
   }
 };
 
@@ -308,7 +337,7 @@ describe("parser errors", () => {
       unsafeParse({ changelog: {} }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The \`changelog\` option is set as {} when the only valid values are undefined, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
+The \`changelog\` option is set as {} when the only valid values are undefined, false, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
 `);
   });
   test("changelog array with 3 values", () => {
@@ -323,7 +352,7 @@ The \`changelog\` option is set as [
   \\"some-module\\",
   \\"something\\",
   \\"other\\"
-] when the only valid values are undefined, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
+] when the only valid values are undefined, false, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
 `);
   });
   test("changelog array with first value not string", () => {
@@ -334,7 +363,7 @@ The \`changelog\` option is set as [
 The \`changelog\` option is set as [
   false,
   \\"something\\"
-] when the only valid values are undefined, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
+] when the only valid values are undefined, false, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
 `);
   });
   test("access other string", () => {
@@ -345,12 +374,12 @@ The \`changelog\` option is set as [
 The \`access\` option is set as \\"something\\" when the only valid values are undefined, \\"public\\" or \\"restricted\\""
 `);
   });
-  test("commit non-boolean", () => {
+  test("commit invalid value", () => {
     expect(() => {
-      unsafeParse({ commit: "something" }, defaultPackages);
+      unsafeParse({ commit: {} }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The \`commit\` option is set as \\"something\\" when the only valid values are undefined or a boolean"
+The \`commit\` option is set as {} when the only valid values are undefined or a boolean or a module path (e.g. \\"@changesets/cli/commit\\" or \\"./some-module\\") or a tuple with a module path and config for the commit message generator (e.g. [\\"@changesets/cli/commit\\", { \\"skipCI\\": \\"version\\" }])"
 `);
   });
   describe("fixed", () => {
@@ -579,7 +608,24 @@ The package \\"pkg-a\\" depends on the ignored package \\"pkg-b\\", but \\"pkg-a
 The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
 `);
   });
-  test("useCalculatedVersionForSnapshots non-boolean", () => {
+
+  test("snapshot.useCalculatedVersion non-boolean", () => {
+    expect(() => {
+      unsafeParse(
+        {
+          snapshot: {
+            useCalculatedVersion: "not true"
+          }
+        },
+        defaultPackages
+      );
+    }).toThrowErrorMatchingInlineSnapshot(`
+"Some errors occurred when validating the changesets config:
+The \`snapshot.useCalculatedVersion\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
+`);
+  });
+
+  test("Experimental useCalculatedVersionForSnapshots non-boolean", () => {
     expect(() => {
       unsafeParse(
         {

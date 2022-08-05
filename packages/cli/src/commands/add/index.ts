@@ -9,6 +9,7 @@ import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
 
+import { getCommitFunctions } from "../../commit/getCommitFunctions";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
@@ -22,7 +23,9 @@ export default async function add(
   { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
 ) {
-  const packages = await getPackages(cwd);
+  const packages = (await getPackages(cwd)).packages.filter(
+    pkg => !config.ignore.includes(pkg.packageJson.name)
+  );
   const changesetBase = path.resolve(cwd, ".changeset");
 
   let newChangeset: UnwrapPromise<ReturnType<typeof createChangeset>>;
@@ -38,10 +41,11 @@ export default async function add(
       ref: config.baseBranch
     });
     const changePackagesName = changedPackages
-      .filter(a => a)
-      .map(pkg => pkg.packageJson.name);
-    newChangeset = await createChangeset(changePackagesName, packages.packages);
-    printConfirmationMessage(newChangeset, packages.packages.length > 1);
+      .map(pkg => pkg.packageJson.name)
+      .filter(pkgName => !config.ignore.includes(pkgName));
+
+    newChangeset = await createChangeset(changePackagesName, packages);
+    printConfirmationMessage(newChangeset, packages.length > 1);
 
     if (!newChangeset.confirmed) {
       newChangeset = {
@@ -53,9 +57,13 @@ export default async function add(
 
   if (newChangeset.confirmed) {
     const changesetID = await writeChangeset(newChangeset, cwd);
-    if (config.commit) {
+    const [{ getAddMessage }, commitOpts] = getCommitFunctions(
+      config.commit,
+      cwd
+    );
+    if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
-      await git.commit(`docs(changeset): ${newChangeset.summary}`, cwd);
+      await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
       log(chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`));
     } else {
       log(

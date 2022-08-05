@@ -42,6 +42,21 @@ function getNormalizedChangelogOption(
   return thing;
 }
 
+function getNormalizedCommitOption(
+  thing: boolean | readonly [string, any] | string
+): Config["commit"] {
+  if (thing === false) {
+    return false;
+  }
+  if (thing === true) {
+    return ["@changesets/cli/commit", { skipCI: "version" }];
+  }
+  if (typeof thing === "string") {
+    return [thing, null];
+  }
+  return thing;
+}
+
 function getUnmatchedPatterns(
   listOfPackageNamesOrGlob: readonly string[],
   pkgNames: readonly string[]
@@ -101,7 +116,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.changelog,
         null,
         2
-      )} when the only valid values are undefined, a module path(e.g. "@changesets/cli/changelog" or "./some-module") or a tuple with a module path and config for the changelog generator(e.g. ["@changesets/cli/changelog", { someOption: true }])`
+      )} when the only valid values are undefined, false, a module path(e.g. "@changesets/cli/changelog" or "./some-module") or a tuple with a module path and config for the changelog generator(e.g. ["@changesets/cli/changelog", { someOption: true }])`
     );
   }
 
@@ -126,13 +141,22 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
-  if (json.commit !== undefined && typeof json.commit !== "boolean") {
+  if (
+    json.commit !== undefined &&
+    typeof json.commit !== "boolean" &&
+    typeof json.commit !== "string" &&
+    !(
+      isArray(json.commit) &&
+      json.commit.length === 2 &&
+      typeof json.commit[0] === "string"
+    )
+  ) {
     messages.push(
       `The \`commit\` option is set as ${JSON.stringify(
         json.commit,
         null,
         2
-      )} when the only valid values are undefined or a boolean`
+      )} when the only valid values are undefined or a boolean or a module path (e.g. "@changesets/cli/commit" or "./some-module") or a tuple with a module path and config for the commit message generator (e.g. ["@changesets/cli/commit", { "skipCI": "version" }])`
     );
   }
   if (json.baseBranch !== undefined && typeof json.baseBranch !== "string") {
@@ -291,12 +315,42 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
+  const { snapshot } = json;
+
+  if (snapshot !== undefined) {
+    if (
+      snapshot.useCalculatedVersion !== undefined &&
+      typeof snapshot.useCalculatedVersion !== "boolean"
+    ) {
+      messages.push(
+        `The \`snapshot.useCalculatedVersion\` option is set as ${JSON.stringify(
+          snapshot.useCalculatedVersion,
+          null,
+          2
+        )} when the only valid values are undefined or a boolean`
+      );
+    }
+    if (
+      snapshot.prereleaseTemplate !== undefined &&
+      typeof snapshot.prereleaseTemplate !== "string"
+    ) {
+      messages.push(
+        `The \`snapshot.prereleaseTemplate\` option is set as ${JSON.stringify(
+          snapshot.prereleaseTemplate,
+          null,
+          2
+        )} when the only valid values are undefined, or a template string.`
+      );
+    }
+  }
+
   if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
     const {
       onlyUpdatePeerDependentsWhenOutOfRange,
       updateInternalDependents,
       useCalculatedVersionForSnapshots
     } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
+
     if (
       onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
       typeof onlyUpdatePeerDependentsWhenOutOfRange !== "boolean"
@@ -309,6 +363,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or a boolean`
       );
     }
+
     if (
       updateInternalDependents !== undefined &&
       !["always", "out-of-range"].includes(updateInternalDependents)
@@ -322,18 +377,25 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       );
     }
     if (
-      useCalculatedVersionForSnapshots !== undefined &&
-      typeof useCalculatedVersionForSnapshots !== "boolean"
+      useCalculatedVersionForSnapshots &&
+      useCalculatedVersionForSnapshots !== undefined
     ) {
-      messages.push(
-        `The \`useCalculatedVersionForSnapshots\` option is set as ${JSON.stringify(
-          useCalculatedVersionForSnapshots,
-          null,
-          2
-        )} when the only valid values are undefined or a boolean`
+      console.warn(
+        `Experimental flag "useCalculatedVersionForSnapshots" is deprecated since snapshot feature became stable. Please use "snapshot.useCalculatedVersion" instead.`
       );
+
+      if (typeof useCalculatedVersionForSnapshots !== "boolean") {
+        messages.push(
+          `The \`useCalculatedVersionForSnapshots\` option is set as ${JSON.stringify(
+            useCalculatedVersionForSnapshots,
+            null,
+            2
+          )} when the only valid values are undefined or a boolean`
+        );
+      }
     }
   }
+
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
@@ -351,8 +413,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       normalizedAccess === undefined
         ? defaultWrittenConfig.access
         : normalizedAccess,
-    commit:
-      json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
+    commit: getNormalizedCommitOption(
+      json.commit === undefined ? defaultWrittenConfig.commit : json.commit
+    ),
     fixed,
     linked,
     baseBranch:
@@ -373,6 +436,18 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,
 
+    snapshot: {
+      prereleaseTemplate: json.snapshot?.prereleaseTemplate ?? null,
+      useCalculatedVersion:
+        json.snapshot?.useCalculatedVersion !== undefined
+          ? json.snapshot.useCalculatedVersion
+          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              ?.useCalculatedVersionForSnapshots !== undefined
+          ? json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              ?.useCalculatedVersionForSnapshots
+          : false
+    },
+
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
@@ -384,15 +459,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
       updateInternalDependents:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          ?.updateInternalDependents ?? "out-of-range",
-
-      useCalculatedVersionForSnapshots:
-        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
-        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .useCalculatedVersionForSnapshots === undefined
-          ? false
-          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              .useCalculatedVersionForSnapshots
+          ?.updateInternalDependents ?? "out-of-range"
     }
   };
   return config;

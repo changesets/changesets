@@ -1,5 +1,39 @@
 # @changesets/release-utils
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@0.5.7
+
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/types@5.1.0
+  - @changesets/read@0.5.6
+  - @changesets/pre@1.0.12
+
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+  - @changesets/types@5.0.0
+  - @changesets/pre@1.0.11
+  - @changesets/read@0.5.5
+
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [[`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15)]:
+  - @changesets/types@4.1.0
+  - @changesets/pre@1.0.10
+  - @changesets/read@0.5.4
+
 ## 0.1.6
 
 ### Patch Changes

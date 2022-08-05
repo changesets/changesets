@@ -95,9 +95,7 @@ function verbosePrint(
       ({ name, newVersion: version, changesets }) => [
         chalk.green(name),
         version,
-        changesets
-          .map(c => chalk.blue(` .changeset/${c}/changes.md`))
-          .join(" +")
+        changesets.map(c => chalk.blue(` .changeset/${c}.md`)).join(" +")
       ]
     );
 

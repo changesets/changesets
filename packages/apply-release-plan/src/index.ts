@@ -17,7 +17,6 @@ import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
-import createVersionCommit from "./createVersionCommit";
 import getChangelogEntry from "./get-changelog-entry";
 
 function stringDefined(s: string | undefined): s is string {
@@ -73,8 +72,6 @@ export default async function applyReleasePlan(
 
   let { releases, changesets } = releasePlan;
 
-  const versionCommit = createVersionCommit(releasePlan, config.commit);
-
   let releasesWithPackage = releases.map(release => {
     let pkg = packagesByName.get(release.name);
     if (!pkg)
@@ -120,7 +117,8 @@ export default async function applyReleasePlan(
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .onlyUpdatePeerDependentsWhenOutOfRange,
       bumpVersionsWithWorkspaceProtocolOnly:
-        config.bumpVersionsWithWorkspaceProtocolOnly
+        config.bumpVersionsWithWorkspaceProtocolOnly,
+      snapshot
     });
   });
 
@@ -172,23 +170,7 @@ export default async function applyReleasePlan(
     );
   }
 
-  if (config.commit) {
-    let newTouchedFilesArr = [...touchedFiles];
-    // Note, git gets angry if you try and have two git actions running at once
-    // So we need to be careful that these iterations are properly sequential
-    while (newTouchedFilesArr.length > 0) {
-      let file = newTouchedFilesArr.shift();
-      await git.add(path.relative(cwd, file!), cwd);
-    }
-
-    let commit = await git.commit(versionCommit, cwd);
-
-    if (!commit) {
-      console.error("Changesets ran into trouble committing your files");
-    }
-  }
-
-  // We return the touched files mostly for testing purposes
+  // We return the touched files to be committed in the cli
   return touchedFiles;
 }
 
@@ -198,28 +180,35 @@ async function getNewChangelogEntry(
   config: Config,
   cwd: string
 ) {
+  if (!config.changelog) {
+    return Promise.resolve(
+      releasesWithPackage.map(release => ({
+        ...release,
+        changelog: null
+      }))
+    );
+  }
+
   let getChangelogFuncs: ChangelogFunctions = {
     getReleaseLine: () => Promise.resolve(""),
     getDependencyReleaseLine: () => Promise.resolve("")
   };
-  let changelogOpts: any;
-  if (config.changelog) {
-    changelogOpts = config.changelog[1];
-    let changesetPath = path.join(cwd, ".changeset");
-    let changelogPath = resolveFrom(changesetPath, config.changelog[0]);
 
-    let possibleChangelogFunc = require(changelogPath);
-    if (possibleChangelogFunc.default) {
-      possibleChangelogFunc = possibleChangelogFunc.default;
-    }
-    if (
-      typeof possibleChangelogFunc.getReleaseLine === "function" &&
-      typeof possibleChangelogFunc.getDependencyReleaseLine === "function"
-    ) {
-      getChangelogFuncs = possibleChangelogFunc;
-    } else {
-      throw new Error("Could not resolve changelog generation functions");
-    }
+  const changelogOpts = config.changelog[1];
+  let changesetPath = path.join(cwd, ".changeset");
+  let changelogPath = resolveFrom(changesetPath, config.changelog[0]);
+
+  let possibleChangelogFunc = require(changelogPath);
+  if (possibleChangelogFunc.default) {
+    possibleChangelogFunc = possibleChangelogFunc.default;
+  }
+  if (
+    typeof possibleChangelogFunc.getReleaseLine === "function" &&
+    typeof possibleChangelogFunc.getDependencyReleaseLine === "function"
+  ) {
+    getChangelogFuncs = possibleChangelogFunc;
+  } else {
+    throw new Error("Could not resolve changelog generation functions");
   }
 
   let commits = await getCommitsThatAddChangesets(

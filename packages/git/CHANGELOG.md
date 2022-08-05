@@ -1,5 +1,38 @@
 # @changesets/git
 
+## 1.4.1
+
+### Patch Changes
+
+- [#889](https://github.com/changesets/changesets/pull/889) [`f64bc1b`](https://github.com/changesets/changesets/commit/f64bc1bb33457918eae34b22f214174ba3cf4504) Thanks [@jakubmazanec](https://github.com/jakubmazanec)! - Fixed `getCurrentCommitId` so that the returned value doesn't contain quotation marks on some Windows machines.
+
+## 1.4.0
+
+### Minor Changes
+
+- [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - Added a new helper function: `getCurrentCommitId`
+
+### Patch Changes
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/types@5.1.0
+
+## 1.3.2
+
+### Patch Changes
+
+- [#770](https://github.com/changesets/changesets/pull/770) [`eb86652`](https://github.com/changesets/changesets/commit/eb86652cbd21c49f90d2a03caa9a578593c4d102) Thanks [@alizeait](https://github.com/alizeait)! - `getChangedFilesSince` and `getChangedPackagesSinceRef` will now return the correct absolute paths of the changed files when the passed `cwd` is different from the repository's root.
+
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+  - @changesets/types@5.0.0
+
+## 1.3.1
+
+### Patch Changes
+
+- Updated dependencies [[`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15)]:
+  - @changesets/types@4.1.0
+
 ## 1.3.0
 
 ### Minor Changes

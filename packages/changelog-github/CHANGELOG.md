@@ -1,5 +1,35 @@
 # @changesets/changelog-github
 
+## 0.4.6
+
+### Patch Changes
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/types@5.1.0
+
+## 0.4.5
+
+### Patch Changes
+
+- [#820](https://github.com/changesets/changesets/pull/820) [`a22eb8c`](https://github.com/changesets/changesets/commit/a22eb8c93fff7912323aa8f3d534066ce2a578fa) Thanks [@Andarist](https://github.com/Andarist)! - Errors resulting from the GitHub API calls should now be properly raised.
+
+- Updated dependencies [[`a22eb8c`](https://github.com/changesets/changesets/commit/a22eb8c93fff7912323aa8f3d534066ce2a578fa)]:
+  - @changesets/get-github-info@0.5.1
+
+## 0.4.4
+
+### Patch Changes
+
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+  - @changesets/types@5.0.0
+
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [[`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15)]:
+  - @changesets/types@4.1.0
+
 ## 0.4.2
 
 ### Patch Changes

@@ -1,5 +1,73 @@
 # @changesets/config
 
+## 2.1.0
+
+### Minor Changes
+
+- [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - Added a new config option: `snapshot.prereleaseTemplate` for customizing the way snapshot release numbers are being composed.
+
+### Patch Changes
+
+- [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - A possibility to use the calculated version for snapshot releases is now stable 🥳 All snapshot-related config parameters are now grouped under a single config property called `snapshot`.
+
+  To migrate, make sure to update your `config.json`.
+
+  Old usage (still works, but comes with a deprecated warning):
+
+  ```json
+  {
+    "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+      "useCalculatedVersionForSnapshots": true
+    }
+  }
+  ```
+
+  New usage:
+
+  ```json
+  {
+    "snapshot": {
+      "useCalculatedVersion": true
+    }
+  }
+  ```
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/types@5.1.0
+  - @changesets/get-dependents-graph@1.3.3
+
+## 2.0.1
+
+### Patch Changes
+
+- [#854](https://github.com/changesets/changesets/pull/854) [`2827c7a`](https://github.com/changesets/changesets/commit/2827c7ab33af30065fafe72ede1a2a6ac88d5276) Thanks [@Andarist](https://github.com/Andarist)! - Fixed the declared JSON schema type for the `changelog` config option.
+
+* [#852](https://github.com/changesets/changesets/pull/852) [`7b1c0c1`](https://github.com/changesets/changesets/commit/7b1c0c1b73a19b50fe3a104acb440c604eab108f) Thanks [@caohuilin](https://github.com/caohuilin)! - Fixed the declared JSON schema type for the `commit` config option.
+
+## 2.0.0
+
+### Major Changes
+
+- [#768](https://github.com/changesets/changesets/pull/768) [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c) Thanks [@rohit-gohri](https://github.com/rohit-gohri)! - The parsed config now normalzied the commit option to either `false` or a tuple describing what module should be loaded to resolve commit functions.
+
+### Patch Changes
+
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+  - @changesets/types@5.0.0
+  - @changesets/get-dependents-graph@1.3.2
+
+## 1.7.0
+
+### Minor Changes
+
+- [#690](https://github.com/changesets/changesets/pull/690) [`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15) Thanks [@Andarist](https://github.com/Andarist)! - Added parsing and validating of the new `fixed` option. The description for this option has also been added to the JSON schema.
+
+### Patch Changes
+
+- Updated dependencies [[`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15)]:
+  - @changesets/types@4.1.0
+  - @changesets/get-dependents-graph@1.3.1
+
 ## 1.6.4
 
 ### Patch Changes

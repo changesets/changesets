@@ -21,7 +21,9 @@ export default function flattenReleases(
         let release = releases.get(name);
         let pkg = packagesByName.get(name);
         if (!pkg) {
-          throw new Error(`Could not find package information for ${name}`);
+          throw new Error(
+            `"${changeset.id}" changeset mentions a release for a package "${name}" but such a package could not be found.`
+          );
         }
         if (!release) {
           release = {

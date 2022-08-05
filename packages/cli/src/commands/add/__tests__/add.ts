@@ -1,3 +1,4 @@
+import path from "path";
 import fixtures from "fixturez";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
@@ -172,6 +173,7 @@ describe("Changesets", () => {
       })
     );
   });
+
   it("should commit when the commit flag is passed in", async () => {
     const cwd = await f.copy("simple-project-custom-config");
 
@@ -179,10 +181,15 @@ describe("Changesets", () => {
     await addChangeset(
       cwd,
       { empty: false },
-      { ...defaultConfig, commit: true }
+      {
+        ...defaultConfig,
+        commit: [path.resolve(__dirname, "..", "..", "..", "commit"), null]
+      }
     );
     expect(git.add).toHaveBeenCalledTimes(1);
+    expect(git.commit).toHaveBeenCalledTimes(1);
   });
+
   it("should create empty changeset when empty flag is passed in", async () => {
     const cwd = await f.copy("simple-project");
 
@@ -196,5 +203,19 @@ describe("Changesets", () => {
         summary: ""
       })
     );
+  });
+  it("should not include ignored packages in the prompt", async () => {
+    const cwd = await f.copy("internal-dependencies");
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset(
+      cwd,
+      { empty: false },
+      { ...defaultConfig, ignore: ["pkg-b"] }
+    );
+
+    // @ts-ignore
+    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
 });

@@ -49,11 +49,13 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Config file options](./docs/config-file-options.md)
 - [Decisions](./docs/decisions.md)
 - [Dictionary](./docs/dictionary.md)
+- [Fixed packages](./docs/fixed-packages.md)
 - [Linked packages](./docs/linked-packages.md)
 - [Modifying changelog format](./docs/modifying-changelog-format.md)
 - [Prereleases](./docs/prereleases.md)
 - [Problems publishing in monorepos](./docs/problems-publishing-in-monorepos.md)
 - [Snapshot releases](./docs/snapshot-releases.md)
+- [Experimental Options](./docs/experimental-options.md)
 
 ## Cool Projects already using Changesets for versioning and changelogs
 
@@ -68,9 +70,15 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Firebase Javascript SDK](https://github.com/firebase/firebase-js-sdk)
 - [Formik](https://github.com/formium/formik)
 - [MobX](https://github.com/mobxjs/mobx)
+- [Nhost](https://github.com/nhost/nhost)
 - [verdaccio](https://verdaccio.org/)
 - [Chakra UI](https://chakra-ui.com/)
 - [Astro](https://astro.build)
+- [SvelteKit](https://kit.svelte.dev/)
+- [Hydrogen](https://hydrogen.shopify.dev)
+- [react-pdf](https://github.com/diegomura/react-pdf)
+- [wagmi](https://github.com/wagmi-dev/wagmi)
+- [refine](https://github.com/pankod/refine)
 
 # Thanks/Inspiration
 

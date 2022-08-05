@@ -1,5 +1,55 @@
 # @changesets/assemble-release-plan
 
+## 5.2.0
+
+### Minor Changes
+
+- [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - Added a new config option: `snapshot.prereleaseTemplate` for customizing the way snapshot release numbers are being composed.
+
+### Patch Changes
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/types@5.1.0
+  - @changesets/get-dependents-graph@1.3.3
+
+## 5.1.3
+
+### Patch Changes
+
+- [#767](https://github.com/changesets/changesets/pull/767) [`d6bfcc5`](https://github.com/changesets/changesets/commit/d6bfcc5052dcba18c521a20d62e2e67a81819112) Thanks [@Andarist](https://github.com/Andarist)! - Improve the error message when a package referenced in a changeset can't be found. The message will now also include the changeset's ID.
+
+## 5.1.2
+
+### Patch Changes
+
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+  - @changesets/types@5.0.0
+  - @changesets/get-dependents-graph@1.3.2
+
+## 5.1.1
+
+### Patch Changes
+
+- [#769](https://github.com/changesets/changesets/pull/769) [`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an infinite loop involving a fixed group of packages and a package within that group that was both ignored and dependent on another package from that group.
+
+## 5.1.0
+
+### Minor Changes
+
+- [#690](https://github.com/changesets/changesets/pull/690) [`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15) Thanks [@Andarist](https://github.com/Andarist)! - Added handling of the `fixed` config option. This adds all the packages from the `fixed` group to the assembled release and added releases end up having the same version.
+
+### Patch Changes
+
+- [#706](https://github.com/changesets/changesets/pull/706) [`0812858`](https://github.com/changesets/changesets/commit/0812858996045e602d22f2b7dd13e8673e3b36b0) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `"none"` releases causing package versions being bumped during snapshot releases. In addition to when you create `"none"` release types explicitly Changesets might create them implicitly in some situations, for example under some circumstances this issue caused snapshot releases to be created sometimes for ignored packages.
+
+* [#751](https://github.com/changesets/changesets/pull/751) [`59c7ebc`](https://github.com/changesets/changesets/commit/59c7ebc7a5e75f69f5487e95a85cd1b7062ac39d) Thanks [@Rugvip](https://github.com/Rugvip)! - Fixed an issue where dependent packages would sometimes not get bumped properly when exiting prerelease mode.
+
+- [#703](https://github.com/changesets/changesets/pull/703) [`15c461d`](https://github.com/changesets/changesets/commit/15c461d5de94a274ccc8b33755a133a513339b0a) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages being always bumped when their `*` dependency was bumped.
+
+- Updated dependencies [[`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15)]:
+  - @changesets/types@4.1.0
+  - @changesets/get-dependents-graph@1.3.1
+
 ## 5.0.5
 
 ### Patch Changes
