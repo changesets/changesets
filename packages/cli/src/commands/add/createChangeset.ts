@@ -58,16 +58,6 @@ async function getPackagesToRelease(
     );
   }
 
-  const pkgJsonsByName = getPkgJsonByName(allPackages);
-
-  // filter out private packages without 'version' field
-  allPackages = allPackages.filter(
-    pkg => !isNonVersionablePackage(pkg.packageJson)
-  );
-  changedPackages = changedPackages.filter(
-    pkgName => !isNonVersionablePackage(pkgJsonsByName.get(pkgName)!)
-  );
-
   if (allPackages.length > 1) {
     const unchangedPackagesNames = allPackages
       .map(({ packageJson }) => packageJson.name)
@@ -110,10 +100,6 @@ function getPkgJsonByName(packages: Package[]) {
   return new Map(
     packages.map(({ packageJson }) => [packageJson.name, packageJson])
   );
-}
-
-function isNonVersionablePackage(packageJson: PackageJSON) {
-  return packageJson.private && !packageJson.version;
 }
 
 export default async function createChangeset(
