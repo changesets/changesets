@@ -1,5 +1,6 @@
 ---
 "@changesets/cli": minor
+"@changesets/config": minor
 "@changesets/get-dependents-graph": minor
 "@changesets/types": minor
 ---
