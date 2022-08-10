@@ -11,14 +11,18 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies"
 ] as const;
 
-const getAllDependencies = (config: PackageJSON, opts?: {
-  ignoreDevDependencies?: boolean;
-}) => {
+const getAllDependencies = (
+  config: PackageJSON,
+  opts?: {
+    ignoreDevDependencies?: boolean;
+  }
+) => {
   const allDependencies = new Map<string, string>();
 
   for (const type of DEPENDENCY_TYPES) {
-    if (opts?.ignoreDevDependencies === true && type === 'devDependencies') continue;
-    
+    if (opts?.ignoreDevDependencies === true && type === "devDependencies")
+      continue;
+
     const deps = config[type];
     if (!deps) continue;
 
