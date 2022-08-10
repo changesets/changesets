@@ -23,8 +23,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  ignore: [] as ReadonlyArray<string>,
-  allowIgnoredDevDependencies: false
+  ignore: [] as ReadonlyArray<string>
 } as const;
 
 function flatten<T>(arr: Array<T[]>): T[] {
@@ -436,6 +435,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,
+
+    allowIgnoredDependencies: json.allowIgnoredDependencies === true,
 
     snapshot: {
       prereleaseTemplate: json.snapshot?.prereleaseTemplate ?? null,
