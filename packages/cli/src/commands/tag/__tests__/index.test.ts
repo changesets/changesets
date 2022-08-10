@@ -30,7 +30,7 @@ describe("tag command", () => {
       (git.getAllTags as jest.Mock).mockReturnValue(
         new Set([
           // pkg-a should not be re-tagged
-          "pkg-a@1.0.0"
+          "pkg-a@1.0.0",
         ])
       );
 

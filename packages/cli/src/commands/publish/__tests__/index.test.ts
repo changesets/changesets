@@ -9,7 +9,7 @@ import { silenceLogsInBlock } from "@changesets/test-utils";
 let changelogPath = path.resolve(__dirname, "../../changelog");
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
-  changelog: [changelogPath, null]
+  changelog: [changelogPath, null],
 };
 
 const f = fixtures(__dirname);

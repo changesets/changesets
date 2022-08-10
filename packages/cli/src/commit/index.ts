@@ -19,12 +19,12 @@ const getVersionMessage: CommitFunctions["getVersionMessage"] = async (
 ) => {
   const skipCI = options?.skipCI === "version" || options?.skipCI === true;
   const publishableReleases = releasePlan.releases.filter(
-    release => release.type !== "none"
+    (release) => release.type !== "none"
   );
   const numPackagesReleased = publishableReleases.length;
 
   const releasesLines = publishableReleases
-    .map(release => `  ${release.name}@${release.newVersion}`)
+    .map((release) => `  ${release.name}@${release.newVersion}`)
     .join("\n");
 
   return outdent`
@@ -38,7 +38,7 @@ const getVersionMessage: CommitFunctions["getVersionMessage"] = async (
 
 const defaultCommitFunctions: Required<CommitFunctions> = {
   getAddMessage,
-  getVersionMessage
+  getVersionMessage,
 };
 
 export default defaultCommitFunctions;

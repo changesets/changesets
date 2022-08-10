@@ -4,7 +4,7 @@ const DEPENDENCY_TYPES = [
   "dependencies",
   "devDependencies",
   "peerDependencies",
-  "optionalDependencies"
+  "optionalDependencies",
 ] as const;
 
 export type VersionType = "major" | "minor" | "patch" | "none";

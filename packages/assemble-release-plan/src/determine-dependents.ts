@@ -4,7 +4,7 @@ import {
   DependencyType,
   PackageJSON,
   VersionType,
-  Config
+  Config,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease, PreInfo } from "./types";
@@ -27,7 +27,7 @@ export default function determineDependents({
   packagesByName,
   dependencyGraph,
   preInfo,
-  config
+  config,
 }: {
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
@@ -51,7 +51,7 @@ export default function determineDependents({
       );
     }
     pkgDependents
-      .map(dependent => {
+      .map((dependent) => {
         let type: VersionType | undefined;
 
         const dependentPackage = packagesByName.get(dependent);
@@ -76,7 +76,7 @@ export default function determineDependents({
                 preInfo,
                 onlyUpdatePeerDependentsWhenOutOfRange:
                   config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                    .onlyUpdatePeerDependentsWhenOutOfRange
+                    .onlyUpdatePeerDependentsWhenOutOfRange,
               })
             ) {
               type = "major";
@@ -121,7 +121,7 @@ export default function determineDependents({
         return {
           name: dependent,
           type,
-          pkgJSON: dependentPackage.packageJson
+          pkgJSON: dependentPackage.packageJson,
         };
       })
       .filter(({ type }) => type)
@@ -146,7 +146,7 @@ export default function determineDependents({
               name,
               type,
               oldVersion: pkgJSON.version,
-              changesets: []
+              changesets: [],
             };
 
             pkgsToSearch.push(newDependent);
@@ -175,7 +175,7 @@ function getDependencyVersionRanges(
     "dependencies",
     "devDependencies",
     "peerDependencies",
-    "optionalDependencies"
+    "optionalDependencies",
   ] as const;
   const dependencyVersionRanges: {
     depType: DependencyType;
@@ -194,12 +194,12 @@ function getDependencyVersionRanges(
           versionRange === "workspace:*"
             ? // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
               dependencyRelease.oldVersion
-            : versionRange.replace(/^workspace:/, "")
+            : versionRange.replace(/^workspace:/, ""),
       });
     } else {
       dependencyVersionRanges.push({
         depType: type,
-        versionRange
+        versionRange,
       });
     }
   }
@@ -213,7 +213,7 @@ function shouldBumpMajor({
   releases,
   nextRelease,
   preInfo,
-  onlyUpdatePeerDependentsWhenOutOfRange
+  onlyUpdatePeerDependentsWhenOutOfRange,
 }: {
   dependent: string;
   depType: DependencyType;

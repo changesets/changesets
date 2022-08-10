@@ -17,8 +17,8 @@ describe("read changesets from disc", () => {
       {
         releases: [{ name: "cool-package", type: "minor" }],
         summary: "Nice simple summary",
-        id: "basic-changeset"
-      }
+        id: "basic-changeset",
+      },
     ]);
   });
   it("should ignore a readme file", async () => {
@@ -29,8 +29,8 @@ describe("read changesets from disc", () => {
       {
         releases: [{ name: "cool-package", type: "minor" }],
         summary: "Nice simple summary",
-        id: "basic-changeset"
-      }
+        id: "basic-changeset",
+      },
     ]);
   });
   it("read a changeset that isn't a three word id", async () => {
@@ -43,8 +43,8 @@ describe("read changesets from disc", () => {
       {
         releases: [{ name: "cool-package", type: "minor" }],
         summary: "Nice simple summary",
-        id: "basic-changeset"
-      }
+        id: "basic-changeset",
+      },
     ]);
   });
   it("should read many changesets from disc", async () => {
@@ -55,14 +55,14 @@ describe("read changesets from disc", () => {
       {
         releases: [{ name: "cool-package", type: "minor" }],
         summary: "Nice simple summary",
-        id: "first-changeset"
+        id: "first-changeset",
       },
       {
         releases: [{ name: "best-package", type: "patch" }],
         summary:
           "I'm amazed we needed to update the best package, because it was already the best",
-        id: "second-changeset"
-      }
+        id: "second-changeset",
+      },
     ]);
   });
   it("should return an empty array when no changesets are found", async () => {
@@ -105,8 +105,8 @@ describe("read changesets from disc", () => {
       {
         releases: [],
         summary: "",
-        id: "empty-changeset"
-      }
+        id: "empty-changeset",
+      },
     ]);
   });
   it("should filter out ignored changesets", async () => {
@@ -117,8 +117,8 @@ describe("read changesets from disc", () => {
       {
         releases: [{ name: "pkg-a", type: "minor" }],
         summary: "Nice simple summary, much wow",
-        id: "changesets-are-beautiful"
-      }
+        id: "changesets-are-beautiful",
+      },
     ]);
   });
 });

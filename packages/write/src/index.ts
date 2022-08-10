@@ -27,7 +27,7 @@ async function writeChangeset(
   // experimenting with human readable ids to make finding changesets easier
   const changesetID = humanId({
     separator: "-",
-    capitalize: false
+    capitalize: false,
   });
 
   const prettierInstance = getPrettierInstance();
@@ -39,7 +39,7 @@ async function writeChangeset(
   // not spec for yaml. This is because package names can contain special
   // characters that will otherwise break the parsing step
   const changesetContents = `---
-${releases.map(release => `"${release.name}": ${release.type}`).join("\n")}
+${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
 ---
 
 ${summary}
@@ -49,7 +49,7 @@ ${summary}
     newChangesetPath,
     prettierInstance.format(changesetContents, {
       ...prettierConfig,
-      parser: "markdown"
+      parser: "markdown",
     })
   );
 

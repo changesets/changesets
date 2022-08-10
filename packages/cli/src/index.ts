@@ -20,52 +20,52 @@ const { input, flags } = meow(
   {
     flags: {
       sinceMaster: {
-        type: "boolean"
+        type: "boolean",
       },
       verbose: {
         type: "boolean",
-        alias: "v"
+        alias: "v",
       },
       output: {
         type: "string",
-        alias: "o"
+        alias: "o",
       },
       otp: {
-        type: "string"
+        type: "string",
       },
       empty: {
-        type: "boolean"
+        type: "boolean",
       },
       since: {
-        type: "string"
+        type: "string",
       },
       ignore: {
         type: "string",
-        isMultiple: true
+        isMultiple: true,
       },
       tag: {
-        type: "string"
+        type: "string",
       },
       open: {
-        type: "boolean"
+        type: "boolean",
       },
       gitTag: {
         type: "boolean",
-        default: true
+        default: true,
       },
       snapshotPrereleaseTemplate: {
-        type: "string"
-      }
+        type: "string",
+      },
       // mixed type like this is not supported by `meow`
       // if it gets passed explicitly then it's still available on the flags with an inferred type though
       // snapshot: { type: "boolean" | "string" },
-    }
+    },
   }
 );
 
 const cwd = process.cwd();
 
-run(input, flags, cwd).catch(err => {
+run(input, flags, cwd).catch((err) => {
   if (err instanceof InternalError) {
     error(
       "The following error is an internal unexpected error, these should never happen."

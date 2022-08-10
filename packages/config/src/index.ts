@@ -9,7 +9,7 @@ import {
   WrittenConfig,
   Fixed,
   Linked,
-  PackageGroup
+  PackageGroup,
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -23,7 +23,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  ignore: [] as ReadonlyArray<string>
+  ignore: [] as ReadonlyArray<string>,
 } as const;
 
 function flatten<T>(arr: Array<T[]>): T[] {
@@ -62,8 +62,8 @@ function getUnmatchedPatterns(
   pkgNames: readonly string[]
 ): string[] {
   return listOfPackageNamesOrGlob.filter(
-    pkgNameOrGlob =>
-      !pkgNames.some(pkgName => micromatch.isMatch(pkgName, pkgNameOrGlob))
+    (pkgNameOrGlob) =>
+      !pkgNames.some((pkgName) => micromatch.isMatch(pkgName, pkgNameOrGlob))
   );
 }
 
@@ -73,7 +73,8 @@ const havePackageGroupsCorrectShape = (
   return (
     isArray(pkgGroups) &&
     pkgGroups.every(
-      arr => isArray(arr) && arr.every(pkgName => typeof pkgName === "string")
+      (arr) =>
+        isArray(arr) && arr.every((pkgName) => typeof pkgName === "string")
     )
   );
 };
@@ -186,7 +187,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       for (let fixedGroup of json.fixed) {
         messages.push(
           ...getUnmatchedPatterns(fixedGroup, pkgNames).map(
-            pkgOrGlob =>
+            (pkgOrGlob) =>
               `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
           )
         );
@@ -203,7 +204,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       }
 
       if (duplicatedPkgNames.size) {
-        duplicatedPkgNames.forEach(pkgName => {
+        duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
             `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
           );
@@ -229,7 +230,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       for (let linkedGroup of json.linked) {
         messages.push(
           ...getUnmatchedPatterns(linkedGroup, pkgNames).map(
-            pkgOrGlob =>
+            (pkgOrGlob) =>
               `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
           )
         );
@@ -246,7 +247,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       }
 
       if (duplicatedPkgNames.size) {
-        duplicatedPkgNames.forEach(pkgName => {
+        duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
             `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
           );
@@ -258,7 +259,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   const allFixedPackages = new Set(flatten(fixed));
   const allLinkedPackages = new Set(flatten(linked));
 
-  allFixedPackages.forEach(pkgName => {
+  allFixedPackages.forEach((pkgName) => {
     if (allLinkedPackages.has(pkgName)) {
       messages.push(
         `The package "${pkgName}" can be found in both fixed and linked groups. A package can only be either fixed or linked.`
@@ -282,7 +283,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     if (
       !(
         isArray(json.ignore) &&
-        json.ignore.every(pkgName => typeof pkgName === "string")
+        json.ignore.every((pkgName) => typeof pkgName === "string")
       )
     ) {
       messages.push(
@@ -295,7 +296,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     } else {
       messages.push(
         ...getUnmatchedPatterns(json.ignore, pkgNames).map(
-          pkgOrGlob =>
+          (pkgOrGlob) =>
             `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
         )
       );
@@ -348,7 +349,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     const {
       onlyUpdatePeerDependentsWhenOutOfRange,
       updateInternalDependents,
-      useCalculatedVersionForSnapshots
+      useCalculatedVersionForSnapshots,
     } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
 
     if (
@@ -445,7 +446,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
               ?.useCalculatedVersionForSnapshots !== undefined
           ? json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               ?.useCalculatedVersionForSnapshots
-          : false
+          : false,
     },
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -459,8 +460,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
       updateInternalDependents:
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          ?.updateInternalDependents ?? "out-of-range"
-    }
+          ?.updateInternalDependents ?? "out-of-range",
+    },
   };
   return config;
 };
@@ -469,12 +470,12 @@ let fakePackage = {
   dir: "",
   packageJson: {
     name: "",
-    version: ""
-  }
+    version: "",
+  },
 };
 
 export let defaultConfig = parse(defaultWrittenConfig, {
   root: fakePackage,
   tool: "root",
-  packages: [fakePackage]
+  packages: [fakePackage],
 });

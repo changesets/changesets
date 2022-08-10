@@ -33,10 +33,7 @@ export async function getAllTags(cwd: string): Promise<Set<string>> {
     throw new Error(gitCmd.stderr.toString());
   }
 
-  const tags = gitCmd.stdout
-    .toString()
-    .trim()
-    .split("\n");
+  const tags = gitCmd.stdout.toString().trim().split("\n");
 
   return new Set(tags);
 }
@@ -95,7 +92,7 @@ export async function getCommitsThatAddFiles(
               "--diff-filter=A",
               "--max-count=1",
               "--pretty=format:%h:%p",
-              gitPath
+              gitPath,
             ],
             { cwd }
           )
@@ -135,7 +132,7 @@ export async function getCommitsThatAddFiles(
     if (await isRepoShallow({ cwd })) {
       // Yes.
       await deepenCloneBy({ by: 50, cwd });
-      remaining = commitsWithMissingParents.map(p => p.path);
+      remaining = commitsWithMissingParents.map((p) => p.path);
     } else {
       // It's not a shallow clone, so all the commit SHAs we have are legitimate.
       for (const unresolved of commitsWithMissingParents) {
@@ -145,13 +142,13 @@ export async function getCommitsThatAddFiles(
     }
   } while (true);
 
-  return gitPaths.map(p => map.get(p));
+  return gitPaths.map((p) => map.get(p));
 }
 
 export async function isRepoShallow({ cwd }: { cwd: string }) {
   const isShallowRepoOutput = (
     await spawn("git", ["rev-parse", "--is-shallow-repository"], {
-      cwd
+      cwd,
     })
   ).stdout
     .toString()
@@ -193,16 +190,13 @@ async function getRepoRoot({ cwd }: { cwd: string }) {
     throw new Error(stderr.toString());
   }
 
-  return stdout
-    .toString()
-    .trim()
-    .replace(/\n|\r/g, "");
+  return stdout.toString().trim().replace(/\n|\r/g, "");
 }
 
 export async function getChangedFilesSince({
   cwd,
   ref,
-  fullPath = false
+  fullPath = false,
 }: {
   cwd: string;
   ref: string;
@@ -221,17 +215,17 @@ export async function getChangedFilesSince({
     .toString()
     .trim()
     .split("\n")
-    .filter(a => a);
+    .filter((a) => a);
   if (!fullPath) return files;
 
   const repoRoot = await getRepoRoot({ cwd });
-  return files.map(file => path.resolve(repoRoot, file));
+  return files.map((file) => path.resolve(repoRoot, file));
 }
 
 // below are less generic functions that we use in combination with other things we are doing
 export async function getChangedChangesetFilesSinceRef({
   cwd,
-  ref
+  ref,
 }: {
   cwd: string;
   ref: string;
@@ -243,7 +237,7 @@ export async function getChangedChangesetFilesSinceRef({
       "git",
       ["diff", "--name-only", "--diff-filter=d", divergedAt],
       {
-        cwd
+        cwd,
       }
     );
 
@@ -253,7 +247,7 @@ export async function getChangedChangesetFilesSinceRef({
       .toString()
       .trim()
       .split("\n")
-      .filter(file => tester.test(file));
+      .filter((file) => tester.test(file));
     return files;
   } catch (err) {
     if (err instanceof GitError) return [];
@@ -263,7 +257,7 @@ export async function getChangedChangesetFilesSinceRef({
 
 export async function getChangedPackagesSinceRef({
   cwd,
-  ref
+  ref,
 }: {
   cwd: string;
   ref: string;
@@ -273,8 +267,8 @@ export async function getChangedPackagesSinceRef({
 
   const fileToPackage: Record<string, Package> = {};
 
-  packages.packages.forEach(pkg =>
-    changedFiles.filter(isInDir(pkg.dir)).forEach(fileName => {
+  packages.packages.forEach((pkg) =>
+    changedFiles.filter(isInDir(pkg.dir)).forEach((fileName) => {
       const prevPkg = fileToPackage[fileName] || { dir: "" };
       if (pkg.dir.length > prevPkg.dir.length) fileToPackage[fileName] = pkg;
     })
@@ -288,7 +282,7 @@ export async function getChangedPackagesSinceRef({
 }
 
 export async function getCurrentCommitId({
-  cwd
+  cwd,
 }: {
   cwd: string;
 }): Promise<string> {

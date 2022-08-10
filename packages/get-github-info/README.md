@@ -31,19 +31,19 @@ const { getInfo } = require("@changesets/get-github-info");
 const getReleaseLine = async (changeset, type) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
-    .map(l => l.trimRight());
+    .map((l) => l.trimRight());
   // getInfo exposes the GH username and PR number if you want them directly
   // but it also exposes a set of links for the commit, PR and GH username
   let { user, pull, links } = await getInfo({
     // replace this will your own repo
     repo: "Noviny/changesets",
-    commit: changeset.commit
+    commit: changeset.commit,
   });
   let returnVal = `- ${links.commit}${
     links.pull === null ? "" : ` ${links.pull}`
   }${links.user === null ? "" : ` Thanks ${links.user}!`}: ${firstLine}`;
   if (futureLines.length > 0) {
-    returnVal += `\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+    returnVal += `\n${futureLines.map((l) => `  ${l}`).join("\n")}`;
   }
   return returnVal;
 };

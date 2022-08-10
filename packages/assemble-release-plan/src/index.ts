@@ -3,7 +3,7 @@ import {
   Config,
   NewChangeset,
   PreState,
-  PackageGroup
+  PackageGroup,
 } from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
@@ -45,7 +45,7 @@ function getSnapshotSuffix(
     datetime: snapshotRefDate
       .toISOString()
       .replace(/\.\d{3}Z$/, "")
-      .replace(/[^\d]/g, "")
+      .replace(/[^\d]/g, ""),
   };
 
   // We need a special handling because we need to handle a case where `--snapshot` is used without any template,
@@ -129,7 +129,7 @@ function assembleReleasePlan(
   snapshot?: SnapshotReleaseParameters
 ): ReleasePlan {
   let packagesByName = new Map(
-    packages.packages.map(x => [x.packageJson.name, x])
+    packages.packages.map((x) => [x.packageJson.name, x])
   );
 
   const relevantChangesets = getRelevantChangesets(
@@ -151,7 +151,7 @@ function assembleReleasePlan(
 
   let dependencyGraph = getDependentsGraph(packages, {
     bumpVersionsWithWorkspaceProtocolOnly:
-      config.bumpVersionsWithWorkspaceProtocolOnly
+      config.bumpVersionsWithWorkspaceProtocolOnly,
   });
 
   let releasesValidated = false;
@@ -162,7 +162,7 @@ function assembleReleasePlan(
       packagesByName,
       dependencyGraph,
       preInfo,
-      config
+      config,
     });
 
     // `releases` might get mutated here
@@ -189,7 +189,7 @@ function assembleReleasePlan(
             name: pkg.packageJson.name,
             type: "patch",
             oldVersion: pkg.packageJson.version,
-            changesets: []
+            changesets: [],
           });
         } else if (
           existingRelease.type === "none" &&
@@ -207,7 +207,7 @@ function assembleReleasePlan(
 
   return {
     changesets: relevantChangesets,
-    releases: [...releases.values()].map(incompleteRelease => {
+    releases: [...releases.values()].map((incompleteRelease) => {
       return {
         ...incompleteRelease,
         newVersion: snapshotSuffix
@@ -217,10 +217,10 @@ function assembleReleasePlan(
               config.snapshot.useCalculatedVersion,
               snapshotSuffix
             )
-          : getNewVersion(incompleteRelease, preInfo)
+          : getNewVersion(incompleteRelease, preInfo),
       };
     }),
-    preState: preInfo?.state
+    preState: preInfo?.state,
   };
 }
 
@@ -236,7 +236,9 @@ function getRelevantChangesets(
     const notIgnoredPackages = [];
     for (const release of changeset.releases) {
       if (
-        ignored.find(ignoredPackageName => ignoredPackageName === release.name)
+        ignored.find(
+          (ignoredPackageName) => ignoredPackageName === release.name
+        )
       ) {
         ignoredPackages.push(release.name);
       } else {
@@ -256,7 +258,9 @@ function getRelevantChangesets(
 
   if (preState && preState.mode !== "exit") {
     let usedChangesetIds = new Set(preState.changesets);
-    return changesets.filter(changeset => !usedChangesetIds.has(changeset.id));
+    return changesets.filter(
+      (changeset) => !usedChangesetIds.has(changeset.id)
+    );
   }
 
   return changesets;
@@ -288,10 +292,10 @@ function getPreInfo(
 
   let updatedPreState = {
     ...preState,
-    changesets: changesets.map(changeset => changeset.id),
+    changesets: changesets.map((changeset) => changeset.id),
     initialVersions: {
-      ...preState.initialVersions
-    }
+      ...preState.initialVersions,
+    },
   };
 
   for (const [, pkg] of packagesByName) {
@@ -324,7 +328,7 @@ function getPreInfo(
 
   return {
     state: updatedPreState,
-    preVersions
+    preVersions,
   };
 }
 
