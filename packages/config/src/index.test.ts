@@ -45,6 +45,7 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
+    allowIgnoredDevDependencies: false,
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
       updateInternalDependents: "out-of-range"
@@ -73,7 +74,8 @@ let defaults = {
     useCalculatedVersion: false,
     prereleaseTemplate: null
   },
-  bumpVersionsWithWorkspaceProtocolOnly: false
+  bumpVersionsWithWorkspaceProtocolOnly: false,
+  allowIgnoredDevDependencies: false
 } as const;
 
 let correctCases: Record<string, CorrectCase> = {

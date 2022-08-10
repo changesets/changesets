@@ -436,7 +436,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,
 
-    allowIgnoredDependencies: json.allowIgnoredDependencies === true,
+    allowIgnoredDevDependencies: json.allowIgnoredDevDependencies === true,
 
     snapshot: {
       prereleaseTemplate: json.snapshot?.prereleaseTemplate ?? null,
