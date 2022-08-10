@@ -23,7 +23,8 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
-  ignore: [] as ReadonlyArray<string>
+  ignore: [] as ReadonlyArray<string>,
+  allowIgnoredDevDependencies: false
 } as const;
 
 function flatten<T>(arr: Array<T[]>): T[] {
