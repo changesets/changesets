@@ -11,10 +11,14 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies"
 ] as const;
 
-const getAllDependencies = (config: PackageJSON) => {
+const getAllDependencies = (config: PackageJSON, opts?: {
+  ignoreDevDependencies?: boolean;
+}) => {
   const allDependencies = new Map<string, string>();
 
   for (const type of DEPENDENCY_TYPES) {
+    if (opts?.ignoreDevDependencies === true && type === 'devDependencies') continue;
+    
     const deps = config[type];
     if (!deps) continue;
 
@@ -52,6 +56,7 @@ export default function getDependencyGraph(
   packages: Packages,
   opts?: {
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+    ignoreDevDependencies?: boolean;
   }
 ): {
   graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
@@ -77,7 +82,7 @@ export default function getDependencyGraph(
   for (const pkg of queue) {
     const { name } = pkg.packageJson;
     const dependencies = [];
-    const allDependencies = getAllDependencies(pkg.packageJson);
+    const allDependencies = getAllDependencies(pkg.packageJson, opts);
 
     for (let [depName, depRange] of allDependencies) {
       const match = packagesByName[depName];
