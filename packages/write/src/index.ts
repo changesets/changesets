@@ -4,6 +4,17 @@ import prettier from "prettier";
 import humanId from "human-id";
 import { Changeset } from "@changesets/types";
 
+function getPrettierInstance(): typeof prettier {
+  try {
+    return require("prettier");
+  } catch (err) {
+    if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
+      throw err;
+    }
+    return prettier;
+  }
+}
+
 async function writeChangeset(
   changeset: Changeset,
   cwd: string
@@ -19,7 +30,8 @@ async function writeChangeset(
     capitalize: false
   });
 
-  const prettierConfig = await prettier.resolveConfig(cwd);
+  const prettierInstance = getPrettierInstance();
+  const prettierConfig = await prettierInstance.resolveConfig(cwd);
 
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
@@ -35,7 +47,7 @@ ${summary}
 
   await fs.writeFile(
     newChangesetPath,
-    prettier.format(changesetContents, {
+    prettierInstance.format(changesetContents, {
       ...prettierConfig,
       parser: "markdown"
     })

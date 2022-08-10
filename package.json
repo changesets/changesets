@@ -46,7 +46,7 @@
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.14.136",
     "@types/meow": "^5.0.0",
-    "@types/prettier": "^1.19.1",
+    "@types/prettier": "^2.7.0",
     "@types/semver": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^3.5.0",
     "@typescript-eslint/parser": "^3.5.0",
@@ -63,7 +63,7 @@
     "jest": "^25.1.0",
     "jest-junit": "^6.4.0",
     "jest-watch-typeahead": "^0.4.2",
-    "prettier": "^1.19.1",
+    "prettier": "^2.7.1",
     "typescript": "^4.5.2"
   },
   "preconstruct": {
