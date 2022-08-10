@@ -3,7 +3,10 @@ import getDependencyGraph from "./get-dependency-graph";
 
 export function getDependentsGraph(
   packages: Packages,
-  opts?: { bumpVersionsWithWorkspaceProtocolOnly?: boolean }
+  opts?: {
+    bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+    ignoreDevDependencies?: boolean;
+  }
 ) {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
