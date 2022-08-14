@@ -1,5 +1,13 @@
 # @changesets/cli
 
+## 2.24.3
+
+### Patch Changes
+
+- Updated dependencies [[`b023e4b`](https://github.com/changesets/changesets/commit/b023e4b3d1ad793a5dd1187b720e8103cebfb937)]:
+  - @changesets/assemble-release-plan@5.2.1
+  - @changesets/get-release-plan@3.0.14
+
 ## 2.24.2
 
 ### Patch Changes
