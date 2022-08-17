@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 5.2.1
+
+### Patch Changes
+
+- [#914](https://github.com/changesets/changesets/pull/914) [`b023e4b`](https://github.com/changesets/changesets/commit/b023e4b3d1ad793a5dd1187b720e8103cebfb937) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with the `assembleReleasePlan`'s signature not being compatible with the old shape of the `config` and `snapshot` parameters. This could have caused runtime errors during snapshot releases when only some of the Changesets transitive dependencies were updated without other ones.
+
 ## 5.2.0
 
 ### Minor Changes

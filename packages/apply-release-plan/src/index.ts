@@ -180,28 +180,35 @@ async function getNewChangelogEntry(
   config: Config,
   cwd: string
 ) {
+  if (!config.changelog) {
+    return Promise.resolve(
+      releasesWithPackage.map(release => ({
+        ...release,
+        changelog: null
+      }))
+    );
+  }
+
   let getChangelogFuncs: ChangelogFunctions = {
     getReleaseLine: () => Promise.resolve(""),
     getDependencyReleaseLine: () => Promise.resolve("")
   };
-  let changelogOpts: any;
-  if (config.changelog) {
-    changelogOpts = config.changelog[1];
-    let changesetPath = path.join(cwd, ".changeset");
-    let changelogPath = resolveFrom(changesetPath, config.changelog[0]);
 
-    let possibleChangelogFunc = require(changelogPath);
-    if (possibleChangelogFunc.default) {
-      possibleChangelogFunc = possibleChangelogFunc.default;
-    }
-    if (
-      typeof possibleChangelogFunc.getReleaseLine === "function" &&
-      typeof possibleChangelogFunc.getDependencyReleaseLine === "function"
-    ) {
-      getChangelogFuncs = possibleChangelogFunc;
-    } else {
-      throw new Error("Could not resolve changelog generation functions");
-    }
+  const changelogOpts = config.changelog[1];
+  let changesetPath = path.join(cwd, ".changeset");
+  let changelogPath = resolveFrom(changesetPath, config.changelog[0]);
+
+  let possibleChangelogFunc = require(changelogPath);
+  if (possibleChangelogFunc.default) {
+    possibleChangelogFunc = possibleChangelogFunc.default;
+  }
+  if (
+    typeof possibleChangelogFunc.getReleaseLine === "function" &&
+    typeof possibleChangelogFunc.getDependencyReleaseLine === "function"
+  ) {
+    getChangelogFuncs = possibleChangelogFunc;
+  } else {
+    throw new Error("Could not resolve changelog generation functions");
   }
 
   let commits = await getCommitsThatAddChangesets(

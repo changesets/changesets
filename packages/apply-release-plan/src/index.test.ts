@@ -1454,6 +1454,21 @@ describe("apply release plan", () => {
     });
   });
   describe("changelogs", () => {
+    it("should not generate any changelogs", async () => {
+      const releasePlan = new FakeReleasePlan();
+      let { changedFiles } = await testSetup(
+        "simple-project",
+        releasePlan.getReleasePlan(),
+        {
+          ...releasePlan.config,
+          changelog: false
+        }
+      );
+
+      expect(
+        changedFiles.find(a => a.endsWith(`pkg-a${path.sep}CHANGELOG.md`))
+      ).toBeUndefined();
+    });
     it("should update a changelog for one package", async () => {
       const releasePlan = new FakeReleasePlan();
       let { changedFiles } = await testSetup(

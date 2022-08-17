@@ -337,7 +337,7 @@ describe("parser errors", () => {
       unsafeParse({ changelog: {} }, defaultPackages);
     }).toThrowErrorMatchingInlineSnapshot(`
 "Some errors occurred when validating the changesets config:
-The \`changelog\` option is set as {} when the only valid values are undefined, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
+The \`changelog\` option is set as {} when the only valid values are undefined, false, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
 `);
   });
   test("changelog array with 3 values", () => {
@@ -352,7 +352,7 @@ The \`changelog\` option is set as [
   \\"some-module\\",
   \\"something\\",
   \\"other\\"
-] when the only valid values are undefined, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
+] when the only valid values are undefined, false, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
 `);
   });
   test("changelog array with first value not string", () => {
@@ -363,7 +363,7 @@ The \`changelog\` option is set as [
 The \`changelog\` option is set as [
   false,
   \\"something\\"
-] when the only valid values are undefined, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
+] when the only valid values are undefined, false, a module path(e.g. \\"@changesets/cli/changelog\\" or \\"./some-module\\") or a tuple with a module path and config for the changelog generator(e.g. [\\"@changesets/cli/changelog\\", { someOption: true }])"
 `);
   });
   test("access other string", () => {
