@@ -19,9 +19,8 @@ async function writeChangeset(
     capitalize: false
   });
 
-  const prettierConfig = await prettier.resolveConfig(cwd);
-
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
+  const prettierConfig = await prettier.resolveConfig(newChangesetPath);
 
   // NOTE: The quotation marks in here are really important even though they are
   // not spec for yaml. This is because package names can contain special
