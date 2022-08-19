@@ -306,6 +306,83 @@ describe("running version in a simple project", () => {
     expect(changesetDir).toContain(".ignored-temporarily.md");
   });
 
+  it("should throw an error if a package.json is missing the name field", async () => {
+    let cwd = await f.copy("no-name-field");
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "minor" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+    await expect(version(cwd, defaultOptions, modifiedDefaultConfig)).rejects
+      .toMatchInlineSnapshot(`
+            [Error: The following package.jsons are missing the "name" field:
+            packages/pkg-a/package.json
+            packages/pkg-b/package.json]
+          `);
+  });
+
+  it("should start with a minimal version when releasing a package without a version field", async () => {
+    let cwd = await f.copy("no-version-field");
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "patch" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "dependencies": Object {
+            "pkg-b": "1.0.0",
+          },
+          "name": "pkg-a",
+          "version": "0.0.1",
+        },
+        Object {
+          "name": "pkg-b",
+          "version": "1.0.0",
+        },
+      ]
+    `);
+  });
+
+  it("should start with a minimal version when bumping a dependant package without a version field", async () => {
+    let cwd = await f.copy("no-version-field");
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary for the first change"
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect((await getPackages(cwd)).packages.map(x => x.packageJson))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "dependencies": Object {
+            "pkg-b": "2.0.0",
+          },
+          "name": "pkg-a",
+          "version": "0.0.1",
+        },
+        Object {
+          "name": "pkg-b",
+          "version": "2.0.0",
+        },
+      ]
+    `);
+  });
+
   it("should not update a dependant that uses a tag as a dependency rage for a package that could otherwise be local", async () => {
     const cwd = await f.copy("dependant-with-tag-range");
 

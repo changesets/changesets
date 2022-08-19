@@ -15,6 +15,7 @@ import { InternalError } from "@changesets/errors";
 import { Packages, Package } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
+import { getPkgJsonVersion } from "./utils";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -218,7 +219,7 @@ function assembleReleasePlan(
           releases.set(pkg.packageJson.name, {
             name: pkg.packageJson.name,
             type: "patch",
-            oldVersion: pkg.packageJson.version,
+            oldVersion: getPkgJsonVersion(pkg.packageJson),
             changesets: []
           });
         } else if (
