@@ -28,6 +28,19 @@
       "description": "The configuration for changelog generators.",
       "default": ["@changesets/cli", null]
     },
+    "conventionalCommits": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "title": "Conventional Commits Preset Path"
+        }
+      ],
+      "description": "During `changeset add`, when true or string, use conventional commits specification to determine the version bump and generate changeset files.",
+      "default": false
+    },
     "fixed": {
       "type": "array",
       "items": {

@@ -17,6 +17,7 @@ import { getDependentsGraph } from "@changesets/get-dependents-graph";
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
   changelog: "@changesets/cli/changelog",
+  conventionalCommits: false,
   commit: false,
   fixed: [] as Fixed,
   linked: [] as Linked,
@@ -120,6 +121,19 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
+  if (
+    json.conventionalCommits !== undefined &&
+    typeof json.conventionalCommits !== "boolean" &&
+    typeof json.conventionalCommits !== "string"
+  ) {
+    messages.push(
+      `The \`conventionalCommits\` option is set as ${JSON.stringify(
+        json.conventionalCommits,
+        null,
+        2
+      )} when the only valid values are undefined, boolean or string`
+    );
+  }
   let normalizedAccess: WrittenConfig["access"] = json.access;
   if ((json.access as string) === "private") {
     normalizedAccess = "restricted";
@@ -409,6 +423,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.changelog
         : json.changelog
     ),
+    conventionalCommits:
+      json.conventionalCommits === undefined
+        ? defaultWrittenConfig.conventionalCommits
+        : json.conventionalCommits,
     access:
       normalizedAccess === undefined
         ? defaultWrittenConfig.access

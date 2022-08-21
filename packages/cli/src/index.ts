@@ -10,7 +10,7 @@ const { input, flags } = meow(
     $ changeset [command]
   Commands
     init
-    add [--empty] [--open]
+    add [--all] [--all-changed] [--all-unchanged] [--empty] [--message] [--open] [--recommend] [--yes]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]
     status [--since <branch>] [--verbose] [--output JSON_FILE.json]
@@ -19,6 +19,25 @@ const { input, flags } = meow(
     `,
   {
     flags: {
+      all: {
+        type: "boolean"
+      },
+      allChanged: {
+        type: "boolean"
+      },
+      allUnchanged: {
+        type: "boolean"
+      },
+      message: {
+        alias: "m",
+        type: "string"
+      },
+      recommend: {
+        type: "boolean"
+      },
+      yes: {
+        type: "boolean"
+      },
       sinceMaster: {
         type: "boolean"
       },
