@@ -339,7 +339,7 @@ export default async function createChangeset(
       initial = data.releaseType ?? "patch";
     }
     type = options.recommend
-      ? initial
+      ? initial ?? "patch"
       : await cli.askList(
           `What kind of change is this for ${green(
             pkg.packageJson.name
