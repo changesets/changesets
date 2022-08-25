@@ -9,9 +9,8 @@ import { error, info, log } from "@changesets/logger";
 import { Release, PackageJSON } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
-import lernaLog from "npmlog";
-// @ts-expect-error
-import { getChangelogConfig } from "@lerna/conventional-commits/lib/get-changelog-config";
+
+import conventionalChangelogPresetLoader from "conventional-changelog-preset-loader";
 import conventionalRecommendedBump from "conventional-recommended-bump";
 
 const conventionalRecommendedBumpAsync = promisify<
@@ -30,9 +29,6 @@ export interface CreateChangesetOptions {
   recommend?: boolean;
   yes?: boolean;
 }
-
-// Silence Lerna
-lernaLog.level = "silent";
 
 async function confirmMajorRelease(pkgJSON: PackageJSON) {
   if (semver.lt(pkgJSON.version, "1.0.0")) {
@@ -148,6 +144,26 @@ function getPkgDirByName(packages: Package[]) {
   );
 }
 
+async function getChangelogConfig(
+  presetName: string
+): Promise<conventionalRecommendedBump.Options["config"]> {
+  // Will return whatever is exported by the preset package. That may be a configuration object, a function, or a promise.
+  const preset = conventionalChangelogPresetLoader(presetName);
+
+  // https://github.com/lerna/lerna/blob/aae1a2bed1cd2d61ed7b86013d7e6108415cfbcd/core/conventional-commits/lib/get-changelog-config.js#L16-L35
+  if (typeof preset === "function") {
+    try {
+      // try assuming config builder function first
+      // @ts-expect-error
+      return preset({});
+    } catch (_) {
+      // legacy presets export an errback function instead of Q.all()
+      return promisify(preset)();
+    }
+  }
+  return preset;
+}
+
 export default async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Package[],
@@ -173,9 +189,11 @@ export default async function createChangeset(
       patch: new Set<string>()
     };
     if (typeof options.conventionalCommits === "string") {
-      const changelogConfig = await getChangelogConfig(options.conventionalCommits)
+      const changelogConfig = await getChangelogConfig(
+        options.conventionalCommits
+      );
       for (const pkgName of pkgsLeftToGetBumpTypeFor) {
-        const conventionalOptions: conventionalRecommendedBump.Options = {
+        const conventionalOptions = {
           config: changelogConfig,
           lernaPackage: pkgName,
           path: pkgDirsByName.get(pkgName)
@@ -193,9 +211,7 @@ export default async function createChangeset(
         log(`Recommending version bumps using conventional commits`);
         pkgsLeftToGetBumpTypeFor.clear();
       } else {
-        info(
-          `Selecting version bumps using conventional commits`
-        );
+        info(`Selecting version bumps using conventional commits`);
         log(`(Hit enter for defaults)`);
       }
     }
@@ -312,22 +328,25 @@ export default async function createChangeset(
     let pkg = allPackages[0];
 
     let type;
+    let initial;
     if (typeof options.conventionalCommits === "string") {
-      const conventionalOptions: conventionalRecommendedBump.Options = {
+      const conventionalOptions = {
         config: await getChangelogConfig(options.conventionalCommits),
         lernaPackage: pkg.packageJson.name,
         path: pkg.dir
       };
       const data = await conventionalRecommendedBumpAsync(conventionalOptions);
-      type = data.releaseType ?? "patch";
-    } else {
-      type = await cli.askList(
-        `What kind of change is this for ${green(
-          pkg.packageJson.name
-        )}? (current version is ${pkg.packageJson.version})`,
-        ["patch", "minor", "major"]
-      );
+      initial = data.releaseType ?? "patch";
     }
+    type = options.recommend
+      ? initial
+      : await cli.askList(
+          `What kind of change is this for ${green(
+            pkg.packageJson.name
+          )}? (current version is ${pkg.packageJson.version})`,
+          ["patch", "minor", "major"],
+          initial
+        );
     if (type === "major" && options.yes !== true) {
       let shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
       if (!shouldReleaseAsMajor) {

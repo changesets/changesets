@@ -44,13 +44,13 @@
     "@changesets/read": "^0.5.7",
     "@changesets/types": "^5.1.0",
     "@changesets/write": "^0.1.9",
-    "@lerna/conventional-commits": "^5.4.3",
     "@manypkg/get-packages": "^1.1.3",
     "@types/is-ci": "^3.0.0",
     "@types/semver": "^6.0.0",
     "ansi-colors": "^4.1.3",
     "chalk": "^2.1.0",
     "conventional-changelog-angular": "^5.0.13",
+    "conventional-changelog-preset-loader": "^2.3.4",
     "conventional-recommended-bump": "^6.1.0",
     "enquirer": "^2.3.0",
     "external-editor": "^3.1.0",
@@ -58,7 +58,6 @@
     "human-id": "^1.0.2",
     "is-ci": "^3.0.1",
     "meow": "^6.0.0",
-    "npmlog": "^6.0.2",
     "outdent": "^0.5.0",
     "p-limit": "^2.2.0",
     "preferred-pm": "^3.0.0",
@@ -71,8 +70,8 @@
   "devDependencies": {
     "@changesets/parse": "*",
     "@changesets/test-utils": "*",
+    "@types/conventional-changelog-preset-loader": "^2.3.1",
     "@types/conventional-recommended-bump": "^6.1.0",
-    "@types/npmlog": "^4.1.4",
     "fixturez": "^1.1.0",
     "strip-ansi": "^5.2.0"
   }

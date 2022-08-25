@@ -125,13 +125,15 @@ async function askConfirm(message: string): Promise<boolean> {
 
 async function askList<Choice extends string>(
   message: string,
-  choices: Choice[]
+  choices: Choice[],
+  initial?: string
 ): Promise<Choice> {
   const name = `List-${serialId()}`;
 
   return prompt([
     {
       choices,
+      initial,
       message,
       name,
       prefix,
