@@ -1,4 +1,10 @@
 export type CliOptions = {
+  all?: boolean;
+  allChanged?: boolean;
+  allUnchanged?: boolean;
+  message?: string;
+  recommend?: boolean;
+  yes?: boolean;
   sinceMaster?: boolean;
   verbose?: boolean;
   output?: string;

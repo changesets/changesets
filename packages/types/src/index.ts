@@ -63,6 +63,7 @@ export type Linked = ReadonlyArray<PackageGroup>;
 
 export type Config = {
   changelog: false | readonly [string, any];
+  conventionalCommits: boolean | string;
   commit: false | readonly [string, any];
   fixed: Fixed;
   linked: Linked;
@@ -85,6 +86,7 @@ export type Config = {
 
 export type WrittenConfig = {
   changelog?: false | readonly [string, any] | string;
+  conventionalCommits?: boolean | string;
   commit?: boolean | readonly [string, any] | string;
   fixed?: Fixed;
   linked?: Linked;

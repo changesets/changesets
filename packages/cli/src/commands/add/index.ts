@@ -4,7 +4,8 @@ import { spawn } from "child_process";
 
 import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
-import { info, log, warn } from "@changesets/logger";
+import { error, info, log, warn } from "@changesets/logger";
+import { ExitError } from "@changesets/errors";
 import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
@@ -22,16 +23,42 @@ function isListablePackage(config: Config, packageJson: PackageJSON) {
   );
 }
 
+interface AddFlags {
+  all?: boolean;
+  allChanged?: boolean;
+  allUnchanged?: boolean;
+  empty?: boolean;
+  message?: string;
+  open?: boolean;
+  recommend?: boolean;
+  yes?: boolean;
+}
+
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  {
+    all,
+    allChanged,
+    allUnchanged,
+    empty,
+    message,
+    open,
+    recommend,
+    yes
+  }: AddFlags,
   config: Config
 ) {
   const packages = (await getPackages(cwd)).packages.filter(pkg =>
     isListablePackage(config, pkg.packageJson)
   );
   const changesetBase = path.resolve(cwd, ".changeset");
-
+  if (recommend === true && !config.conventionalCommits) {
+    error(
+      "You must enable conventional commits in .changeset/config.json to use the --recommend flag"
+    );
+    error('(try adding `"conventionalCommits": true`)');
+    throw new ExitError(1);
+  }
   let newChangeset: Awaited<ReturnType<typeof createChangeset>>;
   if (empty) {
     newChangeset = {
@@ -48,13 +75,29 @@ export default async function add(
       .filter(pkg => isListablePackage(config, pkg.packageJson))
       .map(pkg => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, packages);
+    newChangeset = await createChangeset(changedPackagesName, packages, {
+      all,
+      allChanged,
+      allUnchanged,
+      conventionalCommits:
+        config.conventionalCommits === true
+          ? "conventional-changelog-angular"
+          : config.conventionalCommits,
+      message,
+      recommend,
+      yes
+    });
     printConfirmationMessage(newChangeset, packages.length > 1);
 
-    if (!newChangeset.confirmed) {
+    if (!newChangeset.confirmed && yes !== true) {
       newChangeset = {
         ...newChangeset,
         confirmed: await cli.askConfirm("Is this your desired changeset?")
+      };
+    } else if (!newChangeset.confirmed && yes === true) {
+      newChangeset = {
+        ...newChangeset,
+        confirmed: true
       };
     }
   }

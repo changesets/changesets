@@ -42,6 +42,7 @@ class FakeReleasePlan {
     };
     this.config = {
       changelog: false,
+      conventionalCommits: false,
       commit: false,
       fixed: [],
       linked: [],
@@ -83,6 +84,7 @@ async function testSetup(
   if (!config) {
     config = {
       changelog: false,
+      conventionalCommits: false,
       commit: false,
       fixed: [],
       linked: [],
@@ -487,6 +489,7 @@ describe("apply release plan", () => {
         },
         {
           changelog: false,
+          conventionalCommits: false,
           commit: false,
           fixed: [],
           linked: [],
@@ -553,6 +556,7 @@ describe("apply release plan", () => {
         },
         {
           changelog: false,
+          conventionalCommits: false,
           commit: false,
           fixed: [],
           linked: [],
@@ -746,6 +750,7 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
+              conventionalCommits: false,
               commit: false,
               fixed: [],
               linked: [],
@@ -834,6 +839,7 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
+              conventionalCommits: false,
               commit: false,
               fixed: [],
               linked: [],
@@ -914,6 +920,7 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
+              conventionalCommits: false,
               commit: false,
               fixed: [],
               linked: [],
@@ -994,6 +1001,7 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
+              conventionalCommits: false,
               commit: false,
               fixed: [],
               linked: [],
@@ -1077,6 +1085,7 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
+              conventionalCommits: false,
               commit: false,
               fixed: [],
               linked: [],
@@ -1165,6 +1174,7 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
+              conventionalCommits: false,
               commit: false,
               fixed: [],
               linked: [],
@@ -1245,6 +1255,7 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
+              conventionalCommits: false,
               commit: false,
               fixed: [],
               linked: [],
@@ -1325,6 +1336,7 @@ describe("apply release plan", () => {
             },
             {
               changelog: false,
+              conventionalCommits: false,
               commit: false,
               fixed: [],
               linked: [],
@@ -1409,6 +1421,7 @@ describe("apply release plan", () => {
           },
           {
             changelog: false,
+            conventionalCommits: false,
             commit: false,
             fixed: [],
             linked: [],
@@ -1594,6 +1607,7 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
+          conventionalCommits: false,
           updateInternalDependencies: "patch",
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1698,6 +1712,7 @@ describe("apply release plan", () => {
             null
           ],
           commit: false,
+          conventionalCommits: false,
           fixed: [],
           linked: [],
           access: "restricted",
@@ -1785,6 +1800,7 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
+          conventionalCommits: false,
           commit: false,
           fixed: [],
           linked: [],
@@ -1877,6 +1893,7 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
+          conventionalCommits: false,
           commit: false,
           fixed: [],
           linked: [],
@@ -1983,6 +2000,7 @@ describe("apply release plan", () => {
             path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
             null
           ],
+          conventionalCommits: false,
           commit: false,
           fixed: [],
           linked: [],
