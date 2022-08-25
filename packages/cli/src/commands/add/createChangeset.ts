@@ -173,9 +173,10 @@ export default async function createChangeset(
       patch: new Set<string>()
     };
     if (typeof options.conventionalCommits === "string") {
+      const changelogConfig = await getChangelogConfig(options.conventionalCommits)
       for (const pkgName of pkgsLeftToGetBumpTypeFor) {
         const conventionalOptions: conventionalRecommendedBump.Options = {
-          config: await getChangelogConfig(options.conventionalCommits),
+          config: changelogConfig,
           lernaPackage: pkgName,
           path: pkgDirsByName.get(pkgName)
         };
