@@ -19,9 +19,9 @@ import prettier from "prettier";
 import versionPackage from "./version-package";
 import getChangelogEntry from "./get-changelog-entry";
 
-function getPrettierInstance(): typeof prettier {
+function getPrettierInstance(cwd: string): typeof prettier {
   try {
-    return require("prettier");
+    return require(require.resolve("prettier", { paths: [cwd] }));
   } catch (err) {
     if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
       throw err;
@@ -133,7 +133,7 @@ export default async function applyReleasePlan(
     });
   });
 
-  let prettierInstance = getPrettierInstance();
+  let prettierInstance = getPrettierInstance(cwd);
   let prettierConfig = await prettierInstance.resolveConfig(cwd);
 
   for (let release of finalisedRelease) {
