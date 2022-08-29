@@ -13,22 +13,26 @@ import { getCommitFunctions } from "../../commit/getCommitFunctions";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
+import { PackageJSON } from "@changesets/types";
 
-type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer R>
-  ? R
-  : never;
+function isListablePackage(config: Config, packageJson: PackageJSON) {
+  return (
+    !config.ignore.includes(packageJson.name) &&
+    (packageJson.version || !packageJson.private)
+  );
+}
 
 export default async function add(
   cwd: string,
   { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
 ) {
-  const packages = (await getPackages(cwd)).packages.filter(
-    (pkg) => !config.ignore.includes(pkg.packageJson.name)
+  const packages = (await getPackages(cwd)).packages.filter((pkg) =>
+    isListablePackage(config, pkg.packageJson)
   );
   const changesetBase = path.resolve(cwd, ".changeset");
 
-  let newChangeset: UnwrapPromise<ReturnType<typeof createChangeset>>;
+  let newChangeset: Awaited<ReturnType<typeof createChangeset>>;
   if (empty) {
     newChangeset = {
       confirmed: true,
@@ -40,11 +44,11 @@ export default async function add(
       cwd,
       ref: config.baseBranch,
     });
-    const changePackagesName = changedPackages
-      .map((pkg) => pkg.packageJson.name)
-      .filter((pkgName) => !config.ignore.includes(pkgName));
+    const changedPackagesName = changedPackages
+      .filter((pkg) => isListablePackage(config, pkg.packageJson))
+      .map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changePackagesName, packages);
+    newChangeset = await createChangeset(changedPackagesName, packages);
     printConfirmationMessage(newChangeset, packages.length > 1);
 
     if (!newChangeset.confirmed) {

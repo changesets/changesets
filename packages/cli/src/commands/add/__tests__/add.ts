@@ -218,4 +218,14 @@ describe("Changesets", () => {
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
+  it("should not include private packages without a version in the prompt", async () => {
+    const cwd = await f.copy("private-package-without-version-field");
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset(cwd, { empty: false }, defaultConfig);
+
+    // @ts-ignore
+    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+  });
 });
