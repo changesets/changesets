@@ -4,9 +4,9 @@ import prettier from "prettier";
 import humanId from "human-id";
 import { Changeset } from "@changesets/types";
 
-function getPrettierInstance(): typeof prettier {
+function getPrettierInstance(cwd: string): typeof prettier {
   try {
-    return require("prettier");
+    return require(require.resolve("prettier", { paths: [cwd] }));
   } catch (err) {
     if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
       throw err;
@@ -30,7 +30,7 @@ async function writeChangeset(
     capitalize: false,
   });
 
-  const prettierInstance = getPrettierInstance();
+  const prettierInstance = getPrettierInstance(cwd);
   const prettierConfig = await prettierInstance.resolveConfig(cwd);
 
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
