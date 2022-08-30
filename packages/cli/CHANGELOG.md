@@ -1,5 +1,13 @@
 # @changesets/cli
 
+## 2.24.4
+
+### Patch Changes
+
+- Updated dependencies [[`c140171`](https://github.com/changesets/changesets/commit/c1401716cf5ee839aaa02ea7ff8f23f8af8bf5b0)]:
+  - @changesets/apply-release-plan@6.1.0
+  - @changesets/write@0.2.0
+
 ## 2.24.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @changesets/write
 
+## 0.2.0
+
+### Minor Changes
+
+- [#905](https://github.com/changesets/changesets/pull/905) [`c140171`](https://github.com/changesets/changesets/commit/c1401716cf5ee839aaa02ea7ff8f23f8af8bf5b0) Thanks [@Andarist](https://github.com/Andarist)! - The local version of Prettier is going to be preferred from now on when writing formatted `.md` files back to disk. At the same time the version of Prettier that we depend on has been upgraded.
+
 ## 0.1.9
 
 ### Patch Changes
