@@ -12,7 +12,7 @@ export default function flattenReleases(
 ): Map<string, InternalRelease> {
   let releases: Map<string, InternalRelease> = new Map();
 
-  changesets.forEach(changeset => {
+  changesets.forEach((changeset) => {
     changeset.releases
       // Filter out ignored packages because they should not trigger a release
       // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
@@ -30,7 +30,7 @@ export default function flattenReleases(
             name,
             type,
             oldVersion: pkg.packageJson.version,
-            changesets: [changeset.id]
+            changesets: [changeset.id],
           };
         } else {
           if (

@@ -11,7 +11,7 @@ import {
   askConfirm,
   askQuestionWithEditor,
   askQuestion,
-  askList
+  askList,
 } from "../../../utils/cli-utilities";
 import addChangeset from "..";
 
@@ -32,7 +32,7 @@ git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
 });
 
 // @ts-ignore
-const mockUserResponses = mockResponses => {
+const mockUserResponses = (mockResponses) => {
   const summary = mockResponses.summary || "summary message mock";
   let majorReleases: Array<string> = [];
   let minorReleases: Array<string> = [];
@@ -47,7 +47,7 @@ const mockUserResponses = mockResponses => {
   let returnValues = [
     Object.keys(mockResponses.releases),
     majorReleases,
-    minorReleases
+    minorReleases,
   ];
   // @ts-ignore
   askCheckboxPlus.mockImplementation(() => {
@@ -58,7 +58,7 @@ const mockUserResponses = mockResponses => {
   });
 
   let confirmAnswers = {
-    "Is this your desired changeset?": true
+    "Is this your desired changeset?": true,
   };
 
   if (mockResponses.consoleSummaries && mockResponses.editorSummaries) {
@@ -76,7 +76,7 @@ const mockUserResponses = mockResponses => {
   }
 
   // @ts-ignore
-  askConfirm.mockImplementation(question => {
+  askConfirm.mockImplementation((question) => {
     question = stripAnsi(question);
     // @ts-ignore
     if (confirmAnswers[question]) {
@@ -101,7 +101,7 @@ describe("Changesets", () => {
     expect(call).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
-        releases: [{ name: "pkg-a", type: "patch" }]
+        releases: [{ name: "pkg-a", type: "patch" }],
       })
     );
   });
@@ -121,7 +121,7 @@ describe("Changesets", () => {
       mockUserResponses({
         releases: { "pkg-a": "patch" },
         consoleSummaries,
-        editorSummaries
+        editorSummaries,
       });
       await addChangeset(cwd, { empty: false }, defaultConfig);
 
@@ -130,7 +130,7 @@ describe("Changesets", () => {
       expect(call).toEqual(
         expect.objectContaining({
           summary: expectedSummary,
-          releases: [{ name: "pkg-a", type: "patch" }]
+          releases: [{ name: "pkg-a", type: "patch" }],
         })
       );
     }
@@ -145,14 +145,14 @@ describe("Changesets", () => {
     askList.mockReturnValueOnce(Promise.resolve("minor"));
 
     let confirmAnswers = {
-      "Is this your desired changeset?": true
+      "Is this your desired changeset?": true,
     };
     // @ts-ignore
     askQuestion.mockReturnValueOnce("");
     // @ts-ignore
     askQuestionWithEditor.mockReturnValueOnce(summary);
     // @ts-ignore
-    askConfirm.mockImplementation(question => {
+    askConfirm.mockImplementation((question) => {
       question = stripAnsi(question);
       // @ts-ignore
       if (confirmAnswers[question]) {
@@ -169,7 +169,7 @@ describe("Changesets", () => {
     expect(call).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
-        releases: [{ name: "single-package", type: "minor" }]
+        releases: [{ name: "single-package", type: "minor" }],
       })
     );
   });
@@ -183,7 +183,7 @@ describe("Changesets", () => {
       { empty: false },
       {
         ...defaultConfig,
-        commit: [path.resolve(__dirname, "..", "..", "..", "commit"), null]
+        commit: [path.resolve(__dirname, "..", "..", "..", "commit"), null],
       }
     );
     expect(git.add).toHaveBeenCalledTimes(1);
@@ -200,7 +200,7 @@ describe("Changesets", () => {
     expect(call).toEqual(
       expect.objectContaining({
         releases: [],
-        summary: ""
+        summary: "",
       })
     );
   });

@@ -19,7 +19,7 @@ export function shouldUpdateDependencyBasedOnConfig(
   release: { version: string; type: VersionType },
   {
     depVersionRange,
-    depType
+    depType,
   }: {
     depVersionRange: string;
     depType:
@@ -30,7 +30,7 @@ export function shouldUpdateDependencyBasedOnConfig(
   },
   {
     minReleaseType,
-    onlyUpdatePeerDependentsWhenOutOfRange
+    onlyUpdatePeerDependentsWhenOutOfRange,
   }: {
     minReleaseType: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;

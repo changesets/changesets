@@ -1194,7 +1194,7 @@ meaning within the community, even though these commands do slightly more than t
   const getReleaseLine = async (changeset, versionType) => {
     const indentedSummary = changeset.summary
       .split("\n")
-      .map(l => `  ${l}`.trimRight())
+      .map((l) => `  ${l}`.trimRight())
       .join("\n");
 
     return `- [${versionType}] ${changeset.commit}:\n\n${indentedSummary}`;
@@ -1207,10 +1207,10 @@ meaning within the community, even though these commands do slightly more than t
   const getReleaseLine = async (changeset, type) => {
     const [firstLine, ...futureLines] = changeset.summary
       .split("\n")
-      .map(l => l.trimRight());
+      .map((l) => l.trimRight());
 
     return `- ${changeset.commit}: ${firstLine}\n${futureLines
-      .map(l => `  ${l}`)
+      .map((l) => `  ${l}`)
       .join("\n")}`;
   };
   ```

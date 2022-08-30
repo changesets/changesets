@@ -27,7 +27,7 @@ export default async function add(
   { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
 ) {
-  const packages = (await getPackages(cwd)).packages.filter(pkg =>
+  const packages = (await getPackages(cwd)).packages.filter((pkg) =>
     isListablePackage(config, pkg.packageJson)
   );
   const changesetBase = path.resolve(cwd, ".changeset");
@@ -37,16 +37,16 @@ export default async function add(
     newChangeset = {
       confirmed: true,
       releases: [],
-      summary: ``
+      summary: ``,
     };
   } else {
     const changedPackages = await git.getChangedPackagesSinceRef({
       cwd,
-      ref: config.baseBranch
+      ref: config.baseBranch,
     });
     const changedPackagesName = changedPackages
-      .filter(pkg => isListablePackage(config, pkg.packageJson))
-      .map(pkg => pkg.packageJson.name);
+      .filter((pkg) => isListablePackage(config, pkg.packageJson))
+      .map((pkg) => pkg.packageJson.name);
 
     newChangeset = await createChangeset(changedPackagesName, packages);
     printConfirmationMessage(newChangeset, packages.length > 1);
@@ -54,7 +54,7 @@ export default async function add(
     if (!newChangeset.confirmed) {
       newChangeset = {
         ...newChangeset,
-        confirmed: await cli.askConfirm("Is this your desired changeset?")
+        confirmed: await cli.askConfirm("Is this your desired changeset?"),
       };
     }
   }
@@ -78,7 +78,7 @@ export default async function add(
     }
 
     let hasMajorChange = [...newChangeset.releases].find(
-      c => c.type === "major"
+      (c) => c.type === "major"
     );
 
     if (hasMajorChange) {
@@ -107,7 +107,7 @@ export default async function add(
         externalEditor.editor.args.concat([changesetPath]),
         {
           detached: true,
-          stdio: "inherit"
+          stdio: "inherit",
         }
       );
     }

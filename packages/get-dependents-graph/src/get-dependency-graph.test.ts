@@ -11,12 +11,12 @@ afterEach(() => {
   console.error = consoleError;
 });
 
-describe("getting the dependency graph", function() {
-  it("should skip dependencies specified through the link protocol", function() {
+describe("getting the dependency graph", function () {
+  it("should skip dependencies specified through the link protocol", function () {
     const { graph, valid } = getDependencyGraph({
       root: {
         dir: ".",
-        packageJson: { name: "root", version: "1.0.0" }
+        packageJson: { name: "root", version: "1.0.0" },
       },
       packages: [
         {
@@ -25,30 +25,30 @@ describe("getting the dependency graph", function() {
             name: "foo",
             version: "1.0.0",
             devDependencies: {
-              bar: "link:../bar"
-            }
-          }
+              bar: "link:../bar",
+            },
+          },
         },
         {
           dir: "bar",
           packageJson: {
             name: "bar",
-            version: "1.0.0"
-          }
-        }
+            version: "1.0.0",
+          },
+        },
       ],
-      tool: "pnpm"
+      tool: "pnpm",
     });
     expect(graph.get("foo")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
     expect((console.error as any).mock.calls).toMatchInlineSnapshot(`Array []`);
   });
 
-  it("should skip dependencies specified using a tag", function() {
+  it("should skip dependencies specified using a tag", function () {
     const { graph, valid } = getDependencyGraph({
       root: {
         dir: ".",
-        packageJson: { name: "root", version: "1.0.0" }
+        packageJson: { name: "root", version: "1.0.0" },
       },
       packages: [
         {
@@ -57,19 +57,19 @@ describe("getting the dependency graph", function() {
             name: "foo-example",
             version: "1.0.0",
             dependencies: {
-              bar: "latest"
-            }
-          }
+              bar: "latest",
+            },
+          },
         },
         {
           dir: "packages/bar",
           packageJson: {
             name: "bar",
-            version: "1.0.0"
-          }
-        }
+            version: "1.0.0",
+          },
+        },
       ],
-      tool: "pnpm"
+      tool: "pnpm",
     });
     expect(graph.get("foo-example")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
@@ -82,7 +82,7 @@ describe("getting the dependency graph", function() {
       const { valid } = getDependencyGraph({
         root: {
           dir: ".",
-          packageJson: { name: "root", version: "1.0.0" }
+          packageJson: { name: "root", version: "1.0.0" },
         },
         packages: [
           {
@@ -91,19 +91,19 @@ describe("getting the dependency graph", function() {
               name: "foo",
               version: "1.0.0",
               dependencies: {
-                bar: "link:../bar"
-              }
-            }
+                bar: "link:../bar",
+              },
+            },
           },
           {
             dir: "bar",
             packageJson: {
               name: "bar",
-              version: "1.0.0"
-            }
-          }
+              version: "1.0.0",
+            },
+          },
         ],
-        tool: "pnpm"
+        tool: "pnpm",
       });
       expect(valid).toBeFalsy();
       expect((console.error as any).mock.calls).toMatchInlineSnapshot(`

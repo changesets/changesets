@@ -44,13 +44,15 @@ async function getPackagesToRelease(
       // TODO: take objects and be fancy with matching
       `Which packages would you like to include?`,
       defaultChoiceList,
-      x => {
+      (x) => {
         // this removes changed packages and unchanged packages from the list
         // of packages shown after selection
         if (Array.isArray(x)) {
           return x
-            .filter(x => x !== "changed packages" && x !== "unchanged packages")
-            .map(x => cyan(x))
+            .filter(
+              (x) => x !== "changed packages" && x !== "unchanged packages"
+            )
+            .map((x) => cyan(x))
             .join(", ");
         }
         return x;
@@ -61,17 +63,17 @@ async function getPackagesToRelease(
   if (allPackages.length > 1) {
     const unchangedPackagesNames = allPackages
       .map(({ packageJson }) => packageJson.name)
-      .filter(name => !changedPackages.includes(name));
+      .filter((name) => !changedPackages.includes(name));
 
     const defaultChoiceList = [
       {
         name: "changed packages",
-        choices: changedPackages
+        choices: changedPackages,
       },
       {
         name: "unchanged packages",
-        choices: unchangedPackagesNames
-      }
+        choices: unchangedPackagesNames,
+      },
     ].filter(({ choices }) => choices.length !== 0);
 
     let packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
@@ -85,7 +87,7 @@ async function getPackagesToRelease(
       } while (packagesToRelease.length === 0);
     }
     return packagesToRelease.filter(
-      pkgName =>
+      (pkgName) =>
         pkgName !== "changed packages" && pkgName !== "unchanged packages"
     );
   }
@@ -124,30 +126,30 @@ export default async function createChangeset(
         [
           {
             name: "all packages",
-            choices: packagesToRelease.map(pkgName => {
+            choices: packagesToRelease.map((pkgName) => {
               return {
                 name: pkgName,
                 message: formatPkgNameAndVersion(
                   pkgName,
                   pkgJsonsByName.get(pkgName)!.version
-                )
+                ),
               };
-            })
-          }
+            }),
+          },
         ],
-        x => {
+        (x) => {
           // this removes changed packages and unchanged packages from the list
           // of packages shown after selection
           if (Array.isArray(x)) {
             return x
-              .filter(x => x !== "all packages")
-              .map(x => cyan(x))
+              .filter((x) => x !== "all packages")
+              .map((x) => cyan(x))
               .join(", ");
           }
           return x;
         }
       )
-    ).filter(x => x !== "all packages");
+    ).filter((x) => x !== "all packages");
 
     for (const pkgName of pkgsThatShouldBeMajorBumped) {
       // for packages that are under v1, we want to make sure major releases are intended,
@@ -170,30 +172,30 @@ export default async function createChangeset(
           [
             {
               name: "all packages",
-              choices: [...pkgsLeftToGetBumpTypeFor].map(pkgName => {
+              choices: [...pkgsLeftToGetBumpTypeFor].map((pkgName) => {
                 return {
                   name: pkgName,
                   message: formatPkgNameAndVersion(
                     pkgName,
                     pkgJsonsByName.get(pkgName)!.version
-                  )
+                  ),
                 };
-              })
-            }
+              }),
+            },
           ],
-          x => {
+          (x) => {
             // this removes changed packages and unchanged packages from the list
             // of packages shown after selection
             if (Array.isArray(x)) {
               return x
-                .filter(x => x !== "all packages")
-                .map(x => cyan(x))
+                .filter((x) => x !== "all packages")
+                .map((x) => cyan(x))
                 .join(", ");
             }
             return x;
           }
         )
-      ).filter(x => x !== "all packages");
+      ).filter((x) => x !== "all packages");
 
       for (const pkgName of pkgsThatShouldBeMinorBumped) {
         pkgsLeftToGetBumpTypeFor.delete(pkgName);
@@ -204,7 +206,7 @@ export default async function createChangeset(
 
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
       log(`The following packages will be ${blue("patch")} bumped:`);
-      pkgsLeftToGetBumpTypeFor.forEach(pkgName => {
+      pkgsLeftToGetBumpTypeFor.forEach((pkgName) => {
         log(
           formatPkgNameAndVersion(pkgName, pkgJsonsByName.get(pkgName)!.version)
         );
@@ -246,7 +248,7 @@ export default async function createChangeset(
         return {
           confirmed: true,
           summary,
-          releases
+          releases,
         };
       }
     } catch (err) {
@@ -266,6 +268,6 @@ export default async function createChangeset(
   return {
     confirmed: false,
     summary,
-    releases
+    releases,
   };
 }

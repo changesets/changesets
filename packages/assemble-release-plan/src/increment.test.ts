@@ -8,7 +8,7 @@ describe("incrementVersion", () => {
         name: "pkg-a",
         type: "none",
         changesets: [],
-        oldVersion: "1.0.0"
+        oldVersion: "1.0.0",
       };
 
       const fakePreInfo: PreInfo = {
@@ -17,8 +17,8 @@ describe("incrementVersion", () => {
           mode: "pre",
           tag: "next",
           initialVersions: {},
-          changesets: []
-        }
+          changesets: [],
+        },
       };
 
       const nextVersion = incrementVersion(fakeRelease, fakePreInfo);

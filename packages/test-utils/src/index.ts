@@ -54,7 +54,7 @@ const createLogSilencer = () => {
         process.stdout.write = originalStdoutWrite;
         process.stderr.write = originalStderrWrite;
       };
-    }
+    },
   };
 };
 
@@ -71,14 +71,13 @@ export const silenceLogsInBlock = () => {
   });
 };
 
-export const temporarilySilenceLogs = (
-  testFn: () => Promise<void> | void
-) => async () => {
-  const silencer = createLogSilencer();
-  const dispose = silencer.setup();
-  try {
-    await testFn();
-  } finally {
-    dispose();
-  }
-};
+export const temporarilySilenceLogs =
+  (testFn: () => Promise<void> | void) => async () => {
+    const silencer = createLogSilencer();
+    const dispose = silencer.setup();
+    try {
+      await testFn();
+    } finally {
+      dispose();
+    }
+  };

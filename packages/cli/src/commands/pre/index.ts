@@ -4,7 +4,7 @@ import { exitPre, enterPre } from "@changesets/pre";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError,
-  ExitError
+  ExitError,
 } from "@changesets/errors";
 
 export default async function pre(

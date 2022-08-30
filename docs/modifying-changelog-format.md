@@ -35,7 +35,7 @@ async function getDependencyReleaseLine() {}
 
 module.exports = {
   getReleaseLine,
-  getDependencyReleaseLine
+  getDependencyReleaseLine,
 };
 ```
 
@@ -52,7 +52,7 @@ async function getDependencyReleaseLine() {}
 
 const defaultChangelogFunctions: ChangelogFunctions = {
   getReleaseLine,
-  getDependencyReleaseLine
+  getDependencyReleaseLine,
 };
 
 export default defaultChangelogFunctions;

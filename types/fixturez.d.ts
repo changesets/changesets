@@ -5,7 +5,7 @@ type Opts = {
 };
 
 declare module "fixturez" {
-  export default function(
+  export default function (
     cwd: string,
     opts?: Opts
   ): {
