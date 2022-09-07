@@ -201,9 +201,9 @@
 
 - [`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c) [#305](https://github.com/changesets/changesets/pull/305) Thanks [@Noviny](https://github.com/Noviny)! - Add link to changelog in readme
 
-* [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3) [#306](https://github.com/changesets/changesets/pull/306) Thanks [@Andarist](https://github.com/Andarist)! - Ignore `node_modules` when glob searching for packages. This fixes an issue with package cycles.
+- [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3) [#306](https://github.com/changesets/changesets/pull/306) Thanks [@Andarist](https://github.com/Andarist)! - Ignore `node_modules` when glob searching for packages. This fixes an issue with package cycles.
 
-* Updated dependencies [[`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c), [`e56928b`](https://github.com/changesets/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1), [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3)]:
+- Updated dependencies [[`04ddfd7`](https://github.com/changesets/changesets/commit/04ddfd7c3acbfb84ef9c92873fe7f9dea1f5145c), [`e56928b`](https://github.com/changesets/changesets/commit/e56928bbd6f9096def06ac37487bdbf28efec9d1), [`b49e1cf`](https://github.com/changesets/changesets/commit/b49e1cff65dca7fe9e341a35aa91704aa0e51cb3)]:
   - @changesets/assemble-release-plan@1.0.1
   - @changesets/config@1.0.1
   - @changesets/pre@1.0.1
@@ -245,7 +245,7 @@
 
 - [`bca8865`](https://github.com/changesets/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/changesets/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Added support for reading old changesets from v1
 
-* [`bca8865`](https://github.com/changesets/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/changesets/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Replaced sinceMaster parameter with sinceRef parameter which can be any git ref such as a branch, tag, commit or etc.
+- [`bca8865`](https://github.com/changesets/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/changesets/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Replaced sinceMaster parameter with sinceRef parameter which can be any git ref such as a branch, tag, commit or etc.
 
 ### Patch Changes
 
@@ -292,9 +292,9 @@
 
 - [3dd003c](https://github.com/changesets/changesets/commit/3dd003cb0ccadafa083c91f10cf257ee869df042) [#166](https://github.com/changesets/changesets/pull/166) Thanks [@Noviny](https://github.com/Noviny)! - Make passedConfig an optional variable to ease frustration
 
-* [8c43fa0](https://github.com/changesets/changesets/commit/8c43fa061e2a5a01e4f32504ed351d261761c8dc) [#155](https://github.com/changesets/changesets/pull/155) Thanks [@Noviny](https://github.com/Noviny)! - Add Readme
+- [8c43fa0](https://github.com/changesets/changesets/commit/8c43fa061e2a5a01e4f32504ed351d261761c8dc) [#155](https://github.com/changesets/changesets/pull/155) Thanks [@Noviny](https://github.com/Noviny)! - Add Readme
 
-* Updated dependencies [8c43fa0, 0320391, 1ff73b7]:
+- Updated dependencies [8c43fa0, 0320391, 1ff73b7]:
   - @changesets/assemble-release-plan@0.2.1
   - get-dependents-graph@0.1.1
   - @changesets/read@0.2.1
@@ -307,7 +307,7 @@
 
 - [ca8ff585](https://github.com/changesets/changesets/commit/ca8ff585) [#147](https://github.com/changesets/changesets/pull/147) Thanks [@Noviny](https://github.com/Noviny)! - Initial Release
 
-* [296a6731](https://github.com/changesets/changesets/commit/296a6731) - Safety bump: Towards the end of preparing changesets v2, there was a lot of chaos - this bump is to ensure every package on npm matches what is found in the repository.
+- [296a6731](https://github.com/changesets/changesets/commit/296a6731) - Safety bump: Towards the end of preparing changesets v2, there was a lot of chaos - this bump is to ensure every package on npm matches what is found in the repository.
 
 ### Patch Changes
 
