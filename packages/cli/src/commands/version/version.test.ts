@@ -1066,6 +1066,59 @@ describe("updateInternalDependents: always", () => {
       "
     `);
   });
+
+  it("should not bump a devDependency or any of its dependants when a dependency package gets bumped", async () => {
+    const cwd = await f.copy("simplest-transitive-devdependent");
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(simpleChangeset, cwd);
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always",
+      },
+    });
+
+    expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-a",
+        version: "1.1.0",
+      })
+    );
+    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-b",
+        version: "1.0.0",
+        devDependencies: {
+          "pkg-a": "1.1.0",
+        },
+      })
+    );
+    expect(getPkgJSON("pkg-c", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-c",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      })
+    );
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    // pkg-b and - pkg-c are not being released so changelogs should not be
+    // generated for them
+    expect(() => getChangelog("pkg-b", spy.mock.calls)).toThrowError();
+    expect(() => getChangelog("pkg-c", spy.mock.calls)).toThrowError();
+  });
 });
 
 describe("pre", () => {
