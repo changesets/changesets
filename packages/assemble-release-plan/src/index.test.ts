@@ -1388,7 +1388,7 @@ describe("bumping peerDeps", () => {
       expect(releases[2].newVersion).toEqual("1.0.1");
     });
 
-    it("should not bump a transitive dependent when a devDependency package gets bumped", () => {
+    it("should not bump a dev dependent nor its dependent when a package gets bumped", () => {
       setup.addPackage("pkg-c", "1.0.0");
       setup.updateDevDependency("pkg-b", "pkg-a", "^1.0.0");
       setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");

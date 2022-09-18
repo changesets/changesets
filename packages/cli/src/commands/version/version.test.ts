@@ -1067,7 +1067,7 @@ describe("updateInternalDependents: always", () => {
     `);
   });
 
-  it("should not bump a devDependency or any of its dependants when a dependency package gets bumped", async () => {
+  it("should not bump a dev dependent nor its dependent when a package gets bumped", async () => {
     const cwd = await f.copy("simplest-transitive-devdependent");
     const spy = jest.spyOn(fs, "writeFile");
     await writeChangeset(simpleChangeset, cwd);
