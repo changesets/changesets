@@ -66,7 +66,9 @@ export default function determineDependents({
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
-            if (
+            if (nextRelease.type === "none") {
+              continue;
+            } else if (
               shouldBumpMajor({
                 dependent,
                 depType,
@@ -85,9 +87,8 @@ export default function determineDependents({
                 // TODO validate this - I don't think it's right anymore
                 (!releases.has(dependent) ||
                   releases.get(dependent)!.type === "none") &&
-                ((config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                  .updateInternalDependents === "always" &&
-                  nextRelease.type !== "none") ||
+                (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                  .updateInternalDependents === "always" ||
                   !semver.satisfies(
                     incrementVersion(nextRelease, preInfo),
                     versionRange
