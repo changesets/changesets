@@ -82,35 +82,32 @@ export default function determineDependents({
               })
             ) {
               type = "major";
-            } else {
-              if (
-                // TODO validate this - I don't think it's right anymore
-                (!releases.has(dependent) ||
-                  releases.get(dependent)!.type === "none") &&
-                (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                  .updateInternalDependents === "always" ||
-                  !semver.satisfies(
-                    incrementVersion(nextRelease, preInfo),
-                    versionRange
-                  ))
-              ) {
-                switch (depType) {
-                  case "dependencies":
-                  case "optionalDependencies":
-                  case "peerDependencies":
-                    if (type !== "major" && type !== "minor") {
-                      type = "patch";
-                    }
-                    break;
-                  case "devDependencies": {
-                    // We don't need a version bump if the package is only in the devDependencies of the dependent package
-                    if (
-                      type !== "major" &&
-                      type !== "minor" &&
-                      type !== "patch"
-                    ) {
-                      type = "none";
-                    }
+            } else if (
+              (!releases.has(dependent) ||
+                releases.get(dependent)!.type === "none") &&
+              (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                .updateInternalDependents === "always" ||
+                !semver.satisfies(
+                  incrementVersion(nextRelease, preInfo),
+                  versionRange
+                ))
+            ) {
+              switch (depType) {
+                case "dependencies":
+                case "optionalDependencies":
+                case "peerDependencies":
+                  if (type !== "major" && type !== "minor") {
+                    type = "patch";
+                  }
+                  break;
+                case "devDependencies": {
+                  // We don't need a version bump if the package is only in the devDependencies of the dependent package
+                  if (
+                    type !== "major" &&
+                    type !== "minor" &&
+                    type !== "patch"
+                  ) {
+                    type = "none";
                   }
                 }
               }
