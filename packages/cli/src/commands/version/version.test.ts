@@ -1094,15 +1094,9 @@ describe("updateInternalDependents: always", () => {
         },
       })
     );
-    expect(getPkgJSON("pkg-c", spy.mock.calls)).toEqual(
-      expect.objectContaining({
-        name: "pkg-c",
-        version: "1.0.0",
-        dependencies: {
-          "pkg-b": "1.0.0",
-        },
-      })
-    );
+    // `pkg-c` should not be touched
+    expect(() => getPkgJSON("pkg-c", spy.mock.calls)).toThrowError();
+
     expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
       "# pkg-a
 
