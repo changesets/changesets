@@ -6,7 +6,7 @@
 author: @Andarist
 author: @BPScott
 
-Fixed the issue that caused transitive dependents of dev dependents to be bumped when a package got bumped. To illustrate this with an example:
+Fixed the issue that caused transitive dependents of dev dependents to be bumped when a package got bumped and when using `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.updateInternalDependents: "always"`. To illustrate this with an example:
 
 ```
 pkg-a - version: 1.0.0
