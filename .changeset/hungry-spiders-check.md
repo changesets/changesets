@@ -2,4 +2,4 @@
 "@changesets/cli": patch
 ---
 
-Add newline at the end of the default config file.
+Add a new line at the end of the default config file when invoking `changeset init`.
