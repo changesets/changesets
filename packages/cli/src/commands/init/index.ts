@@ -9,11 +9,11 @@ const pkgPath = path.dirname(require.resolve("@changesets/cli/package.json"));
 
 // Modify base branch to "main" without changing defaultWrittenConfig since it also serves as a fallback
 // for config files that don't specify a base branch. Changing that to main would be a breaking change.
-const defaultConfig = JSON.stringify(
+const defaultConfig = `${JSON.stringify(
   { ...defaultWrittenConfig, baseBranch: "main" },
   null,
   2
-);
+)}\n`;
 
 export default async function init(cwd: string) {
   const changesetBase = path.resolve(cwd, ".changeset");

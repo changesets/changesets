@@ -37,6 +37,18 @@ describe("init", () => {
       { ...defaultWrittenConfig, baseBranch: "main" }
     );
   });
+  it("should add newline at the end of config", async () => {
+    const cwd = await f.copy("simple-project");
+    await fs.remove(path.join(cwd, ".changeset/config.json"));
+
+    await initializeCommand(cwd);
+
+    const configPath = path.join(cwd, ".changeset/config.json");
+    const config = (await fs.promises.readFile(configPath)).toString();
+    const lastCharacter = config.slice(-1);
+
+    expect(lastCharacter).toBe("\n");
+  });
   it("shouldn't overwrite a config if it does exist", async () => {
     const cwd = await f.copy("simple-project");
     await fs.writeJson(path.join(cwd, ".changeset/config.json"), {
