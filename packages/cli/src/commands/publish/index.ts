@@ -78,16 +78,22 @@ export default async function run(
       // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
       // fail if we are behind the base branch).
       log(`Creating git tag${successful.length > 1 ? "s" : ""}...`);
+
+      const tagAndLogSuccess = async (tag: string) => {
+        const isSuccessful = await git.tag(tag, cwd);
+        isSuccessful === true
+          ? log("New tag: ", tag)
+          : error("Unable to create git tag:", tag);
+      };
+
       if (tool !== "root") {
         for (const pkg of successful) {
           const tag = `${pkg.name}@${pkg.newVersion}`;
-          log("New tag: ", tag);
-          await git.tag(tag, cwd);
+          await tagAndLogSuccess(tag);
         }
       } else {
         const tag = `v${successful[0].newVersion}`;
-        log("New tag: ", tag);
-        await git.tag(tag, cwd);
+        await tagAndLogSuccess(tag);
       }
     }
   }
