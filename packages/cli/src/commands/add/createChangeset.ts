@@ -115,7 +115,7 @@ function getPkgJsonsByName(packages: Package[]) {
   );
 }
 
-function isValidChangesetPackage(
+function canPackageBeVersioned(
   packageJson: PackageJSON,
   ignorePrivatePackages: boolean
 ) {
