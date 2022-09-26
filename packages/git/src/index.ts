@@ -281,8 +281,8 @@ export async function getChangedPackagesSinceRef({
   );
 }
 
-export async function tagExists(tagStr: string) {
-  const gitCmd = await spawn("git", ["tag", "-l", tagStr]);
+export async function tagExists(tagStr: string, cwd: string) {
+  const gitCmd = await spawn("git", ["tag", "-l", tagStr], { cwd });
   const output = gitCmd.stdout.toString().trim();
   const tagExists = !!output;
   return tagExists;

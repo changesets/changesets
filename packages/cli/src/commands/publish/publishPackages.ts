@@ -75,6 +75,7 @@ const getTwoFactorState = ({
 };
 
 export default async function publishPackages({
+  cwd,
   packages,
   access,
   otp,
@@ -82,6 +83,7 @@ export default async function publishPackages({
   tag,
   tagPrivatePackages
 }: {
+  cwd: string;
   packages: Package[];
   access: AccessType;
   otp?: string;
@@ -126,7 +128,7 @@ export default async function publishPackages({
   );
 
   const untaggedPrivatePackageReleases = tagPrivatePackages
-    ? getUntaggedPrivatePackages(privatePackages)
+    ? getUntaggedPrivatePackages(privatePackages, cwd)
     : Promise.resolve([]);
 
   const result: {
@@ -147,12 +149,16 @@ export default async function publishPackages({
   return result;
 }
 
-async function getUntaggedPrivatePackages(privatePackages: Package[]) {
+async function getUntaggedPrivatePackages(
+  privatePackages: Package[],
+  cwd: string
+) {
   const packageWithTags = await Promise.all(
     privatePackages.map(async privatePkg => {
       const tagName = `${privatePkg.packageJson.name}@${privatePkg.packageJson.version}`;
       const isMissingTag = !(
-        (await git.tagExists(tagName)) || (await git.remoteTagExists(tagName))
+        (await git.tagExists(tagName, cwd)) ||
+        (await git.remoteTagExists(tagName))
       );
 
       return { pkg: privatePkg, isMissingTag };

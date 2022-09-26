@@ -38,6 +38,7 @@ describe("publishPackages", () => {
   describe("when isCI", () => {
     it("does not call out to npm to see if otp is required", async () => {
       await publishPackages({
+        cwd,
         packages: (await getPackages(cwd)).packages,
         access: "public",
         preState: undefined,

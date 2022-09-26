@@ -231,15 +231,16 @@ describe("git", () => {
     it("returns false when no tag exists", async () => {
       await add("packages/pkg-a/package.json", cwd);
       await commit("added packageA package.json", cwd);
-      expect(await tagExists("tag_name")).toBe(false);
+
+      expect(await tagExists("tag_which_doesn't_exist", cwd)).toBe(false);
     });
 
-    it("should create a tag for the current head", async () => {
+    it("returns true when tag exists", async () => {
       await add("packages/pkg-a/package.json", cwd);
       await commit("added packageA package.json", cwd);
       await tag("tag_message", cwd);
 
-      expect(await tagExists("tag_name")).toBe(false);
+      expect(await tagExists("tag_message", cwd)).toBe(true);
     });
   });
 

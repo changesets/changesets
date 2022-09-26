@@ -58,6 +58,7 @@ export default async function run(
   const { packages, tool } = await getPackages(cwd);
 
   const response = await publishPackages({
+    cwd,
     packages,
     // if not public, we won't pass the access, and it works as normal
     access: config.access,
