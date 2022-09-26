@@ -7,6 +7,7 @@ import { error, log } from "@changesets/logger";
 import { Release, PackageJSON } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
+import { isListablePackage } from "./isListablePackage";
 
 const { green, yellow, red, bold, blue, cyan } = chalk;
 
@@ -65,14 +66,10 @@ async function getPackagesToRelease(
 
   // filter out packages which changesets is not tracking
   allPackages = allPackages.filter(pkg =>
-    isValidChangesetPackage(pkg.packageJson, ignorePrivatePackages)
+    isListablePackage(config, pkg.packageJson)
   );
   changedPackages = changedPackages.filter(
-    pkgName =>
-      !isValidChangesetPackage(
-        pkgJsonsByName.get(pkgName)!,
-        ignorePrivatePackages
-      )
+    pkgName => !isListablePackage(config, pkgJsonsByName.get(pkgName)!)
   );
 
   if (allPackages.length > 1) {
@@ -113,19 +110,6 @@ function getPkgJsonsByName(packages: Package[]) {
   return new Map(
     packages.map(({ packageJson }) => [packageJson.name, packageJson])
   );
-}
-
-function canPackageBeVersioned(
-  packageJson: PackageJSON,
-  ignorePrivatePackages: boolean
-) {
-  const hasVersionField = !!packageJson.version;
-
-  if (ignorePrivatePackages && packageJson.private) {
-    return false;
-  }
-
-  return hasVersionField;
 }
 
 function formatPkgNameAndVersion(pkgName: string, version: string) {

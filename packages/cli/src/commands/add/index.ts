@@ -13,14 +13,7 @@ import { getCommitFunctions } from "../../commit/getCommitFunctions";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
-import { PackageJSON } from "@changesets/types";
-
-function isListablePackage(config: Config, packageJson: PackageJSON) {
-  return (
-    !config.ignore.includes(packageJson.name) &&
-    (packageJson.version || !packageJson.private)
-  );
-}
+import { isListablePackage } from "./isListablePackage";
 
 export default async function add(
   cwd: string,
