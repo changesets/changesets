@@ -22,15 +22,10 @@ git.tag.mockImplementation(() => Promise.resolve(true));
 
 // @ts-ignore
 publishPackages.mockImplementation(() =>
-  Promise.resolve({
-    publishedPackages: [
-      { name: "pkg-a", newVersion: "1.1.0", published: true },
-      { name: "pkg-b", newVersion: "1.0.1", published: true },
-    ],
-    untaggedPrivatePackages: [
-      { name: "project-a", newVersion: "2.0.5", published: true },
-    ]
-  })
+  Promise.resolve([
+    { name: "pkg-a", newVersion: "1.1.0", published: true },
+    { name: "pkg-b", newVersion: "1.0.1", published: true }
+  ])
 );
 
 describe("running release", () => {
@@ -38,7 +33,7 @@ describe("running release", () => {
   let cwd: string;
 
   beforeEach(async () => {
-    cwd = await f.copy("simple-project");
+    cwd = f.copy("simple-project");
   });
 
   describe("When there is no changeset commits", () => {

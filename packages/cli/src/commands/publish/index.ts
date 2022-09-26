@@ -6,6 +6,7 @@ import { readPreState } from "@changesets/pre";
 import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import chalk from "chalk";
+import { getUntaggedPrivatePackages } from "./getUntaggedPrivatePackages";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map((p) => `${p.name}@${p.newVersion}`).join("\n");
@@ -57,24 +58,32 @@ export default async function run(
 
   const { packages, tool } = await getPackages(cwd);
 
-  const response = await publishPackages({
-    cwd,
+  const tagPrivatePackages =
+    config.privatePackages && config.privatePackages.tag;
+  const publishedPackages = await publishPackages({
     packages,
     // if not public, we won't pass the access, and it works as normal
     access: config.access,
     otp,
     preState,
-    tag: releaseTag,
-    tagPrivatePackages: config.privatePackages && config.privatePackages.tag
+    tag: releaseTag
   });
+  const privatePackages = packages.filter(
+    pkg => pkg.packageJson.private && pkg.packageJson.version
+  );
+  const untaggedPrivatePackageReleases = tagPrivatePackages
+    ? await getUntaggedPrivatePackages(privatePackages, cwd)
+    : [];
 
-  const successfulNpmPublishes = response.publishedPackages.filter(
-    (p) => p.published
-  );
-  const unsuccessfulNpmPublishes = response.publishedPackages.filter(
-    (p) => !p.published
-  );
-  const untaggedPrivatePackages = response.untaggedPrivatePackages;
+  if (
+    publishedPackages.length === 0 &&
+    untaggedPrivatePackageReleases.length === 0
+  ) {
+    warn("No unpublished projects to publish");
+  }
+
+  const successfulNpmPublishes = publishedPackages.filter(p => p.published);
+  const unsuccessfulNpmPublishes = publishedPackages.filter(p => !p.published);
 
   if (successfulNpmPublishes.length > 0) {
     success("packages published successfully:");
@@ -99,18 +108,18 @@ export default async function run(
     }
   }
 
-  if (untaggedPrivatePackages.length > 0) {
+  if (untaggedPrivatePackageReleases.length > 0) {
     success("found untagged projects:");
-    logReleases(untaggedPrivatePackages);
+    logReleases(untaggedPrivatePackageReleases);
 
     if (tool !== "root") {
-      for (const pkg of untaggedPrivatePackages) {
+      for (const pkg of untaggedPrivatePackageReleases) {
         const tag = `${pkg.name}@${pkg.newVersion}`;
         log("New tag: ", tag);
         await git.tag(tag, cwd);
       }
     } else {
-      const tag = `v${untaggedPrivatePackages[0].newVersion}`;
+      const tag = `v${untaggedPrivatePackageReleases[0].newVersion}`;
       log("New tag: ", tag);
       await git.tag(tag, cwd);
     }
