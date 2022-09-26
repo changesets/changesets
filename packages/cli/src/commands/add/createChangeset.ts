@@ -4,7 +4,7 @@ import semver from "semver";
 
 import * as cli from "../../utils/cli-utilities";
 import { error, log } from "@changesets/logger";
-import { Release, PackageJSON } from "@changesets/types";
+import { Release, PackageJSON, Config } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
 import { isListablePackage } from "./isListablePackage";
@@ -38,7 +38,7 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
 async function getPackagesToRelease(
   changedPackages: Array<string>,
   allPackages: Array<Package>,
-  ignorePrivatePackages: boolean
+  config: Config
 ) {
   function askInitialReleaseQuestion(defaultChoiceList: Array<any>) {
     return cli.askCheckboxPlus(
@@ -119,7 +119,7 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 export default async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Package[],
-  ignorePrivatePackages: boolean
+  config: Config
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
@@ -127,7 +127,7 @@ export default async function createChangeset(
     const packagesToRelease = await getPackagesToRelease(
       changedPackages,
       allPackages,
-      ignorePrivatePackages
+      config
     );
 
     let pkgJsonsByName = getPkgJsonsByName(allPackages);

@@ -2,7 +2,7 @@ import fixturez from "fixturez";
 import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
-import { Config, PrivatePackages, WrittenConfig } from "@changesets/types";
+import { Config, WrittenConfig } from "@changesets/types";
 import { Packages } from "@manypkg/get-packages";
 
 jest.mock("@changesets/logger");
@@ -45,7 +45,10 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
-    privatePackages: 1,
+    privatePackages: {
+      tag: false,
+      version: true
+    },
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
       updateInternalDependents: "out-of-range",
@@ -57,7 +60,7 @@ test("read reads the config", async () => {
   });
 });
 
-let defaults = {
+let defaults: Config = {
   fixed: [],
   linked: [],
   changelog: ["@changesets/cli/changelog", null],
@@ -66,7 +69,7 @@ let defaults = {
   baseBranch: "master",
   updateInternalDependencies: "patch",
   ignore: [],
-  privatePackages: PrivatePackages.Version,
+  privatePackages: { version: true, tag: false },
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
     updateInternalDependents: "out-of-range",
@@ -76,7 +79,7 @@ let defaults = {
     prereleaseTemplate: null,
   },
   bumpVersionsWithWorkspaceProtocolOnly: false,
-} as const;
+};
 
 let correctCases: Record<string, CorrectCase> = {
   defaults: {
