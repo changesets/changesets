@@ -93,16 +93,14 @@ export default async function publishPackages({
     preState
   );
 
-  const twoFactorState: TwoFactorState =
-    unpublishedPackagesInfo.length > 0
-      ? getTwoFactorState({
-          otp,
-          publicPackages
-        })
-      : {
-          token: null,
-          isRequired: Promise.resolve(false)
-        };
+  if (unpublishedPackagesInfo.length === 0) {
+    return [];
+  }
+
+  const twoFactorState: TwoFactorState = getTwoFactorState({
+    otp,
+    publicPackages
+  });
 
   return Promise.all(
     unpublishedPackagesInfo.map((pkgInfo) => {

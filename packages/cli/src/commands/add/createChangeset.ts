@@ -4,10 +4,9 @@ import semver from "semver";
 
 import * as cli from "../../utils/cli-utilities";
 import { error, log } from "@changesets/logger";
-import { Release, PackageJSON, Config } from "@changesets/types";
+import { Release, PackageJSON } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
-import { isListablePackage } from "./isListablePackage";
 
 const { green, yellow, red, bold, blue, cyan } = chalk;
 
@@ -37,8 +36,7 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
 
 async function getPackagesToRelease(
   changedPackages: Array<string>,
-  allPackages: Array<Package>,
-  config: Config
+  allPackages: Array<Package>
 ) {
   function askInitialReleaseQuestion(defaultChoiceList: Array<any>) {
     return cli.askCheckboxPlus(
@@ -61,16 +59,6 @@ async function getPackagesToRelease(
       }
     );
   }
-
-  const pkgJsonsByName = getPkgJsonsByName(allPackages);
-
-  // filter out packages which changesets is not tracking
-  allPackages = allPackages.filter(pkg =>
-    isListablePackage(config, pkg.packageJson)
-  );
-  changedPackages = changedPackages.filter(
-    pkgName => !isListablePackage(config, pkgJsonsByName.get(pkgName)!)
-  );
 
   if (allPackages.length > 1) {
     const unchangedPackagesNames = allPackages
@@ -118,16 +106,14 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Package[],
-  config: Config
+  allPackages: Package[]
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
   if (allPackages.length > 1) {
     const packagesToRelease = await getPackagesToRelease(
       changedPackages,
-      allPackages,
-      config
+      allPackages
     );
 
     let pkgJsonsByName = getPkgJsonsByName(allPackages);

@@ -1,4 +1,4 @@
-import publishPackages from "./publishPackages";
+import publishPackages, { PublishedResult } from "./publishPackages";
 import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
@@ -72,7 +72,7 @@ export default async function run(
     pkg => pkg.packageJson.private && pkg.packageJson.version
   );
   const untaggedPrivatePackageReleases = tagPrivatePackages
-    ? await getUntaggedPrivatePackages(privatePackages, cwd)
+    ? await getUntaggedPrivatePackages(privatePackages, cwd, tool)
     : [];
 
   if (
@@ -94,17 +94,8 @@ export default async function run(
       // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
       // fail if we are behind the base branch).
       log(`Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`);
-      if (tool !== "root") {
-        for (const pkg of successfulNpmPublishes) {
-          const tag = `${pkg.name}@${pkg.newVersion}`;
-          log("New tag: ", tag);
-          await git.tag(tag, cwd);
-        }
-      } else {
-        const tag = `v${successfulNpmPublishes[0].newVersion}`;
-        log("New tag: ", tag);
-        await git.tag(tag, cwd);
-      }
+
+      await tagPublish(tool, successfulNpmPublishes, cwd);
     }
   }
 
@@ -112,17 +103,7 @@ export default async function run(
     success("found untagged projects:");
     logReleases(untaggedPrivatePackageReleases);
 
-    if (tool !== "root") {
-      for (const pkg of untaggedPrivatePackageReleases) {
-        const tag = `${pkg.name}@${pkg.newVersion}`;
-        log("New tag: ", tag);
-        await git.tag(tag, cwd);
-      }
-    } else {
-      const tag = `v${untaggedPrivatePackageReleases[0].newVersion}`;
-      log("New tag: ", tag);
-      await git.tag(tag, cwd);
-    }
+    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
   }
 
   if (unsuccessfulNpmPublishes.length > 0) {
@@ -130,5 +111,23 @@ export default async function run(
 
     logReleases(unsuccessfulNpmPublishes);
     throw new ExitError(1);
+  }
+}
+
+async function tagPublish(
+  tool: string,
+  packageReleases: PublishedResult[],
+  cwd: string
+) {
+  if (tool !== "root") {
+    for (const pkg of packageReleases) {
+      const tag = `${pkg.name}@${pkg.newVersion}`;
+      log("New tag: ", tag);
+      await git.tag(tag, cwd);
+    }
+  } else {
+    const tag = `v${packageReleases[0].newVersion}`;
+    log("New tag: ", tag);
+    await git.tag(tag, cwd);
   }
 }

@@ -1,14 +1,18 @@
 import * as git from "@changesets/git";
-import { Package } from "@manypkg/get-packages";
+import { Package, Tool } from "@manypkg/get-packages";
 import { PublishedResult } from "./publishPackages";
 
 export async function getUntaggedPrivatePackages(
   privatePackages: Package[],
-  cwd: string
+  cwd: string,
+  tool: Tool
 ) {
   const packageWithTags = await Promise.all(
     privatePackages.map(async privatePkg => {
-      const tagName = `${privatePkg.packageJson.name}@${privatePkg.packageJson.version}`;
+      const tagName =
+        tool === "root"
+          ? `v${privatePkg.packageJson.version}`
+          : `${privatePkg.packageJson.name}@${privatePkg.packageJson.version}`;
       const isMissingTag = !(
         (await git.tagExists(tagName, cwd)) ||
         (await git.remoteTagExists(tagName))

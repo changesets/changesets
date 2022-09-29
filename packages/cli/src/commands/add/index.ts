@@ -41,7 +41,7 @@ export default async function add(
       .filter((pkg) => isListablePackage(config, pkg.packageJson))
       .map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, packages, config);
+    newChangeset = await createChangeset(changedPackagesName, packages);
     printConfirmationMessage(newChangeset, packages.length > 1);
 
     if (!newChangeset.confirmed) {
