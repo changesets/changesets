@@ -9,7 +9,7 @@ import {
   WrittenConfig,
   Fixed,
   Linked,
-  PackageGroup
+  PackageGroup,
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -467,9 +467,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     privatePackages: json.privatePackages
       ? {
           version: json.privatePackages.version ?? true,
-          tag: json.privatePackages.tag ?? false
+          tag: json.privatePackages.tag ?? false,
         }
-      : { version: true, tag: false }
+      : { version: true, tag: false },
   };
 
   return config;

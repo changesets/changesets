@@ -66,10 +66,10 @@ export default async function run(
     access: config.access,
     otp,
     preState,
-    tag: releaseTag
+    tag: releaseTag,
   });
   const privatePackages = packages.filter(
-    pkg => pkg.packageJson.private && pkg.packageJson.version
+    (pkg) => pkg.packageJson.private && pkg.packageJson.version
   );
   const untaggedPrivatePackageReleases = tagPrivatePackages
     ? await getUntaggedPrivatePackages(privatePackages, cwd, tool)
@@ -82,8 +82,10 @@ export default async function run(
     warn("No unpublished projects to publish");
   }
 
-  const successfulNpmPublishes = publishedPackages.filter(p => p.published);
-  const unsuccessfulNpmPublishes = publishedPackages.filter(p => !p.published);
+  const successfulNpmPublishes = publishedPackages.filter((p) => p.published);
+  const unsuccessfulNpmPublishes = publishedPackages.filter(
+    (p) => !p.published
+  );
 
   if (successfulNpmPublishes.length > 0) {
     success("packages published successfully:");

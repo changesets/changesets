@@ -304,7 +304,7 @@ export async function remoteTagExists(tagStr: string) {
     "--tags",
     "origin",
     "-l",
-    tagStr
+    tagStr,
   ]);
   const output = gitCmd.stdout.toString().trim();
   const tagExists = !!output;

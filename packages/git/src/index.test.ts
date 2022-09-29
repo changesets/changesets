@@ -13,7 +13,7 @@ import {
   getChangedPackagesSinceRef,
   getChangedChangesetFilesSinceRef,
   getAllTags,
-  tagExists
+  tagExists,
 } from "./";
 
 const f = fixtures(__dirname);

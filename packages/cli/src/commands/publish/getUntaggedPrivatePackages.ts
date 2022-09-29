@@ -8,7 +8,7 @@ export async function getUntaggedPrivatePackages(
   tool: Tool
 ) {
   const packageWithTags = await Promise.all(
-    privatePackages.map(async privatePkg => {
+    privatePackages.map(async (privatePkg) => {
       const tagName =
         tool === "root"
           ? `v${privatePkg.packageJson.version}`
@@ -29,7 +29,7 @@ export async function getUntaggedPrivatePackages(
       untagged.push({
         name: packageWithTag.pkg.packageJson.name,
         newVersion: packageWithTag.pkg.packageJson.version,
-        published: false
+        published: false,
       });
     }
   }

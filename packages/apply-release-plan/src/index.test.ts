@@ -3,7 +3,7 @@ import {
   ReleasePlan,
   Config,
   NewChangeset,
-  ComprehensiveRelease
+  ComprehensiveRelease,
 } from "@changesets/types";
 import * as git from "@changesets/git";
 import fs from "fs-extra";

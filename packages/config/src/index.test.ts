@@ -47,7 +47,7 @@ test("read reads the config", async () => {
     bumpVersionsWithWorkspaceProtocolOnly: false,
     privatePackages: {
       tag: false,
-      version: true
+      version: true,
     },
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,

@@ -78,7 +78,7 @@ export default async function publishPackages({
   access,
   otp,
   preState,
-  tag
+  tag,
 }: {
   packages: Package[];
   access: AccessType;
@@ -99,7 +99,7 @@ export default async function publishPackages({
 
   const twoFactorState: TwoFactorState = getTwoFactorState({
     otp,
-    publicPackages
+    publicPackages,
   });
 
   return Promise.all(

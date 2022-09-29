@@ -40,7 +40,7 @@ describe("publishPackages", () => {
       await publishPackages({
         packages: (await getPackages(cwd)).packages,
         access: "public",
-        preState: undefined
+        preState: undefined,
       });
       expect(npmUtils.getTokenIsRequired).not.toHaveBeenCalled();
     });
