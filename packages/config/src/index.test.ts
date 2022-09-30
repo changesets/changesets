@@ -645,4 +645,11 @@ The \`snapshot.useCalculatedVersion\` option is set as \\"not true\\" when the o
 The \`useCalculatedVersionForSnapshots\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
 `);
   });
+
+  test("privatePackages false disables versioning and tagging", () => {
+    expect(unsafeParse({ privatePackages: false }, defaultPackages)).toEqual({
+      ...defaults,
+      privatePackages: { version: false, tag: false },
+    });
+  });
 });

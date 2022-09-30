@@ -85,7 +85,7 @@
           }
         },
         {
-          "type": "boolean"
+          "const": false
         }
       ]
     },

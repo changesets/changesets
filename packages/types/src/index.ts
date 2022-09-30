@@ -74,7 +74,7 @@ export type Config = {
   access: AccessType;
   baseBranch: string;
   /** Features enabled for Private packages */
-  privatePackages: false | PrivatePackages;
+  privatePackages: PrivatePackages;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
