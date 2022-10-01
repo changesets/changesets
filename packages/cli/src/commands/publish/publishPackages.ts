@@ -18,7 +18,7 @@ type PkgInfo = {
   publishedVersions: string[];
 };
 
-type PublishedResult = {
+export type PublishedResult = {
   name: string;
   newVersion: string;
   published: boolean;
@@ -88,18 +88,19 @@ export default async function publishPackages({
 }) {
   const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
   const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
-  const twoFactorState: TwoFactorState = getTwoFactorState({
-    otp,
-    publicPackages,
-  });
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
     preState
   );
 
   if (unpublishedPackagesInfo.length === 0) {
-    warn("No unpublished packages to publish");
+    return [];
   }
+
+  const twoFactorState: TwoFactorState = getTwoFactorState({
+    otp,
+    publicPackages,
+  });
 
   return Promise.all(
     unpublishedPackagesInfo.map((pkgInfo) => {

@@ -462,7 +462,28 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           ?.updateInternalDependents ?? "out-of-range",
     },
+
+    // TODO consider enabling this by default in the next major version
+    privatePackages:
+      json.privatePackages === false
+        ? { tag: false, version: false }
+        : json.privatePackages
+        ? {
+            version: json.privatePackages.version ?? true,
+            tag: json.privatePackages.tag ?? false,
+          }
+        : { version: true, tag: false },
   };
+
+  if (
+    config.privatePackages.version === false &&
+    config.privatePackages.tag === true
+  ) {
+    throw new ValidationError(
+      `The \`privatePackages.tag\` option is set to \`true\` but \`privatePackages.version\` is set to \`false\`. This is not allowed.`
+    );
+  }
+
   return config;
 };
 

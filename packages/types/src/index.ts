@@ -61,6 +61,11 @@ export type PackageGroup = ReadonlyArray<string>;
 export type Fixed = ReadonlyArray<PackageGroup>;
 export type Linked = ReadonlyArray<PackageGroup>;
 
+export interface PrivatePackages {
+  version: boolean;
+  tag: boolean;
+}
+
 export type Config = {
   changelog: false | readonly [string, any];
   commit: false | readonly [string, any];
@@ -68,6 +73,8 @@ export type Config = {
   linked: Linked;
   access: AccessType;
   baseBranch: string;
+  /** Features enabled for Private packages */
+  privatePackages: PrivatePackages;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
@@ -90,6 +97,13 @@ export type WrittenConfig = {
   linked?: Linked;
   access?: AccessType;
   baseBranch?: string;
+  /** Opt in to tracking non-npm / private packages */
+  privatePackages?:
+    | false
+    | {
+        version?: boolean;
+        tag?: boolean;
+      };
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;

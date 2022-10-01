@@ -94,14 +94,14 @@ async function getPackagesToRelease(
   return [allPackages[0].packageJson.name];
 }
 
-function formatPkgNameAndVersion(pkgName: string, version: string) {
-  return `${bold(pkgName)}@${bold(version)}`;
-}
-
-function getPkgJsonByName(packages: Package[]) {
+function getPkgJsonsByName(packages: Package[]) {
   return new Map(
     packages.map(({ packageJson }) => [packageJson.name, packageJson])
   );
+}
+
+function formatPkgNameAndVersion(pkgName: string, version: string) {
+  return `${bold(pkgName)}@${bold(version)}`;
 }
 
 export default async function createChangeset(
@@ -116,7 +116,7 @@ export default async function createChangeset(
       allPackages
     );
 
-    let pkgJsonsByName = getPkgJsonByName(allPackages);
+    let pkgJsonsByName = getPkgJsonsByName(allPackages);
 
     let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 

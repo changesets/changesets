@@ -33,7 +33,7 @@ describe("running release", () => {
   let cwd: string;
 
   beforeEach(async () => {
-    cwd = await f.copy("simple-project");
+    cwd = f.copy("simple-project");
   });
 
   describe("When there is no changeset commits", () => {

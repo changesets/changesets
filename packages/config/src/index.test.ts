@@ -45,6 +45,10 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
+    privatePackages: {
+      tag: false,
+      version: true,
+    },
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange: false,
       updateInternalDependents: "out-of-range",
@@ -56,7 +60,7 @@ test("read reads the config", async () => {
   });
 });
 
-let defaults = {
+let defaults: Config = {
   fixed: [],
   linked: [],
   changelog: ["@changesets/cli/changelog", null],
@@ -65,6 +69,7 @@ let defaults = {
   baseBranch: "master",
   updateInternalDependencies: "patch",
   ignore: [],
+  privatePackages: { version: true, tag: false },
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
     updateInternalDependents: "out-of-range",
@@ -74,7 +79,7 @@ let defaults = {
     prereleaseTemplate: null,
   },
   bumpVersionsWithWorkspaceProtocolOnly: false,
-} as const;
+};
 
 let correctCases: Record<string, CorrectCase> = {
   defaults: {
@@ -639,5 +644,12 @@ The \`snapshot.useCalculatedVersion\` option is set as \\"not true\\" when the o
 "Some errors occurred when validating the changesets config:
 The \`useCalculatedVersionForSnapshots\` option is set as \\"not true\\" when the only valid values are undefined or a boolean"
 `);
+  });
+
+  test("privatePackages false disables versioning and tagging", () => {
+    expect(unsafeParse({ privatePackages: false }, defaultPackages)).toEqual({
+      ...defaults,
+      privatePackages: { version: false, tag: false },
+    });
   });
 });

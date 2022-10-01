@@ -281,6 +281,13 @@ export async function getChangedPackagesSinceRef({
   );
 }
 
+export async function tagExists(tagStr: string, cwd: string) {
+  const gitCmd = await spawn("git", ["tag", "-l", tagStr], { cwd });
+  const output = gitCmd.stdout.toString().trim();
+  const tagExists = !!output;
+  return tagExists;
+}
+
 export async function getCurrentCommitId({
   cwd,
 }: {
@@ -289,4 +296,17 @@ export async function getCurrentCommitId({
   return (await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd })).stdout
     .toString()
     .trim();
+}
+
+export async function remoteTagExists(tagStr: string) {
+  const gitCmd = await spawn("git", [
+    "ls-remote",
+    "--tags",
+    "origin",
+    "-l",
+    tagStr,
+  ]);
+  const output = gitCmd.stdout.toString().trim();
+  const tagExists = !!output;
+  return tagExists;
 }

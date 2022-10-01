@@ -116,7 +116,7 @@ describe("Changesets", () => {
     "should read summary",
     // @ts-ignore
     async ({ consoleSummaries, editorSummaries, expectedSummary }) => {
-      const cwd = await f.copy("simple-project");
+      const cwd = f.copy("simple-project");
 
       mockUserResponses({
         releases: { "pkg-a": "patch" },
@@ -137,7 +137,7 @@ describe("Changesets", () => {
   );
 
   it("should generate a changeset in a single package repo", async () => {
-    const cwd = await f.copy("single-package");
+    const cwd = f.copy("single-package");
 
     const summary = "summary message mock";
 
@@ -175,7 +175,7 @@ describe("Changesets", () => {
   });
 
   it("should commit when the commit flag is passed in", async () => {
-    const cwd = await f.copy("simple-project-custom-config");
+    const cwd = f.copy("simple-project-custom-config");
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(
@@ -191,7 +191,7 @@ describe("Changesets", () => {
   });
 
   it("should create empty changeset when empty flag is passed in", async () => {
-    const cwd = await f.copy("simple-project");
+    const cwd = f.copy("simple-project");
 
     await addChangeset(cwd, { empty: true }, defaultConfig);
 
@@ -204,8 +204,9 @@ describe("Changesets", () => {
       })
     );
   });
+
   it("should not include ignored packages in the prompt", async () => {
-    const cwd = await f.copy("internal-dependencies");
+    const cwd = f.copy("internal-dependencies");
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(
@@ -218,8 +219,9 @@ describe("Changesets", () => {
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
+
   it("should not include private packages without a version in the prompt", async () => {
-    const cwd = await f.copy("private-package-without-version-field");
+    const cwd = f.copy("private-package-without-version-field");
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
