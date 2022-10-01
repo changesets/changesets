@@ -1,5 +1,7 @@
 ---
 "@changesets/cli": minor
+"@changesets/config": minor
+"@changesets/types": minor
 ---
 
 Private packages can now be tagged in the same way public packages do when they are published to npm.
