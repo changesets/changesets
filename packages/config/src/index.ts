@@ -476,7 +476,6 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   };
 
   if (
-    config.privatePackages &&
     config.privatePackages.version === false &&
     config.privatePackages.tag === true
   ) {

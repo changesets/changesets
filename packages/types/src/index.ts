@@ -98,10 +98,12 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   /** Opt in to tracking non-npm / private packages */
-  privatePackages?: {
-    version?: boolean;
-    tag?: boolean;
-  };
+  privatePackages?:
+    | false
+    | {
+        version?: boolean;
+        tag?: boolean;
+      };
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;
