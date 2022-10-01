@@ -1,5 +1,23 @@
 # @changesets/assemble-release-plan
 
+## 5.2.2
+
+### Patch Changes
+
+- [#949](https://github.com/changesets/changesets/pull/949) [`64585ea`](https://github.com/changesets/changesets/commit/64585ea4323c4cf51a23b0635990b568d1f58b2b) Thanks [@Andarist](https://github.com/Andarist), [@BPScott](https://github.com/BPScott)! - Fixed the issue that caused transitive dependents of dev dependents to be bumped when a package got bumped and when using `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.updateInternalDependents: "always"`. To illustrate this with an example:
+
+  ```
+  pkg-a - version: 1.0.0
+  pkg-b - devDependencies['pkg-a']: 1.0.0
+  pkg-c - dependencies['pkg-b']: 1.0.0
+  ```
+
+  With a changeset for `pkg-a` the `pkg-c` could have been sometimes incorrectly released.
+
+- Updated dependencies [[`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14)]:
+  - @changesets/types@5.2.0
+  - @changesets/get-dependents-graph@1.3.4
+
 ## 5.2.1
 
 ### Patch Changes
