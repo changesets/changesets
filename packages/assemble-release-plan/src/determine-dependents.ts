@@ -55,8 +55,10 @@ export default function determineDependents({
 
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
-
-        if (config.ignore.includes(dependent)) {
+        if (
+          config.ignore.includes(dependent) ||
+          !dependentPackage.packageJson.version
+        ) {
           type = "none";
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(
