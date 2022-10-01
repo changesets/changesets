@@ -1,5 +1,42 @@
 # @changesets/cli
 
+## 2.25.0
+
+### Minor Changes
+
+- [#662](https://github.com/changesets/changesets/pull/662) [`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Private packages can now be tagged in the same way public packages do when they are published to npm.
+
+  To enable set `privatePackages: { version: true, tag: true }` in your config.json.
+
+  You can also now opt private packages out of versioning entirely by setting `privatePackages: false`.
+
+### Patch Changes
+
+- [#953](https://github.com/changesets/changesets/pull/953) [`98d63e0`](https://github.com/changesets/changesets/commit/98d63e0a85506175e219b93478a814f8588c52d3) Thanks [@alexamy](https://github.com/alexamy)! - Add a new line at the end of the default config file generated when invoking `changeset init`.
+
+- [#949](https://github.com/changesets/changesets/pull/949) [`64585ea`](https://github.com/changesets/changesets/commit/64585ea4323c4cf51a23b0635990b568d1f58b2b) Thanks [@Andarist](https://github.com/Andarist), [@BPScott](https://github.com/BPScott)! - Fixed the issue that caused transitive dependents of dev dependents to be bumped when a package got bumped and when using `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.updateInternalDependents: "always"`. To illustrate this with an example:
+
+  ```
+  pkg-a - version: 1.0.0
+  pkg-b - devDependencies['pkg-a']: 1.0.0
+  pkg-c - dependencies['pkg-b']: 1.0.0
+  ```
+
+  With a changeset for `pkg-a` the `pkg-c` could have been sometimes incorrectly released.
+
+- Updated dependencies [[`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14), [`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14), [`64585ea`](https://github.com/changesets/changesets/commit/64585ea4323c4cf51a23b0635990b568d1f58b2b)]:
+  - @changesets/git@1.5.0
+  - @changesets/config@2.2.0
+  - @changesets/types@5.2.0
+  - @changesets/assemble-release-plan@5.2.2
+  - @changesets/apply-release-plan@6.1.1
+  - @changesets/read@0.5.8
+  - @changesets/get-release-plan@3.0.15
+  - @changesets/changelog-git@0.1.13
+  - @changesets/get-dependents-graph@1.3.4
+  - @changesets/pre@1.0.13
+  - @changesets/write@0.2.1
+
 ## 2.24.4
 
 ### Patch Changes

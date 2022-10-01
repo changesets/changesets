@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 5.2.0
+
+### Minor Changes
+
+- [#662](https://github.com/changesets/changesets/pull/662) [`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Added support for the `privatePackages` property in the config.
+
 ## 5.1.0
 
 ### Minor Changes
