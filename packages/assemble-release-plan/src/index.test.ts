@@ -1234,7 +1234,7 @@ describe("version update thoroughness", () => {
   it("should not bump unversioned dependent packages", () => {
     // @ts-ignore
     setup.addPackage("pkg-e", undefined);
-    setup.updateDependency("pkg-e", "pkg-a", "^1.0.0");
+    setup.updateDependency("pkg-e", "pkg-a", "1.0.0");
 
     let { releases } = assembleReleasePlan(
       setup.changesets,
