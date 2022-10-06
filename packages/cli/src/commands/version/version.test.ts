@@ -588,12 +588,45 @@ describe("workspace range", () => {
     ]);
   });
 
-  it("should bump dependent package when bumping a `workspace:^` dependency", async () => {
+  it("should not bump dependent package when patch bumping a `workspace:^` dependency", async () => {
     const cwd = f.copy("workspace-alias-range-dep");
 
     await writeChangeset(
       {
         releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the change",
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:^",
+          "pkg-c": "workspace:~",
+        },
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1",
+      },
+      {
+        name: "pkg-c",
+        version: "1.0.0",
+      },
+    ]);
+  });
+
+  it("should bump dependent package when major bumping a `workspace:^` dependency", async () => {
+    const cwd = f.copy("workspace-alias-range-dep");
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
         summary: "a very useful summary for the change",
       },
       cwd
@@ -612,7 +645,7 @@ describe("workspace range", () => {
       },
       {
         name: "pkg-b",
-        version: "1.0.1",
+        version: "2.0.0",
       },
       {
         name: "pkg-c",

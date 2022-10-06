@@ -114,15 +114,9 @@ export default async function applyReleasePlan(
     }
   }
 
-  let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
-    name,
-    version: newVersion,
-    type,
-  }));
-
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map((release) => {
-    return versionPackage(release, versionsToUpdate, {
+    return versionPackage(release, releases, {
       updateInternalDependencies: config.updateInternalDependencies,
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
@@ -251,6 +245,8 @@ async function getNewChangelogEntry(
           onlyUpdatePeerDependentsWhenOutOfRange:
             config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange,
+          bumpVersionsWithWorkspaceProtocolOnly:
+            config.bumpVersionsWithWorkspaceProtocolOnly,
         }
       );
 

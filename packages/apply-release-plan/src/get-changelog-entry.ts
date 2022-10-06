@@ -2,7 +2,7 @@ import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
 
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
-import { shouldUpdateDependencyBasedOnConfig } from "./utils";
+import { getUpdatedDependencyRange } from "./utils";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -31,12 +31,16 @@ export default async function getChangelogEntry(
   {
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
+    bumpVersionsWithWorkspaceProtocolOnly,
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+    bumpVersionsWithWorkspaceProtocolOnly: boolean;
   }
 ) {
-  if (release.type === "none") return null;
+  if (release.type === "none") {
+    return null;
+  }
 
   const changelogLines: ChangelogLines = {
     major: [],
@@ -56,31 +60,33 @@ export default async function getChangelogEntry(
       );
     }
   });
-  let dependentReleases = releases.filter((rel) => {
+  let dependenciesUpdated = releases.filter((rel) => {
     const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
     const peerDependencyVersionRange =
       release.packageJson.peerDependencies?.[rel.name];
 
     const versionRange = dependencyVersionRange || peerDependencyVersionRange;
-    return (
-      versionRange &&
-      shouldUpdateDependencyBasedOnConfig(
-        { type: rel.type, version: rel.newVersion },
-        {
-          depVersionRange: versionRange,
-          depType: dependencyVersionRange ? "dependencies" : "peerDependencies",
-        },
-        {
-          minReleaseType: updateInternalDependencies,
-          onlyUpdatePeerDependentsWhenOutOfRange,
-        }
-      )
+    if (!versionRange) {
+      return false;
+    }
+    const update = getUpdatedDependencyRange(
+      rel,
+      {
+        depVersionRange: versionRange,
+        depType: dependencyVersionRange ? "dependencies" : "peerDependencies",
+      },
+      {
+        minReleaseType: updateInternalDependencies,
+        onlyUpdatePeerDependentsWhenOutOfRange,
+        bumpVersionsWithWorkspaceProtocolOnly,
+      }
     );
+    return !update.satisfied || update.range !== versionRange;
   });
 
   let relevantChangesetIds: Set<string> = new Set();
 
-  dependentReleases.forEach((rel) => {
+  dependenciesUpdated.forEach((rel) => {
     rel.changesets.forEach((cs) => {
       relevantChangesetIds.add(cs);
     });
@@ -93,7 +99,7 @@ export default async function getChangelogEntry(
   changelogLines.patch.push(
     changelogFuncs.getDependencyReleaseLine(
       relevantChangesets,
-      dependentReleases,
+      dependenciesUpdated,
       changelogOpts
     )
   );

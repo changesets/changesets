@@ -63,7 +63,7 @@ export default function getDependencyGraph(
   >();
   let valid = true;
 
-  const packagesByName: { [key: string]: Package } = {
+  const packagesByName: Record<string, Package> = {
     [packages.root.packageJson.name]: packages.root,
   };
 
@@ -86,15 +86,22 @@ export default function getDependencyGraph(
       const expected = match.packageJson.version;
       const usesWorkspaceRange = depRange.startsWith("workspace:");
 
+      if (opts?.bumpVersionsWithWorkspaceProtocolOnly && !usesWorkspaceRange) {
+        continue;
+      }
+
       if (usesWorkspaceRange) {
         depRange = depRange.replace(/^workspace:/, "");
 
-        if (depRange === "*" || depRange === "^" || depRange === "~") {
+        if (
+          depRange === "*" ||
+          depRange === "^" ||
+          depRange === "~" ||
+          depRange.includes("/")
+        ) {
           dependencies.push(depName);
           continue;
         }
-      } else if (opts?.bumpVersionsWithWorkspaceProtocolOnly === true) {
-        continue;
       }
 
       const range = getValidRange(depRange);
@@ -112,7 +119,7 @@ export default function getDependencyGraph(
       }
 
       // `depRange` could have been a tag and if a tag has been used there might have been a reason for that
-      // we should not count this as a local monorepro dependant
+      // we should not count this as a local monorepo dependant
       if (!range) {
         continue;
       }

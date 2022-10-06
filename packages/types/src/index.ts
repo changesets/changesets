@@ -79,7 +79,7 @@ export type Config = {
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
-  bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  bumpVersionsWithWorkspaceProtocolOnly: boolean;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Omit<
     Required<ExperimentalOptions>,
     "useCalculatedVersionForSnapshots"
