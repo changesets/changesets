@@ -1230,28 +1230,6 @@ describe("version update thoroughness", () => {
     expect(releases[3].name).toEqual("pkg-d");
     expect(releases[3].newVersion).toEqual("1.0.1");
   });
-
-  it("should not bump unversioned dependent packages", () => {
-    // @ts-ignore
-    setup.addPackage("pkg-e", undefined);
-    setup.updateDependency("pkg-e", "pkg-a", "1.0.0");
-
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      defaultConfig,
-      undefined
-    );
-
-    expect(releases.length).toBe(3);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.0.1");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("1.0.1");
-    expect(releases[2].name).toEqual("pkg-e");
-    expect(releases[2].type).toEqual("none");
-    expect(releases[2].newVersion).toEqual(undefined);
-  });
 });
 
 describe("bumping peerDeps", () => {
