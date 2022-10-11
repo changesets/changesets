@@ -84,6 +84,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [GraphiQL](https://github.com/graphql/graphiql)
 - [wagmi](https://github.com/wagmi-dev/wagmi)
 - [refine](https://github.com/pankod/refine)
+- [react-three-fiber](https://github.com/pmndrs/react-three-fiber)
 
 # Thanks/Inspiration
 
