@@ -47,7 +47,8 @@ ${summary}
 
   await fs.writeFile(
     newChangesetPath,
-    prettierInstance.format(changesetContents, {
+    // Prettier v3 returns a promise
+    await prettierInstance.format(changesetContents, {
       ...prettierConfig,
       parser: "markdown",
     })
