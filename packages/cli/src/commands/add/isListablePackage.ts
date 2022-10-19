@@ -8,7 +8,7 @@ export function isListablePackage(config: Config, packageJson: PackageJSON) {
     return false;
   }
 
-  if (!config.privatePackages?.version && packageJson.private) {
+  if (!config.privatePackages.version && packageJson.private) {
     return false;
   }
 
