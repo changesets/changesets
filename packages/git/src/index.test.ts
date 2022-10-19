@@ -53,7 +53,7 @@ describe("git", () => {
     await spawn("git", ["config", "user.name", "xyz"], { cwd });
     await spawn("git", ["config", "commit.gpgSign", "false"], { cwd });
     await spawn("git", ["config", "tag.gpgSign", "false"], { cwd });
-    await spawn("git", ["config", "tag.forceSignAnnotataled", "false"], {
+    await spawn("git", ["config", "tag.forceSignAnnotated", "false"], {
       cwd,
     });
   });
