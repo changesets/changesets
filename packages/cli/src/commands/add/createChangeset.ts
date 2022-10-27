@@ -106,7 +106,11 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Package[]
+  allPackages: Package[],
+  options?: {
+    version?: "major" | "minor" | "patch",
+    message?: string
+  }
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
@@ -218,12 +222,21 @@ export default async function createChangeset(
     }
   } else {
     let pkg = allPackages[0];
-    let type = await cli.askList(
-      `What kind of change is this for ${green(
-        pkg.packageJson.name
-      )}? (current version is ${pkg.packageJson.version})`,
-      ["patch", "minor", "major"]
-    );
+
+    let type: string | undefined;
+    if (options?.version) {
+      type = options?.version;
+      log(
+        `This change will be a "${options?.version}" as specified by the --version argument`
+      );
+    } else {
+      type = await cli.askList(
+        `What kind of change is this for ${green(
+          pkg.packageJson.name
+        )}? (current version is ${pkg.packageJson.version})`,
+        ["patch", "minor", "major"]
+      );
+    }
     if (type === "major") {
       let shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
       if (!shouldReleaseAsMajor) {
@@ -233,12 +246,21 @@ export default async function createChangeset(
     releases.push({ name: pkg.packageJson.name, type });
   }
 
-  log(
-    "Please enter a summary for this change (this will be in the changelogs)."
-  );
-  log(chalk.gray("  (submit empty line to open external editor)"));
+  let summary: string;
+  if (typeof options?.message === 'string') {
+    log(
+      `--message paramter passed: ${options.message}`
+    );
+    summary = options.message;
+  } else {
+    log(
+      "Please enter a summary for this change (this will be in the changelogs)."
+    );
+    log(chalk.gray("  (submit empty line to open external editor)"));
 
-  let summary = await cli.askQuestion("Summary");
+    summary = await cli.askQuestion("Summary");
+  }
+
   if (summary.length === 0) {
     try {
       summary = cli.askQuestionWithEditor(

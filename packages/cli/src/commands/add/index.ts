@@ -15,9 +15,26 @@ import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
 import { isListablePackage } from "./isListablePackage";
 
+function isValidVersion(input?: string): input is "major" | "minor" | "patch" {
+  if (typeof input === "undefined") {
+    return false;
+  }
+  return ["major", "minor", "patch"].includes(input);
+}
+
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  {
+    empty,
+    open,
+    version,
+    message,
+  }: {
+    empty?: boolean;
+    open?: boolean;
+    version?: string | VersionType;
+    message?: string;
+  },
   config: Config
 ) {
   const packages = await getPackages(cwd);
@@ -47,7 +64,22 @@ export default async function add(
       .filter((pkg) => isListablePackage(config, pkg.packageJson))
       .map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, listablePackages);
+    const changesetOptions: {
+      message?: string;
+      version?: "major" | "minor" | "patch";
+    } = {
+      message,
+    };
+
+    if (isValidVersion(version)) {
+      changesetOptions.version = version;
+    }
+
+    newChangeset = await createChangeset(
+      changedPackagesName,
+      listablePackages,
+      changesetOptions
+    );
     printConfirmationMessage(newChangeset, listablePackages.length > 1);
 
     if (!newChangeset.confirmed) {
