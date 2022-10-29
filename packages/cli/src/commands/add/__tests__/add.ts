@@ -231,7 +231,7 @@ describe("Changesets", () => {
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
 
-  it("should not include private packages with a version in the prompt", async () => {
+  it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
     const cwd = f.copy("private-package-with-version-field");
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
