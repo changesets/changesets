@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "private-package-with-version-field",
+  "description": "Base yarn workspace work",
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ]
+}
