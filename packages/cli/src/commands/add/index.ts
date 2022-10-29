@@ -23,7 +23,7 @@ export default async function add(
   const packages = await getPackages(cwd);
   if (packages.packages.length === 0) {
     throw new Error(
-      `No packages found in the current directory. You might have ${packages.tool} workspaces configured by no packages yet?`
+      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
     );
   }
   const listablePackages = packages.packages.filter((pkg) =>
