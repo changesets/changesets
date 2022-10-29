@@ -1,5 +1,13 @@
 # @changesets/cli
 
+## 2.25.1
+
+### Patch Changes
+
+- [#997](https://github.com/changesets/changesets/pull/997) [`4d4d67b`](https://github.com/changesets/changesets/commit/4d4d67b74f9de9dfdc78b9d3cf904c6b69b81ce5) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Add error message when running changesets in a repo with workspaces configured but no packages yet
+
+- [#985](https://github.com/changesets/changesets/pull/985) [`8d0115e`](https://github.com/changesets/changesets/commit/8d0115ea8b2b2e0c0072c8f69898e65a5a7aebd3) Thanks [@mino01x](https://github.com/mino01x)! - Fixed an issue with private packages with versions being included in the CLI prompt despite the `privatePackages.version: false` setting.
+
 ## 2.25.0
 
 ### Minor Changes
