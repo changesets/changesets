@@ -20,7 +20,13 @@ export default async function add(
   { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
 ) {
-  const packages = (await getPackages(cwd)).packages.filter((pkg) =>
+  const packages = await getPackages(cwd);
+  if (packages.packages.length === 0) {
+    throw new Error(
+      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
+    );
+  }
+  const listablePackages = packages.packages.filter((pkg) =>
     isListablePackage(config, pkg.packageJson)
   );
   const changesetBase = path.resolve(cwd, ".changeset");
@@ -41,8 +47,8 @@ export default async function add(
       .filter((pkg) => isListablePackage(config, pkg.packageJson))
       .map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, packages);
-    printConfirmationMessage(newChangeset, packages.length > 1);
+    newChangeset = await createChangeset(changedPackagesName, listablePackages);
+    printConfirmationMessage(newChangeset, listablePackages.length > 1);
 
     if (!newChangeset.confirmed) {
       newChangeset = {
