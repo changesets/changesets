@@ -3,7 +3,7 @@
 The command line for changesets is the main way of interacting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-using-changesets.md)
 
 - init
-- add [--empty][--open][--version][--message]
+- add [--empty][--open][--version][--summary]
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag]
 - status [--since-master --verbose --output=JSON_FILE.json]
@@ -70,7 +70,7 @@ If you set the commit option in the config, the command will add the updated cha
   instead of being prompted to choose it.
   Level can be one of: `major`, `minor`, `patch`, `none`, and only one version may be specified.
 
-- `--message` - Specify the content of the changeset instead of being prompted to write it.
+- `--summary` - Specify the content of the changeset instead of being prompted to write it.
 ## version
 
 ```

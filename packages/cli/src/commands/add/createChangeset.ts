@@ -109,7 +109,7 @@ export default async function createChangeset(
   allPackages: Package[],
   options?: {
     version?: VersionType;
-    message?: string;
+    summary?: string;
   }
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
@@ -247,9 +247,9 @@ export default async function createChangeset(
   }
 
   let summary: string;
-  if (typeof options?.message === "string") {
-    log(`--message paramter passed: ${options.message}`);
-    summary = options.message;
+  if (typeof options?.summary === "string") {
+    log(`--summary paramter passed: ${options.summary}`);
+    summary = options.summary;
   } else {
     log(
       "Please enter a summary for this change (this will be in the changelogs)."

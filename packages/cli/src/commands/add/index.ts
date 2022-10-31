@@ -28,12 +28,12 @@ export default async function add(
     empty,
     open,
     version,
-    message,
+    summary,
   }: {
     empty?: boolean;
     open?: boolean;
     version?: string | VersionType;
-    message?: string;
+    summary?: string;
   },
   config: Config
 ) {
@@ -65,10 +65,10 @@ export default async function add(
       .map((pkg) => pkg.packageJson.name);
 
     const changesetOptions: {
-      message?: string;
+      summary?: string;
       version?: VersionType;
     } = {
-      message,
+      summary,
     };
 
     if (isVersionType(version)) {
