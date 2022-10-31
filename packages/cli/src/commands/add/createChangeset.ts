@@ -108,7 +108,7 @@ export default async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Package[],
   options?: {
-    version?: VersionType;
+    bumpType?: VersionType;
     summary?: string;
   }
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
@@ -224,10 +224,10 @@ export default async function createChangeset(
     let pkg = allPackages[0];
 
     let type: VersionType | undefined;
-    if (options?.version) {
-      type = options.version;
+    if (options?.bumpType) {
+      type = options.bumpType;
       log(
-        `This change will be a "${options?.version}" as specified by the --version argument`
+        `This change will be a "${options?.bumpType}" as specified by the --bump-type argument`
       );
     } else {
       type = await cli.askList<VersionType>(

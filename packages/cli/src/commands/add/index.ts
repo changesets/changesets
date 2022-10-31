@@ -27,12 +27,12 @@ export default async function add(
   {
     empty,
     open,
-    version,
+    bumpType,
     summary,
   }: {
     empty?: boolean;
     open?: boolean;
-    version?: string | VersionType;
+    bumpType?: string | VersionType;
     summary?: string;
   },
   config: Config
@@ -66,16 +66,16 @@ export default async function add(
 
     const changesetOptions: {
       summary?: string;
-      version?: VersionType;
+      bumpType?: VersionType;
     } = {
       summary,
     };
 
-    if (isVersionType(version)) {
-      changesetOptions.version = version;
-    } else if (typeof version !== "undefined") {
+    if (isVersionType(bumpType)) {
+      changesetOptions.bumpType = bumpType;
+    } else if (typeof bumpType !== "undefined") {
       throw new Error(
-        `--version parameter passed with invalid value: ${version}`
+        `--bump-type parameter passed with invalid value: ${bumpType}`
       );
     }
 

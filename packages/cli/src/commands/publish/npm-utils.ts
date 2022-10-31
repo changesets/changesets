@@ -40,7 +40,7 @@ async function getPublishTool(
   const pm = await preferredPM(cwd);
   if (!pm || pm.name !== "pnpm") return { name: "npm" };
   try {
-    let result = await spawn("pnpm", ["--version"], { cwd });
+    let result = await spawn("pnpm", ["--bump-type"], { cwd });
     let version = result.stdout.toString().trim();
     let parsed = semver.parse(version);
     return {
