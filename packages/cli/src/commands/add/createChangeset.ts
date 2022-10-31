@@ -248,7 +248,7 @@ export default async function createChangeset(
 
   let summary: string;
   if (typeof options?.summary === "string") {
-    log(`--summary paramter passed: ${options.summary}`);
+    log(`--summary argument passed: ${options.summary}`);
     summary = options.summary;
   } else {
     log(
