@@ -225,7 +225,7 @@ export default async function createChangeset(
 
     let type: VersionType | undefined;
     if (options?.version) {
-      type = options?.version;
+      type = options.version;
       log(
         `This change will be a "${options?.version}" as specified by the --version argument`
       );
