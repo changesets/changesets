@@ -1,5 +1,11 @@
 # @changesets/write
 
+## 0.2.2
+
+### Patch Changes
+
+- [#983](https://github.com/changesets/changesets/pull/983) [`6cc4300`](https://github.com/changesets/changesets/commit/6cc430013a052dc2488b9e6700a1e4bd8c8e0680) Thanks [@Andarist](https://github.com/Andarist)! - Improved compatibility with the alpha releases of Prettier v3 by awaiting the `.format` result since it's a promise in that version.
+
 ## 0.2.1
 
 ### Patch Changes
