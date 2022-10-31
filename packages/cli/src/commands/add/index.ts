@@ -73,6 +73,10 @@ export default async function add(
 
     if (isVersionType(version)) {
       changesetOptions.version = version;
+    } else if (typeof version !== "undefined") {
+      throw new Error(
+        `--version parameter passed with invalid value: ${version}`
+      );
     }
 
     newChangeset = await createChangeset(
