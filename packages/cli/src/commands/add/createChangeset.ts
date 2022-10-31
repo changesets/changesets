@@ -4,7 +4,7 @@ import semver from "semver";
 
 import * as cli from "../../utils/cli-utilities";
 import { error, log } from "@changesets/logger";
-import { Release, PackageJSON } from "@changesets/types";
+import { Release, PackageJSON, VersionType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
 
@@ -108,8 +108,8 @@ export default async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Package[],
   options?: {
-    version?: "major" | "minor" | "patch",
-    message?: string
+    version?: VersionType;
+    message?: string;
   }
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
@@ -223,14 +223,14 @@ export default async function createChangeset(
   } else {
     let pkg = allPackages[0];
 
-    let type: string | undefined;
+    let type: VersionType | undefined;
     if (options?.version) {
       type = options?.version;
       log(
         `This change will be a "${options?.version}" as specified by the --version argument`
       );
     } else {
-      type = await cli.askList(
+      type = await cli.askList<VersionType>(
         `What kind of change is this for ${green(
           pkg.packageJson.name
         )}? (current version is ${pkg.packageJson.version})`,
@@ -247,10 +247,8 @@ export default async function createChangeset(
   }
 
   let summary: string;
-  if (typeof options?.message === 'string') {
-    log(
-      `--message paramter passed: ${options.message}`
-    );
+  if (typeof options?.message === "string") {
+    log(`--message paramter passed: ${options.message}`);
     summary = options.message;
   } else {
     log(

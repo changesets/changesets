@@ -5,7 +5,7 @@ import { spawn } from "child_process";
 import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
-import { Config } from "@changesets/types";
+import { Config, VersionType } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
 
@@ -15,11 +15,11 @@ import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
 import { isListablePackage } from "./isListablePackage";
 
-function isValidVersion(input?: string): input is "major" | "minor" | "patch" {
+function isVersionType(input?: string): input is VersionType {
   if (typeof input === "undefined") {
     return false;
   }
-  return ["major", "minor", "patch"].includes(input);
+  return ["major", "minor", "patch", "none"].includes(input);
 }
 
 export default async function add(
@@ -66,12 +66,12 @@ export default async function add(
 
     const changesetOptions: {
       message?: string;
-      version?: "major" | "minor" | "patch";
+      version?: VersionType;
     } = {
       message,
     };
 
-    if (isValidVersion(version)) {
+    if (isVersionType(version)) {
       changesetOptions.version = version;
     }
 
