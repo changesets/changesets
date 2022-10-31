@@ -139,7 +139,7 @@ If you set the `commit` option in the config, the command will add the updated c
 
 - `--version` - Creates a changeset with the specified level,
   instead of being prompted to choose it.
-  Level can be one of: major, minor, patch, and only one version may be specified.
+  Level can be one of: `major`, `minor`, `patch`, `none`, and only one version may be specified.
 
 - `--message` - Specify the content of the changeset instead of being prompted to write it.
 ### version
