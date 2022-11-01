@@ -36,7 +36,7 @@ export function shouldUpdateDependencyBasedOnConfig(
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
 ): boolean {
-  if (!semver.satisfies(release.version, depVersionRange)) {
+  if (!semver.satisfies(release.version, depVersionRange, { includePrerelease: true })) {
     // Dependencies leaving semver range should always be updated
     return true;
   }

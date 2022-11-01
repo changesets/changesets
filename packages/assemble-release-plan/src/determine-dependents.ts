@@ -88,7 +88,8 @@ export default function determineDependents({
                 .updateInternalDependents === "always" ||
                 !semver.satisfies(
                   incrementVersion(nextRelease, preInfo),
-                  versionRange
+                  versionRange,
+                  { includePrerelease: true }
                 ))
             ) {
               switch (depType) {
@@ -233,7 +234,8 @@ function shouldBumpMajor({
     (!onlyUpdatePeerDependentsWhenOutOfRange ||
       !semver.satisfies(
         incrementVersion(nextRelease, preInfo),
-        versionRange
+        versionRange,
+        { includePrerelease: true }
       )) &&
     // bump major only if the dependent doesn't already has a major release.
     (!releases.has(dependent) ||
