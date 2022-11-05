@@ -37,11 +37,11 @@ const getDependencyReleaseLine = async (
       }`
   );
 
-  const updatedDepenenciesList = dependenciesUpdated.map(
+  const updatedDependenciesList = dependenciesUpdated.map(
     (dependency) => `  - ${dependency.name}@${dependency.newVersion}`
   );
 
-  return [...changesetLinks, ...updatedDepenenciesList].join("\n");
+  return [...changesetLinks, ...updatedDependenciesList].join("\n");
 };
 
 const defaultChangelogFunctions: ChangelogFunctions = {
