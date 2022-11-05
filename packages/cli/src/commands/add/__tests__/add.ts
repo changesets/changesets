@@ -230,4 +230,25 @@ describe("Changesets", () => {
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
+
+  it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
+    const cwd = f.copy("private-package-with-version-field");
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset(
+      cwd,
+      { empty: false },
+      {
+        ...defaultConfig,
+        privatePackages: {
+          version: false,
+          tag: false,
+        },
+      }
+    );
+
+    // @ts-ignore
+    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+  });
 });
