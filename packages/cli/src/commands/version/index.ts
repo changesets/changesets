@@ -8,7 +8,7 @@ import readChangesets from "@changesets/read";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
 import { getPackages } from "@manypkg/get-packages";
 
-import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
+// import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
@@ -29,6 +29,7 @@ export default async function version(
   },
   config: Config
 ) {
+  console.debug(1);
   const releaseConfig = {
     ...config,
     // Disable committing when in snapshot mode
@@ -37,8 +38,20 @@ export default async function version(
   const [changesets, preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
-    removeEmptyFolders(path.resolve(cwd, ".changeset")),
+    // removeEmptyFolders(path.resolve(cwd, ".changeset")),
   ]);
+
+  console.debug(
+    2,
+    JSON.stringify(
+      {
+        changesets,
+        preState,
+      },
+      null,
+      2
+    )
+  );
 
   if (preState?.mode === "pre") {
     warn(importantSeparator);
@@ -61,10 +74,12 @@ export default async function version(
     (preState === undefined || preState.mode !== "exit")
   ) {
     warn("No unreleased changesets found, exiting.");
-    return;
+    // return;
   }
 
   let packages = await getPackages(cwd);
+
+  // console.debug(21, packages);
 
   let releasePlan = assembleReleasePlan(
     changesets,
@@ -81,6 +96,19 @@ export default async function version(
       : undefined
   );
 
+  console.debug(
+    22,
+    JSON.stringify(
+      {
+        releasePlan,
+        releaseConfig,
+        options,
+      },
+      null,
+      2
+    )
+  );
+
   let [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
@@ -88,10 +116,28 @@ export default async function version(
     options.snapshot
   );
 
+  console.debug(
+    23,
+    JSON.stringify(
+      {
+        touchedFiles,
+      },
+      null,
+      2
+    )
+  );
+
+  // // eslint-disable-next-line no-constant-condition
+  // if (1) return;
+
+  // TODO: unused function
   const [{ getVersionMessage }, commitOpts] = getCommitFunctions(
     releaseConfig.commit,
     cwd
   );
+
+  console.debug(24, { getVersionMessage });
+
   if (getVersionMessage) {
     let touchedFile: string | undefined;
     // Note, git gets angry if you try and have two git actions running at once

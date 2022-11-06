@@ -49,6 +49,7 @@ export async function tag(tagStr: string, cwd: string) {
 // Find the commit where we diverged from `ref` at using `git merge-base`
 export async function getDivergedCommit(cwd: string, ref: string) {
   const cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
+  console.debug(4, cmd);
   if (cmd.code !== 0) {
     throw new Error(
       `Failed to find where HEAD diverged from ${ref}. Does ${ref} exist?`

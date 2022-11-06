@@ -98,12 +98,29 @@ export default async function getChangelogEntry(
     )
   );
 
-  return [
-    `## ${release.newVersion}`,
+  const a = [
+    // `## ${release.newVersion}`,
+    `## [${release.newVersion}](https://github.com/${changelogOpts.repo}/releases/tag/${release.name}/v${release.newVersion})`,
     await generateChangesForVersionTypeMarkdown(changelogLines, "major"),
     await generateChangesForVersionTypeMarkdown(changelogLines, "minor"),
     await generateChangesForVersionTypeMarkdown(changelogLines, "patch"),
   ]
     .filter((line) => line)
     .join("\n");
+
+  console.debug("generateChangesForVersionTypeMarkdown", {
+    release,
+    releases,
+    changesets,
+    changelogFuncs,
+    changelogOpts,
+    changelogLines: {
+      major: await Promise.all(changelogLines.major),
+      minor: await Promise.all(changelogLines.minor),
+      patch: await Promise.all(changelogLines.patch),
+    },
+    a,
+  });
+
+  return a;
 }

@@ -25,6 +25,9 @@ export default async function getChangesets(
 ): Promise<Array<NewChangeset>> {
   let changesetBase = path.join(cwd, ".changeset");
   let contents: string[];
+
+  console.debug(3, sinceRef);
+
   try {
     contents = await fs.readdir(changesetBase);
   } catch (err) {
@@ -34,6 +37,9 @@ export default async function getChangesets(
     throw err;
   }
 
+  console.debug(31, contents);
+
+  // TODO: currently unused
   if (sinceRef !== undefined) {
     contents = await filterChangesetsSinceRef(
       contents,
@@ -42,12 +48,15 @@ export default async function getChangesets(
     );
   }
 
+  // TODO: currently unused
   let oldChangesetsPromise = getOldChangesetsAndWarn(changesetBase, contents);
 
   let changesets = contents.filter(
     (file) =>
       !file.startsWith(".") && file.endsWith(".md") && file !== "README.md"
   );
+
+  console.debug(32, changesets);
 
   const changesetContents = changesets.map(async (file) => {
     const changeset = await fs.readFile(
@@ -57,8 +66,11 @@ export default async function getChangesets(
 
     return { ...parse(changeset), id: file.replace(".md", "") };
   });
-  return [
+
+  const a = [
     ...(await oldChangesetsPromise),
     ...(await Promise.all(changesetContents)),
   ];
+
+  return a;
 }

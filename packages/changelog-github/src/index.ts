@@ -109,15 +109,25 @@ const changelogFunctions: ChangelogFunctions = {
           .join(", ")
       : links.user;
 
-    const prefix = [
-      links.pull === null ? "" : ` ${links.pull}`,
-      links.commit === null ? "" : ` ${links.commit}`,
-      users === null ? "" : ` Thanks ${users}!`,
+    const futureLines2 = futureLines.map((l) => `  ${l}`).join("\n");
+    const a = [
+      "\n\n",
+      `* ${firstLine}\n${futureLines2}`,
+      links.pull ? ` (${links.pull})` : "",
+      links.commit ? ` (${links.commit})` : "",
+      links.users ? ` (${users})` : "",
     ].join("");
 
-    return `\n\n-${prefix ? `${prefix} -` : ""} ${firstLine}\n${futureLines
-      .map((l) => `  ${l}`)
-      .join("\n")}`;
+    // const prefix = [
+    //   links.pull === null ? "" : ` ${links.pull}`,
+    //   links.commit === null ? "" : ` ${links.commit}`,
+    //   users === null ? "" : ` Thanks ${users}!`,
+    // ].join("");
+
+    // return `\n\n-${prefix ? `${prefix} -` : ""} ${firstLine}\n${futureLines
+    //   .map((l) => `  ${l}`)
+    //   .join("\n")}`;
+    return a;
   },
 };
 

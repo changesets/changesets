@@ -24,6 +24,8 @@ async function getOldChangesets(
     (await fs.lstat(path.join(changesetBase, dir))).isDirectory()
   );
 
+  console.debug(4, changesets);
+
   const changesetContents = changesets.map(async (changesetDir) => {
     const jsonPath = path.join(changesetBase, changesetDir, "changes.json");
 

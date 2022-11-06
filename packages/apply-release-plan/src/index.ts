@@ -67,131 +67,6 @@ async function getCommitsThatAddChangesets(
   return commits;
 }
 
-export default async function applyReleasePlan(
-  releasePlan: ReleasePlan,
-  packages: Packages,
-  config: Config = defaultConfig,
-  snapshot?: string | boolean
-) {
-  let cwd = packages.root.dir;
-
-  let touchedFiles = [];
-
-  const packagesByName = new Map(
-    packages.packages.map((x) => [x.packageJson.name, x])
-  );
-
-  let { releases, changesets } = releasePlan;
-
-  let releasesWithPackage = releases.map((release) => {
-    let pkg = packagesByName.get(release.name);
-    if (!pkg)
-      throw new Error(
-        `Could not find matching package for release of: ${release.name}`
-      );
-    return {
-      ...release,
-      ...pkg,
-    };
-  });
-
-  // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
-  let releaseWithChangelogs = await getNewChangelogEntry(
-    releasesWithPackage,
-    changesets,
-    config,
-    cwd
-  );
-
-  if (releasePlan.preState !== undefined && snapshot === undefined) {
-    if (releasePlan.preState.mode === "exit") {
-      await fs.remove(path.join(cwd, ".changeset", "pre.json"));
-    } else {
-      await fs.writeFile(
-        path.join(cwd, ".changeset", "pre.json"),
-        JSON.stringify(releasePlan.preState, null, 2) + "\n"
-      );
-    }
-  }
-
-  let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
-    name,
-    version: newVersion,
-    type,
-  }));
-
-  // iterate over releases updating packages
-  let finalisedRelease = releaseWithChangelogs.map((release) => {
-    return versionPackage(release, versionsToUpdate, {
-      updateInternalDependencies: config.updateInternalDependencies,
-      onlyUpdatePeerDependentsWhenOutOfRange:
-        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange,
-      bumpVersionsWithWorkspaceProtocolOnly:
-        config.bumpVersionsWithWorkspaceProtocolOnly,
-      snapshot,
-    });
-  });
-
-  let prettierInstance = getPrettierInstance(cwd);
-  let prettierConfig = await prettierInstance.resolveConfig(cwd);
-
-  for (let release of finalisedRelease) {
-    let { changelog, packageJson, dir, name } = release;
-
-    const pkgJSONPath = path.resolve(dir, "package.json");
-    await updatePackageJson(pkgJSONPath, packageJson);
-    touchedFiles.push(pkgJSONPath);
-
-    if (changelog && changelog.length > 0) {
-      const changelogPath = path.resolve(dir, "CHANGELOG.md");
-      await updateChangelog(
-        changelogPath,
-        changelog,
-        name,
-        prettierInstance,
-        prettierConfig
-      );
-      touchedFiles.push(changelogPath);
-    }
-  }
-
-  if (
-    releasePlan.preState === undefined ||
-    releasePlan.preState.mode === "exit"
-  ) {
-    let changesetFolder = path.resolve(cwd, ".changeset");
-    await Promise.all(
-      changesets.map(async (changeset) => {
-        let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
-        let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
-        if (await fs.pathExists(changesetPath)) {
-          // DO NOT remove changeset for ignored packages
-          // Mixed changeset that contains both ignored packages and not ignored packages are disallowed
-          // At this point, we know there is no such changeset, because otherwise the program would've already failed,
-          // so we just check if any ignored package exists in this changeset, and only remove it if none exists
-          // Ignored list is added in v2, so we don't need to do it for v1 changesets
-          if (
-            !changeset.releases.find((release) =>
-              config.ignore.includes(release.name)
-            )
-          ) {
-            touchedFiles.push(changesetPath);
-            await fs.remove(changesetPath);
-          }
-          // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
-        } else if (await fs.pathExists(changesetFolderPath)) {
-          touchedFiles.push(changesetFolderPath);
-          await fs.remove(changesetFolderPath);
-        }
-      })
-    );
-  }
-
-  // We return the touched files to be committed in the cli
-  return touchedFiles;
-}
-
 async function getNewChangelogEntry(
   releasesWithPackage: ModCompWithPackage[],
   changesets: NewChangeset[],
@@ -237,8 +112,7 @@ async function getNewChangelogEntry(
     ...cs,
     commit: commits[i],
   }));
-
-  return Promise.all(
+  const a = await Promise.all(
     releasesWithPackage.map(async (release) => {
       let changelog = await getChangelogEntry(
         release,
@@ -259,15 +133,30 @@ async function getNewChangelogEntry(
         changelog,
       };
     })
-  ).catch((e) => {
-    console.error(
-      "The following error was encountered while generating changelog entries"
-    );
-    console.error(
-      "We have escaped applying the changesets, and no files should have been affected"
-    );
-    throw e;
-  });
+  );
+  // .catch((e) => {
+  //   console.error(
+  //     "The following error was encountered while generating changelog entries"
+  //   );
+  //   console.error(
+  //     "We have escaped applying the changesets, and no files should have been affected"
+  //   );
+  //   throw e;
+  // });
+
+  console.debug(
+    "getNewChangelogEntry",
+    JSON.stringify(
+      {
+        commits,
+        moddedChangesets,
+      },
+      null,
+      2
+    )
+  );
+
+  return a;
 }
 
 async function updateChangelog(
@@ -357,4 +246,157 @@ async function writeFormattedMarkdownFile(
       parser: "markdown",
     })
   );
+}
+
+export default async function applyReleasePlan(
+  releasePlan: ReleasePlan,
+  packages: Packages,
+  config: Config = defaultConfig,
+  snapshot?: string | boolean
+) {
+  let cwd = packages.root.dir;
+
+  let touchedFiles = [];
+
+  const packagesByName = new Map(
+    packages.packages.map((x) => [x.packageJson.name, x])
+  );
+
+  let { releases, changesets } = releasePlan;
+
+  let releasesWithPackage = releases.map((release) => {
+    let pkg = packagesByName.get(release.name);
+    if (!pkg)
+      throw new Error(
+        `Could not find matching package for release of: ${release.name}`
+      );
+    return {
+      ...release,
+      ...pkg,
+    };
+  });
+
+  console.debug(
+    "applyReleasePlan:1",
+    JSON.stringify(
+      {
+        releasePlan,
+        releasesWithPackage,
+        config,
+        snapshot,
+      },
+      null,
+      2
+    )
+  );
+
+  // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
+  let releaseWithChangelogs = await getNewChangelogEntry(
+    releasesWithPackage,
+    changesets,
+    config,
+    cwd
+  );
+
+  console.debug(
+    "applyReleasePlan:2",
+    JSON.stringify(
+      {
+        releaseWithChangelogs,
+      },
+      null,
+      2
+    )
+  );
+
+  // // eslint-disable-next-line no-constant-condition
+  // if (1) return [];
+
+  if (releasePlan.preState !== undefined && snapshot === undefined) {
+    if (releasePlan.preState.mode === "exit") {
+      await fs.remove(path.join(cwd, ".changeset", "pre.json"));
+    } else {
+      await fs.writeFile(
+        path.join(cwd, ".changeset", "pre.json"),
+        JSON.stringify(releasePlan.preState, null, 2) + "\n"
+      );
+    }
+  }
+
+  let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
+    name,
+    version: newVersion,
+    type,
+  }));
+
+  // iterate over releases updating packages
+  let finalisedRelease = releaseWithChangelogs.map((release) => {
+    return versionPackage(release, versionsToUpdate, {
+      updateInternalDependencies: config.updateInternalDependencies,
+      onlyUpdatePeerDependentsWhenOutOfRange:
+        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+          .onlyUpdatePeerDependentsWhenOutOfRange,
+      bumpVersionsWithWorkspaceProtocolOnly:
+        config.bumpVersionsWithWorkspaceProtocolOnly,
+      snapshot,
+    });
+  });
+
+  let prettierInstance = getPrettierInstance(cwd);
+  let prettierConfig = await prettierInstance.resolveConfig(cwd);
+
+  for (let release of finalisedRelease) {
+    let { changelog, packageJson, dir, name } = release;
+
+    const pkgJSONPath = path.resolve(dir, "package.json");
+    await updatePackageJson(pkgJSONPath, packageJson);
+    touchedFiles.push(pkgJSONPath);
+
+    if (changelog && changelog.length > 0) {
+      const changelogPath = path.resolve(dir, "CHANGELOG.md");
+      await updateChangelog(
+        changelogPath,
+        changelog,
+        name,
+        prettierInstance,
+        prettierConfig
+      );
+      touchedFiles.push(changelogPath);
+    }
+  }
+
+  if (
+    releasePlan.preState === undefined ||
+    releasePlan.preState.mode === "exit"
+  ) {
+    let changesetFolder = path.resolve(cwd, ".changeset");
+    await Promise.all(
+      changesets.map(async (changeset) => {
+        let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
+        let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
+        if (await fs.pathExists(changesetPath)) {
+          // DO NOT remove changeset for ignored packages
+          // Mixed changeset that contains both ignored packages and not ignored packages are disallowed
+          // At this point, we know there is no such changeset, because otherwise the program would've already failed,
+          // so we just check if any ignored package exists in this changeset, and only remove it if none exists
+          // Ignored list is added in v2, so we don't need to do it for v1 changesets
+          if (
+            !changeset.releases.find((release) =>
+              config.ignore.includes(release.name)
+            )
+          ) {
+            touchedFiles.push(changesetPath);
+            await fs.remove(changesetPath);
+          }
+          // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
+        } else if (await fs.pathExists(changesetFolderPath)) {
+          touchedFiles.push(changesetFolderPath);
+          await fs.remove(changesetFolderPath);
+        }
+      })
+    );
+  }
+
+  // We return the touched files to be committed in the cli
+  return touchedFiles;
 }
