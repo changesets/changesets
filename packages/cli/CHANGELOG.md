@@ -1,5 +1,13 @@
 # @changesets/cli
 
+## 2.25.2
+
+### Patch Changes
+
+- Updated dependencies [[`6cc4300`](https://github.com/changesets/changesets/commit/6cc430013a052dc2488b9e6700a1e4bd8c8e0680)]:
+  - @changesets/apply-release-plan@6.1.2
+  - @changesets/write@0.2.2
+
 ## 2.25.1
 
 ### Patch Changes
