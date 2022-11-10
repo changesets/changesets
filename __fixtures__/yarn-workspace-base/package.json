@@ -1,9 +1,0 @@
-{
-  "private": true,
-  "name": "yarn-workspace-base",
-  "description": "Base yarn workspace work",
-  "version": "1.0.0",
-  "workspaces": [
-    "packages/*"
-  ]
-}

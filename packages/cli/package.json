@@ -67,7 +67,6 @@
   "devDependencies": {
     "@changesets/parse": "*",
     "@changesets/test-utils": "*",
-    "fixturez": "^1.1.0",
     "strip-ansi": "^5.2.0"
   }
 }

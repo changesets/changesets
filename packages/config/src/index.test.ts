@@ -1,9 +1,9 @@
-import fixturez from "fixturez";
 import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import { Config, WrittenConfig } from "@changesets/types";
 import { Packages } from "@manypkg/get-packages";
+import { testdir } from "@changesets/test-utils";
 
 jest.mock("@changesets/logger");
 
@@ -12,8 +12,6 @@ type CorrectCase = {
   input: WrittenConfig;
   output: Config;
 };
-
-let f = fixturez(__dirname);
 
 let defaultPackages: Packages = {
   root: {
@@ -33,8 +31,13 @@ const withPackages = (pkgNames: string[]) => ({
 });
 
 test("read reads the config", async () => {
-  let dir = f.find("new-config");
-  let config = await read(dir, defaultPackages);
+  let cwd = await testdir({
+    ".changeset/config.json": JSON.stringify({
+      changelog: false,
+      commit: true,
+    }),
+  });
+  let config = await read(cwd, defaultPackages);
   expect(config).toEqual({
     fixed: [],
     linked: [],

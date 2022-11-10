@@ -1,6 +1,0 @@
-{
-  "private": true,
-  "name": "root-only",
-  "description": "Nothing but the root project, a non-mono-repo",
-  "version": "1.0.0"
-}

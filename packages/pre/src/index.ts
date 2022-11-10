@@ -38,7 +38,7 @@ export async function exitPre(cwd: string) {
     throw new PreExitButNotInPreModeError();
   }
 
-  await fs.writeFile(
+  await fs.outputFile(
     preStatePath,
     JSON.stringify({ ...preState, mode: "exit" }, null, 2) + "\n"
   );
@@ -61,5 +61,8 @@ export async function enterPre(cwd: string, tag: string) {
   for (let pkg of packages.packages) {
     newPreState.initialVersions[pkg.packageJson.name] = pkg.packageJson.version;
   }
-  await fs.writeFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
+  await fs.outputFile(
+    preStatePath,
+    JSON.stringify(newPreState, null, 2) + "\n"
+  );
 }

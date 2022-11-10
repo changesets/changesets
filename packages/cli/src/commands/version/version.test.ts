@@ -1,12 +1,10 @@
-import fixtures from "fixturez";
-
 import fs from "fs-extra";
 import path from "path";
 import * as git from "@changesets/git";
 import { warn } from "@changesets/logger";
-import { silenceLogsInBlock } from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
-import { NewChangeset, Config } from "@changesets/types";
+import { Config, Changeset } from "@changesets/types";
 import { defaultConfig } from "@changesets/config";
 import { getPackages } from "@manypkg/get-packages";
 import pre from "../pre";
@@ -44,8 +42,6 @@ function mockGlobalDate<
   };
 }
 
-const f = fixtures(__dirname);
-
 let changelogPath = path.resolve(__dirname, "../../changelog");
 let commitPath = path.resolve(__dirname, "../../commit");
 let modifiedDefaultConfig: Config = {
@@ -80,28 +76,7 @@ git.getCurrentCommitId.mockImplementation(() => Promise.resolve("abcdef"));
 // @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
 
-const simpleChangeset: NewChangeset = {
-  summary: "This is a summary",
-  releases: [{ name: "pkg-a", type: "minor" }],
-  id: "having-lotsof-fun",
-};
-
-const simpleChangeset2: NewChangeset = {
-  summary: "This is a summary too",
-  releases: [
-    { name: "pkg-a", type: "minor" },
-    { name: "pkg-b", type: "patch" },
-  ],
-  id: "wouldnit-be-nice",
-};
-
-const simpleChangeset3: NewChangeset = {
-  summary: "This is not a summary",
-  releases: [{ name: "pkg-b", type: "patch" }],
-  id: "hot-day-today",
-};
-
-const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
+const writeChangesets = (changesets: Changeset[], cwd: string) => {
   return Promise.all(
     changesets.map((changeset) => writeChangeset(changeset, cwd))
   );
@@ -127,8 +102,6 @@ const getChangelog = (pkgName: string, calls: any) => {
   return getFile(pkgName, "CHANGELOG.md", calls);
 };
 
-const writeEmptyChangeset = (cwd: string) => writeChangesets([], cwd);
-
 beforeEach(() => {
   let i = 0;
   (humanId as jest.Mock<string, []>).mockImplementation(() => {
@@ -144,20 +117,20 @@ afterEach(() => {
 
 describe("running version in a simple project", () => {
   silenceLogsInBlock();
-  let cwd: string;
-
-  beforeEach(async () => {
-    cwd = await f.copy("simple-project");
-    console.error = jest.fn();
-  });
-
-  afterEach(async () => {
-    console.error = consoleError;
-  });
 
   describe("when there are no changeset commits", () => {
     it("should warn if no changeset commits exist", async () => {
-      await writeEmptyChangeset(cwd);
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
       await version(cwd, defaultOptions, modifiedDefaultConfig);
       // @ts-ignore
       const loggerWarnCalls = warn.mock.calls;
@@ -170,7 +143,35 @@ describe("running version in a simple project", () => {
 
   describe("when there is a changeset commit", () => {
     it("should bump releasedPackages", async () => {
-      await writeChangesets([simpleChangeset2], cwd);
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary too",
+            releases: [
+              { name: "pkg-a", type: "minor" },
+              { name: "pkg-b", type: "patch" },
+            ],
+          },
+        ],
+        cwd
+      );
       const spy = jest.spyOn(fs, "writeFile");
 
       await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -185,7 +186,32 @@ describe("running version in a simple project", () => {
   });
 
   it("should not touch package.json of an ignored package when it is not a dependent of any releasedPackages ", async () => {
-    await writeChangesets([simpleChangeset], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd
+    );
     const spy = jest.spyOn(fs, "writeFile");
 
     await version(cwd, defaultOptions, {
@@ -201,7 +227,36 @@ describe("running version in a simple project", () => {
   });
 
   it("should not bump ignored packages", async () => {
-    await writeChangesets([simpleChangeset, simpleChangeset3], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        {
+          summary: "This is not a summary",
+          releases: [{ name: "pkg-b", type: "patch" }],
+        },
+      ],
+      cwd
+    );
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
@@ -227,10 +282,26 @@ describe("running version in a simple project", () => {
   });
 
   it("should not commit the result if commit config is not set", async () => {
-    await writeChangesets([simpleChangeset2], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd
+    );
     const spy = jest.spyOn(git, "commit");
-
-    expect(spy).not.toHaveBeenCalled();
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -238,7 +309,35 @@ describe("running version in a simple project", () => {
   });
 
   it("should git add the expected files if commit config is set", async () => {
-    const ids = await writeChangesets([simpleChangeset2], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    const ids = await writeChangesets(
+      [
+        {
+          summary: "This is a summary too",
+          releases: [
+            { name: "pkg-a", type: "minor" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        },
+      ],
+      cwd
+    );
     const spy = jest.spyOn(git, "add");
 
     expect(spy).not.toHaveBeenCalled();
@@ -260,7 +359,35 @@ describe("running version in a simple project", () => {
   });
 
   it("should commit the result if commit config is set", async () => {
-    await writeChangesets([simpleChangeset2], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary too",
+          releases: [
+            { name: "pkg-a", type: "minor" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        },
+      ],
+      cwd
+    );
     const spy = jest.spyOn(git, "commit");
 
     expect(spy).not.toHaveBeenCalled();
@@ -282,7 +409,35 @@ describe("running version in a simple project", () => {
   });
 
   it("should skip over ignored changesets", async () => {
-    const cwd = await f.copy("ignored-changeset");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/changesets-are-beautiful.md": `---
+"pkg-a": minor
+---
+
+Nice simple summary, much wow
+`,
+      ".changeset/.ignored-temporarily.md": `---
+"pkg-b": minor
+---
+
+Awesome feature, hidden behind a feature flag
+`,
+    });
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -307,7 +462,23 @@ describe("running version in a simple project", () => {
   });
 
   it("should not update a dependant that uses a tag as a dependency rage for a package that could otherwise be local", async () => {
-    const cwd = await f.copy("dependant-with-tag-range");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["examples/*", "packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "examples/example-a/package.json": JSON.stringify({
+        name: "example-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-a": "latest",
+        },
+      }),
+    });
 
     await writeChangeset(
       {
@@ -339,7 +510,39 @@ describe("running version in a simple project", () => {
 
   describe("when there are multiple changeset commits", () => {
     it("should bump releasedPackages", async () => {
-      await writeChangesets([simpleChangeset, simpleChangeset2], cwd);
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary",
+            releases: [{ name: "pkg-a", type: "minor" }],
+          },
+          {
+            summary: "This is a summary too",
+            releases: [
+              { name: "pkg-a", type: "minor" },
+              { name: "pkg-b", type: "patch" },
+            ],
+          },
+        ],
+        cwd
+      );
       const spy = jest.spyOn(fs, "writeFile");
 
       await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -353,7 +556,39 @@ describe("running version in a simple project", () => {
     });
 
     it("should bump multiple released packages if required", async () => {
-      await writeChangesets([simpleChangeset, simpleChangeset2], cwd);
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary",
+            releases: [{ name: "pkg-a", type: "minor" }],
+          },
+          {
+            summary: "This is a summary too",
+            releases: [
+              { name: "pkg-a", type: "minor" },
+              { name: "pkg-b", type: "patch" },
+            ],
+          },
+        ],
+        cwd
+      );
       const spy = jest.spyOn(fs, "writeFile");
       await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -373,19 +608,81 @@ describe("running version in a simple project", () => {
       );
     });
     it("should delete the changeset files", async () => {
-      await writeChangesets([simpleChangeset, simpleChangeset2], cwd);
-      await version(cwd, defaultOptions, modifiedDefaultConfig);
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
 
-      const files = await fs.readdir(path.resolve(cwd, ".changeset"));
-      expect(files.length).toBe(2);
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary",
+            releases: [{ name: "pkg-a", type: "minor" }],
+          },
+          {
+            summary: "This is a summary too",
+            releases: [
+              { name: "pkg-a", type: "minor" },
+              { name: "pkg-b", type: "patch" },
+            ],
+          },
+        ],
+        cwd
+      );
+      expect((await fs.readdir(path.resolve(cwd, ".changeset"))).length).toBe(
+        3
+      );
+
+      await version(cwd, defaultOptions, modifiedDefaultConfig);
+      expect((await fs.readdir(path.resolve(cwd, ".changeset"))).length).toBe(
+        1
+      );
     });
   });
 });
 
 describe("fixed", () => {
   it("should bump packages to the correct versions when packages are fixed", async () => {
-    const cwd = await f.copy("fixed-packages");
-    await writeChangesets([simpleChangeset], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd
+    );
     const spy = jest.spyOn(fs, "writeFile");
 
     await version(cwd, defaultOptions, {
@@ -402,8 +699,32 @@ describe("fixed", () => {
   });
 
   it("should not bump an ignored fixed package that depends on a package from the group that is being released", async () => {
-    const cwd = await f.copy("fixed-packages");
-    await writeChangesets([simpleChangeset3], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is not a summary",
+          releases: [{ name: "pkg-b", type: "patch" }],
+        },
+      ],
+      cwd
+    );
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
@@ -430,10 +751,34 @@ describe("fixed", () => {
   });
 
   it("should update CHANGELOGs of all packages from the fixed group", async () => {
-    const cwd = await f.copy("fixed-packages");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     const spy = jest.spyOn(fs, "writeFile");
 
-    await writeChangesets([simpleChangeset], cwd);
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd
+    );
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
@@ -463,7 +808,15 @@ describe("fixed", () => {
 
     spy.mockClear();
 
-    await writeChangesets([simpleChangeset], cwd);
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd
+    );
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
@@ -507,8 +860,35 @@ describe("fixed", () => {
 
 describe("linked", () => {
   it("should bump packages to the correct versions when packages are linked", async () => {
-    const cwd = await f.copy("linked-packages");
-    await writeChangesets([simpleChangeset2], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "0.1.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "0.1.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary too",
+          releases: [
+            { name: "pkg-a", type: "minor" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        },
+      ],
+      cwd
+    );
     const spy = jest.spyOn(fs, "writeFile");
 
     await version(cwd, defaultOptions, {
@@ -525,11 +905,38 @@ describe("linked", () => {
   });
 
   it("should not break when there is a linked package without a changeset", async () => {
-    const cwd = await f.copy("linked-packages");
-    await writeChangesets([simpleChangeset], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "0.1.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "0.1.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd
+    );
     const spy = jest.spyOn(fs, "writeFile");
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      linked: [["pkg-1", "pkg-2"]],
+    });
 
     expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
       expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
@@ -539,9 +946,36 @@ describe("linked", () => {
 
 describe("workspace range", () => {
   it("should update dependency range correctly", async () => {
-    const cwd = f.copy("simple-workspace-range-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
-    await writeChangesets([simpleChangeset2], cwd);
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary too",
+          releases: [
+            { name: "pkg-a", type: "minor" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        },
+      ],
+      cwd
+    );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
     let packages = await getPackages(cwd);
@@ -561,7 +995,23 @@ describe("workspace range", () => {
   });
 
   it("should bump dependent package when bumping a `workspace:*` dependency", async () => {
-    const cwd = f.copy("simple-workspace-wildcard-range-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:*",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
     await writeChangeset(
       {
@@ -589,7 +1039,23 @@ describe("workspace range", () => {
   });
 
   it("should bump dependent package when bumping a `workspace:^` dependency", async () => {
-    const cwd = f.copy("workspace-alias-range-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:^",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
     await writeChangeset(
       {
@@ -607,16 +1073,11 @@ describe("workspace range", () => {
         version: "1.0.1",
         dependencies: {
           "pkg-b": "workspace:^",
-          "pkg-c": "workspace:~",
         },
       },
       {
         name: "pkg-b",
         version: "1.0.1",
-      },
-      {
-        name: "pkg-c",
-        version: "1.0.0",
       },
     ]);
   });
@@ -624,7 +1085,26 @@ describe("workspace range", () => {
 
 describe("same package in different dependency types", () => {
   it("should update different range types correctly", async () => {
-    let cwd = f.copy("simple-project-same-dep-diff-range");
+    let cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        peerDependencies: {
+          "pkg-b": "^1.0.0",
+        },
+        devDependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await writeChangeset(
       {
         releases: [
@@ -662,8 +1142,35 @@ describe("same package in different dependency types", () => {
 
 describe("snapshot release", () => {
   it("should update the package to unique version no matter the kind of version bump it is", async () => {
-    let cwd = f.copy("simple-project");
-    await writeChangesets([simpleChangeset2], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary too",
+          releases: [
+            { name: "pkg-a", type: "minor" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        },
+      ],
+      cwd
+    );
     const spy = jest.spyOn(fs, "writeFile");
     await version(
       cwd,
@@ -691,8 +1198,35 @@ describe("snapshot release", () => {
   });
 
   it("should not commit the result even if commit config is set", async () => {
-    let cwd = f.copy("simple-project");
-    await writeChangesets([simpleChangeset2], cwd);
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary too",
+          releases: [
+            { name: "pkg-a", type: "minor" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        },
+      ],
+      cwd
+    );
     const spy = jest.spyOn(git, "commit");
 
     expect(spy).not.toHaveBeenCalled();
@@ -712,7 +1246,16 @@ describe("snapshot release", () => {
   });
 
   it("should not bump version of a package with an explicit none release type", async () => {
-    const cwd = await f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
     await writeChangeset(
       {
         releases: [{ name: "pkg-a", type: "none" }],
@@ -733,14 +1276,7 @@ describe("snapshot release", () => {
       .toMatchInlineSnapshot(`
       Array [
         Object {
-          "dependencies": Object {
-            "pkg-b": "1.0.0",
-          },
           "name": "pkg-a",
-          "version": "1.0.0",
-        },
-        Object {
-          "name": "pkg-b",
           "version": "1.0.0",
         },
       ]
@@ -750,7 +1286,23 @@ describe("snapshot release", () => {
   it(
     "should not bump version of an ignored package when its dependency gets updated",
     mockGlobalDate(async () => {
-      const cwd = await f.copy("simple-project");
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
       await writeChangeset(
         {
           releases: [{ name: "pkg-b", type: "major" }],
@@ -791,8 +1343,35 @@ describe("snapshot release", () => {
 
   describe("snapshotPrereleaseTemplate", () => {
     it('should throw an error when "{tag}" and empty snapshot is used', async () => {
-      let cwd = f.copy("simple-project");
-      await writeChangesets([simpleChangeset2], cwd);
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary too",
+            releases: [
+              { name: "pkg-a", type: "minor" },
+              { name: "pkg-b", type: "patch" },
+            ],
+          },
+        ],
+        cwd
+      );
       jest.spyOn(fs, "writeFile");
 
       expect(
@@ -814,8 +1393,35 @@ describe("snapshot release", () => {
     });
 
     it('should throw an error when "{tag}" is set and named snapshot is used', async () => {
-      let cwd = f.copy("simple-project");
-      await writeChangesets([simpleChangeset2], cwd);
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary too",
+            releases: [
+              { name: "pkg-a", type: "minor" },
+              { name: "pkg-b", type: "patch" },
+            ],
+          },
+        ],
+        cwd
+      );
       jest.spyOn(fs, "writeFile");
 
       expect(
@@ -858,8 +1464,35 @@ describe("snapshot release", () => {
       "should customize release correctly based on snapshotPrereleaseTemplate template: %p (tag: '%p')",
       mockGlobalDate(
         async (snapshotTemplate, snapshotValue, expectedResult) => {
-          let cwd = f.copy("simple-project");
-          await writeChangesets([simpleChangeset2], cwd);
+          const cwd = await testdir({
+            "package.json": JSON.stringify({
+              private: true,
+              workspaces: ["packages/*"],
+            }),
+            "packages/pkg-a/package.json": JSON.stringify({
+              name: "pkg-a",
+              version: "1.0.0",
+              dependencies: {
+                "pkg-b": "1.0.0",
+              },
+            }),
+            "packages/pkg-b/package.json": JSON.stringify({
+              name: "pkg-b",
+              version: "1.0.0",
+            }),
+          });
+          await writeChangesets(
+            [
+              {
+                summary: "This is a summary too",
+                releases: [
+                  { name: "pkg-a", type: "minor" },
+                  { name: "pkg-b", type: "patch" },
+                ],
+              },
+            ],
+            cwd
+          );
           const spy = jest.spyOn(fs, "writeFile");
           await version(
             cwd,
@@ -894,8 +1527,35 @@ describe("snapshot release", () => {
 
   describe("snapshot.useCalculatedVersion: true", () => {
     it("should update packages using calculated version", async () => {
-      let cwd = f.copy("simple-project");
-      await writeChangesets([simpleChangeset2], cwd);
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary too",
+            releases: [
+              { name: "pkg-a", type: "minor" },
+              { name: "pkg-b", type: "patch" },
+            ],
+          },
+        ],
+        cwd
+      );
       const spy = jest.spyOn(fs, "writeFile");
       await version(
         cwd,
@@ -927,7 +1587,16 @@ describe("snapshot release", () => {
     });
 
     it("should not bump version of a package with an explicit none release type", async () => {
-      const cwd = await f.copy("simple-project");
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+      });
       await writeChangeset(
         {
           releases: [{ name: "pkg-a", type: "none" }],
@@ -954,14 +1623,7 @@ describe("snapshot release", () => {
         .toMatchInlineSnapshot(`
         Array [
           Object {
-            "dependencies": Object {
-              "pkg-b": "1.0.0",
-            },
             "name": "pkg-a",
-            "version": "1.0.0",
-          },
-          Object {
-            "name": "pkg-b",
             "version": "1.0.0",
           },
         ]
@@ -971,7 +1633,23 @@ describe("snapshot release", () => {
     it(
       "should not bump version of an ignored package when its dependency gets updated",
       mockGlobalDate(async () => {
-        const cwd = await f.copy("simple-project");
+        const cwd = await testdir({
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        });
         await writeChangeset(
           {
             releases: [{ name: "pkg-b", type: "major" }],
@@ -1018,9 +1696,31 @@ describe("snapshot release", () => {
 
 describe("updateInternalDependents: always", () => {
   it("should bump a direct dependent when a dependency package gets bumped", async () => {
-    const cwd = await f.copy("simple-project-caret-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "^1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     const spy = jest.spyOn(fs, "writeFile");
-    await writeChangeset(simpleChangeset3, cwd);
+    await writeChangeset(
+      {
+        summary: "This is not a summary",
+        releases: [{ name: "pkg-b", type: "patch" }],
+      },
+      cwd
+    );
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1068,9 +1768,35 @@ describe("updateInternalDependents: always", () => {
   });
 
   it("should not bump a dev dependent nor its dependent when a package gets bumped", async () => {
-    const cwd = await f.copy("simplest-transitive-devdependent");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        devDependencies: { "pkg-a": "1.0.0" },
+      }),
+      "packages/pkg-c/package.json": JSON.stringify({
+        name: "pkg-c",
+        version: "1.0.0",
+        dependencies: { "pkg-b": "1.0.0" },
+      }),
+    });
+
     const spy = jest.spyOn(fs, "writeFile");
-    await writeChangeset(simpleChangeset, cwd);
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1117,7 +1843,23 @@ describe("updateInternalDependents: always", () => {
 
 describe("pre", () => {
   it("should work", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await pre(cwd, { command: "enter", tag: "next" });
     await writeChangeset(
       {
@@ -1311,7 +2053,23 @@ describe("pre", () => {
     `);
   });
   it("should work with adding a package while in pre mode", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await pre(cwd, { command: "enter", tag: "next" });
     await writeChangeset(
       {
@@ -1373,7 +2131,23 @@ describe("pre", () => {
     ]);
   });
   it("should work for my weird case", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await writeChangeset(
       {
         releases: [{ name: "pkg-a", type: "minor" }],
@@ -1421,7 +2195,23 @@ describe("pre", () => {
   });
   // https://github.com/changesets/changesets/pull/382#discussion_r434434182
   it("should bump patch version for packages that had prereleases, but caret dependencies are still in range", async () => {
-    let cwd = f.copy("simple-project-caret-dep");
+    let cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "^1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await pre(cwd, { command: "enter", tag: "next" });
     await writeChangeset(
       {
@@ -1467,7 +2257,23 @@ describe("pre", () => {
   });
 
   it("should use the highest bump type between all prereleases when versioning a package", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await writeChangeset(
       {
         releases: [{ name: "pkg-a", type: "major" }],
@@ -1515,7 +2321,23 @@ describe("pre", () => {
     ]);
   });
   it("should use the highest bump type between all prereleases when versioning a dependent package", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await pre(cwd, { command: "enter", tag: "next" });
 
     await writeChangeset(
@@ -1565,7 +2387,23 @@ describe("pre", () => {
   });
 
   it("should not bump packages through devDependencies", async () => {
-    let cwd = f.copy("simple-dev-dep");
+    let cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        devDependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await writeChangeset(
       {
         releases: [{ name: "pkg-b", type: "major" }],
@@ -1591,7 +2429,23 @@ describe("pre", () => {
     ]);
   });
   it("should not bump ignored packages through dependencies", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await writeChangeset(
       {
         releases: [{ name: "pkg-a", type: "major" }],
@@ -1628,12 +2482,28 @@ describe("pre", () => {
     ]);
   });
   it("should bump dependent of prerelease package when bumping a `workspace:~` dependency", async () => {
-    const cwd = f.copy("workspace-alias-range-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:~",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await pre(cwd, { command: "enter", tag: "alpha" });
 
     await writeChangeset(
       {
-        releases: [{ name: "pkg-c", type: "patch" }],
+        releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
       cwd
@@ -1646,23 +2516,34 @@ describe("pre", () => {
         name: "pkg-a",
         version: "1.0.1-alpha.0",
         dependencies: {
-          "pkg-b": "workspace:^",
-          "pkg-c": "workspace:~",
+          "pkg-b": "workspace:~",
         },
       },
       {
         name: "pkg-b",
-        version: "1.0.0",
-      },
-      {
-        name: "pkg-c",
         version: "1.0.1-alpha.0",
       },
     ]);
   });
 
   it("should replace star range for dependency in dependant package when that dependency has its first prerelease in an already active pre mode", async () => {
-    const cwd = f.copy("simple-star-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "*",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
     await pre(cwd, { command: "enter", tag: "alpha" });
 
@@ -1722,7 +2603,23 @@ describe("pre", () => {
   });
 
   it("bumping dependency in pre mode should result in dependant with star range on that dependency to be patch bumped and that range to be replaced with exact version", async () => {
-    const cwd = f.copy("simple-star-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "*",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
     await pre(cwd, { command: "enter", tag: "alpha" });
 
@@ -1755,7 +2652,23 @@ describe("pre", () => {
   });
 
   it("bumping dependency in pre mode should result in dependant with workspace:* range on that dependency to be patch bumped without changing the dependency range", async () => {
-    const cwd = f.copy("simple-workspace-wildcard-range-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:*",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
     await pre(cwd, { command: "enter", tag: "alpha" });
 
@@ -1788,7 +2701,23 @@ describe("pre", () => {
   });
 
   it("bumping dependency in pre mode should result in dependant with workspace:^ range on that dependency to be patch bumped without changing the dependency range", async () => {
-    const cwd = f.copy("workspace-alias-range-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:^",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
     await pre(cwd, { command: "enter", tag: "alpha" });
 
@@ -1808,7 +2737,6 @@ describe("pre", () => {
         Object {
           "dependencies": Object {
             "pkg-b": "workspace:^",
-            "pkg-c": "workspace:~",
           },
           "name": "pkg-a",
           "version": "1.0.1-alpha.0",
@@ -1817,22 +2745,34 @@ describe("pre", () => {
           "name": "pkg-b",
           "version": "1.0.1-alpha.0",
         },
-        Object {
-          "name": "pkg-c",
-          "version": "1.0.0",
-        },
       ]
     `);
   });
 
   it("bumping dependency in pre mode should result in dependant with workspace:~ range on that dependency to be patch bumped without changing the dependency range", async () => {
-    const cwd = f.copy("workspace-alias-range-dep");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:~",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
     await pre(cwd, { command: "enter", tag: "alpha" });
 
     await writeChangeset(
       {
-        releases: [{ name: "pkg-c", type: "patch" }],
+        releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
       cwd
@@ -1845,18 +2785,13 @@ describe("pre", () => {
       Array [
         Object {
           "dependencies": Object {
-            "pkg-b": "workspace:^",
-            "pkg-c": "workspace:~",
+            "pkg-b": "workspace:~",
           },
           "name": "pkg-a",
           "version": "1.0.1-alpha.0",
         },
         Object {
           "name": "pkg-b",
-          "version": "1.0.0",
-        },
-        Object {
-          "name": "pkg-c",
           "version": "1.0.1-alpha.0",
         },
       ]
@@ -1869,7 +2804,23 @@ describe("pre", () => {
         ...modifiedDefaultConfig,
         linked: [["pkg-a", "pkg-b"]],
       };
-      let cwd = f.copy("simple-project");
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
       await writeChangeset(
         {
           releases: [{ name: "pkg-a", type: "minor" }],
@@ -1961,7 +2912,27 @@ describe("pre", () => {
         ...modifiedDefaultConfig,
         linked: [["pkg-a", "pkg-b"]],
       };
-      let cwd = f.copy("linked-and-not-linked-packages");
+      let cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-c": "0.1.0",
+          },
+        }),
+        "packages/pkg-c/package.json": JSON.stringify({
+          name: "pkg-c",
+          version: "0.1.0",
+        }),
+      });
       await pre(cwd, { command: "enter", tag: "next" });
       await writeChangeset(
         {
@@ -2020,7 +2991,23 @@ describe("pre", () => {
         ...modifiedDefaultConfig,
         linked: [["pkg-a", "pkg-b"]],
       };
-      let cwd = f.copy("linked-packages-with-linked-dev-dep");
+      let cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          devDependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
       await writeChangeset(
         {
           releases: [{ name: "pkg-b", type: "patch" }],

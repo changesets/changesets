@@ -1,3 +1,7 @@
+import fixturez from "fixturez";
+import path from "path";
+import fs from "fs-extra";
+
 /**
  * Reason for eslint disable import/no-commonjs
  * Technically reassigning imports is not allowed and
@@ -81,3 +85,20 @@ export const temporarilySilenceLogs =
       dispose();
     }
   };
+
+let f = fixturez(__dirname);
+
+export interface Fixture extends Record<string, string> {}
+
+export async function testdir(dir: Fixture) {
+  const temp = f.temp();
+  await Promise.all(
+    Object.keys(dir).map(async (filename) => {
+      const fullPath = path.join(temp, filename);
+      await fs.outputFile(fullPath, dir[filename]);
+    })
+  );
+  return temp;
+}
+
+export const tempdir = f.temp;
