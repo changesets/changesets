@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
-    "fixturez": "^1.1.0",
     "spawndamnit": "^2.0.0"
   }
 }

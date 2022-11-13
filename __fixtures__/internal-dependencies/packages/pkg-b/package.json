@@ -1,8 +1,0 @@
-{
-  "name": "pkg-b",
-  "version": "1.2.0",
-  "dependencies": {
-    "pkg-c": "2.0.0",
-    "pkg-a": "^1.0.3"
-  }
-}
