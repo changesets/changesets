@@ -45,9 +45,10 @@ ${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
 ${summary}
   `;
 
-  await fs.writeFile(
+  await fs.outputFile(
     newChangesetPath,
-    prettierInstance.format(changesetContents, {
+    // Prettier v3 returns a promise
+    await prettierInstance.format(changesetContents, {
       ...prettierConfig,
       parser: "markdown",
     })

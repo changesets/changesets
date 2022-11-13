@@ -346,7 +346,8 @@ async function writeFormattedMarkdownFile(
 ) {
   await fs.writeFile(
     filePath,
-    prettierInstance.format(content, {
+    // Prettier v3 returns a promise
+    await prettierInstance.format(content, {
       ...prettierConfig,
       filepath: filePath,
       parser: "markdown",

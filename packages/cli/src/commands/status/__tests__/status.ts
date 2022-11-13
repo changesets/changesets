@@ -1,105 +1,108 @@
-import fixtures from "fixturez";
 import fs from "fs-extra";
 import path from "path";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
-import { silenceLogsInBlock } from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 
 import status from "..";
 
 import humanId from "human-id";
-import { NewChangeset, ReleasePlan } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
 
 jest.mock("human-id");
 jest.mock("@changesets/git");
 
-const f = fixtures(__dirname);
-
-const simpleChangeset: NewChangeset = {
-  id: "fake-ids-abound",
-  summary: "This is a summary",
-  releases: [
-    { name: "pkg-a", type: "minor" },
-    { name: "pkg-b", type: "patch" },
-  ],
-};
-
-const simpleReleasePlan: ReleasePlan = {
-  releases: [
-    {
-      name: "pkg-a",
-      type: "minor",
-      changesets: ["ascii"],
-      oldVersion: "1.0.0",
-      newVersion: "1.1.0",
-    },
-    {
-      name: "pkg-b",
-      type: "patch",
-      changesets: ["ascii"],
-      oldVersion: "1.0.0",
-      newVersion: "1.0.1",
-    },
-  ],
-  changesets: [
-    {
-      summary: "This is a summary",
-      releases: [
-        { name: "pkg-a", type: "minor" },
-        { name: "pkg-b", type: "patch" },
-      ],
-      id: "ascii",
-    },
-  ],
-  preState: undefined,
-};
-
-const simpleChangedPackagesList: Package[] = [
-  {
-    packageJson: { name: "pkg-a", version: "1.0.0", dependencies: {} },
-    dir: "/fake/folder/doesnt/matter",
-  },
-  {
-    packageJson: { name: "pkg-b", version: "1.0.0" },
-    dir: "/fake/folder/doesnt/matter",
-  },
-];
-
-const writeChangesets = (changesets: NewChangeset[], cwd: string) => {
-  return Promise.all(changesets.map((commit) => writeChangeset(commit, cwd)));
-};
-
 describe("status", () => {
   silenceLogsInBlock();
-  let cwd: string;
 
-  beforeEach(async () => {
-    cwd = await f.copy("simple-project");
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it("should get the status for a simple changeset and return the release object", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
     const changesetID = "ascii";
     // @ts-ignore
     humanId.mockReturnValueOnce(changesetID);
     // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(
-      () => simpleChangedPackagesList
-    );
+    git.getChangedPackagesSinceRef.mockImplementation(() => [
+      {
+        packageJson: { name: "pkg-a", version: "1.0.0" },
+        dir: "/fake/folder/doesnt/matter",
+      },
+    ]);
 
-    await writeChangesets([simpleChangeset], cwd);
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
     const releaseObj = await status(cwd, {}, defaultConfig);
-    expect(releaseObj).toEqual(simpleReleasePlan);
+    expect(releaseObj).toMatchInlineSnapshot(`
+      Object {
+        "changesets": Array [
+          Object {
+            "id": "ascii",
+            "releases": Array [
+              Object {
+                "name": "pkg-a",
+                "type": "minor",
+              },
+            ],
+            "summary": "This is a summary",
+          },
+        ],
+        "preState": undefined,
+        "releases": Array [
+          Object {
+            "changesets": Array [
+              "ascii",
+            ],
+            "name": "pkg-a",
+            "newVersion": "1.1.0",
+            "oldVersion": "1.0.0",
+            "type": "minor",
+          },
+        ],
+      }
+    `);
   });
 
   it("should exit early with a non-zero error code when there are changed packages but no changesets", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
     // @ts-ignore
     jest.spyOn(process, "exit").mockImplementation(() => {});
     // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(
-      () => simpleChangedPackagesList
-    );
+    git.getChangedPackagesSinceRef.mockImplementation(() => [
+      {
+        packageJson: { name: "pkg-a", version: "1.0.0" },
+        dir: "/fake/folder/doesnt/matter",
+      },
+    ]);
 
     await status(cwd, {}, defaultConfig);
 
@@ -107,6 +110,18 @@ describe("status", () => {
   });
 
   it("should not exit early with a non-zero error code when there are no changed packages", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
     // @ts-ignore
     jest.spyOn(process, "exit").mockImplementation(() => {});
     // @ts-ignore
@@ -123,41 +138,108 @@ describe("status", () => {
   });
 
   it("should not exit early with a non-zero code when there are changed packages and also a changeset", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
     // @ts-ignore
     jest.spyOn(process, "exit").mockImplementation(() => {});
     // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(
-      () => simpleChangedPackagesList
-    );
+    git.getChangedPackagesSinceRef.mockImplementation(() => [
+      {
+        packageJson: { name: "pkg-a", version: "1.0.0" },
+        dir: "/fake/folder/doesnt/matter",
+      },
+    ]);
     const changesetID = "ascii";
     // @ts-ignore
     humanId.mockReturnValueOnce(changesetID);
 
-    await writeChangesets([simpleChangeset], cwd);
-    const releaseObj = await status(cwd, {}, defaultConfig);
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+    await status(cwd, {}, defaultConfig);
 
-    expect(releaseObj).toEqual(simpleReleasePlan);
     expect(process.exit).not.toHaveBeenCalled();
   });
 
   it.skip("should respect the verbose flag", () => false);
   it("should respect the output flag", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
     const output = "nonsense.json";
 
     // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(
-      () => simpleChangedPackagesList
-    );
+    git.getChangedPackagesSinceRef.mockImplementation(() => [
+      {
+        packageJson: { name: "pkg-a", version: "1.0.0" },
+        dir: "/fake/folder/doesnt/matter",
+      },
+    ]);
     const changesetID = "ascii";
     // @ts-ignore
     humanId.mockReturnValueOnce(changesetID);
 
-    await writeChangesets([simpleChangeset], cwd);
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
     const probsUndefined = await status(cwd, { output }, defaultConfig);
 
     const releaseObj = await fs.readFile(path.join(cwd, output), "utf-8");
 
     expect(probsUndefined).toEqual(undefined);
-    expect(JSON.parse(releaseObj)).toEqual(simpleReleasePlan);
+    expect(JSON.parse(releaseObj)).toMatchInlineSnapshot(`
+      Object {
+        "changesets": Array [
+          Object {
+            "id": "ascii",
+            "releases": Array [
+              Object {
+                "name": "pkg-a",
+                "type": "minor",
+              },
+            ],
+            "summary": "This is a summary",
+          },
+        ],
+        "releases": Array [
+          Object {
+            "changesets": Array [
+              "ascii",
+            ],
+            "name": "pkg-a",
+            "newVersion": "1.1.0",
+            "oldVersion": "1.0.0",
+            "type": "minor",
+          },
+        ],
+      }
+    `);
   });
 });

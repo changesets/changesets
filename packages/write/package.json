@@ -1,6 +1,6 @@
 {
   "name": "@changesets/write",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Writes a changeset to a file",
   "main": "dist/write.cjs.js",
   "module": "dist/write.esm.js",
@@ -15,6 +15,6 @@
   },
   "devDependencies": {
     "@changesets/parse": "*",
-    "fixturez": "^1.1.0"
+    "@changesets/test-utils": "*"
   }
 }

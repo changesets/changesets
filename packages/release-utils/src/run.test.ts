@@ -1,16 +1,13 @@
 import { add, commit } from "@changesets/git";
-import { silenceLogsInBlock } from "@changesets/test-utils";
+import { silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
 import { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import fileUrl from "file-url";
-import fixturez from "fixturez";
 import fs from "fs-extra";
 import path from "path";
 import spawn from "spawndamnit";
 import { getCurrentBranch } from "./gitUtils";
 import { runPublish, runVersion } from "./run";
-
-let f = fixturez(__dirname);
 
 const linkNodeModules = async (cwd: string) => {
   await fs.symlink(
@@ -37,7 +34,7 @@ async function setupRepoAndClone(cwd: string) {
   const mainBranch = await getCurrentBranch(cwd);
 
   // Make a 1-commit-deep shallow clone of this repo
-  let clone = f.temp();
+  let clone = tempdir();
   await spawn(
     "git",
     // Note: a file:// URL is needed in order to make a shallow clone of
@@ -53,7 +50,24 @@ async function setupRepoAndClone(cwd: string) {
 
 describe("version", () => {
   it("returns the right changed packages and pushes to the remote", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
 
     await writeChangesets(
       [
@@ -98,8 +112,7 @@ describe("version", () => {
         \\"dependencies\\": {
           \\"pkg-b\\": \\"1.1.0\\"
         }
-      }
-      "
+      }"
     `);
 
     expect(
@@ -111,8 +124,7 @@ describe("version", () => {
       "{
         \\"name\\": \\"pkg-b\\",
         \\"version\\": \\"1.1.0\\"
-      }
-      "
+      }"
     `);
     expect(
       await fs.readFile(
@@ -161,7 +173,28 @@ describe("version", () => {
   });
 
   it("only includes bumped packages in the returned changed packages", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify(
+        {
+          name: "pkg-b",
+          version: "1.0.0",
+        },
+        null,
+        2
+      ),
+      ".changeset/config.json": JSON.stringify({}),
+    });
 
     await writeChangesets(
       [
@@ -202,8 +235,7 @@ describe("version", () => {
         \\"dependencies\\": {
           \\"pkg-b\\": \\"1.0.0\\"
         }
-      }
-      "
+      }"
     `);
 
     expect(
@@ -215,8 +247,7 @@ describe("version", () => {
       "{
         \\"name\\": \\"pkg-b\\",
         \\"version\\": \\"1.0.0\\"
-      }
-      "
+      }"
     `);
 
     expect(
@@ -251,14 +282,33 @@ describe("version", () => {
   });
 
   it("doesn't include ignored package that got a dependency update in returned versions", async () => {
-    let cwd = f.copy("ignored-package");
+    let cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ignore: ["pkg-a"],
+      }),
+    });
 
     await writeChangesets(
       [
         {
           releases: [
             {
-              name: "ignored-package-pkg-b",
+              name: "pkg-b",
               type: "minor",
             },
           ],
@@ -278,7 +328,7 @@ describe("version", () => {
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-b"),
-        packageJson: { name: "ignored-package-pkg-b", version: "1.1.0" },
+        packageJson: { name: "pkg-b", version: "1.1.0" },
       },
     ]);
   });
@@ -286,7 +336,13 @@ describe("version", () => {
 
 describe("publish", () => {
   test("single package repo", async () => {
-    let cwd = f.copy("single-package");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+    });
 
     const { clone } = await setupRepoAndClone(cwd);
 
@@ -305,7 +361,24 @@ describe("publish", () => {
     expect(tagsResult.stdout.toString("utf8").trim()).toEqual("v1.0.0");
   });
   test("multi package repo", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
 
     const { clone } = await setupRepoAndClone(cwd);
 

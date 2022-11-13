@@ -1,4 +1,3 @@
-import fixtures from "fixturez";
 import {
   ReleasePlan,
   Config,
@@ -14,9 +13,11 @@ import { defaultConfig } from "@changesets/config";
 
 import applyReleasePlan from "./";
 import { getPackages } from "@manypkg/get-packages";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
-
-const f = fixtures(__dirname);
+import {
+  temporarilySilenceLogs,
+  testdir,
+  Fixture,
+} from "@changesets/test-utils";
 
 class FakeReleasePlan {
   changesets: NewChangeset[];
@@ -76,7 +77,7 @@ class FakeReleasePlan {
 }
 
 async function testSetup(
-  fixtureName: string,
+  fixture: Fixture,
   releasePlan: ReleasePlan,
   config?: Config,
   snapshot?: string | undefined,
@@ -104,7 +105,8 @@ async function testSetup(
       },
     };
   }
-  let tempDir = await f.copy(fixtureName);
+  let tempDir = await testdir(fixture);
+
   if (setupFunc) {
     await setupFunc(tempDir);
   }
@@ -132,7 +134,15 @@ describe("apply release plan", () => {
       it("should not reformat a small array in a package.json", async () => {
         const releasePlan = new FakeReleasePlan();
         let { changedFiles } = await testSetup(
-          "small-array",
+          {
+            "package.json": `{
+  "name": "pkg-a",
+  "version": "1.0.0",
+  "files": [
+    "lib"
+  ]
+}`,
+          },
           releasePlan.getReleasePlan(),
           releasePlan.config
         );
@@ -147,13 +157,21 @@ describe("apply release plan", () => {
   "files": [
     "lib"
   ]
-}
-`);
+}`);
       });
       it("should not change tab indentation in a package.json", async () => {
         const releasePlan = new FakeReleasePlan();
         let { changedFiles } = await testSetup(
-          "tab-indent",
+          {
+            "package.json": JSON.stringify(
+              {
+                name: "pkg-a",
+                version: "1.0.0",
+              },
+              null,
+              "\t"
+            ),
+          },
           releasePlan.getReleasePlan(),
           releasePlan.config
         );
@@ -165,13 +183,17 @@ describe("apply release plan", () => {
         expect(pkgJSON).toStrictEqual(`{
 \t"name": "pkg-a",
 \t"version": "1.1.0"
-}
-`);
+}`);
       });
       it("should not add trailing newlines in a package.json if they don't exist", async () => {
         const releasePlan = new FakeReleasePlan();
         let { changedFiles } = await testSetup(
-          "no-trailing-newline",
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              version: "1.0.0",
+            }),
+          },
           releasePlan.getReleasePlan(),
           releasePlan.config
         );
@@ -185,12 +207,44 @@ describe("apply release plan", () => {
   "version": "1.1.0"
 }`);
       });
+      it("should not remove trailing newlines in a package.json if they exist", async () => {
+        const releasePlan = new FakeReleasePlan();
+        let { changedFiles } = await testSetup(
+          {
+            "package.json":
+              JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.0",
+              }) + "\n",
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config
+        );
+        let pkgPath = changedFiles.find((a) => a.endsWith(`package.json`));
+
+        if (!pkgPath) throw new Error(`could not find an updated package json`);
+        let pkgJSON = await fs.readFile(pkgPath, { encoding: "utf-8" });
+
+        expect(pkgJSON).toStrictEqual(`{
+  "name": "pkg-a",
+  "version": "1.1.0"
+}\n`);
+      });
     });
 
     it("should update a version for one package", async () => {
       const releasePlan = new FakeReleasePlan();
       let { changedFiles } = await testSetup(
-        "simple-project",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
@@ -226,7 +280,23 @@ describe("apply release plan", () => {
         ]
       );
       let { changedFiles } = await testSetup(
-        "simple-star-dep",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "*",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
@@ -265,7 +335,23 @@ describe("apply release plan", () => {
         ]
       );
       let { changedFiles } = await testSetup(
-        "simple-workspace-range-dep",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "workspace:1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
@@ -328,7 +414,33 @@ describe("apply release plan", () => {
         ]
       );
       let { changedFiles } = await testSetup(
-        "workspace-version-alias-dep",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "workspace:*",
+              "pkg-c": "workspace:^",
+              "pkg-d": "workspace:~",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+          "packages/pkg-c/package.json": JSON.stringify({
+            name: "pkg-c",
+            version: "1.0.0",
+          }),
+          "packages/pkg-d/package.json": JSON.stringify({
+            name: "pkg-d",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
@@ -382,7 +494,30 @@ describe("apply release plan", () => {
         }
       );
       let { changedFiles } = await testSetup(
-        "workspace-and-other-range-dep",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "workspace:1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+          "packages/pkg-c/package.json": JSON.stringify({
+            name: "pkg-c",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+        },
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
@@ -431,7 +566,23 @@ describe("apply release plan", () => {
       );
 
       let { changedFiles } = await testSetup(
-        "simple-project",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         releasePlan.config
       );
@@ -459,7 +610,23 @@ describe("apply release plan", () => {
     });
     it("should not update the version of the dependent package if the released dep is a dev dep", async () => {
       let { changedFiles } = await testSetup(
-        "simple-dev-dep",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            devDependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         {
           changesets: [
             {
@@ -536,8 +703,16 @@ describe("apply release plan", () => {
       });
     });
     it("should skip dependencies that have the same name as the package", async () => {
-      let { changedFiles } = await testSetup(
-        "self-referenced",
+      let { tempDir } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            name: "self-referenced",
+            version: "1.0.0",
+            devDependencies: {
+              "self-referenced": "file:",
+            },
+          }),
+        },
         {
           changesets: [
             {
@@ -578,12 +753,8 @@ describe("apply release plan", () => {
           },
         }
       );
-      let pkgPath = changedFiles.find((a) =>
-        a.endsWith(`self-referenced${path.sep}package.json`)
-      );
 
-      if (!pkgPath) throw new Error(`could not find an updated package json`);
-      let pkgJSON = await fs.readJSON(pkgPath);
+      let pkgJSON = await fs.readJSON(path.join(tempDir, "package.json"));
 
       expect(pkgJSON).toMatchObject({
         name: "self-referenced",
@@ -595,7 +766,23 @@ describe("apply release plan", () => {
     });
     it("should not update dependent versions when a package has a changeset type of none", async () => {
       let { changedFiles } = await testSetup(
-        "simple-project-caret-dep",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "^1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         {
           changesets: [
             {
@@ -636,7 +823,23 @@ describe("apply release plan", () => {
     });
     it("should not update workspace dependent versions when a package has a changeset type of none", async () => {
       let { changedFiles } = await testSetup(
-        "simple-workspace-range-dep",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "workspace:1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         {
           changesets: [
             {
@@ -695,7 +898,23 @@ describe("apply release plan", () => {
         ]
       );
       let { changedFiles } = await testSetup(
-        "simple-project-caret-dep",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "^1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         releasePlan.config,
         "canary"
@@ -722,7 +941,26 @@ describe("apply release plan", () => {
         const updateInternalDependencies = "patch";
         it("should update min version ranges of patch bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "internal-dependencies",
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.3",
+                dependencies: {
+                  "pkg-b": "~1.2.0",
+                },
+              }),
+              "packages/pkg-b/package.json": JSON.stringify({
+                name: "pkg-b",
+                version: "1.2.0",
+                dependencies: {
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+            },
             {
               changesets: [
                 {
@@ -797,14 +1035,40 @@ describe("apply release plan", () => {
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
-              "pkg-c": "2.0.0",
               "pkg-a": "^1.0.4",
             },
           });
         });
         it("should still update min version ranges of patch bumped internal dependencies that have left semver range", async () => {
           let { changedFiles } = await testSetup(
-            "internal-dependencies",
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.3",
+                dependencies: {
+                  "pkg-b": "~1.2.0",
+                },
+              }),
+              "packages/pkg-b/package.json": JSON.stringify({
+                name: "pkg-b",
+                version: "1.2.0",
+                dependencies: {
+                  "pkg-c": "2.0.0",
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+              "packages/pkg-c/package.json": JSON.stringify({
+                name: "pkg-c",
+                version: "2.0.0",
+                dependencies: {
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+            },
             {
               changesets: [
                 {
@@ -894,7 +1158,26 @@ describe("apply release plan", () => {
         });
         it("should update min version ranges of minor bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "internal-dependencies",
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.3",
+                dependencies: {
+                  "pkg-b": "~1.2.0",
+                },
+              }),
+              "packages/pkg-b/package.json": JSON.stringify({
+                name: "pkg-b",
+                version: "1.2.0",
+                dependencies: {
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+            },
             {
               changesets: [
                 {
@@ -969,14 +1252,32 @@ describe("apply release plan", () => {
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
-              "pkg-c": "2.0.0",
               "pkg-a": "^1.1.0",
             },
           });
         });
         it("should update min version ranges of major bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "internal-dependencies",
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.3",
+                dependencies: {
+                  "pkg-b": "~1.2.0",
+                },
+              }),
+              "packages/pkg-b/package.json": JSON.stringify({
+                name: "pkg-b",
+                version: "1.2.0",
+                dependencies: {
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+            },
             {
               changesets: [
                 {
@@ -1051,7 +1352,6 @@ describe("apply release plan", () => {
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
-              "pkg-c": "2.0.0",
               "pkg-a": "^2.0.0",
             },
           });
@@ -1061,7 +1361,26 @@ describe("apply release plan", () => {
         const updateInternalDependencies = "minor";
         it("should NOT update min version ranges of patch bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "internal-dependencies",
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.3",
+                dependencies: {
+                  "pkg-b": "~1.2.0",
+                },
+              }),
+              "packages/pkg-b/package.json": JSON.stringify({
+                name: "pkg-b",
+                version: "1.2.0",
+                dependencies: {
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+            },
             {
               changesets: [
                 {
@@ -1136,14 +1455,40 @@ describe("apply release plan", () => {
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
-              "pkg-c": "2.0.0",
               "pkg-a": "^1.0.3",
             },
           });
         });
         it("should still update min version ranges of patch bumped internal dependencies that have left semver range", async () => {
           let { changedFiles } = await testSetup(
-            "internal-dependencies",
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.3",
+                dependencies: {
+                  "pkg-b": "~1.2.0",
+                },
+              }),
+              "packages/pkg-b/package.json": JSON.stringify({
+                name: "pkg-b",
+                version: "1.2.0",
+                dependencies: {
+                  "pkg-c": "2.0.0",
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+              "packages/pkg-c/package.json": JSON.stringify({
+                name: "pkg-c",
+                version: "2.0.0",
+                dependencies: {
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+            },
             {
               changesets: [
                 {
@@ -1233,7 +1578,34 @@ describe("apply release plan", () => {
         });
         it("should update min version ranges of minor bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "internal-dependencies",
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.3",
+                dependencies: {
+                  "pkg-b": "~1.2.0",
+                },
+              }),
+              "packages/pkg-b/package.json": JSON.stringify({
+                name: "pkg-b",
+                version: "1.2.0",
+                dependencies: {
+                  "pkg-c": "2.0.0",
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+              "packages/pkg-c/package.json": JSON.stringify({
+                name: "pkg-c",
+                version: "2.0.0",
+                dependencies: {
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+            },
             {
               changesets: [
                 {
@@ -1308,14 +1680,32 @@ describe("apply release plan", () => {
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
-              "pkg-c": "2.0.0",
               "pkg-a": "^1.1.0",
             },
           });
         });
         it("should update min version ranges of major bumped internal dependencies", async () => {
           let { changedFiles } = await testSetup(
-            "internal-dependencies",
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.3",
+                dependencies: {
+                  "pkg-b": "~1.2.0",
+                },
+              }),
+              "packages/pkg-b/package.json": JSON.stringify({
+                name: "pkg-b",
+                version: "1.2.0",
+                dependencies: {
+                  "pkg-a": "^1.0.3",
+                },
+              }),
+            },
             {
               changesets: [
                 {
@@ -1390,7 +1780,6 @@ describe("apply release plan", () => {
             name: "pkg-b",
             version: "1.2.1",
             dependencies: {
-              "pkg-c": "2.0.0",
               "pkg-a": "^2.0.0",
             },
           });
@@ -1401,15 +1790,31 @@ describe("apply release plan", () => {
     describe("onlyUpdatePeerDependentsWhenOutOfRange set to true", () => {
       it("should not bump peerDependencies if they are still in range", async () => {
         let { changedFiles } = await testSetup(
-          "simple-caret-peer-dep",
+          {
+            "package.json": JSON.stringify({
+              private: true,
+              workspaces: ["packages/*"],
+            }),
+            "packages/depended-upon/package.json": JSON.stringify({
+              name: "depended-upon",
+              version: "1.0.0",
+            }),
+            "packages/has-peer-dep/package.json": JSON.stringify({
+              name: "has-peer-dep",
+              version: "1.0.0",
+              peerDependencies: {
+                "depended-upon": "^1.0.0",
+              },
+            }),
+          },
           {
             changesets: [
               {
                 id: "quick-lions-devour",
                 summary: "Hey, let's have fun with testing!",
                 releases: [
-                  { name: "has-peer-dep", type: "patch" },
                   { name: "depended-upon", type: "patch" },
+                  { name: "has-peer-dep", type: "patch" },
                 ],
               },
             ],
@@ -1483,7 +1888,16 @@ describe("apply release plan", () => {
     it("should not generate any changelogs", async () => {
       const releasePlan = new FakeReleasePlan();
       let { changedFiles } = await testSetup(
-        "simple-project",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
@@ -1498,7 +1912,16 @@ describe("apply release plan", () => {
     it("should update a changelog for one package", async () => {
       const releasePlan = new FakeReleasePlan();
       let { changedFiles } = await testSetup(
-        "simple-project",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
@@ -1539,7 +1962,23 @@ describe("apply release plan", () => {
       );
 
       let { changedFiles } = await testSetup(
-        "simple-project",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
@@ -1580,7 +2019,23 @@ describe("apply release plan", () => {
     });
     it("should not update the changelog if only devDeps changed", async () => {
       let { changedFiles } = await testSetup(
-        "simple-dev-dep",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            devDependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         {
           changesets: [
             {
@@ -1657,7 +2112,16 @@ describe("apply release plan", () => {
       releasePlan.releases[0].changesets.push("some-id-1", "some-id-2");
 
       let { changedFiles } = await testSetup(
-        "simple-project",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
@@ -1690,7 +2154,26 @@ describe("apply release plan", () => {
 
     it("should add an updated dependencies line when dependencies have been updated", async () => {
       let { changedFiles } = await testSetup(
-        "internal-dependencies",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.3",
+            dependencies: {
+              "pkg-b": "~1.2.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.2.0",
+            dependencies: {
+              "pkg-a": "^1.0.3",
+            },
+          }),
+        },
         {
           changesets: [
             {
@@ -1780,7 +2263,26 @@ describe("apply release plan", () => {
 
     it("should NOT add updated dependencies line if dependencies have NOT been updated", async () => {
       let { changedFiles } = await testSetup(
-        "internal-dependencies",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.3",
+            dependencies: {
+              "pkg-b": "~1.2.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.2.0",
+            dependencies: {
+              "pkg-a": "^1.0.3",
+            },
+          }),
+        },
         {
           changesets: [
             {
@@ -1866,7 +2368,34 @@ describe("apply release plan", () => {
 
     it("should only add updated dependencies line for dependencies that have been updated", async () => {
       let { changedFiles } = await testSetup(
-        "internal-dependencies",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.3",
+            dependencies: {
+              "pkg-b": "~1.2.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.2.0",
+            dependencies: {
+              "pkg-c": "2.0.0",
+              "pkg-a": "^1.0.3",
+            },
+          }),
+          "packages/pkg-c/package.json": JSON.stringify({
+            name: "pkg-c",
+            version: "2.0.0",
+            dependencies: {
+              "pkg-a": "^1.0.3",
+            },
+          }),
+        },
         {
           changesets: [
             {
@@ -1974,7 +2503,34 @@ describe("apply release plan", () => {
 
     it("should still add updated dependencies line for dependencies that have a bump type less than the minimum internal bump range but leave semver range", async () => {
       let { changedFiles } = await testSetup(
-        "internal-dependencies",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.3",
+            dependencies: {
+              "pkg-b": "~1.2.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.2.0",
+            dependencies: {
+              "pkg-c": "2.0.0",
+              "pkg-a": "^1.0.3",
+            },
+          }),
+          "packages/pkg-c/package.json": JSON.stringify({
+            name: "pkg-c",
+            version: "2.0.0",
+            dependencies: {
+              "pkg-a": "^1.0.3",
+            },
+          }),
+        },
         {
           changesets: [
             {
@@ -2086,32 +2642,44 @@ describe("apply release plan", () => {
     it.skip("a package appears twice", async () => {
       let changedFiles;
       try {
-        let testResults = await testSetup("simple-project", {
-          changesets: [
-            {
-              id: "quick-lions-devour",
-              summary: "Hey, let's have fun with testing!",
-              releases: [{ name: "pkg-a", type: "minor" }],
-            },
-          ],
-          releases: [
-            {
+        let testResults = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              private: true,
+              workspaces: ["packages/*"],
+            }),
+            "packages/pkg-a/package.json": JSON.stringify({
               name: "pkg-a",
-              type: "minor",
-              oldVersion: "1.0.0",
-              newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"],
-            },
-            {
-              name: "pkg-a",
-              type: "minor",
-              oldVersion: "1.0.0",
-              newVersion: "1.1.0",
-              changesets: ["quick-lions-devour"],
-            },
-          ],
-          preState: undefined,
-        });
+              version: "1.0.0",
+            }),
+          },
+          {
+            changesets: [
+              {
+                id: "quick-lions-devour",
+                summary: "Hey, let's have fun with testing!",
+                releases: [{ name: "pkg-a", type: "minor" }],
+              },
+            ],
+            releases: [
+              {
+                name: "pkg-a",
+                type: "minor",
+                oldVersion: "1.0.0",
+                newVersion: "1.1.0",
+                changesets: ["quick-lions-devour"],
+              },
+              {
+                name: "pkg-a",
+                type: "minor",
+                oldVersion: "1.0.0",
+                newVersion: "1.1.0",
+                changesets: ["quick-lions-devour"],
+              },
+            ],
+            preState: undefined,
+          }
+        );
         changedFiles = testResults.changedFiles;
       } catch (e) {
         expect((e as Error).message).toEqual("some string probably");
@@ -2139,7 +2707,23 @@ describe("apply release plan", () => {
         ]
       );
 
-      let tempDir = await f.copy("with-git");
+      let tempDir = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
 
       await spawn("git", ["init"], { cwd: tempDir });
 
@@ -2172,7 +2756,23 @@ describe("apply release plan", () => {
       temporarilySilenceLogs(async () => {
         let releasePlan = new FakeReleasePlan();
 
-        let tempDir = await f.copy("with-git");
+        let tempDir = await testdir({
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        });
 
         await spawn("git", ["init"], { cwd: tempDir });
 
@@ -2228,12 +2828,21 @@ describe("apply release plan", () => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
-            fs.writeFile(thisPath, content);
+            return fs.outputFile(thisPath, content);
           })
         );
 
       await testSetup(
-        "simple-project",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         releasePlan.config,
         undefined,
@@ -2255,12 +2864,21 @@ describe("apply release plan", () => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
-            fs.writeFile(thisPath, content);
+            return fs.outputFile(thisPath, content);
           })
         );
 
       await testSetup(
-        "simple-project",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         { ...releasePlan.config, ignore: ["pkg-a"] },
         undefined,
@@ -2303,7 +2921,16 @@ describe("apply release plan", () => {
         );
 
       await testSetup(
-        "simple-project",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         releasePlan.config,
         undefined,
@@ -2350,7 +2977,16 @@ describe("apply release plan", () => {
       );
 
     let { tempDir } = await testSetup(
-      "simple-project",
+      {
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+      },
       releasePlan.getReleasePlan(),
       {
         ...releasePlan.config,
@@ -2395,7 +3031,23 @@ describe("apply release plan", () => {
       const releasePlan = new FakeReleasePlan();
 
       let { tempDir } = await testSetup(
-        "with-git",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
@@ -2432,12 +3084,28 @@ describe("apply release plan", () => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
-            fs.writeFile(thisPath, content);
+            return fs.outputFile(thisPath, content);
           })
         );
 
       let { tempDir } = await testSetup(
-        "with-git",
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
