@@ -1,7 +1,8 @@
 import path from "path";
-import fixtures from "fixturez";
 import spawn from "spawndamnit";
 import fileUrl from "file-url";
+import { tempdir, testdir } from "@changesets/test-utils";
+import writeChangeset from "@changesets/write";
 
 import {
   getCommitsThatAddFiles,
@@ -15,8 +16,6 @@ import {
   getAllTags,
   tagExists,
 } from "./";
-
-const f = fixtures(__dirname);
 
 async function getCurrentCommit(cwd: string) {
   const cmd = await spawn("git", ["rev-parse", "HEAD"], { cwd });
@@ -36,7 +35,25 @@ async function getCommitCount(cwd: string) {
 describe("git", () => {
   let cwd: string;
   beforeEach(async () => {
-    cwd = f.copy("with-git");
+    cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-a/index.js": `export default "a"`,
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/index.js": `export default "b"`,
+    });
     await spawn("git", ["init"], { cwd });
     // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
     {
@@ -143,7 +160,6 @@ describe("git", () => {
         .filter((a) => a);
 
       expect(stagedFiles).toEqual([
-        "packages/package.json",
         "packages/pkg-a/index.js",
         "packages/pkg-a/package.json",
         "packages/pkg-b/index.js",
@@ -259,12 +275,11 @@ describe("git", () => {
     });
 
     describe("with shallow clone", () => {
-      // We will add these three well-known files
+      // We will add these well-known files
       // over multiple commits, then test looking up
       // the commits at which they were added.
-      const file1 = ".changeset/quick-lions-devour.md";
-      const file2 = "packages/pkg-a/index.js";
-      const file3 = "packages/pkg-b/index.js";
+      const file1 = "packages/pkg-a/index.js";
+      const file2 = "packages/pkg-b/index.js";
 
       // Roughly how many commits will the deepening algorithm
       // deepen each time?  We use this to set up test data to
@@ -291,7 +306,7 @@ describe("git", () => {
 
       async function createShallowClone(depth: number): Promise<string> {
         // Make a 1-commit-deep shallow clone of this repo
-        const cloneDir = f.temp();
+        const cloneDir = tempdir();
         await spawn(
           "git",
           // Note: a file:// URL is needed in order to make a shallow clone of
@@ -344,12 +359,12 @@ describe("git", () => {
       it("reads the SHA of a file-add even if the first commit of a repo", async () => {
         // Finding this commit will require deepening the clone right to the start
         // of the repo history, and coping with a commit that has no parent.
-        const originalCommit = await addFileAndCommit(file3);
+        const originalCommit = await addFileAndCommit(file2);
         await createDummyCommits(shallowCloneDeepeningAmount * 2);
         const clone = await createShallowClone(5);
 
         // Finding this commit will require fully deepening the repo
-        const commit = (await getCommitsThatAddFiles([file3], clone))[0];
+        const commit = (await getCommitsThatAddFiles([file2], clone))[0];
         expect(commit).toEqual(originalCommit);
 
         // We should have fully deepened
@@ -520,27 +535,51 @@ describe("git", () => {
     it("should get the relative path to the changeset file", async () => {
       await add("packages/pkg-a/package.json", cwd);
       await commit("added packageA package.json", cwd);
+      const changesetId = await writeChangeset(
+        {
+          releases: [
+            {
+              name: "pkg-a",
+              type: "minor",
+            },
+          ],
+          summary: "Awesome summary",
+        },
+        cwd
+      );
       await add(".changeset", cwd);
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd,
         ref: "main",
       });
-      expect(files).toHaveLength(2);
-      expect(files[1]).toEqual(".changeset/quick-lions-devour.md");
+      expect(files).toHaveLength(1);
+      expect(files[0]).toEqual(`.changeset/${changesetId}.md`);
     });
     it("should work on a ref that isn't the base branch", async () => {
       await spawn("git", ["checkout", "-b", "some-branch"], { cwd });
       await add("packages/pkg-a/package.json", cwd);
       await commit("added packageA package.json", cwd);
+      const changesetId = await writeChangeset(
+        {
+          releases: [
+            {
+              name: "pkg-a",
+              type: "minor",
+            },
+          ],
+          summary: "Awesome summary",
+        },
+        cwd
+      );
       await add(".changeset", cwd);
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd,
         ref: "some-branch",
       });
-      expect(files).toHaveLength(2);
-      expect(files[1]).toEqual(".changeset/quick-lions-devour.md");
+      expect(files).toHaveLength(1);
+      expect(files[0]).toEqual(`.changeset/${changesetId}.md`);
     });
   });
 });
