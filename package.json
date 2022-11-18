@@ -23,7 +23,8 @@
     "url": "https://github.com/changesets/changesets.git"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "scripts/*"
   ],
   "author": "Changesets Contributors",
   "contributors": [
@@ -68,7 +69,8 @@
   },
   "preconstruct": {
     "packages": [
-      "packages/*"
+      "packages/*",
+      "scripts/*"
     ]
   },
   "prettier": {}

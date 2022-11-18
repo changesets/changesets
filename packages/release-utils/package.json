@@ -19,7 +19,6 @@
     "@changesets/git": "*",
     "@changesets/test-utils": "*",
     "@changesets/write": "*",
-    "file-url": "^3.0.0",
-    "fixturez": "^1.1.0"
+    "file-url": "^3.0.0"
   }
 }

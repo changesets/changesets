@@ -20,8 +20,8 @@
     "micromatch": "^4.0.2"
   },
   "devDependencies": {
+    "@changesets/test-utils": "*",
     "@types/micromatch": "^4.0.1",
-    "fixturez": "^1.1.0",
     "jest-in-case": "^1.0.2"
   }
 }

@@ -15,7 +15,8 @@
     "spawndamnit": "^2.0.0"
   },
   "devDependencies": {
-    "file-url": "^3.0.0",
-    "fixturez": "^1.1.0"
+    "@changesets/test-utils": "*",
+    "@changesets/write": "*",
+    "file-url": "^3.0.0"
   }
 }
