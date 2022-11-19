@@ -16,8 +16,8 @@ test("associated with multiple PRs with only one merged", async () => {
       expect(prettier.format(query, { parser: "graphql" }))
         .toMatchInlineSnapshot(`
         "query {
-          a0: repository(owner: \\"emotion-js\\", name: \\"emotion\\") {
-            aa085003: object(expression: \\"a085003\\") {
+          a0: repository(owner: "emotion-js", name: "emotion") {
+            aa085003: object(expression: "a085003") {
               ... on Commit {
                 commitUrl
                 associatedPullRequests(first: 50) {
@@ -127,8 +127,8 @@ test("associated with multiple PRs with multiple merged gets the one that was me
       expect(prettier.format(query, { parser: "graphql" }))
         .toMatchInlineSnapshot(`
         "query {
-          a0: repository(owner: \\"emotion-js\\", name: \\"emotion\\") {
-            aa085003: object(expression: \\"a085003\\") {
+          a0: repository(owner: "emotion-js", name: "emotion") {
+            aa085003: object(expression: "a085003") {
               ... on Commit {
                 commitUrl
                 associatedPullRequests(first: 50) {
@@ -238,8 +238,8 @@ test("gets the author of the associated pull request if it exists rather than th
       expect(prettier.format(query, { parser: "graphql" }))
         .toMatchInlineSnapshot(`
         "query {
-          a0: repository(owner: \\"JedWatson\\", name: \\"react-select\\") {
-            ac7e9c69: object(expression: \\"c7e9c69\\") {
+          a0: repository(owner: "JedWatson", name: "react-select") {
+            ac7e9c69: object(expression: "c7e9c69") {
               ... on Commit {
                 commitUrl
                 associatedPullRequests(first: 50) {
@@ -328,7 +328,7 @@ test("throws error on invalid repo name", () => {
   expect(async () =>
     getInfo(request)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the \\"^[\\\\w.-]+\\\\/[\\\\w.-]+$\\" pattern)"`
+    `"Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "^[\\w.-]+\\/[\\w.-]+$" pattern)"`
   );
 });
 
@@ -342,7 +342,7 @@ test("associated with multiple PRs with only one merged", async () => {
       expect(prettier.format(query, { parser: "graphql" }))
         .toMatchInlineSnapshot(`
         "query {
-          a0: repository(owner: \\"emotion-js\\", name: \\"emotion\\") {
+          a0: repository(owner: "emotion-js", name: "emotion") {
             pr__1613: pullRequest(number: 1613) {
               url
               author {
@@ -386,9 +386,9 @@ test("associated with multiple PRs with only one merged", async () => {
     repo: "emotion-js/emotion",
   });
   expect(result).toMatchInlineSnapshot(`
-    Object {
+    {
       "commit": "a085003",
-      "links": Object {
+      "links": {
         "commit": "[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
         "pull": "[#1613](https://github.com/emotion-js/emotion/pull/1613)",
         "user": "[@Andarist](https://github.com/Andarist)",
