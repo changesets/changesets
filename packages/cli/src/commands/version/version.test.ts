@@ -265,15 +265,15 @@ describe("running version in a simple project", () => {
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
+      [
+        {
+          "dependencies": {
             "pkg-b": "1.0.1",
           },
           "name": "pkg-a",
           "version": "1.0.0",
         },
-        Object {
+        {
           "name": "pkg-b",
           "version": "1.0.1",
         },
@@ -492,15 +492,15 @@ Awesome feature, hidden behind a feature flag
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
+      [
+        {
+          "dependencies": {
             "pkg-a": "latest",
           },
           "name": "example-a",
           "version": "1.0.0",
         },
-        Object {
+        {
           "name": "pkg-a",
           "version": "2.0.0",
         },
@@ -734,15 +734,15 @@ describe("fixed", () => {
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
+      [
+        {
+          "dependencies": {
             "pkg-b": "1.0.1",
           },
           "name": "pkg-a",
           "version": "1.0.0",
         },
-        Object {
+        {
           "name": "pkg-b",
           "version": "1.0.1",
         },
@@ -1274,8 +1274,8 @@ describe("snapshot release", () => {
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "name": "pkg-a",
           "version": "1.0.0",
         },
@@ -1324,15 +1324,15 @@ describe("snapshot release", () => {
 
       expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
         .toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "dependencies": Object {
+        [
+          {
+            "dependencies": {
               "pkg-b": "0.0.0-20211213000730",
             },
             "name": "pkg-a",
             "version": "1.0.0",
           },
-          Object {
+          {
             "name": "pkg-b",
             "version": "0.0.0-20211213000730",
           },
@@ -1621,8 +1621,8 @@ describe("snapshot release", () => {
 
       expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
         .toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "name": "pkg-a",
             "version": "1.0.0",
           },
@@ -1675,15 +1675,15 @@ describe("snapshot release", () => {
 
         expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
           .toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "dependencies": Object {
+          [
+            {
+              "dependencies": {
                 "pkg-b": "2.0.0-20211213000730",
               },
               "name": "pkg-a",
               "version": "1.0.0",
             },
-            Object {
+            {
               "name": "pkg-b",
               "version": "2.0.0-20211213000730",
             },
@@ -1937,36 +1937,21 @@ describe("pre", () => {
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     packages = (await getPackages(cwd))!;
-    expect(packages.packages.map((x) => x.packageJson)).toMatchInlineSnapshot(
+    expect(packages.packages.map((x) => x.packageJson)).toMatchInlineSnapshot(`
       [
         {
-          dependencies: {
-            "pkg-b": "1.0.1-next.0",
-          },
-          name: "pkg-a",
-          version: "1.1.0-next.3",
-        },
-        {
-          name: "pkg-b",
-          version: "1.0.1-next.0",
-        },
-      ],
-      `
-      Object {
-        "0": Object {
-          "dependencies": Object {
+          "dependencies": {
             "pkg-b": "1.0.1-next.0",
           },
           "name": "pkg-a",
           "version": "1.1.0-next.3",
         },
-        "1": Object {
+        {
           "name": "pkg-b",
           "version": "1.0.1-next.0",
         },
-      }
-    `
-    );
+      ]
+    `);
     await pre(cwd, { command: "exit" });
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     packages = (await getPackages(cwd))!;
@@ -2559,15 +2544,15 @@ describe("pre", () => {
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
+      [
+        {
+          "dependencies": {
             "pkg-b": "*",
           },
           "name": "pkg-a",
           "version": "1.0.1-alpha.0",
         },
-        Object {
+        {
           "name": "pkg-b",
           "version": "1.0.0",
         },
@@ -2586,15 +2571,15 @@ describe("pre", () => {
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
+      [
+        {
+          "dependencies": {
             "pkg-b": "1.0.1-alpha.0",
           },
           "name": "pkg-a",
           "version": "1.0.1-alpha.1",
         },
-        Object {
+        {
           "name": "pkg-b",
           "version": "1.0.1-alpha.0",
         },
@@ -2635,15 +2620,15 @@ describe("pre", () => {
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
+      [
+        {
+          "dependencies": {
             "pkg-b": "1.0.1-alpha.0",
           },
           "name": "pkg-a",
           "version": "1.0.1-alpha.0",
         },
-        Object {
+        {
           "name": "pkg-b",
           "version": "1.0.1-alpha.0",
         },
@@ -2684,15 +2669,15 @@ describe("pre", () => {
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
+      [
+        {
+          "dependencies": {
             "pkg-b": "workspace:*",
           },
           "name": "pkg-a",
           "version": "1.0.1-alpha.0",
         },
-        Object {
+        {
           "name": "pkg-b",
           "version": "1.0.1-alpha.0",
         },
@@ -2733,15 +2718,15 @@ describe("pre", () => {
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
+      [
+        {
+          "dependencies": {
             "pkg-b": "workspace:^",
           },
           "name": "pkg-a",
           "version": "1.0.1-alpha.0",
         },
-        Object {
+        {
           "name": "pkg-b",
           "version": "1.0.1-alpha.0",
         },
@@ -2782,15 +2767,15 @@ describe("pre", () => {
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dependencies": Object {
+      [
+        {
+          "dependencies": {
             "pkg-b": "workspace:~",
           },
           "name": "pkg-a",
           "version": "1.0.1-alpha.0",
         },
-        Object {
+        {
           "name": "pkg-b",
           "version": "1.0.1-alpha.0",
         },

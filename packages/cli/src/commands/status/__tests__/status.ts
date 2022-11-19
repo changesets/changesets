@@ -52,12 +52,12 @@ describe("status", () => {
     );
     const releaseObj = await status(cwd, {}, defaultConfig);
     expect(releaseObj).toMatchInlineSnapshot(`
-      Object {
-        "changesets": Array [
-          Object {
+      {
+        "changesets": [
+          {
             "id": "ascii",
-            "releases": Array [
-              Object {
+            "releases": [
+              {
                 "name": "pkg-a",
                 "type": "minor",
               },
@@ -66,9 +66,9 @@ describe("status", () => {
           },
         ],
         "preState": undefined,
-        "releases": Array [
-          Object {
-            "changesets": Array [
+        "releases": [
+          {
+            "changesets": [
               "ascii",
             ],
             "name": "pkg-a",
@@ -215,12 +215,12 @@ describe("status", () => {
 
     expect(probsUndefined).toEqual(undefined);
     expect(JSON.parse(releaseObj)).toMatchInlineSnapshot(`
-      Object {
-        "changesets": Array [
-          Object {
+      {
+        "changesets": [
+          {
             "id": "ascii",
-            "releases": Array [
-              Object {
+            "releases": [
+              {
                 "name": "pkg-a",
                 "type": "minor",
               },
@@ -228,9 +228,9 @@ describe("status", () => {
             "summary": "This is a summary",
           },
         ],
-        "releases": Array [
-          Object {
-            "changesets": Array [
+        "releases": [
+          {
+            "changesets": [
               "ascii",
             ],
             "name": "pkg-a",

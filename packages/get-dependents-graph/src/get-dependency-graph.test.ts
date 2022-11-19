@@ -41,7 +41,7 @@ describe("getting the dependency graph", function () {
     });
     expect(graph.get("foo")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
-    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`Array []`);
+    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
   });
 
   it("should skip dependencies specified using a tag", function () {
@@ -73,7 +73,7 @@ describe("getting the dependency graph", function () {
     });
     expect(graph.get("foo-example")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
-    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`Array []`);
+    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
   });
 
   it(
@@ -107,12 +107,12 @@ describe("getting the dependency graph", function () {
       });
       expect(valid).toBeFalsy();
       expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "Package [36m\\"foo\\"[39m must depend on the current version of [36m\\"bar\\"[39m: [32m\\"1.0.0\\"[39m vs [31m\\"link:../bar\\"[39m",
-        ],
-      ]
-    `);
+        [
+          [
+            "Package [36m"foo"[39m must depend on the current version of [36m"bar"[39m: [32m"1.0.0"[39m vs [31m"link:../bar"[39m",
+          ],
+        ]
+      `);
     })
   );
 });
