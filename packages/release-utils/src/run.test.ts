@@ -107,10 +107,10 @@ describe("version", () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"name\\": \\"pkg-a\\",
-        \\"version\\": \\"1.1.0\\",
-        \\"dependencies\\": {
-          \\"pkg-b\\": \\"1.1.0\\"
+        "name": "pkg-a",
+        "version": "1.1.0",
+        "dependencies": {
+          "pkg-b": "1.1.0"
         }
       }"
     `);
@@ -122,8 +122,8 @@ describe("version", () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"name\\": \\"pkg-b\\",
-        \\"version\\": \\"1.1.0\\"
+        "name": "pkg-b",
+        "version": "1.1.0"
       }"
     `);
     expect(
@@ -230,10 +230,10 @@ describe("version", () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"name\\": \\"pkg-a\\",
-        \\"version\\": \\"1.1.0\\",
-        \\"dependencies\\": {
-          \\"pkg-b\\": \\"1.0.0\\"
+        "name": "pkg-a",
+        "version": "1.1.0",
+        "dependencies": {
+          "pkg-b": "1.0.0"
         }
       }"
     `);
@@ -245,8 +245,8 @@ describe("version", () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"name\\": \\"pkg-b\\",
-        \\"version\\": \\"1.0.0\\"
+        "name": "pkg-b",
+        "version": "1.0.0"
       }"
     `);
 

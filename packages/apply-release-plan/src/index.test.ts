@@ -2782,11 +2782,11 @@ describe("apply release plan", () => {
             gitCmd.stdout.toString().includes("nothing to commit")
           ).toEqual(true);
           expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
-            Array [
-              Array [
+            [
+              [
                 "The following error was encountered while generating changelog entries",
               ],
-              Array [
+              [
                 "We have escaped applying the changesets, and no files should have been affected",
               ],
             ]

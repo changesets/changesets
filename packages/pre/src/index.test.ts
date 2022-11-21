@@ -30,9 +30,9 @@ describe("enterPre", () => {
 
     expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
       .toMatchInlineSnapshot(`
-      Object {
-        "changesets": Array [],
-        "initialVersions": Object {
+      {
+        "changesets": [],
+        "initialVersions": {
           "pkg-a": "1.0.0",
           "pkg-b": "1.0.0",
         },
@@ -102,11 +102,11 @@ describe("enterPre", () => {
     await enterPre(cwd, "next");
     expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
       .toMatchInlineSnapshot(`
-      Object {
-        "changesets": Array [
+      {
+        "changesets": [
           "slimy-dingos-whisper",
         ],
-        "initialVersions": Object {
+        "initialVersions": {
           "pkg-a": "1.0.0",
           "pkg-b": "1.0.0",
         },
@@ -149,9 +149,9 @@ describe("exitPre", () => {
 
     expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
       .toMatchInlineSnapshot(`
-      Object {
-        "changesets": Array [],
-        "initialVersions": Object {
+      {
+        "changesets": [],
+        "initialVersions": {
           "pkg-a": "1.0.0",
           "pkg-b": "1.0.0",
         },
@@ -213,9 +213,9 @@ test("readPreState reads the pre state", async () => {
     }),
   });
   expect(await readPreState(cwd)).toMatchInlineSnapshot(`
-    Object {
-      "changesets": Array [],
-      "initialVersions": Object {
+    {
+      "changesets": [],
+      "initialVersions": {
         "pkg-a": "1.0.0",
         "pkg-b": "1.0.0",
       },

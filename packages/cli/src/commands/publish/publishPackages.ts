@@ -174,7 +174,7 @@ async function getUnpublishedPackages(
       return {
         name: packageJson.name,
         localVersion: packageJson.version,
-        publishedState: publishedState,
+        publishedState,
         publishedVersions: response.pkgInfo.versions || [],
       };
     })
