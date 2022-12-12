@@ -65,7 +65,7 @@ export const getCommitThatAddsFile = deprecate(
 );
 
 /**
- * Get the short SHAs for the commits that added files, including automatically
+ * Get the SHAs for the commits that added files, including automatically
  * extending a shallow clone if necessary to determine any commits.
  * @param gitPaths - Paths to fetch
  * @param cwd - Location of the repository
@@ -74,7 +74,7 @@ export async function getCommitsThatAddFiles(
   gitPaths: string[],
   cwd: string
 ): Promise<(string | undefined)[]> {
-  // Maps gitPath to short commit SHA
+  // Maps gitPath to commit SHA
   const map = new Map<string, string>();
 
   // Paths we haven't completed processing on yet
@@ -91,7 +91,7 @@ export async function getCommitsThatAddFiles(
               "log",
               "--diff-filter=A",
               "--max-count=1",
-              "--pretty=format:%h:%p",
+              "--pretty=format:%H:%p",
               gitPath,
             ],
             { cwd }
@@ -290,10 +290,18 @@ export async function tagExists(tagStr: string, cwd: string) {
 
 export async function getCurrentCommitId({
   cwd,
+  short = false,
 }: {
   cwd: string;
+  short?: boolean;
 }): Promise<string> {
-  return (await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd })).stdout
+  return (
+    await spawn(
+      "git",
+      ["rev-parse", short && "--short", "HEAD"].filter<string>(Boolean as any),
+      { cwd }
+    )
+  ).stdout
     .toString()
     .trim();
 }
