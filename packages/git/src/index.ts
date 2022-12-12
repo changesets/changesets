@@ -4,7 +4,6 @@ import path from "path";
 import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
-import { deprecate } from "util";
 
 const isInDir = (dir: string) => (subdir: string) => isSubdir(dir, subdir);
 
