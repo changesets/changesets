@@ -57,22 +57,15 @@ export async function getDivergedCommit(cwd: string, ref: string) {
   return cmd.stdout.toString().trim();
 }
 
-export const getCommitThatAddsFile = deprecate(
-  async (gitPath: string, cwd: string) => {
-    return (await getCommitsThatAddFiles([gitPath], cwd))[0];
-  },
-  "Use the bulk getCommitsThatAddFiles function instead"
-);
-
 /**
  * Get the SHAs for the commits that added files, including automatically
  * extending a shallow clone if necessary to determine any commits.
  * @param gitPaths - Paths to fetch
- * @param cwd - Location of the repository
+ * @param options - `cwd` and `short`
  */
 export async function getCommitsThatAddFiles(
   gitPaths: string[],
-  cwd: string
+  { cwd, short = false }: { cwd: string; short?: boolean }
 ): Promise<(string | undefined)[]> {
   // Maps gitPath to commit SHA
   const map = new Map<string, string>();
@@ -91,7 +84,7 @@ export async function getCommitsThatAddFiles(
               "log",
               "--diff-filter=A",
               "--max-count=1",
-              "--pretty=format:%H:%p",
+              short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
               gitPath,
             ],
             { cwd }

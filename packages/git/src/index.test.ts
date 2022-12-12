@@ -277,7 +277,7 @@ describe("git", () => {
 
       const headSha = await getCurrentCommitId({ cwd });
 
-      const commitHash = await getCommitsThatAddFiles(["a.js"], cwd);
+      const commitHash = await getCommitsThatAddFiles(["a.js"], { cwd });
 
       expect(commitHash).toEqual([headSha]);
     });
@@ -339,7 +339,7 @@ describe("git", () => {
 
         // This file was added in the head commit, so will definitely be in our
         // 1-commit clone.
-        const commits = await getCommitsThatAddFiles(["a.js"], clone);
+        const commits = await getCommitsThatAddFiles(["a.js"], { cwd: clone });
         expect(commits).toEqual([originalCommit]);
 
         // We should not need to have deepened the clone for this
@@ -360,7 +360,9 @@ describe("git", () => {
         const clone = await createShallowClone(5, cwd);
 
         // Finding this commit will require deepening the clone until it appears.
-        const commit = (await getCommitsThatAddFiles(["a.js"], clone))[0];
+        const commit = (
+          await getCommitsThatAddFiles(["a.js"], { cwd: clone })
+        )[0];
         expect(commit).toEqual(originalCommit);
 
         // It should not have completely unshallowed the clone; just enough.
@@ -381,7 +383,9 @@ describe("git", () => {
         const clone = await createShallowClone(5, cwd);
 
         // Finding this commit will require fully deepening the repo
-        const commit = (await getCommitsThatAddFiles(["a.js"], clone))[0];
+        const commit = (
+          await getCommitsThatAddFiles(["a.js"], { cwd: clone })
+        )[0];
         expect(commit).toEqual(originalCommit);
 
         // We should have fully deepened
@@ -406,7 +410,7 @@ describe("git", () => {
 
         const commits = await getCommitsThatAddFiles(
           ["a.js", "this-file-does-not-exist", "b.js"],
-          clone
+          { cwd: clone }
         );
 
         expect(commits).toEqual([originalCommit1, undefined, originalCommit2]);
