@@ -13,7 +13,7 @@ import {
   Config,
 } from "@changesets/types";
 
-export default async function gatStatus(
+export default async function getStatus(
   cwd: string,
   {
     sinceMaster,
