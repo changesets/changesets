@@ -85,6 +85,7 @@ export async function run(
       tag,
       open,
       gitTag,
+      format,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -175,7 +176,15 @@ export async function run(
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
+        if (format && format !== 'json') {
+          error(`Received ${format} as output format, but currently only 'json' is supported.`)
+        }
+
+        await status(
+          cwd,
+          { sinceMaster, since, verbose, output, format },
+          config
+        );
         return;
       }
       case "tag": {
