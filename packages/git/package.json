@@ -18,6 +18,7 @@
   "devDependencies": {
     "@changesets/test-utils": "*",
     "@changesets/write": "*",
-    "file-url": "^3.0.0"
+    "file-url": "^3.0.0",
+    "fs-extra": "^7.0.1"
   }
 }
