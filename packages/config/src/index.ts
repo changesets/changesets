@@ -169,7 +169,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but the \`baseBranch\` option can only be set as a string`
     );
   }
-  
+
   if (
     json.changedFilesPatterns !== undefined &&
     (!isArray(json.changedFilesPatterns) ||
@@ -440,7 +440,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.baseBranch
         : json.baseBranch,
 
-    changedFilesPatterns: json.changedFilesPatterns ?? ['**'],
+    changedFilesPatterns: json.changedFilesPatterns ?? ["**"],
 
     updateInternalDependencies:
       json.updateInternalDependencies === undefined

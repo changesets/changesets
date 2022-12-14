@@ -311,7 +311,7 @@ describe("git", () => {
         // the commit we're going to scan for is the latest commit,
         // so will be in the shallow clone immediately without deepening
         await createDummyCommits(10, cwd);
-        await fs.outputFile(path.join(cwd, 'b.js'), 'export default "b"')
+        await fs.outputFile(path.join(cwd, "b.js"), 'export default "b"');
         const originalCommit = await addFileAndCommit("b.js", cwd);
 
         const clone = await createShallowClone(5, cwd);
@@ -381,12 +381,12 @@ describe("git", () => {
         // and also that requesting missing files doesn't affect the location of commits
         // for the files that succeed.
         await createDummyCommits(shallowCloneDeepeningAmount, cwd);
-        
+
         await fs.outputFile(path.join(cwd, "b.js"), 'export default "b"');
         const originalCommit1 = await addFileAndCommit("b.js", cwd);
-        
+
         await createDummyCommits(shallowCloneDeepeningAmount, cwd);
-        
+
         await fs.outputFile(path.join(cwd, "c.js"), 'export default "c"');
         const originalCommit2 = await addFileAndCommit("c.js", cwd);
 
