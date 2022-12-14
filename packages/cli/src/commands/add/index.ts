@@ -42,6 +42,7 @@ export default async function add(
     const changedPackages = await git.getChangedPackagesSinceRef({
       cwd,
       ref: config.baseBranch,
+      changedFilesPatterns: config.changedFilesPatterns,
     });
     const changedPackagesName = changedPackages
       .filter((pkg) => isListablePackage(config, pkg.packageJson))

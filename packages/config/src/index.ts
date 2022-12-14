@@ -169,6 +169,22 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but the \`baseBranch\` option can only be set as a string`
     );
   }
+  
+  if (
+    json.changedFilesPatterns !== undefined &&
+    (!isArray(json.changedFilesPatterns) ||
+      !json.changedFilesPatterns.every(
+        (pattern) => typeof pattern === "string"
+      ))
+  ) {
+    messages.push(
+      `The \`changedFilesPatterns\` option is set as ${JSON.stringify(
+        json.changedFilesPatterns,
+        null,
+        2
+      )} but the \`changedFilesPatterns\` option can only be set as an array of strings`
+    );
+  }
 
   let fixed: string[][] = [];
   if (json.fixed !== undefined) {
@@ -423,6 +439,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch
         : json.baseBranch,
+
+    changedFilesPatterns: json.changedFilesPatterns ?? ['**'],
 
     updateInternalDependencies:
       json.updateInternalDependencies === undefined

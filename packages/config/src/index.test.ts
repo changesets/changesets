@@ -45,6 +45,7 @@ test("read reads the config", async () => {
     commit: ["@changesets/cli/commit", { skipCI: "version" }],
     access: "restricted",
     baseBranch: "master",
+    changedFilesPatterns: ["**"],
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
@@ -70,6 +71,7 @@ let defaults: Config = {
   commit: false,
   access: "restricted",
   baseBranch: "master",
+  changedFilesPatterns: ["**"],
   updateInternalDependencies: "patch",
   ignore: [],
   privatePackages: { version: true, tag: false },
@@ -159,6 +161,15 @@ let correctCases: Record<string, CorrectCase> = {
     output: {
       ...defaults,
       access: "public",
+    },
+  },
+  changedFilesPatterns: {
+    input: {
+      changedFilesPatterns: ["src/**"],
+    },
+    output: {
+      ...defaults,
+      changedFilesPatterns: ["src/**"],
     },
   },
   fixed: {
@@ -292,6 +303,18 @@ let correctCases: Record<string, CorrectCase> = {
     output: {
       ...defaults,
       ignore: ["pkg-a", "@pkg/a", "@pkg/b"],
+    },
+  },
+  privatePackagesFalseDisablesAll: {
+    input: {
+      privatePackages: false,
+    },
+    output: {
+      ...defaults,
+      privatePackages: {
+        version: false,
+        tag: false,
+      },
     },
   },
   updateInternalDependents: {
@@ -649,10 +672,23 @@ describe("parser errors", () => {
     `);
   });
 
-  test("privatePackages false disables versioning and tagging", () => {
-    expect(unsafeParse({ privatePackages: false }, defaultPackages)).toEqual({
-      ...defaults,
-      privatePackages: { version: false, tag: false },
-    });
+  test("changed files patterns - non-array", () => {
+    expect(() => unsafeParse({ changedFilesPatterns: false }, defaultPackages))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The \`changedFilesPatterns\` option is set as false but the \`changedFilesPatterns\` option can only be set as an array of strings"
+    `);
+  });
+
+  test("changed files patterns - non-string element", () => {
+    expect(() =>
+      unsafeParse({ changedFilesPatterns: ["src/**", 100] }, defaultPackages)
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The \`changedFilesPatterns\` option is set as [
+        "src/**",
+        100
+      ] but the \`changedFilesPatterns\` option can only be set as an array of strings"
+    `);
   });
 });

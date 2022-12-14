@@ -4,8 +4,7 @@ import path from "path";
 import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
-
-const isInDir = (dir: string) => (subdir: string) => isSubdir(dir, subdir);
+import micromatch from "micromatch";
 
 export async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
@@ -250,26 +249,36 @@ export async function getChangedChangesetFilesSinceRef({
 export async function getChangedPackagesSinceRef({
   cwd,
   ref,
+  changedFilesPatterns = ["**"],
 }: {
   cwd: string;
   ref: string;
-}) {
+  changedFilesPatterns?: readonly string[];
+}): Promise<Package[]> {
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
-  let packages = await getPackages(cwd);
-
-  const fileToPackage: Record<string, Package> = {};
-
-  packages.packages.forEach((pkg) =>
-    changedFiles.filter(isInDir(pkg.dir)).forEach((fileName) => {
-      const prevPkg = fileToPackage[fileName] || { dir: "" };
-      if (pkg.dir.length > prevPkg.dir.length) fileToPackage[fileName] = pkg;
-    })
-  );
 
   return (
-    Object.values(fileToPackage)
-      // filter, so that we have only unique packages
-      .filter((pkg, idx, packages) => packages.indexOf(pkg) === idx)
+    [...(await getPackages(cwd)).packages]
+      // sort packages by length of dir, so that we can check for subdirs first
+      .sort((pkgA, pkgB) => pkgB.dir.length - pkgA.dir.length)
+      .filter((pkg) => {
+        const changedPackageFiles: string[] = [];
+
+        for (let i = changedFiles.length - 1; i >= 0; i--) {
+          const file = changedFiles[i];
+
+          if (isSubdir(pkg.dir, file)) {
+            changedFiles.splice(i, 1);
+            const relativeFile = file.slice(pkg.dir.length + 1);
+            changedPackageFiles.push(relativeFile);
+          }
+        }
+
+        return (
+          changedPackageFiles.length > 0 &&
+          micromatch(changedPackageFiles, changedFilesPatterns).length > 0
+        );
+      })
   );
 }
 
