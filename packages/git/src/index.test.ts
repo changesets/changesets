@@ -1,7 +1,7 @@
 import path from "path";
 import spawn from "spawndamnit";
 import fileUrl from "file-url";
-import { tempdir, testdir } from "@changesets/test-utils";
+import { Fixture, tempdir, testdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 
 import {
@@ -15,96 +15,79 @@ import {
   getChangedChangesetFilesSinceRef,
   getAllTags,
   tagExists,
+  getCurrentCommitId,
 } from "./";
-
-async function getCurrentCommit(cwd: string) {
-  const cmd = await spawn("git", ["rev-parse", "HEAD"], { cwd });
-  return cmd.stdout.toString().trim();
-}
-
-async function getCurrentCommitShort(cwd: string) {
-  const cmd = await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd });
-  return cmd.stdout.toString().trim();
-}
 
 async function getCommitCount(cwd: string) {
   const cmd = await spawn("git", ["rev-list", "--count", "HEAD"], { cwd });
   return parseInt(cmd.stdout.toString(), 10);
 }
 
-describe("git", () => {
-  let cwd: string;
-  beforeEach(async () => {
-    cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-        dependencies: {
-          "pkg-b": "1.0.0",
-        },
-      }),
-      "packages/pkg-a/index.js": `export default "a"`,
-      "packages/pkg-b/package.json": JSON.stringify({
-        name: "pkg-b",
-        version: "1.0.0",
-      }),
-      "packages/pkg-b/index.js": `export default "b"`,
-    });
-    await spawn("git", ["init"], { cwd });
-    // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
-    {
-      const { stdout } = await spawn(
-        "git",
-        ["rev-parse", "--abbrev-ref", "HEAD"],
-        { cwd }
-      );
-      if (stdout.toString("utf8").trim() !== "main") {
-        await spawn("git", ["checkout", "-b", "main"], { cwd });
-      }
+async function setupGitDir(dir: Fixture) {
+  const cwd = await testdir(dir);
+  await spawn("git", ["init"], { cwd });
+  // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
+  {
+    const { stdout } = await spawn(
+      "git",
+      ["rev-parse", "--abbrev-ref", "HEAD"],
+      { cwd }
+    );
+    if (stdout.toString("utf8").trim() !== "main") {
+      await spawn("git", ["checkout", "-b", "main"], { cwd });
     }
-    await spawn("git", ["config", "user.email", "x@y.z"], { cwd });
-    await spawn("git", ["config", "user.name", "xyz"], { cwd });
-    await spawn("git", ["config", "commit.gpgSign", "false"], { cwd });
-    await spawn("git", ["config", "tag.gpgSign", "false"], { cwd });
-    await spawn("git", ["config", "tag.forceSignAnnotated", "false"], {
-      cwd,
-    });
+  }
+  await spawn("git", ["config", "user.email", "x@y.z"], { cwd });
+  await spawn("git", ["config", "user.name", "xyz"], { cwd });
+  await spawn("git", ["config", "commit.gpgSign", "false"], { cwd });
+  await spawn("git", ["config", "tag.gpgSign", "false"], { cwd });
+  await spawn("git", ["config", "tag.forceSignAnnotated", "false"], {
+    cwd,
   });
 
+  return cwd;
+}
+
+describe("git", () => {
   describe("getDivergedCommit", () => {
     it("should return same commit when branches have not diverged", async () => {
-      await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+        "b.js": 'export default "b"',
+      });
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
 
-      const firstSha = await getCurrentCommit(cwd);
+      const firstSha = await getCurrentCommitId({ cwd });
 
-      await add("packages/pkg-b/package.json", cwd);
-      await commit("added packageB package.json", cwd);
+      await add("b.js", cwd);
+      await commit("added b.js", cwd);
 
-      const secondSha = await getCurrentCommit(cwd);
+      const secondSha = await getCurrentCommitId({ cwd });
       const divergedSha = await getDivergedCommit(cwd, "main");
       expect(firstSha).not.toBe(secondSha);
       expect(divergedSha).toBe(secondSha);
     });
 
     it("should find commit where branch diverged", async () => {
-      await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+        "b.js": 'export default "b"',
+      });
+
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
 
       // This is the first commit. We branch (diverge) from here.
-      const mainSha = await getCurrentCommit(cwd);
+      const mainSha = await getCurrentCommitId({ cwd });
 
       // Create a new branch, and add a commit to it.
       await spawn("git", ["checkout", "-b", "my-branch"], { cwd });
-      await add("packages/pkg-b/package.json", cwd);
-      await commit("added packageB package.json", cwd);
+      await add("b.js", cwd);
+      await commit("added b.js", cwd);
 
       // Now, get the latest commit from our new branch.
-      const branchSha = await getCurrentCommit(cwd);
+      const branchSha = await getCurrentCommitId({ cwd });
 
       // Finally, get the divergent commit.
       const divergedSha = await getDivergedCommit(cwd, "main");
@@ -115,7 +98,11 @@ describe("git", () => {
 
   describe("add", () => {
     it("should add a file to the staging area", async () => {
-      await add("packages/pkg-a/package.json", cwd);
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+        "b.js": 'export default "b"',
+      });
+      await add("a.js", cwd);
 
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
         cwd,
@@ -125,14 +112,17 @@ describe("git", () => {
         .split("\n")
         .filter((a) => a);
 
-      expect(stagedFiles).toHaveLength(1);
-      expect(stagedFiles[0]).toEqual("packages/pkg-a/package.json");
+      expect(stagedFiles).toEqual(["a.js"]);
     });
 
     it("should add multiple files to the staging area", async () => {
-      await add("package.json", cwd);
-      await add("packages/pkg-a/package.json", cwd);
-      await add("packages/pkg-b/package.json", cwd);
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+        "b.js": 'export default "b"',
+        "c.js": 'export default "c"',
+      });
+      await add("a.js", cwd);
+      await add("c.js", cwd);
 
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
         cwd,
@@ -142,14 +132,17 @@ describe("git", () => {
         .split("\n")
         .filter((a) => a);
 
-      expect(stagedFiles).toHaveLength(3);
-      expect(stagedFiles[0]).toEqual("package.json");
-      expect(stagedFiles[1]).toEqual("packages/pkg-a/package.json");
-      expect(stagedFiles[2]).toEqual("packages/pkg-b/package.json");
+      expect(stagedFiles).toHaveLength(2);
+      expect(stagedFiles[0]).toEqual("a.js");
+      expect(stagedFiles[1]).toEqual("c.js");
     });
 
     it("should add a directory", async () => {
-      await add("packages", cwd);
+      const cwd = await setupGitDir({
+        "foo/a.js": 'export default "a"',
+        "foo/b.js": 'export default "b"',
+      });
+      await add("foo", cwd);
 
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
         cwd,
@@ -159,36 +152,35 @@ describe("git", () => {
         .split("\n")
         .filter((a) => a);
 
-      expect(stagedFiles).toEqual([
-        "packages/pkg-a/index.js",
-        "packages/pkg-a/package.json",
-        "packages/pkg-b/index.js",
-        "packages/pkg-b/package.json",
-      ]);
+      expect(stagedFiles).toEqual(["foo/a.js", "foo/b.js"]);
     });
   });
 
   describe("commit", () => {
     it("should commit a file", async () => {
-      await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+      });
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
 
       const gitCmd = await spawn("git", ["log", "-1", "--pretty=%B"], {
         cwd,
       });
       const commitMessage = gitCmd.stdout.toString().trim();
 
-      expect(commitMessage).toEqual("added packageA package.json");
+      expect(commitMessage).toEqual("added a.js");
     });
   });
 
   describe("getAllTags", () => {
-    beforeEach(async () => {
-      await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
-    });
-
     it("should retrieve all git tags", async () => {
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+      });
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
+
       await tag("test_tag", cwd);
       await tag("test_tag2", cwd);
       const tags = await getAllTags(cwd);
@@ -198,12 +190,13 @@ describe("git", () => {
   });
 
   describe("tag", () => {
-    beforeEach(async () => {
-      await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
-    });
-
     it("should create a tag for the current head", async () => {
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+      });
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
+
       const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
       await tag("tag_message", cwd);
 
@@ -217,12 +210,19 @@ describe("git", () => {
     });
 
     it("should create a tag, make a new commit, then create a second tag", async () => {
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+        "b.js": 'export default "b"',
+      });
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
+
       const initialHead = await spawn("git", ["rev-parse", "HEAD"], {
         cwd,
       });
       await tag("tag_message", cwd);
-      await add("packages/pkg-b/package.json", cwd);
-      await commit("added packageB package.json", cwd);
+      await add("b.js", cwd);
+      await commit("added b.js", cwd);
       const newHead = await spawn("git", ["rev-parse", "HEAD"], { cwd });
       await tag("new_tag", cwd);
 
@@ -245,15 +245,22 @@ describe("git", () => {
 
   describe("tagExists", () => {
     it("returns false when no tag exists", async () => {
-      await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+      });
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
 
       expect(await tagExists("tag_which_doesn't_exist", cwd)).toBe(false);
     });
 
     it("returns true when tag exists", async () => {
-      await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+      });
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
+
       await tag("tag_message", cwd);
 
       expect(await tagExists("tag_message", cwd)).toBe(true);
@@ -262,25 +269,20 @@ describe("git", () => {
 
   describe("getCommitsThatAddFiles", () => {
     it("should commit a file and get the hash of that commit", async () => {
-      await add("packages/pkg-b/package.json", cwd);
-      await commit("added packageB package.json", cwd);
-      const headSha = await getCurrentCommitShort(cwd);
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+      });
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
 
-      const commitHash = await getCommitsThatAddFiles(
-        ["packages/pkg-b/package.json"],
-        cwd
-      );
+      const headSha = await getCurrentCommitId({ cwd });
+
+      const commitHash = await getCommitsThatAddFiles(["a.js"], { cwd });
 
       expect(commitHash).toEqual([headSha]);
     });
 
     describe("with shallow clone", () => {
-      // We will add these well-known files
-      // over multiple commits, then test looking up
-      // the commits at which they were added.
-      const file1 = "packages/pkg-a/index.js";
-      const file2 = "packages/pkg-b/index.js";
-
       // Roughly how many commits will the deepening algorithm
       // deepen each time?  We use this to set up test data to
       // check that the deepens the clone but doesn't need to *fully* unshallow
@@ -291,20 +293,23 @@ describe("git", () => {
        * Creates a number of empty commits; this is useful to ensure
        * that a particular commit doesn't make it into a shallow clone.
        */
-      async function createDummyCommits(count: number) {
+      async function createDummyCommits(count: number, cwd: string) {
         for (let i = 0; i < count; i++) {
           await commit("dummy commit", cwd);
         }
       }
 
-      async function addFileAndCommit(file: string) {
+      async function addFileAndCommit(file: string, cwd: string) {
         await add(file, cwd);
         await commit(`add file ${file}`, cwd);
-        const commitSha = await getCurrentCommitShort(cwd);
+        const commitSha = await getCurrentCommitId({ cwd });
         return commitSha;
       }
 
-      async function createShallowClone(depth: number): Promise<string> {
+      async function createShallowClone(
+        depth: number,
+        cwd: string
+      ): Promise<string> {
         // Make a 1-commit-deep shallow clone of this repo
         const cloneDir = tempdir();
         await spawn(
@@ -320,17 +325,21 @@ describe("git", () => {
       }
 
       it("reads the SHA of a file-add without deepening if commit already included in the shallow clone", async () => {
+        const cwd = await setupGitDir({
+          "a.js": 'export default "a"',
+        });
+
         // We create a repo that we shallow-clone;
         // the commit we're going to scan for is the latest commit,
         // so will be in the shallow clone immediately without deepening
-        await createDummyCommits(10);
-        const originalCommit = await addFileAndCommit(file1);
+        await createDummyCommits(10, cwd);
+        const originalCommit = await addFileAndCommit("a.js", cwd);
 
-        const clone = await createShallowClone(5);
+        const clone = await createShallowClone(5, cwd);
 
         // This file was added in the head commit, so will definitely be in our
         // 1-commit clone.
-        const commits = await getCommitsThatAddFiles([file1], clone);
+        const commits = await getCommitsThatAddFiles(["a.js"], { cwd: clone });
         expect(commits).toEqual([originalCommit]);
 
         // We should not need to have deepened the clone for this
@@ -338,16 +347,22 @@ describe("git", () => {
       });
 
       it("reads the SHA of a file-add even if not already included in the shallow clone", async () => {
+        const cwd = await setupGitDir({
+          "a.js": 'export default "a"',
+        });
+
         // We're going to create a repo where the commit we're looking for isn't
         // in the shallow clone, so we'll need to deepen it to locate it.
-        await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3);
-        const originalCommit = await addFileAndCommit(file2);
-        await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3);
+        await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3, cwd);
+        const originalCommit = await addFileAndCommit("a.js", cwd);
+        await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3, cwd);
 
-        const clone = await createShallowClone(5);
+        const clone = await createShallowClone(5, cwd);
 
         // Finding this commit will require deepening the clone until it appears.
-        const commit = (await getCommitsThatAddFiles([file2], clone))[0];
+        const commit = (
+          await getCommitsThatAddFiles(["a.js"], { cwd: clone })
+        )[0];
         expect(commit).toEqual(originalCommit);
 
         // It should not have completely unshallowed the clone; just enough.
@@ -357,14 +372,20 @@ describe("git", () => {
       });
 
       it("reads the SHA of a file-add even if the first commit of a repo", async () => {
+        const cwd = await setupGitDir({
+          "a.js": 'export default "a"',
+        });
+
         // Finding this commit will require deepening the clone right to the start
         // of the repo history, and coping with a commit that has no parent.
-        const originalCommit = await addFileAndCommit(file2);
-        await createDummyCommits(shallowCloneDeepeningAmount * 2);
-        const clone = await createShallowClone(5);
+        const originalCommit = await addFileAndCommit("a.js", cwd);
+        await createDummyCommits(shallowCloneDeepeningAmount * 2, cwd);
+        const clone = await createShallowClone(5, cwd);
 
         // Finding this commit will require fully deepening the repo
-        const commit = (await getCommitsThatAddFiles([file2], clone))[0];
+        const commit = (
+          await getCommitsThatAddFiles(["a.js"], { cwd: clone })
+        )[0];
         expect(commit).toEqual(originalCommit);
 
         // We should have fully deepened
@@ -373,21 +394,23 @@ describe("git", () => {
       });
 
       it("can return SHAs for multiple files including return blanks for missing files", async () => {
+        const cwd = await setupGitDir({
+          "a.js": 'export default "a"',
+          "b.js": 'export default "b"',
+        });
         // We want to ensure that we can retrieve SHAs for multiple files at the same time,
         // and also that requesting missing files doesn't affect the location of commits
         // for the files that succeed.
-        await createDummyCommits(shallowCloneDeepeningAmount);
-        const originalCommit1 = await addFileAndCommit(file1);
-        await createDummyCommits(shallowCloneDeepeningAmount);
-        const originalCommit2 = await addFileAndCommit(file2);
+        await createDummyCommits(shallowCloneDeepeningAmount, cwd);
+        const originalCommit1 = await addFileAndCommit("a.js", cwd);
+        await createDummyCommits(shallowCloneDeepeningAmount, cwd);
+        const originalCommit2 = await addFileAndCommit("b.js", cwd);
 
-        const nonExistentFile = "this-file-does-not-exist";
-
-        const clone = await createShallowClone(5);
+        const clone = await createShallowClone(5, cwd);
 
         const commits = await getCommitsThatAddFiles(
-          [file1, nonExistentFile, file2],
-          clone
+          ["a.js", "this-file-does-not-exist", "b.js"],
+          { cwd: clone }
         );
 
         expect(commits).toEqual([originalCommit1, undefined, originalCommit2]);
@@ -396,15 +419,17 @@ describe("git", () => {
   });
 
   describe("getChangedFilesSince", () => {
-    beforeEach(async () => {
-      await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
-    });
-
     it("should be empty if no changes (partial path)", async () => {
-      const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+      });
+
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
+
+      const head = await getCurrentCommitId({ cwd });
       const changedFiles = await getChangedFilesSince({
-        ref: head.stdout.toString().trim(),
+        ref: head,
         cwd,
         fullPath: false,
       });
@@ -412,9 +437,16 @@ describe("git", () => {
     });
 
     it("should be empty if no changes (full path)", async () => {
-      const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+      });
+
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
+
+      const head = await getCurrentCommitId({ cwd });
       const changedFiles = await getChangedFilesSince({
-        ref: head.stdout.toString().trim(),
+        ref: head,
         cwd,
         fullPath: true,
       });
@@ -422,76 +454,92 @@ describe("git", () => {
     });
 
     it("should get list of files that have been committed", async () => {
-      const firstRef = await spawn("git", ["rev-parse", "HEAD"], { cwd });
-      await add("packages/pkg-a/index.js", cwd);
-      await commit("added packageA index", cwd);
+      const cwd = await setupGitDir({
+        "a.js": 'export default "a"',
+        "b.js": 'export default "b"',
+        "c.js": 'export default "c"',
+        "d.js": 'export default "d"',
+      });
 
-      const secondRef = await spawn("git", ["rev-parse", "HEAD"], { cwd });
-      await add("packages/pkg-b/index.js", cwd);
-      await add("packages/pkg-b/package.json", cwd);
-      await commit("added packageB files", cwd);
+      await add("a.js", cwd);
+      await commit("added a.js", cwd);
+
+      const firstRef = await getCurrentCommitId({ cwd });
+      await add("b.js", cwd);
+      await commit("added b.js", cwd);
+
+      const secondRef = await getCurrentCommitId({ cwd });
+      await add("d.js", cwd);
+      await commit("added d.js", cwd);
 
       const filesChangedSinceFirstRef = await getChangedFilesSince({
-        ref: firstRef.stdout.toString().trim(),
+        ref: firstRef,
         cwd,
       });
-      expect(filesChangedSinceFirstRef[0]).toEqual("packages/pkg-a/index.js");
-      expect(filesChangedSinceFirstRef[1]).toEqual("packages/pkg-b/index.js");
-      expect(filesChangedSinceFirstRef[2]).toEqual(
-        "packages/pkg-b/package.json"
-      );
+      expect(filesChangedSinceFirstRef).toEqual(["b.js", "d.js"]);
 
       const filesChangedSinceSecondRef = await getChangedFilesSince({
-        ref: secondRef.stdout.toString().trim(),
+        ref: secondRef,
         cwd,
       });
-      expect(filesChangedSinceSecondRef[0]).toEqual("packages/pkg-b/index.js");
-      expect(filesChangedSinceSecondRef[1]).toEqual(
-        "packages/pkg-b/package.json"
-      );
+      expect(filesChangedSinceSecondRef).toEqual(["d.js"]);
     });
     it("should get correct full paths of changed files irrespective of cwd", async () => {
-      const ref = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+      const cwd = await setupGitDir({
+        "packages/pkg-a/a.js": 'export default "a"',
+        "packages/pkg-b/b.js": 'export default "b"',
+        "packages/pkg-c/c.js": 'export default "c"',
+      });
 
-      await add("packages/pkg-a/index.js", cwd);
-      await commit("Add packageA index", cwd);
+      await add("packages/pkg-a/a.js", cwd);
+      await commit("added a.js", cwd);
 
-      await add("packages/pkg-b/index.js", cwd);
-      await commit("Added packageB index", cwd);
+      const ref = await getCurrentCommitId({ cwd });
+
+      await add("packages/pkg-b/b.js", cwd);
+      await commit("added b.js", cwd);
+
+      await add("packages/pkg-c/c.js", cwd);
+      await commit("added c.js", cwd);
 
       const filesChangedSinceRef = await getChangedFilesSince({
-        ref: ref.stdout.toString().trim(),
+        ref,
         cwd,
         fullPath: true,
       });
-      expect(filesChangedSinceRef[0]).toBe(
-        path.resolve(cwd, "packages/pkg-a/index.js")
-      );
-      expect(filesChangedSinceRef[1]).toBe(
-        path.resolve(cwd, "packages/pkg-b/index.js")
-      );
+      expect(filesChangedSinceRef).toEqual([
+        path.resolve(cwd, "packages/pkg-b/b.js"),
+        path.resolve(cwd, "packages/pkg-c/c.js"),
+      ]);
 
       const filesChangedSinceRef2 = await getChangedFilesSince({
-        ref: ref.stdout.toString().trim(),
+        ref,
         cwd: path.resolve(cwd, "packages"),
         fullPath: true,
       });
-      expect(filesChangedSinceRef2[0]).toBe(
-        path.resolve(cwd, "packages/pkg-a/index.js")
-      );
-      expect(filesChangedSinceRef2[1]).toBe(
-        path.resolve(cwd, "packages/pkg-b/index.js")
-      );
+      expect(filesChangedSinceRef2).toEqual([
+        path.resolve(cwd, "packages/pkg-b/b.js"),
+        path.resolve(cwd, "packages/pkg-c/c.js"),
+      ]);
     });
   });
 
   describe("getChangedPackagesSinceRef", () => {
-    beforeEach(async () => {
-      await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
-    });
-
     it("should return an empty list if no packages have changed", async () => {
+      const cwd = await setupGitDir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        "packages/pkg-a/a.js": 'export default "a"',
+      });
+
+      await add("packages/pkg-a/a.js", cwd);
+      await commit("added a.js", cwd);
+
       await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
@@ -501,29 +549,62 @@ describe("git", () => {
     });
 
     it("should check changed packages on a branch against base branch", async () => {
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
-      await add("packages/pkg-a/index.js", cwd);
-      await commit("added packageA index", cwd);
+      const cwd = await setupGitDir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+        }),
+        "packages/pkg-c/package.json": JSON.stringify({
+          name: "pkg-c",
+        }),
+        "packages/pkg-d/package.json": JSON.stringify({
+          name: "pkg-d",
+        }),
+      });
 
-      await add("packages/pkg-b/index.js", cwd);
+      await add("packages/pkg-a/package.json", cwd);
+      await commit("added pkg-a", cwd);
+
+      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
       await add("packages/pkg-b/package.json", cwd);
-      await commit("added packageB files", cwd);
+      await commit("added pkg-b", cwd);
+
+      await add("packages/pkg-d/package.json", cwd);
+      await commit("added pkg-d", cwd);
 
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
         ref: "main",
       });
 
-      expect(changedPackages).toHaveLength(2);
-      expect(changedPackages[0].packageJson.name).toEqual("pkg-a");
-      expect(changedPackages[1].packageJson.name).toEqual("pkg-b");
+      expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([
+        "pkg-b",
+        "pkg-d",
+      ]);
     });
   });
 
   describe("getChangedChangesetFilesSinceRef", () => {
     it("should be empty if no changeset files have been added", async () => {
+      const cwd = await setupGitDir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
       await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
+      await commit("added pkg-a", cwd);
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd,
@@ -533,8 +614,20 @@ describe("git", () => {
     });
 
     it("should get the relative path to the changeset file", async () => {
+      const cwd = await setupGitDir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
       await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
+      await commit("added pkg-a", cwd);
+
       const changesetId = await writeChangeset(
         {
           releases: [
@@ -553,13 +646,24 @@ describe("git", () => {
         cwd,
         ref: "main",
       });
-      expect(files).toHaveLength(1);
-      expect(files[0]).toEqual(`.changeset/${changesetId}.md`);
+      expect(files).toEqual([`.changeset/${changesetId}.md`]);
     });
     it("should work on a ref that isn't the base branch", async () => {
+      const cwd = await setupGitDir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
       await spawn("git", ["checkout", "-b", "some-branch"], { cwd });
       await add("packages/pkg-a/package.json", cwd);
-      await commit("added packageA package.json", cwd);
+      await commit("added pkg-a", cwd);
+
       const changesetId = await writeChangeset(
         {
           releases: [
@@ -578,8 +682,7 @@ describe("git", () => {
         cwd,
         ref: "some-branch",
       });
-      expect(files).toHaveLength(1);
-      expect(files[0]).toEqual(`.changeset/${changesetId}.md`);
+      expect(files).toEqual([`.changeset/${changesetId}.md`]);
     });
   });
 });
