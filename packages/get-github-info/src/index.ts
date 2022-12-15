@@ -81,7 +81,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
 const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   if (!process.env.GITHUB_TOKEN) {
     throw new Error(
-      "Please create a GitHub personal access token at https://github.com/settings/tokens/new and add it as the GITHUB_TOKEN environment variable"
+      "Please create a GitHub personal access token at https://github.com/settings/tokens/new with `read:user` and `repo:status` permissions and add it as the GITHUB_TOKEN environment variable"
     );
   }
   let repos: ReposWithCommitsAndPRsToFetch = {};
