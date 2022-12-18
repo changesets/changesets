@@ -1,5 +1,35 @@
 # @changesets/cli
 
+## 2.26.0
+
+### Minor Changes
+
+- [#1033](https://github.com/changesets/changesets/pull/1033) [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2) Thanks [@Andarist](https://github.com/Andarist)! - A new config-level `changedFilePatterns` option has been added. You can configure it with an array of glob patterns like here:
+
+  ```json
+  // .changeset/config.json
+  {
+    "changedFilePatterns": ["src/**"]
+  }
+  ```
+
+  Files that do not match the configured pattern won't contribute to the "changed" status of the package to which they belong. This both affects `changesets add` and `changeset status`.
+
+### Patch Changes
+
+- Updated dependencies [[`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2), [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2)]:
+  - @changesets/git@2.0.0
+  - @changesets/config@2.3.0
+  - @changesets/types@5.2.1
+  - @changesets/apply-release-plan@6.1.3
+  - @changesets/read@0.5.9
+  - @changesets/assemble-release-plan@5.2.3
+  - @changesets/get-release-plan@3.0.16
+  - @changesets/changelog-git@0.1.14
+  - @changesets/get-dependents-graph@1.3.5
+  - @changesets/pre@1.0.14
+  - @changesets/write@0.2.3
+
 ## 2.25.2
 
 ### Patch Changes

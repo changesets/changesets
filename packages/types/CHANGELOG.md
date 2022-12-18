@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 5.2.1
+
+### Patch Changes
+
+- [#1033](https://github.com/changesets/changesets/pull/1033) [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2) Thanks [@Andarist](https://github.com/Andarist)! - Added `changedFilePatterns` property to `Config` and `WrittenConfig` types.
+
 ## 5.2.0
 
 ### Minor Changes
