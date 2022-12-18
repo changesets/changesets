@@ -41,6 +41,7 @@ export default async function getStatus(
   const changedPackages = await git.getChangedPackagesSinceRef({
     cwd,
     ref: sinceBranch || config.baseBranch,
+    changedFilePatterns: config.changedFilePatterns,
   });
 
   if (changedPackages.length > 0 && changesets.length === 0) {
