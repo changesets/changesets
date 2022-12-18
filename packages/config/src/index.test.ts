@@ -45,7 +45,7 @@ test("read reads the config", async () => {
     commit: ["@changesets/cli/commit", { skipCI: "version" }],
     access: "restricted",
     baseBranch: "master",
-    changedFilesPatterns: ["**"],
+    changedFilePatterns: ["**"],
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
@@ -71,7 +71,7 @@ let defaults: Config = {
   commit: false,
   access: "restricted",
   baseBranch: "master",
-  changedFilesPatterns: ["**"],
+  changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
   ignore: [],
   privatePackages: { version: true, tag: false },
@@ -163,13 +163,13 @@ let correctCases: Record<string, CorrectCase> = {
       access: "public",
     },
   },
-  changedFilesPatterns: {
+  changedFilePatterns: {
     input: {
-      changedFilesPatterns: ["src/**"],
+      changedFilePatterns: ["src/**"],
     },
     output: {
       ...defaults,
-      changedFilesPatterns: ["src/**"],
+      changedFilePatterns: ["src/**"],
     },
   },
   fixed: {
@@ -673,22 +673,22 @@ describe("parser errors", () => {
   });
 
   test("changed files patterns - non-array", () => {
-    expect(() => unsafeParse({ changedFilesPatterns: false }, defaultPackages))
+    expect(() => unsafeParse({ changedFilePatterns: false }, defaultPackages))
       .toThrowErrorMatchingInlineSnapshot(`
       "Some errors occurred when validating the changesets config:
-      The \`changedFilesPatterns\` option is set as false but the \`changedFilesPatterns\` option can only be set as an array of strings"
+      The \`changedFilePatterns\` option is set as false but the \`changedFilePatterns\` option can only be set as an array of strings"
     `);
   });
 
   test("changed files patterns - non-string element", () => {
     expect(() =>
-      unsafeParse({ changedFilesPatterns: ["src/**", 100] }, defaultPackages)
+      unsafeParse({ changedFilePatterns: ["src/**", 100] }, defaultPackages)
     ).toThrowErrorMatchingInlineSnapshot(`
       "Some errors occurred when validating the changesets config:
-      The \`changedFilesPatterns\` option is set as [
+      The \`changedFilePatterns\` option is set as [
         "src/**",
         100
-      ] but the \`changedFilesPatterns\` option can only be set as an array of strings"
+      ] but the \`changedFilePatterns\` option can only be set as an array of strings"
     `);
   });
 });

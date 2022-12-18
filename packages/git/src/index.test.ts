@@ -685,7 +685,7 @@ describe("git", () => {
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
         ref: "main",
-        changedFilesPatterns: ["src/**"],
+        changedFilePatterns: ["src/**"],
       });
 
       expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([]);
@@ -717,7 +717,7 @@ describe("git", () => {
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
         ref: "main",
-        changedFilesPatterns: ["src/**"],
+        changedFilePatterns: ["src/**"],
       });
 
       expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([

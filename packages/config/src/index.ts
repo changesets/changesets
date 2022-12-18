@@ -171,18 +171,16 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   if (
-    json.changedFilesPatterns !== undefined &&
-    (!isArray(json.changedFilesPatterns) ||
-      !json.changedFilesPatterns.every(
-        (pattern) => typeof pattern === "string"
-      ))
+    json.changedFilePatterns !== undefined &&
+    (!isArray(json.changedFilePatterns) ||
+      !json.changedFilePatterns.every((pattern) => typeof pattern === "string"))
   ) {
     messages.push(
-      `The \`changedFilesPatterns\` option is set as ${JSON.stringify(
-        json.changedFilesPatterns,
+      `The \`changedFilePatterns\` option is set as ${JSON.stringify(
+        json.changedFilePatterns,
         null,
         2
-      )} but the \`changedFilesPatterns\` option can only be set as an array of strings`
+      )} but the \`changedFilePatterns\` option can only be set as an array of strings`
     );
   }
 
@@ -440,7 +438,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.baseBranch
         : json.baseBranch,
 
-    changedFilesPatterns: json.changedFilesPatterns ?? ["**"],
+    changedFilePatterns: json.changedFilePatterns ?? ["**"],
 
     updateInternalDependencies:
       json.updateInternalDependencies === undefined

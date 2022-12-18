@@ -100,7 +100,7 @@
       "default": "master",
       "description": "Determines the branch that Changesets uses when finding what packages have changed."
     },
-    "changedFilesPatterns": {
+    "changedFilePatterns": {
       "type": "array",
       "items": {
         "type": "string"

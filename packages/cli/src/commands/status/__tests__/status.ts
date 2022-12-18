@@ -301,7 +301,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      { ...defaultConfig, changedFilesPatterns: ["src/**"] }
+      { ...defaultConfig, changedFilePatterns: ["src/**"] }
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -342,7 +342,7 @@ describe("status", () => {
     await status(
       cwd,
       { since: "main" },
-      { ...defaultConfig, changedFilesPatterns: ["src/**"] }
+      { ...defaultConfig, changedFilePatterns: ["src/**"] }
     );
 
     expect(process.exit).toHaveBeenCalledWith(1);
@@ -381,7 +381,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      { ...defaultConfig, changedFilesPatterns: ["src/**"] }
+      { ...defaultConfig, changedFilePatterns: ["src/**"] }
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {

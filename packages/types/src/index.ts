@@ -73,7 +73,7 @@ export type Config = {
   linked: Linked;
   access: AccessType;
   baseBranch: string;
-  changedFilesPatterns: readonly string[];
+  changedFilePatterns: readonly string[];
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
@@ -98,7 +98,7 @@ export type WrittenConfig = {
   linked?: Linked;
   access?: AccessType;
   baseBranch?: string;
-  changedFilesPatterns?: readonly string[];
+  changedFilePatterns?: readonly string[];
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
     | false

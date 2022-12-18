@@ -249,11 +249,11 @@ export async function getChangedChangesetFilesSinceRef({
 export async function getChangedPackagesSinceRef({
   cwd,
   ref,
-  changedFilesPatterns = ["**"],
+  changedFilePatterns = ["**"],
 }: {
   cwd: string;
   ref: string;
-  changedFilesPatterns?: readonly string[];
+  changedFilePatterns?: readonly string[];
 }): Promise<Package[]> {
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
 
@@ -276,7 +276,7 @@ export async function getChangedPackagesSinceRef({
 
         return (
           changedPackageFiles.length > 0 &&
-          micromatch(changedPackageFiles, changedFilesPatterns).length > 0
+          micromatch(changedPackageFiles, changedFilePatterns).length > 0
         );
       })
   );
