@@ -115,4 +115,32 @@ describe("getting the dependency graph", function () {
       `);
     })
   );
+
+  it("succeeds when there is no root package", function () {
+    const { graph, valid } = getDependencyGraph({
+      packages: [
+        {
+          dir: "foo",
+          packageJson: {
+            name: "foo",
+            version: "1.0.0",
+            dependencies: {
+              bar: "workspace:*",
+            },
+          },
+        },
+        {
+          dir: "bar",
+          packageJson: {
+            name: "bar",
+            version: "1.0.0",
+          },
+        },
+      ],
+      tool: "pnpm",
+    });
+    expect(graph.get("foo")!.dependencies).toEqual(["bar"]);
+    expect(valid).toBeTruthy();
+    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+  });
 });
