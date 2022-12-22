@@ -84,14 +84,15 @@ export default function versionPackage(
           depCurrentVersion = workspaceDepVersion;
         }
         if (
+          semver.validRange(depCurrentVersion) !== null &&
           // an empty string is the normalised version of x/X/*
           // we don't want to change these versions because they will match
           // any version and if someone makes the range that
           // they probably want it to stay like that...
-          new semver.Range(depCurrentVersion).range !== "" ||
-          // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
-          // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-          semver.prerelease(version) !== null
+          (new semver.Range(depCurrentVersion).range !== "" ||
+            // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
+            // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
+            semver.prerelease(version) !== null)
         ) {
           let newNewRange = snapshot
             ? version
