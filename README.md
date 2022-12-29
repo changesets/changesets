@@ -24,7 +24,7 @@ The **@changesets/cli** package allows you to write `changeset` files as you mak
 
 If you just want to jump in to using changesets, the [Intro to using changesets](./docs/intro-to-using-changesets.md) and [@changesets/cli](./packages/cli/README.md) docs are where you should head.
 
-If you want a detailed explanation of the the concepts behind changesets, or to understand how you would build on top
+If you want a detailed explanation of the concepts behind changesets, or to understand how you would build on top
 of changesets, check out our [detailed-explanation](./docs/detailed-explanation.md).
 
 We also have a [dictionary](./docs/dictionary.md).

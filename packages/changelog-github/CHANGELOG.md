@@ -1,5 +1,13 @@
 # @changesets/changelog-github
 
+## 0.4.8
+
+### Patch Changes
+
+- Updated dependencies [[`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2), [`b360d50`](https://github.com/changesets/changesets/commit/b360d50809ed2a0e28f3fc482c242776f44b5851)]:
+  - @changesets/types@5.2.1
+  - @changesets/get-github-info@0.5.2
+
 ## 0.4.7
 
 ### Patch Changes

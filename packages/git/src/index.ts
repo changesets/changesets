@@ -4,9 +4,7 @@ import path from "path";
 import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
-import { deprecate } from "util";
-
-const isInDir = (dir: string) => (subdir: string) => isSubdir(dir, subdir);
+import micromatch from "micromatch";
 
 export async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
@@ -57,24 +55,17 @@ export async function getDivergedCommit(cwd: string, ref: string) {
   return cmd.stdout.toString().trim();
 }
 
-export const getCommitThatAddsFile = deprecate(
-  async (gitPath: string, cwd: string) => {
-    return (await getCommitsThatAddFiles([gitPath], cwd))[0];
-  },
-  "Use the bulk getCommitsThatAddFiles function instead"
-);
-
 /**
- * Get the short SHAs for the commits that added files, including automatically
+ * Get the SHAs for the commits that added files, including automatically
  * extending a shallow clone if necessary to determine any commits.
  * @param gitPaths - Paths to fetch
- * @param cwd - Location of the repository
+ * @param options - `cwd` and `short`
  */
 export async function getCommitsThatAddFiles(
   gitPaths: string[],
-  cwd: string
+  { cwd, short = false }: { cwd: string; short?: boolean }
 ): Promise<(string | undefined)[]> {
-  // Maps gitPath to short commit SHA
+  // Maps gitPath to commit SHA
   const map = new Map<string, string>();
 
   // Paths we haven't completed processing on yet
@@ -91,7 +82,7 @@ export async function getCommitsThatAddFiles(
               "log",
               "--diff-filter=A",
               "--max-count=1",
-              "--pretty=format:%h:%p",
+              short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
               gitPath,
             ],
             { cwd }
@@ -258,26 +249,36 @@ export async function getChangedChangesetFilesSinceRef({
 export async function getChangedPackagesSinceRef({
   cwd,
   ref,
+  changedFilePatterns = ["**"],
 }: {
   cwd: string;
   ref: string;
-}) {
+  changedFilePatterns?: readonly string[];
+}): Promise<Package[]> {
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
-  let packages = await getPackages(cwd);
-
-  const fileToPackage: Record<string, Package> = {};
-
-  packages.packages.forEach((pkg) =>
-    changedFiles.filter(isInDir(pkg.dir)).forEach((fileName) => {
-      const prevPkg = fileToPackage[fileName] || { dir: "" };
-      if (pkg.dir.length > prevPkg.dir.length) fileToPackage[fileName] = pkg;
-    })
-  );
 
   return (
-    Object.values(fileToPackage)
-      // filter, so that we have only unique packages
-      .filter((pkg, idx, packages) => packages.indexOf(pkg) === idx)
+    [...(await getPackages(cwd)).packages]
+      // sort packages by length of dir, so that we can check for subdirs first
+      .sort((pkgA, pkgB) => pkgB.dir.length - pkgA.dir.length)
+      .filter((pkg) => {
+        const changedPackageFiles: string[] = [];
+
+        for (let i = changedFiles.length - 1; i >= 0; i--) {
+          const file = changedFiles[i];
+
+          if (isSubdir(pkg.dir, file)) {
+            changedFiles.splice(i, 1);
+            const relativeFile = file.slice(pkg.dir.length + 1);
+            changedPackageFiles.push(relativeFile);
+          }
+        }
+
+        return (
+          changedPackageFiles.length > 0 &&
+          micromatch(changedPackageFiles, changedFilePatterns).length > 0
+        );
+      })
   );
 }
 
@@ -290,10 +291,18 @@ export async function tagExists(tagStr: string, cwd: string) {
 
 export async function getCurrentCommitId({
   cwd,
+  short = false,
 }: {
   cwd: string;
+  short?: boolean;
 }): Promise<string> {
-  return (await spawn("git", ["rev-parse", "--short", "HEAD"], { cwd })).stdout
+  return (
+    await spawn(
+      "git",
+      ["rev-parse", short && "--short", "HEAD"].filter<string>(Boolean as any),
+      { cwd }
+    )
+  ).stdout
     .toString()
     .trim();
 }
