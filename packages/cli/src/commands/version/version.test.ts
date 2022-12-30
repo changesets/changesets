@@ -1839,6 +1839,85 @@ describe("updateInternalDependents: always", () => {
     expect(() => getChangelog("pkg-b", spy.mock.calls)).toThrowError();
     expect(() => getChangelog("pkg-c", spy.mock.calls)).toThrowError();
   });
+
+  it("should not bump dependant it's an npm tag and has changelog on its own", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        dependencies: { "pkg-a": "bulbasaur" }, // using tag version from npm
+      }),
+    });
+
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+    await writeChangeset(
+      {
+        summary: "This is some fix",
+        releases: [{ name: "pkg-b", type: "patch" }],
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always",
+      },
+    });
+
+    expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-a",
+        version: "1.1.0",
+      })
+    );
+    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-b",
+        version: "1.0.1",
+        dependencies: { "pkg-a": "bulbasaur" },
+      })
+    );
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.0.1
+
+      ### Patch Changes
+
+      - g1th4sh: This is some fix
+      - Updated dependencies [g1th4sh]
+        - pkg-a@1.1.0
+      "
+    `);
+  });
 });
 
 describe("pre", () => {
