@@ -1840,7 +1840,7 @@ describe("updateInternalDependents: always", () => {
     expect(() => getChangelog("pkg-c", spy.mock.calls)).toThrowError();
   });
 
-  it("should not bump dependant it's an npm tag and has changelog on its own", async () => {
+  it("should not bump dependant if it's an npm tag and has changelog on its own", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
