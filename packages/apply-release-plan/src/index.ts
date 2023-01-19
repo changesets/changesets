@@ -294,7 +294,13 @@ async function getNewChangelogEntry(
       let changelog = await getChangelogEntry(
         release,
         releasesWithPackage,
-        moddedChangesets,
+        moddedChangesets.map((cs) => ({
+          ...cs,
+          groupedChangelog: isInSingleChangelogPackageGroup(
+            config.fixed,
+            release.name
+          ),
+        })),
         getChangelogFuncs,
         changelogOpts,
         {
@@ -438,6 +444,13 @@ function adjustChangesetReleasesForSingleChangelogGroups(
     }
     return release;
   });
+}
+
+function isInSingleChangelogPackageGroup(fixed: Fixed, name: string) {
+  return fixed.some(
+    (entry): entry is SingleChangelogPackageGroup =>
+      isSingleChangelogPackageGroup(entry) && entry.group.includes(name)
+  );
 }
 
 function isSingleChangelogPackageGroup(

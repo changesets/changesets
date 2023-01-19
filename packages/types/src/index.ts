@@ -130,7 +130,10 @@ export type ExperimentalOptions = {
   useCalculatedVersionForSnapshots?: boolean;
 };
 
-export type NewChangesetWithCommit = NewChangeset & { commit?: string };
+export type NewChangesetWithCommit = NewChangeset & {
+  commit?: string;
+  groupedChangelog?: boolean;
+};
 
 export type ModCompWithPackage = ComprehensiveRelease & {
   packageJson: PackageJSON;
