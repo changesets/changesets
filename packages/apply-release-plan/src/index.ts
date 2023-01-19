@@ -294,13 +294,20 @@ async function getNewChangelogEntry(
       let changelog = await getChangelogEntry(
         release,
         releasesWithPackage,
-        moddedChangesets.map((cs) => ({
-          ...cs,
-          groupedChangelog: isInSingleChangelogPackageGroup(
-            config.fixed,
-            release.name
-          ),
-        })),
+        moddedChangesets.map((cs) => {
+          const fixedGroupEntry = config.fixed.find(
+            (entry): entry is SingleChangelogPackageGroup =>
+              isSingleChangelogPackageGroup(entry) &&
+              entry.group.includes(release.name)
+          );
+          return {
+            ...cs,
+            releases: cs.releases.filter(
+              (r) => !fixedGroupEntry || fixedGroupEntry.group.includes(r.name)
+            ),
+            groupedChangelog: Boolean(fixedGroupEntry),
+          };
+        }),
         getChangelogFuncs,
         changelogOpts,
         {
@@ -444,13 +451,6 @@ function adjustChangesetReleasesForSingleChangelogGroups(
     }
     return release;
   });
-}
-
-function isInSingleChangelogPackageGroup(fixed: Fixed, name: string) {
-  return fixed.some(
-    (entry): entry is SingleChangelogPackageGroup =>
-      isSingleChangelogPackageGroup(entry) && entry.group.includes(name)
-  );
 }
 
 function isSingleChangelogPackageGroup(
