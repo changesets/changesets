@@ -7,7 +7,9 @@ import {
 } from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
-import matchFixedConstraint from "./match-fixed-constraint";
+import matchFixedConstraint, {
+  isSingleChangelogFixedPackageGroup,
+} from "./match-fixed-constraint";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
 import * as semver from "semver";
@@ -349,8 +351,11 @@ function getPreInfo(
     );
   }
   for (let fixedGroup of config.fixed) {
-    let highestPreVersion = getHighestPreVersion(fixedGroup, packagesByName);
-    for (let fixedPackage of fixedGroup) {
+    const packageGroup = isSingleChangelogFixedPackageGroup(fixedGroup)
+      ? fixedGroup.group
+      : fixedGroup;
+    let highestPreVersion = getHighestPreVersion(packageGroup, packagesByName);
+    for (let fixedPackage of packageGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
     }
   }

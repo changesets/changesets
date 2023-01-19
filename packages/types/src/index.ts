@@ -58,7 +58,13 @@ export type PackageJSON = {
 
 export type PackageGroup = ReadonlyArray<string>;
 
-export type Fixed = ReadonlyArray<PackageGroup>;
+export type SingleChangelogPackageGroup = {
+  group: PackageGroup;
+  changelog: string;
+  name: string;
+};
+
+export type Fixed = ReadonlyArray<PackageGroup | SingleChangelogPackageGroup>;
 export type Linked = ReadonlyArray<PackageGroup>;
 
 export interface PrivatePackages {

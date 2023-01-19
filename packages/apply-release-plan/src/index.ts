@@ -2,8 +2,12 @@ import {
   ReleasePlan,
   Config,
   ChangelogFunctions,
+  Fixed,
   NewChangeset,
   ModCompWithPackage,
+  Release,
+  SingleChangelogPackageGroup,
+  VersionType,
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
@@ -134,17 +138,60 @@ export default async function applyReleasePlan(
   });
 
   let prettierInstance = getPrettierInstance(cwd);
-  let prettierConfig = await prettierInstance.resolveConfig(cwd);
 
   for (let release of finalisedRelease) {
-    let { changelog, packageJson, dir, name } = release;
+    let { packageJson, dir } = release;
 
     const pkgJSONPath = path.resolve(dir, "package.json");
     await updatePackageJson(pkgJSONPath, packageJson);
     touchedFiles.push(pkgJSONPath);
+  }
 
+  const singleChangelogGroups = config.fixed.filter(
+    (group): group is SingleChangelogPackageGroup =>
+      isSingleChangelogPackageGroup(group)
+  );
+
+  const releaseChangelogs = finalisedRelease.reduce(
+    (acc, { changelog, dir, name, type }) => {
+      const singleChangelogGroup = singleChangelogGroups.find((g) =>
+        g.group.includes(name)
+      );
+      if (singleChangelogGroup) {
+        const changelogPath = path.resolve(cwd, singleChangelogGroup.changelog);
+        const existingEntry = acc.find(
+          (entry) => entry.changelogPath === changelogPath
+        );
+        if (!existingEntry) {
+          acc.push({
+            name: singleChangelogGroup.name,
+            changelog,
+            changelogPath,
+            type,
+          });
+        }
+      } else {
+        acc.push({
+          name,
+          changelog,
+          changelogPath: path.resolve(dir, "CHANGELOG.md"),
+          type,
+        });
+      }
+      return acc;
+    },
+    [] as Array<{
+      name: string;
+      changelog: string | null;
+      changelogPath: string;
+      type: VersionType;
+    }>
+  );
+
+  let prettierConfig = await prettierInstance.resolveConfig(cwd);
+
+  for (let { changelogPath, changelog, name } of releaseChangelogs) {
     if (changelog && changelog.length > 0) {
-      const changelogPath = path.resolve(dir, "CHANGELOG.md");
       await updateChangelog(
         changelogPath,
         changelog,
@@ -235,6 +282,10 @@ async function getNewChangelogEntry(
   );
   let moddedChangesets = changesets.map((cs, i) => ({
     ...cs,
+    releases: adjustChangesetReleasesForSingleChangelogGroups(
+      config.fixed,
+      cs.releases
+    ),
     commit: commits[i],
   }));
 
@@ -356,5 +407,48 @@ async function writeFormattedMarkdownFile(
       filepath: filePath,
       parser: "markdown",
     })
+  );
+}
+
+function adjustChangesetReleasesForSingleChangelogGroups(
+  fixed: Fixed,
+  releases: Release[]
+): Release[] {
+  return releases.map((release) => {
+    const fixedGroupEntry = fixed.find(
+      (entry): entry is SingleChangelogPackageGroup =>
+        isSingleChangelogPackageGroup(entry) &&
+        entry.group.includes(release.name)
+    );
+    if (fixedGroupEntry) {
+      const types = releases
+        .filter((release) => fixedGroupEntry.group.includes(release.name))
+        .map((release) => release.type);
+      const highestReleaseType = types.includes("major")
+        ? "major"
+        : types.includes("minor")
+        ? "minor"
+        : types.includes("patch")
+        ? "patch"
+        : "none";
+      return {
+        name: release.name,
+        type: highestReleaseType,
+      };
+    }
+    return release;
+  });
+}
+
+function isSingleChangelogPackageGroup(
+  pkgGroup: unknown
+): pkgGroup is SingleChangelogPackageGroup {
+  return Boolean(
+    pkgGroup &&
+      Array.isArray((pkgGroup as SingleChangelogPackageGroup).group) &&
+      ((pkgGroup as SingleChangelogPackageGroup).group as unknown[]).every(
+        (pkgName) => typeof pkgName === "string"
+      ) &&
+      typeof (pkgGroup as SingleChangelogPackageGroup).changelog === "string"
   );
 }

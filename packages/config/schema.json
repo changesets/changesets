@@ -31,10 +31,35 @@
     "fixed": {
       "type": "array",
       "items": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "changelog": {
+                "type": "string",
+                "description": "File path relative to project root."
+              },
+              "group": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "An array of package names/globs."
+              },
+              "name": {
+                "type": "string",
+                "description": "A name for the package group."
+              }
+            },
+            "required": ["changelog", "group", "name"]
+          }
+        ]
       },
       "description": "Packages that should always be released together with the same version.",
       "default": []
