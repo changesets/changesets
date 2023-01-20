@@ -15,7 +15,7 @@ const getReleaseLine = async (
 
   let returnVal = `- ${changeset.commit ? `${changeset.commit}: ` : ""}${
     changeset.groupedChangelog
-      ? `**(${changeset.releases.map(({ name }) => name).join(", ")})**`
+      ? `**(${changeset.releases.map(({ name }) => name).join(", ")})** `
       : ""
   }${firstLine}`;
 
