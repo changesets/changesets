@@ -28,7 +28,11 @@ function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
         id: replacedId,
       };
     }),
-    releases: releaseObj.releases.map((release) => ({
+    individualReleases: releaseObj.individualReleases.map((release) => ({
+      ...release,
+      changesets: release.changesets.map((id) => changesetNames.get(id) || id),
+    })),
+    groupedReleases: releaseObj.groupedReleases.map((release) => ({
       ...release,
       changesets: release.changesets.map((id) => changesetNames.get(id) || id),
     })),
@@ -72,34 +76,31 @@ describe("status", () => {
     await git.commit("updated a", cwd);
 
     const releaseObj = await status(cwd, { since: "main" }, defaultConfig);
-    expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
-      {
-        "changesets": [
-          {
-            "id": "~changeset-1~",
-            "releases": [
-              {
-                "name": "pkg-a",
-                "type": "minor",
-              },
-            ],
-            "summary": "This is a summary",
-          },
-        ],
-        "preState": undefined,
-        "releases": [
-          {
-            "changesets": [
-              "~changeset-1~",
-            ],
-            "name": "pkg-a",
-            "newVersion": "1.1.0",
-            "oldVersion": "1.0.0",
-            "type": "minor",
-          },
-        ],
-      }
-    `);
+    expect(replaceHumanIds(releaseObj)).toStrictEqual({
+      changesets: [
+        {
+          id: "~changeset-1~",
+          releases: [
+            {
+              name: "pkg-a",
+              type: "minor",
+            },
+          ],
+          summary: "This is a summary",
+        },
+      ],
+      preState: undefined,
+      groupedReleases: [],
+      individualReleases: [
+        {
+          changesets: ["~changeset-1~"],
+          name: "pkg-a",
+          newVersion: "1.1.0",
+          oldVersion: "1.0.0",
+          type: "minor",
+        },
+      ],
+    });
   });
 
   it("should exit early with a non-zero error code when there are changed packages but no changesets", async () => {
@@ -156,7 +157,8 @@ describe("status", () => {
     expect(process.exit).not.toHaveBeenCalled();
     expect(releaseObj).toEqual({
       changesets: [],
-      releases: [],
+      groupedReleases: [],
+      individualReleases: [],
       preState: undefined,
     });
   });
@@ -257,7 +259,8 @@ describe("status", () => {
             "summary": "This is a summary",
           },
         ],
-        "releases": [
+        "groupedReleases": [],
+        "individualReleases": [
           {
             "changesets": [
               "~changeset-1~",
@@ -307,7 +310,8 @@ describe("status", () => {
     expect(process.exit).not.toHaveBeenCalled();
     expect(releaseObj).toEqual({
       changesets: [],
-      releases: [],
+      groupedReleases: [],
+      individualReleases: [],
       preState: undefined,
     });
   });
@@ -383,33 +387,30 @@ describe("status", () => {
       { since: "main" },
       { ...defaultConfig, changedFilePatterns: ["src/**"] }
     );
-    expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
-      {
-        "changesets": [
-          {
-            "id": "~changeset-1~",
-            "releases": [
-              {
-                "name": "pkg-a",
-                "type": "minor",
-              },
-            ],
-            "summary": "This is a summary",
-          },
-        ],
-        "preState": undefined,
-        "releases": [
-          {
-            "changesets": [
-              "~changeset-1~",
-            ],
-            "name": "pkg-a",
-            "newVersion": "1.1.0",
-            "oldVersion": "1.0.0",
-            "type": "minor",
-          },
-        ],
-      }
-    `);
+    expect(replaceHumanIds(releaseObj)).toStrictEqual({
+      changesets: [
+        {
+          id: "~changeset-1~",
+          releases: [
+            {
+              name: "pkg-a",
+              type: "minor",
+            },
+          ],
+          summary: "This is a summary",
+        },
+      ],
+      preState: undefined,
+      groupedReleases: [],
+      individualReleases: [
+        {
+          changesets: ["~changeset-1~"],
+          name: "pkg-a",
+          newVersion: "1.1.0",
+          oldVersion: "1.0.0",
+          type: "minor",
+        },
+      ],
+    });
   });
 });

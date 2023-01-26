@@ -85,9 +85,9 @@ export default async function applyReleasePlan(
     packages.packages.map((x) => [x.packageJson.name, x])
   );
 
-  let { releases, changesets } = releasePlan;
+  let { individualReleases, groupedReleases, changesets } = releasePlan;
 
-  let releasesWithPackage = releases.map((release) => {
+  let releasesWithPackage = individualReleases.map((release) => {
     let pkg = packagesByName.get(release.name);
     if (!pkg)
       throw new Error(
@@ -118,11 +118,21 @@ export default async function applyReleasePlan(
     }
   }
 
-  let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
-    name,
-    version: newVersion,
-    type,
-  }));
+  let versionsToUpdate = individualReleases
+    .map(({ name, newVersion, type }) => ({
+      name,
+      version: newVersion,
+      type,
+    }))
+    .concat(
+      ...groupedReleases.flatMap((group) =>
+        group.projects.map((p) => ({
+          name: p.name,
+          version: group.newVersion,
+          type: p.type,
+        }))
+      )
+    );
 
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map((release) => {

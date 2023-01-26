@@ -1,4 +1,9 @@
-import { Changeset, CommitFunctions, ReleasePlan } from "@changesets/types";
+import {
+  Changeset,
+  CommitFunctions,
+  ComprehensiveRelease,
+  ReleasePlan,
+} from "@changesets/types";
 import outdent from "outdent";
 
 type SkipCI = boolean | "add" | "version";
@@ -18,9 +23,23 @@ const getVersionMessage: CommitFunctions["getVersionMessage"] = async (
   options: { skipCI?: SkipCI } | null
 ) => {
   const skipCI = options?.skipCI === "version" || options?.skipCI === true;
-  const publishableReleases = releasePlan.releases.filter(
+  const publishableReleases = releasePlan.individualReleases.filter(
     (release) => release.type !== "none"
   );
+  publishableReleases.concat(
+    releasePlan.groupedReleases
+      .flatMap<ComprehensiveRelease>((g) =>
+        g.projects.map((p) => ({
+          changesets: g.changesets,
+          name: p.name,
+          newVersion: g.newVersion,
+          oldVersion: p.oldVersion,
+          type: p.type,
+        }))
+      )
+      .filter((release) => release.type !== "none")
+  );
+
   const numPackagesReleased = publishableReleases.length;
 
   const releasesLines = publishableReleases

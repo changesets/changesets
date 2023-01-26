@@ -419,7 +419,7 @@ describe("parser errors", () => {
         unsafeParse({ fixed: {} }, defaultPackages);
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
-        The \`fixed\` option is set as {} when the only valid values are undefined or an array of arrays of package names"
+        The \`fixed\` option is set as {} when the only valid values are undefined or an array of either arrays of package names or objects with a "group" property as an array of package names and a "changelog" property as a file path."
       `);
     });
     test("array of non array", () => {
@@ -429,7 +429,7 @@ describe("parser errors", () => {
         "Some errors occurred when validating the changesets config:
         The \`fixed\` option is set as [
           {}
-        ] when the only valid values are undefined or an array of arrays of package names"
+        ] when the only valid values are undefined or an array of either arrays of package names or objects with a "group" property as an array of package names and a "changelog" property as a file path."
       `);
     });
     test("array of array of non-string", () => {
@@ -441,7 +441,7 @@ describe("parser errors", () => {
           [
             {}
           ]
-        ] when the only valid values are undefined or an array of arrays of package names"
+        ] when the only valid values are undefined or an array of either arrays of package names or objects with a "group" property as an array of package names and a "changelog" property as a file path."
       `);
     });
     test("package that does not exist", () => {

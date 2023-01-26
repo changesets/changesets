@@ -4,6 +4,8 @@ import {
   NewChangeset,
   PreState,
   PackageGroup,
+  Fixed,
+  SingleChangelogPackageGroup,
 } from "@changesets/types";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
@@ -244,19 +246,61 @@ function assembleReleasePlan(
 
   return {
     changesets: relevantChangesets,
-    releases: [...releases.values()].map((incompleteRelease) => {
-      return {
-        ...incompleteRelease,
-        newVersion: snapshotSuffix
-          ? getSnapshotVersion(
-              incompleteRelease,
-              preInfo,
-              refinedConfig.snapshot.useCalculatedVersion,
-              snapshotSuffix
-            )
-          : getNewVersion(incompleteRelease, preInfo),
-      };
-    }),
+    individualReleases: [...releases.values()]
+      .filter(
+        (r) => !packageIsInSingleChangelogFixedGroup(config.fixed, r.name)
+      )
+      .map((incompleteRelease) => {
+        return {
+          ...incompleteRelease,
+          newVersion: snapshotSuffix
+            ? getSnapshotVersion(
+                incompleteRelease,
+                preInfo,
+                refinedConfig.snapshot.useCalculatedVersion,
+                snapshotSuffix
+              )
+            : getNewVersion(incompleteRelease, preInfo),
+        };
+      }),
+    groupedReleases: [...releases.values()].reduce((acc, cur) => {
+      const group = packageIsInSingleChangelogFixedGroup(
+        config.fixed,
+        cur.name
+      );
+      if (group) {
+        const existingEntry = acc.find((entry) => entry.relativeChangelogPath);
+        if (existingEntry) {
+          existingEntry.projects.push({
+            name: cur.name,
+            oldVersion: cur.oldVersion,
+            type: cur.type,
+          });
+        } else {
+          acc.push({
+            changesets: cur.changesets,
+            displayName: group.name,
+            newVersion: snapshotSuffix
+              ? getSnapshotVersion(
+                  cur,
+                  preInfo,
+                  refinedConfig.snapshot.useCalculatedVersion,
+                  snapshotSuffix
+                )
+              : getNewVersion(cur, preInfo),
+            projects: [
+              {
+                name: cur.name,
+                oldVersion: cur.oldVersion,
+                type: cur.type,
+              },
+            ],
+            relativeChangelogPath: group.changelog,
+          });
+        }
+      }
+      return acc;
+    }, [] as ReleasePlan["groupedReleases"]),
     preState: preInfo?.state,
   };
 }
@@ -370,6 +414,14 @@ function getPreInfo(
     state: updatedPreState,
     preVersions,
   };
+}
+
+function packageIsInSingleChangelogFixedGroup(fixed: Fixed, pkgName: string) {
+  return fixed.find(
+    (entry): entry is SingleChangelogPackageGroup =>
+      !Array.isArray(entry) &&
+      (entry as SingleChangelogPackageGroup).group.includes(pkgName)
+  );
 }
 
 export default assembleReleasePlan;

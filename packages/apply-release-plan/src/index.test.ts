@@ -3,6 +3,7 @@ import {
   Config,
   NewChangeset,
   ComprehensiveRelease,
+  ComprehensiveGroupRelease,
 } from "@changesets/types";
 import * as git from "@changesets/git";
 import fs from "fs-extra";
@@ -21,7 +22,8 @@ import {
 
 class FakeReleasePlan {
   changesets: NewChangeset[];
-  releases: ComprehensiveRelease[];
+  individualReleases: ComprehensiveRelease[];
+  groupedReleases: ComprehensiveGroupRelease[];
   config: Config;
 
   constructor(
@@ -64,13 +66,15 @@ class FakeReleasePlan {
     };
 
     this.changesets = [baseChangeset, ...changesets];
-    this.releases = [baseRelease, ...releases];
+    this.individualReleases = [baseRelease, ...releases];
+    this.groupedReleases = [];
   }
 
   getReleasePlan(): ReleasePlan {
     return {
       changesets: this.changesets,
-      releases: this.releases,
+      individualReleases: this.individualReleases,
+      groupedReleases: [],
       preState: undefined,
     };
   }
@@ -638,7 +642,7 @@ describe("apply release plan", () => {
               ],
             },
           ],
-          releases: [
+          individualReleases: [
             {
               name: "pkg-a",
               type: "none",
@@ -654,6 +658,7 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"],
             },
           ],
+          groupedReleases: [],
           preState: undefined,
         },
         {
@@ -721,7 +726,7 @@ describe("apply release plan", () => {
               releases: [{ name: "self-referenced", type: "minor" }],
             },
           ],
-          releases: [
+          individualReleases: [
             {
               name: "self-referenced",
               type: "minor",
@@ -730,6 +735,7 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"],
             },
           ],
+          groupedReleases: [],
           preState: undefined,
         },
         {
@@ -791,7 +797,7 @@ describe("apply release plan", () => {
               releases: [{ name: "pkg-b", type: "none" }],
             },
           ],
-          releases: [
+          individualReleases: [
             {
               name: "pkg-b",
               type: "none",
@@ -800,6 +806,7 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"],
             },
           ],
+          groupedReleases: [],
           preState: undefined,
         },
         { ...defaultConfig, changelog: false }
@@ -848,7 +855,7 @@ describe("apply release plan", () => {
               releases: [{ name: "pkg-b", type: "none" }],
             },
           ],
-          releases: [
+          individualReleases: [
             {
               name: "pkg-b",
               type: "none",
@@ -857,6 +864,7 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"],
             },
           ],
+          groupedReleases: [],
           preState: undefined,
         },
         { ...defaultConfig, changelog: false }
@@ -972,7 +980,7 @@ describe("apply release plan", () => {
                   ],
                 },
               ],
-              releases: [
+              individualReleases: [
                 {
                   name: "pkg-a",
                   type: "patch",
@@ -988,6 +996,7 @@ describe("apply release plan", () => {
                   changesets: ["quick-lions-devour"],
                 },
               ],
+              groupedReleases: [],
               preState: undefined,
             },
             {
@@ -1081,7 +1090,7 @@ describe("apply release plan", () => {
                   ],
                 },
               ],
-              releases: [
+              individualReleases: [
                 {
                   name: "pkg-a",
                   type: "patch",
@@ -1104,6 +1113,7 @@ describe("apply release plan", () => {
                   changesets: ["quick-lions-devour"],
                 },
               ],
+              groupedReleases: [],
               preState: undefined,
             },
             {
@@ -1189,7 +1199,7 @@ describe("apply release plan", () => {
                   ],
                 },
               ],
-              releases: [
+              individualReleases: [
                 {
                   name: "pkg-a",
                   type: "minor",
@@ -1205,6 +1215,7 @@ describe("apply release plan", () => {
                   changesets: ["quick-lions-devour"],
                 },
               ],
+              groupedReleases: [],
               preState: undefined,
             },
             {
@@ -1289,7 +1300,7 @@ describe("apply release plan", () => {
                   ],
                 },
               ],
-              releases: [
+              individualReleases: [
                 {
                   name: "pkg-a",
                   type: "major",
@@ -1305,6 +1316,7 @@ describe("apply release plan", () => {
                   changesets: ["quick-lions-devour"],
                 },
               ],
+              groupedReleases: [],
               preState: undefined,
             },
             {
@@ -1392,7 +1404,7 @@ describe("apply release plan", () => {
                   ],
                 },
               ],
-              releases: [
+              individualReleases: [
                 {
                   name: "pkg-a",
                   type: "patch",
@@ -1408,6 +1420,7 @@ describe("apply release plan", () => {
                   changesets: ["quick-lions-devour"],
                 },
               ],
+              groupedReleases: [],
               preState: undefined,
             },
             {
@@ -1501,7 +1514,7 @@ describe("apply release plan", () => {
                   ],
                 },
               ],
-              releases: [
+              individualReleases: [
                 {
                   name: "pkg-a",
                   type: "patch",
@@ -1524,6 +1537,7 @@ describe("apply release plan", () => {
                   changesets: ["quick-lions-devour"],
                 },
               ],
+              groupedReleases: [],
               preState: undefined,
             },
             {
@@ -1617,7 +1631,7 @@ describe("apply release plan", () => {
                   ],
                 },
               ],
-              releases: [
+              individualReleases: [
                 {
                   name: "pkg-a",
                   type: "minor",
@@ -1633,6 +1647,7 @@ describe("apply release plan", () => {
                   changesets: ["quick-lions-devour"],
                 },
               ],
+              groupedReleases: [],
               preState: undefined,
             },
             {
@@ -1717,7 +1732,7 @@ describe("apply release plan", () => {
                   ],
                 },
               ],
-              releases: [
+              individualReleases: [
                 {
                   name: "pkg-a",
                   type: "major",
@@ -1733,6 +1748,7 @@ describe("apply release plan", () => {
                   changesets: ["quick-lions-devour"],
                 },
               ],
+              groupedReleases: [],
               preState: undefined,
             },
             {
@@ -1818,7 +1834,7 @@ describe("apply release plan", () => {
                 ],
               },
             ],
-            releases: [
+            individualReleases: [
               {
                 name: "has-peer-dep",
                 type: "patch",
@@ -1834,6 +1850,7 @@ describe("apply release plan", () => {
                 changesets: ["quick-lions-devour"],
               },
             ],
+            groupedReleases: [],
             preState: undefined,
           },
           {
@@ -2047,7 +2064,7 @@ describe("apply release plan", () => {
               ],
             },
           ],
-          releases: [
+          individualReleases: [
             {
               name: "pkg-a",
               type: "none",
@@ -2063,6 +2080,7 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"],
             },
           ],
+          groupedReleases: [],
           preState: undefined,
         },
         {
@@ -2109,7 +2127,10 @@ describe("apply release plan", () => {
           releases: [{ name: "pkg-a", type: "minor" }],
         },
       ]);
-      releasePlan.releases[0].changesets.push("some-id-1", "some-id-2");
+      releasePlan.individualReleases[0].changesets.push(
+        "some-id-1",
+        "some-id-2"
+      );
 
       let { changedFiles } = await testSetup(
         {
@@ -2185,7 +2206,7 @@ describe("apply release plan", () => {
               ],
             },
           ],
-          releases: [
+          individualReleases: [
             {
               name: "pkg-a",
               type: "patch",
@@ -2201,6 +2222,7 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"],
             },
           ],
+          groupedReleases: [],
           preState: undefined,
         },
         {
@@ -2294,7 +2316,7 @@ describe("apply release plan", () => {
               ],
             },
           ],
-          releases: [
+          individualReleases: [
             {
               name: "pkg-a",
               type: "patch",
@@ -2310,6 +2332,7 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"],
             },
           ],
+          groupedReleases: [],
           preState: undefined,
         },
         {
@@ -2408,7 +2431,7 @@ describe("apply release plan", () => {
               ],
             },
           ],
-          releases: [
+          individualReleases: [
             {
               name: "pkg-a",
               type: "patch",
@@ -2431,6 +2454,7 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"],
             },
           ],
+          groupedReleases: [],
           preState: undefined,
         },
         {
@@ -2543,7 +2567,7 @@ describe("apply release plan", () => {
               ],
             },
           ],
-          releases: [
+          individualReleases: [
             {
               name: "pkg-a",
               type: "patch",
@@ -2566,6 +2590,7 @@ describe("apply release plan", () => {
               changesets: ["quick-lions-devour"],
             },
           ],
+          groupedReleases: [],
           preState: undefined,
         },
         {
@@ -2661,7 +2686,7 @@ describe("apply release plan", () => {
                 releases: [{ name: "pkg-a", type: "minor" }],
               },
             ],
-            releases: [
+            individualReleases: [
               {
                 name: "pkg-a",
                 type: "minor",
@@ -2677,6 +2702,7 @@ describe("apply release plan", () => {
                 changesets: ["quick-lions-devour"],
               },
             ],
+            groupedReleases: [],
             preState: undefined,
           }
         );

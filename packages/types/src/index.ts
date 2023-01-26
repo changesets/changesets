@@ -34,9 +34,22 @@ export type NewChangeset = Changeset & {
   id: string;
 };
 
+export type ComprehensiveGroupRelease = {
+  displayName: string;
+  relativeChangelogPath: string;
+  newVersion: string;
+  changesets: string[];
+  projects: Array<{
+    name: string;
+    oldVersion: string;
+    type: VersionType;
+  }>;
+};
+
 export type ReleasePlan = {
   changesets: NewChangeset[];
-  releases: ComprehensiveRelease[];
+  individualReleases: ComprehensiveRelease[];
+  groupedReleases: ComprehensiveGroupRelease[];
   preState: PreState | undefined;
 };
 
