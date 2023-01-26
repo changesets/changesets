@@ -153,6 +153,18 @@ export type ModCompWithPackage = ComprehensiveRelease & {
   dir: string;
 };
 
+export type ModCompGroupWithPackage = Omit<
+  ComprehensiveGroupRelease,
+  "projects"
+> & {
+  projects: Array<
+    ComprehensiveGroupRelease["projects"][number] & {
+      packageJson: PackageJSON;
+      dir: string;
+    }
+  >;
+};
+
 export type GetReleaseLine = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
