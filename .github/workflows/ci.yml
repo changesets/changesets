@@ -33,7 +33,7 @@ jobs:
         run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
 
   typecheck:
     name: Typecheck
