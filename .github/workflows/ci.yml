@@ -24,7 +24,7 @@ jobs:
       - uses: ./.github/actions/ci-setup
 
       - name: Jest tests
-        run: yarn jest --ci --runInBand --coverage --reporters=default --reporters=jest-junit
+        run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1
