@@ -23,6 +23,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/ci-setup
 
+      - name: Check Git version
+        run: git --version
+
+      - name: Setup mock Git user
+        run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+
       - name: Jest tests
         run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
 
