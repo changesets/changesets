@@ -24,6 +24,13 @@ export type PublishedResult = {
   published: boolean;
 };
 
+interface PublishVersions {
+  [version: string]: {
+    suffix: string;
+    directory: string;
+  };
+}
+
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   if (tag) return tag;
 
@@ -102,48 +109,91 @@ export default async function publishPackages({
     publicPackages,
   });
 
-  return Promise.all(
-    unpublishedPackagesInfo.map((pkgInfo) => {
-      let pkg = packagesByName.get(pkgInfo.name)!;
-      return publishAPackage(
+  const promises: Array<Promise<PublishedResult>> = [];
+
+  for (const pkgInfo of unpublishedPackagesInfo) {
+    const pkg = packagesByName.get(pkgInfo.name)!;
+
+    const { publishConfig } = pkg.packageJson;
+
+    // TODO: fix this cast
+    // tricky because of circular type dependency between @manypkg/get-packages and @changesets/types
+    const versions = ({ publishConfig } as { versions?: PublishVersions })
+      ?.versions;
+
+    if (versions) {
+      for (const version of Object.values(versions)) {
+        promises.push(
+          publishAPackage({
+            pkg,
+            suffix: version.suffix,
+            directory: version.directory,
+            access,
+            twoFactorState,
+            tag: getReleaseTag(pkgInfo, preState, tag),
+          })
+        );
+      }
+      continue;
+    }
+
+    const directory = publishConfig?.directory;
+
+    promises.push(
+      publishAPackage({
         pkg,
+        directory,
         access,
         twoFactorState,
-        getReleaseTag(pkgInfo, preState, tag)
-      );
-    })
-  );
+        tag: getReleaseTag(pkgInfo, preState, tag),
+      })
+    );
+  }
+
+  return Promise.all(promises);
 }
 
-async function publishAPackage(
-  pkg: Package,
-  access: AccessType,
-  twoFactorState: TwoFactorState,
-  tag: string
-): Promise<PublishedResult> {
+async function publishAPackage({
+  pkg,
+  suffix = "",
+  directory,
+  access,
+  twoFactorState,
+  tag,
+}: {
+  pkg: Package;
+  suffix?: string;
+  directory?: string;
+  access: AccessType;
+  twoFactorState: TwoFactorState;
+  tag: string;
+}): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
   const localAccess = publishConfig?.access;
+
+  const versionWithSuffix = `${version}${suffix}`;
   info(
-    `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
+    `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(
+      `"${versionWithSuffix}"`
+    )}`
   );
 
-  const publishDir = publishConfig?.directory
-    ? join(pkg.dir, publishConfig.directory)
-    : pkg.dir;
+  const publishDir = directory ? join(pkg.dir, directory) : pkg.dir;
 
+  const tagWithSuffix = `${tag}${suffix}`;
   const publishConfirmation = await npmUtils.publish(
     name,
     {
       cwd: publishDir,
       access: localAccess || access,
-      tag,
+      tag: tagWithSuffix,
     },
     twoFactorState
   );
 
   return {
     name,
-    newVersion: version,
+    newVersion: versionWithSuffix,
     published: publishConfirmation.published,
   };
 }
