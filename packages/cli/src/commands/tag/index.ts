@@ -1,13 +1,19 @@
 import * as git from "@changesets/git";
 import { getPackages } from "@manypkg/get-packages";
 import { log } from "@changesets/logger";
+import { Config } from "@changesets/types";
+import { isListablePackage } from "../add/isListablePackage";
 
-export default async function run(cwd: string) {
+export default async function run(cwd: string, config: Config) {
   const { packages, tool } = await getPackages(cwd);
+
+  const listablePackages = packages.filter((pkg) =>
+    isListablePackage(config, pkg.packageJson)
+  );
 
   const allExistingTags = await git.getAllTags(cwd);
 
-  for (const pkg of packages) {
+  for (const pkg of listablePackages) {
     const tag =
       tool !== "root"
         ? `${pkg.packageJson.name}@${pkg.packageJson.version}`
