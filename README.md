@@ -75,6 +75,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [verdaccio](https://verdaccio.org/)
 - [Chakra UI](https://chakra-ui.com/)
 - [Astro](https://astro.build)
+- [Remix](https://remix.run/)
 - [SvelteKit](https://kit.svelte.dev/)
 - [Hydrogen](https://hydrogen.shopify.dev)
 - [react-pdf](https://github.com/diegomura/react-pdf)
