@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.26.1
+
+### Patch Changes
+
+- [#1115](https://github.com/changesets/changesets/pull/1115) [`feddc88`](https://github.com/changesets/changesets/commit/feddc88d74781a448855a5a0b0ffa50917489b15) Thanks [@Andarist](https://github.com/Andarist)! - Call `pnpm publish` directly from the directory of the published package. This allows `pnpm` to correctly handle configured `publishConfig.directory`.
+
 ## 2.26.0
 
 ### Minor Changes
