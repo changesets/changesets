@@ -14,10 +14,21 @@ import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
 import { isListablePackage } from "./isListablePackage";
+import { CliOptions } from "../../types";
 
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  {
+    empty,
+    open,
+    message,
+    major,
+    minor,
+    patch,
+  }: Pick<
+    CliOptions,
+    "empty" | "open" | "message" | "major" | "minor" | "patch"
+  >,
   config: Config
 ) {
   const packages = await getPackages(cwd);
@@ -48,7 +59,11 @@ export default async function add(
       .filter((pkg) => isListablePackage(config, pkg.packageJson))
       .map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, listablePackages);
+    newChangeset = await createChangeset(
+      changedPackagesName,
+      listablePackages,
+      { message, major, minor, patch }
+    );
     printConfirmationMessage(newChangeset, listablePackages.length > 1);
 
     if (!newChangeset.confirmed) {

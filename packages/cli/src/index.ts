@@ -10,7 +10,7 @@ const { input, flags } = meow(
     $ changeset [command]
   Commands
     init
-    add [--empty] [--open]
+    add [--empty] [--open] [--message <message>] [--major <major-package>] [--minor <minor-package>] [--patch <patch-package>]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]
     status [--since <branch>] [--verbose] [--output JSON_FILE.json]
@@ -52,6 +52,21 @@ const { input, flags } = meow(
       gitTag: {
         type: "boolean",
         default: true,
+      },
+      major: {
+        type: "string",
+        isMultiple: true,
+      },
+      minor: {
+        type: "string",
+        isMultiple: true,
+      },
+      patch: {
+        type: "string",
+        isMultiple: true,
+      },
+      message: {
+        type: "string",
       },
       snapshotPrereleaseTemplate: {
         type: "string",

@@ -367,4 +367,128 @@ describe("Changesets", () => {
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
+
+  it("should generate changeset without package selection interaction to patch a single package", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: {} });
+    await addChangeset(cwd, { empty: false, patch: "pkg-a" }, defaultConfig);
+
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "summary message mock",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      })
+    );
+  });
+
+  it("should generate changeset without package selection interaction to major multiple package", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: {} });
+    await addChangeset(
+      cwd,
+      { empty: false, major: ["pkg-a", "pkg-b"] },
+      defaultConfig
+    );
+
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "summary message mock",
+        releases: [
+          { name: "pkg-a", type: "major" },
+          { name: "pkg-b", type: "major" },
+        ],
+      })
+    );
+  });
+
+  it("should throw error use without package selection interaction when package name is invalid", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: {} });
+    await expect(async () => {
+      await addChangeset(
+        cwd,
+        { empty: false, major: ["pkg-abcdefg", "pkg-b"] },
+        defaultConfig
+      );
+    }).rejects.toThrowError();
+  });
+
+  it("should generate changeset without insert message interaction to patch single package", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: { "pkg-a": "patch" }, summary: "" });
+    await addChangeset(
+      cwd,
+      { empty: false, message: "this is message without interaction" },
+      defaultConfig
+    );
+
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "this is message without interaction",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      })
+    );
+  });
 });

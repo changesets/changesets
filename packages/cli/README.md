@@ -99,13 +99,13 @@ To publish public packages to NPM, you'll need to edit `.changeset/config.json` 
 ### add
 
 ```
-changeset [--empty] [--open]
+changeset [--empty] [--open] [--message <message>] [--major <major-package>] [--minor <minor-package>] [--patch <patch-package>]
 ```
 
 or
 
 ```
-changeset add [--empty] [--open]
+changeset add [--empty] [--open] [--message <message>] [--major <major-package>] [--minor <minor-package>] [--patch <patch-package>]
 ```
 
 This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
@@ -136,6 +136,29 @@ A changeset created with the `empty` flag would look like this:
 If you set the `commit` option in the config, the command will add the updated changeset files and then commit them.
 
 - `--open` - opens the created changeset in an external editor
+
+Also, If you want to select a package without interaction, use the flag:
+
+- `--major`
+- `--minor`
+- `--patch`
+- `--message`
+
+For example
+
+```bash
+changeset --message 'This is message' --patch @changesets/cli
+```
+
+A changeset created with above example would look like this:
+
+```md
+---
+"@changesets/cli": patch
+---
+
+This is message
+```
 
 ### version
 

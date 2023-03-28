@@ -7,6 +7,7 @@ import { error, log } from "@changesets/logger";
 import { Release, PackageJSON } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
+import { CliOptions } from "../../types";
 
 const { green, yellow, red, bold, blue, cyan } = chalk;
 
@@ -104,13 +105,52 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
   return `${bold(pkgName)}@${bold(version)}`;
 }
 
+function isValidPackage(allPackages: Package[], packageName: string) {
+  return allPackages.find((pkg) => pkg.packageJson.name === packageName);
+}
+
+function getPackagesByOptions(
+  allPackages: Package[],
+  option?: string | string[]
+) {
+  if (!option || !option.length) {
+    return [];
+  }
+
+  // string[] | string to string[]
+  const packages = Array.isArray(option) ? option : [option];
+
+  return packages.map((pkg) => {
+    if (!isValidPackage(allPackages, pkg)) {
+      error(
+        `Please check package are included in name in package.json: ${cyan(
+          pkg
+        )}`
+      );
+
+      throw new ExitError(1);
+    }
+
+    return pkg;
+  });
+}
+
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Package[]
+  allPackages: Package[],
+  options: Pick<CliOptions, "message" | "major" | "minor" | "patch">
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
-  if (allPackages.length > 1) {
+  if (options.major || options.minor || options.patch) {
+    const major = getPackagesByOptions(allPackages, options.major);
+    const minor = getPackagesByOptions(allPackages, options.minor);
+    const patch = getPackagesByOptions(allPackages, options.patch);
+
+    major.map((name) => releases.push({ name, type: "major" }));
+    minor.map((name) => releases.push({ name, type: "minor" }));
+    patch.map((name) => releases.push({ name, type: "patch" }));
+  } else if (allPackages.length > 1) {
     const packagesToRelease = await getPackagesToRelease(
       changedPackages,
       allPackages
@@ -238,7 +278,7 @@ export default async function createChangeset(
   );
   log(chalk.gray("  (submit empty line to open external editor)"));
 
-  let summary = await cli.askQuestion("Summary");
+  let summary = options.message ?? (await cli.askQuestion("Summary"));
   if (summary.length === 0) {
     try {
       summary = cli.askQuestionWithEditor(
