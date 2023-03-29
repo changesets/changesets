@@ -122,20 +122,18 @@ async function publishAPackage(
   tag: string
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-  const localAccess = publishConfig?.access;
   info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
   );
 
-  const publishDir = publishConfig?.directory
-    ? join(pkg.dir, publishConfig.directory)
-    : pkg.dir;
-
   const publishConfirmation = await npmUtils.publish(
     name,
     {
-      cwd: publishDir,
-      access: localAccess || access,
+      cwd: pkg.dir,
+      publishDir: publishConfig?.directory
+        ? join(pkg.dir, publishConfig.directory)
+        : pkg.dir,
+      access: publishConfig?.access || access,
       tag,
     },
     twoFactorState
