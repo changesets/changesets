@@ -122,6 +122,11 @@
       "description": "The minimum bump type to trigger automatic update of internal dependencies that are part of the same release.",
       "default": "patch"
     },
+    "updatePeerDependencies": {
+      "enum": ["major", "follow"],
+      "type": "string",
+      "description": "The strategy used to trigger automatic update of peer dependencies that are part of the same release, \"follow\" means if peer dependencies has a major/minor/patch bumps, this package will have a major/minor/patch bump too, respectively"
+    },
     "bumpVersionsWithWorkspaceProtocolOnly": {
       "type": "boolean",
       "default": false,

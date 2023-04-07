@@ -1401,6 +1401,70 @@ describe("bumping peerDeps", () => {
     expect(releases[1].name).toEqual("pkg-b");
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
+
+  it("should major bump dependent when bumping caret peerDep by major when updatePeerDependencies = follow", () => {
+    setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "major" }],
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      { ...defaultConfig, updatePeerDependencies: "follow" },
+      undefined
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("2.0.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("2.0.0");
+  });
+
+  it("should minor bump dependent when bumping caret peerDep by minor when updatePeerDependencies = follow", () => {
+    setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "minor" }],
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      { ...defaultConfig, updatePeerDependencies: "follow" },
+      undefined
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.1.0");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.1.0");
+  });
+
+  it("should patch bump dependent when bumping caret peerDep by patch when updatePeerDependencies = follow", () => {
+    setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
+    setup.addChangeset({
+      id: "anyway-the-windblows",
+      releases: [{ name: "pkg-a", type: "patch" }],
+    });
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      { ...defaultConfig, updatePeerDependencies: "follow" },
+      undefined
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.1");
+  });
+
   it("should patch bump transitive dep that is only affected by peerDep bump", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addPackage("pkg-c", "1.0.0");
