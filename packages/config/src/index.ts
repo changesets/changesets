@@ -23,6 +23,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
+  updatePeerDepeendencies: "major",
   ignore: [] as ReadonlyArray<string>,
 } as const;
 
@@ -293,6 +294,20 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but can only be 'patch' or 'minor'`
     );
   }
+
+  if (
+    json.updatePeerDependencies !== undefined &&
+    !["major", "follow"].includes(json.updatePeerDependencies)
+  ) {
+    messages.push(
+      `The \`updatePeerDependences\` option is set as ${JSON.stringify(
+        json.updatePeerDependencies,
+        null,
+        2
+      )} but can only be 'major' or 'follow'`
+    );
+  }
+
   if (json.ignore) {
     if (
       !(
@@ -445,6 +460,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.updateInternalDependencies
         : json.updateInternalDependencies,
 
+    updatePeerDependencies:
+      json.updatePeerDependencies === undefined
+        ? defaultWrittenConfig.updatePeerDepeendencies
+        : json.updatePeerDependencies,
     ignore:
       json.ignore === undefined
         ? defaultWrittenConfig.ignore

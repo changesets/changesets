@@ -47,6 +47,7 @@ test("read reads the config", async () => {
     baseBranch: "master",
     changedFilePatterns: ["**"],
     updateInternalDependencies: "patch",
+    updatePeerDependencies: "major",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
     privatePackages: {
@@ -73,6 +74,7 @@ let defaults: Config = {
   baseBranch: "master",
   changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
+  updatePeerDependencies: "major",
   ignore: [],
   privatePackages: { version: true, tag: false },
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -274,6 +276,24 @@ let correctCases: Record<string, CorrectCase> = {
     output: {
       ...defaults,
       updateInternalDependencies: "patch",
+    },
+  },
+  "update peer dependencies major": {
+    input: {
+      updatePeerDependencies: "major",
+    },
+    output: {
+      ...defaults,
+      updatePeerDependencies: "major",
+    },
+  },
+  "update peer dependencies follow": {
+    input: {
+      updatePeerDependencies: "follow",
+    },
+    output: {
+      ...defaults,
+      updatePeerDependencies: "follow",
     },
   },
   ignore: {
