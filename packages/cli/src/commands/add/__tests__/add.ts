@@ -433,6 +433,64 @@ describe("Changesets", () => {
     );
   });
 
+  it("should generate changeset without package selection interaction to major multiple package with glob", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: {} });
+    await addChangeset(cwd, { empty: false, major: ["pkg-*"] }, defaultConfig);
+
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "summary message mock",
+        releases: [
+          { name: "pkg-a", type: "major" },
+          { name: "pkg-b", type: "major" },
+        ],
+      })
+    );
+  });
+
+  it("should throw error use without package selection interaction when duplicate selected package exists", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: {} });
+    await expect(async () => {
+      await addChangeset(
+        cwd,
+        { empty: false, major: ["pkg-a"], minor: ["pkg-a"] },
+        defaultConfig
+      );
+    }).rejects.toThrowError();
+  });
+
   it("should throw error use without package selection interaction when package name is invalid", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -453,7 +511,7 @@ describe("Changesets", () => {
     await expect(async () => {
       await addChangeset(
         cwd,
-        { empty: false, major: ["pkg-abcdefg", "pkg-b"] },
+        { empty: false, major: ["pkg-any"] },
         defaultConfig
       );
     }).rejects.toThrowError();

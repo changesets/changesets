@@ -1,5 +1,6 @@
 import chalk from "chalk";
 
+import micromatch from "micromatch";
 import semver from "semver";
 
 import * as cli from "../../utils/cli-utilities";
@@ -105,10 +106,6 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
   return `${bold(pkgName)}@${bold(version)}`;
 }
 
-function isValidPackage(allPackages: Package[], packageName: string) {
-  return allPackages.find((pkg) => pkg.packageJson.name === packageName);
-}
-
 function getPackagesByOptions(
   allPackages: Package[],
   option?: string | string[]
@@ -117,22 +114,44 @@ function getPackagesByOptions(
     return [];
   }
 
-  // string[] | string to string[]
-  const packages = Array.isArray(option) ? option : [option];
+  const parsedStringPackages = allPackages.map((pkg) => pkg.packageJson.name);
+  const matchedPackages = micromatch(parsedStringPackages, option);
 
-  return packages.map((pkg) => {
-    if (!isValidPackage(allPackages, pkg)) {
-      error(
-        `Please check package are included in name in package.json: ${cyan(
-          pkg
-        )}`
-      );
+  if (matchedPackages.length < 1) {
+    error(
+      `Please check package are included in name in package.json: ${cyan(
+        option.toString()
+      )}`
+    );
 
-      throw new ExitError(1);
+    throw new ExitError(1);
+  }
+
+  return matchedPackages;
+}
+
+function findDuplicates(...arrays: string[][]): string[] {
+  const counts = new Map();
+
+  for (const arr of arrays) {
+    for (const val of arr) {
+      if (counts.has(val)) {
+        counts.set(val, counts.get(val) + 1);
+      } else {
+        counts.set(val, 1);
+      }
     }
+  }
 
-    return pkg;
-  });
+  const duplicates = [];
+
+  for (const [val, count] of counts) {
+    if (count > 1) {
+      duplicates.push(val);
+    }
+  }
+
+  return duplicates;
 }
 
 export default async function createChangeset(
@@ -146,6 +165,18 @@ export default async function createChangeset(
     const major = getPackagesByOptions(allPackages, options.major);
     const minor = getPackagesByOptions(allPackages, options.minor);
     const patch = getPackagesByOptions(allPackages, options.patch);
+
+    const duplicates = findDuplicates(major, minor, patch);
+
+    if (duplicates.length > 0) {
+      error(
+        `Duplicate selected packages exist. Please check the following packages: ${cyan(
+          duplicates.join(", ")
+        )}`
+      );
+
+      throw new ExitError(1);
+    }
 
     major.map((name) => releases.push({ name, type: "major" }));
     minor.map((name) => releases.push({ name, type: "minor" }));
