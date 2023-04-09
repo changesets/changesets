@@ -55,7 +55,7 @@
     "human-id": "^1.0.2",
     "is-ci": "^3.0.1",
     "meow": "^6.0.0",
-    "micromatch": "^4.0.5",
+    "micromatch": "^4.0.2",
     "outdent": "^0.5.0",
     "p-limit": "^2.2.0",
     "preferred-pm": "^3.0.0",
