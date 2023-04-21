@@ -8,6 +8,11 @@ import path from "path";
 import spawn from "spawndamnit";
 import status from "..";
 
+const config = {
+  ...defaultConfig,
+  baseBranch: "main",
+};
+
 function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
   if (!releaseObj) {
     return;
@@ -71,7 +76,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    const releaseObj = await status(cwd, { since: "main" }, defaultConfig);
+    const releaseObj = await status(cwd, {}, config);
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
         "changesets": [
@@ -128,7 +133,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    await status(cwd, { since: "main" }, defaultConfig);
+    await status(cwd, {}, config);
 
     expect(process.exit).toHaveBeenCalledWith(1);
   });
@@ -151,7 +156,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    const releaseObj = await status(cwd, { since: "main" }, defaultConfig);
+    const releaseObj = await status(cwd, {}, config);
 
     expect(process.exit).not.toHaveBeenCalled();
     expect(releaseObj).toEqual({
@@ -194,7 +199,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    await status(cwd, { since: "main" }, defaultConfig);
+    await status(cwd, {}, config);
 
     expect(process.exit).not.toHaveBeenCalled();
   });
@@ -234,11 +239,7 @@ describe("status", () => {
 
     const output = "nonsense.json";
 
-    const probsUndefined = await status(
-      cwd,
-      { since: "main", output },
-      defaultConfig
-    );
+    const probsUndefined = await status(cwd, { output }, config);
 
     const releaseObj = await fs.readFile(path.join(cwd, output), "utf-8");
 
@@ -300,8 +301,8 @@ describe("status", () => {
 
     const releaseObj = await status(
       cwd,
-      { since: "main" },
-      { ...defaultConfig, changedFilePatterns: ["src/**"] }
+      {},
+      { ...config, changedFilePatterns: ["src/**"] }
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -339,11 +340,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    await status(
-      cwd,
-      { since: "main" },
-      { ...defaultConfig, changedFilePatterns: ["src/**"] }
-    );
+    await status(cwd, {}, { ...config, changedFilePatterns: ["src/**"] });
 
     expect(process.exit).toHaveBeenCalledWith(1);
   });
@@ -380,8 +377,8 @@ describe("status", () => {
 
     const releaseObj = await status(
       cwd,
-      { since: "main" },
-      { ...defaultConfig, changedFilePatterns: ["src/**"] }
+      {},
+      { ...config, changedFilePatterns: ["src/**"] }
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -460,7 +457,7 @@ describe("status", () => {
       const releaseObj = await status(
         cwd,
         { since: "long-lived-branch" },
-        defaultConfig
+        config
       );
       // Should only see the changeset added in `new-pr-branch`
       expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
