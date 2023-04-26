@@ -56,7 +56,11 @@ export default async function run(
     showNonLatestTagWarning(tag, preState);
   }
 
-  const { packages, tool } = await getPackages(cwd);
+  const { packages: allPackages, tool } = await getPackages(cwd);
+
+  const packages = allPackages.filter(
+    p => !config.ignore.includes(p.packageJson.name)
+  );
 
   const tagPrivatePackages =
     config.privatePackages && config.privatePackages.tag;
