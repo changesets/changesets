@@ -9,13 +9,11 @@ import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
 
+import { getCommitFunctions } from "../../commit/getCommitFunctions";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
-
-type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer R>
-  ? R
-  : never;
+import { isListablePackage } from "./isListablePackage";
 
 export default async function add(
   cwd: string,
@@ -23,39 +21,53 @@ export default async function add(
   config: Config
 ) {
   const packages = await getPackages(cwd);
+  if (packages.packages.length === 0) {
+    throw new Error(
+      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
+    );
+  }
+  const listablePackages = packages.packages.filter((pkg) =>
+    isListablePackage(config, pkg.packageJson)
+  );
   const changesetBase = path.resolve(cwd, ".changeset");
 
-  let newChangeset: UnwrapPromise<ReturnType<typeof createChangeset>>;
+  let newChangeset: Awaited<ReturnType<typeof createChangeset>>;
   if (empty) {
     newChangeset = {
       confirmed: true,
       releases: [],
-      summary: ``
+      summary: ``,
     };
   } else {
     const changedPackages = await git.getChangedPackagesSinceRef({
       cwd,
-      ref: config.baseBranch
+      ref: config.baseBranch,
+      changedFilePatterns: config.changedFilePatterns,
     });
-    const changePackagesName = changedPackages
-      .filter(a => a)
-      .map(pkg => pkg.packageJson.name);
-    newChangeset = await createChangeset(changePackagesName, packages.packages);
-    printConfirmationMessage(newChangeset, packages.packages.length > 1);
+    const changedPackagesName = changedPackages
+      .filter((pkg) => isListablePackage(config, pkg.packageJson))
+      .map((pkg) => pkg.packageJson.name);
+
+    newChangeset = await createChangeset(changedPackagesName, listablePackages);
+    printConfirmationMessage(newChangeset, listablePackages.length > 1);
 
     if (!newChangeset.confirmed) {
       newChangeset = {
         ...newChangeset,
-        confirmed: await cli.askConfirm("Is this your desired changeset?")
+        confirmed: await cli.askConfirm("Is this your desired changeset?"),
       };
     }
   }
 
   if (newChangeset.confirmed) {
     const changesetID = await writeChangeset(newChangeset, cwd);
-    if (config.commit) {
+    const [{ getAddMessage }, commitOpts] = getCommitFunctions(
+      config.commit,
+      cwd
+    );
+    if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
-      await git.commit(`docs(changeset): ${newChangeset.summary}`, cwd);
+      await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
       log(chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`));
     } else {
       log(
@@ -66,7 +78,7 @@ export default async function add(
     }
 
     let hasMajorChange = [...newChangeset.releases].find(
-      c => c.type === "major"
+      (c) => c.type === "major"
     );
 
     if (hasMajorChange) {
@@ -95,7 +107,7 @@ export default async function add(
         externalEditor.editor.args.concat([changesetPath]),
         {
           detached: true,
-          stdio: "inherit"
+          stdio: "inherit",
         }
       );
     }

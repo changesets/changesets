@@ -14,7 +14,7 @@ describe("parsing a changeset", () => {
     const changeset = parse(changesetMd);
     expect(changeset).toEqual({
       releases: [{ name: "cool-package", type: "minor" }],
-      summary: "Nice simple summary"
+      summary: "Nice simple summary",
     });
   });
   it("should parse major, minor, and patch changes", () => {
@@ -32,9 +32,9 @@ describe("parsing a changeset", () => {
       releases: [
         { name: "cool-package", type: "minor" },
         { name: "cool-package2", type: "major" },
-        { name: "cool-package3", type: "patch" }
+        { name: "cool-package3", type: "patch" },
       ],
-      summary: "Nice simple summary"
+      summary: "Nice simple summary",
     });
   });
   it("should parse a changeset with a scoped package", () => {
@@ -48,7 +48,7 @@ describe("parsing a changeset", () => {
     const changeset = parse(changesetMd);
     expect(changeset).toEqual({
       releases: [{ name: "@cool/package", type: "minor" }],
-      summary: "Nice simple summary"
+      summary: "Nice simple summary",
     });
   });
   it("should parse a changeset with multiline summary", () => {
@@ -72,7 +72,7 @@ describe("parsing a changeset", () => {
     const changeset = parse(changesetMd);
     expect(changeset).toEqual({
       releases: [{ name: "cool-package", type: "minor" }],
-      summary: expectedSummary
+      summary: expectedSummary,
     });
   });
   it("should parse a changeset with multiple packages and multiline summary", () => {
@@ -98,9 +98,9 @@ describe("parsing a changeset", () => {
     expect(changeset).toEqual({
       releases: [
         { name: "cool-package", type: "minor" },
-        { name: "best-package", type: "patch" }
+        { name: "best-package", type: "patch" },
       ],
-      summary: expectedSummary
+      summary: expectedSummary,
     });
   });
   it("should be fine if a packageName includes ---", () => {
@@ -114,7 +114,7 @@ describe("parsing a changeset", () => {
     const changeset = parse(changesetMd);
     expect(changeset).toEqual({
       releases: [{ name: "cool---package", type: "minor" }],
-      summary: "Nice simple summary"
+      summary: "Nice simple summary",
     });
   });
   it("should be fine if the summary body includes ---", () => {
@@ -133,7 +133,29 @@ describe("parsing a changeset", () => {
     const changeset = parse(changesetMd);
     expect(changeset).toEqual({
       releases: [{ name: "cool-package", type: "minor" }],
-      summary: expectedSummary
+      summary: expectedSummary,
+    });
+  });
+  it("should be fine if the summary body is completely empty and there is no trailing whitespace", () => {
+    const changesetMd = outdent`---
+    "cool-package": minor
+    ---`;
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "cool-package", type: "minor" }],
+      summary: "",
+    });
+  });
+  it("should be fine if there is no summary body and the frontmatter has some trailing whitespace", () => {
+    const changesetMd = outdent`---
+    "cool-package": minor
+    --- `;
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "cool-package", type: "minor" }],
+      summary: "",
     });
   });
   it("should be fine if the changeset is empty", () => {
@@ -145,7 +167,14 @@ describe("parsing a changeset", () => {
     const changeset = parse(changesetMd);
     expect(changeset).toEqual({
       releases: [],
-      summary: ""
+      summary: "",
+    });
+  });
+  it("should be fine if the changeset is empty and without any trailing whitespace", () => {
+    const changeset = parse(`---\n---`);
+    expect(changeset).toEqual({
+      releases: [],
+      summary: "",
     });
   });
   it("should be fine if the frontmatter is followed by a whitespace on the same line", () => {
@@ -161,7 +190,7 @@ describe("parsing a changeset", () => {
     const changeset = parse(changesetMd);
     expect(changeset).toEqual({
       releases: [{ name: "cool-package", type: "minor" }],
-      summary: "Nice simple summary"
+      summary: "Nice simple summary",
     });
   });
   it("should be fine when md contains Windows new lines", () => {
@@ -179,9 +208,9 @@ describe("parsing a changeset", () => {
     expect(changeset).toEqual({
       releases: [
         { name: "cool-package", type: "minor" },
-        { name: "best-package", type: "patch" }
+        { name: "best-package", type: "patch" },
       ],
-      summary: "Nice simple summary"
+      summary: "Nice simple summary",
     });
   });
   it("should throw if the frontmatter is followed by non-whitespace characters on the same line", () => {
@@ -193,11 +222,11 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-"could not parse changeset - invalid frontmatter: ---
-\\"cool-package\\": minor
----  fail
+      "could not parse changeset - invalid frontmatter: ---
+      "cool-package": minor
+      ---  fail
 
-Nice simple summary"
-`);
+      Nice simple summary"
+    `);
   });
 });

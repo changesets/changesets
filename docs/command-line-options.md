@@ -1,6 +1,6 @@
 # Command line options
 
-The command line for changesets is the main way of interracting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-changesets.md)
+The command line for changesets is the main way of interacting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-using-changesets.md)
 
 - init
 - add [--empty][--open]
@@ -18,7 +18,7 @@ The most important commands are `add`, which is used by contributors to add info
 changeset init
 ```
 
-This command sets up the .changeset folder. It generates a readme and a config file. The config file includes the default options, as well as comments on what these options represent. You should run this command once, when you are setting up changesets.
+This command sets up the .changeset folder. It generates a readme and a config file. The config file includes the default options and comments on what these options represent. You should run this command once when you are setting up changesets.
 
 ## `add`
 
@@ -34,9 +34,9 @@ changeset
 
 This is the main command people use to interact with the changesets.
 
-This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
+This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. The final step will show the changeset it will generate and confirm that you want to add it.
 
-Once confirmed, the changeset will be write a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semver bump types for them.
+Once confirmed, the changeset will be written a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semver bump types for them.
 
 A changeset that major bumps @changesets/cli would look like this:
 
@@ -72,9 +72,9 @@ If you set the commit option in the config, the command will add the updated cha
 changeset version
 ```
 
-This is one of two commands responsible for releasing packages. The version command takes changesets that have been made and updates versions and dependencies of packages, as well as writing changelogs. It is responsible for all file changes to versions before publishing to npm occurs.
+This is one of two commands responsible for releasing packages. The version command takes changesets that have been made and updates versions and dependencies of packages, as well as writing changelogs. It is responsible for all file changes to versions before publishing to npm.
 
-> We recommend making sure changes made from this commmand are merged back into the base branch before you run publish.
+> We recommend making sure changes made from this command are merged back into the base branch before you run publish.
 
 Version has two options, `ignore` and `snapshot`:
 
@@ -87,7 +87,7 @@ This command is used to allow you to skip packages from being published. This al
 1. If the package is mentioned in a changeset that also includes a package that is not ignored, publishing will fail.
 2. If the package requires one of its dependencies to be updated as part of a publish.
 
-These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos).
+These restrictions exist to ensure your repository or published code does not end up in a broken state. For additional information on the intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos.md).
 
 ```
 changeset version --snapshot
@@ -103,7 +103,7 @@ changeset publish [--otp={token}] [--tag TAGNAME] [--dry-run]
 
 This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`.
 
-Because this command assumes that last commit is the release commit you should not commit any changes between calling version and publish. These commands are separate to enable you to check if the releases changes are accurate.
+Because this command assumes that the last commit is the release commit, you should not commit any changes between calling version and publish. These commands are separate to enable you to check if the release changes are accurate.
 
 `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the --otp option.
 
@@ -113,7 +113,7 @@ Because this command assumes that last commit is the release commit you should n
 
 ### Git Tags
 
-It is useful to have git tags of a publish, to allow people looking for the code at that time to find them. We generate tags in git during publish, but you will need to push them back up if you want to make them available. We recomend after publish you run:
+It is useful to have git tags of a publish, to allow people looking for the code at that time to find them. We generate tags in git during publish, but you will need to push them back up if you want to make them available. We recommend after publish you run:
 
 ```
 git push --follow-tags
@@ -129,9 +129,9 @@ The status command provides information about the changesets that currently exis
 
 - `--verbose` - use if you want to know the new versions, and get a link to the relevant changeset summary.
 
-- `--output` - allows you to write the json object of the status out, for consumption by other tools, such as CI.
+- `--output` - allows you to write the JSON object of the status output for consumption by other tools, such as CI.
 
-- `--since` - to only display information about changesets since a specific branch or git tag (such as `main`, or the git hash of latest). While this can be used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot) to detect pull requests missing changesets, as not all pull requests need one if you are on github.
+- `--since` - to only display information about changesets since a specific branch or git tag (such as `main`, or the git hash of latest). While this can be used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot) to detect pull requests missing changesets, as not all pull requests need one if you are on GitHub.
 
 > NOTE: `status` will fail if you are in the middle of running `version` or `publish`. If you want to get changeset status at the time of a version increase and publish, you need to run it immediately before running `version`.
 
@@ -141,9 +141,9 @@ The status command provides information about the changesets that currently exis
 pre [exit|enter {tag}]
 ```
 
-The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run changeset pre enter next(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with changeset version and changeset publish. For more information about the pre command, see the prereleases [the prereleases documentation](https://github.com/atlassian/changesets/blob/master/docs/prereleases.md).
+The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a pre-release, you should run changeset pre enter next(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with changeset version and changeset publish. For more information about the pre command, see the prereleases [the prereleases documentation](https://github.com/changesets/changesets/blob/master/docs/prereleases.md).
 
-> NOTE: pre-releases are a very complicated feature. Many of the safety rails that changesets helps you with will be taken off. We recommend that you have read both [problems publishing in monorepos](./problems-publishing-in-monorepos) as well as be clear on both exiting and entereing pre-releases before using it. You may also prefer using [snapshot releases](./snapshot-releases.md) for a slightly less involved process.
+> NOTE: pre-releases are a very complicated feature. Many of the safety rails that changesets helps you with will be taken off. We recommend that you read both [problems publishing in monorepos](./problems-publishing-in-monorepos.md) and be clear on both exiting and entering pre-releases before using it. You may also prefer using [snapshot releases](./snapshot-releases.md) for a slightly less involved process.
 
 ## tag
 
@@ -155,4 +155,4 @@ The tag command creates git tags for the current version of all packages. The ta
 
 This is helpful in situations where a different tool, such as `pnpm publish -r`, is used to publish packages instead of changeset. For situations where `changeset publish` is executed, running `changeset tag` is not needed.
 
-The git tags in monorepos are created in the format `pkg-name@version-number` and are based on the current version number of the `package.json` for each package. Note that in single-package repositories, the git tag will include `v` before the version number, for example `v1.0.0`. It is expected that [`changeset version`](#version) is run before `changeset tag`, so that the `package.json` versions are updated before the git tags are created.
+The git tags in monorepos are created in the format `pkg-name@version-number` and are based on the current version number of the `package.json` for each package. Note that in single-package repositories, the git tag will include `v` before the version number, for example, `v1.0.0`. It is expected that [`changeset version`](#version) is run before `changeset tag`, so the `package.json` versions are updated before the git tags are created.

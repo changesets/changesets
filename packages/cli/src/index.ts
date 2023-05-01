@@ -7,65 +7,75 @@ import { run } from "./run";
 const { input, flags } = meow(
   `
   Usage
-    $ changesets [command]
+    $ changeset [command]
   Commands
     init
     add [--empty] [--open]
-    version [--ignore]
-    publish [--otp=code] [--tag TAGNAME] [--dry-run]
-    status [--since <branch>] [--verbose] [--output=JSON_FILE.json]
+    version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
+    publish [--tag <name>] [--otp <code>] [--no-git-tag] [--dry-run]
+    status [--since <branch>] [--verbose] [--output JSON_FILE.json]
     pre <enter|exit> <tag>
     tag
     `,
   {
     flags: {
       sinceMaster: {
-        type: "boolean"
+        type: "boolean",
       },
       verbose: {
         type: "boolean",
-        alias: "v"
+        alias: "v",
       },
       output: {
         type: "string",
-        alias: "o"
+        alias: "o",
       },
       otp: {
-        type: "string"
+        type: "string",
       },
       empty: {
-        type: "boolean"
+        type: "boolean",
       },
       since: {
-        type: "string"
+        type: "string",
       },
       ignore: {
         type: "string",
-        isMultiple: true
+        isMultiple: true,
       },
       tag: {
-        type: "string"
+        type: "string",
       },
       open: {
-        type: "boolean"
+        type: "boolean",
+      },
+      gitTag: {
+        type: "boolean",
+        default: true,
+      },
+      snapshotPrereleaseTemplate: {
+        type: "string",
       },
       dryRun: {
-        type: "boolean"
-      }
-    }
+        type: "boolean",
+      },
+      // mixed type like this is not supported by `meow`
+      // if it gets passed explicitly then it's still available on the flags with an inferred type though
+      // snapshot: { type: "boolean" | "string" },
+    },
   }
 );
 
 const cwd = process.cwd();
 
-run(input, flags, cwd).catch(err => {
+run(input, flags, cwd).catch((err) => {
   if (err instanceof InternalError) {
     error(
       "The following error is an internal unexpected error, these should never happen."
     );
     error("Please open an issue with the following link");
     error(
-      `https://github.com/atlassian/changesets/issues/new?title=${encodeURIComponent(
+      `https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(
         `Unexpected error during ${input[0] || "add"} command`
       )}&body=${encodeURIComponent(`## Error
 

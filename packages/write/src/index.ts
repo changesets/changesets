@@ -4,6 +4,17 @@ import prettier from "prettier";
 import humanId from "human-id";
 import { Changeset } from "@changesets/types";
 
+function getPrettierInstance(cwd: string): typeof prettier {
+  try {
+    return require(require.resolve("prettier", { paths: [cwd] }));
+  } catch (err) {
+    if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
+      throw err;
+    }
+    return prettier;
+  }
+}
+
 async function writeChangeset(
   changeset: Changeset,
   cwd: string
@@ -16,10 +27,11 @@ async function writeChangeset(
   // experimenting with human readable ids to make finding changesets easier
   const changesetID = humanId({
     separator: "-",
-    capitalize: false
+    capitalize: false,
   });
 
-  const prettierConfig = await prettier.resolveConfig(cwd);
+  const prettierInstance = getPrettierInstance(cwd);
+  const prettierConfig = await prettierInstance.resolveConfig(cwd);
 
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
@@ -27,17 +39,18 @@ async function writeChangeset(
   // not spec for yaml. This is because package names can contain special
   // characters that will otherwise break the parsing step
   const changesetContents = `---
-${releases.map(release => `"${release.name}": ${release.type}`).join("\n")}
+${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
 ---
 
 ${summary}
   `;
 
-  await fs.writeFile(
+  await fs.outputFile(
     newChangesetPath,
-    prettier.format(changesetContents, {
+    // Prettier v3 returns a promise
+    await prettierInstance.format(changesetContents, {
       ...prettierConfig,
-      parser: "markdown"
+      parser: "markdown",
     })
   );
 

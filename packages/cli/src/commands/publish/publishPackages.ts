@@ -7,7 +7,7 @@ import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
 import * as npmUtils from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
-import isCI from "../../utils/isCI";
+import isCI from "is-ci";
 
 type PublishedState = "never" | "published" | "only-pre";
 
@@ -18,7 +18,7 @@ type PkgInfo = {
   publishedVersions: string[];
 };
 
-type PublishedResult = {
+export type PublishedResult = {
   name: string;
   newVersion: string;
   published: boolean;
@@ -41,7 +41,7 @@ const isCustomRegistry = (registry?: string): boolean =>
 
 const getTwoFactorState = ({
   otp,
-  publicPackages
+  publicPackages,
 }: {
   otp?: string;
   publicPackages: Package[];
@@ -49,27 +49,27 @@ const getTwoFactorState = ({
   if (otp) {
     return {
       token: otp,
-      isRequired: Promise.resolve(true)
+      isRequired: Promise.resolve(true),
     };
   }
 
   if (
     isCI ||
-    publicPackages.some(pkg =>
+    publicPackages.some((pkg) =>
       isCustomRegistry(pkg.packageJson.publishConfig?.registry)
     ) ||
     isCustomRegistry(process.env.npm_config_registry)
   ) {
     return {
       token: null,
-      isRequired: Promise.resolve(false)
+      isRequired: Promise.resolve(false),
     };
   }
 
   return {
     token: null,
     // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
-    isRequired: npmUtils.getTokenIsRequired()
+    isRequired: npmUtils.getTokenIsRequired(),
   };
 };
 
@@ -79,7 +79,7 @@ export default async function publishPackages({
   otp,
   preState,
   tag,
-  dryRun = false
+  dryRun = false,
 }: {
   packages: Package[];
   access: AccessType;
@@ -88,30 +88,31 @@ export default async function publishPackages({
   tag?: string;
   dryRun?: boolean;
 }) {
-  const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]));
-  const publicPackages = packages.filter(pkg => !pkg.packageJson.private);
-  const twoFactorState: TwoFactorState = getTwoFactorState({
-    otp,
-    publicPackages
-  });
+  const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
+  const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
     preState
   );
 
   if (unpublishedPackagesInfo.length === 0) {
-    warn("No unpublished packages to publish");
+    return [];
   }
 
+  const twoFactorState: TwoFactorState = getTwoFactorState({
+    otp,
+    publicPackages,
+  });
+
   return Promise.all(
-    unpublishedPackagesInfo.map(pkgInfo => {
+    unpublishedPackagesInfo.map((pkgInfo) => {
       let pkg = packagesByName.get(pkgInfo.name)!;
       return publishAPackage({
         pkg,
         access,
         twoFactorState,
         tag: getReleaseTag(pkgInfo, preState, tag),
-        dryRun
+        dryRun,
       });
     })
   );
@@ -122,7 +123,7 @@ async function publishAPackage({
   access,
   twoFactorState,
   tag,
-  dryRun
+  dryRun,
 }: {
   pkg: Package;
   access: AccessType;
@@ -131,22 +132,20 @@ async function publishAPackage({
   dryRun: boolean;
 }): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-  const localAccess = publishConfig?.access;
   info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
   );
 
-  const publishDir = publishConfig?.directory
-    ? join(pkg.dir, publishConfig.directory)
-    : pkg.dir;
-
   const publishConfirmation = await npmUtils.publish(
     name,
     {
-      cwd: publishDir,
-      access: localAccess || access,
+      cwd: pkg.dir,
+      publishDir: publishConfig?.directory
+        ? join(pkg.dir, publishConfig.directory)
+        : pkg.dir,
+      access: publishConfig?.access || access,
       tag,
-      dryRun
+      dryRun,
     },
     twoFactorState
   );
@@ -154,7 +153,7 @@ async function publishAPackage({
   return {
     name,
     newVersion: version,
-    published: publishConfirmation.published
+    published: publishConfirmation.published,
   };
 }
 
@@ -184,8 +183,8 @@ async function getUnpublishedPackages(
       return {
         name: packageJson.name,
         localVersion: packageJson.version,
-        publishedState: publishedState,
-        publishedVersions: response.pkgInfo.versions || []
+        publishedState,
+        publishedVersions: response.pkgInfo.versions || [],
       };
     })
   );

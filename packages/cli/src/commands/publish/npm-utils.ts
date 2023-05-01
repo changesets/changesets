@@ -1,14 +1,23 @@
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
-import { PackageJSON } from "@changesets/types";
+import { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
 import preferredPM from "preferred-pm";
 import chalk from "chalk";
 import spawn from "spawndamnit";
 import semver from "semver";
 import { askQuestion } from "../../utils/cli-utilities";
-import isCI from "../../utils/isCI";
+import isCI from "is-ci";
 import { TwoFactorState } from "../../utils/types";
+import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
+
+interface PublishOptions {
+  cwd: string;
+  publishDir: string;
+  access: AccessType;
+  tag: string;
+  dryRun: boolean;
+}
 
 const npmRequestLimit = pLimit(40);
 const npmPublishLimit = pLimit(10);
@@ -45,12 +54,12 @@ async function getPublishTool(
     return {
       name: "pnpm",
       shouldAddNoGitChecks:
-        parsed?.major === undefined ? false : parsed.major >= 5
+        parsed?.major === undefined ? false : parsed.major >= 5,
     };
   } catch (e) {
     return {
       name: "pnpm",
-      shouldAddNoGitChecks: false
+      shouldAddNoGitChecks: false,
     };
   }
 }
@@ -59,11 +68,18 @@ export async function getTokenIsRequired() {
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry()
+    npm_config_registry: getCorrectRegistry(),
   };
   let result = await spawn("npm", ["profile", "get", "--json"], {
-    env: Object.assign({}, process.env, envOverride)
+    env: Object.assign({}, process.env, envOverride),
   });
+  if (result.code !== 0) {
+    error(
+      "error while checking if token is required",
+      result.stderr.toString().trim() || result.stdout.toString().trim()
+    );
+    return false;
+  }
   let json = jsonParse(result.stdout.toString());
   if (json.error || !json.tfa || !json.tfa.mode) {
     return false;
@@ -86,16 +102,16 @@ export function getPackageInfo(packageJson: PackageJSON) {
       packageJson.name,
       "--registry",
       getCorrectRegistry(packageJson),
-      "--json"
+      "--json",
     ]);
 
     // Github package registry returns empty string when calling npm info
-    // for a non-existant package instead of a E404
+    // for a non-existent package instead of a E404
     if (result.stdout.toString() === "") {
       return {
         error: {
-          code: "E404"
-        }
+          code: "E404",
+        },
       };
     }
     return jsonParse(result.stdout.toString());
@@ -147,12 +163,13 @@ export let getOtpCode = async (twoFactorState: TwoFactorState) => {
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
   pkgName: string,
-  opts: { cwd: string; access?: string; tag: string; dryRun: boolean },
+  opts: PublishOptions,
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   let publishTool = await getPublishTool(opts.cwd);
   let publishFlags = opts.access ? ["--access", opts.access] : [];
   publishFlags.push("--tag", opts.tag);
+
   if ((await twoFactorState.isRequired) && !isCI) {
     let otpCode = await getOtpCode(twoFactorState);
     publishFlags.push("--otp", otpCode);
@@ -167,42 +184,55 @@ async function internalPublish(
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry()
+    npm_config_registry: getCorrectRegistry(),
   };
-  let { stdout } = await spawn(
-    publishTool.name,
-    ["publish", opts.cwd, "--json", ...publishFlags],
-    {
-      env: Object.assign({}, process.env, envOverride)
-    }
-  );
-  // New error handling. NPM's --json option is included alongside the `prepublish and
-  // `postpublish` contents in terminal. We want to handle this as best we can but it has
-  // some struggles
-  // Note that both pre and post publish hooks are printed before the json out, so this works.
-  let json = jsonParse(stdout.toString().replace(/[^{]*/, ""));
+  let { code, stdout, stderr } =
+    publishTool.name === "pnpm"
+      ? await spawn("pnpm", ["publish", "--json", ...publishFlags], {
+          env: Object.assign({}, process.env, envOverride),
+          cwd: opts.cwd,
+        })
+      : await spawn(
+          publishTool.name,
+          ["publish", opts.publishDir, "--json", ...publishFlags],
+          {
+            env: Object.assign({}, process.env, envOverride),
+          }
+        );
+  if (code !== 0) {
+    // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
+    // We want to handle this as best we can but it has some struggles:
+    // - output of those lifecycle scripts can contain JSON
+    // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
+    // Note that the `--json` output is always printed at the end so this should work
+    let json =
+      getLastJsonObjectFromString(stderr.toString()) ||
+      getLastJsonObjectFromString(stdout.toString());
 
-  if (json.error) {
-    // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
-    if (
-      (json.error.code === "EOTP" ||
-        (json.error.code === "E401" &&
-          json.error.detail.includes("--otp=<code>"))) &&
-      !isCI
-    ) {
-      if (twoFactorState.token !== null) {
-        // the current otp code must be invalid since it errored
-        twoFactorState.token = null;
+    if (json?.error) {
+      // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
+      if (
+        (json.error.code === "EOTP" ||
+          (json.error.code === "E401" &&
+            json.error.detail.includes("--otp=<code>"))) &&
+        !isCI
+      ) {
+        if (twoFactorState.token !== null) {
+          // the current otp code must be invalid since it errored
+          twoFactorState.token = null;
+        }
+        // just in case this isn't already true
+        twoFactorState.isRequired = Promise.resolve(true);
+        return internalPublish(pkgName, opts, twoFactorState);
       }
-      // just in case this isn't already true
-      twoFactorState.isRequired = Promise.resolve(true);
-      return internalPublish(pkgName, opts, twoFactorState);
+      error(
+        `an error occurred while publishing ${pkgName}: ${json.error.code}`,
+        json.error.summary,
+        json.error.detail ? "\n" + json.error.detail : ""
+      );
     }
-    error(
-      `an error occurred while publishing ${pkgName}: ${json.error.code}`,
-      json.error.summary,
-      json.error.detail ? "\n" + json.error.detail : ""
-    );
+
+    error(stderr.toString() || stdout.toString());
     return { published: false };
   }
   return { published: true };
@@ -210,7 +240,7 @@ async function internalPublish(
 
 export function publish(
   pkgName: string,
-  opts: { cwd: string; access?: string; tag: string; dryRun: boolean },
+  opts: PublishOptions,
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   // If there are many packages to be published, it's better to limit the

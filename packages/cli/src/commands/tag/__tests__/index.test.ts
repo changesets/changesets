@@ -1,22 +1,32 @@
-import fixtures from "fixturez";
-import { temporarilySilenceLogs } from "../../../../../test-utils/src";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import * as git from "@changesets/git";
 import tag from "../index";
-
-const f = fixtures(__dirname);
 
 jest.mock("@changesets/git");
 
 describe("tag command", () => {
-  temporarilySilenceLogs();
-  let cwd: string;
+  silenceLogsInBlock();
 
   describe("workspace project", () => {
-    beforeEach(async () => {
-      cwd = await f.copy("simple-project");
-    });
-
     it("tags all packages", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+
       (git.getAllTags as jest.Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
@@ -27,10 +37,28 @@ describe("tag command", () => {
     });
 
     it("skips tags that already exist", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+
       (git.getAllTags as jest.Mock).mockReturnValue(
         new Set([
           // pkg-a should not be re-tagged
-          "pkg-a@1.0.0"
+          "pkg-a@1.0.0",
         ])
       );
 
@@ -42,11 +70,14 @@ describe("tag command", () => {
   });
 
   describe("single package repo", () => {
-    beforeEach(async () => {
-      cwd = await f.copy("root-only");
-    });
-
     it("uses a simplified version-only tag", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          name: "root-only",
+          version: "1.0.0",
+        }),
+      });
       (git.getAllTags as jest.Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();

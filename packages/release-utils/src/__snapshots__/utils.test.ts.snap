@@ -1,18 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it sorts the things right 1`] = `
-Array [
-  Object {
+[
+  {
     "highestLevel": 3,
     "name": "c",
     "private": false,
   },
-  Object {
+  {
     "highestLevel": 1,
     "name": "b",
     "private": false,
   },
-  Object {
+  {
     "highestLevel": 3,
     "name": "a",
     "private": true,

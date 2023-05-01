@@ -13,8 +13,9 @@
     "no-template-curly-in-string": "off",
     "camelcase": "off",
     "import/no-duplicates": "off",
-    "no-useless-constructor": "off",
     "no-unusued-vars": "off",
+    "no-use-before-define": "off",
+    "no-useless-constructor": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       { "argsIgnorePattern": "^_", "ignoreRestSiblings": true }
