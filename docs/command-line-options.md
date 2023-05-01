@@ -109,7 +109,7 @@ Because this command assumes that last commit is the release commit you should n
 
 `--tag TAGNAME` - for packages that are published, the chosen tag will be used instead of `latest`, allowing you to publish changes intended for testing and validation, not main consumption. This will most likely be used with [snapshot releases](./snapshot-releases.md).
 
-`--dry-run` - simulates publishing npm packages without actually publishing them to the npm registry.
+`--dry-run` - simulates publishing npm packages without actually publishing them to the registry.
 
 ### Git Tags
 
