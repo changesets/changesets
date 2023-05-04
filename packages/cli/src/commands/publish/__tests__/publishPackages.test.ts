@@ -7,13 +7,8 @@ import { jest } from "@jest/globals";
 jest.mock("../npm-utils");
 jest.mock("is-ci", () => true);
 
-type Info404Mock = jest.MockedFunction<
-  () => ReturnType<typeof npmUtils.infoAllow404>
->;
-
-type PublishMock = jest.MockedFunction<
-  () => ReturnType<typeof npmUtils.publish>
->;
+type Info404Mock = jest.MockedFunction<typeof npmUtils.infoAllow404>;
+type PublishMock = jest.MockedFunction<typeof npmUtils.publish>;
 
 describe("publishPackages", () => {
   let cwd: string;
