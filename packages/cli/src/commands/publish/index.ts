@@ -103,7 +103,12 @@ export default async function run(
       // fail if we are behind the base branch).
       log(`Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`);
 
-      await tagPublish(tool, successfulNpmPublishes, cwd);
+      await tagPublish({
+        tool,
+        packageReleases: successfulNpmPublishes,
+        cwd,
+        dryRun,
+      });
     }
   }
 
@@ -111,7 +116,12 @@ export default async function run(
     success("found untagged projects:");
     logReleases(untaggedPrivatePackageReleases);
 
-    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
+    await tagPublish({
+      tool,
+      packageReleases: untaggedPrivatePackageReleases,
+      cwd,
+      dryRun,
+    });
   }
 
   if (unsuccessfulNpmPublishes.length > 0) {
@@ -122,20 +132,32 @@ export default async function run(
   }
 }
 
-async function tagPublish(
-  tool: string,
-  packageReleases: PublishedResult[],
-  cwd: string
-) {
+async function tagPublish({
+  tool,
+  packageReleases,
+  cwd,
+  dryRun,
+}: {
+  tool: string;
+  packageReleases: PublishedResult[];
+  cwd: string;
+  dryRun?: boolean;
+}) {
   if (tool !== "root") {
     for (const pkg of packageReleases) {
       const tag = `${pkg.name}@${pkg.newVersion}`;
       log("New tag: ", tag);
-      await git.tag(tag, cwd);
+
+      if (!dryRun) {
+        await git.tag(tag, cwd);
+      }
     }
   } else {
     const tag = `v${packageReleases[0].newVersion}`;
     log("New tag: ", tag);
-    await git.tag(tag, cwd);
+
+    if (!dryRun) {
+      await git.tag(tag, cwd);
+    }
   }
 }
