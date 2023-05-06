@@ -72,7 +72,7 @@ I now have another changeset with a major for `pkg-a` and I do a release, the re
 
 ## Using glob expressions
 
-Sometimes you want to link many or all packages within your project (for example in a monorepository setup), in which case you would need to keep the list of linked packages up-to-date.
+Sometimes you want to link many or all packages within your project (for example in a monorepo setup), in which case you would need to keep the list of linked packages up-to-date.
 
 To make it simpler to maintain that list, you can provide glob expressions in the linked list that would match and resolve all the packages you wish to include.
 
