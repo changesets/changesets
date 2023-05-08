@@ -51,6 +51,7 @@ class FakeReleasePlan {
       baseBranch: "main",
       updateInternalDependencies: "patch",
       ignore: [],
+      bumpVersionsWithWorkspaceProtocolOnly: false,
       privatePackages: { version: true, tag: false },
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -93,6 +94,7 @@ async function testSetup(
       changedFilePatterns: ["**"],
       baseBranch: "main",
       updateInternalDependencies: "patch",
+      bumpVersionsWithWorkspaceProtocolOnly: false,
       ignore: [],
       privatePackages: { version: true, tag: false },
       snapshot: {
@@ -665,6 +667,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
+          bumpVersionsWithWorkspaceProtocolOnly: false,
           privatePackages: { version: true, tag: false },
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -741,6 +744,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
+          bumpVersionsWithWorkspaceProtocolOnly: false,
           privatePackages: { version: true, tag: false },
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -999,6 +1003,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              bumpVersionsWithWorkspaceProtocolOnly: false,
               ignore: [],
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1115,6 +1120,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              bumpVersionsWithWorkspaceProtocolOnly: false,
               ignore: [],
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1216,6 +1222,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              bumpVersionsWithWorkspaceProtocolOnly: false,
               ignore: [],
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1316,6 +1323,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              bumpVersionsWithWorkspaceProtocolOnly: false,
               ignore: [],
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1419,6 +1427,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              bumpVersionsWithWorkspaceProtocolOnly: false,
               ignore: [],
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1535,6 +1544,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              bumpVersionsWithWorkspaceProtocolOnly: false,
               ignore: [],
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1644,6 +1654,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              bumpVersionsWithWorkspaceProtocolOnly: false,
               ignore: [],
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1744,6 +1755,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              bumpVersionsWithWorkspaceProtocolOnly: false,
               ignore: [],
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1845,6 +1857,7 @@ describe("apply release plan", () => {
             changedFilePatterns: ["**"],
             baseBranch: "main",
             updateInternalDependencies: "patch",
+            bumpVersionsWithWorkspaceProtocolOnly: false,
             ignore: [],
             privatePackages: { version: true, tag: false },
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -2077,6 +2090,7 @@ describe("apply release plan", () => {
             null,
           ],
           updateInternalDependencies: "patch",
+          bumpVersionsWithWorkspaceProtocolOnly: false,
           ignore: [],
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -2215,6 +2229,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "patch",
+          bumpVersionsWithWorkspaceProtocolOnly: false,
           ignore: [],
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -2324,6 +2339,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "minor",
+          bumpVersionsWithWorkspaceProtocolOnly: false,
           ignore: [],
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -2445,6 +2461,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "minor",
+          bumpVersionsWithWorkspaceProtocolOnly: false,
           ignore: [],
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -2580,6 +2597,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "minor",
+          bumpVersionsWithWorkspaceProtocolOnly: false,
           ignore: [],
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {

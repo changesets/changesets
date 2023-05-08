@@ -40,8 +40,7 @@ export default function determineDependents({
 
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
-    const nextRelease = pkgsToSearch.shift();
-    if (!nextRelease) continue;
+    const nextRelease = pkgsToSearch.shift()!;
     // pkgDependents will be a list of packages that depend on nextRelease ie. ['avatar-group', 'comment']
     const pkgDependents = dependencyGraph.get(nextRelease.name);
     if (!pkgDependents) {
@@ -61,7 +60,8 @@ export default function determineDependents({
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(
             dependentPackage.packageJson,
-            nextRelease
+            nextRelease,
+            config
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
@@ -113,7 +113,7 @@ export default function determineDependents({
             }
           }
         }
-        if (releases.has(dependent) && releases.get(dependent)!.type === type) {
+        if (releases.get(dependent)?.type === type) {
           type = undefined;
         }
         return {
@@ -133,10 +133,6 @@ export default function determineDependents({
         updated = true;
 
         const existing = releases.get(name);
-        // For things that are being given a major bump, we check if we have already
-        // added them here. If we have, we update the existing item instead of pushing it on to search.
-        // It is safe to not add it to pkgsToSearch because it should have already been searched at the
-        // largest possible bump type.
 
         if (existing && type === "major" && existing.type !== "major") {
           existing.type = "major";
@@ -166,7 +162,10 @@ export default function determineDependents({
 */
 function getDependencyVersionRanges(
   dependentPkgJSON: PackageJSON,
-  dependencyRelease: InternalRelease
+  dependencyRelease: InternalRelease,
+  {
+    bumpVersionsWithWorkspaceProtocolOnly,
+  }: { bumpVersionsWithWorkspaceProtocolOnly: boolean }
 ): {
   depType: DependencyType;
   versionRange: string;
@@ -183,18 +182,30 @@ function getDependencyVersionRanges(
   }[] = [];
   for (const type of DEPENDENCY_TYPES) {
     const versionRange = dependentPkgJSON[type]?.[dependencyRelease.name];
-    if (!versionRange) continue;
+    if (!versionRange || /^(file|link):/.test(versionRange)) {
+      continue;
+    }
 
-    if (versionRange.startsWith("workspace:")) {
+    const workspaceRange = versionRange.startsWith("workspace:")
+      ? versionRange.replace(/^workspace:/, "")
+      : null;
+
+    if (!workspaceRange && bumpVersionsWithWorkspaceProtocolOnly) {
+      continue;
+    }
+
+    if (workspaceRange) {
       dependencyVersionRanges.push({
         depType: type,
         versionRange:
-          // intentionally keep other workspace ranges untouched
-          // this has to be fixed but this should only be done when adding appropriate tests
-          versionRange === "workspace:*"
-            ? // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
-              dependencyRelease.oldVersion
-            : versionRange.replace(/^workspace:/, ""),
+          // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
+          workspaceRange === "*" ||
+          // workspace:path/to/baz means the current exact version too
+          workspaceRange.includes("/")
+            ? dependencyRelease.oldVersion
+            : workspaceRange === "^" || workspaceRange === "~"
+            ? `${workspaceRange}${dependencyRelease.oldVersion}`
+            : workspaceRange,
       });
     } else {
       dependencyVersionRanges.push({

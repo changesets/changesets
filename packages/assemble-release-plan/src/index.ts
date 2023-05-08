@@ -176,13 +176,11 @@ function assembleReleasePlan(
     refinedConfig.ignore
   );
 
-  let dependencyGraph = getDependentsGraph(packages, {
-    bumpVersionsWithWorkspaceProtocolOnly:
-      refinedConfig.bumpVersionsWithWorkspaceProtocolOnly,
-  });
+  let dependencyGraph = getDependentsGraph(packages, refinedConfig);
 
   let releasesValidated = false;
-  while (releasesValidated === false) {
+
+  while (!releasesValidated) {
     // The map passed in to determineDependents will be mutated
     let dependentAdded = determineDependents({
       releases,

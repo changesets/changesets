@@ -1038,7 +1038,7 @@ describe("workspace range", () => {
     ]);
   });
 
-  it("should bump dependent package when bumping a `workspace:^` dependency", async () => {
+  it("should not bump dependent package when patch bumping a `workspace:^` dependency", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -1070,7 +1070,7 @@ describe("workspace range", () => {
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
-        version: "1.0.1",
+        version: "1.0.0",
         dependencies: {
           "pkg-b": "workspace:^",
         },
@@ -1078,6 +1078,50 @@ describe("workspace range", () => {
       {
         name: "pkg-b",
         version: "1.0.1",
+      },
+    ]);
+  });
+
+  it("should bump dependent package when major bumping a `workspace:^` dependency", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:^",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary for the change",
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.1",
+        dependencies: {
+          "pkg-b": "workspace:^",
+        },
+      },
+      {
+        name: "pkg-b",
+        version: "2.0.0",
       },
     ]);
   });
