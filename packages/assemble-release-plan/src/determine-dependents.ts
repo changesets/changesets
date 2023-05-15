@@ -101,16 +101,6 @@ export default function determineDependents({
                   }
                   break;
                 case "devDependencies": {
-                  if (config.bumpOnDevDependencies.length) {
-                    console.log(
-                      nextRelease.name,
-                      micromatch(
-                        [nextRelease.name],
-                        config.bumpOnDevDependencies
-                      )
-                    );
-                  }
-
                   if (
                     config.bumpOnDevDependencies.length > 0 &&
                     micromatch([nextRelease.name], config.bumpOnDevDependencies)
