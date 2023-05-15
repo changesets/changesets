@@ -6,6 +6,7 @@ import {
   Config,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
+import micromatch from "micromatch";
 import { InternalRelease, PreInfo } from "./types";
 import { incrementVersion } from "./increment";
 
@@ -100,6 +101,27 @@ export default function determineDependents({
                   }
                   break;
                 case "devDependencies": {
+                  if (config.bumpOnDevDependencies.length) {
+                    console.log(
+                      nextRelease.name,
+                      micromatch(
+                        [nextRelease.name],
+                        config.bumpOnDevDependencies
+                      )
+                    );
+                  }
+
+                  if (
+                    config.bumpOnDevDependencies.length > 0 &&
+                    micromatch([nextRelease.name], config.bumpOnDevDependencies)
+                      .length > 0
+                  ) {
+                    if (type !== "major" && type !== "minor") {
+                      type = "patch";
+                    }
+                    break;
+                  }
+
                   // We don't need a version bump if the package is only in the devDependencies of the dependent package
                   if (
                     type !== "major" &&

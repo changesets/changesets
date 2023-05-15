@@ -12,6 +12,7 @@
     "@changesets/get-dependents-graph": "^1.3.5",
     "@changesets/types": "^5.2.1",
     "@manypkg/get-packages": "^1.1.3",
+    "micromatch": "^4.0.2",
     "semver": "^5.4.1"
   },
   "devDependencies": {
