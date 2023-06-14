@@ -5,16 +5,16 @@ import { NewChangeset, ReleasePlan } from "@changesets/types";
 const simpleChangeset: NewChangeset = {
   summary: "This is a summary",
   releases: [{ name: "package-a", type: "minor" }],
-  id: "abc123xy"
+  id: "abc123xy",
 };
 
 const simpleChangeset2: NewChangeset = {
   summary: "This is another summary",
   releases: [
     { name: "package-a", type: "patch" },
-    { name: "package-b", type: "minor" }
+    { name: "package-b", type: "minor" },
   ],
-  id: "abc123fh"
+  id: "abc123fh",
 };
 
 let simpleReleasePlan: ReleasePlan = {
@@ -25,10 +25,10 @@ let simpleReleasePlan: ReleasePlan = {
       type: "minor",
       oldVersion: "1.0.0",
       newVersion: "1.1.0",
-      changesets: [simpleChangeset.id]
-    }
+      changesets: [simpleChangeset.id],
+    },
   ],
-  preState: undefined
+  preState: undefined,
 };
 
 let secondReleasePlan: ReleasePlan = {
@@ -39,17 +39,17 @@ let secondReleasePlan: ReleasePlan = {
       type: "minor",
       oldVersion: "1.0.0",
       newVersion: "1.1.0",
-      changesets: [simpleChangeset.id]
+      changesets: [simpleChangeset.id],
     },
     {
       name: "package-b",
       type: "minor",
       oldVersion: "1.0.0",
       newVersion: "1.1.0",
-      changesets: [simpleChangeset2.id]
-    }
+      changesets: [simpleChangeset2.id],
+    },
   ],
-  preState: undefined
+  preState: undefined,
 };
 
 describe("defaultCommitFunctions", () => {
@@ -62,9 +62,9 @@ describe("defaultCommitFunctions", () => {
         releases: [
           {
             name: "package-a",
-            type: "minor"
-          }
-        ]
+            type: "minor",
+          },
+        ],
       },
       { skipCI: "version" }
     );
@@ -78,9 +78,9 @@ describe("defaultCommitFunctions", () => {
         releases: [
           {
             name: "package-a",
-            type: "minor"
-          }
-        ]
+            type: "minor",
+          },
+        ],
       },
       { skipCI: "add" }
     );
@@ -94,7 +94,7 @@ describe("defaultCommitFunctions", () => {
 
   it("should handle a single simple releaseObject with one released package - skipCI", async () => {
     const commitStr = await getVersionMessage(simpleReleasePlan, {
-      skipCI: "version"
+      skipCI: "version",
     });
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)
@@ -109,7 +109,7 @@ describe("defaultCommitFunctions", () => {
 
   it("should handle a single simple releaseObject with one released package", async () => {
     const commitStr = await getVersionMessage(simpleReleasePlan, {
-      skipCI: false
+      skipCI: false,
     });
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 1 package(s)
@@ -129,20 +129,20 @@ describe("defaultCommitFunctions", () => {
           type: "patch",
           oldVersion: "1.0.0",
           newVersion: "1.0.1",
-          changesets: [simpleChangeset.id]
+          changesets: [simpleChangeset.id],
         },
         {
           name: "package-b",
           type: "minor",
           oldVersion: "1.0.0",
           newVersion: "1.1.0",
-          changesets: [simpleChangeset2.id]
-        }
+          changesets: [simpleChangeset2.id],
+        },
       ],
-      preState: undefined
+      preState: undefined,
     };
     const commitStr = await getVersionMessage(releasePlan, {
-      skipCI: "version"
+      skipCI: "version",
     });
     expect(commitStr).toEqual(outdent`
       RELEASING: Releasing 2 package(s)
@@ -158,7 +158,7 @@ describe("defaultCommitFunctions", () => {
 
   it("should handle a merging releases from multiple changesets", async () => {
     const commitStr = await getVersionMessage(secondReleasePlan, {
-      skipCI: "version"
+      skipCI: "version",
     });
 
     expect(commitStr).toEqual(outdent`
@@ -182,9 +182,9 @@ describe("defaultCommitFunctions", () => {
             summary: "Hey, let's have fun with testing!",
             releases: [
               { name: "pkg-a", type: "none" },
-              { name: "pkg-b", type: "minor" }
-            ]
-          }
+              { name: "pkg-b", type: "minor" },
+            ],
+          },
         ],
         releases: [
           {
@@ -192,17 +192,17 @@ describe("defaultCommitFunctions", () => {
             type: "none",
             oldVersion: "1.0.0",
             newVersion: "1.0.0",
-            changesets: ["quick-lions-devour"]
+            changesets: ["quick-lions-devour"],
           },
           {
             name: "pkg-b",
             type: "minor",
             oldVersion: "1.0.0",
             newVersion: "1.1.0",
-            changesets: ["quick-lions-devour"]
-          }
+            changesets: ["quick-lions-devour"],
+          },
         ],
-        preState: undefined
+        preState: undefined,
       },
       { skipCI: "version" }
     );

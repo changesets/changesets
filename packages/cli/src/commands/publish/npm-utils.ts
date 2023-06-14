@@ -1,6 +1,6 @@
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
-import { PackageJSON } from "@changesets/types";
+import { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
 import preferredPM from "preferred-pm";
 import chalk from "chalk";
@@ -10,6 +10,13 @@ import { askQuestion } from "../../utils/cli-utilities";
 import isCI from "is-ci";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
+
+interface PublishOptions {
+  cwd: string;
+  publishDir: string;
+  access: AccessType;
+  tag: string;
+}
 
 const npmRequestLimit = pLimit(40);
 const npmPublishLimit = pLimit(10);
@@ -46,12 +53,12 @@ async function getPublishTool(
     return {
       name: "pnpm",
       shouldAddNoGitChecks:
-        parsed?.major === undefined ? false : parsed.major >= 5
+        parsed?.major === undefined ? false : parsed.major >= 5,
     };
   } catch (e) {
     return {
       name: "pnpm",
-      shouldAddNoGitChecks: false
+      shouldAddNoGitChecks: false,
     };
   }
 }
@@ -60,10 +67,10 @@ export async function getTokenIsRequired() {
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry()
+    npm_config_registry: getCorrectRegistry(),
   };
   let result = await spawn("npm", ["profile", "get", "--json"], {
-    env: Object.assign({}, process.env, envOverride)
+    env: Object.assign({}, process.env, envOverride),
   });
   if (result.code !== 0) {
     error(
@@ -94,7 +101,7 @@ export function getPackageInfo(packageJson: PackageJSON) {
       packageJson.name,
       "--registry",
       getCorrectRegistry(packageJson),
-      "--json"
+      "--json",
     ]);
 
     // Github package registry returns empty string when calling npm info
@@ -102,8 +109,8 @@ export function getPackageInfo(packageJson: PackageJSON) {
     if (result.stdout.toString() === "") {
       return {
         error: {
-          code: "E404"
-        }
+          code: "E404",
+        },
       };
     }
     return jsonParse(result.stdout.toString());
@@ -155,12 +162,13 @@ export let getOtpCode = async (twoFactorState: TwoFactorState) => {
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
   pkgName: string,
-  opts: { cwd: string; access?: string; tag: string },
+  opts: PublishOptions,
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   let publishTool = await getPublishTool(opts.cwd);
   let publishFlags = opts.access ? ["--access", opts.access] : [];
   publishFlags.push("--tag", opts.tag);
+
   if ((await twoFactorState.isRequired) && !isCI) {
     let otpCode = await getOtpCode(twoFactorState);
     publishFlags.push("--otp", otpCode);
@@ -172,15 +180,21 @@ async function internalPublish(
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry()
+    npm_config_registry: getCorrectRegistry(),
   };
-  let { code, stdout, stderr } = await spawn(
-    publishTool.name,
-    ["publish", opts.cwd, "--json", ...publishFlags],
-    {
-      env: Object.assign({}, process.env, envOverride)
-    }
-  );
+  let { code, stdout, stderr } =
+    publishTool.name === "pnpm"
+      ? await spawn("pnpm", ["publish", "--json", ...publishFlags], {
+          env: Object.assign({}, process.env, envOverride),
+          cwd: opts.cwd,
+        })
+      : await spawn(
+          publishTool.name,
+          ["publish", opts.publishDir, "--json", ...publishFlags],
+          {
+            env: Object.assign({}, process.env, envOverride),
+          }
+        );
   if (code !== 0) {
     // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
     // We want to handle this as best we can but it has some struggles:
@@ -222,7 +236,7 @@ async function internalPublish(
 
 export function publish(
   pkgName: string,
-  opts: { cwd: string; access?: string; tag: string },
+  opts: PublishOptions,
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   // If there are many packages to be published, it's better to limit the

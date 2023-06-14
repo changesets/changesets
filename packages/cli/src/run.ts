@@ -84,11 +84,11 @@ export async function run(
       snapshotPrereleaseTemplate,
       tag,
       open,
-      gitTag
+      gitTag,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
-    deadFlags.forEach(flag => {
+    deadFlags.forEach((flag) => {
       if (flags[flag]) {
         error(
           `the flag ${flag} has been removed from changesets for version 2`
@@ -145,7 +145,7 @@ export async function run(
         const dependentsGraph = getDependentsGraph(packages, {
           ignoreDevDependencies: config.allowIgnoredDevDependencies,
           bumpVersionsWithWorkspaceProtocolOnly:
-            config.bumpVersionsWithWorkspaceProtocolOnly
+            config.bumpVersionsWithWorkspaceProtocolOnly,
         });
         for (const ignoredPackage of config.ignore) {
           const dependents = dependentsGraph.get(ignoredPackage) || [];

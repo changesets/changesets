@@ -22,4 +22,4 @@ await applyReleasePlan(
 
 Note that `apply-release-plan` does not validate the release plan's accuracy.
 
-To generate a releace plan from written changesets use `@changesets/get-release-plan`
+To generate a release plan from written changesets use `@changesets/get-release-plan`

@@ -13,21 +13,20 @@ import { getCommitFunctions } from "../../commit/getCommitFunctions";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
-import { PackageJSON } from "@changesets/types";
-
-function isListablePackage(config: Config, packageJson: PackageJSON) {
-  return (
-    !config.ignore.includes(packageJson.name) &&
-    (packageJson.version || !packageJson.private)
-  );
-}
+import { isListablePackage } from "./isListablePackage";
 
 export default async function add(
   cwd: string,
   { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
 ) {
-  const packages = (await getPackages(cwd)).packages.filter(pkg =>
+  const packages = await getPackages(cwd);
+  if (packages.packages.length === 0) {
+    throw new Error(
+      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
+    );
+  }
+  const listablePackages = packages.packages.filter((pkg) =>
     isListablePackage(config, pkg.packageJson)
   );
   const changesetBase = path.resolve(cwd, ".changeset");
@@ -37,24 +36,25 @@ export default async function add(
     newChangeset = {
       confirmed: true,
       releases: [],
-      summary: ``
+      summary: ``,
     };
   } else {
     const changedPackages = await git.getChangedPackagesSinceRef({
       cwd,
-      ref: config.baseBranch
+      ref: config.baseBranch,
+      changedFilePatterns: config.changedFilePatterns,
     });
     const changedPackagesName = changedPackages
-      .filter(pkg => isListablePackage(config, pkg.packageJson))
-      .map(pkg => pkg.packageJson.name);
+      .filter((pkg) => isListablePackage(config, pkg.packageJson))
+      .map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, packages);
-    printConfirmationMessage(newChangeset, packages.length > 1);
+    newChangeset = await createChangeset(changedPackagesName, listablePackages);
+    printConfirmationMessage(newChangeset, listablePackages.length > 1);
 
     if (!newChangeset.confirmed) {
       newChangeset = {
         ...newChangeset,
-        confirmed: await cli.askConfirm("Is this your desired changeset?")
+        confirmed: await cli.askConfirm("Is this your desired changeset?"),
       };
     }
   }
@@ -78,7 +78,7 @@ export default async function add(
     }
 
     let hasMajorChange = [...newChangeset.releases].find(
-      c => c.type === "major"
+      (c) => c.type === "major"
     );
 
     if (hasMajorChange) {
@@ -107,7 +107,7 @@ export default async function add(
         externalEditor.editor.args.concat([changesetPath]),
         {
           detached: true,
-          stdio: "inherit"
+          stdio: "inherit",
         }
       );
     }

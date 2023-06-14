@@ -1,5 +1,31 @@
 # @changesets/write
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [[`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2)]:
+  - @changesets/types@5.2.1
+
+## 0.2.2
+
+### Patch Changes
+
+- [#983](https://github.com/changesets/changesets/pull/983) [`6cc4300`](https://github.com/changesets/changesets/commit/6cc430013a052dc2488b9e6700a1e4bd8c8e0680) Thanks [@Andarist](https://github.com/Andarist)! - Improved compatibility with the alpha releases of Prettier v3 by awaiting the `.format` result since it's a promise in that version.
+
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [[`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14)]:
+  - @changesets/types@5.2.0
+
+## 0.2.0
+
+### Minor Changes
+
+- [#905](https://github.com/changesets/changesets/pull/905) [`c140171`](https://github.com/changesets/changesets/commit/c1401716cf5ee839aaa02ea7ff8f23f8af8bf5b0) Thanks [@Andarist](https://github.com/Andarist)! - The local version of Prettier is going to be preferred from now on when writing formatted `.md` files back to disk. At the same time the version of Prettier that we depend on has been upgraded.
+
 ## 0.1.9
 
 ### Patch Changes

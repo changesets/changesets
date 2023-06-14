@@ -1,5 +1,37 @@
 # @changesets/assemble-release-plan
 
+## 5.2.3
+
+### Patch Changes
+
+- Updated dependencies [[`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2)]:
+  - @changesets/types@5.2.1
+  - @changesets/get-dependents-graph@1.3.5
+
+## 5.2.2
+
+### Patch Changes
+
+- [#949](https://github.com/changesets/changesets/pull/949) [`64585ea`](https://github.com/changesets/changesets/commit/64585ea4323c4cf51a23b0635990b568d1f58b2b) Thanks [@Andarist](https://github.com/Andarist), [@BPScott](https://github.com/BPScott)! - Fixed the issue that caused transitive dependents of dev dependents to be bumped when a package got bumped and when using `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.updateInternalDependents: "always"`. To illustrate this with an example:
+
+  ```
+  pkg-a - version: 1.0.0
+  pkg-b - devDependencies['pkg-a']: 1.0.0
+  pkg-c - dependencies['pkg-b']: 1.0.0
+  ```
+
+  With a changeset for `pkg-a` the `pkg-c` could have been sometimes incorrectly released.
+
+- Updated dependencies [[`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14)]:
+  - @changesets/types@5.2.0
+  - @changesets/get-dependents-graph@1.3.4
+
+## 5.2.1
+
+### Patch Changes
+
+- [#914](https://github.com/changesets/changesets/pull/914) [`b023e4b`](https://github.com/changesets/changesets/commit/b023e4b3d1ad793a5dd1187b720e8103cebfb937) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with the `assembleReleasePlan`'s signature not being compatible with the old shape of the `config` and `snapshot` parameters. This could have caused runtime errors during snapshot releases when only some of the Changesets transitive dependencies were updated without other ones.
+
 ## 5.2.0
 
 ### Minor Changes
@@ -42,7 +74,7 @@
 
 - [#706](https://github.com/changesets/changesets/pull/706) [`0812858`](https://github.com/changesets/changesets/commit/0812858996045e602d22f2b7dd13e8673e3b36b0) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `"none"` releases causing package versions being bumped during snapshot releases. In addition to when you create `"none"` release types explicitly Changesets might create them implicitly in some situations, for example under some circumstances this issue caused snapshot releases to be created sometimes for ignored packages.
 
-* [#751](https://github.com/changesets/changesets/pull/751) [`59c7ebc`](https://github.com/changesets/changesets/commit/59c7ebc7a5e75f69f5487e95a85cd1b7062ac39d) Thanks [@Rugvip](https://github.com/Rugvip)! - Fixed an issue where dependent packages would sometimes not get bumped properly when exiting prerelease mode.
+- [#751](https://github.com/changesets/changesets/pull/751) [`59c7ebc`](https://github.com/changesets/changesets/commit/59c7ebc7a5e75f69f5487e95a85cd1b7062ac39d) Thanks [@Rugvip](https://github.com/Rugvip)! - Fixed an issue where dependent packages would sometimes not get bumped properly when exiting prerelease mode.
 
 - [#703](https://github.com/changesets/changesets/pull/703) [`15c461d`](https://github.com/changesets/changesets/commit/15c461d5de94a274ccc8b33755a133a513339b0a) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages being always bumped when their `*` dependency was bumped.
 

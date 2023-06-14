@@ -12,8 +12,8 @@ export default function printConfirmationMessage(
 ) {
   function getReleasesOfType(type: VersionType) {
     return changeset.releases
-      .filter(release => release.type === type)
-      .map(release => release.name);
+      .filter((release) => release.type === type)
+      .map((release) => release.name);
   }
   log("\n=== Summary of changesets ===");
   const majorReleases = getReleasesOfType("major");

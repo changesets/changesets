@@ -1,7 +1,0 @@
-{
-  "name": "tilde-dep",
-  "version": "1.0.0",
-  "dependencies": {
-    "depended-upon": "~1.0.0"
-  }
-}

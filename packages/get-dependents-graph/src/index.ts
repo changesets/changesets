@@ -13,33 +13,33 @@ export function getDependentsGraph(
   const { graph: dependencyGraph } = getDependencyGraph(packages, {
     ignoreDevDependencies: opts?.ignoreDevDependencies === true,
     bumpVersionsWithWorkspaceProtocolOnly:
-      opts?.bumpVersionsWithWorkspaceProtocolOnly === true
+      opts?.bumpVersionsWithWorkspaceProtocolOnly === true,
   });
 
   const dependentsLookup: {
     [key: string]: { pkg: Package; dependents: Array<string> };
   } = {};
 
-  packages.packages.forEach(pkg => {
+  packages.packages.forEach((pkg) => {
     dependentsLookup[pkg.packageJson.name] = {
       pkg,
-      dependents: []
+      dependents: [],
     };
   });
 
-  packages.packages.forEach(pkg => {
+  packages.packages.forEach((pkg) => {
     const dependent = pkg.packageJson.name;
     const valFromDependencyGraph = dependencyGraph.get(dependent);
     if (valFromDependencyGraph) {
       const dependencies = valFromDependencyGraph.dependencies;
 
-      dependencies.forEach(dependency => {
+      dependencies.forEach((dependency) => {
         dependentsLookup[dependency].dependents.push(dependent);
       });
     }
   });
 
-  Object.keys(dependentsLookup).forEach(key => {
+  Object.keys(dependentsLookup).forEach((key) => {
     graph.set(key, dependentsLookup[key]);
   });
 

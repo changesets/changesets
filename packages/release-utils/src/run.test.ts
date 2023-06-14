@@ -1,16 +1,13 @@
 import { add, commit } from "@changesets/git";
-import { silenceLogsInBlock } from "@changesets/test-utils";
+import { silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
 import { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import fileUrl from "file-url";
-import fixturez from "fixturez";
 import fs from "fs-extra";
 import path from "path";
 import spawn from "spawndamnit";
 import { getCurrentBranch } from "./gitUtils";
 import { runPublish, runVersion } from "./run";
-
-let f = fixturez(__dirname);
 
 const linkNodeModules = async (cwd: string) => {
   await fs.symlink(
@@ -19,7 +16,7 @@ const linkNodeModules = async (cwd: string) => {
   );
 };
 const writeChangesets = (changesets: Changeset[], cwd: string) => {
-  return Promise.all(changesets.map(commit => writeChangeset(commit, cwd)));
+  return Promise.all(changesets.map((commit) => writeChangeset(commit, cwd)));
 };
 
 jest.setTimeout(10000);
@@ -37,14 +34,14 @@ async function setupRepoAndClone(cwd: string) {
   const mainBranch = await getCurrentBranch(cwd);
 
   // Make a 1-commit-deep shallow clone of this repo
-  let clone = f.temp();
+  let clone = tempdir();
   await spawn(
     "git",
     // Note: a file:// URL is needed in order to make a shallow clone of
     // a local repo
     ["clone", "--depth", "1", fileUrl(cwd), "."],
     {
-      cwd: clone
+      cwd: clone,
     }
   );
   await spawn("git", ["checkout", "-b", "some-other-branch"], { cwd });
@@ -53,7 +50,24 @@ async function setupRepoAndClone(cwd: string) {
 
 describe("version", () => {
   it("returns the right changed packages and pushes to the remote", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
 
     await writeChangesets(
       [
@@ -61,15 +75,15 @@ describe("version", () => {
           releases: [
             {
               name: "pkg-a",
-              type: "minor"
+              type: "minor",
             },
             {
               name: "pkg-b",
-              type: "minor"
-            }
+              type: "minor",
+            },
           ],
-          summary: "Awesome feature"
-        }
+          summary: "Awesome feature",
+        },
       ],
       cwd
     );
@@ -79,11 +93,11 @@ describe("version", () => {
     await linkNodeModules(clone);
 
     const { changedPackages } = await runVersion({
-      cwd: clone
+      cwd: clone,
     });
 
     await spawn("git", ["checkout", `changeset-release/${mainBranch}`], {
-      cwd
+      cwd,
     });
 
     expect(
@@ -93,13 +107,12 @@ describe("version", () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"name\\": \\"pkg-a\\",
-        \\"version\\": \\"1.1.0\\",
-        \\"dependencies\\": {
-          \\"pkg-b\\": \\"1.1.0\\"
+        "name": "pkg-a",
+        "version": "1.1.0",
+        "dependencies": {
+          "pkg-b": "1.1.0"
         }
-      }
-      "
+      }"
     `);
 
     expect(
@@ -109,10 +122,9 @@ describe("version", () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"name\\": \\"pkg-b\\",
-        \\"version\\": \\"1.1.0\\"
-      }
-      "
+        "name": "pkg-b",
+        "version": "1.1.0"
+      }"
     `);
     expect(
       await fs.readFile(
@@ -149,19 +161,40 @@ describe("version", () => {
           name: "pkg-a",
           version: "1.1.0",
           dependencies: {
-            "pkg-b": "1.1.0"
-          }
-        }
+            "pkg-b": "1.1.0",
+          },
+        },
       },
       {
         dir: path.join(clone, "packages", "pkg-b"),
-        packageJson: { name: "pkg-b", version: "1.1.0" }
-      }
+        packageJson: { name: "pkg-b", version: "1.1.0" },
+      },
     ]);
   });
 
   it("only includes bumped packages in the returned changed packages", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify(
+        {
+          name: "pkg-b",
+          version: "1.0.0",
+        },
+        null,
+        2
+      ),
+      ".changeset/config.json": JSON.stringify({}),
+    });
 
     await writeChangesets(
       [
@@ -169,11 +202,11 @@ describe("version", () => {
           releases: [
             {
               name: "pkg-a",
-              type: "minor"
-            }
+              type: "minor",
+            },
           ],
-          summary: "Awesome feature"
-        }
+          summary: "Awesome feature",
+        },
       ],
       cwd
     );
@@ -183,11 +216,11 @@ describe("version", () => {
     await linkNodeModules(clone);
 
     const { changedPackages } = await runVersion({
-      cwd: clone
+      cwd: clone,
     });
 
     await spawn("git", ["checkout", `changeset-release/${mainBranch}`], {
-      cwd
+      cwd,
     });
 
     expect(
@@ -197,13 +230,12 @@ describe("version", () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"name\\": \\"pkg-a\\",
-        \\"version\\": \\"1.1.0\\",
-        \\"dependencies\\": {
-          \\"pkg-b\\": \\"1.0.0\\"
+        "name": "pkg-a",
+        "version": "1.1.0",
+        "dependencies": {
+          "pkg-b": "1.0.0"
         }
-      }
-      "
+      }"
     `);
 
     expect(
@@ -213,10 +245,9 @@ describe("version", () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"name\\": \\"pkg-b\\",
-        \\"version\\": \\"1.0.0\\"
-      }
-      "
+        "name": "pkg-b",
+        "version": "1.0.0"
+      }"
     `);
 
     expect(
@@ -243,27 +274,46 @@ describe("version", () => {
           name: "pkg-a",
           version: "1.1.0",
           dependencies: {
-            "pkg-b": "1.0.0"
-          }
-        }
-      }
+            "pkg-b": "1.0.0",
+          },
+        },
+      },
     ]);
   });
 
   it("doesn't include ignored package that got a dependency update in returned versions", async () => {
-    let cwd = f.copy("ignored-package");
+    let cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ignore: ["pkg-a"],
+      }),
+    });
 
     await writeChangesets(
       [
         {
           releases: [
             {
-              name: "ignored-package-pkg-b",
-              type: "minor"
-            }
+              name: "pkg-b",
+              type: "minor",
+            },
           ],
-          summary: "Awesome feature"
-        }
+          summary: "Awesome feature",
+        },
       ],
       cwd
     );
@@ -273,20 +323,26 @@ describe("version", () => {
     await linkNodeModules(clone);
 
     let { changedPackages } = await runVersion({
-      cwd: clone
+      cwd: clone,
     });
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-b"),
-        packageJson: { name: "ignored-package-pkg-b", version: "1.1.0" }
-      }
+        packageJson: { name: "pkg-b", version: "1.1.0" },
+      },
     ]);
   });
 });
 
 describe("publish", () => {
   test("single package repo", async () => {
-    let cwd = f.copy("single-package");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+    });
 
     const { clone } = await setupRepoAndClone(cwd);
 
@@ -294,18 +350,35 @@ describe("publish", () => {
 
     let result = await runPublish({
       script: `node ${require.resolve("./fake-publish-script-single-package")}`,
-      cwd: clone
+      cwd: clone,
     });
 
     expect(result).toEqual({
       published: true,
-      publishedPackages: [{ name: "single-package", version: "1.0.0" }]
+      publishedPackages: [{ name: "single-package", version: "1.0.0" }],
     });
     let tagsResult = await spawn("git", ["tag"], { cwd });
     expect(tagsResult.stdout.toString("utf8").trim()).toEqual("v1.0.0");
   });
   test("multi package repo", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
 
     const { clone } = await setupRepoAndClone(cwd);
 
@@ -313,15 +386,15 @@ describe("publish", () => {
 
     let result = await runPublish({
       script: `node ${require.resolve("./fake-publish-script-multi-package")}`,
-      cwd: clone
+      cwd: clone,
     });
 
     expect(result).toEqual({
       published: true,
       publishedPackages: [
         { name: "pkg-a", version: "1.0.0" },
-        { name: "pkg-b", version: "1.0.0" }
-      ]
+        { name: "pkg-b", version: "1.0.0" },
+      ],
     });
     let tagsResult = await spawn("git", ["tag"], { cwd });
     expect(tagsResult.stdout.toString("utf8").trim()).toEqual(

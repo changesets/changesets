@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "2.24.2",
+  "version": "2.26.1",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
     "changeset": "bin.js"
@@ -30,20 +30,20 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@babel/runtime": "^7.10.4",
-    "@changesets/apply-release-plan": "^6.0.4",
-    "@changesets/assemble-release-plan": "^5.2.0",
-    "@changesets/changelog-git": "^0.1.12",
-    "@changesets/config": "^2.1.1",
+    "@babel/runtime": "^7.20.1",
+    "@changesets/apply-release-plan": "^6.1.3",
+    "@changesets/assemble-release-plan": "^5.2.3",
+    "@changesets/changelog-git": "^0.1.14",
+    "@changesets/config": "^2.3.0",
     "@changesets/errors": "^0.1.4",
-    "@changesets/get-dependents-graph": "^1.3.3",
-    "@changesets/get-release-plan": "^3.0.13",
-    "@changesets/git": "^1.4.1",
+    "@changesets/get-dependents-graph": "^1.3.5",
+    "@changesets/get-release-plan": "^3.0.16",
+    "@changesets/git": "^2.0.0",
     "@changesets/logger": "^0.0.5",
-    "@changesets/pre": "^1.0.12",
-    "@changesets/read": "^0.5.7",
-    "@changesets/types": "^5.1.0",
-    "@changesets/write": "^0.1.9",
+    "@changesets/pre": "^1.0.14",
+    "@changesets/read": "^0.5.9",
+    "@changesets/types": "^5.2.1",
+    "@changesets/write": "^0.2.3",
     "@manypkg/get-packages": "^1.1.3",
     "@types/is-ci": "^3.0.0",
     "@types/semver": "^6.0.0",
@@ -67,7 +67,6 @@
   "devDependencies": {
     "@changesets/parse": "*",
     "@changesets/test-utils": "*",
-    "fixturez": "^1.1.0",
     "strip-ansi": "^5.2.0"
   }
 }

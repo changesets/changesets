@@ -1,20 +1,25 @@
-import fixtures from "fixturez";
 import { error } from "@changesets/logger";
+import { testdir } from "@changesets/test-utils";
 
 import { run } from "./run";
 
-const f = fixtures(__dirname);
 jest.mock("@changesets/logger");
 jest.mock("./commands/version");
 
 describe("cli", () => {
   describe("version", () => {
-    let cwd: string;
-    beforeEach(async () => {
-      cwd = await f.copy("simple-project");
-    });
-
     it("should validate package name passed in from --ignore flag", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
       try {
         await run(["version"], { ignore: "pkg-c" }, cwd);
       } catch (e) {
@@ -29,6 +34,24 @@ describe("cli", () => {
     });
 
     it("should throw if dependents of ignored packages are not explicitly listed in the ignore array", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
       try {
         await run(["version"], { ignore: ["pkg-b"] }, cwd);
       } catch (e) {
@@ -43,7 +66,26 @@ describe("cli", () => {
     });
 
     it("should throw if `--ignore` flag is used while ignore array is also defined in the config file ", async () => {
-      cwd = await f.copy("simple-project-with-ignore-config");
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          ignore: ["pkg-a"],
+        }),
+      });
       try {
         await run(["version"], { ignore: "pkg-b" }, cwd);
       } catch (e) {

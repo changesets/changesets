@@ -32,12 +32,12 @@ export default async function version(
   const releaseConfig = {
     ...config,
     // Disable committing when in snapshot mode
-    commit: options.snapshot ? false : config.commit
+    commit: options.snapshot ? false : config.commit,
   };
   const [changesets, preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
-    removeEmptyFolders(path.resolve(cwd, ".changeset"))
+    removeEmptyFolders(path.resolve(cwd, ".changeset")),
   ]);
 
   if (preState?.mode === "pre") {
@@ -75,8 +75,8 @@ export default async function version(
       ? {
           tag: options.snapshot === true ? undefined : options.snapshot,
           commit: config.snapshot.prereleaseTemplate?.includes("{commit}")
-            ? await getCurrentCommitId({ cwd })
-            : undefined
+            ? await getCurrentCommitId({ cwd, short: true })
+            : undefined,
         }
       : undefined
   );

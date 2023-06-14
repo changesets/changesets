@@ -12,7 +12,8 @@ export default function matchFixedConstraint(
 
   for (let fixedPackages of config.fixed) {
     let releasingFixedPackages = [...releases.values()].filter(
-      release => fixedPackages.includes(release.name) && release.type !== "none"
+      (release) =>
+        fixedPackages.includes(release.name) && release.type !== "none"
     );
 
     if (releasingFixedPackages.length === 0) continue;
@@ -36,7 +37,7 @@ export default function matchFixedConstraint(
           name: pkgName,
           type: highestReleaseType,
           oldVersion: highestVersion,
-          changesets: []
+          changesets: [],
         });
         continue;
       }

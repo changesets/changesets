@@ -38,5 +38,5 @@ temporarilySilenceLogs();
 log("I am not logged");
 
 // Use console.log to log messages in tests if required
-console.log("Yiey, I am logged");
+console.log("Yay, I am logged");
 ```

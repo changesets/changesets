@@ -4,7 +4,7 @@ import { PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import {
   PreExitButNotInPreModeError,
-  PreEnterButInPreModeError
+  PreEnterButInPreModeError,
 } from "@changesets/errors";
 
 export async function readPreState(cwd: string): Promise<PreState | undefined> {
@@ -38,7 +38,7 @@ export async function exitPre(cwd: string) {
     throw new PreExitButNotInPreModeError();
   }
 
-  await fs.writeFile(
+  await fs.outputFile(
     preStatePath,
     JSON.stringify({ ...preState, mode: "exit" }, null, 2) + "\n"
   );
@@ -56,10 +56,13 @@ export async function enterPre(cwd: string, tag: string) {
     mode: "pre",
     tag,
     initialVersions: {},
-    changesets: preState?.changesets ?? []
+    changesets: preState?.changesets ?? [],
   };
   for (let pkg of packages.packages) {
     newPreState.initialVersions[pkg.packageJson.name] = pkg.packageJson.version;
   }
-  await fs.writeFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
+  await fs.outputFile(
+    preStatePath,
+    JSON.stringify(newPreState, null, 2) + "\n"
+  );
 }
