@@ -49,7 +49,6 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
-    allowIgnoredDevDependencies: false,
     privatePackages: {
       tag: false,
       version: true,
@@ -84,8 +83,7 @@ let defaults: Config = {
     useCalculatedVersion: false,
     prereleaseTemplate: null,
   },
-  bumpVersionsWithWorkspaceProtocolOnly: false,
-  allowIgnoredDevDependencies: false
+  bumpVersionsWithWorkspaceProtocolOnly: false
 };
 
 let correctCases: Record<string, CorrectCase> = {

@@ -79,8 +79,6 @@ export type Config = {
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
-  /** Allows packages to be published if they have ignored packages in their devDependencies */
-  allowIgnoredDevDependencies?: boolean;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Omit<
@@ -111,7 +109,6 @@ export type WrittenConfig = {
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;
-  allowIgnoredDevDependencies?: boolean;
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   snapshot?: {
     useCalculatedVersion?: boolean;

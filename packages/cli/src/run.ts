@@ -143,7 +143,6 @@ export async function run(
 
         // Validate that all dependents of ignored packages are listed in the ignore list
         const dependentsGraph = getDependentsGraph(packages, {
-          ignoreDevDependencies: config.allowIgnoredDevDependencies,
           bumpVersionsWithWorkspaceProtocolOnly:
             config.bumpVersionsWithWorkspaceProtocolOnly,
         });
