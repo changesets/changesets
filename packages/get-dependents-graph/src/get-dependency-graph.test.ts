@@ -116,12 +116,12 @@ describe("getting the dependency graph", function () {
     })
   );
 
-  it("should skip devDependencies if specified", function() {
+  it("should skip devDependencies if specified", function () {
     const { graph, valid } = getDependencyGraph(
       {
         root: {
           dir: ".",
-          packageJson: { name: "root", version: "1.0.0" }
+          packageJson: { name: "root", version: "1.0.0" },
         },
         packages: [
           {
@@ -130,19 +130,19 @@ describe("getting the dependency graph", function () {
               name: "foo",
               version: "1.0.0",
               devDependencies: {
-                bar: "workspace:*"
-              }
-            }
+                bar: "workspace:*",
+              },
+            },
           },
           {
             dir: "bar",
             packageJson: {
               name: "bar",
-              version: "1.0.0"
-            }
-          }
+              version: "1.0.0",
+            },
+          },
         ],
-        tool: "pnpm"
+        tool: "pnpm",
       },
       { ignoreDevDependencies: true }
     );

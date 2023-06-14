@@ -83,7 +83,7 @@ let defaults: Config = {
     useCalculatedVersion: false,
     prereleaseTemplate: null,
   },
-  bumpVersionsWithWorkspaceProtocolOnly: false
+  bumpVersionsWithWorkspaceProtocolOnly: false,
 };
 
 let correctCases: Record<string, CorrectCase> = {

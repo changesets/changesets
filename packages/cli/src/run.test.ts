@@ -94,7 +94,6 @@ describe("cli", () => {
       expect(loggerErrorCalls.length).toEqual(0);
     });
 
-
     it("should throw if `--ignore` flag is used while ignore array is also defined in the config file ", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
