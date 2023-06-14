@@ -148,6 +148,6 @@ describe("getting the dependency graph", function () {
     );
     expect(graph.get("foo")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
-    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`Array []`);
+    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
   });
 });
