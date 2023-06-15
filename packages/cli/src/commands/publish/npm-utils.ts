@@ -193,6 +193,7 @@ async function internalPublish(
           ["publish", opts.publishDir, "--json", ...publishFlags],
           {
             env: Object.assign({}, process.env, envOverride),
+            cwd: opts.cwd,
           }
         );
   if (code !== 0) {
