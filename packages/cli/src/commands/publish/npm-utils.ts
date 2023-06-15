@@ -186,7 +186,7 @@ async function internalPublish(
     publishTool.name === "pnpm"
       ? await spawn("pnpm", ["publish", "--json", ...publishFlags], {
           env: Object.assign({}, process.env, envOverride),
-          cwd: opts.cwd,
+          cwd: opts.publishDir,
         })
       : await spawn(
           publishTool.name,
