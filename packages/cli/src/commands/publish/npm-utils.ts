@@ -186,14 +186,16 @@ async function internalPublish(
     publishTool.name === "pnpm"
       ? await spawn("pnpm", ["publish", "--json", ...publishFlags], {
           env: Object.assign({}, process.env, envOverride),
-          cwd: opts.publishDir,
+          cwd: opts.cwd,
         })
       : await spawn(
           publishTool.name,
           ["publish", opts.publishDir, "--json", ...publishFlags],
           {
             env: Object.assign({}, process.env, envOverride),
-            cwd: opts.cwd,
+            // if your publish directory contains its own package.json then you need to run publish
+            // from that directory otherwise you will get the package.json from the root
+            cwd: opts.publishDir,
           }
         );
   if (code !== 0) {
