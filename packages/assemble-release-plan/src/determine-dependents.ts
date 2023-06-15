@@ -84,7 +84,7 @@ export default function determineDependents({
                     .onlyUpdatePeerDependentsWhenOutOfRange,
               })
             ) {
-              if (config.updatePeerDependencies === "major") {
+              if (config.autoBumpPeerDependentsStrategy === "major") {
                 if (nextRelease.type === "patch") {
                   if (
                     !semverSatisfies(
@@ -103,6 +103,7 @@ export default function determineDependents({
                 )
                   type = "major";
               } else {
+                // autoBumpPeerDependentsStrategy is "follow"
                 if (!releases.has(dependent)) {
                   type = nextRelease.type;
                 } else {

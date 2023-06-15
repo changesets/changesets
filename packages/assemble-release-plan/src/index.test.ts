@@ -1402,7 +1402,7 @@ describe("bumping peerDeps", () => {
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
 
-  it("should major bump dependent when bumping caret peerDep by major when updatePeerDependencies = follow", () => {
+  it("should major bump dependent when bumping caret peerDep by major when autoBumpPeerDependentsStrategy = follow", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
@@ -1412,7 +1412,7 @@ describe("bumping peerDeps", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
-      { ...defaultConfig, updatePeerDependencies: "follow" },
+      { ...defaultConfig, autoBumpPeerDependentsStrategy: "follow" },
       undefined
     );
 
@@ -1423,7 +1423,7 @@ describe("bumping peerDeps", () => {
     expect(releases[1].newVersion).toEqual("2.0.0");
   });
 
-  it("should minor bump dependent when bumping caret peerDep by minor when updatePeerDependencies = follow", () => {
+  it("should minor bump dependent when bumping caret peerDep by minor when autoBumpPeerDependentsStrategy = follow", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
@@ -1433,7 +1433,7 @@ describe("bumping peerDeps", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
-      { ...defaultConfig, updatePeerDependencies: "follow" },
+      { ...defaultConfig, autoBumpPeerDependentsStrategy: "follow" },
       undefined
     );
 
@@ -1444,7 +1444,7 @@ describe("bumping peerDeps", () => {
     expect(releases[1].newVersion).toEqual("1.1.0");
   });
 
-  it("should patch bump dependent when bumping caret peerDep by patch when updatePeerDependencies = follow", () => {
+  it("should patch bump dependent when bumping caret peerDep by patch when autoBumpPeerDependentsStrategy = follow", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
@@ -1454,7 +1454,7 @@ describe("bumping peerDeps", () => {
     let { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
-      { ...defaultConfig, updatePeerDependencies: "follow" },
+      { ...defaultConfig, autoBumpPeerDependentsStrategy: "follow" },
       undefined
     );
 

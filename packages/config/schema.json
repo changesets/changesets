@@ -132,6 +132,17 @@
       "default": false,
       "description": "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace."
     },
+    "autoBumpPeerDependentInSameChangeset": {
+      "type": "boolean",
+      "default": true,
+      "description": "Determines whether Changesets should automatically bump peer dependencies that are part of the same changeset."
+    },
+    "autoBumpPeerDependentCondition": {
+      "enum": ["always", "out-of-range"],
+      "type": "string",
+      "default": "always",
+      "description": "Determines the condition to automatically bump peer dependencies"
+    },
     "snapshot": {
       "type": "object",
       "properties": {
