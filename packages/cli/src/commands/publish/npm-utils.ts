@@ -193,9 +193,6 @@ async function internalPublish(
           ["publish", opts.publishDir, "--json", ...publishFlags],
           {
             env: Object.assign({}, process.env, envOverride),
-            // if your publish directory contains its own package.json then you need to run publish
-            // from that directory otherwise you will get the package.json from the root
-            cwd: opts.publishDir,
           }
         );
   if (code !== 0) {
