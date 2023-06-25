@@ -5,7 +5,7 @@ import pLimit from "p-limit";
 import preferredPM from "preferred-pm";
 import chalk from "chalk";
 import spawn from "spawndamnit";
-import semver from "semver";
+import semverParse from "semver/functions/parse";
 import { askQuestion } from "../../utils/cli-utilities";
 import isCI from "is-ci";
 import { TwoFactorState } from "../../utils/types";
@@ -49,7 +49,7 @@ async function getPublishTool(
   try {
     let result = await spawn("pnpm", ["--version"], { cwd });
     let version = result.stdout.toString().trim();
-    let parsed = semver.parse(version);
+    let parsed = semverParse(version);
     return {
       name: "pnpm",
       shouldAddNoGitChecks:

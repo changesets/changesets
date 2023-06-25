@@ -1,5 +1,5 @@
 import { join } from "path";
-import semver from "semver";
+import semverParse from "semver/functions/parse";
 import chalk from "chalk";
 import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
@@ -161,7 +161,7 @@ async function getUnpublishedPackages(
             response.pkgInfo.versions &&
             response.pkgInfo.versions.every(
               (version: string) =>
-                semver.parse(version)!.prerelease[0] === preState.tag
+                semverParse(version)!.prerelease[0] === preState.tag
             )
           ) {
             publishedState = "only-pre";
