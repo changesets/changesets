@@ -4,7 +4,7 @@ import {
   VersionType,
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
-import Range from "semver/classes/range"
+import Range from "semver/classes/range";
 import semverPrerelease from "semver/functions/prerelease";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
