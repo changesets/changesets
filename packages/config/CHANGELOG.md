@@ -1,5 +1,12 @@
 # @changesets/config
 
+## 2.3.1
+
+### Patch Changes
+
+- Updated dependencies [[`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4)]:
+  - @changesets/get-dependents-graph@1.3.6
+
 ## 2.3.0
 
 ### Minor Changes

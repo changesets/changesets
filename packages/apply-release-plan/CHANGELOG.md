@@ -1,5 +1,14 @@
 # @changesets/apply-release-plan
 
+## 6.1.4
+
+### Patch Changes
+
+- [#1176](https://github.com/changesets/changesets/pull/1176) [`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4) Thanks [@joshwooding](https://github.com/joshwooding)! - Bump [`semver`](https://github.com/npm/node-semver) dependency to v7.5.3
+
+- Updated dependencies []:
+  - @changesets/config@2.3.1
+
 ## 6.1.3
 
 ### Patch Changes
