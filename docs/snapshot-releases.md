@@ -51,3 +51,42 @@ yarn add your-package-name@bulbasaur
 ## What to do with the snapshot branch
 
 In almost all circumstances, we recommend that the changes after you have run `version` get merged back into your main branch. With snapshots, this is not the case. We recommend that you do not push the changes from this running of `version` to any branch. This is because the snapshot is intended for installation only, not to represent the correct published state of the repo. Save the generated version, and the tag you used, but do not push this to a branch you are planning to merge into the main branch, or merge it into the main branch.
+
+## Automatic snapshots on PRs
+
+You can automatically generate snapshots on pull requests with GitHub Actions:
+
+```yaml
+name: Pre-release
+
+on: pull_request
+
+jobs:
+  publish_prerelease:
+    runs-on: ubuntu-latest
+    if: github.repository == 'johndoe/examplerepo' # replace with yours
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Publish Pre-release
+        run: |
+          COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+          COMMIT_SHA_SHORT=$(git rev-parse --short "$COMMIT_SHA")
+          yarn changeset version --snapshot prerelease-$COMMIT_SHA_SHORT
+          yarn changeset publish --tag prerelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+This will generate a snapshot on each commit to a PR using the commit `SHA`, and publish it under the `prerelease` tag. This is very handy if you need to incrementally test out changes in your PR and don't want to generate snapshots manually for each commit.
+
+There is an **unintended consequence** to this for brand new packages that have never been published to npm before. You can read more about it in the [changeset publish docs](./command-line-options.md#unintended-first-time-publish).

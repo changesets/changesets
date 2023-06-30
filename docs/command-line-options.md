@@ -101,7 +101,19 @@ Snapshot is used for a special kind of publishing for testing - it creates tempo
 changeset publish [--otp={token}]
 ```
 
-This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`.
+This publishes changes to npm, and creates git tags. The command works by:
+
+- querying current versions in the repository
+- comparing the version it has in its `package.json` with published versions
+- trying to publish what has not been published yet by running `npm publish`
+
+Importantly, `changeset publish` doesn't care about changeset files at all. If invoked, it will still run through the above actions whether a changeset file has been generated or not.
+
+This means an accidental publish can happen if you have an unpublished package (or even an unpublished version of a package), start using Changesets (but don't generate a changeset yet), and use our [changesets/action](https://github.com/changesets/action). If you don't immediately add a changeset file then the first run of the action just calls `changeset publish` and it publishes what has not been published yet. Unfortunately, this means something marked with a throwaway version of say `0.0.0` in package.json would still get published.
+
+You are more likely to run into this if you have a GitHub Action set up that does [automatic snapshots on pull requests](./snapshot-releases.md#automatic-snapshots-on-prs), because running `changeset version && changeset publish` sequentially in CI means that `changeset publish` will run regardless if `changeset version` did anything or exited.
+
+You can get around this behavior by temporarily marking `private: true` in package.json while in development, and removing it when you're ready to generate a changeset and publish the package.
 
 Because this command assumes that the last commit is the release commit, you should not commit any changes between calling version and publish. These commands are separate to enable you to check if the release changes are accurate.
 
