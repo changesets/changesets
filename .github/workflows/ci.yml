@@ -1,0 +1,60 @@
+name: CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  prepare-cache:
+    name: Prepare Cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/ci-setup
+
+  test:
+    name: Test
+    needs: prepare-cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/ci-setup
+
+      - name: Check Git version
+        run: git --version
+
+      - name: Setup mock Git user
+        run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+
+      - name: Jest tests
+        run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+
+  typecheck:
+    name: Typecheck
+    needs: prepare-cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/ci-setup
+
+      - name: Typecheck
+        run: yarn types:check
+
+  lint:
+    name: Lint
+    needs: prepare-cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/ci-setup
+
+      - name: Lint
+        run: yarn lint
