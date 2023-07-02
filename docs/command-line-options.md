@@ -98,7 +98,7 @@ Snapshot is used for a special kind of publishing for testing - it creates tempo
 ## publish
 
 ```
-changeset publish [--otp={token}]
+changeset publish [--otp={token}] [--since={gitTag}] [--tag={tag}]
 ```
 
 This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`.
@@ -108,6 +108,8 @@ Because this command assumes that the last commit is the release commit, you sho
 `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the --otp option.
 
 `--tag TAGNAME` - for packages that are published, the chosen tag will be used instead of `latest`, allowing you to publish changes intended for testing and validation, not main consumption. This will most likely be used with [snapshot releases](./snapshot-releases.md).
+
+- `--since` - to only publish changesets since a specific branch or git tag (such as `main`, or the git hash of latest).
 
 ### Git Tags
 

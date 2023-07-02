@@ -1,7 +1,7 @@
 import publishPackages from "../publishPackages";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { silenceLogsInBlock, gitdir } from "@changesets/test-utils";
 import runRelease from "..";
 
 jest.mock("../../../utils/cli-utilities");
@@ -23,7 +23,7 @@ describe("running release", () => {
     // failed one (where the change was pushed back but not released and the next build has no
     // changeset commits)
     it("should still run publishPackages", async () => {
-      const cwd = await testdir({
+      const cwd = await gitdir({
         "package.json": JSON.stringify({
           private: true,
           workspaces: ["packages/*"],

@@ -171,7 +171,7 @@ export async function run(
         return;
       }
       case "publish": {
-        await publish(cwd, { otp, tag, gitTag }, config);
+        await publish(cwd, { otp, tag, since, gitTag }, config);
         return;
       }
       case "status": {

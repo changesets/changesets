@@ -40,7 +40,12 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
 
 export default async function run(
   cwd: string,
-  { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
+  {
+    otp,
+    tag,
+    since,
+    gitTag = true,
+  }: { otp?: string; tag?: string; gitTag?: boolean; since?: string },
   config: Config
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
@@ -56,19 +61,24 @@ export default async function run(
     showNonLatestTagWarning(tag, preState);
   }
 
-  const { packages, tool } = await getPackages(cwd);
+  const { tool } = await getPackages(cwd);
+  const changedPackages = await git.getChangedPackagesSinceRef({
+    cwd,
+    ref: since || config.baseBranch,
+    changedFilePatterns: config.changedFilePatterns,
+  });
 
   const tagPrivatePackages =
     config.privatePackages && config.privatePackages.tag;
   const publishedPackages = await publishPackages({
-    packages,
+    packages: changedPackages,
     // if not public, we won't pass the access, and it works as normal
     access: config.access,
     otp,
     preState,
     tag: releaseTag,
   });
-  const privatePackages = packages.filter(
+  const privatePackages = changedPackages?.filter(
     (pkg) => pkg.packageJson.private && pkg.packageJson.version
   );
   const untaggedPrivatePackageReleases = tagPrivatePackages
