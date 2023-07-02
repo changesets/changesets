@@ -1,5 +1,24 @@
 # @changesets/cli
 
+## 2.26.2
+
+### Patch Changes
+
+- [#1176](https://github.com/changesets/changesets/pull/1176) [`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4) Thanks [@joshwooding](https://github.com/joshwooding)! - Bump [`semver`](https://github.com/npm/node-semver) dependency to v7.5.3
+
+- Updated dependencies [[`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4)]:
+  - @changesets/apply-release-plan@6.1.4
+  - @changesets/assemble-release-plan@5.2.4
+  - @changesets/get-dependents-graph@1.3.6
+  - @changesets/get-release-plan@3.0.17
+  - @changesets/config@2.3.1
+
+## 2.26.1
+
+### Patch Changes
+
+- [#1115](https://github.com/changesets/changesets/pull/1115) [`feddc88`](https://github.com/changesets/changesets/commit/feddc88d74781a448855a5a0b0ffa50917489b15) Thanks [@Andarist](https://github.com/Andarist)! - Call `pnpm publish` directly from the directory of the published package. This allows `pnpm` to correctly handle configured `publishConfig.directory`.
+
 ## 2.26.0
 
 ### Minor Changes

@@ -6,7 +6,7 @@ The command line for changesets is the main way of interacting with it. There ar
 - add [--empty][--open]
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag]
-- status [--since-master --verbose --output=JSON_FILE.json]
+- status [--since=master --verbose --output=JSON_FILE.json]
 - pre [exit|enter {tag}]
 - tag
 
@@ -101,7 +101,7 @@ Snapshot is used for a special kind of publishing for testing - it creates tempo
 changeset publish [--otp={token}]
 ```
 
-This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`.
+This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`. If you are using `pnpm` as a package manager, this automatically detects it and uses `pnpm publish` instead.
 
 Because this command assumes that the last commit is the release commit, you should not commit any changes between calling version and publish. These commands are separate to enable you to check if the release changes are accurate.
 
