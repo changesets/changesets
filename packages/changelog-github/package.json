@@ -4,6 +4,18 @@
   "description": "A changelog entry generator for GitHub that links to commits, PRs and users",
   "main": "dist/changesets-changelog-github.cjs.js",
   "module": "dist/changesets-changelog-github.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-changelog-github.cjs.mjs",
+        "default": "./dist/changesets-changelog-github.cjs.js"
+      },
+      "module": "./dist/changesets-changelog-github.esm.js",
+      "import": "./dist/changesets-changelog-github.cjs.mjs",
+      "default": "./dist/changesets-changelog-github.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/changelog-github",
   "dependencies": {

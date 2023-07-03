@@ -4,6 +4,18 @@
   "description": "Takes a release plan and applies it to packages",
   "main": "dist/changesets-apply-release-plan.cjs.js",
   "module": "dist/changesets-apply-release-plan.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-apply-release-plan.cjs.mjs",
+        "default": "./dist/changesets-apply-release-plan.cjs.js"
+      },
+      "module": "./dist/changesets-apply-release-plan.esm.js",
+      "import": "./dist/changesets-apply-release-plan.cjs.mjs",
+      "default": "./dist/changesets-apply-release-plan.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/apply-release-plan",
   "dependencies": {

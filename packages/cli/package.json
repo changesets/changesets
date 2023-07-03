@@ -15,6 +15,36 @@
   ],
   "main": "dist/changesets-cli.cjs.js",
   "module": "dist/changesets-cli.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-cli.cjs.mjs",
+        "default": "./dist/changesets-cli.cjs.js"
+      },
+      "module": "./dist/changesets-cli.esm.js",
+      "import": "./dist/changesets-cli.cjs.mjs",
+      "default": "./dist/changesets-cli.cjs.js"
+    },
+    "./changelog": {
+      "types": {
+        "import": "./changelog/dist/changesets-cli-changelog.cjs.mjs",
+        "default": "./changelog/dist/changesets-cli-changelog.cjs.js"
+      },
+      "module": "./changelog/dist/changesets-cli-changelog.esm.js",
+      "import": "./changelog/dist/changesets-cli-changelog.cjs.mjs",
+      "default": "./changelog/dist/changesets-cli-changelog.cjs.js"
+    },
+    "./commit": {
+      "types": {
+        "import": "./commit/dist/changesets-cli-commit.cjs.mjs",
+        "default": "./commit/dist/changesets-cli-commit.cjs.js"
+      },
+      "module": "./commit/dist/changesets-cli-commit.esm.js",
+      "import": "./commit/dist/changesets-cli-commit.cjs.mjs",
+      "default": "./commit/dist/changesets-cli-commit.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "author": "Changesets Contributors",
   "contributors": [
     "Ben Conolly",

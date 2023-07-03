@@ -4,6 +4,18 @@
   "description": "Get the graph of dependents in a monorepo",
   "main": "dist/changesets-get-dependents-graph.cjs.js",
   "module": "dist/changesets-get-dependents-graph.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-get-dependents-graph.cjs.mjs",
+        "default": "./dist/changesets-get-dependents-graph.cjs.js"
+      },
+      "module": "./dist/changesets-get-dependents-graph.esm.js",
+      "import": "./dist/changesets-get-dependents-graph.cjs.mjs",
+      "default": "./dist/changesets-get-dependents-graph.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/get-dependents-graph",
   "dependencies": {

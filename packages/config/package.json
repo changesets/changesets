@@ -4,6 +4,18 @@
   "description": "Utilities for reading and parsing Changeset's config",
   "main": "dist/changesets-config.cjs.js",
   "module": "dist/changesets-config.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-config.cjs.mjs",
+        "default": "./dist/changesets-config.cjs.js"
+      },
+      "module": "./dist/changesets-config.esm.js",
+      "import": "./dist/changesets-config.cjs.mjs",
+      "default": "./dist/changesets-config.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/config",
   "files": [
