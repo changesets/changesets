@@ -1,7 +1,7 @@
 {
   "name": "@changesets/release-utils",
   "version": "0.1.13",
-  "main": "dist/release-utils.cjs.js",
+  "main": "dist/changesets-release-utils.cjs.js",
   "dependencies": {
     "@changesets/pre": "^1.0.14",
     "@changesets/read": "^0.5.9",

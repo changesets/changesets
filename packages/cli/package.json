@@ -13,8 +13,8 @@
     "changelog",
     "commit"
   ],
-  "main": "dist/cli.cjs.js",
-  "module": "dist/cli.esm.js",
+  "main": "dist/changesets-cli.cjs.js",
+  "module": "dist/changesets-cli.esm.js",
   "author": "Changesets Contributors",
   "contributors": [
     "Ben Conolly",
@@ -23,9 +23,9 @@
   ],
   "preconstruct": {
     "entrypoints": [
-      ".",
-      "changelog",
-      "commit"
+      "./index.ts",
+      "./changelog.ts",
+      "./commit/index.ts"
     ]
   },
   "license": "MIT",

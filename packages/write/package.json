@@ -2,8 +2,8 @@
   "name": "@changesets/write",
   "version": "0.2.3",
   "description": "Writes a changeset to a file",
-  "main": "dist/write.cjs.js",
-  "module": "dist/write.esm.js",
+  "main": "dist/changesets-write.cjs.js",
+  "module": "dist/changesets-write.esm.js",
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/write",
   "dependencies": {
