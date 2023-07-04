@@ -63,9 +63,11 @@ export default async function getChangelogEntry(
       release.packageJson.peerDependencies?.[rel.name];
 
     const versionRange = dependencyVersionRange || peerDependencyVersionRange;
+    const usesWorkspaceRange = versionRange?.startsWith("workspace:");
+    const isValidSemver = semverValidRange(versionRange) !== null;
     return (
       versionRange &&
-      semverValidRange(versionRange) !== null &&
+      (usesWorkspaceRange || isValidSemver) &&
       shouldUpdateDependencyBasedOnConfig(
         { type: rel.type, version: rel.newVersion },
         {
