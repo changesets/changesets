@@ -1913,8 +1913,6 @@ describe("updateInternalDependents: always", () => {
       ### Patch Changes
 
       - g1th4sh: This is some fix
-      - Updated dependencies [g1th4sh]
-        - pkg-a@1.1.0
       "
     `);
   });
