@@ -63,10 +63,11 @@ export default function versionPackage(
           continue;
         }
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
+        const isValidSemver = semverValidRange(depCurrentVersion) !== null;
 
         if (
           !usesWorkspaceRange &&
-          bumpVersionsWithWorkspaceProtocolOnly === true
+          (!isValidSemver || bumpVersionsWithWorkspaceProtocolOnly === true)
         ) {
           continue;
         }
@@ -86,15 +87,14 @@ export default function versionPackage(
           depCurrentVersion = workspaceDepVersion;
         }
         if (
-          semverValidRange(depCurrentVersion) !== null &&
           // an empty string is the normalised version of x/X/*
           // we don't want to change these versions because they will match
           // any version and if someone makes the range that
           // they probably want it to stay like that...
-          (new Range(depCurrentVersion).range !== "" ||
-            // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
-            // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-            semverPrerelease(version) !== null)
+          new Range(depCurrentVersion).range !== "" ||
+          // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
+          // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
+          semverPrerelease(version) !== null
         ) {
           let newNewRange = snapshot
             ? version
