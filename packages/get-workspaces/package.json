@@ -4,6 +4,18 @@
   "description": "Get workspaces for yarn workspaces, bolt workspaces, or the root package for building repo-agnostic tools",
   "main": "dist/get-workspaces.cjs.js",
   "module": "dist/get-workspaces.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/get-workspaces.cjs.mjs",
+        "default": "./dist/get-workspaces.cjs.js"
+      },
+      "module": "./dist/get-workspaces.esm.js",
+      "import": "./dist/get-workspaces.cjs.mjs",
+      "default": "./dist/get-workspaces.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/get-workspaces",
   "dependencies": {

@@ -1,7 +1,20 @@
 {
   "name": "@changesets/release-utils",
   "version": "0.1.13",
-  "main": "dist/release-utils.cjs.js",
+  "main": "dist/changesets-release-utils.cjs.js",
+  "module": "dist/changesets-release-utils.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-release-utils.cjs.mjs",
+        "default": "./dist/changesets-release-utils.cjs.js"
+      },
+      "module": "./dist/changesets-release-utils.esm.js",
+      "import": "./dist/changesets-release-utils.cjs.mjs",
+      "default": "./dist/changesets-release-utils.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "dependencies": {
     "@changesets/pre": "^1.0.14",
     "@changesets/read": "^0.5.9",
