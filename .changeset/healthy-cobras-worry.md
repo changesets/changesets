@@ -21,4 +21,4 @@
 "@changesets/pre": minor
 ---
 
-`package.json#exports` have been added to limit what (and how) code might be imported from the package
+`package.json#exports` have been added to limit what (and how) code might be imported from the package.

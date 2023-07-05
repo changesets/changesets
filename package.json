@@ -40,7 +40,7 @@
     "@babel/preset-typescript": "^7.18.6",
     "@babel/runtime": "^7.20.1",
     "@manypkg/cli": "^0.19.1",
-    "@preconstruct/cli": "^2.8.0",
+    "@preconstruct/cli": "^2.8.1",
     "@types/fs-extra": "^5.1.0",
     "@types/jest": "^24.0.12",
     "@types/jest-in-case": "^1.0.6",
