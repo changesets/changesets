@@ -1,8 +1,4 @@
-import {
-  ComprehensiveRelease,
-  PackageJSON,
-  VersionType,
-} from "@changesets/types";
+import { PackageJSON, VersionType } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
 import Range from "semver/classes/range";
 import semverPrerelease from "semver/functions/prerelease";
@@ -15,12 +11,10 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
-export default function versionPackage(
-  release: ComprehensiveRelease & {
-    changelog: string | null;
-    packageJson: PackageJSON;
-    dir: string;
-  },
+export default function versionPackage<
+  T extends { newVersion: string; packageJson: PackageJSON }
+>(
+  release: T,
   versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
   {
     updateInternalDependencies,

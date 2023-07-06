@@ -37,7 +37,18 @@ export default async function getStatus(
   const sinceBranch =
     since === undefined ? (sinceMaster ? "master" : undefined) : since;
   const releasePlan = await getReleasePlan(cwd, sinceBranch, config);
-  const { changesets, releases } = releasePlan;
+  const { changesets, individualReleases, groupedReleases } = releasePlan;
+  const releases = individualReleases.concat(
+    ...groupedReleases.flatMap<ComprehensiveRelease>((g) =>
+      g.projects.map((p) => ({
+        changesets: g.changesets,
+        name: p.name,
+        newVersion: g.newVersion,
+        oldVersion: p.oldVersion,
+        type: p.type,
+      }))
+    )
+  );
   const changedPackages = await git.getChangedPackagesSinceRef({
     cwd,
     ref: sinceBranch || config.baseBranch,

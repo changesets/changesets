@@ -112,6 +112,9 @@ const changelogFunctions: ChangelogFunctions = {
     const prefix = [
       links.pull === null ? "" : ` ${links.pull}`,
       links.commit === null ? "" : ` ${links.commit}`,
+      changeset.groupedChangelog
+        ? ` **(${changeset.releases.map(({ name }) => name).join(", ")})**`
+        : "",
       users === null ? "" : ` Thanks ${users}!`,
     ].join("");
 

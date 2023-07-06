@@ -4,6 +4,7 @@ import {
   ChangelogFunctions,
   NewChangeset,
   ModCompWithPackage,
+  ModCompGroupWithPackage,
 } from "@changesets/types";
 
 import { defaultConfig } from "@changesets/config";
@@ -17,7 +18,10 @@ import path from "path";
 import prettier from "prettier";
 
 import versionPackage from "./version-package";
-import getChangelogEntry from "./get-changelog-entry";
+import {
+  getChangelogEntryForIndividualRelease,
+  getChangelogEntryForGroupRelease,
+} from "./get-changelog-entry";
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
@@ -81,9 +85,24 @@ export default async function applyReleasePlan(
     packages.packages.map((x) => [x.packageJson.name, x])
   );
 
-  let { releases, changesets } = releasePlan;
+  let { individualReleases, groupedReleases, changesets } = releasePlan;
 
-  let releasesWithPackage = releases.map((release) => {
+  let groupedReleasesWithPackage = groupedReleases.map((group) => ({
+    ...group,
+    projects: group.projects.map((project) => {
+      let pkg = packagesByName.get(project.name);
+      if (!pkg)
+        throw new Error(
+          `Could not find matching package for release of: ${project.name}`
+        );
+      return {
+        ...project,
+        ...pkg,
+      };
+    }),
+  }));
+
+  let releasesWithPackage = individualReleases.map((release) => {
     let pkg = packagesByName.get(release.name);
     if (!pkg)
       throw new Error(
@@ -96,12 +115,14 @@ export default async function applyReleasePlan(
   });
 
   // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
-  let releaseWithChangelogs = await getNewChangelogEntry(
-    releasesWithPackage,
-    changesets,
-    config,
-    cwd
-  );
+  let { individualReleasesWithChangelogs, groupedReleasesWithChangelogs } =
+    await getNewChangelogEntry(
+      groupedReleasesWithPackage,
+      releasesWithPackage,
+      changesets,
+      config,
+      cwd
+    );
 
   if (releasePlan.preState !== undefined && snapshot === undefined) {
     if (releasePlan.preState.mode === "exit") {
@@ -114,29 +135,64 @@ export default async function applyReleasePlan(
     }
   }
 
-  let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
-    name,
-    version: newVersion,
-    type,
-  }));
+  let versionsToUpdate = individualReleases
+    .map(({ name, newVersion, type }) => ({
+      name,
+      version: newVersion,
+      type,
+    }))
+    .concat(
+      ...groupedReleases.flatMap((group) =>
+        group.projects.map((p) => ({
+          name: p.name,
+          version: group.newVersion,
+          type: p.type,
+        }))
+      )
+    );
 
   // iterate over releases updating packages
-  let finalisedRelease = releaseWithChangelogs.map((release) => {
-    return versionPackage(release, versionsToUpdate, {
-      updateInternalDependencies: config.updateInternalDependencies,
-      onlyUpdatePeerDependentsWhenOutOfRange:
-        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange,
-      bumpVersionsWithWorkspaceProtocolOnly:
-        config.bumpVersionsWithWorkspaceProtocolOnly,
-      snapshot,
-    });
+  let finalisedIndividualRelease = individualReleasesWithChangelogs.map(
+    (release) => {
+      return versionPackage(release, versionsToUpdate, {
+        updateInternalDependencies: config.updateInternalDependencies,
+        onlyUpdatePeerDependentsWhenOutOfRange:
+          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+            .onlyUpdatePeerDependentsWhenOutOfRange,
+        bumpVersionsWithWorkspaceProtocolOnly:
+          config.bumpVersionsWithWorkspaceProtocolOnly,
+        snapshot,
+      });
+    }
+  );
+  let finalisedGroupRelease = groupedReleasesWithChangelogs.map((release) => {
+    return {
+      ...release,
+      projects: release.projects.map((project) => {
+        return versionPackage(
+          {
+            ...release,
+            ...project,
+          },
+          versionsToUpdate,
+          {
+            updateInternalDependencies: config.updateInternalDependencies,
+            onlyUpdatePeerDependentsWhenOutOfRange:
+              config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                .onlyUpdatePeerDependentsWhenOutOfRange,
+            bumpVersionsWithWorkspaceProtocolOnly:
+              config.bumpVersionsWithWorkspaceProtocolOnly,
+            snapshot,
+          }
+        );
+      }),
+    };
   });
 
   let prettierInstance = getPrettierInstance(cwd);
   let prettierConfig = await prettierInstance.resolveConfig(cwd);
 
-  for (let release of finalisedRelease) {
+  for (let release of finalisedIndividualRelease) {
     let { changelog, packageJson, dir, name } = release;
 
     const pkgJSONPath = path.resolve(dir, "package.json");
@@ -145,10 +201,35 @@ export default async function applyReleasePlan(
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
+
       await updateChangelog(
         changelogPath,
         changelog,
         name,
+        prettierInstance,
+        prettierConfig
+      );
+      touchedFiles.push(changelogPath);
+    }
+  }
+
+  for (let release of finalisedGroupRelease) {
+    let { changelog, displayName, relativeChangelogPath, projects } = release;
+
+    for (let project of projects) {
+      const { dir, packageJson } = project;
+      const pkgJSONPath = path.resolve(dir, "package.json");
+      await updatePackageJson(pkgJSONPath, packageJson);
+      touchedFiles.push(pkgJSONPath);
+    }
+
+    if (changelog && changelog.length > 0) {
+      const changelogPath = path.resolve(cwd, relativeChangelogPath);
+
+      await updateChangelog(
+        changelogPath,
+        changelog,
+        displayName,
         prettierInstance,
         prettierConfig
       );
@@ -193,18 +274,25 @@ export default async function applyReleasePlan(
 }
 
 async function getNewChangelogEntry(
+  groupReleasesWithPackage: ModCompGroupWithPackage[],
   releasesWithPackage: ModCompWithPackage[],
   changesets: NewChangeset[],
   config: Config,
   cwd: string
 ) {
   if (!config.changelog) {
-    return Promise.resolve(
-      releasesWithPackage.map((release) => ({
+    return Promise.resolve({
+      individualReleasesWithChangelogs: releasesWithPackage.map((release) => ({
         ...release,
         changelog: null,
-      }))
-    );
+      })),
+      groupedReleasesWithChangelogs: groupReleasesWithPackage.map(
+        (release) => ({
+          ...release,
+          changelog: null,
+        })
+      ),
+    });
   }
 
   let getChangelogFuncs: ChangelogFunctions = {
@@ -238,9 +326,9 @@ async function getNewChangelogEntry(
     commit: commits[i],
   }));
 
-  return Promise.all(
+  let individualReleasesWithChangelogs = await Promise.all(
     releasesWithPackage.map(async (release) => {
-      let changelog = await getChangelogEntry(
+      let changelog = await getChangelogEntryForIndividualRelease(
         release,
         releasesWithPackage,
         moddedChangesets,
@@ -268,6 +356,35 @@ async function getNewChangelogEntry(
     );
     throw e;
   });
+
+  let groupedReleasesWithChangelogs = await Promise.all(
+    groupReleasesWithPackage.map(async (release) => {
+      let changelog = await getChangelogEntryForGroupRelease(
+        release,
+        moddedChangesets,
+        getChangelogFuncs,
+        changelogOpts
+      );
+
+      return {
+        ...release,
+        changelog,
+      };
+    })
+  ).catch((e) => {
+    console.error(
+      "The following error was encountered while generating changelog entries"
+    );
+    console.error(
+      "We have escaped applying the changesets, and no files should have been affected"
+    );
+    throw e;
+  });
+
+  return {
+    individualReleasesWithChangelogs,
+    groupedReleasesWithChangelogs,
+  };
 }
 
 async function updateChangelog(

@@ -1,4 +1,8 @@
-import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
+import {
+  ChangelogFunctions,
+  ModCompGroupWithPackage,
+  NewChangesetWithCommit,
+} from "@changesets/types";
 
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
@@ -22,7 +26,7 @@ async function generateChangesForVersionTypeMarkdown(
 }
 
 // release is the package and version we are releasing
-export default async function getChangelogEntry(
+export async function getChangelogEntryForIndividualRelease(
   release: ModCompWithPackage,
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
@@ -97,6 +101,45 @@ export default async function getChangelogEntry(
       changelogOpts
     )
   );
+
+  return [
+    `## ${release.newVersion}`,
+    await generateChangesForVersionTypeMarkdown(changelogLines, "major"),
+    await generateChangesForVersionTypeMarkdown(changelogLines, "minor"),
+    await generateChangesForVersionTypeMarkdown(changelogLines, "patch"),
+  ]
+    .filter((line) => line)
+    .join("\n");
+}
+
+export async function getChangelogEntryForGroupRelease(
+  release: ModCompGroupWithPackage,
+  changesets: NewChangesetWithCommit[],
+  changelogFuncs: ChangelogFunctions,
+  changelogOpts: any
+) {
+  if (release.projects.every((p) => p.type === "none")) return null;
+
+  const changelogLines: ChangelogLines = {
+    major: [],
+    minor: [],
+    patch: [],
+  };
+
+  changesets.forEach((cs) => {
+    const rls = cs.releases.find((r) =>
+      release.projects.some((p) => p.name === r.name)
+    );
+    if (rls && rls.type !== "none") {
+      changelogLines[rls.type].push(
+        changelogFuncs.getReleaseLine(
+          { ...cs, groupedChangelog: true },
+          rls.type,
+          changelogOpts
+        )
+      );
+    }
+  });
 
   return [
     `## ${release.newVersion}`,

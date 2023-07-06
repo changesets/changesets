@@ -34,9 +34,22 @@ export type NewChangeset = Changeset & {
   id: string;
 };
 
+export type ComprehensiveGroupRelease = {
+  displayName: string;
+  relativeChangelogPath: string;
+  newVersion: string;
+  changesets: string[];
+  projects: Array<{
+    name: string;
+    oldVersion: string;
+    type: VersionType;
+  }>;
+};
+
 export type ReleasePlan = {
   changesets: NewChangeset[];
-  releases: ComprehensiveRelease[];
+  individualReleases: ComprehensiveRelease[];
+  groupedReleases: ComprehensiveGroupRelease[];
   preState: PreState | undefined;
 };
 
@@ -58,7 +71,13 @@ export type PackageJSON = {
 
 export type PackageGroup = ReadonlyArray<string>;
 
-export type Fixed = ReadonlyArray<PackageGroup>;
+export type SingleChangelogPackageGroup = {
+  group: PackageGroup;
+  changelog: string;
+  name: string;
+};
+
+export type Fixed = ReadonlyArray<PackageGroup | SingleChangelogPackageGroup>;
 export type Linked = ReadonlyArray<PackageGroup>;
 
 export interface PrivatePackages {
@@ -124,11 +143,26 @@ export type ExperimentalOptions = {
   useCalculatedVersionForSnapshots?: boolean;
 };
 
-export type NewChangesetWithCommit = NewChangeset & { commit?: string };
+export type NewChangesetWithCommit = NewChangeset & {
+  commit?: string;
+  groupedChangelog?: boolean;
+};
 
 export type ModCompWithPackage = ComprehensiveRelease & {
   packageJson: PackageJSON;
   dir: string;
+};
+
+export type ModCompGroupWithPackage = Omit<
+  ComprehensiveGroupRelease,
+  "projects"
+> & {
+  projects: Array<
+    ComprehensiveGroupRelease["projects"][number] & {
+      packageJson: PackageJSON;
+      dir: string;
+    }
+  >;
 };
 
 export type GetReleaseLine = (

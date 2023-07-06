@@ -19,7 +19,7 @@ const simpleChangeset2: NewChangeset = {
 
 let simpleReleasePlan: ReleasePlan = {
   changesets: [simpleChangeset],
-  releases: [
+  individualReleases: [
     {
       name: "package-a",
       type: "minor",
@@ -28,12 +28,13 @@ let simpleReleasePlan: ReleasePlan = {
       changesets: [simpleChangeset.id],
     },
   ],
+  groupedReleases: [],
   preState: undefined,
 };
 
 let secondReleasePlan: ReleasePlan = {
   changesets: [simpleChangeset, simpleChangeset2],
-  releases: [
+  individualReleases: [
     {
       name: "package-a",
       type: "minor",
@@ -49,6 +50,7 @@ let secondReleasePlan: ReleasePlan = {
       changesets: [simpleChangeset2.id],
     },
   ],
+  groupedReleases: [],
   preState: undefined,
 };
 
@@ -123,7 +125,7 @@ describe("defaultCommitFunctions", () => {
   it("should handle a multiple releases from one changeset", async () => {
     let releasePlan: ReleasePlan = {
       changesets: [simpleChangeset, simpleChangeset2],
-      releases: [
+      individualReleases: [
         {
           name: "package-a",
           type: "patch",
@@ -139,6 +141,7 @@ describe("defaultCommitFunctions", () => {
           changesets: [simpleChangeset2.id],
         },
       ],
+      groupedReleases: [],
       preState: undefined,
     };
     const commitStr = await getVersionMessage(releasePlan, {
@@ -186,7 +189,7 @@ describe("defaultCommitFunctions", () => {
             ],
           },
         ],
-        releases: [
+        individualReleases: [
           {
             name: "pkg-a",
             type: "none",
@@ -202,6 +205,7 @@ describe("defaultCommitFunctions", () => {
             changesets: ["quick-lions-devour"],
           },
         ],
+        groupedReleases: [],
         preState: undefined,
       },
       { skipCI: "version" }

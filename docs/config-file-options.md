@@ -72,13 +72,27 @@ These restrictions exist to ensure your repository or published code do not end 
 
 > NOTE: you can also provide glob expressions to match the packages, according to the [micromatch](https://www.npmjs.com/package/micromatch) format.
 
-## `fixed` (array of arrays of package names)
+## `fixed` (array of either arrays of package names or objects with `group` (array of package names), `changelog` (filepath relative to project root), and `name` properties)
 
 This option can be used to declare that packages should be version-bumped and published together. As an example, if you have a `@changesets/button` component and a `@changesets/theme` component and you want to make sure that when one gets bumped to `1.1.0`, the other is also bumped to `1.1.0` regardless if it has any change or not. To achieve this you would have the config:
 
 ```json
 {
   "fixed": [["@changesets/button", "@changesets/theme"]]
+}
+```
+
+If you want to produce/update a single changelog for the group, you would have a config like so:
+
+```json
+{
+  "fixed": [
+    {
+      "group": ["@changesets/button", "@changesets/theme"],
+      "changelog": "CHANGELOG.md",
+      "name": "UI Packages"
+    }
+  ]
 }
 ```
 
