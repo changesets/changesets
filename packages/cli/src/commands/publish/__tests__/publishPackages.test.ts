@@ -5,7 +5,9 @@ import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { jest } from "@jest/globals";
 
 jest.mock("../npm-utils");
-jest.mock("is-ci", () => true);
+jest.mock("ci-info", () => ({
+  isCI: true,
+}));
 
 type Info404Mock = jest.MockedFunction<typeof npmUtils.infoAllow404>;
 type PublishMock = jest.MockedFunction<typeof npmUtils.publish>;
