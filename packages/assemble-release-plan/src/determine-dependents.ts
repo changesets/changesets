@@ -73,15 +73,21 @@ export default function determineDependents({
           for (const { depType, versionRange } of dependencyVersionRanges) {
             if (nextRelease.type === "none") {
               continue;
-            } else if (
+            }
+            if (
+              depType === "peerDependencies" &&
+              !config.autoBumpPeerDependentsInSameChangeset
+            ) {
+              continue;
+            }
+            if (
               shouldBumpsForPeerDeps({
                 depType,
                 versionRange,
                 nextRelease,
                 preInfo,
                 onlyUpdatePeerDependentsWhenOutOfRange:
-                  config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                    .onlyUpdatePeerDependentsWhenOutOfRange,
+                  config.autoBumpPeerDependentsCondition === "out-of-range",
               })
             ) {
               if (config.autoBumpPeerDependentsStrategy === "major") {
