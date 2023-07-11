@@ -4,11 +4,15 @@
 "@changesets/types": minor
 ---
 
-Add a new bump strategy for peers bump.
+Add a serials of config options to control the behaviour of auto bumping of peers dependents.
 
-This adds a new option "updatePeersDependencies" to the config, and can be set
-to "major" (default) or "follow". When set to "major", it preserves the 
-origin behaviour that when peers dependencies has a minor or major bump,
-the dependent need to perform a major bump; when set to "follow", when peers 
-have a major/minor/patch bump, the dependent will need to perform **at least**
-a major/minor/patch bump, respectively.
+- `autoBumpPeerDependentsInSameChangeset`: boolean, default to `true` for compatibility reason,
+  if set to `false`, auto bumping of peer dependents will be disabled.
+
+- `autoBumpPeerDependentsCondition`: string enum of `"always"` or `"out-of-range"`, default to `"always"`
+  for compatibility reason, auto bumping of peer dependents will only be triggered when the bumped version
+  is out of semver range specified by the peer dependent.
+
+- `autoBumpPeerDependentsStrategy`: string enum of `"major"` or `"follow"`, default to `"major"` for
+  compatibility reason, if set to `"follow"`, the bump type of peer dependents will follow the bump type
+  of the bumped package.
