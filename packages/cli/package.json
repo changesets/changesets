@@ -13,6 +13,9 @@
     "changelog",
     "commit"
   ],
+  "engines": {
+    "node": "^12.20.0 || >= 14.13.0"
+  }
   "main": "dist/changesets-cli.cjs.js",
   "module": "dist/changesets-cli.esm.js",
   "exports": {
