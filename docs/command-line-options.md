@@ -5,7 +5,6 @@ The command line for changesets is the main way of interacting with it. There ar
 - init
 - add [--empty][--open]
 - version [--since=master --ignore, --snapshot]
-
 - publish [--otp=code, --tag]
 - status [--since=master --verbose --output=JSON_FILE.json]
 - pre [exit|enter {tag}]
@@ -80,7 +79,7 @@ This is one of two commands responsible for releasing packages. The version comm
 Version has three options, `since`, `ignore` and `snapshot`:
 
 ```
-changeset version --since=main
+changeset version --since={baseBranch}
 ```
 
 Since option used to preform version of changesets since a specific branch or git tag (such as `main`, or the git hash of latest).
