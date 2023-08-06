@@ -4,9 +4,9 @@ The command line for changesets is the main way of interacting with it. There ar
 
 - init
 - add [--empty][--open]
-- version [--since=master --ignore, --snapshot]
+- version [--since=master, --ignore, --snapshot]
 - publish [--otp=code, --tag]
-- status [--since=master, --verbose --output=JSON_FILE.json]
+- status [--since=master --verbose --output=JSON_FILE.json]
 - pre [exit|enter {tag}]
 - tag
 
