@@ -4676,7 +4676,7 @@ is-regex@^1.1.4:
 
 is-scoped@2.0.0:
   version "2.0.0"
-  resolved "https://registry.npmmirror.com/is-scoped/-/is-scoped-2.0.0.tgz#526329fb35d126161f9417851287bbfdd18735ae"
+  resolved "https://registry.npmjs.org/is-scoped/-/is-scoped-2.0.0.tgz#526329fb35d126161f9417851287bbfdd18735ae"
   integrity sha512-69xmf0zbk2jMLZl9luJmmPVhLo7l1GOzGqXGuFVxtxUAPFNTQKMQhpDqc3YISdtT+JN1wgRmKKNDUG2vOH0Ctw==
   dependencies:
     scoped-regex "^2.0.0"
@@ -6640,7 +6640,7 @@ safe-regex@^1.1.0:
 
 scoped-regex@^2.0.0:
   version "2.1.0"
-  resolved "https://registry.npmmirror.com/scoped-regex/-/scoped-regex-2.1.0.tgz#7b9be845d81fd9d21d1ec97c61a0b7cf86d2015f"
+  resolved "https://registry.npmjs.org/scoped-regex/-/scoped-regex-2.1.0.tgz#7b9be845d81fd9d21d1ec97c61a0b7cf86d2015f"
   integrity sha512-g3WxHrqSWCZHGHlSrF51VXFdjImhwvH8ZO/pryFH56Qi0cDsZfylQa/t0jCzVQFNbNvM00HfHjkDPEuarKDSWQ==
 
 sembear@^0.5.0:
