@@ -85,6 +85,7 @@ export async function run(
       tag,
       open,
       gitTag,
+      gitTagFormat,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -171,7 +172,19 @@ export async function run(
         return;
       }
       case "publish": {
-        await publish(cwd, { otp, tag, gitTag }, config);
+        await publish(
+          cwd,
+          {
+            otp,
+            tag,
+            // Enables gitTag if gitTagFormat has content
+            gitTag:
+              (typeof gitTagFormat === "string" && gitTagFormat.length > 0) ||
+              gitTag,
+            gitTagFormat,
+          },
+          config
+        );
         return;
       }
       case "status": {
@@ -179,7 +192,7 @@ export async function run(
         return;
       }
       case "tag": {
-        await tagCommand(cwd);
+        await tagCommand(cwd, gitTagFormat);
         return;
       }
       case "pre": {

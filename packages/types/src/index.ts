@@ -171,3 +171,23 @@ export type PreState = {
   };
   changesets: string[];
 };
+
+/**
+ * e.g. **`@changesets/cli@1.0.0`**
+ */
+export type ScopedPackageInfo = {
+  /**
+   * organization name, not include `@` symbol
+   * @example `changesets`
+   */
+  organizationName?: string;
+  /**
+   * full package name, include `@` symbol
+   * @example `@changesets/cli`
+   */
+  packageName: string;
+  /** @example cli */
+  projectName: string;
+  /** @example 1.0.0 */
+  version: string;
+};
