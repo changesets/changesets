@@ -79,6 +79,14 @@ export type Config = {
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
+  /**
+   * Customize the format of a git tag, which is a template string that can be replaced by a variable
+   * @example:
+   *  // @changesets/cli@1.0.0
+   *  "{projectName}-v{version}" => "cli-v1.0.0"
+   * @see {@link ScopedPackageInfo}
+   */
+  gitTagFormat: string;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Omit<

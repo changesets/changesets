@@ -85,7 +85,7 @@ export async function run(
       tag,
       open,
       gitTag,
-      gitTagFormat,
+      gitTagFormat = config.gitTagFormat,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
