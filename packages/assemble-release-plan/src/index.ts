@@ -10,7 +10,7 @@ import flattenReleases from "./flatten-releases";
 import matchFixedConstraint from "./match-fixed-constraint";
 import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
-import * as semver from "semver";
+import semverParse from "semver/functions/parse";
 import { InternalError } from "@changesets/errors";
 import { Packages, Package } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -22,7 +22,7 @@ type SnapshotReleaseParameters = {
 };
 
 function getPreVersion(version: string) {
-  let parsed = semver.parse(version)!;
+  let parsed = semverParse(version)!;
   let preVersion =
     parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
   if (typeof preVersion !== "number") {
