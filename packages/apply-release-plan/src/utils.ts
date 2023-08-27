@@ -1,7 +1,7 @@
 /**
  * Shared utility functions and business logic
  */
-import semver from "semver";
+import semverSatisfies from "semver/functions/satisfies";
 import { VersionType } from "@changesets/types";
 
 const bumpTypes = ["none", "patch", "minor", "major"];
@@ -36,7 +36,7 @@ export function shouldUpdateDependencyBasedOnConfig(
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
 ): boolean {
-  if (!semver.satisfies(release.version, depVersionRange)) {
+  if (!semverSatisfies(release.version, depVersionRange)) {
     // Dependencies leaving semver range should always be updated
     return true;
   }

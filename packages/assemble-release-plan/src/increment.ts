@@ -1,4 +1,4 @@
-import * as semver from "semver";
+import semverInc from "semver/functions/inc";
 import { InternalRelease, PreInfo } from "./types";
 import { InternalError } from "@changesets/errors";
 
@@ -10,7 +10,7 @@ export function incrementVersion(
     return release.oldVersion;
   }
 
-  let version = semver.inc(release.oldVersion, release.type)!;
+  let version = semverInc(release.oldVersion, release.type)!;
   if (preInfo !== undefined && preInfo.state.mode !== "exit") {
     let preVersion = preInfo.preVersions.get(release.name);
     if (preVersion === undefined) {
