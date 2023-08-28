@@ -1,5 +1,5 @@
 // This is a modified version of the graph-getting in bolt
-import semver from "semver";
+import Range from "semver/classes/range";
 import chalk from "chalk";
 import { Packages, Package } from "@manypkg/get-packages";
 import { PackageJSON } from "@changesets/types";
@@ -42,7 +42,7 @@ const getValidRange = (potentialRange: string) => {
   }
 
   try {
-    return new semver.Range(potentialRange);
+    return new Range(potentialRange);
   } catch {
     return null;
   }

@@ -1,7 +1,20 @@
 {
   "name": "@changesets/release-utils",
-  "version": "0.1.12",
-  "main": "dist/release-utils.cjs.js",
+  "version": "0.1.13",
+  "main": "dist/changesets-release-utils.cjs.js",
+  "module": "dist/changesets-release-utils.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-release-utils.cjs.mjs",
+        "default": "./dist/changesets-release-utils.cjs.js"
+      },
+      "module": "./dist/changesets-release-utils.esm.js",
+      "import": "./dist/changesets-release-utils.cjs.mjs",
+      "default": "./dist/changesets-release-utils.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "dependencies": {
     "@changesets/pre": "^1.0.14",
     "@changesets/read": "^0.5.9",
@@ -11,7 +24,7 @@
     "mdast-util-to-string": "^1.0.6",
     "remark-parse": "^7.0.1",
     "remark-stringify": "^7.0.3",
-    "semver": "^5.4.1",
+    "semver": "^7.5.3",
     "spawndamnit": "^2.0.0",
     "unified": "^8.3.2"
   },

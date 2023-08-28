@@ -1,6 +1,6 @@
 import { getPackages, Package } from "@manypkg/get-packages";
 import path from "path";
-import * as semver from "semver";
+import semverLt from "semver/functions/lt";
 import {
   execWithOutput,
   getVersionsByDirectory,
@@ -127,7 +127,7 @@ export async function runVersion({
       "cli",
       "package.json"
     ));
-    let cmd = semver.lt(changesetsCliPkgJson.version, "2.0.0")
+    let cmd = semverLt(changesetsCliPkgJson.version, "2.0.0")
       ? "bump"
       : "version";
     await execWithOutput(
