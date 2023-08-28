@@ -372,17 +372,17 @@ describe("Changesets", () => {
     it("generates a changeset", async () => {
       const cwd = await testdir({
         "rush.json": JSON.stringify({
-          "projects": [
+          projects: [
             {
-              "projectFolder": "libraries/a",
-              "packageName": "@example/a"
-            }
-          ]
+              projectFolder: "libraries/a",
+              packageName: "@example/a",
+            },
+          ],
         }),
         "libraries/a/package.json": JSON.stringify({
           name: "@example/a",
-          version: "1.0.0"
-        })
+          version: "1.0.0",
+        }),
       });
 
       const summary = "summary message mock";

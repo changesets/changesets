@@ -58,7 +58,7 @@ let getSimpleSetup = () => ({
       relativeDir: ".",
     },
     packages: [getPackage({ name: "pkg-a", version: "1.0.0" })],
-    tool: YarnTool
+    tool: YarnTool,
   },
   changesets: [
     getChangeset({ releases: [getRelease({ name: "pkg-a", type: "patch" })] }),

@@ -189,16 +189,16 @@ describe("running version in a simple project", () => {
     it("should bump releasedPackages", async () => {
       const cwd = await testdir({
         "rush.json": JSON.stringify({
-          "projects": [
+          projects: [
             {
-              "projectFolder": "packages/pkg-a",
-              "packageName": "pkg-a"
+              projectFolder: "packages/pkg-a",
+              packageName: "pkg-a",
             },
             {
-              "projectFolder": "packages/pkg-b",
-              "packageName": "pkg-b"
-            }
-          ]
+              projectFolder: "packages/pkg-b",
+              packageName: "pkg-b",
+            },
+          ],
         }),
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
