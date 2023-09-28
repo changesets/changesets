@@ -691,4 +691,16 @@ describe("parser errors", () => {
       ] but the \`changedFilePatterns\` option can only be set as an array of strings"
     `);
   });
+
+  test("gitTagFormat - invalid variable", () => {
+    expect(() => {
+      unsafeParse(
+        { gitTagFormat: "{projectName}-{version}-{invalid}" },
+        defaultPackages
+      );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The \`gitTagFormat\` option contains an invalid variable "invalid". Valid variables are organizationName, packageName, projectName, version"
+    `);
+  });
 });

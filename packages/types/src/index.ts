@@ -107,6 +107,7 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
+  gitTagFormat?: Config["gitTagFormat"];
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
     | false
