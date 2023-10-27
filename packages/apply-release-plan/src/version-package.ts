@@ -4,7 +4,8 @@ import {
   VersionType,
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
-import semver from "semver";
+import Range from "semver/classes/range";
+import semverPrerelease from "semver/functions/prerelease";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
 const DEPENDENCY_TYPES = [
@@ -88,10 +89,10 @@ export default function versionPackage(
           // we don't want to change these versions because they will match
           // any version and if someone makes the range that
           // they probably want it to stay like that...
-          new semver.Range(depCurrentVersion).range !== "" ||
+          new Range(depCurrentVersion).range !== "" ||
           // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-          semver.prerelease(version) !== null
+          semverPrerelease(version) !== null
         ) {
           let newNewRange = snapshot
             ? version
