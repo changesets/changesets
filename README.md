@@ -65,7 +65,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [keystone](https://v5.keystonejs.com/)
 - [react-select](https://react-select.com/home)
 - [XState](https://xstate.js.org/)
-- [pnpm](https://pnpm.js.org/)
+- [pnpm](https://pnpm.io/)
 - [filbert-js](https://github.com/kuldeepkeshwar/filbert-js)
 - [tinyhttp](https://github.com/talentlessguy/tinyhttp)
 - [Firebase Javascript SDK](https://github.com/firebase/firebase-js-sdk)
