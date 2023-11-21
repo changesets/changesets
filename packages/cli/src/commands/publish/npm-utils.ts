@@ -5,12 +5,11 @@ import pLimit from "p-limit";
 import preferredPM from "preferred-pm";
 import chalk from "chalk";
 import spawn from "spawndamnit";
-import semverParse from "semver/functions/parse";
+import { SemVer, parse as semverParse } from "semver";
 import { askQuestion } from "../../utils/cli-utilities";
 import { isCI } from "ci-info";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
-import { SemVer } from "semver";
 
 interface PublishOptions {
   cwd: string;
@@ -44,14 +43,18 @@ function getCorrectRegistry(packageJson?: PackageJSON): string {
 
 async function getPublishTool(
   cwd: string
-): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean } | { name: "yarn"; version: SemVer | null }> {
+): Promise<
+  | { name: "npm" }
+  | { name: "pnpm"; shouldAddNoGitChecks: boolean }
+  | { name: "yarn"; version: SemVer | null }
+> {
   const pm = await preferredPM(cwd);
 
   if (pm && pm.name === "yarn") {
     let result = await spawn("yarn", ["--version"], { cwd });
     let version = result.stdout.toString().trim();
     let parsed = semverParse(version);
-    return { name: "yarn", version: parsed }
+    return { name: "yarn", version: parsed };
   }
 
   if (!pm || pm.name !== "pnpm") return { name: "npm" };
@@ -191,20 +194,31 @@ async function internalPublish(
   const envOverride = {
     npm_config_registry: getCorrectRegistry(),
   };
+
+  const isYarnBerry =
+    publishTool.name === "yarn" &&
+    publishTool.version &&
+    publishTool.version.major >= 2;
+
   let { code, stdout, stderr } =
     publishTool.name === "pnpm"
       ? await spawn("pnpm", ["publish", "--json", ...publishFlags], {
           env: Object.assign({}, process.env, envOverride),
           cwd: opts.cwd,
         })
-            : await spawn(
+      : isYarnBerry
+      ? await spawn(publishTool.name, ["npm", "publish", ...publishFlags], {
+          env: Object.assign({}, process.env, envOverride),
+          cwd: opts.cwd,
+        })
+      : await spawn(
           publishTool.name,
           ["publish", opts.publishDir, "--json", ...publishFlags],
           {
             env: Object.assign({}, process.env, envOverride),
           }
         );
-      if (code !== 0) {
+  if (code !== 0) {
     // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
     // We want to handle this as best we can but it has some struggles:
     // - output of those lifecycle scripts can contain JSON
