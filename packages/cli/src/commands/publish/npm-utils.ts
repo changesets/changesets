@@ -10,6 +10,7 @@ import { askQuestion } from "../../utils/cli-utilities";
 import { isCI } from "ci-info";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
+import { SemVer } from "semver";
 
 interface PublishOptions {
   cwd: string;
@@ -43,8 +44,16 @@ function getCorrectRegistry(packageJson?: PackageJSON): string {
 
 async function getPublishTool(
   cwd: string
-): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
+): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean } | { name: "yarn"; version: SemVer | null }> {
   const pm = await preferredPM(cwd);
+
+  if (pm && pm.name === "yarn") {
+    let result = await spawn("yarn", ["--version"], { cwd });
+    let version = result.stdout.toString().trim();
+    let parsed = semverParse(version);
+    return { name: "yarn", version: parsed }
+  }
+
   if (!pm || pm.name !== "pnpm") return { name: "npm" };
   try {
     let result = await spawn("pnpm", ["--version"], { cwd });
@@ -188,14 +197,14 @@ async function internalPublish(
           env: Object.assign({}, process.env, envOverride),
           cwd: opts.cwd,
         })
-      : await spawn(
+            : await spawn(
           publishTool.name,
           ["publish", opts.publishDir, "--json", ...publishFlags],
           {
             env: Object.assign({}, process.env, envOverride),
           }
         );
-  if (code !== 0) {
+      if (code !== 0) {
     // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
     // We want to handle this as best we can but it has some struggles:
     // - output of those lifecycle scripts can contain JSON
