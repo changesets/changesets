@@ -1,5 +1,32 @@
 # @changesets/cli
 
+## 2.27.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+- [#1236](https://github.com/changesets/changesets/pull/1236) [`dfd4cca`](https://github.com/changesets/changesets/commit/dfd4cca84118df913feedfeac37a4939566ae447) Thanks [@camertron](https://github.com/camertron)! - Avoid using short commit IDs
+
+### Patch Changes
+
+- [#1053](https://github.com/changesets/changesets/pull/1053) [`90a870a`](https://github.com/changesets/changesets/commit/90a870af2e7bcbe1551210063492e20c256f4995) Thanks [@paescuj](https://github.com/paescuj)! - Replace the dependency `is-ci` with `ci-info`.
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a), [`dfd4cca`](https://github.com/changesets/changesets/commit/dfd4cca84118df913feedfeac37a4939566ae447)]:
+  - @changesets/assemble-release-plan@6.0.0
+  - @changesets/get-dependents-graph@2.0.0
+  - @changesets/apply-release-plan@7.0.0
+  - @changesets/get-release-plan@4.0.0
+  - @changesets/changelog-git@0.2.0
+  - @changesets/config@3.0.0
+  - @changesets/errors@0.2.0
+  - @changesets/logger@0.1.0
+  - @changesets/types@6.0.0
+  - @changesets/write@0.3.0
+  - @changesets/read@0.6.0
+  - @changesets/git@3.0.0
+  - @changesets/pre@2.0.0
+
 ## 2.26.2
 
 ### Patch Changes

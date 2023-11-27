@@ -52,7 +52,7 @@ async function getCommitsThatAddChangesets(
 
   const legacyPaths = missingIds.map((id) => `.changeset/${id}/changes.json`);
   const commitsForLegacyPaths = await git.getCommitsThatAddFiles(legacyPaths, {
-    cwd
+    cwd,
   });
 
   // Fill in the blanks in the array of commits
