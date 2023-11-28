@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.27.1
+
+### Patch Changes
+
+- [#1267](https://github.com/changesets/changesets/pull/1267) [`86cfff1`](https://github.com/changesets/changesets/commit/86cfff1f1891e75238eec61dc97a303ad7a8c030) Thanks [@Andarist](https://github.com/Andarist)! - Make `./bin.js` available through `package.json#exports` to fix compatibility with `changesets/action`.
+
 ## 2.27.0
 
 ### Minor Changes
