@@ -43,7 +43,8 @@
       "import": "./commit/dist/changesets-cli-commit.cjs.mjs",
       "default": "./commit/dist/changesets-cli-commit.cjs.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./bin.js": "./bin.js"
   },
   "author": "Changesets Contributors",
   "contributors": [
@@ -56,7 +57,12 @@
       "./index.ts",
       "./changelog.ts",
       "./commit/index.ts"
-    ]
+    ],
+    "exports": {
+      "extra": {
+        "./bin.js": "./bin.js"
+      }
+    }
   },
   "license": "MIT",
   "dependencies": {
