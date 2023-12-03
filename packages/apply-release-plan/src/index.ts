@@ -38,7 +38,7 @@ async function getCommitsThatAddChangesets(
   cwd: string
 ) {
   const paths = changesetIds.map((id) => `.changeset/${id}.md`);
-  const commits = await git.getCommitsThatAddFiles(paths, { cwd, short: true });
+  const commits = await git.getCommitsThatAddFiles(paths, { cwd });
 
   if (commits.every(stringDefined)) {
     // We have commits for all files
@@ -53,7 +53,6 @@ async function getCommitsThatAddChangesets(
   const legacyPaths = missingIds.map((id) => `.changeset/${id}/changes.json`);
   const commitsForLegacyPaths = await git.getCommitsThatAddFiles(legacyPaths, {
     cwd,
-    short: true,
   });
 
   // Fill in the blanks in the array of commits
