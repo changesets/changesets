@@ -135,6 +135,7 @@ async function publishAPackage(
         : pkg.dir,
       access: publishConfig?.access || access,
       tag,
+      registry: publishConfig?.registry,
     },
     twoFactorState
   );
