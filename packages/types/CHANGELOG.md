@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 6.0.0
+
+### Major Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
 ## 5.2.1
 
 ### Patch Changes
