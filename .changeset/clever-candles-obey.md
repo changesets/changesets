@@ -4,12 +4,11 @@
 "@changesets/get-release-plan": major
 ---
 
-Use semver compat for workspace:^ dependencies.
+Use semver compat for workspace:^ and workspace:~ dependencies.
 
-Prior to this change, all packages depending on an updated package via `workspace:^` got a version bump.
+Prior to this change, all packages depending on an updated package via `workspace:^` or `workspace:~` got a version bump.
 This leads to packages being released that don't need to be according to semver.
 
 This is a bugfix in terms of supporting semver, but it's breaking backwards compatible behavior.
 
-If you're using `workspace:^` dependencies in your project, ensure that changes to dependencies of a package
-come with a dedicated changeset for that package.
+If you're using `workspace:^` or `workspace:~` dependencies in your project, ensure that changes to dependencies of a package come with a dedicated changeset for that package.

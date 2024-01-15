@@ -188,18 +188,18 @@ function getDependencyVersionRanges(
     if (versionRange.startsWith("workspace:")) {
       // intentionally keep other workspace ranges untouched
       // this has to be fixed but this should only be done when adding appropriate tests
-      let workspaceRange = versionRange;
-      if (versionRange === "workspace:*") {
-        // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
-        workspaceRange = dependencyRelease.oldVersion;
-      } else if (versionRange === "workspace:^") {
-        // Use ^oldVersion for workspace:^.
-        // The version range might have changed in dependent package, but that should have its own changeset bumping that package.
-        workspaceRange = `^${dependencyRelease.oldVersion}`;
-      } else {
-        workspaceRange = versionRange.replace(/^workspace:/, "");
+      let workspaceRange = versionRange.replace(/^workspace:/, "");
+      switch (workspaceRange) {
+        case "*":
+          // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
+          workspaceRange = dependencyRelease.oldVersion;
+          break;
+        case "~":
+        case "^":
+          // Use ^oldVersion for workspace:^ or ~oldVersion for workspace:~.
+          // The version range might have changed in dependent package, but that should have its own changeset bumping that package.
+          workspaceRange += dependencyRelease.oldVersion;
       }
-
       dependencyVersionRanges.push({
         depType: type,
         versionRange: workspaceRange,
