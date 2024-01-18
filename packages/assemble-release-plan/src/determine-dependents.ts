@@ -1,4 +1,4 @@
-import semver from "semver";
+import semverSatisfies from "semver/functions/satisfies";
 import {
   DependencyType,
   PackageJSON,
@@ -86,7 +86,7 @@ export default function determineDependents({
                 releases.get(dependent)!.type === "none") &&
               (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
                 .updateInternalDependents === "always" ||
-                !semver.satisfies(
+                !semverSatisfies(
                   incrementVersion(nextRelease, preInfo),
                   versionRange
                 ))
@@ -231,10 +231,7 @@ function shouldBumpMajor({
     // 1. If onlyUpdatePeerDependentsWhenOutOfRange set to true, bump major if the version is leaving the range.
     // 2. If onlyUpdatePeerDependentsWhenOutOfRange set to false, bump major regardless whether or not the version is leaving the range.
     (!onlyUpdatePeerDependentsWhenOutOfRange ||
-      !semver.satisfies(
-        incrementVersion(nextRelease, preInfo),
-        versionRange
-      )) &&
+      !semverSatisfies(incrementVersion(nextRelease, preInfo), versionRange)) &&
     // bump major only if the dependent doesn't already has a major release.
     (!releases.has(dependent) ||
       (releases.has(dependent) && releases.get(dependent)!.type !== "major"))

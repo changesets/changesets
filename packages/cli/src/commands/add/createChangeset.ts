@@ -1,7 +1,7 @@
 import chalk from "chalk";
 
 import micromatch from "micromatch";
-import semver from "semver";
+import semverLt from "semver/functions/lt";
 
 import * as cli from "../../utils/cli-utilities";
 import { error, log } from "@changesets/logger";
@@ -13,7 +13,7 @@ import { CliOptions } from "../../types";
 const { green, yellow, red, bold, blue, cyan } = chalk;
 
 async function confirmMajorRelease(pkgJSON: PackageJSON) {
-  if (semver.lt(pkgJSON.version, "1.0.0")) {
+  if (semverLt(pkgJSON.version, "1.0.0")) {
     // prettier-ignore
     log(yellow(`WARNING: Releasing a major version for ${green(pkgJSON.name)} will be its ${red('first major release')}.`))
     log(
