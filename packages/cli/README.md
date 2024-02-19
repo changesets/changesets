@@ -137,6 +137,11 @@ If you set the `commit` option in the config, the command will add the updated c
 
 - `--open` - opens the created changeset in an external editor
 
+- `--bump-type` - Creates a changeset with the specified bump type,
+  instead of being prompted to choose it.
+  Bump type can be one of: `major`, `minor`, `patch`, `none`, and only one version may be specified.
+
+- `--summary` - Specify the content of the changeset instead of being prompted to write it.
 ### version
 
 ```
