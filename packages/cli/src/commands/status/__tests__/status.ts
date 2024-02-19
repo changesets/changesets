@@ -412,4 +412,41 @@ describe("status", () => {
       }
     `);
   });
+
+  it("should respect the format flag", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    // @ts-ignore
+    git.getChangedPackagesSinceRef.mockImplementation(() => [
+      {
+        packageJson: { name: "pkg-a", version: "1.0.0" },
+        dir: "/fake/folder/doesnt/matter",
+      },
+    ]);
+    const changesetID = "ascii";
+    // @ts-ignore
+    humanId.mockReturnValueOnce(changesetID);
+
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+    const probsUndefined = await status(cwd, { format: "json" }, defaultConfig);
+
+    expect(probsUndefined).toEqual(undefined);
+    expect(console.log).toHaveBeenCalledTimes(1);
+  });
 });

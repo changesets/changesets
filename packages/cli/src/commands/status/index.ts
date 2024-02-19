@@ -20,11 +20,13 @@ export default async function getStatus(
     since,
     verbose,
     output,
+    format,
   }: {
     sinceMaster?: boolean;
     since?: string;
     verbose?: boolean;
     output?: string;
+    format?: "json";
   },
   config: Config
 ) {
@@ -59,6 +61,11 @@ export default async function getStatus(
       path.join(cwd, output),
       JSON.stringify(releasePlan, undefined, 2)
     );
+    return;
+  }
+
+  if (format === "json") {
+    console.log(JSON.stringify(releasePlan, undefined, 2));
     return;
   }
 
