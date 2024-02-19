@@ -61,6 +61,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 ## Cool Projects already using Changesets for versioning and changelogs
 
 - [atlaskit](https://atlaskit.atlassian.com/)
+- [Block Protocol](https://github.com/blockprotocol/blockprotocol)
 - [emotion](https://emotion.sh/docs/introduction)
 - [keystone](https://v5.keystonejs.com/)
 - [react-select](https://react-select.com/home)
