@@ -1140,6 +1140,46 @@ describe("same package in different dependency types", () => {
   });
 });
 
+describe("when there is an unversioned dependent package", () => {
+  it("should leave the dependent unversioned and update the dependency version if semver is no longer satisfied", async () => {
+    let cwd = f.copy("simple-project-unversioned-dependent");
+    await writeChangeset(
+      {
+        releases: [
+          {
+            name: "pkg-c",
+            type: "patch",
+          },
+        ],
+        summary: "a very useful summary for the first change",
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        dependencies: {
+          "pkg-c": "1.0.1",
+        },
+        name: "pkg-a",
+      },
+      {
+        dependencies: {
+          "pkg-c": "^1.0.0",
+        },
+        name: "pkg-b",
+      },
+      {
+        name: "pkg-c",
+        version: "1.0.1",
+      },
+    ]);
+  });
+});
+
 describe("snapshot release", () => {
   it("should update the package to unique version no matter the kind of version bump it is", async () => {
     const cwd = await testdir({

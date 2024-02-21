@@ -1,0 +1,6 @@
+{
+  "name": "pkg-b",
+  "dependencies": {
+    "pkg-c": "^1.0.0"
+  }
+}
