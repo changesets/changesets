@@ -315,8 +315,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )
       );
 
-      // Validate that all dependents of ignored packages are listed in the ignore list
-      const dependentsGraph = getDependentsGraph(packages);
+      // Validate that all dependents of ignored packages are listed in the ignore list, ignore
+      // devDependencies.
+      const dependentsGraph = getDependentsGraph(packages, {
+        ignoreDevDependencies: true,
+      });
       for (const ignoredPackage of json.ignore) {
         const dependents = dependentsGraph.get(ignoredPackage) || [];
         for (const dependent of dependents) {
