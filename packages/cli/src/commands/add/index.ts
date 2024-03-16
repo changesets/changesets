@@ -17,7 +17,7 @@ import { isListablePackage } from "./isListablePackage";
 
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  { empty, open, since }: { empty?: boolean; open?: boolean, since?: string },
   config: Config
 ) {
   const packages = await getPackages(cwd);
@@ -41,7 +41,7 @@ export default async function add(
   } else {
     const changedPackages = await git.getChangedPackagesSinceRef({
       cwd,
-      ref: config.baseBranch,
+      ref: since || config.baseBranch,
       changedFilePatterns: config.changedFilePatterns,
     });
     const changedPackagesName = changedPackages
