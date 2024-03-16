@@ -17,7 +17,7 @@ import printConfirmationMessage from "./messages";
 
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  { empty, open, since }: { empty?: boolean; open?: boolean; since?: string },
   config: Config
 ) {
   const packages = await getPackages(cwd);
@@ -46,6 +46,7 @@ export default async function add(
     const changedPackagesNames = (
       await getVersionableChangedPackages(config, {
         cwd,
+        ref: since,
       })
     ).map((pkg) => pkg.packageJson.name);
 
