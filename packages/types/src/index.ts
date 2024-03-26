@@ -154,7 +154,7 @@ export type ChangelogLines = {
 export type GenerateChangesForVersionTypeMarkdown = (
   obj: ChangelogLines,
   type: keyof ChangelogLines
-) => string;
+) => Promise<string>;
 
 export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
