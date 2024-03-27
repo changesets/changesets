@@ -16,6 +16,7 @@ interface PublishOptions {
   publishDir: string;
   access: AccessType;
   tag: string;
+  registry?: string;
 }
 
 const npmRequestLimit = pLimit(40);
@@ -168,6 +169,10 @@ async function internalPublish(
   let publishTool = await getPublishTool(opts.cwd);
   let publishFlags = opts.access ? ["--access", opts.access] : [];
   publishFlags.push("--tag", opts.tag);
+
+  if (opts.registry) {
+    publishFlags.push("--registry", opts.registry);
+  }
 
   if ((await twoFactorState.isRequired) && !isCI) {
     let otpCode = await getOtpCode(twoFactorState);
