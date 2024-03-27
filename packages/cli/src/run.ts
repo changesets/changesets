@@ -179,7 +179,7 @@ export async function run(
         return;
       }
       case "tag": {
-        await tagCommand(cwd);
+        await tagCommand(cwd, config);
         return;
       }
       case "pre": {
