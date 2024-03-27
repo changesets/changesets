@@ -1,5 +1,6 @@
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import * as git from "@changesets/git";
+import { defaultConfig } from "@changesets/config";
 import tag from "../index";
 
 jest.mock("@changesets/git");
@@ -30,7 +31,7 @@ describe("tag command", () => {
       (git.getAllTags as jest.Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag(cwd);
+      await tag(cwd, defaultConfig);
       expect(git.tag).toHaveBeenCalledTimes(2);
       expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("pkg-a@1.0.0");
       expect((git.tag as jest.Mock).mock.calls[1][0]).toEqual("pkg-b@1.0.0");
@@ -63,7 +64,7 @@ describe("tag command", () => {
       );
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag(cwd);
+      await tag(cwd, defaultConfig);
       expect(git.tag).toHaveBeenCalledTimes(1);
       expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("pkg-b@1.0.0");
     });
@@ -81,7 +82,7 @@ describe("tag command", () => {
       (git.getAllTags as jest.Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag(cwd);
+      await tag(cwd, defaultConfig);
       expect(git.tag).toHaveBeenCalledTimes(1);
       expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("v1.0.0");
     });
