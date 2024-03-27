@@ -1,5 +1,6 @@
 import chalk from "chalk";
 
+import micromatch from "micromatch";
 import semverLt from "semver/functions/lt";
 
 import * as cli from "../../utils/cli-utilities";
@@ -7,6 +8,7 @@ import { error, log } from "@changesets/logger";
 import { Release, PackageJSON } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
+import { CliOptions } from "../../types";
 
 const { green, yellow, red, bold, blue, cyan } = chalk;
 
@@ -104,13 +106,82 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
   return `${bold(pkgName)}@${bold(version)}`;
 }
 
+function getPackagesByOptions(
+  allPackages: Package[],
+  option?: string | string[]
+) {
+  if (!option || !option.length) {
+    return [];
+  }
+
+  const parsedStringPackages = allPackages.map((pkg) => pkg.packageJson.name);
+  const matchedPackages = micromatch(parsedStringPackages, option);
+
+  if (matchedPackages.length < 1) {
+    error(
+      `Please check package are included in name in package.json: ${cyan(
+        option.toString()
+      )}`
+    );
+
+    throw new ExitError(1);
+  }
+
+  return matchedPackages;
+}
+
+function findDuplicates(...arrays: string[][]): string[] {
+  const counts = new Map();
+
+  for (const arr of arrays) {
+    for (const val of arr) {
+      if (counts.has(val)) {
+        counts.set(val, counts.get(val) + 1);
+      } else {
+        counts.set(val, 1);
+      }
+    }
+  }
+
+  const duplicates = [];
+
+  for (const [val, count] of counts) {
+    if (count > 1) {
+      duplicates.push(val);
+    }
+  }
+
+  return duplicates;
+}
+
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Package[]
+  allPackages: Package[],
+  options: Pick<CliOptions, "message" | "major" | "minor" | "patch">
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
-  if (allPackages.length > 1) {
+  if (options.major || options.minor || options.patch) {
+    const major = getPackagesByOptions(allPackages, options.major);
+    const minor = getPackagesByOptions(allPackages, options.minor);
+    const patch = getPackagesByOptions(allPackages, options.patch);
+
+    const duplicates = findDuplicates(major, minor, patch);
+
+    if (duplicates.length > 0) {
+      error(
+        `Duplicate selected packages exist. Please check the following packages: ${cyan(
+          duplicates.join(", ")
+        )}`
+      );
+
+      throw new ExitError(1);
+    }
+
+    major.map((name) => releases.push({ name, type: "major" }));
+    minor.map((name) => releases.push({ name, type: "minor" }));
+    patch.map((name) => releases.push({ name, type: "patch" }));
+  } else if (allPackages.length > 1) {
     const packagesToRelease = await getPackagesToRelease(
       changedPackages,
       allPackages
@@ -238,7 +309,7 @@ export default async function createChangeset(
   );
   log(chalk.gray("  (submit empty line to open external editor)"));
 
-  let summary = await cli.askQuestion("Summary");
+  let summary = options.message ?? (await cli.askQuestion("Summary"));
   if (summary.length === 0) {
     try {
       summary = cli.askQuestionWithEditor(
