@@ -12,10 +12,10 @@ const { input, flags } = meow(
     init
     add [--empty] [--open]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
-    publish [--tag <name>] [--otp <code>] [--no-git-tag]
+    publish [--tag <name>] [--otp <code>] [--no-git-tag] | [--git-tag-format <format>]
     status [--since <branch>] [--verbose] [--output JSON_FILE.json]
     pre <enter|exit> <tag>
-    tag
+    tag [--git-tag-format <format>]
     `,
   {
     flags: {
@@ -52,6 +52,9 @@ const { input, flags } = meow(
       gitTag: {
         type: "boolean",
         default: true,
+      },
+      gitTagFormat: {
+        type: "string",
       },
       snapshotPrereleaseTemplate: {
         type: "string",

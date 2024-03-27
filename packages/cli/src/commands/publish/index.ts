@@ -7,6 +7,7 @@ import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import chalk from "chalk";
 import { getUntaggedPrivatePackages } from "./getUntaggedPrivatePackages";
+import { parsePackage, replacePlaceholders } from "../tag/parsePackage";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map((p) => `${p.name}@${p.newVersion}`).join("\n");
@@ -40,7 +41,12 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
 
 export default async function run(
   cwd: string,
-  { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
+  {
+    otp,
+    tag,
+    gitTag = true,
+    gitTagFormat,
+  }: { otp?: string; tag?: string; gitTag?: boolean; gitTagFormat?: string },
   config: Config
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
@@ -97,7 +103,7 @@ export default async function run(
       // fail if we are behind the base branch).
       log(`Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`);
 
-      await tagPublish(tool, successfulNpmPublishes, cwd);
+      await tagPublish(tool, successfulNpmPublishes, cwd, gitTagFormat);
     }
   }
 
@@ -105,7 +111,7 @@ export default async function run(
     success("found untagged projects:");
     logReleases(untaggedPrivatePackageReleases);
 
-    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
+    await tagPublish(tool, untaggedPrivatePackageReleases, cwd, gitTagFormat);
   }
 
   if (unsuccessfulNpmPublishes.length > 0) {
@@ -119,16 +125,22 @@ export default async function run(
 async function tagPublish(
   tool: string,
   packageReleases: PublishedResult[],
-  cwd: string
+  cwd: string,
+  format?: string
 ) {
   if (tool !== "root") {
     for (const pkg of packageReleases) {
-      const tag = `${pkg.name}@${pkg.newVersion}`;
+      const parseResult = parsePackage(pkg);
+
+      const tag = replacePlaceholders(parseResult, format);
       log("New tag: ", tag);
       await git.tag(tag, cwd);
     }
   } else {
-    const tag = `v${packageReleases[0].newVersion}`;
+    const tag = replacePlaceholders(
+      parsePackage(packageReleases[0]),
+      format ?? "v{version}"
+    );
     log("New tag: ", tag);
     await git.tag(tag, cwd);
   }
