@@ -3,6 +3,7 @@ import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
+import semverValidRange from "semver/ranges/valid";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -62,8 +63,11 @@ export default async function getChangelogEntry(
       release.packageJson.peerDependencies?.[rel.name];
 
     const versionRange = dependencyVersionRange || peerDependencyVersionRange;
+    const usesWorkspaceRange = versionRange?.startsWith("workspace:");
+    const isValidSemver = semverValidRange(versionRange) !== null;
     return (
       versionRange &&
+      (usesWorkspaceRange || isValidSemver) &&
       shouldUpdateDependencyBasedOnConfig(
         { type: rel.type, version: rel.newVersion },
         {
