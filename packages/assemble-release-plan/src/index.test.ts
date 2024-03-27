@@ -560,6 +560,56 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     expect(releases[1].newVersion).toEqual("1.0.0");
   });
 
+  describe("bumpOnDevDependencies", () => {
+    it("should bump a dev dependent and its dependent when a listed package gets bumped", () => {
+      setup.updateDevDependency("pkg-b", "pkg-a", "1.0.0");
+      setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
+
+      let { releases } = assembleReleasePlan(setup.changesets, setup.packages, {
+        ...defaultConfig,
+        bumpOnDevDependencies: ["pkg-a"],
+      });
+
+      expect(releases.length).toBe(3);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("1.0.1");
+      expect(releases[2].name).toEqual("pkg-c");
+      expect(releases[2].newVersion).toEqual("1.0.1");
+    });
+
+    it("should support glob syntax", () => {
+      setup.updateDevDependency("pkg-b", "pkg-a", "1.0.0");
+
+      let { releases } = assembleReleasePlan(setup.changesets, setup.packages, {
+        ...defaultConfig,
+        bumpOnDevDependencies: ["pkg-*"],
+      });
+
+      expect(releases.length).toBe(2);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("1.0.1");
+    });
+
+    it("should not bump a dev dependent when any other package gets bumped", () => {
+      setup.updateDevDependency("pkg-b", "pkg-a", "1.0.0");
+
+      let { releases } = assembleReleasePlan(setup.changesets, setup.packages, {
+        ...defaultConfig,
+        bumpOnDevDependencies: ["pkg-x"],
+      });
+
+      expect(releases.length).toBe(2);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("1.0.0");
+    });
+  });
+
   describe("fixed packages", () => {
     it("should assemble release plan for fixed packages", () => {
       setup.addChangeset({

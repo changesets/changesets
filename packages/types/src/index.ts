@@ -89,6 +89,7 @@ export type Config = {
     useCalculatedVersion: boolean;
     prereleaseTemplate: string | null;
   };
+  bumpOnDevDependencies: readonly string[];
 };
 
 export type WrittenConfig = {

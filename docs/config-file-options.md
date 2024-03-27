@@ -10,7 +10,8 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "access": "restricted",
   "baseBranch": "master",
   "ignore": [],
-  "changelog": "@changesets/cli/changelog"
+  "changelog": "@changesets/cli/changelog",
+  "bumpOnDevDependencies": []
 }
 ```
 
@@ -193,3 +194,13 @@ You can use the following placeholders for customizing the snapshot release vers
 **Default behavior**
 
 If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
+
+## `bumpOnDevDependencies` (optional array of package names)
+
+Default value: `[]`
+
+Some projects bundle some or all of their dependencies into built files. In these projects, bundled dependencies are commonly stored in `devDependencies`, as they're not needed during end-user installation.
+
+By default, changes to `devDependencies` won't cause Changesets to bump dependent packages. You can use this option to override that behavior for one or more `devDependencies`.
+
+This option takes package names (i.e. `["@bundled/foo", "@bundled/bar"]`) or patterns (i.e. `["@bundled/*"]`).

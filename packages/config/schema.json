@@ -140,6 +140,14 @@
           "minLength": 1
         }
       }
+    },
+    "bumpOnDevDependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Package names or patterns for `devDependencies` that should bump dependent packages."
     }
   }
 }

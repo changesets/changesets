@@ -489,6 +489,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
             tag: json.privatePackages.tag ?? false,
           }
         : { version: true, tag: false },
+
+    bumpOnDevDependencies: [],
   };
 
   if (
