@@ -13,7 +13,7 @@ const { input, flags } = meow(
     add [--empty] [--open]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]
-    status [--since <branch>] [--verbose] [--output JSON_FILE.json]
+    status [--since <branch>] [--verbose] [--output JSON_FILE.json] [--format json]
     pre <enter|exit> <tag>
     tag
     `,
@@ -54,6 +54,9 @@ const { input, flags } = meow(
         default: true,
       },
       snapshotPrereleaseTemplate: {
+        type: "string",
+      },
+      format: {
         type: "string",
       },
       // mixed type like this is not supported by `meow`

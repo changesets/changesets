@@ -11,6 +11,7 @@ export type CliOptions = {
   tag?: string;
   gitTag?: boolean;
   open?: boolean;
+  format?: "json";
 };
 
 export type CommandOptions = CliOptions & {
