@@ -55,7 +55,6 @@ export default function determineDependents({
 
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
-
         if (config.ignore.includes(dependent)) {
           type = "none";
         } else {
@@ -91,22 +90,26 @@ export default function determineDependents({
                   versionRange
                 ))
             ) {
-              switch (depType) {
-                case "dependencies":
-                case "optionalDependencies":
-                case "peerDependencies":
-                  if (type !== "major" && type !== "minor") {
-                    type = "patch";
-                  }
-                  break;
-                case "devDependencies": {
-                  // We don't need a version bump if the package is only in the devDependencies of the dependent package
-                  if (
-                    type !== "major" &&
-                    type !== "minor" &&
-                    type !== "patch"
-                  ) {
-                    type = "none";
+              if (!dependentPackage.packageJson.version) {
+                type = "none";
+              } else {
+                switch (depType) {
+                  case "dependencies":
+                  case "optionalDependencies":
+                  case "peerDependencies":
+                    if (type !== "major" && type !== "minor") {
+                      type = "patch";
+                    }
+                    break;
+                  case "devDependencies": {
+                    // We don't need a version bump if the package is only in the devDependencies of the dependent package
+                    if (
+                      type !== "major" &&
+                      type !== "minor" &&
+                      type !== "patch"
+                    ) {
+                      type = "none";
+                    }
                   }
                 }
               }
