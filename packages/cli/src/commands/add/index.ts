@@ -5,7 +5,7 @@ import { spawn } from "child_process";
 import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
-import { Config } from "@changesets/types";
+import { Config, VersionType } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
 
@@ -15,9 +15,26 @@ import printConfirmationMessage from "./messages";
 import { ExternalEditor } from "external-editor";
 import { isListablePackage } from "./isListablePackage";
 
+function isVersionType(input?: string): input is VersionType {
+  if (typeof input === "undefined") {
+    return false;
+  }
+  return ["major", "minor", "patch", "none"].includes(input);
+}
+
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  {
+    empty,
+    open,
+    bumpType,
+    summary,
+  }: {
+    empty?: boolean;
+    open?: boolean;
+    bumpType?: string | VersionType;
+    summary?: string;
+  },
   config: Config
 ) {
   const packages = await getPackages(cwd);
@@ -48,7 +65,26 @@ export default async function add(
       .filter((pkg) => isListablePackage(config, pkg.packageJson))
       .map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, listablePackages);
+    const changesetOptions: {
+      summary?: string;
+      bumpType?: VersionType;
+    } = {
+      summary,
+    };
+
+    if (isVersionType(bumpType)) {
+      changesetOptions.bumpType = bumpType;
+    } else if (typeof bumpType !== "undefined") {
+      throw new Error(
+        `--bump-type parameter passed with invalid value: ${bumpType}`
+      );
+    }
+
+    newChangeset = await createChangeset(
+      changedPackagesName,
+      listablePackages,
+      changesetOptions
+    );
     printConfirmationMessage(newChangeset, listablePackages.length > 1);
 
     if (!newChangeset.confirmed) {

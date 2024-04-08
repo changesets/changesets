@@ -4,7 +4,7 @@ import semverLt from "semver/functions/lt";
 
 import * as cli from "../../utils/cli-utilities";
 import { error, log } from "@changesets/logger";
-import { Release, PackageJSON } from "@changesets/types";
+import { Release, PackageJSON, VersionType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
 
@@ -106,7 +106,11 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Package[]
+  allPackages: Package[],
+  options?: {
+    bumpType?: VersionType;
+    summary?: string;
+  }
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
@@ -218,12 +222,21 @@ export default async function createChangeset(
     }
   } else {
     let pkg = allPackages[0];
-    let type = await cli.askList(
-      `What kind of change is this for ${green(
-        pkg.packageJson.name
-      )}? (current version is ${pkg.packageJson.version})`,
-      ["patch", "minor", "major"]
-    );
+
+    let type: VersionType | undefined;
+    if (options?.bumpType) {
+      type = options.bumpType;
+      log(
+        `This change will be a "${options?.bumpType}" as specified by the --bump-type argument`
+      );
+    } else {
+      type = await cli.askList<VersionType>(
+        `What kind of change is this for ${green(
+          pkg.packageJson.name
+        )}? (current version is ${pkg.packageJson.version})`,
+        ["patch", "minor", "major"]
+      );
+    }
     if (type === "major") {
       let shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
       if (!shouldReleaseAsMajor) {
@@ -233,12 +246,19 @@ export default async function createChangeset(
     releases.push({ name: pkg.packageJson.name, type });
   }
 
-  log(
-    "Please enter a summary for this change (this will be in the changelogs)."
-  );
-  log(chalk.gray("  (submit empty line to open external editor)"));
+  let summary: string;
+  if (typeof options?.summary === "string") {
+    log(`--summary argument passed: ${options.summary}`);
+    summary = options.summary;
+  } else {
+    log(
+      "Please enter a summary for this change (this will be in the changelogs)."
+    );
+    log(chalk.gray("  (submit empty line to open external editor)"));
 
-  let summary = await cli.askQuestion("Summary");
+    summary = await cli.askQuestion("Summary");
+  }
+
   if (summary.length === 0) {
     try {
       summary = cli.askQuestionWithEditor(
