@@ -8,6 +8,11 @@ import path from "path";
 import spawn from "spawndamnit";
 import status from "..";
 
+const config = {
+  ...defaultConfig,
+  baseBranch: "main",
+};
+
 function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
   if (!releaseObj) {
     return;
@@ -71,7 +76,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    const releaseObj = await status(cwd, { since: "main" }, defaultConfig);
+    const releaseObj = await status(cwd, {}, config);
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
         "changesets": [
@@ -128,7 +133,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    await status(cwd, { since: "main" }, defaultConfig);
+    await status(cwd, {}, config);
 
     expect(process.exit).toHaveBeenCalledWith(1);
   });
@@ -151,7 +156,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    const releaseObj = await status(cwd, { since: "main" }, defaultConfig);
+    const releaseObj = await status(cwd, {}, config);
 
     expect(process.exit).not.toHaveBeenCalled();
     expect(releaseObj).toEqual({
@@ -194,7 +199,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    await status(cwd, { since: "main" }, defaultConfig);
+    await status(cwd, {}, config);
 
     expect(process.exit).not.toHaveBeenCalled();
   });
@@ -234,11 +239,7 @@ describe("status", () => {
 
     const output = "nonsense.json";
 
-    const probsUndefined = await status(
-      cwd,
-      { since: "main", output },
-      defaultConfig
-    );
+    const probsUndefined = await status(cwd, { output }, config);
 
     const releaseObj = await fs.readFile(path.join(cwd, output), "utf-8");
 
@@ -300,8 +301,8 @@ describe("status", () => {
 
     const releaseObj = await status(
       cwd,
-      { since: "main" },
-      { ...defaultConfig, changedFilePatterns: ["src/**"] }
+      {},
+      { ...config, changedFilePatterns: ["src/**"] }
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -339,11 +340,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    await status(
-      cwd,
-      { since: "main" },
-      { ...defaultConfig, changedFilePatterns: ["src/**"] }
-    );
+    await status(cwd, {}, { ...config, changedFilePatterns: ["src/**"] });
 
     expect(process.exit).toHaveBeenCalledWith(1);
   });
@@ -380,8 +377,8 @@ describe("status", () => {
 
     const releaseObj = await status(
       cwd,
-      { since: "main" },
-      { ...defaultConfig, changedFilePatterns: ["src/**"] }
+      {},
+      { ...config, changedFilePatterns: ["src/**"] }
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -411,5 +408,166 @@ describe("status", () => {
         ],
       }
     `);
+  });
+
+  describe("since", () => {
+    it("should get the status since a specific branch", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await spawn("git", ["checkout", "-b", "long-lived-branch"], { cwd });
+      await fs.outputFile(
+        path.join(cwd, "packages/pkg-a/a.js"),
+        'export default "a in long-lived-branch"'
+      );
+      await writeChangeset(
+        {
+          summary: "This is a summary of changes in long-lived-branch",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+      await git.add(".", cwd);
+      await git.commit("updated a in long-lived-branch", cwd);
+
+      await spawn("git", ["checkout", "-b", "new-pr-branch"], { cwd });
+      await fs.outputFile(
+        path.join(cwd, "packages/pkg-a/a.js"),
+        'export default "a in new-pr-branch"'
+      );
+      await writeChangeset(
+        {
+          summary: "This is a summary of changes in new-pr-branch",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+      await git.add(".", cwd);
+      await git.commit("updated a in new-pr-branch", cwd);
+
+      const releaseObj = await status(
+        cwd,
+        { since: "long-lived-branch" },
+        config
+      );
+      // Should only see the changeset added in `new-pr-branch`
+      expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
+        {
+          "changesets": [
+            {
+              "id": "~changeset-1~",
+              "releases": [
+                {
+                  "name": "pkg-a",
+                  "type": "minor",
+                },
+              ],
+              "summary": "This is a summary of changes in new-pr-branch",
+            },
+          ],
+          "preState": undefined,
+          "releases": [
+            {
+              "changesets": [
+                "~changeset-1~",
+              ],
+              "name": "pkg-a",
+              "newVersion": "1.1.0",
+              "oldVersion": "1.0.0",
+              "type": "minor",
+            },
+          ],
+        }
+      `);
+    });
+
+    it("should work when the folder is in a subdirectory of the repository", async () => {
+      const gitDir = await gitdir({
+        "changeset-subdir/package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "changeset-subdir/packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "changeset-subdir/.changeset/config.json": JSON.stringify({}),
+      });
+      const cwd = path.join(gitDir, "changeset-subdir");
+
+      await spawn("git", ["checkout", "-b", "long-lived-branch"], { cwd });
+      await fs.outputFile(
+        path.join(cwd, "packages/pkg-a/a.js"),
+        'export default "a in long-lived-branch"'
+      );
+      await writeChangeset(
+        {
+          summary: "This is a summary of changes in long-lived-branch",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+      await git.add(".", cwd);
+      await git.commit("updated a in long-lived-branch", cwd);
+
+      await spawn("git", ["checkout", "-b", "new-pr-branch"], { cwd });
+      await fs.outputFile(
+        path.join(cwd, "packages/pkg-a/a.js"),
+        'export default "a in new-pr-branch"'
+      );
+      await writeChangeset(
+        {
+          summary: "This is a summary of changes in new-pr-branch",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+      await git.add(".", cwd);
+      await git.commit("updated a in new-pr-branch", cwd);
+
+      const releaseObj = await status(
+        cwd,
+        { since: "long-lived-branch" },
+        config
+      );
+      // Should only see the changeset added in `new-pr-branch`
+      expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
+        {
+          "changesets": [
+            {
+              "id": "~changeset-1~",
+              "releases": [
+                {
+                  "name": "pkg-a",
+                  "type": "minor",
+                },
+              ],
+              "summary": "This is a summary of changes in new-pr-branch",
+            },
+          ],
+          "preState": undefined,
+          "releases": [
+            {
+              "changesets": [
+                "~changeset-1~",
+              ],
+              "name": "pkg-a",
+              "newVersion": "1.1.0",
+              "oldVersion": "1.0.0",
+              "type": "minor",
+            },
+          ],
+        }
+      `);
+    });
   });
 });
