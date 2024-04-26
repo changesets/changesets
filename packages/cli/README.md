@@ -170,7 +170,7 @@ git push --follow-tags
 ### status
 
 ```
-status [--verbose] [--output={filePath}] [--since={gitTag}]
+status [--verbose] [--output={filePath}] [--since={gitTag}][--failOnNoChanges]
 ```
 
 The status command provides information about the changesets that currently exist. If there are changes to packages but no changesets are present, it exits with error status code `1`.
@@ -182,6 +182,8 @@ The status command provides information about the changesets that currently exis
 - `--since` - to only display information about changesets since a specific branch or git tag. While this can be
   used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot)
   to detect pull requests missing changesets, as not all pull requests need one.
+
+- `--failOnNoChanges` - to cause a failure in CI even if there are no uncommitted changes in any of your repo packages.
 
 ### pre
 

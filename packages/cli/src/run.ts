@@ -85,6 +85,7 @@ export async function run(
       tag,
       open,
       gitTag,
+      failOnNoChanges,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -195,7 +196,11 @@ export async function run(
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
+        await status(
+          cwd,
+          { sinceMaster, since, verbose, output, failOnNoChanges },
+          config
+        );
         return;
       }
       case "tag": {
