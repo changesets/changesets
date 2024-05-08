@@ -133,7 +133,9 @@ export default async function applyReleasePlan(
   });
 
   let prettierInstance = getPrettierInstance(cwd);
-  let prettierConfig = await prettierInstance.resolveConfig(cwd);
+  let prettierConfig = await prettierInstance.resolveConfig(
+    path.join(cwd, "package.json")
+  );
 
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;

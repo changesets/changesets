@@ -31,7 +31,9 @@ async function writeChangeset(
   });
 
   const prettierInstance = getPrettierInstance(cwd);
-  const prettierConfig = await prettierInstance.resolveConfig(cwd);
+  const prettierConfig = await prettierInstance.resolveConfig(
+    path.join(cwd, "package.json")
+  );
 
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
