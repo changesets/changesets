@@ -24,7 +24,7 @@ This will instead update versions to `0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS`
 
 ## Publishing your packages
 
-After running the `yarn changeset version` command, you can use the `changeset publish --tag bulbasaur` command to releases the packages. By using the `--tag` flag, you will not add it to the `latest` flag on npm. This is REALLY IMPORTANT because if you do not include a tag, people installing your package using `yarn add your-package-name` will install the snapshot version.
+After running the `yarn changeset version` command, you can use the `changeset publish --tag bulbasaur` command to release the packages. By using the `--tag` flag, you will not add it to the `latest` flag on npm. This is REALLY IMPORTANT because if you do not include a tag, people installing your package using `yarn add your-package-name` will install the snapshot version.
 
 ## Using the `--no-git-tag` flag
 
