@@ -38,10 +38,21 @@ export default async function getStatus(
     since === undefined ? (sinceMaster ? "master" : undefined) : since;
   const releasePlan = await getReleasePlan(cwd, sinceBranch, config);
   const { changesets, releases } = releasePlan;
-  const changedPackages = await git.getChangedPackagesSinceRef({
-    cwd,
-    ref: sinceBranch || config.baseBranch,
-    changedFilePatterns: config.changedFilePatterns,
+  const ignoredSet = new Set(config.ignore);
+  const changedPackages = (
+    await git.getChangedPackagesSinceRef({
+      cwd,
+      ref: sinceBranch || config.baseBranch,
+      changedFilePatterns: config.changedFilePatterns,
+    })
+  ).filter((pkg) => {
+    if (ignoredSet.has(pkg.packageJson.name)) {
+      return false;
+    }
+    if (pkg.packageJson.private && !config.privatePackages.version) {
+      return false;
+    }
+    return true;
   });
 
   if (changedPackages.length > 0 && changesets.length === 0) {
