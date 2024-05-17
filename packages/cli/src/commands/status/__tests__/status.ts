@@ -1,12 +1,17 @@
-import { defaultConfig } from "@changesets/config";
+import { defaultConfig, read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { gitdir, silenceLogsInBlock } from "@changesets/test-utils";
 import { ReleasePlan } from "@changesets/types";
 import writeChangeset from "@changesets/write";
+import { getPackages } from "@manypkg/get-packages";
 import fs from "fs-extra";
 import path from "path";
 import spawn from "spawndamnit";
 import status from "..";
+
+async function readConfig(cwd: string) {
+  return read(cwd, await getPackages(cwd));
+}
 
 function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
   if (!releaseObj) {
@@ -411,5 +416,102 @@ describe("status", () => {
         ],
       }
     `);
+  });
+
+  it("should not exit early with a non-zero error code when only changed packages are ignored", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-a/src/a.js": 'export default "a"',
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/src/b.js": 'export default "b"',
+      ".changeset/config.json": JSON.stringify({
+        ignore: ["pkg-b"],
+      }),
+    });
+
+    // @ts-ignore
+    jest.spyOn(process, "exit").mockImplementation(() => {});
+
+    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "updated b"'
+    );
+    await git.add(".", cwd);
+    await git.commit("updated b", cwd);
+
+    const releaseObj = await status(
+      cwd,
+      { since: "main" },
+      await readConfig(cwd)
+    );
+
+    expect(process.exit).not.toHaveBeenCalled();
+    expect(releaseObj).toEqual({
+      changesets: [],
+      releases: [],
+      preState: undefined,
+    });
+  });
+
+  it("should not exit early with a non-zero error code when only changed packages are private and versioning for private packages is turned off", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-a/src/a.js": 'export default "a"',
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        private: true,
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/src/b.js": 'export default "b"',
+      ".changeset/config.json": JSON.stringify({
+        privatePackages: {
+          version: false,
+        },
+      }),
+    });
+
+    // @ts-ignore
+    jest.spyOn(process, "exit").mockImplementation(() => {});
+
+    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "updated b"'
+    );
+    await git.add(".", cwd);
+    await git.commit("updated b", cwd);
+
+    const releaseObj = await status(
+      cwd,
+      { since: "main" },
+      await readConfig(cwd)
+    );
+
+    expect(process.exit).not.toHaveBeenCalled();
+    expect(releaseObj).toEqual({
+      changesets: [],
+      releases: [],
+      preState: undefined,
+    });
   });
 });
