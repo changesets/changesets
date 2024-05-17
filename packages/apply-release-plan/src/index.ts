@@ -133,7 +133,6 @@ export default async function applyReleasePlan(
   });
 
   let prettierInstance = getPrettierInstance(cwd);
-  let prettierConfig = await prettierInstance.resolveConfig(cwd);
 
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;
@@ -144,13 +143,7 @@ export default async function applyReleasePlan(
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
-      await updateChangelog(
-        changelogPath,
-        changelog,
-        name,
-        prettierInstance,
-        prettierConfig
-      );
+      await updateChangelog(changelogPath, changelog, name, prettierInstance);
       touchedFiles.push(changelogPath);
     }
   }
@@ -273,26 +266,18 @@ async function updateChangelog(
   changelogPath: string,
   changelog: string,
   name: string,
-  prettierInstance: typeof prettier,
-  prettierConfig: prettier.Options | null
+  prettierInstance: typeof prettier
 ) {
   let templateString = `\n\n${changelog.trim()}\n`;
 
   try {
     if (fs.existsSync(changelogPath)) {
-      await prependFile(
-        changelogPath,
-        templateString,
-        name,
-        prettierInstance,
-        prettierConfig
-      );
+      await prependFile(changelogPath, templateString, name, prettierInstance);
     } else {
       await writeFormattedMarkdownFile(
         changelogPath,
         `# ${name}${templateString}`,
-        prettierInstance,
-        prettierConfig
+        prettierInstance
       );
     }
   } catch (e) {
@@ -316,8 +301,7 @@ async function prependFile(
   filePath: string,
   data: string,
   name: string,
-  prettierInstance: typeof prettier,
-  prettierConfig: prettier.Options | null
+  prettierInstance: typeof prettier
 ) {
   const fileData = fs.readFileSync(filePath).toString();
   // if the file exists but doesn't have the header, we'll add it in
@@ -326,32 +310,25 @@ async function prependFile(
     await writeFormattedMarkdownFile(
       filePath,
       completelyNewChangelog,
-      prettierInstance,
-      prettierConfig
+      prettierInstance
     );
     return;
   }
   const newChangelog = fileData.replace("\n", data);
 
-  await writeFormattedMarkdownFile(
-    filePath,
-    newChangelog,
-    prettierInstance,
-    prettierConfig
-  );
+  await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
 }
 
 async function writeFormattedMarkdownFile(
   filePath: string,
   content: string,
-  prettierInstance: typeof prettier,
-  prettierConfig: prettier.Options | null
+  prettierInstance: typeof prettier
 ) {
   await fs.writeFile(
     filePath,
     // Prettier v3 returns a promise
     await prettierInstance.format(content, {
-      ...prettierConfig,
+      ...(await prettierInstance.resolveConfig(filePath)),
       filepath: filePath,
       parser: "markdown",
     })
