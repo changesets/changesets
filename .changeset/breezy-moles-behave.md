@@ -3,4 +3,4 @@
 "@changesets/write": patch
 ---
 
-Fix `changeset version` not applying a custom .prettierrc configuration with `prettier` >= 3.1.1
+Fix an issue with not applying a custom `.prettierrc` configuration with `prettier@>= 3.1.1` 
