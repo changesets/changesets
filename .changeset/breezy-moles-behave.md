@@ -1,4 +1,5 @@
 ---
+"@changesets/cli": patch
 "@changesets/apply-release-plan": patch
 "@changesets/write": patch
 ---
