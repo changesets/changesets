@@ -1,5 +1,20 @@
 # @changesets/cli
 
+## 2.27.2
+
+### Patch Changes
+
+- [#1354](https://github.com/changesets/changesets/pull/1354) [`69be7dc`](https://github.com/changesets/changesets/commit/69be7dc7195011ac6dbd00b24ea923f02adcf69c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` incorrectly returning an error status in two cases:
+
+  - for changed ignored packages
+  - for changed private packages when `privatePackage.version` was set to `false`
+
+- [#1351](https://github.com/changesets/changesets/pull/1351) [`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b) Thanks [@TheHolyWaffle](https://github.com/TheHolyWaffle)! - Fix an issue with not applying a custom `.prettierrc` configuration with `prettier@>= 3.1.1`
+
+- Updated dependencies [[`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b)]:
+  - @changesets/apply-release-plan@7.0.1
+  - @changesets/write@0.3.1
+
 ## 2.27.1
 
 ### Patch Changes
