@@ -1,5 +1,11 @@
 # @changesets/write
 
+## 0.3.1
+
+### Patch Changes
+
+- [#1351](https://github.com/changesets/changesets/pull/1351) [`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b) Thanks [@TheHolyWaffle](https://github.com/TheHolyWaffle)! - Fix an issue with not applying a custom `.prettierrc` configuration with `prettier@>= 3.1.1`
+
 ## 0.3.0
 
 ### Minor Changes
