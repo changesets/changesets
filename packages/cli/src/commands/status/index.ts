@@ -1,17 +1,17 @@
 import chalk from "chalk";
-import table from "tty-table";
 import fs from "fs-extra";
 import path from "path";
+import table from "tty-table";
 
-import * as git from "@changesets/git";
 import getReleasePlan from "@changesets/get-release-plan";
-import { error, log, info, warn } from "@changesets/logger";
+import { error, info, log, warn } from "@changesets/logger";
 import {
-  VersionType,
-  Release,
   ComprehensiveRelease,
   Config,
+  Release,
+  VersionType,
 } from "@changesets/types";
+import { getVersionableChangedPackages } from "../../utils/versionablePackages";
 
 export default async function getStatus(
   cwd: string,
@@ -38,21 +38,9 @@ export default async function getStatus(
     since === undefined ? (sinceMaster ? "master" : undefined) : since;
   const releasePlan = await getReleasePlan(cwd, sinceBranch, config);
   const { changesets, releases } = releasePlan;
-  const ignoredSet = new Set(config.ignore);
-  const changedPackages = (
-    await git.getChangedPackagesSinceRef({
-      cwd,
-      ref: sinceBranch || config.baseBranch,
-      changedFilePatterns: config.changedFilePatterns,
-    })
-  ).filter((pkg) => {
-    if (ignoredSet.has(pkg.packageJson.name)) {
-      return false;
-    }
-    if (pkg.packageJson.private && !config.privatePackages.version) {
-      return false;
-    }
-    return true;
+  const changedPackages = await getVersionableChangedPackages(config, {
+    cwd,
+    ref: sinceBranch,
   });
 
   if (changedPackages.length > 0 && changesets.length === 0) {
