@@ -34,15 +34,18 @@ export function filterVersionablePackages(config: Config, packages: Package[]) {
 
 export async function getVersionableChangedPackages(
   config: Config,
-  options: {
+  {
+    cwd,
+    ref,
+  }: {
     cwd: string;
     ref?: string;
   }
 ) {
   const changedPackages = await getChangedPackagesSinceRef({
-    ref: config.baseBranch,
+    ref: ref ?? config.baseBranch,
     changedFilePatterns: config.changedFilePatterns,
-    ...options,
+    cwd,
   });
   return filterVersionablePackages(config, changedPackages);
 }
