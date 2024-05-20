@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.27.3
+
+### Patch Changes
+
+- [#1357](https://github.com/changesets/changesets/pull/1357) [`18c966a`](https://github.com/changesets/changesets/commit/18c966af7b20201453190cbfd2e2dfb59631c02c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` executed without `since` argument. It should now correctly use the configured base branch as the default value.
+
 ## 2.27.2
 
 ### Patch Changes
