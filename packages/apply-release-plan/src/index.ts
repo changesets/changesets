@@ -9,7 +9,7 @@ import {
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import resolveFrom from "resolve-from";
-import { Packages } from "@manypkg/get-packages";
+import { Package, Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
 
 import fs from "fs-extra";
@@ -78,6 +78,11 @@ export default async function applyReleasePlan(
 
   const packagesByName = new Map(
     packages.packages.map((x) => [x.packageJson.name, x])
+  );
+
+  const isVersionablePackage = createIsVersionablePackage(
+    config.ignore,
+    config.privatePackages.version
   );
 
   let { releases, changesets } = releasePlan;
@@ -163,10 +168,10 @@ export default async function applyReleasePlan(
           // At this point, we know there is no such changeset, because otherwise the program would've already failed,
           // so we just check if any ignored package exists in this changeset, and only remove it if none exists
           // Ignored list is added in v2, so we don't need to do it for v1 changesets
-          // TODO(jakebailey): should this check isVersionablePackage?
           if (
-            !changeset.releases.find((release) =>
-              config.ignore.includes(release.name)
+            !changeset.releases.find(
+              (release) =>
+                !isVersionablePackage(packagesByName.get(release.name)!)
             )
           ) {
             touchedFiles.push(changesetPath);
@@ -183,6 +188,26 @@ export default async function applyReleasePlan(
 
   // We return the touched files to be committed in the cli
   return touchedFiles;
+}
+
+// TODO(jakebailey): don't copy paste
+export function createIsVersionablePackage(
+  ignoredPackages: readonly string[],
+  allowPrivatePackages: boolean
+): (pkg: Package) => boolean {
+  const ignoredPackagesSet = new Set(ignoredPackages);
+  return ({ packageJson }: Package) => {
+    if (ignoredPackagesSet.has(packageJson.name)) {
+      return false;
+    }
+
+    if (packageJson.private && !allowPrivatePackages) {
+      return false;
+    }
+
+    const hasVersionField = !!packageJson.version;
+    return hasVersionField;
+  };
 }
 
 async function getNewChangelogEntry(

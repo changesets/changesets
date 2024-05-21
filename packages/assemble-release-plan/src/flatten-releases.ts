@@ -8,7 +8,7 @@ import { InternalRelease } from "./types";
 export default function flattenReleases(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
-  ignoredPackages: Readonly<string[]>
+  isVersionablePackage: (pkg: Package) => boolean
 ): Map<string, InternalRelease> {
   let releases: Map<string, InternalRelease> = new Map();
 
@@ -16,8 +16,7 @@ export default function flattenReleases(
     changeset.releases
       // Filter out ignored packages because they should not trigger a release
       // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
-      // TODO(jakebailey): should this check isVersionablePackage?
-      .filter(({ name }) => !ignoredPackages.includes(name))
+      .filter(({ name }) => isVersionablePackage(packagesByName.get(name)!))
       .forEach(({ name, type }) => {
         let release = releases.get(name);
         let pkg = packagesByName.get(name);

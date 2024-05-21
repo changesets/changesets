@@ -8,7 +8,7 @@ import {
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease, PreInfo } from "./types";
 import { incrementVersion } from "./increment";
-import { isVersionablePackage } from "./utils";
+import { createIsVersionablePackage } from "./utils";
 
 /*
   WARNING:
@@ -38,10 +38,10 @@ export default function determineDependents({
   let updated = false;
   // NOTE this is intended to be called recursively
   let pkgsToSearch = [...releases.values()];
-  const isVersionablePackageOptions = {
-    ignoredPackages: new Set(config.ignore),
-    versionPrivatePackages: config.privatePackages.version,
-  };
+  const isVersionablePackage = createIsVersionablePackage(
+    config.ignore,
+    config.privatePackages.version
+  );
 
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
@@ -61,9 +61,7 @@ export default function determineDependents({
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
 
-        if (
-          !isVersionablePackage(dependentPackage, isVersionablePackageOptions)
-        ) {
+        if (!isVersionablePackage(dependentPackage)) {
           type = "none";
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(

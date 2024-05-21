@@ -15,7 +15,7 @@ import { InternalError } from "@changesets/errors";
 import { Packages, Package } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
-import { isVersionablePackage } from "./utils";
+import { createIsVersionablePackage } from "./utils";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -155,14 +155,15 @@ function assembleReleasePlan(
     packages.packages.map((x) => [x.packageJson.name, x])
   );
 
-  const isVersionablePackageOptions = {
-    ignoredPackages: new Set(config.ignore),
-    versionPrivatePackages: config.privatePackages.version,
-  };
+  const isVersionablePackage = createIsVersionablePackage(
+    config.ignore,
+    config.privatePackages.version
+  );
 
   const relevantChangesets = getRelevantChangesets(
     changesets,
-    refinedConfig.ignore,
+    packagesByName,
+    isVersionablePackage,
     preState
   );
 
@@ -179,7 +180,7 @@ function assembleReleasePlan(
   let releases = flattenReleases(
     relevantChangesets,
     packagesByName,
-    refinedConfig.ignore
+    isVersionablePackage
   );
 
   let dependencyGraph = getDependentsGraph(packages, {
@@ -230,7 +231,7 @@ function assembleReleasePlan(
           });
         } else if (
           existingRelease.type === "none" &&
-          !isVersionablePackage(pkg, isVersionablePackageOptions)
+          !isVersionablePackage(pkg)
         ) {
           existingRelease.type = "patch";
         }
@@ -267,7 +268,8 @@ function assembleReleasePlan(
 
 function getRelevantChangesets(
   changesets: NewChangeset[],
-  ignored: Readonly<string[]>,
+  packagesByName: Map<string, Package>,
+  isVersionablePackage: (pkg: Package) => boolean,
   preState: PreState | undefined
 ): NewChangeset[] {
   for (const changeset of changesets) {
@@ -276,12 +278,7 @@ function getRelevantChangesets(
     const ignoredPackages = [];
     const notIgnoredPackages = [];
     for (const release of changeset.releases) {
-      // TODO(jakebailey): should this check isVersionablePackage?
-      if (
-        ignored.find(
-          (ignoredPackageName) => ignoredPackageName === release.name
-        )
-      ) {
+      if (!isVersionablePackage(packagesByName.get(release.name)!)) {
         ignoredPackages.push(release.name);
       } else {
         notIgnoredPackages.push(release.name);

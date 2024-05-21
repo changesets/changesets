@@ -60,24 +60,21 @@ export function getCurrentHighestVersion(
 }
 
 // TODO(jakebailey): don't copy paste
-export function isVersionablePackage(
-  { packageJson }: Package,
-  {
-    ignoredPackages,
-    versionPrivatePackages,
-  }: {
-    ignoredPackages: Set<string>;
-    versionPrivatePackages: boolean;
-  }
-) {
-  if (ignoredPackages.has(packageJson.name)) {
-    return false;
-  }
+export function createIsVersionablePackage(
+  ignoredPackages: readonly string[],
+  allowPrivatePackages: boolean
+): (pkg: Package) => boolean {
+  const ignoredPackagesSet = new Set(ignoredPackages);
+  return ({ packageJson }: Package) => {
+    if (ignoredPackagesSet.has(packageJson.name)) {
+      return false;
+    }
 
-  if (packageJson.private && !versionPrivatePackages) {
-    return false;
-  }
+    if (packageJson.private && !allowPrivatePackages) {
+      return false;
+    }
 
-  const hasVersionField = !!packageJson.version;
-  return hasVersionField;
+    const hasVersionField = !!packageJson.version;
+    return hasVersionField;
+  };
 }
