@@ -146,9 +146,11 @@ export async function run(
           bumpVersionsWithWorkspaceProtocolOnly:
             config.bumpVersionsWithWorkspaceProtocolOnly,
         });
+        // TODO(jakebailey): should this check isVersionablePackage?
         for (const ignoredPackage of config.ignore) {
           const dependents = dependentsGraph.get(ignoredPackage) || [];
           for (const dependent of dependents) {
+            // TODO(jakebailey): should this check isVersionablePackage?
             if (!config.ignore.includes(dependent)) {
               messages.push(
                 `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please pass "${dependent}" to the \`--ignore\` flag.`
