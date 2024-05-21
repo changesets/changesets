@@ -32,6 +32,14 @@ export function filterVersionablePackages(config: Config, packages: Package[]) {
   return packages.filter((pkg) => isVersionablePackage(pkg, options));
 }
 
+export function filterTaggablePackages(config: Config, packages: Package[]) {
+  const options = {
+    ignoredPackages: new Set(config.ignore),
+    versionPrivatePackages: config.privatePackages.tag,
+  };
+  return packages.filter((pkg) => isVersionablePackage(pkg, options));
+}
+
 export async function getVersionableChangedPackages(
   config: Config,
   {

@@ -223,6 +223,7 @@ function assembleReleasePlan(
             changesets: [],
           });
         } else if (
+          // TODO(jakebailey): should this check isVersionablePackage?
           existingRelease.type === "none" &&
           !refinedConfig.ignore.includes(pkg.packageJson.name)
         ) {
@@ -270,6 +271,7 @@ function getRelevantChangesets(
     const ignoredPackages = [];
     const notIgnoredPackages = [];
     for (const release of changeset.releases) {
+      // TODO(jakebailey): should this check isVersionablePackage?
       if (
         ignored.find(
           (ignoredPackageName) => ignoredPackageName === release.name

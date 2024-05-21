@@ -26,6 +26,7 @@ export default function matchFixedConstraint(
 
     // Finally, we update the packages so all of them are on the highest version
     for (let pkgName of fixedPackages) {
+      // TODO(jakebailey): should this check isVersionablePackage?
       if (config.ignore.includes(pkgName)) {
         continue;
       }

@@ -163,6 +163,7 @@ export default async function applyReleasePlan(
           // At this point, we know there is no such changeset, because otherwise the program would've already failed,
           // so we just check if any ignored package exists in this changeset, and only remove it if none exists
           // Ignored list is added in v2, so we don't need to do it for v1 changesets
+          // TODO(jakebailey): should this check isVersionablePackage?
           if (
             !changeset.releases.find((release) =>
               config.ignore.includes(release.name)

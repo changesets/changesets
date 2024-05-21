@@ -58,3 +58,26 @@ export function getCurrentHighestVersion(
 
   return highestVersion!;
 }
+
+// TODO(jakebailey): don't copy paste
+export function isVersionablePackage(
+  { packageJson }: Package,
+  {
+    ignoredPackages,
+    versionPrivatePackages,
+  }: {
+    ignoredPackages: Set<string>;
+    versionPrivatePackages: boolean;
+  }
+) {
+  if (ignoredPackages.has(packageJson.name)) {
+    return false;
+  }
+
+  if (packageJson.private && !versionPrivatePackages) {
+    return false;
+  }
+
+  const hasVersionField = !!packageJson.version;
+  return hasVersionField;
+}

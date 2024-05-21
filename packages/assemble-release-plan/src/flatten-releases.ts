@@ -16,6 +16,7 @@ export default function flattenReleases(
     changeset.releases
       // Filter out ignored packages because they should not trigger a release
       // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
+      // TODO(jakebailey): should this check isVersionablePackage?
       .filter(({ name }) => !ignoredPackages.includes(name))
       .forEach(({ name, type }) => {
         let release = releases.get(name);
