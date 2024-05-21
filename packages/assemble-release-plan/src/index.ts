@@ -229,7 +229,6 @@ function assembleReleasePlan(
             changesets: [],
           });
         } else if (
-          // TODO(jakebailey): should this check isVersionablePackage?
           existingRelease.type === "none" &&
           !isVersionablePackage(pkg, isVersionablePackageOptions)
         ) {
