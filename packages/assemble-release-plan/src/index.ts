@@ -15,6 +15,7 @@ import { InternalError } from "@changesets/errors";
 import { Packages, Package } from "@manypkg/get-packages";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { PreInfo, InternalRelease } from "./types";
+import { isVersionablePackage } from "./utils";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -154,6 +155,11 @@ function assembleReleasePlan(
     packages.packages.map((x) => [x.packageJson.name, x])
   );
 
+  const isVersionablePackageOptions = {
+    ignoredPackages: new Set(config.ignore),
+    versionPrivatePackages: config.privatePackages.version,
+  };
+
   const relevantChangesets = getRelevantChangesets(
     changesets,
     refinedConfig.ignore,
@@ -225,7 +231,7 @@ function assembleReleasePlan(
         } else if (
           // TODO(jakebailey): should this check isVersionablePackage?
           existingRelease.type === "none" &&
-          !refinedConfig.ignore.includes(pkg.packageJson.name)
+          !isVersionablePackage(pkg, isVersionablePackageOptions)
         ) {
           existingRelease.type = "patch";
         }

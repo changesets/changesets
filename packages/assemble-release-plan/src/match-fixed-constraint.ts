@@ -1,7 +1,11 @@
 import { Config } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease } from "./types";
-import { getCurrentHighestVersion, getHighestReleaseType } from "./utils";
+import {
+  getCurrentHighestVersion,
+  getHighestReleaseType,
+  isVersionablePackage,
+} from "./utils";
 
 export default function matchFixedConstraint(
   releases: Map<string, InternalRelease>,
@@ -9,6 +13,11 @@ export default function matchFixedConstraint(
   config: Config
 ): boolean {
   let updated = false;
+
+  const isVersionablePackageOptions = {
+    ignoredPackages: new Set(config.ignore),
+    versionPrivatePackages: config.privatePackages.version,
+  };
 
   for (let fixedPackages of config.fixed) {
     let releasingFixedPackages = [...releases.values()].filter(
@@ -26,8 +35,8 @@ export default function matchFixedConstraint(
 
     // Finally, we update the packages so all of them are on the highest version
     for (let pkgName of fixedPackages) {
-      // TODO(jakebailey): should this check isVersionablePackage?
-      if (config.ignore.includes(pkgName)) {
+      const pkg = packagesByName.get(pkgName);
+      if (pkg && !isVersionablePackage(pkg, isVersionablePackageOptions)) {
         continue;
       }
       let release = releases.get(pkgName);
