@@ -82,9 +82,27 @@ describe("tag command", () => {
       (git.getAllTags as jest.Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag(cwd, defaultConfig);
+      await tag(cwd, {
+        ...defaultConfig,
+        privatePackages: { version: true, tag: true },
+      });
       expect(git.tag).toHaveBeenCalledTimes(1);
       expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("v1.0.0");
+    });
+
+    it("does not tag on private", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          name: "root-only",
+          version: "1.0.0",
+        }),
+      });
+      (git.getAllTags as jest.Mock).mockReturnValue(new Set());
+
+      expect(git.tag).not.toHaveBeenCalled();
+      await tag(cwd, defaultConfig);
+      expect(git.tag).toHaveBeenCalledTimes(0);
     });
   });
 });
