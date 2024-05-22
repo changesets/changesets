@@ -10,6 +10,7 @@ export type CliOptions = {
   snapshotPrereleaseTemplate?: string;
   tag?: string;
   gitTag?: boolean;
+  gitTagFormat?: string;
   open?: boolean;
 };
 

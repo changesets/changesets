@@ -4624,6 +4624,13 @@ is-regex@^1.1.4:
     call-bind "^1.0.2"
     has-tostringtag "^1.0.0"
 
+is-scoped@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/is-scoped/-/is-scoped-2.0.0.tgz#526329fb35d126161f9417851287bbfdd18735ae"
+  integrity sha512-69xmf0zbk2jMLZl9luJmmPVhLo7l1GOzGqXGuFVxtxUAPFNTQKMQhpDqc3YISdtT+JN1wgRmKKNDUG2vOH0Ctw==
+  dependencies:
+    scoped-regex "^2.0.0"
+
 is-shared-array-buffer@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/is-shared-array-buffer/-/is-shared-array-buffer-1.0.2.tgz#8f259c573b60b6a32d4058a1a07430c0a7344c79"
@@ -6580,6 +6587,11 @@ safe-regex@^1.1.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
+
+scoped-regex@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/scoped-regex/-/scoped-regex-2.1.0.tgz#7b9be845d81fd9d21d1ec97c61a0b7cf86d2015f"
+  integrity sha512-g3WxHrqSWCZHGHlSrF51VXFdjImhwvH8ZO/pryFH56Qi0cDsZfylQa/t0jCzVQFNbNvM00HfHjkDPEuarKDSWQ==
 
 sembear@^0.5.0:
   version "0.5.2"

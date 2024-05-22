@@ -79,6 +79,14 @@ export type Config = {
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
+  /**
+   * Customize the format of a git tag, which is a template string that can be replaced by a variable
+   * @example:
+   *  // @changesets/cli@1.0.0
+   *  "{projectName}-v{version}" => "cli-v1.0.0"
+   * @see {@link ScopedPackageInfo}
+   */
+  gitTagFormat: string;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Omit<
@@ -99,6 +107,7 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
+  gitTagFormat?: Config["gitTagFormat"];
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
     | false
@@ -170,4 +179,24 @@ export type PreState = {
     [pkgName: string]: string;
   };
   changesets: string[];
+};
+
+/**
+ * e.g. **`@changesets/cli@1.0.0`**
+ */
+export type ScopedPackageInfo = {
+  /**
+   * organization name, not include `@` symbol
+   * @example `changesets`
+   */
+  organizationName?: string;
+  /**
+   * full package name, include `@` symbol
+   * @example `@changesets/cli`
+   */
+  packageName: string;
+  /** @example cli */
+  projectName: string;
+  /** @example 1.0.0 */
+  version: string;
 };

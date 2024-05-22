@@ -89,6 +89,7 @@
     "external-editor": "^3.1.0",
     "fs-extra": "^7.0.1",
     "human-id": "^1.0.2",
+    "is-scoped": "2.0.0",
     "meow": "^6.0.0",
     "outdent": "^0.5.0",
     "p-limit": "^2.2.0",

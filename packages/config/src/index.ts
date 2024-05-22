@@ -10,6 +10,7 @@ import {
   Fixed,
   Linked,
   PackageGroup,
+  ScopedPackageInfo,
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -77,6 +78,21 @@ const havePackageGroupsCorrectShape = (
         isArray(arr) && arr.every((pkgName) => typeof pkgName === "string")
     )
   );
+};
+
+// validate whether there are invalid variables in the template string
+const validateTemplateString = (template: string, validVariables: string[]) => {
+  const regex = /\{(.*?)}/g;
+  let match;
+  const invalidVariables: string[] = [];
+  while ((match = regex.exec(template)) !== null) {
+    const variable = match[1];
+    if (!validVariables.includes(variable)) {
+      invalidVariables.push(variable);
+    }
+  }
+
+  return invalidVariables;
 };
 
 // TODO: it might be possible to remove this if improvements to `Array.isArray` ever land
@@ -411,6 +427,30 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
+  // validate gitTagFormat
+  if (typeof json.gitTagFormat === "string" && json.gitTagFormat.length > 0) {
+    const validScope: Required<ScopedPackageInfo> = {
+      organizationName: "",
+      packageName: "",
+      projectName: "",
+      version: "",
+    };
+
+    const validVariables = Object.keys(validScope);
+    const invalidVariables = validateTemplateString(
+      json.gitTagFormat,
+      validVariables
+    );
+
+    for (const invalidVariable of invalidVariables) {
+      messages.push(
+        `The \`gitTagFormat\` option contains an invalid variable "${invalidVariable}". Valid variables are ${validVariables.join(
+          ", "
+        )}`
+      );
+    }
+  }
+
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
@@ -452,6 +492,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,
+
+    gitTagFormat: json.gitTagFormat,
 
     snapshot: {
       prereleaseTemplate: json.snapshot?.prereleaseTemplate ?? null,
