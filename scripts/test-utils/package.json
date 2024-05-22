@@ -1,14 +1,26 @@
 {
   "name": "@changesets/test-utils",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": true,
   "description": "Utils for testing changesets packages",
-  "main": "dist/test-utils.cjs.js",
-  "module": "dist/test-utils.esm.js",
+  "main": "dist/changesets-test-utils.cjs.js",
+  "module": "dist/changesets-test-utils.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-test-utils.cjs.mjs",
+        "default": "./dist/changesets-test-utils.cjs.js"
+      },
+      "module": "./dist/changesets-test-utils.esm.js",
+      "import": "./dist/changesets-test-utils.cjs.mjs",
+      "default": "./dist/changesets-test-utils.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/test-utils",
   "dependencies": {
-    "@changesets/logger": "^0.0.5",
+    "@changesets/logger": "^0.1.0",
     "fixturez": "^1.1.0",
     "fs-extra": "^7.0.1",
     "spawndamnit": "^2.0.0"

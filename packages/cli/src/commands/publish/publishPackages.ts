@@ -1,5 +1,5 @@
 import { join } from "path";
-import semver from "semver";
+import semverParse from "semver/functions/parse";
 import chalk from "chalk";
 import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
@@ -7,7 +7,7 @@ import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
 import * as npmUtils from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
-import isCI from "is-ci";
+import { isCI } from "ci-info";
 
 type PublishedState = "never" | "published" | "only-pre";
 
@@ -122,20 +122,18 @@ async function publishAPackage(
   tag: string
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-  const localAccess = publishConfig?.access;
   info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
   );
 
-  const publishDir = publishConfig?.directory
-    ? join(pkg.dir, publishConfig.directory)
-    : pkg.dir;
-
   const publishConfirmation = await npmUtils.publish(
     name,
     {
-      cwd: publishDir,
-      access: localAccess || access,
+      cwd: pkg.dir,
+      publishDir: publishConfig?.directory
+        ? join(pkg.dir, publishConfig.directory)
+        : pkg.dir,
+      access: publishConfig?.access || access,
       tag,
     },
     twoFactorState
@@ -163,7 +161,7 @@ async function getUnpublishedPackages(
             response.pkgInfo.versions &&
             response.pkgInfo.versions.every(
               (version: string) =>
-                semver.parse(version)!.prerelease[0] === preState.tag
+                semverParse(version)!.prerelease[0] === preState.tag
             )
           ) {
             publishedState = "only-pre";
