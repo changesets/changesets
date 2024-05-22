@@ -9,17 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  prepare-cache:
-    name: Prepare Cache
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/ci-setup
-
   test:
     name: Test
-    needs: prepare-cache
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -40,7 +31,6 @@ jobs:
 
   typecheck:
     name: Typecheck
-    needs: prepare-cache
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -52,7 +42,6 @@ jobs:
 
   lint:
     name: Lint
-    needs: prepare-cache
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
