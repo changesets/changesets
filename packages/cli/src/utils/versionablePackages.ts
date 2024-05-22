@@ -6,17 +6,17 @@ function isVersionablePackage(
   { packageJson }: Package,
   {
     ignoredPackages,
-    versionPrivatePackages,
+    ignorePrivatePackages,
   }: {
     ignoredPackages: Set<string>;
-    versionPrivatePackages: boolean;
+    ignorePrivatePackages: boolean;
   }
 ) {
   if (ignoredPackages.has(packageJson.name)) {
     return false;
   }
 
-  if (packageJson.private && !versionPrivatePackages) {
+  if (packageJson.private && !ignorePrivatePackages) {
     return false;
   }
 
@@ -27,7 +27,7 @@ function isVersionablePackage(
 export function filterVersionablePackages(config: Config, packages: Package[]) {
   const options = {
     ignoredPackages: new Set(config.ignore),
-    versionPrivatePackages: config.privatePackages.version,
+    ignorePrivatePackages: config.privatePackages.version,
   };
   return packages.filter((pkg) => isVersionablePackage(pkg, options));
 }
@@ -35,7 +35,7 @@ export function filterVersionablePackages(config: Config, packages: Package[]) {
 export function filterTaggablePackages(config: Config, packages: Package[]) {
   const options = {
     ignoredPackages: new Set(config.ignore),
-    versionPrivatePackages: config.privatePackages.tag,
+    ignorePrivatePackages: config.privatePackages.tag,
   };
   return packages.filter((pkg) => isVersionablePackage(pkg, options));
 }
