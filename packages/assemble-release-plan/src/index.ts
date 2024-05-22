@@ -231,7 +231,7 @@ function assembleReleasePlan(
           });
         } else if (
           existingRelease.type === "none" &&
-          !isVersionablePackage(pkg)
+          isVersionablePackage(pkg)
         ) {
           existingRelease.type = "patch";
         }
