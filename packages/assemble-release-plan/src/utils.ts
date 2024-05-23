@@ -60,7 +60,6 @@ export function getCurrentHighestVersion(
 }
 
 // Note: if updating this, also update the other copies of createIsVersionablePackage.
-// TODO(jakebailey): don't copy paste
 export function createIsVersionablePackage(
   ignoredPackages: readonly string[],
   allowPrivatePackages: boolean

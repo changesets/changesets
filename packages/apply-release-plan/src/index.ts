@@ -191,7 +191,6 @@ export default async function applyReleasePlan(
 }
 
 // Note: if updating this, also update the other copies of createIsVersionablePackage.
-// TODO(jakebailey): don't copy paste
 function createIsVersionablePackage(
   ignoredPackages: readonly string[],
   allowPrivatePackages: boolean
