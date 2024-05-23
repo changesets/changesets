@@ -2,42 +2,41 @@ import { Config } from "@changesets/types";
 import { getChangedPackagesSinceRef } from "@changesets/git";
 import { Package } from "@manypkg/get-packages";
 
-function isVersionablePackage(
-  { packageJson }: Package,
-  {
-    ignoredPackages,
-    ignorePrivatePackages,
-  }: {
-    ignoredPackages: Set<string>;
-    ignorePrivatePackages: boolean;
-  }
-) {
-  if (ignoredPackages.has(packageJson.name)) {
-    return false;
-  }
+// Note: if updating this, also update the other copies of createIsVersionablePackage.
+// TODO(jakebailey): don't copy paste
+function createIsVersionablePackage(
+  ignoredPackages: readonly string[],
+  allowPrivatePackages: boolean
+): (pkg: Package) => boolean {
+  const ignoredPackagesSet = new Set(ignoredPackages);
+  return ({ packageJson }: Package) => {
+    if (ignoredPackagesSet.has(packageJson.name)) {
+      return false;
+    }
 
-  if (packageJson.private && !ignorePrivatePackages) {
-    return false;
-  }
+    if (packageJson.private && !allowPrivatePackages) {
+      return false;
+    }
 
-  const hasVersionField = !!packageJson.version;
-  return hasVersionField;
+    const hasVersionField = !!packageJson.version;
+    return hasVersionField;
+  };
 }
 
 export function filterVersionablePackages(config: Config, packages: Package[]) {
-  const options = {
-    ignoredPackages: new Set(config.ignore),
-    ignorePrivatePackages: config.privatePackages.version,
-  };
-  return packages.filter((pkg) => isVersionablePackage(pkg, options));
+  const isVersionablePackage = createIsVersionablePackage(
+    config.ignore,
+    config.privatePackages.version
+  );
+  return packages.filter((pkg) => isVersionablePackage(pkg));
 }
 
 export function filterTaggablePackages(config: Config, packages: Package[]) {
-  const options = {
-    ignoredPackages: new Set(config.ignore),
-    ignorePrivatePackages: config.privatePackages.tag,
-  };
-  return packages.filter((pkg) => isVersionablePackage(pkg, options));
+  const isVersionablePackage = createIsVersionablePackage(
+    config.ignore,
+    config.privatePackages.tag
+  );
+  return packages.filter((pkg) => isVersionablePackage(pkg));
 }
 
 export async function getVersionableChangedPackages(

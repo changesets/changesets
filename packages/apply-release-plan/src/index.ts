@@ -190,8 +190,9 @@ export default async function applyReleasePlan(
   return touchedFiles;
 }
 
+// Note: if updating this, also update the other copies of createIsVersionablePackage.
 // TODO(jakebailey): don't copy paste
-export function createIsVersionablePackage(
+function createIsVersionablePackage(
   ignoredPackages: readonly string[],
   allowPrivatePackages: boolean
 ): (pkg: Package) => boolean {
