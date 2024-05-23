@@ -115,4 +115,39 @@ describe("getting the dependency graph", function () {
       `);
     })
   );
+
+  it("should skip devDependencies if specified", function () {
+    const { graph, valid } = getDependencyGraph(
+      {
+        root: {
+          dir: ".",
+          packageJson: { name: "root", version: "1.0.0" },
+        },
+        packages: [
+          {
+            dir: "foo",
+            packageJson: {
+              name: "foo",
+              version: "1.0.0",
+              devDependencies: {
+                bar: "workspace:*",
+              },
+            },
+          },
+          {
+            dir: "bar",
+            packageJson: {
+              name: "bar",
+              version: "1.0.0",
+            },
+          },
+        ],
+        tool: "pnpm",
+      },
+      { ignoreDevDependencies: true }
+    );
+    expect(graph.get("foo")!.dependencies).toStrictEqual([]);
+    expect(valid).toBeTruthy();
+    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+  });
 });
