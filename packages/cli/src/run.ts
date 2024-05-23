@@ -15,6 +15,7 @@ import status from "./commands/status";
 import pre from "./commands/pre";
 import tagCommand from "./commands/tag";
 import { CliOptions } from "./types";
+import { createIsVersionablePackage } from "./utils/versionablePackages";
 
 export async function run(
   input: string[],
@@ -141,17 +142,28 @@ export async function run(
           config.ignore = ignoreArrayFromCmd;
         }
 
+        const packagesByName = new Map(
+          packages.packages.map((x) => [x.packageJson.name, x])
+        );
+        const isVersionablePackage = createIsVersionablePackage(
+          config.ignore,
+          config.privatePackages.version
+        );
+
         // Validate that all dependents of ignored packages are listed in the ignore list
         const dependentsGraph = getDependentsGraph(packages, {
           bumpVersionsWithWorkspaceProtocolOnly:
             config.bumpVersionsWithWorkspaceProtocolOnly,
         });
-        // TODO(jakebailey): should this check isVersionablePackage?
-        for (const ignoredPackage of config.ignore) {
+        for (const pkg of packages.packages) {
+          if (isVersionablePackage(pkg)) {
+            continue;
+          }
+          const ignoredPackage = pkg.packageJson.name;
           const dependents = dependentsGraph.get(ignoredPackage) || [];
           for (const dependent of dependents) {
-            // TODO(jakebailey): should this check isVersionablePackage?
-            if (!config.ignore.includes(dependent)) {
+            const dependentPkg = packagesByName.get(dependent)!;
+            if (isVersionablePackage(dependentPkg)) {
               messages.push(
                 `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please pass "${dependent}" to the \`--ignore\` flag.`
               );

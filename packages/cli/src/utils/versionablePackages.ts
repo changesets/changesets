@@ -3,7 +3,7 @@ import { getChangedPackagesSinceRef } from "@changesets/git";
 import { Package } from "@manypkg/get-packages";
 
 // Note: if updating this, also update the other copies of createIsVersionablePackage.
-function createIsVersionablePackage(
+export function createIsVersionablePackage(
   ignoredPackages: readonly string[],
   allowPrivatePackages: boolean
 ): (pkg: Package) => boolean {
