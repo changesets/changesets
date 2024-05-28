@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 6.0.1
+
+### Patch Changes
+
+- [#1361](https://github.com/changesets/changesets/pull/1361) [`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c) Thanks [@jakebailey](https://github.com/jakebailey)! - Ensure that `version`/`tag` do not touch private packages with when versioning/tagging is turned off using `versionPackages` config
+
 ## 6.0.0
 
 ### Major Changes
