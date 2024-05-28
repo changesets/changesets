@@ -1,23 +1,21 @@
-import {
-  ReleasePlan,
-  Config,
-  ChangelogFunctions,
-  NewChangeset,
-  ModCompWithPackage,
-} from "@changesets/types";
-
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import resolveFrom from "resolve-from";
-import { Package, Packages } from "@manypkg/get-packages";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
+import {
+  ChangelogFunctions,
+  Config,
+  ModCompWithPackage,
+  NewChangeset,
+  ReleasePlan,
+} from "@changesets/types";
+import { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
-
 import fs from "fs-extra";
 import path from "path";
 import prettier from "prettier";
-
-import versionPackage from "./version-package";
+import resolveFrom from "resolve-from";
 import getChangelogEntry from "./get-changelog-entry";
+import versionPackage from "./version-package";
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
@@ -78,11 +76,6 @@ export default async function applyReleasePlan(
 
   const packagesByName = new Map(
     packages.packages.map((x) => [x.packageJson.name, x])
-  );
-
-  const isVersionablePackage = createIsVersionablePackage(
-    config.ignore,
-    config.privatePackages.version
   );
 
   let { releases, changesets } = releasePlan;
@@ -163,15 +156,17 @@ export default async function applyReleasePlan(
         let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
         let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
         if (await fs.pathExists(changesetPath)) {
-          // DO NOT remove changeset for ignored packages
-          // Mixed changeset that contains both ignored packages and not ignored packages are disallowed
+          // DO NOT remove changeset for skipped packages
+          // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
           // At this point, we know there is no such changeset, because otherwise the program would've already failed,
-          // so we just check if any ignored package exists in this changeset, and only remove it if none exists
-          // Ignored list is added in v2, so we don't need to do it for v1 changesets
+          // so we just check if any skipped package exists in this changeset, and only remove it if none exists
+          // options to skip packages were added in v2, so we don't need to do it for v1 changesets
           if (
-            !changeset.releases.find(
-              (release) =>
-                !isVersionablePackage(packagesByName.get(release.name)!)
+            !changeset.releases.find((release) =>
+              shouldSkipPackage(packagesByName.get(release.name)!, {
+                ignore: config.ignore,
+                allowPrivatePackages: config.privatePackages.version,
+              })
             )
           ) {
             touchedFiles.push(changesetPath);
@@ -188,26 +183,6 @@ export default async function applyReleasePlan(
 
   // We return the touched files to be committed in the cli
   return touchedFiles;
-}
-
-// Note: if updating this, also update the other copies of createIsVersionablePackage.
-function createIsVersionablePackage(
-  ignoredPackages: readonly string[],
-  allowPrivatePackages: boolean
-): (pkg: Package) => boolean {
-  const ignoredPackagesSet = new Set(ignoredPackages);
-  return ({ packageJson }: Package) => {
-    if (ignoredPackagesSet.has(packageJson.name)) {
-      return false;
-    }
-
-    if (packageJson.private && !allowPrivatePackages) {
-      return false;
-    }
-
-    const hasVersionField = !!packageJson.version;
-    return hasVersionField;
-  };
 }
 
 async function getNewChangelogEntry(

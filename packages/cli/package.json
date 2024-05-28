@@ -78,6 +78,7 @@
     "@changesets/logger": "^0.1.0",
     "@changesets/pre": "^2.0.0",
     "@changesets/read": "^0.6.0",
+    "@changesets/should-skip-package": "^0.1.0",
     "@changesets/types": "^6.0.0",
     "@changesets/write": "^0.3.1",
     "@manypkg/get-packages": "^1.1.3",

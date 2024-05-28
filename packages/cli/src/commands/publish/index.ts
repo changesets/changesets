@@ -38,7 +38,7 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   warn(importantEnd);
 }
 
-export default async function run(
+export default async function publish(
   cwd: string,
   { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
   config: Config

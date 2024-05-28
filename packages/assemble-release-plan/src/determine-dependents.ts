@@ -1,14 +1,14 @@
-import semverSatisfies from "semver/functions/satisfies";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
+  Config,
   DependencyType,
   PackageJSON,
   VersionType,
-  Config,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
-import { InternalRelease, PreInfo } from "./types";
+import semverSatisfies from "semver/functions/satisfies";
 import { incrementVersion } from "./increment";
-import { createIsVersionablePackage } from "./utils";
+import { InternalRelease, PreInfo } from "./types";
 
 /*
   WARNING:
@@ -38,10 +38,6 @@ export default function determineDependents({
   let updated = false;
   // NOTE this is intended to be called recursively
   let pkgsToSearch = [...releases.values()];
-  const isVersionablePackage = createIsVersionablePackage(
-    config.ignore,
-    config.privatePackages.version
-  );
 
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
@@ -61,7 +57,12 @@ export default function determineDependents({
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
 
-        if (!isVersionablePackage(dependentPackage)) {
+        if (
+          shouldSkipPackage(dependentPackage, {
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
+          })
+        ) {
           type = "none";
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(

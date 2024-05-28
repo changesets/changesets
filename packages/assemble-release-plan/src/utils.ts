@@ -58,23 +58,3 @@ export function getCurrentHighestVersion(
 
   return highestVersion!;
 }
-
-// Note: if updating this, also update the other copies of createIsVersionablePackage.
-export function createIsVersionablePackage(
-  ignoredPackages: readonly string[],
-  allowPrivatePackages: boolean
-): (pkg: Package) => boolean {
-  const ignoredPackagesSet = new Set(ignoredPackages);
-  return ({ packageJson }: Package) => {
-    if (ignoredPackagesSet.has(packageJson.name)) {
-      return false;
-    }
-
-    if (packageJson.private && !allowPrivatePackages) {
-      return false;
-    }
-
-    const hasVersionField = !!packageJson.version;
-    return hasVersionField;
-  };
-}

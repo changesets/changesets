@@ -1,9 +1,14 @@
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { read } from "@changesets/config";
 import * as git from "@changesets/git";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { getPackages } from "@manypkg/get-packages";
 import tag from "../index";
-import { defaultConfig } from "@changesets/config";
 
 jest.mock("@changesets/git");
+
+async function readConfig(cwd: string) {
+  return read(cwd, await getPackages(cwd));
+}
 
 describe("tag command", () => {
   silenceLogsInBlock();
@@ -26,12 +31,13 @@ describe("tag command", () => {
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify({}),
       });
 
       (git.getAllTags as jest.Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag(cwd, defaultConfig);
+      await tag(cwd, await readConfig(cwd));
       expect(git.tag).toHaveBeenCalledTimes(2);
       expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("pkg-a@1.0.0");
       expect((git.tag as jest.Mock).mock.calls[1][0]).toEqual("pkg-b@1.0.0");
@@ -54,6 +60,7 @@ describe("tag command", () => {
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify({}),
       });
 
       (git.getAllTags as jest.Mock).mockReturnValue(
@@ -64,7 +71,7 @@ describe("tag command", () => {
       );
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag(cwd, defaultConfig);
+      await tag(cwd, await readConfig(cwd));
       expect(git.tag).toHaveBeenCalledTimes(1);
       expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("pkg-b@1.0.0");
     });
@@ -78,14 +85,17 @@ describe("tag command", () => {
           name: "root-only",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify({
+          privatePackages: {
+            version: true,
+            tag: true,
+          },
+        }),
       });
       (git.getAllTags as jest.Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag(cwd, {
-        ...defaultConfig,
-        privatePackages: { version: true, tag: true },
-      });
+      await tag(cwd, await readConfig(cwd));
       expect(git.tag).toHaveBeenCalledTimes(1);
       expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("v1.0.0");
     });
@@ -97,11 +107,12 @@ describe("tag command", () => {
           name: "root-only",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify({}),
       });
       (git.getAllTags as jest.Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag(cwd, defaultConfig);
+      await tag(cwd, await readConfig(cwd));
       expect(git.tag).toHaveBeenCalledTimes(0);
     });
   });

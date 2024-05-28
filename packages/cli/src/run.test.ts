@@ -60,8 +60,8 @@ describe("cli", () => {
 
       const loggerErrorCalls = (error as any).mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
-      expect(loggerErrorCalls[0][0]).toEqual(
-        `The package "pkg-a" depends on the ignored package "pkg-b", but "pkg-a" is not being ignored. Please pass "pkg-a" to the \`--ignore\` flag.`
+      expect(loggerErrorCalls[0][0]).toMatchInlineSnapshot(
+        `"The package "pkg-a" depends on the skipped package "pkg-b" (either by \`ignore\` option or by \`privatePackages.version\`), but "pkg-a" is not being skipped. Please pass "pkg-a" to the \`--ignore\` flag."`
       );
     });
 

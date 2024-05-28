@@ -1,15 +1,23 @@
 import * as git from "@changesets/git";
-import { getPackages } from "@manypkg/get-packages";
 import { log } from "@changesets/logger";
-import { filterTaggablePackages } from "../../utils/versionablePackages";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 
-export default async function run(cwd: string, config: Config) {
+export default async function tag(cwd: string, config: Config) {
   const { packages, tool } = await getPackages(cwd);
 
   const allExistingTags = await git.getAllTags(cwd);
 
-  for (const pkg of filterTaggablePackages(config, packages)) {
+  const taggablePackages = packages.filter(
+    (pkg) =>
+      !shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.tag,
+      })
+  );
+
+  for (const pkg of taggablePackages) {
     const tag =
       tool !== "root"
         ? `${pkg.packageJson.name}@${pkg.packageJson.version}`
