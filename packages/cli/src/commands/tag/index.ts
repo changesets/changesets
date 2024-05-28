@@ -3,6 +3,7 @@ import { log } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
+import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
 
 export default async function tag(cwd: string, config: Config) {
   const { packages, tool } = await getPackages(cwd);
@@ -17,11 +18,12 @@ export default async function tag(cwd: string, config: Config) {
       })
   );
 
-  for (const pkg of taggablePackages) {
-    const tag =
-      tool !== "root"
-        ? `${pkg.packageJson.name}@${pkg.packageJson.version}`
-        : `v${pkg.packageJson.version}`;
+  for (const { name, newVersion } of await getUntaggedPackages(
+    taggablePackages,
+    cwd,
+    tool
+  )) {
+    const tag = tool !== "root" ? `${name}@${newVersion}` : `v${newVersion}`;
 
     if (allExistingTags.has(tag)) {
       log("Skipping tag (already exists): ", tag);
