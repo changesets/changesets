@@ -13,7 +13,7 @@ import {
 } from "@changesets/types";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages";
 
-export default async function getStatus(
+export default async function status(
   cwd: string,
   {
     sinceMaster,
