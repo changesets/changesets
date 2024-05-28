@@ -30,6 +30,13 @@ const withPackages = (pkgNames: string[]) => ({
   })),
 });
 
+test("missing config throws", async () => {
+  let cwd = await testdir({
+    ".changeset/README.md": "",
+  });
+  expect(async () => await read(cwd, defaultPackages)).toThrowError();
+});
+
 test("read reads the config", async () => {
   let cwd = await testdir({
     ".changeset/config.json": JSON.stringify({
