@@ -1,5 +1,18 @@
 # @changesets/cli
 
+## 2.27.5
+
+### Patch Changes
+
+- [#1370](https://github.com/changesets/changesets/pull/1370) [`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a regression that caused `changeset version` to fail on packages having a dev dependency on a skipped package.
+
+- Updated dependencies [[`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b)]:
+  - @changesets/get-dependents-graph@2.1.0
+  - @changesets/assemble-release-plan@6.0.2
+  - @changesets/config@3.0.1
+  - @changesets/get-release-plan@4.0.2
+  - @changesets/apply-release-plan@7.0.3
+
 ## 2.27.4
 
 ### Patch Changes

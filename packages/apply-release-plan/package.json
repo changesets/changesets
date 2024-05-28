@@ -1,6 +1,6 @@
 {
   "name": "@changesets/apply-release-plan",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "description": "Takes a release plan and applies it to packages",
   "main": "dist/changesets-apply-release-plan.cjs.js",
   "module": "dist/changesets-apply-release-plan.esm.js",
@@ -20,7 +20,7 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/apply-release-plan",
   "dependencies": {
     "@babel/runtime": "^7.20.1",
-    "@changesets/config": "^3.0.0",
+    "@changesets/config": "^3.0.1",
     "@changesets/get-version-range-type": "^0.4.0",
     "@changesets/git": "^3.0.0",
     "@changesets/should-skip-package": "^0.1.0",
