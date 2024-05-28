@@ -1,4 +1,4 @@
-import { parse, read, readAnyConfigFile } from "./";
+import { parse, read } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import { Config, WrittenConfig } from "@changesets/types";
@@ -37,7 +37,7 @@ test("read reads the config", async () => {
       commit: true,
     }),
   });
-  let config = await readAnyConfigFile(cwd, defaultPackages);
+  let config = await read(cwd, defaultPackages);
   expect(config).toEqual({
     fixed: [],
     linked: [],
@@ -79,7 +79,7 @@ test("read cjs format", async () => {
   let cwd = await testdir({
     ".changeset/config.cjs": cjsConfig,
   });
-  let config = await read2(cwd, defaultPackages);
+  let config = await read(cwd, defaultPackages);
   expect(config).toEqual({
     fixed: [],
     linked: [],
@@ -121,7 +121,7 @@ test("read mjs format", async () => {
   let cwd = await testdir({
     ".changeset/config.mjs": mjsConfig,
   });
-  let config = await read2(cwd, defaultPackages);
+  let config = await read(cwd, defaultPackages);
   expect(config).toEqual({
     fixed: [],
     linked: [],
