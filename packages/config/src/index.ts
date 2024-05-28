@@ -13,9 +13,8 @@ import {
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import JSONC from "tiny-jsonc";
 
-export let defaultWrittenConfig: WrittenConfig = {
+export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
   changelog: "@changesets/cli/changelog",
   commit: false,
@@ -107,7 +106,8 @@ let readConfigJsonc = async (
   let json = await fs.readFile(path.join(cwd, ".changeset", "config.jsonc"), {
     encoding: "utf8",
   });
-  let configObject: WrittenConfig = JSONC.parse(json);
+  const JSONC = await import("tiny-jsonc");
+  let configObject: WrittenConfig = JSONC.default.parse(json);
   return parse(configObject, packages);
 };
 
