@@ -6,7 +6,7 @@ import { readPreState } from "@changesets/pre";
 import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import chalk from "chalk";
-import { filterUntaggedPackages } from "../../utils/filterUntaggedPackages";
+import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map((p) => `${p.name}@${p.newVersion}`).join("\n");
@@ -72,7 +72,7 @@ export default async function publish(
     (pkg) => pkg.packageJson.private && pkg.packageJson.version
   );
   const untaggedPrivatePackageReleases = tagPrivatePackages
-    ? await filterUntaggedPackages(privatePackages, cwd, tool)
+    ? await getUntaggedPackages(privatePackages, cwd, tool)
     : [];
 
   if (

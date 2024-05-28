@@ -3,7 +3,7 @@ import { log } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import { filterUntaggedPackages } from "../../utils/filterUntaggedPackages";
+import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
 
 export default async function tag(cwd: string, config: Config) {
   const { packages, tool } = await getPackages(cwd);
@@ -18,7 +18,7 @@ export default async function tag(cwd: string, config: Config) {
       })
   );
 
-  for (const { name, newVersion } of await filterUntaggedPackages(
+  for (const { name, newVersion } of await getUntaggedPackages(
     taggablePackages,
     cwd,
     tool
