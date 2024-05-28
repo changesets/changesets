@@ -65,7 +65,7 @@ describe("cli", () => {
       );
     });
 
-    it("should not throw if dependents of unversioned private packages are not explicitly listed in the ignore array", async () => {
+    it("should not throw if dependents of unversioned private packages are not explicitly listed by the ignore flag", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
