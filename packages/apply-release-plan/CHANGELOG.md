@@ -1,5 +1,12 @@
 # @changesets/apply-release-plan
 
+## 7.0.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/config@3.0.1
+
 ## 7.0.2
 
 ### Patch Changes
