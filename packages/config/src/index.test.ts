@@ -106,45 +106,6 @@ test("read cjs format", async () => {
   });
 });
 
-const jsoncConfig = `{
-  // JSONC supports comments in the config file.
-  changelog: false,
-  // And trailing commas...
-  commit: true,
-}
-`;
-
-test("read jsonc format", async () => {
-  let cwd = await testdir({
-    ".changeset/config.jsonc": jsoncConfig,
-  });
-  let config = await read(cwd, defaultPackages);
-  expect(config).toEqual({
-    fixed: [],
-    linked: [],
-    changelog: false,
-    commit: ["@changesets/cli/commit", { skipCI: "version" }],
-    access: "restricted",
-    baseBranch: "master",
-    changedFilePatterns: ["**"],
-    updateInternalDependencies: "patch",
-    ignore: [],
-    bumpVersionsWithWorkspaceProtocolOnly: false,
-    privatePackages: {
-      tag: false,
-      version: true,
-    },
-    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-      onlyUpdatePeerDependentsWhenOutOfRange: false,
-      updateInternalDependents: "out-of-range",
-    },
-    snapshot: {
-      useCalculatedVersion: false,
-      prereleaseTemplate: null,
-    },
-  });
-});
-
 let defaults: Config = {
   fixed: [],
   linked: [],

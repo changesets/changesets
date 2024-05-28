@@ -99,28 +99,11 @@ export let readConfigJson = async (
   return parse(json, packages);
 };
 
-let readConfigJsonc = async (
-  cwd: string,
-  packages: Packages
-): Promise<Config> => {
-  let json = await fs.readFile(path.join(cwd, ".changeset", "config.jsonc"), {
-    encoding: "utf8",
-  });
-  const JSONC = await import("tiny-jsonc");
-  let configObject: WrittenConfig = JSONC.default.parse(json);
-  return parse(configObject, packages);
-};
-
 export let read = async (cwd: string, packages: Packages): Promise<Config> => {
   // If a config.json file exists in the expected path, short-circuit to the old behavior.
   const originalConfigFilePath = path.join(cwd, ".changeset", "config.json");
   if (fs.existsSync(originalConfigFilePath)) {
     return readConfigJson(cwd, packages);
-  }
-
-  const jsoncConfigPath = path.join(cwd, ".changeset", "config.jsonc");
-  if (fs.existsSync(jsoncConfigPath)) {
-    return readConfigJsonc(cwd, packages);
   }
 
   // Dynamically load cosmiconfig only if we proceed down this code path.

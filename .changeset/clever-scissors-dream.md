@@ -1,11 +1,12 @@
 ---
 "@changesets/config": minor
+"@changesets/cli": minor
 ---
 
-Add support for config file in CommonJS or ESM
+Add support for config file in CommonJS
 
-The changesets configuration file can now be in CommonJS (config.cjs) or JSONC (config.jsonc) format, in addition to
-JSON. Despite being code, the CJS expected format/type of the config object is the same as the JSON format.
+The changesets configuration file can now be in CommonJS (config.cjs) format in addition to JSON. Despite being code,
+the CJS expected format/type of the config object is the same as the JSON format.
 
 Benefits to this change include:
 

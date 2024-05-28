@@ -30,8 +30,7 @@
     "@manypkg/get-packages": "^1.1.3",
     "cosmiconfig": "^9.0.0",
     "fs-extra": "^7.0.1",
-    "micromatch": "^4.0.2",
-    "tiny-jsonc": "^1.0.1"
+    "micromatch": "^4.0.2"
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
