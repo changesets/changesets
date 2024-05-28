@@ -147,6 +147,7 @@ export async function run(
 
         // validate that all dependents of skipped packages are also skipped
         const dependentsGraph = getDependentsGraph(packages, {
+          ignoreDevDependencies: true,
           bumpVersionsWithWorkspaceProtocolOnly:
             config.bumpVersionsWithWorkspaceProtocolOnly,
         });
