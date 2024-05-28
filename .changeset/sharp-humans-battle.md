@@ -4,4 +4,4 @@
 "@changesets/cli": patch
 ---
 
-Ensure that version/tag do not touch private packages with privatePackages config
+Ensure that `version`/`tag` do not touch private packages with when versioning/tagging is turned off using `versionPackages` config
