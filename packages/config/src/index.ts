@@ -91,9 +91,45 @@ function isArray<T>(
   return Array.isArray(arg);
 }
 
-export let read = async (cwd: string, packages: Packages) => {
+export let readV2ConfigFile = async (cwd: string, packages: Packages) => {
   let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
   return parse(json, packages);
+};
+
+export let read = async (cwd: string, packages: Packages): Promise<Config> => {
+  return readV2ConfigFile(cwd, packages);
+};
+
+export let readAnyConfigFile = async (
+  cwd: string,
+  packages: Packages
+): Promise<Config> => {
+  const originalConfigFilePath = path.join(cwd, ".changeset", "config.json");
+
+  if (fs.existsSync(originalConfigFilePath)) {
+    return readV2ConfigFile(cwd, packages);
+  }
+
+  throw new Error(`Cannot find config at path ${originalConfigFilePath}`);
+  // const { cosmiconfig } = await import("cosmiconfig");
+  // // const searchOptions
+  // const configExplorer = cosmiconfig("changesets", {
+  //   searchPlaces: [".changeset/config.cjs", ".changeset/config.json"],
+
+  //   // Don't look up the folder tree for additional config files
+  //   searchStrategy: "none",
+
+  //   // Don't look in any of the default search places; only use those defined above
+  //   mergeSearchPlaces: false,
+  // });
+
+  // const searchResult = await configExplorer.search(cwd);
+  // if (searchResult?.config === undefined) {
+  //   throw new Error(`Cannot find changesets config.`);
+  // }
+
+  // const config: WrittenConfig = searchResult?.config;
+  // return parse(config, packages);
 };
 
 export let parse = (json: WrittenConfig, packages: Packages): Config => {

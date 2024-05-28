@@ -1,4 +1,4 @@
-import { read, parse } from "./";
+import { parse, read, readAnyConfigFile } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import { Config, WrittenConfig } from "@changesets/types";
@@ -37,7 +37,91 @@ test("read reads the config", async () => {
       commit: true,
     }),
   });
-  let config = await read(cwd, defaultPackages);
+  let config = await readAnyConfigFile(cwd, defaultPackages);
+  expect(config).toEqual({
+    fixed: [],
+    linked: [],
+    changelog: false,
+    commit: ["@changesets/cli/commit", { skipCI: "version" }],
+    access: "restricted",
+    baseBranch: "master",
+    changedFilePatterns: ["**"],
+    updateInternalDependencies: "patch",
+    ignore: [],
+    bumpVersionsWithWorkspaceProtocolOnly: false,
+    privatePackages: {
+      tag: false,
+      version: true,
+    },
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+      onlyUpdatePeerDependentsWhenOutOfRange: false,
+      updateInternalDependents: "out-of-range",
+    },
+    snapshot: {
+      useCalculatedVersion: false,
+      prereleaseTemplate: null,
+    },
+  });
+});
+
+const cjsConfig = `// @ts-check
+
+/** @type {import("@changesets/types").WrittenConfig} */
+const config = {
+  changelog: false,
+  commit: true,
+};
+
+module.exports = config;
+`;
+
+test("read cjs format", async () => {
+  let cwd = await testdir({
+    ".changeset/config.cjs": cjsConfig,
+  });
+  let config = await read2(cwd, defaultPackages);
+  expect(config).toEqual({
+    fixed: [],
+    linked: [],
+    changelog: false,
+    commit: ["@changesets/cli/commit", { skipCI: "version" }],
+    access: "restricted",
+    baseBranch: "master",
+    changedFilePatterns: ["**"],
+    updateInternalDependencies: "patch",
+    ignore: [],
+    bumpVersionsWithWorkspaceProtocolOnly: false,
+    privatePackages: {
+      tag: false,
+      version: true,
+    },
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+      onlyUpdatePeerDependentsWhenOutOfRange: false,
+      updateInternalDependents: "out-of-range",
+    },
+    snapshot: {
+      useCalculatedVersion: false,
+      prereleaseTemplate: null,
+    },
+  });
+});
+
+const mjsConfig = `// @ts-check
+
+/** @type {import("@changesets/types").WrittenConfig} */
+export const config = {
+  changelog: false,
+  commit: true,
+};
+
+// export default config;
+`;
+
+test("read mjs format", async () => {
+  let cwd = await testdir({
+    ".changeset/config.mjs": mjsConfig,
+  });
+  let config = await read2(cwd, defaultPackages);
   expect(config).toEqual({
     fixed: [],
     linked: [],
