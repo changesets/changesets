@@ -13,6 +13,7 @@ import {
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import JSONC from "tiny-jsonc";
 
 export let defaultWrittenConfig: WrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
@@ -99,6 +100,17 @@ export let readConfigJson = async (
   return parse(json, packages);
 };
 
+let readConfigJsonc = async (
+  cwd: string,
+  packages: Packages
+): Promise<Config> => {
+  let json = await fs.readFile(path.join(cwd, ".changeset", "config.jsonc"), {
+    encoding: "utf8",
+  });
+  let configObject: WrittenConfig = JSONC.parse(json);
+  return parse(configObject, packages);
+};
+
 export let read = async (cwd: string, packages: Packages): Promise<Config> => {
   // If a config.json file exists in the expected path, short-circuit to the old behavior.
   const originalConfigFilePath = path.join(cwd, ".changeset", "config.json");
@@ -106,14 +118,19 @@ export let read = async (cwd: string, packages: Packages): Promise<Config> => {
     return readConfigJson(cwd, packages);
   }
 
+  const jsoncConfigPath = path.join(cwd, ".changeset", "config.jsonc");
+  if (fs.existsSync(jsoncConfigPath)) {
+    return readConfigJsonc(cwd, packages);
+  }
+
   // Dynamically load cosmiconfig only if we proceed down this code path.
   const { cosmiconfig } = await import("cosmiconfig");
   const configExplorer = cosmiconfig("changesets", {
-    // Only check for CommonJS and ESM (mjs) files; JSON format is loaded by existing logic above.
-    // The .js extension is excluded because there is code elsewhere that assumes such a file is a V1 changesets config
-    // file. To limit the size of this change, only .cjs and .mjs config files will be loaded. A future change could add
-    // to this list and fully remove code related to the V1 config format.
-    searchPlaces: [".changeset/config.cjs", ".changeset/config.mjs"],
+    // Only check for CommonJS config; JSON and JSONC formats are loaded by existing logic above. The .mjs file format
+    // is exlcuded because it seems to break tests. The .js extension is excluded because there is code elsewhere that
+    // assumes such a file is a V1 changesets config file. To limit the size of this change, only .cjs config files will
+    // be loaded. A future change could add to this list and fully remove code related to the V1 config format.
+    searchPlaces: [".changeset/config.cjs"],
 
     // Don't look up the folder tree for additional config files.
     searchStrategy: "none",

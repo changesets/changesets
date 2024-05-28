@@ -106,20 +106,17 @@ test("read cjs format", async () => {
   });
 });
 
-const mjsConfig = `// @ts-check
-
-/** @type {import("@changesets/types").WrittenConfig} */
-export const config = {
+const jsoncConfig = `{
+  // JSONC supports comments in the config file.
   changelog: false,
+  // And trailing commas...
   commit: true,
-};
-
-// export default config;
+}
 `;
 
-test("read mjs format", async () => {
+test("read jsonc format", async () => {
   let cwd = await testdir({
-    ".changeset/config.mjs": mjsConfig,
+    ".changeset/config.jsonc": jsoncConfig,
   });
   let config = await read(cwd, defaultPackages);
   expect(config).toEqual({
