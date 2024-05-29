@@ -6,7 +6,7 @@ import { readPreState } from "@changesets/pre";
 import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import chalk from "chalk";
-import { getUntaggedPrivatePackages } from "./getUntaggedPrivatePackages";
+import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map((p) => `${p.name}@${p.newVersion}`).join("\n");
@@ -38,7 +38,7 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   warn(importantEnd);
 }
 
-export default async function run(
+export default async function publish(
   cwd: string,
   { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
   config: Config
@@ -72,7 +72,7 @@ export default async function run(
     (pkg) => pkg.packageJson.private && pkg.packageJson.version
   );
   const untaggedPrivatePackageReleases = tagPrivatePackages
-    ? await getUntaggedPrivatePackages(privatePackages, cwd, tool)
+    ? await getUntaggedPackages(privatePackages, cwd, tool)
     : [];
 
   if (

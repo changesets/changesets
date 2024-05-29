@@ -1,5 +1,52 @@
 # @changesets/cli
 
+## 2.27.5
+
+### Patch Changes
+
+- [#1370](https://github.com/changesets/changesets/pull/1370) [`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a regression that caused `changeset version` to fail on packages having a dev dependency on a skipped package.
+
+- Updated dependencies [[`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b)]:
+  - @changesets/get-dependents-graph@2.1.0
+  - @changesets/assemble-release-plan@6.0.2
+  - @changesets/config@3.0.1
+  - @changesets/get-release-plan@4.0.2
+  - @changesets/apply-release-plan@7.0.3
+
+## 2.27.4
+
+### Patch Changes
+
+- [#1361](https://github.com/changesets/changesets/pull/1361) [`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c) Thanks [@jakebailey](https://github.com/jakebailey)! - Ensure that `version`/`tag` do not touch private packages with when versioning/tagging is turned off using `versionPackages` config
+
+- [#1369](https://github.com/changesets/changesets/pull/1369) [`d729d8c`](https://github.com/changesets/changesets/commit/d729d8cc0e226871aa0c5b73cce80bbf313ca56c) Thanks [@Andarist](https://github.com/Andarist)! - `changeset tag` should now correctly skip tags that exist on the remote
+
+- Updated dependencies [[`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c)]:
+  - @changesets/assemble-release-plan@6.0.1
+  - @changesets/apply-release-plan@7.0.2
+  - @changesets/get-release-plan@4.0.1
+
+## 2.27.3
+
+### Patch Changes
+
+- [#1357](https://github.com/changesets/changesets/pull/1357) [`18c966a`](https://github.com/changesets/changesets/commit/18c966af7b20201453190cbfd2e2dfb59631c02c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` executed without `since` argument. It should now correctly use the configured base branch as the default value.
+
+## 2.27.2
+
+### Patch Changes
+
+- [#1354](https://github.com/changesets/changesets/pull/1354) [`69be7dc`](https://github.com/changesets/changesets/commit/69be7dc7195011ac6dbd00b24ea923f02adcf69c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` incorrectly returning an error status in two cases:
+
+  - for changed ignored packages
+  - for changed private packages when `privatePackage.version` was set to `false`
+
+- [#1351](https://github.com/changesets/changesets/pull/1351) [`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b) Thanks [@TheHolyWaffle](https://github.com/TheHolyWaffle)! - Fix an issue with not applying a custom `.prettierrc` configuration with `prettier@>= 3.1.1`
+
+- Updated dependencies [[`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b)]:
+  - @changesets/apply-release-plan@7.0.1
+  - @changesets/write@0.3.1
+
 ## 2.27.1
 
 ### Patch Changes

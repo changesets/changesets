@@ -1,5 +1,24 @@
 # @changesets/apply-release-plan
 
+## 7.0.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/config@3.0.1
+
+## 7.0.2
+
+### Patch Changes
+
+- [#1361](https://github.com/changesets/changesets/pull/1361) [`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c) Thanks [@jakebailey](https://github.com/jakebailey)! - Ensure that `version`/`tag` do not touch private packages with when versioning/tagging is turned off using `versionPackages` config
+
+## 7.0.1
+
+### Patch Changes
+
+- [#1351](https://github.com/changesets/changesets/pull/1351) [`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b) Thanks [@TheHolyWaffle](https://github.com/TheHolyWaffle)! - Fix an issue with not applying a custom `.prettierrc` configuration with `prettier@>= 3.1.1`
+
 ## 7.0.0
 
 ### Major Changes

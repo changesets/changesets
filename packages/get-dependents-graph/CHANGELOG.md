@@ -1,5 +1,11 @@
 # @changesets/get-dependents-graph
 
+## 2.1.0
+
+### Minor Changes
+
+- [#1370](https://github.com/changesets/changesets/pull/1370) [`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b) Thanks [@Andarist](https://github.com/Andarist)! - Added a new `ignoreDevDependencies` option
+
 ## 2.0.0
 
 ### Major Changes
