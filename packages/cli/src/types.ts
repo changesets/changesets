@@ -11,6 +11,7 @@ export type CliOptions = {
   tag?: string;
   gitTag?: boolean;
   open?: boolean;
+  failOnNoChanges?: boolean;
 };
 
 export type CommandOptions = CliOptions & {

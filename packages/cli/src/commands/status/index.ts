@@ -20,11 +20,13 @@ export default async function status(
     since,
     verbose,
     output,
+    failOnNoChanges,
   }: {
     sinceMaster?: boolean;
     since?: string;
     verbose?: boolean;
     output?: string;
+    failOnNoChanges?: boolean;
   },
   config: Config
 ) {
@@ -43,7 +45,10 @@ export default async function status(
     ref: sinceBranch,
   });
 
-  if (changedPackages.length > 0 && changesets.length === 0) {
+  if (
+    (failOnNoChanges || changedPackages.length > 0) &&
+    changesets.length === 0
+  ) {
     error(
       "Some packages have been changed but no changesets were found. Run `changeset add` to resolve this error."
     );
