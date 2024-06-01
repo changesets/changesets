@@ -69,4 +69,5 @@ Changesets are designed to stack, so there's no problem with adding multiple. Yo
 ## I want to know more about changesets
 
 [here is a more in-depth explanation](https://github.com/changesets/changesets/blob/main/docs/detailed-explanation.md)
-OS Aplet run: ubuntu latest build 
+OS Aplet run: ubuntu latest build ...
+
