@@ -10,6 +10,7 @@
     "default-files",
     "dist",
     "bin.js",
+    "CHANGELOG.md",
     "changelog",
     "commit"
   ],
