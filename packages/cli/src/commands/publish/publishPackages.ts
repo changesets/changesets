@@ -79,12 +79,14 @@ export default async function publishPackages({
   otp,
   preState,
   tag,
+  dryRun = false,
 }: {
   packages: Package[];
   access: AccessType;
   otp?: string;
   preState: PreState | undefined;
   tag?: string;
+  dryRun?: boolean;
 }) {
   const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
   const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
@@ -105,22 +107,30 @@ export default async function publishPackages({
   return Promise.all(
     unpublishedPackagesInfo.map((pkgInfo) => {
       let pkg = packagesByName.get(pkgInfo.name)!;
-      return publishAPackage(
+      return publishAPackage({
         pkg,
         access,
         twoFactorState,
-        getReleaseTag(pkgInfo, preState, tag)
-      );
+        tag: getReleaseTag(pkgInfo, preState, tag),
+        dryRun,
+      });
     })
   );
 }
 
-async function publishAPackage(
-  pkg: Package,
-  access: AccessType,
-  twoFactorState: TwoFactorState,
-  tag: string
-): Promise<PublishedResult> {
+async function publishAPackage({
+  pkg,
+  access,
+  twoFactorState,
+  tag,
+  dryRun,
+}: {
+  pkg: Package;
+  access: AccessType;
+  twoFactorState: TwoFactorState;
+  tag: string;
+  dryRun: boolean;
+}): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
   info(
     `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
@@ -135,6 +145,7 @@ async function publishAPackage(
         : pkg.dir,
       access: publishConfig?.access || access,
       tag,
+      dryRun,
     },
     twoFactorState
   );

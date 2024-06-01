@@ -12,7 +12,7 @@ const { input, flags } = meow(
     init
     add [--empty] [--open]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
-    publish [--tag <name>] [--otp <code>] [--no-git-tag]
+    publish [--tag <name>] [--otp <code>] [--no-git-tag] [--dry-run]
     status [--since <branch>] [--verbose] [--output JSON_FILE.json]
     pre <enter|exit> <tag>
     tag
@@ -55,6 +55,9 @@ const { input, flags } = meow(
       },
       snapshotPrereleaseTemplate: {
         type: "string",
+      },
+      dryRun: {
+        type: "boolean",
       },
       // mixed type like this is not supported by `meow`
       // if it gets passed explicitly then it's still available on the flags with an inferred type though

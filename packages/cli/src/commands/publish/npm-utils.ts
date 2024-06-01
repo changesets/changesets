@@ -16,6 +16,7 @@ interface PublishOptions {
   publishDir: string;
   access: AccessType;
   tag: string;
+  dryRun: boolean;
 }
 
 const npmRequestLimit = pLimit(40);
@@ -175,6 +176,9 @@ async function internalPublish(
   }
   if (publishTool.name === "pnpm" && publishTool.shouldAddNoGitChecks) {
     publishFlags.push("--no-git-checks");
+  }
+  if (opts.dryRun) {
+    publishFlags.push("--dry-run");
   }
 
   // Due to a super annoying issue in yarn, we have to manually override this env variable
