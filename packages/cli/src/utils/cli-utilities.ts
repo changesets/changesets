@@ -42,7 +42,7 @@ const limit = Math.max(termSize().rows - 5, 10);
 
 let cancelFlow = () => {
   success("Cancelled... 👋 ");
-  process.exit();
+  process.exit(1);
 };
 
 async function askCheckboxPlus(
