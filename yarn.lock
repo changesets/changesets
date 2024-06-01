@@ -2553,9 +2553,9 @@ braces@^3.0.1, braces@^3.0.2, braces@~3.0.2:
     fill-range "^7.0.1"
 
 breakword@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/breakword/-/breakword-1.0.5.tgz#fd420a417f55016736b5b615161cae1c8f819810"
-  integrity sha512-ex5W9DoOQ/LUEU3PMdLs9ua/CYZl1678NUkKOdUSi8Aw5F1idieaiRURCBFJCwVcrD1J8Iy3vfWSloaMwO2qFg==
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/breakword/-/breakword-1.0.6.tgz#242506e7b871b7fad1bce8dc05cb0f2a129c12bd"
+  integrity sha512-yjxDAYyK/pBvws9H4xKYpLDpYKEH6CzrBPAuXq3x18I+c/2MkVtT3qAr7Oloi6Dss9qNhPVueAAVU1CSeNDIXw==
   dependencies:
     wcwidth "^1.0.1"
 
