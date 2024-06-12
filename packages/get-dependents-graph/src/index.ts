@@ -2,7 +2,7 @@ import { Packages, Package } from "@manypkg/get-packages";
 import getDependencyGraph from "./get-dependency-graph";
 
 export function getDependentsGraph(
-  packages: Packages,
+  packages: Omit<Packages, "tool">,
   opts?: {
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
