@@ -65,7 +65,155 @@ jobs:
         run: |
           echo $FAILURE
           if [ "$FAILURE" = "false" ]; then
-            exit 0
-          else
-            exit 1
-          fi
+                      - název: Stáhněte si artefakt Build
+  použití: actions/download-artifact@v4.1.7
+  s:
+    # Název artefaktu ke stažení. Pokud není specifikováno, stahují se všechny artefakty pro běh.
+    jméno: # volitelné
+    # Cílová cesta. Podporuje základní expanzi vlnovky. Výchozí hodnota je $GITHUB_WORKSPACE
+    cesta: # volitelné
+    # Vzor globu odpovídající artefaktům, které by měly být staženy. Ignorováno, pokud je zadáno jméno.
+    vzor: # volitelné
+    # Když se shoduje více artefaktů, změní se tím chování cílových adresářů. Pokud je true, stažené artefakty budou ve stejném adresáři určeném cestou. Pokud je hodnota false, stažené artefakty budou extrahovány do jednotlivých pojmenovaných adresářů v rámci zadané cesty.
+    merge-multiple: # volitelné, výchozí hodnota je false
+    # Token GitHub používaný k ověření pomocí rozhraní GitHub API. To je vyžadováno při stahování artefaktů z jiného úložiště nebo z jiného běhu pracovního postupu. Pokud toto není zadáno, akce se pokusí stáhnout artefakty z aktuálního úložiště a aktuálního běhu pracovního postupu.
+    github-token: # volitelné
+    # Vlastník úložiště a název úložiště spojené „/“. Pokud je zadán github-token, jedná se o úložiště, ze kterého se budou artefakty stahovat.
+    úložiště: # volitelné, výchozí je ${{ github.repository }}
+    # ID pracovního postupu, ze kterého byl nahrán požadovaný artefakt stahování. Pokud je zadán github-token, jedná se o běh, ze kterého se budou artefakty stahovat.
+    run-id: # volitelné, výchozí je ${{ github.run_id }}
+                    - název: Zavřít zastaralé problémy
+  použití: actions/stale@v9.0.0
+  s:
+    # Token pro úložiště. Lze předat pomocí `{{ secrets.GITHUB_TOKEN }}`.
+    repo-token: # volitelné, výchozí je ${{ github.token }}
+    # Zpráva, která se má přidat k problému při označování. Pokud není zadána žádná, neoznačí problémy jako zastaralé.
+    stare-issue-message: # volitelné
+    # Zpráva, která má být zveřejněna v žádosti o stažení při označování. Pokud není zadána žádná, neoznačí žádosti o stažení jako zastaralé.
+    zastaralá-pr-zpráva: # volitelné
+    # Zpráva, která má být zveřejněna k problému při jeho uzavírání. Pokud není zadána žádná, nebude při uzavírání problému komentovat.
+    close-issue-message: # volitelné
+    # Zpráva, která se má odeslat na žádost o stažení při jejím uzavření. Není-li zadána žádná, nebude při uzavírání požadavků na stažení komentovat.
+    close-pr-message: # volitelné
+    # Počet dní starý problém nebo požadavek na stažení, než bude označen jako zastaralý. Nastavte na -1, abyste nikdy automaticky neoznačovali problémy nebo vytahovali požadavky jako zastaralé.
+    days-before-stale: # volitelné, výchozí hodnota je 60
+    # Počet dní, kdy může být problém, než bude označen jako zastaralý. Nastavením na -1 se problémy nikdy automaticky neoznačují jako zastaralé. Přepsat možnost „dny-před-zastaralé“ týkající se pouze problémů.
+    days-before-issue-stale: # volitelné
+    # Počet dní starý požadavek na stažení, než bude označen jako zastaralý. Nastavením na -1 se požadavky na stažení automaticky neoznačují jako zastaralé. Přepsat volbu „dny-před-zastaralé“ týkající se pouze požadavků na stažení.
+    days-before-pr-stale: # volitelné
+    # Počet dní čekání na uzavření problému nebo požadavku na stažení poté, co byl označen jako zastaralý. Nastavte na -1, aby se nikdy neuzavíraly zastaralé problémy ani požadavky na stažení.
+    days-before-close: # volitelné, výchozí hodnota je 7
+    # Počet dní čekání na uzavření problému poté, co byl označen jako zastaralý. Nastavte na -1, aby se zastaralé problémy nikdy nezavřely. Přepsat možnost „dny-před-zavřít“ týkající se pouze problémů.
+    days-before-issue-close: # volitelné
+    # Počet dní čekání na uzavření požadavku na stažení poté, co byl označen jako zastaralý. Nastavením na -1 se zastarané požadavky na stažení nikdy neuzavírají. Přepsat možnost „dny-před-zavřít“ týkající se pouze požadavků na stažení.
+    days-before-pr-close: # volitelné
+    # Štítek, který se použije, když je problém zastaralý.
+    zastaralý-issue-label: # volitelné, výchozí je zastaralý
+    # Štítek, který se použije, když je problém uzavřen.
+    close-issue-label: # volitelné
+    # Štítky, které znamenají, že problém není označen jako zastaralý. Více štítků oddělte čárkami (např. "label1,label2").
+    osvobozené-issue-labels: # volitelné, výchozí je
+    # Důvod použít při uzavírání problému.
+    close-issue-reason: # volitelné, výchozí hodnota není_plánována
+    # Štítek, který se má použít, když je požadavek na stažení zastaralý.
+    stale-pr-label: # volitelné, výchozí je Stale
+    # Štítek, který se má použít při uzavření požadavku na stažení.
+    close-pr-label: # volitelné
+    # Štítky, které znamenají, že požadavek na stažení není označen jako zastaralý. Více štítků oddělte čárkami (např. "label1,label2").
+    osvobození-pr-labels: # volitelné, výchozí je
+    # Milníky, které znamenají, že problém nebo požadavek na stažení nejsou označeny jako zastaralé. Více milníků oddělte čárkami (např. "milestone1,milestone2").
+    osvobozené milníky: # volitelné, výchozí je
+    # Milníky, které znamenají, že problém není označen jako zastaralý. Více milníků oddělte čárkami (např. "milestone1,milestone2"). Přepsat možnost „mileníky osvobození“ týkající se pouze problémů.
+    osvobozené-vydání-milníky: # volitelné, výchozí je
+    # Milníky, které znamenají, že požadavek na stažení není označen jako zastaralý. Více milníků oddělte čárkami (např. "milestone1,milestone2"). Přepsat možnost „mileníky osvobození“ týkající se pouze požadavků na stažení.
+    osvobození-pr-milestones: # volitelné, výchozí je
+    # Osvoboďte všechny problémy a vyžádejte si požadavky s milníky, aby nebyly označeny jako zastaralé. Výchozí hodnota je false.
+    osvobození-all-milestones: # volitelné, výchozí hodnota je false
+    # Osvoboďte všechny problémy s milníky z označení jako zastaralé. Přepsat možnost „vyjmout všechny milníky“ týkající se pouze problémů.
+    osvobození-all-issue-milestones: # volitelné, výchozí je
+    # Osvoboďte všechny žádosti o stažení s milníky, aby nebyly označeny jako zastaralé. Přepsat možnost „exempt-all-milestones“ týkající se pouze požadavků na stažení.
+    osvobození-all-pr-milestones: # volitelné, výchozí je
+    # Pouze problémy nebo žádosti o stažení se všemi těmito štítky jsou kontrolovány, pokud jsou zastaralé. Výchozí hodnota je `` (vypnuto) a může to být seznam štítků oddělených čárkami.
+    only-labels: # volitelné, výchozí je
+    # Pokud jsou zastaralé, kontrolují se pouze problémy nebo žádosti o stažení s alespoň jedním z těchto štítků. Výchozí hodnota je `` (vypnuto) a může to být seznam štítků oddělených čárkami.
+    any-of-labels: # volitelné, výchozí je
+    # Pokud jsou zastaralé, kontrolují se pouze problémy s alespoň jedním z těchto štítků. Výchozí hodnota je `` (vypnuto) a může to být seznam štítků oddělených čárkami. Přepsat možnost „any-of-labels“ týkající se pouze problémů.
+    any-of-issue-labels: # volitelné, výchozí je
+    # Pokud jsou zastaralé, kontrolují se pouze žádosti o stažení s alespoň jedním z těchto štítků. Výchozí hodnota je `` (vypnuto) a může to být seznam štítků oddělených čárkami. Přepsat možnost „any-of-labels“ týkající se pouze požadavků na stažení.
+    any-of-pr-labels: # volitelné, výchozí je
+    # Pouze problémy se všemi těmito štítky jsou kontrolovány, pokud jsou zastaralé. Výchozí hodnota je `[]` (vypnuto) a může to být seznam štítků oddělených čárkami. Přepsat možnost „pouze štítky“ týkající se pouze problémů.
+    only-issue-labels: # volitelné, výchozí je
+    # Pouze žádosti o stažení se všemi těmito štítky jsou kontrolovány, pokud jsou zastaralé. Výchozí hodnota je `[]` (vypnuto) a může to být seznam štítků oddělených čárkami. Přepsat možnost „pouze-labels“ týkající se pouze požadavků na stažení.
+    only-pr-labels: # volitelné, výchozí je
+    # Maximální počet operací na běh, používaný k řízení omezení rychlosti (související s GitHub API CRUD).
+    Operations-per-run: # volitelné, výchozí hodnota je 30
+    # Odstraňte zastaralé štítky z problémů a vytáhněte požadavky, když jsou aktualizovány nebo komentovány.
+    remove-stale-when-updated: # volitelné, výchozí hodnota je true
+    # Odstraňte zastaralé štítky z problémů, když jsou aktualizovány nebo komentovány. Přepsat možnost „odstranit-zastaralé-při aktualizaci“ týkající se pouze problémů.
+    remove-issue-stale-when-updated: # volitelné, výchozí je
+    # Odstraňte zastaralé štítky z požadavků na stažení, když jsou aktualizovány nebo komentovány. Přepište možnost „remove-stale-when-updated“ týkající se pouze požadavků na stažení.
+    remove-pr-stale-when-updated: # volitelné, výchozí je
+    # Spusťte procesor v režimu ladění, aniž byste skutečně prováděli jakékoli operace s živými problémy.
+    debug-only: # volitelné, výchozí hodnota je false
+    # Příkaz k získání problémů nebo žádostí o stažení. Výchozí hodnota je false, což je sestupné.
+    ascending: # volitelné, výchozí hodnota je false
+    # Smažte větev git po uzavření zastaralého požadavku na stažení.
+    delete-branch: # volitelné, výchozí hodnota je false
+    # Datum použité k přeskočení zastaralé akce na vydání/žádosti o stažení vytvořené před ní (ISO 8601 nebo RFC 2822).
+    počáteční datum: # volitelné, výchozí je
+    # Zmocněnci, kteří vyjmuli problém nebo požadavek na stažení z označení jako zastaralý. Více příjemců oddělte čárkami (např. "user1,user2").
+    osvobození-přiřazení: # volitelné, výchozí je
+    # Zmocněnci, kteří vyjmuli problém z označení jako zastaralého. Více příjemců oddělte čárkami (např. "user1,user2"). Přepsat možnost „vyňatí zmocněnci“ týkající se pouze problémů.
+    osvobozené-issue-assignees: # volitelné, výchozí je
+    # Nabyvatelé, kteří vyjmou požadavek na stažení z označení jako zastaralý. Více příjemců oddělte čárkami (např. "user1,user2"). Přepsat možnost „exempt-assignees“ týkající se pouze požadavků na stažení.
+    osvobození-pr-assignees: # volitelné, výchozí je
+    # Osvoboďte všechny problémy a žádosti o stažení s nabyvateli, aby nebyly označeny jako zastaralé. Výchozí hodnota je false.
+    osvobození-all-assignees: # volitelné, výchozí hodnota je false
+    # Osvoboďte všechny problémy s nabyvateli z označení jako zastaralé. Přepsat možnost „vyjmout všechny-přidělené osoby“ týkající se pouze problémů.
+    osvobození-všechny-vydání-přiřazení: # volitelné, výchozí je
+    # Osvoboďte všechny žádosti o stažení s nabyvateli, aby nebyly označeny jako zastaralé. Přepsat možnost „exempt-all-assignees“ týkající se pouze požadavků na stažení.
+    osvobození-all-pr-assignees: # volitelné, výchozí je
+    # Osvoboďte žádosti o stažení konceptu z označení jako zastaralé. Výchozí hodnota je false.
+    osvobození-draft-pr: # volitelné, výchozí hodnota je false
+    # Na konci zobrazit nějaké statistiky týkající se zastaralého pracovního postupu (pouze když jsou povoleny protokoly).
+    enable-statistics: # volitelné, výchozí hodnota je true
+    # Čárkami oddělený seznam štítků, které se mají přidat, když problém nebo požadavek na stažení přestane fungovat.
+    labels-to-add-when-unstale: # volitelné, výchozí je
+    # Čárkami oddělený seznam štítků, které se mají odstranit, když se problém nebo požadavek na stažení stane zastaralým.
+    labels-to-remove-when-stale: # volitelné, výchozí je
+    # Seznam štítků oddělených čárkami, které se mají odstranit, když problém nebo požadavek na stažení přestane fungovat.
+    labels-to-remove-when-unstale: # volitelné, výchozí je
+    # Jakákoli aktualizace (aktualizace/komentář) může resetovat zastaralou dobu nečinnosti u problémů a žádostí o stažení.
+    ignore-updates: # volitelné, výchozí hodnota je false
+    # Jakákoli aktualizace (aktualizace/komentář) může resetovat zastaralou dobu nečinnosti problémů. Přepsat možnost „ignorovat aktualizace“ týkající se pouze problémů.
+    ignore-issue-updates: # volitelné, výchozí je
+    # Jakákoli aktualizace (aktualizace/komentář) může resetovat zastaralou dobu nečinnosti u požadavků na stažení. Přepsat možnost „ignore-updates“ týkající se pouze požadavků na stažení.
+    ignore-pr-updates: # volitelné, výchozí je
+    # Pouze problémy nebo žádosti o stažení s příjemcem budou automaticky označeny jako zastaralé.
+    include-only-assigned: # volitelné, výchozí hodnota je false
+                - name: Nahrajte artefakt sestavení
+  použití: actions/upload-artifact@v4.3.3
+  s:
+    # Název artefaktu
+    jméno: # nepovinné, výchozí je artefakt
+    # Soubor, adresář nebo vzor zástupných znaků, který popisuje, co se má nahrát
+    cesta:
+    # Požadované chování, pokud nebyly nalezeny žádné soubory pomocí zadané cesty.
+Dostupné možnosti:
+  varovat: Vytiskne varování, ale akce neprojde
+  chyba: Selhání akce s chybovou zprávou
+  ignorovat: Nevypisovat žádná varování ani chyby, akce se nezdaří
+
+    if-no-files-found: # volitelné, výchozí je varování
+    # Doba, po které artefakt vyprší ve dnech. 0 znamená použití výchozího uchování.
+Minimálně 1 den. Maximálně 90 dní, pokud se nezmění na stránce nastavení úložiště.
+
+    retenční dny: # volitelné
+    # Úroveň komprese pro Zlib, která se má použít na archiv artefaktů. Hodnota se může pohybovat od 0 do 9: - 0: Žádná komprese - 1: Nejlepší rychlost - 6: Výchozí komprese (stejná jako GNU Gzip) - 9: Nejlepší komprese Vyšší úrovně povedou k lepší kompresi, ale dokončení bude trvat déle. Pro velké soubory, které nelze snadno komprimovat, se doporučuje hodnota 0 pro výrazně rychlejší nahrávání.
+
+    kompresní úroveň: # volitelné, výchozí je 6
+    # Pokud je pravda, artefakt se shodným názvem bude smazán před nahráním nového. Pokud je hodnota false, akce se nezdaří, pokud artefakt pro dané jméno již existuje. Neselže, pokud artefakt neexistuje.
+
+    overwrite: # volitelné, výchozí hodnota je false
+          
+            
