@@ -97,12 +97,11 @@
     "resolve-from": "^5.0.0",
     "semver": "^7.5.3",
     "spawndamnit": "^2.0.0",
-    "term-size": "^2.1.0",
-    "tty-table": "^4.1.5"
+    "strip-ansi": "^6.0.1",
+    "term-size": "^2.1.0"
   },
   "devDependencies": {
     "@changesets/parse": "*",
-    "@changesets/test-utils": "*",
-    "strip-ansi": "^5.2.0"
+    "@changesets/test-utils": "*"
   }
 }
