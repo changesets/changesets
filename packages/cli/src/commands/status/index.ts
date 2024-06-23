@@ -126,8 +126,8 @@ function table(headers: { value: string; width: number }[], data: string[][]) {
   str += `  ┌${headers.map((h) => "─".repeat(h.width)).join("┬")}┐\n`;
   str += `  │${headers.map((h) => padAround(h.value, h.width)).join("│")}│\n`;
   str += `  ├${headers.map((h) => "─".repeat(h.width)).join("┼")}┤\n`;
-  for (let i = 0; i < data.length; i++) {
-    str += `  │${data[i]
+  for (const row of data) {
+    str += `  │${row
       .map((value, j) => ` ${padEnd(value, columnWidths[j] - 2)} `)
       .join("│")}│\n`;
   }
