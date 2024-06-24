@@ -1,8 +1,6 @@
 import chalk from "chalk";
 import fs from "fs-extra";
 import path from "path";
-import table from "tty-table";
-
 import getReleasePlan from "@changesets/get-release-plan";
 import { error, info, log, warn } from "@changesets/logger";
 import {
@@ -91,24 +89,12 @@ function verbosePrint(
   if (packages.length) {
     info(chalk`Packages to be bumped at {green ${type}}`);
 
-    const columns = packages.map(
-      ({ name, newVersion: version, changesets }) => [
-        chalk.green(name),
-        version,
-        changesets.map((c) => chalk.blue(` .changeset/${c}.md`)).join(" +"),
-      ]
-    );
-
-    const t1 = table(
-      [
-        { value: "Package Name", width: 20 },
-        { value: "New Version", width: 20 },
-        { value: "Related Changeset Summaries", width: 70 },
-      ],
-      columns,
-      { paddingLeft: 1, paddingRight: 0, headerAlign: "center", align: "left" }
-    );
-    log(t1.render() + "\n");
+    for (const { name, newVersion: version, changesets } of packages) {
+      log(chalk`- {green ${name}} {cyan ${version}}`);
+      for (const c of changesets) {
+        log(chalk`  - {blue .changeset/${c}.md}`);
+      }
+    }
   } else {
     info(
       chalk`Running release would release {red NO} packages as a {green ${type}}`
