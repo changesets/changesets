@@ -42,7 +42,8 @@ if (parsed.snapshot === "" && args[args.indexOf("--snapshot") + 1] !== "") {
   parsed.snapshot = true;
 }
 
-if (parsed.help) {
+// Help message should only be shown if it's the only argument passed
+if (parsed.help && args.length === 1) {
   console.log(
     `
   Organise your package versioning and publishing to make both contributors and maintainers happy
