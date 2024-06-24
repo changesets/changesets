@@ -2,4 +2,4 @@
 "@changesets/cli": patch
 ---
 
-Remove `tty-table` dependency and re-implement simpler table printing
+Display `changeset status --verbose` in list form and remove `tty-table` dependency
