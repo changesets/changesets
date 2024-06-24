@@ -486,9 +486,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         : json.privatePackages
         ? {
             version: json.privatePackages.version ?? true,
-            tag: json.privatePackages.tag ?? false,
+            tag: json.privatePackages.tag ?? true,
           }
-        : { version: true, tag: false },
+        : { version: true, tag: true },
   };
 
   if (
