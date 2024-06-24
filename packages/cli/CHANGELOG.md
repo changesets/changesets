@@ -1,5 +1,13 @@
 # @changesets/cli
 
+## 2.27.6
+
+### Patch Changes
+
+- [#1392](https://github.com/changesets/changesets/pull/1392) [`f295b3e`](https://github.com/changesets/changesets/commit/f295b3e560233e2a800f62216febb7061ba66df3) Thanks [@bluwy](https://github.com/bluwy)! - Replace `meow` dependency with `mri` to reduce the number of transitive dependencies
+
+- [#1390](https://github.com/changesets/changesets/pull/1390) [`6a3452e`](https://github.com/changesets/changesets/commit/6a3452ef1943bfb3a3018168b4b6c14af556fdef) Thanks [@bluwy](https://github.com/bluwy)! - Display `changeset status --verbose` in list form and remove `tty-table` dependency
+
 ## 2.27.5
 
 ### Patch Changes
