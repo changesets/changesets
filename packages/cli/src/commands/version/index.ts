@@ -61,6 +61,8 @@ export default async function version(
     return;
   }
 
+  warn(">> Unrelesed changesets found.")
+  
   let packages = await getPackages(cwd);
 
   let releasePlan = assembleReleasePlan(
