@@ -2889,6 +2889,46 @@ describe("apply release plan", () => {
       let pathExists = await fs.pathExists(changesetPath);
       expect(pathExists).toEqual(true);
     });
+    it("should NOT delete changesets for private unversioned packages", async () => {
+      const releasePlan = new FakeReleasePlan();
+
+      let changesetPath: string;
+
+      const setupFunc = (tempDir: string) =>
+        Promise.all(
+          releasePlan.getReleasePlan().changesets.map(({ id, summary }) => {
+            const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
+            changesetPath = thisPath;
+            const content = `---\n---\n${summary}`;
+            return fs.outputFile(thisPath, content);
+          })
+        );
+
+      await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            private: true,
+          }),
+        },
+        releasePlan.getReleasePlan(),
+        {
+          ...releasePlan.config,
+          privatePackages: { version: false, tag: false },
+        },
+        undefined,
+        setupFunc
+      );
+
+      // @ts-ignore this is possibly bad
+      let pathExists = await fs.pathExists(changesetPath);
+      expect(pathExists).toEqual(true);
+    });
     it("should delete an old format changeset if it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
 

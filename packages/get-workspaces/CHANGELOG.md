@@ -1,5 +1,12 @@
 # get-workspaces
 
+## 1.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a)]:
+  - @changesets/types@6.0.0
+
 ## 1.0.10
 
 ### Patch Changes

@@ -1,19 +1,17 @@
 import chalk from "chalk";
-import table from "tty-table";
 import fs from "fs-extra";
 import path from "path";
-
-import * as git from "@changesets/git";
 import getReleasePlan from "@changesets/get-release-plan";
-import { error, log, info, warn } from "@changesets/logger";
+import { error, info, log, warn } from "@changesets/logger";
 import {
-  VersionType,
-  Release,
   ComprehensiveRelease,
   Config,
+  Release,
+  VersionType,
 } from "@changesets/types";
+import { getVersionableChangedPackages } from "../../utils/versionablePackages";
 
-export default async function getStatus(
+export default async function status(
   cwd: string,
   {
     sinceMaster,
@@ -38,10 +36,9 @@ export default async function getStatus(
     since === undefined ? (sinceMaster ? "master" : undefined) : since;
   const releasePlan = await getReleasePlan(cwd, sinceBranch, config);
   const { changesets, releases } = releasePlan;
-  const changedPackages = await git.getChangedPackagesSinceRef({
+  const changedPackages = await getVersionableChangedPackages(config, {
     cwd,
-    ref: sinceBranch || config.baseBranch,
-    changedFilePatterns: config.changedFilePatterns,
+    ref: sinceBranch,
   });
 
   if (changedPackages.length > 0 && changesets.length === 0) {
@@ -92,24 +89,12 @@ function verbosePrint(
   if (packages.length) {
     info(chalk`Packages to be bumped at {green ${type}}`);
 
-    const columns = packages.map(
-      ({ name, newVersion: version, changesets }) => [
-        chalk.green(name),
-        version,
-        changesets.map((c) => chalk.blue(` .changeset/${c}.md`)).join(" +"),
-      ]
-    );
-
-    const t1 = table(
-      [
-        { value: "Package Name", width: 20 },
-        { value: "New Version", width: 20 },
-        { value: "Related Changeset Summaries", width: 70 },
-      ],
-      columns,
-      { paddingLeft: 1, paddingRight: 0, headerAlign: "center", align: "left" }
-    );
-    log(t1.render() + "\n");
+    for (const { name, newVersion: version, changesets } of packages) {
+      log(chalk`- {green ${name}} {cyan ${version}}`);
+      for (const c of changesets) {
+        log(chalk`  - {blue .changeset/${c}.md}`);
+      }
+    }
   } else {
     info(
       chalk`Running release would release {red NO} packages as a {green ${type}}`
