@@ -6,7 +6,7 @@ import {
 import getVersionRangeType from "@changesets/get-version-range-type";
 import Range from "semver/classes/range";
 import semverPrerelease from "semver/functions/prerelease";
-import semverValidRange from "semver/ranges/valid";
+import validRange from "semver/ranges/valid";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
 const DEPENDENCY_TYPES = [
@@ -63,11 +63,11 @@ export default function versionPackage(
           continue;
         }
         const usesWorkspaceRange = depCurrentVersion.startsWith("workspace:");
-        const isValidSemver = semverValidRange(depCurrentVersion) !== null;
 
         if (
           !usesWorkspaceRange &&
-          (!isValidSemver || bumpVersionsWithWorkspaceProtocolOnly === true)
+          (bumpVersionsWithWorkspaceProtocolOnly ||
+            validRange(depCurrentVersion) === null)
         ) {
           continue;
         }
