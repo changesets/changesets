@@ -1,19 +1,19 @@
 import chalk from "chalk";
-import path from "path";
 import { spawn } from "child_process";
+import path from "path";
 
-import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
-import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
-
+import { getPackages } from "@manypkg/get-packages";
+import { ExternalEditor } from "external-editor";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
+import * as cli from "../../utils/cli-utilities";
+import { getVersionableChangedPackages } from "../../utils/versionablePackages";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
-import { ExternalEditor } from "external-editor";
-import { isListablePackage } from "./isListablePackage";
 
 export default async function add(
   cwd: string,
@@ -26,8 +26,12 @@ export default async function add(
       `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
     );
   }
-  const listablePackages = packages.packages.filter((pkg) =>
-    isListablePackage(config, pkg.packageJson)
+  const versionablePackages = packages.packages.filter(
+    (pkg) =>
+      !shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.version,
+      })
   );
   const changesetBase = path.resolve(cwd, ".changeset");
 
@@ -39,17 +43,17 @@ export default async function add(
       summary: ``,
     };
   } else {
-    const changedPackages = await git.getChangedPackagesSinceRef({
-      cwd,
-      ref: config.baseBranch,
-      changedFilePatterns: config.changedFilePatterns,
-    });
-    const changedPackagesName = changedPackages
-      .filter((pkg) => isListablePackage(config, pkg.packageJson))
-      .map((pkg) => pkg.packageJson.name);
+    const changedPackagesNames = (
+      await getVersionableChangedPackages(config, {
+        cwd,
+      })
+    ).map((pkg) => pkg.packageJson.name);
 
-    newChangeset = await createChangeset(changedPackagesName, listablePackages);
-    printConfirmationMessage(newChangeset, listablePackages.length > 1);
+    newChangeset = await createChangeset(
+      changedPackagesNames,
+      versionablePackages
+    );
+    printConfirmationMessage(newChangeset, versionablePackages.length > 1);
 
     if (!newChangeset.confirmed) {
       newChangeset = {

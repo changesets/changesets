@@ -40,18 +40,16 @@
     "@babel/preset-typescript": "^7.18.6",
     "@babel/runtime": "^7.20.1",
     "@manypkg/cli": "^0.19.1",
-    "@preconstruct/cli": "^1.1.26",
+    "@preconstruct/cli": "^2.8.1",
     "@types/fs-extra": "^5.1.0",
     "@types/jest": "^24.0.12",
     "@types/jest-in-case": "^1.0.6",
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.14.136",
-    "@types/meow": "^5.0.0",
     "@types/prettier": "^2.7.1",
-    "@types/semver": "^6.0.0",
+    "@types/semver": "^7.5.0",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
-    "codecov": "^3.6.5",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.0.0",
@@ -65,13 +63,19 @@
     "jest-junit": "^15.0.0",
     "jest-watch-typeahead": "^2.2.1",
     "prettier": "^2.7.1",
-    "typescript": "^4.8.4"
+    "typescript": "^5.1.6"
   },
   "preconstruct": {
     "packages": [
       "packages/*",
       "scripts/*"
-    ]
+    ],
+    "exports": {
+      "importConditionDefaultExport": "default"
+    },
+    "___experimentalFlags_WILL_CHANGE_IN_PATCH": {
+      "importsConditions": true
+    }
   },
   "prettier": {}
 }

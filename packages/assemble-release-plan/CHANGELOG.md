@@ -1,5 +1,40 @@
 # @changesets/assemble-release-plan
 
+## 6.0.2
+
+### Patch Changes
+
+- Updated dependencies [[`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b)]:
+  - @changesets/get-dependents-graph@2.1.0
+
+## 6.0.1
+
+### Patch Changes
+
+- [#1361](https://github.com/changesets/changesets/pull/1361) [`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c) Thanks [@jakebailey](https://github.com/jakebailey)! - Ensure that `version`/`tag` do not touch private packages with when versioning/tagging is turned off using `versionPackages` config
+
+## 6.0.0
+
+### Major Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+### Patch Changes
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a)]:
+  - @changesets/get-dependents-graph@2.0.0
+  - @changesets/errors@0.2.0
+  - @changesets/types@6.0.0
+
+## 5.2.4
+
+### Patch Changes
+
+- [#1176](https://github.com/changesets/changesets/pull/1176) [`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4) Thanks [@joshwooding](https://github.com/joshwooding)! - Bump [`semver`](https://github.com/npm/node-semver) dependency to v7.5.3
+
+- Updated dependencies [[`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4)]:
+  - @changesets/get-dependents-graph@1.3.6
+
 ## 5.2.3
 
 ### Patch Changes

@@ -3017,3 +3017,58 @@ describe("pre", () => {
     });
   });
 });
+
+describe("with privatePackages", () => {
+  silenceLogsInBlock();
+
+  it("should skip private packages", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/changesets-are-beautiful.md": `---
+"pkg-b": minor
+---
+
+Nice simple summary, much wow
+`,
+    });
+
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      privatePackages: {
+        version: false,
+        tag: false,
+      },
+    });
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.0",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.1.0",
+        },
+      },
+      {
+        name: "pkg-b",
+        version: "1.1.0",
+      },
+    ]);
+  });
+});

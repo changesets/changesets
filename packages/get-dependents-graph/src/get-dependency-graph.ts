@@ -1,5 +1,5 @@
 // This is a modified version of the graph-getting in bolt
-import semver from "semver";
+import Range from "semver/classes/range";
 import chalk from "chalk";
 import { Packages, Package } from "@manypkg/get-packages";
 import { PackageJSON } from "@changesets/types";
@@ -11,7 +11,10 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
-const getAllDependencies = (config: PackageJSON) => {
+const getAllDependencies = (
+  config: PackageJSON,
+  ignoreDevDependencies: boolean
+) => {
   const allDependencies = new Map<string, string>();
 
   for (const type of DEPENDENCY_TYPES) {
@@ -21,8 +24,10 @@ const getAllDependencies = (config: PackageJSON) => {
     for (const name of Object.keys(deps)) {
       const depRange = deps[name];
       if (
-        (depRange.startsWith("link:") || depRange.startsWith("file:")) &&
-        type === "devDependencies"
+        type === "devDependencies" &&
+        (ignoreDevDependencies ||
+          depRange.startsWith("link:") ||
+          depRange.startsWith("file:"))
       ) {
         continue;
       }
@@ -42,7 +47,7 @@ const getValidRange = (potentialRange: string) => {
   }
 
   try {
-    return new semver.Range(potentialRange);
+    return new Range(potentialRange);
   } catch {
     return null;
   }
@@ -50,9 +55,13 @@ const getValidRange = (potentialRange: string) => {
 
 export default function getDependencyGraph(
   packages: Packages,
-  opts?: {
+  {
+    ignoreDevDependencies = false,
+    bumpVersionsWithWorkspaceProtocolOnly = false,
+  }: {
+    ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-  }
+  } = {}
 ): {
   graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
   valid: boolean;
@@ -77,7 +86,10 @@ export default function getDependencyGraph(
   for (const pkg of queue) {
     const { name } = pkg.packageJson;
     const dependencies = [];
-    const allDependencies = getAllDependencies(pkg.packageJson);
+    const allDependencies = getAllDependencies(
+      pkg.packageJson,
+      ignoreDevDependencies
+    );
 
     for (let [depName, depRange] of allDependencies) {
       const match = packagesByName[depName];
@@ -93,7 +105,7 @@ export default function getDependencyGraph(
           dependencies.push(depName);
           continue;
         }
-      } else if (opts?.bumpVersionsWithWorkspaceProtocolOnly === true) {
+      } else if (bumpVersionsWithWorkspaceProtocolOnly) {
         continue;
       }
 
