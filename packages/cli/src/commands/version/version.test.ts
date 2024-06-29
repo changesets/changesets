@@ -1897,7 +1897,65 @@ describe("updateInternalDependents: always", () => {
     expect(() => getChangelog("pkg-c", spy.mock.calls)).toThrowError();
   });
 
-  it("should not bump dependant if it's an npm tag and has changelog on its own", async () => {
+  it("should not bump dependant when it depends on an npm tag of a bumped dependency", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        dependencies: { "pkg-a": "bulbasaur" }, // using tag version from npm
+      }),
+    });
+
+    const spy = jest.spyOn(fs, "writeFile");
+
+    await writeChangeset(
+      {
+        summary: "This is some fix",
+        releases: [{ name: "pkg-b", type: "patch" }],
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always",
+      },
+    });
+
+    expect(() => getPkgJSON("pkg-a", spy.mock.calls)).toThrow();
+
+    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-b",
+        version: "1.0.1",
+        dependencies: { "pkg-a": "bulbasaur" },
+      })
+    );
+
+    expect(() => getChangelog("pkg-a", spy.mock.calls)).toThrow();
+
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.0.1
+
+      ### Patch Changes
+
+      - g1th4sh: This is some fix
+      "
+    `);
+  });
+
+  it("should bump dependant when it depend on an npm tag of a bumped dependency when it has its own changeset", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
