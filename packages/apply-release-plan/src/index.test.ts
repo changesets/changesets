@@ -1356,12 +1356,7 @@ describe("apply release plan", () => {
             },
           });
         });
-        it("should not update internal version for tags", async () => {
-          /**
-           * This case appears when you have monorepo with examples.
-           * These examples might be available on web container like stackblitz or codesandbox and needs to use specific version.
-           * Locally monorepo links packages together, but in web container it uses specific version, so tags are useful there.
-           */
+        it("should not update dependant's dependency range when it depends on a tag of a bumped dependency", async () => {
           let { changedFiles } = await testSetup(
             {
               "package.json": JSON.stringify({
