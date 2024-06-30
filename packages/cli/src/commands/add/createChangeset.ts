@@ -34,7 +34,21 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
   return true;
 }
 
+enum ReleaseCategories {
+  StagedPackages = "staged packages",
+  ChangedPackages = "changed packages",
+  UnchangedPakcages = "unchanged packages",
+}
+
+const isReleaseCategory = (x: string): x is ReleaseCategories =>
+  [
+    ReleaseCategories.StagedPackages,
+    ReleaseCategories.ChangedPackages,
+    ReleaseCategories.UnchangedPakcages,
+  ].includes(x as ReleaseCategories);
+
 async function getPackagesToRelease(
+  stagedPackages: Array<string>,
   changedPackages: Array<string>,
   allPackages: Array<Package>
 ) {
@@ -49,9 +63,7 @@ async function getPackagesToRelease(
         // of packages shown after selection
         if (Array.isArray(x)) {
           return x
-            .filter(
-              (x) => x !== "changed packages" && x !== "unchanged packages"
-            )
+            .filter((x) => !isReleaseCategory(x))
             .map((x) => cyan(x))
             .join(", ");
         }
@@ -60,19 +72,39 @@ async function getPackagesToRelease(
     );
   }
 
+  function createNamespacedChoiceMapper(namespace: string) {
+    return (pkgName: string) => ({
+      name: `${pkgName}#${namespace}`,
+      message: pkgName,
+      value: pkgName, // FIXME - this seems not to be working
+    });
+  }
+
+  function deNamespace(pkgName: string) {
+    return pkgName.replace(/#.*$/, "");
+  }
+
   if (allPackages.length > 1) {
     const unchangedPackagesNames = allPackages
       .map(({ packageJson }) => packageJson.name)
-      .filter((name) => !changedPackages.includes(name));
-
+      .filter(
+        (name) =>
+          !changedPackages.includes(name) && !stagedPackages.includes(name)
+      );
     const defaultChoiceList = [
       {
-        name: "changed packages",
-        choices: changedPackages,
+        name: ReleaseCategories.StagedPackages,
+        choices: stagedPackages.map(createNamespacedChoiceMapper("staged")),
       },
       {
-        name: "unchanged packages",
-        choices: unchangedPackagesNames,
+        name: ReleaseCategories.ChangedPackages,
+        choices: changedPackages.map(createNamespacedChoiceMapper("changed")),
+      },
+      {
+        name: ReleaseCategories.UnchangedPakcages,
+        choices: unchangedPackagesNames.map(
+          createNamespacedChoiceMapper("unchanged")
+        ),
       },
     ].filter(({ choices }) => choices.length !== 0);
 
@@ -86,10 +118,9 @@ async function getPackagesToRelease(
         packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
       } while (packagesToRelease.length === 0);
     }
-    return packagesToRelease.filter(
-      (pkgName) =>
-        pkgName !== "changed packages" && pkgName !== "unchanged packages"
-    );
+    return packagesToRelease
+      .map(deNamespace)
+      .filter((pkgName) => !isReleaseCategory(pkgName));
   }
   return [allPackages[0].packageJson.name];
 }
@@ -105,6 +136,7 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 }
 
 export default async function createChangeset(
+  stagedPackages: Array<string>,
   changedPackages: Array<string>,
   allPackages: Package[]
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
@@ -112,6 +144,7 @@ export default async function createChangeset(
 
   if (allPackages.length > 1) {
     const packagesToRelease = await getPackagesToRelease(
+      stagedPackages,
       changedPackages,
       allPackages
     );
