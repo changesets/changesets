@@ -34,6 +34,10 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
   return true;
 }
 
+/**
+ * Because some choices in the list maybe duplicated (even though nested),
+ * we need to namespace them to make sure they are unique.
+ */
 export function createNamespacedChoiceMapper(namespace: string) {
   return (pkgName: string) => ({
     name: `${pkgName}#${namespace}`,
