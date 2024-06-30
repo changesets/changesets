@@ -42,7 +42,7 @@ export function createNamespacedChoiceMapper(namespace: string) {
   return (pkgName: string) => ({
     name: `${pkgName}#${namespace}`,
     message: pkgName,
-    value: pkgName, // FIXME - this seems not to be working
+    value: pkgName,
   });
 }
 
