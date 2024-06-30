@@ -28,6 +28,10 @@ git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
   expect(ref).toBe("master");
   return [];
 });
+// @ts-ignore
+git.getStagedPackages.mockImplementation(() => {
+  return [];
+});
 
 // @ts-ignore
 const mockUserResponses = (mockResponses) => {
