@@ -34,12 +34,6 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
   return true;
 }
 
-enum ReleaseCategories {
-  StagedPackages = "staged packages",
-  ChangedPackages = "changed packages",
-  UnchangedPakcages = "unchanged packages",
-}
-
 export function createNamespacedChoiceMapper(namespace: string) {
   return (pkgName: string) => ({
     name: `${pkgName}#${namespace}`,
@@ -50,6 +44,12 @@ export function createNamespacedChoiceMapper(namespace: string) {
 
 export function deNamespace(pkgName: string) {
   return pkgName.replace(/#.*$/, "");
+}
+
+enum ReleaseCategories {
+  StagedPackages = "staged packages",
+  ChangedPackages = "changed packages",
+  UnchangedPakcages = "unchanged packages",
 }
 
 const isReleaseCategory = (x: string): x is ReleaseCategories =>
