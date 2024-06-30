@@ -42,10 +42,6 @@ export function createNamespacedChoiceMapper(namespace: string) {
   });
 }
 
-export function deNamespace(pkgName: string) {
-  return pkgName.replace(/#.*$/, "");
-}
-
 async function getPackagesToRelease(
   stagedPackages: Array<string>,
   changedPackages: Array<string>,
@@ -110,14 +106,12 @@ async function getPackagesToRelease(
         packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
       } while (packagesToRelease.length === 0);
     }
-    return packagesToRelease
-      .map(deNamespace)
-      .filter(
-        (pkgName) =>
-          pkgName !== "staged packages" &&
-          pkgName !== "changed packages" &&
-          pkgName !== "unchanged packages"
-      );
+    return packagesToRelease.filter(
+      (pkgName) =>
+        pkgName !== "staged packages" &&
+        pkgName !== "changed packages" &&
+        pkgName !== "unchanged packages"
+    );
   }
   return [allPackages[0].packageJson.name];
 }
