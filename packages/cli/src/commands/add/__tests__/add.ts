@@ -13,6 +13,7 @@ import {
   askList,
 } from "../../../utils/cli-utilities";
 import addChangeset from "..";
+import { createNamespacedChoiceMapper } from "../createChangeset";
 
 jest.mock("../../../utils/cli-utilities");
 jest.mock("@changesets/git");
@@ -298,7 +299,9 @@ describe("Changesets", () => {
 
     // @ts-ignore
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
-    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+    expect(choices).toEqual(
+      ["pkg-a", "pkg-c"].map(createNamespacedChoiceMapper("unchanged"))
+    );
   });
 
   it("should not include private packages without a version in the prompt", async () => {
@@ -326,7 +329,9 @@ describe("Changesets", () => {
 
     // @ts-ignore
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
-    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+    expect(choices).toEqual(
+      ["pkg-a", "pkg-c"].map(createNamespacedChoiceMapper("unchanged"))
+    );
   });
 
   it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
@@ -365,6 +370,8 @@ describe("Changesets", () => {
 
     // @ts-ignore
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
-    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+    expect(choices).toEqual(
+      ["pkg-a", "pkg-c"].map(createNamespacedChoiceMapper("unchanged"))
+    );
   });
 });

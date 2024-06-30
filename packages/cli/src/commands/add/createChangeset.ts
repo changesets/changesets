@@ -40,6 +40,18 @@ enum ReleaseCategories {
   UnchangedPakcages = "unchanged packages",
 }
 
+export function createNamespacedChoiceMapper(namespace: string) {
+  return (pkgName: string) => ({
+    name: `${pkgName}#${namespace}`,
+    message: pkgName,
+    value: pkgName, // FIXME - this seems not to be working
+  });
+}
+
+export function deNamespace(pkgName: string) {
+  return pkgName.replace(/#.*$/, "");
+}
+
 const isReleaseCategory = (x: string): x is ReleaseCategories =>
   [
     ReleaseCategories.StagedPackages,
@@ -70,18 +82,6 @@ async function getPackagesToRelease(
         return x;
       }
     );
-  }
-
-  function createNamespacedChoiceMapper(namespace: string) {
-    return (pkgName: string) => ({
-      name: `${pkgName}#${namespace}`,
-      message: pkgName,
-      value: pkgName, // FIXME - this seems not to be working
-    });
-  }
-
-  function deNamespace(pkgName: string) {
-    return pkgName.replace(/#.*$/, "");
   }
 
   if (allPackages.length > 1) {
