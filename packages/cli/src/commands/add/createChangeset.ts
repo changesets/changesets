@@ -46,19 +46,6 @@ export function deNamespace(pkgName: string) {
   return pkgName.replace(/#.*$/, "");
 }
 
-enum ReleaseCategories {
-  StagedPackages = "staged packages",
-  ChangedPackages = "changed packages",
-  UnchangedPakcages = "unchanged packages",
-}
-
-const isReleaseCategory = (x: string): x is ReleaseCategories =>
-  [
-    ReleaseCategories.StagedPackages,
-    ReleaseCategories.ChangedPackages,
-    ReleaseCategories.UnchangedPakcages,
-  ].includes(x as ReleaseCategories);
-
 async function getPackagesToRelease(
   stagedPackages: Array<string>,
   changedPackages: Array<string>,
@@ -75,7 +62,12 @@ async function getPackagesToRelease(
         // of packages shown after selection
         if (Array.isArray(x)) {
           return x
-            .filter((x) => !isReleaseCategory(x))
+            .filter(
+              (x) =>
+                x !== "staged packages" &&
+                x !== "changed packages" &&
+                x !== "unchanged packages"
+            )
             .map((x) => cyan(x))
             .join(", ");
         }
@@ -93,15 +85,15 @@ async function getPackagesToRelease(
       );
     const defaultChoiceList = [
       {
-        name: ReleaseCategories.StagedPackages,
+        name: "staged packages",
         choices: stagedPackages.map(createNamespacedChoiceMapper("staged")),
       },
       {
-        name: ReleaseCategories.ChangedPackages,
+        name: "changed packages",
         choices: changedPackages.map(createNamespacedChoiceMapper("changed")),
       },
       {
-        name: ReleaseCategories.UnchangedPakcages,
+        name: "unchanged packages",
         choices: unchangedPackagesNames.map(
           createNamespacedChoiceMapper("unchanged")
         ),
@@ -120,7 +112,12 @@ async function getPackagesToRelease(
     }
     return packagesToRelease
       .map(deNamespace)
-      .filter((pkgName) => !isReleaseCategory(pkgName));
+      .filter(
+        (pkgName) =>
+          pkgName !== "staged packages" &&
+          pkgName !== "changed packages" &&
+          pkgName !== "unchanged packages"
+      );
   }
   return [allPackages[0].packageJson.name];
 }
