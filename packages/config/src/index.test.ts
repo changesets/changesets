@@ -64,6 +64,48 @@ test("read reads the config", async () => {
   });
 });
 
+const cjsConfig = `// @ts-check
+
+/** @type {import("@changesets/types").WrittenConfig} */
+const config = {
+  changelog: false,
+  commit: true,
+};
+
+module.exports = config;
+`;
+
+test("read cjs format", async () => {
+  let cwd = await testdir({
+    ".changeset/config.cjs": cjsConfig,
+  });
+  let config = await read(cwd, defaultPackages);
+  expect(config).toEqual({
+    fixed: [],
+    linked: [],
+    changelog: false,
+    commit: ["@changesets/cli/commit", { skipCI: "version" }],
+    access: "restricted",
+    baseBranch: "master",
+    changedFilePatterns: ["**"],
+    updateInternalDependencies: "patch",
+    ignore: [],
+    bumpVersionsWithWorkspaceProtocolOnly: false,
+    privatePackages: {
+      tag: false,
+      version: true,
+    },
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+      onlyUpdatePeerDependentsWhenOutOfRange: false,
+      updateInternalDependents: "out-of-range",
+    },
+    snapshot: {
+      useCalculatedVersion: false,
+      prereleaseTemplate: null,
+    },
+  });
+});
+
 let defaults: Config = {
   fixed: [],
   linked: [],

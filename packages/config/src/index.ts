@@ -91,9 +91,44 @@ function isArray<T>(
   return Array.isArray(arg);
 }
 
-export let read = async (cwd: string, packages: Packages) => {
+export let readConfigJson = async (
+  cwd: string,
+  packages: Packages
+): Promise<Config> => {
   let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
   return parse(json, packages);
+};
+
+export let read = async (cwd: string, packages: Packages): Promise<Config> => {
+  // If a config.json file exists in the expected path, short-circuit to the old behavior.
+  const originalConfigFilePath = path.join(cwd, ".changeset", "config.json");
+  if (fs.existsSync(originalConfigFilePath)) {
+    return readConfigJson(cwd, packages);
+  }
+
+  // Dynamically load cosmiconfig only if we proceed down this code path.
+  const { cosmiconfig } = await import("cosmiconfig");
+  const configExplorer = cosmiconfig("changesets", {
+    // Only check for CommonJS config; JSON is loaded by existing logic above. The .mjs file format is exlcuded because
+    // it seems to break tests. The .js extension is excluded because there is code elsewhere that assumes such a file
+    // is a V1 changesets config file. To limit the size of this change, only .cjs config files will be loaded. A future
+    // change could add to this list and fully remove code related to the V1 config format.
+    searchPlaces: [".changeset/config.cjs"],
+
+    // Don't look up the folder tree for additional config files.
+    searchStrategy: "none",
+
+    // Don't look in any of the default search places; only use those defined above.
+    mergeSearchPlaces: false,
+  });
+
+  const searchResult = await configExplorer.search(cwd);
+  if (searchResult?.config === undefined) {
+    throw new Error(`Cannot find changesets config.`);
+  }
+
+  const config: WrittenConfig = searchResult?.config;
+  return parse(config, packages);
 };
 
 export let parse = (json: WrittenConfig, packages: Packages): Config => {
