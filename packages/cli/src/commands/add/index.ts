@@ -11,7 +11,10 @@ import { getPackages } from "@manypkg/get-packages";
 import { ExternalEditor } from "external-editor";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
 import * as cli from "../../utils/cli-utilities";
-import { getVersionableChangedPackages } from "../../utils/versionablePackages";
+import {
+  getVersionableChangedPackages,
+  getVersionableStagedPackages,
+} from "../../utils/versionablePackages";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
 
@@ -43,6 +46,12 @@ export default async function add(
       summary: ``,
     };
   } else {
+    const stagedPackagesNames = (
+      await getVersionableStagedPackages(config, {
+        cwd,
+      })
+    ).map((pkg) => pkg.packageJson.name);
+
     const changedPackagesNames = (
       await getVersionableChangedPackages(config, {
         cwd,
@@ -50,6 +59,7 @@ export default async function add(
     ).map((pkg) => pkg.packageJson.name);
 
     newChangeset = await createChangeset(
+      stagedPackagesNames,
       changedPackagesNames,
       versionablePackages
     );
