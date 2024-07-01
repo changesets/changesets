@@ -4,3 +4,4 @@ scratchings.js
 dist/
 .env
 coverage/
+.direnv/
