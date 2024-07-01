@@ -1,5 +1,11 @@
 # @changesets/get-dependents-graph
 
+## 2.1.1
+
+### Patch Changes
+
+- [#1400](https://github.com/changesets/changesets/pull/1400) [`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a crash in `getDependentsGraph` in a scenario when a workspace depends on the root workspace
+
 ## 2.1.0
 
 ### Minor Changes
