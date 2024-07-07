@@ -2,8 +2,9 @@ import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
-import preferredPM from "preferred-pm";
 import chalk from "chalk";
+import * as fs from "fs";
+import * as path from "path";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
 import { askQuestion } from "../../utils/cli-utilities";
@@ -44,8 +45,7 @@ function getCorrectRegistry(packageJson?: PackageJSON): string {
 async function getPublishTool(
   cwd: string
 ): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
-  const pm = await preferredPM(cwd);
-  if (!pm || pm.name !== "pnpm") return { name: "npm" };
+  if (!isPnpm(cwd)) return { name: "npm" };
   try {
     let result = await spawn("pnpm", ["--version"], { cwd });
     let version = result.stdout.toString().trim();
@@ -60,6 +60,38 @@ async function getPublishTool(
       name: "pnpm",
       shouldAddNoGitChecks: false,
     };
+  }
+}
+
+function isPnpm(pkgPath: string) {
+  // pnpm >= 3
+  if (fs.existsSync(path.join(pkgPath, "pnpm-lock.yaml"))) {
+    return true;
+  }
+  // pnpm 1-2
+  if (fs.existsSync(path.join(pkgPath, "shrinkwrap.yaml"))) {
+    return true;
+  }
+  if (findUp("pnpm-lock.yaml", pkgPath)) {
+    return true;
+  }
+  return false;
+}
+
+function findUp(name: string, cwd: string) {
+  let directory = path.resolve(cwd);
+  const { root } = path.parse(directory);
+  while (directory && directory !== root) {
+    const filePath = path.isAbsolute(name) ? name : path.join(directory, name);
+
+    try {
+      const stats = fs.statSync(filePath);
+      if (stats?.isFile()) {
+        return filePath;
+      }
+    } catch {}
+
+    directory = path.dirname(directory);
   }
 }
 
