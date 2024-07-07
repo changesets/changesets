@@ -45,7 +45,7 @@ function getCorrectRegistry(packageJson?: PackageJSON): string {
 async function getPublishTool(
   cwd: string
 ): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
-  if (!isPnpm(cwd)) return { name: "npm" };
+  if (preferredPm(cwd) !== "pnpm") return { name: "npm" };
   try {
     let result = await spawn("pnpm", ["--version"], { cwd });
     let version = result.stdout.toString().trim();
@@ -63,19 +63,31 @@ async function getPublishTool(
   }
 }
 
-function isPnpm(pkgPath: string) {
+function preferredPm(pkgPath: string) {
+  if (fs.existsSync(path.join(pkgPath, 'package-lock.json'))) {
+    return "npm";
+  }
+  if (fs.existsSync(path.join(pkgPath, 'yarn.lock'))) {
+    return "yarn";
+  }
   // pnpm >= 3
   if (fs.existsSync(path.join(pkgPath, "pnpm-lock.yaml"))) {
-    return true;
+    return "pnpm";
   }
   // pnpm 1-2
   if (fs.existsSync(path.join(pkgPath, "shrinkwrap.yaml"))) {
-    return true;
+    return "pnpm";
+  }
+  if (fs.existsSync(path.join(pkgPath, 'bun.lockb'))) {
+    return "bun";
   }
   if (findUp("pnpm-lock.yaml", pkgPath)) {
-    return true;
+    return "pnpm";
   }
-  return false;
+  if (findUp("yarn.lock", pkgPath)) {
+    return "yarn";
+  }
+  return "npm";
 }
 
 function findUp(name: string, cwd: string) {
