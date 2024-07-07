@@ -64,10 +64,10 @@ async function getPublishTool(
 }
 
 function preferredPm(pkgPath: string) {
-  if (fs.existsSync(path.join(pkgPath, 'package-lock.json'))) {
+  if (fs.existsSync(path.join(pkgPath, "package-lock.json"))) {
     return "npm";
   }
-  if (fs.existsSync(path.join(pkgPath, 'yarn.lock'))) {
+  if (fs.existsSync(path.join(pkgPath, "yarn.lock"))) {
     return "yarn";
   }
   // pnpm >= 3
@@ -78,7 +78,7 @@ function preferredPm(pkgPath: string) {
   if (fs.existsSync(path.join(pkgPath, "shrinkwrap.yaml"))) {
     return "pnpm";
   }
-  if (fs.existsSync(path.join(pkgPath, 'bun.lockb'))) {
+  if (fs.existsSync(path.join(pkgPath, "bun.lockb"))) {
     return "bun";
   }
   if (findUp("pnpm-lock.yaml", pkgPath)) {
