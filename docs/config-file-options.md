@@ -9,6 +9,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "linked": [],
   "access": "restricted",
   "baseBranch": "master",
+  "tagFormat": "${name}@${version}",
   "ignore": [],
   "changelog": "@changesets/cli/changelog"
 }
@@ -56,6 +57,20 @@ If you want to prevent a package from being published to npm, set `private: true
 The branch to which changesets will make comparisons. A number of internal changesets features use git to compare present changesets against another branch. This defaults what branch will be used for these comparisons. This should generally set to the major branch you merge changes into. Commands that use this information accept a `--since` option which can be used to override this.
 
 > To help make coding a more inclusive experience, we recommend changing the name of your `master` branch to `main`.
+
+## `tagFormat` (git tag format)
+
+The tagFormat configuration item allows you to customize the format of the tags created by the tool. It uses placeholders that are replaced with the actual package name and version when the tag is generated. This feature provides flexibility in defining how your version tags should look, making it easier to adhere to specific naming conventions or integrate with other tools and workflows.
+
+To use the tagFormat configuration item, add it to your .changeset/config.json file with the desired format. The available placeholders are ${name} for the package name and ${version} for the package version. For example:
+
+```json
+{
+  "tagFormat": "${name}/v${version}"
+}
+```
+
+This configuration would result in tags like `package-name/v1.0.0`. You can customize this format to match your project's needs, such as using a different separator, including additional static text, or formatting the version differently.
 
 ## `ignore` (array of packages)
 
