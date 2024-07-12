@@ -104,6 +104,7 @@ let defaults: Config = {
   commit: false,
   access: "restricted",
   baseBranch: "master",
+  tagFormat: "${name}@${version}",
   changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
   ignore: [],
