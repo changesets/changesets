@@ -1,6 +1,6 @@
 // This is a modified version of the graph-getting in bolt
 import Range from "semver/classes/range";
-import chalk from "chalk";
+import pc from "picocolors";
 import { Packages, Package } from "@manypkg/get-packages";
 import { PackageJSON } from "@changesets/types";
 
@@ -114,11 +114,11 @@ export default function getDependencyGraph(
       if ((range && !range.test(expected)) || isProtocolRange(depRange)) {
         valid = false;
         console.error(
-          `Package ${chalk.cyan(
+          `Package ${pc.cyan(
             `"${name}"`
-          )} must depend on the current version of ${chalk.cyan(
+          )} must depend on the current version of ${pc.cyan(
             `"${depName}"`
-          )}: ${chalk.green(`"${expected}"`)} vs ${chalk.red(`"${depRange}"`)}`
+          )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${depRange}"`)}`
         );
         continue;
       }

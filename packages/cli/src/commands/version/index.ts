@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import pc from "picocolors";
 import path from "path";
 import * as git from "@changesets/git";
 import { log, warn, error } from "@changesets/logger";
@@ -14,11 +14,11 @@ import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
 import { getCurrentCommitId } from "@changesets/git";
 
-let importantSeparator = chalk.red(
+let importantSeparator = pc.red(
   "===============================IMPORTANT!==============================="
 );
 
-let importantEnd = chalk.red(
+let importantEnd = pc.red(
   "----------------------------------------------------------------------"
 );
 
