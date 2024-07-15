@@ -1,5 +1,5 @@
-import chalk from "chalk";
 import outdent from "outdent";
+import pc from "picocolors";
 import { log } from "@changesets/logger";
 import { Release, VersionType } from "@changesets/types";
 
@@ -21,18 +21,19 @@ export default function printConfirmationMessage(
   const patchReleases = getReleasesOfType("patch");
 
   if (majorReleases.length > 0)
-    log(`${chalk.bold.green("major")}:  ${majorReleases.join(", ")}`);
+    log(`${pc.bold(pc.green("major"))}:  ${majorReleases.join(", ")}`);
   if (minorReleases.length > 0)
-    log(`${chalk.bold.green("minor")}:  ${minorReleases.join(", ")}`);
+    log(`${pc.bold(pc.green("minor"))}:  ${minorReleases.join(", ")}`);
   if (patchReleases.length > 0)
-    log(`${chalk.bold.green("patch")}:  ${patchReleases.join(", ")}`);
+    log(`${pc.bold(pc.green("patch"))}:  ${patchReleases.join(", ")}`);
 
   log("");
 
   if (repoHasMultiplePackages) {
+    // ToDo: Change to pc.redBright when https://github.com/alexeyraspopov/picocolors/pull/55 is published.
     const message = outdent`
       Note: All dependents of these packages that will be incompatible with
-      the new version will be ${chalk.redBright(
+      the new version will be ${pc.red(
         "patch bumped"
       )} when this changeset is applied.
     `;
