@@ -19,6 +19,7 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/logger",
   "dependencies": {
-    "chalk": "^2.1.0"
+    "chalk": "^2.1.0",
+    "picocolors": "^1.0.1"
   }
 }
