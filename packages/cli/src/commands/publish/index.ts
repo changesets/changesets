@@ -5,7 +5,7 @@ import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import chalk from "chalk";
+import pc from "picocolors";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
@@ -13,11 +13,11 @@ function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   log(mappedPkgs);
 }
 
-let importantSeparator = chalk.red(
+let importantSeparator = pc.red(
   "===============================IMPORTANT!==============================="
 );
 
-let importantEnd = chalk.red(
+let importantEnd = pc.red(
   "----------------------------------------------------------------------"
 );
 
@@ -25,10 +25,10 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   warn(importantSeparator);
   if (preState) {
     warn(
-      `You are in prerelease mode so packages will be published to the ${chalk.cyan(
+      `You are in prerelease mode so packages will be published to the ${pc.cyan(
         preState.tag
       )}
-        dist tag except for packages that have not had normal releases which will be published to ${chalk.cyan(
+        dist tag except for packages that have not had normal releases which will be published to ${pc.cyan(
           "latest"
         )}`
     );

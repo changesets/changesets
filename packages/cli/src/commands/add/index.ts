@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import pc from "picocolors";
 import { spawn } from "child_process";
 import path from "path";
 
@@ -72,10 +72,10 @@ export default async function add(
     if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
       await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
-      log(chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`));
+      log(pc.green(`${empty ? "Empty " : ""}Changeset added and committed`));
     } else {
       log(
-        chalk.green(
+        pc.green(
           `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`
         )
       );
@@ -94,13 +94,13 @@ export default async function add(
       warn("HOW a consumer should update their code");
     } else {
       log(
-        chalk.green(
+        pc.green(
           "If you want to modify or expand on the changeset summary, you can find it here"
         )
       );
     }
     const changesetPath = path.resolve(changesetBase, `${changesetID}.md`);
-    info(chalk.blue(changesetPath));
+    info(pc.blue(changesetPath));
 
     if (open) {
       // this is really a hack to reuse the logic embedded in `external-editor` related to determining the editor

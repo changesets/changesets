@@ -1,5 +1,5 @@
 import * as logger from "@changesets/logger";
-import chalk from "chalk";
+import pc from "picocolors";
 import { exitPre, enterPre } from "@changesets/pre";
 import {
   PreExitButNotInPreModeError,
@@ -14,7 +14,7 @@ export default async function pre(
   if (options.command === "enter") {
     try {
       await enterPre(cwd, options.tag);
-      logger.success(`Entered pre mode with tag ${chalk.cyan(options.tag)}`);
+      logger.success(`Entered pre mode with tag ${pc.cyan(options.tag)}`);
       logger.info(
         "Run `changeset version` to version packages with prerelease versions"
       );

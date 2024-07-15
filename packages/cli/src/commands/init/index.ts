@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs-extra";
-import chalk from "chalk";
+import pc from "picocolors";
 
 import { defaultWrittenConfig } from "@changesets/config";
 import { info, log, warn, error } from "@changesets/logger";
@@ -56,7 +56,9 @@ export default async function init(cwd: string) {
     );
 
     log(
-      chalk`Thanks for choosing {green changesets} to help manage your versioning and publishing\n`
+      `Thanks for choosing ${pc.green(
+        "changesets"
+      )} to help manage your versioning and publishing\n`
     );
     log("You should be set up to start using changesets now!\n");
 
@@ -64,8 +66,10 @@ export default async function init(cwd: string) {
       "We have added a `.changeset` folder, and a couple of files to help you out:"
     );
     info(
-      chalk`- {blue .changeset/README.md} contains information about using changesets`
+      `- ${pc.blue(
+        ".changeset/README.md"
+      )} contains information about using changesets`
     );
-    info(chalk`- {blue .changeset/config.json} is our default config`);
+    info(`- ${pc.blue(".changeset/config.json")} is our default config`);
   }
 }

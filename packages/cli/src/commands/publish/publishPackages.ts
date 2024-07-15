@@ -1,6 +1,6 @@
 import { join } from "path";
 import semverParse from "semver/functions/parse";
-import chalk from "chalk";
+import pc from "picocolors";
 import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { info, warn } from "@changesets/logger";
@@ -122,9 +122,7 @@ async function publishAPackage(
   tag: string
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-  info(
-    `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
-  );
+  info(`Publishing ${pc.cyan(`"${name}"`)} at ${pc.green(`"${version}"`)}`);
 
   const publishConfirmation = await npmUtils.publish(
     name,
@@ -189,9 +187,9 @@ async function getUnpublishedPackages(
       );
       if (preState !== undefined && publishedState === "only-pre") {
         info(
-          `${name} is being published to ${chalk.cyan(
+          `${name} is being published to ${pc.cyan(
             "latest"
-          )} rather than ${chalk.cyan(
+          )} rather than ${pc.cyan(
             preState.tag
           )} because there has not been a regular release of it yet`
         );

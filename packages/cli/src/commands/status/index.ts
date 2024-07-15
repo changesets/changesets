@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import pc from "picocolors";
 import fs from "fs-extra";
 import path from "path";
 import getReleasePlan from "@changesets/get-release-plan";
@@ -72,12 +72,12 @@ export default async function status(
 function SimplePrint(type: VersionType, releases: Array<Release>) {
   const packages = releases.filter((r) => r.type === type);
   if (packages.length) {
-    info(chalk`Packages to be bumped at {green ${type}}:\n`);
+    info(`Packages to be bumped at ${pc.green(type)}:\n`);
 
     const pkgs = packages.map(({ name }) => `- ${name}`).join("\n");
-    log(chalk.green(pkgs));
+    log(pc.green(pkgs));
   } else {
-    info(chalk`{red NO} packages to be bumped at {green ${type}}`);
+    info(`${pc.green("NO")} packages to be bumped at ${pc.green(type)}`);
   }
 }
 
@@ -87,17 +87,19 @@ function verbosePrint(
 ) {
   const packages = releases.filter((r) => r.type === type);
   if (packages.length) {
-    info(chalk`Packages to be bumped at {green ${type}}`);
+    info(`Packages to be bumped at ${pc.green(type)}`);
 
     for (const { name, newVersion: version, changesets } of packages) {
-      log(chalk`- {green ${name}} {cyan ${version}}`);
+      log(`- ${pc.green(name)} ${pc.cyan(version)}`);
       for (const c of changesets) {
-        log(chalk`  - {blue .changeset/${c}.md}`);
+        log(`  - ${pc.blue(`.changeset/${c}.md`)}`);
       }
     }
   } else {
     info(
-      chalk`Running release would release {red NO} packages as a {green ${type}}`
+      `Running release would release ${pc.red("NO")} packages as a ${pc.green(
+        type
+      )}`
     );
   }
 }
