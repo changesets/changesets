@@ -1,5 +1,5 @@
-import chalk from "chalk";
 import path from "path";
+import pc from "picocolors";
 import { NewChangeset } from "@changesets/types";
 import * as fs from "fs-extra";
 import pFilter from "p-filter";
@@ -7,11 +7,11 @@ import { warn } from "@changesets/logger";
 
 // THIS SHOULD BE REMOVED WHEN SUPPORT FOR CHANGESETS FROM V1 IS DROPPED
 
-let importantSeparator = chalk.red(
+let importantSeparator = pc.red(
   "===============================IMPORTANT!==============================="
 );
 
-let importantEnd = chalk.red(
+let importantEnd = pc.red(
   "----------------------------------------------------------------------"
 );
 
