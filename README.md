@@ -18,7 +18,7 @@ Changesets has a focus on solving these problems for multi-package repositories,
 
 A `changeset` is an intent to release a set of packages at particular [semver bump types](https://semver.org/) with a summary of the changes made.
 
-The **@changesets/cli** package allows you to write `changeset` files as you make changes, then combine any number of changesets into a release, that flattens the bump-types into a single release per package, handles internal dependencies in a multi-package-repository, and updates changelogs, as well as release all updated packages from a mono-repository with one command.
+The **@changesets/cli** package allows you to write `changeset` files as you make changes, then combine any number of changesets into a release, that flattens the bump-types into a single release per package, handles internal dependencies in a multi-package-repository, and updates changelogs, as well as releases all updated packages from a mono-repository with one command.
 
 ## How do I get started?
 
@@ -60,34 +60,34 @@ To make releasing easier, you can use [this changesets github action](https://gi
 
 ## Cool Projects already using Changesets for versioning and changelogs
 
+- [Astro](https://astro.build)
 - [atlaskit](https://atlaskit.atlassian.com/)
+- [Chakra UI](https://chakra-ui.com/)
 - [emotion](https://emotion.sh/docs/introduction)
-- [keystone](https://v5.keystonejs.com/)
-- [react-select](https://react-select.com/home)
-- [XState](https://xstate.js.org/)
-- [pnpm](https://pnpm.js.org/)
 - [filbert-js](https://github.com/kuldeepkeshwar/filbert-js)
-- [tinyhttp](https://github.com/talentlessguy/tinyhttp)
 - [Firebase Javascript SDK](https://github.com/firebase/firebase-js-sdk)
 - [Formik](https://github.com/formium/formik)
-- [MobX](https://github.com/mobxjs/mobx)
-- [Nhost](https://github.com/nhost/nhost)
-- [verdaccio](https://verdaccio.org/)
-- [Chakra UI](https://chakra-ui.com/)
-- [Astro](https://astro.build)
-- [SvelteKit](https://kit.svelte.dev/)
-- [Hydrogen](https://hydrogen.shopify.dev)
-- [react-pdf](https://github.com/diegomura/react-pdf)
+- [GraphiQL](https://github.com/graphql/graphiql)
 - [GraphQL Code Generator](https://github.com/dotansimha/graphql-code-generator)
 - [GraphQL Yoga](https://github.com/dotansimha/graphql-yoga)
 - [GraphQL-Mesh](https://github.com/Urigo/graphql-mesh)
-- [GraphiQL](https://github.com/graphql/graphiql)
-- [wagmi](https://github.com/wagmi-dev/wagmi)
+- [Hydrogen](https://hydrogen.shopify.dev)
+- [keystone](https://v5.keystonejs.com/)
+- [MobX](https://github.com/mobxjs/mobx)
+- [Nhost](https://github.com/nhost/nhost)
+- [pnpm](https://pnpm.js.org/)
+- [react-pdf](https://github.com/diegomura/react-pdf)
+- [react-select](https://react-select.com/home)
 - [refine](https://github.com/pankod/refine)
+- [SvelteKit](https://kit.svelte.dev/)
+- [tinyhttp](https://github.com/talentlessguy/tinyhttp)
+- [verdaccio](https://verdaccio.org/)
+- [wagmi](https://github.com/wagmi-dev/wagmi)
+- [XState](https://xstate.js.org/)
 
 # Thanks/Inspiration
 
 - [bolt](https://github.com/boltpkg/bolt) - Brought us a strong concept of how packages in a mono-repo should be able to interconnect, and provided the initial infrastructure to get inter-package information.
 - [Atlassian](https://www.atlassian.com/) - The original idea/sponsor of the changesets code, and where many of the ideas and processes were fermented. It was originally implemented by the team behind [atlaskit](https://atlaskit.atlassian.com).
-- [lerna-semantic-release](https://github.com/atlassian/lerna-semantic-release) - put down many of the initial patterns around updating packages within a multi-package-repository, and started us thinking about how to manage dependent packages.
-- [Thinkmill](https://www.thinkmill.com.au) - For sponsoring the focused open sourcing of this project, and the version two rearchitecture.
+- [lerna-semantic-release](https://github.com/atlassian/lerna-semantic-release) - Put down many of the initial patterns around updating packages within a multi-package-repository, and got us started thinking about how to manage dependent packages.
+- [Thinkmill](https://www.thinkmill.com.au) - For sponsoring the focused open-sourcing of this project, and the version two rearchitecture.
