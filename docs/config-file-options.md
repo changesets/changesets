@@ -4,13 +4,14 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 
 ```json
 {
+  "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "updateInternalDependencies": "patch",
+  "fixed": [],
   "linked": [],
   "access": "restricted",
-  "baseBranch": "master",
-  "ignore": [],
-  "changelog": "@changesets/cli/changelog"
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
 }
 ```
 
