@@ -84,6 +84,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [GraphiQL](https://github.com/graphql/graphiql)
 - [wagmi](https://github.com/wagmi-dev/wagmi)
 - [refine](https://github.com/pankod/refine)
+- [Material Web Components for React](https://github.com/grayhatdevelopers/material-web-components-react)
 
 # Thanks/Inspiration
 
