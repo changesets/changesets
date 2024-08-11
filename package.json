@@ -13,7 +13,6 @@
     "lint:prettier": "prettier --list-different \"**/*.{js,ts,tsx,md}\"",
     "types:check": "tsc",
     "prettier": "prettier --write \"**/*.{js,ts,tsx,md}\"",
-    "changeset": "packages/cli/bin.js",
     "check-all": "yarn test && yarn lint && yarn types:check",
     "version-packages": "changeset version && yarn prettier",
     "release": "yarn build && changeset publish"
@@ -39,6 +38,8 @@
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-typescript": "^7.18.6",
     "@babel/runtime": "^7.20.1",
+    "@changesets/changelog-github": "*",
+    "@changesets/cli": "*",
     "@manypkg/cli": "^0.19.1",
     "@preconstruct/cli": "^2.8.1",
     "@types/fs-extra": "^5.1.0",
