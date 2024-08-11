@@ -2,7 +2,7 @@ import { PreState, NewChangeset } from "@changesets/types";
 import { readPreState } from "@changesets/pre";
 import readChangesets from "@changesets/read";
 
-export type ChangesetState = {
+type ChangesetState = {
   preState: PreState | undefined;
   changesets: NewChangeset[];
 };

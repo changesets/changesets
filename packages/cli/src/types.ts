@@ -12,7 +12,3 @@ export type CliOptions = {
   gitTag?: boolean;
   open?: boolean;
 };
-
-export type CommandOptions = CliOptions & {
-  cwd: string;
-};
