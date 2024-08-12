@@ -19,6 +19,7 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/assemble-release-plan",
   "dependencies": {
+    "@babel/runtime": "^7.20.1",
     "@changesets/errors": "^0.2.0",
     "@changesets/get-dependents-graph": "^2.1.1",
     "@changesets/should-skip-package": "^0.1.0",
