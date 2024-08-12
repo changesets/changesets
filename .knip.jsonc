@@ -1,5 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignore": ["./packages/apply-release-plan/src/test-utils/*.ts}"],
+  "workspaces": {
+    ".": {
+      "entry": ["packages/apply-release-plan/src/test-utils/*.ts"]
+    }
+  },
   "ignoreDependencies": [
     // implicit dependency imported in generated output
     "@babel/runtime",
