@@ -4,6 +4,8 @@
     // implicit dependency imported in generated output
     "@babel/runtime",
     // used in types/lodash.d.ts
-    "@types/lodash"
+    "@types/lodash",
+    // used by CI
+    "jest-junit"
   ]
 }
