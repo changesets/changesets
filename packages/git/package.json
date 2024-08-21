@@ -1,5 +1,5 @@
 {
-  "name": "@changesets/git",
+  "name": "@fond-of/changeset-git",
   "version": "3.0.0",
   "description": "Some git helpers that changesets use to get information",
   "main": "dist/changesets-git.cjs.js",

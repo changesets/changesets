@@ -1,5 +1,5 @@
 {
-  "name": "@changesets/cli",
+  "name": "@fond-of/changeset-cli",
   "version": "2.27.7",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {

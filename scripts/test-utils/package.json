@@ -1,5 +1,5 @@
 {
-  "name": "@changesets/test-utils",
+  "name": "@fond-of/changeset-test-utils",
   "version": "0.0.6",
   "private": true,
   "description": "Utils for testing changesets packages",

@@ -1,5 +1,5 @@
 {
-  "name": "@changesets/read",
+  "name": "@fond-of/changeset-read",
   "version": "0.6.0",
   "description": "Read changesets from disc, and return the information as JSON",
   "main": "dist/changesets-read.cjs.js",

@@ -1,5 +1,5 @@
 {
-  "name": "@changesets/types",
+  "name": "@fond-of/changeset-types",
   "version": "6.0.0",
   "description": "Common types shared between changeset packages",
   "main": "dist/changesets-types.cjs.js",

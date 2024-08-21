@@ -41,7 +41,7 @@ export async function run(
 
   let config: Config;
   try {
-    config = await read(cwd, packages);
+    config = await read(cwd, packages, flags.config);
   } catch (e) {
     let oldConfigExists = await fs.pathExists(
       path.resolve(cwd, ".changeset/config.js")
@@ -85,6 +85,7 @@ export async function run(
       tag,
       open,
       gitTag,
+      config: configPath,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -195,7 +196,7 @@ export async function run(
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
+        await status(cwd, { sinceMaster, since, verbose, output, configPath }, config);
         return;
       }
       case "tag": {

@@ -1,5 +1,5 @@
 {
-  "name": "@changesets/pre",
+  "name": "@fond-of/changeset-pre",
   "version": "2.0.0",
   "description": "Utils to make a Changesets repo enter and exit pre mode",
   "main": "dist/changesets-pre.cjs.js",

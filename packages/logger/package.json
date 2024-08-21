@@ -1,5 +1,5 @@
 {
-  "name": "@changesets/logger",
+  "name": "@fond-of/changeset-logger",
   "version": "0.1.0",
   "description": "Console log alias",
   "main": "dist/changesets-logger.cjs.js",

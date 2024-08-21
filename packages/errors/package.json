@@ -1,5 +1,5 @@
 {
-  "name": "@changesets/errors",
+  "name": "@fond-of/changeset-errors",
   "version": "0.2.0",
   "description": "Error classes for @changesets",
   "main": "dist/changesets-errors.cjs.js",

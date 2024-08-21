@@ -1,5 +1,5 @@
 {
-  "name": "@changesets/apply-release-plan",
+  "name": "@fond-of/changeset-apply-release-plan",
   "version": "7.0.4",
   "description": "Takes a release plan and applies it to packages",
   "main": "dist/changesets-apply-release-plan.cjs.js",

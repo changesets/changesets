@@ -26,11 +26,6 @@ jobs:
       - name: Jest tests
         run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest
