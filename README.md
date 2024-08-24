@@ -1,3 +1,4 @@
+#sudo su 
 <p align="center">
   <img src="./assets/images/changesets-banner-light.png" />
 </p>
