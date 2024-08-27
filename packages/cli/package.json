@@ -66,7 +66,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@babel/runtime": "^7.20.1",
     "@changesets/apply-release-plan": "^7.0.4",
     "@changesets/assemble-release-plan": "^6.0.3",
     "@changesets/changelog-git": "^0.2.0",
@@ -89,7 +88,6 @@
     "enquirer": "^2.3.0",
     "external-editor": "^3.1.0",
     "fs-extra": "^7.0.1",
-    "human-id": "^1.0.2",
     "mri": "^1.2.0",
     "outdent": "^0.5.0",
     "p-limit": "^2.2.0",
@@ -102,6 +100,7 @@
   "devDependencies": {
     "@changesets/parse": "*",
     "@changesets/test-utils": "*",
+    "human-id": "^1.0.2",
     "strip-ansi": "^5.2.0"
   }
 }
