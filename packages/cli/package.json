@@ -100,7 +100,6 @@
     "term-size": "^2.1.0"
   },
   "devDependencies": {
-    "@changesets/parse": "*",
     "@changesets/test-utils": "*",
     "strip-ansi": "^5.2.0"
   }

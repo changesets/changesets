@@ -86,7 +86,7 @@ export async function getTokenIsRequired() {
   return json.tfa.mode === "auth-and-writes";
 }
 
-export function getPackageInfo(packageJson: PackageJSON) {
+function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestLimit(async () => {
     info(`npm info ${packageJson.name}`);
 
@@ -151,7 +151,7 @@ let askForOtpCode = (twoFactorState: TwoFactorState) =>
     return val;
   });
 
-export let getOtpCode = async (twoFactorState: TwoFactorState) => {
+let getOtpCode = async (twoFactorState: TwoFactorState) => {
   if (twoFactorState.token !== null) {
     return twoFactorState.token;
   }
