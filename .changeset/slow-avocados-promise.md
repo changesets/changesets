@@ -2,4 +2,4 @@
 "@changesets/cli": patch
 ---
 
-chore: switch from `preferred-pm` to `package-manager-detector`
+Switched from `preferred-pm` to `package-manager-detector` in order to reduce installation size
