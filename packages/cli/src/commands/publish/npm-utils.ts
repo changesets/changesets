@@ -2,7 +2,7 @@ import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
-import { detect } from "package-manager-detector/detect";
+import { detect } from "package-manager-detector";
 import chalk from "chalk";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
