@@ -2,7 +2,7 @@ import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
-import preferredPM from "preferred-pm";
+import { detect } from "package-manager-detector";
 import chalk from "chalk";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
@@ -44,7 +44,7 @@ function getCorrectRegistry(packageJson?: PackageJSON): string {
 async function getPublishTool(
   cwd: string
 ): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
-  const pm = await preferredPM(cwd);
+  const pm = await detect({ cwd });
   if (!pm || pm.name !== "pnpm") return { name: "npm" };
   try {
     let result = await spawn("pnpm", ["--version"], { cwd });
