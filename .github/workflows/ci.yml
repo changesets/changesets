@@ -13,6 +13,9 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      matrix:
+        node-version: ['8.x', '10.x', '12.x', '14.x', '16.x', '18.x', '20.x']
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci-setup
