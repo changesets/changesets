@@ -34,6 +34,9 @@ async function writeChangeset(
   const prettierInstance = getPrettierInstance(cwd);
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
+  const formatChangesetsWithPrettier =
+    config?.formatChangesetsWithPrettier ?? true;
+
   // NOTE: The quotation marks in here are really important even though they are
   // not spec for yaml. This is because package names can contain special
   // characters that will otherwise break the parsing step
@@ -46,7 +49,7 @@ ${summary}
 
   await fs.outputFile(
     newChangesetPath,
-    !config?.formatChangesetsWithPrettier
+    !formatChangesetsWithPrettier
       ? changesetContents
       : // Prettier v3 returns a promise
         await prettierInstance.format(changesetContents, {
