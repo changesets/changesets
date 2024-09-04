@@ -25,7 +25,7 @@
     "@changesets/types": "^6.0.0",
     "fs-extra": "^7.0.1",
     "p-filter": "^2.1.0",
-    "picocolors": "^1.0.1"
+    "picocolors": "^1.1.0"
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
