@@ -3,7 +3,7 @@ import { error, info, warn } from "@changesets/logger";
 import { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
 import { detect } from "package-manager-detector";
-import chalk from "chalk";
+import pc from "picocolors";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
 import { askQuestion } from "../../utils/cli-utilities";
@@ -120,14 +120,14 @@ export function getPackageInfo(packageJson: PackageJSON) {
 export async function infoAllow404(packageJson: PackageJSON) {
   let pkgInfo = await getPackageInfo(packageJson);
   if (pkgInfo.error?.code === "E404") {
-    warn(`Received 404 for npm info ${chalk.cyan(`"${packageJson.name}"`)}`);
+    warn(`Received 404 for npm info ${pc.cyan(`"${packageJson.name}"`)}`);
     return { published: false, pkgInfo: {} };
   }
   if (pkgInfo.error) {
     error(
       `Received an unknown error code: ${
         pkgInfo.error.code
-      } for npm info ${chalk.cyan(`"${packageJson.name}"`)}`
+      } for npm info ${pc.cyan(`"${packageJson.name}"`)}`
     );
     error(pkgInfo.error.summary);
     if (pkgInfo.error.detail) error(pkgInfo.error.detail);
