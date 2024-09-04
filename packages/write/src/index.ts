@@ -1,4 +1,4 @@
-import { Changeset } from "@changesets/types";
+import { Changeset, Config } from "@changesets/types";
 import fs from "fs-extra";
 import humanId from "human-id";
 import path from "path";
@@ -17,7 +17,8 @@ function getPrettierInstance(cwd: string): typeof prettier {
 
 async function writeChangeset(
   changeset: Changeset,
-  cwd: string
+  cwd: string,
+  config?: Partial<Config>
 ): Promise<string> {
   const { summary, releases } = changeset;
 
@@ -45,11 +46,13 @@ ${summary}
 
   await fs.outputFile(
     newChangesetPath,
-    // Prettier v3 returns a promise
-    await prettierInstance.format(changesetContents, {
-      ...(await prettierInstance.resolveConfig(newChangesetPath)),
-      parser: "markdown",
-    })
+    !config?.formatChangesetsWithPrettier
+      ? changesetContents
+      : // Prettier v3 returns a promise
+        await prettierInstance.format(changesetContents, {
+          ...(await prettierInstance.resolveConfig(newChangesetPath)),
+          parser: "markdown",
+        })
   );
 
   return changesetID;
