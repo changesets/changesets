@@ -1,6 +1,6 @@
 {
   "name": "@changesets/pre",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Utils to make a Changesets repo enter and exit pre mode",
   "main": "dist/changesets-pre.cjs.js",
   "module": "dist/changesets-pre.esm.js",
