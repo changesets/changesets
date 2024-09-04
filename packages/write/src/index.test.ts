@@ -59,10 +59,12 @@ describe("simple project", () => {
 
     const summary = `This is a summary
 ~~~html
+<style>custom-element::part(thing) {color:blue}</style>
 <custom-element>
-  <p><code>code</code></p>
-
-<custom-element>
+  <custom-element>
+    <p><code>code</code></p>
+  </custom-element>
+</custom-element>
 ~~~`;
 
     await writeChangeset(
