@@ -30,10 +30,9 @@ export default function printConfirmationMessage(
   log("");
 
   if (repoHasMultiplePackages) {
-    // ToDo: Change to pc.redBright when https://github.com/alexeyraspopov/picocolors/pull/55 is published.
     const message = outdent`
       Note: All dependents of these packages that will be incompatible with
-      the new version will be ${pc.red(
+      the new version will be ${pc.redBright(
         "patch bumped"
       )} when this changeset is applied.
     `;
