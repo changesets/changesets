@@ -238,15 +238,15 @@ describe("apply release plan", () => {
         {
           "package.json": JSON.stringify({
             private: true,
-            name: "main",
+            name: "pkg-a",
             version: "1.0.0",
           }),
           "package-lock.json": JSON.stringify({
-            name: "main",
+            name: "pkg-a",
             version: "1.0.0",
             packages: {
               "": {
-                name: "main",
+                name: "pkg-a",
                 version: "1.0.0",
               },
             },
@@ -264,7 +264,7 @@ describe("apply release plan", () => {
 
       expect(pkgJSON).toMatchObject({
         private: true,
-        name: "main",
+        name: "pkg-a",
         version: "1.1.0",
       });
 
@@ -277,11 +277,11 @@ describe("apply release plan", () => {
       let pkgLockJSON = await fs.readJson(pkgLockPath);
 
       expect(pkgLockJSON).toMatchObject({
-        name: "main",
+        name: "pkg-a",
         version: "1.1.0",
         packages: {
           "": {
-            name: "main",
+            name: "pkg-a",
             version: "1.1.0",
           },
         },
