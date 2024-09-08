@@ -133,11 +133,17 @@ export default async function applyReleasePlan(
   let prettierInstance = getPrettierInstance(cwd);
 
   for (let release of finalisedRelease) {
-    let { changelog, packageJson, dir, name } = release;
+    let { changelog, packageJson, dir, name, newVersion } = release;
 
     const pkgJSONPath = path.resolve(dir, "package.json");
     await updatePackageJson(pkgJSONPath, packageJson);
     touchedFiles.push(pkgJSONPath);
+
+    const pkglockJSONPath = path.resolve(dir, "package-lock.json");
+    if (fs.existsSync(pkglockJSONPath)) {
+      await updatePackageLockJson(pkglockJSONPath, newVersion);
+      touchedFiles.push(pkglockJSONPath);
+    }
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
@@ -296,6 +302,21 @@ async function updatePackageJson(
     JSON.stringify(pkgJson, null, indent) + (pkgRaw.endsWith("\n") ? "\n" : "");
 
   return fs.writeFile(pkgJsonPath, stringified);
+}
+
+async function updatePackageLockJson(
+  pkglockJsonPath: string,
+  newVersion: string
+): Promise<void> {
+  const pkgLockRaw = await fs.readFile(pkglockJsonPath, "utf-8");
+  try {
+    const pkgLock = JSON.parse(pkgLockRaw);
+    pkgLock.version = newVersion;
+    const indent = detectIndent(pkgLockRaw).indent || "  ";
+    return fs.writeFile(pkglockJsonPath, JSON.stringify(pkgLock, null, indent));
+  } catch (e) {
+    console.error("Could not update package-lock.json");
+  }
 }
 
 async function prependFile(
