@@ -139,11 +139,7 @@ export default async function applyReleasePlan(
     await updatePackageJson(pkgJSONPath, packageJson);
     touchedFiles.push(pkgJSONPath);
 
-    const pkglockJSONPath = path.resolve(dir, "package-lock.json");
-    if (fs.existsSync(pkglockJSONPath)) {
-      await updatePackageLockJson(pkglockJSONPath, newVersion);
-      touchedFiles.push(pkglockJSONPath);
-    }
+    await updatePackageLockJson(dir, name, newVersion, touchedFiles);
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
@@ -305,18 +301,43 @@ async function updatePackageJson(
 }
 
 async function updatePackageLockJson(
-  pkglockJsonPath: string,
-  newVersion: string
+  dir: string,
+  name: string,
+  newVersion: string,
+  touchedFiles: string[]
 ): Promise<void> {
-  const pkgLockRaw = await fs.readFile(pkglockJsonPath, "utf-8");
-  try {
-    const pkgLock = JSON.parse(pkgLockRaw);
-    pkgLock.version = newVersion;
-    pkgLock.packages[""].version = newVersion;
-    const indent = detectIndent(pkgLockRaw).indent || "  ";
-    return fs.writeFile(pkglockJsonPath, JSON.stringify(pkgLock, null, indent));
-  } catch (e) {
-    console.error("Could not update package-lock.json");
+  let pkglockJsonPath = path.resolve(dir, "package-lock.json");
+  if (fs.existsSync(pkglockJsonPath)) {
+    const pkgLockRaw = await fs.readFile(pkglockJsonPath, "utf-8");
+    try {
+      const pkgLock = JSON.parse(pkgLockRaw);
+      pkgLock.version = newVersion;
+      pkgLock.packages[""].version = newVersion;
+      const indent = detectIndent(pkgLockRaw).indent || "  ";
+      await fs.writeFile(
+        pkglockJsonPath,
+        JSON.stringify(pkgLock, null, indent)
+      );
+      touchedFiles.push(pkglockJsonPath);
+    } catch (e) {}
+  } else {
+    const parentDir = path.resolve(dir, "..");
+    if (path.basename(parentDir) === "packages") {
+      let pkgLockPath = path.resolve(parentDir, "..", "package-lock.json");
+      if (fs.existsSync(pkgLockPath)) {
+        const pkgLockRaw = await fs.readFile(pkgLockPath, "utf-8");
+        try {
+          const pkgLock = JSON.parse(pkgLockRaw);
+          pkgLock.packages[`packages/${name}`].version = newVersion;
+          const indent = detectIndent(pkgLockRaw).indent || "  ";
+          await fs.writeFile(
+            pkgLockPath,
+            JSON.stringify(pkgLock, null, indent)
+          );
+          touchedFiles.push(pkgLockPath);
+        } catch (e) {}
+      }
+    }
   }
 }
 
