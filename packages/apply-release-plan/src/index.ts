@@ -312,6 +312,7 @@ async function updatePackageLockJson(
   try {
     const pkgLock = JSON.parse(pkgLockRaw);
     pkgLock.version = newVersion;
+    pkgLock.packages[""].version = newVersion;
     const indent = detectIndent(pkgLockRaw).indent || "  ";
     return fs.writeFile(pkglockJsonPath, JSON.stringify(pkgLock, null, indent));
   } catch (e) {
