@@ -1,5 +1,100 @@
 # @changesets/cli
 
+## 2.27.8
+
+### Patch Changes
+
+- [#1417](https://github.com/changesets/changesets/pull/1417) [`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55) Thanks [@trivikr](https://github.com/trivikr)! - Replace `chalk` with `picocolors` to reduce install size
+
+- [#1419](https://github.com/changesets/changesets/pull/1419) [`4efc038`](https://github.com/changesets/changesets/commit/4efc0382fcf7ef0ebd0d8e0515b655b6870728f1) Thanks [@bluwy](https://github.com/bluwy)! - Fix logging `--version` flag
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+- [#1446](https://github.com/changesets/changesets/pull/1446) [`5150fc1`](https://github.com/changesets/changesets/commit/5150fc174ea55406da401cacdd68a9a2e754126d) Thanks [@benmccann](https://github.com/benmccann)! - Switched from `preferred-pm` to `package-manager-detector` in order to reduce installation size
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/get-dependents-graph@2.1.2
+  - @changesets/logger@0.1.1
+  - @changesets/read@0.6.1
+  - @changesets/assemble-release-plan@6.0.4
+  - @changesets/should-skip-package@0.1.1
+  - @changesets/apply-release-plan@7.0.5
+  - @changesets/get-release-plan@4.0.4
+  - @changesets/write@0.3.2
+  - @changesets/git@3.0.1
+  - @changesets/pre@2.0.1
+  - @changesets/config@3.0.3
+
+## 2.27.7
+
+### Patch Changes
+
+- [#1047](https://github.com/changesets/changesets/pull/1047) [`d108fa6`](https://github.com/changesets/changesets/commit/d108fa66e63c3000f42db7580a862b737e241c4d) Thanks [@patzick](https://github.com/patzick)! - Fixed a crash that could occur when depending on a tagged version of another workspace package.
+
+- [#1400](https://github.com/changesets/changesets/pull/1400) [`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a crash that prevented the CLI from running in a scenario when a workspace depends on the root workspace
+
+- Updated dependencies [[`d108fa6`](https://github.com/changesets/changesets/commit/d108fa66e63c3000f42db7580a862b737e241c4d), [`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca), [`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca)]:
+  - @changesets/apply-release-plan@7.0.4
+  - @changesets/config@3.0.2
+  - @changesets/get-dependents-graph@2.1.1
+  - @changesets/assemble-release-plan@6.0.3
+  - @changesets/get-release-plan@4.0.3
+
+## 2.27.6
+
+### Patch Changes
+
+- [#1392](https://github.com/changesets/changesets/pull/1392) [`f295b3e`](https://github.com/changesets/changesets/commit/f295b3e560233e2a800f62216febb7061ba66df3) Thanks [@bluwy](https://github.com/bluwy)! - Replace `meow` dependency with `mri` to reduce the number of transitive dependencies
+
+- [#1390](https://github.com/changesets/changesets/pull/1390) [`6a3452e`](https://github.com/changesets/changesets/commit/6a3452ef1943bfb3a3018168b4b6c14af556fdef) Thanks [@bluwy](https://github.com/bluwy)! - Display `changeset status --verbose` in list form and remove `tty-table` dependency
+
+## 2.27.5
+
+### Patch Changes
+
+- [#1370](https://github.com/changesets/changesets/pull/1370) [`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a regression that caused `changeset version` to fail on packages having a dev dependency on a skipped package.
+
+- Updated dependencies [[`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b)]:
+  - @changesets/get-dependents-graph@2.1.0
+  - @changesets/assemble-release-plan@6.0.2
+  - @changesets/config@3.0.1
+  - @changesets/get-release-plan@4.0.2
+  - @changesets/apply-release-plan@7.0.3
+
+## 2.27.4
+
+### Patch Changes
+
+- [#1361](https://github.com/changesets/changesets/pull/1361) [`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c) Thanks [@jakebailey](https://github.com/jakebailey)! - Version 2.25.0 introduced the `privatePackage` configuration option with default `{ version: false, tag: false }`; due to a bug, these options were not respected in all commands, leading to commands like `changeset tag` still tagging private packages. This has been fixed, and all packages now respect this option.
+
+- [#1369](https://github.com/changesets/changesets/pull/1369) [`d729d8c`](https://github.com/changesets/changesets/commit/d729d8cc0e226871aa0c5b73cce80bbf313ca56c) Thanks [@Andarist](https://github.com/Andarist)! - `changeset tag` should now correctly skip tags that exist on the remote
+
+- Updated dependencies [[`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c)]:
+  - @changesets/assemble-release-plan@6.0.1
+  - @changesets/apply-release-plan@7.0.2
+  - @changesets/get-release-plan@4.0.1
+
+## 2.27.3
+
+### Patch Changes
+
+- [#1357](https://github.com/changesets/changesets/pull/1357) [`18c966a`](https://github.com/changesets/changesets/commit/18c966af7b20201453190cbfd2e2dfb59631c02c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` executed without `since` argument. It should now correctly use the configured base branch as the default value.
+
+## 2.27.2
+
+### Patch Changes
+
+- [#1354](https://github.com/changesets/changesets/pull/1354) [`69be7dc`](https://github.com/changesets/changesets/commit/69be7dc7195011ac6dbd00b24ea923f02adcf69c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` incorrectly returning an error status in two cases:
+
+  - for changed ignored packages
+  - for changed private packages when `privatePackage.version` was set to `false`
+
+- [#1351](https://github.com/changesets/changesets/pull/1351) [`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b) Thanks [@TheHolyWaffle](https://github.com/TheHolyWaffle)! - Fix an issue with not applying a custom `.prettierrc` configuration with `prettier@>= 3.1.1`
+
+- Updated dependencies [[`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b)]:
+  - @changesets/apply-release-plan@7.0.1
+  - @changesets/write@0.3.1
+
 ## 2.27.1
 
 ### Patch Changes
