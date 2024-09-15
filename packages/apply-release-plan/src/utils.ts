@@ -31,9 +31,11 @@ export function shouldUpdateDependencyBasedOnConfig(
   {
     minReleaseType,
     onlyUpdatePeerDependentsWhenOutOfRange,
+    updateInternalDependents,
   }: {
     minReleaseType: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+    updateInternalDependents: "out-of-range" | "always";
   }
 ): boolean {
   if (!semverSatisfies(release.version, depVersionRange)) {
@@ -45,7 +47,9 @@ export function shouldUpdateDependencyBasedOnConfig(
   let shouldUpdate = getBumpLevel(release.type) >= minLevel;
 
   if (depType === "peerDependencies") {
-    shouldUpdate = !onlyUpdatePeerDependentsWhenOutOfRange;
+    shouldUpdate =
+      !onlyUpdatePeerDependentsWhenOutOfRange ||
+      updateInternalDependents === "always";
   }
   return shouldUpdate;
 }
