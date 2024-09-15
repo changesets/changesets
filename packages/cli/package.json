@@ -100,7 +100,7 @@
   "devDependencies": {
     "@changesets/parse": "*",
     "@changesets/test-utils": "*",
-    "human-id": "^1.0.2",
+    "human-id": "^4.1.1",
     "strip-ansi": "^5.2.0"
   }
 }
