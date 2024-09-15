@@ -1,4 +1,8 @@
-import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
+import {
+  ChangelogFunctions,
+  ExperimentalOptions,
+  NewChangesetWithCommit,
+} from "@changesets/types";
 
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
@@ -35,8 +39,8 @@ export default async function getChangelogEntry(
     onlyUpdatePeerDependentsWhenOutOfRange,
   }: {
     updateInternalDependencies: "patch" | "minor";
-    updateInternalDependents: "out-of-range" | "always";
-    onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+    updateInternalDependents: ExperimentalOptions["updateInternalDependents"];
+    onlyUpdatePeerDependentsWhenOutOfRange: ExperimentalOptions["onlyUpdatePeerDependentsWhenOutOfRange"];
   }
 ) {
   if (release.type === "none") return null;

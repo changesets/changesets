@@ -2,7 +2,11 @@
  * Shared utility functions and business logic
  */
 import semverSatisfies from "semver/functions/satisfies";
-import { VersionType } from "@changesets/types";
+import {
+  DependencyType,
+  ExperimentalOptions,
+  VersionType,
+} from "@changesets/types";
 
 const bumpTypes = ["none", "patch", "minor", "major"];
 
@@ -22,11 +26,7 @@ export function shouldUpdateDependencyBasedOnConfig(
     depType,
   }: {
     depVersionRange: string;
-    depType:
-      | "dependencies"
-      | "devDependencies"
-      | "peerDependencies"
-      | "optionalDependencies";
+    depType: DependencyType;
   },
   {
     minReleaseType,
@@ -34,8 +34,8 @@ export function shouldUpdateDependencyBasedOnConfig(
     updateInternalDependents,
   }: {
     minReleaseType: "patch" | "minor";
-    onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-    updateInternalDependents: "out-of-range" | "always";
+    onlyUpdatePeerDependentsWhenOutOfRange: ExperimentalOptions["onlyUpdatePeerDependentsWhenOutOfRange"];
+    updateInternalDependents?: ExperimentalOptions["updateInternalDependents"];
   }
 ): boolean {
   if (!semverSatisfies(release.version, depVersionRange)) {
