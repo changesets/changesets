@@ -2736,7 +2736,7 @@ describe("apply release plan", () => {
       - Hey, let's have fun with testing!`);
     });
 
-    it("should add an updated peerDependencies line when peerDependencies have been updated and updateInternalDependents is `always`", async () => {
+    it("should add an updated dependencies line when peerDependencies have been updated and updateInternalDependents is `always`", async () => {
       let { changedFiles } = await testSetup(
         {
           "package.json": JSON.stringify({
