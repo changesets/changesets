@@ -231,8 +231,6 @@ async function getNewChangelogEntry(
     commit: commits[i],
   }));
 
-  console.log("releasesWithPackage >>>", releasesWithPackage);
-
   return Promise.all(
     releasesWithPackage.map(async (release) => {
       let changelog = await getChangelogEntry(
@@ -251,8 +249,6 @@ async function getNewChangelogEntry(
               .updateInternalDependents,
         }
       );
-
-      console.log("CHANGELOG >>>", changelog);
 
       return {
         ...release,

@@ -2833,20 +2833,12 @@ describe("apply release plan", () => {
         a.endsWith(`pkg-c${path.sep}CHANGELOG.md`)
       );
 
-      console.log("readmePath", readmePath);
-      console.log("readmePathB", readmePathB);
-      console.log("readmePathC", readmePathC);
-
       if (!readmePath || !readmePathB || !readmePathC)
         throw new Error(`could not find an updated changelog`);
 
       let readme = await fs.readFile(readmePath, "utf-8");
       let readmeB = await fs.readFile(readmePathB, "utf-8");
       let readmeC = await fs.readFile(readmePathC, "utf-8");
-
-      console.log("readme", readme.trim());
-      console.log("readmeB", readmeB.trim());
-      console.log("readmeC", readmeC.trim());
 
       expect(readme.trim()).toEqual(outdent`# pkg-a
 

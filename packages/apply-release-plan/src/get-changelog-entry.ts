@@ -47,10 +47,6 @@ export default async function getChangelogEntry(
     patch: [],
   };
 
-  // console.group("RELEASE >>>", release);
-
-  console.log("RELEASE NAME >>>", release.name);
-
   // I sort of feel we can do better, as ComprehensiveReleases have an array
   // of the relevant changesets but since we need the version type for the
   // release in the changeset, I don't know if we can
@@ -68,15 +64,7 @@ export default async function getChangelogEntry(
     const peerDependencyVersionRange =
       release.packageJson.peerDependencies?.[rel.name];
 
-    console.log("rel.name >>>", rel.name);
-
-    // console.log("dependencyVersionRange >>>", dependencyVersionRange);
-    // console.log("peerDependencyVersionRange >>>", peerDependencyVersionRange);
-
     const versionRange = dependencyVersionRange || peerDependencyVersionRange;
-
-    // console.log("validRange(versionRange)", validRange(versionRange));
-
     const usesWorkspaceRange = versionRange?.startsWith("workspace:");
     return (
       versionRange &&
@@ -95,8 +83,6 @@ export default async function getChangelogEntry(
       )
     );
   });
-
-  console.log("dependentReleases >>>", dependentReleases);
 
   let relevantChangesetIds: Set<string> = new Set();
 
