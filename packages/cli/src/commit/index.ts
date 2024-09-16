@@ -7,8 +7,8 @@ const getAddMessage: CommitFunctions["getAddMessage"] = async (
   options: { skipCI?: SkipCI } | null
 ) => {
   const skipCI = options?.skipCI === "add" || options?.skipCI === true;
-  // prettier-ignore
-  return `docs(changeset): ${changeset.summary}${skipCI ? `\n\n[skip ci]\n` : ""}`;
+  const skipMsg = skipCI ? `\n\n[skip ci]\n` : "";
+  return `docs(changeset): ${changeset.summary}${skipMsg}`;
 };
 
 const getVersionMessage: CommitFunctions["getVersionMessage"] = async (

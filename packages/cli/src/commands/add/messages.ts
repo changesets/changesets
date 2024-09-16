@@ -29,9 +29,10 @@ export default function printConfirmationMessage(
   log("");
 
   if (repoHasMultiplePackages) {
-    // prettier-ignore
-    const message = `Note: All dependents of these packages that will be incompatible with
-the new version will be ${pc.redBright("patch bumped")} when this changeset is applied.`;
+    const message =
+      "Note: All dependents of these packages that will be incompatible with the new version will be " +
+      pc.redBright("patch bumped") +
+      " when this changeset is applied.";
 
     log(message + "\n");
   }
