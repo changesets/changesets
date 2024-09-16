@@ -2,4 +2,4 @@
 "@changesets/cli": patch
 ---
 
-chore: move @types/semver to devDependencies
+Moved `@types/semver` to `devDependencies`
