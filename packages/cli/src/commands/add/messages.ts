@@ -1,4 +1,3 @@
-import outdent from "outdent";
 import pc from "picocolors";
 import { log } from "@changesets/logger";
 import { Release, VersionType } from "@changesets/types";
@@ -30,12 +29,9 @@ export default function printConfirmationMessage(
   log("");
 
   if (repoHasMultiplePackages) {
-    const message = outdent`
-      Note: All dependents of these packages that will be incompatible with
-      the new version will be ${pc.redBright(
-        "patch bumped"
-      )} when this changeset is applied.
-    `;
+    // prettier-ignore
+    const message = `Note: All dependents of these packages that will be incompatible with
+the new version will be ${pc.redBright("patch bumped")} when this changeset is applied.`;
 
     log(message + "\n");
   }
