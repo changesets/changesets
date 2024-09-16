@@ -100,7 +100,7 @@
     "@changesets/parse": "*",
     "@changesets/test-utils": "*",
     "@types/semver": "^7.5.0",
-    "human-id": "^1.0.2",
+    "human-id": "^4.1.1",
     "strip-ansi": "^5.2.0"
   }
 }
