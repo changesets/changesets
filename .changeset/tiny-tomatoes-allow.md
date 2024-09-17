@@ -2,4 +2,4 @@
 "@changesets/cli": patch
 ---
 
-chore: remove outdent dependency
+remove `outdent` dependency
