@@ -15,7 +15,8 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node_version: [8, 10, 12, 14, 16, 18, 20, 22]
+        # node 8, 10, 12 are not tested as jest doesn't support them
+        node_version: [14, 16, 18, 20, 22]
       fail-fast: false
     steps:
       - uses: actions/checkout@v4

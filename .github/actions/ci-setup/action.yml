@@ -16,11 +16,5 @@ runs:
         cache: yarn
 
     - name: Install dependencies
-      if: inputs.node-version >= 14
       shell: bash
       run: yarn install --frozen-lockfile
-
-    - name: Install dependencies with --ignore-engines
-      if: inputs.node-version < 14
-      shell: bash
-      run: yarn install --frozen-lockfile --ignore-engines
