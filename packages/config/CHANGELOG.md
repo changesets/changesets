@@ -1,5 +1,13 @@
 # @changesets/config
 
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/get-dependents-graph@2.1.2
+  - @changesets/logger@0.1.1
+
 ## 3.0.2
 
 ### Patch Changes
