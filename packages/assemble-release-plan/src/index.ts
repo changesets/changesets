@@ -276,8 +276,14 @@ function getRelevantChangesets(
     const skippedPackages = [];
     const notSkippedPackages = [];
     for (const release of changeset.releases) {
+      const pkg = packagesByName.get(release.name);
+      if (!pkg) {
+        throw new Error(
+          `Could not find matching package for release of: "${release.name}" in changeset ${changeset.id}`
+        );
+      }
       if (
-        shouldSkipPackage(packagesByName.get(release.name)!, {
+        shouldSkipPackage(pkg, {
           ignore: config.ignore,
           allowPrivatePackages: config.privatePackages.version,
         })
