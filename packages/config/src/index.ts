@@ -1,4 +1,3 @@
-import * as fs from "fs-extra";
 import path from "path";
 import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
@@ -13,6 +12,7 @@ import {
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { readFile } from "fs/promises";
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
@@ -92,7 +92,9 @@ function isArray<T>(
 }
 
 export let read = async (cwd: string, packages: Packages) => {
-  let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
+  let json = JSON.parse(
+    await readFile(path.join(cwd, ".changeset", "config.json"), "utf8")
+  );
   return parse(json, packages);
 };
 
