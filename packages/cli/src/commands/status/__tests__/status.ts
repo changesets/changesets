@@ -1,11 +1,10 @@
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
-import { gitdir, silenceLogsInBlock } from "@changesets/test-utils";
+import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
 import { ReleasePlan } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
-import { ObjectEncodingOptions } from "fs";
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
 import status from "..";
@@ -39,15 +38,6 @@ function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
       changesets: release.changesets.map((id) => changesetNames.get(id) || id),
     })),
   };
-}
-
-async function outputFile(
-  filePath: string,
-  content: string,
-  encoding = "utf8" as ObjectEncodingOptions
-) {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, content, encoding);
 }
 
 describe("status", () => {

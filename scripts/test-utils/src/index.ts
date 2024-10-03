@@ -1,5 +1,6 @@
 import fixturez from "fixturez";
 import spawn from "spawndamnit";
+import { ObjectEncodingOptions } from "fs";
 import fs from "fs/promises";
 import path from "path";
 
@@ -133,4 +134,21 @@ export async function gitdir(dir: Fixture) {
   });
 
   return cwd;
+}
+
+export async function outputFile(
+  filePath: string,
+  content: string,
+  encoding = "utf8" as ObjectEncodingOptions
+) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, content, encoding);
+}
+
+// `fs.exists` is deprecated, and Node recommends this for asynchronous existence checks.
+export async function pathExists(p: string) {
+  return fs
+    .access(p)
+    .then(() => true)
+    .catch(() => false);
 }

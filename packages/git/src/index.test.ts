@@ -1,8 +1,7 @@
-import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
 import fileUrl from "file-url";
-import { gitdir, tempdir } from "@changesets/test-utils";
+import { gitdir, outputFile, tempdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 
 import {
@@ -18,20 +17,10 @@ import {
   tagExists,
   getCurrentCommitId,
 } from "./";
-import { ObjectEncodingOptions } from "fs";
 
 async function getCommitCount(cwd: string) {
   const cmd = await spawn("git", ["rev-list", "--count", "HEAD"], { cwd });
   return parseInt(cmd.stdout.toString(), 10);
-}
-
-async function outputFile(
-  filePath: string,
-  content: string,
-  encoding = "utf8" as ObjectEncodingOptions
-) {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, content, encoding);
 }
 
 describe("git", () => {

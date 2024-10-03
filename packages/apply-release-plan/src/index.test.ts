@@ -5,8 +5,7 @@ import {
   ComprehensiveRelease,
 } from "@changesets/types";
 import * as git from "@changesets/git";
-import { ObjectEncodingOptions } from "fs";
-import { access, mkdir, readFile, writeFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import path from "path";
 import outdent from "outdent";
 import spawn from "spawndamnit";
@@ -18,6 +17,8 @@ import {
   temporarilySilenceLogs,
   testdir,
   Fixture,
+  outputFile,
+  pathExists,
 } from "@changesets/test-utils";
 
 class FakeReleasePlan {
@@ -131,15 +132,6 @@ async function testSetup(
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(path, "utf8"));
-}
-
-async function outputFile(
-  filePath: string,
-  content: string,
-  encoding = "utf8" as ObjectEncodingOptions
-) {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, content, encoding);
 }
 
 describe("apply release plan", () => {
@@ -2964,10 +2956,8 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let pathExists = await access(changesetPath)
-        .then(() => true)
-        .catch(() => false);
-      expect(pathExists).toEqual(false);
+      let changesetExists = await pathExists(changesetPath);
+      expect(changesetExists).toEqual(false);
     });
     it("should NOT delete changesets for ignored packages", async () => {
       const releasePlan = new FakeReleasePlan();
@@ -3002,10 +2992,8 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let pathExists = await access(changesetPath)
-        .then(() => true)
-        .catch(() => false);
-      expect(pathExists).toEqual(true);
+      let changesetExists = await pathExists(changesetPath);
+      expect(changesetExists).toEqual(true);
     });
     it("should NOT delete changesets for private unversioned packages", async () => {
       const releasePlan = new FakeReleasePlan();
@@ -3044,10 +3032,8 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let pathExists = await access(changesetPath)
-        .then(() => true)
-        .catch(() => false);
-      expect(pathExists).toEqual(true);
+      let changesetExists = await pathExists(changesetPath);
+      expect(changesetExists).toEqual(true);
     });
     it("should delete an old format changeset if it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
@@ -3098,13 +3084,9 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let mdPathExists = await access(changesetMDPath)
-        .then(() => true)
-        .catch(() => false);
+      let mdPathExists = await pathExists(changesetMDPath);
       // @ts-ignore this is possibly bad
-      let JSONPathExists = await access(changesetMDPath)
-        .then(() => true)
-        .catch(() => false);
+      let JSONPathExists = await pathExists(changesetJSONPath);
 
       expect(mdPathExists).toEqual(false);
       expect(JSONPathExists).toEqual(false);
@@ -3280,11 +3262,9 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let pathExists = await access(changesetPath)
-        .then(() => true)
-        .catch(() => false);
+      let changesetExists = await pathExists(changesetPath);
 
-      expect(pathExists).toEqual(false);
+      expect(changesetExists).toEqual(false);
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 
