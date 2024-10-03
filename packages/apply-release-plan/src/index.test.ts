@@ -5,6 +5,7 @@ import {
   ComprehensiveRelease,
 } from "@changesets/types";
 import * as git from "@changesets/git";
+import { ObjectEncodingOptions } from "fs";
 import { access, mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import outdent from "outdent";
@@ -135,7 +136,7 @@ async function readJson(path: string) {
 async function outputFile(
   filePath: string,
   content: string,
-  encoding = "utf8" as const
+  encoding = "utf8" as ObjectEncodingOptions
 ) {
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(filePath, content, encoding);

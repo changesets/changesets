@@ -4,6 +4,7 @@ import { gitdir, silenceLogsInBlock } from "@changesets/test-utils";
 import { ReleasePlan } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
+import { ObjectEncodingOptions } from "fs";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
@@ -43,7 +44,7 @@ function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
 async function outputFile(
   filePath: string,
   content: string,
-  encoding = "utf8" as const
+  encoding = "utf8" as ObjectEncodingOptions
 ) {
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(filePath, content, encoding);
