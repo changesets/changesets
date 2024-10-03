@@ -1,4 +1,5 @@
-import * as fs from "fs-extra";
+import { ObjectEncodingOptions } from "fs";
+import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import { PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
@@ -7,12 +8,21 @@ import {
   PreEnterButInPreModeError,
 } from "@changesets/errors";
 
+async function outputFile(
+  filePath: string,
+  content: string,
+  encoding = "utf8" as ObjectEncodingOptions
+) {
+  await mkdir(path.dirname(filePath), { recursive: true });
+  await writeFile(filePath, content, encoding);
+}
+
 export async function readPreState(cwd: string): Promise<PreState | undefined> {
   let preStatePath = path.resolve(cwd, ".changeset", "pre.json");
   // TODO: verify that the pre state isn't broken
   let preState: PreState | undefined;
   try {
-    let contents = await fs.readFile(preStatePath, "utf8");
+    let contents = await readFile(preStatePath, "utf8");
     try {
       preState = JSON.parse(contents);
     } catch (err) {
@@ -38,7 +48,7 @@ export async function exitPre(cwd: string) {
     throw new PreExitButNotInPreModeError();
   }
 
-  await fs.outputFile(
+  await outputFile(
     preStatePath,
     JSON.stringify({ ...preState, mode: "exit" }, null, 2) + "\n"
   );
@@ -61,8 +71,5 @@ export async function enterPre(cwd: string, tag: string) {
   for (let pkg of packages.packages) {
     newPreState.initialVersions[pkg.packageJson.name] = pkg.packageJson.version;
   }
-  await fs.outputFile(
-    preStatePath,
-    JSON.stringify(newPreState, null, 2) + "\n"
-  );
+  await outputFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
 }

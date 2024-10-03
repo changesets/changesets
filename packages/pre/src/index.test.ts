@@ -1,5 +1,5 @@
 import { enterPre, exitPre, readPreState } from "./index";
-import * as fs from "fs-extra";
+import { readFile } from "fs/promises";
 import path from "path";
 import {
   PreEnterButInPreModeError,
@@ -28,8 +28,11 @@ describe("enterPre", () => {
     });
     await enterPre(cwd, "next");
 
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
-      .toMatchInlineSnapshot(`
+    expect(
+      JSON.parse(
+        await readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+      )
+    ).toMatchInlineSnapshot(`
       {
         "changesets": [],
         "initialVersions": {
@@ -100,8 +103,11 @@ describe("enterPre", () => {
       }),
     });
     await enterPre(cwd, "next");
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
-      .toMatchInlineSnapshot(`
+    expect(
+      JSON.parse(
+        await readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+      )
+    ).toMatchInlineSnapshot(`
       {
         "changesets": [
           "slimy-dingos-whisper",
@@ -147,8 +153,11 @@ describe("exitPre", () => {
     });
     await exitPre(cwd);
 
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
-      .toMatchInlineSnapshot(`
+    expect(
+      JSON.parse(
+        await readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+      )
+    ).toMatchInlineSnapshot(`
       {
         "changesets": [],
         "initialVersions": {
