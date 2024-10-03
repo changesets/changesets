@@ -3,14 +3,14 @@ import { silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
 import { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import fileUrl from "file-url";
-import fs from "fs-extra";
+import { readFile, symlink } from "fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
 import { getCurrentBranch } from "./gitUtils";
 import { runPublish, runVersion } from "./run";
 
 const linkNodeModules = async (cwd: string) => {
-  await fs.symlink(
+  await symlink(
     path.join(__dirname, "..", "..", "..", "node_modules"),
     path.join(cwd, "node_modules")
   );
@@ -101,9 +101,9 @@ describe("version", () => {
     });
 
     expect(
-      await fs.readFile(
+      await readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf-8"
+        "utf8"
       )
     ).toMatchInlineSnapshot(`
       "{
@@ -116,9 +116,9 @@ describe("version", () => {
     `);
 
     expect(
-      await fs.readFile(
+      await readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf-8"
+        "utf8"
       )
     ).toMatchInlineSnapshot(`
       "{
@@ -127,9 +127,9 @@ describe("version", () => {
       }"
     `);
     expect(
-      await fs.readFile(
+      await readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf-8"
+        "utf8"
       )
     ).toEqual(
       expect.stringContaining(`# pkg-a
@@ -141,9 +141,9 @@ describe("version", () => {
 `)
     );
     expect(
-      await fs.readFile(
+      await readFile(
         path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
-        "utf-8"
+        "utf8"
       )
     ).toEqual(
       expect.stringContaining(`# pkg-b
@@ -224,9 +224,9 @@ describe("version", () => {
     });
 
     expect(
-      await fs.readFile(
+      await readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf-8"
+        "utf8"
       )
     ).toMatchInlineSnapshot(`
       "{
@@ -239,9 +239,9 @@ describe("version", () => {
     `);
 
     expect(
-      await fs.readFile(
+      await readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf-8"
+        "utf8"
       )
     ).toMatchInlineSnapshot(`
       "{
@@ -251,9 +251,9 @@ describe("version", () => {
     `);
 
     expect(
-      await fs.readFile(
+      await readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf-8"
+        "utf8"
       )
     ).toEqual(
       expect.stringContaining(`# pkg-a
@@ -265,7 +265,7 @@ describe("version", () => {
 `)
     );
     await expect(
-      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf-8")
+      readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8")
     ).rejects.toMatchObject({ code: "ENOENT" });
     expect(changedPackages).toEqual([
       {
