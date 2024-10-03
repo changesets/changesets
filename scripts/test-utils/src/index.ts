@@ -1,7 +1,7 @@
 import fixturez from "fixturez";
 import spawn from "spawndamnit";
+import fs from "fs/promises";
 import path from "path";
-import fs from "fs-extra";
 
 /**
  * Reason for eslint disable import/no-commonjs
@@ -96,7 +96,8 @@ export async function testdir(dir: Fixture) {
   await Promise.all(
     Object.keys(dir).map(async (filename) => {
       const fullPath = path.join(temp, filename);
-      await fs.outputFile(fullPath, dir[filename]);
+      await fs.mkdir(path.dirname(fullPath), { recursive: true });
+      await fs.writeFile(fullPath, dir[filename]);
     })
   );
   return temp;
