@@ -1,5 +1,5 @@
 import pc from "picocolors";
-import fs from "fs-extra";
+import { writeFile } from "fs/promises";
 import path from "path";
 import getReleasePlan from "@changesets/get-release-plan";
 import { error, info, log, warn } from "@changesets/logger";
@@ -52,7 +52,7 @@ export default async function status(
   }
 
   if (output) {
-    await fs.writeFile(
+    await writeFile(
       path.join(cwd, output),
       JSON.stringify(releasePlan, undefined, 2)
     );

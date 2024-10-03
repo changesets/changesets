@@ -1,4 +1,5 @@
-import fs from "fs-extra";
+import { existsSync } from "fs";
+import { readFile } from "fs/promises";
 import path from "path";
 import { defaultWrittenConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
@@ -16,11 +17,11 @@ describe("init", () => {
     const cwd = await testdir({});
     const { readmePath, configPath } = getPaths(cwd);
 
-    expect(fs.pathExistsSync(readmePath)).toBe(false);
-    expect(fs.pathExistsSync(configPath)).toBe(false);
+    expect(existsSync(readmePath)).toBe(false);
+    expect(existsSync(configPath)).toBe(false);
     await initializeCommand(cwd);
-    expect(fs.pathExistsSync(readmePath)).toBe(true);
-    expect(fs.pathExistsSync(configPath)).toBe(true);
+    expect(existsSync(readmePath)).toBe(true);
+    expect(existsSync(configPath)).toBe(true);
   });
   it("should write the default config if it doesn't exist", async () => {
     const cwd = await testdir({
@@ -31,9 +32,11 @@ describe("init", () => {
     });
 
     await initializeCommand(cwd);
-    expect(await fs.readJson(path.join(cwd, ".changeset/config.json"))).toEqual(
-      { ...defaultWrittenConfig, baseBranch: "main" }
-    );
+    expect(
+      JSON.parse(
+        await readFile(path.join(cwd, ".changeset/config.json"), "utf8")
+      )
+    ).toEqual({ ...defaultWrittenConfig, baseBranch: "main" });
   });
   it("should add newline at the end of config", async () => {
     const cwd = await testdir({
@@ -46,7 +49,7 @@ describe("init", () => {
     await initializeCommand(cwd);
 
     const configPath = path.join(cwd, ".changeset/config.json");
-    const config = (await fs.promises.readFile(configPath)).toString();
+    const config = (await readFile(configPath)).toString();
     const lastCharacter = config.slice(-1);
 
     expect(lastCharacter).toBe("\n");
@@ -63,10 +66,12 @@ describe("init", () => {
     });
 
     await initializeCommand(cwd);
-    expect(await fs.readJson(path.join(cwd, ".changeset/config.json"))).toEqual(
-      {
-        changelog: false,
-      }
-    );
+    expect(
+      JSON.parse(
+        await readFile(path.join(cwd, ".changeset/config.json"), "utf8")
+      )
+    ).toEqual({
+      changelog: false,
+    });
   });
 });

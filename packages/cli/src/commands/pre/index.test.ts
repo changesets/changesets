@@ -1,6 +1,6 @@
+import { readFile } from "fs/promises";
 import path from "path";
 import pc from "picocolors";
-import * as fs from "fs-extra";
 import * as logger from "@changesets/logger";
 import { ExitError } from "@changesets/errors";
 import { testdir } from "@changesets/test-utils";
@@ -22,7 +22,9 @@ describe("enterPre", () => {
     await pre(cwd, { command: "enter", tag: "next" });
 
     expect(
-      await fs.readJson(path.join(cwd, ".changeset", "pre.json"))
+      JSON.parse(
+        await readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+      )
     ).toMatchObject({
       changesets: [],
       initialVersions: {},
@@ -72,14 +74,16 @@ describe("enterPre", () => {
     });
 
     await pre(cwd, { command: "enter", tag: "next" });
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
-      {
-        changesets: [],
-        initialVersions: {},
-        mode: "pre",
-        tag: "next",
-      }
-    );
+    expect(
+      JSON.parse(
+        await readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+      )
+    ).toEqual({
+      changesets: [],
+      initialVersions: {},
+      mode: "pre",
+      tag: "next",
+    });
     expect(mockedLogger.success).toBeCalledWith(
       `Entered pre mode with tag ${pc.cyan("next")}`
     );
@@ -102,14 +106,16 @@ describe("exitPre", () => {
     });
     await pre(cwd, { command: "exit" });
 
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
-      {
-        changesets: [],
-        initialVersions: {},
-        mode: "exit",
-        tag: "next",
-      }
-    );
+    expect(
+      JSON.parse(
+        await readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+      )
+    ).toEqual({
+      changesets: [],
+      initialVersions: {},
+      mode: "exit",
+      tag: "next",
+    });
   });
   it("should throw if not in pre", async () => {
     const cwd = await testdir({

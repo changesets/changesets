@@ -1,5 +1,6 @@
+import { existsSync } from "fs";
+import { cp, writeFile } from "fs/promises";
 import path from "path";
-import fs from "fs-extra";
 import pc from "picocolors";
 
 import { defaultWrittenConfig } from "@changesets/config";
@@ -18,9 +19,9 @@ const defaultConfig = `${JSON.stringify(
 export default async function init(cwd: string) {
   const changesetBase = path.resolve(cwd, ".changeset");
 
-  if (fs.existsSync(changesetBase)) {
-    if (!fs.existsSync(path.join(changesetBase, "config.json"))) {
-      if (fs.existsSync(path.join(changesetBase, "config.js"))) {
+  if (existsSync(changesetBase)) {
+    if (!existsSync(path.join(changesetBase, "config.json"))) {
+      if (existsSync(path.join(changesetBase, "config.js"))) {
         error(
           "It looks like you're using the version 1 `.changeset/config.js` file"
         );
@@ -39,7 +40,7 @@ export default async function init(cwd: string) {
           "The default config file will be written at `.changeset/config.json`"
         );
       }
-      await fs.writeFile(
+      await writeFile(
         path.resolve(changesetBase, "config.json"),
         defaultConfig
       );
@@ -49,11 +50,10 @@ export default async function init(cwd: string) {
       );
     }
   } else {
-    await fs.copy(path.resolve(pkgPath, "./default-files"), changesetBase);
-    await fs.writeFile(
-      path.resolve(changesetBase, "config.json"),
-      defaultConfig
-    );
+    await cp(path.resolve(pkgPath, "./default-files"), changesetBase, {
+      recursive: true,
+    });
+    await writeFile(path.resolve(changesetBase, "config.json"), defaultConfig);
 
     log(
       `Thanks for choosing ${pc.green(
