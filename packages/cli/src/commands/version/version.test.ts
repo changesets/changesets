@@ -1,4 +1,4 @@
-import fs from "fs-extra";
+import fs from "fs/promises";
 import path from "path";
 import * as git from "@changesets/git";
 import { warn } from "@changesets/logger";
@@ -113,6 +113,7 @@ beforeEach(() => {
 
 afterEach(() => {
   console.error = consoleError;
+  jest.restoreAllMocks();
 });
 
 describe("running version in a simple project", () => {
@@ -219,7 +220,7 @@ describe("running version in a simple project", () => {
       ignore: ["pkg-a"],
     });
 
-    const bumpedPackageA = !!spy.mock.calls.find((call: string[]) =>
+    const bumpedPackageA = !!spy.mock.calls.find((call: any) =>
       call[0].endsWith(`pkg-a${path.sep}package.json`)
     );
 
@@ -2271,11 +2272,18 @@ describe("pre", () => {
         version: "1.0.1-next.0",
       },
     ]);
-    await fs.mkdir(path.join(cwd, "packages", "pkg-c"));
-    await fs.writeJson(path.join(cwd, "packages", "pkg-c", "package.json"), {
-      name: "pkg-c",
-      version: "0.0.0",
-    });
+    await fs.mkdir(path.join(cwd, "packages", "pkg-c"), { recursive: true });
+    await fs.writeFile(
+      path.join(cwd, "packages", "pkg-c", "package.json"),
+      JSON.stringify(
+        {
+          name: "pkg-c",
+          version: "0.0.0",
+        },
+        null,
+        2
+      ) + "\n"
+    );
     await writeChangeset(
       {
         releases: [
