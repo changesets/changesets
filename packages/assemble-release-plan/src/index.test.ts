@@ -535,11 +535,29 @@ describe("assemble-release-plan", () => {
         undefined
       )
     ).toThrowErrorMatchingInlineSnapshot(`
-"Found mixed changeset big-cats-delight
-Found ignored packages: pkg-b
-Found not ignored packages: pkg-a
-Mixed changesets that contain both ignored and not ignored packages are not allowed"
-`);
+      "Found mixed changeset big-cats-delight
+      Found ignored packages: pkg-b
+      Found not ignored packages: pkg-a
+      Mixed changesets that contain both ignored and not ignored packages are not allowed"
+    `);
+  });
+
+  it("should throw for packages not present in the project", () => {
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "impossible-package", type: "major" }],
+    });
+
+    expect(() =>
+      assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        defaultConfig,
+        undefined
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Could not find matching package for release of: "impossible-package" in changeset big-cats-delight"`
+    );
   });
 
   it("should not bump a dev dependent nor its dependent when a package gets bumped", () => {
