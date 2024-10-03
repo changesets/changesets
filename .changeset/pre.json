@@ -1,0 +1,28 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@changesets/apply-release-plan": "7.0.5",
+    "@changesets/assemble-release-plan": "6.0.4",
+    "@changesets/changelog-git": "0.2.0",
+    "@changesets/changelog-github": "0.5.0",
+    "@changesets/cli": "2.27.8",
+    "@changesets/config": "3.0.3",
+    "@changesets/errors": "0.2.0",
+    "@changesets/get-dependents-graph": "2.1.2",
+    "@changesets/get-github-info": "0.6.0",
+    "@changesets/get-release-plan": "4.0.4",
+    "@changesets/get-version-range-type": "0.4.0",
+    "@changesets/git": "3.0.1",
+    "@changesets/logger": "0.1.1",
+    "@changesets/parse": "0.4.0",
+    "@changesets/pre": "2.0.1",
+    "@changesets/read": "0.6.1",
+    "@changesets/release-utils": "0.2.1",
+    "@changesets/should-skip-package": "0.1.1",
+    "@changesets/types": "6.0.0",
+    "@changesets/write": "0.3.2",
+    "@changesets/test-utils": "0.0.7"
+  },
+  "changesets": []
+}
