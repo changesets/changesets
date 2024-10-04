@@ -50,10 +50,7 @@ export default async function getChangesets(
   );
 
   const changesetContents = changesets.map(async (file) => {
-    const changeset = await fs.readFile(
-      path.join(changesetBase, file),
-      "utf8"
-    );
+    const changeset = await fs.readFile(path.join(changesetBase, file), "utf8");
 
     return { ...parse(changeset), id: file.replace(".md", "") };
   });
