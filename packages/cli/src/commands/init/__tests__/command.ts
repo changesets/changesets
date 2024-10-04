@@ -1,5 +1,5 @@
-import { existsSync } from "fs";
-import { readFile } from "fs/promises";
+import fs from "fs";
+import fsp from "fs/promises";
 import path from "path";
 import { defaultWrittenConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
@@ -17,11 +17,11 @@ describe("init", () => {
     const cwd = await testdir({});
     const { readmePath, configPath } = getPaths(cwd);
 
-    expect(existsSync(readmePath)).toBe(false);
-    expect(existsSync(configPath)).toBe(false);
+    expect(fs.existsSync(readmePath)).toBe(false);
+    expect(fs.existsSync(configPath)).toBe(false);
     await initializeCommand(cwd);
-    expect(existsSync(readmePath)).toBe(true);
-    expect(existsSync(configPath)).toBe(true);
+    expect(fs.existsSync(readmePath)).toBe(true);
+    expect(fs.existsSync(configPath)).toBe(true);
   });
   it("should write the default config if it doesn't exist", async () => {
     const cwd = await testdir({
@@ -34,7 +34,7 @@ describe("init", () => {
     await initializeCommand(cwd);
     expect(
       JSON.parse(
-        await readFile(path.join(cwd, ".changeset/config.json"), "utf8")
+        await fsp.readFile(path.join(cwd, ".changeset/config.json"), "utf8")
       )
     ).toEqual({ ...defaultWrittenConfig, baseBranch: "main" });
   });
@@ -49,7 +49,7 @@ describe("init", () => {
     await initializeCommand(cwd);
 
     const configPath = path.join(cwd, ".changeset/config.json");
-    const config = (await readFile(configPath)).toString();
+    const config = (await fsp.readFile(configPath)).toString();
     const lastCharacter = config.slice(-1);
 
     expect(lastCharacter).toBe("\n");
@@ -68,7 +68,7 @@ describe("init", () => {
     await initializeCommand(cwd);
     expect(
       JSON.parse(
-        await readFile(path.join(cwd, ".changeset/config.json"), "utf8")
+        await fsp.readFile(path.join(cwd, ".changeset/config.json"), "utf8")
       )
     ).toEqual({
       changelog: false,

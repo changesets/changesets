@@ -7,7 +7,7 @@ import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import humanId from "human-id";
 import assert from "node:assert/strict";
-import fs from "node:fs/promises";
+import fsp from "node:fs/promises";
 import path from "node:path";
 import pre from "../pre";
 import version from "./index";
@@ -91,7 +91,7 @@ const getFilePath = async (pkgName: string, fileName: string, cwd: string) => {
 };
 
 const getFile = async (pkgName: string, fileName: string, cwd: string) => {
-  return fs.readFile(await getFilePath(pkgName, fileName, cwd), "utf8");
+  return fsp.readFile(await getFilePath(pkgName, fileName, cwd), "utf8");
 };
 
 const getPkgJSON = async (pkgName: string, cwd: string) => {
@@ -457,7 +457,7 @@ Awesome feature, hidden behind a feature flag
       },
     ]);
 
-    const changesetDir = await fs.readdir(path.join(cwd, ".changeset"));
+    const changesetDir = await fsp.readdir(path.join(cwd, ".changeset"));
     // should still contain the ignored changeset
     expect(changesetDir).toContain(".ignored-temporarily.md");
   });
@@ -642,12 +642,12 @@ Awesome feature, hidden behind a feature flag
         ],
         cwd
       );
-      expect((await fs.readdir(path.resolve(cwd, ".changeset"))).length).toBe(
+      expect((await fsp.readdir(path.resolve(cwd, ".changeset"))).length).toBe(
         3
       );
 
       await version(cwd, defaultOptions, modifiedDefaultConfig);
-      expect((await fs.readdir(path.resolve(cwd, ".changeset"))).length).toBe(
+      expect((await fsp.readdir(path.resolve(cwd, ".changeset"))).length).toBe(
         1
       );
     });
@@ -1420,7 +1420,7 @@ describe("snapshot release", () => {
         ],
         cwd
       );
-      jest.spyOn(fs, "writeFile");
+      jest.spyOn(fsp, "writeFile");
 
       expect(
         version(
@@ -1470,7 +1470,7 @@ describe("snapshot release", () => {
         ],
         cwd
       );
-      jest.spyOn(fs, "writeFile");
+      jest.spyOn(fsp, "writeFile");
 
       expect(
         version(
@@ -1887,10 +1887,10 @@ describe("updateInternalDependents: always", () => {
     // pkg-b and - pkg-c are not being released so changelogs should not be
     // generated for them
     expect(
-      fs.access(await getFilePath("pkg-b", "CHANGELOG.md", cwd))
+      fsp.access(await getFilePath("pkg-b", "CHANGELOG.md", cwd))
     ).rejects.toThrow();
     expect(
-      fs.access(await getFilePath("pkg-c", "CHANGELOG.md", cwd))
+      fsp.access(await getFilePath("pkg-c", "CHANGELOG.md", cwd))
     ).rejects.toThrow();
   });
 
@@ -1944,7 +1944,7 @@ describe("updateInternalDependents: always", () => {
 
     // shouldn't be created
     expect(
-      fs.access(await getFilePath("pkg-a", "CHANGELOG.md", cwd))
+      fsp.access(await getFilePath("pkg-a", "CHANGELOG.md", cwd))
     ).rejects.toThrow();
 
     expect(await getChangelog("pkg-b", cwd)).toMatchInlineSnapshot(`
@@ -2164,7 +2164,7 @@ describe("pre", () => {
       },
     ]);
     expect(
-      await fs.readFile(
+      await fsp.readFile(
         path.join(packages.packages[0].dir, "CHANGELOG.md"),
         "utf8"
       )
@@ -2211,7 +2211,7 @@ describe("pre", () => {
       "
     `);
     expect(
-      await fs.readFile(
+      await fsp.readFile(
         path.join(packages.packages[1].dir, "CHANGELOG.md"),
         "utf8"
       )
@@ -2274,8 +2274,8 @@ describe("pre", () => {
         version: "1.0.1-next.0",
       },
     ]);
-    await fs.mkdir(path.join(cwd, "packages", "pkg-c"), { recursive: true });
-    await fs.writeFile(
+    await fsp.mkdir(path.join(cwd, "packages", "pkg-c"), { recursive: true });
+    await fsp.writeFile(
       path.join(cwd, "packages", "pkg-c", "package.json"),
       JSON.stringify(
         {

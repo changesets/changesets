@@ -1,7 +1,7 @@
 import fixturez from "fixturez";
 import spawn from "spawndamnit";
-import { ObjectEncodingOptions } from "fs";
-import fs from "fs/promises";
+import fs from "fs";
+import fsp from "fs/promises";
 import path from "path";
 
 /**
@@ -97,8 +97,8 @@ export async function testdir(dir: Fixture) {
   await Promise.all(
     Object.keys(dir).map(async (filename) => {
       const fullPath = path.join(temp, filename);
-      await fs.mkdir(path.dirname(fullPath), { recursive: true });
-      await fs.writeFile(fullPath, dir[filename]);
+      await fsp.mkdir(path.dirname(fullPath), { recursive: true });
+      await fsp.writeFile(fullPath, dir[filename]);
     })
   );
   return temp;
@@ -139,15 +139,15 @@ export async function gitdir(dir: Fixture) {
 export async function outputFile(
   filePath: string,
   content: string,
-  encoding = "utf8" as ObjectEncodingOptions
+  encoding = "utf8" as fs.ObjectEncodingOptions
 ) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, content, encoding);
+  await fsp.mkdir(path.dirname(filePath), { recursive: true });
+  await fsp.writeFile(filePath, content, encoding);
 }
 
 // `fs.exists` is deprecated, and Node recommends this for asynchronous existence checks.
 export async function pathExists(p: string) {
-  return fs
+  return fsp
     .access(p)
     .then(() => true)
     .catch(() => false);

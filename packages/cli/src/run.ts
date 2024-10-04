@@ -5,8 +5,8 @@ import { error } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import { existsSync } from "fs";
-import { access } from "fs/promises";
+import fs from "fs";
+import fsp from "fs/promises";
 import path from "path";
 import add from "./commands/add";
 import init from "./commands/init";
@@ -27,7 +27,7 @@ export async function run(
     return;
   }
 
-  if (!existsSync(path.resolve(cwd, ".changeset"))) {
+  if (!fs.existsSync(path.resolve(cwd, ".changeset"))) {
     error("There is no .changeset folder. ");
     error(
       "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
@@ -44,9 +44,8 @@ export async function run(
   try {
     config = await read(cwd, packages);
   } catch (e) {
-    let oldConfigExists = await access(
-      path.resolve(cwd, ".changeset/config.js")
-    )
+    let oldConfigExists = await fsp
+      .access(path.resolve(cwd, ".changeset/config.js"))
       .then(() => true)
       .catch(() => false);
     if (oldConfigExists) {

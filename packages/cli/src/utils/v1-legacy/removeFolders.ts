@@ -1,5 +1,5 @@
-import { readdirSync } from "fs";
-import { readdir, rmdir } from "fs/promises";
+import fs from "fs";
+import fsp from "fs/promises";
 import path from "path";
 
 // This helper is designed to operate on the .changeset
@@ -7,13 +7,13 @@ import path from "path";
 // THIS SHOULD BE REMOVED WHEN SUPPORT FOR CHANGESETS FROM V1 IS DROPPED
 
 const removeEmptyFolders = async (folderPath: string) => {
-  const dirContents = readdirSync(folderPath);
+  const dirContents = fs.readdirSync(folderPath);
   return Promise.all(
     dirContents.map(async (contentPath) => {
       const singleChangesetPath = path.resolve(folderPath, contentPath);
       try {
-        if ((await readdir(singleChangesetPath)).length < 1) {
-          await rmdir(singleChangesetPath);
+        if ((await fsp.readdir(singleChangesetPath)).length < 1) {
+          await fsp.rmdir(singleChangesetPath);
         }
       } catch (err) {
         if ((err as any).code !== "ENOTDIR") {

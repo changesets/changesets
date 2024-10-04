@@ -4,7 +4,7 @@ import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
 import { ReleasePlan } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
-import { readFile } from "fs/promises";
+import fsp from "fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
 import status from "..";
@@ -319,7 +319,7 @@ describe("status", () => {
       await readConfig(cwd)
     );
 
-    const releaseObj = await readFile(path.join(cwd, output), "utf8");
+    const releaseObj = await fsp.readFile(path.join(cwd, output), "utf8");
 
     expect(probsUndefined).toEqual(undefined);
     expect(replaceHumanIds(JSON.parse(releaseObj))).toMatchInlineSnapshot(`

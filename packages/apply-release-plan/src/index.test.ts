@@ -5,7 +5,7 @@ import {
   ComprehensiveRelease,
 } from "@changesets/types";
 import * as git from "@changesets/git";
-import { readFile } from "fs/promises";
+import fsp from "fs/promises";
 import path from "path";
 import outdent from "outdent";
 import spawn from "spawndamnit";
@@ -131,7 +131,7 @@ async function testSetup(
 }
 
 async function readJson(path: string) {
-  return JSON.parse(await readFile(path, "utf8"));
+  return JSON.parse(await fsp.readFile(path, "utf8"));
 }
 
 describe("apply release plan", () => {
@@ -155,7 +155,7 @@ describe("apply release plan", () => {
         let pkgPath = changedFiles.find((a) => a.endsWith(`package.json`));
 
         if (!pkgPath) throw new Error(`could not find an updated package json`);
-        let pkgJSON = await readFile(pkgPath, { encoding: "utf-8" });
+        let pkgJSON = await fsp.readFile(pkgPath, { encoding: "utf-8" });
 
         expect(pkgJSON).toStrictEqual(`{
   "name": "pkg-a",
@@ -184,7 +184,7 @@ describe("apply release plan", () => {
         let pkgPath = changedFiles.find((a) => a.endsWith(`package.json`));
 
         if (!pkgPath) throw new Error(`could not find an updated package json`);
-        let pkgJSON = await readFile(pkgPath, { encoding: "utf-8" });
+        let pkgJSON = await fsp.readFile(pkgPath, { encoding: "utf-8" });
 
         expect(pkgJSON).toStrictEqual(`{
 \t"name": "pkg-a",
@@ -206,7 +206,7 @@ describe("apply release plan", () => {
         let pkgPath = changedFiles.find((a) => a.endsWith(`package.json`));
 
         if (!pkgPath) throw new Error(`could not find an updated package json`);
-        let pkgJSON = await readFile(pkgPath, { encoding: "utf-8" });
+        let pkgJSON = await fsp.readFile(pkgPath, { encoding: "utf-8" });
 
         expect(pkgJSON).toStrictEqual(`{
   "name": "pkg-a",
@@ -229,7 +229,7 @@ describe("apply release plan", () => {
         let pkgPath = changedFiles.find((a) => a.endsWith(`package.json`));
 
         if (!pkgPath) throw new Error(`could not find an updated package json`);
-        let pkgJSON = await readFile(pkgPath, { encoding: "utf-8" });
+        let pkgJSON = await fsp.readFile(pkgPath, { encoding: "utf-8" });
 
         expect(pkgJSON).toStrictEqual(`{
   "name": "pkg-a",
@@ -2043,7 +2043,7 @@ describe("apply release plan", () => {
       );
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
-      let readme = await readFile(readmePath, "utf-8");
+      let readme = await fsp.readFile(readmePath, "utf-8");
 
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
@@ -2104,8 +2104,8 @@ describe("apply release plan", () => {
 
       if (!readmePath || !readmePathB)
         throw new Error(`could not find an updated changelog`);
-      let readme = await readFile(readmePath, "utf-8");
-      let readmeB = await readFile(readmePathB, "utf-8");
+      let readme = await fsp.readFile(readmePath, "utf-8");
+      let readmeB = await fsp.readFile(readmePathB, "utf-8");
 
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
@@ -2243,7 +2243,7 @@ describe("apply release plan", () => {
       );
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
-      let readme = await readFile(readmePath, "utf-8");
+      let readme = await fsp.readFile(readmePath, "utf-8");
       expect(readme.trim()).toEqual(
         [
           "# pkg-a\n",
@@ -2343,8 +2343,8 @@ describe("apply release plan", () => {
 
       if (!readmePath || !readmePathB)
         throw new Error(`could not find an updated changelog`);
-      let readme = await readFile(readmePath, "utf-8");
-      let readmeB = await readFile(readmePathB, "utf-8");
+      let readme = await fsp.readFile(readmePath, "utf-8");
+      let readmeB = await fsp.readFile(readmePathB, "utf-8");
 
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
@@ -2452,8 +2452,8 @@ describe("apply release plan", () => {
 
       if (!readmePath || !readmePathB)
         throw new Error(`could not find an updated changelog`);
-      let readme = await readFile(readmePath, "utf-8");
-      let readmeB = await readFile(readmePathB, "utf-8");
+      let readme = await fsp.readFile(readmePath, "utf-8");
+      let readmeB = await fsp.readFile(readmePathB, "utf-8");
 
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
@@ -2576,9 +2576,9 @@ describe("apply release plan", () => {
 
       if (!readmePath || !readmePathB || !readmePathC)
         throw new Error(`could not find an updated changelog`);
-      let readme = await readFile(readmePath, "utf-8");
-      let readmeB = await readFile(readmePathB, "utf-8");
-      let readmeC = await readFile(readmePathC, "utf-8");
+      let readme = await fsp.readFile(readmePath, "utf-8");
+      let readmeB = await fsp.readFile(readmePathB, "utf-8");
+      let readmeC = await fsp.readFile(readmePathC, "utf-8");
 
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
@@ -2711,9 +2711,9 @@ describe("apply release plan", () => {
 
       if (!readmePath || !readmePathB || !readmePathC)
         throw new Error(`could not find an updated changelog`);
-      let readme = await readFile(readmePath, "utf-8");
-      let readmeB = await readFile(readmePathB, "utf-8");
-      let readmeC = await readFile(readmePathC, "utf-8");
+      let readme = await fsp.readFile(readmePath, "utf-8");
+      let readmeB = await fsp.readFile(readmePathB, "utf-8");
+      let readmeC = await fsp.readFile(readmePathC, "utf-8");
 
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
@@ -3155,7 +3155,7 @@ describe("apply release plan", () => {
     let lastCommit = commits[commits.length - 1].substring(0, 7);
 
     expect(
-      await readFile(
+      await fsp.readFile(
         path.join(tempDir, "packages", "pkg-a", "CHANGELOG.md"),
         "utf8"
       )

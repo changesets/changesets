@@ -3,7 +3,7 @@ import outdent from "outdent";
 
 import read from "./";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import { mkdir } from "fs/promises";
+import fsp from "fs/promises";
 
 silenceLogsInBlock();
 
@@ -98,7 +98,7 @@ I'm amazed we needed to update the best package, because it was already the best
   });
   it("should return an empty array when no changesets are found", async () => {
     const cwd = await testdir({});
-    await mkdir(path.join(cwd, ".changeset"), { recursive: true });
+    await fsp.mkdir(path.join(cwd, ".changeset"), { recursive: true });
 
     const changesets = await read(cwd);
     expect(changesets).toEqual([]);

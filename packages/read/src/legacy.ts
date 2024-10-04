@@ -1,4 +1,4 @@
-import { lstat, readFile } from "fs/promises";
+import fsp from "fs/promises";
 import path from "path";
 import pc from "picocolors";
 import { NewChangeset } from "@changesets/types";
@@ -21,15 +21,18 @@ async function getOldChangesets(
 ): Promise<Array<NewChangeset>> {
   // this needs to support just not dealing with dirs that aren't set up properly
   let changesets = await pFilter(dirs, async (dir) =>
-    (await lstat(path.join(changesetBase, dir))).isDirectory()
+    (await fsp.lstat(path.join(changesetBase, dir))).isDirectory()
   );
 
   const changesetContents = changesets.map(async (changesetDir) => {
     const jsonPath = path.join(changesetBase, changesetDir, "changes.json");
 
     const [summary, rawJson] = await Promise.all([
-      readFile(path.join(changesetBase, changesetDir, "changes.md"), "utf8"),
-      readFile(jsonPath, "utf8"),
+      fsp.readFile(
+        path.join(changesetBase, changesetDir, "changes.md"),
+        "utf8"
+      ),
+      fsp.readFile(jsonPath, "utf8"),
     ]);
     const json = JSON.parse(rawJson);
 

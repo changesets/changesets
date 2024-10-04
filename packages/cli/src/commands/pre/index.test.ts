@@ -1,4 +1,4 @@
-import { readFile } from "fs/promises";
+import fsp from "fs/promises";
 import path from "path";
 import pc from "picocolors";
 import * as logger from "@changesets/logger";
@@ -23,7 +23,7 @@ describe("enterPre", () => {
 
     expect(
       JSON.parse(
-        await readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+        await fsp.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
       )
     ).toMatchObject({
       changesets: [],
@@ -76,7 +76,7 @@ describe("enterPre", () => {
     await pre(cwd, { command: "enter", tag: "next" });
     expect(
       JSON.parse(
-        await readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+        await fsp.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
       )
     ).toEqual({
       changesets: [],
@@ -108,7 +108,7 @@ describe("exitPre", () => {
 
     expect(
       JSON.parse(
-        await readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+        await fsp.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
       )
     ).toEqual({
       changesets: [],

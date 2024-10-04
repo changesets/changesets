@@ -10,8 +10,8 @@ import {
 } from "@changesets/types";
 import { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
-import { existsSync, readFileSync } from "fs";
-import { access, readFile, rm, writeFile } from "fs/promises";
+import fs from "fs";
+import fsp from "fs/promises";
 import path from "path";
 import prettier from "prettier";
 import resolveFrom from "resolve-from";
@@ -103,12 +103,12 @@ export default async function applyReleasePlan(
 
   if (releasePlan.preState !== undefined && snapshot === undefined) {
     if (releasePlan.preState.mode === "exit") {
-      await rm(path.join(cwd, ".changeset", "pre.json"), {
+      await fsp.rm(path.join(cwd, ".changeset", "pre.json"), {
         recursive: true,
         force: true,
       });
     } else {
-      await writeFile(
+      await fsp.writeFile(
         path.join(cwd, ".changeset", "pre.json"),
         JSON.stringify(releasePlan.preState, null, 2) + "\n"
       );
@@ -160,7 +160,8 @@ export default async function applyReleasePlan(
         let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
         let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
         if (
-          await access(changesetPath)
+          await fsp
+            .access(changesetPath)
             .then(() => true)
             .catch(() => false)
         ) {
@@ -178,16 +179,17 @@ export default async function applyReleasePlan(
             )
           ) {
             touchedFiles.push(changesetPath);
-            await rm(changesetPath, { recursive: true, force: true });
+            await fsp.rm(changesetPath, { recursive: true, force: true });
           }
           // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
         } else if (
-          await access(changesetFolderPath)
+          await fsp
+            .access(changesetFolderPath)
             .then(() => true)
             .catch(() => false)
         ) {
           touchedFiles.push(changesetFolderPath);
-          await rm(changesetFolderPath, { recursive: true, force: true });
+          await fsp.rm(changesetFolderPath, { recursive: true, force: true });
         }
       })
     );
@@ -284,7 +286,7 @@ async function updateChangelog(
   let templateString = `\n\n${changelog.trim()}\n`;
 
   try {
-    if (existsSync(changelogPath)) {
+    if (fs.existsSync(changelogPath)) {
       await prependFile(changelogPath, templateString, name, prettierInstance);
     } else {
       await writeFormattedMarkdownFile(
@@ -302,12 +304,12 @@ async function updatePackageJson(
   pkgJsonPath: string,
   pkgJson: any
 ): Promise<void> {
-  const pkgRaw = await readFile(pkgJsonPath, "utf8");
+  const pkgRaw = await fsp.readFile(pkgJsonPath, "utf8");
   const indent = detectIndent(pkgRaw).indent || "  ";
   const stringified =
     JSON.stringify(pkgJson, null, indent) + (pkgRaw.endsWith("\n") ? "\n" : "");
 
-  return writeFile(pkgJsonPath, stringified);
+  return fsp.writeFile(pkgJsonPath, stringified);
 }
 
 async function prependFile(
@@ -316,7 +318,7 @@ async function prependFile(
   name: string,
   prettierInstance: typeof prettier
 ) {
-  const fileData = readFileSync(filePath).toString();
+  const fileData = fs.readFileSync(filePath).toString();
   // if the file exists but doesn't have the header, we'll add it in
   if (!fileData) {
     const completelyNewChangelog = `# ${name}${data}`;
@@ -337,7 +339,7 @@ async function writeFormattedMarkdownFile(
   content: string,
   prettierInstance: typeof prettier
 ) {
-  await writeFile(
+  await fsp.writeFile(
     filePath,
     // Prettier v3 returns a promise
     await prettierInstance.format(content, {
