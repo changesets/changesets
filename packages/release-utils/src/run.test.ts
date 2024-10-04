@@ -3,14 +3,14 @@ import { silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
 import { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import fileUrl from "file-url";
-import fsp from "fs/promises";
+import fs from "node:fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
 import { getCurrentBranch } from "./gitUtils";
 import { runPublish, runVersion } from "./run";
 
 const linkNodeModules = async (cwd: string) => {
-  await fsp.symlink(
+  await fs.symlink(
     path.join(__dirname, "..", "..", "..", "node_modules"),
     path.join(cwd, "node_modules")
   );
@@ -101,7 +101,7 @@ describe("version", () => {
     });
 
     expect(
-      await fsp.readFile(
+      await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
         "utf8"
       )
@@ -116,7 +116,7 @@ describe("version", () => {
     `);
 
     expect(
-      await fsp.readFile(
+      await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
         "utf8"
       )
@@ -127,7 +127,7 @@ describe("version", () => {
       }"
     `);
     expect(
-      await fsp.readFile(
+      await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
         "utf8"
       )
@@ -141,7 +141,7 @@ describe("version", () => {
 `)
     );
     expect(
-      await fsp.readFile(
+      await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
         "utf8"
       )
@@ -224,7 +224,7 @@ describe("version", () => {
     });
 
     expect(
-      await fsp.readFile(
+      await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
         "utf8"
       )
@@ -239,7 +239,7 @@ describe("version", () => {
     `);
 
     expect(
-      await fsp.readFile(
+      await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
         "utf8"
       )
@@ -251,7 +251,7 @@ describe("version", () => {
     `);
 
     expect(
-      await fsp.readFile(
+      await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
         "utf8"
       )
@@ -265,7 +265,7 @@ describe("version", () => {
 `)
     );
     await expect(
-      fsp.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8")
+      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8")
     ).rejects.toMatchObject({ code: "ENOENT" });
     expect(changedPackages).toEqual([
       {

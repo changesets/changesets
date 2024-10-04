@@ -1,5 +1,5 @@
 import { enterPre, exitPre, readPreState } from "./index";
-import fsp from "fs/promises";
+import fs from "node:fs/promises";
 import path from "path";
 import {
   PreEnterButInPreModeError,
@@ -30,7 +30,7 @@ describe("enterPre", () => {
 
     expect(
       JSON.parse(
-        await fsp.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
       )
     ).toMatchInlineSnapshot(`
       {
@@ -105,7 +105,7 @@ describe("enterPre", () => {
     await enterPre(cwd, "next");
     expect(
       JSON.parse(
-        await fsp.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
       )
     ).toMatchInlineSnapshot(`
       {
@@ -155,7 +155,7 @@ describe("exitPre", () => {
 
     expect(
       JSON.parse(
-        await fsp.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
       )
     ).toMatchInlineSnapshot(`
       {

@@ -147,8 +147,8 @@ export async function outputFile(
 
 // `fs.exists` is deprecated, and Node recommends this for asynchronous existence checks.
 export async function pathExists(p: string) {
-  return fsp
-    .access(p)
-    .then(() => true)
-    .catch(() => false);
+  return fsp.access(p).then(
+    () => true,
+    () => false
+  );
 }

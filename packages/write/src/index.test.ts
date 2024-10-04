@@ -1,4 +1,4 @@
-import fsp from "fs/promises";
+import fs from "node:fs/promises";
 import path from "path";
 import parse from "@changesets/parse";
 import writeChangeset from "./";
@@ -34,7 +34,7 @@ describe("simple project", () => {
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
-    const mdContent = await fsp.readFile(mdPath, "utf8");
+    const mdContent = await fs.readFile(mdPath, "utf8");
 
     expect(parse(mdContent)).toEqual({
       summary: "This is a summary",
@@ -66,7 +66,7 @@ describe("simple project", () => {
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
-    const mdContent = await fsp.readFile(mdPath, "utf8");
+    const mdContent = await fs.readFile(mdPath, "utf8");
 
     expect(parse(mdContent)).toEqual({
       summary: "",

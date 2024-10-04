@@ -1,4 +1,4 @@
-import fsp from "fs/promises";
+import fs from "node:fs/promises";
 import path from "path";
 import parse from "@changesets/parse";
 import { NewChangeset } from "@changesets/types";
@@ -26,7 +26,7 @@ export default async function getChangesets(
   let changesetBase = path.join(cwd, ".changeset");
   let contents: string[];
   try {
-    contents = await fsp.readdir(changesetBase);
+    contents = await fs.readdir(changesetBase);
   } catch (err) {
     if ((err as any).code === "ENOENT") {
       throw new Error("There is no .changeset directory in this project");
@@ -50,7 +50,7 @@ export default async function getChangesets(
   );
 
   const changesetContents = changesets.map(async (file) => {
-    const changeset = await fsp.readFile(
+    const changeset = await fs.readFile(
       path.join(changesetBase, file),
       "utf8"
     );

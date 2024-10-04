@@ -1,5 +1,4 @@
-import fs from "fs";
-import fsp from "fs/promises";
+import fs from "node:fs/promises";
 import path from "path";
 import { PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
@@ -8,13 +7,9 @@ import {
   PreEnterButInPreModeError,
 } from "@changesets/errors";
 
-async function outputFile(
-  filePath: string,
-  content: string,
-  encoding = "utf8" as fs.ObjectEncodingOptions
-) {
-  await fsp.mkdir(path.dirname(filePath), { recursive: true });
-  await fsp.writeFile(filePath, content, encoding);
+async function outputFile(filePath: string, content: string) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, content, "utf8");
 }
 
 export async function readPreState(cwd: string): Promise<PreState | undefined> {
@@ -22,7 +17,7 @@ export async function readPreState(cwd: string): Promise<PreState | undefined> {
   // TODO: verify that the pre state isn't broken
   let preState: PreState | undefined;
   try {
-    let contents = await fsp.readFile(preStatePath, "utf8");
+    let contents = await fs.readFile(preStatePath, "utf8");
     try {
       preState = JSON.parse(contents);
     } catch (err) {
