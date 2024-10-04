@@ -301,7 +301,7 @@ async function updateChangelog(
 
   // if the file exists but doesn't have the header, we'll add it in
   if (!fileData) {
-    const completelyNewChangelog = `# ${name}${fileData}`;
+    const completelyNewChangelog = `# ${name}${templateString}`;
     await writeFormattedMarkdownFile(
       changelogPath,
       completelyNewChangelog,
@@ -310,7 +310,7 @@ async function updateChangelog(
     return;
   }
 
-  const newChangelog = fileData.replace("\n", fileData);
+  const newChangelog = fileData.replace("\n", templateString);
 
   await writeFormattedMarkdownFile(
     changelogPath,
