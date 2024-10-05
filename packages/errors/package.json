@@ -20,5 +20,8 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/errors",
   "dependencies": {
     "extendable-error": "^0.1.5"
+  },
+  "engines": {
+    "node": "^18.0.0 || ^20.0.0 || >=22.0.0"
   }
 }
