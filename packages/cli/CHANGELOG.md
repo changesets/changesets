@@ -1,5 +1,13 @@
 # @changesets/cli
 
+## 2.27.9
+
+### Patch Changes
+
+- [#1458](https://github.com/changesets/changesets/pull/1458) [`400ab7b`](https://github.com/changesets/changesets/commit/400ab7b5995aa4463c8db003a97bcfe11185422e) Thanks [@benmccann](https://github.com/benmccann)! - Moved `@types/semver` to `devDependencies`
+
+- [#1462](https://github.com/changesets/changesets/pull/1462) [`689e541`](https://github.com/changesets/changesets/commit/689e54127fe059425c6be51e2802879b49b0b5d8) Thanks [@benmccann](https://github.com/benmccann)! - remove `outdent` dependency
+
 ## 2.27.8
 
 ### Patch Changes
