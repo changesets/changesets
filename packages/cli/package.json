@@ -89,7 +89,6 @@
     "p-limit": "^2.2.0",
     "package-manager-detector": "^0.2.0",
     "picocolors": "^1.1.0",
-    "resolve-from": "^5.0.0",
     "semver": "^7.5.3",
     "spawndamnit": "^2.0.0",
     "term-size": "^2.1.0"

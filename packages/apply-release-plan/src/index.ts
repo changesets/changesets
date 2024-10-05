@@ -13,13 +13,12 @@ import detectIndent from "detect-indent";
 import fs from "node:fs/promises";
 import path from "path";
 import prettier from "prettier";
-import resolveFrom from "resolve-from";
 import getChangelogEntry from "./get-changelog-entry";
 import versionPackage from "./version-package";
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
-    return require(require.resolve("prettier", { paths: [cwd] }));
+    return require(require.resolve("prettier", { paths: [path.resolve(cwd)] }));
   } catch (err) {
     if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
       throw err;
@@ -220,7 +219,9 @@ async function getNewChangelogEntry(
 
   const changelogOpts = config.changelog[1];
   let changesetPath = path.join(cwd, ".changeset");
-  let changelogPath = resolveFrom(changesetPath, config.changelog[0]);
+  let changelogPath = require.resolve(config.changelog[0], {
+    paths: [path.resolve(changesetPath)],
+  });
 
   let possibleChangelogFunc = require(changelogPath);
   if (possibleChangelogFunc.default) {
