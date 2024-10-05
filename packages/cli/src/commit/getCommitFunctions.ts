@@ -1,6 +1,5 @@
 import { CommitFunctions } from "@changesets/types";
 import path from "path";
-import resolveFrom from "resolve-from";
 
 export function getCommitFunctions(
   commit: false | readonly [string, any],
@@ -12,7 +11,7 @@ export function getCommitFunctions(
   }
   let commitOpts: any = commit[1];
   let changesetPath = path.join(cwd, ".changeset");
-  let commitPath = resolveFrom(changesetPath, commit[0]);
+  let commitPath = require.resolve(commit[0], { paths: [path.resolve(changesetPath)] });
 
   let possibleCommitFunc = require(commitPath);
   if (possibleCommitFunc.default) {
