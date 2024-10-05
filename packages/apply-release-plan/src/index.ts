@@ -10,7 +10,7 @@ import {
 } from "@changesets/types";
 import { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import prettier from "prettier";
 import resolveFrom from "resolve-from";
@@ -102,7 +102,10 @@ export default async function applyReleasePlan(
 
   if (releasePlan.preState !== undefined && snapshot === undefined) {
     if (releasePlan.preState.mode === "exit") {
-      await fs.remove(path.join(cwd, ".changeset", "pre.json"));
+      await fs.rm(path.join(cwd, ".changeset", "pre.json"), {
+        recursive: true,
+        force: true,
+      });
     } else {
       await fs.writeFile(
         path.join(cwd, ".changeset", "pre.json"),
@@ -155,7 +158,12 @@ export default async function applyReleasePlan(
       changesets.map(async (changeset) => {
         let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
         let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
-        if (await fs.pathExists(changesetPath)) {
+        if (
+          await fs.access(changesetPath).then(
+            () => true,
+            () => false
+          )
+        ) {
           // DO NOT remove changeset for skipped packages
           // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
           // At this point, we know there is no such changeset, because otherwise the program would've already failed,
@@ -170,12 +178,17 @@ export default async function applyReleasePlan(
             )
           ) {
             touchedFiles.push(changesetPath);
-            await fs.remove(changesetPath);
+            await fs.rm(changesetPath, { recursive: true, force: true });
           }
           // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
-        } else if (await fs.pathExists(changesetFolderPath)) {
+        } else if (
+          await fs.access(changesetFolderPath).then(
+            () => true,
+            () => false
+          )
+        ) {
           touchedFiles.push(changesetFolderPath);
-          await fs.remove(changesetFolderPath);
+          await fs.rm(changesetFolderPath, { recursive: true, force: true });
         }
       })
     );
@@ -270,54 +283,52 @@ async function updateChangelog(
   prettierInstance: typeof prettier
 ) {
   let templateString = `\n\n${changelog.trim()}\n`;
+  let fileData;
 
   try {
-    if (fs.existsSync(changelogPath)) {
-      await prependFile(changelogPath, templateString, name, prettierInstance);
-    } else {
-      await writeFormattedMarkdownFile(
-        changelogPath,
-        `# ${name}${templateString}`,
-        prettierInstance
-      );
+    fileData = (await fs.readFile(changelogPath)).toString();
+  } catch (err: any) {
+    if (err?.code !== "ENOENT") {
+      throw err;
     }
-  } catch (e) {
-    console.warn(e);
+    await writeFormattedMarkdownFile(
+      changelogPath,
+      `# ${name}${templateString}`,
+      prettierInstance
+    );
+    return;
   }
+
+  // if the file exists but doesn't have the header, we'll add it in
+  if (!fileData) {
+    const completelyNewChangelog = `# ${name}${templateString}`;
+    await writeFormattedMarkdownFile(
+      changelogPath,
+      completelyNewChangelog,
+      prettierInstance
+    );
+    return;
+  }
+
+  const newChangelog = fileData.replace("\n", templateString);
+
+  await writeFormattedMarkdownFile(
+    changelogPath,
+    newChangelog,
+    prettierInstance
+  );
 }
 
 async function updatePackageJson(
   pkgJsonPath: string,
   pkgJson: any
 ): Promise<void> {
-  const pkgRaw = await fs.readFile(pkgJsonPath, "utf-8");
+  const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
   const indent = detectIndent(pkgRaw).indent || "  ";
   const stringified =
     JSON.stringify(pkgJson, null, indent) + (pkgRaw.endsWith("\n") ? "\n" : "");
 
   return fs.writeFile(pkgJsonPath, stringified);
-}
-
-async function prependFile(
-  filePath: string,
-  data: string,
-  name: string,
-  prettierInstance: typeof prettier
-) {
-  const fileData = fs.readFileSync(filePath).toString();
-  // if the file exists but doesn't have the header, we'll add it in
-  if (!fileData) {
-    const completelyNewChangelog = `# ${name}${data}`;
-    await writeFormattedMarkdownFile(
-      filePath,
-      completelyNewChangelog,
-      prettierInstance
-    );
-    return;
-  }
-  const newChangelog = fileData.replace("\n", data);
-
-  await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
 }
 
 async function writeFormattedMarkdownFile(

@@ -1,9 +1,16 @@
+import fs from "node:fs/promises";
 import path from "path";
-import fs from "fs-extra";
 import pc from "picocolors";
 
 import { defaultWrittenConfig } from "@changesets/config";
 import { info, log, warn, error } from "@changesets/logger";
+
+async function pathExists(p: string) {
+  return fs.access(p).then(
+    () => true,
+    () => false
+  );
+}
 
 const pkgPath = path.dirname(require.resolve("@changesets/cli/package.json"));
 
@@ -18,9 +25,9 @@ const defaultConfig = `${JSON.stringify(
 export default async function init(cwd: string) {
   const changesetBase = path.resolve(cwd, ".changeset");
 
-  if (fs.existsSync(changesetBase)) {
-    if (!fs.existsSync(path.join(changesetBase, "config.json"))) {
-      if (fs.existsSync(path.join(changesetBase, "config.js"))) {
+  if (await pathExists(changesetBase)) {
+    if (!(await pathExists(path.join(changesetBase, "config.json")))) {
+      if (await pathExists(path.join(changesetBase, "config.js"))) {
         error(
           "It looks like you're using the version 1 `.changeset/config.js` file"
         );
@@ -49,7 +56,9 @@ export default async function init(cwd: string) {
       );
     }
   } else {
-    await fs.copy(path.resolve(pkgPath, "./default-files"), changesetBase);
+    await fs.cp(path.resolve(pkgPath, "./default-files"), changesetBase, {
+      recursive: true,
+    });
     await fs.writeFile(
       path.resolve(changesetBase, "config.json"),
       defaultConfig

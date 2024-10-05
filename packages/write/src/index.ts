@@ -1,5 +1,5 @@
 import { Changeset } from "@changesets/types";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import humanId from "human-id";
 import path from "path";
 import prettier from "prettier";
@@ -43,7 +43,8 @@ ${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
 ${summary}
   `;
 
-  await fs.outputFile(
+  await fs.mkdir(path.dirname(newChangesetPath), { recursive: true });
+  await fs.writeFile(
     newChangesetPath,
     // Prettier v3 returns a promise
     await prettierInstance.format(changesetContents, {

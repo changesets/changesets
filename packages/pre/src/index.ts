@@ -1,4 +1,4 @@
-import * as fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import { PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
@@ -6,6 +6,11 @@ import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError,
 } from "@changesets/errors";
+
+async function outputFile(filePath: string, content: string) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, content, "utf8");
+}
 
 export async function readPreState(cwd: string): Promise<PreState | undefined> {
   let preStatePath = path.resolve(cwd, ".changeset", "pre.json");
@@ -38,7 +43,7 @@ export async function exitPre(cwd: string) {
     throw new PreExitButNotInPreModeError();
   }
 
-  await fs.outputFile(
+  await outputFile(
     preStatePath,
     JSON.stringify({ ...preState, mode: "exit" }, null, 2) + "\n"
   );
@@ -61,8 +66,5 @@ export async function enterPre(cwd: string, tag: string) {
   for (let pkg of packages.packages) {
     newPreState.initialVersions[pkg.packageJson.name] = pkg.packageJson.version;
   }
-  await fs.outputFile(
-    preStatePath,
-    JSON.stringify(newPreState, null, 2) + "\n"
-  );
+  await outputFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
 }

@@ -20,7 +20,6 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/write",
   "dependencies": {
     "@changesets/types": "^6.0.0",
-    "fs-extra": "^7.0.1",
     "human-id": "^4.1.1",
     "prettier": "^2.7.1"
   },

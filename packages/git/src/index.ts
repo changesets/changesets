@@ -1,5 +1,5 @@
 import spawn from "spawndamnit";
-import fs from "fs";
+import fs from "node:fs/promises";
 import path from "path";
 import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
@@ -159,7 +159,12 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
     const fullGitDir = path.resolve(cwd, gitDir);
 
     // Check for the existence of <gitDir>/shallow
-    return fs.existsSync(path.join(fullGitDir, "shallow"));
+    try {
+      await fs.access(path.join(fullGitDir, "shallow"));
+      return true;
+    } catch {
+      return false;
+    }
   } else {
     // We have a newer Git which supports `rev-parse --is-shallow-repository`. We'll use
     // the output of that instead of messing with .git/shallow in case that changes in the future.

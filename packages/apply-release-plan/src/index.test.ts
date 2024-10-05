@@ -5,7 +5,7 @@ import {
   ComprehensiveRelease,
 } from "@changesets/types";
 import * as git from "@changesets/git";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import outdent from "outdent";
 import spawn from "spawndamnit";
@@ -17,6 +17,8 @@ import {
   temporarilySilenceLogs,
   testdir,
   Fixture,
+  outputFile,
+  pathExists,
 } from "@changesets/test-utils";
 
 class FakeReleasePlan {
@@ -126,6 +128,10 @@ async function testSetup(
     ),
     tempDir,
   };
+}
+
+async function readJson(path: string) {
+  return JSON.parse(await fs.readFile(path, "utf8"));
 }
 
 describe("apply release plan", () => {
@@ -253,7 +259,7 @@ describe("apply release plan", () => {
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
-      let pkgJSON = await fs.readJSON(pkgPath);
+      let pkgJSON = await readJson(pkgPath);
 
       expect(pkgJSON).toMatchObject({
         name: "pkg-a",
@@ -305,7 +311,7 @@ describe("apply release plan", () => {
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
-      let pkgJSON = await fs.readJSON(pkgPath);
+      let pkgJSON = await readJson(pkgPath);
 
       expect(pkgJSON).toEqual({
         name: "pkg-a",
@@ -360,7 +366,7 @@ describe("apply release plan", () => {
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
-      let pkgJSON = await fs.readJSON(pkgPath);
+      let pkgJSON = await readJson(pkgPath);
 
       expect(pkgJSON).toEqual({
         name: "pkg-a",
@@ -449,7 +455,7 @@ describe("apply release plan", () => {
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
-      let pkgJSON = await fs.readJSON(pkgPath);
+      let pkgJSON = await readJson(pkgPath);
 
       expect(pkgJSON).toEqual({
         name: "pkg-a",
@@ -526,7 +532,7 @@ describe("apply release plan", () => {
       );
 
       if (!pkgAPath) throw new Error(`could not find an updated package json`);
-      let pkgAJSON = await fs.readJSON(pkgAPath);
+      let pkgAJSON = await readJson(pkgAPath);
 
       expect(pkgAJSON).toEqual({
         name: "pkg-a",
@@ -541,7 +547,7 @@ describe("apply release plan", () => {
       );
 
       if (!pkgCPath) throw new Error(`could not find an updated package json`);
-      let pkgCJSON = await fs.readJSON(pkgCPath);
+      let pkgCJSON = await readJson(pkgCPath);
 
       expect(pkgCJSON).toEqual({
         name: "pkg-c",
@@ -596,8 +602,8 @@ describe("apply release plan", () => {
       if (!pkgPathA || !pkgPathB) {
         throw new Error(`could not find an updated package json`);
       }
-      let pkgJSONA = await fs.readJSON(pkgPathA);
-      let pkgJSONB = await fs.readJSON(pkgPathB);
+      let pkgJSONA = await readJson(pkgPathA);
+      let pkgJSONB = await readJson(pkgPathB);
 
       expect(pkgJSONA).toMatchObject({
         name: "pkg-a",
@@ -687,8 +693,8 @@ describe("apply release plan", () => {
       if (!pkgPathA || !pkgPathB) {
         throw new Error(`could not find an updated package json`);
       }
-      let pkgJSONA = await fs.readJSON(pkgPathA);
-      let pkgJSONB = await fs.readJSON(pkgPathB);
+      let pkgJSONA = await readJson(pkgPathA);
+      let pkgJSONB = await readJson(pkgPathB);
 
       expect(pkgJSONA).toMatchObject({
         name: "pkg-a",
@@ -754,7 +760,7 @@ describe("apply release plan", () => {
         }
       );
 
-      let pkgJSON = await fs.readJSON(path.join(tempDir, "package.json"));
+      let pkgJSON = await readJson(path.join(tempDir, "package.json"));
 
       expect(pkgJSON).toMatchObject({
         name: "self-referenced",
@@ -814,7 +820,7 @@ describe("apply release plan", () => {
       expect(pkgPathA).toBeUndefined();
       if (!pkgPathB) throw new Error(`could not find an updated package json`);
 
-      let pkgJSONB = await fs.readJSON(pkgPathB);
+      let pkgJSONB = await readJson(pkgPathB);
 
       expect(pkgJSONB).toMatchObject({
         name: "pkg-b",
@@ -871,7 +877,7 @@ describe("apply release plan", () => {
       expect(pkgPathA).toBeUndefined();
       if (!pkgPathB) throw new Error(`could not find an updated package json`);
 
-      let pkgJSONB = await fs.readJSON(pkgPathB);
+      let pkgJSONB = await readJson(pkgPathB);
 
       expect(pkgJSONB).toMatchObject({
         name: "pkg-b",
@@ -925,7 +931,7 @@ describe("apply release plan", () => {
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
-      let pkgJSON = await fs.readJSON(pkgPath);
+      let pkgJSON = await readJson(pkgPath);
 
       expect(pkgJSON).toMatchObject({
         name: "pkg-a",
@@ -1021,8 +1027,8 @@ describe("apply release plan", () => {
           if (!pkgPathA || !pkgPathB) {
             throw new Error(`could not find an updated package json`);
           }
-          let pkgJSONA = await fs.readJSON(pkgPathA);
-          let pkgJSONB = await fs.readJSON(pkgPathB);
+          let pkgJSONA = await readJson(pkgPathA);
+          let pkgJSONB = await readJson(pkgPathB);
 
           expect(pkgJSONA).toMatchObject({
             name: "pkg-a",
@@ -1137,8 +1143,8 @@ describe("apply release plan", () => {
           if (!pkgPathA || !pkgPathB) {
             throw new Error(`could not find an updated package json`);
           }
-          let pkgJSONA = await fs.readJSON(pkgPathA);
-          let pkgJSONB = await fs.readJSON(pkgPathB);
+          let pkgJSONA = await readJson(pkgPathA);
+          let pkgJSONB = await readJson(pkgPathB);
 
           expect(pkgJSONA).toMatchObject({
             name: "pkg-a",
@@ -1238,8 +1244,8 @@ describe("apply release plan", () => {
           if (!pkgPathA || !pkgPathB) {
             throw new Error(`could not find an updated package json`);
           }
-          let pkgJSONA = await fs.readJSON(pkgPathA);
-          let pkgJSONB = await fs.readJSON(pkgPathB);
+          let pkgJSONA = await readJson(pkgPathA);
+          let pkgJSONB = await readJson(pkgPathB);
 
           expect(pkgJSONA).toMatchObject({
             name: "pkg-a",
@@ -1338,8 +1344,8 @@ describe("apply release plan", () => {
           if (!pkgPathA || !pkgPathB) {
             throw new Error(`could not find an updated package json`);
           }
-          let pkgJSONA = await fs.readJSON(pkgPathA);
-          let pkgJSONB = await fs.readJSON(pkgPathB);
+          let pkgJSONA = await readJson(pkgPathA);
+          let pkgJSONB = await readJson(pkgPathB);
 
           expect(pkgJSONA).toMatchObject({
             name: "pkg-a",
@@ -1438,8 +1444,8 @@ describe("apply release plan", () => {
           if (!pkgPathA || !pkgPathB) {
             throw new Error(`could not find an updated package json`);
           }
-          let pkgJSONA = await fs.readJSON(pkgPathA);
-          let pkgJSONB = await fs.readJSON(pkgPathB);
+          let pkgJSONA = await readJson(pkgPathA);
+          let pkgJSONB = await readJson(pkgPathB);
 
           expect(pkgJSONA).toMatchObject({
             name: "pkg-a",
@@ -1541,8 +1547,8 @@ describe("apply release plan", () => {
           if (!pkgPathA || !pkgPathB) {
             throw new Error(`could not find an updated package json`);
           }
-          let pkgJSONA = await fs.readJSON(pkgPathA);
-          let pkgJSONB = await fs.readJSON(pkgPathB);
+          let pkgJSONA = await readJson(pkgPathA);
+          let pkgJSONB = await readJson(pkgPathB);
 
           expect(pkgJSONA).toMatchObject({
             name: "pkg-a",
@@ -1657,8 +1663,8 @@ describe("apply release plan", () => {
           if (!pkgPathA || !pkgPathB) {
             throw new Error(`could not find an updated package json`);
           }
-          let pkgJSONA = await fs.readJSON(pkgPathA);
-          let pkgJSONB = await fs.readJSON(pkgPathB);
+          let pkgJSONA = await readJson(pkgPathA);
+          let pkgJSONB = await readJson(pkgPathB);
 
           expect(pkgJSONA).toMatchObject({
             name: "pkg-a",
@@ -1766,8 +1772,8 @@ describe("apply release plan", () => {
           if (!pkgPathA || !pkgPathB) {
             throw new Error(`could not find an updated package json`);
           }
-          let pkgJSONA = await fs.readJSON(pkgPathA);
-          let pkgJSONB = await fs.readJSON(pkgPathB);
+          let pkgJSONA = await readJson(pkgPathA);
+          let pkgJSONB = await readJson(pkgPathB);
 
           expect(pkgJSONA).toMatchObject({
             name: "pkg-a",
@@ -1866,8 +1872,8 @@ describe("apply release plan", () => {
           if (!pkgPathA || !pkgPathB) {
             throw new Error(`could not find an updated package json`);
           }
-          let pkgJSONA = await fs.readJSON(pkgPathA);
-          let pkgJSONB = await fs.readJSON(pkgPathB);
+          let pkgJSONA = await readJson(pkgPathA);
+          let pkgJSONB = await readJson(pkgPathB);
 
           expect(pkgJSONA).toMatchObject({
             name: "pkg-a",
@@ -1967,8 +1973,8 @@ describe("apply release plan", () => {
         if (!pkgPathDependent || !pkgPathDepended) {
           throw new Error(`could not find an updated package json`);
         }
-        let pkgJSONDependent = await fs.readJSON(pkgPathDependent);
-        let pkgJSONDepended = await fs.readJSON(pkgPathDepended);
+        let pkgJSONDependent = await readJson(pkgPathDependent);
+        let pkgJSONDepended = await readJson(pkgPathDepended);
 
         expect(pkgJSONDependent).toMatchObject({
           name: "has-peer-dep",
@@ -2928,7 +2934,7 @@ describe("apply release plan", () => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
-            return fs.outputFile(thisPath, content);
+            return outputFile(thisPath, content);
           })
         );
 
@@ -2950,8 +2956,8 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let pathExists = await fs.pathExists(changesetPath);
-      expect(pathExists).toEqual(false);
+      let changesetExists = await pathExists(changesetPath);
+      expect(changesetExists).toEqual(false);
     });
     it("should NOT delete changesets for ignored packages", async () => {
       const releasePlan = new FakeReleasePlan();
@@ -2964,7 +2970,7 @@ describe("apply release plan", () => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
-            return fs.outputFile(thisPath, content);
+            return outputFile(thisPath, content);
           })
         );
 
@@ -2986,8 +2992,8 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let pathExists = await fs.pathExists(changesetPath);
-      expect(pathExists).toEqual(true);
+      let changesetExists = await pathExists(changesetPath);
+      expect(changesetExists).toEqual(true);
     });
     it("should NOT delete changesets for private unversioned packages", async () => {
       const releasePlan = new FakeReleasePlan();
@@ -3000,7 +3006,7 @@ describe("apply release plan", () => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
-            return fs.outputFile(thisPath, content);
+            return outputFile(thisPath, content);
           })
         );
 
@@ -3026,8 +3032,8 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let pathExists = await fs.pathExists(changesetPath);
-      expect(pathExists).toEqual(true);
+      let changesetExists = await pathExists(changesetPath);
+      expect(changesetExists).toEqual(true);
     });
     it("should delete an old format changeset if it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
@@ -3052,8 +3058,8 @@ describe("apply release plan", () => {
                 id,
                 `changes.json`
               );
-              await fs.outputFile(changesetMDPath, summary);
-              await fs.outputFile(
+              await outputFile(changesetMDPath, summary);
+              await outputFile(
                 changesetJSONPath,
                 JSON.stringify({ id, summary })
               );
@@ -3078,9 +3084,9 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let mdPathExists = await fs.pathExists(changesetMDPath);
+      let mdPathExists = await pathExists(changesetMDPath);
       // @ts-ignore this is possibly bad
-      let JSONPathExists = await fs.pathExists(changesetMDPath);
+      let JSONPathExists = await pathExists(changesetJSONPath);
 
       expect(mdPathExists).toEqual(false);
       expect(JSONPathExists).toEqual(false);
@@ -3108,11 +3114,8 @@ describe("apply release plan", () => {
             id,
             `changes.json`
           );
-          await fs.outputFile(changesetMDPath, summary);
-          await fs.outputFile(
-            changesetJSONPath,
-            JSON.stringify({ id, summary })
-          );
+          await outputFile(changesetMDPath, summary);
+          await outputFile(changesetJSONPath, JSON.stringify({ id, summary }));
         })
       );
 
@@ -3224,7 +3227,7 @@ describe("apply release plan", () => {
             const thisPath = path.resolve(tempDir, ".changeset", `${id}.md`);
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
-            return fs.outputFile(thisPath, content);
+            return outputFile(thisPath, content);
           })
         );
 
@@ -3259,9 +3262,9 @@ describe("apply release plan", () => {
       );
 
       // @ts-ignore this is possibly bad
-      let pathExists = await fs.pathExists(changesetPath);
+      let changesetExists = await pathExists(changesetPath);
 
-      expect(pathExists).toEqual(false);
+      expect(changesetExists).toEqual(false);
 
       let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
 

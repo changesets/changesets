@@ -1,10 +1,10 @@
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
-import { gitdir, silenceLogsInBlock } from "@changesets/test-utils";
+import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
 import { ReleasePlan } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
 import status from "..";
@@ -62,7 +62,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
       'export default "updated a"'
     );
@@ -128,7 +128,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
       'export default "updated a"'
     );
@@ -195,7 +195,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
       'export default "updated a"'
     );
@@ -258,7 +258,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
       'export default "updated a"'
     );
@@ -295,7 +295,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
       'export default "updated a"'
     );
@@ -319,7 +319,7 @@ describe("status", () => {
       await readConfig(cwd)
     );
 
-    const releaseObj = await fs.readFile(path.join(cwd, output), "utf-8");
+    const releaseObj = await fs.readFile(path.join(cwd, output), "utf8");
 
     expect(probsUndefined).toEqual(undefined);
     expect(replaceHumanIds(JSON.parse(releaseObj))).toMatchInlineSnapshot(`
@@ -371,7 +371,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/unrelated.json"),
       JSON.stringify({})
     );
@@ -414,7 +414,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/src/a.js"),
       'export default "updated a"'
     );
@@ -445,7 +445,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
       'export default "updated a"'
     );
@@ -520,7 +520,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
       'export default "updated b"'
     );
@@ -570,7 +570,7 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
       'export default "updated b"'
     );

@@ -1,5 +1,5 @@
 import pc from "picocolors";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import getReleasePlan from "@changesets/get-release-plan";
 import { error, info, log, warn } from "@changesets/logger";
