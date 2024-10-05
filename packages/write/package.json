@@ -1,6 +1,6 @@
 {
   "name": "@changesets/write",
-  "version": "0.3.2",
+  "version": "0.3.3-next.0",
   "description": "Writes a changeset to a file",
   "main": "dist/changesets-write.cjs.js",
   "module": "dist/changesets-write.esm.js",
@@ -25,6 +25,6 @@
   },
   "devDependencies": {
     "@changesets/parse": "*",
-    "@changesets/test-utils": "*"
+    "@changesets/test-utils": "0.0.8-next.0"
   }
 }

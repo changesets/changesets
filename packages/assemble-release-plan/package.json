@@ -27,6 +27,6 @@
     "semver": "^7.5.3"
   },
   "devDependencies": {
-    "@changesets/config": "*"
+    "@changesets/config": "3.0.4-next.0"
   }
 }

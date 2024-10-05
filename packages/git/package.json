@@ -1,6 +1,6 @@
 {
   "name": "@changesets/git",
-  "version": "3.0.1",
+  "version": "3.0.2-next.0",
   "description": "Some git helpers that changesets use to get information",
   "main": "dist/changesets-git.cjs.js",
   "module": "dist/changesets-git.esm.js",
@@ -26,8 +26,8 @@
     "spawndamnit": "^2.0.0"
   },
   "devDependencies": {
-    "@changesets/test-utils": "*",
-    "@changesets/write": "*",
+    "@changesets/test-utils": "0.0.8-next.0",
+    "@changesets/write": "0.3.3-next.0",
     "file-url": "^3.0.0"
   }
 }

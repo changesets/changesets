@@ -1,5 +1,11 @@
 # @changesets/write
 
+## 0.3.3-next.0
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@ziebam](https://github.com/ziebam)! - Replace `fs-extra` usage with `node:fs`
+
 ## 0.3.2
 
 ### Patch Changes

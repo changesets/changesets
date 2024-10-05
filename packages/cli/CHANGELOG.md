@@ -1,5 +1,20 @@
 # @changesets/cli
 
+## 2.27.10-next.0
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@ziebam](https://github.com/ziebam)! - Replace `fs-extra` usage with `node:fs`
+
+- Updated dependencies [[`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e)]:
+  - @changesets/apply-release-plan@7.0.6-next.0
+  - @changesets/config@3.0.4-next.0
+  - @changesets/write@0.3.3-next.0
+  - @changesets/read@0.6.2-next.0
+  - @changesets/git@3.0.2-next.0
+  - @changesets/pre@2.0.2-next.0
+  - @changesets/get-release-plan@4.0.5-next.0
+
 ## 2.27.9
 
 ### Patch Changes

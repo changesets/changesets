@@ -1,5 +1,14 @@
 # @changesets/get-release-plan
 
+## 4.0.5-next.0
+
+### Patch Changes
+
+- Updated dependencies [[`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e)]:
+  - @changesets/config@3.0.4-next.0
+  - @changesets/read@0.6.2-next.0
+  - @changesets/pre@2.0.2-next.0
+
 ## 4.0.4
 
 ### Patch Changes

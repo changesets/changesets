@@ -23,6 +23,6 @@
     "@manypkg/get-packages": "^1.1.3"
   },
   "devDependencies": {
-    "@changesets/test-utils": "*"
+    "@changesets/test-utils": "0.0.8-next.0"
   }
 }
