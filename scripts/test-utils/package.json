@@ -23,5 +23,8 @@
     "@changesets/logger": "^0.1.1",
     "fixturez": "^1.1.0",
     "spawndamnit": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

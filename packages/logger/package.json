@@ -20,5 +20,8 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/logger",
   "dependencies": {
     "picocolors": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
