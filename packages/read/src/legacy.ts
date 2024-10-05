@@ -1,7 +1,7 @@
+import fs from "node:fs/promises";
 import path from "path";
 import pc from "picocolors";
 import { NewChangeset } from "@changesets/types";
-import * as fs from "fs-extra";
 import pFilter from "p-filter";
 import { warn } from "@changesets/logger";
 
@@ -27,13 +27,11 @@ async function getOldChangesets(
   const changesetContents = changesets.map(async (changesetDir) => {
     const jsonPath = path.join(changesetBase, changesetDir, "changes.json");
 
-    const [summary, json] = await Promise.all([
-      fs.readFile(
-        path.join(changesetBase, changesetDir, "changes.md"),
-        "utf-8"
-      ),
-      fs.readJson(jsonPath),
+    const [summary, rawJson] = await Promise.all([
+      fs.readFile(path.join(changesetBase, changesetDir, "changes.md"), "utf8"),
+      fs.readFile(jsonPath, "utf8"),
     ]);
+    const json = JSON.parse(rawJson);
 
     return { releases: json.releases, summary, id: changesetDir };
   });

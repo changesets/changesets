@@ -3,7 +3,7 @@ import { silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
 import { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import fileUrl from "file-url";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
 import { getCurrentBranch } from "./gitUtils";
@@ -103,7 +103,7 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf-8"
+        "utf8"
       )
     ).toMatchInlineSnapshot(`
       "{
@@ -118,7 +118,7 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf-8"
+        "utf8"
       )
     ).toMatchInlineSnapshot(`
       "{
@@ -129,7 +129,7 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf-8"
+        "utf8"
       )
     ).toEqual(
       expect.stringContaining(`# pkg-a
@@ -143,7 +143,7 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
-        "utf-8"
+        "utf8"
       )
     ).toEqual(
       expect.stringContaining(`# pkg-b
@@ -226,7 +226,7 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf-8"
+        "utf8"
       )
     ).toMatchInlineSnapshot(`
       "{
@@ -241,7 +241,7 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf-8"
+        "utf8"
       )
     ).toMatchInlineSnapshot(`
       "{
@@ -253,7 +253,7 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf-8"
+        "utf8"
       )
     ).toEqual(
       expect.stringContaining(`# pkg-a
@@ -265,7 +265,7 @@ describe("version", () => {
 `)
     );
     await expect(
-      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf-8")
+      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8")
     ).rejects.toMatchObject({ code: "ENOENT" });
     expect(changedPackages).toEqual([
       {

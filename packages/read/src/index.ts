@@ -1,4 +1,4 @@
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import parse from "@changesets/parse";
 import { NewChangeset } from "@changesets/types";
@@ -50,10 +50,7 @@ export default async function getChangesets(
   );
 
   const changesetContents = changesets.map(async (file) => {
-    const changeset = await fs.readFile(
-      path.join(changesetBase, file),
-      "utf-8"
-    );
+    const changeset = await fs.readFile(path.join(changesetBase, file), "utf8");
 
     return { ...parse(changeset), id: file.replace(".md", "") };
   });

@@ -1,7 +1,8 @@
 import fixturez from "fixturez";
 import spawn from "spawndamnit";
+import fs from "fs";
+import fsp from "fs/promises";
 import path from "path";
-import fs from "fs-extra";
 
 /**
  * Reason for eslint disable import/no-commonjs
@@ -96,7 +97,8 @@ export async function testdir(dir: Fixture) {
   await Promise.all(
     Object.keys(dir).map(async (filename) => {
       const fullPath = path.join(temp, filename);
-      await fs.outputFile(fullPath, dir[filename]);
+      await fsp.mkdir(path.dirname(fullPath), { recursive: true });
+      await fsp.writeFile(fullPath, dir[filename]);
     })
   );
   return temp;
@@ -132,4 +134,21 @@ export async function gitdir(dir: Fixture) {
   });
 
   return cwd;
+}
+
+export async function outputFile(
+  filePath: string,
+  content: string,
+  encoding = "utf8" as fs.ObjectEncodingOptions
+) {
+  await fsp.mkdir(path.dirname(filePath), { recursive: true });
+  await fsp.writeFile(filePath, content, encoding);
+}
+
+// `fs.exists` is deprecated, and Node recommends this for asynchronous existence checks.
+export async function pathExists(p: string) {
+  return fsp.access(p).then(
+    () => true,
+    () => false
+  );
 }

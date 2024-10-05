@@ -1,4 +1,4 @@
-import * as fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
@@ -92,7 +92,9 @@ function isArray<T>(
 }
 
 export let read = async (cwd: string, packages: Packages) => {
-  let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
+  let json = JSON.parse(
+    await fs.readFile(path.join(cwd, ".changeset", "config.json"), "utf8")
+  );
   return parse(json, packages);
 };
 
