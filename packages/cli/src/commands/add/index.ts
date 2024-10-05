@@ -43,11 +43,19 @@ export default async function add(
       summary: ``,
     };
   } else {
-    const changedPackagesNames = (
-      await getVersionableChangedPackages(config, {
-        cwd,
-      })
-    ).map((pkg) => pkg.packageJson.name);
+    let changedPackagesNames: string[] = [];
+    try {
+      changedPackagesNames = (
+        await getVersionableChangedPackages(config, {
+          cwd,
+        })
+      ).map((pkg) => pkg.packageJson.name);
+    } catch (e: any) {
+      warn(
+        `Failed to find changed packages from the "${config.baseBranch}" base branch due to error below`
+      );
+      warn(e);
+    }
 
     newChangeset = await createChangeset(
       changedPackagesNames,
