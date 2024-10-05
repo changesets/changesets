@@ -11,7 +11,9 @@ export function getCommitFunctions(
   }
   let commitOpts: any = commit[1];
   let changesetPath = path.join(cwd, ".changeset");
-  let commitPath = require.resolve(commit[0], { paths: [path.resolve(changesetPath)] });
+  let commitPath = require.resolve(commit[0], {
+    paths: [path.resolve(changesetPath)],
+  });
 
   let possibleCommitFunc = require(commitPath);
   if (possibleCommitFunc.default) {
