@@ -9,6 +9,7 @@
 "@changesets/get-github-info": minor
 "@changesets/changelog-git": minor
 "@changesets/release-utils": minor
+"@changesets/test-utils": patch
 "@changesets/config": major
 "@changesets/errors": minor
 "@changesets/logger": minor
