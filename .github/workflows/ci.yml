@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test:
-    name: "Test: node-${{ matrix.node_version }}"
+    name: "Test using Node ${{ matrix.node_version }}"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
