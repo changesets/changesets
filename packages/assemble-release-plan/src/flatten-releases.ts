@@ -26,12 +26,7 @@ export default function flattenReleases(
       )
       .forEach(({ name, type }) => {
         let release = releases.get(name);
-        let pkg = packagesByName.get(name);
-        if (!pkg) {
-          throw new Error(
-            `"${changeset.id}" changeset mentions a release for a package "${name}" but such a package could not be found.`
-          );
-        }
+        const pkg = packagesByName.get(name)!;
         if (!release) {
           release = {
             name,

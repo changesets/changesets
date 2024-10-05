@@ -556,7 +556,7 @@ describe("assemble-release-plan", () => {
         undefined
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find matching package for release of: "impossible-package" in changeset big-cats-delight"`
+      `""big-cats-delight" changeset mentions a release for a package "impossible-package" but such a package could not be found."`
     );
   });
 

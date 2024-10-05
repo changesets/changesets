@@ -279,7 +279,7 @@ function getRelevantChangesets(
       const pkg = packagesByName.get(release.name);
       if (!pkg) {
         throw new Error(
-          `Could not find matching package for release of: "${release.name}" in changeset ${changeset.id}`
+          `"${changeset.id}" changeset mentions a release for a package "${release.name}" but such a package could not be found.`
         );
       }
       if (
