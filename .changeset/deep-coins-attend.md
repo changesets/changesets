@@ -21,4 +21,4 @@
 "@changesets/pre": major
 ---
 
-Add `"engines"` field for explicit node version support. The supported node versions are `^18.0.0 || ^20.0.0 || >=22.0.0`.
+Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
