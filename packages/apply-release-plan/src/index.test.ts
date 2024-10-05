@@ -11,7 +11,7 @@ import outdent from "outdent";
 import spawn from "spawndamnit";
 import { defaultConfig } from "@changesets/config";
 
-import applyReleasePlan from "./";
+import applyReleasePlan from "./index.ts";
 import { getPackages } from "@manypkg/get-packages";
 import {
   temporarilySilenceLogs,

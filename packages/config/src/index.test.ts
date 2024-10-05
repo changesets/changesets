@@ -1,4 +1,4 @@
-import { read, parse } from "./";
+import { read, parse } from "./index.ts";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import { Config, WrittenConfig } from "@changesets/types";

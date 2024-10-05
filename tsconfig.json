@@ -3,6 +3,7 @@
     "target": "esnext",
     "module": "Node16",
     "moduleResolution": "Node16",
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "strict": true,

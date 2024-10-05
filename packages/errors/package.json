@@ -10,8 +10,5 @@
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/errors",
-  "dependencies": {
-    "extendable-error": "^0.1.5"
-  }
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/errors"
 }
