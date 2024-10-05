@@ -1,4 +1,0 @@
-{
-  "packages": ["packages/*"],
-  "node": "18"
-}
