@@ -1,11 +1,5 @@
 # @changesets/cli
 
-## 2.27.2
-
-### Patch Changes
-
-- Fix typo in `changeset pre enter` command when tag is not passed
-
 ## 2.27.1
 
 ### Patch Changes

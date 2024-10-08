@@ -99,6 +99,7 @@ describe("cli", () => {
       );
     });
   });
+
   describe("pre", () => {
     it("should throw an error if tag not passed in", async () => {
       const cwd = await testdir({
