@@ -1,5 +1,5 @@
 import path from "path";
-import chalk from "chalk";
+import pc from "picocolors";
 import * as fs from "fs-extra";
 import * as logger from "@changesets/logger";
 import { ExitError } from "@changesets/errors";
@@ -30,7 +30,7 @@ describe("enterPre", () => {
       tag: "next",
     });
     expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${chalk.cyan("next")}`
+      `Entered pre mode with tag ${pc.cyan("next")}`
     );
   });
   it("should throw if already in pre", async () => {
@@ -81,7 +81,7 @@ describe("enterPre", () => {
       }
     );
     expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${chalk.cyan("next")}`
+      `Entered pre mode with tag ${pc.cyan("next")}`
     );
   });
 });
