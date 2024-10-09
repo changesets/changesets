@@ -1,34 +1,11 @@
-import fixturez from "fixturez";
 import path from "path";
-import chalk from "chalk";
+import pc from "picocolors";
 import * as fs from "fs-extra";
-import { PreState } from "@changesets/types";
 import * as logger from "@changesets/logger";
 import { ExitError } from "@changesets/errors";
+import { testdir } from "@changesets/test-utils";
 
 import pre from "./index";
-
-let f = fixturez(__dirname);
-
-let preStateForSimpleProject: PreState = {
-  changesets: [],
-  initialVersions: {
-    "pkg-a": "1.0.0",
-    "pkg-b": "1.0.0",
-  },
-  mode: "pre",
-  tag: "next",
-};
-
-let preStateForExited: PreState = {
-  changesets: ["slimy-dingos-whisper"],
-  initialVersions: {
-    "pkg-a": "1.0.0",
-    "pkg-b": "1.0.0",
-  },
-  mode: "exit",
-  tag: "beta",
-};
 
 jest.mock("@changesets/logger");
 
@@ -36,22 +13,40 @@ let mockedLogger = logger as jest.Mocked<typeof logger>;
 
 describe("enterPre", () => {
   it("should enter", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+    });
     await pre(cwd, { command: "enter", tag: "next" });
 
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
-      preStateForSimpleProject
-    );
+    expect(
+      await fs.readJson(path.join(cwd, ".changeset", "pre.json"))
+    ).toMatchObject({
+      changesets: [],
+      initialVersions: {},
+      mode: "pre",
+      tag: "next",
+    });
     expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${chalk.cyan("next")}`
+      `Entered pre mode with tag ${pc.cyan("next")}`
     );
   });
   it("should throw if already in pre", async () => {
-    let cwd = f.copy("simple-project");
-    await fs.writeJSON(
-      path.join(cwd, ".changeset", "pre.json"),
-      preStateForSimpleProject
-    );
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {},
+        mode: "pre",
+        tag: "next",
+      }),
+    });
+
     await expect(
       pre(cwd, { command: "enter", tag: "next" })
     ).rejects.toBeInstanceOf(ExitError);
@@ -63,40 +58,66 @@ describe("enterPre", () => {
     );
   });
   it("should enter if already exited pre mode", async () => {
-    let cwd = f.copy("simple-project");
-    await fs.writeJSON(
-      path.join(cwd, ".changeset", "pre.json"),
-      preStateForExited
-    );
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {},
+        mode: "exit",
+        tag: "beta",
+      }),
+    });
+
     await pre(cwd, { command: "enter", tag: "next" });
     expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
       {
-        ...preStateForExited,
+        changesets: [],
+        initialVersions: {},
         mode: "pre",
         tag: "next",
       }
     );
     expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${chalk.cyan("next")}`
+      `Entered pre mode with tag ${pc.cyan("next")}`
     );
   });
 });
 
 describe("exitPre", () => {
   it("should exit", async () => {
-    let cwd = f.copy("simple-project");
-    await fs.writeJSON(
-      path.join(cwd, ".changeset", "pre.json"),
-      preStateForSimpleProject
-    );
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {},
+        mode: "pre",
+        tag: "next",
+      }),
+    });
     await pre(cwd, { command: "exit" });
 
     expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
-      { ...preStateForSimpleProject, mode: "exit" }
+      {
+        changesets: [],
+        initialVersions: {},
+        mode: "exit",
+        tag: "next",
+      }
     );
   });
   it("should throw if not in pre", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+    });
     await expect(pre(cwd, { command: "exit" })).rejects.toBeInstanceOf(
       ExitError
     );

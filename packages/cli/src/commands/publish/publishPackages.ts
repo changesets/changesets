@@ -1,13 +1,13 @@
 import { join } from "path";
-import semver from "semver";
-import chalk from "chalk";
+import semverParse from "semver/functions/parse";
+import pc from "picocolors";
 import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
 import * as npmUtils from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
-import isCI from "is-ci";
+import { isCI } from "ci-info";
 
 type PublishedState = "never" | "published" | "only-pre";
 
@@ -122,20 +122,16 @@ async function publishAPackage(
   tag: string
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-  const localAccess = publishConfig?.access;
-  info(
-    `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
-  );
-
-  const publishDir = publishConfig?.directory
-    ? join(pkg.dir, publishConfig.directory)
-    : pkg.dir;
+  info(`Publishing ${pc.cyan(`"${name}"`)} at ${pc.green(`"${version}"`)}`);
 
   const publishConfirmation = await npmUtils.publish(
     name,
     {
-      cwd: publishDir,
-      access: localAccess || access,
+      cwd: pkg.dir,
+      publishDir: publishConfig?.directory
+        ? join(pkg.dir, publishConfig.directory)
+        : pkg.dir,
+      access: publishConfig?.access || access,
       tag,
     },
     twoFactorState
@@ -163,7 +159,7 @@ async function getUnpublishedPackages(
             response.pkgInfo.versions &&
             response.pkgInfo.versions.every(
               (version: string) =>
-                semver.parse(version)!.prerelease[0] === preState.tag
+                semverParse(version)!.prerelease[0] === preState.tag
             )
           ) {
             publishedState = "only-pre";
@@ -174,7 +170,7 @@ async function getUnpublishedPackages(
       return {
         name: packageJson.name,
         localVersion: packageJson.version,
-        publishedState: publishedState,
+        publishedState,
         publishedVersions: response.pkgInfo.versions || [],
       };
     })
@@ -191,9 +187,9 @@ async function getUnpublishedPackages(
       );
       if (preState !== undefined && publishedState === "only-pre") {
         info(
-          `${name} is being published to ${chalk.cyan(
+          `${name} is being published to ${pc.cyan(
             "latest"
-          )} rather than ${chalk.cyan(
+          )} rather than ${pc.cyan(
             preState.tag
           )} because there has not been a regular release of it yet`
         );

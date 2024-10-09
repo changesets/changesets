@@ -1,9 +1,8 @@
 import path from "path";
-import fixtures from "fixturez";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
-import { silenceLogsInBlock } from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 
 import {
@@ -14,8 +13,6 @@ import {
   askList,
 } from "../../../utils/cli-utilities";
 import addChangeset from "..";
-
-const f = fixtures(__dirname);
 
 jest.mock("../../../utils/cli-utilities");
 jest.mock("@changesets/git");
@@ -87,11 +84,24 @@ const mockUserResponses = (mockResponses) => {
   });
 };
 
-describe("Changesets", () => {
+describe("Add command", () => {
   silenceLogsInBlock();
 
   it("should generate changeset to patch a single package", async () => {
-    const cwd = await f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
@@ -116,7 +126,20 @@ describe("Changesets", () => {
     "should read summary",
     // @ts-ignore
     async ({ consoleSummaries, editorSummaries, expectedSummary }) => {
-      const cwd = f.copy("simple-project");
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
 
       mockUserResponses({
         releases: { "pkg-a": "patch" },
@@ -137,7 +160,13 @@ describe("Changesets", () => {
   );
 
   it("should generate a changeset in a single package repo", async () => {
-    const cwd = f.copy("single-package");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+    });
 
     const summary = "summary message mock";
 
@@ -175,7 +204,23 @@ describe("Changesets", () => {
   });
 
   it("should commit when the commit flag is passed in", async () => {
-    const cwd = f.copy("simple-project-custom-config");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(
@@ -191,7 +236,16 @@ describe("Changesets", () => {
   });
 
   it("should create empty changeset when empty flag is passed in", async () => {
-    const cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
 
     await addChangeset(cwd, { empty: true }, defaultConfig);
 
@@ -206,7 +260,34 @@ describe("Changesets", () => {
   });
 
   it("should not include ignored packages in the prompt", async () => {
-    const cwd = f.copy("internal-dependencies");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.3",
+        dependencies: {
+          "pkg-b": "~1.2.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.2.0",
+        dependencies: {
+          "pkg-c": "2.0.0",
+          "pkg-a": "^1.0.3",
+        },
+      }),
+      "packages/pkg-c/package.json": JSON.stringify({
+        name: "pkg-c",
+        version: "2.0.0",
+        dependencies: {
+          "pkg-a": "^1.0.3",
+        },
+      }),
+    });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(
@@ -221,10 +302,66 @@ describe("Changesets", () => {
   });
 
   it("should not include private packages without a version in the prompt", async () => {
-    const cwd = f.copy("private-package-without-version-field");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        private: true,
+      }),
+      "packages/pkg-c/package.json": JSON.stringify({
+        name: "pkg-c",
+        version: "1.0.0",
+      }),
+    });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
+
+    // @ts-ignore
+    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+  });
+
+  it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        private: true,
+      }),
+      "packages/pkg-c/package.json": JSON.stringify({
+        name: "pkg-c",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset(
+      cwd,
+      { empty: false },
+      {
+        ...defaultConfig,
+        privatePackages: {
+          version: false,
+          tag: false,
+        },
+      }
+    );
 
     // @ts-ignore
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];

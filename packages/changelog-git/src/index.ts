@@ -14,7 +14,7 @@ const getReleaseLine = async (
     .map((l) => l.trimRight());
 
   let returnVal = `- ${
-    changeset.commit ? `${changeset.commit}: ` : ""
+    changeset.commit ? `${changeset.commit.slice(0, 7)}: ` : ""
   }${firstLine}`;
 
   if (futureLines.length > 0) {
@@ -33,15 +33,15 @@ const getDependencyReleaseLine = async (
   const changesetLinks = changesets.map(
     (changeset) =>
       `- Updated dependencies${
-        changeset.commit ? ` [${changeset.commit}]` : ""
+        changeset.commit ? ` [${changeset.commit.slice(0, 7)}]` : ""
       }`
   );
 
-  const updatedDepenenciesList = dependenciesUpdated.map(
+  const updatedDependenciesList = dependenciesUpdated.map(
     (dependency) => `  - ${dependency.name}@${dependency.newVersion}`
   );
 
-  return [...changesetLinks, ...updatedDepenenciesList].join("\n");
+  return [...changesetLinks, ...updatedDependenciesList].join("\n");
 };
 
 const defaultChangelogFunctions: ChangelogFunctions = {

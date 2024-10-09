@@ -1,86 +1,184 @@
-import fixturez from "fixturez";
 import { enterPre, exitPre, readPreState } from "./index";
 import * as fs from "fs-extra";
 import path from "path";
-import { PreState } from "@changesets/types";
 import {
   PreEnterButInPreModeError,
   PreExitButNotInPreModeError,
-} from "@changesets/errors/src";
-
-let f = fixturez(__dirname);
-
-let preStateForSimpleProject: PreState = {
-  changesets: [],
-  initialVersions: {
-    "pkg-a": "1.0.0",
-    "pkg-b": "1.0.0",
-  },
-  mode: "pre",
-  tag: "next",
-};
-
-let preStateForExited: PreState = {
-  changesets: ["slimy-dingos-whisper"],
-  initialVersions: {
-    "pkg-a": "1.0.0",
-    "pkg-b": "1.0.0",
-  },
-  mode: "exit",
-  tag: "beta",
-};
+} from "@changesets/errors";
+import { testdir } from "@changesets/test-utils";
 
 describe("enterPre", () => {
   it("should enter", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
     await enterPre(cwd, "next");
 
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
-      preStateForSimpleProject
-    );
+    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
+      .toMatchInlineSnapshot(`
+      {
+        "changesets": [],
+        "initialVersions": {
+          "pkg-a": "1.0.0",
+          "pkg-b": "1.0.0",
+        },
+        "mode": "pre",
+        "tag": "next",
+      }
+    `);
   });
   it("should throw if already in pre", async () => {
-    let cwd = f.copy("simple-project");
-    await fs.writeJSON(
-      path.join(cwd, ".changeset", "pre.json"),
-      preStateForSimpleProject
-    );
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {
+          "pkg-a": "1.0.0",
+          "pkg-b": "1.0.0",
+        },
+        mode: "pre",
+        tag: "next",
+      }),
+    });
     await expect(enterPre(cwd, "some-tag")).rejects.toBeInstanceOf(
       PreEnterButInPreModeError
     );
   });
   it("should enter if already exited pre mode", async () => {
-    let cwd = f.copy("simple-project");
-    await fs.writeJSON(
-      path.join(cwd, ".changeset", "pre.json"),
-      preStateForExited
-    );
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: ["slimy-dingos-whisper"],
+        initialVersions: {
+          "pkg-a": "1.0.0",
+          "pkg-b": "1.0.0",
+        },
+        mode: "exit",
+        tag: "beta",
+      }),
+    });
     await enterPre(cwd, "next");
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
+    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
+      .toMatchInlineSnapshot(`
       {
-        ...preStateForExited,
-        mode: "pre",
-        tag: "next",
+        "changesets": [
+          "slimy-dingos-whisper",
+        ],
+        "initialVersions": {
+          "pkg-a": "1.0.0",
+          "pkg-b": "1.0.0",
+        },
+        "mode": "pre",
+        "tag": "next",
       }
-    );
+    `);
   });
 });
 
 describe("exitPre", () => {
   it("should exit", async () => {
-    let cwd = f.copy("simple-project");
-    await fs.writeJSON(
-      path.join(cwd, ".changeset", "pre.json"),
-      preStateForSimpleProject
-    );
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {
+          "pkg-a": "1.0.0",
+          "pkg-b": "1.0.0",
+        },
+        mode: "pre",
+        tag: "next",
+      }),
+    });
     await exitPre(cwd);
 
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
-      { ...preStateForSimpleProject, mode: "exit" }
-    );
+    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json")))
+      .toMatchInlineSnapshot(`
+      {
+        "changesets": [],
+        "initialVersions": {
+          "pkg-a": "1.0.0",
+          "pkg-b": "1.0.0",
+        },
+        "mode": "exit",
+        "tag": "next",
+      }
+    `);
   });
   it("should throw if not in pre", async () => {
-    let cwd = f.copy("simple-project");
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
     await expect(exitPre(cwd)).rejects.toBeInstanceOf(
       PreExitButNotInPreModeError
     );
@@ -88,10 +186,41 @@ describe("exitPre", () => {
 });
 
 test("readPreState reads the pre state", async () => {
-  let cwd = f.copy("simple-project");
-  await fs.writeJSON(
-    path.join(cwd, ".changeset", "pre.json"),
-    preStateForSimpleProject
-  );
-  expect(await readPreState(cwd)).toEqual(preStateForSimpleProject);
+  const cwd = await testdir({
+    "package.json": JSON.stringify({
+      private: true,
+      workspaces: ["packages/*"],
+    }),
+    "packages/pkg-a/package.json": JSON.stringify({
+      name: "pkg-a",
+      version: "1.0.0",
+      dependencies: {
+        "pkg-b": "1.0.0",
+      },
+    }),
+    "packages/pkg-b/package.json": JSON.stringify({
+      name: "pkg-b",
+      version: "1.0.0",
+    }),
+    ".changeset/pre.json": JSON.stringify({
+      changesets: [],
+      initialVersions: {
+        "pkg-a": "1.0.0",
+        "pkg-b": "1.0.0",
+      },
+      mode: "pre",
+      tag: "next",
+    }),
+  });
+  expect(await readPreState(cwd)).toMatchInlineSnapshot(`
+    {
+      "changesets": [],
+      "initialVersions": {
+        "pkg-a": "1.0.0",
+        "pkg-b": "1.0.0",
+      },
+      "mode": "pre",
+      "tag": "next",
+    }
+  `);
 });

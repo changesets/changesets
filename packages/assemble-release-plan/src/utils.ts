@@ -1,6 +1,6 @@
 import { PackageGroup, VersionType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
-import semver from "semver";
+import semverGt from "semver/functions/gt";
 import { InternalRelease } from "./types";
 
 export function getHighestReleaseType(
@@ -50,7 +50,7 @@ export function getCurrentHighestVersion(
 
     if (
       highestVersion === undefined ||
-      semver.gt(pkg.packageJson.version, highestVersion)
+      semverGt(pkg.packageJson.version, highestVersion)
     ) {
       highestVersion = pkg.packageJson.version;
     }

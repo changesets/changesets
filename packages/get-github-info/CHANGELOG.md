@@ -1,5 +1,17 @@
 # @changesets/get-github-info
 
+## 0.6.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+## 0.5.2
+
+### Patch Changes
+
+- [#1035](https://github.com/changesets/changesets/pull/1035) [`b360d50`](https://github.com/changesets/changesets/commit/b360d50809ed2a0e28f3fc482c242776f44b5851) Thanks [@Kikobeats](https://github.com/Kikobeats)! - Improved the error message for a missing `GITHUB_TOKEN` to include the information about the required permissions.
+
 ## 0.5.1
 
 ### Patch Changes

@@ -81,7 +81,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
 const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   if (!process.env.GITHUB_TOKEN) {
     throw new Error(
-      "Please create a GitHub personal access token at https://github.com/settings/tokens/new and add it as the GITHUB_TOKEN environment variable"
+      "Please create a GitHub personal access token at https://github.com/settings/tokens/new with `read:user` and `repo:status` permissions and add it as the GITHUB_TOKEN environment variable"
     );
   }
   let repos: ReposWithCommitsAndPRsToFetch = {};
@@ -208,7 +208,7 @@ export async function getInfo(request: {
     user: user ? user.login : null,
     pull: associatedPullRequest ? associatedPullRequest.number : null,
     links: {
-      commit: `[\`${request.commit}\`](${data.commitUrl})`,
+      commit: `[\`${request.commit.slice(0, 7)}\`](${data.commitUrl})`,
       pull: associatedPullRequest
         ? `[#${associatedPullRequest.number}](${associatedPullRequest.url})`
         : null,
@@ -255,7 +255,7 @@ export async function getInfoFromPullRequest(request: {
     commit: commit ? commit.abbreviatedOid : null,
     links: {
       commit: commit
-        ? `[\`${commit.abbreviatedOid}\`](${commit.commitUrl})`
+        ? `[\`${commit.abbreviatedOid.slice(0, 7)}\`](${commit.commitUrl})`
         : null,
       pull: `[#${request.pull}](https://github.com/${request.repo}/pull/${request.pull})`,
       user: user ? `[@${user.login}](${user.url})` : null,

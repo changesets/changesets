@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import startCase from "lodash.startcase";
-import { getCommitThatAddsFile } from "@changesets/git";
+import { getCommitsThatAddFiles } from "@changesets/git";
 import { ComprehensiveRelease, NewChangeset } from "@changesets/types";
 
 import { RelevantChangesets } from "../types";
@@ -10,9 +10,9 @@ async function getReleaseLine(changeset: NewChangeset, cwd: string) {
     .split("\n")
     .map((l) => l.trimRight());
 
-  const commitThatAddsFile = await getCommitThatAddsFile(
-    `.changeset/${changeset.id}.md`,
-    cwd
+  const [commitThatAddsFile] = await getCommitsThatAddFiles(
+    [`.changeset/${changeset.id}.md`],
+    { cwd }
   );
 
   return `- [${commitThatAddsFile}] ${firstLine}\n${futureLines

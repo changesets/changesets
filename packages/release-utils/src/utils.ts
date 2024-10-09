@@ -84,7 +84,7 @@ export function getChangelogEntry(changelog: string, version: string) {
   }
   return {
     content: unified().use(remarkStringify).stringify(ast),
-    highestLevel: highestLevel,
+    highestLevel,
   };
 }
 

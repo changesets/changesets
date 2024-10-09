@@ -1,8 +1,8 @@
+import { Changeset } from "@changesets/types";
 import fs from "fs-extra";
+import humanId from "human-id";
 import path from "path";
 import prettier from "prettier";
-import humanId from "human-id";
-import { Changeset } from "@changesets/types";
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
@@ -31,8 +31,6 @@ async function writeChangeset(
   });
 
   const prettierInstance = getPrettierInstance(cwd);
-  const prettierConfig = await prettierInstance.resolveConfig(cwd);
-
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
   // NOTE: The quotation marks in here are really important even though they are
@@ -45,10 +43,11 @@ ${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
 ${summary}
   `;
 
-  await fs.writeFile(
+  await fs.outputFile(
     newChangesetPath,
-    prettierInstance.format(changesetContents, {
-      ...prettierConfig,
+    // Prettier v3 returns a promise
+    await prettierInstance.format(changesetContents, {
+      ...(await prettierInstance.resolveConfig(newChangesetPath)),
       parser: "markdown",
     })
   );

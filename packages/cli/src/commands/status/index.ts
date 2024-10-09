@@ -1,19 +1,17 @@
-import chalk from "chalk";
-import table from "tty-table";
+import pc from "picocolors";
 import fs from "fs-extra";
 import path from "path";
-
-import * as git from "@changesets/git";
 import getReleasePlan from "@changesets/get-release-plan";
-import { error, log, info, warn } from "@changesets/logger";
+import { error, info, log, warn } from "@changesets/logger";
 import {
-  VersionType,
-  Release,
   ComprehensiveRelease,
   Config,
+  Release,
+  VersionType,
 } from "@changesets/types";
+import { getVersionableChangedPackages } from "../../utils/versionablePackages";
 
-export default async function getStatus(
+export default async function status(
   cwd: string,
   {
     sinceMaster,
@@ -38,9 +36,9 @@ export default async function getStatus(
     since === undefined ? (sinceMaster ? "master" : undefined) : since;
   const releasePlan = await getReleasePlan(cwd, sinceBranch, config);
   const { changesets, releases } = releasePlan;
-  const changedPackages = await git.getChangedPackagesSinceRef({
+  const changedPackages = await getVersionableChangedPackages(config, {
     cwd,
-    ref: sinceBranch || config.baseBranch,
+    ref: sinceBranch,
   });
 
   if (changedPackages.length > 0 && changesets.length === 0) {
@@ -74,12 +72,12 @@ export default async function getStatus(
 function SimplePrint(type: VersionType, releases: Array<Release>) {
   const packages = releases.filter((r) => r.type === type);
   if (packages.length) {
-    info(chalk`Packages to be bumped at {green ${type}}:\n`);
+    info(`Packages to be bumped at ${pc.green(type)}:\n`);
 
     const pkgs = packages.map(({ name }) => `- ${name}`).join("\n");
-    log(chalk.green(pkgs));
+    log(pc.green(pkgs));
   } else {
-    info(chalk`{red NO} packages to be bumped at {green ${type}}`);
+    info(`${pc.green("NO")} packages to be bumped at ${pc.green(type)}`);
   }
 }
 
@@ -89,29 +87,19 @@ function verbosePrint(
 ) {
   const packages = releases.filter((r) => r.type === type);
   if (packages.length) {
-    info(chalk`Packages to be bumped at {green ${type}}`);
+    info(`Packages to be bumped at ${pc.green(type)}`);
 
-    const columns = packages.map(
-      ({ name, newVersion: version, changesets }) => [
-        chalk.green(name),
-        version,
-        changesets.map((c) => chalk.blue(` .changeset/${c}.md`)).join(" +"),
-      ]
-    );
-
-    const t1 = table(
-      [
-        { value: "Package Name", width: 20 },
-        { value: "New Version", width: 20 },
-        { value: "Related Changeset Summaries", width: 70 },
-      ],
-      columns,
-      { paddingLeft: 1, paddingRight: 0, headerAlign: "center", align: "left" }
-    );
-    log(t1.render() + "\n");
+    for (const { name, newVersion: version, changesets } of packages) {
+      log(`- ${pc.green(name)} ${pc.cyan(version)}`);
+      for (const c of changesets) {
+        log(`  - ${pc.blue(`.changeset/${c}.md`)}`);
+      }
+    }
   } else {
     info(
-      chalk`Running release would release {red NO} packages as a {green ${type}}`
+      `Running release would release ${pc.red("NO")} packages as a ${pc.green(
+        type
+      )}`
     );
   }
 }
