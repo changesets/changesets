@@ -48,7 +48,7 @@ export default async function getChangesets(
     (file) =>
       !file.startsWith(".") &&
       file.endsWith(".md") &&
-      file.toLowerCase() !== "readme.md"
+      !/^README\.md$/i.test(file)
   );
 
   const changesetContents = changesets.map(async (file) => {
