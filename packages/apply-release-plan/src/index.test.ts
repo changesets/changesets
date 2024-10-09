@@ -1356,6 +1356,106 @@ describe("apply release plan", () => {
             },
           });
         });
+        it("should not update dependant's dependency range when it depends on a tag of a bumped dependency", async () => {
+          let { changedFiles } = await testSetup(
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.3",
+                dependencies: {
+                  "pkg-b": "latest",
+                },
+              }),
+              "packages/pkg-b/package.json": JSON.stringify({
+                name: "pkg-b",
+                version: "1.2.0",
+                dependencies: {
+                  "pkg-a": "bulbasaur",
+                },
+              }),
+            },
+            {
+              changesets: [
+                {
+                  id: "quick-lions-devour",
+                  summary: "Hey, let's have fun with testing!",
+                  releases: [
+                    { name: "pkg-a", type: "patch" },
+                    { name: "pkg-b", type: "patch" },
+                  ],
+                },
+              ],
+              releases: [
+                {
+                  name: "pkg-a",
+                  type: "patch",
+                  oldVersion: "1.0.3",
+                  newVersion: "1.0.4",
+                  changesets: ["quick-lions-devour"],
+                },
+                {
+                  name: "pkg-b",
+                  type: "patch",
+                  oldVersion: "1.2.0",
+                  newVersion: "1.2.1",
+                  changesets: ["quick-lions-devour"],
+                },
+              ],
+              preState: undefined,
+            },
+            {
+              changelog: false,
+              commit: false,
+              fixed: [],
+              linked: [],
+              access: "restricted",
+              changedFilePatterns: ["**"],
+              baseBranch: "main",
+              updateInternalDependencies,
+              ignore: [],
+              privatePackages: { version: true, tag: false },
+              ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                updateInternalDependents: "out-of-range",
+              },
+              snapshot: {
+                useCalculatedVersion: false,
+                prereleaseTemplate: null,
+              },
+            }
+          );
+          let pkgPathA = changedFiles.find((a) =>
+            a.endsWith(`pkg-a${path.sep}package.json`)
+          );
+          let pkgPathB = changedFiles.find((b) =>
+            b.endsWith(`pkg-b${path.sep}package.json`)
+          );
+
+          if (!pkgPathA || !pkgPathB) {
+            throw new Error(`could not find an updated package json`);
+          }
+          let pkgJSONA = await fs.readJSON(pkgPathA);
+          let pkgJSONB = await fs.readJSON(pkgPathB);
+
+          expect(pkgJSONA).toMatchObject({
+            name: "pkg-a",
+            version: "1.0.4",
+            dependencies: {
+              "pkg-b": "latest",
+            },
+          });
+          expect(pkgJSONB).toMatchObject({
+            name: "pkg-b",
+            version: "1.2.1",
+            dependencies: {
+              "pkg-a": "bulbasaur",
+            },
+          });
+        });
       });
       describe("updateInternalDependencies set to minor", () => {
         const updateInternalDependencies = "minor";

@@ -1,5 +1,22 @@
 # @changesets/config
 
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/get-dependents-graph@2.1.2
+  - @changesets/logger@0.1.1
+
+## 3.0.2
+
+### Patch Changes
+
+- [#1400](https://github.com/changesets/changesets/pull/1400) [`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a crash when validating `ignore` while parsing the config in a scenario when a workspace depends on the root workspace
+
+- Updated dependencies [[`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca)]:
+  - @changesets/get-dependents-graph@2.1.1
+
 ## 3.0.1
 
 ### Patch Changes

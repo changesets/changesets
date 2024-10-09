@@ -84,7 +84,7 @@ const mockUserResponses = (mockResponses) => {
   });
 };
 
-describe("Changesets", () => {
+describe("Add command", () => {
   silenceLogsInBlock();
 
   it("should generate changeset to patch a single package", async () => {
