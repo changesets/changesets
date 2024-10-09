@@ -1,20 +1,21 @@
+import { InternalError } from "@changesets/errors";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
-  ReleasePlan,
   Config,
   NewChangeset,
-  PreState,
   PackageGroup,
+  PreState,
+  ReleasePlan,
 } from "@changesets/types";
+import { Package, Packages } from "@manypkg/get-packages";
+import semverParse from "semver/functions/parse";
+import applyLinks from "./apply-links";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
-import matchFixedConstraint from "./match-fixed-constraint";
-import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
-import * as semver from "semver";
-import { InternalError } from "@changesets/errors";
-import { Packages, Package } from "@manypkg/get-packages";
-import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { PreInfo, InternalRelease } from "./types";
+import matchFixedConstraint from "./match-fixed-constraint";
+import { InternalRelease, PreInfo } from "./types";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -22,7 +23,7 @@ type SnapshotReleaseParameters = {
 };
 
 function getPreVersion(version: string) {
-  let parsed = semver.parse(version)!;
+  let parsed = semverParse(version)!;
   let preVersion =
     parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
   if (typeof preVersion !== "number") {
@@ -156,7 +157,8 @@ function assembleReleasePlan(
 
   const relevantChangesets = getRelevantChangesets(
     changesets,
-    refinedConfig.ignore,
+    packagesByName,
+    refinedConfig,
     preState
   );
 
@@ -173,7 +175,7 @@ function assembleReleasePlan(
   let releases = flattenReleases(
     relevantChangesets,
     packagesByName,
-    refinedConfig.ignore
+    refinedConfig
   );
 
   let dependencyGraph = getDependentsGraph(packages, {
@@ -224,7 +226,10 @@ function assembleReleasePlan(
           });
         } else if (
           existingRelease.type === "none" &&
-          !refinedConfig.ignore.includes(pkg.packageJson.name)
+          !shouldSkipPackage(pkg, {
+            ignore: refinedConfig.ignore,
+            allowPrivatePackages: refinedConfig.privatePackages.version,
+          })
         ) {
           existingRelease.type = "patch";
         }
@@ -261,31 +266,33 @@ function assembleReleasePlan(
 
 function getRelevantChangesets(
   changesets: NewChangeset[],
-  ignored: Readonly<string[]>,
+  packagesByName: Map<string, Package>,
+  config: Config,
   preState: PreState | undefined
 ): NewChangeset[] {
   for (const changeset of changesets) {
     // Using the following 2 arrays to decide whether a changeset
-    // contains both ignored and not ignored packages
-    const ignoredPackages = [];
-    const notIgnoredPackages = [];
+    // contains both skipped and not skipped packages
+    const skippedPackages = [];
+    const notSkippedPackages = [];
     for (const release of changeset.releases) {
       if (
-        ignored.find(
-          (ignoredPackageName) => ignoredPackageName === release.name
-        )
+        shouldSkipPackage(packagesByName.get(release.name)!, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        })
       ) {
-        ignoredPackages.push(release.name);
+        skippedPackages.push(release.name);
       } else {
-        notIgnoredPackages.push(release.name);
+        notSkippedPackages.push(release.name);
       }
     }
 
-    if (ignoredPackages.length > 0 && notIgnoredPackages.length > 0) {
+    if (skippedPackages.length > 0 && notSkippedPackages.length > 0) {
       throw new Error(
         `Found mixed changeset ${changeset.id}\n` +
-          `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
-          `Found not ignored packages: ${notIgnoredPackages.join(" ")}\n` +
+          `Found ignored packages: ${skippedPackages.join(" ")}\n` +
+          `Found not ignored packages: ${notSkippedPackages.join(" ")}\n` +
           "Mixed changesets that contain both ignored and not ignored packages are not allowed"
       );
     }

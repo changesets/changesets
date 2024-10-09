@@ -100,7 +100,7 @@ If you want to use this option, you should read the documentation on [linked pac
 
 ## `updateInternalDependencies`
 
-This option sets whether, when a package that is being dependend upon changes, whether you should update what version it depends on. To make this more understandable, here is an example:
+This option sets whether, when a package that is being depended upon changes, whether you should update what version it depends on. To make this more understandable, here is an example:
 
 Say we have two packages, one depending on the other:
 

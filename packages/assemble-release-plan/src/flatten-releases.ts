@@ -1,22 +1,29 @@
 // This function takes in changesets and returns one release per
 // package listed in the changesets
 
-import { NewChangeset } from "@changesets/types";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
+import { Config, NewChangeset } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease } from "./types";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
-  ignoredPackages: Readonly<string[]>
+  config: Config
 ): Map<string, InternalRelease> {
   let releases: Map<string, InternalRelease> = new Map();
 
   changesets.forEach((changeset) => {
     changeset.releases
-      // Filter out ignored packages because they should not trigger a release
+      // Filter out skipped packages because they should not trigger a release
       // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
-      .filter(({ name }) => !ignoredPackages.includes(name))
+      .filter(
+        ({ name }) =>
+          !shouldSkipPackage(packagesByName.get(name)!, {
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
+          })
+      )
       .forEach(({ name, type }) => {
         let release = releases.get(name);
         let pkg = packagesByName.get(name);

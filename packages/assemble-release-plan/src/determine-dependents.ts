@@ -1,13 +1,14 @@
-import semver from "semver";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
+  Config,
   DependencyType,
   PackageJSON,
   VersionType,
-  Config,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
-import { InternalRelease, PreInfo } from "./types";
+import semverSatisfies from "semver/functions/satisfies";
 import { incrementVersion } from "./increment";
+import { InternalRelease, PreInfo } from "./types";
 
 /*
   WARNING:
@@ -56,7 +57,12 @@ export default function determineDependents({
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
 
-        if (config.ignore.includes(dependent)) {
+        if (
+          shouldSkipPackage(dependentPackage, {
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
+          })
+        ) {
           type = "none";
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(
@@ -86,7 +92,7 @@ export default function determineDependents({
                 releases.get(dependent)!.type === "none") &&
               (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
                 .updateInternalDependents === "always" ||
-                !semver.satisfies(
+                !semverSatisfies(
                   incrementVersion(nextRelease, preInfo),
                   versionRange
                 ))
@@ -231,10 +237,7 @@ function shouldBumpMajor({
     // 1. If onlyUpdatePeerDependentsWhenOutOfRange set to true, bump major if the version is leaving the range.
     // 2. If onlyUpdatePeerDependentsWhenOutOfRange set to false, bump major regardless whether or not the version is leaving the range.
     (!onlyUpdatePeerDependentsWhenOutOfRange ||
-      !semver.satisfies(
-        incrementVersion(nextRelease, preInfo),
-        versionRange
-      )) &&
+      !semverSatisfies(incrementVersion(nextRelease, preInfo), versionRange)) &&
     // bump major only if the dependent doesn't already has a major release.
     (!releases.has(dependent) ||
       (releases.has(dependent) && releases.get(dependent)!.type !== "major"))

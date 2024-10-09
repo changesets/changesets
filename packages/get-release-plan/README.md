@@ -16,9 +16,9 @@ The directory to run `getReleasePlan` in - most often `process.cwd()`
 
 ## since: string
 
-Sets whether to use all changests present, or only those changesets that are new since the branch
+Sets whether to use all changesets present, or only those changesets that are new since the branch
 diverged from another one.
 
 ## passedConfig?: Config
 
-The changeset config options as defined in `@changesets/types`. This is optional, and can be used to overrwrite any written config options.
+The changeset config options as defined in `@changesets/types`. This is optional, and can be used to overwrite any written config options.

@@ -1,19 +1,19 @@
-import { Config } from "@changesets/types";
-import fs from "fs-extra";
-import path from "path";
-import { getPackages } from "@manypkg/get-packages";
-import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { error } from "@changesets/logger";
 import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
-
-import init from "./commands/init";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { error } from "@changesets/logger";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
+import { Config } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
+import fs from "fs-extra";
+import path from "path";
 import add from "./commands/add";
-import version from "./commands/version";
+import init from "./commands/init";
+import pre from "./commands/pre";
 import publish from "./commands/publish";
 import status from "./commands/status";
-import pre from "./commands/pre";
 import tagCommand from "./commands/tag";
+import version from "./commands/version";
 import { CliOptions } from "./types";
 
 export async function run(
@@ -141,17 +141,37 @@ export async function run(
           config.ignore = ignoreArrayFromCmd;
         }
 
-        // Validate that all dependents of ignored packages are listed in the ignore list
+        const packagesByName = new Map(
+          packages.packages.map((x) => [x.packageJson.name, x])
+        );
+
+        // validate that all dependents of skipped packages are also skipped
         const dependentsGraph = getDependentsGraph(packages, {
+          ignoreDevDependencies: true,
           bumpVersionsWithWorkspaceProtocolOnly:
             config.bumpVersionsWithWorkspaceProtocolOnly,
         });
-        for (const ignoredPackage of config.ignore) {
-          const dependents = dependentsGraph.get(ignoredPackage) || [];
+        for (const pkg of packages.packages) {
+          if (
+            !shouldSkipPackage(pkg, {
+              ignore: config.ignore,
+              allowPrivatePackages: config.privatePackages.version,
+            })
+          ) {
+            continue;
+          }
+          const skippedPackage = pkg.packageJson.name;
+          const dependents = dependentsGraph.get(skippedPackage) || [];
           for (const dependent of dependents) {
-            if (!config.ignore.includes(dependent)) {
+            const dependentPkg = packagesByName.get(dependent)!;
+            if (
+              !shouldSkipPackage(dependentPkg, {
+                ignore: config.ignore,
+                allowPrivatePackages: config.privatePackages.version,
+              })
+            ) {
               messages.push(
-                `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please pass "${dependent}" to the \`--ignore\` flag.`
+                `The package "${dependent}" depends on the skipped package "${skippedPackage}" (either by \`ignore\` option or by \`privatePackages.version\`), but "${dependent}" is not being skipped. Please pass "${dependent}" to the \`--ignore\` flag.`
               );
             }
           }
@@ -179,7 +199,7 @@ export async function run(
         return;
       }
       case "tag": {
-        await tagCommand(cwd);
+        await tagCommand(cwd, config);
         return;
       }
       case "pre": {
