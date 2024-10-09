@@ -92,6 +92,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Remix](https://remix.run/)
 - [Clerk](https://github.com/clerk/javascript)
 - [Hey API](https://github.com/hey-api/openapi-ts)
+- [neverthrow](https://github.com/supermacro/neverthrow)
 
 # Thanks/Inspiration
 
