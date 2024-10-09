@@ -21,7 +21,7 @@ Next, change your `.changeset/config.json` to point to the new package:
 If you want to write your own, you can reference a file path. For example, you can create a new file `.changeset/my-changelog-config.js`, then you can reference it in the `.changeset/config.json` file as:
 
 ```
-"changelog": ".changeset/my-changelog-config.js"
+"changelog": "./my-changelog-config.js"
 ```
 
 ## Writing Changelog Formatting Functions
@@ -35,7 +35,7 @@ async function getDependencyReleaseLine() {}
 
 module.exports = {
   getReleaseLine,
-  getDependencyReleaseLine
+  getDependencyReleaseLine,
 };
 ```
 
@@ -52,7 +52,7 @@ async function getDependencyReleaseLine() {}
 
 const defaultChangelogFunctions: ChangelogFunctions = {
   getReleaseLine,
-  getDependencyReleaseLine
+  getDependencyReleaseLine,
 };
 
 export default defaultChangelogFunctions;

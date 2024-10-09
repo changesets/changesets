@@ -2,7 +2,7 @@ import {
   NewChangesetWithCommit,
   VersionType,
   ChangelogFunctions,
-  ModCompWithPackage
+  ModCompWithPackage,
 } from "@changesets/types";
 
 const getReleaseLine = async (
@@ -11,14 +11,14 @@ const getReleaseLine = async (
 ) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
-    .map(l => l.trimRight());
+    .map((l) => l.trimRight());
 
   let returnVal = `- ${
-    changeset.commit ? `${changeset.commit}: ` : ""
+    changeset.commit ? `${changeset.commit.slice(0, 7)}: ` : ""
   }${firstLine}`;
 
   if (futureLines.length > 0) {
-    returnVal += `\n${futureLines.map(l => `  ${l}`).join("\n")}`;
+    returnVal += `\n${futureLines.map((l) => `  ${l}`).join("\n")}`;
   }
 
   return returnVal;
@@ -31,22 +31,22 @@ const getDependencyReleaseLine = async (
   if (dependenciesUpdated.length === 0) return "";
 
   const changesetLinks = changesets.map(
-    changeset =>
+    (changeset) =>
       `- Updated dependencies${
-        changeset.commit ? ` [${changeset.commit}]` : ""
+        changeset.commit ? ` [${changeset.commit.slice(0, 7)}]` : ""
       }`
   );
 
-  const updatedDepenenciesList = dependenciesUpdated.map(
-    dependency => `  - ${dependency.name}@${dependency.newVersion}`
+  const updatedDependenciesList = dependenciesUpdated.map(
+    (dependency) => `  - ${dependency.name}@${dependency.newVersion}`
   );
 
-  return [...changesetLinks, ...updatedDepenenciesList].join("\n");
+  return [...changesetLinks, ...updatedDependenciesList].join("\n");
 };
 
 const defaultChangelogFunctions: ChangelogFunctions = {
   getReleaseLine,
-  getDependencyReleaseLine
+  getDependencyReleaseLine,
 };
 
 export default defaultChangelogFunctions;

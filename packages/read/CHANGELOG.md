@@ -1,5 +1,65 @@
 # @changesets/read
 
+## 0.6.1
+
+### Patch Changes
+
+- [#1417](https://github.com/changesets/changesets/pull/1417) [`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55) Thanks [@trivikr](https://github.com/trivikr)! - Replace `chalk` with `picocolors` to reduce install size
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/logger@0.1.1
+  - @changesets/git@3.0.1
+
+## 0.6.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+### Patch Changes
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a)]:
+  - @changesets/logger@0.1.0
+  - @changesets/parse@0.4.0
+  - @changesets/types@6.0.0
+  - @changesets/git@3.0.0
+
+## 0.5.9
+
+### Patch Changes
+
+- Updated dependencies [[`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2), [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2)]:
+  - @changesets/git@2.0.0
+  - @changesets/types@5.2.1
+  - @changesets/parse@0.3.16
+
+## 0.5.8
+
+### Patch Changes
+
+- Updated dependencies [[`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14), [`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14)]:
+  - @changesets/git@1.5.0
+  - @changesets/types@5.2.0
+  - @changesets/parse@0.3.15
+
+## 0.5.7
+
+### Patch Changes
+
+- Updated dependencies [[`f64bc1b`](https://github.com/changesets/changesets/commit/f64bc1bb33457918eae34b22f214174ba3cf4504)]:
+  - @changesets/git@1.4.1
+
+## 0.5.6
+
+### Patch Changes
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e), [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/git@1.4.0
+  - @changesets/types@5.1.0
+  - @changesets/parse@0.3.14
+
 ## 0.5.5
 
 ### Patch Changes
@@ -129,7 +189,7 @@
 
 - [`bca8865`](https://github.com/changesets/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/changesets/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Added support for reading old changesets from v1
 
-* [`bca8865`](https://github.com/changesets/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/changesets/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Replaced sinceMaster parameter with sinceRef parameter which can be any git ref such as a branch, tag, commit or etc.
+- [`bca8865`](https://github.com/changesets/changesets/commit/bca88652d38caa31e789c4564230ba0b49562ad2) [#221](https://github.com/changesets/changesets/pull/221) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Replaced sinceMaster parameter with sinceRef parameter which can be any git ref such as a branch, tag, commit or etc.
 
 ### Patch Changes
 
@@ -171,9 +231,9 @@
 
 - [8c43fa0](https://github.com/changesets/changesets/commit/8c43fa061e2a5a01e4f32504ed351d261761c8dc) [#155](https://github.com/changesets/changesets/pull/155) Thanks [@Noviny](https://github.com/Noviny)! - Add Readme
 
-* [0320391](https://github.com/changesets/changesets/commit/0320391699a73621d0e51ce031062a06cbdefadc) [#163](https://github.com/changesets/changesets/pull/163) Thanks [@Noviny](https://github.com/Noviny)! - Reordered dependencies in the package json (this should have no impact)
+- [0320391](https://github.com/changesets/changesets/commit/0320391699a73621d0e51ce031062a06cbdefadc) [#163](https://github.com/changesets/changesets/pull/163) Thanks [@Noviny](https://github.com/Noviny)! - Reordered dependencies in the package json (this should have no impact)
 
-* Updated dependencies [8c43fa0, 0320391, 1ff73b7]:
+- Updated dependencies [8c43fa0, 0320391, 1ff73b7]:
   - @changesets/git@0.2.1
   - @changesets/parse@0.2.1
   - @changesets/types@0.3.0

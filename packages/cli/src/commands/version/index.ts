@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import pc from "picocolors";
 import path from "path";
 import * as git from "@changesets/git";
 import { log, warn, error } from "@changesets/logger";
@@ -12,12 +12,13 @@ import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
+import { getCurrentCommitId } from "@changesets/git";
 
-let importantSeparator = chalk.red(
+let importantSeparator = pc.red(
   "===============================IMPORTANT!==============================="
 );
 
-let importantEnd = chalk.red(
+let importantEnd = pc.red(
   "----------------------------------------------------------------------"
 );
 
@@ -31,12 +32,12 @@ export default async function version(
   const releaseConfig = {
     ...config,
     // Disable committing when in snapshot mode
-    commit: options.snapshot ? false : config.commit
+    commit: options.snapshot ? false : config.commit,
   };
   const [changesets, preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
-    removeEmptyFolders(path.resolve(cwd, ".changeset"))
+    removeEmptyFolders(path.resolve(cwd, ".changeset")),
   ]);
 
   if (preState?.mode === "pre") {
@@ -71,6 +72,13 @@ export default async function version(
     releaseConfig,
     preState,
     options.snapshot
+      ? {
+          tag: options.snapshot === true ? undefined : options.snapshot,
+          commit: config.snapshot.prereleaseTemplate?.includes("{commit}")
+            ? await getCurrentCommitId({ cwd })
+            : undefined,
+        }
+      : undefined
   );
 
   let [...touchedFiles] = await applyReleasePlan(

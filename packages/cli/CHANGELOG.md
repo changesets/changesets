@@ -1,5 +1,368 @@
 # @changesets/cli
 
+## 2.27.9
+
+### Patch Changes
+
+- [#1458](https://github.com/changesets/changesets/pull/1458) [`400ab7b`](https://github.com/changesets/changesets/commit/400ab7b5995aa4463c8db003a97bcfe11185422e) Thanks [@benmccann](https://github.com/benmccann)! - Moved `@types/semver` to `devDependencies`
+
+- [#1462](https://github.com/changesets/changesets/pull/1462) [`689e541`](https://github.com/changesets/changesets/commit/689e54127fe059425c6be51e2802879b49b0b5d8) Thanks [@benmccann](https://github.com/benmccann)! - remove `outdent` dependency
+
+## 2.27.8
+
+### Patch Changes
+
+- [#1417](https://github.com/changesets/changesets/pull/1417) [`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55) Thanks [@trivikr](https://github.com/trivikr)! - Replace `chalk` with `picocolors` to reduce install size
+
+- [#1419](https://github.com/changesets/changesets/pull/1419) [`4efc038`](https://github.com/changesets/changesets/commit/4efc0382fcf7ef0ebd0d8e0515b655b6870728f1) Thanks [@bluwy](https://github.com/bluwy)! - Fix logging `--version` flag
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+- [#1446](https://github.com/changesets/changesets/pull/1446) [`5150fc1`](https://github.com/changesets/changesets/commit/5150fc174ea55406da401cacdd68a9a2e754126d) Thanks [@benmccann](https://github.com/benmccann)! - Switched from `preferred-pm` to `package-manager-detector` in order to reduce installation size
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/get-dependents-graph@2.1.2
+  - @changesets/logger@0.1.1
+  - @changesets/read@0.6.1
+  - @changesets/assemble-release-plan@6.0.4
+  - @changesets/should-skip-package@0.1.1
+  - @changesets/apply-release-plan@7.0.5
+  - @changesets/get-release-plan@4.0.4
+  - @changesets/write@0.3.2
+  - @changesets/git@3.0.1
+  - @changesets/pre@2.0.1
+  - @changesets/config@3.0.3
+
+## 2.27.7
+
+### Patch Changes
+
+- [#1047](https://github.com/changesets/changesets/pull/1047) [`d108fa6`](https://github.com/changesets/changesets/commit/d108fa66e63c3000f42db7580a862b737e241c4d) Thanks [@patzick](https://github.com/patzick)! - Fixed a crash that could occur when depending on a tagged version of another workspace package.
+
+- [#1400](https://github.com/changesets/changesets/pull/1400) [`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a crash that prevented the CLI from running in a scenario when a workspace depends on the root workspace
+
+- Updated dependencies [[`d108fa6`](https://github.com/changesets/changesets/commit/d108fa66e63c3000f42db7580a862b737e241c4d), [`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca), [`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca)]:
+  - @changesets/apply-release-plan@7.0.4
+  - @changesets/config@3.0.2
+  - @changesets/get-dependents-graph@2.1.1
+  - @changesets/assemble-release-plan@6.0.3
+  - @changesets/get-release-plan@4.0.3
+
+## 2.27.6
+
+### Patch Changes
+
+- [#1392](https://github.com/changesets/changesets/pull/1392) [`f295b3e`](https://github.com/changesets/changesets/commit/f295b3e560233e2a800f62216febb7061ba66df3) Thanks [@bluwy](https://github.com/bluwy)! - Replace `meow` dependency with `mri` to reduce the number of transitive dependencies
+
+- [#1390](https://github.com/changesets/changesets/pull/1390) [`6a3452e`](https://github.com/changesets/changesets/commit/6a3452ef1943bfb3a3018168b4b6c14af556fdef) Thanks [@bluwy](https://github.com/bluwy)! - Display `changeset status --verbose` in list form and remove `tty-table` dependency
+
+## 2.27.5
+
+### Patch Changes
+
+- [#1370](https://github.com/changesets/changesets/pull/1370) [`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a regression that caused `changeset version` to fail on packages having a dev dependency on a skipped package.
+
+- Updated dependencies [[`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b)]:
+  - @changesets/get-dependents-graph@2.1.0
+  - @changesets/assemble-release-plan@6.0.2
+  - @changesets/config@3.0.1
+  - @changesets/get-release-plan@4.0.2
+  - @changesets/apply-release-plan@7.0.3
+
+## 2.27.4
+
+### Patch Changes
+
+- [#1361](https://github.com/changesets/changesets/pull/1361) [`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c) Thanks [@jakebailey](https://github.com/jakebailey)! - Version 2.25.0 introduced the `privatePackage` configuration option with default `{ version: false, tag: false }`; due to a bug, these options were not respected in all commands, leading to commands like `changeset tag` still tagging private packages. This has been fixed, and all packages now respect this option.
+
+- [#1369](https://github.com/changesets/changesets/pull/1369) [`d729d8c`](https://github.com/changesets/changesets/commit/d729d8cc0e226871aa0c5b73cce80bbf313ca56c) Thanks [@Andarist](https://github.com/Andarist)! - `changeset tag` should now correctly skip tags that exist on the remote
+
+- Updated dependencies [[`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c)]:
+  - @changesets/assemble-release-plan@6.0.1
+  - @changesets/apply-release-plan@7.0.2
+  - @changesets/get-release-plan@4.0.1
+
+## 2.27.3
+
+### Patch Changes
+
+- [#1357](https://github.com/changesets/changesets/pull/1357) [`18c966a`](https://github.com/changesets/changesets/commit/18c966af7b20201453190cbfd2e2dfb59631c02c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` executed without `since` argument. It should now correctly use the configured base branch as the default value.
+
+## 2.27.2
+
+### Patch Changes
+
+- [#1354](https://github.com/changesets/changesets/pull/1354) [`69be7dc`](https://github.com/changesets/changesets/commit/69be7dc7195011ac6dbd00b24ea923f02adcf69c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` incorrectly returning an error status in two cases:
+
+  - for changed ignored packages
+  - for changed private packages when `privatePackage.version` was set to `false`
+
+- [#1351](https://github.com/changesets/changesets/pull/1351) [`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b) Thanks [@TheHolyWaffle](https://github.com/TheHolyWaffle)! - Fix an issue with not applying a custom `.prettierrc` configuration with `prettier@>= 3.1.1`
+
+- Updated dependencies [[`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b)]:
+  - @changesets/apply-release-plan@7.0.1
+  - @changesets/write@0.3.1
+
+## 2.27.1
+
+### Patch Changes
+
+- [#1267](https://github.com/changesets/changesets/pull/1267) [`86cfff1`](https://github.com/changesets/changesets/commit/86cfff1f1891e75238eec61dc97a303ad7a8c030) Thanks [@Andarist](https://github.com/Andarist)! - Make `./bin.js` available through `package.json#exports` to fix compatibility with `changesets/action`.
+
+## 2.27.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+- [#1236](https://github.com/changesets/changesets/pull/1236) [`dfd4cca`](https://github.com/changesets/changesets/commit/dfd4cca84118df913feedfeac37a4939566ae447) Thanks [@camertron](https://github.com/camertron)! - Avoid using short commit IDs
+
+### Patch Changes
+
+- [#1053](https://github.com/changesets/changesets/pull/1053) [`90a870a`](https://github.com/changesets/changesets/commit/90a870af2e7bcbe1551210063492e20c256f4995) Thanks [@paescuj](https://github.com/paescuj)! - Replace the dependency `is-ci` with `ci-info`.
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a), [`dfd4cca`](https://github.com/changesets/changesets/commit/dfd4cca84118df913feedfeac37a4939566ae447)]:
+  - @changesets/assemble-release-plan@6.0.0
+  - @changesets/get-dependents-graph@2.0.0
+  - @changesets/apply-release-plan@7.0.0
+  - @changesets/get-release-plan@4.0.0
+  - @changesets/changelog-git@0.2.0
+  - @changesets/config@3.0.0
+  - @changesets/errors@0.2.0
+  - @changesets/logger@0.1.0
+  - @changesets/types@6.0.0
+  - @changesets/write@0.3.0
+  - @changesets/read@0.6.0
+  - @changesets/git@3.0.0
+  - @changesets/pre@2.0.0
+
+## 2.26.2
+
+### Patch Changes
+
+- [#1176](https://github.com/changesets/changesets/pull/1176) [`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4) Thanks [@joshwooding](https://github.com/joshwooding)! - Bump [`semver`](https://github.com/npm/node-semver) dependency to v7.5.3
+
+- Updated dependencies [[`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4)]:
+  - @changesets/apply-release-plan@6.1.4
+  - @changesets/assemble-release-plan@5.2.4
+  - @changesets/get-dependents-graph@1.3.6
+  - @changesets/get-release-plan@3.0.17
+  - @changesets/config@2.3.1
+
+## 2.26.1
+
+### Patch Changes
+
+- [#1115](https://github.com/changesets/changesets/pull/1115) [`feddc88`](https://github.com/changesets/changesets/commit/feddc88d74781a448855a5a0b0ffa50917489b15) Thanks [@Andarist](https://github.com/Andarist)! - Call `pnpm publish` directly from the directory of the published package. This allows `pnpm` to correctly handle configured `publishConfig.directory`.
+
+## 2.26.0
+
+### Minor Changes
+
+- [#1033](https://github.com/changesets/changesets/pull/1033) [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2) Thanks [@Andarist](https://github.com/Andarist)! - A new config-level `changedFilePatterns` option has been added. You can configure it with an array of glob patterns like here:
+
+  ```json
+  // .changeset/config.json
+  {
+    "changedFilePatterns": ["src/**"]
+  }
+  ```
+
+  Files that do not match the configured pattern won't contribute to the "changed" status of the package to which they belong. This both affects `changesets add` and `changeset status`.
+
+### Patch Changes
+
+- Updated dependencies [[`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2), [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2)]:
+  - @changesets/git@2.0.0
+  - @changesets/config@2.3.0
+  - @changesets/types@5.2.1
+  - @changesets/apply-release-plan@6.1.3
+  - @changesets/read@0.5.9
+  - @changesets/assemble-release-plan@5.2.3
+  - @changesets/get-release-plan@3.0.16
+  - @changesets/changelog-git@0.1.14
+  - @changesets/get-dependents-graph@1.3.5
+  - @changesets/pre@1.0.14
+  - @changesets/write@0.2.3
+
+## 2.25.2
+
+### Patch Changes
+
+- Updated dependencies [[`6cc4300`](https://github.com/changesets/changesets/commit/6cc430013a052dc2488b9e6700a1e4bd8c8e0680)]:
+  - @changesets/apply-release-plan@6.1.2
+  - @changesets/write@0.2.2
+
+## 2.25.1
+
+### Patch Changes
+
+- [#997](https://github.com/changesets/changesets/pull/997) [`4d4d67b`](https://github.com/changesets/changesets/commit/4d4d67b74f9de9dfdc78b9d3cf904c6b69b81ce5) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Add error message when running changesets in a repo with workspaces configured but no packages yet
+
+- [#985](https://github.com/changesets/changesets/pull/985) [`8d0115e`](https://github.com/changesets/changesets/commit/8d0115ea8b2b2e0c0072c8f69898e65a5a7aebd3) Thanks [@mino01x](https://github.com/mino01x)! - Fixed an issue with private packages with versions being included in the CLI prompt despite the `privatePackages.version: false` setting.
+
+## 2.25.0
+
+### Minor Changes
+
+- [#662](https://github.com/changesets/changesets/pull/662) [`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Private packages can now be tagged in the same way public packages do when they are published to npm.
+
+  To enable set `privatePackages: { version: true, tag: true }` in your config.json.
+
+  You can also now opt private packages out of versioning entirely by setting `privatePackages: false`.
+
+### Patch Changes
+
+- [#953](https://github.com/changesets/changesets/pull/953) [`98d63e0`](https://github.com/changesets/changesets/commit/98d63e0a85506175e219b93478a814f8588c52d3) Thanks [@alexamy](https://github.com/alexamy)! - Add a new line at the end of the default config file generated when invoking `changeset init`.
+
+- [#949](https://github.com/changesets/changesets/pull/949) [`64585ea`](https://github.com/changesets/changesets/commit/64585ea4323c4cf51a23b0635990b568d1f58b2b) Thanks [@Andarist](https://github.com/Andarist), [@BPScott](https://github.com/BPScott)! - Fixed the issue that caused transitive dependents of dev dependents to be bumped when a package got bumped and when using `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.updateInternalDependents: "always"`. To illustrate this with an example:
+
+  ```
+  pkg-a - version: 1.0.0
+  pkg-b - devDependencies['pkg-a']: 1.0.0
+  pkg-c - dependencies['pkg-b']: 1.0.0
+  ```
+
+  With a changeset for `pkg-a` the `pkg-c` could have been sometimes incorrectly released.
+
+- Updated dependencies [[`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14), [`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14), [`64585ea`](https://github.com/changesets/changesets/commit/64585ea4323c4cf51a23b0635990b568d1f58b2b)]:
+  - @changesets/git@1.5.0
+  - @changesets/config@2.2.0
+  - @changesets/types@5.2.0
+  - @changesets/assemble-release-plan@5.2.2
+  - @changesets/apply-release-plan@6.1.1
+  - @changesets/read@0.5.8
+  - @changesets/get-release-plan@3.0.15
+  - @changesets/changelog-git@0.1.13
+  - @changesets/get-dependents-graph@1.3.4
+  - @changesets/pre@1.0.13
+  - @changesets/write@0.2.1
+
+## 2.24.4
+
+### Patch Changes
+
+- Updated dependencies [[`c140171`](https://github.com/changesets/changesets/commit/c1401716cf5ee839aaa02ea7ff8f23f8af8bf5b0)]:
+  - @changesets/apply-release-plan@6.1.0
+  - @changesets/write@0.2.0
+
+## 2.24.3
+
+### Patch Changes
+
+- Updated dependencies [[`b023e4b`](https://github.com/changesets/changesets/commit/b023e4b3d1ad793a5dd1187b720e8103cebfb937)]:
+  - @changesets/assemble-release-plan@5.2.1
+  - @changesets/get-release-plan@3.0.14
+
+## 2.24.2
+
+### Patch Changes
+
+- [#900](https://github.com/changesets/changesets/pull/900) [`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e) Thanks [@sdirosa](https://github.com/sdirosa)! - Fixed an issue with generating changelogs not being skipped when the `changelog` config option was set to `false`.
+
+- [#720](https://github.com/changesets/changesets/pull/720) [`0fd56e1`](https://github.com/changesets/changesets/commit/0fd56e17092c7258de57adf7dd4ba08406c8e440) Thanks [@bhovhannes](https://github.com/bhovhannes)! - Private packages without a `version` field are no longer listed when adding a changeset.
+
+- [#844](https://github.com/changesets/changesets/pull/844) [`8627ec1`](https://github.com/changesets/changesets/commit/8627ec1faba53644b366c314be248e1bba48f329) Thanks [@Andarist](https://github.com/Andarist)! - Attempt to log `stdout` when publish fails if `stderr` is empty and JSON error can't be retrieved from none of those.
+
+- Updated dependencies [[`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e), [`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e)]:
+  - @changesets/config@2.1.1
+  - @changesets/apply-release-plan@6.0.4
+  - @changesets/get-release-plan@3.0.13
+
+## 2.24.1
+
+### Patch Changes
+
+- Updated dependencies [[`f64bc1b`](https://github.com/changesets/changesets/commit/f64bc1bb33457918eae34b22f214174ba3cf4504)]:
+  - @changesets/git@1.4.1
+  - @changesets/apply-release-plan@6.0.3
+  - @changesets/read@0.5.7
+  - @changesets/get-release-plan@3.0.12
+
+## 2.24.0
+
+### Minor Changes
+
+- [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - Added a new config flag for `changesets version --snapshot` mode: `--snapshot-prerelease-template`
+
+- [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - Added a new config option: `snapshot.prereleaseTemplate` for customizing the way snapshot release numbers are being composed.
+
+### Patch Changes
+
+- [#858](https://github.com/changesets/changesets/pull/858) [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e) Thanks [@dotansimha](https://github.com/dotansimha)! - A possibility to use the calculated version for snapshot releases is now stable 🥳 All snapshot-related config parameters are now grouped under a single config property called `snapshot`.
+
+  To migrate, make sure to update your `config.json`.
+
+  Old usage (still works, but comes with a deprecated warning):
+
+  ```json
+  {
+    "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+      "useCalculatedVersionForSnapshots": true
+    }
+  }
+  ```
+
+  New usage:
+
+  ```json
+  {
+    "snapshot": {
+      "useCalculatedVersion": true
+    }
+  }
+  ```
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e), [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e), [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/config@2.1.0
+  - @changesets/git@1.4.0
+  - @changesets/assemble-release-plan@5.2.0
+  - @changesets/types@5.1.0
+  - @changesets/apply-release-plan@6.0.2
+  - @changesets/get-release-plan@3.0.11
+  - @changesets/read@0.5.6
+  - @changesets/changelog-git@0.1.12
+  - @changesets/get-dependents-graph@1.3.3
+  - @changesets/pre@1.0.12
+  - @changesets/write@0.1.9
+
+## 2.23.2
+
+### Patch Changes
+
+- [#871](https://github.com/changesets/changesets/pull/871) [`e174172`](https://github.com/changesets/changesets/commit/e174172623854f0a86d87481222296d7bdcd9976) Thanks [@NicoKam](https://github.com/NicoKam)! - Fixed filtering of the ignored packages when adding a changeset.
+
+## 2.23.1
+
+### Patch Changes
+
+- [#843](https://github.com/changesets/changesets/pull/843) [`101b1cb`](https://github.com/changesets/changesets/commit/101b1cb7e45f23146ce764a892a9ba04ed545cc5) Thanks [@caohuilin](https://github.com/caohuilin)! - Fixed the printed filename in the verbose output of `changeset status`.
+
+- [#857](https://github.com/changesets/changesets/pull/857) [`7febb59`](https://github.com/changesets/changesets/commit/7febb599167234ae071b5d223b80cbc8a9375709) Thanks [@dotansimha](https://github.com/dotansimha)! - Fixed an issue with dependency ranges still using pre-existing range modifiers instead of fixed package versions when performing a snapshot release. This ensures that installs of snapshot versions are always reproducible.
+
+- [#744](https://github.com/changesets/changesets/pull/744) [`84e46d1`](https://github.com/changesets/changesets/commit/84e46d19bd26c3a4ab6ff6d0543bd327dfa32a10) Thanks [@mskelton](https://github.com/mskelton)! - Ignored packages are no longer listed when adding a changeset.
+
+- Updated dependencies [[`2827c7a`](https://github.com/changesets/changesets/commit/2827c7ab33af30065fafe72ede1a2a6ac88d5276), [`7b1c0c1`](https://github.com/changesets/changesets/commit/7b1c0c1b73a19b50fe3a104acb440c604eab108f), [`7febb59`](https://github.com/changesets/changesets/commit/7febb599167234ae071b5d223b80cbc8a9375709)]:
+  - @changesets/config@2.0.1
+  - @changesets/apply-release-plan@6.0.1
+  - @changesets/get-release-plan@3.0.10
+
+## 2.23.0
+
+### Minor Changes
+
+- [#796](https://github.com/changesets/changesets/pull/796) [`745b771`](https://github.com/changesets/changesets/commit/745b7713f6ab18c8f5ec0500ddcf1ce5db2377cf) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgraded `tty-table` to fix deprecation warnings coming from its transitive dependency.
+
+### Patch Changes
+
+- [#811](https://github.com/changesets/changesets/pull/811) [`c54c25d`](https://github.com/changesets/changesets/commit/c54c25d7bbbdc055d2df97396c3b73e66f8b3b78) Thanks [@samrose3](https://github.com/samrose3)! - Improved accessibility of the CLI prompts by using selected/unselected indicators that don't rely solely on the colors.
+
+- [#767](https://github.com/changesets/changesets/pull/767) [`d6bfcc5`](https://github.com/changesets/changesets/commit/d6bfcc5052dcba18c521a20d62e2e67a81819112) Thanks [@Andarist](https://github.com/Andarist)! - Improve the error message when a package referenced in a changeset can't be found. The message will now also include the changeset's ID.
+
+- Updated dependencies [[`d6bfcc5`](https://github.com/changesets/changesets/commit/d6bfcc5052dcba18c521a20d62e2e67a81819112)]:
+  - @changesets/assemble-release-plan@5.1.3
+  - @changesets/get-release-plan@3.0.9
+
 ## 2.22.0
 
 ### Minor Changes
@@ -10,9 +373,9 @@
 
 - [#776](https://github.com/changesets/changesets/pull/776) [`ad7506d`](https://github.com/changesets/changesets/commit/ad7506dc6973293a6f913653c2a6a15ba5b8b500) Thanks [@janosh](https://github.com/janosh)! - `changeset init` will now configure `baseBranch: "main"` in the `.changeset/config.json` as the default value.
 
-* [#770](https://github.com/changesets/changesets/pull/770) [`eb86652`](https://github.com/changesets/changesets/commit/eb86652cbd21c49f90d2a03caa9a578593c4d102) Thanks [@alizeait](https://github.com/alizeait)! - `changeset add` and `changeset status` should now properly handle the situation where Changesets are managed from a directory different than the root of the repository.
+- [#770](https://github.com/changesets/changesets/pull/770) [`eb86652`](https://github.com/changesets/changesets/commit/eb86652cbd21c49f90d2a03caa9a578593c4d102) Thanks [@alizeait](https://github.com/alizeait)! - `changeset add` and `changeset status` should now properly handle the situation where Changesets are managed from a directory different than the root of the repository.
 
-* Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c), [`eb86652`](https://github.com/changesets/changesets/commit/eb86652cbd21c49f90d2a03caa9a578593c4d102), [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c), [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
+- Updated dependencies [[`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c), [`eb86652`](https://github.com/changesets/changesets/commit/eb86652cbd21c49f90d2a03caa9a578593c4d102), [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c), [`c87eba6`](https://github.com/changesets/changesets/commit/c87eba6f80a34563b7382f87472c29f6dafb546c)]:
   - @changesets/types@5.0.0
   - @changesets/git@1.3.2
   - @changesets/apply-release-plan@6.0.0
@@ -31,9 +394,9 @@
 
 - [#760](https://github.com/changesets/changesets/pull/760) [`5a2a59a`](https://github.com/changesets/changesets/commit/5a2a59a37b7fb31e17414579b470402d3016e28e) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with logging non-stringified Buffers in case of publish errors.
 
-* [#769](https://github.com/changesets/changesets/pull/769) [`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an infinite loop involving a fixed group of packages and a package within that group that was both ignored and dependent on another package from that group.
+- [#769](https://github.com/changesets/changesets/pull/769) [`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an infinite loop involving a fixed group of packages and a package within that group that was both ignored and dependent on another package from that group.
 
-* Updated dependencies [[`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f)]:
+- Updated dependencies [[`3e8e672`](https://github.com/changesets/changesets/commit/3e8e6721d31f80fff28826e0fad2c14216c3d94f)]:
   - @changesets/assemble-release-plan@5.1.1
   - @changesets/get-release-plan@3.0.7
 
@@ -49,11 +412,11 @@
 
 - [#706](https://github.com/changesets/changesets/pull/706) [`0812858`](https://github.com/changesets/changesets/commit/0812858996045e602d22f2b7dd13e8673e3b36b0) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `"none"` releases causing package versions being bumped during snapshot releases. In addition to when you create `"none"` release types explicitly Changesets might create them implicitly in some situations, for example under some circumstances this issue caused snapshot releases to be created sometimes for ignored packages.
 
-* [#703](https://github.com/changesets/changesets/pull/703) [`15c461d`](https://github.com/changesets/changesets/commit/15c461d5de94a274ccc8b33755a133a513339b0a) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `*` dependency ranges not being replaced in premode. Those have to replaced with exact versions because prereleases don't satisfy wildcard ranges. A published prerelease package with such dependency range left untouched won't install correct prerelease dependency version.
+- [#703](https://github.com/changesets/changesets/pull/703) [`15c461d`](https://github.com/changesets/changesets/commit/15c461d5de94a274ccc8b33755a133a513339b0a) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `*` dependency ranges not being replaced in premode. Those have to replaced with exact versions because prereleases don't satisfy wildcard ranges. A published prerelease package with such dependency range left untouched won't install correct prerelease dependency version.
 
 - [#749](https://github.com/changesets/changesets/pull/749) [`d14cf79`](https://github.com/changesets/changesets/commit/d14cf79fd323529c6fe6ca956d9a7fda93bb425b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue that caused **created** CHANGELOG files not being formatted in the same way as the **updated** ones (this could happen when calling `changeset version` for the very first time for a package).
 
-* [#751](https://github.com/changesets/changesets/pull/751) [`59c7ebc`](https://github.com/changesets/changesets/commit/59c7ebc7a5e75f69f5487e95a85cd1b7062ac39d) Thanks [@Rugvip](https://github.com/Rugvip)! - Fixed an issue where dependent packages would sometimes not get bumped properly when exiting prerelease mode.
+- [#751](https://github.com/changesets/changesets/pull/751) [`59c7ebc`](https://github.com/changesets/changesets/commit/59c7ebc7a5e75f69f5487e95a85cd1b7062ac39d) Thanks [@Rugvip](https://github.com/Rugvip)! - Fixed an issue where dependent packages would sometimes not get bumped properly when exiting prerelease mode.
 
 - [#703](https://github.com/changesets/changesets/pull/703) [`15c461d`](https://github.com/changesets/changesets/commit/15c461d5de94a274ccc8b33755a133a513339b0a) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with dependant packages being always bumped when their `*` dependency was bumped.
 
@@ -76,15 +439,15 @@
 
 - [#698](https://github.com/changesets/changesets/pull/698) [`9e14a9a`](https://github.com/changesets/changesets/commit/9e14a9a89d337bfcf4c0472989ed1f46f70a2627) Thanks [@zthxxx](https://github.com/zthxxx)! - Reworked the CLI output when adding a changeset. This includes fixing broken formatting in certain terminal width, reducing visual noise and making other small adjustments.
 
-* [#704](https://github.com/changesets/changesets/pull/704) [`6f9c9d6`](https://github.com/changesets/changesets/commit/6f9c9d60c0e02c79d555c48deb01559057f1d252) Thanks [@Andarist](https://github.com/Andarist)! - Dependencies specified using a tag will no longer result in printing incorrect errors in the console.
+- [#704](https://github.com/changesets/changesets/pull/704) [`6f9c9d6`](https://github.com/changesets/changesets/commit/6f9c9d60c0e02c79d555c48deb01559057f1d252) Thanks [@Andarist](https://github.com/Andarist)! - Dependencies specified using a tag will no longer result in printing incorrect errors in the console.
 
 ### Patch Changes
 
 - [#740](https://github.com/changesets/changesets/pull/740) [`957e39c`](https://github.com/changesets/changesets/commit/957e39c21549dd91e03faa5cd30e44e4c3d7331f) Thanks [@akphi](https://github.com/akphi)! - Fixed an issue with failing to parse changesets containing a completely empty summary.
 
-* [#693](https://github.com/changesets/changesets/pull/693) [`1be201f`](https://github.com/changesets/changesets/commit/1be201fc27903cb2f42137400b5484c4ccad3812) Thanks [@luciaquirke](https://github.com/luciaquirke)! - Fixed an issue with `none` release type sometimes overriding other release types and thus preventing a release from happening.
+- [#693](https://github.com/changesets/changesets/pull/693) [`1be201f`](https://github.com/changesets/changesets/commit/1be201fc27903cb2f42137400b5484c4ccad3812) Thanks [@luciaquirke](https://github.com/luciaquirke)! - Fixed an issue with `none` release type sometimes overriding other release types and thus preventing a release from happening.
 
-* Updated dependencies [[`6f9c9d6`](https://github.com/changesets/changesets/commit/6f9c9d60c0e02c79d555c48deb01559057f1d252), [`77c1cef`](https://github.com/changesets/changesets/commit/77c1ceff402f390c1ededec358d914ba68a31d0d), [`1be201f`](https://github.com/changesets/changesets/commit/1be201fc27903cb2f42137400b5484c4ccad3812)]:
+- Updated dependencies [[`6f9c9d6`](https://github.com/changesets/changesets/commit/6f9c9d60c0e02c79d555c48deb01559057f1d252), [`77c1cef`](https://github.com/changesets/changesets/commit/77c1ceff402f390c1ededec358d914ba68a31d0d), [`1be201f`](https://github.com/changesets/changesets/commit/1be201fc27903cb2f42137400b5484c4ccad3812)]:
   - @changesets/get-dependents-graph@1.3.0
   - @changesets/git@1.3.0
   - @changesets/assemble-release-plan@5.0.5
@@ -103,7 +466,7 @@
 
 - [#713](https://github.com/changesets/changesets/pull/713) [`82be80e`](https://github.com/changesets/changesets/commit/82be80ecfe9288535071e850ae56f2e7a7006eba) Thanks [@zthxxx](https://github.com/zthxxx)! - Fixed an issue with not being able to reenter exited pre mode.
 
-* [#708](https://github.com/changesets/changesets/pull/708) [`ab8f2b2`](https://github.com/changesets/changesets/commit/ab8f2b29d5cf921d97987a665051b67a7ec55ed3) Thanks [@Andarist](https://github.com/Andarist)! - Updated [`is-ci`](https://github.com/watson/is-ci) dependency that helps us to check if Changesets are executed in the CI environment.
+- [#708](https://github.com/changesets/changesets/pull/708) [`ab8f2b2`](https://github.com/changesets/changesets/commit/ab8f2b29d5cf921d97987a665051b67a7ec55ed3) Thanks [@Andarist](https://github.com/Andarist)! - Updated [`is-ci`](https://github.com/watson/is-ci) dependency that helps us to check if Changesets are executed in the CI environment.
 
 - [#710](https://github.com/changesets/changesets/pull/710) [`4272cb0`](https://github.com/changesets/changesets/commit/4272cb0eca8b24857b4832df4ae7300befe6feb2) Thanks [@Andarist](https://github.com/Andarist)! - Errors received from `npm profile get --json`, that is used to check if 2FA is required, will now always be printed.
 
@@ -1077,7 +1440,7 @@ meaning within the community, even though these commands do slightly more than t
   const getReleaseLine = async (changeset, versionType) => {
     const indentedSummary = changeset.summary
       .split("\n")
-      .map(l => `  ${l}`.trimRight())
+      .map((l) => `  ${l}`.trimRight())
       .join("\n");
 
     return `- [${versionType}] ${changeset.commit}:\n\n${indentedSummary}`;
@@ -1090,10 +1453,10 @@ meaning within the community, even though these commands do slightly more than t
   const getReleaseLine = async (changeset, type) => {
     const [firstLine, ...futureLines] = changeset.summary
       .split("\n")
-      .map(l => l.trimRight());
+      .map((l) => l.trimRight());
 
     return `- ${changeset.commit}: ${firstLine}\n${futureLines
-      .map(l => `  ${l}`)
+      .map((l) => `  ${l}`)
       .join("\n")}`;
   };
   ```

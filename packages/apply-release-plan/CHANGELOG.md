@@ -1,5 +1,135 @@
 # @changesets/apply-release-plan
 
+## 7.0.5
+
+### Patch Changes
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+- Updated dependencies [[`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/should-skip-package@0.1.1
+  - @changesets/git@3.0.1
+  - @changesets/config@3.0.3
+
+## 7.0.4
+
+### Patch Changes
+
+- [#1047](https://github.com/changesets/changesets/pull/1047) [`d108fa6`](https://github.com/changesets/changesets/commit/d108fa66e63c3000f42db7580a862b737e241c4d) Thanks [@patzick](https://github.com/patzick)! - Fixed a crash that could occur when depending on a tagged version of another workspace package.
+
+- Updated dependencies [[`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca)]:
+  - @changesets/config@3.0.2
+
+## 7.0.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/config@3.0.1
+
+## 7.0.2
+
+### Patch Changes
+
+- [#1361](https://github.com/changesets/changesets/pull/1361) [`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c) Thanks [@jakebailey](https://github.com/jakebailey)! - Version 2.25.0 introduced the `privatePackage` configuration option with default `{ version: false, tag: false }`; due to a bug, these options were not respected in all commands, leading to commands like `changeset tag` still tagging private packages. This has been fixed, and all packages now respect this option.
+
+## 7.0.1
+
+### Patch Changes
+
+- [#1351](https://github.com/changesets/changesets/pull/1351) [`c6da182`](https://github.com/changesets/changesets/commit/c6da182ece2ec40974f15f3efcf9d9ba20cf122b) Thanks [@TheHolyWaffle](https://github.com/TheHolyWaffle)! - Fix an issue with not applying a custom `.prettierrc` configuration with `prettier@>= 3.1.1`
+
+## 7.0.0
+
+### Major Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+### Minor Changes
+
+- [#1236](https://github.com/changesets/changesets/pull/1236) [`dfd4cca`](https://github.com/changesets/changesets/commit/dfd4cca84118df913feedfeac37a4939566ae447) Thanks [@camertron](https://github.com/camertron)! - Avoid using short commit IDs
+
+### Patch Changes
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a)]:
+  - @changesets/get-version-range-type@0.4.0
+  - @changesets/config@3.0.0
+  - @changesets/types@6.0.0
+  - @changesets/git@3.0.0
+
+## 6.1.4
+
+### Patch Changes
+
+- [#1176](https://github.com/changesets/changesets/pull/1176) [`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4) Thanks [@joshwooding](https://github.com/joshwooding)! - Bump [`semver`](https://github.com/npm/node-semver) dependency to v7.5.3
+
+- Updated dependencies []:
+  - @changesets/config@2.3.1
+
+## 6.1.3
+
+### Patch Changes
+
+- Updated dependencies [[`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2), [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7), [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2)]:
+  - @changesets/git@2.0.0
+  - @changesets/config@2.3.0
+  - @changesets/types@5.2.1
+
+## 6.1.2
+
+### Patch Changes
+
+- [#983](https://github.com/changesets/changesets/pull/983) [`6cc4300`](https://github.com/changesets/changesets/commit/6cc430013a052dc2488b9e6700a1e4bd8c8e0680) Thanks [@Andarist](https://github.com/Andarist)! - Improved compatibility with the alpha releases of Prettier v3 by awaiting the `.format` result since it's a promise in that version.
+
+## 6.1.1
+
+### Patch Changes
+
+- Updated dependencies [[`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14), [`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14)]:
+  - @changesets/git@1.5.0
+  - @changesets/config@2.2.0
+  - @changesets/types@5.2.0
+
+## 6.1.0
+
+### Minor Changes
+
+- [#905](https://github.com/changesets/changesets/pull/905) [`c140171`](https://github.com/changesets/changesets/commit/c1401716cf5ee839aaa02ea7ff8f23f8af8bf5b0) Thanks [@Andarist](https://github.com/Andarist)! - The local version of Prettier is going to be preferred from now on when writing formatted `.md` files back to disk. At the same time the version of Prettier that we depend on has been upgraded.
+
+## 6.0.4
+
+### Patch Changes
+
+- [#900](https://github.com/changesets/changesets/pull/900) [`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e) Thanks [@sdirosa](https://github.com/sdirosa)! - Fixed an issue with generating changelogs not being skipped when the `changelog` config option was set to `false`.
+
+- Updated dependencies [[`7d998ee`](https://github.com/changesets/changesets/commit/7d998eeb16064b5442ebc49ad31dec7b841d504e)]:
+  - @changesets/config@2.1.1
+
+## 6.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`f64bc1b`](https://github.com/changesets/changesets/commit/f64bc1bb33457918eae34b22f214174ba3cf4504)]:
+  - @changesets/git@1.4.1
+
+## 6.0.2
+
+### Patch Changes
+
+- Updated dependencies [[`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e), [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e), [`dd9b76f`](https://github.com/changesets/changesets/commit/dd9b76f162a546ae8b412e0cb10277f971f3585e)]:
+  - @changesets/config@2.1.0
+  - @changesets/git@1.4.0
+  - @changesets/types@5.1.0
+
+## 6.0.1
+
+### Patch Changes
+
+- [#857](https://github.com/changesets/changesets/pull/857) [`7febb59`](https://github.com/changesets/changesets/commit/7febb599167234ae071b5d223b80cbc8a9375709) Thanks [@dotansimha](https://github.com/dotansimha)! - Fixed an issue with dependency ranges still using pre-existing range modifiers instead of fixed package versions when performing a snapshot release. This ensures that installs of snapshot versions are always reproducible.
+
+- Updated dependencies [[`2827c7a`](https://github.com/changesets/changesets/commit/2827c7ab33af30065fafe72ede1a2a6ac88d5276), [`7b1c0c1`](https://github.com/changesets/changesets/commit/7b1c0c1b73a19b50fe3a104acb440c604eab108f)]:
+  - @changesets/config@2.0.1
+
 ## 6.0.0
 
 ### Major Changes
@@ -19,9 +149,9 @@
 
 - [#703](https://github.com/changesets/changesets/pull/703) [`15c461d`](https://github.com/changesets/changesets/commit/15c461d5de94a274ccc8b33755a133a513339b0a) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `*` dependency ranges not being replaced in premode. Those have to replaced with exact versions because prereleases don't satisfy wildcard ranges. A published prerelease package with such dependency range left untouched won't install correct prerelease dependency version.
 
-* [#749](https://github.com/changesets/changesets/pull/749) [`d14cf79`](https://github.com/changesets/changesets/commit/d14cf79fd323529c6fe6ca956d9a7fda93bb425b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue that caused **created** CHANGELOG files not being formatted in the same way as the **updated** ones (this could happen when calling `changeset version` for the very first time for a package).
+- [#749](https://github.com/changesets/changesets/pull/749) [`d14cf79`](https://github.com/changesets/changesets/commit/d14cf79fd323529c6fe6ca956d9a7fda93bb425b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue that caused **created** CHANGELOG files not being formatted in the same way as the **updated** ones (this could happen when calling `changeset version` for the very first time for a package).
 
-* Updated dependencies [[`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15), [`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15)]:
+- Updated dependencies [[`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15), [`27a5a82`](https://github.com/changesets/changesets/commit/27a5a82188914570d192162f9d045dfd082a3c15)]:
   - @changesets/types@4.1.0
   - @changesets/config@1.7.0
   - @changesets/git@1.3.1

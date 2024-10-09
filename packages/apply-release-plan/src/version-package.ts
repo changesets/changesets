@@ -1,17 +1,19 @@
 import {
   ComprehensiveRelease,
   PackageJSON,
-  VersionType
+  VersionType,
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
-import semver from "semver";
+import Range from "semver/classes/range";
+import semverPrerelease from "semver/functions/prerelease";
+import validRange from "semver/ranges/valid";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
   "devDependencies",
   "peerDependencies",
-  "optionalDependencies"
+  "optionalDependencies",
 ] as const;
 
 export default function versionPackage(
@@ -24,11 +26,13 @@ export default function versionPackage(
   {
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
-    bumpVersionsWithWorkspaceProtocolOnly
+    bumpVersionsWithWorkspaceProtocolOnly,
+    snapshot,
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+    snapshot?: string | boolean | undefined;
   }
 ) {
   let { newVersion, packageJson } = release;
@@ -48,11 +52,11 @@ export default function versionPackage(
             { version, type },
             {
               depVersionRange: depCurrentVersion,
-              depType
+              depType,
             },
             {
               minReleaseType: updateInternalDependencies,
-              onlyUpdatePeerDependentsWhenOutOfRange
+              onlyUpdatePeerDependentsWhenOutOfRange,
             }
           )
         ) {
@@ -62,7 +66,8 @@ export default function versionPackage(
 
         if (
           !usesWorkspaceRange &&
-          bumpVersionsWithWorkspaceProtocolOnly === true
+          (bumpVersionsWithWorkspaceProtocolOnly ||
+            validRange(depCurrentVersion) === null)
         ) {
           continue;
         }
@@ -86,13 +91,14 @@ export default function versionPackage(
           // we don't want to change these versions because they will match
           // any version and if someone makes the range that
           // they probably want it to stay like that...
-          new semver.Range(depCurrentVersion).range !== "" ||
+          new Range(depCurrentVersion).range !== "" ||
           // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-          semver.prerelease(version) !== null
+          semverPrerelease(version) !== null
         ) {
-          let rangeType = getVersionRangeType(depCurrentVersion);
-          let newNewRange = `${rangeType}${version}`;
+          let newNewRange = snapshot
+            ? version
+            : `${getVersionRangeType(depCurrentVersion)}${version}`;
           if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`;
           deps[name] = newNewRange;
         }

@@ -4,26 +4,19 @@ on:
   push:
     branches:
       - main
+      - next
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
     name: Release
+    if: github.repository == 'changesets/changesets'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - name: Checkout Repo
-        # https://github.com/actions/checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js 12.x
-        # https://github.com/actions/setup-node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 12.x
-
-      - name: Install Dependencies
-        run: yarn
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci-setup
 
       - name: Create Release Pull Request or Publish to npm
         # https://github.com/changesets/action

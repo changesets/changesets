@@ -1,5 +1,23 @@
 # @changesets/get-github-info
 
+## 0.6.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+## 0.5.2
+
+### Patch Changes
+
+- [#1035](https://github.com/changesets/changesets/pull/1035) [`b360d50`](https://github.com/changesets/changesets/commit/b360d50809ed2a0e28f3fc482c242776f44b5851) Thanks [@Kikobeats](https://github.com/Kikobeats)! - Improved the error message for a missing `GITHUB_TOKEN` to include the information about the required permissions.
+
+## 0.5.1
+
+### Patch Changes
+
+- [#820](https://github.com/changesets/changesets/pull/820) [`a22eb8c`](https://github.com/changesets/changesets/commit/a22eb8c93fff7912323aa8f3d534066ce2a578fa) Thanks [@Andarist](https://github.com/Andarist)! - Errors resulting from the GitHub API calls should now be properly raised.
+
 ## 0.5.0
 
 ### Minor Changes
@@ -36,7 +54,7 @@
 
 - [`503154db`](https://github.com/changesets/changesets/commit/503154db39fe8ab88a1176e4569c48078bcf5569) [#257](https://github.com/changesets/changesets/pull/257) Thanks [@Noviny](https://github.com/Noviny)! - Modify the Author query to match github's changes to their graphql
 
-* [`16bf3017`](https://github.com/changesets/changesets/commit/16bf3017dbf25d498fee028bf9806d15edd61be9) [#229](https://github.com/changesets/changesets/pull/229) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix the author of a PR not being queried
+- [`16bf3017`](https://github.com/changesets/changesets/commit/16bf3017dbf25d498fee028bf9806d15edd61be9) [#229](https://github.com/changesets/changesets/pull/229) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix the author of a PR not being queried
 
 ## 0.4.0
 

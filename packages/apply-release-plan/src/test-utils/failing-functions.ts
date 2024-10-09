@@ -4,5 +4,5 @@ export default {
   },
   getDependencyReleaseLine: () => {
     throw new Error("no chance");
-  }
+  },
 };

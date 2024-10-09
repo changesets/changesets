@@ -1,23 +1,29 @@
+import { InternalError } from "@changesets/errors";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
-  ReleasePlan,
   Config,
   NewChangeset,
+  PackageGroup,
   PreState,
-  PackageGroup
+  ReleasePlan,
 } from "@changesets/types";
+import { Package, Packages } from "@manypkg/get-packages";
+import semverParse from "semver/functions/parse";
+import applyLinks from "./apply-links";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
-import matchFixedConstraint from "./match-fixed-constraint";
-import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
-import * as semver from "semver";
-import { InternalError } from "@changesets/errors";
-import { Packages, Package } from "@manypkg/get-packages";
-import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { PreInfo, InternalRelease } from "./types";
+import matchFixedConstraint from "./match-fixed-constraint";
+import { InternalRelease, PreInfo } from "./types";
+
+type SnapshotReleaseParameters = {
+  tag?: string | undefined;
+  commit?: string | undefined;
+};
 
 function getPreVersion(version: string) {
-  let parsed = semver.parse(version)!;
+  let parsed = semverParse(version)!;
   let preVersion =
     parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
   if (typeof preVersion !== "number") {
@@ -27,31 +33,64 @@ function getPreVersion(version: string) {
   return preVersion;
 }
 
-function getSnapshotSuffix(snapshot?: string | boolean): string | undefined {
-  if (snapshot === undefined) {
-    return;
+function getSnapshotSuffix(
+  template: Config["snapshot"]["prereleaseTemplate"],
+  snapshotParameters: SnapshotReleaseParameters
+): string {
+  let snapshotRefDate = new Date();
+
+  const placeholderValues = {
+    commit: snapshotParameters.commit,
+    tag: snapshotParameters.tag,
+    timestamp: snapshotRefDate.getTime().toString(),
+    datetime: snapshotRefDate
+      .toISOString()
+      .replace(/\.\d{3}Z$/, "")
+      .replace(/[^\d]/g, ""),
+  };
+
+  // We need a special handling because we need to handle a case where `--snapshot` is used without any template,
+  // and the resulting version needs to be composed without a tag.
+  if (!template) {
+    return [placeholderValues.tag, placeholderValues.datetime]
+      .filter(Boolean)
+      .join("-");
   }
 
-  let dateAndTime = new Date()
-    .toISOString()
-    .replace(/\.\d{3}Z$/, "")
-    .replace(/[^\d]/g, "");
-  let tag = "";
+  const placeholders = Object.keys(placeholderValues) as Array<
+    keyof typeof placeholderValues
+  >;
 
-  if (typeof snapshot === "string") tag = `-${snapshot}`;
+  if (!template.includes(`{tag}`) && placeholderValues.tag !== undefined) {
+    throw new Error(
+      `Failed to compose snapshot version: "{tag}" placeholder is missing, but the snapshot parameter is defined (value: '${placeholderValues.tag}')`
+    );
+  }
 
-  return `${tag}-${dateAndTime}`;
+  return placeholders.reduce((prev, key) => {
+    return prev.replace(new RegExp(`\\{${key}\\}`, "g"), () => {
+      const value = placeholderValues[key];
+      if (value === undefined) {
+        throw new Error(
+          `Failed to compose snapshot version: "{${key}}" placeholder is used without having a value defined!`
+        );
+      }
+
+      return value;
+    });
+  }, template);
 }
 
-function getNewVersion(
+function getSnapshotVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined,
-  snapshotSuffix: string | undefined,
-  useCalculatedVersionForSnapshots: boolean
+  useCalculatedVersion: boolean,
+  snapshotSuffix: string
 ): string {
   if (release.type === "none") {
     return release.oldVersion;
   }
+
   /**
    * Using version as 0.0.0 so that it does not hinder with other version release
    * For example;
@@ -59,43 +98,76 @@ function getNewVersion(
    * and a consumer is using the range ^1.0.0-beta, most people would expect that range to resolve to 1.0.0-beta.0
    * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
    *
-   * You can set `useCalculatedVersionForSnapshots` flag to true to use calculated versions if you don't care about the above problem.
+   * You can set `snapshot.useCalculatedVersion` flag to true to use calculated versions if you don't care about the above problem.
    */
-  if (snapshotSuffix && !useCalculatedVersionForSnapshots) {
-    return `0.0.0${snapshotSuffix}`;
-  }
+  const baseVersion = useCalculatedVersion
+    ? incrementVersion(release, preInfo)
+    : `0.0.0`;
 
-  const calculatedVersion = incrementVersion(release, preInfo);
-
-  if (snapshotSuffix && useCalculatedVersionForSnapshots) {
-    return `${calculatedVersion}${snapshotSuffix}`;
-  }
-
-  return calculatedVersion;
+  return `${baseVersion}-${snapshotSuffix}`;
 }
+
+function getNewVersion(
+  release: InternalRelease,
+  preInfo: PreInfo | undefined
+): string {
+  if (release.type === "none") {
+    return release.oldVersion;
+  }
+
+  return incrementVersion(release, preInfo);
+}
+
+type OptionalProp<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
-  config: Config,
+  config: OptionalProp<Config, "snapshot">,
   // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
   preState: PreState | undefined,
-  snapshot?: string | boolean
+  // snapshot: undefined            ->  not using snaphot
+  // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
+  // snapshot: { tag: "canary" }    ->  --snapshot canary
+  snapshot?: SnapshotReleaseParameters | string | boolean
 ): ReleasePlan {
+  // TODO: remove `refined*` in the next major version of this package
+  // just use `config` and `snapshot` parameters directly, typed as: `config: Config, snapshot?: SnapshotReleaseParameters`
+  const refinedConfig: Config = config.snapshot
+    ? (config as Config)
+    : {
+        ...config,
+        snapshot: {
+          prereleaseTemplate: null,
+          useCalculatedVersion: (
+            config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH as any
+          ).useCalculatedVersionForSnapshots,
+        },
+      };
+  const refinedSnapshot: SnapshotReleaseParameters | undefined =
+    typeof snapshot === "string"
+      ? { tag: snapshot }
+      : typeof snapshot === "boolean"
+      ? { tag: undefined }
+      : snapshot;
+
   let packagesByName = new Map(
-    packages.packages.map(x => [x.packageJson.name, x])
+    packages.packages.map((x) => [x.packageJson.name, x])
   );
 
   const relevantChangesets = getRelevantChangesets(
     changesets,
-    config.ignore,
+    packagesByName,
+    refinedConfig,
     preState
   );
 
-  const preInfo = getPreInfo(changesets, packagesByName, config, preState);
-
-  // Caching the snapshot version here and use this if it is snapshot release
-  const snapshotSuffix = getSnapshotSuffix(snapshot);
+  const preInfo = getPreInfo(
+    changesets,
+    packagesByName,
+    refinedConfig,
+    preState
+  );
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
@@ -103,12 +175,12 @@ function assembleReleasePlan(
   let releases = flattenReleases(
     relevantChangesets,
     packagesByName,
-    config.ignore
+    refinedConfig
   );
 
   let dependencyGraph = getDependentsGraph(packages, {
     bumpVersionsWithWorkspaceProtocolOnly:
-      config.bumpVersionsWithWorkspaceProtocolOnly
+      refinedConfig.bumpVersionsWithWorkspaceProtocolOnly,
   });
 
   let releasesValidated = false;
@@ -119,16 +191,20 @@ function assembleReleasePlan(
       packagesByName,
       dependencyGraph,
       preInfo,
-      config
+      config: refinedConfig,
     });
 
     // `releases` might get mutated here
     let fixedConstraintUpdated = matchFixedConstraint(
       releases,
       packagesByName,
-      config
+      refinedConfig
     );
-    let linksUpdated = applyLinks(releases, packagesByName, config.linked);
+    let linksUpdated = applyLinks(
+      releases,
+      packagesByName,
+      refinedConfig.linked
+    );
 
     releasesValidated =
       !linksUpdated && !dependentAdded && !fixedConstraintUpdated;
@@ -146,11 +222,14 @@ function assembleReleasePlan(
             name: pkg.packageJson.name,
             type: "patch",
             oldVersion: pkg.packageJson.version,
-            changesets: []
+            changesets: [],
           });
         } else if (
           existingRelease.type === "none" &&
-          !config.ignore.includes(pkg.packageJson.name)
+          !shouldSkipPackage(pkg, {
+            ignore: refinedConfig.ignore,
+            allowPrivatePackages: refinedConfig.privatePackages.version,
+          })
         ) {
           existingRelease.type = "patch";
         }
@@ -158,49 +237,62 @@ function assembleReleasePlan(
     }
   }
 
+  // Caching the snapshot version here and use this if it is snapshot release
+  const snapshotSuffix =
+    refinedSnapshot &&
+    getSnapshotSuffix(
+      refinedConfig.snapshot.prereleaseTemplate,
+      refinedSnapshot
+    );
+
   return {
     changesets: relevantChangesets,
-    releases: [...releases.values()].map(incompleteRelease => {
+    releases: [...releases.values()].map((incompleteRelease) => {
       return {
         ...incompleteRelease,
-        newVersion: getNewVersion(
-          incompleteRelease,
-          preInfo,
-          snapshotSuffix,
-          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-            .useCalculatedVersionForSnapshots
-        )
+        newVersion: snapshotSuffix
+          ? getSnapshotVersion(
+              incompleteRelease,
+              preInfo,
+              refinedConfig.snapshot.useCalculatedVersion,
+              snapshotSuffix
+            )
+          : getNewVersion(incompleteRelease, preInfo),
       };
     }),
-    preState: preInfo?.state
+    preState: preInfo?.state,
   };
 }
 
 function getRelevantChangesets(
   changesets: NewChangeset[],
-  ignored: Readonly<string[]>,
+  packagesByName: Map<string, Package>,
+  config: Config,
   preState: PreState | undefined
 ): NewChangeset[] {
   for (const changeset of changesets) {
     // Using the following 2 arrays to decide whether a changeset
-    // contains both ignored and not ignored packages
-    const ignoredPackages = [];
-    const notIgnoredPackages = [];
+    // contains both skipped and not skipped packages
+    const skippedPackages = [];
+    const notSkippedPackages = [];
     for (const release of changeset.releases) {
       if (
-        ignored.find(ignoredPackageName => ignoredPackageName === release.name)
+        shouldSkipPackage(packagesByName.get(release.name)!, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        })
       ) {
-        ignoredPackages.push(release.name);
+        skippedPackages.push(release.name);
       } else {
-        notIgnoredPackages.push(release.name);
+        notSkippedPackages.push(release.name);
       }
     }
 
-    if (ignoredPackages.length > 0 && notIgnoredPackages.length > 0) {
+    if (skippedPackages.length > 0 && notSkippedPackages.length > 0) {
       throw new Error(
         `Found mixed changeset ${changeset.id}\n` +
-          `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
-          `Found not ignored packages: ${notIgnoredPackages.join(" ")}\n` +
+          `Found ignored packages: ${skippedPackages.join(" ")}\n` +
+          `Found not ignored packages: ${notSkippedPackages.join(" ")}\n` +
           "Mixed changesets that contain both ignored and not ignored packages are not allowed"
       );
     }
@@ -208,7 +300,9 @@ function getRelevantChangesets(
 
   if (preState && preState.mode !== "exit") {
     let usedChangesetIds = new Set(preState.changesets);
-    return changesets.filter(changeset => !usedChangesetIds.has(changeset.id));
+    return changesets.filter(
+      (changeset) => !usedChangesetIds.has(changeset.id)
+    );
   }
 
   return changesets;
@@ -240,10 +334,10 @@ function getPreInfo(
 
   let updatedPreState = {
     ...preState,
-    changesets: changesets.map(changeset => changeset.id),
+    changesets: changesets.map((changeset) => changeset.id),
     initialVersions: {
-      ...preState.initialVersions
-    }
+      ...preState.initialVersions,
+    },
   };
 
   for (const [, pkg] of packagesByName) {
@@ -276,7 +370,7 @@ function getPreInfo(
 
   return {
     state: updatedPreState,
-    preVersions
+    preVersions,
   };
 }
 

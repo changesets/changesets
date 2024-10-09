@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci-setup
+
+      - name: Check Git version
+        run: git --version
+
+      - name: Setup mock Git user
+        run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+
+      - name: Jest tests
+        run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci-setup
+
+      - name: Typecheck
+        run: yarn types:check
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci-setup
+
+      - name: Lint
+        run: yarn lint
+
+  ci-ok:
+    name: CI OK
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [test, typecheck, lint]
+    env:
+      FAILURE: ${{ contains(join(needs.*.result, ','), 'failure') }}
+    steps:
+      - name: Check for failure
+        run: |
+          echo $FAILURE
+          if [ "$FAILURE" = "false" ]; then
+            exit 0
+          else
+            exit 1
+          fi
