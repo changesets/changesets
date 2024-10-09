@@ -1,24 +1,34 @@
 {
   "name": "@changesets/read",
-  "version": "0.5.1",
+  "version": "0.6.1",
   "description": "Read changesets from disc, and return the information as JSON",
-  "main": "dist/read.cjs.js",
-  "module": "dist/read.esm.js",
+  "main": "dist/changesets-read.cjs.js",
+  "module": "dist/changesets-read.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-read.cjs.mjs",
+        "default": "./dist/changesets-read.cjs.js"
+      },
+      "module": "./dist/changesets-read.esm.js",
+      "import": "./dist/changesets-read.cjs.mjs",
+      "default": "./dist/changesets-read.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/read",
   "dependencies": {
-    "@babel/runtime": "^7.10.4",
-    "@changesets/git": "^1.2.0",
-    "@changesets/logger": "^0.0.5",
-    "@changesets/parse": "^0.3.9",
-    "@changesets/types": "^4.0.1",
-    "chalk": "^2.1.0",
+    "@changesets/git": "^3.0.1",
+    "@changesets/logger": "^0.1.1",
+    "@changesets/parse": "^0.4.0",
+    "@changesets/types": "^6.0.0",
     "fs-extra": "^7.0.1",
-    "p-filter": "^2.1.0"
+    "p-filter": "^2.1.0",
+    "picocolors": "^1.1.0"
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
-    "fixturez": "^1.1.0",
     "outdent": "^0.5.0"
   }
 }

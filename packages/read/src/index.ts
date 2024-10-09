@@ -12,11 +12,11 @@ async function filterChangesetsSinceRef(
 ) {
   const newChangesets = await git.getChangedChangesetFilesSinceRef({
     cwd: changesetBase,
-    ref: sinceRef
+    ref: sinceRef,
   });
-  const newHahses = newChangesets.map(c => c.split("/")[1]);
+  const newHashes = newChangesets.map((c) => c.split("/")[1]);
 
-  return changesets.filter(dir => newHahses.includes(dir));
+  return changesets.filter((dir) => newHashes.includes(dir));
 }
 
 export default async function getChangesets(
@@ -28,7 +28,7 @@ export default async function getChangesets(
   try {
     contents = await fs.readdir(changesetBase);
   } catch (err) {
-    if (err.code === "ENOENT") {
+    if ((err as any).code === "ENOENT") {
       throw new Error("There is no .changeset directory in this project");
     }
     throw err;
@@ -45,11 +45,13 @@ export default async function getChangesets(
   let oldChangesetsPromise = getOldChangesetsAndWarn(changesetBase, contents);
 
   let changesets = contents.filter(
-    file =>
-      !file.startsWith(".") && file.endsWith(".md") && file !== "README.md"
+    (file) =>
+      !file.startsWith(".") &&
+      file.endsWith(".md") &&
+      !/^README\.md$/i.test(file)
   );
 
-  const changesetContents = changesets.map(async file => {
+  const changesetContents = changesets.map(async (file) => {
     const changeset = await fs.readFile(
       path.join(changesetBase, file),
       "utf-8"
@@ -59,6 +61,6 @@ export default async function getChangesets(
   });
   return [
     ...(await oldChangesetsPromise),
-    ...(await Promise.all(changesetContents))
+    ...(await Promise.all(changesetContents)),
   ];
 }

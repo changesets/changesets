@@ -17,7 +17,7 @@ let preState = await readPreState(cwd);
 await exitPre(cwd);
 ```
 
-This package is used by internally by Changesets to enter and exit pre mode along with reading the pre state for the `publish` and `version` commands, you should only need it if you're using `@changesets/assemble-release-plan`, implementing Changesets or want to enter or exit pre mode programatically.
+This package is used by internally by Changesets to enter and exit pre mode along with reading the pre state for the `publish` and `version` commands, you should only need it if you're using `@changesets/assemble-release-plan`, implementing Changesets or want to enter or exit pre mode programmatically.
 
 ## Types
 

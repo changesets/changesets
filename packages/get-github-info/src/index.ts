@@ -24,7 +24,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
             name: ${JSON.stringify(repo.split("/")[1])}
           ) {
             ${repos[repo]
-              .map(data =>
+              .map((data) =>
                 data.kind === "commit"
                   ? `a${data.commit}: object(expression: ${JSON.stringify(
                       data.commit
@@ -58,7 +58,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
                     mergeCommit {
                       commitUrl
                       abbreviatedOid
-                    }            
+                    }
                   }`
               )
               .join("\n")}
@@ -81,7 +81,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
 const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   if (!process.env.GITHUB_TOKEN) {
     throw new Error(
-      "Please create a GitHub personal access token at https://github.com/settings/tokens/new and add it as the GITHUB_TOKEN environment variable"
+      "Please create a GitHub personal access token at https://github.com/settings/tokens/new with `read:user` and `repo:status` permissions and add it as the GITHUB_TOKEN environment variable"
     );
   }
   let repos: ReposWithCommitsAndPRsToFetch = {};
@@ -95,10 +95,20 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   const data = await fetch("https://api.github.com/graphql", {
     method: "POST",
     headers: {
-      Authorization: `Token ${process.env.GITHUB_TOKEN}`
+      Authorization: `Token ${process.env.GITHUB_TOKEN}`,
     },
-    body: JSON.stringify({ query: makeQuery(repos) })
+    body: JSON.stringify({ query: makeQuery(repos) }),
   }).then((x: any) => x.json());
+
+  if (data.errors) {
+    throw new Error(
+      `An error occurred when fetching data from GitHub\n${JSON.stringify(
+        data.errors,
+        null,
+        2
+      )}`
+    );
+  }
 
   // this is mainly for the case where there's an authentication problem
   if (!data.data) {
@@ -116,7 +126,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   Object.keys(repos).forEach((repo, index) => {
     let output: { commit: Record<string, any>; pull: Record<string, any> } = {
       commit: {},
-      pull: {}
+      pull: {},
     };
     cleanedData[repo] = output;
     Object.entries(data.data[`a${index}`]).forEach(([field, value]) => {
@@ -198,12 +208,12 @@ export async function getInfo(request: {
     user: user ? user.login : null,
     pull: associatedPullRequest ? associatedPullRequest.number : null,
     links: {
-      commit: `[\`${request.commit}\`](${data.commitUrl})`,
+      commit: `[\`${request.commit.slice(0, 7)}\`](${data.commitUrl})`,
       pull: associatedPullRequest
         ? `[#${associatedPullRequest.number}](${associatedPullRequest.url})`
         : null,
-      user: user ? `[@${user.login}](${user.url})` : null
-    }
+      user: user ? `[@${user.login}](${user.url})` : null,
+    },
   };
 }
 
@@ -245,10 +255,10 @@ export async function getInfoFromPullRequest(request: {
     commit: commit ? commit.abbreviatedOid : null,
     links: {
       commit: commit
-        ? `[\`${commit.abbreviatedOid}\`](${commit.commitUrl})`
+        ? `[\`${commit.abbreviatedOid.slice(0, 7)}\`](${commit.commitUrl})`
         : null,
       pull: `[#${request.pull}](https://github.com/${request.repo}/pull/${request.pull})`,
-      user: user ? `[@${user.login}](${user.url})` : null
-    }
+      user: user ? `[@${user.login}](${user.url})` : null,
+    },
   };
 }

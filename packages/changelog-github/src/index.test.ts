@@ -11,12 +11,12 @@ jest.mock(
       commit: "a085003",
       user: "Andarist",
       pull: 1613,
-      repo: "emotion-js/emotion"
+      repo: "emotion-js/emotion",
     };
     const links = {
       user: `[@${data.user}](https://github.com/${data.user})`,
       pull: `[#${data.pull}](https://github.com/${data.repo}/pull/${data.pull})`,
-      commit: `[\`${data.commit}\`](https://github.com/${data.repo}/commit/${data.commit})`
+      commit: `[\`${data.commit}\`](https://github.com/${data.repo}/commit/${data.commit})`,
     };
     return {
       async getInfo({ commit, repo }) {
@@ -25,7 +25,7 @@ jest.mock(
         return {
           pull: data.pull,
           user: data.user,
-          links
+          links,
         };
       },
       async getInfoFromPullRequest({ pull, repo }) {
@@ -34,9 +34,9 @@ jest.mock(
         return {
           commit: data.commit,
           user: data.user,
-          links
+          links,
         };
-      }
+      },
     };
   }
 );
@@ -54,10 +54,10 @@ const getChangeset = (content: string, commit: string | undefined) => {
   `
       ),
       id: "some-id",
-      commit
+      commit,
     },
     "minor",
-    { repo: data.repo }
+    { repo: data.repo },
   ] as const;
 };
 
@@ -65,16 +65,16 @@ const data = {
   commit: "a085003",
   user: "Andarist",
   pull: 1613,
-  repo: "emotion-js/emotion"
+  repo: "emotion-js/emotion",
 };
 
 describe.each([data.commit, "wrongcommit", undefined])(
   "with commit from changeset of %s",
-  commitFromChangeset => {
+  (commitFromChangeset) => {
     describe.each(["pr", "pull request", "pull"])(
       "override pr with %s keyword",
-      keyword => {
-        test.each(["with #", "without #"] as const)("%s", async kind => {
+      (keyword) => {
+        test.each(["with #", "without #"] as const)("%s", async (kind) => {
           expect(
             await getReleaseLine(
               ...getChangeset(
@@ -102,8 +102,8 @@ describe.each([data.commit, "wrongcommit", undefined])(
 
 describe.each(["author", "user"])(
   "override author with %s keyword",
-  keyword => {
-    test.each(["with @", "without @"] as const)("%s", async kind => {
+  (keyword) => {
+    test.each(["with @", "without @"] as const)("%s", async (kind) => {
       expect(
         await getReleaseLine(
           ...getChangeset(

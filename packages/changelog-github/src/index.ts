@@ -20,22 +20,22 @@ const changelogFunctions: ChangelogFunctions = {
 
     const changesetLink = `- Updated dependencies [${(
       await Promise.all(
-        changesets.map(async cs => {
+        changesets.map(async (cs) => {
           if (cs.commit) {
             let { links } = await getInfo({
               repo: options.repo,
-              commit: cs.commit
+              commit: cs.commit,
             });
             return links.commit;
           }
         })
       )
     )
-      .filter(_ => _)
+      .filter((_) => _)
       .join(", ")}]:`;
 
     const updatedDepenenciesList = dependenciesUpdated.map(
-      dependency => `  - ${dependency.name}@${dependency.newVersion}`
+      (dependency) => `  - ${dependency.name}@${dependency.newVersion}`
     );
 
     return [changesetLink, ...updatedDepenenciesList].join("\n");
@@ -69,18 +69,19 @@ const changelogFunctions: ChangelogFunctions = {
 
     const [firstLine, ...futureLines] = replacedChangelog
       .split("\n")
-      .map(l => l.trimRight());
+      .map((l) => l.trimRight());
 
     const links = await (async () => {
       if (prFromSummary !== undefined) {
         let { links } = await getInfoFromPullRequest({
           repo: options.repo,
-          pull: prFromSummary
+          pull: prFromSummary,
         });
         if (commitFromSummary) {
+          const shortCommitId = commitFromSummary.slice(0, 7);
           links = {
             ...links,
-            commit: `[\`${commitFromSummary}\`](https://github.com/${options.repo}/commit/${commitFromSummary})`
+            commit: `[\`${shortCommitId}\`](https://github.com/${options.repo}/commit/${commitFromSummary})`,
           };
         }
         return links;
@@ -89,21 +90,21 @@ const changelogFunctions: ChangelogFunctions = {
       if (commitToFetchFrom) {
         let { links } = await getInfo({
           repo: options.repo,
-          commit: commitToFetchFrom
+          commit: commitToFetchFrom,
         });
         return links;
       }
       return {
         commit: null,
         pull: null,
-        user: null
+        user: null,
       };
     })();
 
     const users = usersFromSummary.length
       ? usersFromSummary
           .map(
-            userFromSummary =>
+            (userFromSummary) =>
               `[@${userFromSummary}](https://github.com/${userFromSummary})`
           )
           .join(", ")
@@ -112,13 +113,13 @@ const changelogFunctions: ChangelogFunctions = {
     const prefix = [
       links.pull === null ? "" : ` ${links.pull}`,
       links.commit === null ? "" : ` ${links.commit}`,
-      users === null ? "" : ` Thanks ${users}!`
+      users === null ? "" : ` Thanks ${users}!`,
     ].join("");
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${firstLine}\n${futureLines
-      .map(l => `  ${l}`)
+      .map((l) => `  ${l}`)
       .join("\n")}`;
-  }
+  },
 };
 
 export default changelogFunctions;

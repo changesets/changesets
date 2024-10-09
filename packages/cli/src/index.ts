@@ -1,69 +1,87 @@
-import meow from "meow";
+import mri from "mri";
 import { ExitError, InternalError } from "@changesets/errors";
 import { error } from "@changesets/logger";
 import { format } from "util";
 import { run } from "./run";
 
-const { input, flags } = meow(
-  `
+const args = process.argv.slice(2);
+
+const parsed = mri(args, {
+  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot"],
+  string: [
+    "output",
+    "otp",
+    "since",
+    "ignore",
+    "tag",
+    "snapshot",
+    "snapshotPrereleaseTemplate",
+  ],
+  alias: {
+    // Short flags
+    v: "verbose",
+    o: "output",
+    // Support kebab-case flags
+    "since-master": "sinceMaster",
+    "git-tag": "gitTag",
+    "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
+    // Deprecated flags
+    "update-changelog": "updateChangelog",
+    "is-public": "isPublic",
+    "skip-c-i": "skipCI",
+  },
+  default: {
+    gitTag: true,
+  },
+});
+
+// `mri` doesn't handle mixed boolean and strings well. It'll always try to coerce it as
+// a string even if only `--snapshot` is passed. We check here if this was the case and
+// try to coerce it as a boolean
+if (parsed.snapshot === "" && args[args.indexOf("--snapshot") + 1] !== "") {
+  parsed.snapshot = true;
+}
+
+// Help message should only be shown if it's the only argument passed
+if (parsed.help && args.length === 1) {
+  console.log(
+    `
+  Organise your package versioning and publishing to make both contributors and maintainers happy
+
   Usage
-    $ changesets [command]
+    $ changeset [command]
   Commands
     init
     add [--empty] [--open]
-    version [--ignore]
-    publish [--otp=code]
-    status [--since <branch>] [--verbose] [--output=JSON_FILE.json]
+    version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
+    publish [--tag <name>] [--otp <code>] [--no-git-tag]
+    status [--since <branch>] [--verbose] [--output JSON_FILE.json]
     pre <enter|exit> <tag>
     tag
-    `,
-  {
-    flags: {
-      sinceMaster: {
-        type: "boolean"
-      },
-      verbose: {
-        type: "boolean",
-        alias: "v"
-      },
-      output: {
-        type: "string",
-        alias: "o"
-      },
-      otp: {
-        type: "string"
-      },
-      empty: {
-        type: "boolean"
-      },
-      since: {
-        type: "string"
-      },
-      ignore: {
-        type: "string",
-        isMultiple: true
-      },
-      tag: {
-        type: "string"
-      },
-      open: {
-        type: "boolean"
-      }
-    }
-  }
-);
+
+    `
+  );
+  process.exit(0);
+}
+
+// Version should only be shown if it's the only argument passed
+if (parsed.version && args.length === 1) {
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  console.log(require("@changesets/cli/package.json").version);
+  process.exit(0);
+}
 
 const cwd = process.cwd();
 
-run(input, flags, cwd).catch(err => {
+run(parsed._, parsed, cwd).catch((err) => {
   if (err instanceof InternalError) {
     error(
       "The following error is an internal unexpected error, these should never happen."
     );
     error("Please open an issue with the following link");
     error(
-      `https://github.com/atlassian/changesets/issues/new?title=${encodeURIComponent(
-        `Unexpected error during ${input[0] || "add"} command`
+      `https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(
+        `Unexpected error during ${parsed._[0] || "add"} command`
       )}&body=${encodeURIComponent(`## Error
 
 \`\`\`

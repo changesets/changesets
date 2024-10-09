@@ -17,11 +17,11 @@ export async function readChangesetState(
 
   if (isInPreMode && preState !== undefined) {
     let changesetsToFilter = new Set(preState.changesets);
-    changesets = changesets.filter(x => !changesetsToFilter.has(x.id));
+    changesets = changesets.filter((x) => !changesetsToFilter.has(x.id));
   }
 
   return {
     preState: isInPreMode ? preState : undefined,
-    changesets
+    changesets,
   };
 }
