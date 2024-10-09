@@ -89,6 +89,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Medusa](https://github.com/medusajs/medusa)
 - [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts)
 - [Block Protocol](https://github.com/blockprotocol/blockprotocol)
+- [Remix](https://remix.run/)
 
 # Thanks/Inspiration
 
