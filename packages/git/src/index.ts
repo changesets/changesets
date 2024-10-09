@@ -4,11 +4,9 @@ import path from "path";
 import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
-import { deprecate } from "util";
+import micromatch from "micromatch";
 
-const isInDir = (dir: string) => (subdir: string) => isSubdir(dir, subdir);
-
-async function add(pathToFile: string, cwd: string) {
+export async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
 
   if (gitCmd.code !== 0) {
@@ -17,7 +15,7 @@ async function add(pathToFile: string, cwd: string) {
   return gitCmd.code === 0;
 }
 
-async function commit(message: string, cwd: string) {
+export async function commit(message: string, cwd: string) {
   const gitCmd = await spawn(
     "git",
     ["commit", "-m", message, "--allow-empty"],
@@ -26,9 +24,21 @@ async function commit(message: string, cwd: string) {
   return gitCmd.code === 0;
 }
 
+export async function getAllTags(cwd: string): Promise<Set<string>> {
+  const gitCmd = await spawn("git", ["tag"], { cwd });
+
+  if (gitCmd.code !== 0) {
+    throw new Error(gitCmd.stderr.toString());
+  }
+
+  const tags = gitCmd.stdout.toString().trim().split("\n");
+
+  return new Set(tags);
+}
+
 // used to create a single tag at a time for the current head only
-async function tag(tagStr: string, cwd: string) {
-  // NOTE: it's important we use the -m flag otherwise 'git push --follow-tags' wont actually push
+export async function tag(tagStr: string, cwd: string) {
+  // NOTE: it's important we use the -m flag to create annotated tag otherwise 'git push --follow-tags' won't actually push
   // the tags
   const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], { cwd });
   return gitCmd.code === 0;
@@ -45,24 +55,17 @@ export async function getDivergedCommit(cwd: string, ref: string) {
   return cmd.stdout.toString().trim();
 }
 
-const getCommitThatAddsFile = deprecate(
-  async (gitPath: string, cwd: string) => {
-    return (await getCommitsThatAddFiles([gitPath], cwd))[0];
-  },
-  "Use the bulk getCommitsThatAddFiles function instead"
-);
-
 /**
- * Get the short SHAs for the commits that added files, including automatically
+ * Get the SHAs for the commits that added files, including automatically
  * extending a shallow clone if necessary to determine any commits.
  * @param gitPaths - Paths to fetch
- * @param cwd - Location of the repository
+ * @param options - `cwd` and `short`
  */
-async function getCommitsThatAddFiles(
+export async function getCommitsThatAddFiles(
   gitPaths: string[],
-  cwd: string
+  { cwd, short = false }: { cwd: string; short?: boolean }
 ): Promise<(string | undefined)[]> {
-  // Maps gitPath to short commit SHA
+  // Maps gitPath to commit SHA
   const map = new Map<string, string>();
 
   // Paths we haven't completed processing on yet
@@ -70,7 +73,26 @@ async function getCommitsThatAddFiles(
 
   do {
     // Fetch commit information for all paths we don't have yet
-    const commitInfos = await Promise.all(remaining.map(findCommitAndParent));
+    const commitInfos = await Promise.all(
+      remaining.map(async (gitPath: string) => {
+        const [commitSha, parentSha] = (
+          await spawn(
+            "git",
+            [
+              "log",
+              "--diff-filter=A",
+              "--max-count=1",
+              short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
+              gitPath,
+            ],
+            { cwd }
+          )
+        ).stdout
+          .toString()
+          .split(":");
+        return { path: gitPath, commitSha, parentSha };
+      })
+    );
 
     // To collect commits without parents (usually because they're absent from
     // a shallow clone).
@@ -98,10 +120,10 @@ async function getCommitsThatAddFiles(
     // a shallow clone.
 
     // Can we deepen the clone?
-    if (await isRepoShallow()) {
+    if (await isRepoShallow({ cwd })) {
       // Yes.
-      await deepenCloneBy(50);
-      remaining = commitsWithMissingParents.map(p => p.path);
+      await deepenCloneBy({ by: 50, cwd });
+      remaining = commitsWithMissingParents.map((p) => p.path);
     } else {
       // It's not a shallow clone, so all the commit SHAs we have are legitimate.
       for (const unresolved of commitsWithMissingParents) {
@@ -111,65 +133,61 @@ async function getCommitsThatAddFiles(
     }
   } while (true);
 
-  return gitPaths.map(p => map.get(p));
+  return gitPaths.map((p) => map.get(p));
+}
 
-  /** Find the commit that added a file, and the parent of that commit */
-  async function findCommitAndParent(gitPath: string) {
-    const logResult = await spawn(
-      "git",
-      [
-        "log",
-        "--diff-filter=A",
-        "--max-count=1",
-        "--pretty=format:%h:%p",
-        gitPath
-      ],
-      { cwd }
-    );
-    const [commitSha, parentSha] = logResult.stdout.toString().split(":");
-    return { path: gitPath, commitSha, parentSha };
-  }
+export async function isRepoShallow({ cwd }: { cwd: string }) {
+  const isShallowRepoOutput = (
+    await spawn("git", ["rev-parse", "--is-shallow-repository"], {
+      cwd,
+    })
+  ).stdout
+    .toString()
+    .trim();
 
-  async function isRepoShallow() {
-    const gitCmd = await spawn(
-      "git",
-      ["rev-parse", "--is-shallow-repository"],
-      { cwd }
-    );
+  if (isShallowRepoOutput === "--is-shallow-repository") {
+    // We have an old version of Git (<2.15) which doesn't support `rev-parse --is-shallow-repository`
+    // In that case, we'll test for the existence of .git/shallow.
 
-    const isShallowRepoOutput = gitCmd.stdout.toString().trim();
+    // Firstly, find the .git folder for the repo; note that this will be relative to the repo dir
+    const gitDir = (
+      await spawn("git", ["rev-parse", "--git-dir"], { cwd })
+    ).stdout
+      .toString()
+      .trim();
 
-    if (isShallowRepoOutput === "--is-shallow-repository") {
-      // We have an old version of Git (<2.15) which doesn't support `rev-parse --is-shallow-repository`
-      // In that case, we'll test for the existence of .git/shallow.
+    const fullGitDir = path.resolve(cwd, gitDir);
 
-      // Firstly, find the .git folder for the repo; note that this will be relative to the repo dir
-      const gitDir = (
-        await spawn("git", ["rev-parse", "--git-dir"], { cwd })
-      ).stdout
-        .toString()
-        .trim();
-
-      const fullGitDir = path.resolve(cwd, gitDir);
-
-      // Check for the existence of <gitDir>/shallow
-      return fs.existsSync(path.join(fullGitDir, "shallow"));
-    } else {
-      // We have a newer Git which supports `rev-parse --is-shallow-repository`. We'll use
-      // the output of that instead of messing with .git/shallow in case that changes in the future.
-      return isShallowRepoOutput === "true";
-    }
-  }
-
-  async function deepenCloneBy(by: number) {
-    await spawn("git", ["fetch", `--deepen=${by}`], { cwd });
+    // Check for the existence of <gitDir>/shallow
+    return fs.existsSync(path.join(fullGitDir, "shallow"));
+  } else {
+    // We have a newer Git which supports `rev-parse --is-shallow-repository`. We'll use
+    // the output of that instead of messing with .git/shallow in case that changes in the future.
+    return isShallowRepoOutput === "true";
   }
 }
 
-async function getChangedFilesSince({
+export async function deepenCloneBy({ by, cwd }: { by: number; cwd: string }) {
+  await spawn("git", ["fetch", `--deepen=${by}`], { cwd });
+}
+async function getRepoRoot({ cwd }: { cwd: string }) {
+  const { stdout, code, stderr } = await spawn(
+    "git",
+    ["rev-parse", "--show-toplevel"],
+    { cwd }
+  );
+
+  if (code !== 0) {
+    throw new Error(stderr.toString());
+  }
+
+  return stdout.toString().trim().replace(/\n|\r/g, "");
+}
+
+export async function getChangedFilesSince({
   cwd,
   ref,
-  fullPath = false
+  fullPath = false,
 }: {
   cwd: string;
   ref: string;
@@ -188,15 +206,17 @@ async function getChangedFilesSince({
     .toString()
     .trim()
     .split("\n")
-    .filter(a => a);
+    .filter((a) => a);
   if (!fullPath) return files;
-  return files.map(file => path.resolve(cwd, file));
+
+  const repoRoot = await getRepoRoot({ cwd });
+  return files.map((file) => path.resolve(repoRoot, file));
 }
 
 // below are less generic functions that we use in combination with other things we are doing
-async function getChangedChangesetFilesSinceRef({
+export async function getChangedChangesetFilesSinceRef({
   cwd,
-  ref
+  ref,
 }: {
   cwd: string;
   ref: string;
@@ -208,7 +228,7 @@ async function getChangedChangesetFilesSinceRef({
       "git",
       ["diff", "--name-only", "--diff-filter=d", divergedAt],
       {
-        cwd
+        cwd,
       }
     );
 
@@ -218,7 +238,7 @@ async function getChangedChangesetFilesSinceRef({
       .toString()
       .trim()
       .split("\n")
-      .filter(file => tester.test(file));
+      .filter((file) => tester.test(file));
     return files;
   } catch (err) {
     if (err instanceof GitError) return [];
@@ -226,39 +246,76 @@ async function getChangedChangesetFilesSinceRef({
   }
 }
 
-async function getChangedPackagesSinceRef({
+export async function getChangedPackagesSinceRef({
   cwd,
-  ref
+  ref,
+  changedFilePatterns = ["**"],
 }: {
   cwd: string;
   ref: string;
-}) {
+  changedFilePatterns?: readonly string[];
+}): Promise<Package[]> {
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
-  let packages = await getPackages(cwd);
-
-  const fileToPackage: Record<string, Package> = {};
-
-  packages.packages.forEach(pkg =>
-    changedFiles.filter(isInDir(pkg.dir)).forEach(fileName => {
-      const prevPkg = fileToPackage[fileName] || { dir: "" };
-      if (pkg.dir.length > prevPkg.dir.length) fileToPackage[fileName] = pkg;
-    })
-  );
 
   return (
-    Object.values(fileToPackage)
-      // filter, so that we have only unique packages
-      .filter((pkg, idx, packages) => packages.indexOf(pkg) === idx)
+    [...(await getPackages(cwd)).packages]
+      // sort packages by length of dir, so that we can check for subdirs first
+      .sort((pkgA, pkgB) => pkgB.dir.length - pkgA.dir.length)
+      .filter((pkg) => {
+        const changedPackageFiles: string[] = [];
+
+        for (let i = changedFiles.length - 1; i >= 0; i--) {
+          const file = changedFiles[i];
+
+          if (isSubdir(pkg.dir, file)) {
+            changedFiles.splice(i, 1);
+            const relativeFile = file.slice(pkg.dir.length + 1);
+            changedPackageFiles.push(relativeFile);
+          }
+        }
+
+        return (
+          changedPackageFiles.length > 0 &&
+          micromatch(changedPackageFiles, changedFilePatterns).length > 0
+        );
+      })
   );
 }
 
-export {
-  getCommitThatAddsFile,
-  getCommitsThatAddFiles,
-  getChangedFilesSince,
-  add,
-  commit,
-  tag,
-  getChangedPackagesSinceRef,
-  getChangedChangesetFilesSinceRef
-};
+export async function tagExists(tagStr: string, cwd: string) {
+  const gitCmd = await spawn("git", ["tag", "-l", tagStr], { cwd });
+  const output = gitCmd.stdout.toString().trim();
+  const tagExists = !!output;
+  return tagExists;
+}
+
+export async function getCurrentCommitId({
+  cwd,
+  short = false,
+}: {
+  cwd: string;
+  short?: boolean;
+}): Promise<string> {
+  return (
+    await spawn(
+      "git",
+      ["rev-parse", short && "--short", "HEAD"].filter<string>(Boolean as any),
+      { cwd }
+    )
+  ).stdout
+    .toString()
+    .trim();
+}
+
+export async function remoteTagExists(tagStr: string) {
+  const gitCmd = await spawn("git", [
+    "ls-remote",
+    "--tags",
+    "origin",
+    "-l",
+    tagStr,
+  ]);
+  const output = gitCmd.stdout.toString().trim();
+  const tagExists = !!output;
+  return tagExists;
+}

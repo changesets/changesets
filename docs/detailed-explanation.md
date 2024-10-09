@@ -34,7 +34,8 @@ A changeset is a Markdown file with YAML front matter. The contents of the Markd
 
 ```md
 ---
-"@changesets/cli": major
+"@myproject/cli": major
+"@myproject/core": minor
 ---
 
 Change all the things
@@ -53,10 +54,8 @@ This is useful because it breaks versioning into two steps:
 
 A tool to publish multiple packages from a mono-repo is also important, however does not need to be linked to this.
 
-See this blog post [I need to write this, this link goes nowhere]()
-
 ## Benefits to single-package repos
 
 Changesets are designed first and foremost to handle versioning in multi-package repos, where interdependencies flowing through the system are important to understand and capture.
 
-Conceptually though, the benefits of changesets are detacheable from this. I think this process overall leads to an improvement in Pull Requests that helps increase confidence in versioning decisions and changelog entries.
+Conceptually though, the benefits of changesets are detachable from this. I think this process overall leads to an improvement in Pull Requests that helps increase confidence in versioning decisions and changelog entries.

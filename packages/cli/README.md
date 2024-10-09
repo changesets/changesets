@@ -94,7 +94,7 @@ changeset init
 
 This command sets up the `.changeset` folder. It generates a readme and a config file. The config file includes the default options, as well as comments on what these options represent. You should run this command once, when you are setting up `changesets`.
 
-To publish public packages to NPM, you'll need to edit `.changeset/config.json` and change `"access": "restricted",` to `"access": "public",`. Read more about [access in config file options](https://github.com/atlassian/changesets/blob/main/docs/config-file-options.md#access-restricted--public). The `publishConfig` of each `package.json` is also respected and takes a priority over monorepo-wide setting in `.changeset/config.json`.
+To publish public packages to NPM, you'll need to edit `.changeset/config.json` and change `"access": "restricted",` to `"access": "public",`. Read more about [access in config file options](https://github.com/changesets/changesets/blob/main/docs/config-file-options.md#access-restricted--public). The `publishConfig` of each `package.json` is also respected and takes a priority over monorepo-wide setting in `.changeset/config.json`.
 
 ### add
 
@@ -173,7 +173,7 @@ git push --follow-tags
 status [--verbose] [--output={filePath}] [--since={gitTag}]
 ```
 
-The status command provides information about the changesets that currently exist. If there are no changesets present, it exits with an error status code.
+The status command provides information about the changesets that currently exist. If there are changes to packages but no changesets are present, it exits with error status code `1`.
 
 - `--verbose` - use if you want to know the new versions, and get a link to the relevant changeset summary.
 
@@ -189,7 +189,7 @@ The status command provides information about the changesets that currently exis
 pre [exit|enter {tag}]
 ```
 
-The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/atlassian/changesets/blob/main/docs/prereleases.md).
+The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/changesets/changesets/blob/main/docs/prereleases.md).
 
 ### Bumping peerDependencies
 

@@ -2,8 +2,10 @@
 
 Linked packages allow you to specify a group or groups of packages that should be versioned together. There are some complex cases, so some examples are shown below to demonstrate various cases.
 
-- Linked packages will still only be bumped when there is a changeset for them (this can mean you explicitly choose to add a changeset for it or because it's a dependant of something being released)
+- Linked packages will still only be bumped when there is a changeset for them (this can mean because you explicitly choose to add a changeset for it or because it's a dependent of something being released)
 - Packages that have changesets and are in a set of linked packages will **always** be versioned to the highest current version in the set of linked packages + the highest bump type from changesets in the set of linked packages
+
+> Unlike `fixed packages`, there is no guarantee that all packages in the group of linked packages will be version-bumped and published, only those with changeset(s) will be.
 
 ## Examples
 
@@ -70,9 +72,9 @@ I now have another changeset with a major for `pkg-a` and I do a release, the re
 
 ## Using glob expressions
 
-Sometimes you want to link many or all packages within your project (for example in a monorepository setup), in which case you would need to keep the list of linked packages up-to-date.
+Sometimes you want to link many or all packages within your project (for example in a monorepo setup), in which case you would need to keep the list of linked packages up-to-date.
 
-To make it simpler to maintain that list, you can provide glob expressions in the linked list that would match and resolve to all the packages that you wish to include.
+To make it simpler to maintain that list, you can provide glob expressions in the linked list that would match and resolve all the packages you wish to include.
 
 For example:
 
