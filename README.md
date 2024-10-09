@@ -86,6 +86,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [refine](https://github.com/pankod/refine)
 - [Modern Web](https://modern-web.dev)
 - [Atomizer](https://github.com/acss-io/atomizer)
+- [Medusa](https://github.com/medusajs/medusa)
 
 # Thanks/Inspiration
 
