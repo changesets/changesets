@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import pc from "picocolors";
 
 import semverLt from "semver/functions/lt";
 
@@ -8,7 +8,7 @@ import { Release, PackageJSON } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
 
-const { green, yellow, red, bold, blue, cyan } = chalk;
+const { green, yellow, red, bold, blue, cyan, gray } = pc;
 
 async function confirmMajorRelease(pkgJSON: PackageJSON) {
   if (semverLt(pkgJSON.version, "1.0.0")) {
@@ -236,7 +236,7 @@ export default async function createChangeset(
   log(
     "Please enter a summary for this change (this will be in the changelogs)."
   );
-  log(chalk.gray("  (submit empty line to open external editor)"));
+  log(gray("  (submit empty line to open external editor)"));
 
   let summary = await cli.askQuestion("Summary");
   if (summary.length === 0) {
