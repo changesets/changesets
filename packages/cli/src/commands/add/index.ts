@@ -3,10 +3,11 @@ import { spawn } from "child_process";
 import path from "path";
 
 import * as git from "@changesets/git";
-import { info, log, warn } from "@changesets/logger";
+import { error, info, log, warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
+import { ExitError } from "@changesets/errors";
 import { getPackages } from "@manypkg/get-packages";
 import { ExternalEditor } from "external-editor";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
@@ -22,10 +23,12 @@ export default async function add(
 ) {
   const packages = await getPackages(cwd);
   if (packages.packages.length === 0) {
-    throw new Error(
+    error(
       `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
     );
+    throw new ExitError(1);
   }
+
   const versionablePackages = packages.packages.filter(
     (pkg) =>
       !shouldSkipPackage(pkg, {
