@@ -369,22 +369,21 @@ describe("Add command", () => {
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
 
-  describe("no versionable packages", () => {
-    it("should print an informative message when in a single-package repo", async () => {
-      const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+  it("should exit with an error when there are no versionable packages in a single-package repo", async () => {
+    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
 
-      const cwd = await testdir({
-        "package.json": JSON.stringify({
-          name: "test-missing-version",
-        }),
-      });
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "test-missing-version",
+      }),
+    });
 
-      await expect(() =>
-        addChangeset(cwd, { empty: false }, defaultConfig)
-      ).rejects.toThrow("The process exited with code: 1");
+    await expect(() =>
+      addChangeset(cwd, { empty: false }, defaultConfig)
+    ).rejects.toThrow("The process exited with code: 1");
 
-      expect(loggerErrorMock).toHaveBeenCalledTimes(3);
-      expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
+    expect(loggerErrorMock).toHaveBeenCalledTimes(3);
+    expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
       [
         [
           "No versionable packages found",
@@ -397,29 +396,29 @@ describe("Add command", () => {
         ],
       ]
     `);
+  });
+
+  it("should exit with an error when there are no versionable packages when in a monorepo", async () => {
+    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+      }),
     });
 
-    it("should print an informative message when in a monorepo", async () => {
-      const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+    await expect(() =>
+      addChangeset(cwd, { empty: false }, defaultConfig)
+    ).rejects.toThrow("The process exited with code: 1");
 
-      const cwd = await testdir({
-        "package.json": JSON.stringify({
-          workspaces: ["packages/*"],
-        }),
-        "packages/pkg-a/package.json": JSON.stringify({
-          name: "pkg-a",
-        }),
-        "packages/pkg-b/package.json": JSON.stringify({
-          name: "pkg-b",
-        }),
-      });
-
-      await expect(() =>
-        addChangeset(cwd, { empty: false }, defaultConfig)
-      ).rejects.toThrow("The process exited with code: 1");
-
-      expect(loggerErrorMock).toHaveBeenCalledTimes(3);
-      expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
+    expect(loggerErrorMock).toHaveBeenCalledTimes(3);
+    expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
       [
         [
           "No versionable packages found",
@@ -432,6 +431,5 @@ describe("Add command", () => {
         ],
       ]
     `);
-    });
   });
 });
