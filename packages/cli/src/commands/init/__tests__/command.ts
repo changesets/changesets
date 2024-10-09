@@ -1,22 +1,19 @@
-import fixtures from "fixturez";
 import fs from "fs-extra";
 import path from "path";
 import { defaultWrittenConfig } from "@changesets/config";
-import { temporarilySilenceLogs } from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 
 import initializeCommand from "..";
 
-const f = fixtures(__dirname);
-
 const getPaths = (cwd: string) => ({
   readmePath: path.join(cwd, ".changeset/README.md"),
-  configPath: path.join(cwd, ".changeset/config.json")
+  configPath: path.join(cwd, ".changeset/config.json"),
 });
 
 describe("init", () => {
-  temporarilySilenceLogs();
+  silenceLogsInBlock();
   it("should initialize in a project without a .changeset folder", async () => {
-    const cwd = await f.copy("without-existing-changeset");
+    const cwd = await testdir({});
     const { readmePath, configPath } = getPaths(cwd);
 
     expect(fs.pathExistsSync(readmePath)).toBe(false);
@@ -26,30 +23,49 @@ describe("init", () => {
     expect(fs.pathExistsSync(configPath)).toBe(true);
   });
   it("should write the default config if it doesn't exist", async () => {
-    const cwd = await f.copy("simple-project");
-    await fs.remove(path.join(cwd, ".changeset/config.json"));
-
-    expect(fs.pathExistsSync(path.join(cwd, ".changeset/README.md"))).toBe(
-      true
-    );
-    await initializeCommand(cwd);
-    expect(await fs.readJson(path.join(cwd, ".changeset/config.json"))).toEqual(
-      defaultWrittenConfig
-    );
-  });
-  it("shouldn't overwrite a config if it does exist", async () => {
-    const cwd = await f.copy("simple-project");
-    await fs.writeJson(path.join(cwd, ".changeset/config.json"), {
-      changelog: false
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
     });
 
-    expect(fs.pathExistsSync(path.join(cwd, ".changeset/README.md"))).toBe(
-      true
+    await initializeCommand(cwd);
+    expect(await fs.readJson(path.join(cwd, ".changeset/config.json"))).toEqual(
+      { ...defaultWrittenConfig, baseBranch: "main" }
     );
+  });
+  it("should add newline at the end of config", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+    });
+
+    await initializeCommand(cwd);
+
+    const configPath = path.join(cwd, ".changeset/config.json");
+    const config = (await fs.promises.readFile(configPath)).toString();
+    const lastCharacter = config.slice(-1);
+
+    expect(lastCharacter).toBe("\n");
+  });
+  it("shouldn't overwrite a config if it does exist", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".changeset/config.json": JSON.stringify({
+        changelog: false,
+      }),
+    });
+
     await initializeCommand(cwd);
     expect(await fs.readJson(path.join(cwd, ".changeset/config.json"))).toEqual(
       {
-        changelog: false
+        changelog: false,
       }
     );
   });

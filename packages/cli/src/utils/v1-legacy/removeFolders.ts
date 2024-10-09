@@ -8,14 +8,14 @@ import fs from "fs-extra";
 const removeEmptyFolders = async (folderPath: string) => {
   const dirContents = fs.readdirSync(folderPath);
   return Promise.all(
-    dirContents.map(async contentPath => {
+    dirContents.map(async (contentPath) => {
       const singleChangesetPath = path.resolve(folderPath, contentPath);
       try {
         if ((await fs.readdir(singleChangesetPath)).length < 1) {
           await fs.rmdir(singleChangesetPath);
         }
       } catch (err) {
-        if (err.code !== "ENOTDIR") {
+        if ((err as any).code !== "ENOTDIR") {
           throw err;
         }
       }

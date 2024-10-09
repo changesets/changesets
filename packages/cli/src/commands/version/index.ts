@@ -1,5 +1,6 @@
-import chalk from "chalk";
+import pc from "picocolors";
 import path from "path";
+import * as git from "@changesets/git";
 import { log, warn, error } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
@@ -10,12 +11,14 @@ import { getPackages } from "@manypkg/get-packages";
 import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
+import { getCommitFunctions } from "../../commit/getCommitFunctions";
+import { getCurrentCommitId } from "@changesets/git";
 
-let importantSeparator = chalk.red(
+let importantSeparator = pc.red(
   "===============================IMPORTANT!==============================="
 );
 
-let importantEnd = chalk.red(
+let importantEnd = pc.red(
   "----------------------------------------------------------------------"
 );
 
@@ -29,12 +32,12 @@ export default async function version(
   const releaseConfig = {
     ...config,
     // Disable committing when in snapshot mode
-    commit: options.snapshot ? false : config.commit
+    commit: options.snapshot ? false : config.commit,
   };
   const [changesets, preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
-    removeEmptyFolders(path.resolve(cwd, ".changeset"))
+    removeEmptyFolders(path.resolve(cwd, ".changeset")),
   ]);
 
   if (preState?.mode === "pre") {
@@ -69,17 +72,46 @@ export default async function version(
     releaseConfig,
     preState,
     options.snapshot
+      ? {
+          tag: options.snapshot === true ? undefined : options.snapshot,
+          commit: config.snapshot.prereleaseTemplate?.includes("{commit}")
+            ? await getCurrentCommitId({ cwd })
+            : undefined,
+        }
+      : undefined
   );
 
-  await applyReleasePlan(
+  let [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
     releaseConfig,
     options.snapshot
   );
 
-  if (releaseConfig.commit) {
-    log("All files have been updated and committed. You're ready to publish!");
+  const [{ getVersionMessage }, commitOpts] = getCommitFunctions(
+    releaseConfig.commit,
+    cwd
+  );
+  if (getVersionMessage) {
+    let touchedFile: string | undefined;
+    // Note, git gets angry if you try and have two git actions running at once
+    // So we need to be careful that these iterations are properly sequential
+    while ((touchedFile = touchedFiles.shift())) {
+      await git.add(path.relative(cwd, touchedFile), cwd);
+    }
+
+    const commit = await git.commit(
+      await getVersionMessage(releasePlan, commitOpts),
+      cwd
+    );
+
+    if (!commit) {
+      error("Changesets ran into trouble committing your files");
+    } else {
+      log(
+        "All files have been updated and committed. You're ready to publish!"
+      );
+    }
   } else {
     log("All files have been updated. Review them and commit at your leisure");
   }

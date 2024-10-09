@@ -1,7 +1,0 @@
-{
-  "name": "has-peer-dep",
-  "version": "1.0.0",
-  "peerDependencies": {
-    "depended-upon": "1.0.0"
-  }
-}

@@ -18,7 +18,7 @@ export const push = async (
   {
     force,
     includeTags,
-    cwd
+    cwd,
   }: { force?: boolean; includeTags?: boolean; cwd: string }
 ) => {
   await execWithOutput(
@@ -28,7 +28,7 @@ export const push = async (
       "origin",
       `HEAD:${branch}`,
       includeTags && "--tags",
-      force && "--force"
+      force && "--force",
     ].filter((x): x is string => !!x),
     { cwd }
   );
@@ -40,7 +40,7 @@ export const switchToMaybeExistingBranch = async (
 ) => {
   let { stderr } = await execWithOutput("git", ["checkout", branch], {
     ignoreReturnCode: true,
-    cwd
+    cwd,
   });
   let isCreatingBranch = !stderr
     .toString()
@@ -60,14 +60,14 @@ export const reset = async (
 
 export const commitAll = async (message: string, cwd: string) => {
   await execWithOutput("git", ["add", "."], {
-    cwd
+    cwd,
   });
   await execWithOutput("git", ["commit", "-m", message], { cwd });
 };
 
 export const checkIfClean = async (cwd: string): Promise<boolean> => {
   const { stdout } = await execWithOutput("git", ["status", "--porcelain"], {
-    cwd
+    cwd,
   });
   return !stdout.length;
 };
