@@ -85,6 +85,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [wagmi](https://github.com/wagmi-dev/wagmi)
 - [refine](https://github.com/pankod/refine)
 - [Modern Web](https://modern-web.dev)
+- [Atomizer](https://github.com/acss-io/atomizer)
 
 # Thanks/Inspiration
 
