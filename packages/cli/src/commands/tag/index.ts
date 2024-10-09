@@ -18,12 +18,16 @@ export default async function tag(cwd: string, config: Config) {
       })
   );
 
+  const tagFormat = config.tagFormat || "${name}@${version}";
   for (const { name, newVersion } of await getUntaggedPackages(
     taggablePackages,
     cwd,
     tool
   )) {
-    const tag = tool !== "root" ? `${name}@${newVersion}` : `v${newVersion}`;
+    const tag =
+      tool === "root"
+        ? `v${newVersion}`
+        : tagFormat.replace("${name}", name).replace("${version}", newVersion);
 
     if (allExistingTags.has(tag)) {
       log("Skipping tag (already exists): ", tag);
