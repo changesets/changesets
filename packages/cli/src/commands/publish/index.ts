@@ -5,19 +5,19 @@ import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import chalk from "chalk";
-import { getUntaggedPrivatePackages } from "./getUntaggedPrivatePackages";
+import pc from "picocolors";
+import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map((p) => `${p.name}@${p.newVersion}`).join("\n");
   log(mappedPkgs);
 }
 
-let importantSeparator = chalk.red(
+let importantSeparator = pc.red(
   "===============================IMPORTANT!==============================="
 );
 
-let importantEnd = chalk.red(
+let importantEnd = pc.red(
   "----------------------------------------------------------------------"
 );
 
@@ -25,10 +25,10 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   warn(importantSeparator);
   if (preState) {
     warn(
-      `You are in prerelease mode so packages will be published to the ${chalk.cyan(
+      `You are in prerelease mode so packages will be published to the ${pc.cyan(
         preState.tag
       )}
-        dist tag except for packages that have not had normal releases which will be published to ${chalk.cyan(
+        dist tag except for packages that have not had normal releases which will be published to ${pc.cyan(
           "latest"
         )}`
     );
@@ -38,7 +38,7 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   warn(importantEnd);
 }
 
-export default async function run(
+export default async function publish(
   cwd: string,
   { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
   config: Config
@@ -72,7 +72,7 @@ export default async function run(
     (pkg) => pkg.packageJson.private && pkg.packageJson.version
   );
   const untaggedPrivatePackageReleases = tagPrivatePackages
-    ? await getUntaggedPrivatePackages(privatePackages, cwd, tool)
+    ? await getUntaggedPackages(privatePackages, cwd, tool)
     : [];
 
   if (

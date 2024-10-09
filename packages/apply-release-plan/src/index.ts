@@ -1,23 +1,21 @@
-import {
-  ReleasePlan,
-  Config,
-  ChangelogFunctions,
-  NewChangeset,
-  ModCompWithPackage,
-} from "@changesets/types";
-
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import resolveFrom from "resolve-from";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
+import {
+  ChangelogFunctions,
+  Config,
+  ModCompWithPackage,
+  NewChangeset,
+  ReleasePlan,
+} from "@changesets/types";
 import { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
-
 import fs from "fs-extra";
 import path from "path";
 import prettier from "prettier";
-
-import versionPackage from "./version-package";
+import resolveFrom from "resolve-from";
 import getChangelogEntry from "./get-changelog-entry";
+import versionPackage from "./version-package";
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
@@ -38,7 +36,7 @@ async function getCommitsThatAddChangesets(
   cwd: string
 ) {
   const paths = changesetIds.map((id) => `.changeset/${id}.md`);
-  const commits = await git.getCommitsThatAddFiles(paths, { cwd, short: true });
+  const commits = await git.getCommitsThatAddFiles(paths, { cwd });
 
   if (commits.every(stringDefined)) {
     // We have commits for all files
@@ -53,7 +51,6 @@ async function getCommitsThatAddChangesets(
   const legacyPaths = missingIds.map((id) => `.changeset/${id}/changes.json`);
   const commitsForLegacyPaths = await git.getCommitsThatAddFiles(legacyPaths, {
     cwd,
-    short: true,
   });
 
   // Fill in the blanks in the array of commits
@@ -134,7 +131,6 @@ export default async function applyReleasePlan(
   });
 
   let prettierInstance = getPrettierInstance(cwd);
-  let prettierConfig = await prettierInstance.resolveConfig(cwd);
 
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;
@@ -145,13 +141,7 @@ export default async function applyReleasePlan(
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
-      await updateChangelog(
-        changelogPath,
-        changelog,
-        name,
-        prettierInstance,
-        prettierConfig
-      );
+      await updateChangelog(changelogPath, changelog, name, prettierInstance);
       touchedFiles.push(changelogPath);
     }
   }
@@ -166,14 +156,17 @@ export default async function applyReleasePlan(
         let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
         let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
         if (await fs.pathExists(changesetPath)) {
-          // DO NOT remove changeset for ignored packages
-          // Mixed changeset that contains both ignored packages and not ignored packages are disallowed
+          // DO NOT remove changeset for skipped packages
+          // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
           // At this point, we know there is no such changeset, because otherwise the program would've already failed,
-          // so we just check if any ignored package exists in this changeset, and only remove it if none exists
-          // Ignored list is added in v2, so we don't need to do it for v1 changesets
+          // so we just check if any skipped package exists in this changeset, and only remove it if none exists
+          // options to skip packages were added in v2, so we don't need to do it for v1 changesets
           if (
             !changeset.releases.find((release) =>
-              config.ignore.includes(release.name)
+              shouldSkipPackage(packagesByName.get(release.name)!, {
+                ignore: config.ignore,
+                allowPrivatePackages: config.privatePackages.version,
+              })
             )
           ) {
             touchedFiles.push(changesetPath);
@@ -274,26 +267,18 @@ async function updateChangelog(
   changelogPath: string,
   changelog: string,
   name: string,
-  prettierInstance: typeof prettier,
-  prettierConfig: prettier.Options | null
+  prettierInstance: typeof prettier
 ) {
   let templateString = `\n\n${changelog.trim()}\n`;
 
   try {
     if (fs.existsSync(changelogPath)) {
-      await prependFile(
-        changelogPath,
-        templateString,
-        name,
-        prettierInstance,
-        prettierConfig
-      );
+      await prependFile(changelogPath, templateString, name, prettierInstance);
     } else {
       await writeFormattedMarkdownFile(
         changelogPath,
         `# ${name}${templateString}`,
-        prettierInstance,
-        prettierConfig
+        prettierInstance
       );
     }
   } catch (e) {
@@ -317,8 +302,7 @@ async function prependFile(
   filePath: string,
   data: string,
   name: string,
-  prettierInstance: typeof prettier,
-  prettierConfig: prettier.Options | null
+  prettierInstance: typeof prettier
 ) {
   const fileData = fs.readFileSync(filePath).toString();
   // if the file exists but doesn't have the header, we'll add it in
@@ -327,32 +311,25 @@ async function prependFile(
     await writeFormattedMarkdownFile(
       filePath,
       completelyNewChangelog,
-      prettierInstance,
-      prettierConfig
+      prettierInstance
     );
     return;
   }
   const newChangelog = fileData.replace("\n", data);
 
-  await writeFormattedMarkdownFile(
-    filePath,
-    newChangelog,
-    prettierInstance,
-    prettierConfig
-  );
+  await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
 }
 
 async function writeFormattedMarkdownFile(
   filePath: string,
   content: string,
-  prettierInstance: typeof prettier,
-  prettierConfig: prettier.Options | null
+  prettierInstance: typeof prettier
 ) {
   await fs.writeFile(
     filePath,
     // Prettier v3 returns a promise
     await prettierInstance.format(content, {
-      ...prettierConfig,
+      ...(await prettierInstance.resolveConfig(filePath)),
       filepath: filePath,
       parser: "markdown",
     })
