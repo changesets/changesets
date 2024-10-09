@@ -87,6 +87,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Modern Web](https://modern-web.dev)
 - [Atomizer](https://github.com/acss-io/atomizer)
 - [Medusa](https://github.com/medusajs/medusa)
+- [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts)
 
 # Thanks/Inspiration
 
