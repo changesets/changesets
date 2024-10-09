@@ -85,6 +85,10 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [GraphiQL](https://github.com/graphql/graphiql)
 - [wagmi](https://github.com/wagmi-dev/wagmi)
 - [refine](https://github.com/pankod/refine)
+- [Modern Web](https://modern-web.dev)
+- [Atomizer](https://github.com/acss-io/atomizer)
+- [Medusa](https://github.com/medusajs/medusa)
+- [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts)
 
 # Thanks/Inspiration
 
