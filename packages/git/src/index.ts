@@ -184,6 +184,30 @@ async function getRepoRoot({ cwd }: { cwd: string }) {
   return stdout.toString().trim().replace(/\n|\r/g, "");
 }
 
+export async function getStagedFiles({
+  cwd,
+  fullPath = false,
+}: {
+  cwd: string;
+  fullPath?: boolean;
+}): Promise<Array<string>> {
+  // Now we can find which files we added
+  const cmd = await spawn("git", ["diff", "--name-only", "--cached"], { cwd });
+  if (cmd.code !== 0) {
+    throw new Error(`Failed to diff against staged files.`);
+  }
+
+  const files = cmd.stdout
+    .toString()
+    .trim()
+    .split("\n")
+    .filter((a) => a);
+  if (!fullPath) return files;
+
+  const repoRoot = await getRepoRoot({ cwd });
+  return files.map((file) => path.resolve(repoRoot, file));
+}
+
 export async function getChangedFilesSince({
   cwd,
   ref,
@@ -244,6 +268,40 @@ export async function getChangedChangesetFilesSinceRef({
     if (err instanceof GitError) return [];
     throw err;
   }
+}
+
+export async function getStagedPackages({
+  cwd,
+  changedFilePatterns = ["**"],
+}: {
+  cwd: string;
+  changedFilePatterns?: readonly string[];
+}): Promise<Package[]> {
+  const stagedFiles = await getStagedFiles({ cwd, fullPath: true });
+
+  return (
+    [...(await getPackages(cwd)).packages]
+      // sort packages by length of dir, so that we can check for subdirs first
+      .sort((pkgA, pkgB) => pkgB.dir.length - pkgA.dir.length)
+      .filter((pkg) => {
+        const changedPackageFiles: string[] = [];
+
+        for (let i = stagedFiles.length - 1; i >= 0; i--) {
+          const file = stagedFiles[i];
+
+          if (isSubdir(pkg.dir, file)) {
+            stagedFiles.splice(i, 1);
+            const relativeFile = file.slice(pkg.dir.length + 1);
+            changedPackageFiles.push(relativeFile);
+          }
+        }
+
+        return (
+          changedPackageFiles.length > 0 &&
+          micromatch(changedPackageFiles, changedFilePatterns).length > 0
+        );
+      })
+  );
 }
 
 export async function getChangedPackagesSinceRef({
