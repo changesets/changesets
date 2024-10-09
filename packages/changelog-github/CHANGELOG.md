@@ -1,5 +1,32 @@
 # @changesets/changelog-github
 
+## 0.5.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+### Patch Changes
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a)]:
+  - @changesets/get-github-info@0.6.0
+  - @changesets/types@6.0.0
+
+## 0.4.8
+
+### Patch Changes
+
+- Updated dependencies [[`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2), [`b360d50`](https://github.com/changesets/changesets/commit/b360d50809ed2a0e28f3fc482c242776f44b5851)]:
+  - @changesets/types@5.2.1
+  - @changesets/get-github-info@0.5.2
+
+## 0.4.7
+
+### Patch Changes
+
+- Updated dependencies [[`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14)]:
+  - @changesets/types@5.2.0
+
 ## 0.4.6
 
 ### Patch Changes

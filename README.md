@@ -24,7 +24,7 @@ The **@changesets/cli** package allows you to write `changeset` files as you mak
 
 If you just want to jump in to using changesets, the [Intro to using changesets](./docs/intro-to-using-changesets.md) and [@changesets/cli](./packages/cli/README.md) docs are where you should head.
 
-If you want a detailed explanation of the the concepts behind changesets, or to understand how you would build on top
+If you want a detailed explanation of the concepts behind changesets, or to understand how you would build on top
 of changesets, check out our [detailed-explanation](./docs/detailed-explanation.md).
 
 We also have a [dictionary](./docs/dictionary.md).
@@ -55,6 +55,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Prereleases](./docs/prereleases.md)
 - [Problems publishing in monorepos](./docs/problems-publishing-in-monorepos.md)
 - [Snapshot releases](./docs/snapshot-releases.md)
+- [Versioning applications and other non-npm packages](./docs/versioning-apps.md)
 - [Experimental Options](./docs/experimental-options.md)
 
 ## Cool Projects already using Changesets for versioning and changelogs
@@ -83,7 +84,8 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [GraphiQL](https://github.com/graphql/graphiql)
 - [wagmi](https://github.com/wagmi-dev/wagmi)
 - [refine](https://github.com/pankod/refine)
-- [atomizer](https://github.com/acss-io/atomizer)
+- [Modern Web](https://modern-web.dev)
+- [Atomizer](https://github.com/acss-io/atomizer)
 
 # Thanks/Inspiration
 

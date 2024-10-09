@@ -1,14 +1,14 @@
-import semver from "semver";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
-  Release,
+  Config,
   DependencyType,
   PackageJSON,
   VersionType,
-  Config
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
-import { InternalRelease, PreInfo } from "./types";
+import semverSatisfies from "semver/functions/satisfies";
 import { incrementVersion } from "./increment";
+import { InternalRelease, PreInfo } from "./types";
 
 /*
   WARNING:
@@ -27,7 +27,7 @@ export default function determineDependents({
   packagesByName,
   dependencyGraph,
   preInfo,
-  config
+  config,
 }: {
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
@@ -51,13 +51,18 @@ export default function determineDependents({
       );
     }
     pkgDependents
-      .map(dependent => {
+      .map((dependent) => {
         let type: VersionType | undefined;
 
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
 
-        if (config.ignore.includes(dependent)) {
+        if (
+          shouldSkipPackage(dependentPackage, {
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
+          })
+        ) {
           type = "none";
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(
@@ -66,7 +71,9 @@ export default function determineDependents({
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
-            if (
+            if (nextRelease.type === "none") {
+              continue;
+            } else if (
               shouldBumpMajor({
                 dependent,
                 depType,
@@ -76,39 +83,36 @@ export default function determineDependents({
                 preInfo,
                 onlyUpdatePeerDependentsWhenOutOfRange:
                   config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                    .onlyUpdatePeerDependentsWhenOutOfRange
+                    .onlyUpdatePeerDependentsWhenOutOfRange,
               })
             ) {
               type = "major";
-            } else {
-              if (
-                // TODO validate this - I don't think it's right anymore
-                (!releases.has(dependent) ||
-                  releases.get(dependent)!.type === "none") &&
-                (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                  .updateInternalDependents === "always" ||
-                  !semver.satisfies(
-                    incrementVersion(nextRelease, preInfo),
-                    versionRange
-                  ))
-              ) {
-                switch (depType) {
-                  case "dependencies":
-                  case "optionalDependencies":
-                  case "peerDependencies":
-                    if (type !== "major" && type !== "minor") {
-                      type = "patch";
-                    }
-                    break;
-                  case "devDependencies": {
-                    // We don't need a version bump if the package is only in the devDependencies of the dependent package
-                    if (
-                      type !== "major" &&
-                      type !== "minor" &&
-                      type !== "patch"
-                    ) {
-                      type = "none";
-                    }
+            } else if (
+              (!releases.has(dependent) ||
+                releases.get(dependent)!.type === "none") &&
+              (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                .updateInternalDependents === "always" ||
+                !semverSatisfies(
+                  incrementVersion(nextRelease, preInfo),
+                  versionRange
+                ))
+            ) {
+              switch (depType) {
+                case "dependencies":
+                case "optionalDependencies":
+                case "peerDependencies":
+                  if (type !== "major" && type !== "minor") {
+                    type = "patch";
+                  }
+                  break;
+                case "devDependencies": {
+                  // We don't need a version bump if the package is only in the devDependencies of the dependent package
+                  if (
+                    type !== "major" &&
+                    type !== "minor" &&
+                    type !== "patch"
+                  ) {
+                    type = "none";
                   }
                 }
               }
@@ -121,39 +125,41 @@ export default function determineDependents({
         return {
           name: dependent,
           type,
-          pkgJSON: dependentPackage.packageJson
+          pkgJSON: dependentPackage.packageJson,
         };
       })
-      .filter(({ type }) => type)
-      .forEach(
-        // @ts-ignore - I don't know how to make typescript understand that the filter above guarantees this and I got sick of trying
-        ({ name, type, pkgJSON }: Release & { pkgJSON: PackageJSON }) => {
-          // At this point, we know if we are making a change
-          updated = true;
+      .filter(
+        (
+          dependentItem
+        ): dependentItem is typeof dependentItem & { type: VersionType } =>
+          !!dependentItem.type
+      )
+      .forEach(({ name, type, pkgJSON }) => {
+        // At this point, we know if we are making a change
+        updated = true;
 
-          const existing = releases.get(name);
-          // For things that are being given a major bump, we check if we have already
-          // added them here. If we have, we update the existing item instead of pushing it on to search.
-          // It is safe to not add it to pkgsToSearch because it should have already been searched at the
-          // largest possible bump type.
+        const existing = releases.get(name);
+        // For things that are being given a major bump, we check if we have already
+        // added them here. If we have, we update the existing item instead of pushing it on to search.
+        // It is safe to not add it to pkgsToSearch because it should have already been searched at the
+        // largest possible bump type.
 
-          if (existing && type === "major" && existing.type !== "major") {
-            existing.type = "major";
+        if (existing && type === "major" && existing.type !== "major") {
+          existing.type = "major";
 
-            pkgsToSearch.push(existing);
-          } else {
-            let newDependent: InternalRelease = {
-              name,
-              type,
-              oldVersion: pkgJSON.version,
-              changesets: []
-            };
+          pkgsToSearch.push(existing);
+        } else {
+          let newDependent: InternalRelease = {
+            name,
+            type,
+            oldVersion: pkgJSON.version,
+            changesets: [],
+          };
 
-            pkgsToSearch.push(newDependent);
-            releases.set(name, newDependent);
-          }
+          pkgsToSearch.push(newDependent);
+          releases.set(name, newDependent);
         }
-      );
+      });
   }
 
   return updated;
@@ -175,7 +181,7 @@ function getDependencyVersionRanges(
     "dependencies",
     "devDependencies",
     "peerDependencies",
-    "optionalDependencies"
+    "optionalDependencies",
   ] as const;
   const dependencyVersionRanges: {
     depType: DependencyType;
@@ -194,12 +200,12 @@ function getDependencyVersionRanges(
           versionRange === "workspace:*"
             ? // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
               dependencyRelease.oldVersion
-            : versionRange.replace(/^workspace:/, "")
+            : versionRange.replace(/^workspace:/, ""),
       });
     } else {
       dependencyVersionRanges.push({
         depType: type,
-        versionRange
+        versionRange,
       });
     }
   }
@@ -213,7 +219,7 @@ function shouldBumpMajor({
   releases,
   nextRelease,
   preInfo,
-  onlyUpdatePeerDependentsWhenOutOfRange
+  onlyUpdatePeerDependentsWhenOutOfRange,
 }: {
   dependent: string;
   depType: DependencyType;
@@ -231,10 +237,7 @@ function shouldBumpMajor({
     // 1. If onlyUpdatePeerDependentsWhenOutOfRange set to true, bump major if the version is leaving the range.
     // 2. If onlyUpdatePeerDependentsWhenOutOfRange set to false, bump major regardless whether or not the version is leaving the range.
     (!onlyUpdatePeerDependentsWhenOutOfRange ||
-      !semver.satisfies(
-        incrementVersion(nextRelease, preInfo),
-        versionRange
-      )) &&
+      !semverSatisfies(incrementVersion(nextRelease, preInfo), versionRange)) &&
     // bump major only if the dependent doesn't already has a major release.
     (!releases.has(dependent) ||
       (releases.has(dependent) && releases.get(dependent)!.type !== "major"))

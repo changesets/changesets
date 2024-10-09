@@ -1,7 +1,0 @@
-{
-  "name": "pkg-a",
-  "version": "1.0.0",
-  "devDependencies": {
-    "pkg-b": "1.0.0"
-  }
-}

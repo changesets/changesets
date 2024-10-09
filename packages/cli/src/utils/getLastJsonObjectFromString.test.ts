@@ -12,12 +12,12 @@ describe("getLastJsonObjectFromString", () => {
       getLastJsonObjectFromString(
         JSON.stringify({
           test: "foo",
-          bar: { baz: { qwe: "rty" }, arr: [1, 2, 3, 4] }
+          bar: { baz: { qwe: "rty" }, arr: [1, 2, 3, 4] },
         })
       )
     ).toEqual({
       test: "foo",
-      bar: { baz: { qwe: "rty" }, arr: [1, 2, 3, 4] }
+      bar: { baz: { qwe: "rty" }, arr: [1, 2, 3, 4] },
     });
   });
 
@@ -50,7 +50,7 @@ describe("getLastJsonObjectFromString", () => {
       getLastJsonObjectFromString(
         `${JSON.stringify({
           test: "foo",
-          baz: { qwe: "rty" }
+          baz: { qwe: "rty" },
         })}   \n\n  ${JSON.stringify({ much: "awesome" })}`
       )
     ).toEqual({ much: "awesome" });
