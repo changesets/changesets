@@ -64,9 +64,9 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open }: CliOptions = flags;
+    const { empty, open, since }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
-    await add(cwd, { empty, open }, config);
+    await add(cwd, { empty, open, since }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -106,7 +106,7 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        await add(cwd, { empty, open }, config);
+        await add(cwd, { empty, open, since }, config);
         return;
       }
       case "version": {
