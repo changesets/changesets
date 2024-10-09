@@ -91,6 +91,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Block Protocol](https://github.com/blockprotocol/blockprotocol)
 - [Remix](https://remix.run/)
 - [Clerk](https://github.com/clerk/javascript)
+- [Hey API](https://github.com/hey-api/openapi-ts)
 
 # Thanks/Inspiration
 
