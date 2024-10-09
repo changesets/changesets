@@ -88,6 +88,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Atomizer](https://github.com/acss-io/atomizer)
 - [Medusa](https://github.com/medusajs/medusa)
 - [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts)
+- [Block Protocol](https://github.com/blockprotocol/blockprotocol)
 
 # Thanks/Inspiration
 
