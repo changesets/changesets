@@ -32,7 +32,7 @@ I now have another changeset with a minor for `pkg-a` and I do a release, the re
 
 ## Using glob expressions
 
-Sometimes you want to fix many or all packages within your project (for example in a monorepository setup), in which case you would need to keep the list of fixed packages up-to-date.
+Sometimes you want to fix many or all packages within your project (for example in a monorepo setup), in which case you would need to keep the list of fixed packages up-to-date.
 
 To make it simpler to maintain that list, you can provide glob expressions in the list that would match and resolve to all the packages that you wish to include.
 

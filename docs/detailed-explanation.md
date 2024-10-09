@@ -54,8 +54,6 @@ This is useful because it breaks versioning into two steps:
 
 A tool to publish multiple packages from a mono-repo is also important, however does not need to be linked to this.
 
-See this blog post [I need to write this, this link goes nowhere]()
-
 ## Benefits to single-package repos
 
 Changesets are designed first and foremost to handle versioning in multi-package repos, where interdependencies flowing through the system are important to understand and capture.
