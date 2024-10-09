@@ -90,6 +90,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts)
 - [Block Protocol](https://github.com/blockprotocol/blockprotocol)
 - [Remix](https://remix.run/)
+- [Clerk](https://github.com/clerk/javascript)
 
 # Thanks/Inspiration
 
