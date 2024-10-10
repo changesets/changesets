@@ -39,7 +39,7 @@
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-typescript": "^7.18.6",
     "@manypkg/cli": "^0.19.1",
-    "@preconstruct/cli": "^2.8.8",
+    "@preconstruct/cli": "^2.8.9",
     "@types/jest": "^24.0.12",
     "@types/jest-in-case": "^1.0.6",
     "@types/js-yaml": "^3.12.1",
@@ -78,5 +78,6 @@
       "typeModule": true
     }
   },
-  "prettier": {}
+  "prettier": {},
+  "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }
