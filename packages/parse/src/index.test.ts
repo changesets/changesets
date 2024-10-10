@@ -1,4 +1,4 @@
-import outdent from "outdent";
+import { outdent } from "outdent";
 
 import parse from "./index.ts";
 

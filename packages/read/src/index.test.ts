@@ -1,5 +1,5 @@
 import path from "path";
-import outdent from "outdent";
+import { outdent } from "outdent";
 
 import read from "./index.ts";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";

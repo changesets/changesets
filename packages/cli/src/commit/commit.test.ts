@@ -1,4 +1,4 @@
-import outdent from "outdent";
+import { outdent } from "outdent";
 import defaultCommitFunctions from "./index.ts";
 import { NewChangeset, ReleasePlan } from "@changesets/types";
 
