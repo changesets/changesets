@@ -1081,6 +1081,63 @@ describe("workspace range", () => {
       },
     ]);
   });
+
+  it("should update dependant CHANGELOGs with 'Dependency update' information", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        dependencies: { "pkg-a": "workspace:*" },
+      }),
+    });
+
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always",
+      },
+    });
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.0.1
+
+      ### Patch Changes
+
+      - Updated dependencies [g1th4sh]
+        - pkg-a@1.1.0
+      "
+    `);
+  });
 });
 
 describe("same package in different dependency types", () => {
@@ -1838,6 +1895,141 @@ describe("updateInternalDependents: always", () => {
     // generated for them
     expect(() => getChangelog("pkg-b", spy.mock.calls)).toThrowError();
     expect(() => getChangelog("pkg-c", spy.mock.calls)).toThrowError();
+  });
+
+  it("should not bump dependant when it depends on an npm tag of a bumped dependency", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        dependencies: { "pkg-a": "bulbasaur" }, // using tag version from npm
+      }),
+    });
+
+    const spy = jest.spyOn(fs, "writeFile");
+
+    await writeChangeset(
+      {
+        summary: "This is some fix",
+        releases: [{ name: "pkg-b", type: "patch" }],
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always",
+      },
+    });
+
+    expect(() => getPkgJSON("pkg-a", spy.mock.calls)).toThrow();
+
+    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-b",
+        version: "1.0.1",
+        dependencies: { "pkg-a": "bulbasaur" },
+      })
+    );
+
+    expect(() => getChangelog("pkg-a", spy.mock.calls)).toThrow();
+
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.0.1
+
+      ### Patch Changes
+
+      - g1th4sh: This is some fix
+      "
+    `);
+  });
+
+  it("should bump dependant when it depend on an npm tag of a bumped dependency when it has its own changeset", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        dependencies: { "pkg-a": "bulbasaur" }, // using tag version from npm
+      }),
+    });
+
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+    await writeChangeset(
+      {
+        summary: "This is some fix",
+        releases: [{ name: "pkg-b", type: "patch" }],
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        updateInternalDependents: "always",
+      },
+    });
+
+    expect(getPkgJSON("pkg-a", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-a",
+        version: "1.1.0",
+      })
+    );
+    expect(getPkgJSON("pkg-b", spy.mock.calls)).toEqual(
+      expect.objectContaining({
+        name: "pkg-b",
+        version: "1.0.1",
+        dependencies: { "pkg-a": "bulbasaur" },
+      })
+    );
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 1.0.1
+
+      ### Patch Changes
+
+      - g1th4sh: This is some fix
+      "
+    `);
   });
 });
 
@@ -3015,5 +3207,60 @@ describe("pre", () => {
         },
       ]);
     });
+  });
+});
+
+describe("with privatePackages", () => {
+  silenceLogsInBlock();
+
+  it("should skip private packages", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/changesets-are-beautiful.md": `---
+"pkg-b": minor
+---
+
+Nice simple summary, much wow
+`,
+    });
+
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      privatePackages: {
+        version: false,
+        tag: false,
+      },
+    });
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.0",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.1.0",
+        },
+      },
+      {
+        name: "pkg-b",
+        version: "1.1.0",
+      },
+    ]);
   });
 });
