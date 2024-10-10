@@ -1,6 +1,7 @@
 # @changesets/get-version-range-type
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/get-version-range-type)
+[![npm package](https://img.shields.io/npm/v/@changesets/get-version-range-type.svg)](https://npmjs.com/package/@changesets/get-version-range-type)
+[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 Simple function that takes in a string which is a version range (ie `^1.0.0`, `~3.5.1`, `2.0.0`)
 and returns the range definition.

@@ -1,6 +1,7 @@
 # @changesets/get-github-info
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/get-github-info)
+[![npm package](https://img.shields.io/npm/v/@changesets/get-github-info.svg)](https://npmjs.com/package/@changesets/get-github-info)
+[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 > Get the GitHub username and PR number from a commit. Intended for use with changesets.
 
