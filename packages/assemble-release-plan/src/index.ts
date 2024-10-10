@@ -16,6 +16,7 @@ import flattenReleases from "./flatten-releases";
 import { incrementVersion } from "./increment";
 import matchFixedConstraint from "./match-fixed-constraint";
 import { InternalRelease, PreInfo } from "./types";
+import { getPackageIfExists } from "./utils";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -126,7 +127,7 @@ function assembleReleasePlan(
   config: OptionalProp<Config, "snapshot">,
   // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
   preState: PreState | undefined,
-  // snapshot: undefined            ->  not using snaphot
+  // snapshot: undefined            ->  not using snapshot
   // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
   // snapshot: { tag: "canary" }    ->  --snapshot canary
   snapshot?: SnapshotReleaseParameters | string | boolean
@@ -276,12 +277,7 @@ function getRelevantChangesets(
     const skippedPackages = [];
     const notSkippedPackages = [];
     for (const release of changeset.releases) {
-      const pkg = packagesByName.get(release.name);
-      if (!pkg) {
-        throw new Error(
-          `"${changeset.id}" changeset mentions a release for a package "${release.name}" but such a package could not be found.`
-        );
-      }
+      const pkg = getPackageIfExists(packagesByName, release.name, changeset);
       if (
         shouldSkipPackage(pkg, {
           ignore: config.ignore,
