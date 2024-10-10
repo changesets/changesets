@@ -8,7 +8,7 @@
 </p>
 <br/>
 
-[![npm package](https://img.shields.io/npm/v/@changesets/cli.svg)](https://npmjs.com/package/@changesets/cli)
+[![npm package](https://img.shields.io/npm/v/@changesets/cli?label=%40changesets%2Fcli)](https://npmjs.com/package/@changesets/cli)
 [![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./packages/cli/CHANGELOG.md)
 
 The `changesets` workflow is designed to help when people are making changes, all the way through to publishing. It lets contributors declare how their changes should be released, then we automate updating package versions, and changelogs, and publishing new versions of packages based on the provided information.

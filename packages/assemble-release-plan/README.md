@@ -1,6 +1,6 @@
 # Assemble Release Plan
 
-[![npm package](https://img.shields.io/npm/v/@changesets/assemble-release-plan.svg)](https://npmjs.com/package/@changesets/assemble-release-plan)
+[![npm package](https://img.shields.io/npm/v/@changesets/assemble-release-plan)](https://npmjs.com/package/@changesets/assemble-release-plan)
 [![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 Assemble a release plan for changesets from data about a repository.

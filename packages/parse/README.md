@@ -1,6 +1,6 @@
 # @changesets/parse
 
-[![npm package](https://img.shields.io/npm/v/@changesets/parse.svg)](https://npmjs.com/package/@changesets/parse)
+[![npm package](https://img.shields.io/npm/v/@changesets/parse)](https://npmjs.com/package/@changesets/parse)
 [![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 Parses a changeset from its written format to a data object.

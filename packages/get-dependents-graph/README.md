@@ -1,6 +1,6 @@
 # Get Dependents Graph
 
-[![npm package](https://img.shields.io/npm/v/@changesets/get-dependents-graph.svg)](https://npmjs.com/package/@changesets/get-dependents-graph)
+[![npm package](https://img.shields.io/npm/v/@changesets/get-dependents-graph)](https://npmjs.com/package/@changesets/get-dependents-graph)
 [![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 Small helper utility extracted from bolt to get a graph of relationships between packages.
