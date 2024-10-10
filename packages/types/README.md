@@ -1,6 +1,7 @@
 # @changesets/types
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/types)
+[![npm package](https://img.shields.io/npm/v/@changesets/types)](https://npmjs.com/package/@changesets/types)
+[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 A package of types for use in changesets, or projects wishing to extend them.
 
