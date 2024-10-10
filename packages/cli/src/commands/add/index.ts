@@ -20,7 +20,7 @@ export default async function add(
   cwd: string,
   { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
-) {
+): Promise<void> {
   const packages = await getPackages(cwd);
   if (packages.packages.length === 0) {
     error(
@@ -36,6 +36,14 @@ export default async function add(
         allowPrivatePackages: config.privatePackages.version,
       })
   );
+
+  if (versionablePackages.length === 0) {
+    error("No versionable packages found");
+    error('- Ensure the packages to version are not in the "ignore" config');
+    error('- Ensure that relevant package.json files have the "version" field');
+    throw new ExitError(1);
+  }
+
   const changesetBase = path.resolve(cwd, ".changeset");
 
   let newChangeset: Awaited<ReturnType<typeof createChangeset>>;
