@@ -42,8 +42,8 @@ jobs:
       - name: Typecheck
         run: yarn types:check
 
-  lint_and_format:
-    name: Lint & Format
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -60,7 +60,7 @@ jobs:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [test, typecheck, lint_and_format]
+    needs: [test, typecheck, lint]
     env:
       FAILURE: ${{ contains(join(needs.*.result, ','), 'failure') }}
     steps:
