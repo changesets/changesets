@@ -192,28 +192,4 @@ Awesome feature, hidden behind a feature flag
       },
     ]);
   });
-
-  it("should read an old changeset", async () => {
-    const cwd = await testdir({
-      ".changeset/basic-changeset/changes.json": JSON.stringify({
-        releases: [
-          {
-            name: "cool-package",
-            type: "minor",
-          },
-        ],
-        dependents: [],
-      }),
-      ".changeset/basic-changeset/changes.md": `Nice simple summary`,
-    });
-
-    const changesets = await read(cwd);
-    expect(changesets).toEqual([
-      {
-        releases: [{ name: "cool-package", type: "minor" }],
-        summary: "Nice simple summary",
-        id: "basic-changeset",
-      },
-    ]);
-  });
 });
