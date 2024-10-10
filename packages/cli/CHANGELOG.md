@@ -1,5 +1,17 @@
 # @changesets/cli
 
+## 2.27.10
+
+### Patch Changes
+
+- [#1489](https://github.com/changesets/changesets/pull/1489) [`7bf751c`](https://github.com/changesets/changesets/commit/7bf751cd80d49527026709529025beb0f6f0732a) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Use custom errors when exiting add command due to missing tool
+
+- [#1466](https://github.com/changesets/changesets/pull/1466) [`ccce743`](https://github.com/changesets/changesets/commit/ccce7433d5183fbccb3e3ad9005c66c3b3bc6bd9) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add error message and exit when there are no versionable packages
+
+- Updated dependencies [[`82cacb2`](https://github.com/changesets/changesets/commit/82cacb2227cf3a215cd9d29b9fb0c860f20ba2ca)]:
+  - @changesets/read@0.6.2
+  - @changesets/get-release-plan@4.0.5
+
 ## 2.27.9
 
 ### Patch Changes
