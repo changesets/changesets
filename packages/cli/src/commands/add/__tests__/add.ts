@@ -398,7 +398,7 @@ describe("Add command", () => {
     `);
   });
 
-  it("should exit with an error when there are no versionable packages when in a monorepo", async () => {
+  it("should exit with an error when there are no versionable packages in a monorepo", async () => {
     const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
 
     const cwd = await testdir({
