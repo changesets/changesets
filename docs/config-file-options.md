@@ -10,7 +10,11 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "access": "restricted",
   "baseBranch": "master",
   "ignore": [],
-  "changelog": "@changesets/cli/changelog"
+  "changelog": "@changesets/cli/changelog",
+  "privatePackages": {
+    "version": true,
+    "tag": true
+  }
 }
 ```
 
@@ -156,6 +160,26 @@ You would specify our github changelog generator with:
 ```
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
+
+## `privatePackages` (object)
+
+This option is used to configure the versioning and tagging of private packages. It can be set as follows:
+
+```json
+{
+  "privatePackages": {
+    "version": true,
+    "tag": true
+  }
+}
+```
+
+- `version` (boolean): Determines whether private packages can be versioned. Set it to true to enable versioning.
+- `tag` (boolean): Determines whether private packages can be tagged. Set it to true to enable tagging.
+
+By default changesets will only update the changelog and version (ie `{ version: true, tag: false }`).
+
+ You can also opt private packages out of versioning entirely by setting `privatePackages: false`.
 
 ## `bumpVersionsWithWorkspaceProtocolOnly` (boolean)
 
