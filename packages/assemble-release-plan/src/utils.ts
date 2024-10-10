@@ -65,10 +65,10 @@ export function getPackageIfExists(
   changeset: Pick<NewChangeset, "id">
 ): Package {
   const pkg = packagesByName.get(packageName);
-  if (!pkg) {
-    throw new Error(
-      `"${changeset.id}" changeset mentions a release for a package "${packageName}" but such a package could not be found.`
-    );
+  if (pkg) {
+    return pkg;
   }
-  return pkg;
+  throw new Error(
+    `"${changeset.id}" changeset mentions a release for a package "${packageName}" but such a package could not be found.`
+  );
 }
