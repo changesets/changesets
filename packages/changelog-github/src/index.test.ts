@@ -20,8 +20,10 @@ jest.mock(
     };
     return {
       async getInfo({ commit, repo }) {
+        /* eslint-disable jest/no-standalone-expect */
         expect(commit).toBe(data.commit);
         expect(repo).toBe(data.repo);
+        /* eslint-enable jest/no-standalone-expect */
         return {
           pull: data.pull,
           user: data.user,
@@ -29,8 +31,10 @@ jest.mock(
         };
       },
       async getInfoFromPullRequest({ pull, repo }) {
+        /* eslint-disable jest/no-standalone-expect */
         expect(pull).toBe(data.pull);
         expect(repo).toBe(data.repo);
+        /* eslint-enable jest/no-standalone-expect */
         return {
           commit: data.commit,
           user: data.user,

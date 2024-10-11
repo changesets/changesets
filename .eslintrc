@@ -39,8 +39,13 @@
         "**/test.ts",
         "**/test-utils/**/*"
       ],
-      "env": {
-        "jest": true
+      "extends": ["plugin:jest/recommended"],
+      "plugins": ["jest"],
+      "rules": {
+        "jest/no-standalone-expect": [
+          "error",
+          { "additionalTestBlockFunctions": ["jestInCase"] }
+        ]
       }
     },
     {

@@ -29,7 +29,7 @@ describe("enterPre", () => {
       mode: "pre",
       tag: "next",
     });
-    expect(mockedLogger.success).toBeCalledWith(
+    expect(mockedLogger.success).toHaveBeenCalledWith(
       `Entered pre mode with tag ${pc.cyan("next")}`
     );
   });
@@ -50,10 +50,10 @@ describe("enterPre", () => {
     await expect(
       pre(cwd, { command: "enter", tag: "next" })
     ).rejects.toBeInstanceOf(ExitError);
-    expect(mockedLogger.error).toBeCalledWith(
+    expect(mockedLogger.error).toHaveBeenCalledWith(
       "`changeset pre enter` cannot be run when in pre mode"
     );
-    expect(logger.info).toBeCalledWith(
+    expect(logger.info).toHaveBeenCalledWith(
       "If you're trying to exit pre mode, run `changeset pre exit`"
     );
   });
@@ -80,7 +80,7 @@ describe("enterPre", () => {
         tag: "next",
       }
     );
-    expect(mockedLogger.success).toBeCalledWith(
+    expect(mockedLogger.success).toHaveBeenCalledWith(
       `Entered pre mode with tag ${pc.cyan("next")}`
     );
   });
@@ -121,10 +121,10 @@ describe("exitPre", () => {
     await expect(pre(cwd, { command: "exit" })).rejects.toBeInstanceOf(
       ExitError
     );
-    expect(mockedLogger.error).toBeCalledWith(
+    expect(mockedLogger.error).toHaveBeenCalledWith(
       "`changeset pre exit` can only be run when in pre mode"
     );
-    expect(logger.info).toBeCalledWith(
+    expect(logger.info).toHaveBeenCalledWith(
       "If you're trying to enter pre mode, run `changeset pre enter`"
     );
   });
