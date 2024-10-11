@@ -75,6 +75,7 @@ const data = {
 describe.each([data.commit, "wrongcommit", undefined])(
   "with commit from changeset of %s",
   (commitFromChangeset) => {
+    // eslint-disable-next-line jest/max-nested-describe
     describe.each(["pr", "pull request", "pull"])(
       "override pr with %s keyword",
       (keyword) => {
