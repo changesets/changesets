@@ -79,25 +79,25 @@ describe.each([data.commit, "wrongcommit", undefined])(
       "override pr with %s keyword",
       (keyword) => {
         test.each(["with #", "without #"] as const)("%s", async (kind) => {
-          expect(
-            await getReleaseLine(
+          await expect(
+            getReleaseLine(
               ...getChangeset(
                 `${keyword}: ${kind === "with #" ? "#" : ""}${data.pull}`,
                 commitFromChangeset
               )
             )
-          ).toEqual(
+          ).resolves.toEqual(
             `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`
           );
         });
       }
     );
     test("override commit with commit keyword", async () => {
-      expect(
-        await getReleaseLine(
+      await expect(
+        getReleaseLine(
           ...getChangeset(`commit: ${data.commit}`, commitFromChangeset)
         )
-      ).toEqual(
+      ).resolves.toEqual(
         `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`
       );
     });
@@ -108,14 +108,14 @@ describe.each(["author", "user"])(
   "override author with %s keyword",
   (keyword) => {
     test.each(["with @", "without @"] as const)("%s", async (kind) => {
-      expect(
-        await getReleaseLine(
+      await expect(
+        getReleaseLine(
           ...getChangeset(
             `${keyword}: ${kind === "with @" ? "@" : ""}other`,
             data.commit
           )
         )
-      ).toEqual(
+      ).resolves.toEqual(
         `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@other](https://github.com/other)! - something\n`
       );
     });
@@ -123,14 +123,14 @@ describe.each(["author", "user"])(
 );
 
 it("with multiple authors", async () => {
-  expect(
-    await getReleaseLine(
+  await expect(
+    getReleaseLine(
       ...getChangeset(
         ["author: @Andarist", "author: @mitchellhamilton"].join("\n"),
         data.commit
       )
     )
-  ).toMatchInlineSnapshot(`
+  ).resolves.toMatchInlineSnapshot(`
     "
 
     - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist), [@mitchellhamilton](https://github.com/mitchellhamilton)! - something

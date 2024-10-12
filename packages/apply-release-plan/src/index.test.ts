@@ -3134,12 +3134,12 @@ describe("apply release plan", () => {
 
     let lastCommit = commits[commits.length - 1].substring(0, 7);
 
-    expect(
-      await fs.readFile(
+    await expect(
+      fs.readFile(
         path.join(tempDir, "packages", "pkg-a", "CHANGELOG.md"),
         "utf8"
       )
-    ).toBe(`# pkg-a
+    ).resolves.toBe(`# pkg-a
 
 ## 1.1.0
 

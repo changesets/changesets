@@ -2160,12 +2160,9 @@ describe("pre", () => {
         version: "1.0.1",
       },
     ]);
-    expect(
-      await fs.readFile(
-        path.join(packages.packages[0].dir, "CHANGELOG.md"),
-        "utf8"
-      )
-    ).toMatchInlineSnapshot(`
+    await expect(
+      fs.readFile(path.join(packages.packages[0].dir, "CHANGELOG.md"), "utf8")
+    ).resolves.toMatchInlineSnapshot(`
       "# pkg-a
 
       ## 1.1.0
@@ -2207,12 +2204,9 @@ describe("pre", () => {
         - pkg-b@1.0.1-next.0
       "
     `);
-    expect(
-      await fs.readFile(
-        path.join(packages.packages[1].dir, "CHANGELOG.md"),
-        "utf8"
-      )
-    ).toMatchInlineSnapshot(`
+    await expect(
+      fs.readFile(path.join(packages.packages[1].dir, "CHANGELOG.md"), "utf8")
+    ).resolves.toMatchInlineSnapshot(`
       "# pkg-b
 
       ## 1.0.1

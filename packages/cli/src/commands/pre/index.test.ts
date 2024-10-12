@@ -21,9 +21,9 @@ describe("enterPre", () => {
     });
     await pre(cwd, { command: "enter", tag: "next" });
 
-    expect(
-      await fs.readJson(path.join(cwd, ".changeset", "pre.json"))
-    ).toMatchObject({
+    await expect(
+      fs.readJson(path.join(cwd, ".changeset", "pre.json"))
+    ).resolves.toMatchObject({
       changesets: [],
       initialVersions: {},
       mode: "pre",
@@ -72,14 +72,14 @@ describe("enterPre", () => {
     });
 
     await pre(cwd, { command: "enter", tag: "next" });
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
-      {
-        changesets: [],
-        initialVersions: {},
-        mode: "pre",
-        tag: "next",
-      }
-    );
+    await expect(
+      fs.readJson(path.join(cwd, ".changeset", "pre.json"))
+    ).resolves.toEqual({
+      changesets: [],
+      initialVersions: {},
+      mode: "pre",
+      tag: "next",
+    });
     expect(mockedLogger.success).toHaveBeenCalledWith(
       `Entered pre mode with tag ${pc.cyan("next")}`
     );
@@ -102,14 +102,14 @@ describe("exitPre", () => {
     });
     await pre(cwd, { command: "exit" });
 
-    expect(await fs.readJson(path.join(cwd, ".changeset", "pre.json"))).toEqual(
-      {
-        changesets: [],
-        initialVersions: {},
-        mode: "exit",
-        tag: "next",
-      }
-    );
+    await expect(
+      fs.readJson(path.join(cwd, ".changeset", "pre.json"))
+    ).resolves.toEqual({
+      changesets: [],
+      initialVersions: {},
+      mode: "exit",
+      tag: "next",
+    });
   });
   it("should throw if not in pre", async () => {
     const cwd = await testdir({
