@@ -14,6 +14,7 @@ import {
   askList,
 } from "../../../utils/cli-utilities";
 import addChangeset from "..";
+import { createNamespacedChoiceMapper } from "../createChangeset";
 
 jest.mock("../../../utils/cli-utilities");
 jest.mock("@changesets/git");
@@ -26,6 +27,10 @@ git.commit.mockImplementation(() => Promise.resolve(true));
 // @ts-ignore
 git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
   expect(ref).toBe("master");
+  return [];
+});
+// @ts-ignore
+git.getStagedPackages.mockImplementation(() => {
   return [];
 });
 
@@ -299,7 +304,9 @@ describe("Add command", () => {
 
     // @ts-ignore
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
-    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+    expect(choices).toEqual(
+      ["pkg-a", "pkg-c"].map(createNamespacedChoiceMapper("unchanged"))
+    );
   });
 
   it("should not include private packages without a version in the prompt", async () => {
@@ -327,7 +334,9 @@ describe("Add command", () => {
 
     // @ts-ignore
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
-    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+    expect(choices).toEqual(
+      ["pkg-a", "pkg-c"].map(createNamespacedChoiceMapper("unchanged"))
+    );
   });
 
   it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
@@ -366,7 +375,9 @@ describe("Add command", () => {
 
     // @ts-ignore
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
-    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+    expect(choices).toEqual(
+      ["pkg-a", "pkg-c"].map(createNamespacedChoiceMapper("unchanged"))
+    );
   });
 
   it("should exit with an error when there are no versionable packages in a single-package repo", async () => {

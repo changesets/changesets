@@ -52,6 +52,9 @@ async function askCheckboxPlus(
 ): Promise<Array<string>> {
   const name = `CheckboxPlus-${serialId()}`;
 
+  // flatten the choices for easier searching
+  const flattened = choices.flatMap((choice) => choice.choices);
+
   return prompt({
     type: "autocomplete",
     name,
@@ -68,6 +71,13 @@ async function askCheckboxPlus(
     },
     indicator(state: any, choice: any) {
       return choice.enabled ? state.symbols.checked : state.symbols.indicator;
+    },
+    result(chosen: any) {
+      // map the chosen names to their values
+      return chosen.map((name: any) => {
+        // return the value of the choice if it exists, otherwise return the name
+        return flattened.find((choice) => choice.name === name)?.value || name;
+      });
     },
   } as ArrayPromptOptions)
     .then((responses: any) => responses[name])

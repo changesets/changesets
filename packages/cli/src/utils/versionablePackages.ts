@@ -1,6 +1,28 @@
 import { Config } from "@changesets/types";
-import { getChangedPackagesSinceRef } from "@changesets/git";
+import { getChangedPackagesSinceRef, getStagedPackages } from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
+
+export async function getVersionableStagedPackages(
+  config: Config,
+  {
+    cwd,
+  }: {
+    cwd: string;
+    ref?: string;
+  }
+) {
+  const stagedPackages = await getStagedPackages({
+    changedFilePatterns: config.changedFilePatterns,
+    cwd,
+  });
+  return stagedPackages.filter(
+    (pkg) =>
+      !shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.version,
+      })
+  );
+}
 
 export async function getVersionableChangedPackages(
   config: Config,
