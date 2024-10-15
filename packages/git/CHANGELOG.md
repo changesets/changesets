@@ -1,5 +1,11 @@
 # @changesets/git
 
+## 3.0.2
+
+### Patch Changes
+
+- [#1487](https://github.com/changesets/changesets/pull/1487) [`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f) Thanks [@bluwy](https://github.com/bluwy)! - Bump `micromatch` dependency to ^4.0.8 to prevent installing version with vulnerability
+
 ## 3.0.1
 
 ### Patch Changes

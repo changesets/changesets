@@ -1,5 +1,13 @@
 # @changesets/apply-release-plan
 
+## 7.0.6
+
+### Patch Changes
+
+- Updated dependencies [[`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f)]:
+  - @changesets/config@3.0.4
+  - @changesets/git@3.0.2
+
 ## 7.0.5
 
 ### Patch Changes
