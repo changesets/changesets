@@ -35,5 +35,8 @@
     "@types/micromatch": "^4.0.1",
     "jest-in-case": "^1.0.2",
     "outdent": "^0.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

@@ -29,5 +29,8 @@
   "devDependencies": {
     "@changesets/test-utils": "*",
     "outdent": "^0.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

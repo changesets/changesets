@@ -25,5 +25,8 @@
   "devDependencies": {
     "nock": "^11.7.0",
     "prettier": "^2.7.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

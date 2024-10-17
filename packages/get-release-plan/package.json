@@ -25,5 +25,8 @@
     "@changesets/read": "^0.6.1",
     "@changesets/types": "^6.0.0",
     "@manypkg/get-packages": "^1.1.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

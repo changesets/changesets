@@ -26,5 +26,8 @@
   "devDependencies": {
     "@changesets/parse": "*",
     "@changesets/test-utils": "*"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
