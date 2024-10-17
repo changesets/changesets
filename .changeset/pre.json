@@ -24,5 +24,8 @@
     "@changesets/write": "0.3.2",
     "@changesets/test-utils": "0.0.7"
   },
-  "changesets": []
+  "changesets": [
+    "afraid-radios-fetch",
+    "deep-coins-attend"
+  ]
 }
