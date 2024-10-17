@@ -20,10 +20,8 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/read",
   "dependencies": {
     "@changesets/git": "^3.0.1",
-    "@changesets/logger": "^0.1.1",
     "@changesets/parse": "^0.4.0",
     "@changesets/types": "^6.0.0",
-    "p-filter": "^2.1.0",
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
