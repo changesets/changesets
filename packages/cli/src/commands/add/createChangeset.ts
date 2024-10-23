@@ -34,7 +34,20 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
   return true;
 }
 
+/**
+ * Because some choices in the list maybe duplicated (even though nested),
+ * we need to namespace them to make sure they are unique.
+ */
+export function createNamespacedChoiceMapper(namespace: string) {
+  return (pkgName: string) => ({
+    name: `${pkgName}#${namespace}`,
+    message: pkgName,
+    value: pkgName,
+  });
+}
+
 async function getPackagesToRelease(
+  stagedPackages: Array<string>,
   changedPackages: Array<string>,
   allPackages: Array<Package>
 ) {
@@ -50,7 +63,10 @@ async function getPackagesToRelease(
         if (Array.isArray(x)) {
           return x
             .filter(
-              (x) => x !== "changed packages" && x !== "unchanged packages"
+              (x) =>
+                x !== "staged packages" &&
+                x !== "changed packages" &&
+                x !== "unchanged packages"
             )
             .map((x) => cyan(x))
             .join(", ");
@@ -63,16 +79,24 @@ async function getPackagesToRelease(
   if (allPackages.length > 1) {
     const unchangedPackagesNames = allPackages
       .map(({ packageJson }) => packageJson.name)
-      .filter((name) => !changedPackages.includes(name));
-
+      .filter(
+        (name) =>
+          !changedPackages.includes(name) && !stagedPackages.includes(name)
+      );
     const defaultChoiceList = [
       {
+        name: "staged packages",
+        choices: stagedPackages.map(createNamespacedChoiceMapper("staged")),
+      },
+      {
         name: "changed packages",
-        choices: changedPackages,
+        choices: changedPackages.map(createNamespacedChoiceMapper("changed")),
       },
       {
         name: "unchanged packages",
-        choices: unchangedPackagesNames,
+        choices: unchangedPackagesNames.map(
+          createNamespacedChoiceMapper("unchanged")
+        ),
       },
     ].filter(({ choices }) => choices.length !== 0);
 
@@ -88,7 +112,9 @@ async function getPackagesToRelease(
     }
     return packagesToRelease.filter(
       (pkgName) =>
-        pkgName !== "changed packages" && pkgName !== "unchanged packages"
+        pkgName !== "staged packages" &&
+        pkgName !== "changed packages" &&
+        pkgName !== "unchanged packages"
     );
   }
   return [allPackages[0].packageJson.name];
@@ -105,6 +131,7 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 }
 
 export default async function createChangeset(
+  stagedPackages: Array<string>,
   changedPackages: Array<string>,
   allPackages: Package[]
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
@@ -112,6 +139,7 @@ export default async function createChangeset(
 
   if (allPackages.length > 1) {
     const packagesToRelease = await getPackagesToRelease(
+      stagedPackages,
       changedPackages,
       allPackages
     );
