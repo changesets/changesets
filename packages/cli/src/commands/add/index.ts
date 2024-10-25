@@ -55,8 +55,16 @@ export default async function add(
     };
   } else if (versionablePackages.length === 0) {
     warn("This workspace does not contain any packages that can be versioned");
-    warn(`If you intend to version the root package, add ${pc.green('"."')} to the list of workspaces`);
-    warn(`See ${pc.blue('https://github.com/changesets/changesets/issues/1137')} for more details`);
+    warn(
+      `If you intend to version the root package, add ${pc.green(
+        '"."'
+      )} to the list of workspaces`
+    );
+    warn(
+      `See ${pc.blue(
+        "https://github.com/changesets/changesets/issues/1137"
+      )} for more details`
+    );
     newChangeset = {
       confirmed: false,
       releases: [],
