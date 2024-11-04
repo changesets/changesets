@@ -280,7 +280,7 @@ function getRelevantChangesets(
 
       if (!packageByName) {
         throw new Error(
-          `Changeset ${changeset.id} references non-existent package ${release.name}`
+          `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
         );
       }
 
