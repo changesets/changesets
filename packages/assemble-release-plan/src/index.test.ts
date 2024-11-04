@@ -577,7 +577,9 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         defaultConfig,
         undefined
       )
-    ).toThrow("Found changeset small-dogs-sad for package pkg-z which is not in the workspace");
+    ).toThrow(
+      "Found changeset small-dogs-sad for package pkg-z which is not in the workspace"
+    );
   });
 
   describe("fixed packages", () => {
