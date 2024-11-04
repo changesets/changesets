@@ -279,7 +279,9 @@ function getRelevantChangesets(
       const packageByName = packagesByName.get(release.name);
 
       if (!packageByName) {
-        throw new Error(`Changeset ${changeset.id} references non-existent package ${release.name}`);
+        throw new Error(
+          `Changeset ${changeset.id} references non-existent package ${release.name}`
+        );
       }
 
       if (
