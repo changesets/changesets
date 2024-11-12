@@ -62,6 +62,8 @@ export default async function add(
         })
       ).map((pkg) => pkg.packageJson.name);
     } catch (e: any) {
+      // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
+      // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
       warn(
         `Failed to find changed packages from the "${config.baseBranch}" base branch due to error below`
       );
