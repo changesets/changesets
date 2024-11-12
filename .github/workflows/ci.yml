@@ -38,7 +38,7 @@ jobs:
       # Run coverage only once on node 20 to avoid duplicate codecov uploads
       - name: Jest tests with coverage
         if: matrix.node_version == 20
-        run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
+        run: yarn jest --ci --color --runInBand --reporters=default --reporters=jest-junit --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
