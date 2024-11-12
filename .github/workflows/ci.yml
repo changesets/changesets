@@ -3,19 +3,27 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+      - next
 
 permissions:
   contents: read
 
 jobs:
   test:
-    name: Test
+    name: "Test using Node ${{ matrix.node_version }}"
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      matrix:
+        node_version: [18, 20, 22]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci-setup
+        with:
+          node-version: ${{ matrix.node_version }}
 
       - name: Check Git version
         run: git --version
@@ -24,10 +32,17 @@ jobs:
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
       - name: Jest tests
-        run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
+        if: matrix.node_version != 20
+        run: yarn jest --ci --color --runInBand --reporters=default --reporters=jest-junit
+
+      # Run coverage only once on node 20 to avoid duplicate codecov uploads
+      - name: Jest tests with coverage
+        if: matrix.node_version == 20
+        run: yarn jest --ci --color --runInBand --reporters=default --reporters=jest-junit --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
+        if: matrix.node_version == 20
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
