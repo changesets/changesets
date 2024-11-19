@@ -35,6 +35,6 @@
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
-    "spawndamnit": "^2.0.0"
+    "spawndamnit": "^3.0.1"
   }
 }

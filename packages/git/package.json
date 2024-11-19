@@ -23,7 +23,7 @@
     "@manypkg/get-packages": "^1.1.3",
     "is-subdir": "^1.1.1",
     "micromatch": "^4.0.8",
-    "spawndamnit": "^2.0.0"
+    "spawndamnit": "^3.0.1"
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
