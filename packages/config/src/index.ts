@@ -97,8 +97,7 @@ export let read = async (cwd: string, _packages?: Packages | undefined) => {
   return parse(json, packages);
 };
 
-export let parse = (json: WrittenConfig, _packages?: Packages | undefined): Config => {
-  const packages = _packages ?? await getPackages(cwd);
+export let parse = (json: WrittenConfig, packages: Packages): Config => {
   let messages = [];
   let pkgNames: readonly string[] = packages.packages.map(
     ({ packageJson }) => packageJson.name
