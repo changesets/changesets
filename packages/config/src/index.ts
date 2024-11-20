@@ -91,8 +91,8 @@ function isArray<T>(
   return Array.isArray(arg);
 }
 
-export let read = async (cwd: string, _packages?: Packages | undefined) => {
-  const packages = _packages ?? (await getPackages(cwd));
+export let read = async (cwd: string, packages?: Packages) => {
+  packages ??= await getPackages(cwd);
   let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
   return parse(json, packages);
 };
