@@ -1,5 +1,14 @@
 # @changesets/read
 
+## 0.6.2
+
+### Patch Changes
+
+- [#789](https://github.com/changesets/changesets/pull/789) [`82cacb2`](https://github.com/changesets/changesets/commit/82cacb2227cf3a215cd9d29b9fb0c860f20ba2ca) Thanks [@bastienrobert](https://github.com/bastienrobert)! - Allow lowercase `readme.md` in the `.changeset` directory
+
+- Updated dependencies [[`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f), [`962ab91`](https://github.com/changesets/changesets/commit/962ab918bc2deb89012a0cefce10387997cc54ed)]:
+  - @changesets/git@3.0.2
+
 ## 0.6.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@changesets/release-utils",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "main": "dist/changesets-release-utils.cjs.js",
   "module": "dist/changesets-release-utils.esm.js",
   "exports": {
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@changesets/pre": "^2.0.1",
-    "@changesets/read": "^0.6.1",
+    "@changesets/read": "^0.6.2",
     "@changesets/types": "^6.0.0",
     "@manypkg/get-packages": "^1.1.3",
     "fs-extra": "^7.0.1",
