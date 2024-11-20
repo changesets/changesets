@@ -1,6 +1,6 @@
 {
   "name": "@changesets/test-utils",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "description": "Utils for testing changesets packages",
   "main": "dist/changesets-test-utils.cjs.js",

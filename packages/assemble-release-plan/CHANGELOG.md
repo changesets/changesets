@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 6.0.5
+
+### Patch Changes
+
+- [#1508](https://github.com/changesets/changesets/pull/1508) [`26c8ba9`](https://github.com/changesets/changesets/commit/26c8ba9f58d3b123a19106771b4bdcb2800235cc) Thanks [@stevethedev](https://github.com/stevethedev)! - Add error-reporting for when a changeset references a non-existent package
+
 ## 6.0.4
 
 ### Patch Changes
