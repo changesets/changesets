@@ -92,7 +92,7 @@
     "picocolors": "^1.1.0",
     "resolve-from": "^5.0.0",
     "semver": "^7.5.3",
-    "spawndamnit": "^2.0.0",
+    "spawndamnit": "^3.0.1",
     "term-size": "^2.1.0"
   },
   "devDependencies": {

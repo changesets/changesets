@@ -25,7 +25,7 @@
     "remark-parse": "^7.0.1",
     "remark-stringify": "^7.0.3",
     "semver": "^7.5.3",
-    "spawndamnit": "^2.0.0",
+    "spawndamnit": "^3.0.1",
     "unified": "^8.3.2"
   },
   "devDependencies": {
