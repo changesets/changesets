@@ -92,13 +92,13 @@ function isArray<T>(
 }
 
 export let read = async (cwd: string, _packages?: Packages | undefined) => {
-  const packages = _packages ? _packages : await getPackages(cwd);
+  const packages = _packages ?? await getPackages(cwd);
   let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
   return parse(json, packages);
 };
 
 export let parse = (json: WrittenConfig, _packages?: Packages | undefined): Config => {
-  const packages = _packages ? _packages : await getPackages(cwd);
+  const packages = _packages ?? await getPackages(cwd);
   let messages = [];
   let pkgNames: readonly string[] = packages.packages.map(
     ({ packageJson }) => packageJson.name
