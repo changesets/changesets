@@ -43,7 +43,7 @@
     "@types/jest": "^24.0.12",
     "@types/jest-in-case": "^1.0.6",
     "@types/js-yaml": "^3.12.1",
-    "@types/lodash": "^4.14.136",
+    "@types/lodash": "^4.17.13",
     "@types/prettier": "^2.7.1",
     "@types/semver": "^7.5.0",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
