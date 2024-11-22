@@ -1,13 +1,14 @@
-import semverSatisfies from "semver/functions/satisfies";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
+  Config,
   DependencyType,
   PackageJSON,
   VersionType,
-  Config,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
-import { InternalRelease, PreInfo } from "./types";
+import semverSatisfies from "semver/functions/satisfies";
 import { incrementVersion } from "./increment";
+import { InternalRelease, PreInfo } from "./types";
 
 /*
   WARNING:
@@ -56,7 +57,12 @@ export default function determineDependents({
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
 
-        if (config.ignore.includes(dependent)) {
+        if (
+          shouldSkipPackage(dependentPackage, {
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
+          })
+        ) {
           type = "none";
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(

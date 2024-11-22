@@ -1,5 +1,64 @@
 # @changesets/get-release-plan
 
+## 4.0.5
+
+### Patch Changes
+
+- Updated dependencies [[`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f), [`26c8ba9`](https://github.com/changesets/changesets/commit/26c8ba9f58d3b123a19106771b4bdcb2800235cc), [`82cacb2`](https://github.com/changesets/changesets/commit/82cacb2227cf3a215cd9d29b9fb0c860f20ba2ca)]:
+  - @changesets/config@3.0.4
+  - @changesets/assemble-release-plan@6.0.5
+  - @changesets/read@0.6.2
+
+## 4.0.4
+
+### Patch Changes
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/read@0.6.1
+  - @changesets/assemble-release-plan@6.0.4
+  - @changesets/pre@2.0.1
+  - @changesets/config@3.0.3
+
+## 4.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca)]:
+  - @changesets/config@3.0.2
+  - @changesets/assemble-release-plan@6.0.3
+
+## 4.0.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/assemble-release-plan@6.0.2
+  - @changesets/config@3.0.1
+
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [[`954a16a`](https://github.com/changesets/changesets/commit/954a16aa1d118a0f7fa745ffe0d19b304f685d4c)]:
+  - @changesets/assemble-release-plan@6.0.1
+
+## 4.0.0
+
+### Major Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+### Patch Changes
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a)]:
+  - @changesets/assemble-release-plan@6.0.0
+  - @changesets/config@3.0.0
+  - @changesets/types@6.0.0
+  - @changesets/read@0.6.0
+  - @changesets/pre@2.0.0
+
 ## 3.0.17
 
 ### Patch Changes
