@@ -87,7 +87,7 @@
     "external-editor": "^3.1.0",
     "fs-extra": "^7.0.1",
     "mri": "^1.2.0",
-    "p-limit": "^2.2.0",
+    "p-limit": "^6.1.0",
     "package-manager-detector": "^0.2.0",
     "picocolors": "^1.1.0",
     "resolve-from": "^5.0.0",
