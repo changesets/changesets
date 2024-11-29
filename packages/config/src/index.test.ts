@@ -65,7 +65,7 @@ test("read reads the config", async () => {
   });
 });
 
-test("read reads the config with package infos collected from current context", async () => {
+test("read can read config based on the passed in `cwd`", async () => {
   let cwd = await testdir({
     ".changeset/config.json": JSON.stringify({
       changelog: false,
