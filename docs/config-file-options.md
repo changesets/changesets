@@ -136,7 +136,7 @@ Changesets will always update the dependency if it would leave the old semver ra
 
 ## `changelog` (false or a path)
 
-This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects to be a file that exports the following:
+This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects a file that exports the following:
 
 ```
 {
