@@ -73,6 +73,7 @@ export type Config = {
   linked: Linked;
   access: AccessType;
   baseBranch: string;
+  tagFormat: string;
   changedFilePatterns: readonly string[];
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
@@ -98,6 +99,7 @@ export type WrittenConfig = {
   linked?: Linked;
   access?: AccessType;
   baseBranch?: string;
+  tagFormat?: string;
   changedFilePatterns?: readonly string[];
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
