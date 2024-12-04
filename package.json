@@ -15,7 +15,10 @@
     "changeset": "packages/cli/bin.js",
     "check-all": "yarn test && yarn types:check && yarn lint && yarn format",
     "version-packages": "changeset version && yarn format:fix",
-    "release": "yarn build && changeset publish"
+    "release": "yarn build && changeset publish",
+    "docs:dev": "yarn workspace @changesets/docs dev",
+    "docs:build": "yarn workspace @changesets/docs build",
+    "docs:preview": "yarn workspace @changesets/docs preview"
   },
   "repository": {
     "type": "git",
@@ -23,7 +26,8 @@
   },
   "workspaces": [
     "packages/*",
-    "scripts/*"
+    "scripts/*",
+    "site"
   ],
   "author": "Changesets Contributors",
   "contributors": [
@@ -46,6 +50,7 @@
     "@types/lodash": "^4.17.13",
     "@types/prettier": "^2.7.1",
     "@types/semver": "^7.5.0",
+    "@types/unist": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^8.28.0",

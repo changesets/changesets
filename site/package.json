@@ -1,0 +1,16 @@
+{
+  "name": "@changesets/docs",
+  "private": true,
+  "version": "0.0.1",
+  "description": "The official documentation for Changesets",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "author": "Akino",
+  "devDependencies": {
+    "canvas-confetti": "^1.9.3",
+    "vitepress": "^1.5.0"
+  }
+}

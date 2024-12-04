@@ -1,0 +1,32 @@
+@media (min-width: 640px) {
+  .VPHero .container .main .text {
+    font-size: 48px !important;
+  }
+}
+
+:root {
+  --vp-c-brand-1: #124787;
+  --vp-c-brand-2: #165db3;
+  --vp-c-brand-3: #5bb7f3;
+
+  --vp-home-hero-name-background: linear-gradient( 
+    135deg, 
+    #124787 10%,
+    #5bb7f3 100%
+  );
+  
+  --vp-home-hero-image-background-image: linear-gradient(
+    -60deg,
+    #a5ccf9 50%,
+    #65baf6 50%
+  );
+  --vp-home-hero-image-filter: blur(50px);
+
+  --vp-button-brand-border: #124787;
+  --vp-button-brand-text: #f4f8fd;
+  --vp-button-brand-bg: #124787;
+
+  --vp-button-brand-hover-border: #165db3;
+  --vp-button-brand-hover-text: #fff;
+  --vp-button-brand-hover-bg: #165db3;
+}

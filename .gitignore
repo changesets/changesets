@@ -2,5 +2,8 @@ node_modules/
 *error.log
 scratchings.js
 dist/
+cache/
 .env
 coverage/
+
+.DS_Store
