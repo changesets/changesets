@@ -32,6 +32,6 @@
     "@changesets/git": "*",
     "@changesets/test-utils": "*",
     "@changesets/write": "*",
-    "file-url": "^3.0.0"
+    "file-url": "^4.0.0"
   }
 }
