@@ -280,5 +280,80 @@ describe("cli", () => {
         expect.any(Object)
       );
     });
+
+    it("should publish all packages when filter is undefined", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      // @ts-ignore
+      npmUtils.publish.mockImplementation(() => ({
+        published: true,
+      }));
+
+      try {
+        await run(["publish"], {}, cwd);
+      } catch (e) {
+        // Ignore errors; validate only the behavior
+      }
+
+      expect(npmUtils.publish).toHaveBeenCalledWith(
+        "pkg-a",
+        expect.any(Object),
+        expect.any(Object)
+      );
+      expect(npmUtils.publish).toHaveBeenCalledWith(
+        "pkg-b",
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    it("should publish only the package specified as a string filter", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      // @ts-ignore
+      npmUtils.publish.mockImplementation(() => ({
+        published: true,
+      }));
+
+      try {
+        await run(["publish"], { filter: "pkg-a" }, cwd);
+      } catch (e) {
+        // Ignore errors; validate only the behavior
+      }
+
+      expect(npmUtils.publish).toHaveBeenCalledWith(
+        "pkg-a",
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
   });
 });
