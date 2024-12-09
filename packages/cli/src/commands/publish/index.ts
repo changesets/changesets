@@ -40,7 +40,12 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
 
 export default async function publish(
   cwd: string,
-  { otp, tag, gitTag = true, filter }: { otp?: string; tag?: string; gitTag?: boolean, filter?: string[] },
+  {
+    otp,
+    tag,
+    gitTag = true,
+    filter,
+  }: { otp?: string; tag?: string; gitTag?: boolean; filter?: string[] },
   config: Config
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
@@ -67,7 +72,7 @@ export default async function publish(
     otp,
     preState,
     tag: releaseTag,
-    filter
+    filter,
   });
   const privatePackages = packages.filter(
     (pkg) => pkg.packageJson.private && pkg.packageJson.version
