@@ -115,7 +115,7 @@ export default async function publish(
     throw new ExitError(1);
   }
 
-  if (config.githubRelease) {
+  if (gitTag && config.githubRelease) {
     for (const pkg of packages) {
       const published = publishedPackages.find(
         (y) => y.name === pkg.packageJson.name
