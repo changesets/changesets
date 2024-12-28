@@ -7,7 +7,10 @@ import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import pc from "picocolors";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
-import { createGithubReleaseWithGh } from "../../utils/githubRelease";
+import {
+  checkGhCli,
+  createGithubReleaseWithGh,
+} from "../../utils/githubRelease";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map((p) => `${p.name}@${p.newVersion}`).join("\n");
@@ -44,6 +47,13 @@ export default async function publish(
   { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
   config: Config
 ) {
+  if (gitTag && config.githubRelease) {
+    // check gh is installed if githubRelease is enabled before publishing, so user can fix the issue before publishing
+    await checkGhCli().catch((e) => {
+      error(e.message);
+      throw new ExitError(1);
+    });
+  }
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
   let preState = await readPreState(cwd);
 
