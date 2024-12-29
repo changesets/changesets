@@ -102,7 +102,9 @@ export default async function publish(
     success("packages published successfully:");
     logReleases(successfulNpmPublishes);
 
-    if (gitTag) {
+    // Skip tag creation if GitHub releases are enabled, since GitHub will create the tags automatically.
+    // Creating tags locally would cause push errors due to tag conflicts.
+    if (!config.githubRelease && gitTag) {
       // We create the tags after the push above so that we know that HEAD won't change and that pushing
       // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
       // fail if we are behind the base branch).
@@ -136,12 +138,10 @@ export default async function publish(
       }
     }
   }
-  // Skip tag creation if GitHub releases are enabled, since GitHub will create the tags automatically.
-  // Creating tags locally would cause push errors due to tag conflicts.
-  if (!config.githubRelease && untaggedPrivatePackageReleases.length > 0) {
+
+  if (untaggedPrivatePackageReleases.length > 0) {
     success("found untagged projects:");
     logReleases(untaggedPrivatePackageReleases);
-
     await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
   }
   if (unsuccessfulNpmPublishes.length > 0) {
