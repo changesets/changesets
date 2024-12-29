@@ -112,20 +112,7 @@ export default async function publish(
     }
   }
 
-  if (untaggedPrivatePackageReleases.length > 0) {
-    success("found untagged projects:");
-    logReleases(untaggedPrivatePackageReleases);
-
-    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
-  }
-  if (unsuccessfulNpmPublishes.length > 0) {
-    error("packages failed to publish:");
-
-    logReleases(unsuccessfulNpmPublishes);
-    throw new ExitError(1);
-  }
-
-  if (gitTag && config.githubRelease) {
+  if (config.githubRelease) {
     for (const pkg of packages) {
       const published = publishedPackages.find(
         (y) => y.name === pkg.packageJson.name
@@ -148,6 +135,20 @@ export default async function publish(
         throw new ExitError(1);
       }
     }
+  }
+  // Skip tag creation if GitHub releases are enabled, since GitHub will create the tags automatically.
+  // Creating tags locally would cause push errors due to tag conflicts.
+  if (!config.githubRelease && untaggedPrivatePackageReleases.length > 0) {
+    success("found untagged projects:");
+    logReleases(untaggedPrivatePackageReleases);
+
+    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
+  }
+  if (unsuccessfulNpmPublishes.length > 0) {
+    error("packages failed to publish:");
+
+    logReleases(unsuccessfulNpmPublishes);
+    throw new ExitError(1);
   }
 }
 
