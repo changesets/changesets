@@ -16,7 +16,7 @@ export async function createGithubReleaseWithGh({
   tagName: string;
 }) {
   await checkGhCli();
-  const { repoOwner, repoName } = await getGithubRepoInfo();
+  const { repoOwner, repoName } = await getGithubRepoInfo(pkgDir);
   const changelogPath = path.join(pkgDir, "CHANGELOG.md");
 
   try {
@@ -47,6 +47,7 @@ export async function createGithubReleaseWithGh({
       ],
       {
         stdin: changelogEntry.content,
+
         onOutput: (stdout, stderr) => {
           if (stdout) {
             log(stdout.trim());
@@ -141,9 +142,11 @@ export async function checkGhCli() {
   }
 }
 
-export async function getGithubRepoInfo() {
+export async function getGithubRepoInfo(cwd: string) {
   try {
-    const remoteUrl = await execAsync("git", ["remote", "get-url", "origin"]);
+    const remoteUrl = await execAsync("git", ["remote", "get-url", "origin"], {
+      cwd,
+    });
 
     // Handle SSH format: git@github.com:owner/repo.git
     // Handle HTTPS format: https://github.com/owner/repo.git
