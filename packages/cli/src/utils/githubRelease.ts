@@ -142,7 +142,7 @@ export async function checkGhCli() {
   }
 }
 
-export async function getGithubRepoInfo(cwd: string) {
+export async function getGithubRepoInfo(cwd?: string) {
   try {
     const remoteUrl = await execAsync("git", ["remote", "get-url", "origin"], {
       cwd,
