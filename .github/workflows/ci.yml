@@ -53,6 +53,9 @@ jobs:
       - name: Lint
         run: yarn lint
 
+      - name: Format
+        run: yarn format
+
   ci-ok:
     name: CI OK
     runs-on: ubuntu-latest

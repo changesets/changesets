@@ -1,5 +1,17 @@
 # @changesets/config
 
+## 3.0.5
+
+### Patch Changes
+
+- [#1517](https://github.com/changesets/changesets/pull/1517) [`f0270f6`](https://github.com/changesets/changesets/commit/f0270f69793ddb6865f2510d334864b093cb10e3) Thanks [@akphi](https://github.com/akphi)! - Make `packages` an optional parameter in the `read` function. When `packages` are not passed in explicitly from the caller they now will be read based on the passed in `cwd`.
+
+## 3.0.4
+
+### Patch Changes
+
+- [#1487](https://github.com/changesets/changesets/pull/1487) [`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f) Thanks [@bluwy](https://github.com/bluwy)! - Bump `micromatch` dependency to ^4.0.8 to prevent installing version with vulnerability
+
 ## 3.0.3
 
 ### Patch Changes
