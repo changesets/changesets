@@ -1,12 +1,13 @@
-import chalk from "chalk";
+import pc from "picocolors";
 import { spawn } from "child_process";
 import path from "path";
 
 import * as git from "@changesets/git";
-import { info, log, warn } from "@changesets/logger";
+import { error, info, log, warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
+import { ExitError } from "@changesets/errors";
 import { getPackages } from "@manypkg/get-packages";
 import { ExternalEditor } from "external-editor";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
@@ -19,13 +20,15 @@ export default async function add(
   cwd: string,
   { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
-) {
+): Promise<void> {
   const packages = await getPackages(cwd);
   if (packages.packages.length === 0) {
-    throw new Error(
+    error(
       `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
     );
+    throw new ExitError(1);
   }
+
   const versionablePackages = packages.packages.filter(
     (pkg) =>
       !shouldSkipPackage(pkg, {
@@ -33,6 +36,14 @@ export default async function add(
         allowPrivatePackages: config.privatePackages.version,
       })
   );
+
+  if (versionablePackages.length === 0) {
+    error("No versionable packages found");
+    error('- Ensure the packages to version are not in the "ignore" config');
+    error('- Ensure that relevant package.json files have the "version" field');
+    throw new ExitError(1);
+  }
+
   const changesetBase = path.resolve(cwd, ".changeset");
 
   let newChangeset: Awaited<ReturnType<typeof createChangeset>>;
@@ -43,11 +54,21 @@ export default async function add(
       summary: ``,
     };
   } else {
-    const changedPackagesNames = (
-      await getVersionableChangedPackages(config, {
-        cwd,
-      })
-    ).map((pkg) => pkg.packageJson.name);
+    let changedPackagesNames: string[] = [];
+    try {
+      changedPackagesNames = (
+        await getVersionableChangedPackages(config, {
+          cwd,
+        })
+      ).map((pkg) => pkg.packageJson.name);
+    } catch (e: any) {
+      // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
+      // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
+      warn(
+        `Failed to find changed packages from the "${config.baseBranch}" base branch due to error below`
+      );
+      warn(e);
+    }
 
     newChangeset = await createChangeset(
       changedPackagesNames,
@@ -72,10 +93,10 @@ export default async function add(
     if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
       await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
-      log(chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`));
+      log(pc.green(`${empty ? "Empty " : ""}Changeset added and committed`));
     } else {
       log(
-        chalk.green(
+        pc.green(
           `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`
         )
       );
@@ -94,13 +115,13 @@ export default async function add(
       warn("HOW a consumer should update their code");
     } else {
       log(
-        chalk.green(
+        pc.green(
           "If you want to modify or expand on the changeset summary, you can find it here"
         )
       );
     }
     const changesetPath = path.resolve(changesetBase, `${changesetID}.md`);
-    info(chalk.blue(changesetPath));
+    info(pc.blue(changesetPath));
 
     if (open) {
       // this is really a hack to reuse the logic embedded in `external-editor` related to determining the editor

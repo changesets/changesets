@@ -1,5 +1,21 @@
 # @changesets/assemble-release-plan
 
+## 6.0.5
+
+### Patch Changes
+
+- [#1508](https://github.com/changesets/changesets/pull/1508) [`26c8ba9`](https://github.com/changesets/changesets/commit/26c8ba9f58d3b123a19106771b4bdcb2800235cc) Thanks [@stevethedev](https://github.com/stevethedev)! - Add error-reporting for when a changeset references a non-existent package
+
+## 6.0.4
+
+### Patch Changes
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/get-dependents-graph@2.1.2
+  - @changesets/should-skip-package@0.1.1
+
 ## 6.0.3
 
 ### Patch Changes
