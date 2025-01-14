@@ -4,6 +4,7 @@ import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
+import { error as loggerError } from "@changesets/logger";
 
 import {
   askCheckboxPlus,
@@ -366,5 +367,69 @@ describe("Add command", () => {
     // @ts-ignore
     const { choices } = askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
+  });
+
+  it("should exit with an error when there are no versionable packages in a single-package repo", async () => {
+    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "test-missing-version",
+      }),
+    });
+
+    await expect(() =>
+      addChangeset(cwd, { empty: false }, defaultConfig)
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorMock).toHaveBeenCalledTimes(3);
+    expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
+      [
+        [
+          "No versionable packages found",
+        ],
+        [
+          "- Ensure the packages to version are not in the "ignore" config",
+        ],
+        [
+          "- Ensure that relevant package.json files have the "version" field",
+        ],
+      ]
+    `);
+  });
+
+  it("should exit with an error when there are no versionable packages in a monorepo", async () => {
+    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+      }),
+    });
+
+    await expect(() =>
+      addChangeset(cwd, { empty: false }, defaultConfig)
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorMock).toHaveBeenCalledTimes(3);
+    expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
+      [
+        [
+          "No versionable packages found",
+        ],
+        [
+          "- Ensure the packages to version are not in the "ignore" config",
+        ],
+        [
+          "- Ensure that relevant package.json files have the "version" field",
+        ],
+      ]
+    `);
   });
 });
