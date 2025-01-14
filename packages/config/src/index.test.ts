@@ -2,8 +2,9 @@ import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import { Config, WrittenConfig } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import { Packages, getPackages } from "@manypkg/get-packages";
 import { testdir } from "@changesets/test-utils";
+import outdent from "outdent";
 
 jest.mock("@changesets/logger");
 
@@ -62,6 +63,77 @@ test("read reads the config", async () => {
       prereleaseTemplate: null,
     },
   });
+});
+
+test("read can read config based on the passed in `cwd`", async () => {
+  let cwd = await testdir({
+    ".changeset/config.json": JSON.stringify({
+      changelog: false,
+      commit: true,
+    }),
+    "package.json": JSON.stringify({
+      name: "testing",
+      version: "0.0.0",
+    }),
+  });
+  let config = await read(cwd);
+
+  expect(config).toEqual({
+    fixed: [],
+    linked: [],
+    changelog: false,
+    commit: ["@changesets/cli/commit", { skipCI: "version" }],
+    access: "restricted",
+    baseBranch: "master",
+    changedFilePatterns: ["**"],
+    updateInternalDependencies: "patch",
+    ignore: [],
+    bumpVersionsWithWorkspaceProtocolOnly: false,
+    privatePackages: {
+      tag: false,
+      version: true,
+    },
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+      onlyUpdatePeerDependentsWhenOutOfRange: false,
+      updateInternalDependents: "out-of-range",
+    },
+    snapshot: {
+      useCalculatedVersion: false,
+      prereleaseTemplate: null,
+    },
+  });
+});
+
+it("should not fail when validating ignored packages when some package depends on the root workspace", async () => {
+  const cwd = await testdir({
+    ".changeset/config.json": JSON.stringify({
+      ignore: ["other-example"],
+    }),
+    "package.json": JSON.stringify({
+      name: "zod-to-fields",
+      version: "0.1.2",
+    }),
+    "pnpm-workspace.yaml": outdent`
+          packages:
+            - examples/*
+        `,
+    "examples/react/package.json": JSON.stringify({
+      name: "react-example",
+      private: true,
+      version: "0.0.0",
+      dependencies: {
+        "zod-to-fields": "workspace:*",
+      },
+    }),
+    "examples/other/package.json": JSON.stringify({
+      name: "other-example",
+      private: true,
+      version: "0.0.0",
+    }),
+  });
+
+  const packages = await getPackages(cwd);
+  expect(() => read(cwd, packages)).not.toThrow();
 });
 
 let defaults: Config = {
