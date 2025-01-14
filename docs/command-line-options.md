@@ -18,7 +18,7 @@ The most important commands are `add`, which is used by contributors to add info
 changeset init
 ```
 
-This command sets up the .changeset folder. It generates a readme and a config file. The config file includes the default options and comments on what these options represent. You should run this command once when you are setting up changesets.
+This command sets up the `.changeset` folder. It generates a readme and a config file. The config file includes the default options and comments on what these options represent. You should run this command once when you are setting up changesets.
 
 ## `add`
 
@@ -36,9 +36,9 @@ This is the main command people use to interact with the changesets.
 
 This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. The final step will show the changeset it will generate and confirm that you want to add it.
 
-Once confirmed, the changeset will be written a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semver bump types for them.
+Once confirmed, the changeset will be written as a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semver bump types for them.
 
-A changeset that major bumps @changesets/cli would look like this:
+A changeset that major bumps `@changesets/cli` would look like this:
 
 ```
 ---
