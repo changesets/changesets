@@ -218,11 +218,7 @@ async function internalPublish(
       env: Object.assign({}, process.env, envOverride),
       cwd: opts.cwd,
     });
-  } else if (
-    publishTool.name === "yarn" &&
-    publishTool.version?.major != null &&
-    publishTool.version.major >= 2
-  ) {
+  } else if (publishTool.name === "yarn") {
     results = await spawn("yarn", ["npm", "publish", ...publishFlags], {
       env: Object.assign({}, process.env, envOverride),
     });
