@@ -208,16 +208,14 @@ async function getNewChangelogEntry(
   const changelogOpts = config.changelog[1];
   let changesetPath = path.join(cwd, ".changeset");
   let changelogPath;
+
   try {
     changelogPath = resolveFrom(changesetPath, config.changelog[0]);
-  } catch (error) {
-    const { execSync } = require("child_process");
-    const globalNodeModules = execSync("npm root -g", {
-      stdio: ["pipe", "pipe", "ignore"],
-    })
-      .toString()
-      .trim();
-    changelogPath = path.join(globalNodeModules, config.changelog[0]);
+  } catch {
+    changelogPath = resolveFrom(
+      path.join(__dirname, "..", ".."),
+      config.changelog[0]
+    );
   }
 
   let possibleChangelogFunc = require(changelogPath);
