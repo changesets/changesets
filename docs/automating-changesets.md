@@ -29,7 +29,35 @@ Sometimes, you may want to make CI fail if no changeset is present to ensure no 
 In your CI process, add a step that runs:
 
 ```bash
-changeset status --since=main
+changeset status --since origin/main
+```
+
+A Github example looks like this:
+
+```bash
+name: Require Changeset
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  requireChangesets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Require changeset
+        run: yarn changeset status --since origin/main
 ```
 
 This will exit with exit code 1 if there have been no new changesets since main.
