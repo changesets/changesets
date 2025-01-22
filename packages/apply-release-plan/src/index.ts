@@ -69,7 +69,7 @@ export default async function applyReleasePlan(
   packages: Packages,
   config: Config = defaultConfig,
   snapshot?: string | boolean,
-  contextDir?: string
+  contextDir = __dirname
 ) {
   let cwd = packages.root.dir;
 
@@ -192,7 +192,7 @@ async function getNewChangelogEntry(
   changesets: NewChangeset[],
   config: Config,
   cwd: string,
-  contextDir = __dirname
+  contextDir: string
 ) {
   if (!config.changelog) {
     return Promise.resolve(
