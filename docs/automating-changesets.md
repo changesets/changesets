@@ -49,7 +49,7 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  requireChangesets:
+  requireChangeset:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
