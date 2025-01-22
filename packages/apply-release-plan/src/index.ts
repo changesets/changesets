@@ -68,7 +68,8 @@ export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
   config: Config = defaultConfig,
-  snapshot?: string | boolean
+  snapshot?: string | boolean,
+  contextDir?: string
 ) {
   let cwd = packages.root.dir;
 
@@ -97,7 +98,8 @@ export default async function applyReleasePlan(
     releasesWithPackage,
     changesets,
     config,
-    cwd
+    cwd,
+    contextDir
   );
 
   if (releasePlan.preState !== undefined && snapshot === undefined) {
@@ -189,7 +191,8 @@ async function getNewChangelogEntry(
   releasesWithPackage: ModCompWithPackage[],
   changesets: NewChangeset[],
   config: Config,
-  cwd: string
+  cwd: string,
+  contextDir = __dirname
 ) {
   if (!config.changelog) {
     return Promise.resolve(
@@ -212,7 +215,7 @@ async function getNewChangelogEntry(
   try {
     changelogPath = resolveFrom(changesetPath, config.changelog[0]);
   } catch {
-    changelogPath = resolveFrom(__dirname, config.changelog[0]);
+    changelogPath = resolveFrom(contextDir, config.changelog[0]);
   }
 
   let possibleChangelogFunc = require(changelogPath);
