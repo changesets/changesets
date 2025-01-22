@@ -32,7 +32,7 @@ In your CI process, add a step that runs:
 changeset status --since origin/main
 ```
 
-A Github example looks like this:
+A Github Action example looks like this:
 
 ```bash
 name: Require Changeset
