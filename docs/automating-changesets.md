@@ -32,9 +32,13 @@ In your CI process, add a step that runs:
 changeset status --since origin/main
 ```
 
-A Github Action example looks like this:
+This will exit with exit code 1 if there have been no new changesets since main.
 
-```bash
+In some cases, you may _want_ to merge a change without doing any releases (such as when you only change tests or build tools). In this case, you can run `changeset --empty`. This will add a special changeset that does not release anything.
+
+An example Github Action can look like this:
+
+```yml
 name: Require Changeset
 
 on:
@@ -59,10 +63,6 @@ jobs:
       - name: Require changeset
         run: yarn changeset status --since origin/main
 ```
-
-This will exit with exit code 1 if there have been no new changesets since main.
-
-In some cases, you may _want_ to merge a change without doing any releases (such as when you only change tests or build tools). In this case, you can run `changeset --empty`. This will add a special changeset that does not release anything.
 
 ## How do I run the version and publish commands?
 
