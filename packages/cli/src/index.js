@@ -62,6 +62,8 @@ const { input, flags } = meow(
 
 const cwd = process.cwd();
 
+console.log("Hello World!");
+
 (async () => {
   if (input.length < 1) {
     await add({ cwd });
