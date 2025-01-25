@@ -8,7 +8,6 @@ import readChangesets from "@changesets/read";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
 import { getPackages } from "@manypkg/get-packages";
 
-import { removeEmptyFolders } from "../../utils/v1-legacy/removeFolders";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
@@ -37,7 +36,6 @@ export default async function version(
   const [changesets, preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
-    removeEmptyFolders(path.resolve(cwd, ".changeset")),
   ]);
 
   if (preState?.mode === "pre") {
