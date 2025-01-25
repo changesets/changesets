@@ -49,7 +49,7 @@ export async function getDivergedCommit(cwd: string, ref: string) {
   const cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
   if (cmd.code !== 0) {
     throw new Error(
-      `Failed to find where HEAD diverged from ${ref}. Does ${ref} exist?`
+      `Failed to find where HEAD diverged from "${ref}". Does "${ref}" exist and it's synced with remote?`
     );
   }
   return cmd.stdout.toString().trim();

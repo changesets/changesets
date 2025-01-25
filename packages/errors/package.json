@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/errors",
   "dependencies": {
-    "extendable-error": "^0.1.5"
+    "extendable-error": "^0.1.7"
   },
   "engines": {
     "node": ">=18.0.0"

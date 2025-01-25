@@ -1,6 +1,6 @@
 {
   "name": "@changesets/assemble-release-plan",
-  "version": "6.0.4",
+  "version": "6.0.5",
   "description": "Reads changesets and adds information on dependents that need bumping",
   "main": "dist/changesets-assemble-release-plan.cjs.js",
   "module": "dist/changesets-assemble-release-plan.esm.js",

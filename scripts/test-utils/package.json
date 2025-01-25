@@ -1,6 +1,6 @@
 {
   "name": "@changesets/test-utils",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "description": "Utils for testing changesets packages",
   "main": "dist/changesets-test-utils.cjs.js",
@@ -22,7 +22,7 @@
   "dependencies": {
     "@changesets/logger": "^0.1.1",
     "fixturez": "^1.1.0",
-    "spawndamnit": "^2.0.0"
+    "spawndamnit": "^3.0.1"
   },
   "engines": {
     "node": ">=18.0.0"
