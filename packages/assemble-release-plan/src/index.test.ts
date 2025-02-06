@@ -1018,6 +1018,31 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[0].newVersion).toEqual("2.0.0-next.1");
       expect(releases[0].type).toEqual("minor");
     });
+
+    it("should respect the pre.startWith option", () => {
+      expect(
+        setup.packages.packages.find((pkg) => pkg.packageJson.name === "pkg-a")
+          ?.packageJson.version
+      ).toEqual("1.0.0");
+
+      const { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        { ...defaultConfig, pre: { startWith: 1 } },
+        {
+          changesets: ["major-bumping-one"],
+          tag: "next",
+          initialVersions: {
+            "pkg-a": "1.0.0",
+          },
+          mode: "pre",
+        }
+      );
+
+      expect(releases.length).toEqual(1);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1-next.1");
+    });
   });
 
   describe("workspace protocol", () => {

@@ -62,6 +62,9 @@ test("read reads the config", async () => {
       useCalculatedVersion: false,
       prereleaseTemplate: null,
     },
+    pre: {
+      startWith: 0,
+    },
   });
 });
 
@@ -100,6 +103,9 @@ test("read can read config based on the passed in `cwd`", async () => {
     snapshot: {
       useCalculatedVersion: false,
       prereleaseTemplate: null,
+    },
+    pre: {
+      startWith: 0,
     },
   });
 });
@@ -154,6 +160,9 @@ let defaults: Config = {
   snapshot: {
     useCalculatedVersion: false,
     prereleaseTemplate: null,
+  },
+  pre: {
+    startWith: 0,
   },
   bumpVersionsWithWorkspaceProtocolOnly: false,
 };
