@@ -22,10 +22,12 @@ type SnapshotReleaseParameters = {
   commit?: string | undefined;
 };
 
-function getPreVersion(version: string) {
+function getPreVersion(version: string, config: Config) {
   let parsed = semverParse(version)!;
   let preVersion =
-    parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
+    parsed.prerelease[1] === undefined
+      ? config.pre.startWith - 1
+      : parsed.prerelease[1];
   if (typeof preVersion !== "number") {
     throw new InternalError("preVersion is not a number");
   }
@@ -318,12 +320,13 @@ function getRelevantChangesets(
 
 function getHighestPreVersion(
   packageGroup: PackageGroup,
-  packagesByName: Map<string, Package>
+  packagesByName: Map<string, Package>,
+  config: Config
 ): number {
   let highestPreVersion = 0;
   for (let pkg of packageGroup) {
     highestPreVersion = Math.max(
-      getPreVersion(packagesByName.get(pkg)!.packageJson.version),
+      getPreVersion(packagesByName.get(pkg)!.packageJson.version, config),
       highestPreVersion
     );
   }
@@ -360,17 +363,25 @@ function getPreInfo(
   for (const [, pkg] of packagesByName) {
     preVersions.set(
       pkg.packageJson.name,
-      getPreVersion(pkg.packageJson.version)
+      getPreVersion(pkg.packageJson.version, config)
     );
   }
   for (let fixedGroup of config.fixed) {
-    let highestPreVersion = getHighestPreVersion(fixedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      fixedGroup,
+      packagesByName,
+      config
+    );
     for (let fixedPackage of fixedGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
     }
   }
   for (let linkedGroup of config.linked) {
-    let highestPreVersion = getHighestPreVersion(linkedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      linkedGroup,
+      packagesByName,
+      config
+    );
     for (let linkedPackage of linkedGroup) {
       preVersions.set(linkedPackage, highestPreVersion);
     }

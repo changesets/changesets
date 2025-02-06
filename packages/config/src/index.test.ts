@@ -62,6 +62,9 @@ test("read reads the config", async () => {
       useCalculatedVersion: false,
       prereleaseTemplate: null,
     },
+    pre: {
+      startWith: 0,
+    },
   });
 });
 
@@ -100,6 +103,9 @@ test("read can read config based on the passed in `cwd`", async () => {
     snapshot: {
       useCalculatedVersion: false,
       prereleaseTemplate: null,
+    },
+    pre: {
+      startWith: 0,
     },
   });
 });
@@ -154,6 +160,9 @@ let defaults: Config = {
   snapshot: {
     useCalculatedVersion: false,
     prereleaseTemplate: null,
+  },
+  pre: {
+    startWith: 0,
   },
   bumpVersionsWithWorkspaceProtocolOnly: false,
 };
@@ -725,6 +734,22 @@ describe("parser errors", () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "Some errors occurred when validating the changesets config:
       The \`snapshot.useCalculatedVersion\` option is set as "not true" when the only valid values are undefined or a boolean"
+    `);
+  });
+
+  test("snapshot.useCalculatedVersion non-number", () => {
+    expect(() => {
+      unsafeParse(
+        {
+          pre: {
+            startWith: "not a number",
+          },
+        },
+        defaultPackages
+      );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The \`pre.startWith\` option is set as "not a number" but the \`pre.startWith\` option can only be set as a number"
     `);
   });
 

@@ -60,6 +60,9 @@ class FakeReleasePlan {
         useCalculatedVersion: false,
         prereleaseTemplate: null,
       },
+      pre: {
+        startWith: 0,
+      },
       ...config,
     };
 
@@ -98,6 +101,9 @@ async function testSetup(
       snapshot: {
         useCalculatedVersion: false,
         prereleaseTemplate: null,
+      },
+      pre: {
+        startWith: 0,
       },
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -675,6 +681,9 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
+          pre: {
+            startWith: 0,
+          },
         }
       );
       let pkgPathA = changedFiles.find((a) =>
@@ -750,6 +759,9 @@ describe("apply release plan", () => {
           snapshot: {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
+          },
+          pre: {
+            startWith: 0,
           },
         }
       );
@@ -1009,6 +1021,9 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
+              pre: {
+                startWith: 0,
+              },
             }
           );
           let pkgPathA = changedFiles.find((a) =>
@@ -1125,6 +1140,9 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
+              pre: {
+                startWith: 0,
+              },
             }
           );
           let pkgPathA = changedFiles.find((a) =>
@@ -1226,6 +1244,9 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
+              pre: {
+                startWith: 0,
+              },
             }
           );
           let pkgPathA = changedFiles.find((a) =>
@@ -1326,6 +1347,9 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
+              pre: {
+                startWith: 0,
+              },
             }
           );
           let pkgPathA = changedFiles.find((a) =>
@@ -1425,6 +1449,9 @@ describe("apply release plan", () => {
               snapshot: {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
+              },
+              pre: {
+                startWith: 0,
               },
             }
           );
@@ -1528,6 +1555,9 @@ describe("apply release plan", () => {
               snapshot: {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
+              },
+              pre: {
+                startWith: 0,
               },
             }
           );
@@ -1645,6 +1675,9 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
+              pre: {
+                startWith: 0,
+              },
             }
           );
           let pkgPathA = changedFiles.find((a) =>
@@ -1754,6 +1787,9 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
+              pre: {
+                startWith: 0,
+              },
             }
           );
           let pkgPathA = changedFiles.find((a) =>
@@ -1853,6 +1889,9 @@ describe("apply release plan", () => {
               snapshot: {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
+              },
+              pre: {
+                startWith: 0,
               },
             }
           );
@@ -1954,6 +1993,9 @@ describe("apply release plan", () => {
             snapshot: {
               useCalculatedVersion: false,
               prereleaseTemplate: null,
+            },
+            pre: {
+              startWith: 0,
             },
           }
         );
@@ -2187,6 +2229,9 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
+          pre: {
+            startWith: 0,
+          },
         }
       );
       let pkgAChangelogPath = changedFiles.find((a) =>
@@ -2325,6 +2370,9 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
+          pre: {
+            startWith: 0,
+          },
         }
       );
 
@@ -2433,6 +2481,9 @@ describe("apply release plan", () => {
           snapshot: {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
+          },
+          pre: {
+            startWith: 0,
           },
         }
       );
@@ -2554,6 +2605,9 @@ describe("apply release plan", () => {
           snapshot: {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
+          },
+          pre: {
+            startWith: 0,
           },
         }
       );
@@ -2689,6 +2743,9 @@ describe("apply release plan", () => {
           snapshot: {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
+          },
+          pre: {
+            startWith: 0,
           },
         }
       );

@@ -140,6 +140,15 @@
           "minLength": 1
         }
       }
+    },
+    "pre": {
+      "type": "object",
+      "properties": {
+        "startWith": {
+          "type": "number",
+          "description": "Use this number as a prerelease number when a package is first versioned as a prerelease."
+        }
+      }
     }
   }
 }
