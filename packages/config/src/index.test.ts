@@ -737,6 +737,22 @@ describe("parser errors", () => {
     `);
   });
 
+  test("snapshot.useCalculatedVersion non-number", () => {
+    expect(() => {
+      unsafeParse(
+        {
+          pre: {
+            startWith: "not a number",
+          },
+        },
+        defaultPackages
+      );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The \`pre.startWith\` option is set as "not a number" but the \`pre.startWith\` option can only be set as a number"
+    `);
+  });
+
   test("Experimental useCalculatedVersionForSnapshots non-boolean", () => {
     expect(() => {
       unsafeParse(
