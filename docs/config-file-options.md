@@ -158,7 +158,9 @@ You would specify our github changelog generator with:
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 
-## `bumpVersionsWithWorkspaceProtocolOnly` (boolean)
+## `bumpVersionsWithWorkspaceProtocolOnly` (optional boolean)
+
+Default value: `false`
 
 Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.
 
