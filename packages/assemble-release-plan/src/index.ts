@@ -322,8 +322,16 @@ function getHighestPreVersion(
 ): number {
   let highestPreVersion = 0;
   for (let pkg of packageGroup) {
+    let { version, name } = packagesByName.get(pkg)!.packageJson;
+
+    if (!version) {
+      throw new Error(
+        `Could not find version for package ${name} in the workspace`
+      );
+    }
+
     highestPreVersion = Math.max(
-      getPreVersion(packagesByName.get(pkg)!.packageJson.version),
+      getPreVersion(version),
       highestPreVersion
     );
   }
@@ -358,9 +366,15 @@ function getPreInfo(
   // preVersion is the map between package name and its next pre version number.
   let preVersions = new Map<string, number>();
   for (const [, pkg] of packagesByName) {
+    let { version, name } = pkg.packageJson;
+    if (!version) {
+      throw new Error(
+        `Could not find version for package ${name} in the workspace`
+      );
+    }
     preVersions.set(
       pkg.packageJson.name,
-      getPreVersion(pkg.packageJson.version)
+      getPreVersion(version)
     );
   }
   for (let fixedGroup of config.fixed) {
