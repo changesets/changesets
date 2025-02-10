@@ -26,6 +26,25 @@ Nice simple summary`,
       },
     ]);
   });
+  it("should read a changeset from a nested directory", async () => {
+    const nestedFolderPath = "some/nested/folder/";
+    const repositoryRoot = await testdir({
+      [`${nestedFolderPath}/.changeset/nested-folders-rock.md`]: `---
+"amazing-package": minor
+---
+
+Amazing summary`,
+    });
+    const cwd = path.resolve(repositoryRoot, nestedFolderPath);
+    const changesets = await read(cwd);
+    expect(changesets).toEqual([
+      {
+        releases: [{ name: "amazing-package", type: "minor" }],
+        summary: "Amazing summary",
+        id: "nested-folders-rock",
+      },
+    ]);
+  });
   it("should ignore a readme file", async () => {
     const cwd = await testdir({
       ".changeset/README.md": `Changesets are great for monorepos`,
