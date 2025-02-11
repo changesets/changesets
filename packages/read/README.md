@@ -6,7 +6,7 @@
 Read in all changesets from a repository.
 
 ```js
-import read from "@changesets/read";
+import getChangesets from "@changesets/read";
 
 let changesets = await getChangesets(cwd);
 ```
