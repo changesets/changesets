@@ -18,7 +18,7 @@ import printConfirmationMessage from "./messages";
 
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  { empty, open, noCommit }: { empty?: boolean; open?: boolean; noCommit?: boolean },
   config: Config
 ): Promise<void> {
   const packages = await getPackages(cwd);
@@ -90,7 +90,7 @@ export default async function add(
       config.commit,
       cwd
     );
-    if (getAddMessage) {
+    if (getAddMessage && !noCommit) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
       await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
       log(pc.green(`${empty ? "Empty " : ""}Changeset added and committed`));

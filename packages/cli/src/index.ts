@@ -7,7 +7,7 @@ import { run } from "./run";
 const args = process.argv.slice(2);
 
 const parsed = mri(args, {
-  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot"],
+  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot", "noCommit"],
   string: [
     "output",
     "otp",
@@ -21,6 +21,7 @@ const parsed = mri(args, {
     // Short flags
     v: "verbose",
     o: "output",
+    n: "noCommit",
     // Support kebab-case flags
     "since-master": "sinceMaster",
     "git-tag": "gitTag",
@@ -52,7 +53,7 @@ if (parsed.help && args.length === 1) {
     $ changeset [command]
   Commands
     init
-    add [--empty] [--open]
+    add [--empty] [--open] [--no-commit]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]
     status [--since <branch>] [--verbose] [--output JSON_FILE.json]

@@ -236,6 +236,38 @@ describe("Add command", () => {
     expect(git.commit).toHaveBeenCalledTimes(1);
   });
 
+  it("should not commit when the `no-commit` flag is passed in", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset(
+      cwd,
+      { empty: false, noCommit: true },
+      {
+        ...defaultConfig,
+        commit: [path.resolve(__dirname, "..", "..", "..", "commit"), null],
+      }
+    );
+    expect(git.add).toHaveBeenCalledTimes(0);
+    expect(git.commit).toHaveBeenCalledTimes(0);
+  });
+
   it("should create empty changeset when empty flag is passed in", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
