@@ -7,7 +7,15 @@ import { run } from "./run";
 const args = process.argv.slice(2);
 
 const parsed = mri(args, {
-  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot", "noCommit"],
+  boolean: [
+    "sinceMaster",
+    "verbose",
+    "empty",
+    "open",
+    "gitTag",
+    "snapshot",
+    "noCommit",
+  ],
   string: [
     "output",
     "otp",

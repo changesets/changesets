@@ -18,7 +18,11 @@ import printConfirmationMessage from "./messages";
 
 export default async function add(
   cwd: string,
-  { empty, open, noCommit }: { empty?: boolean; open?: boolean; noCommit?: boolean },
+  {
+    empty,
+    open,
+    noCommit,
+  }: { empty?: boolean; open?: boolean; noCommit?: boolean },
   config: Config
 ): Promise<void> {
   const packages = await getPackages(cwd);
