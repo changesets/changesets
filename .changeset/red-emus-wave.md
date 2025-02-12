@@ -1,5 +1,5 @@
 ---
-"@changesets/cli": minor
+"@changesets/cli": patch
 ---
 
-Remove support for version 1 changesets
+Removed extra leftover code related to Changesets v1
