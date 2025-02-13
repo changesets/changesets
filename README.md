@@ -95,6 +95,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Hey API](https://github.com/hey-api/openapi-ts)
 - [neverthrow](https://github.com/supermacro/neverthrow)
 - [Protect.js](https://github.com/cipherstash/protectjs)
+- [Apollo Client](https://github.com/apollographql/apollo-client)
 
 # Thanks/Inspiration
 
