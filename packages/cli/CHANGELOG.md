@@ -1,5 +1,23 @@
 # @changesets/cli
 
+## 2.27.12
+
+### Patch Changes
+
+- [#1562](https://github.com/changesets/changesets/pull/1562) [`a0f87f1`](https://github.com/changesets/changesets/commit/a0f87f1ce596e7c5c316edc24d5d4571e6acd4d7) Thanks [@Netail](https://github.com/Netail), [@cefn](https://github.com/cefn)! - Fixed changelog application when executing using `npx` and similar tools
+
+- Updated dependencies [[`a0f87f1`](https://github.com/changesets/changesets/commit/a0f87f1ce596e7c5c316edc24d5d4571e6acd4d7)]:
+  - @changesets/apply-release-plan@7.0.8
+
+## 2.27.11
+
+### Patch Changes
+
+- Updated dependencies [[`f0270f6`](https://github.com/changesets/changesets/commit/f0270f69793ddb6865f2510d334864b093cb10e3)]:
+  - @changesets/config@3.0.5
+  - @changesets/apply-release-plan@7.0.7
+  - @changesets/get-release-plan@4.0.6
+
 ## 2.27.10
 
 ### Patch Changes
