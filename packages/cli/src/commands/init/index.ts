@@ -6,9 +6,7 @@ import { defaultWrittenConfig } from "@changesets/config";
 import { info, log, warn, error } from "@changesets/logger";
 import { createRequire } from "node:module";
 
-const require = createRequire(
-  typeof __filename !== "undefined" ? __filename : import.meta.url
-);
+const require = createRequire(import.meta.url);
 
 async function pathExists(p: string) {
   return fs.access(p).then(

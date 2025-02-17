@@ -11,8 +11,12 @@ import type {
   Linked,
   PackageGroup,
 } from "@changesets/types";
-import packageJson from "../package.json" with { type: "json" };
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+// eslint-disable-next-line import/no-commonjs
+const packageJson = require("../package.json");
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
