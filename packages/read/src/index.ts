@@ -3,7 +3,6 @@ import path from "path";
 import parse from "@changesets/parse";
 import type { NewChangeset } from "@changesets/types";
 import * as git from "@changesets/git";
-import getOldChangesetsAndWarn from "./legacy.ts";
 
 async function filterChangesetsSinceRef(
   changesets: Array<string>,
@@ -42,11 +41,11 @@ export default async function getChangesets(
     );
   }
 
-  let oldChangesetsPromise = getOldChangesetsAndWarn(changesetBase, contents);
-
   let changesets = contents.filter(
     (file) =>
-      !file.startsWith(".") && file.endsWith(".md") && file !== "README.md"
+      !file.startsWith(".") &&
+      file.endsWith(".md") &&
+      !/^README\.md$/i.test(file)
   );
 
   const changesetContents = changesets.map(async (file) => {
@@ -54,8 +53,5 @@ export default async function getChangesets(
 
     return { ...parse(changeset), id: file.replace(".md", "") };
   });
-  return [
-    ...(await oldChangesetsPromise),
-    ...(await Promise.all(changesetContents)),
-  ];
+  return await Promise.all(changesetContents);
 }

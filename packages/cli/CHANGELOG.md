@@ -1,5 +1,64 @@
 # @changesets/cli
 
+## 2.28.0
+
+### Minor Changes
+
+- [#1453](https://github.com/changesets/changesets/pull/1453) [`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf) Thanks [@bennypowers](https://github.com/bennypowers)! - Added a new config option to opt-out from formatting with Prettier using `prettier: false`.
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf), [`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/config@3.1.0
+  - @changesets/write@0.4.0
+  - @changesets/apply-release-plan@7.0.9
+  - @changesets/assemble-release-plan@6.0.6
+  - @changesets/changelog-git@0.2.1
+  - @changesets/get-dependents-graph@2.1.3
+  - @changesets/get-release-plan@4.0.7
+  - @changesets/pre@2.0.2
+  - @changesets/read@0.6.3
+  - @changesets/should-skip-package@0.1.2
+
+## 2.27.12
+
+### Patch Changes
+
+- [#1562](https://github.com/changesets/changesets/pull/1562) [`a0f87f1`](https://github.com/changesets/changesets/commit/a0f87f1ce596e7c5c316edc24d5d4571e6acd4d7) Thanks [@Netail](https://github.com/Netail), [@cefn](https://github.com/cefn)! - Fixed changelog application when executing using `npx` and similar tools
+
+- Updated dependencies [[`a0f87f1`](https://github.com/changesets/changesets/commit/a0f87f1ce596e7c5c316edc24d5d4571e6acd4d7)]:
+  - @changesets/apply-release-plan@7.0.8
+
+## 2.27.11
+
+### Patch Changes
+
+- Updated dependencies [[`f0270f6`](https://github.com/changesets/changesets/commit/f0270f69793ddb6865f2510d334864b093cb10e3)]:
+  - @changesets/config@3.0.5
+  - @changesets/apply-release-plan@7.0.7
+  - @changesets/get-release-plan@4.0.6
+
+## 2.27.10
+
+### Patch Changes
+
+- [#1485](https://github.com/changesets/changesets/pull/1485) [`baf5644`](https://github.com/changesets/changesets/commit/baf56448606e005577dbe2fb1e78ff457dcaaefd) Thanks [@bluwy](https://github.com/bluwy)! - Ignore error if failed to find changed packages in `changeset add`
+
+- [#1489](https://github.com/changesets/changesets/pull/1489) [`7bf751c`](https://github.com/changesets/changesets/commit/7bf751cd80d49527026709529025beb0f6f0732a) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Use custom errors when exiting add command due to missing tool
+
+- [#1466](https://github.com/changesets/changesets/pull/1466) [`ccce743`](https://github.com/changesets/changesets/commit/ccce7433d5183fbccb3e3ad9005c66c3b3bc6bd9) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add error message and exit when there are no versionable packages
+
+- [#1514](https://github.com/changesets/changesets/pull/1514) [`962ab91`](https://github.com/changesets/changesets/commit/962ab918bc2deb89012a0cefce10387997cc54ed) Thanks [@nicoalonsop](https://github.com/nicoalonsop)! - Update spawndamnit to fix [cross-spawn vulnerability](https://security.snyk.io/vuln/SNYK-JS-CROSSSPAWN-8303230)
+
+- Updated dependencies [[`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f), [`26c8ba9`](https://github.com/changesets/changesets/commit/26c8ba9f58d3b123a19106771b4bdcb2800235cc), [`82cacb2`](https://github.com/changesets/changesets/commit/82cacb2227cf3a215cd9d29b9fb0c860f20ba2ca), [`962ab91`](https://github.com/changesets/changesets/commit/962ab918bc2deb89012a0cefce10387997cc54ed)]:
+  - @changesets/config@3.0.4
+  - @changesets/git@3.0.2
+  - @changesets/assemble-release-plan@6.0.5
+  - @changesets/read@0.6.2
+  - @changesets/apply-release-plan@7.0.6
+  - @changesets/get-release-plan@4.0.5
+
 ## 2.27.9
 
 ### Patch Changes

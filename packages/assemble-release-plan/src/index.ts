@@ -276,8 +276,16 @@ function getRelevantChangesets(
     const skippedPackages = [];
     const notSkippedPackages = [];
     for (const release of changeset.releases) {
+      const packageByName = packagesByName.get(release.name);
+
+      if (!packageByName) {
+        throw new Error(
+          `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
+        );
+      }
+
       if (
-        shouldSkipPackage(packagesByName.get(release.name)!, {
+        shouldSkipPackage(packageByName, {
           ignore: config.ignore,
           allowPrivatePackages: config.privatePackages.version,
         })

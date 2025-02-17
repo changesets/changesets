@@ -560,6 +560,28 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     expect(releases[1].newVersion).toEqual("1.0.0");
   });
 
+  it("should throw an error when a changeset contains a package that is not in the workspace", () => {
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }],
+    });
+    setup.addChangeset({
+      id: "small-dogs-sad",
+      releases: [{ name: "pkg-z", type: "minor" }],
+    });
+
+    expect(() =>
+      assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        defaultConfig,
+        undefined
+      )
+    ).toThrow(
+      "Found changeset small-dogs-sad for package pkg-z which is not in the workspace"
+    );
+  });
+
   describe("fixed packages", () => {
     it("should assemble release plan for fixed packages", () => {
       setup.addChangeset({

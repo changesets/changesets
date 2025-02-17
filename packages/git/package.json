@@ -1,6 +1,6 @@
 {
   "name": "@changesets/git",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Some git helpers that changesets use to get information",
   "main": "dist/changesets-git.cjs.js",
   "module": "dist/changesets-git.esm.js",
@@ -15,12 +15,15 @@
     "@changesets/errors": "^0.2.0",
     "@manypkg/get-packages": "^1.1.3",
     "is-subdir": "^1.1.1",
-    "micromatch": "^4.0.2",
-    "spawndamnit": "^2.0.0"
+    "micromatch": "^4.0.8",
+    "spawndamnit": "^3.0.1"
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
     "@changesets/write": "*",
     "file-url": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

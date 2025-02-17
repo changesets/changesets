@@ -1,5 +1,20 @@
 # @changesets/assemble-release-plan
 
+## 6.0.6
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/get-dependents-graph@2.1.3
+  - @changesets/should-skip-package@0.1.2
+
+## 6.0.5
+
+### Patch Changes
+
+- [#1508](https://github.com/changesets/changesets/pull/1508) [`26c8ba9`](https://github.com/changesets/changesets/commit/26c8ba9f58d3b123a19106771b4bdcb2800235cc) Thanks [@stevethedev](https://github.com/stevethedev)! - Add error-reporting for when a changeset references a non-existent package
+
 ## 6.0.4
 
 ### Patch Changes

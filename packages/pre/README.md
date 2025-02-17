@@ -1,6 +1,7 @@
 # @changesets/pre
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/pre)
+[![npm package](https://img.shields.io/npm/v/@changesets/pre)](https://npmjs.com/package/@changesets/pre)
+[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 Enter and exit pre mode in a Changesets repo.
 
