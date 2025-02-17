@@ -24,6 +24,7 @@ type SnapshotReleaseParameters = {
 
 function getPreVersion(version: string) {
   let parsed = semverParse(version)!;
+  if (!parsed) return
   let preVersion =
     parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
   if (typeof preVersion !== "number") {
