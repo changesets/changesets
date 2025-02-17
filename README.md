@@ -96,6 +96,8 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [neverthrow](https://github.com/supermacro/neverthrow)
 - [Apollo Client](https://github.com/apollographql/apollo-client)
 
+<!-- NOTE: we currently only accept new entries with at least 1000 GitHub stars -->
+
 # Thanks/Inspiration
 
 - [bolt](https://github.com/boltpkg/bolt) - Brought us a strong concept of how packages in a mono-repo should be able to interconnect, and provided the initial infrastructure to get inter-package information.
