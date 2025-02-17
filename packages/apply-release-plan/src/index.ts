@@ -18,7 +18,7 @@ import getChangelogEntry from "./get-changelog-entry.ts";
 import versionPackage from "./version-package.ts";
 import { createRequire } from "node:module";
 
-const require = createRequire(import.meta.url);
+const require = createRequire(typeof __filename !== "undefined" ? __filename : import.meta.url);
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {

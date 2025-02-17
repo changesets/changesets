@@ -10,7 +10,9 @@ import { getCurrentBranch } from "./gitUtils.ts";
 import { runPublish, runVersion } from "./run.ts";
 import { createRequire } from "node:module";
 
-const require = createRequire(import.meta.url);
+const require = createRequire(
+  typeof __filename !== "undefined" ? __filename : import.meta.url
+);
 
 const linkNodeModules = async (cwd: string) => {
   await fs.symlink(

@@ -5,7 +5,7 @@ import path from "path";
 import prettier from "prettier";
 import { createRequire } from "node:module";
 
-const require = createRequire(import.meta.url);
+const require = createRequire(typeof __filename !== "undefined" ? __filename : import.meta.url);
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
