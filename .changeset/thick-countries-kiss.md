@@ -1,7 +1,7 @@
 ---
 "@changesets/types": minor
-"@changesets/write": minor
+"@changesets/config": minor
 "@changesets/cli": minor
 ---
 
-Allow opting out of prettier formatting with `--noFormatChangesetsWithPrettier` flag
+Added a new config option to opt-out from formatting with Prettier using `prettier: false`.
