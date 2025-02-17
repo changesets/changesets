@@ -61,22 +61,21 @@ To make releasing easier, you can use [this changesets github action](https://gi
 
 ## Cool Projects already using Changesets for versioning and changelogs
 
-- [atlaskit](https://atlaskit.atlassian.com/)
+- [atlaskit](https://atlaskit.atlassian.com)
 - [emotion](https://emotion.sh/docs/introduction)
-- [keystone](https://v5.keystonejs.com/)
+- [keystone](https://keystonejs.com)
 - [react-select](https://react-select.com/home)
-- [XState](https://xstate.js.org/)
-- [pnpm](https://pnpm.io/)
-- [filbert-js](https://github.com/kuldeepkeshwar/filbert-js)
+- [XState](https://xstate.js.org)
+- [pnpm](https://pnpm.io)
 - [tinyhttp](https://github.com/talentlessguy/tinyhttp)
 - [Firebase Javascript SDK](https://github.com/firebase/firebase-js-sdk)
-- [Formik](https://github.com/formium/formik)
+- [Formik](https://github.com/jaredpalmer/formik)
 - [MobX](https://github.com/mobxjs/mobx)
 - [Nhost](https://github.com/nhost/nhost)
-- [verdaccio](https://verdaccio.org/)
-- [Chakra UI](https://chakra-ui.com/)
+- [verdaccio](https://verdaccio.org)
+- [Chakra UI](https://chakra-ui.com)
 - [Astro](https://astro.build)
-- [SvelteKit](https://kit.svelte.dev/)
+- [SvelteKit](https://kit.svelte.dev)
 - [Hydrogen](https://hydrogen.shopify.dev)
 - [react-pdf](https://github.com/diegomura/react-pdf)
 - [GraphQL Code Generator](https://github.com/dotansimha/graphql-code-generator)
@@ -96,6 +95,8 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [neverthrow](https://github.com/supermacro/neverthrow)
 - [Protect.js](https://github.com/cipherstash/protectjs)
 - [Apollo Client](https://github.com/apollographql/apollo-client)
+
+<!-- NOTE: we currently only accept new entries with at least 1000 GitHub stars -->
 
 # Thanks/Inspiration
 
