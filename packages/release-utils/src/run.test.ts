@@ -8,11 +8,6 @@ import path from "path";
 import spawn from "spawndamnit";
 import { getCurrentBranch } from "./gitUtils.ts";
 import { runPublish, runVersion } from "./run.ts";
-import { createRequire } from "node:module";
-
-const require = createRequire(
-  typeof __filename !== "undefined" ? __filename : import.meta.url
-);
 
 const linkNodeModules = async (cwd: string) => {
   await fs.symlink(
@@ -354,7 +349,7 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node ${require.resolve("./fake-publish-script-single-package")}`,
+      script: `node -e "import * as git from '@changesets/git'; console.log('🦋 New tag: v1.0.0'); git.tag('v1.0.0', process.cwd());"`,
       cwd: clone,
     });
 
@@ -390,7 +385,7 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node ${require.resolve("./fake-publish-script-multi-package")}`,
+      script: `node -e "import * as git from '@changesets/git'; console.log('🦋 New tag: pkg-a@1.0.0'); console.log('🦋 New tag: pkg-b@1.0.0'); git.tag('pkg-a@1.0.0', process.cwd()); git.tag('pkg-b@1.0.0', process.cwd());"`,
       cwd: clone,
     });
 
