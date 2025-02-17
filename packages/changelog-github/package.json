@@ -1,6 +1,6 @@
 {
   "name": "@changesets/changelog-github",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A changelog entry generator for GitHub that links to commits, PRs and users",
   "main": "dist/changesets-changelog-github.cjs.js",
   "module": "dist/changesets-changelog-github.esm.js",
@@ -20,7 +20,7 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/changelog-github",
   "dependencies": {
     "@changesets/get-github-info": "^0.6.0",
-    "@changesets/types": "^6.0.0",
+    "@changesets/types": "^6.1.0",
     "dotenv": "^8.1.0"
   },
   "devDependencies": {

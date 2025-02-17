@@ -135,7 +135,8 @@ export default async function applyReleasePlan(
     });
   });
 
-  let prettierInstance = getPrettierInstance(cwd);
+  let prettierInstance =
+    config.prettier !== false ? getPrettierInstance(cwd) : undefined;
 
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;
@@ -289,7 +290,7 @@ async function updateChangelog(
   changelogPath: string,
   changelog: string,
   name: string,
-  prettierInstance: typeof prettier
+  prettierInstance: typeof prettier | undefined
 ) {
   let templateString = `\n\n${changelog.trim()}\n`;
   let fileData;
@@ -343,15 +344,17 @@ async function updatePackageJson(
 async function writeFormattedMarkdownFile(
   filePath: string,
   content: string,
-  prettierInstance: typeof prettier
+  prettierInstance: typeof prettier | undefined
 ) {
   await fs.writeFile(
     filePath,
-    // Prettier v3 returns a promise
-    await prettierInstance.format(content, {
-      ...(await prettierInstance.resolveConfig(filePath)),
-      filepath: filePath,
-      parser: "markdown",
-    })
+    prettierInstance
+      ? // Prettier v3 returns a promise
+        await prettierInstance.format(content, {
+          ...(await prettierInstance.resolveConfig(filePath)),
+          filepath: filePath,
+          parser: "markdown",
+        })
+      : content
   );
 }

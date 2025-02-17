@@ -94,6 +94,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Clerk](https://github.com/clerk/javascript)
 - [Hey API](https://github.com/hey-api/openapi-ts)
 - [neverthrow](https://github.com/supermacro/neverthrow)
+- [Apollo Client](https://github.com/apollographql/apollo-client)
 
 # Thanks/Inspiration
 
