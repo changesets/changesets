@@ -11,7 +11,7 @@ import { runPublish, runVersion } from "./run.ts";
 
 const linkNodeModules = async (cwd: string) => {
   await fs.symlink(
-    path.join(__dirname, "..", "..", "..", "node_modules"),
+    path.join(path.dirname(import.meta.url), "..", "..", "..", "node_modules"),
     path.join(cwd, "node_modules")
   );
 };

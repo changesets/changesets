@@ -13,7 +13,7 @@ import detectIndent from "detect-indent";
 import fs from "node:fs/promises";
 import path from "path";
 import prettier from "prettier";
-import resolveFrom from "resolve-from";
+import { resolve } from "import-meta-resolve";
 import getChangelogEntry from "./get-changelog-entry.ts";
 import versionPackage from "./version-package.ts";
 import { createRequire } from "node:module";
@@ -230,9 +230,9 @@ async function getNewChangelogEntry(
   let changelogPath;
 
   try {
-    changelogPath = resolveFrom(changesetPath, config.changelog[0]);
+    changelogPath = resolve(changesetPath, config.changelog[0]);
   } catch {
-    changelogPath = resolveFrom(contextDir, config.changelog[0]);
+    changelogPath = resolve(contextDir, config.changelog[0]);
   }
 
   let possibleChangelogFunc = require(changelogPath);

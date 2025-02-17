@@ -1,6 +1,6 @@
 import type { CommitFunctions } from "@changesets/types";
 import path from "path";
-import resolveFrom from "resolve-from";
+import { resolve } from "import-meta-resolve";
 
 export function getCommitFunctions(
   commit: false | readonly [string, any],
@@ -12,7 +12,7 @@ export function getCommitFunctions(
   }
   let commitOpts: any = commit[1];
   let changesetPath = path.join(cwd, ".changeset");
-  let commitPath = resolveFrom(changesetPath, commit[0]);
+  let commitPath = resolve(changesetPath, commit[0]);
 
   let possibleCommitFunc = require(commitPath);
   if (possibleCommitFunc.default) {
