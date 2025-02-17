@@ -8,7 +8,7 @@ export type CliOptions = {
   ignore?: string | string[];
   snapshot?: string | boolean;
   snapshotPrereleaseTemplate?: string;
-  noFormatChangesetsWithPrettier?: boolean;
+  prettier?: boolean;
   tag?: string;
   gitTag?: boolean;
   open?: boolean;

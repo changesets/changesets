@@ -146,6 +146,7 @@ let defaults: Config = {
   changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
   ignore: [],
+  prettier: true,
   privatePackages: { version: true, tag: false },
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,

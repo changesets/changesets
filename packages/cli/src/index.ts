@@ -7,15 +7,7 @@ import { run } from "./run";
 const args = process.argv.slice(2);
 
 const parsed = mri(args, {
-  boolean: [
-    "sinceMaster",
-    "verbose",
-    "empty",
-    "open",
-    "gitTag",
-    "snapshot",
-    "noFormatChangesetsWithPrettier",
-  ],
+  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot"],
   string: [
     "output",
     "otp",
@@ -40,7 +32,6 @@ const parsed = mri(args, {
   },
   default: {
     gitTag: true,
-    noFormatChangesetsWithPrettier: false,
   },
 });
 
@@ -78,12 +69,6 @@ if (parsed.version && args.length === 1) {
   // eslint-disable-next-line import/no-extraneous-dependencies
   console.log(require("@changesets/cli/package.json").version);
   process.exit(0);
-}
-
-// Version should only be shown if it's the only argument passed
-if (parsed.noFormatChangesetsWithPrettier) {
-  delete parsed.noFormatChangesetsWithPrettier;
-  parsed.formatChangesetsWithPrettier = false;
 }
 
 const cwd = process.cwd();

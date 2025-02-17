@@ -70,7 +70,7 @@ describe("simple project", () => {
       },
       cwd,
       {
-        formatChangesetsWithPrettier: false,
+        prettier: false,
       }
     );
 
@@ -83,7 +83,7 @@ describe("simple project", () => {
     });
   });
 
-  it("should format if user fails to opt out", async () => {
+  it("should format if user fails doesn't opt out", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,

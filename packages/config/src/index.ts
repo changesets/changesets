@@ -331,6 +331,16 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
+  if (json.prettier !== undefined) {
+    messages.push(
+      `The \`prettier\` option is set as ${JSON.stringify(
+        json.prettier,
+        null,
+        2
+      )} when the only valid values are undefined or a boolean`
+    );
+  }
+
   const { snapshot } = json;
 
   if (snapshot !== undefined) {
@@ -479,6 +489,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           ?.updateInternalDependents ?? "out-of-range",
     },
+
+    prettier: typeof json.prettier === "boolean" ? json.prettier : true,
 
     // TODO consider enabling this by default in the next major version
     privatePackages:
