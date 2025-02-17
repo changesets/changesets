@@ -1,6 +1,6 @@
 import { add, commit } from "@changesets/git";
 import { silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
-import { Changeset } from "@changesets/types";
+import type { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import fileUrl from "file-url";
 import fs from "node:fs/promises";
@@ -8,6 +8,9 @@ import path from "path";
 import spawn from "spawndamnit";
 import { getCurrentBranch } from "./gitUtils.ts";
 import { runPublish, runVersion } from "./run.ts";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 const linkNodeModules = async (cwd: string) => {
   await fs.symlink(

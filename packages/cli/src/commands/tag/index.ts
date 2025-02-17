@@ -1,7 +1,7 @@
 import * as git from "@changesets/git";
 import { log } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 

@@ -3,15 +3,15 @@ import path from "path";
 import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
-import { Packages } from "@manypkg/get-packages";
-import {
+import type { Packages } from "@manypkg/get-packages";
+import type {
   Config,
   WrittenConfig,
   Fixed,
   Linked,
   PackageGroup,
 } from "@changesets/types";
-import packageJson from "../package.json";
+import packageJson from "../package.json" with { type: "json" };
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 
 export let defaultWrittenConfig = {

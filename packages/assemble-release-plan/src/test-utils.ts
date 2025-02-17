@@ -1,5 +1,5 @@
-import { NewChangeset, Release, VersionType } from "@changesets/types";
-import { Package, Packages } from "@manypkg/get-packages";
+import type { NewChangeset, Release, VersionType } from "@changesets/types";
+import type { Package, Packages } from "@manypkg/get-packages";
 
 function getPackage({
   name,

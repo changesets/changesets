@@ -4,6 +4,9 @@ import pc from "picocolors";
 
 import { defaultWrittenConfig } from "@changesets/config";
 import { info, log, warn, error } from "@changesets/logger";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 async function pathExists(p: string) {
   return fs.access(p).then(

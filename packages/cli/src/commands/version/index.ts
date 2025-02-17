@@ -2,7 +2,7 @@ import pc from "picocolors";
 import path from "path";
 import * as git from "@changesets/git";
 import { log, warn, error } from "@changesets/logger";
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
 import assembleReleasePlan from "@changesets/assemble-release-plan";

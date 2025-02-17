@@ -3,7 +3,7 @@ import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { error } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "node:fs/promises";
 import path from "path";
@@ -14,7 +14,7 @@ import publish from "./commands/publish/index.ts";
 import status from "./commands/status/index.ts";
 import tagCommand from "./commands/tag/index.ts";
 import version from "./commands/version/index.ts";
-import { CliOptions } from "./types.ts";
+import type { CliOptions } from "./types.ts";
 
 export async function run(
   input: string[],

@@ -7,8 +7,8 @@ release. This includes updating package versions, and updating changelogs.
 
 ```ts
 import applyReleasePlan from "@changesets/apply-release-plan";
-import { ReleasePlan, Config } from "@changesets/types";
-import { Packages } from '@manypkg/get-packages'
+import type { ReleasePlan, Config } from "@changesets/types";
+import type { Packages } from '@manypkg/get-packages'
 
 await applyReleasePlan(
     // The release plan to be applied - see @changesets/types for information about its shape

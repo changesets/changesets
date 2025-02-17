@@ -5,7 +5,7 @@ import path from "path";
 import * as git from "@changesets/git";
 import { info, log, warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import { ExternalEditor } from "external-editor";

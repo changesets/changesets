@@ -1,14 +1,14 @@
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import {
+import type {
   ChangelogFunctions,
   Config,
   ModCompWithPackage,
   NewChangeset,
   ReleasePlan,
 } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import type { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
 import fs from "node:fs/promises";
 import path from "path";
@@ -16,6 +16,9 @@ import prettier from "prettier";
 import resolveFrom from "resolve-from";
 import getChangelogEntry from "./get-changelog-entry.ts";
 import versionPackage from "./version-package.ts";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {

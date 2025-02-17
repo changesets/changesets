@@ -1,7 +1,7 @@
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
-import { ReleasePlan } from "@changesets/types";
+import type { ReleasePlan } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "node:fs/promises";

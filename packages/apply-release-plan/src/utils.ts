@@ -2,7 +2,7 @@
  * Shared utility functions and business logic
  */
 import semverSatisfies from "semver/functions/satisfies.js";
-import { VersionType } from "@changesets/types";
+import type { VersionType } from "@changesets/types";
 
 const bumpTypes = ["none", "patch", "minor", "major"];
 

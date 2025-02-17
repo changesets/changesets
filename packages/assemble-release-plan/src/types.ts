@@ -1,4 +1,4 @@
-import { VersionType, PreState } from "@changesets/types";
+import type { VersionType, PreState } from "@changesets/types";
 
 export type InternalRelease = {
   name: string;

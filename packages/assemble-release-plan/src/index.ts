@@ -1,14 +1,14 @@
 import { InternalError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import {
+import type {
   Config,
   NewChangeset,
   PackageGroup,
   PreState,
   ReleasePlan,
 } from "@changesets/types";
-import { Package, Packages } from "@manypkg/get-packages";
+import type { Package, Packages } from "@manypkg/get-packages";
 import semverParse from "semver/functions/parse.js";
 import applyLinks from "./apply-links.ts";
 import determineDependents from "./determine-dependents.ts";

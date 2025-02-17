@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "path";
 import pc from "picocolors";
-import { NewChangeset } from "@changesets/types";
+import type { NewChangeset } from "@changesets/types";
 import pFilter from "p-filter";
 import { warn } from "@changesets/logger";
 

@@ -2,7 +2,7 @@ import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { warn } from "@changesets/logger";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import { Changeset, Config } from "@changesets/types";
+import type { Changeset, Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import humanId from "human-id";
@@ -43,11 +43,9 @@ function mockGlobalDate<
   };
 }
 
-let changelogPath = path.resolve(__dirname, "../../changelog");
-let commitPath = path.resolve(__dirname, "../../commit");
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
-  changelog: [changelogPath, null],
+  changelog: ["@changesets/cli/changelog", null],
 };
 
 let defaultOptions = {
@@ -345,7 +343,7 @@ describe("running version in a simple project", () => {
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      commit: [commitPath, null],
+      commit: ["@changesets/cli/commit", null],
     });
 
     expect(spy).toHaveBeenCalled();
@@ -395,7 +393,7 @@ describe("running version in a simple project", () => {
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      commit: [commitPath, null],
+      commit: ["@changesets/cli/commit", null],
     });
 
     expect(spy).toHaveBeenCalled();
@@ -1286,7 +1284,7 @@ describe("snapshot release", () => {
       },
       {
         ...modifiedDefaultConfig,
-        commit: [commitPath, null],
+        commit: ["@changesets/cli/commit", null],
       }
     );
 

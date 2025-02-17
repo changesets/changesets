@@ -22,7 +22,7 @@ This package is used by internally by Changesets to enter and exit pre mode alon
 ## Types
 
 ```ts
-import { PreState } from "@changesets/types";
+import type { PreState } from "@changesets/types";
 
 export function enterPre(cwd: string, tag: string): Promise<void>;
 export function exitPre(cwd: string): Promise<void>;

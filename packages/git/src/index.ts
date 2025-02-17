@@ -1,7 +1,7 @@
 import spawn from "spawndamnit";
 import fs from "node:fs/promises";
 import path from "path";
-import { getPackages, Package } from "@manypkg/get-packages";
+import { getPackages, type Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
 import micromatch from "micromatch";
