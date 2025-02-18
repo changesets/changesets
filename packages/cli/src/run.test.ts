@@ -2,6 +2,7 @@ import { error } from "@changesets/logger";
 import { testdir } from "@changesets/test-utils";
 
 import { run } from "./run";
+import writeChangeset from "@changesets/write";
 
 jest.mock("@changesets/logger");
 jest.mock("./commands/version");
@@ -167,6 +168,71 @@ describe("cli", () => {
       expect(loggerErrorCalls[0][0]).toEqual(
         `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`
       );
+    });
+
+    it("should not throw if prettier: false is configured", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          prettier: false,
+        }),
+      });
+      await writeChangeset(
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+
+      try {
+        await run(["version"], {}, cwd);
+      } catch (e) {
+        // ignore the error. We just want to validate the error message
+      }
+
+      const loggerErrorCalls = (error as any).mock.calls;
+      expect(loggerErrorCalls.length).toEqual(0);
+    });
+
+    it("should throw if prettier: string is configured", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          prettier: "no thanks",
+        }),
+      });
+      await writeChangeset(
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+
+      try {
+        await run(["version"], {}, cwd);
+      } catch (e) {
+        // ignore the error. We just want to validate the error message
+      }
+
+      const loggerErrorCalls = (error as any).mock.calls;
+      expect(loggerErrorCalls.length).toEqual(1);
+      expect(loggerErrorCalls[0][0]).toEqual("Can't prettier");
     });
   });
 });
