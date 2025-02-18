@@ -227,12 +227,10 @@ describe("cli", () => {
       try {
         await run(["version"], {}, cwd);
       } catch (e) {
-        // ignore the error. We just want to validate the error message
+        expect((e as any).message)
+          .toEqual(`Some errors occurred when validating the changesets config:
+The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean`);
       }
-
-      const loggerErrorCalls = (error as any).mock.calls;
-      expect(loggerErrorCalls.length).toEqual(1);
-      expect(loggerErrorCalls[0][0]).toEqual("Can't prettier");
     });
   });
 });
