@@ -86,7 +86,7 @@ export default async function version(
     __dirname
   );
 
-  const [{ getVersionMessage }, commitOpts] = getCommitFunctions(
+  const [{ getVersionMessage }, commitOpts] = await getCommitFunctions(
     releaseConfig.commit,
     cwd
   );

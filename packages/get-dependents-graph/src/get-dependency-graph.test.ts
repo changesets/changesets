@@ -110,7 +110,7 @@ describe("getting the dependency graph", function () {
       expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
         [
           [
-            "Package [36m"foo"[39m must depend on the current version of [36m"bar"[39m: [32m"1.0.0"[39m vs [31m"link:../bar"[39m",
+            "Package "foo" must depend on the current version of "bar": "1.0.0" vs "link:../bar"",
           ],
         ]
       `);

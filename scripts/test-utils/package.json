@@ -15,7 +15,8 @@
   "dependencies": {
     "@changesets/logger": "^0.1.1",
     "fixturez": "^1.1.0",
-    "spawndamnit": "^3.0.1"
+    "spawndamnit": "^3.0.1",
+    "vitest": "^3.0.6"
   },
   "engines": {
     "node": ">=18.0.0"

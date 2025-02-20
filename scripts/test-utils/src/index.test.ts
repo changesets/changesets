@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { log } from "@changesets/logger";
 import { silenceLogsInBlock } from "./index.ts";
 
@@ -6,7 +7,7 @@ describe("temporarilySilenceLogs", () => {
   describe("log", () => {
     let originalConsoleLog = console.log;
     beforeEach(() => {
-      console.log = jest.fn();
+      console.log = vi.fn();
     });
     afterEach(() => {
       console.log = originalConsoleLog;

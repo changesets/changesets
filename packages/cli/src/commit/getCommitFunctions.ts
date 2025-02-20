@@ -2,19 +2,19 @@ import type { CommitFunctions } from "@changesets/types";
 import path from "path";
 import { resolve } from "import-meta-resolve";
 
-export function getCommitFunctions(
+export async function getCommitFunctions(
   commit: false | readonly [string, any],
   cwd: string
-): [CommitFunctions, any] {
+): Promise<[CommitFunctions, any]> {
   let commitFunctions: CommitFunctions = {};
   if (!commit) {
     return [commitFunctions, null];
   }
   let commitOpts: any = commit[1];
   let changesetPath = path.join(cwd, ".changeset");
-  let commitPath = resolve(changesetPath, commit[0]);
+  let commitPath = resolve(commit[0], changesetPath);
 
-  let possibleCommitFunc = require(commitPath);
+  let possibleCommitFunc = await import(commitPath);
   if (possibleCommitFunc.default) {
     possibleCommitFunc = possibleCommitFunc.default;
   }

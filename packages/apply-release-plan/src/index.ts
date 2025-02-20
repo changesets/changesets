@@ -17,6 +17,7 @@ import { resolve } from "import-meta-resolve";
 import getChangelogEntry from "./get-changelog-entry.ts";
 import versionPackage from "./version-package.ts";
 import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
 
@@ -230,12 +231,18 @@ async function getNewChangelogEntry(
   let changelogPath;
 
   try {
-    changelogPath = resolve(changesetPath, config.changelog[0]);
+    changelogPath = resolve(
+      config.changelog[0],
+      pathToFileURL(changesetPath).toString()
+    );
   } catch {
-    changelogPath = resolve(contextDir, config.changelog[0]);
+    changelogPath = resolve(
+      config.changelog[0],
+      pathToFileURL(contextDir).toString()
+    );
   }
 
-  let possibleChangelogFunc = require(changelogPath);
+  let possibleChangelogFunc = await import(changelogPath);
   if (possibleChangelogFunc.default) {
     possibleChangelogFunc = possibleChangelogFunc.default;
   }

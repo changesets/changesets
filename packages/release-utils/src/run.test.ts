@@ -350,7 +350,7 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node -e "import * as git from '@changesets/git'; console.log('🦋 New tag: v1.0.0'); git.tag('v1.0.0', process.cwd());"`,
+      script: `node -e "const git = await import('@changesets/git'); console.log('🦋 New tag: v1.0.0'); git.tag('v1.0.0', process.cwd());"`,
       cwd: clone,
     });
 
@@ -386,7 +386,7 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node -e "import * as git from '@changesets/git'; console.log('🦋 New tag: pkg-a@1.0.0'); console.log('🦋 New tag: pkg-b@1.0.0'); git.tag('pkg-a@1.0.0', process.cwd()); git.tag('pkg-b@1.0.0', process.cwd());"`,
+      script: `node -e "const git = await import('@changesets/git'); console.log('🦋 New tag: pkg-a@1.0.0'); console.log('🦋 New tag: pkg-b@1.0.0'); git.tag('pkg-a@1.0.0', process.cwd()); git.tag('pkg-b@1.0.0', process.cwd());"`,
       cwd: clone,
     });
 
