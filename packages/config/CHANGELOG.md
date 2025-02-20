@@ -1,5 +1,11 @@
 # @changesets/config
 
+## 3.1.1
+
+### Patch Changes
+
+- [#1590](https://github.com/changesets/changesets/pull/1590) [`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998) Thanks [@bennypowers](https://github.com/bennypowers)! - Prevent fatal error when using the newly-introduced `prettier` option
+
 ## 3.1.0
 
 ### Minor Changes
