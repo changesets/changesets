@@ -306,29 +306,29 @@ test("gets the author of the associated pull request if it exists rather than th
   expect(result).toMatchObject({ pull: 3682, user: "lmvco" });
 });
 
-test("throws error on missing repo name", () => {
+test("throws error on missing repo name", async () => {
   const request = {
     commit: "c7e9c69",
   };
 
-  expect(async () =>
+  await expect(async () =>
     // @ts-expect-error
     getInfo(request)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"`
+    `[Error: Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo]`
   );
 });
 
-test("throws error on invalid repo name", () => {
+test("throws error on invalid repo name", async () => {
   const request = {
     commit: "c7e9c69",
     repo: "https://github.com/JedWatson/react-select",
   };
 
-  expect(async () =>
+  await expect(async () =>
     getInfo(request)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "^[\\w.-]+\\/[\\w.-]+$" pattern)"`
+    `[Error: Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "^[\\w.-]+\\/[\\w.-]+$" pattern)]`
   );
 });
 

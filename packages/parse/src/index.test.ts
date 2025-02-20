@@ -222,11 +222,11 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      "could not parse changeset - invalid frontmatter: ---
+      [Error: could not parse changeset - invalid frontmatter: ---
       "cool-package": minor
       ---  fail
 
-      Nice simple summary"
+      Nice simple summary]
     `);
   });
 });
