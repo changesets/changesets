@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import { add, commit } from "@changesets/git";
-import { silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
+import { linkNodeModules, silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
 import type { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import fileUrl from "file-url";
@@ -10,12 +10,6 @@ import spawn from "spawndamnit";
 import { getCurrentBranch } from "./gitUtils.ts";
 import { runPublish, runVersion } from "./run.ts";
 
-const linkNodeModules = async (cwd: string) => {
-  await fs.symlink(
-    path.join(path.dirname(import.meta.url), "..", "..", "..", "node_modules"),
-    path.join(cwd, "node_modules")
-  );
-};
 const writeChangesets = (changesets: Changeset[], cwd: string) => {
   return Promise.all(changesets.map((commit) => writeChangeset(commit, cwd)));
 };

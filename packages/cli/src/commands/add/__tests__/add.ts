@@ -15,6 +15,9 @@ import {
   askList,
 } from "../../../utils/cli-utilities.ts";
 import addChangeset from "../index.ts";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 vi.mock("../../../utils/cli-utilities");
 vi.mock("@changesets/git");

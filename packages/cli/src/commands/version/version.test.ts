@@ -2,7 +2,11 @@ import { Mock, vi } from "vitest";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { warn } from "@changesets/logger";
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import {
+  linkNodeModules,
+  silenceLogsInBlock,
+  testdir,
+} from "@changesets/test-utils";
 import type { Changeset, Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
@@ -326,6 +330,9 @@ describe("running version in a simple project", () => {
         version: "1.0.0",
       }),
     });
+
+    await linkNodeModules(cwd);
+
     const ids = await writeChangesets(
       [
         {
@@ -376,6 +383,9 @@ describe("running version in a simple project", () => {
         version: "1.0.0",
       }),
     });
+
+    await linkNodeModules(cwd);
+
     await writeChangesets(
       [
         {

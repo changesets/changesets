@@ -20,6 +20,9 @@ import {
   outputFile,
   pathExists,
 } from "@changesets/test-utils";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 class FakeReleasePlan {
   changesets: NewChangeset[];

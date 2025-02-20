@@ -17,7 +17,7 @@ import { resolve } from "import-meta-resolve";
 import getChangelogEntry from "./get-changelog-entry.ts";
 import versionPackage from "./version-package.ts";
 import { createRequire } from "node:module";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
 
@@ -73,7 +73,7 @@ export default async function applyReleasePlan(
   packages: Packages,
   config: Config = defaultConfig,
   snapshot?: string | boolean,
-  contextDir = __dirname
+  contextDir = path.dirname(fileURLToPath(import.meta.url))
 ) {
   let cwd = packages.root.dir;
 

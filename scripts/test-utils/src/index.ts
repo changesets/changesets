@@ -4,7 +4,7 @@ import spawn from "spawndamnit";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import * as logger from "@changesets/logger";
+import { fileURLToPath } from "node:url";
 
 const mockedLogger: Partial<typeof import("@changesets/logger")> = {};
 
@@ -21,12 +21,6 @@ vi.mock(import("@changesets/logger"), async (importOriginal) => {
 });
 
 const createLogSilencer = () => {
-  const originalLoggerError = logger.error;
-  const originalLoggerInfo = logger.info;
-  const originalLoggerLog = logger.log;
-  const originalLoggerWarn = logger.warn;
-  const originalLoggerSuccess = logger.success;
-
   const originalConsoleError = console.error;
   const originalConsoleInfo = console.info;
   const originalConsoleLog = console.log;
@@ -156,5 +150,18 @@ export async function pathExists(p: string) {
   return fsp.access(p).then(
     () => true,
     () => false
+  );
+}
+
+export async function linkNodeModules(cwd: string) {
+  await fsp.symlink(
+    path.join(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "..",
+      "..",
+      "node_modules"
+    ),
+    path.join(cwd, "node_modules")
   );
 }

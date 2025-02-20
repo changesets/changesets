@@ -11,6 +11,7 @@ import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 import { getCurrentCommitId } from "@changesets/git";
+import { fileURLToPath } from "node:url";
 
 let importantSeparator = pc.red(
   "===============================IMPORTANT!==============================="
@@ -83,7 +84,7 @@ export default async function version(
     packages,
     releaseConfig,
     options.snapshot,
-    __dirname
+    path.dirname(fileURLToPath(import.meta.url))
   );
 
   const [{ getVersionMessage }, commitOpts] = await getCommitFunctions(
