@@ -1,5 +1,14 @@
 # @changesets/cli
 
+## 2.28.1
+
+### Patch Changes
+
+- Updated dependencies [[`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998)]:
+  - @changesets/config@3.1.1
+  - @changesets/apply-release-plan@7.0.10
+  - @changesets/get-release-plan@4.0.8
+
 ## 2.28.0
 
 ### Minor Changes
