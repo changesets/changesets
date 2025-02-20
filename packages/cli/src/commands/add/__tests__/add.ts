@@ -1,3 +1,4 @@
+import { Mock, vi } from "vitest";
 import path from "path";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
@@ -15,9 +16,9 @@ import {
 } from "../../../utils/cli-utilities.ts";
 import addChangeset from "../index.ts";
 
-jest.mock("../../../utils/cli-utilities");
-jest.mock("@changesets/git");
-jest.mock("@changesets/write");
+vi.mock("../../../utils/cli-utilities");
+vi.mock("@changesets/git");
+vi.mock("@changesets/write");
 // @ts-ignore
 writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 // @ts-ignore
@@ -370,7 +371,7 @@ describe("Add command", () => {
   });
 
   it("should exit with an error when there are no versionable packages in a single-package repo", async () => {
-    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+    const loggerErrorMock = loggerError as Mock<typeof loggerError>;
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -399,7 +400,7 @@ describe("Add command", () => {
   });
 
   it("should exit with an error when there are no versionable packages in a monorepo", async () => {
-    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+    const loggerErrorMock = loggerError as Mock<typeof loggerError>;
 
     const cwd = await testdir({
       "package.json": JSON.stringify({

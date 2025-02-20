@@ -26,8 +26,8 @@
   "devDependencies": {
     "@changesets/test-utils": "*",
     "@types/micromatch": "^4.0.1",
-    "jest-in-case": "^1.0.2",
-    "outdent": "^0.8.0"
+    "outdent": "^0.8.0",
+    "vitest": "^3.0.6"
   },
   "engines": {
     "node": ">=18.0.0"

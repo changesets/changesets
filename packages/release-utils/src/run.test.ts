@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { add, commit } from "@changesets/git";
 import { silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
 import type { Changeset } from "@changesets/types";
@@ -19,11 +20,11 @@ const writeChangesets = (changesets: Changeset[], cwd: string) => {
   return Promise.all(changesets.map((commit) => writeChangeset(commit, cwd)));
 };
 
-jest.setTimeout(10000);
+vi.setConfig({ testTimeout: 10000 });
 silenceLogsInBlock();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 async function setupRepoAndClone(cwd: string) {

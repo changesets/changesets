@@ -1,10 +1,11 @@
+import { vi } from "vitest";
 import publishPackages from "../publishPackages.ts";
 import * as npmUtils from "../npm-utils.ts";
 import { getPackages } from "@manypkg/get-packages";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 
-jest.mock("../npm-utils");
-jest.mock("ci-info", () => ({
+vi.mock("../npm-utils");
+vi.mock("ci-info", () => ({
   isCI: true,
 }));
 
@@ -12,7 +13,7 @@ describe("publishPackages", () => {
   silenceLogsInBlock();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("when isCI", () => {

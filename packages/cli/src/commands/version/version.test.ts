@@ -1,3 +1,4 @@
+import { Mock, vi } from "vitest";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { warn } from "@changesets/logger";
@@ -56,10 +57,10 @@ let defaultOptions = {
 // This is from bolt's error log
 const consoleError = console.error;
 
-jest.mock("../../utils/cli-utilities");
-jest.mock("@changesets/git");
-jest.mock("human-id");
-jest.mock("@changesets/logger");
+vi.mock("../../utils/cli-utilities");
+vi.mock("@changesets/git");
+vi.mock("human-id");
+vi.mock("@changesets/logger");
 
 // @ts-ignore
 git.add.mockImplementation(() => Promise.resolve(true));
@@ -102,11 +103,11 @@ const getChangelog = async (pkgName: string, cwd: string) => {
 
 beforeEach(() => {
   let i = 0;
-  (humanId as jest.Mock<string, []>).mockImplementation(() => {
+  (humanId as Mock<() => string>).mockImplementation(() => {
     return `some-id-${i++}`;
   });
 
-  console.error = jest.fn();
+  console.error = vi.fn();
 });
 
 afterEach(() => {
@@ -300,7 +301,7 @@ describe("running version in a simple project", () => {
       ],
       cwd
     );
-    const spy = jest.spyOn(git, "commit");
+    const spy = vi.spyOn(git, "commit");
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -337,7 +338,7 @@ describe("running version in a simple project", () => {
       ],
       cwd
     );
-    const spy = jest.spyOn(git, "add");
+    const spy = vi.spyOn(git, "add");
 
     expect(spy).not.toHaveBeenCalled();
 
@@ -387,7 +388,7 @@ describe("running version in a simple project", () => {
       ],
       cwd
     );
-    const spy = jest.spyOn(git, "commit");
+    const spy = vi.spyOn(git, "commit");
 
     expect(spy).not.toHaveBeenCalled();
 
@@ -1273,7 +1274,7 @@ describe("snapshot release", () => {
       ],
       cwd
     );
-    const spy = jest.spyOn(git, "commit");
+    const spy = vi.spyOn(git, "commit");
 
     expect(spy).not.toHaveBeenCalled();
 

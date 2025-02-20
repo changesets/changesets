@@ -17,7 +17,8 @@
     "dotenv": "^8.1.0"
   },
   "devDependencies": {
-    "@changesets/parse": "*"
+    "@changesets/parse": "*",
+    "vitest": "^3.0.6"
   },
   "engines": {
     "node": ">=18.0.0"

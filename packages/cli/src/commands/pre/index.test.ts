@@ -1,3 +1,4 @@
+import { Mocked, vi } from "vitest";
 import fs from "node:fs/promises";
 import path from "path";
 import pc from "picocolors";
@@ -7,9 +8,9 @@ import { testdir } from "@changesets/test-utils";
 
 import pre from "./index.ts";
 
-jest.mock("@changesets/logger");
+vi.mock("@changesets/logger");
 
-let mockedLogger = logger as jest.Mocked<typeof logger>;
+let mockedLogger = logger as Mocked<typeof logger>;
 
 describe("enterPre", () => {
   it("should enter", async () => {

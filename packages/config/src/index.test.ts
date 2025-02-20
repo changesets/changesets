@@ -1,12 +1,12 @@
+import { vi } from "vitest";
 import { read, parse } from "./index.ts";
-import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import type { Config, WrittenConfig } from "@changesets/types";
 import { type Packages, getPackages } from "@manypkg/get-packages";
 import { testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
 
-jest.mock("@changesets/logger");
+vi.mock("@changesets/logger");
 
 type CorrectCase = {
   packages?: string[];
@@ -422,18 +422,18 @@ let correctCases: Record<string, CorrectCase> = {
   },
 };
 
-jestInCase(
-  "parse",
-  (testCase) => {
-    expect(
-      parse(
-        testCase.input,
-        withPackages(testCase.packages || ["pkg-a", "pkg-b"])
-      )
-    ).toEqual(testCase.output);
-  },
-  correctCases
-);
+describe("parse", () => {
+  test.each(
+    Object.keys(correctCases).map((title) => ({
+      title,
+      ...correctCases[title],
+    }))
+  )("$title", ({ input, output, packages }) => {
+    expect(parse(input, withPackages(packages || ["pkg-a", "pkg-b"]))).toEqual(
+      output
+    );
+  });
+});
 
 let unsafeParse = parse as any;
 

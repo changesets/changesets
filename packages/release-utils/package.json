@@ -24,7 +24,8 @@
     "@changesets/git": "*",
     "@changesets/test-utils": "*",
     "@changesets/write": "*",
-    "file-url": "^3.0.0"
+    "file-url": "^3.0.0",
+    "vitest": "^3.0.6"
   },
   "engines": {
     "node": ">=18.0.0"

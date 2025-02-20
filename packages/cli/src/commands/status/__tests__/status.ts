@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
@@ -44,7 +45,7 @@ describe("status", () => {
   silenceLogsInBlock();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should get the status for a simple changeset and return the release object", async () => {
@@ -191,7 +192,7 @@ describe("status", () => {
     });
 
     // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation(() => {});
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -222,7 +223,7 @@ describe("status", () => {
     });
 
     // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation(() => {});
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -254,7 +255,7 @@ describe("status", () => {
     });
 
     // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation(() => {});
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -367,7 +368,7 @@ describe("status", () => {
     });
 
     // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation(() => {});
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -410,7 +411,7 @@ describe("status", () => {
     });
 
     // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation(() => {});
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -516,7 +517,7 @@ describe("status", () => {
     });
 
     // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation(() => {});
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -566,7 +567,7 @@ describe("status", () => {
     });
 
     // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation(() => {});
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 

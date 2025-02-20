@@ -4,7 +4,7 @@
   "private": true,
   "description": "A tool to help manage the versioning and changelogs for open source packages",
   "scripts": {
-    "test": "jest",
+    "test": "vitest",
     "build": "preconstruct build",
     "watch": "preconstruct watch",
     "postinstall": "preconstruct dev && manypkg check",
@@ -40,8 +40,6 @@
     "@babel/preset-typescript": "^7.26.0",
     "@manypkg/cli": "^0.22.0",
     "@preconstruct/cli": "^2.8.9",
-    "@types/jest": "^24.0.12",
-    "@types/jest-in-case": "^1.0.6",
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.17.13",
     "@types/node": "^22.7.4",
@@ -56,11 +54,9 @@
     "eslint-plugin-n": "^15.5.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
-    "jest": "^29.7.0",
-    "jest-junit": "^15.0.0",
-    "jest-watch-typeahead": "^2.2.2",
     "prettier": "^2.7.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vitest": "^3.0.6"
   },
   "preconstruct": {
     "packages": [

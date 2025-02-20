@@ -1,10 +1,11 @@
+import { vi } from "vitest";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 import getDependencyGraph from "./get-dependency-graph.ts";
 
 const consoleError = console.error;
 
 beforeEach(() => {
-  console.error = jest.fn();
+  console.error = vi.fn();
 });
 
 afterEach(() => {
