@@ -331,7 +331,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
-  if (json.prettier !== undefined) {
+  if (["undefined", "boolean"].includes(typeof json.prettier) === false) {
     messages.push(
       `The \`prettier\` option is set as ${JSON.stringify(
         json.prettier,

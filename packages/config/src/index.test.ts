@@ -380,6 +380,31 @@ let correctCases: Record<string, CorrectCase> = {
       ignore: ["pkg-a", "@pkg/a", "@pkg/b"],
     },
   },
+  prettierDefault: {
+    input: {},
+    output: {
+      ...defaults,
+      prettier: true,
+    },
+  },
+  prettierOn: {
+    input: {
+      prettier: true,
+    },
+    output: {
+      ...defaults,
+      prettier: true,
+    },
+  },
+  prettierOff: {
+    input: {
+      prettier: false,
+    },
+    output: {
+      ...defaults,
+      prettier: false,
+    },
+  },
   privatePackagesFalseDisablesAll: {
     input: {
       privatePackages: false,
