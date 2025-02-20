@@ -170,7 +170,7 @@ describe("cli", () => {
       );
     });
 
-    it("should not throw if prettier: false is configured", async () => {
+    it("should not throw if `prettier: false` is configured", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
@@ -192,17 +192,10 @@ describe("cli", () => {
         cwd
       );
 
-      try {
-        await run(["version"], {}, cwd);
-      } catch (e) {
-        // ignore the error. We just want to validate the error message
-      }
-
-      const loggerErrorCalls = (error as any).mock.calls;
-      expect(loggerErrorCalls.length).toEqual(0);
+      await expect(run(["version"], {}, cwd)).resolves.not.toThrow();
     });
 
-    it("should throw if prettier: string is configured", async () => {
+    it('should throw if `prettier: "string"` is configured', async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
@@ -224,13 +217,11 @@ describe("cli", () => {
         cwd
       );
 
-      try {
-        await run(["version"], {}, cwd);
-      } catch (e) {
-        expect((e as any).message)
-          .toEqual(`Some errors occurred when validating the changesets config:
-The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean`);
-      }
+      await expect(run(["version"], {}, cwd)).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean"
+      `);
     });
   });
 });
