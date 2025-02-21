@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { Mock, vi } from "vitest";
 import fixturez from "fixturez";
 import spawn from "spawndamnit";
 import fs from "node:fs";
@@ -6,7 +6,15 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const mockedLogger: Partial<typeof import("@changesets/logger")> = {};
+type PartialMockMethods<T> = Partial<{
+  [K in keyof T as T[K] extends (...args: never) => unknown
+    ? K
+    : never]: T[K] extends (...args: never) => unknown ? Mock<T[K]> : never;
+}>;
+
+export const mockedLogger: PartialMockMethods<
+  typeof import("@changesets/logger")
+> = {};
 
 vi.mock(import("@changesets/logger"), async (importOriginal) => {
   const mod = await importOriginal();
