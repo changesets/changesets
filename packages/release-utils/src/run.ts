@@ -8,6 +8,7 @@ import {
 } from "./utils.ts";
 import * as gitUtils from "./gitUtils.ts";
 import { readChangesetState } from "./readChangesetState.ts";
+import { execa } from "execa";
 
 type PublishOptions = {
   script: string;
@@ -30,13 +31,11 @@ export async function runPublish({
   cwd = process.cwd(),
 }: PublishOptions): Promise<PublishResult> {
   let branch = await gitUtils.getCurrentBranch(cwd);
-  let [publishCommand, ...publishArgs] = script.split(/\s+/);
 
-  let changesetPublishOutput = await execWithOutput(
-    publishCommand,
-    publishArgs,
-    { cwd }
-  );
+  const { stdout: changesetPublishOutput } = await execa({
+    shell: true,
+    cwd,
+  })`${script}`;
 
   await gitUtils.pullBranch(branch, cwd);
   await gitUtils.push(branch, { includeTags: true, cwd });
@@ -48,7 +47,7 @@ export async function runPublish({
     let newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@([^\s]+)/;
     let packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
 
-    for (let line of changesetPublishOutput.stdout.split("\n")) {
+    for (let line of changesetPublishOutput.split("\n")) {
       let match = line.match(newTagRegex);
       if (match === null) {
         continue;
@@ -73,7 +72,7 @@ export async function runPublish({
     let pkg = packages[0];
     let newTagRegex = /New tag:/;
 
-    for (let line of changesetPublishOutput.stdout.split("\n")) {
+    for (let line of changesetPublishOutput.split("\n")) {
       let match = line.match(newTagRegex);
 
       if (match) {
@@ -117,8 +116,10 @@ export async function runVersion({
   let versionsByDirectory = await getVersionsByDirectory(cwd);
 
   if (script) {
-    let [versionCommand, ...versionArgs] = script.split(/\s+/);
-    await execWithOutput(versionCommand, versionArgs, { cwd });
+    await execa({
+      shell: true,
+      cwd,
+    })`${script}`;
   } else {
     let changesetsCliPkgJson = await require(path.join(
       cwd,

@@ -1,6 +1,11 @@
 import { vi } from "vitest";
 import { add, commit } from "@changesets/git";
-import { linkNodeModules, silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
+import {
+  linkNodeModules,
+  silenceLogsInBlock,
+  tempdir,
+  testdir,
+} from "@changesets/test-utils";
 import type { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import fileUrl from "file-url";
