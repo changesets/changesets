@@ -1892,10 +1892,10 @@ describe("updateInternalDependents: always", () => {
 
     // pkg-b and - pkg-c are not being released so changelogs should not be
     // generated for them
-    expect(
+    await expect(
       fs.access(await getFilePath("pkg-b", "CHANGELOG.md", cwd))
     ).rejects.toThrow();
-    expect(
+    await expect(
       fs.access(await getFilePath("pkg-c", "CHANGELOG.md", cwd))
     ).rejects.toThrow();
   });
@@ -1949,7 +1949,7 @@ describe("updateInternalDependents: always", () => {
     );
 
     // shouldn't be created
-    expect(
+    await expect(
       fs.access(await getFilePath("pkg-a", "CHANGELOG.md", cwd))
     ).rejects.toThrow();
 
