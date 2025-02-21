@@ -1,16 +1,17 @@
-import { Mocked, vi } from "vitest";
 import fs from "node:fs/promises";
 import path from "path";
 import pc from "picocolors";
 import * as logger from "@changesets/logger";
 import { ExitError } from "@changesets/errors";
-import { testdir } from "@changesets/test-utils";
+import {
+  mockedLogger,
+  silenceLogsInBlock,
+  testdir,
+} from "@changesets/test-utils";
 
 import pre from "./index.ts";
 
-vi.mock("@changesets/logger");
-
-let mockedLogger = logger as Mocked<typeof logger>;
+silenceLogsInBlock();
 
 describe("enterPre", () => {
   it("should enter", async () => {
@@ -56,7 +57,7 @@ describe("enterPre", () => {
     expect(mockedLogger.error).toBeCalledWith(
       "`changeset pre enter` cannot be run when in pre mode"
     );
-    expect(logger.info).toBeCalledWith(
+    expect(mockedLogger.info).toBeCalledWith(
       "If you're trying to exit pre mode, run `changeset pre exit`"
     );
   });
@@ -131,7 +132,7 @@ describe("exitPre", () => {
     expect(mockedLogger.error).toBeCalledWith(
       "`changeset pre exit` can only be run when in pre mode"
     );
-    expect(logger.info).toBeCalledWith(
+    expect(mockedLogger.info).toBeCalledWith(
       "If you're trying to enter pre mode, run `changeset pre enter`"
     );
   });

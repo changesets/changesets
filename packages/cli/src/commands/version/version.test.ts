@@ -1,9 +1,9 @@
 import { Mock, vi } from "vitest";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import { warn } from "@changesets/logger";
 import {
   linkNodeModules,
+  mockedLogger,
   silenceLogsInBlock,
   testdir,
 } from "@changesets/test-utils";
@@ -135,8 +135,7 @@ describe("running version in a simple project", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
       await version(cwd, defaultOptions, modifiedDefaultConfig);
-      // @ts-ignore
-      const loggerWarnCalls = warn.mock.calls;
+      const loggerWarnCalls = mockedLogger.warn!.mock.calls;
       expect(loggerWarnCalls.length).toEqual(1);
       expect(loggerWarnCalls[0][0]).toEqual(
         "No unreleased changesets found, exiting."
