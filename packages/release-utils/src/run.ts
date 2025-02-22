@@ -130,18 +130,19 @@ export async function runVersion({
         paths: [cwd],
       }
     );
-    let cmd = semverLt(require(changesetsCliPkgJsonPath).version, "2.0.0")
-      ? "bump"
-      : "version";
-    await execWithOutput(
-      "node",
-      [
-        "--experimental-strip-types", // TODO: don't do this here
-        path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"),
-        cmd,
-      ],
-      { cwd }
+    const args = [];
+    // this is done just so our tests can run with the types stripped since they are run with source files
+    // this won't be used by published package since this file will be compiled there
+    if (import.meta.url.endsWith(".ts")) {
+      args.push("--experimental-strip-types");
+    }
+    args.push(path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"));
+    args.push(
+      semverLt(require(changesetsCliPkgJsonPath).version, "2.0.0")
+        ? "bump"
+        : "version"
     );
+    await execWithOutput("node", args, { cwd });
   }
 
   let changedPackages = await getChangedPackages(cwd, versionsByDirectory);
