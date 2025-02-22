@@ -1,5 +1,4 @@
 import { getPackages, type Package } from "@manypkg/get-packages";
-import path from "path";
 import semverLt from "semver/functions/lt.js";
 import {
   execWithOutput,
@@ -9,6 +8,10 @@ import {
 import * as gitUtils from "./gitUtils.ts";
 import { readChangesetState } from "./readChangesetState.ts";
 import { execa } from "execa";
+import { createRequire } from "node:module";
+import path from "node:path";
+
+const require = createRequire(import.meta.url);
 
 type PublishOptions = {
   script: string;
@@ -121,19 +124,18 @@ export async function runVersion({
       cwd,
     })`${script}`;
   } else {
-    let changesetsCliPkgJson = await require(path.join(
-      cwd,
-      "node_modules",
-      "@changesets",
-      "cli",
-      "package.json"
-    ));
-    let cmd = semverLt(changesetsCliPkgJson.version, "2.0.0")
+    let changesetsCliPkgJsonPath = require.resolve(
+      "@changesets/cli/package.json",
+      {
+        paths: [cwd],
+      }
+    );
+    let cmd = semverLt(require(changesetsCliPkgJsonPath).version, "2.0.0")
       ? "bump"
       : "version";
     await execWithOutput(
       "node",
-      ["./node_modules/@changesets/cli/bin.js", cmd],
+      [path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"), cmd],
       { cwd }
     );
   }
