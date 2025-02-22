@@ -1,7 +1,6 @@
 import fs from "node:fs/promises";
 import path from "path";
 import pc from "picocolors";
-import * as logger from "@changesets/logger";
 import { ExitError } from "@changesets/errors";
 import {
   mockedLogger,
