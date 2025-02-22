@@ -135,7 +135,11 @@ export async function runVersion({
       : "version";
     await execWithOutput(
       "node",
-      [path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"), cmd],
+      [
+        "--experimental-strip-types", // TODO: don't do this here
+        path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"),
+        cmd,
+      ],
       { cwd }
     );
   }
