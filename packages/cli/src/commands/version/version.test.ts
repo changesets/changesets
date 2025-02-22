@@ -118,9 +118,9 @@ afterEach(() => {
   console.error = consoleError;
 });
 
-describe("running version in a simple project", () => {
-  silenceLogsInBlock();
+silenceLogsInBlock();
 
+describe("running version in a simple project", () => {
   describe("when there are no changeset commits", () => {
     it("should warn if no changeset commits exist", async () => {
       const cwd = await testdir({
@@ -1429,7 +1429,7 @@ describe("snapshot release", () => {
         cwd
       );
 
-      expect(
+      await expect(
         version(
           cwd,
           { snapshot: true },
@@ -1478,7 +1478,7 @@ describe("snapshot release", () => {
         cwd
       );
 
-      expect(
+      await expect(
         version(
           cwd,
           { snapshot: "test" },
@@ -1515,7 +1515,7 @@ describe("snapshot release", () => {
       [undefined, "canary", "0.0.0-canary-20211213000730"],
       [null, "alpha", "0.0.0-alpha-20211213000730"],
     ])(
-      "should customize release correctly based on snapshotPrereleaseTemplate template: %p (tag: '%p')",
+      "should customize release correctly based on snapshotPrereleaseTemplate template: %s (tag: '%s')",
       mockGlobalDate(
         async (snapshotTemplate, snapshotValue, expectedResult) => {
           const cwd = await testdir({
@@ -3227,8 +3227,6 @@ describe("pre", () => {
 });
 
 describe("with privatePackages", () => {
-  silenceLogsInBlock();
-
   it("should skip private packages", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
