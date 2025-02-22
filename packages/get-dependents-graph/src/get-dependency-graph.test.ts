@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import stripAnsi from "strip-ansi";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 import getDependencyGraph from "./get-dependency-graph.ts";
 
@@ -107,13 +108,10 @@ describe("getting the dependency graph", function () {
         tool: "pnpm",
       });
       expect(valid).toBeFalsy();
-      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
-        [
-          [
-            "Package "foo" must depend on the current version of "bar": "1.0.0" vs "link:../bar"",
-          ],
-        ]
-      `);
+      expect((console.error as any).mock.calls).toHaveLength(1);
+      expect((console.error as any).mock.calls[0][0]).toBe(
+        stripAnsi(`Package "foo" must depend on the current version of "bar": "1.0.0" vs "link:../bar"`)
+      );
     })
   );
 });
