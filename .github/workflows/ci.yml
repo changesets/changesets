@@ -34,12 +34,12 @@ jobs:
       - name: Vitest tests
         if: matrix.node_version != 22
         # @changesets/release-utils depend on `--experimental-strip-types` so we exclude those test here for simplicity
-        run: yarn vitest --no-file-parallelism --reporter=default --reporter=junit --exclude=packages/release-utils
+        run: yarn vitest --no-file-parallelism --exclude=packages/release-utils
 
       # Run coverage only once on node 22 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
         if: matrix.node_version == 22
-        run: yarn vitest --no-file-parallelism --reporter=default --reporter=junit --coverage
+        run: yarn vitest --no-file-parallelism --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
