@@ -31,18 +31,19 @@ jobs:
       - name: Setup mock Git user
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
-      - name: Jest tests
-        if: matrix.node_version != 20
-        run: yarn jest --ci --color --runInBand --reporters=default --reporters=jest-junit
+      - name: Vitest tests
+        if: matrix.node_version != 22
+        # @changesets/release-utils depend on `--experimental-strip-types` so we exclude those test here for simplicity
+        run: yarn vitest --ci --color --no-file-parallelism --reporters=default --reporters=junit --exclude=packages/release-utils
 
-      # Run coverage only once on node 20 to avoid duplicate codecov uploads
-      - name: Jest tests with coverage
-        if: matrix.node_version == 20
-        run: yarn jest --ci --color --runInBand --reporters=default --reporters=jest-junit --coverage
+      # Run coverage only once on node 22 to avoid duplicate codecov uploads
+      - name: Vitest tests with coverage
+        if: matrix.node_version == 22
+        run: yarn vitest --ci --color --no-file-parallelism --reporters=default --reporters=junit --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
-        if: matrix.node_version == 20
+        if: matrix.node_version == 22
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
