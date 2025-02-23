@@ -2,8 +2,6 @@
   "name": "@changesets/apply-release-plan",
   "version": "7.0.9",
   "description": "Takes a release plan and applies it to packages",
-  "main": "dist/changesets-apply-release-plan.cjs.js",
-  "module": "dist/changesets-apply-release-plan.esm.js",
   "type": "module",
   "exports": {
     ".": "./dist/changesets-apply-release-plan.js",

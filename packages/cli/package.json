@@ -13,8 +13,6 @@
     "changelog",
     "commit"
   ],
-  "main": "dist/changesets-cli.cjs.js",
-  "module": "dist/changesets-cli.esm.js",
   "type": "module",
   "exports": {
     ".": "./dist/changesets-cli.js",

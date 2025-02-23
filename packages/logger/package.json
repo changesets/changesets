@@ -2,8 +2,6 @@
   "name": "@changesets/logger",
   "version": "0.1.1",
   "description": "Console log alias",
-  "main": "dist/changesets-logger.cjs.js",
-  "module": "dist/changesets-logger.esm.js",
   "type": "module",
   "exports": {
     ".": "./dist/changesets-logger.js",

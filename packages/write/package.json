@@ -2,8 +2,6 @@
   "name": "@changesets/write",
   "version": "0.4.0",
   "description": "Writes a changeset to a file",
-  "main": "dist/changesets-write.cjs.js",
-  "module": "dist/changesets-write.esm.js",
   "type": "module",
   "exports": {
     ".": "./dist/changesets-write.js",

@@ -2,8 +2,6 @@
   "name": "@changesets/changelog-git",
   "version": "0.2.1",
   "description": "A changelog entry generator for git that writes hashes",
-  "main": "dist/changesets-changelog-git.cjs.js",
-  "module": "dist/changesets-changelog-git.esm.js",
   "type": "module",
   "exports": {
     ".": "./dist/changesets-changelog-git.js",
