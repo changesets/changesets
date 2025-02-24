@@ -1,11 +1,16 @@
 import { getPackages, type Package } from "@manypkg/get-packages";
-// @ts-ignore
-import mdastToString from "mdast-util-to-string";
+import cp, { ChildProcess } from "node:child_process";
+import { promisify } from "node:util";
+import { SIGTERM } from "node:constants";
+import { toString as mdastToString } from "mdast-util-to-string";
 import os from "os";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import spawn from "spawndamnit";
 import unified from "unified";
+import { onExit } from "signal-exit";
+
+const exec = promisify(cp.exec);
 
 export const BumpLevels = {
   dep: 0,
@@ -88,7 +93,53 @@ export function getChangelogEntry(changelog: string, version: string) {
   };
 }
 
+const activeProcesses = new Set<ChildProcess>();
+
+onExit(() => {
+  for (let child of activeProcesses) {
+    child.kill(SIGTERM);
+  }
+});
+
 export async function execWithOutput(
+  command: string,
+  options: { ignoreReturnCode?: boolean; cwd: string }
+) {
+  process.stdout.write(`Running: ${command}` + os.EOL);
+
+  let childProcess = exec(command, {
+    cwd: options.cwd,
+  });
+
+  activeProcesses.add(childProcess.child);
+
+  childProcess.child.on("stdout", (data) => process.stdout.write(data));
+  childProcess.child.on("stderr", (data) => process.stderr.write(data));
+
+  childProcess.child.on("error", () =>
+    activeProcesses.delete(childProcess.child)
+  );
+  childProcess.child.on("close", () =>
+    activeProcesses.delete(childProcess.child)
+  );
+
+  let result = await childProcess;
+
+  if (!options?.ignoreReturnCode && childProcess.child.exitCode !== 0) {
+    throw new Error(
+      `The command ${JSON.stringify(command)} failed with code ${
+        childProcess.child.exitCode
+      }\n${result.stdout}\n${result.stderr}`
+    );
+  }
+  return {
+    code: childProcess.child.exitCode,
+    stdout: result.stdout,
+    stderr: result.stderr,
+  };
+}
+
+export async function spawnWithOutput(
   command: string,
   args: string[],
   options: { ignoreReturnCode?: boolean; cwd: string }

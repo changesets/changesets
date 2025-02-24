@@ -1,13 +1,13 @@
 import { getPackages, type Package } from "@manypkg/get-packages";
 import semverLt from "semver/functions/lt.js";
 import {
-  execWithOutput,
+  spawnWithOutput,
   getVersionsByDirectory,
   getChangedPackages,
+  execWithOutput,
 } from "./utils.ts";
 import * as gitUtils from "./gitUtils.ts";
 import { readChangesetState } from "./readChangesetState.ts";
-import { execa } from "execa";
 import { createRequire } from "node:module";
 import path from "node:path";
 
@@ -35,10 +35,9 @@ export async function runPublish({
 }: PublishOptions): Promise<PublishResult> {
   let branch = await gitUtils.getCurrentBranch(cwd);
 
-  const { stdout: changesetPublishOutput } = await execa({
-    shell: true,
+  const { stdout: changesetPublishOutput } = await execWithOutput(script, {
     cwd,
-  })`${script}`;
+  });
 
   await gitUtils.pullBranch(branch, cwd);
   await gitUtils.push(branch, { includeTags: true, cwd });
@@ -119,10 +118,9 @@ export async function runVersion({
   let versionsByDirectory = await getVersionsByDirectory(cwd);
 
   if (script) {
-    await execa({
-      shell: true,
+    await execWithOutput(script, {
       cwd,
-    })`${script}`;
+    });
   } else {
     let changesetsCliPkgJsonPath = require.resolve(
       "@changesets/cli/package.json",
@@ -142,7 +140,7 @@ export async function runVersion({
         ? "bump"
         : "version"
     );
-    await execWithOutput("node", args, { cwd });
+    await spawnWithOutput("node", args, { cwd });
   }
 
   let changedPackages = await getChangedPackages(cwd, versionsByDirectory);
