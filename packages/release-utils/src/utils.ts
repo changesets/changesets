@@ -1,5 +1,5 @@
 import { getPackages, type Package } from "@manypkg/get-packages";
-import cp, { ChildProcess } from "node:child_process";
+import cp, { type ChildProcess } from "node:child_process";
 import { promisify } from "node:util";
 import { SIGTERM } from "node:constants";
 import { toString as mdastToString } from "mdast-util-to-string";
