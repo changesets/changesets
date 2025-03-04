@@ -1,4 +1,8 @@
-import { Changeset, CommitFunctions, ReleasePlan } from "@changesets/types";
+import type {
+  Changeset,
+  CommitFunctions,
+  ReleasePlan,
+} from "@changesets/types";
 
 type SkipCI = boolean | "add" | "version";
 

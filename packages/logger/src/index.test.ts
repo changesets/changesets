@@ -1,4 +1,5 @@
-import { log, error, info, warn, success } from "./index";
+import { vi } from "vitest";
+import { log, error, info, warn, success } from "./index.ts";
 
 describe("@changesets/logger", () => {
   const logMessageOne = "Message 1";
@@ -9,7 +10,7 @@ describe("@changesets/logger", () => {
   describe("log", () => {
     let originalConsoleLog = console.log;
     beforeEach(() => {
-      console.log = jest.fn();
+      console.log = vi.fn();
     });
     afterEach(() => {
       console.log = originalConsoleLog;
@@ -24,7 +25,7 @@ describe("@changesets/logger", () => {
   describe("error", () => {
     let originalConsoleError = console.error;
     beforeEach(() => {
-      console.error = jest.fn();
+      console.error = vi.fn();
     });
     afterEach(() => {
       console.error = originalConsoleError;
@@ -39,7 +40,7 @@ describe("@changesets/logger", () => {
   describe("info", () => {
     let originalConsoleInfo = console.info;
     beforeEach(() => {
-      console.info = jest.fn();
+      console.info = vi.fn();
     });
     afterEach(() => {
       console.info = originalConsoleInfo;
@@ -55,7 +56,7 @@ describe("@changesets/logger", () => {
   describe("warn", () => {
     let originalConsoleWarn = console.warn;
     beforeEach(() => {
-      console.warn = jest.fn();
+      console.warn = vi.fn();
     });
     afterEach(() => {
       console.warn = originalConsoleWarn;
@@ -71,7 +72,7 @@ describe("@changesets/logger", () => {
   describe("success", () => {
     let originalConsoleLog = console.log;
     beforeEach(() => {
-      console.log = jest.fn();
+      console.log = vi.fn();
     });
     afterEach(() => {
       console.log = originalConsoleLog;

@@ -3,16 +3,20 @@ import path from "path";
 import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
-import { Packages, getPackages } from "@manypkg/get-packages";
-import {
+import { type Packages, getPackages } from "@manypkg/get-packages";
+import type {
   Config,
   WrittenConfig,
   Fixed,
   Linked,
   PackageGroup,
 } from "@changesets/types";
-import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+// eslint-disable-next-line import/no-commonjs
+const packageJson = require("../package.json");
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,

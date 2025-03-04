@@ -1,6 +1,6 @@
-import outdent from "outdent";
+import { outdent } from "outdent";
 
-import parse from "./";
+import parse from "./index.ts";
 
 describe("parsing a changeset", () => {
   it("should parse a changeset", () => {
@@ -222,11 +222,11 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      "could not parse changeset - invalid frontmatter: ---
+      [Error: could not parse changeset - invalid frontmatter: ---
       "cool-package": minor
       ---  fail
 
-      Nice simple summary"
+      Nice simple summary]
     `);
   });
 });

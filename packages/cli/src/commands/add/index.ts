@@ -5,16 +5,16 @@ import path from "path";
 import * as git from "@changesets/git";
 import { error, info, log, warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { ExitError } from "@changesets/errors";
 import { getPackages } from "@manypkg/get-packages";
 import { ExternalEditor } from "external-editor";
-import { getCommitFunctions } from "../../commit/getCommitFunctions";
-import * as cli from "../../utils/cli-utilities";
-import { getVersionableChangedPackages } from "../../utils/versionablePackages";
-import createChangeset from "./createChangeset";
-import printConfirmationMessage from "./messages";
+import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
+import * as cli from "../../utils/cli-utilities.ts";
+import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
+import createChangeset from "./createChangeset.ts";
+import printConfirmationMessage from "./messages.ts";
 
 export default async function add(
   cwd: string,
@@ -86,7 +86,7 @@ export default async function add(
 
   if (newChangeset.confirmed) {
     const changesetID = await writeChangeset(newChangeset, cwd, config);
-    const [{ getAddMessage }, commitOpts] = getCommitFunctions(
+    const [{ getAddMessage }, commitOpts] = await getCommitFunctions(
       config.commit,
       cwd
     );

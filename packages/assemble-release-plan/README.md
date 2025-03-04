@@ -25,8 +25,8 @@ const releasePlan = assembleReleasePlan(changesets, packages, config, preState);
 Signature
 
 ```ts
-import { NewChangeset, Config, ReleasePlan } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import type { NewChangeset, Config, ReleasePlan } from "@changesets/types";
+import type { Packages } from "@manypkg/get-packages";
 
 assembleReleasePlan = (
   changesets: NewChangeset[],

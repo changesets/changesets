@@ -3,13 +3,13 @@ import fs from "node:fs/promises";
 import path from "path";
 import getReleasePlan from "@changesets/get-release-plan";
 import { error, info, log, warn } from "@changesets/logger";
-import {
+import type {
   ComprehensiveRelease,
   Config,
   Release,
   VersionType,
 } from "@changesets/types";
-import { getVersionableChangedPackages } from "../../utils/versionablePackages";
+import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
 
 export default async function status(
   cwd: string,

@@ -1,6 +1,6 @@
 import { defaultConfig } from "@changesets/config";
-import assembleReleasePlan from "./";
-import FakeFullState from "./test-utils";
+import assembleReleasePlan from "./index.ts";
+import FakeFullState from "./test-utils.ts";
 
 describe("assemble-release-plan", () => {
   let setup: FakeFullState;
@@ -535,11 +535,11 @@ describe("assemble-release-plan", () => {
         undefined
       )
     ).toThrowErrorMatchingInlineSnapshot(`
-"Found mixed changeset big-cats-delight
-Found ignored packages: pkg-b
-Found not ignored packages: pkg-a
-Mixed changesets that contain both ignored and not ignored packages are not allowed"
-`);
+      [Error: Found mixed changeset big-cats-delight
+      Found ignored packages: pkg-b
+      Found not ignored packages: pkg-a
+      Mixed changesets that contain both ignored and not ignored packages are not allowed]
+    `);
   });
 
   it("should not bump a dev dependent nor its dependent when a package gets bumped", () => {

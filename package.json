@@ -4,7 +4,7 @@
   "private": true,
   "description": "A tool to help manage the versioning and changelogs for open source packages",
   "scripts": {
-    "test": "jest",
+    "test": "vitest",
     "build": "preconstruct build",
     "watch": "preconstruct watch",
     "postinstall": "preconstruct dev && manypkg check",
@@ -12,7 +12,7 @@
     "types:check": "tsc",
     "format": "prettier --list-different \"**/*.{js,ts,tsx,md}\"",
     "format:fix": "prettier --write \"**/*.{js,ts,tsx,md}\"",
-    "changeset": "packages/cli/bin.js",
+    "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js",
     "check-all": "yarn test && yarn types:check && yarn lint && yarn format",
     "version-packages": "changeset version && yarn format:fix",
     "release": "yarn build && changeset publish"
@@ -39,9 +39,7 @@
     "@babel/preset-env": "^7.26.0",
     "@babel/preset-typescript": "^7.26.0",
     "@manypkg/cli": "^0.22.0",
-    "@preconstruct/cli": "^2.8.1",
-    "@types/jest": "^24.0.12",
-    "@types/jest-in-case": "^1.0.6",
+    "@preconstruct/cli": "^2.8.9",
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.17.13",
     "@types/node": "^22.7.4",
@@ -49,6 +47,7 @@
     "@types/semver": "^7.5.0",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.62.0",
+    "@vitest/coverage-v8": "^3.0.6",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.1.0",
@@ -56,11 +55,9 @@
     "eslint-plugin-n": "^15.5.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
-    "jest": "^29.3.1",
-    "jest-junit": "^15.0.0",
-    "jest-watch-typeahead": "^2.2.2",
     "prettier": "^2.7.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.6"
   },
   "preconstruct": {
     "packages": [
@@ -71,7 +68,9 @@
       "importConditionDefaultExport": "default"
     },
     "___experimentalFlags_WILL_CHANGE_IN_PATCH": {
-      "importsConditions": true
+      "distInRoot": true,
+      "importsConditions": true,
+      "typeModule": true
     }
   },
   "prettier": {},

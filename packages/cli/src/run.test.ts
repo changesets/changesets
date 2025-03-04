@@ -1,10 +1,15 @@
-import { error } from "@changesets/logger";
-import { testdir } from "@changesets/test-utils";
+import { vi } from "vitest";
+import {
+  silenceLogsInBlock,
+  mockedLogger,
+  testdir,
+} from "@changesets/test-utils";
 
-import { run } from "./run";
+import { run } from "./run.ts";
 
-jest.mock("@changesets/logger");
-jest.mock("./commands/version");
+vi.mock("./commands/version");
+
+silenceLogsInBlock();
 
 describe("cli", () => {
   describe("version", () => {
@@ -26,7 +31,7 @@ describe("cli", () => {
         // ignore errors. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toEqual(
         `The package "pkg-c" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`
@@ -58,7 +63,7 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toMatchInlineSnapshot(
         `"The package "pkg-a" depends on the skipped package "pkg-b" (either by \`ignore\` option or by \`privatePackages.version\`), but "pkg-a" is not being skipped. Please pass "pkg-a" to the \`--ignore\` flag."`
@@ -96,7 +101,7 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(0);
     });
 
@@ -131,7 +136,7 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(0);
     });
 
@@ -162,7 +167,7 @@ describe("cli", () => {
         // ignore errors. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toEqual(
         `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`

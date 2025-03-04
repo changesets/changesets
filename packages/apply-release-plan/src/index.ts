@@ -1,21 +1,25 @@
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import {
+import type {
   ChangelogFunctions,
   Config,
   ModCompWithPackage,
   NewChangeset,
   ReleasePlan,
 } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import type { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
 import fs from "node:fs/promises";
 import path from "path";
 import prettier from "prettier";
-import resolveFrom from "resolve-from";
-import getChangelogEntry from "./get-changelog-entry";
-import versionPackage from "./version-package";
+import { resolve } from "import-meta-resolve";
+import getChangelogEntry from "./get-changelog-entry.ts";
+import versionPackage from "./version-package.ts";
+import { createRequire } from "node:module";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const require = createRequire(import.meta.url);
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
@@ -69,7 +73,7 @@ export default async function applyReleasePlan(
   packages: Packages,
   config: Config = defaultConfig,
   snapshot?: string | boolean,
-  contextDir = __dirname
+  contextDir = path.dirname(fileURLToPath(import.meta.url))
 ) {
   let cwd = packages.root.dir;
 
@@ -227,12 +231,18 @@ async function getNewChangelogEntry(
   let changelogPath;
 
   try {
-    changelogPath = resolveFrom(changesetPath, config.changelog[0]);
+    changelogPath = resolve(
+      config.changelog[0],
+      pathToFileURL(changesetPath).toString()
+    );
   } catch {
-    changelogPath = resolveFrom(contextDir, config.changelog[0]);
+    changelogPath = resolve(
+      config.changelog[0],
+      pathToFileURL(contextDir).toString()
+    );
   }
 
-  let possibleChangelogFunc = require(changelogPath);
+  let possibleChangelogFunc = await import(changelogPath);
   if (possibleChangelogFunc.default) {
     possibleChangelogFunc = possibleChangelogFunc.default;
   }

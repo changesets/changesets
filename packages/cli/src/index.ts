@@ -2,7 +2,10 @@ import mri from "mri";
 import { ExitError, InternalError } from "@changesets/errors";
 import { error } from "@changesets/logger";
 import { format } from "util";
-import { run } from "./run";
+import { run } from "./run.ts";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 const args = process.argv.slice(2);
 

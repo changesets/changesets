@@ -1,9 +1,10 @@
-import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
-
-import { ModCompWithPackage } from "@changesets/types";
-import startCase from "lodash.startcase";
-import { shouldUpdateDependencyBasedOnConfig } from "./utils";
-import validRange from "semver/ranges/valid";
+import type {
+  ChangelogFunctions,
+  ModCompWithPackage,
+  NewChangesetWithCommit,
+} from "@changesets/types";
+import validRange from "semver/ranges/valid.js";
+import { capitalize, shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -18,7 +19,7 @@ async function generateChangesForVersionTypeMarkdown(
   let releaseLines = await Promise.all(obj[type]);
   releaseLines = releaseLines.filter((x) => x);
   if (releaseLines.length) {
-    return `### ${startCase(type)} Changes\n\n${releaseLines.join("\n")}\n`;
+    return `### ${capitalize(type)} Changes\n\n${releaseLines.join("\n")}\n`;
   }
 }
 

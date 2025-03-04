@@ -1,15 +1,15 @@
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
-import { AccessType, PackageJSON } from "@changesets/types";
+import type { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
 import spawn from "spawndamnit";
-import semverParse from "semver/functions/parse";
-import { askQuestion } from "../../utils/cli-utilities";
+import semverParse from "semver/functions/parse.js";
+import { askQuestion } from "../../utils/cli-utilities.ts";
 import { isCI } from "ci-info";
-import { TwoFactorState } from "../../utils/types";
-import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
+import type { TwoFactorState } from "../../utils/types.ts";
+import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
 
 interface PublishOptions {
   cwd: string;

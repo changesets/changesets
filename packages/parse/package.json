@@ -2,18 +2,9 @@
   "name": "@changesets/parse",
   "version": "0.4.1",
   "description": "Parse a changeset file's contents into a usable json object",
-  "main": "dist/changesets-parse.cjs.js",
-  "module": "dist/changesets-parse.esm.js",
+  "type": "module",
   "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/changesets-parse.cjs.mjs",
-        "default": "./dist/changesets-parse.cjs.js"
-      },
-      "module": "./dist/changesets-parse.esm.js",
-      "import": "./dist/changesets-parse.cjs.mjs",
-      "default": "./dist/changesets-parse.cjs.js"
-    },
+    ".": "./dist/changesets-parse.js",
     "./package.json": "./package.json"
   },
   "license": "MIT",
@@ -23,7 +14,7 @@
     "js-yaml": "^3.13.1"
   },
   "devDependencies": {
-    "outdent": "^0.5.0"
+    "outdent": "^0.8.0"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -5,7 +5,7 @@ type Opts = {
 };
 
 declare module "fixturez" {
-  export default function (
+  function fixturez(
     cwd: string,
     opts?: Opts
   ): {
@@ -14,4 +14,6 @@ declare module "fixturez" {
     copy: (a: string) => string;
     cleanup: () => any;
   };
+
+  export = fixturez;
 }

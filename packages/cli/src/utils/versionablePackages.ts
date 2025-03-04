@@ -1,4 +1,4 @@
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import { getChangedPackagesSinceRef } from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 

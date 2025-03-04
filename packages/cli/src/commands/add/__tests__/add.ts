@@ -1,3 +1,4 @@
+import { Mock, vi } from "vitest";
 import path from "path";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
@@ -12,12 +13,15 @@ import {
   askQuestionWithEditor,
   askQuestion,
   askList,
-} from "../../../utils/cli-utilities";
-import addChangeset from "..";
+} from "../../../utils/cli-utilities.ts";
+import addChangeset from "../index.ts";
+import { fileURLToPath } from "node:url";
 
-jest.mock("../../../utils/cli-utilities");
-jest.mock("@changesets/git");
-jest.mock("@changesets/write");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+vi.mock("../../../utils/cli-utilities");
+vi.mock("@changesets/git");
+vi.mock("@changesets/write");
 // @ts-ignore
 writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 // @ts-ignore
@@ -370,7 +374,7 @@ describe("Add command", () => {
   });
 
   it("should exit with an error when there are no versionable packages in a single-package repo", async () => {
-    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+    const loggerErrorMock = loggerError as Mock<typeof loggerError>;
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -399,7 +403,7 @@ describe("Add command", () => {
   });
 
   it("should exit with an error when there are no versionable packages in a monorepo", async () => {
-    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+    const loggerErrorMock = loggerError as Mock<typeof loggerError>;
 
     const cwd = await testdir({
       "package.json": JSON.stringify({

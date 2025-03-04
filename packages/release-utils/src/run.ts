@@ -1,13 +1,17 @@
-import { getPackages, Package } from "@manypkg/get-packages";
-import path from "path";
-import semverLt from "semver/functions/lt";
+import { getPackages, type Package } from "@manypkg/get-packages";
+import semverLt from "semver/functions/lt.js";
 import {
-  execWithOutput,
+  spawnWithOutput,
   getVersionsByDirectory,
   getChangedPackages,
-} from "./utils";
-import * as gitUtils from "./gitUtils";
-import { readChangesetState } from "./readChangesetState";
+  execWithOutput,
+} from "./utils.ts";
+import * as gitUtils from "./gitUtils.ts";
+import { readChangesetState } from "./readChangesetState.ts";
+import { createRequire } from "node:module";
+import path from "node:path";
+
+const require = createRequire(import.meta.url);
 
 type PublishOptions = {
   script: string;
@@ -30,13 +34,10 @@ export async function runPublish({
   cwd = process.cwd(),
 }: PublishOptions): Promise<PublishResult> {
   let branch = await gitUtils.getCurrentBranch(cwd);
-  let [publishCommand, ...publishArgs] = script.split(/\s+/);
 
-  let changesetPublishOutput = await execWithOutput(
-    publishCommand,
-    publishArgs,
-    { cwd }
-  );
+  const { stdout: changesetPublishOutput } = await execWithOutput(script, {
+    cwd,
+  });
 
   await gitUtils.pullBranch(branch, cwd);
   await gitUtils.push(branch, { includeTags: true, cwd });
@@ -48,7 +49,7 @@ export async function runPublish({
     let newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@([^\s]+)/;
     let packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
 
-    for (let line of changesetPublishOutput.stdout.split("\n")) {
+    for (let line of changesetPublishOutput.split("\n")) {
       let match = line.match(newTagRegex);
       if (match === null) {
         continue;
@@ -73,7 +74,7 @@ export async function runPublish({
     let pkg = packages[0];
     let newTagRegex = /New tag:/;
 
-    for (let line of changesetPublishOutput.stdout.split("\n")) {
+    for (let line of changesetPublishOutput.split("\n")) {
       let match = line.match(newTagRegex);
 
       if (match) {
@@ -117,24 +118,29 @@ export async function runVersion({
   let versionsByDirectory = await getVersionsByDirectory(cwd);
 
   if (script) {
-    let [versionCommand, ...versionArgs] = script.split(/\s+/);
-    await execWithOutput(versionCommand, versionArgs, { cwd });
-  } else {
-    let changesetsCliPkgJson = await require(path.join(
+    await execWithOutput(script, {
       cwd,
-      "node_modules",
-      "@changesets",
-      "cli",
-      "package.json"
-    ));
-    let cmd = semverLt(changesetsCliPkgJson.version, "2.0.0")
-      ? "bump"
-      : "version";
-    await execWithOutput(
-      "node",
-      ["./node_modules/@changesets/cli/bin.js", cmd],
-      { cwd }
+    });
+  } else {
+    let changesetsCliPkgJsonPath = require.resolve(
+      "@changesets/cli/package.json",
+      {
+        paths: [cwd],
+      }
     );
+    const args = [];
+    // this is done just so our tests can run with the types stripped since they are run with source files
+    // this won't be used by published package since this file will be compiled there
+    if (import.meta.url.endsWith(".ts")) {
+      args.push("--experimental-strip-types");
+    }
+    args.push(path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"));
+    args.push(
+      semverLt(require(changesetsCliPkgJsonPath).version, "2.0.0")
+        ? "bump"
+        : "version"
+    );
+    await spawnWithOutput("node", args, { cwd });
   }
 
   let changedPackages = await getChangedPackages(cwd, versionsByDirectory);

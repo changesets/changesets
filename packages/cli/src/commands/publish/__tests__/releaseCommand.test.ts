@@ -1,12 +1,13 @@
-import publishPackages from "../publishPackages";
+import { vi } from "vitest";
+import publishPackages from "../publishPackages.ts";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import runRelease from "..";
+import runRelease from "../index.ts";
 
-jest.mock("../../../utils/cli-utilities");
-jest.mock("@changesets/git");
-jest.mock("../publishPackages");
+vi.mock("../../../utils/cli-utilities");
+vi.mock("@changesets/git");
+vi.mock("../publishPackages");
 
 // @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
@@ -15,7 +16,7 @@ describe("running release", () => {
   silenceLogsInBlock();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("When there is no changeset commits", () => {

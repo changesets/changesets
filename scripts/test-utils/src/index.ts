@@ -1,26 +1,34 @@
+import { Mock, vi } from "vitest";
 import fixturez from "fixturez";
 import spawn from "spawndamnit";
-import fs from "fs";
-import fsp from "fs/promises";
-import path from "path";
+import fs from "node:fs";
+import fsp from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-/**
- * Reason for eslint disable import/no-commonjs
- * Technically reassigning imports is not allowed and
- * Rollup errors at compile time on this(but the Babel
- * transform that's running in jest makes it work there),
- * making this a require should be fine.
- */
-// eslint-disable-next-line import/no-commonjs
-const logger = require("@changesets/logger");
+type PartialMockMethods<T> = Partial<{
+  [K in keyof T as T[K] extends (...args: never) => unknown
+    ? K
+    : never]: T[K] extends (...args: never) => unknown ? Mock<T[K]> : never;
+}>;
+
+export const mockedLogger: PartialMockMethods<
+  typeof import("@changesets/logger")
+> = {};
+
+vi.mock(import("@changesets/logger"), async (importOriginal) => {
+  const mod = await importOriginal();
+  return {
+    prefix: mod.prefix,
+    error: (...args) => (mockedLogger.error ?? mod.error)(...args),
+    info: (...args) => (mockedLogger.info ?? mod.info)(...args),
+    log: (...args) => (mockedLogger.log ?? mod.log)(...args),
+    warn: (...args) => (mockedLogger.warn ?? mod.warn)(...args),
+    success: (...args) => (mockedLogger.success ?? mod.success)(...args),
+  };
+});
 
 const createLogSilencer = () => {
-  const originalLoggerError = logger.error;
-  const originalLoggerInfo = logger.info;
-  const originalLoggerLog = logger.log;
-  const originalLoggerWarn = logger.warn;
-  const originalLoggerSuccess = logger.success;
-
   const originalConsoleError = console.error;
   const originalConsoleInfo = console.info;
   const originalConsoleLog = console.log;
@@ -31,26 +39,26 @@ const createLogSilencer = () => {
 
   return {
     setup() {
-      logger.error = jest.fn();
-      logger.info = jest.fn();
-      logger.log = jest.fn();
-      logger.warn = jest.fn();
-      logger.success = jest.fn();
+      mockedLogger.error = vi.fn();
+      mockedLogger.info = vi.fn();
+      mockedLogger.log = vi.fn();
+      mockedLogger.warn = vi.fn();
+      mockedLogger.success = vi.fn();
 
-      console.error = jest.fn();
-      console.info = jest.fn();
-      console.log = jest.fn();
-      console.warn = jest.fn();
+      console.error = vi.fn();
+      console.info = vi.fn();
+      console.log = vi.fn();
+      console.warn = vi.fn();
 
-      process.stdout.write = jest.fn();
-      process.stderr.write = jest.fn();
+      process.stdout.write = vi.fn();
+      process.stderr.write = vi.fn();
 
       return () => {
-        logger.error = originalLoggerError;
-        logger.info = originalLoggerInfo;
-        logger.log = originalLoggerLog;
-        logger.warn = originalLoggerWarn;
-        logger.success = originalLoggerSuccess;
+        mockedLogger.error = undefined;
+        mockedLogger.info = undefined;
+        mockedLogger.log = undefined;
+        mockedLogger.warn = undefined;
+        mockedLogger.success = undefined;
 
         console.error = originalConsoleError;
         console.info = originalConsoleInfo;
@@ -150,5 +158,18 @@ export async function pathExists(p: string) {
   return fsp.access(p).then(
     () => true,
     () => false
+  );
+}
+
+export async function linkNodeModules(cwd: string) {
+  await fsp.symlink(
+    path.join(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "..",
+      "..",
+      "node_modules"
+    ),
+    path.join(cwd, "node_modules")
   );
 }

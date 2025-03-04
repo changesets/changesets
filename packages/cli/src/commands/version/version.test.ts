@@ -1,16 +1,21 @@
+import { Mock, vi } from "vitest";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import { warn } from "@changesets/logger";
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import { Changeset, Config } from "@changesets/types";
+import {
+  linkNodeModules,
+  mockedLogger,
+  silenceLogsInBlock,
+  testdir,
+} from "@changesets/test-utils";
+import type { Changeset, Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
-import humanId from "human-id";
+import { humanId } from "human-id";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
-import pre from "../pre";
-import version from "./index";
+import pre from "../pre/index.ts";
+import version from "./index.ts";
 
 function mockGlobalDate<
   Args extends any[],
@@ -43,11 +48,9 @@ function mockGlobalDate<
   };
 }
 
-let changelogPath = path.resolve(__dirname, "../../changelog");
-let commitPath = path.resolve(__dirname, "../../commit");
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
-  changelog: [changelogPath, null],
+  changelog: ["@changesets/cli/changelog", null],
 };
 
 let defaultOptions = {
@@ -58,10 +61,10 @@ let defaultOptions = {
 // This is from bolt's error log
 const consoleError = console.error;
 
-jest.mock("../../utils/cli-utilities");
-jest.mock("@changesets/git");
-jest.mock("human-id");
-jest.mock("@changesets/logger");
+vi.mock("../../utils/cli-utilities");
+vi.mock("@changesets/git");
+vi.mock("human-id");
+vi.mock("@changesets/logger");
 
 // @ts-ignore
 git.add.mockImplementation(() => Promise.resolve(true));
@@ -104,20 +107,20 @@ const getChangelog = async (pkgName: string, cwd: string) => {
 
 beforeEach(() => {
   let i = 0;
-  (humanId as jest.Mock<string, []>).mockImplementation(() => {
+  (humanId as Mock<() => string>).mockImplementation(() => {
     return `some-id-${i++}`;
   });
 
-  console.error = jest.fn();
+  console.error = vi.fn();
 });
 
 afterEach(() => {
   console.error = consoleError;
 });
 
-describe("running version in a simple project", () => {
-  silenceLogsInBlock();
+silenceLogsInBlock();
 
+describe("running version in a simple project", () => {
   describe("when there are no changeset commits", () => {
     it("should warn if no changeset commits exist", async () => {
       const cwd = await testdir({
@@ -132,8 +135,7 @@ describe("running version in a simple project", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
       await version(cwd, defaultOptions, modifiedDefaultConfig);
-      // @ts-ignore
-      const loggerWarnCalls = warn.mock.calls;
+      const loggerWarnCalls = mockedLogger.warn!.mock.calls;
       expect(loggerWarnCalls.length).toEqual(1);
       expect(loggerWarnCalls[0][0]).toEqual(
         "No unreleased changesets found, exiting."
@@ -302,7 +304,7 @@ describe("running version in a simple project", () => {
       ],
       cwd
     );
-    const spy = jest.spyOn(git, "commit");
+    const spy = vi.spyOn(git, "commit");
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -327,6 +329,9 @@ describe("running version in a simple project", () => {
         version: "1.0.0",
       }),
     });
+
+    await linkNodeModules(cwd);
+
     const ids = await writeChangesets(
       [
         {
@@ -339,13 +344,13 @@ describe("running version in a simple project", () => {
       ],
       cwd
     );
-    const spy = jest.spyOn(git, "add");
+    const spy = vi.spyOn(git, "add");
 
     expect(spy).not.toHaveBeenCalled();
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      commit: [commitPath, null],
+      commit: ["@changesets/cli/commit", null],
     });
 
     expect(spy).toHaveBeenCalled();
@@ -377,6 +382,9 @@ describe("running version in a simple project", () => {
         version: "1.0.0",
       }),
     });
+
+    await linkNodeModules(cwd);
+
     await writeChangesets(
       [
         {
@@ -389,13 +397,13 @@ describe("running version in a simple project", () => {
       ],
       cwd
     );
-    const spy = jest.spyOn(git, "commit");
+    const spy = vi.spyOn(git, "commit");
 
     expect(spy).not.toHaveBeenCalled();
 
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
-      commit: [commitPath, null],
+      commit: ["@changesets/cli/commit", null],
     });
 
     expect(spy).toHaveBeenCalled();
@@ -1275,7 +1283,7 @@ describe("snapshot release", () => {
       ],
       cwd
     );
-    const spy = jest.spyOn(git, "commit");
+    const spy = vi.spyOn(git, "commit");
 
     expect(spy).not.toHaveBeenCalled();
 
@@ -1286,7 +1294,7 @@ describe("snapshot release", () => {
       },
       {
         ...modifiedDefaultConfig,
-        commit: [commitPath, null],
+        commit: ["@changesets/cli/commit", null],
       }
     );
 
@@ -1421,7 +1429,7 @@ describe("snapshot release", () => {
         cwd
       );
 
-      expect(
+      await expect(
         version(
           cwd,
           { snapshot: true },
@@ -1470,7 +1478,7 @@ describe("snapshot release", () => {
         cwd
       );
 
-      expect(
+      await expect(
         version(
           cwd,
           { snapshot: "test" },
@@ -1507,7 +1515,7 @@ describe("snapshot release", () => {
       [undefined, "canary", "0.0.0-canary-20211213000730"],
       [null, "alpha", "0.0.0-alpha-20211213000730"],
     ])(
-      "should customize release correctly based on snapshotPrereleaseTemplate template: %p (tag: '%p')",
+      "should customize release correctly based on snapshotPrereleaseTemplate template: %s (tag: '%s')",
       mockGlobalDate(
         async (snapshotTemplate, snapshotValue, expectedResult) => {
           const cwd = await testdir({
@@ -1884,10 +1892,10 @@ describe("updateInternalDependents: always", () => {
 
     // pkg-b and - pkg-c are not being released so changelogs should not be
     // generated for them
-    expect(
+    await expect(
       fs.access(await getFilePath("pkg-b", "CHANGELOG.md", cwd))
     ).rejects.toThrow();
-    expect(
+    await expect(
       fs.access(await getFilePath("pkg-c", "CHANGELOG.md", cwd))
     ).rejects.toThrow();
   });
@@ -1941,7 +1949,7 @@ describe("updateInternalDependents: always", () => {
     );
 
     // shouldn't be created
-    expect(
+    await expect(
       fs.access(await getFilePath("pkg-a", "CHANGELOG.md", cwd))
     ).rejects.toThrow();
 
@@ -3219,8 +3227,6 @@ describe("pre", () => {
 });
 
 describe("with privatePackages", () => {
-  silenceLogsInBlock();
-
   it("should skip private packages", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

@@ -1,7 +1,7 @@
-import { Linked } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
-import { InternalRelease } from "./types";
-import { getCurrentHighestVersion, getHighestReleaseType } from "./utils";
+import type { Linked } from "@changesets/types";
+import type { Package } from "@manypkg/get-packages";
+import type { InternalRelease } from "./types.ts";
+import { getCurrentHighestVersion, getHighestReleaseType } from "./utils.ts";
 
 /*
   WARNING:

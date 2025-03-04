@@ -1,9 +1,9 @@
 import * as git from "@changesets/git";
 import { log } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
+import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 
 export default async function tag(cwd: string, config: Config) {
   const { packages, tool } = await getPackages(cwd);

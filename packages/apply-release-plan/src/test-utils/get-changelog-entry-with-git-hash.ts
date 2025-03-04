@@ -1,9 +1,8 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import startCase from "lodash.startcase";
 import { getCommitsThatAddFiles } from "@changesets/git";
-import { ComprehensiveRelease, NewChangeset } from "@changesets/types";
+import type { ComprehensiveRelease, NewChangeset } from "@changesets/types";
 
-import { RelevantChangesets } from "../types";
+import type { RelevantChangesets } from "../types.ts";
+import { capitalize } from "../utils.ts";
 
 async function getReleaseLine(changeset: NewChangeset, cwd: string) {
   const [firstLine, ...futureLines] = changeset.summary
@@ -31,7 +30,7 @@ async function getReleaseLines(
   if (!releaseLines.length) return "";
   const resolvedLines = await Promise.all(releaseLines);
 
-  return `### ${startCase(type)} Changes\n\n${resolvedLines.join("")}`;
+  return `### ${capitalize(type)} Changes\n\n${resolvedLines.join("")}`;
 }
 
 export default async function defaultChangelogGetter(

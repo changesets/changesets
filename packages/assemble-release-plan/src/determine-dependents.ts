@@ -1,14 +1,14 @@
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import {
+import type {
   Config,
   DependencyType,
   PackageJSON,
   VersionType,
 } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
-import semverSatisfies from "semver/functions/satisfies";
-import { incrementVersion } from "./increment";
-import { InternalRelease, PreInfo } from "./types";
+import type { Package } from "@manypkg/get-packages";
+import semverSatisfies from "semver/functions/satisfies.js";
+import { incrementVersion } from "./increment.ts";
+import type { InternalRelease, PreInfo } from "./types.ts";
 
 /*
   WARNING:
