@@ -10,7 +10,7 @@ import {
 import type { Changeset, Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
-import humanId from "human-id";
+import { humanId } from "human-id";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
