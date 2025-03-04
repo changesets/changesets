@@ -1,5 +1,55 @@
 # @changesets/apply-release-plan
 
+## 7.0.10
+
+### Patch Changes
+
+- Updated dependencies [[`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998)]:
+  - @changesets/config@3.1.1
+
+## 7.0.9
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/config@3.1.0
+  - @changesets/should-skip-package@0.1.2
+
+## 7.0.8
+
+### Patch Changes
+
+- [#1562](https://github.com/changesets/changesets/pull/1562) [`a0f87f1`](https://github.com/changesets/changesets/commit/a0f87f1ce596e7c5c316edc24d5d4571e6acd4d7) Thanks [@Netail](https://github.com/Netail), [@cefn](https://github.com/cefn)! - Add an ability to pass in `contextDir` of the running script (like the `@changesets/cli`) so the changelog modules can be alternatively resolved using it
+
+## 7.0.7
+
+### Patch Changes
+
+- Updated dependencies [[`f0270f6`](https://github.com/changesets/changesets/commit/f0270f69793ddb6865f2510d334864b093cb10e3)]:
+  - @changesets/config@3.0.5
+
+## 7.0.6
+
+### Patch Changes
+
+- [#1514](https://github.com/changesets/changesets/pull/1514) [`962ab91`](https://github.com/changesets/changesets/commit/962ab918bc2deb89012a0cefce10387997cc54ed) Thanks [@nicoalonsop](https://github.com/nicoalonsop)! - Update spawndamnit to fix [cross-spawn vulnerability](https://security.snyk.io/vuln/SNYK-JS-CROSSSPAWN-8303230)
+
+- Updated dependencies [[`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f), [`962ab91`](https://github.com/changesets/changesets/commit/962ab918bc2deb89012a0cefce10387997cc54ed)]:
+  - @changesets/config@3.0.4
+  - @changesets/git@3.0.2
+
+## 7.0.5
+
+### Patch Changes
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+- Updated dependencies [[`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/should-skip-package@0.1.1
+  - @changesets/git@3.0.1
+  - @changesets/config@3.0.3
+
 ## 7.0.4
 
 ### Patch Changes
