@@ -6,6 +6,8 @@
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "erasableSyntaxOnly": true,
+    "libReplacement": false,
     "strict": true,
     "noEmit": true,
     "types": ["vitest/globals"]
