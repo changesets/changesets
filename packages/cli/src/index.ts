@@ -64,6 +64,13 @@ if (parsed.help && args.length === 1) {
   process.exit(0);
 }
 
+// Version should only be shown if it's the only argument passed
+if (parsed.version && args.length === 1) {
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  console.log(require("@changesets/cli/package.json").version);
+  process.exit(0);
+}
+
 const cwd = process.cwd();
 
 run(parsed._, parsed, cwd).catch((err) => {

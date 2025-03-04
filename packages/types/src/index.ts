@@ -74,6 +74,8 @@ export type Config = {
   access: AccessType;
   baseBranch: string;
   changedFilePatterns: readonly string[];
+  /** When false, Changesets won't format with Prettier */
+  prettier: boolean;
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
@@ -99,6 +101,7 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
+  prettier?: boolean;
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
     | false
