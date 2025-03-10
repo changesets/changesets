@@ -6532,10 +6532,10 @@ tempy@^0.2.1:
     temp-dir "^1.0.0"
     unique-string "^1.0.0"
 
-term-size@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/term-size/-/term-size-2.1.0.tgz#3aec444c07a7cf936e157c1dc224b590c3c7eef2"
-  integrity sha512-I42EWhJ+2aeNQawGx1VtpO0DFI9YcfuvAMNIdKyf/6sRbHJ4P+ZQ/zIT87tE+ln1ymAGcCJds4dolfSAS0AcNg==
+term-size@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/term-size/-/term-size-4.0.0.tgz#4aa3c66b7a38c33c99d7f2495198ed30548f79fa"
+  integrity sha512-105zga8eUjLH0I+ffu2UXZLCHCEu6fbgpeKRnBmScUQuMbEXtR77DQkUS9XoaJhvxko6W/4ZiwcPETtzYUgYrw==
 
 terser@^5.16.8:
   version "5.18.2"
