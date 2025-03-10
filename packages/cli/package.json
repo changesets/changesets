@@ -93,7 +93,7 @@
     "resolve-from": "^5.0.0",
     "semver": "^7.5.3",
     "spawndamnit": "^3.0.1",
-    "term-size": "^2.1.0"
+    "term-size": "^4.0.0"
   },
   "devDependencies": {
     "@changesets/parse": "*",
