@@ -102,6 +102,7 @@ export function getPackageInfo(packageJson: PackageJSON) {
       "--registry",
       getCorrectRegistry(packageJson),
       "--json",
+      "--prefer-online",
     ]);
 
     // Github package registry returns empty string when calling npm info
