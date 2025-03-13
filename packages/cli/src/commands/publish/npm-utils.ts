@@ -32,9 +32,23 @@ function jsonParse(input: string) {
   }
 }
 
-function getCorrectRegistry(packageJson?: PackageJSON): string {
-  const registry =
+async function getCorrectRegistry(packageJson?: PackageJSON): Promise<string> {
+  let registry =
     packageJson?.publishConfig?.registry ?? process.env.npm_config_registry;
+
+  if (packageJson?.name?.startsWith("@")) {
+    const nameSplit = packageJson.name.split("/");
+
+    if (nameSplit.length > 1) {
+      const scope = nameSplit[0];
+      const result = await spawn("npm", ["config", "get", `${scope}:registry`]);
+      const scopeRegistry = result.stdout.toString().trim();
+
+      if (scopeRegistry && scopeRegistry !== "undefined") {
+        registry = scopeRegistry;
+      }
+    }
+  }
 
   return !registry || registry === "https://registry.yarnpkg.com"
     ? "https://registry.npmjs.org"
@@ -67,7 +81,7 @@ export async function getTokenIsRequired() {
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry(),
+    npm_config_registry: await getCorrectRegistry(),
   };
   let result = await spawn("npm", ["profile", "get", "--json"], {
     env: Object.assign({}, process.env, envOverride),
@@ -100,8 +114,9 @@ export function getPackageInfo(packageJson: PackageJSON) {
       "info",
       packageJson.name,
       "--registry",
-      getCorrectRegistry(packageJson),
+      await getCorrectRegistry(packageJson),
       "--json",
+      "--prefer-online",
     ]);
 
     // Github package registry returns empty string when calling npm info
@@ -180,7 +195,7 @@ async function internalPublish(
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry(),
+    npm_config_registry: await getCorrectRegistry(),
   };
   let { code, stdout, stderr } =
     publishTool.name === "pnpm"
