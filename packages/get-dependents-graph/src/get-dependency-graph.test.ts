@@ -1,5 +1,6 @@
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 import getDependencyGraph from "./get-dependency-graph";
+import { Tool } from "@manypkg/get-packages";
 
 const consoleError = console.error;
 
@@ -14,13 +15,15 @@ afterEach(() => {
 describe("getting the dependency graph", function () {
   it("should skip dependencies specified through the link protocol", function () {
     const { graph, valid } = getDependencyGraph({
-      root: {
+      rootPackage: {
         dir: ".",
+        relativeDir: ".",
         packageJson: { name: "root", version: "1.0.0" },
       },
       packages: [
         {
           dir: "foo",
+          relativeDir: "foo",
           packageJson: {
             name: "foo",
             version: "1.0.0",
@@ -31,13 +34,15 @@ describe("getting the dependency graph", function () {
         },
         {
           dir: "bar",
+          relativeDir: "bar",
           packageJson: {
             name: "bar",
             version: "1.0.0",
           },
         },
       ],
-      tool: "pnpm",
+      rootDir: ".",
+      tool: { type: "pnpm" } as Tool,
     });
     expect(graph.get("foo")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
@@ -46,13 +51,15 @@ describe("getting the dependency graph", function () {
 
   it("should skip dependencies specified using a tag", function () {
     const { graph, valid } = getDependencyGraph({
-      root: {
+      rootPackage: {
         dir: ".",
+        relativeDir: ".",
         packageJson: { name: "root", version: "1.0.0" },
       },
       packages: [
         {
           dir: "examples/foo",
+          relativeDir: "examples/foo",
           packageJson: {
             name: "foo-example",
             version: "1.0.0",
@@ -63,13 +70,15 @@ describe("getting the dependency graph", function () {
         },
         {
           dir: "packages/bar",
+          relativeDir: "packages/bar",
           packageJson: {
             name: "bar",
             version: "1.0.0",
           },
         },
       ],
-      tool: "pnpm",
+      rootDir: ".",
+      tool: { type: "pnpm" } as Tool,
     });
     expect(graph.get("foo-example")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
@@ -80,13 +89,15 @@ describe("getting the dependency graph", function () {
     "should set valid to false if the link protocol is used in a non-dev dep",
     temporarilySilenceLogs(() => {
       const { valid } = getDependencyGraph({
-        root: {
+        rootPackage: {
           dir: ".",
+          relativeDir: ".",
           packageJson: { name: "root", version: "1.0.0" },
         },
         packages: [
           {
             dir: "foo",
+            relativeDir: "foo",
             packageJson: {
               name: "foo",
               version: "1.0.0",
@@ -97,13 +108,15 @@ describe("getting the dependency graph", function () {
           },
           {
             dir: "bar",
+            relativeDir: "bar",
             packageJson: {
               name: "bar",
               version: "1.0.0",
             },
           },
         ],
-        tool: "pnpm",
+        tool: { type: "pnpm" } as Tool,
+        rootDir: ".",
       });
       expect(valid).toBeFalsy();
       expect((console.error as any).mock.calls).toMatchInlineSnapshot(`

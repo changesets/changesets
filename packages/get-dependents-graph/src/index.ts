@@ -14,12 +14,14 @@ export function getDependentsGraph(
 
   const dependentsLookup: {
     [key: string]: { pkg: Package; dependents: Array<string> };
-  } = {
-    [packages.root.packageJson.name]: {
-      pkg: packages.root,
+  } = {};
+
+  if (packages.rootPackage?.packageJson.name) {
+    dependentsLookup[packages.rootPackage.packageJson.name] = {
+      pkg: packages.rootPackage,
       dependents: [],
-    },
-  };
+    };
+  }
 
   packages.packages.forEach((pkg) => {
     dependentsLookup[pkg.packageJson.name] = {
