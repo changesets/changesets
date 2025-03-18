@@ -31,7 +31,7 @@ export async function readPreState(cwd: string): Promise<PreState | undefined> {
 
 export async function isActivePre(cwd: string) {
   let preState = await readPreState(cwd);
-  return preState?.mode === "pre" ? true : false;
+  return preState?.mode === "pre";
 }
 
 export async function exitPre(cwd: string) {

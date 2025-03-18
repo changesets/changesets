@@ -84,6 +84,20 @@ describe("enterPre", () => {
       `Entered pre mode with tag ${pc.cyan("next")}`
     );
   });
+  it("should throw for unknown errors", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {},
+        mode: "unknown"
+      }),
+    });
+    await expect(pre(cwd, { command: "exit" })).rejects;
+  });
 });
 
 describe("exitPre", () => {
@@ -127,6 +141,20 @@ describe("exitPre", () => {
     expect(logger.info).toBeCalledWith(
       "If you're trying to enter pre mode, run `changeset pre enter`"
     );
+  });
+  it("should throw for unknown errors", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {},
+        mode: "unknown"
+      }),
+    });
+    await expect(pre(cwd, { command: "exit" })).rejects;
   });
 });
 

@@ -53,12 +53,8 @@ export default async function pre(
     }
     case "is-active":
     default: {
-      try {
-        const isActive = await isActivePre(cwd);
-        logger.success(`Pre mode active: ${isActive}`);
-      } catch (err) {
-        throw err;
-      }
+      const isActive = await isActivePre(cwd);
+      logger.success(`Pre mode active: ${isActive}`);
     }
   }
 }
