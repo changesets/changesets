@@ -93,7 +93,7 @@ describe("enterPre", () => {
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
         initialVersions: {},
-        mode: "unknown"
+        mode: "unknown",
       }),
     });
     await expect(pre(cwd, { command: "exit" })).rejects;
@@ -151,13 +151,12 @@ describe("exitPre", () => {
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
         initialVersions: {},
-        mode: "unknown"
+        mode: "unknown",
       }),
     });
     await expect(pre(cwd, { command: "exit" })).rejects;
   });
 });
-
 
 describe("isActivePre", () => {
   it("should provide 'true' when in pre", async () => {
@@ -175,11 +174,9 @@ describe("isActivePre", () => {
     });
     await pre(cwd, { command: "is-active" });
 
-    expect(mockedLogger.success).toBeCalledWith(
-      `Pre mode active: true`
-    );
+    expect(mockedLogger.success).toBeCalledWith(`Pre mode active: true`);
   });
-  it("should provide 'false' when not in pre", async () => { 
+  it("should provide 'false' when not in pre", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -194,8 +191,6 @@ describe("isActivePre", () => {
     });
     await pre(cwd, { command: "is-active" });
 
-    expect(mockedLogger.success).toBeCalledWith(
-      `Pre mode active: false`
-    );
+    expect(mockedLogger.success).toBeCalledWith(`Pre mode active: false`);
   });
-})
+});

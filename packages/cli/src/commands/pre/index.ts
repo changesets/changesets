@@ -9,9 +9,11 @@ import {
 
 export default async function pre(
   cwd: string,
-  options: { command: "enter"; tag: string } | { command: "exit"; tag?: string } | { command: "is-active"; tag?: string}
+  options:
+    | { command: "enter"; tag: string }
+    | { command: "exit"; tag?: string }
+    | { command: "is-active"; tag?: string }
 ) {
-
   switch (options.command) {
     case "enter": {
       try {

@@ -8,7 +8,7 @@ import {
 import { testdir } from "@changesets/test-utils";
 
 describe("isActivePre", () => {
-  it("should provide 'true' when in pre", async () => { 
+  it("should provide 'true' when in pre", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -31,7 +31,7 @@ describe("isActivePre", () => {
 
     expect(await isActivePre(cwd)).toBe(true);
   });
-  it("should provide 'false' when not in pre", async () => { 
+  it("should provide 'false' when not in pre", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
