@@ -129,3 +129,45 @@ describe("exitPre", () => {
     );
   });
 });
+
+
+describe("isActivePre", () => {
+  it("should provide 'true' when in pre", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {},
+        mode: "pre",
+        tag: "next",
+      }),
+    });
+    await pre(cwd, { command: "is-active" });
+
+    expect(mockedLogger.success).toBeCalledWith(
+      `Pre mode active: true`
+    );
+  });
+  it("should provide 'false' when not in pre", async () => { 
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {},
+        mode: "exit",
+        tag: "next",
+      }),
+    });
+    await pre(cwd, { command: "is-active" });
+
+    expect(mockedLogger.success).toBeCalledWith(
+      `Pre mode active: false`
+    );
+  });
+})

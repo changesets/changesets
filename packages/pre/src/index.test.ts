@@ -1,4 +1,4 @@
-import { isActivePre, enterPre, exitPre, readPreState } from "./index";
+import { enterPre, exitPre, isActivePre, readPreState } from "./index";
 import * as fs from "fs-extra";
 import path from "path";
 import {

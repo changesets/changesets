@@ -204,9 +204,9 @@ export async function run(
       }
       case "pre": {
         let command = input[1];
-        if (command !== "enter" && command !== "exit") {
+        if (command !== "enter" && command !== "exit" && command !== "is-active") {
           error(
-            "`enter`, `exit` or `snapshot` must be passed after prerelease"
+            "`enter`, `exit` or `is-active` must be passed after prerelease"
           );
           throw new ExitError(1);
         }
