@@ -3,7 +3,6 @@ import fs from "node:fs/promises";
 import path from "path";
 import { getPackages, type Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
-import isSubdir from "is-subdir";
 import micromatch from "micromatch";
 
 export async function add(pathToFile: string, cwd: string) {
@@ -271,8 +270,8 @@ export async function getChangedPackagesSinceRef({
 
         for (let i = changedFiles.length - 1; i >= 0; i--) {
           const file = changedFiles[i];
-
-          if (isSubdir(pkg.dir, file)) {
+          const isFileInPkg = !path.relative(pkg.dir, file).startsWith("..");
+          if (isFileInPkg) {
             changedFiles.splice(i, 1);
             const relativeFile = file.slice(pkg.dir.length + 1);
             changedPackageFiles.push(relativeFile);
