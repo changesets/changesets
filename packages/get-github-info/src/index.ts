@@ -1,4 +1,3 @@
-// @ts-ignore
 import DataLoader from "dataloader";
 
 const validRepoNameRegex = /^[\w.-]+\/[\w.-]+$/;
