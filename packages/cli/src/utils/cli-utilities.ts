@@ -1,5 +1,4 @@
 // @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
-import termSize from "term-size";
 import { error, prefix, success } from "@changesets/logger";
 import enuirer from "enquirer";
 import { edit } from "external-editor";
@@ -41,7 +40,7 @@ const serialId: () => number = (function () {
   return () => id++;
 })();
 
-const limit = Math.max(termSize().rows - 5, 10);
+const limit = Math.max(process.stdout.rows - 5, 10);
 
 let cancelFlow = () => {
   success("Cancelled... 👋 ");
