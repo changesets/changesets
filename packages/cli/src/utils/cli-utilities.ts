@@ -1,4 +1,3 @@
-// @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
 import { error, prefix, success } from "@changesets/logger";
 import enuirer from "enquirer";
 import { edit } from "external-editor";
