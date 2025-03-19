@@ -224,8 +224,8 @@ describe("cli", () => {
 
       await expect(run(["version"], {}, cwd)).rejects
         .toThrowErrorMatchingInlineSnapshot(`
-        "Some errors occurred when validating the changesets config:
-        The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean"
+        [Error: Some errors occurred when validating the changesets config:
+        The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean]
       `);
     });
   });

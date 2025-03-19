@@ -14,8 +14,8 @@
     "format:fix": "prettier --write \"**/*.{js,ts,tsx,md}\"",
     "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js",
     "check-all": "yarn test && yarn types:check && yarn lint && yarn format",
-    "version-packages": "changeset version && yarn format:fix",
-    "release": "yarn build && changeset publish"
+    "version-packages": "yarn changeset version && yarn format:fix",
+    "release": "yarn build && yarn changeset publish"
   },
   "repository": {
     "type": "git",
