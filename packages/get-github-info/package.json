@@ -13,7 +13,7 @@
     "dataloader": "^1.4.0"
   },
   "devDependencies": {
-    "nock": "^11.7.0",
+    "nock": "^14.0.1",
     "prettier": "^2.7.1"
   },
   "engines": {
