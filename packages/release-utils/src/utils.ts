@@ -2,12 +2,11 @@ import { getPackages, type Package } from "@manypkg/get-packages";
 import cp, { type ChildProcess } from "node:child_process";
 import { promisify } from "node:util";
 import { SIGTERM } from "node:constants";
-import { toString as mdastToString } from "mdast-util-to-string";
+import { toString as mdastNodeToString } from "mdast-util-to-string";
 import os from "os";
-import remarkParse from "remark-parse";
-import remarkStringify from "remark-stringify";
+import { fromMarkdown as stringToMdast } from "mdast-util-from-markdown";
+import { toMarkdown as mdastToString } from "mdast-util-to-markdown";
 import spawn from "spawndamnit";
-import unified from "unified";
 import { onExit } from "signal-exit";
 
 const exec = promisify(cp.exec);
@@ -42,11 +41,11 @@ export async function getChangedPackages(
 }
 
 export function getChangelogEntry(changelog: string, version: string) {
-  let ast = unified().use(remarkParse).parse(changelog);
+  let ast = stringToMdast(changelog);
 
   let highestLevel: number = BumpLevels.dep;
 
-  let nodes = ast.children as Array<any>;
+  let nodes = ast.children;
   let headingStartInfo:
     | {
         index: number;
@@ -58,7 +57,7 @@ export function getChangelogEntry(changelog: string, version: string) {
   for (let i = 0; i < nodes.length; i++) {
     let node = nodes[i];
     if (node.type === "heading") {
-      let stringified: string = mdastToString(node);
+      let stringified: string = mdastNodeToString(node);
       let match = stringified.toLowerCase().match(/(major|minor|patch)/);
       if (match !== null) {
         let level = BumpLevels[match[0] as "major" | "minor" | "patch"];
@@ -88,7 +87,7 @@ export function getChangelogEntry(changelog: string, version: string) {
     );
   }
   return {
-    content: unified().use(remarkStringify).stringify(ast),
+    content: mdastToString(ast),
     highestLevel,
   };
 }
