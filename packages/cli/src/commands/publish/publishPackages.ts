@@ -1,4 +1,4 @@
-import { join } from "path";
+import { resolve } from "path";
 import semverParse from "semver/functions/parse";
 import pc from "picocolors";
 import { AccessType } from "@changesets/types";
@@ -129,7 +129,7 @@ async function publishAPackage(
     {
       cwd: pkg.dir,
       publishDir: publishConfig?.directory
-        ? join(pkg.dir, publishConfig.directory)
+        ? resolve(pkg.dir, publishConfig.directory)
         : pkg.dir,
       access: publishConfig?.access || access,
       tag,
