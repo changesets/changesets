@@ -23,23 +23,23 @@ exports[`it sorts the things right 1`] = `
 exports[`it works 1`] = `
 "### Major Changes
 
--   [2164a779](https://github.com/keystonejs/keystone-5/commit/2164a779):
+* [2164a779](https://github.com/keystonejs/keystone-5/commit/2164a779):
 
-    -   Replace jade with pug because Jade was renamed to Pug, and \`jade\` package is outdated
+  * Replace jade with pug because Jade was renamed to Pug, and \`jade\` package is outdated
 
 ### Patch Changes
 
--   [81dc0be5](https://github.com/keystonejs/keystone-5/commit/81dc0be5):
+* [81dc0be5](https://github.com/keystonejs/keystone-5/commit/81dc0be5):
 
-    -   Update dependencies
+  * Update dependencies
 "
 `;
 
 exports[`it works 2`] = `
 "### Patch Changes
 
--   [19fe6c1b](https://github.com/keystonejs/keystone-5/commit/19fe6c1b):
+* [19fe6c1b](https://github.com/keystonejs/keystone-5/commit/19fe6c1b):
 
-    Move frontmatter in docs into comments
+  Move frontmatter in docs into comments
 "
 `;
