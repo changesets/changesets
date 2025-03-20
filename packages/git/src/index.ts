@@ -226,7 +226,7 @@ export async function getChangedChangesetFilesSinceRef({
     // Now we can find which files we added
     const cmd = await spawn(
       "git",
-      ["diff", "--name-only", "--diff-filter=d", divergedAt],
+      ["diff", "--name-only", "--diff-filter=d", "--no-relative", divergedAt],
       {
         cwd,
       }
