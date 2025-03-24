@@ -1,5 +1,13 @@
 # @changesets/read
 
+## 0.6.3
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/parse@0.4.1
+
 ## 0.6.2
 
 ### Patch Changes
