@@ -1,5 +1,35 @@
 # @changesets/cli
 
+## 2.28.1
+
+### Patch Changes
+
+- Updated dependencies [[`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998)]:
+  - @changesets/config@3.1.1
+  - @changesets/apply-release-plan@7.0.10
+  - @changesets/get-release-plan@4.0.8
+
+## 2.28.0
+
+### Minor Changes
+
+- [#1453](https://github.com/changesets/changesets/pull/1453) [`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf) Thanks [@bennypowers](https://github.com/bennypowers)! - Added a new config option to opt-out from formatting with Prettier using `prettier: false`.
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf), [`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/config@3.1.0
+  - @changesets/write@0.4.0
+  - @changesets/apply-release-plan@7.0.9
+  - @changesets/assemble-release-plan@6.0.6
+  - @changesets/changelog-git@0.2.1
+  - @changesets/get-dependents-graph@2.1.3
+  - @changesets/get-release-plan@4.0.7
+  - @changesets/pre@2.0.2
+  - @changesets/read@0.6.3
+  - @changesets/should-skip-package@0.1.2
+
 ## 2.27.12
 
 ### Patch Changes
