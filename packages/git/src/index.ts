@@ -41,7 +41,13 @@ export async function tag(tagStr: string, cwd: string) {
   // NOTE: it's important we use the -m flag to create annotated tag otherwise 'git push --follow-tags' won't actually push
   // the tags
   const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], { cwd });
-  return gitCmd.code === 0;
+
+  if (gitCmd.code !== 0) {
+    console.error(gitCmd.stderr.toString());
+    throw new Error(`Failed to create tag ${tagStr} on current HEAD`);
+  }
+
+  return true;
 }
 
 // Find the commit where we diverged from `ref` at using `git merge-base`
