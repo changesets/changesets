@@ -41,6 +41,12 @@ export async function tag(tagStr: string, cwd: string) {
   // NOTE: it's important we use the -m flag to create annotated tag otherwise 'git push --follow-tags' won't actually push
   // the tags
   const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], { cwd });
+
+  if (gitCmd.code !== 0) {
+    console.error(gitCmd.stderr);
+    throw new Error(`Failed to create tag ${tagStr} on current HEAD`)
+  }
+
   return gitCmd.code === 0;
 }
 
