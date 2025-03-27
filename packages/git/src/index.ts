@@ -44,7 +44,7 @@ export async function tag(tagStr: string, cwd: string) {
 
   if (gitCmd.code !== 0) {
     console.error(gitCmd.stderr);
-    throw new Error(`Failed to create tag ${tagStr} on current HEAD`)
+    throw new Error(`Failed to create tag ${tagStr} on current HEAD`);
   }
 
   return gitCmd.code === 0;
