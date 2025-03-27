@@ -134,6 +134,11 @@ export type ModCompWithPackage = ComprehensiveRelease & {
   dir: string;
 };
 
+export type GetVersionLine = (
+  release: ModCompWithPackage,
+  changelogOpts: null | Record<string, any>
+) => Promise<string>;
+
 export type GetReleaseLine = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
@@ -147,6 +152,7 @@ export type GetDependencyReleaseLine = (
 ) => Promise<string>;
 
 export type ChangelogFunctions = {
+  getVersionLine?: GetVersionLine;
   getReleaseLine: GetReleaseLine;
   getDependencyReleaseLine: GetDependencyReleaseLine;
 };
