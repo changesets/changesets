@@ -43,11 +43,11 @@ export async function tag(tagStr: string, cwd: string) {
   const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], { cwd });
 
   if (gitCmd.code !== 0) {
-    console.error(gitCmd.stderr);
+    console.error(gitCmd.stderr.toString());
     throw new Error(`Failed to create tag ${tagStr} on current HEAD`);
   }
 
-  return gitCmd.code === 0;
+  return true;
 }
 
 // Find the commit where we diverged from `ref` at using `git merge-base`
