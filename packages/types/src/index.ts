@@ -91,6 +91,9 @@ export type Config = {
     useCalculatedVersion: boolean;
     prereleaseTemplate: string | null;
   };
+  pre: {
+    startWith: number;
+  };
 };
 
 export type WrittenConfig = {
@@ -116,6 +119,9 @@ export type WrittenConfig = {
   snapshot?: {
     useCalculatedVersion?: boolean;
     prereleaseTemplate?: string;
+  };
+  pre?: {
+    startWith?: number;
   };
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?: ExperimentalOptions;
 };
