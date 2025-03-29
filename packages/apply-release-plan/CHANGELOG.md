@@ -1,5 +1,21 @@
 # @changesets/apply-release-plan
 
+## 7.0.10
+
+### Patch Changes
+
+- Updated dependencies [[`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998)]:
+  - @changesets/config@3.1.1
+
+## 7.0.9
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/config@3.1.0
+  - @changesets/should-skip-package@0.1.2
+
 ## 7.0.8
 
 ### Patch Changes
