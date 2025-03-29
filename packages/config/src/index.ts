@@ -3,7 +3,7 @@ import path from "path";
 import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
-import { Packages, getPackages } from "@manypkg/get-packages";
+import { Package, Packages, Tool, getPackages } from "@manypkg/get-packages";
 import {
   Config,
   WrittenConfig,
@@ -516,8 +516,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   return config;
 };
 
-let fakePackage = {
+let fakePackage: Package = {
   dir: "",
+  relativeDir: "",
   packageJson: {
     name: "",
     version: "",
@@ -525,7 +526,8 @@ let fakePackage = {
 };
 
 export let defaultConfig = parse(defaultWrittenConfig, {
-  root: fakePackage,
-  tool: "root",
+  rootPackage: fakePackage,
+  tool: { type: "root" } as Tool,
   packages: [fakePackage],
+  rootDir: "",
 });

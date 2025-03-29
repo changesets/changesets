@@ -164,10 +164,12 @@ describe("version", () => {
             "pkg-b": "1.1.0",
           },
         },
+        relativeDir: "packages/pkg-a",
       },
       {
         dir: path.join(clone, "packages", "pkg-b"),
         packageJson: { name: "pkg-b", version: "1.1.0" },
+        relativeDir: "packages/pkg-b",
       },
     ]);
   });
@@ -277,6 +279,7 @@ describe("version", () => {
             "pkg-b": "1.0.0",
           },
         },
+        relativeDir: "packages/pkg-a",
       },
     ]);
   });
@@ -329,6 +332,7 @@ describe("version", () => {
       {
         dir: path.join(clone, "packages", "pkg-b"),
         packageJson: { name: "pkg-b", version: "1.1.0" },
+        relativeDir: "packages/pkg-b",
       },
     ]);
   });

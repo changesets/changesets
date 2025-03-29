@@ -2,7 +2,7 @@ import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import { Config, WrittenConfig } from "@changesets/types";
-import { Packages, getPackages } from "@manypkg/get-packages";
+import { Packages, Tool, getPackages } from "@manypkg/get-packages";
 import { testdir } from "@changesets/test-utils";
 import outdent from "outdent";
 
@@ -15,19 +15,22 @@ type CorrectCase = {
 };
 
 let defaultPackages: Packages = {
-  root: {
+  rootPackage: {
     packageJson: { name: "", version: "" },
     dir: "/",
+    relativeDir: ".",
   },
+  rootDir: "/",
   packages: [],
-  tool: "yarn",
+  tool: { type: "yarn" } as Tool,
 };
 
-const withPackages = (pkgNames: string[]) => ({
+const withPackages = (pkgNames: string[]): Packages => ({
   ...defaultPackages,
   packages: pkgNames.map((pkgName) => ({
     packageJson: { name: pkgName, version: "" },
     dir: "dir",
+    relativeDir: "relativeDir",
   })),
 });
 
