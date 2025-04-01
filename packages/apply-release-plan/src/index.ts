@@ -224,6 +224,7 @@ async function getNewChangelogEntry(
   let getChangelogFuncs: ChangelogFunctions = {
     getReleaseLine: () => Promise.resolve(""),
     getDependencyReleaseLine: () => Promise.resolve(""),
+    getCurrentRelease: () => Promise.resolve(""),
   };
 
   const changelogOpts = config.changelog[1];
@@ -248,7 +249,8 @@ async function getNewChangelogEntry(
   }
   if (
     typeof possibleChangelogFunc.getReleaseLine === "function" &&
-    typeof possibleChangelogFunc.getDependencyReleaseLine === "function"
+    typeof possibleChangelogFunc.getDependencyReleaseLine === "function" &&
+    typeof possibleChangelogFunc.getCurrentRelease === "function"
   ) {
     getChangelogFuncs = possibleChangelogFunc;
   } else {
