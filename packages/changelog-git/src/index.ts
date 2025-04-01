@@ -45,7 +45,7 @@ const getDependencyReleaseLine = async (
   return [...changesetLinks, ...updatedDependenciesList].join("\n");
 };
 
-const getCurrentRelease:GetCurrentRelease = async (changesets, _options) => {
+const getCurrentRelease:GetCurrentRelease = async (changesets: string, _changelogOpts: null | Record<string, any>) => {
   return changesets;
 };
 
