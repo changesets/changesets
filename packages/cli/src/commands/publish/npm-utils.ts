@@ -90,7 +90,7 @@ export async function getTokenIsRequired() {
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    [scope ? `npm_config_${scope}:registry`: 'npm_config_registry']: registry,
+    [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
   let result = await spawn("npm", ["profile", "get", "--json"], {
     env: Object.assign({}, process.env, envOverride),
@@ -206,7 +206,7 @@ async function internalPublish(
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    [scope ? `npm_config_${scope}:registry` : 'npm_config_registry']: registry,
+    [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
 
   let { code, stdout, stderr } =

@@ -57,7 +57,8 @@ const getTwoFactorState = ({
     isCI ||
     publicPackages.some((pkg) =>
       isCustomRegistry(npmUtils.getCorrectRegistry(pkg.packageJson).registry)
-    )
+    ) ||
+    isCustomRegistry(process.env.npm_config_registry)
   ) {
     return {
       token: null,
