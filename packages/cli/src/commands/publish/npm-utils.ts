@@ -89,12 +89,9 @@ export async function getTokenIsRequired() {
   const { scope, registry } = getCorrectRegistry();
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-  const envOverride: Record<string, string> = {
-    npm_config_registry: registry,
+  const envOverride = {
+    [scope ? `npm_config_${scope}:registry`: 'npm_config_registry']: registry,
   };
-  if (scope) {
-    envOverride[`npm_config_${scope}:registry`] = registry;
-  }
   let result = await spawn("npm", ["profile", "get", "--json"], {
     env: Object.assign({}, process.env, envOverride),
   });
@@ -208,13 +205,9 @@ async function internalPublish(
 
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-  const envOverride: Record<string, string> = {
-    npm_config_registry: registry,
+  const envOverride = {
+    [scope ? `npm_config_${scope}:registry` : 'npm_config_registry']: registry,
   };
-
-  if (scope) {
-    envOverride[`npm_config_${scope}:registry`] = registry;
-  }
 
   let { code, stdout, stderr } =
     publishTool.name === "pnpm"
