@@ -171,7 +171,7 @@ git push --follow-tags
 ### status
 
 ```shell
-status [--verbose] [--output={filePath}] [--since={gitTag}]
+changeset status [--verbose] [--output={filePath}] [--since={gitTag}]
 ```
 
 The status command provides information about the changesets that currently exist. If there are changes to packages but no changesets are present, it exits with error status code `1`.
@@ -187,7 +187,7 @@ The status command provides information about the changesets that currently exis
 ### pre
 
 ```shell
-pre [exit|enter {tag}]
+changeset pre [exit|enter {tag}]
 ```
 
 The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a prerelease, you should run `changeset pre enter next`(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with `changeset version` and `changeset publish`. For more information about the pre command, see [the prereleases documentation](https://github.com/changesets/changesets/blob/main/docs/prereleases.md).
