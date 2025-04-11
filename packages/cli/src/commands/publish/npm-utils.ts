@@ -40,22 +40,24 @@ interface RegistryInfo {
 export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   const packageName = packageJson?.name;
 
-  const scope = packageName?.startsWith("@")
-    ? packageName.split("/")[0]
-    : undefined;
-
-  const scopedRegistry =
-    scope &&
-    (packageJson?.publishConfig?.[`${scope}:registry`] ||
-      process.env[`npm_config_${scope}:registry`]);
+  if (packageName?.startsWith("@")) {
+    const scope = packageName.split("/")[0];
+    const scopedRegistry =
+      packageJson.publishConfig?.[`${scope}:registry`] ||
+      process.env[`npm_config_${scope}:registry`];
+    if (scopedRegistry) {
+      return {
+        scope,
+        registry: scopedRegistry,
+      };
+    }
+  }
 
   const registry =
-    scopedRegistry ||
-    packageJson?.publishConfig?.registry ||
-    process.env.npm_config_registry;
+    packageJson?.publishConfig?.registry || process.env.npm_config_registry;
 
   return {
-    scope: scopedRegistry ? scope : undefined,
+    scope: undefined,
     registry:
       !registry || registry === "https://registry.yarnpkg.com"
         ? "https://registry.npmjs.org"
