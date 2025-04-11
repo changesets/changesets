@@ -43,7 +43,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   if (packageName?.startsWith("@")) {
     const scope = packageName.split("/")[0];
     const scopedRegistry =
-      packageJson.publishConfig?.[`${scope}:registry`] ||
+      packageJson!.publishConfig?.[`${scope}:registry`] ||
       process.env[`npm_config_${scope}:registry`];
     if (scopedRegistry) {
       return {
