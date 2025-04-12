@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.29.0
+
+### Minor Changes
+
+- [#1470](https://github.com/changesets/changesets/pull/1470) [`29f34a3`](https://github.com/changesets/changesets/commit/29f34a31cadd7d067728176d23b5728437ff5ff3) Thanks [@JounQin](https://github.com/JounQin)! - Support scoped registries configured using `package.json#publishConfig`
+
 ## 2.28.1
 
 ### Patch Changes
