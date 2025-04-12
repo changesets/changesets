@@ -2,4 +2,4 @@
 "@changesets/cli": minor
 ---
 
-Support scoped registries configured using `package.json#publishConfig` and environment variables
+Support scoped registries configured using `package.json#publishConfig`
