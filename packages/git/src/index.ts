@@ -195,7 +195,11 @@ export async function getChangedFilesSince({
 }): Promise<Array<string>> {
   const divergedAt = await getDivergedCommit(cwd, ref);
   // Now we can find which files we added
-  const cmd = await spawn("git", ["diff", "--name-only", divergedAt], { cwd });
+  const cmd = await spawn(
+    "git",
+    ["diff", "--name-only", "--no-relative", divergedAt],
+    { cwd }
+  );
   if (cmd.code !== 0) {
     throw new Error(
       `Failed to diff against ${divergedAt}. Is ${divergedAt} a valid ref?`
@@ -226,7 +230,7 @@ export async function getChangedChangesetFilesSinceRef({
     // Now we can find which files we added
     const cmd = await spawn(
       "git",
-      ["diff", "--name-only", "--diff-filter=d", divergedAt],
+      ["diff", "--name-only", "--diff-filter=d", "--no-relative", divergedAt],
       {
         cwd,
       }
