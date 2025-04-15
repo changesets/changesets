@@ -1,5 +1,23 @@
 # @changesets/cli
 
+## 2.29.1
+
+### Patch Changes
+
+- [#1620](https://github.com/changesets/changesets/pull/1620) [`b15e629`](https://github.com/changesets/changesets/commit/b15e6291c3e7e780ee9e58101d3069f2382569ae) Thanks [@Netail](https://github.com/Netail)! - Correctly fetch new changesets with since if the git option diff.relative has been set to true
+
+- Updated dependencies [[`b15e629`](https://github.com/changesets/changesets/commit/b15e6291c3e7e780ee9e58101d3069f2382569ae)]:
+  - @changesets/git@3.0.3
+  - @changesets/apply-release-plan@7.0.11
+  - @changesets/read@0.6.4
+  - @changesets/get-release-plan@4.0.9
+
+## 2.29.0
+
+### Minor Changes
+
+- [#1470](https://github.com/changesets/changesets/pull/1470) [`29f34a3`](https://github.com/changesets/changesets/commit/29f34a31cadd7d067728176d23b5728437ff5ff3) Thanks [@JounQin](https://github.com/JounQin)! - Support scoped registries configured using `package.json#publishConfig`
+
 ## 2.28.1
 
 ### Patch Changes

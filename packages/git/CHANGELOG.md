@@ -1,5 +1,11 @@
 # @changesets/git
 
+## 3.0.3
+
+### Patch Changes
+
+- [#1620](https://github.com/changesets/changesets/pull/1620) [`b15e629`](https://github.com/changesets/changesets/commit/b15e6291c3e7e780ee9e58101d3069f2382569ae) Thanks [@Netail](https://github.com/Netail)! - Make sure that git diff always returns the paths relative to the git root in case diff.relative has been set to true in the git config
+
 ## 3.0.2
 
 ### Patch Changes
