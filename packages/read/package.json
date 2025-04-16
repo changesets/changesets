@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
+    "@changesets/write": "*",
     "outdent": "^0.5.0"
   }
 }
