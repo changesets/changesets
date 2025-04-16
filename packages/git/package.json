@@ -1,6 +1,6 @@
 {
   "name": "@changesets/git",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Some git helpers that changesets use to get information",
   "main": "dist/changesets-git.cjs.js",
   "module": "dist/changesets-git.esm.js",

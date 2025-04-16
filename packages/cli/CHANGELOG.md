@@ -1,5 +1,17 @@
 # @changesets/cli
 
+## 2.29.2
+
+### Patch Changes
+
+- [#1636](https://github.com/changesets/changesets/pull/1636) [`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d) Thanks [@Netail](https://github.com/Netail)! - Correctly resolve new changesets with `since` option when the `.changeset` directory is not directly in the git root
+
+- Updated dependencies [[`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d)]:
+  - @changesets/read@0.6.5
+  - @changesets/git@3.0.4
+  - @changesets/get-release-plan@4.0.10
+  - @changesets/apply-release-plan@7.0.12
+
 ## 2.29.1
 
 ### Patch Changes

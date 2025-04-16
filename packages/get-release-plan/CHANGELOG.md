@@ -1,5 +1,12 @@
 # @changesets/get-release-plan
 
+## 4.0.10
+
+### Patch Changes
+
+- Updated dependencies [[`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d)]:
+  - @changesets/read@0.6.5
+
 ## 4.0.9
 
 ### Patch Changes
