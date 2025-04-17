@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.29.3
+
+### Patch Changes
+
+- [#1619](https://github.com/changesets/changesets/pull/1619) [`c1e8a78`](https://github.com/changesets/changesets/commit/c1e8a78f315620f38bdcb35d0ac73fb6016283d0) Thanks [@manucorporat](https://github.com/manucorporat)! - Support `../` in `publishConfig.directory` when publishing packages
+
 ## 2.29.2
 
 ### Patch Changes
