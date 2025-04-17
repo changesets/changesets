@@ -11,8 +11,8 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/write",
   "dependencies": {
     "@changesets/types": "^6.1.0",
-    "human-id": "^4.1.1",
-    "prettier": "^2.7.1"
+    "formatly": "^0.2.1",
+    "human-id": "^4.1.1"
   },
   "devDependencies": {
     "@changesets/parse": "*",

@@ -80,6 +80,19 @@
       "description": "When false, Changesets won't format with Prettier",
       "default": true
     },
+    "format": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": ["auto", "prettier", "biome", "deno", "dprint"]
+        },
+        {
+          "const": false
+        }
+      ],
+      "description": "The formatter to use to format changesets and changelogs. Set `false` to disable formatting. The default value of `\"auto\"` will auto-detect the formatter based on the project's configuration files.",
+      "default": "auto"
+    },
     "privatePackages": {
       "anyOf": [
         {
