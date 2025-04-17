@@ -1,5 +1,26 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.0
+
+### Major Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replace `fs-extra` usage with `node:fs`
+
+- [#1617](https://github.com/changesets/changesets/pull/1617) [`8f7b607`](https://github.com/changesets/changesets/commit/8f7b607b486e299e038bf8e257d28f0193ac4412) Thanks [@bluwy](https://github.com/bluwy)! - Move `outdent` as a dev dependency
+
+- Updated dependencies [[`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e), [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`3628cab`](https://github.com/changesets/changesets/commit/3628cab6cbfd931b7f2a909b38b66c1aa794d4bf), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/config@4.0.0-next.0
+  - @changesets/git@4.0.0-next.0
+  - @changesets/get-version-range-type@1.0.0-next.0
+  - @changesets/should-skip-package@1.0.0-next.0
+  - @changesets/types@7.0.0-next.0
+
 ## 7.0.12
 
 ### Patch Changes

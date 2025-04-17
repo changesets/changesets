@@ -24,5 +24,18 @@
     "@changesets/write": "0.3.2",
     "@changesets/test-utils": "0.0.7"
   },
-  "changesets": []
+  "changesets": [
+    "afraid-radios-fetch",
+    "busy-points-guess",
+    "chilly-insects-attack",
+    "deep-coins-attend",
+    "gentle-windows-enter",
+    "happy-news-wave",
+    "old-paths-bake",
+    "petite-buttons-shake",
+    "red-emus-wave",
+    "spotty-chairs-call",
+    "thick-emus-refuse",
+    "whole-aliens-notice"
+  ]
 }

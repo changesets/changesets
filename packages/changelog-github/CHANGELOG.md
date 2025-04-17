@@ -1,5 +1,23 @@
 # @changesets/changelog-github
 
+## 1.0.0-next.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Minor Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1615](https://github.com/changesets/changesets/pull/1615) [`4b962cc`](https://github.com/changesets/changesets/commit/4b962cc6e5c56ca519c3d5c00bdec59c754a43cc) Thanks [@bluwy](https://github.com/bluwy)! - Bump `dotenv` dependency to v16
+
+### Patch Changes
+
+- Updated dependencies [[`5b02e2f`](https://github.com/changesets/changesets/commit/5b02e2f61d2a1335293016f81efb0386a0ed7967), [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/get-github-info@1.0.0-next.0
+  - @changesets/types@7.0.0-next.0
+
 ## 0.5.1
 
 ### Patch Changes

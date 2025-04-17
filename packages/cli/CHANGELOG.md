@@ -1,5 +1,39 @@
 # @changesets/cli
 
+## 3.0.0-next.0
+
+### Major Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replace `fs-extra` usage with `node:fs`
+
+- [#1570](https://github.com/changesets/changesets/pull/1570) [`d099e43`](https://github.com/changesets/changesets/commit/d099e43300c590c86740a638330bed03511c7c77) Thanks [@pralkarz](https://github.com/pralkarz)! - Removed extra leftover code related to Changesets v1
+
+- [#1616](https://github.com/changesets/changesets/pull/1616) [`609046c`](https://github.com/changesets/changesets/commit/609046c353caa08473b86e7c194e256e1cecacaa) Thanks [@bluwy](https://github.com/bluwy)! - Remove `term-size` dependency
+
+- [#1640](https://github.com/changesets/changesets/pull/1640) [`2ad65e0`](https://github.com/changesets/changesets/commit/2ad65e062ec882dcde461dbcd80a3e1d4ee98c96) Thanks [@bluwy](https://github.com/bluwy)! - Remove deprecated flag warnings, including `--updateChangelog`, `--isPublic`, `--skipCI`, and `--commit`
+
+- Updated dependencies [[`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e), [`6d1f384`](https://github.com/changesets/changesets/commit/6d1f384c8feab091f58443f6f7ee2ada64e0e7cc), [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`3628cab`](https://github.com/changesets/changesets/commit/3628cab6cbfd931b7f2a909b38b66c1aa794d4bf), [`8f7b607`](https://github.com/changesets/changesets/commit/8f7b607b486e299e038bf8e257d28f0193ac4412), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/apply-release-plan@8.0.0-next.0
+  - @changesets/config@4.0.0-next.0
+  - @changesets/write@1.0.0-next.0
+  - @changesets/read@1.0.0-next.0
+  - @changesets/git@4.0.0-next.0
+  - @changesets/pre@3.0.0-next.0
+  - @changesets/assemble-release-plan@7.0.0-next.0
+  - @changesets/get-dependents-graph@3.0.0-next.0
+  - @changesets/should-skip-package@1.0.0-next.0
+  - @changesets/get-release-plan@5.0.0-next.0
+  - @changesets/changelog-git@1.0.0-next.0
+  - @changesets/errors@1.0.0-next.0
+  - @changesets/logger@1.0.0-next.0
+  - @changesets/types@7.0.0-next.0
+
 ## 2.29.2
 
 ### Patch Changes
