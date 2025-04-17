@@ -91,19 +91,6 @@ export async function run(
       open,
       gitTag,
     }: CliOptions = flags;
-    const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
-
-    deadFlags.forEach((flag) => {
-      if (flags[flag]) {
-        error(
-          `the flag ${flag} has been removed from changesets for version 2`
-        );
-        error(`Please encode the desired value into your config`);
-        error(`See our changelog for more details`);
-        throw new ExitError(1);
-      }
-    });
-
     // Command line options need to be undefined, otherwise their
     // default value overrides the user's provided config in their
     // config file. For this reason, we only assign them to this
