@@ -1,9 +1,11 @@
 import fs from "fs-extra";
-import path from "path";
+import path from "node:path";
 import outdent from "outdent";
 
 import read from "./";
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import writeChangeset from "@changesets/write";
+import { add } from "@changesets/git";
 
 silenceLogsInBlock();
 
@@ -213,6 +215,41 @@ Awesome feature, hidden behind a feature flag
         releases: [{ name: "cool-package", type: "minor" }],
         summary: "Nice simple summary",
         id: "basic-changeset",
+      },
+    ]);
+  });
+  it("should read a nested changeset relative to git root", async () => {
+    const cwd = await gitdir({
+      "library/package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "library/packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+      }),
+      "library/.changeset/config.json": JSON.stringify({}),
+    });
+
+    const changesetId = await writeChangeset(
+      {
+        releases: [
+          {
+            name: "pkg-a",
+            type: "minor",
+          },
+        ],
+        summary: "Awesome summary",
+      },
+      path.join(cwd, "library")
+    );
+    await add("library/.changeset", cwd);
+
+    const changesets = await read(path.join(cwd, "library"), "main");
+    expect(changesets).toEqual([
+      {
+        releases: [{ name: "pkg-a", type: "minor" }],
+        summary: "Awesome summary",
+        id: changesetId,
       },
     ]);
   });
