@@ -147,9 +147,15 @@ export type GetDependencyReleaseLine = (
   changelogOpts: any
 ) => Promise<string>;
 
+export type GetCurrentRelease = (
+  changesets: string,
+  changelogOpts: null | Record<string, any>
+) => Promise<string>;
+
 export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
   getDependencyReleaseLine: GetDependencyReleaseLine;
+  getCurrentRelease: GetCurrentRelease;
 };
 
 export type GetAddMessage = (
