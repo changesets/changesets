@@ -90,7 +90,7 @@
           "const": false
         }
       ],
-      "description": "The formatter to use. If set to 'auto', it will auto-detect the formatter based on the presence of their configuration files. Set to false to disable formatting.",
+      "description": "The formatter to use to format changesets and changelogs. Set `false` to disable formatting. The default value of `\"auto\"` will auto-detect the formatter based on the project's configuration files.",
       "default": "auto"
     },
     "privatePackages": {

@@ -75,7 +75,10 @@ export type Config = {
   access: AccessType;
   baseBranch: string;
   changedFilePatterns: readonly string[];
-  /** The formatter to use. If set to 'auto', it will auto-detect the formatter based on the presence of their configuration files. Set to false to disable formatting. */
+  /**
+   * The formatter to use to format changesets and changelogs. Set `false` to disable formatting.
+   * The default value of `"auto"` will auto-detect the formatter based on the project's configuration files.
+   */
   format: "auto" | "prettier" | "biome" | "deno" | "dprint" | false;
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
