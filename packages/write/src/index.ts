@@ -1,27 +1,30 @@
-import type { Changeset } from "@changesets/types";
+import type { Changeset, Config } from "@changesets/types";
 import fs from "node:fs/promises";
 import { humanId } from "human-id";
+import { formatly, resolveFormatter } from "formatly";
 import path from "path";
-import prettier from "prettier";
-import { createRequire } from "node:module";
 
-const require = createRequire(import.meta.url);
+type Formatter = (filePath: string) => Promise<void>;
 
-function getPrettierInstance(cwd: string): typeof prettier {
-  try {
-    return require(require.resolve("prettier", { paths: [cwd] }));
-  } catch (err) {
-    if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
-      throw err;
-    }
-    return prettier;
-  }
+async function getFormatter(
+  config: Config["format"],
+  cwd: string
+): Promise<Formatter> {
+  if (config === false) return async () => {};
+
+  const formatter =
+    config === "auto" ? (await resolveFormatter(cwd))?.name : config;
+  if (!formatter) return async () => {};
+
+  return async (filePath: string) => {
+    await formatly([filePath], { cwd, formatter });
+  };
 }
 
 async function writeChangeset(
   changeset: Changeset,
   cwd: string,
-  options?: { prettier?: boolean }
+  options?: Pick<Config, "format">
 ): Promise<string> {
   const { summary, releases } = changeset;
 
@@ -34,8 +37,8 @@ async function writeChangeset(
     capitalize: false,
   });
 
-  const prettierInstance =
-    options?.prettier !== false ? getPrettierInstance(cwd) : undefined;
+  const formatter = await getFormatter(options?.format ?? "auto", cwd);
+
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
   // NOTE: The quotation marks in here are really important even though they are
@@ -49,16 +52,8 @@ ${summary}
   `;
 
   await fs.mkdir(path.dirname(newChangesetPath), { recursive: true });
-  await fs.writeFile(
-    newChangesetPath,
-    prettierInstance
-      ? // Prettier v3 returns a promise
-        await prettierInstance.format(changesetContents, {
-          ...(await prettierInstance.resolveConfig(newChangesetPath)),
-          parser: "markdown",
-        })
-      : changesetContents
-  );
+  await fs.writeFile(newChangesetPath, changesetContents);
+  await formatter(newChangesetPath);
 
   return changesetID;
 }

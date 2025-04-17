@@ -135,7 +135,6 @@ describe("version", () => {
       expect.stringContaining(`# pkg-a
 
 ## 1.1.0
-
 ### Minor Changes
 
 `)
@@ -149,7 +148,6 @@ describe("version", () => {
       expect.stringContaining(`# pkg-b
 
 ## 1.1.0
-
 ### Minor Changes
 
 `)
@@ -259,7 +257,6 @@ describe("version", () => {
       expect.stringContaining(`# pkg-a
 
 ## 1.1.0
-
 ### Minor Changes
 
 `)

@@ -80,6 +80,19 @@
       "description": "When false, Changesets won't format with Prettier",
       "default": true
     },
+    "format": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": ["auto", "prettier", "biome", "deno", "dprint"]
+        },
+        {
+          "const": false
+        }
+      ],
+      "description": "The formatter to use. If set to 'auto', it will auto-detect the formatter based on the presence of their configuration files. Set to false to disable formatting.",
+      "default": "auto"
+    },
     "privatePackages": {
       "anyOf": [
         {

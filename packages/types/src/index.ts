@@ -75,8 +75,8 @@ export type Config = {
   access: AccessType;
   baseBranch: string;
   changedFilePatterns: readonly string[];
-  /** When false, Changesets won't format with Prettier */
-  prettier: boolean;
+  /** The formatter to use. If set to 'auto', it will auto-detect the formatter based on the presence of their configuration files. Set to false to disable formatting. */
+  format: "auto" | "prettier" | "biome" | "deno" | "dprint" | false;
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
@@ -102,7 +102,7 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
-  prettier?: boolean;
+  format?: "auto" | "prettier" | "biome" | "deno" | "dprint" | false;
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
     | false

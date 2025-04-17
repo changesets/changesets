@@ -7,7 +7,6 @@ import {
 import * as git from "@changesets/git";
 import fs from "node:fs/promises";
 import path from "path";
-import { outdent } from "outdent";
 import spawn from "spawndamnit";
 import { defaultConfig } from "@changesets/config";
 
@@ -56,7 +55,7 @@ class FakeReleasePlan {
       baseBranch: "main",
       updateInternalDependencies: "patch",
       ignore: [],
-      prettier: true,
+      format: "auto",
       privatePackages: { version: true, tag: false },
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -100,7 +99,7 @@ async function testSetup(
       baseBranch: "main",
       updateInternalDependencies: "patch",
       ignore: [],
-      prettier: true,
+      format: "auto",
       privatePackages: { version: true, tag: false },
       snapshot: {
         useCalculatedVersion: false,
@@ -676,7 +675,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -753,7 +752,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1013,7 +1012,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1130,7 +1129,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1232,7 +1231,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1333,7 +1332,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1434,7 +1433,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1538,7 +1537,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1655,7 +1654,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1765,7 +1764,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1866,7 +1865,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1968,7 +1967,7 @@ describe("apply release plan", () => {
             baseBranch: "main",
             updateInternalDependencies: "patch",
             ignore: [],
-            prettier: true,
+            format: "auto",
             privatePackages: { version: true, tag: false },
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               onlyUpdatePeerDependentsWhenOutOfRange: true,
@@ -2062,13 +2061,14 @@ describe("apply release plan", () => {
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       let readme = await fs.readFile(readmePath, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.1.0
+        ## 1.1.0
+        ### Minor Changes
 
-      ### Minor Changes
-
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
     });
     it("should update a changelog for two packages", async () => {
       const releasePlan = new FakeReleasePlan(
@@ -2124,21 +2124,24 @@ describe("apply release plan", () => {
       let readme = await fs.readFile(readmePath, "utf-8");
       let readmeB = await fs.readFile(readmePathB, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.1.0
+        ## 1.1.0
+        ### Minor Changes
 
-      ### Minor Changes
+        - Hey, let's have fun with testing!
 
-      - Hey, let's have fun with testing!
+        ### Patch Changes
 
-      ### Patch Changes
+          - pkg-b@2.0.0"
+      `);
 
-      - pkg-b@2.0.0`);
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
-
-      ## 2.0.0`);
+        ## 2.0.0"
+      `);
     });
     it("should not update the changelog if only devDeps changed", async () => {
       let { changedFiles } = await testSetup(
@@ -2201,7 +2204,7 @@ describe("apply release plan", () => {
           ],
           updateInternalDependencies: "patch",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2262,18 +2265,20 @@ describe("apply release plan", () => {
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       let readme = await fs.readFile(readmePath, "utf-8");
-      expect(readme.trim()).toEqual(
-        [
-          "# pkg-a\n",
-          "## 1.1.0\n",
-          "### Minor Changes\n",
-          "- Hey, let's have fun with testing!",
-          "- Random stuff\n",
-          "  get it while it's hot!\n",
-          "- New feature, much wow\n",
-          "  look at this shiny stuff!",
-        ].join("\n")
-      );
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
+
+        ## 1.1.0
+        ### Minor Changes
+
+        - Hey, let's have fun with testing!
+        - Random stuff
+          
+          get it while it's hot!
+        - New feature, much wow
+          
+          look at this shiny stuff!"
+      `);
     });
 
     it("should add an updated dependencies line when dependencies have been updated", async () => {
@@ -2340,7 +2345,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "patch",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2365,25 +2370,27 @@ describe("apply release plan", () => {
       let readme = await fs.readFile(readmePath, "utf-8");
       let readmeB = await fs.readFile(readmePathB, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.0.4
+        ## 1.0.4
+        ### Patch Changes
 
-      ### Patch Changes
+        - Hey, let's have fun with testing!
+        - Updated dependencies
+          - pkg-b@1.2.1"
+      `);
 
-      - Hey, let's have fun with testing!
-      - Updated dependencies
-        - pkg-b@1.2.1`);
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+        ## 1.2.1
+        ### Patch Changes
 
-      ## 1.2.1
-
-      ### Patch Changes
-
-      - Hey, let's have fun with testing!
-      - Updated dependencies
-        - pkg-a@1.0.4`);
+        - Hey, let's have fun with testing!
+        - Updated dependencies
+          - pkg-a@1.0.4"
+      `);
     });
 
     it("should NOT add updated dependencies line if dependencies have NOT been updated", async () => {
@@ -2450,7 +2457,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2475,21 +2482,23 @@ describe("apply release plan", () => {
       let readme = await fs.readFile(readmePath, "utf-8");
       let readmeB = await fs.readFile(readmePathB, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.0.4
+        ## 1.0.4
+        ### Patch Changes
 
-      ### Patch Changes
+        - Hey, let's have fun with testing!"
+      `);
 
-      - Hey, let's have fun with testing!`);
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+        ## 1.2.1
+        ### Patch Changes
 
-      ## 1.2.1
-
-      ### Patch Changes
-
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
     });
 
     it("should only add updated dependencies line for dependencies that have been updated", async () => {
@@ -2572,7 +2581,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2601,31 +2610,34 @@ describe("apply release plan", () => {
       let readmeB = await fs.readFile(readmePathB, "utf-8");
       let readmeC = await fs.readFile(readmePathC, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.0.4
+        ## 1.0.4
+        ### Patch Changes
 
-      ### Patch Changes
+        - Hey, let's have fun with testing!"
+      `);
 
-      - Hey, let's have fun with testing!`);
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+        ## 1.2.1
+        ### Patch Changes
 
-      ## 1.2.1
+        - Hey, let's have fun with testing!
+        - Updated dependencies
+          - pkg-c@2.1.0"
+      `);
 
-      ### Patch Changes
+      expect(readmeC.trim()).toMatchInlineSnapshot(`
+        "# pkg-c
 
-      - Hey, let's have fun with testing!
-      - Updated dependencies
-        - pkg-c@2.1.0`);
+        ## 2.1.0
+        ### Minor Changes
 
-      expect(readmeC.trim()).toEqual(outdent`# pkg-c
-
-      ## 2.1.0
-
-      ### Minor Changes
-
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
     });
 
     it("should still add updated dependencies line for dependencies that have a bump type less than the minimum internal bump range but leave semver range", async () => {
@@ -2708,7 +2720,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2737,31 +2749,34 @@ describe("apply release plan", () => {
       let readmeB = await fs.readFile(readmePathB, "utf-8");
       let readmeC = await fs.readFile(readmePathC, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.0.4
+        ## 1.0.4
+        ### Patch Changes
 
-      ### Patch Changes
+        - Hey, let's have fun with testing!"
+      `);
 
-      - Hey, let's have fun with testing!`);
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+        ## 1.2.1
+        ### Patch Changes
 
-      ## 1.2.1
+        - Hey, let's have fun with testing!
+        - Updated dependencies
+          - pkg-c@2.0.1"
+      `);
 
-      ### Patch Changes
+      expect(readmeC.trim()).toMatchInlineSnapshot(`
+        "# pkg-c
 
-      - Hey, let's have fun with testing!
-      - Updated dependencies
-        - pkg-c@2.0.1`);
+        ## 2.0.1
+        ### Patch Changes
 
-      expect(readmeC.trim()).toEqual(outdent`# pkg-c
-
-      ## 2.0.1
-
-      ### Patch Changes
-
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
     });
   });
   describe("should error and not write if", () => {
@@ -3184,7 +3199,6 @@ describe("apply release plan", () => {
     ).toBe(`# pkg-a
 
 ## 1.1.0
-
 ### Minor Changes
 
 - ${lastCommit}: Hey, let's have fun with testing!
