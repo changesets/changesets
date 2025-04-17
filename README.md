@@ -94,6 +94,8 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Hey API](https://github.com/hey-api/openapi-ts)
 - [neverthrow](https://github.com/supermacro/neverthrow)
 - [Apollo Client](https://github.com/apollographql/apollo-client)
+- [Adobe Spectrum CSS](https://github.com/adobe/spectrum-css)
+- [Adobe Spectrum Web Components](https://github.com/adobe/spectrum-web-components)
 
 <!-- NOTE: we currently only accept new entries with at least 1000 GitHub stars -->
 
