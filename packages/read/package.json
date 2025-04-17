@@ -1,6 +1,6 @@
 {
   "name": "@changesets/read",
-  "version": "0.6.3",
+  "version": "0.6.5",
   "description": "Read changesets from disc, and return the information as JSON",
   "type": "module",
   "exports": {
@@ -10,13 +10,14 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/read",
   "dependencies": {
-    "@changesets/git": "^3.0.2",
+    "@changesets/git": "^3.0.4",
     "@changesets/parse": "^0.4.1",
     "@changesets/types": "^6.1.0",
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
+    "@changesets/write": "*",
     "outdent": "^0.8.0"
   },
   "engines": {

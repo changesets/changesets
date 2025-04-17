@@ -4,8 +4,6 @@
   "private": true,
   "type": "module",
   "description": "Utils for testing changesets packages",
-  "main": "dist/changesets-test-utils.cjs.js",
-  "module": "dist/changesets-test-utils.esm.js",
   "exports": {
     ".": "./dist/changesets-test-utils.js",
     "./package.json": "./package.json"

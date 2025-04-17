@@ -1,9 +1,11 @@
-import path from "path";
+import path from "node:path";
 import { outdent } from "outdent";
 
 import read from "./index.ts";
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import fs from "node:fs/promises";
+import writeChangeset from "@changesets/write";
+import { add } from "@changesets/git";
 
 silenceLogsInBlock();
 
@@ -127,7 +129,7 @@ I'm amazed we needed to update the best package, because it was already the best
 Everything is wrong`,
     });
 
-    expect(read(cwd)).rejects.toThrow(
+    await expect(read(cwd)).rejects.toThrow(
       outdent`could not parse changeset - invalid frontmatter: ---
 
       "cool-package": minor
@@ -189,6 +191,41 @@ Awesome feature, hidden behind a feature flag
         releases: [{ name: "pkg-a", type: "minor" }],
         summary: "Nice simple summary, much wow",
         id: "changesets-are-beautiful",
+      },
+    ]);
+  });
+  it("should read a nested changeset relative to git root", async () => {
+    const cwd = await gitdir({
+      "library/package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "library/packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+      }),
+      "library/.changeset/config.json": JSON.stringify({}),
+    });
+
+    const changesetId = await writeChangeset(
+      {
+        releases: [
+          {
+            name: "pkg-a",
+            type: "minor",
+          },
+        ],
+        summary: "Awesome summary",
+      },
+      path.join(cwd, "library")
+    );
+    await add("library/.changeset", cwd);
+
+    const changesets = await read(path.join(cwd, "library"), "main");
+    expect(changesets).toEqual([
+      {
+        releases: [{ name: "pkg-a", type: "minor" }],
+        summary: "Awesome summary",
+        id: changesetId,
       },
     ]);
   });

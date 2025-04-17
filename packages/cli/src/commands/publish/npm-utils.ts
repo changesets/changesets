@@ -32,13 +32,37 @@ function jsonParse(input: string) {
   }
 }
 
-function getCorrectRegistry(packageJson?: PackageJSON): string {
-  const registry =
-    packageJson?.publishConfig?.registry ?? process.env.npm_config_registry;
+interface RegistryInfo {
+  scope?: string;
+  registry: string;
+}
 
-  return !registry || registry === "https://registry.yarnpkg.com"
-    ? "https://registry.npmjs.org"
-    : registry;
+export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
+  const packageName = packageJson?.name;
+
+  if (packageName?.startsWith("@")) {
+    const scope = packageName.split("/")[0];
+    const scopedRegistry =
+      packageJson!.publishConfig?.[`${scope}:registry`] ||
+      process.env[`npm_config_${scope}:registry`];
+    if (scopedRegistry) {
+      return {
+        scope,
+        registry: scopedRegistry,
+      };
+    }
+  }
+
+  const registry =
+    packageJson?.publishConfig?.registry || process.env.npm_config_registry;
+
+  return {
+    scope: undefined,
+    registry:
+      !registry || registry === "https://registry.yarnpkg.com"
+        ? "https://registry.npmjs.org"
+        : registry,
+  };
 }
 
 async function getPublishTool(
@@ -64,10 +88,11 @@ async function getPublishTool(
 }
 
 export async function getTokenIsRequired() {
+  const { scope, registry } = getCorrectRegistry();
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry(),
+    [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
   let result = await spawn("npm", ["profile", "get", "--json"], {
     env: Object.assign({}, process.env, envOverride),
@@ -90,6 +115,8 @@ export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestLimit(async () => {
     info(`npm info ${packageJson.name}`);
 
+    const { scope, registry } = getCorrectRegistry(packageJson);
+
     // Due to a couple of issues with yarnpkg, we also want to override the npm registry when doing
     // npm info.
     // Issues: We sometimes get back cached responses, i.e old data about packages which causes
@@ -99,8 +126,7 @@ export function getPackageInfo(packageJson: PackageJSON) {
     let result = await spawn("npm", [
       "info",
       packageJson.name,
-      "--registry",
-      getCorrectRegistry(packageJson),
+      `--${scope ? `${scope}:` : ""}registry=${registry}`,
       "--json",
     ]);
 
@@ -161,7 +187,7 @@ export let getOtpCode = async (twoFactorState: TwoFactorState) => {
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
-  pkgName: string,
+  packageJson: PackageJSON,
   opts: PublishOptions,
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
@@ -177,11 +203,14 @@ async function internalPublish(
     publishFlags.push("--no-git-checks");
   }
 
+  const { scope, registry } = getCorrectRegistry(packageJson);
+
   // Due to a super annoying issue in yarn, we have to manually override this env variable
   // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
-    npm_config_registry: getCorrectRegistry(),
+    [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
+
   let { code, stdout, stderr } =
     publishTool.name === "pnpm"
       ? await spawn("pnpm", ["publish", "--json", ...publishFlags], {
@@ -219,10 +248,10 @@ async function internalPublish(
         }
         // just in case this isn't already true
         twoFactorState.isRequired = Promise.resolve(true);
-        return internalPublish(pkgName, opts, twoFactorState);
+        return internalPublish(packageJson, opts, twoFactorState);
       }
       error(
-        `an error occurred while publishing ${pkgName}: ${json.error.code}`,
+        `an error occurred while publishing ${packageJson.name}: ${json.error.code}`,
         json.error.summary,
         json.error.detail ? "\n" + json.error.detail : ""
       );
@@ -235,13 +264,13 @@ async function internalPublish(
 }
 
 export function publish(
-  pkgName: string,
+  packageJson: PackageJSON,
   opts: PublishOptions,
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   // If there are many packages to be published, it's better to limit the
   // concurrency to avoid unwanted errors, for example from npm.
   return npmRequestLimit(() =>
-    npmPublishLimit(() => internalPublish(pkgName, opts, twoFactorState))
+    npmPublishLimit(() => internalPublish(packageJson, opts, twoFactorState))
   );
 }

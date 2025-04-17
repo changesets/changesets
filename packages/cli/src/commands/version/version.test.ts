@@ -355,13 +355,28 @@ describe("running version in a simple project", () => {
 
     expect(spy).toHaveBeenCalled();
 
-    expect(spy).toHaveBeenCalledWith("packages/pkg-a/package.json", cwd);
-    expect(spy).toHaveBeenCalledWith("packages/pkg-a/CHANGELOG.md", cwd);
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-a", "package.json"),
+      cwd
+    );
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-a", "CHANGELOG.md"),
+      cwd
+    );
 
-    expect(spy).toHaveBeenCalledWith("packages/pkg-b/package.json", cwd);
-    expect(spy).toHaveBeenCalledWith("packages/pkg-b/CHANGELOG.md", cwd);
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-b", "package.json"),
+      cwd
+    );
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-b", "CHANGELOG.md"),
+      cwd
+    );
 
-    expect(spy).toHaveBeenCalledWith(`.changeset/${ids[0]}.md`, cwd);
+    expect(spy).toHaveBeenCalledWith(
+      path.join(".changeset", `${ids[0]}.md`),
+      cwd
+    );
   });
 
   it("should commit the result if commit config is set", async () => {
