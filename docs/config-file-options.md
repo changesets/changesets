@@ -194,3 +194,11 @@ You can use the following placeholders for customizing the snapshot release vers
 **Default behavior**
 
 If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
+
+### `format` (optional string or boolean)
+
+Default value: `"auto"`
+
+The formatter to use to format changesets and changelogs. Set `false` to disable formatting. The default value of `"auto"` will auto-detect the formatter based on the project's configuration files. See the [formatly documentation](https://github.com/JoshuaKGoldberg/formatly?tab=readme-ov-file#formatter-detection) for more details.
+
+Supported formatters include `"prettier"`, `"biome"`, `"deno"`, and `"dprint"`.
