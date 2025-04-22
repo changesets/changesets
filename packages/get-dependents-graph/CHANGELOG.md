@@ -1,5 +1,12 @@
 # @changesets/get-dependents-graph
 
+## 2.1.3
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+
 ## 2.1.2
 
 ### Patch Changes
