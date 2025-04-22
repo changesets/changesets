@@ -28,10 +28,6 @@ const parsed = mri(args, {
     "since-master": "sinceMaster",
     "git-tag": "gitTag",
     "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
-    // Deprecated flags
-    "update-changelog": "updateChangelog",
-    "is-public": "isPublic",
-    "skip-c-i": "skipCI",
   },
   default: {
     gitTag: true,

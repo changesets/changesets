@@ -1,6 +1,6 @@
 {
   "name": "@changesets/logger",
-  "version": "0.1.1",
+  "version": "1.0.0-next.0",
   "description": "Console log alias",
   "type": "module",
   "exports": {

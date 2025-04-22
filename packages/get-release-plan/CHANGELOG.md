@@ -1,5 +1,22 @@
 # @changesets/get-release-plan
 
+## 5.0.0-next.0
+
+### Major Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Patch Changes
+
+- Updated dependencies [[`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e), [`6d1f384`](https://github.com/changesets/changesets/commit/6d1f384c8feab091f58443f6f7ee2ada64e0e7cc), [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/config@4.0.0-next.0
+  - @changesets/read@1.0.0-next.0
+  - @changesets/pre@3.0.0-next.0
+  - @changesets/assemble-release-plan@7.0.0-next.0
+  - @changesets/types@7.0.0-next.0
+
 ## 4.0.10
 
 ### Patch Changes
