@@ -2129,7 +2129,9 @@ describe("apply release plan", () => {
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
-      ## 2.0.0`);
+      ## 2.0.0
+
+      No changes in this release.`);
     });
     it("should not update the changelog if only devDeps changed", async () => {
       let { changedFiles } = await testSetup(
