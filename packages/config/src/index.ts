@@ -25,7 +25,7 @@ export let defaultWrittenConfig = {
   fixed: [] as Fixed,
   linked: [] as Linked,
   access: "restricted",
-  baseBranch: "master",
+  baseBranch: "main",
   updateInternalDependencies: "patch",
   ignore: [] as ReadonlyArray<string>,
 } as const;
