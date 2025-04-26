@@ -1,5 +1,4 @@
 export type CliOptions = {
-  sinceMaster?: boolean;
   verbose?: boolean;
   output?: string;
   otp?: string;
