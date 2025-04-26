@@ -39,7 +39,7 @@ describe("init", () => {
       JSON.parse(
         await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8")
       )
-    ).toEqual({ ...defaultWrittenConfig, baseBranch: "main" });
+    ).toEqual(defaultWrittenConfig);
   });
   it("should add newline at the end of config", async () => {
     const cwd = await testdir({
