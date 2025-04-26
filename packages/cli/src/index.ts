@@ -10,7 +10,7 @@ const require = createRequire(import.meta.url);
 const args = process.argv.slice(2);
 
 const parsed = mri(args, {
-  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot"],
+  boolean: ["verbose", "empty", "open", "gitTag", "snapshot"],
   string: [
     "output",
     "otp",
@@ -25,7 +25,6 @@ const parsed = mri(args, {
     v: "verbose",
     o: "output",
     // Support kebab-case flags
-    "since-master": "sinceMaster",
     "git-tag": "gitTag",
     "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
   },

@@ -78,7 +78,6 @@ export async function run(
     );
   } else {
     const {
-      sinceMaster,
       since,
       verbose,
       output,
@@ -187,7 +186,7 @@ export async function run(
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
+        await status(cwd, { since, verbose, output }, config);
         return;
       }
       case "tag": {
