@@ -377,11 +377,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
-    const {
-      onlyUpdatePeerDependentsWhenOutOfRange,
-      updateInternalDependents,
-      useCalculatedVersionForSnapshots,
-    } = json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
+    const { onlyUpdatePeerDependentsWhenOutOfRange, updateInternalDependents } =
+      json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
 
     if (
       onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
@@ -407,24 +404,6 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           2
         )} but can only be 'always' or 'out-of-range'`
       );
-    }
-    if (
-      useCalculatedVersionForSnapshots &&
-      useCalculatedVersionForSnapshots !== undefined
-    ) {
-      console.warn(
-        `Experimental flag "useCalculatedVersionForSnapshots" is deprecated since snapshot feature became stable. Please use "snapshot.useCalculatedVersion" instead.`
-      );
-
-      if (typeof useCalculatedVersionForSnapshots !== "boolean") {
-        messages.push(
-          `The \`useCalculatedVersionForSnapshots\` option is set as ${JSON.stringify(
-            useCalculatedVersionForSnapshots,
-            null,
-            2
-          )} when the only valid values are undefined or a boolean`
-        );
-      }
     }
   }
 
@@ -475,10 +454,6 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       useCalculatedVersion:
         json.snapshot?.useCalculatedVersion !== undefined
           ? json.snapshot.useCalculatedVersion
-          : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              ?.useCalculatedVersionForSnapshots !== undefined
-          ? json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              ?.useCalculatedVersionForSnapshots
           : false,
     },
 

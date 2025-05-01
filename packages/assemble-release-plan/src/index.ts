@@ -139,9 +139,7 @@ function assembleReleasePlan(
         ...config,
         snapshot: {
           prereleaseTemplate: null,
-          useCalculatedVersion: (
-            config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH as any
-          ).useCalculatedVersionForSnapshots,
+          useCalculatedVersion: false,
         },
       };
   const refinedSnapshot: SnapshotReleaseParameters | undefined =
