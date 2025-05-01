@@ -19,6 +19,7 @@ describe("enterPre", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
     });
     await pre(cwd, { command: "enter", tag: "next" });
 
@@ -42,6 +43,7 @@ describe("enterPre", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
         initialVersions: {},
@@ -66,6 +68,7 @@ describe("enterPre", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
         initialVersions: {},
@@ -98,6 +101,7 @@ describe("exitPre", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
         initialVersions: {},
@@ -124,6 +128,7 @@ describe("exitPre", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
     });
     await expect(pre(cwd, { command: "exit" })).rejects.toBeInstanceOf(
       ExitError

@@ -99,6 +99,7 @@ describe("Add command", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -137,6 +138,7 @@ describe("Add command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -215,6 +217,7 @@ describe("Add command", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -247,6 +250,7 @@ describe("Add command", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -271,6 +275,7 @@ describe("Add command", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.3",
@@ -313,6 +318,7 @@ describe("Add command", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -341,6 +347,7 @@ describe("Add command", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -375,7 +382,7 @@ describe("Add command", () => {
   });
 
   it("should exit with an error when there are no versionable packages in a single-package repo", async () => {
-    const loggerErrorSpy = vi.spyOn(logger, 'error')
+    const loggerErrorSpy = vi.spyOn(logger, "error");
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -404,12 +411,13 @@ describe("Add command", () => {
   });
 
   it("should exit with an error when there are no versionable packages in a monorepo", async () => {
-    const loggerErrorSpy = vi.spyOn(logger, 'error')
+    const loggerErrorSpy = vi.spyOn(logger, "error");
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
       }),

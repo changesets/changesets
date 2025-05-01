@@ -55,6 +55,7 @@ describe("version", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -157,6 +158,7 @@ describe("version", () => {
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-a"),
+        relativeDir: "packages/pkg-a",
         packageJson: {
           name: "pkg-a",
           version: "1.1.0",
@@ -167,6 +169,7 @@ describe("version", () => {
       },
       {
         dir: path.join(clone, "packages", "pkg-b"),
+        relativeDir: "packages/pkg-b",
         packageJson: { name: "pkg-b", version: "1.1.0" },
       },
     ]);
@@ -178,6 +181,7 @@ describe("version", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -270,6 +274,7 @@ describe("version", () => {
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-a"),
+        relativeDir: "packages/pkg-a",
         packageJson: {
           name: "pkg-a",
           version: "1.1.0",
@@ -287,6 +292,7 @@ describe("version", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -328,6 +334,7 @@ describe("version", () => {
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-b"),
+        relativeDir: "packages/pkg-b",
         packageJson: { name: "pkg-b", version: "1.1.0" },
       },
     ]);
@@ -366,6 +373,7 @@ describe("publish", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",

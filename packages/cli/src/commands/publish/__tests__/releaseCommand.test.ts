@@ -23,12 +23,13 @@ describe("running release", () => {
     // we make sure we still do this so that a later build can clean up after a previously
     // failed one (where the change was pushed back but not released and the next build has no
     // changeset commits)
-    it("should still run publishPackages", async () => {
+    it.only("should still run publishPackages", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",

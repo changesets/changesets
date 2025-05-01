@@ -18,7 +18,8 @@
     "semver": "^7.5.3"
   },
   "devDependencies": {
-    "@changesets/config": "4.0.0-next.0"
+    "@changesets/config": "4.0.0-next.0",
+    "@manypkg/tools": "^2.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -97,7 +97,7 @@ export default async function publish(
       // fail if we are behind the base branch).
       log(`Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`);
 
-      await tagPublish(tool, successfulNpmPublishes, cwd);
+      await tagPublish(tool.type, successfulNpmPublishes, cwd);
     }
   }
 
@@ -105,7 +105,7 @@ export default async function publish(
     success("found untagged projects:");
     logReleases(untaggedPrivatePackageReleases);
 
-    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
+    await tagPublish(tool.type, untaggedPrivatePackageReleases, cwd);
   }
 
   if (unsuccessfulNpmPublishes.length > 0) {
