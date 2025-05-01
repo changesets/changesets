@@ -1,11 +1,11 @@
-import { Mock, vi } from "vitest";
+import { vi } from "vitest";
 import path from "path";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
-import { error as loggerError } from "@changesets/logger";
+import * as logger from "@changesets/logger";
 
 import {
   askCheckboxPlus,
@@ -22,6 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 vi.mock("../../../utils/cli-utilities");
 vi.mock("@changesets/git");
 vi.mock("@changesets/write");
+vi.mock("@changesets/logger");
 // @ts-ignore
 writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 // @ts-ignore
@@ -374,7 +375,7 @@ describe("Add command", () => {
   });
 
   it("should exit with an error when there are no versionable packages in a single-package repo", async () => {
-    const loggerErrorMock = loggerError as Mock<typeof loggerError>;
+    const loggerErrorSpy = vi.spyOn(logger, 'error')
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -386,8 +387,8 @@ describe("Add command", () => {
       addChangeset(cwd, { empty: false }, defaultConfig)
     ).rejects.toThrow("The process exited with code: 1");
 
-    expect(loggerErrorMock).toHaveBeenCalledTimes(3);
-    expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
+    expect(loggerErrorSpy).toHaveBeenCalledTimes(3);
+    expect(loggerErrorSpy.mock.calls).toMatchInlineSnapshot(`
       [
         [
           "No versionable packages found",
@@ -403,7 +404,7 @@ describe("Add command", () => {
   });
 
   it("should exit with an error when there are no versionable packages in a monorepo", async () => {
-    const loggerErrorMock = loggerError as Mock<typeof loggerError>;
+    const loggerErrorSpy = vi.spyOn(logger, 'error')
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -421,8 +422,8 @@ describe("Add command", () => {
       addChangeset(cwd, { empty: false }, defaultConfig)
     ).rejects.toThrow("The process exited with code: 1");
 
-    expect(loggerErrorMock).toHaveBeenCalledTimes(3);
-    expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
+    expect(loggerErrorSpy).toHaveBeenCalledTimes(3);
+    expect(loggerErrorSpy.mock.calls).toMatchInlineSnapshot(`
       [
         [
           "No versionable packages found",
