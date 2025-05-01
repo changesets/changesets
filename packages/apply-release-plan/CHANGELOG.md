@@ -1,5 +1,20 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.1
+
+### Major Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d), [`b83787f`](https://github.com/changesets/changesets/commit/b83787fb090dc03ad566a7d8b7e286dbe93e2301)]:
+  - @changesets/get-version-range-type@1.0.0-next.1
+  - @changesets/should-skip-package@1.0.0-next.1
+  - @changesets/config@4.0.0-next.1
+  - @changesets/types@7.0.0-next.1
+  - @changesets/git@4.0.0-next.1
+
 ## 8.0.0-next.0
 
 ### Major Changes

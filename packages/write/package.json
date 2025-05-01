@@ -1,6 +1,6 @@
 {
   "name": "@changesets/write",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "Writes a changeset to a file",
   "type": "module",
   "exports": {
@@ -10,13 +10,13 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/write",
   "dependencies": {
-    "@changesets/types": "^7.0.0-next.0",
+    "@changesets/types": "^7.0.0-next.1",
     "human-id": "^4.1.1",
     "prettier": "^2.7.1"
   },
   "devDependencies": {
-    "@changesets/parse": "1.0.0-next.0",
-    "@changesets/test-utils": "0.0.9-next.0",
+    "@changesets/parse": "1.0.0-next.1",
+    "@changesets/test-utils": "0.0.9-next.1",
     "vitest": "^3.0.6"
   },
   "engines": {

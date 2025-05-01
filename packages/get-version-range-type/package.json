@@ -1,6 +1,6 @@
 {
   "name": "@changesets/get-version-range-type",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "Common get-version-range-type shared between changeset packages",
   "type": "module",
   "exports": {

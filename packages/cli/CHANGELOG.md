@@ -1,5 +1,31 @@
 # @changesets/cli
 
+## 3.0.0-next.1
+
+### Major Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+- [#1651](https://github.com/changesets/changesets/pull/1651) [`e1df862`](https://github.com/changesets/changesets/commit/e1df8625800a1b3c4f66474a0e3c01b08214465c) Thanks [@bluwy](https://github.com/bluwy)! - Remove support for the `--sinceMaster` flag for `changeset status`. Use `--since=master` or `--since=main` instead.
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d), [`b83787f`](https://github.com/changesets/changesets/commit/b83787fb090dc03ad566a7d8b7e286dbe93e2301)]:
+  - @changesets/assemble-release-plan@7.0.0-next.1
+  - @changesets/get-dependents-graph@3.0.0-next.1
+  - @changesets/should-skip-package@1.0.0-next.1
+  - @changesets/apply-release-plan@8.0.0-next.1
+  - @changesets/get-release-plan@5.0.0-next.1
+  - @changesets/changelog-git@1.0.0-next.1
+  - @changesets/config@4.0.0-next.1
+  - @changesets/errors@1.0.0-next.1
+  - @changesets/logger@1.0.0-next.1
+  - @changesets/types@7.0.0-next.1
+  - @changesets/write@1.0.0-next.1
+  - @changesets/read@1.0.0-next.1
+  - @changesets/git@4.0.0-next.1
+  - @changesets/pre@3.0.0-next.1
+
 ## 3.0.0-next.0
 
 ### Major Changes
