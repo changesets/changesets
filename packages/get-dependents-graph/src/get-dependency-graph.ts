@@ -55,6 +55,7 @@ const getValidRange = (potentialRange: string) => {
 
 export default function getDependencyGraph(
   packages: Packages,
+  rootPackage: Package,
   {
     ignoreDevDependencies = false,
     bumpVersionsWithWorkspaceProtocolOnly = false,
@@ -73,10 +74,10 @@ export default function getDependencyGraph(
   let valid = true;
 
   const packagesByName: { [key: string]: Package } = {
-    [packages.root.packageJson.name]: packages.root,
+    [rootPackage.packageJson.name]: rootPackage,
   };
 
-  const queue = [packages.root];
+  const queue = [rootPackage];
 
   for (const pkg of packages.packages) {
     queue.push(pkg);

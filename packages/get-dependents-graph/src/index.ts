@@ -10,13 +10,22 @@ export function getDependentsGraph(
 ) {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
-  const { graph: dependencyGraph } = getDependencyGraph(packages, opts);
+  const rootPackage = packages.rootPackage;
+  if (rootPackage == null) {
+    return new Map();
+  }
+
+  const { graph: dependencyGraph } = getDependencyGraph(
+    packages,
+    rootPackage,
+    opts
+  );
 
   const dependentsLookup: {
     [key: string]: { pkg: Package; dependents: Array<string> };
   } = {
-    [packages.root.packageJson.name]: {
-      pkg: packages.root,
+    [rootPackage.packageJson.name]: {
+      pkg: rootPackage,
       dependents: [],
     },
   };

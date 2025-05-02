@@ -32,6 +32,7 @@ describe("init", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
     });
 
     await initializeCommand(cwd);
@@ -47,6 +48,7 @@ describe("init", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
     });
 
     await initializeCommand(cwd);
@@ -63,6 +65,7 @@ describe("init", () => {
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/config.json": JSON.stringify({
         changelog: false,
       }),

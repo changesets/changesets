@@ -1,5 +1,7 @@
+import path from "node:path";
 import type { NewChangeset, Release, VersionType } from "@changesets/types";
 import type { Package, Packages } from "@manypkg/get-packages";
+import { YarnTool } from "@manypkg/tools";
 
 function getPackage({
   name,
@@ -13,7 +15,8 @@ function getPackage({
       name,
       version,
     },
-    dir: "this-shouldn't-matter",
+    dir: path.resolve(name),
+    relativeDir: "this-shouldn't-matter",
   };
 }
 
@@ -46,15 +49,17 @@ function getRelease({
 
 let getSimpleSetup = () => ({
   packages: {
-    root: {
+    rootPackage: {
       packageJson: {
         name: "root",
         version: "0.0.0",
       },
       dir: "/",
+      relativeDir: ".",
     },
+    rootDir: "/",
     packages: [getPackage({ name: "pkg-a", version: "1.0.0" })],
-    tool: "yarn" as const,
+    tool: YarnTool,
   },
   changesets: [
     getChangeset({ releases: [getRelease({ name: "pkg-a", type: "patch" })] }),

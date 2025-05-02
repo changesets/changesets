@@ -251,6 +251,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -296,6 +297,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -351,6 +353,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -430,6 +433,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -510,6 +514,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -582,6 +587,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -626,6 +632,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -784,6 +791,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -841,6 +849,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -916,6 +925,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -959,6 +969,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1060,6 +1071,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1178,6 +1190,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1279,6 +1292,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1380,6 +1394,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1484,6 +1499,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1585,6 +1601,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1703,6 +1720,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1812,6 +1830,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1917,6 +1936,7 @@ describe("apply release plan", () => {
               private: true,
               workspaces: ["packages/*"],
             }),
+            "package-lock.json": "",
             "packages/depended-upon/package.json": JSON.stringify({
               name: "depended-upon",
               version: "1.0.0",
@@ -2016,6 +2036,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2040,6 +2061,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2090,6 +2112,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2147,6 +2170,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2241,6 +2265,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2283,6 +2308,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.3",
@@ -2393,6 +2419,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.3",
@@ -2499,6 +2526,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.3",
@@ -2635,6 +2663,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.3",
@@ -2776,6 +2805,7 @@ describe("apply release plan", () => {
               private: true,
               workspaces: ["packages/*"],
             }),
+            "package-lock.json": "",
             "packages/pkg-a/package.json": JSON.stringify({
               name: "pkg-a",
               version: "1.0.0",
@@ -2840,6 +2870,7 @@ describe("apply release plan", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -2889,6 +2920,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2966,6 +2998,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3002,6 +3035,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3038,6 +3072,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3094,6 +3129,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3147,6 +3183,7 @@ describe("apply release plan", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -3201,6 +3238,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3259,6 +3297,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",

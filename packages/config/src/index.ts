@@ -3,7 +3,11 @@ import path from "path";
 import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
-import { type Packages, getPackages } from "@manypkg/get-packages";
+import {
+  type Package,
+  type Packages,
+  getPackages,
+} from "@manypkg/get-packages";
 import type {
   Config,
   WrittenConfig,
@@ -13,6 +17,7 @@ import type {
 } from "@changesets/types";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { createRequire } from "node:module";
+import { RootTool } from "@manypkg/tools";
 
 const require = createRequire(import.meta.url);
 // eslint-disable-next-line import/no-commonjs
@@ -522,8 +527,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   return config;
 };
 
-let fakePackage = {
+let fakePackage: Package = {
   dir: "",
+  relativeDir: "",
   packageJson: {
     name: "",
     version: "",
@@ -531,7 +537,8 @@ let fakePackage = {
 };
 
 export let defaultConfig = parse(defaultWrittenConfig, {
-  root: fakePackage,
-  tool: "root",
+  rootPackage: fakePackage,
+  rootDir: "",
+  tool: RootTool,
   packages: [fakePackage],
 });

@@ -5,6 +5,8 @@ import type { Config, WrittenConfig } from "@changesets/types";
 import { type Packages, getPackages } from "@manypkg/get-packages";
 import { testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
+import path from "path";
+import { YarnTool } from "@manypkg/tools";
 
 vi.mock("@changesets/logger");
 
@@ -15,19 +17,22 @@ type CorrectCase = {
 };
 
 let defaultPackages: Packages = {
-  root: {
+  rootPackage: {
     packageJson: { name: "", version: "" },
     dir: "/",
+    relativeDir: "/",
   },
+  rootDir: "/",
   packages: [],
-  tool: "yarn",
+  tool: YarnTool,
 };
 
 const withPackages = (pkgNames: string[]) => ({
   ...defaultPackages,
   packages: pkgNames.map((pkgName) => ({
     packageJson: { name: pkgName, version: "" },
-    dir: "dir",
+    dir: path.resolve("dir"),
+    relativeDir: "dir",
   })),
 });
 
