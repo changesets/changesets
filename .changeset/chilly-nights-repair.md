@@ -6,4 +6,4 @@
 author: @remorses
 author: @vzt7
 
-Fixed a crash in prerelease mode when some package has no version field in its `package.json`
+Fixed a crash in prerelease mode when a package misses the version field in its `package.json`
