@@ -22,7 +22,7 @@ type SnapshotReleaseParameters = {
   commit?: string | undefined;
 };
 
-function getPreVersion(version: string) {
+function getPreVersion(version?: string) {
   let parsed = semverParse(version);
   if (!parsed) return;
   let preVersion =
