@@ -1,6 +1,9 @@
 ---
 "@changesets/assemble-release-plan": patch
-"@changesets/parse": patch
+"@changesets/cli": patch
 ---
 
-Fix version and publish commands when inside a prerelease and some packages have no version field
+author: @remorses
+author: @vzt7
+
+Fixed a crash in prerelease mode when some package has no version field in its `package.json`

@@ -18,9 +18,8 @@ export default function parseChangesetFile(contents: string): {
 
   let releases: Release[];
   try {
-    const yamlStuff: { [key: string]: VersionType } = yaml.safeLoad(
-      roughReleases
-    ) as any;
+    const yamlStuff: { [key: string]: VersionType } =
+      yaml.safeLoad(roughReleases);
     if (yamlStuff) {
       releases = Object.entries(yamlStuff).map(([name, type]) => ({
         name,

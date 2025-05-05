@@ -22,9 +22,8 @@ type SnapshotReleaseParameters = {
   commit?: string | undefined;
 };
 
-function getPreVersion(version?: string) {
-  let parsed = semverParse(version);
-  if (!parsed) return;
+function getPreVersion(version: string) {
+  let parsed = semverParse(version)!;
   let preVersion =
     parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
   if (typeof preVersion !== "number") {
@@ -323,9 +322,10 @@ function getHighestPreVersion(
 ): number {
   let highestPreVersion = 0;
   for (let pkg of packageGroup) {
-    const pre = getPreVersion(packagesByName.get(pkg)!.packageJson.version);
-    if (!pre) continue;
-    highestPreVersion = Math.max(pre, highestPreVersion);
+    highestPreVersion = Math.max(
+      getPreVersion(packagesByName.get(pkg)!.packageJson.version),
+      highestPreVersion
+    );
   }
   return highestPreVersion;
 }
@@ -358,9 +358,18 @@ function getPreInfo(
   // preVersion is the map between package name and its next pre version number.
   let preVersions = new Map<string, number>();
   for (const [, pkg] of packagesByName) {
-    const pre = getPreVersion(pkg.packageJson.version);
-    if (!pre) continue;
-    preVersions.set(pkg.packageJson.name, pre);
+    if (
+      shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.tag,
+      })
+    ) {
+      continue;
+    }
+    preVersions.set(
+      pkg.packageJson.name,
+      getPreVersion(pkg.packageJson.version)
+    );
   }
   for (let fixedGroup of config.fixed) {
     let highestPreVersion = getHighestPreVersion(fixedGroup, packagesByName);
