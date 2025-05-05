@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 6.0.7
+
+### Patch Changes
+
+- [#1589](https://github.com/changesets/changesets/pull/1589) [`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8) Thanks [@remorses](https://github.com/remorses), [@vzt7](https://github.com/vzt7)! - Fixed a crash in prerelease mode when a package misses the version field in its `package.json`
+
 ## 6.0.6
 
 ### Patch Changes
