@@ -24,7 +24,7 @@
     "@changesets/parse": "^0.4.1",
     "@changesets/types": "^6.1.0",
     "fs-extra": "^7.0.1",
-    "p-filter": "^2.1.0",
+    "p-filter": "^4.1.0",
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
