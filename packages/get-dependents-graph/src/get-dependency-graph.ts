@@ -47,7 +47,7 @@ const getValidRange = (potentialRange: string) => {
   }
 
   try {
-    return new Range(potentialRange);
+    return new Range(potentialRange, { includePrerelease: true });
   } catch {
     return null;
   }
