@@ -1,5 +1,15 @@
 # @changesets/cli
 
+## 2.29.4
+
+### Patch Changes
+
+- [#1668](https://github.com/changesets/changesets/pull/1668) [`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a crash in pre mode when trying to version private packages when tagging for private package is disabled
+
+- Updated dependencies [[`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627)]:
+  - @changesets/assemble-release-plan@6.0.8
+  - @changesets/get-release-plan@4.0.12
+
 ## 2.29.3
 
 ### Patch Changes
