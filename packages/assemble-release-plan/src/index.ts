@@ -361,7 +361,7 @@ function getPreInfo(
     if (
       shouldSkipPackage(pkg, {
         ignore: config.ignore,
-        allowPrivatePackages: config.privatePackages.tag,
+        allowPrivatePackages: config.privatePackages.version,
       })
     ) {
       continue;
