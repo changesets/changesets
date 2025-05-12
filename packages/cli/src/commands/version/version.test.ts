@@ -3028,6 +3028,43 @@ describe("pre", () => {
     ]);
   });
 
+  it("should version successfully a private package when tagging for them is disabled", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        private: true,
+        version: "1.0.0",
+      }),
+    });
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "patch" }],
+        summary: "a very useful summary for the first change",
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      privatePackages: {
+        tag: false,
+        version: true,
+      },
+    });
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        private: true,
+        version: "1.0.1-next.0",
+      },
+    ]);
+  });
+
   describe("linked", () => {
     it("should work with linked", async () => {
       let linkedConfig = {
