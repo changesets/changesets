@@ -1,6 +1,6 @@
 import pc from "picocolors";
 import { spawn } from "child_process";
-import path from "path";
+import path from "node:path";
 
 import * as git from "@changesets/git";
 import { error, info, log, warn } from "@changesets/logger";
@@ -15,6 +15,7 @@ import * as cli from "../../utils/cli-utilities.ts";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
 import createChangeset from "./createChangeset.ts";
 import printConfirmationMessage from "./messages.ts";
+import { fileURLToPath } from "node:url";
 
 export default async function add(
   cwd: string,
@@ -88,7 +89,8 @@ export default async function add(
     const changesetID = await writeChangeset(newChangeset, cwd, config);
     const [{ getAddMessage }, commitOpts] = await getCommitFunctions(
       config.commit,
-      cwd
+      cwd,
+      path.dirname(fileURLToPath(import.meta.url))
     );
     if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
