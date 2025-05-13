@@ -1,5 +1,35 @@
 # @changesets/apply-release-plan
 
+## 7.0.12
+
+### Patch Changes
+
+- Updated dependencies [[`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d)]:
+  - @changesets/git@3.0.4
+
+## 7.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`b15e629`](https://github.com/changesets/changesets/commit/b15e6291c3e7e780ee9e58101d3069f2382569ae)]:
+  - @changesets/git@3.0.3
+
+## 7.0.10
+
+### Patch Changes
+
+- Updated dependencies [[`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998)]:
+  - @changesets/config@3.1.1
+
+## 7.0.9
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/config@3.1.0
+  - @changesets/should-skip-package@0.1.2
+
 ## 7.0.8
 
 ### Patch Changes

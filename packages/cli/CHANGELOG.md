@@ -1,5 +1,87 @@
 # @changesets/cli
 
+## 2.29.4
+
+### Patch Changes
+
+- [#1668](https://github.com/changesets/changesets/pull/1668) [`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a crash in pre mode when trying to version private packages when tagging for private package is disabled
+
+- Updated dependencies [[`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627)]:
+  - @changesets/assemble-release-plan@6.0.8
+  - @changesets/get-release-plan@4.0.12
+
+## 2.29.3
+
+### Patch Changes
+
+- [#1589](https://github.com/changesets/changesets/pull/1589) [`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8) Thanks [@remorses](https://github.com/remorses), [@vzt7](https://github.com/vzt7)! - Fixed a crash in prerelease mode when a package misses the version field in its `package.json`
+
+- [#1619](https://github.com/changesets/changesets/pull/1619) [`c1e8a78`](https://github.com/changesets/changesets/commit/c1e8a78f315620f38bdcb35d0ac73fb6016283d0) Thanks [@manucorporat](https://github.com/manucorporat)! - Support `../` in `publishConfig.directory` when publishing packages
+
+- Updated dependencies [[`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8)]:
+  - @changesets/assemble-release-plan@6.0.7
+  - @changesets/get-release-plan@4.0.11
+
+## 2.29.2
+
+### Patch Changes
+
+- [#1636](https://github.com/changesets/changesets/pull/1636) [`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d) Thanks [@Netail](https://github.com/Netail)! - Correctly resolve new changesets with `since` option when the `.changeset` directory is not directly in the git root
+
+- Updated dependencies [[`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d)]:
+  - @changesets/read@0.6.5
+  - @changesets/git@3.0.4
+  - @changesets/get-release-plan@4.0.10
+  - @changesets/apply-release-plan@7.0.12
+
+## 2.29.1
+
+### Patch Changes
+
+- [#1620](https://github.com/changesets/changesets/pull/1620) [`b15e629`](https://github.com/changesets/changesets/commit/b15e6291c3e7e780ee9e58101d3069f2382569ae) Thanks [@Netail](https://github.com/Netail)! - Correctly fetch new changesets with since if the git option diff.relative has been set to true
+
+- Updated dependencies [[`b15e629`](https://github.com/changesets/changesets/commit/b15e6291c3e7e780ee9e58101d3069f2382569ae)]:
+  - @changesets/git@3.0.3
+  - @changesets/apply-release-plan@7.0.11
+  - @changesets/read@0.6.4
+  - @changesets/get-release-plan@4.0.9
+
+## 2.29.0
+
+### Minor Changes
+
+- [#1470](https://github.com/changesets/changesets/pull/1470) [`29f34a3`](https://github.com/changesets/changesets/commit/29f34a31cadd7d067728176d23b5728437ff5ff3) Thanks [@JounQin](https://github.com/JounQin)! - Support scoped registries configured using `package.json#publishConfig`
+
+## 2.28.1
+
+### Patch Changes
+
+- Updated dependencies [[`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998)]:
+  - @changesets/config@3.1.1
+  - @changesets/apply-release-plan@7.0.10
+  - @changesets/get-release-plan@4.0.8
+
+## 2.28.0
+
+### Minor Changes
+
+- [#1453](https://github.com/changesets/changesets/pull/1453) [`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf) Thanks [@bennypowers](https://github.com/bennypowers)! - Added a new config option to opt-out from formatting with Prettier using `prettier: false`.
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf), [`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/config@3.1.0
+  - @changesets/write@0.4.0
+  - @changesets/apply-release-plan@7.0.9
+  - @changesets/assemble-release-plan@6.0.6
+  - @changesets/changelog-git@0.2.1
+  - @changesets/get-dependents-graph@2.1.3
+  - @changesets/get-release-plan@4.0.7
+  - @changesets/pre@2.0.2
+  - @changesets/read@0.6.3
+  - @changesets/should-skip-package@0.1.2
+
 ## 2.27.12
 
 ### Patch Changes
