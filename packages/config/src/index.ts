@@ -341,7 +341,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
-  const { snapshot } = json;
+  const { snapshot, pre } = json;
 
   if (snapshot !== undefined) {
     if (
@@ -366,6 +366,18 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           null,
           2
         )} when the only valid values are undefined, or a template string.`
+      );
+    }
+  }
+
+  if (pre !== undefined) {
+    if (pre.startWith !== undefined && typeof pre.startWith !== "number") {
+      messages.push(
+        `The \`pre.startWith\` option is set as ${JSON.stringify(
+          pre.startWith,
+          null,
+          2
+        )} but the \`pre.startWith\` option can only be set as a number`
       );
     }
   }
@@ -474,6 +486,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           ? json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               ?.useCalculatedVersionForSnapshots
           : false,
+    },
+
+    pre: {
+      startWith: json.pre?.startWith ?? 0,
     },
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
