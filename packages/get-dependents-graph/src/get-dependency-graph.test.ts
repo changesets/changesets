@@ -115,4 +115,36 @@ describe("getting the dependency graph", function () {
       `);
     })
   );
+
+  it("should handle dependencies with prerelease versions", function () {
+    const { graph, valid } = getDependencyGraph({
+      root: {
+        dir: ".",
+        packageJson: { name: "root", version: "1.0.0" },
+      },
+      packages: [
+        {
+          dir: "foo",
+          packageJson: {
+            name: "foo",
+            version: "1.0.0",
+            dependencies: {
+              bar: "^1.0.0-beta.0",
+            },
+          },
+        },
+        {
+          dir: "bar",
+          packageJson: {
+            name: "bar",
+            version: "1.2.3-beta.1",
+          },
+        },
+      ],
+      tool: "pnpm",
+    });
+    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+    expect(graph.get("foo")!.dependencies).toStrictEqual(["bar"]);
+    expect(valid).toBeTruthy();
+  });
 });
