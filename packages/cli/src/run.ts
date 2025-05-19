@@ -28,10 +28,10 @@ export async function run(
   }
 
   if (!fs.existsSync(path.resolve(cwd, ".changeset"))) {
-    const pm = await detect()
-    let pmInit = "`yarn changeset init`"
+    const pm = await detect();
+    let pmInit = "`yarn changeset init`";
     if (pm) {
-      pmInit = `\`${pm} changeset init\``
+      pmInit = `\`${pm} changeset init\``;
     }
     error("There is no .changeset folder. ");
     error(
