@@ -358,6 +358,14 @@ function getPreInfo(
   // preVersion is the map between package name and its next pre version number.
   let preVersions = new Map<string, number>();
   for (const [, pkg] of packagesByName) {
+    if (
+      shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.version,
+      })
+    ) {
+      continue;
+    }
     preVersions.set(
       pkg.packageJson.name,
       getPreVersion(pkg.packageJson.version)
