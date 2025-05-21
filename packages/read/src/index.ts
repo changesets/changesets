@@ -14,7 +14,7 @@ async function filterChangesetsSinceRef(
     cwd: changesetBase,
     ref: sinceRef,
   });
-  const newHashes = newChangesets.map((c) => c.split("/")[1]);
+  const newHashes = newChangesets.map((c) => c.split("/").pop());
 
   return changesets.filter((dir) => newHashes.includes(dir));
 }
@@ -46,7 +46,9 @@ export default async function getChangesets(
 
   let changesets = contents.filter(
     (file) =>
-      !file.startsWith(".") && file.endsWith(".md") && file !== "README.md"
+      !file.startsWith(".") &&
+      file.endsWith(".md") &&
+      !/^README\.md$/i.test(file)
   );
 
   const changesetContents = changesets.map(async (file) => {

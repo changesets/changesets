@@ -86,7 +86,8 @@ export default async function version(
     releasePlan,
     packages,
     releaseConfig,
-    options.snapshot
+    options.snapshot,
+    __dirname
   );
 
   const [{ getVersionMessage }, commitOpts] = getCommitFunctions(

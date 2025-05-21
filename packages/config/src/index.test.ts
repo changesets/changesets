@@ -50,6 +50,47 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
+    prettier: true,
+    privatePackages: {
+      tag: false,
+      version: true,
+    },
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+      onlyUpdatePeerDependentsWhenOutOfRange: false,
+      updateInternalDependents: "out-of-range",
+    },
+    snapshot: {
+      useCalculatedVersion: false,
+      prereleaseTemplate: null,
+    },
+  });
+});
+
+test("read can read config based on the passed in `cwd`", async () => {
+  let cwd = await testdir({
+    ".changeset/config.json": JSON.stringify({
+      changelog: false,
+      commit: true,
+    }),
+    "package.json": JSON.stringify({
+      name: "testing",
+      version: "0.0.0",
+    }),
+  });
+  let config = await read(cwd);
+
+  expect(config).toEqual({
+    fixed: [],
+    linked: [],
+    changelog: false,
+    commit: ["@changesets/cli/commit", { skipCI: "version" }],
+    access: "restricted",
+    baseBranch: "master",
+    changedFilePatterns: ["**"],
+    updateInternalDependencies: "patch",
+    ignore: [],
+    bumpVersionsWithWorkspaceProtocolOnly: false,
+    prettier: true,
     privatePackages: {
       tag: false,
       version: true,
@@ -107,6 +148,7 @@ let defaults: Config = {
   changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
   ignore: [],
+  prettier: true,
   privatePackages: { version: true, tag: false },
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
