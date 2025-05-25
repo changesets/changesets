@@ -31,14 +31,17 @@ export function shouldUpdateDependencyBasedOnConfig(
   {
     minReleaseType,
     onlyUpdatePeerDependentsWhenOutOfRange,
+    satisfyInternalSemverWhenUpdating,
   }: {
     minReleaseType: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+    satisfyInternalSemverWhenUpdating: boolean;
   }
 ): boolean {
   if (!semverSatisfies(release.version, depVersionRange)) {
-    // Dependencies leaving semver range should always be updated
-    return true;
+    // Dependencies leaving semver range should always be updated,
+    // unless the config is set to disable this behavior
+    return !satisfyInternalSemverWhenUpdating;
   }
 
   const minLevel = getBumpLevel(minReleaseType);

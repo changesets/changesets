@@ -123,6 +123,7 @@ export default async function applyReleasePlan(
   let finalisedRelease = releaseWithChangelogs.map((release) => {
     return versionPackage(release, versionsToUpdate, {
       updateInternalDependencies: config.updateInternalDependencies,
+      satisfyInternalSemverWhenUpdating: config.satisfyInternalSemverWhenUpdating,
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .onlyUpdatePeerDependentsWhenOutOfRange,
