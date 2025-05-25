@@ -48,6 +48,7 @@ test("read reads the config", async () => {
     baseBranch: "master",
     changedFilePatterns: ["**"],
     updateInternalDependencies: "patch",
+    satisfyInternalSemverWhenUpdating: false,
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
     prettier: true,
@@ -88,6 +89,7 @@ test("read can read config based on the passed in `cwd`", async () => {
     baseBranch: "master",
     changedFilePatterns: ["**"],
     updateInternalDependencies: "patch",
+    satisfyInternalSemverWhenUpdating: false,
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
     prettier: true,
@@ -147,6 +149,7 @@ let defaults: Config = {
   baseBranch: "master",
   changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
+  satisfyInternalSemverWhenUpdating: false,
   ignore: [],
   prettier: true,
   privatePackages: { version: true, tag: false },
@@ -418,6 +421,24 @@ let correctCases: Record<string, CorrectCase> = {
         useCalculatedVersion: true,
         prereleaseTemplate: null,
       },
+    },
+  },
+  "satisfyInternalSemverWhenUpdating true": {
+    input: {
+      satisfyInternalSemverWhenUpdating: true,
+    },
+    output: {
+      ...defaults,
+      satisfyInternalSemverWhenUpdating: true,
+    },
+  },
+  "satisfyInternalSemverWhenUpdating false": {
+    input: {
+      satisfyInternalSemverWhenUpdating: false,
+    },
+    output: {
+      ...defaults,
+      satisfyInternalSemverWhenUpdating: false,
     },
   },
 };
