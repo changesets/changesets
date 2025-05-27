@@ -1935,7 +1935,7 @@ describe("apply release plan", () => {
               requireSemverSatisfaction: false,
             }),
           };
-    
+
           const releasePlan: ReleasePlan = {
             changesets: [
               {
@@ -1962,7 +1962,7 @@ describe("apply release plan", () => {
             ],
             preState: undefined,
           };
-    
+
           const packages = await getPackages(await testdir(fixture));
           const config = JSON.parse(
             await fs.readFile(
@@ -1970,21 +1970,20 @@ describe("apply release plan", () => {
               "utf-8"
             )
           ) as Config;
-    
+
           await applyReleasePlan(releasePlan, packages, config);
-    
-          const pkgADir = packages.packages.find(p => p.packageJson.name === "pkg-a")?.dir;
+
+          const pkgADir = packages.packages.find(
+            (p) => p.packageJson.name === "pkg-a"
+          )?.dir;
           if (!pkgADir) throw new Error("pkg-a not found in test setup");
-    
+
           const pkgAJson = JSON.parse(
-            await fs.readFile(
-              path.join(pkgADir, "package.json"),
-              "utf-8"
-            )
+            await fs.readFile(path.join(pkgADir, "package.json"), "utf-8")
           );
           expect(pkgAJson.dependencies["pkg-b"]).toBe("^2.0.0");
         });
-    
+
         it("should NOT update dependency if requireSemverSatisfaction is true and new version is out of range", async () => {
           const fixture = {
             "package.json": JSON.stringify({
@@ -2004,7 +2003,7 @@ describe("apply release plan", () => {
             }),
           };
           const tempDir = await testdir(fixture);
-    
+
           const releasePlan: ReleasePlan = {
             changesets: [
               {
@@ -2031,7 +2030,7 @@ describe("apply release plan", () => {
             ],
             preState: undefined,
           };
-    
+
           const packages = await getPackages(tempDir);
           // Explicitly define the config for this test
           const config: Config = {
@@ -2043,27 +2042,43 @@ describe("apply release plan", () => {
             linked: defaultConfig.linked || [],
             access: defaultConfig.access || "restricted",
             baseBranch: defaultConfig.baseBranch || "master",
-            updateInternalDependencies: defaultConfig.updateInternalDependencies || "patch",
+            updateInternalDependencies:
+              defaultConfig.updateInternalDependencies || "patch",
             ignore: defaultConfig.ignore || [],
             changedFilePatterns: defaultConfig.changedFilePatterns || ["**"],
-            bumpVersionsWithWorkspaceProtocolOnly: defaultConfig.bumpVersionsWithWorkspaceProtocolOnly || false,
+            bumpVersionsWithWorkspaceProtocolOnly:
+              defaultConfig.bumpVersionsWithWorkspaceProtocolOnly || false,
             prettier: defaultConfig.prettier !== false,
-            privatePackages: defaultConfig.privatePackages || { version: true, tag: false },
-            snapshot: defaultConfig.snapshot || { useCalculatedVersion: false, prereleaseTemplate: null },
-            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH || {
-              onlyUpdatePeerDependentsWhenOutOfRange: false,
-              updateInternalDependents: "out-of-range",
+            privatePackages: defaultConfig.privatePackages || {
+              version: true,
+              tag: false,
             },
+            snapshot: defaultConfig.snapshot || {
+              useCalculatedVersion: false,
+              prereleaseTemplate: null,
+            },
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH:
+              defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH || {
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                updateInternalDependents: "out-of-range",
+              },
           };
-    
+
           await applyReleasePlan(releasePlan, packages, config);
-    
+
           const pkgAJson = JSON.parse(
-            await fs.readFile(path.join(packages.packages.find(p => p.packageJson.name === "pkg-a")!.dir, "package.json"), "utf-8")
+            await fs.readFile(
+              path.join(
+                packages.packages.find((p) => p.packageJson.name === "pkg-a")!
+                  .dir,
+                "package.json"
+              ),
+              "utf-8"
+            )
           );
           expect(pkgAJson.dependencies["pkg-b"]).toBe("^1.0.0"); // Should NOT change
         });
-    
+
         it("should update dependency if requireSemverSatisfaction is true and new version is IN range", async () => {
           const fixture = {
             "package.json": JSON.stringify({
@@ -2083,7 +2098,7 @@ describe("apply release plan", () => {
             }),
           };
           const tempDir = await testdir(fixture);
-    
+
           const releasePlan: ReleasePlan = {
             changesets: [
               {
@@ -2110,7 +2125,7 @@ describe("apply release plan", () => {
             ],
             preState: undefined,
           };
-    
+
           const packages = await getPackages(tempDir);
           // Explicitly define the config for this test
           const config: Config = {
@@ -2122,23 +2137,39 @@ describe("apply release plan", () => {
             linked: defaultConfig.linked || [],
             access: defaultConfig.access || "restricted",
             baseBranch: defaultConfig.baseBranch || "master",
-            updateInternalDependencies: defaultConfig.updateInternalDependencies || "patch",
+            updateInternalDependencies:
+              defaultConfig.updateInternalDependencies || "patch",
             ignore: defaultConfig.ignore || [],
             changedFilePatterns: defaultConfig.changedFilePatterns || ["**"],
-            bumpVersionsWithWorkspaceProtocolOnly: defaultConfig.bumpVersionsWithWorkspaceProtocolOnly || false,
+            bumpVersionsWithWorkspaceProtocolOnly:
+              defaultConfig.bumpVersionsWithWorkspaceProtocolOnly || false,
             prettier: defaultConfig.prettier !== false,
-            privatePackages: defaultConfig.privatePackages || { version: true, tag: false },
-            snapshot: defaultConfig.snapshot || { useCalculatedVersion: false, prereleaseTemplate: null },
-            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH || {
-              onlyUpdatePeerDependentsWhenOutOfRange: false,
-              updateInternalDependents: "out-of-range",
+            privatePackages: defaultConfig.privatePackages || {
+              version: true,
+              tag: false,
             },
+            snapshot: defaultConfig.snapshot || {
+              useCalculatedVersion: false,
+              prereleaseTemplate: null,
+            },
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH:
+              defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH || {
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                updateInternalDependents: "out-of-range",
+              },
           };
-    
+
           await applyReleasePlan(releasePlan, packages, config);
-    
+
           const pkgAJson = JSON.parse(
-            await fs.readFile(path.join(packages.packages.find(p => p.packageJson.name === "pkg-a")!.dir, "package.json"), "utf-8")
+            await fs.readFile(
+              path.join(
+                packages.packages.find((p) => p.packageJson.name === "pkg-a")!
+                  .dir,
+                "package.json"
+              ),
+              "utf-8"
+            )
           );
           expect(pkgAJson.dependencies["pkg-b"]).toBe("^1.0.1"); // Should update
         });
@@ -3549,5 +3580,4 @@ describe("apply release plan", () => {
       expect(changesetsDeleted).toBe(true);
     });
   });
-
 });
