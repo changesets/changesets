@@ -252,6 +252,7 @@ async function getNewChangelogEntry(
         changelogOpts,
         {
           updateInternalDependencies: config.updateInternalDependencies,
+          requireSemverSatisfaction: config.requireSemverSatisfaction,
           onlyUpdatePeerDependentsWhenOutOfRange:
             config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange,
