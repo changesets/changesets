@@ -25,13 +25,13 @@ export default function versionPackage(
   versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
   {
     updateInternalDependencies,
-    satisfyInternalSemverWhenUpdating,
+    requireSemverSatisfaction,
     onlyUpdatePeerDependentsWhenOutOfRange,
     bumpVersionsWithWorkspaceProtocolOnly,
     snapshot,
   }: {
     updateInternalDependencies: "patch" | "minor";
-    satisfyInternalSemverWhenUpdating: boolean;
+    requireSemverSatisfaction: boolean;
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
     snapshot?: string | boolean | undefined;
@@ -59,7 +59,7 @@ export default function versionPackage(
             {
               minReleaseType: updateInternalDependencies,
               onlyUpdatePeerDependentsWhenOutOfRange,
-              satisfyInternalSemverWhenUpdating,
+              requireSemverSatisfaction,
             }
           )
         ) {

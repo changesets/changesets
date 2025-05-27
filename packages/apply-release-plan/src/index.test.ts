@@ -50,7 +50,7 @@ class FakeReleasePlan {
       changedFilePatterns: ["**"],
       baseBranch: "main",
       updateInternalDependencies: "patch",
-      satisfyInternalSemverWhenUpdating: false,
+      requireSemverSatisfaction: false,
       ignore: [],
       prettier: true,
       privatePackages: { version: true, tag: false },
@@ -95,7 +95,7 @@ async function testSetup(
       changedFilePatterns: ["**"],
       baseBranch: "main",
       updateInternalDependencies: "patch",
-      satisfyInternalSemverWhenUpdating: false,
+      requireSemverSatisfaction: false,
       ignore: [],
       prettier: true,
       privatePackages: { version: true, tag: false },
@@ -669,7 +669,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
-          satisfyInternalSemverWhenUpdating: false,
+          requireSemverSatisfaction: false,
           prettier: true,
           privatePackages: { version: true, tag: false },
           ignore: [],
@@ -747,7 +747,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
-          satisfyInternalSemverWhenUpdating: false,
+          requireSemverSatisfaction: false,
           prettier: true,
           privatePackages: { version: true, tag: false },
           ignore: [],
@@ -1007,7 +1007,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1125,7 +1125,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1228,7 +1228,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1330,7 +1330,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1432,7 +1432,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1537,7 +1537,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1655,7 +1655,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1766,7 +1766,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1868,7 +1868,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1912,8 +1912,8 @@ describe("apply release plan", () => {
         });
       });
 
-      describe("satisfyInternalSemverWhenUpdating option", () => {
-        it("should update dependency if satisfyInternalSemverWhenUpdating is false and new version is out of range", async () => {
+      describe("requireSemverSatisfaction option", () => {
+        it("should update dependency if requireSemverSatisfaction is false and new version is out of range", async () => {
           const fixture = {
             "package.json": JSON.stringify({
               private: true,
@@ -1932,7 +1932,7 @@ describe("apply release plan", () => {
             }),
             ".changeset/config.json": JSON.stringify({
               ...defaultConfig,
-              satisfyInternalSemverWhenUpdating: false,
+              requireSemverSatisfaction: false,
             }),
           };
     
@@ -1985,7 +1985,7 @@ describe("apply release plan", () => {
           expect(pkgAJson.dependencies["pkg-b"]).toBe("^2.0.0");
         });
     
-        it("should NOT update dependency if satisfyInternalSemverWhenUpdating is true and new version is out of range", async () => {
+        it("should NOT update dependency if requireSemverSatisfaction is true and new version is out of range", async () => {
           const fixture = {
             "package.json": JSON.stringify({
               private: true,
@@ -2036,7 +2036,7 @@ describe("apply release plan", () => {
           // Explicitly define the config for this test
           const config: Config = {
             ...defaultConfig,
-            satisfyInternalSemverWhenUpdating: true,
+            requireSemverSatisfaction: true,
             changelog: defaultConfig.changelog || false,
             commit: defaultConfig.commit || false,
             fixed: defaultConfig.fixed || [],
@@ -2064,7 +2064,7 @@ describe("apply release plan", () => {
           expect(pkgAJson.dependencies["pkg-b"]).toBe("^1.0.0"); // Should NOT change
         });
     
-        it("should update dependency if satisfyInternalSemverWhenUpdating is true and new version is IN range", async () => {
+        it("should update dependency if requireSemverSatisfaction is true and new version is IN range", async () => {
           const fixture = {
             "package.json": JSON.stringify({
               private: true,
@@ -2115,7 +2115,7 @@ describe("apply release plan", () => {
           // Explicitly define the config for this test
           const config: Config = {
             ...defaultConfig,
-            satisfyInternalSemverWhenUpdating: true, // Enable the feature
+            requireSemverSatisfaction: true, // Enable the feature
             changelog: defaultConfig.changelog || false,
             commit: defaultConfig.commit || false,
             fixed: defaultConfig.fixed || [],
@@ -2203,7 +2203,7 @@ describe("apply release plan", () => {
             changedFilePatterns: ["**"],
             baseBranch: "main",
             updateInternalDependencies: "patch",
-            satisfyInternalSemverWhenUpdating: false,
+            requireSemverSatisfaction: false,
             ignore: [],
             prettier: true,
             privatePackages: { version: true, tag: false },
@@ -2437,7 +2437,7 @@ describe("apply release plan", () => {
             null,
           ],
           updateInternalDependencies: "patch",
-          satisfyInternalSemverWhenUpdating: false,
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
@@ -2577,7 +2577,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "patch",
-          satisfyInternalSemverWhenUpdating: false,
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
@@ -2688,7 +2688,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "minor",
-          satisfyInternalSemverWhenUpdating: false,
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
@@ -2811,7 +2811,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "minor",
-          satisfyInternalSemverWhenUpdating: false,
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
@@ -2948,7 +2948,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "minor",
-          satisfyInternalSemverWhenUpdating: false,
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
