@@ -97,7 +97,10 @@ export default function determineDependents({
                   incrementVersion(nextRelease, preInfo),
                   versionRange,
                   {
-                    includePrerelease: isPreMode,
+                    includePrerelease:
+                      isPreMode &&
+                      config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                        .onlyUpdatePeerDependentsWhenOutOfRange,
                   }
                 ))
             ) {
@@ -243,7 +246,7 @@ function shouldBumpMajor({
     // 2. If onlyUpdatePeerDependentsWhenOutOfRange set to false, bump major regardless whether or not the version is leaving the range.
     (!onlyUpdatePeerDependentsWhenOutOfRange ||
       !semverSatisfies(incrementVersion(nextRelease, preInfo), versionRange, {
-        includePrerelease: isPreMode,
+        includePrerelease: isPreMode && onlyUpdatePeerDependentsWhenOutOfRange,
       })) &&
     // bump major only if the dependent doesn't already has a major release.
     (!releases.has(dependent) ||
