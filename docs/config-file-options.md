@@ -9,9 +9,13 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "fixed": [],
   "linked": [],
   "access": "restricted",
-  "baseBranch": "main",
+  "baseBranch": "master",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [],
+  "bumpVersionsWithWorkspaceProtocolOnly": false,
+  "changedFilePatterns": ["**"],
+  "prettier": true,
+  "privatePackages": { "version": true, "tag": false }
 }
 ```
 
@@ -194,3 +198,61 @@ You can use the following placeholders for customizing the snapshot release vers
 **Default behavior**
 
 If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
+
+## `prettier` (optional boolean)
+
+This option configures whether Changesets will format its output using Prettier. When set to `false`, Changesets will skip formatting with Prettier.
+
+Default value: `true`
+
+```json
+{
+  "prettier": false
+}
+```
+
+---
+
+## `privatePackages` (object or `false`)
+
+This option controls whether Changesets should tag and version private packages.
+
+Default value: `{ version: true, tag: false }`
+
+```json
+{
+  "privatePackages": {
+    "tag": true,
+    "version": true
+  }
+}
+```
+
+### Fields:
+
+* `tag` (`boolean`): whether private packages should receive git tags.
+* `version` (`boolean`): whether private packages should have their versions bumped.
+
+If set to `false`, private packages will be completely ignored during tagging and versioning.
+
+---
+
+## `changedFilePatterns` (array of strings)
+
+Glob patterns for changed files that should mark a package as changed. Useful to fine-tune what counts as a change (e.g. only source files, ignoring test files, etc).
+
+Default value:
+
+```json
+{
+  "changedFilePatterns": ["**"]
+}
+```
+
+Example:
+
+```json
+{
+  "changedFilePatterns": ["src/**", "lib/**"]
+}
+```
