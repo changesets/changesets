@@ -1,0 +1,49 @@
+name: Manual Release with Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release Version'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply manual version to package.json
+        run: |
+          NEW_VERSION=${{ github.event.inputs.release_version }}
+          echo "Setting version to $NEW_VERSION"
+          npm version $NEW_VERSION --no-git-tag-version
+
+      - name: Commit version bump
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git checkout -b release/manual-${{ github.event.inputs.release_version }}
+          git add .
+          git commit -m "chore: bump version to ${{ github.event.inputs.release_version }} (triggered by ${{ github.actor }})"
+          git push origin HEAD   
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: "Release: ${{ github.event.inputs.release_version }}"
+          body: "This PR bumps the version to `${{ github.event.inputs.release_version }}` manually via workflow_dispatch."
+          base: main
+          branch: release/manual-${{ github.event.inputs.release_version }}
