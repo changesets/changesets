@@ -1,0 +1,21 @@
+{
+  "name": "simple-node-app",
+  "version": "1.0.0",
+  "description": "A simple Node.js HTTP server using Node.js v20",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "node",
+    "http",
+    "server",
+    "example"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "engines": {
+    "node": "20.x"
+  }
+}
