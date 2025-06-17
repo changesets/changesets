@@ -812,5 +812,42 @@ describe("git", () => {
       });
       expect(files).toEqual([`.changeset/${changesetId}.md`]);
     });
+
+    it("should still get the relative path to the changeset file if git config relative has been set to true", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await spawn("git", ["config", "diff.relative", "true"], {
+        cwd,
+      });
+
+      const changesetId = await writeChangeset(
+        {
+          releases: [
+            {
+              name: "pkg-a",
+              type: "minor",
+            },
+          ],
+          summary: "Awesome summary",
+        },
+        cwd
+      );
+      await add(".changeset", cwd);
+
+      const files = await getChangedChangesetFilesSinceRef({
+        cwd: path.join(cwd, ".changeset"),
+        ref: "main",
+      });
+      expect(files).toEqual([`.changeset/${changesetId}.md`]);
+    });
   });
 });

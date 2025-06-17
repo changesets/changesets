@@ -1,5 +1,14 @@
 # @changesets/read
 
+## 0.6.5
+
+### Patch Changes
+
+- [#1636](https://github.com/changesets/changesets/pull/1636) [`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d) Thanks [@Netail](https://github.com/Netail)! - Correctly resolve new changesets with `since` option when the `.changeset` directory is not directly in the git root
+
+- Updated dependencies [[`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d)]:
+  - @changesets/git@3.0.4
+
 ## 0.6.4
 
 ### Patch Changes

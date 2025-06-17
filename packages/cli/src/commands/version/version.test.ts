@@ -349,13 +349,28 @@ describe("running version in a simple project", () => {
 
     expect(spy).toHaveBeenCalled();
 
-    expect(spy).toHaveBeenCalledWith("packages/pkg-a/package.json", cwd);
-    expect(spy).toHaveBeenCalledWith("packages/pkg-a/CHANGELOG.md", cwd);
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-a", "package.json"),
+      cwd
+    );
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-a", "CHANGELOG.md"),
+      cwd
+    );
 
-    expect(spy).toHaveBeenCalledWith("packages/pkg-b/package.json", cwd);
-    expect(spy).toHaveBeenCalledWith("packages/pkg-b/CHANGELOG.md", cwd);
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-b", "package.json"),
+      cwd
+    );
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-b", "CHANGELOG.md"),
+      cwd
+    );
 
-    expect(spy).toHaveBeenCalledWith(`.changeset/${ids[0]}.md`, cwd);
+    expect(spy).toHaveBeenCalledWith(
+      path.join(".changeset", `${ids[0]}.md`),
+      cwd
+    );
   });
 
   it("should commit the result if commit config is set", async () => {
@@ -2973,6 +2988,81 @@ describe("pre", () => {
         },
       ]
     `);
+  });
+
+  it("should version successfully when skipping a private package without a version field", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        private: true,
+        // no version
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the first change",
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        private: true,
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1-next.0",
+      },
+    ]);
+  });
+
+  it("should version successfully a private package when tagging for them is disabled", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        private: true,
+        version: "1.0.0",
+      }),
+    });
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "patch" }],
+        summary: "a very useful summary for the first change",
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      privatePackages: {
+        tag: false,
+        version: true,
+      },
+    });
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        private: true,
+        version: "1.0.1-next.0",
+      },
+    ]);
   });
 
   describe("linked", () => {

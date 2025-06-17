@@ -1,5 +1,17 @@
 # @changesets/assemble-release-plan
 
+## 6.0.8
+
+### Patch Changes
+
+- [#1668](https://github.com/changesets/changesets/pull/1668) [`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a crash in pre mode when trying to version private packages when tagging for private package is disabled
+
+## 6.0.7
+
+### Patch Changes
+
+- [#1589](https://github.com/changesets/changesets/pull/1589) [`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8) Thanks [@remorses](https://github.com/remorses), [@vzt7](https://github.com/vzt7)! - Fixed a crash in prerelease mode when a package misses the version field in its `package.json`
+
 ## 6.0.6
 
 ### Patch Changes
