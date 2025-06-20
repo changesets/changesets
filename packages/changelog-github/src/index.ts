@@ -101,7 +101,9 @@ const changelogFunctions: ChangelogFunctions = {
       };
     })();
 
-    const users = usersFromSummary.length
+    const users = options.skipAuthors
+      ? null
+      : usersFromSummary.length
       ? usersFromSummary
           .map(
             (userFromSummary) =>
