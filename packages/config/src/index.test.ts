@@ -138,6 +138,54 @@ it("should not fail when validating ignored packages when some package depends o
   expect(() => read(cwd, packages)).not.toThrow();
 });
 
+it("warns about outdated versions only when bumpVersionsWithWorkspaceProtocolOnly is false", async () => {
+  jest.spyOn(console, "error").mockImplementationOnce(() => {});
+
+  const fixture = {
+    ".changeset/config.json": JSON.stringify({
+      bumpVersionsWithWorkspaceProtocolOnly: true,
+      // Nested dependency check is only triggered when ignore is passed
+      ignore: [],
+    }),
+    "package.json": JSON.stringify({}),
+    "pnpm-workspace.yaml": outdent`
+      packages:
+        - examples/*
+    `,
+    "examples/shared/package.json": JSON.stringify({
+      name: "shared",
+      version: "2.0.0",
+    }),
+    "examples/latest/package.json": JSON.stringify({
+      name: "latest",
+      version: "1.0.0",
+      dependencies: {
+        shared: "workspace:*",
+      },
+    }),
+    "examples/outdated/package.json": JSON.stringify({
+      name: "outdated",
+      version: "1.0.0",
+      dependencies: {
+        shared: "1.0.0",
+      },
+    }),
+  };
+
+  let cwd = await testdir(fixture);
+  await read(cwd, await getPackages(cwd));
+  expect(console.error).not.toHaveBeenCalled();
+
+  fixture[".changeset/config.json"] = JSON.stringify({
+    bumpVersionsWithWorkspaceProtocolOnly: false,
+    ignore: [],
+  });
+
+  cwd = await testdir(fixture);
+  await read(cwd, await getPackages(cwd));
+  expect(console.error).toHaveBeenCalled();
+});
+
 let defaults: Config = {
   fixed: [],
   linked: [],

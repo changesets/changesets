@@ -294,6 +294,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but can only be 'patch' or 'minor'`
     );
   }
+
+  const bumpVersionsWithWorkspaceProtocolOnly =
+    json.bumpVersionsWithWorkspaceProtocolOnly === true;
+
   if (json.ignore) {
     if (
       !(
@@ -317,7 +321,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       );
 
       // Validate that all dependents of ignored packages are listed in the ignore list
-      const dependentsGraph = getDependentsGraph(packages);
+      const dependentsGraph = getDependentsGraph(packages, {
+        bumpVersionsWithWorkspaceProtocolOnly,
+      });
       for (const ignoredPackage of json.ignore) {
         const dependents = dependentsGraph.get(ignoredPackage) || [];
         for (const dependent of dependents) {
@@ -461,8 +467,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.ignore
         : micromatch(pkgNames, json.ignore),
 
-    bumpVersionsWithWorkspaceProtocolOnly:
-      json.bumpVersionsWithWorkspaceProtocolOnly === true,
+    bumpVersionsWithWorkspaceProtocolOnly,
 
     snapshot: {
       prereleaseTemplate: json.snapshot?.prereleaseTemplate ?? null,
