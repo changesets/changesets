@@ -22,7 +22,8 @@ export default function matchFixedConstraint(
     let highestReleaseType = getHighestReleaseType(releasingFixedPackages);
     let highestVersion = getCurrentHighestVersion(
       fixedPackages,
-      packagesByName
+      packagesByName,
+      config
     );
 
     // Finally, we update the packages so all of them are on the highest version
