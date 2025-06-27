@@ -1,5 +1,12 @@
 # @changesets/get-release-plan
 
+## 4.0.13
+
+### Patch Changes
+
+- Updated dependencies [[`6352819`](https://github.com/changesets/changesets/commit/6352819685369daecf31f72e948d0fe92ff33485)]:
+  - @changesets/assemble-release-plan@6.0.9
+
 ## 4.0.12
 
 ### Patch Changes
