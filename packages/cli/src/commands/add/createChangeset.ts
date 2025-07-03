@@ -110,7 +110,7 @@ export default async function createChangeset(
   takeAllChanged: boolean,
   minor: boolean,
   patch: boolean,
-  preparedSummary: string
+  preparedSummary: string | undefined
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
