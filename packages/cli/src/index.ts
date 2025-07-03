@@ -7,7 +7,17 @@ import { run } from "./run";
 const args = process.argv.slice(2);
 
 const parsed = mri(args, {
-  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot", "allChanged", "minor", "patch"],
+  boolean: [
+    "sinceMaster",
+    "verbose",
+    "empty",
+    "open",
+    "gitTag",
+    "snapshot",
+    "allChanged",
+    "minor",
+    "patch",
+  ],
   string: [
     "output",
     "otp",
@@ -16,7 +26,7 @@ const parsed = mri(args, {
     "tag",
     "snapshot",
     "snapshotPrereleaseTemplate",
-    "summary"
+    "summary",
   ],
   alias: {
     // Short flags
@@ -94,7 +104,7 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
 - @changesets/cli@${
         // eslint-disable-next-line import/no-extraneous-dependencies
         require("@changesets/cli/package.json").version
-        }
+      }
 - node@${process.version}
 
 ## Extra details

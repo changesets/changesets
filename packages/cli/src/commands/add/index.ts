@@ -18,13 +18,20 @@ import printConfirmationMessage from "./messages";
 
 export default async function add(
   cwd: string,
-  { empty, open, allChanged, minor, patch, summary }: {
+  {
+    empty,
+    open,
+    allChanged,
+    minor,
+    patch,
+    summary,
+  }: {
     empty?: boolean;
-    open?: boolean,
-    allChanged?: boolean,
-    minor?: boolean,
-    patch?: boolean,
-    summary?: string
+    open?: boolean;
+    allChanged?: boolean;
+    minor?: boolean;
+    patch?: boolean;
+    summary?: string;
   },
   config: Config
 ): Promise<void> {

@@ -115,10 +115,9 @@ export default async function createChangeset(
   const releases: Array<Release> = [];
 
   if (allPackages.length > 1) {
-    const packagesToRelease = takeAllChanged ? changedPackages : await getPackagesToRelease(
-      changedPackages,
-      allPackages
-    );
+    const packagesToRelease = takeAllChanged
+      ? changedPackages
+      : await getPackagesToRelease(changedPackages, allPackages);
 
     let pkgJsonsByName = getPkgJsonsByName(allPackages);
 
@@ -180,7 +179,7 @@ export default async function createChangeset(
       if (minor) {
         pkgsThatShouldBeMinorBumped = [...pkgsLeftToGetBumpTypeFor];
       } else if (patch) {
-        pkgsThatShouldBeMinorBumped = []
+        pkgsThatShouldBeMinorBumped = [];
       } else {
         pkgsThatShouldBeMinorBumped = (
           await cli.askCheckboxPlus(
@@ -257,7 +256,7 @@ export default async function createChangeset(
     log(gray("  (submit empty line to open external editor)"));
   }
 
-  let summary = preparedSummary || await cli.askQuestion("Summary");
+  let summary = preparedSummary || (await cli.askQuestion("Summary"));
   if (summary.length === 0) {
     try {
       summary = cli.askQuestionWithEditor(
