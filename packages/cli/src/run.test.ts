@@ -2,6 +2,7 @@ import { error } from "@changesets/logger";
 import { testdir } from "@changesets/test-utils";
 
 import { run } from "./run";
+import writeChangeset from "@changesets/write";
 
 import * as npmUtils from "./commands/publish/npm-utils";
 
@@ -170,6 +171,60 @@ describe("cli", () => {
       expect(loggerErrorCalls[0][0]).toEqual(
         `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`
       );
+    });
+
+    it("should not throw if `prettier: false` is configured", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          prettier: false,
+        }),
+      });
+      await writeChangeset(
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+
+      await expect(run(["version"], {}, cwd)).resolves.not.toThrow();
+    });
+
+    it('should throw if `prettier: "string"` is configured', async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          prettier: "no thanks",
+        }),
+      });
+      await writeChangeset(
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+
+      await expect(run(["version"], {}, cwd)).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean"
+      `);
     });
   });
 

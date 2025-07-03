@@ -349,13 +349,28 @@ describe("running version in a simple project", () => {
 
     expect(spy).toHaveBeenCalled();
 
-    expect(spy).toHaveBeenCalledWith("packages/pkg-a/package.json", cwd);
-    expect(spy).toHaveBeenCalledWith("packages/pkg-a/CHANGELOG.md", cwd);
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-a", "package.json"),
+      cwd
+    );
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-a", "CHANGELOG.md"),
+      cwd
+    );
 
-    expect(spy).toHaveBeenCalledWith("packages/pkg-b/package.json", cwd);
-    expect(spy).toHaveBeenCalledWith("packages/pkg-b/CHANGELOG.md", cwd);
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-b", "package.json"),
+      cwd
+    );
+    expect(spy).toHaveBeenCalledWith(
+      path.join("packages", "pkg-b", "CHANGELOG.md"),
+      cwd
+    );
 
-    expect(spy).toHaveBeenCalledWith(`.changeset/${ids[0]}.md`, cwd);
+    expect(spy).toHaveBeenCalledWith(
+      path.join(".changeset", `${ids[0]}.md`),
+      cwd
+    );
   });
 
   it("should commit the result if commit config is set", async () => {
@@ -1038,7 +1053,7 @@ describe("workspace range", () => {
     ]);
   });
 
-  it("should bump dependent package when bumping a `workspace:^` dependency", async () => {
+  it("should not bump dependent package when patch bumping a `workspace:^` dependency", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -1070,7 +1085,7 @@ describe("workspace range", () => {
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
-        version: "1.0.1",
+        version: "1.0.0",
         dependencies: {
           "pkg-b": "workspace:^",
         },
@@ -1078,6 +1093,50 @@ describe("workspace range", () => {
       {
         name: "pkg-b",
         version: "1.0.1",
+      },
+    ]);
+  });
+
+  it("should bump dependent package when minor bumping a `workspace:~` dependency", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:~",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "minor" }],
+        summary: "a very useful summary for the change",
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.1",
+        dependencies: {
+          "pkg-b": "workspace:~",
+        },
+      },
+      {
+        name: "pkg-b",
+        version: "1.1.0",
       },
     ]);
   });
@@ -1137,6 +1196,105 @@ describe("workspace range", () => {
         - pkg-a@1.1.0
       "
     `);
+  });
+
+  it("should bump major bump peer-dependent when workspace:~ dependency gets a minor bump (without onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        peerDependencies: { "pkg-a": "workspace:^" },
+      }),
+    });
+
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 2.0.0
+
+      ### Patch Changes
+
+      - Updated dependencies [g1th4sh]
+        - pkg-a@1.1.0
+      "
+    `);
+  });
+
+  it("should not bump peer-dependent when workspace:~ dependency gets a minor bump (with onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        peerDependencies: { "pkg-a": "workspace:^" },
+      }),
+    });
+
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        onlyUpdatePeerDependentsWhenOutOfRange: true,
+      },
+    });
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    // `pkg-b` should not be touched
+    expect(() => getChangelog("pkg-b", spy.mock.calls)).toThrowError();
   });
 });
 
@@ -2973,6 +3131,81 @@ describe("pre", () => {
         },
       ]
     `);
+  });
+
+  it("should version successfully when skipping a private package without a version field", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        private: true,
+        // no version
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the first change",
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        private: true,
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1-next.0",
+      },
+    ]);
+  });
+
+  it("should version successfully a private package when tagging for them is disabled", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        private: true,
+        version: "1.0.0",
+      }),
+    });
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "patch" }],
+        summary: "a very useful summary for the first change",
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      privatePackages: {
+        tag: false,
+        version: true,
+      },
+    });
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        private: true,
+        version: "1.0.1-next.0",
+      },
+    ]);
   });
 
   describe("linked", () => {

@@ -1,4 +1,4 @@
-import { join } from "path";
+import { resolve } from "path";
 import semverParse from "semver/functions/parse";
 import pc from "picocolors";
 import { AccessType } from "@changesets/types";
@@ -56,7 +56,7 @@ const getTwoFactorState = ({
   if (
     isCI ||
     publicPackages.some((pkg) =>
-      isCustomRegistry(pkg.packageJson.publishConfig?.registry)
+      isCustomRegistry(npmUtils.getCorrectRegistry(pkg.packageJson).registry)
     ) ||
     isCustomRegistry(process.env.npm_config_registry)
   ) {
@@ -131,11 +131,11 @@ async function publishAPackage(
   info(`Publishing ${pc.cyan(`"${name}"`)} at ${pc.green(`"${version}"`)}`);
 
   const publishConfirmation = await npmUtils.publish(
-    name,
+    pkg.packageJson,
     {
       cwd: pkg.dir,
       publishDir: publishConfig?.directory
-        ? join(pkg.dir, publishConfig.directory)
+        ? resolve(pkg.dir, publishConfig.directory)
         : pkg.dir,
       access: publishConfig?.access || access,
       tag,
