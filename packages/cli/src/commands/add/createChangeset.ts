@@ -254,9 +254,15 @@ export default async function createChangeset(
       "Please enter a summary for this change (this will be in the changelogs)."
     );
     log(gray("  (submit empty line to open external editor)"));
+  } else {
+    return {
+      confirmed: true,
+      summary: preparedSummary,
+      releases,
+    };
   }
 
-  let summary = preparedSummary || (await cli.askQuestion("Summary"));
+  let summary = await cli.askQuestion("Summary");
   if (summary.length === 0) {
     try {
       summary = cli.askQuestionWithEditor(
