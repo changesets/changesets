@@ -5,6 +5,7 @@ import { getVersionableChangedPackages } from "../../../utils/versionablePackage
 import addChangeset from "..";
 
 jest.mock("../../../utils/versionablePackages");
+jest.mock("@changesets/write");
 
 // @ts-ignore
 writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
