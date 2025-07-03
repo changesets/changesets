@@ -85,6 +85,10 @@ export async function run(
       tag,
       open,
       gitTag,
+      allChanged,
+      minor,
+      patch,
+      summary
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -106,7 +110,7 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        await add(cwd, { empty, open }, config);
+        await add(cwd, { empty, open, allChanged, minor, patch, summary }, config);
         return;
       }
       case "version": {

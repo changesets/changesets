@@ -18,7 +18,14 @@ import printConfirmationMessage from "./messages";
 
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  { empty, open, allChanged, minor, patch, summary }: {
+    empty?: boolean;
+    open?: boolean,
+    allChanged?: boolean,
+    minor?: boolean,
+    patch?: boolean,
+    summary?: string
+  },
   config: Config
 ): Promise<void> {
   const packages = await getPackages(cwd);
@@ -72,7 +79,11 @@ export default async function add(
 
     newChangeset = await createChangeset(
       changedPackagesNames,
-      versionablePackages
+      versionablePackages,
+      !!allChanged,
+      !!minor,
+      !!patch,
+      summary
     );
     printConfirmationMessage(newChangeset, versionablePackages.length > 1);
 
