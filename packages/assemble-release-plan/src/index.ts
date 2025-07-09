@@ -200,11 +200,7 @@ function assembleReleasePlan(
       packagesByName,
       refinedConfig
     );
-    let linksUpdated = applyLinks(
-      releases,
-      packagesByName,
-      refinedConfig.linked
-    );
+    let linksUpdated = applyLinks(releases, packagesByName, refinedConfig);
 
     releasesValidated =
       !linksUpdated && !dependentAdded && !fixedConstraintUpdated;
