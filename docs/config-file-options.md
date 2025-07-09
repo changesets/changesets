@@ -194,3 +194,15 @@ You can use the following placeholders for customizing the snapshot release vers
 **Default behavior**
 
 If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
+
+## `pre` (object or undefined)
+
+Default value: `undefined`
+
+### `startWith` (optional number)
+
+Default value: `0`
+
+Use this number as a prerelease number when a package is first versioned as a prerelease.
+
+For example, a package with version `1.0.0` will be versioned as `1.0.0-RC.1` if `startWith` is set to `1` (and the tag is `RC`).
