@@ -1,5 +1,37 @@
 # @changesets/cli
 
+## 2.29.5
+
+### Patch Changes
+
+- [#1693](https://github.com/changesets/changesets/pull/1693) [`6352819`](https://github.com/changesets/changesets/commit/6352819685369daecf31f72e948d0fe92ff33485) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `workspace:^` and `workspace:~` dependency ranges not being semantically treated as, respectively, `^CURRENT_VERSION` and `~CURRENT_VERSION`. This led to dependent packages being, at times, bumped too often when their dependencies with those ranges were bumped.
+
+- Updated dependencies [[`6352819`](https://github.com/changesets/changesets/commit/6352819685369daecf31f72e948d0fe92ff33485)]:
+  - @changesets/assemble-release-plan@6.0.9
+  - @changesets/get-release-plan@4.0.13
+
+## 2.29.4
+
+### Patch Changes
+
+- [#1668](https://github.com/changesets/changesets/pull/1668) [`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a crash in pre mode when trying to version private packages when tagging for private package is disabled
+
+- Updated dependencies [[`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627)]:
+  - @changesets/assemble-release-plan@6.0.8
+  - @changesets/get-release-plan@4.0.12
+
+## 2.29.3
+
+### Patch Changes
+
+- [#1589](https://github.com/changesets/changesets/pull/1589) [`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8) Thanks [@remorses](https://github.com/remorses), [@vzt7](https://github.com/vzt7)! - Fixed a crash in prerelease mode when a package misses the version field in its `package.json`
+
+- [#1619](https://github.com/changesets/changesets/pull/1619) [`c1e8a78`](https://github.com/changesets/changesets/commit/c1e8a78f315620f38bdcb35d0ac73fb6016283d0) Thanks [@manucorporat](https://github.com/manucorporat)! - Support `../` in `publishConfig.directory` when publishing packages
+
+- Updated dependencies [[`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8)]:
+  - @changesets/assemble-release-plan@6.0.7
+  - @changesets/get-release-plan@4.0.11
+
 ## 2.29.2
 
 ### Patch Changes
