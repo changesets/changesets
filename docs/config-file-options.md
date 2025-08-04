@@ -197,7 +197,7 @@ If you are not specifying `prereleaseTemplate`, the default behavior will fall b
 
 ## `privatePackages` (object or false)
 
-This option is for setting how private packages should be handled. By default, Changesets will update the changelog and version for private packages, but will not create a tag. You can configure this option to change the default behavior.
+This option is for setting how private packages should be handled. By default, Changesets will update the changelog for private packages and update their version, but will not create a tag. You can configure this option to change the default behavior.
 
 ### `version` (optional boolean)
 
