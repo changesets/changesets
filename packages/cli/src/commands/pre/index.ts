@@ -4,6 +4,7 @@ import { exitPre, enterPre } from "@changesets/pre";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError,
+  PreEnterButInRequestedPreModeError,
   ExitError,
 } from "@changesets/errors";
 
@@ -19,6 +20,14 @@ export default async function pre(
         "Run `changeset version` to version packages with prerelease versions"
       );
     } catch (err) {
+
+      if (err instanceof PreEnterButInRequestedPreModeError) {
+        logger.info(
+          "Already in pre mode for specified tag"
+        );
+        return;
+      }
+
       if (err instanceof PreEnterButInPreModeError) {
         logger.error("`changeset pre enter` cannot be run when in pre mode");
         logger.info(

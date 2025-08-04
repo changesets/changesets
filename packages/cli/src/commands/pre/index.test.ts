@@ -33,7 +33,29 @@ describe("enterPre", () => {
       `Entered pre mode with tag ${pc.cyan("next")}`
     );
   });
-  it("should throw if already in pre", async () => {
+
+  it("should exit gracefully if already in pre for specified tag", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {},
+        mode: "pre",
+        tag: "next",
+      }),
+    });
+
+    await pre(cwd, { command: "enter", tag: "next" });
+
+    expect(mockedLogger.info).toBeCalledWith(
+      "Already in pre mode for specified tag"
+    );
+  });
+
+  it("should throw if already in pre for a different tag", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -48,7 +70,7 @@ describe("enterPre", () => {
     });
 
     await expect(
-      pre(cwd, { command: "enter", tag: "next" })
+      pre(cwd, { command: "enter", tag: "a-different-tag" })
     ).rejects.toBeInstanceOf(ExitError);
     expect(mockedLogger.error).toBeCalledWith(
       "`changeset pre enter` cannot be run when in pre mode"
@@ -57,6 +79,7 @@ describe("enterPre", () => {
       "If you're trying to exit pre mode, run `changeset pre exit`"
     );
   });
+
   it("should enter if already exited pre mode", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
