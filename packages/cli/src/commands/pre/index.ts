@@ -20,11 +20,8 @@ export default async function pre(
         "Run `changeset version` to version packages with prerelease versions"
       );
     } catch (err) {
-
       if (err instanceof PreEnterButInRequestedPreModeError) {
-        logger.info(
-          "Already in pre mode for specified tag"
-        );
+        logger.info("Already in pre mode for specified tag");
         return;
       }
 

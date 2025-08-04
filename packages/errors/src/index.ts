@@ -36,7 +36,6 @@ export class PreEnterButInRequestedPreModeError extends ExtendableError {
   }
 }
 
-
 export class InternalError extends ExtendableError {
   constructor(message: string) {
     super(message);

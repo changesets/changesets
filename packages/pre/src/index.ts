@@ -5,7 +5,7 @@ import { getPackages } from "@manypkg/get-packages";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError,
-  PreEnterButInRequestedPreModeError
+  PreEnterButInRequestedPreModeError,
 } from "@changesets/errors";
 
 export async function readPreState(cwd: string): Promise<PreState | undefined> {
