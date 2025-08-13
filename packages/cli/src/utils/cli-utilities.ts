@@ -1,6 +1,6 @@
 import { error, prefix, success } from "@changesets/logger";
 import enuirer from "enquirer";
-import { edit } from "external-editor";
+import { edit } from "@inquirer/external-editor";
 import ansiColors from "ansi-colors";
 
 const { prompt } = enuirer;
