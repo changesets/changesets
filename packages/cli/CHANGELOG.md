@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.29.6
+
+### Patch Changes
+
+- [#1712](https://github.com/changesets/changesets/pull/1712) [`a3563b0`](https://github.com/changesets/changesets/commit/a3563b0d6c84e7142541493dea0c89acdc339b93) Thanks [@benmccann](https://github.com/benmccann)! - Switch to maintained fork of `external-editor`
+
 ## 2.29.5
 
 ### Patch Changes
