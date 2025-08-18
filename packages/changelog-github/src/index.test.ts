@@ -133,3 +133,21 @@ it("with multiple authors", async () => {
     "
   `);
 });
+
+it("skipping authors in changelog message", async () => {
+  const [changeset, releaseType, options] = getChangeset(
+    ["author: @Andarist"].join("\n"),
+    data.commit
+  );
+  expect(
+    await getReleaseLine(changeset, releaseType, {
+      ...options,
+      skipAuthors: true,
+    })
+  ).toMatchInlineSnapshot(`
+    "
+
+    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) - something
+    "
+  `);
+});
