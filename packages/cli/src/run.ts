@@ -3,6 +3,7 @@ import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { error } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
+import { detect } from "package-manager-detector";
 import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "fs-extra";
@@ -27,9 +28,14 @@ export async function run(
   }
 
   if (!fs.existsSync(path.resolve(cwd, ".changeset"))) {
+    const pm = await detect();
+    let pmInit = "`yarn changeset init`";
+    if (pm) {
+      pmInit = `\`${pm} changeset init\``;
+    }
     error("There is no .changeset folder. ");
     error(
-      "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
+      `If this is the first time \`changesets\` have been used in this project, run ${pmInit} to get set up.`
     );
     error(
       "If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration."
