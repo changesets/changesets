@@ -1478,6 +1478,38 @@ describe("bumping peerDeps", () => {
       expect(releases[0].newVersion).toEqual("1.1.0");
     });
 
+    it("should not bump dependent when still in range for prerelease versions", () => {
+      setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
+      setup.addChangeset({
+        id: "anyway-the-windblows",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            onlyUpdatePeerDependentsWhenOutOfRange: true,
+          },
+        },
+        {
+          mode: "pre",
+          tag: "alpha",
+          initialVersions: {
+            "pkg-a": "1.0.0",
+            "pkg-b": "1.0.0",
+          },
+          changesets: [],
+        }
+      );
+      expect(releases.length).toBe(1);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.1.0-alpha.0");
+    });
+
     it("should major bump dependent when leaving range", () => {
       setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
       setup.addChangeset({
