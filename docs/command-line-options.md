@@ -3,10 +3,10 @@
 The command line for changesets is the main way of interacting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-using-changesets.md)
 
 - init
-- add [--empty][--open]
+- add [--empty][--open][--enable-pnpm-catalog]
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag]
-- status [--since=master --verbose --output=JSON_FILE.json]
+- status [--since=master --verbose --output=JSON_FILE.json --enable-pnpm-catalog]
 - pre [exit|enter {tag}]
 - tag
 
@@ -65,6 +65,7 @@ A changeset created with the empty flag would look like this:
 If you set the commit option in the config, the command will add the updated changeset files and then commit them.
 
 - `--open` - opens the created changeset in an external editor
+- `--enable-pnpm-catalog` - surface packages whose versions resolve through pnpm's catalog feature so they can be included in a changeset; by default catalog-only edits are ignored.
 
 ## version
 
@@ -130,6 +131,8 @@ The status command provides information about the changesets that currently exis
 - `--output` - allows you to write the JSON object of the status output for consumption by other tools, such as CI.
 
 - `--since` - to only display information about changesets since a specific branch or git tag (such as `main`, or the git hash of latest). While this can be used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot) to detect pull requests missing changesets, as not all pull requests need one if you are on GitHub.
+
+- `--enable-pnpm-catalog` - treat pnpm catalog entries as dependency updates when determining whether packages have changed. Without the flag, catalog-only edits are ignored so existing release flows stay the same.
 
 > NOTE: `status` will fail if you are in the middle of running `version` or `publish`. If you want to get changeset status at the time of a version increase and publish, you need to run it immediately before running `version`.
 

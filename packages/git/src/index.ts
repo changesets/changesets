@@ -5,6 +5,7 @@ import { getPackages, Package } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import isSubdir from "is-subdir";
 import micromatch from "micromatch";
+import yaml from "js-yaml";
 
 export async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
@@ -254,12 +255,17 @@ export async function getChangedPackagesSinceRef({
   cwd,
   ref,
   changedFilePatterns = ["**"],
+  includeCatalogUpdates = false,
 }: {
   cwd: string;
   ref: string;
   changedFilePatterns?: readonly string[];
+  includeCatalogUpdates?: boolean;
 }): Promise<Package[]> {
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
+  const changedDependencyPackages = includeCatalogUpdates
+    ? await getChangedDependencyPackagesInCatalogSinceRef({ cwd, ref })
+    : [];
 
   return (
     [...(await getPackages(cwd)).packages]
@@ -278,12 +284,108 @@ export async function getChangedPackagesSinceRef({
           }
         }
 
-        return (
+        if (
           changedPackageFiles.length > 0 &&
           micromatch(changedPackageFiles, changedFilePatterns).length > 0
+        ) {
+          return true;
+        }
+
+        let dependencies = Object.assign(
+          {},
+          pkg.packageJson.dependencies,
+          pkg.packageJson.devDependencies
         );
+        if (!includeCatalogUpdates || changedDependencyPackages.length === 0) {
+          return false;
+        }
+
+        return Object.keys(dependencies).some((dep) => {
+          return (
+            dependencies[dep] === "catalog:" &&
+            changedDependencyPackages.includes(dep)
+          );
+        });
       })
   );
+}
+
+export async function getChangedDependencyPackagesInCatalogSinceRef({
+  cwd,
+  ref,
+}: {
+  cwd: string;
+  ref: string;
+}): Promise<Array<string>> {
+  const repoRoot = await getRepoRoot({ cwd });
+  const workspaceFilePath = path.join(repoRoot, "pnpm-workspace.yaml");
+
+  // Check if pnpm-workspace.yaml exists
+  if (!fs.existsSync(workspaceFilePath)) {
+    return [];
+  }
+
+  try {
+    // Get the current workspace content
+    const currentWorkspaceContent = fs.readFileSync(workspaceFilePath, "utf8");
+    const currentWorkspace = yaml.load(currentWorkspaceContent) as any;
+
+    // Check if there's a catalog in the current workspace
+    if (!currentWorkspace?.catalog) {
+      return [];
+    }
+
+    // Get the previous version of the workspace file using git
+    const divergedAt = await getDivergedCommit(cwd, ref);
+    const gitCmd = await spawn(
+      "git",
+      ["show", `${divergedAt}:pnpm-workspace.yaml`],
+      { cwd: repoRoot }
+    );
+
+    // If the file didn't exist before, all catalog packages are "changed"
+    if (gitCmd.code !== 0) {
+      return Object.keys(currentWorkspace.catalog);
+    }
+
+    const previousWorkspaceContent = gitCmd.stdout.toString();
+    const previousWorkspace = yaml.load(previousWorkspaceContent) as any;
+
+    // If there was no catalog before, all catalog packages are "changed"
+    if (!previousWorkspace?.catalog) {
+      return Object.keys(currentWorkspace.catalog);
+    }
+
+    // Compare catalogs and find changed packages
+    const changedPackages: string[] = [];
+    const currentCatalog = currentWorkspace.catalog;
+    const previousCatalog = previousWorkspace.catalog;
+
+    // Check for changed or new packages
+    for (const packageName in currentCatalog) {
+      if (
+        !previousCatalog[packageName] ||
+        previousCatalog[packageName] !== currentCatalog[packageName]
+      ) {
+        changedPackages.push(packageName);
+      }
+    }
+
+    // Check for removed packages
+    for (const packageName in previousCatalog) {
+      if (
+        !currentCatalog[packageName] &&
+        !changedPackages.includes(packageName)
+      ) {
+        changedPackages.push(packageName);
+      }
+    }
+
+    return changedPackages;
+  } catch (error) {
+    // If there's an error reading or parsing the workspace file, return empty array
+    return [];
+  }
 }
 
 export async function tagExists(tagStr: string, cwd: string) {

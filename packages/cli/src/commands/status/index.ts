@@ -18,11 +18,13 @@ export default async function status(
     since,
     verbose,
     output,
+    enablePnpmCatalog,
   }: {
     sinceMaster?: boolean;
     since?: string;
     verbose?: boolean;
     output?: string;
+    enablePnpmCatalog?: boolean;
   },
   config: Config
 ) {
@@ -39,6 +41,7 @@ export default async function status(
   const changedPackages = await getVersionableChangedPackages(config, {
     cwd,
     ref: sinceBranch,
+    enablePnpmCatalog,
   });
 
   if (changedPackages.length > 0 && changesets.length === 0) {
