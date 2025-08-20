@@ -38,7 +38,7 @@ const getReleaseLine = async (changeset, type) => {
   // but it also exposes a set of links for the commit, PR and GH username
   let { user, pull, links } = await getInfo({
     // replace this with your own repo
-    repo: "Noviny/changesets",
+    repo: "changesets/changesets",
     commit: changeset.commit,
   });
   let returnVal = `- ${links.commit}${

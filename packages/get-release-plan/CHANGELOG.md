@@ -1,5 +1,26 @@
 # @changesets/get-release-plan
 
+## 4.0.13
+
+### Patch Changes
+
+- Updated dependencies [[`6352819`](https://github.com/changesets/changesets/commit/6352819685369daecf31f72e948d0fe92ff33485)]:
+  - @changesets/assemble-release-plan@6.0.9
+
+## 4.0.12
+
+### Patch Changes
+
+- Updated dependencies [[`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627)]:
+  - @changesets/assemble-release-plan@6.0.8
+
+## 4.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8)]:
+  - @changesets/assemble-release-plan@6.0.7
+
 ## 5.0.0-next.0
 
 ### Major Changes
