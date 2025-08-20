@@ -1,6 +1,6 @@
 {
   "name": "@changesets/test-utils",
-  "version": "0.0.9-next.0",
+  "version": "0.0.9-next.1",
   "private": true,
   "type": "module",
   "description": "Utils for testing changesets packages",
@@ -11,7 +11,7 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/test-utils",
   "dependencies": {
-    "@changesets/logger": "^1.0.0-next.0",
+    "@changesets/logger": "^1.0.0-next.1",
     "fixturez": "^1.1.0",
     "spawndamnit": "^3.0.1",
     "vitest": "^3.0.6"

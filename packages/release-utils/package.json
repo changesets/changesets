@@ -1,15 +1,15 @@
 {
   "name": "@changesets/release-utils",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "type": "module",
   "exports": {
     ".": "./dist/changesets-release-utils.js",
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@changesets/pre": "^3.0.0-next.0",
-    "@changesets/read": "^1.0.0-next.0",
-    "@changesets/types": "^7.0.0-next.0",
+    "@changesets/pre": "^3.0.0-next.1",
+    "@changesets/read": "^1.0.0-next.1",
+    "@changesets/types": "^7.0.0-next.1",
     "@manypkg/get-packages": "^1.1.3",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-to-markdown": "^2.1.2",
@@ -19,9 +19,9 @@
     "spawndamnit": "^3.0.1"
   },
   "devDependencies": {
-    "@changesets/git": "4.0.0-next.0",
-    "@changesets/test-utils": "0.0.9-next.0",
-    "@changesets/write": "1.0.0-next.0",
+    "@changesets/git": "4.0.0-next.1",
+    "@changesets/test-utils": "0.0.9-next.1",
+    "@changesets/write": "1.0.0-next.1",
     "file-url": "^3.0.0",
     "vitest": "^3.0.6"
   },
