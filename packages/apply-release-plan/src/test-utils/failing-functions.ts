@@ -5,4 +5,7 @@ export default {
   getDependencyReleaseLine: () => {
     throw new Error("no chance");
   },
+  getCurrentRelease: () => {
+    throw new Error("no chance");
+  },
 };

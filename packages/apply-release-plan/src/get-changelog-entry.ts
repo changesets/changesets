@@ -101,8 +101,7 @@ export default async function getChangelogEntry(
       changelogOpts
     )
   );
-
-  return [
+  const currentReleaseMessage = [
     `## ${release.newVersion}`,
     await generateChangesForVersionTypeMarkdown(changelogLines, "major"),
     await generateChangesForVersionTypeMarkdown(changelogLines, "minor"),
@@ -110,4 +109,9 @@ export default async function getChangelogEntry(
   ]
     .filter((line) => line)
     .join("\n");
+
+  return await changelogFuncs.getCurrentRelease(
+    currentReleaseMessage,
+    changelogOpts
+  );
 }
