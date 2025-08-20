@@ -79,17 +79,20 @@ export default async function version(
       : undefined
   );
 
+  const contextDir = path.dirname(fileURLToPath(import.meta.url));
+
   let [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
     releaseConfig,
     options.snapshot,
-    path.dirname(fileURLToPath(import.meta.url))
+    contextDir
   );
 
   const [{ getVersionMessage }, commitOpts] = await getCommitFunctions(
     releaseConfig.commit,
-    cwd
+    cwd,
+    contextDir
   );
   if (getVersionMessage) {
     let touchedFile: string | undefined;
