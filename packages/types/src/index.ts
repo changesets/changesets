@@ -102,7 +102,7 @@ export type Config = {
     analyzer?: (
       commits: Array<{ hash: string; message: string }>,
       preset: string
-    ) => Promise<VersionType>;
+    ) => Promise<VersionType | null>;
   };
 };
 

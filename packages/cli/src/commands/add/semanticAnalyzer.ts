@@ -6,7 +6,7 @@ import { VersionType } from "@changesets/types";
 export async function analyzeConventionalCommits(
   commits: Array<{ hash: string; message: string }>,
   preset: string
-): Promise<VersionType> {
+): Promise<VersionType | null> {
   try {
     const result = await analyzeCommits(
       { preset },
