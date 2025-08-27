@@ -11,7 +11,7 @@
 [![npm package](https://img.shields.io/npm/v/@changesets/cli?label=%40changesets%2Fcli)](https://npmjs.com/package/@changesets/cli)
 [![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./packages/cli/CHANGELOG.md)
 
-The `changesets` workflow is designed to help when people are making changes, all the way through to publishing. It lets contributors declare how their changes should be released, then we automate updating package versions, and changelogs, and publishing new versions of packages based on the provided information.
+The `changesets` workflow is designed to help when people are making changes, all the way through to publishing. It lets contributors declare how their changes should be released, then we automate updating package versions, and changelogs, and publishing new versions of packages based on the provided information. With auto mode, changesets can also be automatically generated from conventional commits.
 
 Changesets has a focus on solving these problems for multi-package repositories, and keeps packages that rely on each other within the multi-package repository up-to-date, as well as making it easy to make changes to groups of packages.
 
@@ -44,6 +44,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Detailed explanation](./docs/detailed-explanation.md)
 - [Common questions](./docs/common-questions.md)
 - [Adding a changeset](./docs/adding-a-changeset.md)
+- [Auto mode](./docs/auto-mode.md) - Automatically generate changesets from conventional commits
 - [Automating changesets](./docs/automating-changesets.md)
 - [Checking for changesets](./docs/checking-for-changesets.md)
 - [Command line options](./docs/command-line-options.md)
