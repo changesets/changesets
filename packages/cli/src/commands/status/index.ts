@@ -18,11 +18,13 @@ export default async function status(
     since,
     verbose,
     output,
+    strict,
   }: {
     sinceMaster?: boolean;
     since?: string;
     verbose?: boolean;
     output?: string;
+    strict?: boolean;
   },
   config: Config
 ) {
@@ -48,6 +50,25 @@ export default async function status(
     error(
       "If this change doesn't need a release, run `changeset add --empty`."
     );
+    process.exit(1);
+  }
+
+  if (
+    strict &&
+    changedPackages.some(
+      (pkg) =>
+        !changesets.some((cs) =>
+          cs.releases.some((r) => r.name === pkg.packageJson.name)
+        )
+    )
+  ) {
+    error(
+      "Some packages have been changed but no changesets were found for those packages."
+    );
+    error(
+      "In strict mode, all changed packages must have a corresponding changeset."
+    );
+    error("Run `changeset add` to resolve this error.");
     process.exit(1);
   }
 
