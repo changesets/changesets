@@ -325,7 +325,8 @@ async function prependFile(
     );
     return;
   }
-  const newChangelog = fileData.replace("\n", data);
+  const [header, ...oldChangelogLines] = fileData.split("\n");
+  const newChangelog = header + data + oldChangelogLines.join("\n");
 
   await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
 }
