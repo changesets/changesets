@@ -325,17 +325,11 @@ async function prependFile(
     );
     return;
   }
-  const firstNewlineIdx = fileData.indexOf("\n");
-  let newChangelog: string;
-  if (firstNewlineIdx === -1) {
-    // No newline found, treat the whole file as header
-    newChangelog = fileData + data;
-  } else {
-    newChangelog =
-      fileData.slice(0, firstNewlineIdx) +
-      data +
-      fileData.slice(firstNewlineIdx + 1);
-  }
+  const index = fileData.indexOf("\n");
+  const newChangelog =
+    index === -1
+      ? fileData + data // treat the whole file as header
+      : fileData.slice(0, index) + data + fileData.slice(index + 1);
 
   await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
 }
