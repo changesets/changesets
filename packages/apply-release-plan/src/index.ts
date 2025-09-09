@@ -333,7 +333,6 @@ async function prependFile(
   } else {
     newChangelog =
       fileData.slice(0, firstNewlineIdx) +
-      "\n" +
       data +
       fileData.slice(firstNewlineIdx + 1);
   }
