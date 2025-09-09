@@ -22,6 +22,7 @@
     "@changesets/errors": "^0.2.0",
     "@manypkg/get-packages": "^1.1.3",
     "is-subdir": "^1.1.1",
+    "js-yaml": "^3.13.1",
     "micromatch": "^4.0.8",
     "spawndamnit": "^3.0.1"
   },
