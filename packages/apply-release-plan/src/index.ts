@@ -331,7 +331,11 @@ async function prependFile(
     // No newline found, treat the whole file as header
     newChangelog = fileData + data;
   } else {
-    newChangelog = fileData.slice(0, firstNewlineIdx) + "\n" + data + fileData.slice(firstNewlineIdx + 1);
+    newChangelog =
+      fileData.slice(0, firstNewlineIdx) +
+      "\n" +
+      data +
+      fileData.slice(firstNewlineIdx + 1);
   }
 
   await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
