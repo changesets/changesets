@@ -523,7 +523,7 @@ Awesome feature, hidden behind a feature flag
     `);
   });
 
-  it("should allow special replacement patterns in the changelog", async () => {
+  it("should ignore special string replacement patterns in appended changesets", async () => {
     const spy = jest.spyOn(fs, "writeFile");
 
     const cwd = await testdir({

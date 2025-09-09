@@ -2,4 +2,4 @@
 "@changesets/apply-release-plan": patch
 ---
 
-Fix generating wrong CHANGELOG when having special replacement patterns in changesets.
+Fix an issue that caused an incorrect `CHANGELOG` to be generated when a changeset contained a special string replacement pattern.
