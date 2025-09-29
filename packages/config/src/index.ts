@@ -10,6 +10,8 @@ import {
   Fixed,
   Linked,
   PackageGroup,
+  GroupsGroup,
+  Groups,
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -75,6 +77,18 @@ const havePackageGroupsCorrectShape = (
     pkgGroups.every(
       (arr) =>
         isArray(arr) && arr.every((pkgName) => typeof pkgName === "string")
+    )
+  );
+};
+
+const haveGroupsListCorrectShape = (
+  groups: ReadonlyArray<GroupsGroup>
+) => {
+  return (
+    isArray(groups) &&
+    groups.every(
+      (arr) =>
+        isArray(arr) && arr.length === 2 && arr.every((pkgName) => typeof pkgName === "string")
     )
   );
 };
@@ -331,6 +345,26 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
+  const allGroups = json.groups;
+  const groups: Groups = [];
+
+  if (allGroups !== undefined) {
+    if (linked.length || fixed.length) {
+      messages.push(
+        `The \`groups\` option cannot be used alongside the \`linked\` or \`fixed\` options. Please use only the \`groups\` option as it is a more flexible alternative to both \`linked\` and \`fixed\`.`
+      );
+    }
+    if (!haveGroupsListCorrectShape(allGroups)) {
+      messages.push(
+        `The \`groups\` option is set as ${JSON.stringify(
+          allGroups,
+          null,
+          2
+        )} when the only valid values are undefined or an array of array with 2 items of package names`
+      );
+    }
+  }
+
   if (json.prettier !== undefined && typeof json.prettier !== "boolean") {
     messages.push(
       `The \`prettier\` option is set as ${JSON.stringify(
@@ -444,6 +478,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     ),
     fixed,
     linked,
+    groups,
     baseBranch:
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch
