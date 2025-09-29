@@ -81,14 +81,14 @@ const havePackageGroupsCorrectShape = (
   );
 };
 
-const haveGroupsListCorrectShape = (
-  groups: ReadonlyArray<GroupsGroup>
-) => {
+const haveGroupsListCorrectShape = (groups: ReadonlyArray<GroupsGroup>) => {
   return (
     isArray(groups) &&
     groups.every(
       (arr) =>
-        isArray(arr) && arr.length === 2 && arr.every((pkgName) => typeof pkgName === "string")
+        isArray(arr) &&
+        arr.length === 2 &&
+        arr.every((pkgName) => typeof pkgName === "string")
     )
   );
 };
@@ -346,7 +346,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   const allGroups = json.groups;
-  const groups: Groups = [];
+  const groups: [string[], string[]][] = [];
 
   if (allGroups !== undefined) {
     if (linked.length || fixed.length) {
@@ -362,6 +362,23 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           2
         )} when the only valid values are undefined or an array of array with 2 items of package names`
       );
+    } else {
+      for (const group of allGroups ?? []) {
+        messages.push(
+          ...getUnmatchedPatterns(group, pkgNames).map(
+            (pkgOrGlob) =>
+              `The package or glob expression "${pkgOrGlob}" specified in the \`groups\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+          )
+        );
+
+        const expandedGroup: [string[], string[]] = [
+          micromatch(pkgNames, group[0]),
+          micromatch(pkgNames, group[1]),
+        ];
+        // FIXME: we might want to warn if both sides of the group are empty after expansion
+        // FIXME: there is still issue with types and as groups require strict pkgNames what about glob patterns?
+        groups.push(expandedGroup);
+      }
     }
   }
 
