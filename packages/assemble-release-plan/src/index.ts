@@ -16,6 +16,7 @@ import flattenReleases from "./flatten-releases";
 import { incrementVersion } from "./increment";
 import matchFixedConstraint from "./match-fixed-constraint";
 import { InternalRelease, PreInfo } from "./types";
+import applyGroups from "./apply-groups";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -206,8 +207,17 @@ function assembleReleasePlan(
       refinedConfig.linked
     );
 
+    let groupsUpdated = applyGroups(
+      releases,
+      packagesByName,
+      refinedConfig.groups
+    );
+
     releasesValidated =
-      !linksUpdated && !dependentAdded && !fixedConstraintUpdated;
+      !linksUpdated &&
+      !dependentAdded &&
+      !fixedConstraintUpdated &&
+      !groupsUpdated;
   }
 
   if (preInfo?.state.mode === "exit") {

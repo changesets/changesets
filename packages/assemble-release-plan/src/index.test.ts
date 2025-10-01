@@ -892,6 +892,124 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     });
   });
 
+  describe.only("groups packages", () => {
+    it("should bump only target when target is update not source", () => {
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [{ name: "pkg-c", type: "major" }],
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          groups: [
+            ["pkg-a", "pkg-c"],
+          ],
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(1);
+      expect(releases[0].newVersion).toEqual("2.0.0");
+    });
+
+    it("should bump source when target is updated", () => {
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [{ name: "pkg-a", type: "major" }],
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          groups: [
+            ["pkg-a", "pkg-b"],
+          ],
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(2);
+      expect(releases[0].newVersion).toEqual("2.0.0");
+      expect(releases[1].newVersion).toEqual("2.0.0");
+    });
+
+    it('should bump all targets for one source update', () => {
+      setup.addChangeset({
+        id: "just-some-umbrellas",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          groups: [
+            ["pkg-a", "pkg-b"],
+            ["pkg-a", "pkg-c"]
+          ],
+        },
+        undefined
+      );
+
+      expect(releases.length).toEqual(3);
+      expect(releases[0].newVersion).toEqual("1.1.0");
+      expect(releases[1].newVersion).toEqual("1.1.0");
+      expect(releases[2].newVersion).toEqual("1.1.0");
+    });
+
+    // it("should assemble a release plan where new highest version is set by an unreleased package", () => {
+    //   setup.addChangeset({
+    //     id: "just-some-umbrellas",
+    //     releases: [
+    //       { name: "pkg-b", type: "minor" },
+    //       { name: "pkg-a", type: "patch" },
+    //     ],
+    //   });
+
+    //   setup.updatePackage("pkg-c", "2.0.0");
+
+    //   let { releases } = assembleReleasePlan(
+    //     setup.changesets,
+    //     setup.packages,
+    //     {
+    //       ...defaultConfig,
+    //       groups: [["pkg-a", "pkg-b"], ['pkg-a', 'pkg-c']],
+    //     },
+    //     undefined
+    //   );
+
+    //   expect(releases.length).toEqual(3);
+    //   expect(releases[0].newVersion).toEqual("1.0.1");
+    //   expect(releases[1].newVersion).toEqual("1.1.0");
+    //   expect(releases[2].newVersion).toEqual("2.0.1");
+    // });
+
+    it("should return an empty release array when no changes will occur", () => {
+      let { releases } = assembleReleasePlan(
+        [],
+        setup.packages,
+        {
+          ...defaultConfig,
+          groups: [
+            ["pkg-a", "pkg-b"],
+            ["pkg-c", "pkg-d"],
+          ],
+        },
+        undefined
+      );
+
+      expect(releases).toEqual([]);
+    });
+  });
+
   describe("pre mode", () => {
     it("should not generate a release for package that has no changesets and is not a dependent of any packages being released when exiting pre mode", () => {
       const { releases } = assembleReleasePlan(
