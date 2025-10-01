@@ -346,7 +346,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   const allGroups = json.groups;
-  const groups: [string[], string[]][] = [];
+  const groups: [string, string][] = [];
 
   if (allGroups !== undefined) {
     if (linked.length || fixed.length) {
@@ -371,12 +371,30 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           )
         );
 
-        const expandedGroup: [string[], string[]] = [
-          micromatch(pkgNames, group[0]),
-          micromatch(pkgNames, group[1]),
-        ];
-        // FIXME: we might want to warn if both sides of the group are empty after expansion
-        // FIXME: there is still issue with types and as groups require strict pkgNames what about glob patterns?
+        const source = micromatch(pkgNames, group[0]);
+        const target = micromatch(pkgNames, group[1]);
+
+        if (source.length > 1) {
+          messages.push(
+            `The source side of the group "${
+              group[0]
+            }" in the \`groups\` option must resolve to exactly one package, but it resolves to [${source.join(
+              ", "
+            )}].`
+          );
+        }
+
+        if (target.length > 1) {
+          messages.push(
+            `The target side of the group "${
+              group[1]
+            }" in the \`groups\` option must resolve to exactly one package, but it resolves to [${target.join(
+              ", "
+            )}].`
+          );
+        }
+
+        const expandedGroup: Groups[number] = [source[0], target[0]];
         groups.push(expandedGroup);
       }
     }

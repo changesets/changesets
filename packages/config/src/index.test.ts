@@ -700,6 +700,24 @@ describe("parser errors", () => {
         The \`groups\` option cannot be used alongside the \`linked\` or \`fixed\` options. Please use only the \`groups\` option as it is a more flexible alternative to both \`linked\` and \`fixed\`."
       `);
     });
+
+    test("groups glob expression should match only one target package", () => {
+      expect(() => {
+        parse({ groups: [["pkg-a", "pkg-glob-*"]] }, withPackages(["pkg-a", "pkg-glob-1", "pkg-glob-2"]));
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The target side of the group "pkg-glob-*" in the \`groups\` option must resolve to exactly one package, but it resolves to [pkg-glob-1, pkg-glob-2]."
+      `);
+    });
+
+    test("groups glob expression should match only one source package", () => {
+      expect(() => {
+        parse({ groups: [["pkg-glob-*", "pkg-a"]] }, withPackages(["pkg-a", "pkg-glob-1", "pkg-glob-2"]));
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The source side of the group "pkg-glob-*" in the \`groups\` option must resolve to exactly one package, but it resolves to [pkg-glob-1, pkg-glob-2]."
+      `);
+    });
   });
 
   test("access private warns and sets to restricted", () => {
