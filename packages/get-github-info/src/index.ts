@@ -105,9 +105,13 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     } catch (parseError) {
       const responseText = await response.text();
       if (!response.ok) {
-        throw new Error(`GitHub API request failed with status ${response.status}: ${response.statusText}\nResponse: ${responseText}`);
+        throw new Error(
+          `GitHub API request failed with status ${response.status}: ${response.statusText}\nResponse: ${responseText}`
+        );
       }
-      throw new Error(`Failed to parse response as JSON: ${parseError}\nResponse: ${responseText}`);
+      throw new Error(
+        `Failed to parse response as JSON: ${parseError}\nResponse: ${responseText}`
+      );
     }
 
     return responseData;
