@@ -22,10 +22,13 @@
     "url": "https://github.com/changesets/changesets.git"
   },
   "packageManager": "yarn@1.22.22",
-  "workspaces": [
-    "packages/*",
-    "scripts/*"
-  ],
+    "workspaces": {
+    "packages": ["packages/*", "scripts/*"],
+    "nohoist": [
+      "**",
+      "**/**"
+    ]
+  },
   "author": "Changesets Contributors",
   "contributors": [
     "Ben Conolly",
