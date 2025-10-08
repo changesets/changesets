@@ -10,6 +10,8 @@ import {
   Fixed,
   Linked,
   PackageGroup,
+  GroupsGroup,
+  Groups,
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -75,6 +77,18 @@ const havePackageGroupsCorrectShape = (
     pkgGroups.every(
       (arr) =>
         isArray(arr) && arr.every((pkgName) => typeof pkgName === "string")
+    )
+  );
+};
+
+const haveGroupsListCorrectShape = (groups: ReadonlyArray<GroupsGroup>) => {
+  return (
+    isArray(groups) &&
+    groups.every(
+      (arr) =>
+        isArray(arr) &&
+        arr.length === 2 &&
+        arr.every((pkgName) => typeof pkgName === "string")
     )
   );
 };
@@ -331,6 +345,61 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
+  const allGroups = json.groups;
+  const groups: [string, string][] = [];
+
+  if (allGroups !== undefined) {
+    if (linked.length || fixed.length) {
+      messages.push(
+        `The \`groups\` option cannot be used alongside the \`linked\` or \`fixed\` options. Please use only the \`groups\` option as it is a more flexible alternative to both \`linked\` and \`fixed\`.`
+      );
+    }
+    if (!haveGroupsListCorrectShape(allGroups)) {
+      messages.push(
+        `The \`groups\` option is set as ${JSON.stringify(
+          allGroups,
+          null,
+          2
+        )} when the only valid values are undefined or an array of array with 2 items of package names`
+      );
+    } else {
+      for (const group of allGroups ?? []) {
+        messages.push(
+          ...getUnmatchedPatterns(group, pkgNames).map(
+            (pkgOrGlob) =>
+              `The package or glob expression "${pkgOrGlob}" specified in the \`groups\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+          )
+        );
+
+        const source = micromatch(pkgNames, group[0]);
+        const target = micromatch(pkgNames, group[1]);
+
+        if (source.length > 1) {
+          messages.push(
+            `The source side of the group "${
+              group[0]
+            }" in the \`groups\` option must resolve to exactly one package, but it resolves to [${source.join(
+              ", "
+            )}].`
+          );
+        }
+
+        if (target.length > 1) {
+          messages.push(
+            `The target side of the group "${
+              group[1]
+            }" in the \`groups\` option must resolve to exactly one package, but it resolves to [${target.join(
+              ", "
+            )}].`
+          );
+        }
+
+        const expandedGroup: Groups[number] = [source[0], target[0]];
+        groups.push(expandedGroup);
+      }
+    }
+  }
+
   if (json.prettier !== undefined && typeof json.prettier !== "boolean") {
     messages.push(
       `The \`prettier\` option is set as ${JSON.stringify(
@@ -444,6 +513,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     ),
     fixed,
     linked,
+    groups,
     baseBranch:
       json.baseBranch === undefined
         ? defaultWrittenConfig.baseBranch

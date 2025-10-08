@@ -62,6 +62,14 @@ export type PackageGroup = ReadonlyArray<string>;
 export type Fixed = ReadonlyArray<PackageGroup>;
 export type Linked = ReadonlyArray<PackageGroup>;
 
+export type GroupsGroup = [string, string];
+/**
+ * Groups allow you to define custom linkings but with possibility to groups of repeating deps
+ * E.g. `[["pkg-a", "pkg-b"], ["pkg-c", "pkg-b"]]` means that `pkg-a` and `pkg-b` are linked,
+ * and `pkg-c` and `pkg-b` are linked, but there is no linking between the two groups
+ */
+export type Groups = ReadonlyArray<GroupsGroup>;
+
 export interface PrivatePackages {
   version: boolean;
   tag: boolean;
@@ -72,6 +80,7 @@ export type Config = {
   commit: false | readonly [string, any];
   fixed: Fixed;
   linked: Linked;
+  groups: Groups;
   access: AccessType;
   baseBranch: string;
   changedFilePatterns: readonly string[];
@@ -99,6 +108,7 @@ export type WrittenConfig = {
   commit?: boolean | readonly [string, any] | string;
   fixed?: Fixed;
   linked?: Linked;
+  groups?: Groups;
   access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];

@@ -42,6 +42,7 @@ test("read reads the config", async () => {
   expect(config).toEqual({
     fixed: [],
     linked: [],
+    groups: [],
     changelog: false,
     commit: ["@changesets/cli/commit", { skipCI: "version" }],
     access: "restricted",
@@ -82,6 +83,7 @@ test("read can read config based on the passed in `cwd`", async () => {
   expect(config).toEqual({
     fixed: [],
     linked: [],
+    groups: [],
     changelog: false,
     commit: ["@changesets/cli/commit", { skipCI: "version" }],
     access: "restricted",
@@ -141,6 +143,7 @@ it("should not fail when validating ignored packages when some package depends o
 let defaults: Config = {
   fixed: [],
   linked: [],
+  groups: [],
   changelog: ["@changesets/cli/changelog", null],
   commit: false,
   access: "restricted",
@@ -625,6 +628,98 @@ describe("parser errors", () => {
       `);
     });
   });
+
+  describe("groups", () => {
+    describe("invalid structures", () => {
+      test("non-array", () => {
+        expect(() => {
+          unsafeParse({ groups: {} }, defaultPackages);
+        }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The \`groups\` option is set as {} when the only valid values are undefined or an array of array with 2 items of package names"
+      `);
+      });
+
+      test("array of non array", () => {
+        expect(() => {
+          unsafeParse({ groups: [{}] }, defaultPackages);
+        }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The \`groups\` option is set as [
+          {}
+        ] when the only valid values are undefined or an array of array with 2 items of package names"
+      `);
+      });
+
+      test("array of array of non-string", () => {
+        expect(() => {
+          unsafeParse({ groups: [[{}]] }, defaultPackages);
+        }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The \`groups\` option is set as [
+          [
+            {}
+          ]
+        ] when the only valid values are undefined or an array of array with 2 items of package names"
+      `);
+      });
+    });
+
+    test("package that does not exist", () => {
+      expect(() => {
+        parse({ groups: [["pkg-a", "not-existing"]] }, withPackages(["pkg-a"]));
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The package or glob expression "not-existing" specified in the \`groups\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+      `);
+    });
+
+    test("package that does not exist (using glob expressions)", () => {
+      expect(() => {
+        parse({ groups: [["pkg-a", "foo/*"]] }, withPackages(["pkg-a"]));
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The package or glob expression "foo/*" specified in the \`groups\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+      `);
+    });
+
+    test("using groups and linked alongside", () => {
+      expect(() => {
+        parse({ groups: [["pkg-a", "pkg-a"]], linked: [["pkg-a"]] }, withPackages(["pkg-a"]));
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The \`groups\` option cannot be used alongside the \`linked\` or \`fixed\` options. Please use only the \`groups\` option as it is a more flexible alternative to both \`linked\` and \`fixed\`."
+      `);
+    });
+
+    test("using groups and fixed alongside", () => {
+      expect(() => {
+        parse({ groups: [["pkg-a", "pkg-a"]], fixed: [["pkg-a"]] }, withPackages(["pkg-a"]));
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The \`groups\` option cannot be used alongside the \`linked\` or \`fixed\` options. Please use only the \`groups\` option as it is a more flexible alternative to both \`linked\` and \`fixed\`."
+      `);
+    });
+
+    test("groups glob expression should match only one target package", () => {
+      expect(() => {
+        parse({ groups: [["pkg-a", "pkg-glob-*"]] }, withPackages(["pkg-a", "pkg-glob-1", "pkg-glob-2"]));
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The target side of the group "pkg-glob-*" in the \`groups\` option must resolve to exactly one package, but it resolves to [pkg-glob-1, pkg-glob-2]."
+      `);
+    });
+
+    test("groups glob expression should match only one source package", () => {
+      expect(() => {
+        parse({ groups: [["pkg-glob-*", "pkg-a"]] }, withPackages(["pkg-a", "pkg-glob-1", "pkg-glob-2"]));
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The source side of the group "pkg-glob-*" in the \`groups\` option must resolve to exactly one package, but it resolves to [pkg-glob-1, pkg-glob-2]."
+      `);
+    });
+  });
+
   test("access private warns and sets to restricted", () => {
     let config = unsafeParse({ access: "private" }, defaultPackages);
     expect(config).toEqual(defaults);
