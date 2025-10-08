@@ -1,0 +1,341 @@
+// UniVerseX - Vercel Starter
+// Single-file React app (Next.js style) + project README and config
+
+/*
+Project structure (paste these files into a new repo):
+
+package.json
+tailwind.config.js
+postcss.config.js
+vercel.json
+/public/manifest.json
+/pages/_app.jsx
+/pages/index.jsx
+/styles/globals.css
+/README.md
+
+This starter is a minimal Next.js + Tailwind project built to deploy on Vercel and to be used as a Development URL for Pi App Studio Testnet.
+
+Notes:
+- Dark mode follows user system preference by default.
+- Languages: auto-detect from browser (navigator.language) and falls back to English.
+- Pi SDK integration: a small `usePiAuth` stub shows where to integrate Pi's SDK. Replace with real Pi SDK code and tokens when available.
+
+--- package.json ---
+{
+  "name": "universex-vercel-starter",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "13.4.10",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "10.4.14",
+    "postcss": "8.4.23",
+    "tailwindcss": "3.4.7"
+  }
+}
+
+--- tailwind.config.js ---
+module.exports = {
+  content: ["./pages/**/*.{js,jsx}", "./components/**/*.{js,jsx}", "./app/**/*.{js,jsx}", "./src/**/*.{js,jsx}"],
+  darkMode: 'class',
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+--- postcss.config.js ---
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+--- vercel.json ---
+{
+  "version": 2,
+  "builds": [
+    { "src": "next.config.mjs", "use": "@vercel/next" }
+  ]
+}
+
+--- public/manifest.json ---
+{
+  "name": "UniVerseX",
+  "short_name": "UniVerseX",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f2937"
+}
+
+--- styles/globals.css ---
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #__next {
+  height: 100%;
+}
+
+/* simple container */
+.container {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+--- pages/_app.jsx ---
+import '../styles/globals.css'
+import { useEffect, useState } from 'react'
+
+export default function App({ Component, pageProps }) {
+  // Set dark mode by system preference, but respect saved preference
+  useEffect(() => {
+    const saved = localStorage.getItem('uvx-theme')
+    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [])
+
+  return <Component {...pageProps} />
+}
+
+--- pages/index.jsx ---
+import { useEffect, useState } from 'react'
+
+// Simple translation table for demonstration. Extend as needed.
+const TRANSLATIONS = {
+  en: {
+    title: 'UniVerseX — Everything in one place',
+    description: 'Global marketplace · Education · Social · Payments',
+    explore: 'Explore',
+    sections: {
+      commerce: 'Commerce',
+      social: 'Community & Social',
+      learn: 'Education & Courses',
+      finance: 'Payments & Wallets',
+    }
+  },
+  ar: {
+    title: 'UniVerseX — كل شيء في مكان واحد',
+    description: 'سوق عالمي · تعليم · مجتمع · مدفوعات',
+    explore: 'استكشف',
+    sections: {
+      commerce: 'تجارة إلكترونية',
+      social: 'المجتمع والشبكات',
+      learn: 'التعليم والدورات',
+      finance: 'المدفوعات والمحافظ',
+    }
+  },
+  fr: {
+    title: 'UniVerseX — Tout en un',
+    description: 'Marketplace global · Éducation · Social · Paiements',
+    explore: 'Explorer',
+    sections: {
+      commerce: 'Commerce',
+      social: 'Communauté & Social',
+      learn: 'Éducation & Cours',
+      finance: 'Paiements & Portefeuilles',
+    }
+  }
+}
+
+function detectLang() {
+  const nav = typeof navigator !== 'undefined' ? navigator.language || navigator.userLanguage : 'en'
+  const code = nav.split('-')[0]
+  return TRANSLATIONS[code] ? code : 'en'
+}
+
+function usePiAuth() {
+  // STUB: replace this with real Pi SDK integration
+  const [connected, setConnected] = useState(false)
+  useEffect(() => {
+    // Example: check for window.piWallet or similar provided by Pi Browser
+    if (typeof window !== 'undefined' && window.pi) {
+      // integrate real auth flow here
+      setConnected(true)
+    }
+  }, [])
+  return { connected }
+}
+
+export default function Home() {
+  const [lang, setLang] = useState('en')
+  const t = TRANSLATIONS[lang]
+  const { connected } = usePiAuth()
+
+  useEffect(() => {
+    setLang(detectLang())
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <header className="py-6 border-b border-gray-200 dark:border-gray-800">
+        <div className="container flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded bg-gradient-to-br from-indigo-600 to-pink-500 flex items-center justify-center text-white font-bold">U</div>
+            <div>
+              <div className="font-semibold">UniVerseX</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{t.description}</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm">{connected ? 'Pi Connected' : 'Not connected'}</div>
+            <LanguageSelector lang={lang} setLang={setLang} />
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <main className="py-12">
+        <div className="container">
+          <section className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h1 className="text-3xl font-bold mb-4">{t.title}</h1>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">{t.description}</p>
+              <div className="flex gap-3">
+                <a className="px-4 py-2 rounded bg-indigo-600 text-white" href="#">{t.explore}</a>
+                <a className="px-4 py-2 rounded border" href="#">Learn more</a>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Card title={t.sections.commerce}>Products marketplace, storefronts, carts.</Card>
+              <Card title={t.sections.social}>Groups, posts, private messaging.</Card>
+              <Card title={t.sections.learn}>Courses, lessons, certifications.</Card>
+              <Card title={t.sections.finance}>Wallet, conversions, fiat on/off ramps.</Card>
+            </div>
+          </section>
+
+          <section className="mt-12">
+            <h2 className="text-xl font-semibold mb-4">Quick setup for Pi Testnet</h2>
+            <ol className="list-decimal list-inside text-gray-600 dark:text-gray-300">
+              <li>Deploy this project to Vercel (push to GitHub and connect in Vercel).</li>
+              <li>Copy the generated URL (e.g. https://your-app.vercel.app) to Pi App Studio &rarr; Development URL.</li>
+              <li>Integrate Pi SDK credentials and switch to Testnet mode.</li>
+            </ol>
+          </section>
+
+        </div>
+      </main>
+
+      <footer className="py-6 border-t border-gray-200 dark:border-gray-800">
+        <div className="container text-sm text-gray-500">© UniVerseX — Test Version</div>
+      </footer>
+    </div>
+  )
+}
+
+function Card({ title, children }) {
+  return (
+    <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+      <div className="font-semibold mb-2">{title}</div>
+      <div className="text-sm text-gray-600 dark:text-gray-300">{children}</div>
+    </div>
+  )
+}
+
+function LanguageSelector({ lang, setLang }) {
+  return (
+    <select value={lang} onChange={(e) => setLang(e.target.value)} className="bg-transparent border rounded px-2 py-1 text-sm">
+      <option value="en">English</option>
+      <option value="ar">العربية</option>
+      <option value="fr">Français</option>
+    </select>
+  )
+}
+
+function ThemeToggle() {
+  useEffect(() => {}, [])
+  const toggle = () => {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('uvx-theme', 'light')
+    } else {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('uvx-theme', 'dark')
+    }
+  }
+  return (
+    <button onClick={toggle} className="px-2 py-1 border rounded text-sm">
+      Toggle Theme
+    </button>
+  )
+}
+
+--- README.md ---
+# UniVerseX - Vercel Starter
+
+This repository is a minimal Next.js + Tailwind starter for UniVerseX (test version) to deploy on Vercel and connect to Pi App Studio Testnet.
+
+## Deploy to Vercel
+1. Create a GitHub repo and push these files.
+2. Sign in to Vercel and choose "Import Project" → select your GitHub repo.
+3. Use the default build settings (Next.js). Click Deploy.
+4. After deployment, Vercel gives you a URL like `https://your-repo.vercel.app`.
+
+## Use with Pi App Studio (Development URL)
+1. Open Pi App Studio (appstudio.pi) and go to your app settings.
+2. In the "Configure Development URL" field, paste the Vercel URL.
+3. Make sure to enable Testnet mode in your Pi SDK integration.
+
+## Pi SDK Integration (important)
+- Replace the `usePiAuth` stub in `pages/index.jsx` with Pi's official SDK integration code.
+- Provide your Pi Developer token or follow Pi's OAuth flow as required by the Pi developer docs.
+
+## Notes
+- This is a starter skeleton. Extend sections into full-featured commerce, social, learning, and finance modules.
+- For production, secure API keys with environment variables in Vercel and enable HTTPS only.
+
+--- End of starter ---
+
+// You can copy these file blocks into individual files in a new Git repo, push to GitHub, and deploy on Vercel.
+// If you'd like, I can now generate a ZIP containing these files for download, or give step-by-step commands to create the repo locally and push it to GitHub.
+
+
+تمام — جهزت لك مشروع UniVerseX — Vercel Starter داخل مساحة الكود (Canvas). 📁
+افتح المستند المُسمى "Uni Verse X - Vercel Starter (react + Tailwind)" في المساحة بجانب المحادثة للاطّلاع على كل الملفات والتعليمات والكود الجاهز.
+
+الخطوات العملية التالية منك (بإيجاز):
+
+1. انسخ الملفات الموجودة في المستند إلى مجلد مشروع محلي (أو أنشئ repo على GitHub).
+
+
+2. ادفع (push) الكود إلى GitHub.
+
+
+3. استورد المشروع في Vercel وانشره (Deploy).
+
+
+4. انسخ رابط Vercel الناتج وألصقه في Pi App Studio → Configure Development URL.
+
+
+5. استبدل stub المصادقة (usePiAuth) بكود Pi SDK وفعّل Testnet.
+
+
+
+أستطيع الآن (اختر أحد الخيارات):
+
+أ) أُنشئ أرشيف ZIP جاهز يحتوي كل الملفات لتنزله مباشرة.
+
+ب) أقدّم لك أوامر سطر الأوامر خطوة بخطوة لإنشاء repo ودفعه إلى GitHub (إذا تريد العمل من جهازك).
+
+ج) أجهز لك نسخة مُبسطة للرفع مباشرة على Replit إذا تفضّل حلًّا أسرع من Vercel.
+
+
+اختر أي خيار تريده الآن وسأفعله فورًا.
+
