@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, type Mock, vi } from "vitest";
 import fixturez from "fixturez";
-import spawn from "spawndamnit";
+import { exec as spawn } from "tinyexec";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
@@ -115,29 +115,35 @@ export const tempdir = f.temp;
 
 export async function gitdir(dir: Fixture) {
   const cwd = await testdir(dir);
-  await spawn("git", ["init"], { cwd });
+  await spawn("git", ["init"], { nodeOptions: { cwd } });
   // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
   {
     const { stdout } = await spawn(
       "git",
       ["rev-parse", "--abbrev-ref", "HEAD"],
-      { cwd },
+      { nodeOptions: { cwd } },
     );
-    if (stdout.toString("utf8").trim() !== "main") {
-      await spawn("git", ["checkout", "-b", "main"], { cwd });
+    if (stdout.trim() !== "main") {
+      await spawn("git", ["checkout", "-b", "main"], { nodeOptions: { cwd } });
     }
   }
-  await spawn("git", ["config", "user.email", "x@y.z"], { cwd });
-  await spawn("git", ["config", "user.name", "xyz"], { cwd });
-  await spawn("git", ["config", "commit.gpgSign", "false"], { cwd });
-  await spawn("git", ["config", "tag.gpgSign", "false"], { cwd });
+  await spawn("git", ["config", "user.email", "x@y.z"], {
+    nodeOptions: { cwd },
+  });
+  await spawn("git", ["config", "user.name", "xyz"], { nodeOptions: { cwd } });
+  await spawn("git", ["config", "commit.gpgSign", "false"], {
+    nodeOptions: { cwd },
+  });
+  await spawn("git", ["config", "tag.gpgSign", "false"], {
+    nodeOptions: { cwd },
+  });
   await spawn("git", ["config", "tag.forceSignAnnotated", "false"], {
-    cwd,
+    nodeOptions: { cwd },
   });
 
-  await spawn("git", ["add", "."], { cwd });
+  await spawn("git", ["add", "."], { nodeOptions: { cwd } });
   await spawn("git", ["commit", "-m", "initial commit", "--allow-empty"], {
-    cwd,
+    nodeOptions: { cwd },
   });
 
   return cwd;

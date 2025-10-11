@@ -11,7 +11,7 @@ import {
 } from "@changesets/test-utils";
 import * as logger from "@changesets/logger";
 import getChangesets from "@changesets/read";
-import spawn from "spawndamnit";
+import { exec as spawn } from "tinyexec";
 
 import * as utils from "../../../utils/cli-utilities.ts";
 import addChangeset from "../index.ts";
@@ -226,9 +226,12 @@ describe("Add command", () => {
       },
     );
 
-    const result = await spawn("git", ["log", "--oneline", "-1"], { cwd });
-    const lastCommitMsg = result.stdout.toString("utf-8").trim();
-    expect(lastCommitMsg).toContain("docs(changeset): summary message mock");
+    const result = await spawn("git", ["log", "--oneline", "-1"], {
+      nodeOptions: { cwd },
+    });
+    expect(result.stdout.trim()).toContain(
+      "docs(changeset): summary message mock",
+    );
   });
 
   it("should create empty changeset when empty flag is passed in", async () => {
@@ -397,7 +400,7 @@ describe("Add command", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    await spawn("git", ["checkout", "-b", "foo"], { cwd });
+    await spawn("git", ["checkout", "-b", "foo"], { nodeOptions: { cwd } });
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
       'export default "a"',
@@ -405,7 +408,7 @@ describe("Add command", () => {
     await git.add(".", cwd);
     await git.commit("update pkg-a", cwd);
 
-    await spawn("git", ["checkout", "-b", "bar"], { cwd });
+    await spawn("git", ["checkout", "-b", "bar"], { nodeOptions: { cwd } });
     await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
       'export default "b"',

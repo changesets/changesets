@@ -7,7 +7,7 @@ import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "node:fs/promises";
 import path from "path";
-import spawn from "spawndamnit";
+import { exec as spawn } from "tinyexec";
 import status from "../index.ts";
 
 async function readConfig(cwd: string) {
@@ -61,7 +61,9 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
@@ -127,7 +129,9 @@ describe("status", () => {
       }),
     });
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
@@ -193,7 +197,9 @@ describe("status", () => {
 
     vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
@@ -223,7 +229,9 @@ describe("status", () => {
 
     vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     const releaseObj = await status(
       cwd,
@@ -254,7 +262,9 @@ describe("status", () => {
 
     vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
@@ -291,7 +301,9 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
@@ -366,7 +378,9 @@ describe("status", () => {
 
     vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/unrelated.json"),
@@ -408,7 +422,9 @@ describe("status", () => {
 
     vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/src/a.js"),
@@ -439,7 +455,9 @@ describe("status", () => {
       }),
     });
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
@@ -513,7 +531,9 @@ describe("status", () => {
 
     vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
@@ -562,7 +582,9 @@ describe("status", () => {
 
     vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await spawn("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
