@@ -66,7 +66,7 @@ describe("defaultCommitFunctions", () => {
           },
         ],
       },
-      { skipCI: "version" }
+      { skipCI: "version" },
     );
     expect(commitStr).toEqual(`docs(changeset): test changeset summary commit`);
   });
@@ -82,7 +82,7 @@ describe("defaultCommitFunctions", () => {
           },
         ],
       },
-      { skipCI: "add" }
+      { skipCI: "add" },
     );
     expect(commitStr).toEqual(outdent`
         docs(changeset): test changeset summary commit
@@ -204,7 +204,7 @@ describe("defaultCommitFunctions", () => {
         ],
         preState: undefined,
       },
-      { skipCI: "version" }
+      { skipCI: "version" },
     );
 
     expect(commitStr).toMatch("RELEASING: Releasing 1 package(s)");

@@ -4,11 +4,11 @@ import semverGt from "semver/functions/gt.js";
 import type { InternalRelease } from "./types.ts";
 
 export function getHighestReleaseType(
-  releases: InternalRelease[]
+  releases: InternalRelease[],
 ): VersionType {
   if (releases.length === 0) {
     throw new Error(
-      `Large internal Changesets error when calculating highest release type in the set of releases. Please contact the maintainers`
+      `Large internal Changesets error when calculating highest release type in the set of releases. Please contact the maintainers`,
     );
   }
 
@@ -34,7 +34,7 @@ export function getHighestReleaseType(
 
 export function getCurrentHighestVersion(
   packageGroup: PackageGroup,
-  packagesByName: Map<string, Package>
+  packagesByName: Map<string, Package>,
 ): string {
   let highestVersion: string | undefined;
 
@@ -43,7 +43,7 @@ export function getCurrentHighestVersion(
 
     if (!pkg) {
       console.error(
-        `FATAL ERROR IN CHANGESETS! We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`
+        `FATAL ERROR IN CHANGESETS! We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`,
       );
       throw new Error(`fatal: could not resolve linked packages`);
     }

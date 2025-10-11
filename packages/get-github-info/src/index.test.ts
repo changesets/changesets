@@ -111,7 +111,7 @@ test("associated with multiple PRs with only one merged", async () => {
             },
           },
         },
-      })
+      }),
     );
   let result = await getInfo({ commit: "a085003", repo: "emotion-js/emotion" });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
@@ -222,7 +222,7 @@ test("associated with multiple PRs with multiple merged gets the one that was me
             },
           },
         },
-      })
+      }),
     );
   let result = await getInfo({ commit: "a085003", repo: "emotion-js/emotion" });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
@@ -297,7 +297,7 @@ test("gets the author of the associated pull request if it exists rather than th
             },
           },
         },
-      })
+      }),
     );
   let result = await getInfo({
     commit: "c7e9c69",
@@ -313,9 +313,9 @@ test("throws error on missing repo name", async () => {
 
   await expect(async () =>
     // @ts-expect-error
-    getInfo(request)
+    getInfo(request),
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `[Error: Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo]`
+    `[Error: Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo]`,
   );
 });
 
@@ -326,9 +326,9 @@ test("throws error on invalid repo name", async () => {
   };
 
   await expect(async () =>
-    getInfo(request)
+    getInfo(request),
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `[Error: Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "^[\\w.-]+\\/[\\w.-]+$" pattern)]`
+    `[Error: Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "^[\\w.-]+\\/[\\w.-]+$" pattern)]`,
   );
 });
 
@@ -379,7 +379,7 @@ test("associated with multiple PRs with only one merged", async () => {
             },
           },
         },
-      })
+      }),
     );
   let result = await getInfoFromPullRequest({
     pull: 1613,

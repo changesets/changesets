@@ -110,8 +110,8 @@ describe("getting the dependency graph", function () {
       expect(valid).toBeFalsy();
       expect((console.error as any).mock.calls).toHaveLength(1);
       expect(stripAnsi((console.error as any).mock.calls[0][0])).toBe(
-        `Package "foo" must depend on the current version of "bar": "1.0.0" vs "link:../bar"`
+        `Package "foo" must depend on the current version of "bar": "1.0.0" vs "link:../bar"`,
       );
-    })
+    }),
   );
 });

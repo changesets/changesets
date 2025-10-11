@@ -107,7 +107,7 @@ export async function testdir(dir: Fixture) {
       const fullPath = path.join(temp, filename);
       await fsp.mkdir(path.dirname(fullPath), { recursive: true });
       await fsp.writeFile(fullPath, dir[filename]);
-    })
+    }),
   );
   return temp;
 }
@@ -122,7 +122,7 @@ export async function gitdir(dir: Fixture) {
     const { stdout } = await spawn(
       "git",
       ["rev-parse", "--abbrev-ref", "HEAD"],
-      { cwd }
+      { cwd },
     );
     if (stdout.toString("utf8").trim() !== "main") {
       await spawn("git", ["checkout", "-b", "main"], { cwd });
@@ -147,7 +147,7 @@ export async function gitdir(dir: Fixture) {
 export async function outputFile(
   filePath: string,
   content: string,
-  encoding = "utf8" as fs.ObjectEncodingOptions
+  encoding = "utf8" as fs.ObjectEncodingOptions,
 ) {
   await fsp.mkdir(path.dirname(filePath), { recursive: true });
   await fsp.writeFile(filePath, content, encoding);
@@ -157,7 +157,7 @@ export async function outputFile(
 export async function pathExists(p: string) {
   return fsp.access(p).then(
     () => true,
-    () => false
+    () => false,
   );
 }
 
@@ -168,8 +168,8 @@ export async function linkNodeModules(cwd: string) {
       "..",
       "..",
       "..",
-      "node_modules"
+      "node_modules",
     ),
-    path.join(cwd, "node_modules")
+    path.join(cwd, "node_modules"),
   );
 }

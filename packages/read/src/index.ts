@@ -7,7 +7,7 @@ import * as git from "@changesets/git";
 async function filterChangesetsSinceRef(
   changesets: Array<string>,
   changesetBase: string,
-  sinceRef: string
+  sinceRef: string,
 ) {
   const newChangesets = await git.getChangedChangesetFilesSinceRef({
     cwd: changesetBase,
@@ -20,7 +20,7 @@ async function filterChangesetsSinceRef(
 
 export default async function getChangesets(
   cwd: string,
-  sinceRef?: string
+  sinceRef?: string,
 ): Promise<Array<NewChangeset>> {
   let changesetBase = path.join(cwd, ".changeset");
   let contents: string[];
@@ -37,7 +37,7 @@ export default async function getChangesets(
     contents = await filterChangesetsSinceRef(
       contents,
       changesetBase,
-      sinceRef
+      sinceRef,
     );
   }
 
@@ -45,7 +45,7 @@ export default async function getChangesets(
     (file) =>
       !file.startsWith(".") &&
       file.endsWith(".md") &&
-      !/^README\.md$/i.test(file)
+      !/^README\.md$/i.test(file),
   );
 
   const changesetContents = changesets.map(async (file) => {

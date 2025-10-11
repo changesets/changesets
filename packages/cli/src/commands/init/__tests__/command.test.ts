@@ -37,8 +37,8 @@ describe("init", () => {
     await initializeCommand(cwd);
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8"),
+      ),
     ).toEqual(defaultWrittenConfig);
   });
   it("should add newline at the end of config", async () => {
@@ -71,8 +71,8 @@ describe("init", () => {
     await initializeCommand(cwd);
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8"),
+      ),
     ).toEqual({
       changelog: false,
     });

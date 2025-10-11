@@ -18,7 +18,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -39,7 +39,7 @@ describe("assemble-release-plan", () => {
       undefined,
       {
         tag: undefined,
-      }
+      },
     );
 
     expect(releases.length).toBe(1);
@@ -54,7 +54,7 @@ describe("assemble-release-plan", () => {
       undefined,
       {
         tag: "foo",
-      }
+      },
     );
 
     expect(releases.length).toBe(1);
@@ -75,7 +75,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(4);
@@ -98,7 +98,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -136,7 +136,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -164,7 +164,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -182,7 +182,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -201,7 +201,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -223,7 +223,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -246,7 +246,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         bumpVersionsWithWorkspaceProtocolOnly: true,
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -271,7 +271,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         bumpVersionsWithWorkspaceProtocolOnly: true,
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -298,7 +298,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -322,7 +322,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -345,7 +345,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -365,7 +365,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -383,7 +383,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -401,7 +401,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -426,7 +426,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         ignore: ["pkg-b"],
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -450,7 +450,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         ignore: ["pkg-b"],
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -477,7 +477,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         ignore: ["pkg-b"],
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -504,7 +504,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         ignore: ["pkg-b"],
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -532,8 +532,8 @@ describe("assemble-release-plan", () => {
           ...defaultConfig,
           ignore: ["pkg-b"],
         },
-        undefined
-      )
+        undefined,
+      ),
     ).toThrowErrorMatchingInlineSnapshot(`
       [Error: Found mixed changeset big-cats-delight
       Found ignored packages: pkg-b
@@ -550,7 +550,7 @@ describe("assemble-release-plan", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -575,10 +575,10 @@ describe("assemble-release-plan", () => {
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
-      )
+        undefined,
+      ),
     ).toThrow(
-      "Found changeset small-dogs-sad for package pkg-z which is not in the workspace"
+      "Found changeset small-dogs-sad for package pkg-z which is not in the workspace",
     );
   });
 
@@ -596,7 +596,7 @@ describe("assemble-release-plan", () => {
           ...defaultConfig,
           fixed: [["pkg-a", "pkg-b"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -621,7 +621,7 @@ describe("assemble-release-plan", () => {
           ...defaultConfig,
           fixed: [["pkg-a", "pkg-b", "pkg-c"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(3);
@@ -657,7 +657,7 @@ describe("assemble-release-plan", () => {
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(4);
@@ -692,7 +692,7 @@ describe("assemble-release-plan", () => {
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(4);
@@ -716,7 +716,7 @@ describe("assemble-release-plan", () => {
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases).toEqual([]);
@@ -737,7 +737,7 @@ describe("assemble-release-plan", () => {
           ...defaultConfig,
           fixed: [["pkg-a", "pkg-c"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases).toMatchObject([
@@ -771,7 +771,7 @@ describe("assemble-release-plan", () => {
           ...defaultConfig,
           linked: [["pkg-a", "pkg-b"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -796,7 +796,7 @@ describe("assemble-release-plan", () => {
           ...defaultConfig,
           linked: [["pkg-a", "pkg-b", "pkg-c"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -832,7 +832,7 @@ describe("assemble-release-plan", () => {
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(4);
@@ -852,7 +852,7 @@ describe("assemble-release-plan", () => {
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases).toEqual([]);
@@ -872,7 +872,7 @@ describe("assemble-release-plan", () => {
           ...defaultConfig,
           linked: [["pkg-a", "pkg-c"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases).toMatchObject([
@@ -905,7 +905,7 @@ describe("assemble-release-plan", () => {
           tag: "next",
           initialVersions: {},
           mode: "exit",
-        }
+        },
       );
 
       expect(releases.length).toEqual(1);
@@ -932,7 +932,7 @@ describe("assemble-release-plan", () => {
             "pkg-b": "1.0.0",
           },
           mode: "exit",
-        }
+        },
       );
 
       expect(releases.length).toEqual(2);
@@ -962,7 +962,7 @@ describe("assemble-release-plan", () => {
             "pkg-b": "1.0.0",
           },
           mode: "exit",
-        }
+        },
       );
 
       expect(releases.length).toEqual(2);
@@ -1010,7 +1010,7 @@ describe("assemble-release-plan", () => {
             "pkg-c": "1.0.0",
           },
           mode: "pre",
-        }
+        },
       );
 
       expect(releases.length).toEqual(1);
@@ -1032,7 +1032,7 @@ describe("assemble-release-plan", () => {
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -1052,7 +1052,7 @@ describe("assemble-release-plan", () => {
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -1068,7 +1068,7 @@ describe("assemble-release-plan", () => {
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -1093,7 +1093,7 @@ describe("assemble-release-plan", () => {
             updateInternalDependents: "always",
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(2);
@@ -1117,7 +1117,7 @@ describe("assemble-release-plan", () => {
             updateInternalDependents: "always",
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(3);
@@ -1146,7 +1146,7 @@ describe("assemble-release-plan", () => {
             updateInternalDependents: "always",
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(2);
@@ -1170,7 +1170,7 @@ describe("assemble-release-plan", () => {
             updateInternalDependents: "always",
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(2);
@@ -1200,7 +1200,7 @@ describe("version update thoroughness", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
     expect(releases.length).toEqual(2);
     expect(releases[0].name).toEqual("pkg-a");
@@ -1218,7 +1218,7 @@ describe("version update thoroughness", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -1239,7 +1239,7 @@ describe("version update thoroughness", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(4);
@@ -1268,7 +1268,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1289,7 +1289,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -1303,7 +1303,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -1321,7 +1321,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1341,7 +1341,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1362,7 +1362,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -1376,7 +1376,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -1394,7 +1394,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1414,7 +1414,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1436,7 +1436,7 @@ describe("bumping peerDeps", () => {
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(3);
@@ -1471,7 +1471,7 @@ describe("bumping peerDeps", () => {
             onlyUpdatePeerDependentsWhenOutOfRange: true,
           },
         },
-        undefined
+        undefined,
       );
       expect(releases.length).toBe(1);
       expect(releases[0].name).toEqual("pkg-a");
@@ -1495,7 +1495,7 @@ describe("bumping peerDeps", () => {
             onlyUpdatePeerDependentsWhenOutOfRange: true,
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(2);

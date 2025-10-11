@@ -34,7 +34,7 @@ export function shouldUpdateDependencyBasedOnConfig(
   }: {
     minReleaseType: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-  }
+  },
 ): boolean {
   if (!semverSatisfies(release.version, depVersionRange)) {
     // Dependencies leaving semver range should always be updated

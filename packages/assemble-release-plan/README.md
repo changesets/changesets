@@ -31,7 +31,7 @@ import type { Packages } from "@manypkg/get-packages";
 assembleReleasePlan = (
   changesets: NewChangeset[],
   packages: Packages,
-  config: Config
+  config: Config,
 ) => ReleasePlan;
 ```
 

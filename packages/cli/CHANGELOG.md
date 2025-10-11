@@ -263,7 +263,6 @@
 ### Patch Changes
 
 - [#1354](https://github.com/changesets/changesets/pull/1354) [`69be7dc`](https://github.com/changesets/changesets/commit/69be7dc7195011ac6dbd00b24ea923f02adcf69c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` incorrectly returning an error status in two cases:
-
   - for changed ignored packages
   - for changed private packages when `privatePackage.version` was set to `false`
 
@@ -1221,7 +1220,6 @@
 - [`a679b1d`](https://github.com/changesets/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62) [#204](https://github.com/changesets/changesets/pull/204) Thanks [@Andarist](https://github.com/Andarist)! - Correctly handle the 'access' flag for packages
 
   Previously, we had access as "public" or "private", access "private" isn't valid. This was a confusing because there are three states for publishing a package:
-
   - `private: true` - the package will not be published to npm (worked)
   - `access: public` - the package will be publicly published to npm (even if it uses a scope) (worked)
   - `access: restricted` - the package will be published to npm, but only visible/accessible by those who are part of the scope. This technically worked, but we were passing the wrong bit of information in.
@@ -1457,7 +1455,6 @@ meaning within the community, even though these commands do slightly more than t
 
 - [e55fa3f0](https://github.com/changesets/changesets/commit/e55fa3f0) [#92](https://github.com/changesets/changesets/pull/92) Thanks [@highvoltag3](https://github.com/highvoltag3)! - Catch Promise rejection on SIGINT and exit gracefully
 - [94267ff3](https://github.com/changesets/changesets/commit/94267ff3) [#106](https://github.com/changesets/changesets/pull/106) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Improve 2FA support for publishing:
-
   - Prompt for an OTP code when required
   - Add `--otp` option to release command
 
@@ -1500,7 +1497,6 @@ meaning within the community, even though these commands do slightly more than t
 - [7fa42641](https://github.com/changesets/changesets/commit/7fa42641) [#61](https://github.com/changesets/changesets/pull/61) Thanks [@Noviny](https://github.com/Noviny)! - When bumping, run prettier over the changelog file.
 
   If you want this option turned off, add `disabledLanguage: ["markdown"] to your prettier config.
-
   - [6dc510f4](https://github.com/changesets/changesets/commit/6dc510f4) [#62](https://github.com/changesets/changesets/pull/62) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add butterfly emoji prefix to CLI output
 
 ## 1.1.4
@@ -1570,14 +1566,12 @@ meaning within the community, even though these commands do slightly more than t
   the binary has been changed to `changeset`.
 
   The new names are:
-
   - `build-releases initialize` => `changeset init` (for ecosystem consistency)
   - `build-releases changeset` => `changeset` (default command). You can also run `changeset add`
   - `build-releases version` => `changeset bump`
   - `build-releases publish` => `changeset release`
 
   The function of these commands remains unchanged.
-
   - 51c8b0d6: Change format of changelog entries
 
   Previously changelog entries were in the form of:
@@ -1638,7 +1632,6 @@ meaning within the community, even though these commands do slightly more than t
 - 51c8b0d6: Support non-bolt repositories
 
   Changesets have been expanded to support:
-
   - bolt repositories
   - yarn workspaces-based repositories
   - single package repositories.
@@ -1654,7 +1647,6 @@ meaning within the community, even though these commands do slightly more than t
   If plans to modularize bolt proceed, we may go back to relying on its functions.
 
   This should have no impact on use.
-
   - 51c8b0d6: Add 'select all' and 'select all changed' options, to make mass-bumping easier.
   - eeb4d5c6: Add new command: `status` - see Readme for more information
 
@@ -1663,19 +1655,16 @@ meaning within the community, even though these commands do slightly more than t
 ## 3.0.3
 
 - [patch][c87337f](https://bitbucket.org/changesets/atlaskit-mk-2/commits/c87337f):
-
   - The version command now removes empty folders before it starts. This should prevent a race condition in CI
 
 ## 3.0.2
 
 - [patch][f7b030a](https://bitbucket.org/changesets/atlaskit-mk-2/commits/f7b030a):
-
   - Fixes potential infinite loop in parseChangesetCommit
 
 ## 3.0.1
 
 - [patch][494c1fe](https://bitbucket.org/changesets/atlaskit-mk-2/commits/494c1fe):
-
   - Update git commit message to match previous tooling.
 
 ## 3.0.0
@@ -1684,7 +1673,6 @@ meaning within the community, even though these commands do slightly more than t
   d):
 
   Changesets now use local file system - this has several effects:
-
   1. Changesets will no longer automatically create a commit. You will need to add and commit the files yourself.
   2. Changesets are easier to modify. You should ONLY modify the changes.md file (_Not changes.json_).
   3. There will be a new directory which is `.changeset`, which will hold all the changesets.

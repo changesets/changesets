@@ -6,7 +6,7 @@ export function getDependentsGraph(
   opts?: {
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-  }
+  },
 ) {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 

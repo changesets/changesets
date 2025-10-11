@@ -65,14 +65,14 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
@@ -80,7 +80,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -131,14 +131,14 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
@@ -146,7 +146,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: undefined },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -198,7 +198,7 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
 
     await git.add(".", cwd);
@@ -230,7 +230,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -261,14 +261,14 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     await git.add(".", cwd);
@@ -298,7 +298,7 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
 
     await writeChangeset(
@@ -306,7 +306,7 @@ describe("status", () => {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     await git.add(".", cwd);
@@ -317,7 +317,7 @@ describe("status", () => {
     const probsUndefined = await status(
       cwd,
       { since: "main", output },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     const releaseObj = await fs.readFile(path.join(cwd, output), "utf8");
@@ -374,7 +374,7 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/unrelated.json"),
-      JSON.stringify({})
+      JSON.stringify({}),
     );
 
     await git.add(".", cwd);
@@ -383,7 +383,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -417,7 +417,7 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/src/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
 
     await git.add(".", cwd);
@@ -448,14 +448,14 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
@@ -463,7 +463,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -523,7 +523,7 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
-      'export default "updated b"'
+      'export default "updated b"',
     );
     await git.add(".", cwd);
     await git.commit("updated b", cwd);
@@ -531,7 +531,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -573,7 +573,7 @@ describe("status", () => {
 
     await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
-      'export default "updated b"'
+      'export default "updated b"',
     );
     await git.add(".", cwd);
     await git.commit("updated b", cwd);
@@ -581,7 +581,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();

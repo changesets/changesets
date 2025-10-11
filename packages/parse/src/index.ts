@@ -10,7 +10,7 @@ export default function parseChangesetFile(contents: string): {
   const execResult = mdRegex.exec(contents);
   if (!execResult) {
     throw new Error(
-      `could not parse changeset - invalid frontmatter: ${contents}`
+      `could not parse changeset - invalid frontmatter: ${contents}`,
     );
   }
   let [, roughReleases, roughSummary] = execResult;
@@ -30,7 +30,7 @@ export default function parseChangesetFile(contents: string): {
     }
   } catch (e) {
     throw new Error(
-      `could not parse changeset - invalid frontmatter: ${contents}`
+      `could not parse changeset - invalid frontmatter: ${contents}`,
     );
   }
 

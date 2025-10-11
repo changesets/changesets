@@ -71,7 +71,7 @@ const mockUserResponses = (mockResponses) => {
     askQuestion.mockImplementation(() => mockResponses.consoleSummaries[i++]);
     // @ts-ignore
     askQuestionWithEditor.mockImplementation(
-      () => mockResponses.editorSummaries[j++]
+      () => mockResponses.editorSummaries[j++],
     );
   } else {
     // @ts-ignore
@@ -118,7 +118,7 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "pkg-a", type: "patch" }],
-      })
+      }),
     );
   });
 
@@ -160,9 +160,9 @@ describe("Add command", () => {
         expect.objectContaining({
           summary: expectedSummary,
           releases: [{ name: "pkg-a", type: "patch" }],
-        })
+        }),
       );
-    }
+    },
   );
 
   it("should generate a changeset in a single package repo", async () => {
@@ -205,7 +205,7 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "single-package", type: "minor" }],
-      })
+      }),
     );
   });
 
@@ -235,7 +235,7 @@ describe("Add command", () => {
       {
         ...defaultConfig,
         commit: [path.resolve(__dirname, "..", "..", "..", "commit"), null],
-      }
+      },
     );
     expect(git.add).toHaveBeenCalledTimes(1);
     expect(git.commit).toHaveBeenCalledTimes(1);
@@ -261,7 +261,7 @@ describe("Add command", () => {
       expect.objectContaining({
         releases: [],
         summary: "",
-      })
+      }),
     );
   });
 
@@ -299,7 +299,7 @@ describe("Add command", () => {
     await addChangeset(
       cwd,
       { empty: false },
-      { ...defaultConfig, ignore: ["pkg-b"] }
+      { ...defaultConfig, ignore: ["pkg-b"] },
     );
 
     // @ts-ignore
@@ -366,7 +366,7 @@ describe("Add command", () => {
           version: false,
           tag: false,
         },
-      }
+      },
     );
 
     // @ts-ignore
@@ -384,7 +384,7 @@ describe("Add command", () => {
     });
 
     await expect(() =>
-      addChangeset(cwd, { empty: false }, defaultConfig)
+      addChangeset(cwd, { empty: false }, defaultConfig),
     ).rejects.toThrow("The process exited with code: 1");
 
     expect(loggerErrorSpy).toHaveBeenCalledTimes(3);
@@ -419,7 +419,7 @@ describe("Add command", () => {
     });
 
     await expect(() =>
-      addChangeset(cwd, { empty: false }, defaultConfig)
+      addChangeset(cwd, { empty: false }, defaultConfig),
     ).rejects.toThrow("The process exited with code: 1");
 
     expect(loggerErrorSpy).toHaveBeenCalledTimes(3);

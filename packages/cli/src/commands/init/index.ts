@@ -11,7 +11,7 @@ const require = createRequire(import.meta.url);
 async function pathExists(p: string) {
   return fs.access(p).then(
     () => true,
-    () => false
+    () => false,
   );
 }
 
@@ -26,30 +26,30 @@ export default async function init(cwd: string) {
     if (!(await pathExists(path.join(changesetBase, "config.json")))) {
       if (await pathExists(path.join(changesetBase, "config.js"))) {
         error(
-          "It looks like you're using the version 1 `.changeset/config.js` file"
+          "It looks like you're using the version 1 `.changeset/config.js` file",
         );
         error(
-          "The format of the config object has significantly changed in v2 as well"
+          "The format of the config object has significantly changed in v2 as well",
         );
         error(
-          " - we thoroughly recommend looking at the changelog for this package for what has changed"
+          " - we thoroughly recommend looking at the changelog for this package for what has changed",
         );
         error(
-          "Changesets will write the defaults for the new config, remember to transfer your options into the new config at `.changeset/config.json`"
+          "Changesets will write the defaults for the new config, remember to transfer your options into the new config at `.changeset/config.json`",
         );
       } else {
         error("It looks like you don't have a config file");
         info(
-          "The default config file will be written at `.changeset/config.json`"
+          "The default config file will be written at `.changeset/config.json`",
         );
       }
       await fs.writeFile(
         path.resolve(changesetBase, "config.json"),
-        defaultConfig
+        defaultConfig,
       );
     } else {
       warn(
-        "It looks like you already have changesets initialized. You should be able to run changeset commands no problems."
+        "It looks like you already have changesets initialized. You should be able to run changeset commands no problems.",
       );
     }
   } else {
@@ -58,23 +58,23 @@ export default async function init(cwd: string) {
     });
     await fs.writeFile(
       path.resolve(changesetBase, "config.json"),
-      defaultConfig
+      defaultConfig,
     );
 
     log(
       `Thanks for choosing ${pc.green(
-        "changesets"
-      )} to help manage your versioning and publishing\n`
+        "changesets",
+      )} to help manage your versioning and publishing\n`,
     );
     log("You should be set up to start using changesets now!\n");
 
     info(
-      "We have added a `.changeset` folder, and a couple of files to help you out:"
+      "We have added a `.changeset` folder, and a couple of files to help you out:",
     );
     info(
       `- ${pc.blue(
-        ".changeset/README.md"
-      )} contains information about using changesets`
+        ".changeset/README.md",
+      )} contains information about using changesets`,
     );
     info(`- ${pc.blue(".changeset/config.json")} is our default config`);
   }

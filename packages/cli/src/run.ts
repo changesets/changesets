@@ -19,7 +19,7 @@ import type { CliOptions } from "./types.ts";
 export async function run(
   input: string[],
   flags: { [name: string]: any },
-  cwd: string
+  cwd: string,
 ) {
   if (input[0] === "init") {
     await init(cwd);
@@ -31,10 +31,10 @@ export async function run(
   } catch (err) {
     error("There is no .changeset folder. ");
     error(
-      "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
+      "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up.",
     );
     error(
-      "If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration."
+      "If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration.",
     );
     throw new ExitError(1);
   }
@@ -49,18 +49,18 @@ export async function run(
       .access(path.resolve(cwd, ".changeset/config.js"))
       .then(
         () => true,
-        () => false
+        () => false,
       );
     if (oldConfigExists) {
       error(
-        "It looks like you're using the version 1 `.changeset/config.js` file"
+        "It looks like you're using the version 1 `.changeset/config.js` file",
       );
       error("You'll need to convert it to a `.changeset/config.json` file");
       error(
-        "The format of the config object has significantly changed in v2 as well"
+        "The format of the config object has significantly changed in v2 as well",
       );
       error(
-        " - we thoroughly recommend looking at the changelog for this package for what has changed"
+        " - we thoroughly recommend looking at the changelog for this package for what has changed",
       );
       throw new ExitError(1);
     } else {
@@ -74,7 +74,7 @@ export async function run(
     await add(cwd, { empty, open }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
-      "Too many arguments passed to changesets - we only accept the command name as an argument"
+      "Too many arguments passed to changesets - we only accept the command name as an argument",
     );
   } else {
     const {
@@ -111,21 +111,21 @@ export async function run(
 
         // Validate that items in ignoreArrayFromCmd are valid project names
         let pkgNames = new Set(
-          packages.packages.map(({ packageJson }) => packageJson.name)
+          packages.packages.map(({ packageJson }) => packageJson.name),
         );
 
         const messages = [];
         for (const pkgName of ignoreArrayFromCmd || []) {
           if (!pkgNames.has(pkgName)) {
             messages.push(
-              `The package "${pkgName}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`
+              `The package "${pkgName}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
             );
           }
         }
 
         if (config.ignore.length > 0 && ignoreArrayFromCmd) {
           messages.push(
-            `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`
+            `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`,
           );
         } else if (ignoreArrayFromCmd) {
           // use the ignore flags from cli
@@ -133,7 +133,7 @@ export async function run(
         }
 
         const packagesByName = new Map(
-          packages.packages.map((x) => [x.packageJson.name, x])
+          packages.packages.map((x) => [x.packageJson.name, x]),
         );
 
         // validate that all dependents of skipped packages are also skipped
@@ -162,7 +162,7 @@ export async function run(
               })
             ) {
               messages.push(
-                `The package "${dependent}" depends on the skipped package "${skippedPackage}" (either by \`ignore\` option or by \`privatePackages.version\`), but "${dependent}" is not being skipped. Please pass "${dependent}" to the \`--ignore\` flag.`
+                `The package "${dependent}" depends on the skipped package "${skippedPackage}" (either by \`ignore\` option or by \`privatePackages.version\`), but "${dependent}" is not being skipped. Please pass "${dependent}" to the \`--ignore\` flag.`,
               );
             }
           }
@@ -197,7 +197,7 @@ export async function run(
         let command = input[1];
         if (command !== "enter" && command !== "exit") {
           error(
-            "`enter`, `exit` or `snapshot` must be passed after prerelease"
+            "`enter`, `exit` or `snapshot` must be passed after prerelease",
           );
           throw new ExitError(1);
         }
@@ -212,19 +212,19 @@ export async function run(
       }
       case "bump": {
         error(
-          'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation'
+          'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation',
         );
         error(
-          "To fix this, use `changeset version` instead, and update any scripts that use changesets"
+          "To fix this, use `changeset version` instead, and update any scripts that use changesets",
         );
         throw new ExitError(1);
       }
       case "release": {
         error(
-          'In version 2 of changesets, "release" has been renamed to "publish" - see our changelog for an explanation'
+          'In version 2 of changesets, "release" has been renamed to "publish" - see our changelog for an explanation',
         );
         error(
-          "To fix this, use `changeset publish` instead, and update any scripts that use changesets"
+          "To fix this, use `changeset publish` instead, and update any scripts that use changesets",
         );
         throw new ExitError(1);
       }

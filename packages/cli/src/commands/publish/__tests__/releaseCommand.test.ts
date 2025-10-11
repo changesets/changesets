@@ -47,7 +47,7 @@ describe("running release", () => {
         Promise.resolve([
           { name: "pkg-a", newVersion: "1.1.0", published: true },
           { name: "pkg-b", newVersion: "1.0.1", published: true },
-        ])
+        ]),
       );
 
       await runRelease(cwd, {}, defaultConfig);

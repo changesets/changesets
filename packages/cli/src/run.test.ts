@@ -35,7 +35,7 @@ describe("cli", () => {
       const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toEqual(
-        `The package "pkg-c" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`
+        `The package "pkg-c" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
       );
     });
 
@@ -67,7 +67,7 @@ describe("cli", () => {
       const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toMatchInlineSnapshot(
-        `"The package "pkg-a" depends on the skipped package "pkg-b" (either by \`ignore\` option or by \`privatePackages.version\`), but "pkg-a" is not being skipped. Please pass "pkg-a" to the \`--ignore\` flag."`
+        `"The package "pkg-a" depends on the skipped package "pkg-b" (either by \`ignore\` option or by \`privatePackages.version\`), but "pkg-a" is not being skipped. Please pass "pkg-a" to the \`--ignore\` flag."`,
       );
     });
 
@@ -171,7 +171,7 @@ describe("cli", () => {
       const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toEqual(
-        `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`
+        `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`,
       );
     });
 
@@ -194,7 +194,7 @@ describe("cli", () => {
           summary: "This is a summary",
           releases: [{ name: "pkg-a", type: "minor" }],
         },
-        cwd
+        cwd,
       );
 
       await expect(run(["version"], {}, cwd)).resolves.not.toThrow();
@@ -219,7 +219,7 @@ describe("cli", () => {
           summary: "This is a summary",
           releases: [{ name: "pkg-a", type: "minor" }],
         },
-        cwd
+        cwd,
       );
 
       await expect(run(["version"], {}, cwd)).rejects

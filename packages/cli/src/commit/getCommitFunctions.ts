@@ -5,7 +5,7 @@ import { pathToFileURL } from "node:url";
 
 export async function getCommitFunctions(
   commit: false | readonly [string, any],
-  cwd: string
+  cwd: string,
 ): Promise<[CommitFunctions, any]> {
   let commitFunctions: CommitFunctions = {};
   if (!commit) {
