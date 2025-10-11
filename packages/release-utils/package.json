@@ -17,7 +17,7 @@
     "mdast-util-to-string": "^4.0.0",
     "semver": "^7.5.3",
     "signal-exit": "^4.1.0",
-    "spawndamnit": "^3.0.1"
+    "tinyexec": "^1.0.2"
   },
   "devDependencies": {
     "@changesets/git": "4.0.0-next.1",

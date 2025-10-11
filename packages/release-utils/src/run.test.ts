@@ -11,7 +11,7 @@ import writeChangeset from "@changesets/write";
 import { pathToFileURL } from "node:url";
 import fs from "node:fs/promises";
 import path from "path";
-import spawn from "spawndamnit";
+import { exec as spawn } from "tinyexec";
 import { getCurrentBranch } from "./gitUtils.ts";
 import { runPublish, runVersion } from "./run.ts";
 
@@ -27,7 +27,7 @@ beforeEach(() => {
 });
 
 async function setupRepoAndClone(cwd: string) {
-  await spawn("git", ["init"], { cwd });
+  await spawn("git", ["init"], { nodeOptions: { cwd } });
   await add(".", cwd);
   await commit("commit1", cwd);
 
@@ -41,10 +41,12 @@ async function setupRepoAndClone(cwd: string) {
     // a local repo
     ["clone", "--depth", "1", pathToFileURL(cwd).toString(), "."],
     {
-      cwd: clone,
+      nodeOptions: { cwd: clone },
     },
   );
-  await spawn("git", ["checkout", "-b", "some-other-branch"], { cwd });
+  await spawn("git", ["checkout", "-b", "some-other-branch"], {
+    nodeOptions: { cwd },
+  });
   return { clone, mainBranch };
 }
 
@@ -97,7 +99,7 @@ describe("version", () => {
     });
 
     await spawn("git", ["checkout", `changeset-release/${mainBranch}`], {
-      cwd,
+      nodeOptions: { cwd },
     });
 
     expect(
@@ -220,7 +222,7 @@ describe("version", () => {
     });
 
     await spawn("git", ["checkout", `changeset-release/${mainBranch}`], {
-      cwd,
+      nodeOptions: { cwd },
     });
 
     expect(
@@ -357,8 +359,8 @@ describe("publish", () => {
       published: true,
       publishedPackages: [{ name: "single-package", version: "1.0.0" }],
     });
-    let tagsResult = await spawn("git", ["tag"], { cwd });
-    expect(tagsResult.stdout.toString("utf8").trim()).toEqual("v1.0.0");
+    let tagsResult = await spawn("git", ["tag"], { nodeOptions: { cwd } });
+    expect(tagsResult.stdout.trim()).toEqual("v1.0.0");
   });
   test("multi package repo", async () => {
     const cwd = await testdir({
@@ -396,9 +398,7 @@ describe("publish", () => {
         { name: "pkg-b", version: "1.0.0" },
       ],
     });
-    let tagsResult = await spawn("git", ["tag"], { cwd });
-    expect(tagsResult.stdout.toString("utf8").trim()).toEqual(
-      "pkg-a@1.0.0\npkg-b@1.0.0",
-    );
+    let tagsResult = await spawn("git", ["tag"], { nodeOptions: { cwd } });
+    expect(tagsResult.stdout.trim()).toEqual("pkg-a@1.0.0\npkg-b@1.0.0");
   });
 });
