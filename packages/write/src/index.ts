@@ -9,7 +9,7 @@ async function importPrettier() {
   } catch (err) {
     if ((err as any).code === "MODULE_NOT_FOUND") {
       throw new Error(
-        "The `prettier` option is enabled but Prettier was not found in your project. Please install Prettier in your project or disable the option.",
+        "The `prettier` option is enabled but was not found in your project. Please install Prettier or disable the option",
         { cause: err },
       );
     }

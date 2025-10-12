@@ -13,6 +13,7 @@ import type {
 } from "@changesets/types";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
 // eslint-disable-next-line import/no-commonjs
@@ -30,9 +31,9 @@ export let defaultWrittenConfig = {
   ignore: [] as ReadonlyArray<string>,
 } as const;
 
-function isPackageInstalled(name: string) {
+function isPackageInstalled(name: string, cwd?: string) {
   try {
-    import(name);
+    import.meta.resolve(name, cwd ? pathToFileURL(cwd) : undefined);
     return true;
   } catch (error) {
     if (
@@ -120,7 +121,11 @@ export let read = async (cwd: string, packages?: Packages) => {
   return parse(json, packages);
 };
 
-export let parse = (json: WrittenConfig, packages: Packages): Config => {
+export let parse = (
+  json: WrittenConfig,
+  packages: Packages,
+  cwd?: string,
+): Config => {
   let messages = [];
   let pkgNames: readonly string[] = packages.packages.map(
     ({ packageJson }) => packageJson.name,
@@ -453,7 +458,17 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
-  if (messages.length) {
+  if (json.prettier === true && !isPackageInstalled("prettier", cwd)) {
+    messages.push(
+      "The `prettier` option is enabled but was not found in your project. Please install Prettier or disable the option",
+    );
+  }
+  const prettier =
+    typeof json.prettier === "boolean"
+      ? json.prettier
+      : isPackageInstalled("prettier", cwd);
+
+  if (messages.length !== 0) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
         messages.join("\n"),
@@ -521,10 +536,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           ?.updateInternalDependents ?? "out-of-range",
     },
 
-    prettier:
-      typeof json.prettier === "boolean"
-        ? json.prettier
-        : isPackageInstalled("prettier"),
+    prettier,
 
     // TODO consider enabling this by default in the next major version
     privatePackages:

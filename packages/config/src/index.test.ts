@@ -1,3 +1,5 @@
+import os from "node:os";
+import path from "node:path";
 import { vi } from "vitest";
 import { read, parse } from "./index.ts";
 import * as logger from "@changesets/logger";
@@ -10,6 +12,7 @@ vi.mock("@changesets/logger");
 
 type CorrectCase = {
   packages?: string[];
+  cwd?: string;
   input: WrittenConfig;
   output: Config;
 };
@@ -392,6 +395,23 @@ let correctCases: Record<string, CorrectCase> = {
       },
     },
   },
+  canDisablePrettier: {
+    input: {
+      prettier: false,
+    },
+    output: {
+      ...defaults,
+      prettier: false,
+    },
+  },
+  prettierDefaultsToFalseIfNotInstalled: {
+    cwd: path.resolve(process.cwd(), ".."),
+    input: {},
+    output: {
+      ...defaults,
+      prettier: false,
+    },
+  },
   updateInternalDependents: {
     input: {
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -428,14 +448,18 @@ describe("parse", () => {
       title,
       ...correctCases[title],
     })),
-  )("$title", ({ input, output, packages }) => {
-    expect(parse(input, withPackages(packages || ["pkg-a", "pkg-b"]))).toEqual(
-      output,
-    );
+  )("$title", ({ input, output, packages, cwd }) => {
+    expect(
+      parse(input, withPackages(packages || ["pkg-a", "pkg-b"]), cwd),
+    ).toEqual(output);
   });
 });
 
-let unsafeParse = parse as any;
+let unsafeParse = parse as (
+  config: WrittenConfig | Record<string, unknown>,
+  packages: Packages,
+  cwd?: string,
+) => Config;
 
 describe("parser errors", () => {
   test("changelog invalid value", () => {
@@ -696,6 +720,21 @@ describe("parser errors", () => {
     ).toThrowErrorMatchingInlineSnapshot(`
       [Error: Some errors occurred when validating the changesets config:
       The package "pkg-a" depends on the ignored package "pkg-b", but "pkg-a" is not being ignored. Please add "pkg-a" to the \`ignore\` option.]
+    `);
+  });
+
+  test("throws if prettier is enabled but not installed", () => {
+    expect(() =>
+      parse(
+        {
+          prettier: true,
+        },
+        defaultPackages,
+        os.tmpdir(),
+      ),
+    ).toThrowErrorMatchingInlineSnapshot(`
+      [Error: Some errors occurred when validating the changesets config:
+      The \`prettier\` option is enabled but was not found in your project. Please install Prettier or disable the option]
     `);
   });
 
