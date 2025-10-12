@@ -41,7 +41,6 @@
     "@manypkg/cli": "^0.22.0",
     "@preconstruct/cli": "^2.8.12",
     "@types/js-yaml": "^3.12.1",
-    "@types/lodash": "^4.17.13",
     "@types/node": "^22.14.1",
     "@types/prettier": "^2.7.1",
     "@types/semver": "^7.5.0",
