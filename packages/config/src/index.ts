@@ -30,6 +30,23 @@ export let defaultWrittenConfig = {
   ignore: [] as ReadonlyArray<string>,
 } as const;
 
+function isPackageInstalled(name: string) {
+  try {
+    import.meta.resolve(name);
+    return true;
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      error.code === "ERR_MODULE_NOT_FOUND"
+    ) {
+      return false;
+    }
+
+    throw error;
+  }
+}
+
 function flatten<T>(arr: Array<T[]>): T[] {
   return ([] as T[]).concat(...arr);
 }
@@ -337,14 +354,22 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
-  if (json.prettier !== undefined && typeof json.prettier !== "boolean") {
-    messages.push(
-      `The \`prettier\` option is set as ${JSON.stringify(
-        json.prettier,
-        null,
-        2,
-      )} when the only valid values are undefined or a boolean`,
-    );
+  if (json.prettier !== undefined) {
+    if (typeof json.prettier !== "boolean") {
+      messages.push(
+        `The \`prettier\` option is set as ${JSON.stringify(
+          json.prettier,
+          null,
+          2,
+        )} when the only valid values are undefined or a boolean`,
+      );
+    }
+
+    if (json.prettier === true && !isPackageInstalled("prettier")) {
+      messages.push(
+        `The \`prettier\` option is set but could not be found. Please install it or disable the option.`,
+      );
+    }
   }
 
   const { snapshot } = json;
@@ -496,8 +521,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           ?.updateInternalDependents ?? "out-of-range",
     },
 
-    // TODO: consider defaulting to true if prettier is installed
-    prettier: typeof json.prettier === "boolean" ? json.prettier : true,
+    prettier:
+      typeof json.prettier === "boolean"
+        ? json.prettier
+        : isPackageInstalled("prettier"),
 
     // TODO consider enabling this by default in the next major version
     privatePackages:
