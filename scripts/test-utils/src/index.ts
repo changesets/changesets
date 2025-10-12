@@ -153,14 +153,6 @@ export async function outputFile(
   await fsp.writeFile(filePath, content, encoding);
 }
 
-// `fs.exists` is deprecated, and Node recommends this for asynchronous existence checks.
-export async function pathExists(p: string) {
-  return fsp.access(p).then(
-    () => true,
-    () => false
-  );
-}
-
 export async function linkNodeModules(cwd: string) {
   await fsp.symlink(
     path.join(
