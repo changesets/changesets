@@ -7,10 +7,11 @@ import runRelease from "../index.ts";
 
 vi.mock("../../../utils/cli-utilities");
 vi.mock("@changesets/git");
+const mockGit = vi.mocked(git);
 vi.mock("../publishPackages");
+const mockedPublishPackages = vi.mocked(publishPackages);
 
-// @ts-ignore
-git.tag.mockImplementation(() => Promise.resolve(true));
+mockGit.tag.mockImplementation(() => Promise.resolve(true));
 
 describe("running release", () => {
   silenceLogsInBlock();
@@ -42,8 +43,7 @@ describe("running release", () => {
         }),
       });
 
-      // @ts-ignore
-      publishPackages.mockImplementation(() =>
+      mockedPublishPackages.mockImplementation(() =>
         Promise.resolve([
           { name: "pkg-a", newVersion: "1.1.0", published: true },
           { name: "pkg-b", newVersion: "1.0.1", published: true },

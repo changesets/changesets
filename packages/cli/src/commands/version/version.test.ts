@@ -38,24 +38,18 @@ let defaultOptions = {
 // This is from bolt's error log
 const consoleError = console.error;
 
-vi.mock("../../utils/cli-utilities");
-vi.mock("@changesets/git");
 vi.mock("human-id");
 vi.mock("@changesets/logger");
 
-// @ts-ignore
-git.add.mockImplementation(() => Promise.resolve(true));
-// @ts-ignore
-git.commit.mockImplementation(() => Promise.resolve(true));
-// @ts-ignore
-git.getCommitsThatAddFiles.mockImplementation((changesetIds) =>
-  Promise.resolve(changesetIds.map(() => "g1th4sh"))
+vi.mock("@changesets/git");
+const mockedGit = vi.mocked(git);
+mockedGit.add.mockImplementation(async () => true);
+mockedGit.commit.mockImplementation(async () => true);
+mockedGit.getCommitsThatAddFiles.mockImplementation(async (changesetIds) =>
+  changesetIds.map(() => "g1th4sh")
 );
-// @ts-ignore
-git.getCurrentCommitId.mockImplementation(() => Promise.resolve("abcdef"));
-
-// @ts-ignore
-git.tag.mockImplementation(() => Promise.resolve(true));
+mockedGit.getCurrentCommitId.mockImplementation(async () => "abcdef");
+mockedGit.tag.mockImplementation(async () => true);
 
 const writeChangesets = (changesets: Changeset[], cwd: string) => {
   return Promise.all(
@@ -1480,41 +1474,41 @@ describe("snapshot release", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
-          workspaces: ["packages/*"],
-        }),
-        "packages/pkg-a/package.json": JSON.stringify({
-          name: "pkg-a",
-          version: "1.0.0",
-          dependencies: {
-            "pkg-b": "1.0.0",
-          },
-        }),
-        "packages/pkg-b/package.json": JSON.stringify({
-          name: "pkg-b",
-          version: "1.0.0",
-        }),
-      });
-      await writeChangeset(
-        {
-          releases: [{ name: "pkg-b", type: "major" }],
-          summary: "a very useful summary",
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
         },
-        cwd
-      );
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary",
+      },
+      cwd
+    );
 
-      await version(
-        cwd,
-        {
-          snapshot: true,
-        },
-        {
-          ...modifiedDefaultConfig,
-          ignore: ["pkg-a"],
-        }
-      );
+    await version(
+      cwd,
+      {
+        snapshot: true,
+      },
+      {
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      }
+    );
 
-      expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
-        .toMatchInlineSnapshot(`
+    expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
+      .toMatchInlineSnapshot(`
         [
           {
             "dependencies": {
@@ -1656,56 +1650,56 @@ describe("snapshot release", () => {
         const cwd = await testdir({
           "package.json": JSON.stringify({
             private: true,
-              workspaces: ["packages/*"],
-            }),
-            "packages/pkg-a/package.json": JSON.stringify({
-              name: "pkg-a",
-              version: "1.0.0",
-              dependencies: {
-                "pkg-b": "1.0.0",
-              },
-            }),
-            "packages/pkg-b/package.json": JSON.stringify({
-              name: "pkg-b",
-              version: "1.0.0",
-            }),
-          });
-          await writeChangesets(
-            [
-              {
-                summary: "This is a summary too",
-                releases: [
-                  { name: "pkg-a", type: "minor" },
-                  { name: "pkg-b", type: "patch" },
-                ],
-              },
-            ],
-            cwd
-          );
-          await version(
-            cwd,
-            { snapshot: snapshotValue },
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        });
+        await writeChangesets(
+          [
             {
-              ...modifiedDefaultConfig,
-              commit: false,
-              snapshot: {
-                ...modifiedDefaultConfig.snapshot,
-                prereleaseTemplate: snapshotTemplate as string,
-              },
-            }
-          );
+              summary: "This is a summary too",
+              releases: [
+                { name: "pkg-a", type: "minor" },
+                { name: "pkg-b", type: "patch" },
+              ],
+            },
+          ],
+          cwd
+        );
+        await version(
+          cwd,
+          { snapshot: snapshotValue },
+          {
+            ...modifiedDefaultConfig,
+            commit: false,
+            snapshot: {
+              ...modifiedDefaultConfig.snapshot,
+              prereleaseTemplate: snapshotTemplate as string,
+            },
+          }
+        );
 
-          expect(await getPkgJSON("pkg-a", cwd)).toEqual(
-            expect.objectContaining({
-              name: "pkg-a",
-              version: expectedResult,
-            })
-          );
+        expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+          expect.objectContaining({
+            name: "pkg-a",
+            version: expectedResult,
+          })
+        );
 
-          expect(await getPkgJSON("pkg-b", cwd)).toEqual(
-            expect.objectContaining({
-              name: "pkg-b",
-              version: expectedResult,
+        expect(await getPkgJSON("pkg-b", cwd)).toEqual(
+          expect.objectContaining({
+            name: "pkg-b",
+            version: expectedResult,
           })
         );
       }
@@ -1822,45 +1816,45 @@ describe("snapshot release", () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
-            workspaces: ["packages/*"],
-          }),
-          "packages/pkg-a/package.json": JSON.stringify({
-            name: "pkg-a",
-            version: "1.0.0",
-            dependencies: {
-              "pkg-b": "1.0.0",
-            },
-          }),
-          "packages/pkg-b/package.json": JSON.stringify({
-            name: "pkg-b",
-            version: "1.0.0",
-          }),
-        });
-        await writeChangeset(
-          {
-            releases: [{ name: "pkg-b", type: "major" }],
-            summary: "a very useful summary",
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
           },
-          cwd
-        );
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+      await writeChangeset(
+        {
+          releases: [{ name: "pkg-b", type: "major" }],
+          summary: "a very useful summary",
+        },
+        cwd
+      );
 
-        await version(
-          cwd,
-          {
-            snapshot: true,
+      await version(
+        cwd,
+        {
+          snapshot: true,
+        },
+        {
+          ...modifiedDefaultConfig,
+          ignore: ["pkg-a"],
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null,
           },
-          {
-            ...modifiedDefaultConfig,
-            ignore: ["pkg-a"],
-            snapshot: {
-              useCalculatedVersion: true,
-              prereleaseTemplate: null,
-            },
-          }
-        );
+        }
+      );
 
-        expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
-          .toMatchInlineSnapshot(`
+      expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
+        .toMatchInlineSnapshot(`
           [
             {
               "dependencies": {
