@@ -14,7 +14,7 @@
     "@changesets/logger": "^1.0.0-next.0",
     "fixturez": "^1.1.0",
     "spawndamnit": "^3.0.1",
-    "vitest": "^3.0.6"
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=20.0.0"
