@@ -19,12 +19,10 @@ async function importPrettier() {
 }
 
 async function writeChangeset(
-  changeset: Changeset,
+  { summary, releases }: Changeset,
   cwd: string,
   options?: { prettier?: boolean },
 ): Promise<string> {
-  const { summary, releases } = changeset;
-
   const changesetBase = path.resolve(cwd, ".changeset");
 
   // Worth understanding that the ID merely needs to be a unique hash to avoid git conflicts
