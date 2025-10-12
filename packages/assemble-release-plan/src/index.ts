@@ -148,8 +148,8 @@ function assembleReleasePlan(
     typeof snapshot === "string"
       ? { tag: snapshot }
       : typeof snapshot === "boolean"
-      ? { tag: undefined }
-      : snapshot;
+        ? { tag: undefined }
+        : snapshot;
 
   let packagesByName = new Map(
     packages.packages.map((x) => [x.packageJson.name, x])
