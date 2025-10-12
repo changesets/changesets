@@ -17,6 +17,21 @@ import getChangelogEntry from "./get-changelog-entry.ts";
 import versionPackage from "./version-package.ts";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+async function importPrettier() {
+  try {
+    return await import("prettier");
+  } catch (err) {
+    if ((err as any).code === "MODULE_NOT_FOUND") {
+      throw new Error(
+        "The `prettier` option is enabled but Prettier was not found in your project. Please install Prettier in your project or disable the option.",
+        { cause: err },
+      );
+    }
+
+    throw err;
+  }
+}
+
 function stringDefined(s: string | undefined): s is string {
   return !!s;
 }
@@ -136,7 +151,7 @@ export default async function applyReleasePlan(
       let format: ((content: string) => Promise<string>) | undefined;
 
       if (config.prettier) {
-        const prettier = await import("prettier");
+        const prettier = await importPrettier();
 
         format = async (content: string): Promise<string> =>
           prettier.format(content, {

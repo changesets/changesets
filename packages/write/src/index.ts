@@ -3,6 +3,21 @@ import fs from "node:fs/promises";
 import { humanId } from "human-id";
 import path from "path";
 
+async function importPrettier() {
+  try {
+    return await import("prettier");
+  } catch (err) {
+    if ((err as any).code === "MODULE_NOT_FOUND") {
+      throw new Error(
+        "The `prettier` option is enabled but Prettier was not found in your project. Please install Prettier in your project or disable the option.",
+        { cause: err },
+      );
+    }
+
+    throw err;
+  }
+}
+
 async function writeChangeset(
   changeset: Changeset,
   cwd: string,
@@ -19,7 +34,7 @@ async function writeChangeset(
     capitalize: false,
   });
 
-  const prettier = options?.prettier ? await import("prettier") : undefined;
+  const prettier = options?.prettier ? await importPrettier() : undefined;
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
   // NOTE: The quotation marks in here are really important even though they are
