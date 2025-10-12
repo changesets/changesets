@@ -17,8 +17,8 @@ const mockedGit = vi.mocked(git);
 vi.mock("@changesets/write");
 const mockedWriteChangeset = vi.mocked(writeChangeset);
 vi.mock("@changesets/logger");
-mockedWriteChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
-mockedGit.commit.mockImplementation(() => Promise.resolve(true));
+mockedWriteChangeset.mockImplementation(async () => "abcdefg");
+mockedGit.commit.mockImplementation(async () => true);
 mockedGit.getChangedPackagesSinceRef.mockImplementation(async ({ ref }) => {
   expect(ref).toBe("master");
   return [];
@@ -62,8 +62,8 @@ const mockUserResponses = (mockResponses: {
   ) {
     let i = 0;
     let j = 0;
-    mockedUtils.askQuestion.mockImplementation(() =>
-      Promise.resolve(mockResponses.consoleSummaries![i++])
+    mockedUtils.askQuestion.mockImplementation(
+      async () => mockResponses.consoleSummaries![i++]
     );
     mockedUtils.askQuestionWithEditor.mockImplementation(
       () => mockResponses.editorSummaries![j++]
@@ -160,7 +160,7 @@ describe("Add command", () => {
     });
 
     const summary = "summary message mock";
-    mockedUtils.askList.mockReturnValueOnce(Promise.resolve("minor"));
+    mockedUtils.askList.mockResolvedValueOnce("minor");
 
     let confirmAnswers: Record<string, boolean> = {
       "Is this your desired changeset?": true,
