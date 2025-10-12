@@ -2,21 +2,6 @@ import type { Changeset } from "@changesets/types";
 import fs from "node:fs/promises";
 import { humanId } from "human-id";
 import path from "path";
-import prettier from "prettier";
-import { createRequire } from "node:module";
-
-const require = createRequire(import.meta.url);
-
-function getPrettierInstance(cwd: string): typeof prettier {
-  try {
-    return require(require.resolve("prettier", { paths: [cwd] }));
-  } catch (err) {
-    if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
-      throw err;
-    }
-    return prettier;
-  }
-}
 
 async function writeChangeset(
   changeset: Changeset,
@@ -34,8 +19,8 @@ async function writeChangeset(
     capitalize: false,
   });
 
-  const prettierInstance =
-    options?.prettier !== false ? getPrettierInstance(cwd) : undefined;
+  // TODO: try/catch and add good error message if prettier is not installed
+  const prettier = options?.prettier ? await import("prettier") : undefined;
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
   // NOTE: The quotation marks in here are really important even though they are
@@ -51,10 +36,9 @@ ${summary}
   await fs.mkdir(path.dirname(newChangesetPath), { recursive: true });
   await fs.writeFile(
     newChangesetPath,
-    prettierInstance
-      ? // Prettier v3 returns a promise
-        await prettierInstance.format(changesetContents, {
-          ...(await prettierInstance.resolveConfig(newChangesetPath)),
+    prettier != null
+      ? await prettier.format(changesetContents, {
+          ...(await prettier.resolveConfig(newChangesetPath)),
           parser: "markdown",
         })
       : changesetContents,

@@ -496,6 +496,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           ?.updateInternalDependents ?? "out-of-range",
     },
 
+    // TODO: consider defaulting to true if prettier is installed
     prettier: typeof json.prettier === "boolean" ? json.prettier : true,
 
     // TODO consider enabling this by default in the next major version

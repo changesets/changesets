@@ -12,25 +12,10 @@ import type { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
 import fs from "node:fs/promises";
 import path from "path";
-import prettier from "prettier";
 import { resolve } from "import-meta-resolve";
 import getChangelogEntry from "./get-changelog-entry.ts";
 import versionPackage from "./version-package.ts";
-import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
-
-const require = createRequire(import.meta.url);
-
-function getPrettierInstance(cwd: string): typeof prettier {
-  try {
-    return require(require.resolve("prettier", { paths: [cwd] }));
-  } catch (err) {
-    if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
-      throw err;
-    }
-    return prettier;
-  }
-}
 
 function stringDefined(s: string | undefined): s is string {
   return !!s;
@@ -139,9 +124,6 @@ export default async function applyReleasePlan(
     });
   });
 
-  let prettierInstance =
-    config.prettier !== false ? getPrettierInstance(cwd) : undefined;
-
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;
 
@@ -151,7 +133,21 @@ export default async function applyReleasePlan(
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
-      await updateChangelog(changelogPath, changelog, name, prettierInstance);
+      let format: ((content: string) => Promise<string>) | undefined;
+
+      if (config.prettier) {
+        // TODO: try/catch and add good error message if prettier is not installed
+        const prettier = await import("prettier");
+
+        format = async (content: string): Promise<string> =>
+          prettier.format(content, {
+            ...(await prettier.resolveConfig(changelogPath)),
+            parser: "markdown",
+            filepath: changelogPath,
+          });
+      }
+
+      await updateChangelog(changelogPath, changelog, name, format);
       touchedFiles.push(changelogPath);
     }
   }
@@ -300,7 +296,7 @@ async function updateChangelog(
   changelogPath: string,
   changelog: string,
   name: string,
-  prettierInstance: typeof prettier | undefined,
+  formatFunction: ((content: string) => Promise<string> | string) | undefined,
 ) {
   let templateString = `\n\n${changelog.trim()}\n`;
   let fileData;
@@ -314,7 +310,7 @@ async function updateChangelog(
     await writeFormattedMarkdownFile(
       changelogPath,
       `# ${name}${templateString}`,
-      prettierInstance,
+      formatFunction,
     );
     return;
   }
@@ -325,18 +321,14 @@ async function updateChangelog(
     await writeFormattedMarkdownFile(
       changelogPath,
       completelyNewChangelog,
-      prettierInstance,
+      formatFunction,
     );
     return;
   }
 
   const newChangelog = fileData.replace("\n", templateString);
 
-  await writeFormattedMarkdownFile(
-    changelogPath,
-    newChangelog,
-    prettierInstance,
-  );
+  await writeFormattedMarkdownFile(changelogPath, newChangelog, formatFunction);
 }
 
 async function updatePackageJson(
@@ -354,17 +346,10 @@ async function updatePackageJson(
 async function writeFormattedMarkdownFile(
   filePath: string,
   content: string,
-  prettierInstance: typeof prettier | undefined,
+  formatFunction: ((content: string) => Promise<string> | string) | undefined,
 ) {
   await fs.writeFile(
     filePath,
-    prettierInstance
-      ? // Prettier v3 returns a promise
-        await prettierInstance.format(content, {
-          ...(await prettierInstance.resolveConfig(filePath)),
-          filepath: filePath,
-          parser: "markdown",
-        })
-      : content,
+    formatFunction != null ? await formatFunction(content) : content,
   );
 }
