@@ -2778,11 +2778,6 @@ file-entry-cache@^6.0.1:
   dependencies:
     flat-cache "^3.0.4"
 
-file-url@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/file-url/-/file-url-3.0.0.tgz#247a586a746ce9f7a8ed05560290968afc262a77"
-  integrity sha512-g872QGsHexznxkIAdK8UiZRe7SkE6kvylShU4Nsj8NvfvZag7S0QuQ4IgvPDkk75HxgjIVDwycFTDAgIiO4nDA==
-
 fill-range@^7.1.1:
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/fill-range/-/fill-range-7.1.1.tgz#44265d3cac07e3ea7dc247516380643754a05292"

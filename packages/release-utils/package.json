@@ -22,7 +22,6 @@
     "@changesets/git": "4.0.0-next.0",
     "@changesets/test-utils": "0.0.9-next.0",
     "@changesets/write": "1.0.0-next.0",
-    "file-url": "^3.0.0",
     "vitest": "^3.2.4"
   },
   "engines": {

@@ -1,6 +1,6 @@
 import path from "path";
 import spawn from "spawndamnit";
-import fileUrl from "file-url";
+import { pathToFileURL } from "node:url";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, it } from "vitest";
 import { gitdir, outputFile, tempdir } from "@changesets/test-utils";
@@ -295,7 +295,13 @@ describe("git", () => {
           "git",
           // Note: a file:// URL is needed in order to make a shallow clone of
           // a local repo
-          ["clone", "--depth", depth.toString(), fileUrl(cwd), "."],
+          [
+            "clone",
+            "--depth",
+            depth.toString(),
+            pathToFileURL(cwd).toString(),
+            ".",
+          ],
           {
             cwd: cloneDir,
           }

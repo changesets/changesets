@@ -8,7 +8,7 @@ import {
 } from "@changesets/test-utils";
 import type { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
-import fileUrl from "file-url";
+import { pathToFileURL } from "node:url";
 import fs from "node:fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
@@ -39,7 +39,7 @@ async function setupRepoAndClone(cwd: string) {
     "git",
     // Note: a file:// URL is needed in order to make a shallow clone of
     // a local repo
-    ["clone", "--depth", "1", fileUrl(cwd), "."],
+    ["clone", "--depth", "1", pathToFileURL(cwd).toString(), "."],
     {
       cwd: clone,
     }
