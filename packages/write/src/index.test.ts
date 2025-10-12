@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import fs from "node:fs/promises";
 import path from "path";
 import parse from "@changesets/parse";

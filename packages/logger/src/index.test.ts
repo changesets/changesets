@@ -1,5 +1,5 @@
-import { vi } from "vitest";
-import { log, error, info, warn, success } from "./index.ts";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { error, info, log, success, warn } from "./index.ts";
 
 describe("@changesets/logger", () => {
   const logMessageOne = "Message 1";

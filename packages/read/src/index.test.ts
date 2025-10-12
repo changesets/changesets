@@ -1,5 +1,7 @@
 import path from "node:path";
 import { outdent } from "outdent";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, it } from "vitest";
 
 import read from "./index.ts";
 import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";

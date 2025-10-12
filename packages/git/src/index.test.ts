@@ -1,21 +1,23 @@
 import path from "path";
 import spawn from "spawndamnit";
 import fileUrl from "file-url";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, it } from "vitest";
 import { gitdir, outputFile, tempdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 
 import {
-  getCommitsThatAddFiles,
-  getChangedFilesSince,
   add,
   commit,
-  tag,
-  getDivergedCommit,
-  getChangedPackagesSinceRef,
-  getChangedChangesetFilesSinceRef,
   getAllTags,
-  tagExists,
+  getChangedChangesetFilesSinceRef,
+  getChangedFilesSince,
+  getChangedPackagesSinceRef,
+  getCommitsThatAddFiles,
   getCurrentCommitId,
+  getDivergedCommit,
+  tag,
+  tagExists,
 } from "./index.ts";
 
 async function getCommitCount(cwd: string) {

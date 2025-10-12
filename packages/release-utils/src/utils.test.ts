@@ -1,6 +1,7 @@
+import { expect, test } from "vitest";
 import {
-  getChangelogEntry,
   BumpLevels,
+  getChangelogEntry,
   sortChangelogEntries,
 } from "./utils.ts";
 

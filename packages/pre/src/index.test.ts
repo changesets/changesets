@@ -6,6 +6,8 @@ import {
   PreExitButNotInPreModeError,
 } from "@changesets/errors";
 import { testdir } from "@changesets/test-utils";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, it, test } from "vitest";
 
 describe("enterPre", () => {
   it("should enter", async () => {

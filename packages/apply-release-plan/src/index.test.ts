@@ -1,8 +1,10 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, it, test } from "vitest";
 import {
-  ReleasePlan,
+  ComprehensiveRelease,
   Config,
   NewChangeset,
-  ComprehensiveRelease,
+  ReleasePlan,
 } from "@changesets/types";
 import * as git from "@changesets/git";
 import fs from "node:fs/promises";
@@ -14,11 +16,11 @@ import { defaultConfig } from "@changesets/config";
 import applyReleasePlan from "./index.ts";
 import { getPackages } from "@manypkg/get-packages";
 import {
-  temporarilySilenceLogs,
-  testdir,
   Fixture,
   outputFile,
   pathExists,
+  temporarilySilenceLogs,
+  testdir,
 } from "@changesets/test-utils";
 import { fileURLToPath } from "node:url";
 

@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { describe, expect, it, test, vi } from "vitest";
 import changelogFunctions from "./index.ts";
 import parse from "@changesets/parse";
 

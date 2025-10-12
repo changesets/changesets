@@ -1,4 +1,4 @@
-import { Mock, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";

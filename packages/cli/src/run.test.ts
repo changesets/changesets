@@ -1,7 +1,7 @@
-import { vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
-  silenceLogsInBlock,
   mockedLogger,
+  silenceLogsInBlock,
   testdir,
 } from "@changesets/test-utils";
 

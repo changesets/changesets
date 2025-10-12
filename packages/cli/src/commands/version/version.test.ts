@@ -1,4 +1,12 @@
-import { Mock, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+} from "vitest";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import {

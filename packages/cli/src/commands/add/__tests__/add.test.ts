@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import path from "path";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
@@ -10,9 +10,9 @@ import * as logger from "@changesets/logger";
 import {
   askCheckboxPlus,
   askConfirm,
-  askQuestionWithEditor,
-  askQuestion,
   askList,
+  askQuestion,
+  askQuestionWithEditor,
 } from "../../../utils/cli-utilities.ts";
 import addChangeset from "../index.ts";
 import { fileURLToPath } from "node:url";

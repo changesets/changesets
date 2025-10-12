@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { getLastJsonObjectFromString } from "./getLastJsonObjectFromString.ts";
 
 describe("getLastJsonObjectFromString", () => {
