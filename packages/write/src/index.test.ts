@@ -84,7 +84,7 @@ describe("simple project", () => {
     });
   });
 
-  it("should format if user fails doesn't opt out", async () => {
+  it("should format with prettier if user enables the option", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -111,6 +111,7 @@ describe("simple project", () => {
         releases: [{ name: "pkg-a", type: "minor" }],
       },
       cwd,
+      { prettier: true },
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);

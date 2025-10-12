@@ -13,35 +13,37 @@ test("associated with multiple PRs with only one merged", async () => {
     },
   })
     .post(apiPath, ({ query }) => {
-      expect(prettier.format(query, { parser: "graphql" }))
-        .toMatchInlineSnapshot(`
-        "query {
-          a0: repository(owner: "emotion-js", name: "emotion") {
-            aa085003: object(expression: "a085003") {
-              ... on Commit {
-                commitUrl
-                associatedPullRequests(first: 50) {
-                  nodes {
-                    number
-                    url
-                    mergedAt
-                    author {
-                      login
-                      url
-                    }
-                  }
-                }
-                author {
-                  user {
-                    login
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
+      expect(query).toMatchInlineSnapshot(`
         "
+              query {
+                a0: repository(
+                    owner: "emotion-js"
+                    name: "emotion"
+                  ) {
+                    aa085003: object(expression: "a085003") {
+                    ... on Commit {
+                    commitUrl
+                    associatedPullRequests(first: 50) {
+                      nodes {
+                        number
+                        url
+                        mergedAt
+                        author {
+                          login
+                          url
+                        }
+                      }
+                    }
+                    author {
+                      user {
+                        login
+                        url
+                      }
+                    }
+                  }}
+                  }
+                }
+            "
       `);
       return true;
     })
@@ -124,35 +126,35 @@ test("associated with multiple PRs with multiple merged gets the one that was me
     },
   })
     .post(apiPath, ({ query }) => {
-      expect(prettier.format(query, { parser: "graphql" }))
-        .toMatchInlineSnapshot(`
+      expect(query.trim()).toMatchInlineSnapshot(`
         "query {
-          a0: repository(owner: "emotion-js", name: "emotion") {
-            aa085003: object(expression: "a085003") {
-              ... on Commit {
-                commitUrl
-                associatedPullRequests(first: 50) {
-                  nodes {
-                    number
-                    url
-                    mergedAt
-                    author {
-                      login
-                      url
+                a0: repository(
+                    owner: "emotion-js"
+                    name: "emotion"
+                  ) {
+                    aa085003: object(expression: "a085003") {
+                    ... on Commit {
+                    commitUrl
+                    associatedPullRequests(first: 50) {
+                      nodes {
+                        number
+                        url
+                        mergedAt
+                        author {
+                          login
+                          url
+                        }
+                      }
                     }
+                    author {
+                      user {
+                        login
+                        url
+                      }
+                    }
+                  }}
                   }
-                }
-                author {
-                  user {
-                    login
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
-        "
+                }"
       `);
       return true;
     })
@@ -235,35 +237,37 @@ test("gets the author of the associated pull request if it exists rather than th
     },
   })
     .post(apiPath, ({ query }) => {
-      expect(prettier.format(query, { parser: "graphql" }))
-        .toMatchInlineSnapshot(`
-        "query {
-          a0: repository(owner: "JedWatson", name: "react-select") {
-            ac7e9c69: object(expression: "c7e9c69") {
-              ... on Commit {
-                commitUrl
-                associatedPullRequests(first: 50) {
-                  nodes {
-                    number
-                    url
-                    mergedAt
-                    author {
-                      login
-                      url
-                    }
-                  }
-                }
-                author {
-                  user {
-                    login
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
+      expect(query).toMatchInlineSnapshot(`
         "
+              query {
+                a0: repository(
+                    owner: "JedWatson"
+                    name: "react-select"
+                  ) {
+                    ac7e9c69: object(expression: "c7e9c69") {
+                    ... on Commit {
+                    commitUrl
+                    associatedPullRequests(first: 50) {
+                      nodes {
+                        number
+                        url
+                        mergedAt
+                        author {
+                          login
+                          url
+                        }
+                      }
+                    }
+                    author {
+                      user {
+                        login
+                        url
+                      }
+                    }
+                  }}
+                  }
+                }
+            "
       `);
       return true;
     })
@@ -332,31 +336,34 @@ test("throws error on invalid repo name", async () => {
   );
 });
 
-test("associated with multiple PRs with only one merged", async () => {
+test("associated with multiple PRs with only one merged 2", async () => {
   nock("https://api.github.com", {
     reqheaders: {
       Authorization: `Token ${process.env.GITHUB_TOKEN}`,
     },
   })
     .post(apiPath, ({ query }) => {
-      expect(prettier.format(query, { parser: "graphql" }))
-        .toMatchInlineSnapshot(`
-        "query {
-          a0: repository(owner: "emotion-js", name: "emotion") {
-            pr__1613: pullRequest(number: 1613) {
-              url
-              author {
-                login
-                url
-              }
-              mergeCommit {
-                commitUrl
-                abbreviatedOid
-              }
-            }
-          }
-        }
+      expect(query).toMatchInlineSnapshot(`
         "
+              query {
+                a0: repository(
+                    owner: "emotion-js"
+                    name: "emotion"
+                  ) {
+                    pr__1613: pullRequest(number: 1613) {
+                            url
+                            author {
+                              login
+                              url
+                            }
+                            mergeCommit {
+                              commitUrl
+                              abbreviatedOid
+                            }
+                          }
+                  }
+                }
+            "
       `);
       return true;
     })

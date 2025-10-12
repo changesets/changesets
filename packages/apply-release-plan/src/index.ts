@@ -136,7 +136,6 @@ export default async function applyReleasePlan(
       let format: ((content: string) => Promise<string>) | undefined;
 
       if (config.prettier) {
-        // TODO: try/catch and add good error message if prettier is not installed
         const prettier = await import("prettier");
 
         format = async (content: string): Promise<string> =>

@@ -19,7 +19,6 @@ async function writeChangeset(
     capitalize: false,
   });
 
-  // TODO: try/catch and add good error message if prettier is not installed
   const prettier = options?.prettier ? await import("prettier") : undefined;
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
