@@ -25,37 +25,6 @@ import path from "node:path";
 import pre from "../pre/index.ts";
 import version from "./index.ts";
 
-function mockGlobalDate<
-  Args extends any[],
-  Return extends Promise<void> | void
->(
-  testFn: (...args: Args) => Return,
-  fixedDate: string = "2021-12-13T00:07:30.879Z"
-) {
-  return async (...args: Args) => {
-    const originalDate = Date;
-    const MockedDate = class MockedDate extends Date {
-      constructor() {
-        super(fixedDate);
-      }
-
-      static now() {
-        return new MockedDate().getTime();
-      }
-    } as typeof Date;
-
-    // eslint-disable-next-line no-global-assign
-    Date = MockedDate;
-
-    try {
-      await testFn(...args);
-    } finally {
-      // eslint-disable-next-line no-global-assign
-      Date = originalDate;
-    }
-  };
-}
-
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: ["@changesets/cli/changelog", null],
@@ -120,6 +89,8 @@ beforeEach(() => {
   });
 
   console.error = vi.fn();
+
+  vi.setSystemTime(vi.getRealSystemTime());
 });
 
 afterEach(() => {
@@ -1503,12 +1474,12 @@ describe("snapshot release", () => {
     `);
   });
 
-  it(
-    "should not bump version of an ignored package when its dependency gets updated",
-    mockGlobalDate(async () => {
-      const cwd = await testdir({
-        "package.json": JSON.stringify({
-          private: true,
+  it("should not bump version of an ignored package when its dependency gets updated", async () => {
+    vi.setSystemTime("2021-12-13T00:07:30.879Z");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
           workspaces: ["packages/*"],
         }),
         "packages/pkg-a/package.json": JSON.stringify({
@@ -1558,8 +1529,7 @@ describe("snapshot release", () => {
           },
         ]
       `);
-    })
-  );
+  });
 
   describe("snapshotPrereleaseTemplate", () => {
     it('should throw an error when "{tag}" and empty snapshot is used', async () => {
@@ -1680,11 +1650,12 @@ describe("snapshot release", () => {
       [null, "alpha", "0.0.0-alpha-20211213000730"],
     ])(
       "should customize release correctly based on snapshotPrereleaseTemplate template: %s (tag: '%s')",
-      mockGlobalDate(
-        async (snapshotTemplate, snapshotValue, expectedResult) => {
-          const cwd = await testdir({
-            "package.json": JSON.stringify({
-              private: true,
+      async (snapshotTemplate, snapshotValue, expectedResult) => {
+        vi.setSystemTime("2021-12-13T00:07:30.879Z");
+
+        const cwd = await testdir({
+          "package.json": JSON.stringify({
+            private: true,
               workspaces: ["packages/*"],
             }),
             "packages/pkg-a/package.json": JSON.stringify({
@@ -1735,10 +1706,9 @@ describe("snapshot release", () => {
             expect.objectContaining({
               name: "pkg-b",
               version: expectedResult,
-            })
-          );
-        }
-      )
+          })
+        );
+      }
     );
   });
 
@@ -1846,12 +1816,12 @@ describe("snapshot release", () => {
       `);
     });
 
-    it(
-      "should not bump version of an ignored package when its dependency gets updated",
-      mockGlobalDate(async () => {
-        const cwd = await testdir({
-          "package.json": JSON.stringify({
-            private: true,
+    it("should not bump version of an ignored package when its dependency gets updated", async () => {
+      vi.setSystemTime("2021-12-13T00:07:30.879Z");
+
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
             workspaces: ["packages/*"],
           }),
           "packages/pkg-a/package.json": JSON.stringify({
@@ -1905,8 +1875,7 @@ describe("snapshot release", () => {
             },
           ]
         `);
-      })
-    );
+    });
   });
 });
 
