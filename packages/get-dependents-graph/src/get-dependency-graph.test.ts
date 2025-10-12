@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import stripAnsi from "strip-ansi";
+import { stripVTControlCharacters } from "node:util";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 import getDependencyGraph from "./get-dependency-graph.ts";
 
@@ -109,7 +109,9 @@ describe("getting the dependency graph", function () {
       });
       expect(valid).toBeFalsy();
       expect((console.error as any).mock.calls).toHaveLength(1);
-      expect(stripAnsi((console.error as any).mock.calls[0][0])).toBe(
+      expect(
+        stripVTControlCharacters((console.error as any).mock.calls[0][0])
+      ).toBe(
         `Package "foo" must depend on the current version of "bar": "1.0.0" vs "link:../bar"`
       );
     })
