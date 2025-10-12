@@ -31,6 +31,7 @@
   "devDependencies": {
     "@changesets/test-utils": "0.0.9-next.0",
     "outdent": "^0.8.0",
+    "prettier": "^3.6.2",
     "spawndamnit": "^3.0.1"
   },
   "engines": {
