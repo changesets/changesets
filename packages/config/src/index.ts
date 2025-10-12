@@ -32,7 +32,7 @@ export let defaultWrittenConfig = {
 
 function isPackageInstalled(name: string) {
   try {
-    import.meta.resolve(name);
+    import(name);
     return true;
   } catch (error) {
     if (

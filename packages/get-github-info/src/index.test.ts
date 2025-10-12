@@ -1,6 +1,5 @@
 import { getInfo, getInfoFromPullRequest } from "./index.ts";
 import nock from "nock";
-import prettier from "prettier";
 
 process.env.GITHUB_TOKEN = "token";
 
