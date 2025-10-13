@@ -210,7 +210,10 @@ describe("Add command", () => {
       { empty: false },
       {
         ...defaultConfig,
-        commit: [path.resolve(import.meta.dirname, "..", "..", "..", "commit"), null],
+        commit: [
+          path.resolve(import.meta.dirname, "..", "..", "..", "commit"),
+          null,
+        ],
       }
     );
     expect(git.add).toHaveBeenCalledTimes(1);
