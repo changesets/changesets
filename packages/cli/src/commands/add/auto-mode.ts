@@ -12,7 +12,7 @@ export type CommitAnalysisResult = {
 export type CommitAnalyzer = (
   commits: Array<{ hash: string; message: string }>,
   preset: string
-) => Promise<VersionType>;
+) => Promise<VersionType | null>;
 
 // Git utility types
 export type Commit = {
