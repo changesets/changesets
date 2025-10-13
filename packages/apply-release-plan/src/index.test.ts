@@ -3059,8 +3059,8 @@ describe("apply release plan", () => {
     it("should delete an old format changeset if it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetMDPath: string;
-      let changesetJSONPath: string;
+      let changesetMDPath!: string;
+      let changesetJSONPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
