@@ -81,7 +81,7 @@ async function getPackagesToRelease(
     if (packagesToRelease.length === 0) {
       do {
         error("You must select at least one package to release");
-        error("(You most likely hit enter instead of space!)");
+        error("(Press space to mark/unmark one option. Press enter to confirm.)");
 
         packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
       } while (packagesToRelease.length === 0);
