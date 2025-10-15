@@ -4,7 +4,7 @@
   "private": true,
   "description": "A tool to help manage the versioning and changelogs for open source packages",
   "scripts": {
-    "postinstall": "preconstruct dev && manypkg check",
+    "postinstall": "manypkg check",
     "build": "preconstruct build",
     "watch": "preconstruct watch",
     "format": "prettier --experimental-cli --list-different \"**/*.{js,ts,tsx,md}\"",
@@ -34,12 +34,8 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.28.5",
-    "@babel/preset-env": "^7.28.5",
-    "@babel/preset-typescript": "^7.27.0",
     "@eslint/js": "10.0.1",
     "@manypkg/cli": "^0.25.1",
-    "@preconstruct/cli": "^2.8.12",
     "@types/node": "^24.12.2",
     "@types/semver": "^7.7.1",
     "@vitest/coverage-v8": "^4.1.5",
@@ -50,6 +46,7 @@
     "eslint-plugin-n": "^17.24.0",
     "eslint-plugin-perfectionist": "^5.9.0",
     "prettier": "^3.7.4",
+    "tsdown": "^0.22.0-beta.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.1",
     "vitest": "^4.1.5"
