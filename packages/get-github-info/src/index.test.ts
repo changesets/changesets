@@ -1,6 +1,8 @@
 import { getInfo, getInfoFromPullRequest } from "./index.ts";
 import nock from "nock";
 import prettier from "prettier";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { expect, test } from "vitest";
 
 process.env.GITHUB_TOKEN = "token";
 

@@ -8,6 +8,6 @@
     "libReplacement": false,
     "strict": true,
     "noEmit": true,
-    "types": ["vitest/globals"]
+    "types": ["node"]
   }
 }

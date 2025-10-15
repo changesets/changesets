@@ -1,8 +1,10 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, it, test } from "vitest";
 import {
-  ReleasePlan,
+  ComprehensiveRelease,
   Config,
   NewChangeset,
-  ComprehensiveRelease,
+  ReleasePlan,
 } from "@changesets/types";
 import * as git from "@changesets/git";
 import fs from "node:fs/promises";
@@ -14,11 +16,11 @@ import { defaultConfig } from "@changesets/config";
 import applyReleasePlan from "./index.ts";
 import { getPackages } from "@manypkg/get-packages";
 import {
-  temporarilySilenceLogs,
-  testdir,
   Fixture,
   outputFile,
   pathExists,
+  temporarilySilenceLogs,
+  testdir,
 } from "@changesets/test-utils";
 import { fileURLToPath } from "node:url";
 
@@ -2948,7 +2950,7 @@ describe("apply release plan", () => {
     it("should delete one changeset after it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetPath: string;
+      let changesetPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -2977,14 +2979,13 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      // @ts-ignore this is possibly bad
       let changesetExists = await pathExists(changesetPath);
       expect(changesetExists).toEqual(false);
     });
     it("should NOT delete changesets for ignored packages", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetPath: string;
+      let changesetPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -3013,14 +3014,13 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      // @ts-ignore this is possibly bad
       let changesetExists = await pathExists(changesetPath);
       expect(changesetExists).toEqual(true);
     });
     it("should NOT delete changesets for private unversioned packages", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetPath: string;
+      let changesetPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -3053,15 +3053,14 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      // @ts-ignore this is possibly bad
       let changesetExists = await pathExists(changesetPath);
       expect(changesetExists).toEqual(true);
     });
     it("should delete an old format changeset if it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetMDPath: string;
-      let changesetJSONPath: string;
+      let changesetMDPath!: string;
+      let changesetJSONPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -3105,9 +3104,7 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      // @ts-ignore this is possibly bad
       let mdPathExists = await pathExists(changesetMDPath);
-      // @ts-ignore this is possibly bad
       let JSONPathExists = await pathExists(changesetJSONPath);
 
       expect(mdPathExists).toEqual(false);
@@ -3241,7 +3238,7 @@ describe("apply release plan", () => {
     it("should remove applied changesets", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetPath: string;
+      let changesetPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -3283,7 +3280,6 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      // @ts-ignore this is possibly bad
       let changesetExists = await pathExists(changesetPath);
 
       expect(changesetExists).toEqual(false);

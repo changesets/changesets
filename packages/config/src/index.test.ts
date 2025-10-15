@@ -1,8 +1,8 @@
-import { vi } from "vitest";
-import { read, parse } from "./index.ts";
+import { describe, expect, it, test, vi } from "vitest";
+import { parse, read } from "./index.ts";
 import * as logger from "@changesets/logger";
 import type { Config, WrittenConfig } from "@changesets/types";
-import { type Packages, getPackages } from "@manypkg/get-packages";
+import { getPackages, type Packages } from "@manypkg/get-packages";
 import { testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
 

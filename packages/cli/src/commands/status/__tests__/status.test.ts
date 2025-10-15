@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
@@ -191,8 +191,7 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -222,8 +221,7 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -254,8 +252,7 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -367,8 +364,7 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -410,8 +406,7 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -516,8 +511,7 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
@@ -566,8 +560,7 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 

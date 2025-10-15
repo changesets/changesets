@@ -1,4 +1,12 @@
-import { Mock, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+} from "vitest";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import {
@@ -17,37 +25,6 @@ import path from "node:path";
 import pre from "../pre/index.ts";
 import version from "./index.ts";
 
-function mockGlobalDate<
-  Args extends any[],
-  Return extends Promise<void> | void
->(
-  testFn: (...args: Args) => Return,
-  fixedDate: string = "2021-12-13T00:07:30.879Z"
-) {
-  return async (...args: Args) => {
-    const originalDate = Date;
-    const MockedDate = class MockedDate extends Date {
-      constructor() {
-        super(fixedDate);
-      }
-
-      static now() {
-        return new MockedDate().getTime();
-      }
-    } as typeof Date;
-
-    // eslint-disable-next-line no-global-assign
-    Date = MockedDate;
-
-    try {
-      await testFn(...args);
-    } finally {
-      // eslint-disable-next-line no-global-assign
-      Date = originalDate;
-    }
-  };
-}
-
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: ["@changesets/cli/changelog", null],
@@ -61,24 +38,18 @@ let defaultOptions = {
 // This is from bolt's error log
 const consoleError = console.error;
 
-vi.mock("../../utils/cli-utilities");
-vi.mock("@changesets/git");
 vi.mock("human-id");
 vi.mock("@changesets/logger");
 
-// @ts-ignore
-git.add.mockImplementation(() => Promise.resolve(true));
-// @ts-ignore
-git.commit.mockImplementation(() => Promise.resolve(true));
-// @ts-ignore
-git.getCommitsThatAddFiles.mockImplementation((changesetIds) =>
-  Promise.resolve(changesetIds.map(() => "g1th4sh"))
+vi.mock("@changesets/git");
+const mockedGit = vi.mocked(git);
+mockedGit.add.mockImplementation(async () => true);
+mockedGit.commit.mockImplementation(async () => true);
+mockedGit.getCommitsThatAddFiles.mockImplementation(async (changesetIds) =>
+  changesetIds.map(() => "g1th4sh")
 );
-// @ts-ignore
-git.getCurrentCommitId.mockImplementation(() => Promise.resolve("abcdef"));
-
-// @ts-ignore
-git.tag.mockImplementation(() => Promise.resolve(true));
+mockedGit.getCurrentCommitId.mockImplementation(async () => "abcdef");
+mockedGit.tag.mockImplementation(async () => true);
 
 const writeChangesets = (changesets: Changeset[], cwd: string) => {
   return Promise.all(
@@ -112,6 +83,8 @@ beforeEach(() => {
   });
 
   console.error = vi.fn();
+
+  vi.setSystemTime(vi.getRealSystemTime());
 });
 
 afterEach(() => {
@@ -1495,47 +1468,47 @@ describe("snapshot release", () => {
     `);
   });
 
-  it(
-    "should not bump version of an ignored package when its dependency gets updated",
-    mockGlobalDate(async () => {
-      const cwd = await testdir({
-        "package.json": JSON.stringify({
-          private: true,
-          workspaces: ["packages/*"],
-        }),
-        "packages/pkg-a/package.json": JSON.stringify({
-          name: "pkg-a",
-          version: "1.0.0",
-          dependencies: {
-            "pkg-b": "1.0.0",
-          },
-        }),
-        "packages/pkg-b/package.json": JSON.stringify({
-          name: "pkg-b",
-          version: "1.0.0",
-        }),
-      });
-      await writeChangeset(
-        {
-          releases: [{ name: "pkg-b", type: "major" }],
-          summary: "a very useful summary",
-        },
-        cwd
-      );
+  it("should not bump version of an ignored package when its dependency gets updated", async () => {
+    vi.setSystemTime("2021-12-13T00:07:30.879Z");
 
-      await version(
-        cwd,
-        {
-          snapshot: true,
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
         },
-        {
-          ...modifiedDefaultConfig,
-          ignore: ["pkg-a"],
-        }
-      );
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary",
+      },
+      cwd
+    );
 
-      expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
-        .toMatchInlineSnapshot(`
+    await version(
+      cwd,
+      {
+        snapshot: true,
+      },
+      {
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      }
+    );
+
+    expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
+      .toMatchInlineSnapshot(`
         [
           {
             "dependencies": {
@@ -1550,8 +1523,7 @@ describe("snapshot release", () => {
           },
         ]
       `);
-    })
-  );
+  });
 
   describe("snapshotPrereleaseTemplate", () => {
     it('should throw an error when "{tag}" and empty snapshot is used', async () => {
@@ -1672,65 +1644,65 @@ describe("snapshot release", () => {
       [null, "alpha", "0.0.0-alpha-20211213000730"],
     ])(
       "should customize release correctly based on snapshotPrereleaseTemplate template: %s (tag: '%s')",
-      mockGlobalDate(
-        async (snapshotTemplate, snapshotValue, expectedResult) => {
-          const cwd = await testdir({
-            "package.json": JSON.stringify({
-              private: true,
-              workspaces: ["packages/*"],
-            }),
-            "packages/pkg-a/package.json": JSON.stringify({
-              name: "pkg-a",
-              version: "1.0.0",
-              dependencies: {
-                "pkg-b": "1.0.0",
-              },
-            }),
-            "packages/pkg-b/package.json": JSON.stringify({
-              name: "pkg-b",
-              version: "1.0.0",
-            }),
-          });
-          await writeChangesets(
-            [
-              {
-                summary: "This is a summary too",
-                releases: [
-                  { name: "pkg-a", type: "minor" },
-                  { name: "pkg-b", type: "patch" },
-                ],
-              },
-            ],
-            cwd
-          );
-          await version(
-            cwd,
-            { snapshot: snapshotValue },
+      async (snapshotTemplate, snapshotValue, expectedResult) => {
+        vi.setSystemTime("2021-12-13T00:07:30.879Z");
+
+        const cwd = await testdir({
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        });
+        await writeChangesets(
+          [
             {
-              ...modifiedDefaultConfig,
-              commit: false,
-              snapshot: {
-                ...modifiedDefaultConfig.snapshot,
-                prereleaseTemplate: snapshotTemplate as string,
-              },
-            }
-          );
+              summary: "This is a summary too",
+              releases: [
+                { name: "pkg-a", type: "minor" },
+                { name: "pkg-b", type: "patch" },
+              ],
+            },
+          ],
+          cwd
+        );
+        await version(
+          cwd,
+          { snapshot: snapshotValue },
+          {
+            ...modifiedDefaultConfig,
+            commit: false,
+            snapshot: {
+              ...modifiedDefaultConfig.snapshot,
+              prereleaseTemplate: snapshotTemplate as string,
+            },
+          }
+        );
 
-          expect(await getPkgJSON("pkg-a", cwd)).toEqual(
-            expect.objectContaining({
-              name: "pkg-a",
-              version: expectedResult,
-            })
-          );
+        expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+          expect.objectContaining({
+            name: "pkg-a",
+            version: expectedResult,
+          })
+        );
 
-          expect(await getPkgJSON("pkg-b", cwd)).toEqual(
-            expect.objectContaining({
-              name: "pkg-b",
-              version: expectedResult,
-            })
-          );
-        }
-      )
+        expect(await getPkgJSON("pkg-b", cwd)).toEqual(
+          expect.objectContaining({
+            name: "pkg-b",
+            version: expectedResult,
+          })
+        );
+      }
     );
   });
 
@@ -1838,51 +1810,51 @@ describe("snapshot release", () => {
       `);
     });
 
-    it(
-      "should not bump version of an ignored package when its dependency gets updated",
-      mockGlobalDate(async () => {
-        const cwd = await testdir({
-          "package.json": JSON.stringify({
-            private: true,
-            workspaces: ["packages/*"],
-          }),
-          "packages/pkg-a/package.json": JSON.stringify({
-            name: "pkg-a",
-            version: "1.0.0",
-            dependencies: {
-              "pkg-b": "1.0.0",
-            },
-          }),
-          "packages/pkg-b/package.json": JSON.stringify({
-            name: "pkg-b",
-            version: "1.0.0",
-          }),
-        });
-        await writeChangeset(
-          {
-            releases: [{ name: "pkg-b", type: "major" }],
-            summary: "a very useful summary",
-          },
-          cwd
-        );
+    it("should not bump version of an ignored package when its dependency gets updated", async () => {
+      vi.setSystemTime("2021-12-13T00:07:30.879Z");
 
-        await version(
-          cwd,
-          {
-            snapshot: true,
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
           },
-          {
-            ...modifiedDefaultConfig,
-            ignore: ["pkg-a"],
-            snapshot: {
-              useCalculatedVersion: true,
-              prereleaseTemplate: null,
-            },
-          }
-        );
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+      await writeChangeset(
+        {
+          releases: [{ name: "pkg-b", type: "major" }],
+          summary: "a very useful summary",
+        },
+        cwd
+      );
 
-        expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
-          .toMatchInlineSnapshot(`
+      await version(
+        cwd,
+        {
+          snapshot: true,
+        },
+        {
+          ...modifiedDefaultConfig,
+          ignore: ["pkg-a"],
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null,
+          },
+        }
+      );
+
+      expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
+        .toMatchInlineSnapshot(`
           [
             {
               "dependencies": {
@@ -1897,8 +1869,7 @@ describe("snapshot release", () => {
             },
           ]
         `);
-      })
-    );
+    });
   });
 });
 

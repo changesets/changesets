@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import path from "path";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
@@ -7,35 +7,28 @@ import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 import * as logger from "@changesets/logger";
 
-import {
-  askCheckboxPlus,
-  askConfirm,
-  askQuestionWithEditor,
-  askQuestion,
-  askList,
-} from "../../../utils/cli-utilities.ts";
+import * as utils from "../../../utils/cli-utilities.ts";
 import addChangeset from "../index.ts";
-import { fileURLToPath } from "node:url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 vi.mock("../../../utils/cli-utilities");
+const mockedUtils = vi.mocked(utils);
 vi.mock("@changesets/git");
+const mockedGit = vi.mocked(git);
 vi.mock("@changesets/write");
+const mockedWriteChangeset = vi.mocked(writeChangeset);
 vi.mock("@changesets/logger");
-// @ts-ignore
-writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
-// @ts-ignore
-git.commit.mockImplementation(() => Promise.resolve(true));
-
-// @ts-ignore
-git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
+mockedWriteChangeset.mockImplementation(async () => "abcdefg");
+mockedGit.commit.mockImplementation(async () => true);
+mockedGit.getChangedPackagesSinceRef.mockImplementation(async ({ ref }) => {
   expect(ref).toBe("master");
   return [];
 });
-
-// @ts-ignore
-const mockUserResponses = (mockResponses) => {
+const mockUserResponses = (mockResponses: {
+  releases: Record<string, "patch" | "minor" | "major">;
+  consoleSummaries?: string[];
+  editorSummaries?: string[];
+  summary?: string;
+}) => {
   const summary = mockResponses.summary || "summary message mock";
   let majorReleases: Array<string> = [];
   let minorReleases: Array<string> = [];
@@ -52,38 +45,35 @@ const mockUserResponses = (mockResponses) => {
     majorReleases,
     minorReleases,
   ];
-  // @ts-ignore
-  askCheckboxPlus.mockImplementation(() => {
+  mockedUtils.askCheckboxPlus.mockImplementation(async () => {
     if (callCount === returnValues.length) {
       throw new Error(`There was an unexpected call to askCheckboxPlus`);
     }
     return returnValues[callCount++];
   });
 
-  let confirmAnswers = {
+  let confirmAnswers: Record<string, boolean> = {
     "Is this your desired changeset?": true,
   };
 
-  if (mockResponses.consoleSummaries && mockResponses.editorSummaries) {
+  if (
+    mockResponses.consoleSummaries != null &&
+    mockResponses.editorSummaries != null
+  ) {
     let i = 0;
     let j = 0;
-    // @ts-ignore
-    askQuestion.mockImplementation(() => mockResponses.consoleSummaries[i++]);
-    // @ts-ignore
-    askQuestionWithEditor.mockImplementation(
-      () => mockResponses.editorSummaries[j++]
+    mockedUtils.askQuestion.mockImplementation(
+      async () => mockResponses.consoleSummaries![i++]
+    );
+    mockedUtils.askQuestionWithEditor.mockImplementation(
+      () => mockResponses.editorSummaries![j++]
     );
   } else {
-    // @ts-ignore
-    askQuestion.mockReturnValueOnce(summary);
+    mockedUtils.askQuestion.mockResolvedValue(summary);
   }
-
-  // @ts-ignore
-  askConfirm.mockImplementation((question) => {
+  mockedUtils.askConfirm.mockImplementation(async (question) => {
     question = stripAnsi(question);
-    // @ts-ignore
     if (confirmAnswers[question]) {
-      // @ts-ignore
       return confirmAnswers[question];
     }
     throw new Error(`An answer could not be found for ${question}`);
@@ -111,9 +101,7 @@ describe("Add command", () => {
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
-
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
+    const call = mockedWriteChangeset.mock.calls[0][0];
     expect(call).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
@@ -130,7 +118,6 @@ describe("Add command", () => {
     ${["", "summary after error"]}            | ${1 /* mock implementation will throw */} | ${"summary after error"}
   `(
     "should read summary",
-    // @ts-ignore
     async ({ consoleSummaries, editorSummaries, expectedSummary }) => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
@@ -153,9 +140,7 @@ describe("Add command", () => {
         editorSummaries,
       });
       await addChangeset(cwd, { empty: false }, defaultConfig);
-
-      // @ts-ignore
-      const call = writeChangeset.mock.calls[0][0];
+      const call = mockedWriteChangeset.mock.calls[0][0];
       expect(call).toEqual(
         expect.objectContaining({
           summary: expectedSummary,
@@ -175,32 +160,23 @@ describe("Add command", () => {
     });
 
     const summary = "summary message mock";
+    mockedUtils.askList.mockResolvedValueOnce("minor");
 
-    // @ts-ignore
-    askList.mockReturnValueOnce(Promise.resolve("minor"));
-
-    let confirmAnswers = {
+    let confirmAnswers: Record<string, boolean> = {
       "Is this your desired changeset?": true,
     };
-    // @ts-ignore
-    askQuestion.mockReturnValueOnce("");
-    // @ts-ignore
-    askQuestionWithEditor.mockReturnValueOnce(summary);
-    // @ts-ignore
-    askConfirm.mockImplementation((question) => {
+    mockedUtils.askQuestion.mockResolvedValue("");
+    mockedUtils.askQuestionWithEditor.mockReturnValueOnce(summary);
+    mockedUtils.askConfirm.mockImplementation(async (question) => {
       question = stripAnsi(question);
-      // @ts-ignore
       if (confirmAnswers[question]) {
-        // @ts-ignore
         return confirmAnswers[question];
       }
       throw new Error(`An answer could not be found for ${question}`);
     });
 
     await addChangeset(cwd, { empty: false }, defaultConfig);
-
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
+    const call = mockedWriteChangeset.mock.calls[0][0];
     expect(call).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
@@ -234,7 +210,10 @@ describe("Add command", () => {
       { empty: false },
       {
         ...defaultConfig,
-        commit: [path.resolve(__dirname, "..", "..", "..", "commit"), null],
+        commit: [
+          path.resolve(import.meta.dirname, "..", "..", "..", "commit"),
+          null,
+        ],
       }
     );
     expect(git.add).toHaveBeenCalledTimes(1);
@@ -254,9 +233,7 @@ describe("Add command", () => {
     });
 
     await addChangeset(cwd, { empty: true }, defaultConfig);
-
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
+    const call = mockedWriteChangeset.mock.calls[0][0];
     expect(call).toEqual(
       expect.objectContaining({
         releases: [],
@@ -301,9 +278,7 @@ describe("Add command", () => {
       { empty: false },
       { ...defaultConfig, ignore: ["pkg-b"] }
     );
-
-    // @ts-ignore
-    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
 
@@ -329,9 +304,7 @@ describe("Add command", () => {
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
-
-    // @ts-ignore
-    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
 
@@ -368,9 +341,7 @@ describe("Add command", () => {
         },
       }
     );
-
-    // @ts-ignore
-    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
 
