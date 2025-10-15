@@ -17,6 +17,6 @@
     "@changesets/test-utils": "0.0.9-next.1"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.19.0"
   }
 }
