@@ -17,7 +17,6 @@
   },
   "devDependencies": {
     "@changesets/test-utils": "0.0.9-next.0",
-    "strip-ansi": "^7.1.0",
     "vitest": "^3.2.4"
   },
   "engines": {

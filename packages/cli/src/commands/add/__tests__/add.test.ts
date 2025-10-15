@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import path from "path";
-import stripAnsi from "strip-ansi";
+import { stripVTControlCharacters } from "node:util";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
@@ -72,7 +72,7 @@ const mockUserResponses = (mockResponses: {
     mockedUtils.askQuestion.mockResolvedValue(summary);
   }
   mockedUtils.askConfirm.mockImplementation(async (question) => {
-    question = stripAnsi(question);
+    question = stripVTControlCharacters(question);
     if (confirmAnswers[question]) {
       return confirmAnswers[question];
     }
@@ -168,7 +168,7 @@ describe("Add command", () => {
     mockedUtils.askQuestion.mockResolvedValue("");
     mockedUtils.askQuestionWithEditor.mockReturnValueOnce(summary);
     mockedUtils.askConfirm.mockImplementation(async (question) => {
-      question = stripAnsi(question);
+      question = stripVTControlCharacters(question);
       if (confirmAnswers[question]) {
         return confirmAnswers[question];
       }
