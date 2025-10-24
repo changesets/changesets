@@ -1,5 +1,18 @@
 # @changesets/cli
 
+## 2.29.7
+
+### Patch Changes
+
+- Updated dependencies [[`957f24e`](https://github.com/changesets/changesets/commit/957f24ed0446494c5709189ae57583f72c716d43)]:
+  - @changesets/apply-release-plan@7.0.13
+
+## 2.29.6
+
+### Patch Changes
+
+- [#1712](https://github.com/changesets/changesets/pull/1712) [`a3563b0`](https://github.com/changesets/changesets/commit/a3563b0d6c84e7142541493dea0c89acdc339b93) Thanks [@benmccann](https://github.com/benmccann)! - Switch to maintained fork of `external-editor`
+
 ## 2.29.5
 
 ### Patch Changes
