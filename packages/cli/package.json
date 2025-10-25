@@ -100,6 +100,8 @@
   "devDependencies": {
     "@changesets/parse": "*",
     "@changesets/test-utils": "*",
+    "@types/npmcli__config": "^6.0.3",
+    "@types/pacote": "^11.1.8",
     "@types/semver": "^7.5.0",
     "human-id": "^4.1.1",
     "outdent": "^0.5.0",

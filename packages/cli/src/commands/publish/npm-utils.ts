@@ -177,7 +177,10 @@ export function getPackageInfo(packageJson: PackageJSON) {
   });
 }
 
-export async function infoAllow404(packageJson: PackageJSON) {
+export async function infoAllow404(packageJson: PackageJSON): Promise<{
+  published: boolean;
+  pkgInfo: { versions?: string[] } & Record<string, any>;
+}> {
   let pkgInfo = await getPackageInfo(packageJson);
   if (pkgInfo.error?.code === "E404") {
     warn(`Received 404 for npm info ${pc.cyan(`"${packageJson.name}"`)}`);
