@@ -4,7 +4,9 @@ import { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
-import npmFetch from "npm-registry-fetch";
+import { packument } from "pacote";
+import Config from "@npmcli/config";
+import { definitions, flatten, shorthands } from "@npmcli/config/lib/definitions/index.js";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
 import { askQuestion } from "../../utils/cli-utilities";
@@ -21,6 +23,18 @@ interface PublishOptions {
 
 const npmRequestLimit = pLimit(40);
 const npmPublishLimit = pLimit(10);
+
+async function getNpmConfig() {
+  const config = new Config({
+    definitions,
+    flatten,
+    shorthands,
+    npmPath: process.env.npm_execpath || process.execPath,
+  });
+
+  await config.load();
+  return config.flat;
+}
 
 function jsonParse(input: string) {
   try {
@@ -118,12 +132,26 @@ export function getPackageInfo(packageJson: PackageJSON) {
 
     const { registry } = getCorrectRegistry(packageJson);
 
+    // Load npm config to get auth tokens from .npmrc files
+    const npmConfig = await getNpmConfig();
+
+    // Use pacote with npm's flatOptions which includes auth tokens
+    const opts = {
+      ...npmConfig,
+      registry,
+      preferOnline: true,
+      fullMetadata: true,
+    };
+
     try {
-      return await npmFetch.json(packageJson.name, {
-        registry,
-        preferOnline: true,
-        fullMetadata: true,
-      });
+      const result = await packument(packageJson.name, opts);
+
+      // pacote returns versions as an object { [version: string]: ManifestObject }
+      // but the rest of the codebase expects versions as an array of strings
+      return {
+        ...result,
+        versions: Object.keys(result.versions),
+      };
     } catch (err: any) {
       const code = err?.code ?? err?.statusCode;
       if (code === "E404" || code === 404) {
