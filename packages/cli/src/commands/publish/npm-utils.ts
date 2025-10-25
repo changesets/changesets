@@ -4,6 +4,7 @@ import { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
+import npmFetch from "npm-registry-fetch";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
 import { askQuestion } from "../../utils/cli-utilities";
@@ -115,31 +116,36 @@ export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestLimit(async () => {
     info(`npm info ${packageJson.name}`);
 
-    const { scope, registry } = getCorrectRegistry(packageJson);
+    const { registry } = getCorrectRegistry(packageJson);
 
-    // Due to a couple of issues with yarnpkg, we also want to override the npm registry when doing
-    // npm info.
-    // Issues: We sometimes get back cached responses, i.e old data about packages which causes
-    // `publish` to behave incorrectly. It can also cause issues when publishing private packages
-    // as they will always give a 404, which will tell `publish` to always try to publish.
-    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-    let result = await spawn("npm", [
-      "info",
-      packageJson.name,
-      `--${scope ? `${scope}:` : ""}registry=${registry}`,
-      "--json",
-    ]);
-
-    // Github package registry returns empty string when calling npm info
-    // for a non-existent package instead of a E404
-    if (result.stdout.toString() === "") {
-      return {
-        error: {
-          code: "E404",
-        },
-      };
+    try {
+      return await npmFetch.json(packageJson.name, {
+        registry,
+        preferOnline: true,
+        fullMetadata: true,
+      });
+    } catch (err: any) {
+      const code = err?.code ?? err?.statusCode;
+      if (code === "E404" || code === 404) {
+        return {
+          error: {
+            code: "E404",
+            summary: err?.summary,
+            detail: err?.detail,
+          },
+        };
+      }
+      if (err?.code || err?.summary || err?.detail) {
+        return {
+          error: {
+            code: err?.code ?? "UNKNOWN",
+            summary: err?.summary,
+            detail: err?.detail,
+          },
+        };
+      }
+      throw err;
     }
-    return jsonParse(result.stdout.toString());
   });
 }
 
