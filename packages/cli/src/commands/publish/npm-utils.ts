@@ -6,7 +6,11 @@ import { detect } from "package-manager-detector";
 import pc from "picocolors";
 import { packument } from "pacote";
 import Config from "@npmcli/config";
-import { definitions, flatten, shorthands } from "@npmcli/config/lib/definitions/index.js";
+import {
+  definitions,
+  flatten,
+  shorthands,
+} from "@npmcli/config/lib/definitions/index.js";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
 import { askQuestion } from "../../utils/cli-utilities";
