@@ -1,6 +1,6 @@
 {
   "name": "@changesets/get-github-info",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "Get the GitHub username and PR number from a commit. Intended for use with changesets.",
   "type": "module",
   "exports": {
