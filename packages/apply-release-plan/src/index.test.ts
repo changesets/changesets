@@ -7,6 +7,7 @@ import {
   ReleasePlan,
 } from "@changesets/types";
 import * as git from "@changesets/git";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "path";
 import { outdent } from "outdent";
@@ -18,7 +19,6 @@ import { getPackages } from "@manypkg/get-packages";
 import {
   Fixture,
   outputFile,
-  pathExists,
   temporarilySilenceLogs,
   testdir,
 } from "@changesets/test-utils";
@@ -2979,7 +2979,7 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      let changesetExists = await pathExists(changesetPath);
+      let changesetExists = existsSync(changesetPath);
       expect(changesetExists).toEqual(false);
     });
     it("should NOT delete changesets for ignored packages", async () => {
@@ -3014,7 +3014,7 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      let changesetExists = await pathExists(changesetPath);
+      let changesetExists = existsSync(changesetPath);
       expect(changesetExists).toEqual(true);
     });
     it("should NOT delete changesets for private unversioned packages", async () => {
@@ -3053,7 +3053,7 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      let changesetExists = await pathExists(changesetPath);
+      let changesetExists = existsSync(changesetPath);
       expect(changesetExists).toEqual(true);
     });
     it("should delete an old format changeset if it is applied", async () => {
@@ -3104,8 +3104,8 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      let mdPathExists = await pathExists(changesetMDPath);
-      let JSONPathExists = await pathExists(changesetJSONPath);
+      let mdPathExists = existsSync(changesetMDPath);
+      let JSONPathExists = existsSync(changesetJSONPath);
 
       expect(mdPathExists).toEqual(false);
       expect(JSONPathExists).toEqual(false);
@@ -3280,7 +3280,7 @@ describe("apply release plan", () => {
         setupFunc
       );
 
-      let changesetExists = await pathExists(changesetPath);
+      let changesetExists = existsSync(changesetPath);
 
       expect(changesetExists).toEqual(false);
 
