@@ -2,6 +2,7 @@
   "name": "@changesets/release-utils",
   "version": "1.0.0-next.0",
   "type": "module",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/release-utils",
   "exports": {
     ".": "./dist/changesets-release-utils.js",
     "./package.json": "./package.json"
