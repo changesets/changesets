@@ -12,6 +12,7 @@ export type CliOptions = {
   tag?: string;
   gitTag?: boolean;
   open?: boolean;
+  enablePnpmCatalog?: boolean;
 };
 
 export type CommandOptions = CliOptions & {

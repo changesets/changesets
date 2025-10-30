@@ -64,9 +64,9 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open }: CliOptions = flags;
+    const { empty, open, enablePnpmCatalog }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
-    await add(cwd, { empty, open }, config);
+    await add(cwd, { empty, open, enablePnpmCatalog }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -85,6 +85,7 @@ export async function run(
       tag,
       open,
       gitTag,
+      enablePnpmCatalog,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -106,7 +107,7 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        await add(cwd, { empty, open }, config);
+        await add(cwd, { empty, open, enablePnpmCatalog }, config);
         return;
       }
       case "version": {
@@ -195,7 +196,11 @@ export async function run(
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
+        await status(
+          cwd,
+          { sinceMaster, since, verbose, output, enablePnpmCatalog },
+          config
+        );
         return;
       }
       case "tag": {
