@@ -1,6 +1,6 @@
 {
   "name": "@changesets/changelog-git",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "A changelog entry generator for git that writes hashes",
   "type": "module",
   "exports": {
@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/changelog-git",
   "dependencies": {
-    "@changesets/types": "^7.0.0-next.0"
+    "@changesets/types": "^7.0.0-next.1"
   },
   "engines": {
     "node": ">=20.0.0"
