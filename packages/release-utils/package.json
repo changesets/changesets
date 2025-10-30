@@ -1,6 +1,7 @@
 {
   "name": "@changesets/release-utils",
   "version": "0.2.6",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/release-utils",
   "main": "dist/changesets-release-utils.cjs.js",
   "module": "dist/changesets-release-utils.esm.js",
   "exports": {
