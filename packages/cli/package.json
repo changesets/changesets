@@ -9,6 +9,7 @@
   "files": [
     "default-files",
     "dist",
+    "src",
     "bin.js",
     "changelog",
     "commit"
@@ -76,6 +77,7 @@
     "@changesets/git": "^3.0.4",
     "@changesets/logger": "^0.1.1",
     "@changesets/pre": "^2.0.2",
+    "@changesets/release-utils": "^0.2.5",
     "@changesets/read": "^0.6.5",
     "@changesets/should-skip-package": "^0.1.2",
     "@changesets/types": "^6.1.0",
