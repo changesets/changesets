@@ -476,10 +476,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.snapshot?.useCalculatedVersion !== undefined
           ? json.snapshot.useCalculatedVersion
           : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              ?.useCalculatedVersionForSnapshots !== undefined
-          ? json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              ?.useCalculatedVersionForSnapshots
-          : false,
+                ?.useCalculatedVersionForSnapshots !== undefined
+            ? json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                ?.useCalculatedVersionForSnapshots
+            : false,
     },
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -503,11 +503,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       json.privatePackages === false
         ? { tag: false, version: false }
         : json.privatePackages
-        ? {
-            version: json.privatePackages.version ?? true,
-            tag: json.privatePackages.tag ?? false,
-          }
-        : { version: true, tag: false },
+          ? {
+              version: json.privatePackages.version ?? true,
+              tag: json.privatePackages.tag ?? false,
+            }
+          : { version: true, tag: false },
   };
 
   if (

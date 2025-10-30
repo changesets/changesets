@@ -9,7 +9,7 @@ const DEPENDENCY_TYPES = [
 
 export type VersionType = "major" | "minor" | "patch" | "none";
 
-export type DependencyType = typeof DEPENDENCY_TYPES[number];
+export type DependencyType = (typeof DEPENDENCY_TYPES)[number];
 
 export type AccessType = "public" | "restricted";
 
