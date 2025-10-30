@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.29.8
+
+### Patch Changes
+
+- [#1739](https://github.com/changesets/changesets/pull/1739) [`f6f3d0b`](https://github.com/changesets/changesets/commit/f6f3d0bfdb69a80648eee5734762bb59c5cdbbca) Thanks [@CNOCTAVE](https://github.com/CNOCTAVE)! - Tweaked a hint text printed when one confirms an empty set of packages to be released
+
 ## 2.29.7
 
 ### Patch Changes
