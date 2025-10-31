@@ -11,6 +11,7 @@ import {
 import { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
 import fs from "fs-extra";
+import * as jsonc from "jsonc-parser";
 import path from "path";
 import prettier from "prettier";
 import resolveFrom from "resolve-from";
@@ -184,6 +185,22 @@ export default async function applyReleasePlan(
     );
   }
 
+  const packageLockJsonPath = path.join(cwd, "package-lock.json");
+
+  if (await fs.pathExists(packageLockJsonPath)) {
+    const lock = await fs.readFile(packageLockJsonPath, "utf-8");
+    const edits = finalisedRelease.flatMap((release) =>
+      jsonc.modify(
+        lock,
+        ["packages", path.relative(cwd, release.dir), "version"],
+        release.packageJson.version,
+        {}
+      )
+    );
+    await fs.writeFile(packageLockJsonPath, jsonc.applyEdits(lock, edits));
+    touchedFiles.push(packageLockJsonPath);
+  }
+
   // We return the touched files to be committed in the cli
   return touchedFiles;
 }
@@ -296,16 +313,94 @@ async function updateChangelog(
   }
 }
 
+function getJsonChanges(previous: unknown, next: unknown) {
+  return collect(previous, next, [], []);
+
+  function collect(
+    a: unknown,
+    b: unknown,
+    path: jsonc.JSONPath,
+    changes: {
+      path: jsonc.JSONPath;
+      value: unknown;
+    }[]
+  ) {
+    if (a !== b) {
+      const typeB = typeOf(b);
+      if (typeOf(a) !== typeB) {
+        changes.push({ path: path.slice(), value: b });
+      } else if (typeB === "object") {
+        const objA = a as Record<string, unknown>;
+        const objB = b as Record<string, unknown>;
+        const keys = new Set([...Object.keys(objA), ...Object.keys(objB)]);
+        for (const key of keys) {
+          if (!(key in objB)) {
+            changes.push({
+              path: path.concat(key),
+              value: undefined,
+            });
+            continue;
+          }
+          path.push(key);
+          collect(objA[key], objB[key], path, changes);
+          path.pop();
+        }
+      } else if (typeB === "array") {
+        const arrA = a as ReadonlyArray<unknown>;
+        const arrB = b as ReadonlyArray<unknown>;
+        for (let i = 0; i < arrA.length; i++) {
+          if (i >= arrB.length) {
+            changes.push({
+              path: path.concat(i),
+              value: undefined,
+            });
+            continue;
+          }
+          path.push(i);
+          collect(arrA[i], arrB[i], path, changes);
+          path.pop();
+        }
+        for (let i = arrA.length; i < arrB.length; i++) {
+          changes.push({
+            path: path.concat(i),
+            value: arrB[i],
+          });
+        }
+      } else {
+        changes.push({ path: path.slice(), value: b });
+      }
+    }
+    return changes;
+  }
+
+  function typeOf(arg: unknown) {
+    return arg === null ? "null" : Array.isArray(arg) ? "array" : typeof arg;
+  }
+}
+
 async function updatePackageJson(
   pkgJsonPath: string,
   pkgJson: any
 ): Promise<void> {
   const pkgRaw = await fs.readFile(pkgJsonPath, "utf-8");
-  const indent = detectIndent(pkgRaw).indent || "  ";
-  const stringified =
-    JSON.stringify(pkgJson, null, indent) + (pkgRaw.endsWith("\n") ? "\n" : "");
 
-  return fs.writeFile(pkgJsonPath, stringified);
+  // Detect the original formatting
+  const indent = detectIndent(pkgRaw).indent || "  ";
+  const insertSpaces = indent[0] === " ";
+  const tabSize = insertSpaces ? indent.length : 1;
+
+  const changes = getJsonChanges(JSON.parse(pkgRaw), pkgJson);
+
+  const edits = changes.flatMap((change) =>
+    jsonc.modify(pkgRaw, change.path, change.value, {
+      formattingOptions: {
+        insertSpaces,
+        tabSize,
+      },
+    })
+  );
+
+  return fs.writeFile(pkgJsonPath, jsonc.applyEdits(pkgRaw, edits));
 }
 
 async function prependFile(
