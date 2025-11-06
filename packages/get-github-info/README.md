@@ -52,7 +52,7 @@ const getReleaseLine = async (changeset, type) => {
 // ...
 ```
 
-You'll need to [get a GitHub personal access token](https://github.com/settings/tokens/new) with `read:user` and `repo:status` permissions, and add it to a `.env` file.
+You'll need to [get a GitHub personal access token](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions, and add it to a `.env` file.
 
 ```bash
 GITHUB_TOKEN=token_here
