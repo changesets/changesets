@@ -406,20 +406,6 @@ let correctCases: Record<string, CorrectCase> = {
       },
     },
   },
-  experimental_deprecated_useCalculatedVersionInSnapshot: {
-    input: {
-      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        useCalculatedVersionForSnapshots: true,
-      },
-    },
-    output: {
-      ...defaults,
-      snapshot: {
-        useCalculatedVersion: true,
-        prereleaseTemplate: null,
-      },
-    },
-  },
 };
 
 describe("parse", () => {
@@ -728,22 +714,6 @@ describe("parser errors", () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       [Error: Some errors occurred when validating the changesets config:
       The \`snapshot.useCalculatedVersion\` option is set as "not true" when the only valid values are undefined or a boolean]
-    `);
-  });
-
-  test("Experimental useCalculatedVersionForSnapshots non-boolean", () => {
-    expect(() => {
-      unsafeParse(
-        {
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            useCalculatedVersionForSnapshots: "not true",
-          },
-        },
-        defaultPackages
-      );
-    }).toThrowErrorMatchingInlineSnapshot(`
-      [Error: Some errors occurred when validating the changesets config:
-      The \`useCalculatedVersionForSnapshots\` option is set as "not true" when the only valid values are undefined or a boolean]
     `);
   });
 
