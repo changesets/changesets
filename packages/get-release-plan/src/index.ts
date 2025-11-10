@@ -8,7 +8,7 @@ import { readPreState } from "@changesets/pre";
 export default async function getReleasePlan(
   cwd: string,
   sinceRef?: string,
-  passedConfig?: Config
+  passedConfig?: Config,
 ): Promise<ReleasePlan> {
   const packages = await getPackages(cwd);
   const preState = await readPreState(cwd);

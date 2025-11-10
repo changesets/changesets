@@ -9,7 +9,7 @@ import type { InternalRelease } from "./types.ts";
 export default function flattenReleases(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
-  config: Config
+  config: Config,
 ): Map<string, InternalRelease> {
   let releases: Map<string, InternalRelease> = new Map();
 
@@ -22,14 +22,14 @@ export default function flattenReleases(
           !shouldSkipPackage(packagesByName.get(name)!, {
             ignore: config.ignore,
             allowPrivatePackages: config.privatePackages.version,
-          })
+          }),
       )
       .forEach(({ name, type }) => {
         let release = releases.get(name);
         let pkg = packagesByName.get(name);
         if (!pkg) {
           throw new Error(
-            `"${changeset.id}" changeset mentions a release for a package "${name}" but such a package could not be found.`
+            `"${changeset.id}" changeset mentions a release for a package "${name}" but such a package could not be found.`,
           );
         }
         if (!release) {

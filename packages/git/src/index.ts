@@ -18,7 +18,7 @@ export async function commit(message: string, cwd: string) {
   const gitCmd = await spawn(
     "git",
     ["commit", "-m", message, "--allow-empty"],
-    { cwd }
+    { cwd },
   );
   return gitCmd.code === 0;
 }
@@ -48,7 +48,7 @@ export async function getDivergedCommit(cwd: string, ref: string) {
   const cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
   if (cmd.code !== 0) {
     throw new Error(
-      `Failed to find where HEAD diverged from "${ref}". Does "${ref}" exist and it's synced with remote?`
+      `Failed to find where HEAD diverged from "${ref}". Does "${ref}" exist and it's synced with remote?`,
     );
   }
   return cmd.stdout.toString().trim();
@@ -62,7 +62,7 @@ export async function getDivergedCommit(cwd: string, ref: string) {
  */
 export async function getCommitsThatAddFiles(
   gitPaths: string[],
-  { cwd, short = false }: { cwd: string; short?: boolean }
+  { cwd, short = false }: { cwd: string; short?: boolean },
 ): Promise<(string | undefined)[]> {
   // Maps gitPath to commit SHA
   const map = new Map<string, string>();
@@ -84,13 +84,13 @@ export async function getCommitsThatAddFiles(
               short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
               gitPath,
             ],
-            { cwd }
+            { cwd },
           )
         ).stdout
           .toString()
           .split(":");
         return { path: gitPath, commitSha, parentSha };
-      })
+      }),
     );
 
     // To collect commits without parents (usually because they're absent from
@@ -178,7 +178,7 @@ async function getRepoRoot({ cwd }: { cwd: string }) {
   const { stdout, code, stderr } = await spawn(
     "git",
     ["rev-parse", "--show-toplevel"],
-    { cwd }
+    { cwd },
   );
 
   if (code !== 0) {
@@ -202,11 +202,11 @@ export async function getChangedFilesSince({
   const cmd = await spawn(
     "git",
     ["diff", "--name-only", "--no-relative", divergedAt],
-    { cwd }
+    { cwd },
   );
   if (cmd.code !== 0) {
     throw new Error(
-      `Failed to diff against ${divergedAt}. Is ${divergedAt} a valid ref?`
+      `Failed to diff against ${divergedAt}. Is ${divergedAt} a valid ref?`,
     );
   }
 
@@ -237,7 +237,7 @@ export async function getChangedChangesetFilesSinceRef({
       ["diff", "--name-only", "--diff-filter=d", "--no-relative", divergedAt],
       {
         cwd,
-      }
+      },
     );
 
     let tester = /.changeset\/[^/]+\.md$/;
@@ -308,7 +308,7 @@ export async function getCurrentCommitId({
     await spawn(
       "git",
       ["rev-parse", short && "--short", "HEAD"].filter<string>(Boolean as any),
-      { cwd }
+      { cwd },
     )
   ).stdout
     .toString()

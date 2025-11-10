@@ -56,7 +56,7 @@ const getTwoFactorState = ({
   if (
     isCI ||
     publicPackages.some((pkg) =>
-      isCustomRegistry(npmUtils.getCorrectRegistry(pkg.packageJson).registry)
+      isCustomRegistry(npmUtils.getCorrectRegistry(pkg.packageJson).registry),
     ) ||
     isCustomRegistry(process.env.npm_config_registry)
   ) {
@@ -90,7 +90,7 @@ export default async function publishPackages({
   const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
-    preState
+    preState,
   );
 
   if (unpublishedPackagesInfo.length === 0) {
@@ -109,9 +109,9 @@ export default async function publishPackages({
         pkg,
         access,
         twoFactorState,
-        getReleaseTag(pkgInfo, preState, tag)
+        getReleaseTag(pkgInfo, preState, tag),
       );
-    })
+    }),
   );
 }
 
@@ -119,7 +119,7 @@ async function publishAPackage(
   pkg: Package,
   access: AccessType,
   twoFactorState: TwoFactorState,
-  tag: string
+  tag: string,
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
   info(`Publishing ${pc.cyan(`"${name}"`)} at ${pc.green(`"${version}"`)}`);
@@ -134,7 +134,7 @@ async function publishAPackage(
       access: publishConfig?.access || access,
       tag,
     },
-    twoFactorState
+    twoFactorState,
   );
 
   return {
@@ -146,7 +146,7 @@ async function publishAPackage(
 
 async function getUnpublishedPackages(
   packages: Array<Package>,
-  preState: PreState | undefined
+  preState: PreState | undefined,
 ) {
   const results: Array<PkgInfo> = await Promise.all(
     packages.map(async ({ packageJson }) => {
@@ -159,7 +159,7 @@ async function getUnpublishedPackages(
             response.pkgInfo.versions &&
             response.pkgInfo.versions.every(
               (version: string) =>
-                semverParse(version)!.prerelease[0] === preState.tag
+                semverParse(version)!.prerelease[0] === preState.tag,
             )
           ) {
             publishedState = "only-pre";
@@ -173,7 +173,7 @@ async function getUnpublishedPackages(
         publishedState,
         publishedVersions: response.pkgInfo.versions || [],
       };
-    })
+    }),
   );
 
   const packagesToPublish: Array<PkgInfo> = [];
@@ -183,21 +183,21 @@ async function getUnpublishedPackages(
     if (!publishedVersions.includes(localVersion)) {
       packagesToPublish.push(pkgInfo);
       info(
-        `${name} is being published because our local version (${localVersion}) has not been published on npm`
+        `${name} is being published because our local version (${localVersion}) has not been published on npm`,
       );
       if (preState !== undefined && publishedState === "only-pre") {
         info(
           `${name} is being published to ${pc.cyan(
-            "latest"
+            "latest",
           )} rather than ${pc.cyan(
-            preState.tag
-          )} because there has not been a regular release of it yet`
+            preState.tag,
+          )} because there has not been a regular release of it yet`,
         );
       }
     } else {
       // If the local version is behind npm, something is wrong, we warn here, and by not getting published later, it will fail
       warn(
-        `${name} is not being published because version ${localVersion} is already published on npm`
+        `${name} is not being published because version ${localVersion} is already published on npm`,
       );
     }
   }

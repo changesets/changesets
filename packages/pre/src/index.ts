@@ -45,7 +45,7 @@ export async function exitPre(cwd: string) {
 
   await outputFile(
     preStatePath,
-    JSON.stringify({ ...preState, mode: "exit" }, null, 2) + "\n"
+    JSON.stringify({ ...preState, mode: "exit" }, null, 2) + "\n",
   );
 }
 

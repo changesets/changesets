@@ -4,7 +4,7 @@ import { InternalError } from "@changesets/errors";
 
 export function incrementVersion(
   release: InternalRelease,
-  preInfo: PreInfo | undefined
+  preInfo: PreInfo | undefined,
 ) {
   if (release.type === "none") {
     return release.oldVersion;
@@ -15,7 +15,7 @@ export function incrementVersion(
     let preVersion = preInfo.preVersions.get(release.name);
     if (preVersion === undefined) {
       throw new InternalError(
-        `preVersion for ${release.name} does not exist when preState is defined`
+        `preVersion for ${release.name} does not exist when preState is defined`,
       );
     }
     // why are we adding this ourselves rather than passing 'pre' + versionType to semver.inc?

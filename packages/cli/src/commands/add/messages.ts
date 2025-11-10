@@ -7,7 +7,7 @@ export default function printConfirmationMessage(
     releases: Array<Release>;
     summary: string;
   },
-  repoHasMultiplePackages: boolean
+  repoHasMultiplePackages: boolean,
 ) {
   function getReleasesOfType(type: VersionType) {
     return changeset.releases
