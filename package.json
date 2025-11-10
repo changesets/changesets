@@ -10,8 +10,8 @@
     "postinstall": "preconstruct dev && manypkg check",
     "lint": "yarn eslint . --ext .ts,.tsx,.js",
     "types:check": "tsc",
-    "format": "prettier --list-different \"**/*.{js,ts,tsx,md}\"",
-    "format:fix": "prettier --write \"**/*.{js,ts,tsx,md}\"",
+    "format": "prettier --experimental-cli --list-different \"**/*.{js,ts,tsx,md}\"",
+    "format:fix": "prettier --experimental-cli --write \"**/*.{js,ts,tsx,md}\"",
     "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js",
     "check-all": "yarn test && yarn types:check && yarn lint && yarn format",
     "version-packages": "yarn changeset version && yarn format:fix",
@@ -70,7 +70,6 @@
       "typeModule": true
     }
   },
-  "prettier": {},
   "engines": {
     "node": ">=20.0.0"
   }

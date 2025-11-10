@@ -25,8 +25,8 @@ describe("enterPre", () => {
 
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
+      ),
     ).toMatchObject({
       changesets: [],
       initialVersions: {},
@@ -34,7 +34,7 @@ describe("enterPre", () => {
       tag: "next",
     });
     expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${pc.cyan("next")}`
+      `Entered pre mode with tag ${pc.cyan("next")}`,
     );
   });
   it("should throw if already in pre", async () => {
@@ -52,13 +52,13 @@ describe("enterPre", () => {
     });
 
     await expect(
-      pre(cwd, { command: "enter", tag: "next" })
+      pre(cwd, { command: "enter", tag: "next" }),
     ).rejects.toBeInstanceOf(ExitError);
     expect(mockedLogger.error).toBeCalledWith(
-      "`changeset pre enter` cannot be run when in pre mode"
+      "`changeset pre enter` cannot be run when in pre mode",
     );
     expect(mockedLogger.info).toBeCalledWith(
-      "If you're trying to exit pre mode, run `changeset pre exit`"
+      "If you're trying to exit pre mode, run `changeset pre exit`",
     );
   });
   it("should enter if already exited pre mode", async () => {
@@ -78,8 +78,8 @@ describe("enterPre", () => {
     await pre(cwd, { command: "enter", tag: "next" });
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
+      ),
     ).toEqual({
       changesets: [],
       initialVersions: {},
@@ -87,7 +87,7 @@ describe("enterPre", () => {
       tag: "next",
     });
     expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${pc.cyan("next")}`
+      `Entered pre mode with tag ${pc.cyan("next")}`,
     );
   });
 });
@@ -110,8 +110,8 @@ describe("exitPre", () => {
 
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
+      ),
     ).toEqual({
       changesets: [],
       initialVersions: {},
@@ -127,13 +127,13 @@ describe("exitPre", () => {
       }),
     });
     await expect(pre(cwd, { command: "exit" })).rejects.toBeInstanceOf(
-      ExitError
+      ExitError,
     );
     expect(mockedLogger.error).toBeCalledWith(
-      "`changeset pre exit` can only be run when in pre mode"
+      "`changeset pre exit` can only be run when in pre mode",
     );
     expect(mockedLogger.info).toBeCalledWith(
-      "If you're trying to enter pre mode, run `changeset pre enter`"
+      "If you're trying to enter pre mode, run `changeset pre enter`",
     );
   });
 });

@@ -9,7 +9,7 @@ const DEPENDENCY_TYPES = [
 
 export type VersionType = "major" | "minor" | "patch" | "none";
 
-export type DependencyType = typeof DEPENDENCY_TYPES[number];
+export type DependencyType = (typeof DEPENDENCY_TYPES)[number];
 
 export type AccessType = "public" | "restricted";
 
@@ -138,13 +138,13 @@ export type ModCompWithPackage = ComprehensiveRelease & {
 export type GetReleaseLine = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
-  changelogOpts: null | Record<string, any>
+  changelogOpts: null | Record<string, any>,
 ) => Promise<string>;
 
 export type GetDependencyReleaseLine = (
   changesets: NewChangesetWithCommit[],
   dependenciesUpdated: ModCompWithPackage[],
-  changelogOpts: any
+  changelogOpts: any,
 ) => Promise<string>;
 
 export type ChangelogFunctions = {
@@ -154,12 +154,12 @@ export type ChangelogFunctions = {
 
 export type GetAddMessage = (
   changeset: Changeset,
-  commitOptions: any
+  commitOptions: any,
 ) => Promise<string>;
 
 export type GetVersionMessage = (
   releasePlan: ReleasePlan,
-  commitOptions: any
+  commitOptions: any,
 ) => Promise<string>;
 
 export type CommitFunctions = {

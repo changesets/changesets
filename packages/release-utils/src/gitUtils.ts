@@ -4,7 +4,7 @@ export const getCurrentBranch = async (cwd: string) => {
   const { stdout } = await spawnWithOutput(
     "git",
     ["rev-parse", "--abbrev-ref", "HEAD"],
-    { cwd }
+    { cwd },
   );
   return stdout.trim();
 };
@@ -19,7 +19,7 @@ export const push = async (
     force,
     includeTags,
     cwd,
-  }: { force?: boolean; includeTags?: boolean; cwd: string }
+  }: { force?: boolean; includeTags?: boolean; cwd: string },
 ) => {
   await spawnWithOutput(
     "git",
@@ -30,13 +30,13 @@ export const push = async (
       includeTags && "--tags",
       force && "--force",
     ].filter((x): x is string => !!x),
-    { cwd }
+    { cwd },
   );
 };
 
 export const switchToMaybeExistingBranch = async (
   branch: string,
-  cwd: string
+  cwd: string,
 ) => {
   let { stderr } = await spawnWithOutput("git", ["checkout", branch], {
     ignoreReturnCode: true,
@@ -53,7 +53,7 @@ export const switchToMaybeExistingBranch = async (
 export const reset = async (
   pathSpec: string,
   mode: "hard" | "soft" | "mixed" = "hard",
-  cwd: string
+  cwd: string,
 ) => {
   await spawnWithOutput("git", ["reset", `--${mode}`, pathSpec], { cwd });
 };

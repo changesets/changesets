@@ -5,7 +5,7 @@ import type { PublishedResult } from "../commands/publish/publishPackages.ts";
 export async function getUntaggedPackages(
   packages: Package[],
   cwd: string,
-  tool: Tool
+  tool: Tool,
 ) {
   const packageWithTags = await Promise.all(
     packages.map(async (pkg) => {
@@ -19,7 +19,7 @@ export async function getUntaggedPackages(
       );
 
       return { pkg, isMissingTag };
-    })
+    }),
   );
 
   const untagged: PublishedResult[] = [];

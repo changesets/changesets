@@ -9,20 +9,22 @@ import {
 
 export default async function pre(
   cwd: string,
-  options: { command: "enter"; tag: string } | { command: "exit"; tag?: string }
+  options:
+    | { command: "enter"; tag: string }
+    | { command: "exit"; tag?: string },
 ) {
   if (options.command === "enter") {
     try {
       await enterPre(cwd, options.tag);
       logger.success(`Entered pre mode with tag ${pc.cyan(options.tag)}`);
       logger.info(
-        "Run `changeset version` to version packages with prerelease versions"
+        "Run `changeset version` to version packages with prerelease versions",
       );
     } catch (err) {
       if (err instanceof PreEnterButInPreModeError) {
         logger.error("`changeset pre enter` cannot be run when in pre mode");
         logger.info(
-          "If you're trying to exit pre mode, run `changeset pre exit`"
+          "If you're trying to exit pre mode, run `changeset pre exit`",
         );
         throw new ExitError(1);
       }
@@ -33,13 +35,13 @@ export default async function pre(
       await exitPre(cwd);
       logger.success(`Exited pre mode`);
       logger.info(
-        "Run `changeset version` to version packages with normal versions"
+        "Run `changeset version` to version packages with normal versions",
       );
     } catch (err) {
       if (err instanceof PreExitButNotInPreModeError) {
         logger.error("`changeset pre exit` can only be run when in pre mode");
         logger.info(
-          "If you're trying to enter pre mode, run `changeset pre enter`"
+          "If you're trying to enter pre mode, run `changeset pre enter`",
         );
         throw new ExitError(1);
       }

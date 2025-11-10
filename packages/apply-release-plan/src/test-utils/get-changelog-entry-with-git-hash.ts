@@ -11,7 +11,7 @@ async function getReleaseLine(changeset: NewChangeset, cwd: string) {
 
   const [commitThatAddsFile] = await getCommitsThatAddFiles(
     [`.changeset/${changeset.id}.md`],
-    { cwd }
+    { cwd },
   );
 
   return `- [${commitThatAddsFile}] ${firstLine}\n${futureLines
@@ -22,10 +22,10 @@ async function getReleaseLine(changeset: NewChangeset, cwd: string) {
 async function getReleaseLines(
   obj: RelevantChangesets,
   type: keyof RelevantChangesets,
-  cwd: string
+  cwd: string,
 ) {
   const releaseLines = obj[type].map((changeset) =>
-    getReleaseLine(changeset, cwd)
+    getReleaseLine(changeset, cwd),
   );
   if (!releaseLines.length) return "";
   const resolvedLines = await Promise.all(releaseLines);
@@ -36,7 +36,7 @@ async function getReleaseLines(
 export default async function defaultChangelogGetter(
   release: ComprehensiveRelease,
   relevantChangesets: RelevantChangesets,
-  options: { cwd: string }
+  options: { cwd: string },
 ) {
   let { cwd } = options;
 
@@ -44,17 +44,17 @@ export default async function defaultChangelogGetter(
   let majorReleaseLines = await getReleaseLines(
     relevantChangesets,
     "major",
-    cwd
+    cwd,
   );
   let minorReleaseLines = await getReleaseLines(
     relevantChangesets,
     "minor",
-    cwd
+    cwd,
   );
   let patchReleaseLines = await getReleaseLines(
     relevantChangesets,
     "patch",
-    cwd
+    cwd,
   );
 
   return [

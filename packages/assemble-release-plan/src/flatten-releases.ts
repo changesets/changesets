@@ -10,7 +10,7 @@ import { mapGetOrThrowInternal } from "./utils.ts";
 export default function flattenReleases(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
-  config: Config
+  config: Config,
 ): Map<string, InternalRelease> {
   let releases: Map<string, InternalRelease> = new Map();
 
@@ -22,7 +22,7 @@ export default function flattenReleases(
         const pkg = mapGetOrThrowInternal(
           packagesByName,
           name,
-          `Couldn't find package named "${name}" listed in changeset "${changeset.id}"`
+          `Couldn't find package named "${name}" listed in changeset "${changeset.id}"`,
         );
         return !shouldSkipPackage(pkg, {
           ignore: config.ignore,
@@ -33,7 +33,7 @@ export default function flattenReleases(
         let pkg = mapGetOrThrowInternal(
           packagesByName,
           name,
-          `Couldn't find package named "${name}" listed in changeset "${changeset.id}"`
+          `Couldn't find package named "${name}" listed in changeset "${changeset.id}"`,
         );
         let release = releases.get(name);
         if (!release) {

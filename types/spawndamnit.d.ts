@@ -5,7 +5,7 @@ declare module "spawndamnit" {
   function spawn(
     cmd: string,
     args: Array<string>,
-    opts?: SpawnOptions
+    opts?: SpawnOptions,
   ): Promise<{ stdout: Buffer; code: number; stderr: Buffer }> & EventEmitter;
 
   export = spawn;

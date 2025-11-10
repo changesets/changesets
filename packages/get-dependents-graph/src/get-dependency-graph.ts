@@ -13,7 +13,7 @@ const DEPENDENCY_TYPES = [
 
 const getAllDependencies = (
   config: PackageJSON,
-  ignoreDevDependencies: boolean
+  ignoreDevDependencies: boolean,
 ) => {
   const allDependencies = new Map<string, string>();
 
@@ -61,7 +61,7 @@ export default function getDependencyGraph(
   }: {
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-  } = {}
+  } = {},
 ): {
   graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
   valid: boolean;
@@ -88,7 +88,7 @@ export default function getDependencyGraph(
     const dependencies = [];
     const allDependencies = getAllDependencies(
       pkg.packageJson,
-      ignoreDevDependencies
+      ignoreDevDependencies,
     );
 
     for (let [depName, depRange] of allDependencies) {
@@ -115,10 +115,10 @@ export default function getDependencyGraph(
         valid = false;
         console.error(
           `Package ${pc.cyan(
-            `"${name}"`
+            `"${name}"`,
           )} must depend on the current version of ${pc.cyan(
-            `"${depName}"`
-          )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${depRange}"`)}`
+            `"${depName}"`,
+          )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${depRange}"`)}`,
         );
         continue;
       }

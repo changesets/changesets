@@ -22,7 +22,7 @@ function getChangeset(
     id?: string;
     summary?: string;
     releases?: Array<Release>;
-  } = {}
+  } = {},
 ): NewChangeset {
   let id = data.id || "strange-words-combine";
   let summary = data.summary || "base summary whatever";
@@ -76,12 +76,12 @@ class FakeFullState {
       id?: string;
       summary?: string;
       releases?: Array<Release>;
-    } = {}
+    } = {},
   ) {
     let changeset = getChangeset(data);
     if (this.changesets.find((c) => c.id === changeset.id)) {
       throw new Error(
-        `tried to add a second changeset with same id: ${changeset.id}`
+        `tried to add a second changeset with same id: ${changeset.id}`,
       );
     }
     this.changesets.push(changeset);
@@ -116,11 +116,11 @@ class FakeFullState {
     let pkg = getPackage({ name, version });
     if (
       this.packages.packages.find(
-        (c) => c.packageJson.name === pkg.packageJson.name
+        (c) => c.packageJson.name === pkg.packageJson.name,
       )
     ) {
       throw new Error(
-        `tried to add a second package with same name': ${pkg.packageJson.name}`
+        `tried to add a second package with same name': ${pkg.packageJson.name}`,
       );
     }
     this.packages.packages.push(pkg);
@@ -129,7 +129,7 @@ class FakeFullState {
     let pkg = this.packages.packages.find((c) => c.packageJson.name === name);
     if (!pkg) {
       throw new Error(
-        `could not update package ${name} because it doesn't exist - try addWorskpace`
+        `could not update package ${name} because it doesn't exist - try addWorskpace`,
       );
     }
     pkg.packageJson.version = version;

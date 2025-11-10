@@ -66,7 +66,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
 }
 
 async function getPublishTool(
-  cwd: string
+  cwd: string,
 ): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
   const pm = await detect({ cwd });
   if (!pm || pm.name !== "pnpm") return { name: "npm" };
@@ -100,7 +100,7 @@ export async function getTokenIsRequired() {
   if (result.code !== 0) {
     error(
       "error while checking if token is required",
-      result.stderr.toString().trim() || result.stdout.toString().trim()
+      result.stderr.toString().trim() || result.stdout.toString().trim(),
     );
     return false;
   }
@@ -153,7 +153,7 @@ export async function infoAllow404(packageJson: PackageJSON) {
     error(
       `Received an unknown error code: ${
         pkgInfo.error.code
-      } for npm info ${pc.cyan(`"${packageJson.name}"`)}`
+      } for npm info ${pc.cyan(`"${packageJson.name}"`)}`,
     );
     error(pkgInfo.error.summary);
     if (pkgInfo.error.detail) error(pkgInfo.error.detail);
@@ -169,7 +169,7 @@ let askForOtpCode = (twoFactorState: TwoFactorState) =>
   otpAskLimit(async () => {
     if (twoFactorState.token !== null) return twoFactorState.token;
     info(
-      "This operation requires a one-time password from your authenticator."
+      "This operation requires a one-time password from your authenticator.",
     );
 
     let val = await askQuestion("Enter one-time password:");
@@ -189,7 +189,7 @@ export let getOtpCode = async (twoFactorState: TwoFactorState) => {
 async function internalPublish(
   packageJson: PackageJSON,
   opts: PublishOptions,
-  twoFactorState: TwoFactorState
+  twoFactorState: TwoFactorState,
 ): Promise<{ published: boolean }> {
   let publishTool = await getPublishTool(opts.cwd);
   let publishFlags = opts.access ? ["--access", opts.access] : [];
@@ -222,7 +222,7 @@ async function internalPublish(
           ["publish", opts.publishDir, "--json", ...publishFlags],
           {
             env: Object.assign({}, process.env, envOverride),
-          }
+          },
         );
   if (code !== 0) {
     // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
@@ -253,7 +253,7 @@ async function internalPublish(
       error(
         `an error occurred while publishing ${packageJson.name}: ${json.error.code}`,
         json.error.summary,
-        json.error.detail ? "\n" + json.error.detail : ""
+        json.error.detail ? "\n" + json.error.detail : "",
       );
     }
 
@@ -266,11 +266,11 @@ async function internalPublish(
 export function publish(
   packageJson: PackageJSON,
   opts: PublishOptions,
-  twoFactorState: TwoFactorState
+  twoFactorState: TwoFactorState,
 ): Promise<{ published: boolean }> {
   // If there are many packages to be published, it's better to limit the
   // concurrency to avoid unwanted errors, for example from npm.
   return npmRequestLimit(() =>
-    npmPublishLimit(() => internalPublish(packageJson, opts, twoFactorState))
+    npmPublishLimit(() => internalPublish(packageJson, opts, twoFactorState)),
   );
 }

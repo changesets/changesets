@@ -57,7 +57,7 @@ if (parsed.help && args.length === 1) {
     pre <enter|exit> <tag>
     tag
 
-    `
+    `,
   );
   process.exit(0);
 }
@@ -74,12 +74,12 @@ const cwd = process.cwd();
 run(parsed._, parsed, cwd).catch((err) => {
   if (err instanceof InternalError) {
     error(
-      "The following error is an internal unexpected error, these should never happen."
+      "The following error is an internal unexpected error, these should never happen.",
     );
     error("Please open an issue with the following link");
     error(
       `https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(
-        `Unexpected error during ${parsed._[0] || "add"} command`
+        `Unexpected error during ${parsed._[0] || "add"} command`,
       )}&body=${encodeURIComponent(`## Error
 
 \`\`\`
@@ -97,7 +97,7 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
 ## Extra details
 
 <!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->
-`)}`
+`)}`,
     );
   }
   if (err instanceof ExitError) {

@@ -31,7 +31,7 @@ describe("simple project", () => {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
@@ -71,7 +71,7 @@ describe("simple project", () => {
       cwd,
       {
         prettier: false,
-      }
+      },
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
@@ -108,7 +108,7 @@ describe("simple project", () => {
         summary,
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
@@ -148,7 +148,7 @@ describe("simple project", () => {
         summary: "",
         releases: [],
       },
-      cwd
+      cwd,
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
