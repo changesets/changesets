@@ -68,7 +68,7 @@ describe("tag command", () => {
         new Set([
           // pkg-a should not be re-tagged
           "pkg-a@1.0.0",
-        ])
+        ]),
       );
 
       expect(git.tag).not.toHaveBeenCalled();

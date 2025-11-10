@@ -22,7 +22,7 @@ export default async function status(
     verbose?: boolean;
     output?: string;
   },
-  config: Config
+  config: Config,
 ) {
   const releasePlan = await getReleasePlan(cwd, since, config);
   const { changesets, releases } = releasePlan;
@@ -33,10 +33,10 @@ export default async function status(
 
   if (changedPackages.length > 0 && changesets.length === 0) {
     error(
-      "Some packages have been changed but no changesets were found. Run `changeset add` to resolve this error."
+      "Some packages have been changed but no changesets were found. Run `changeset add` to resolve this error.",
     );
     error(
-      "If this change doesn't need a release, run `changeset add --empty`."
+      "If this change doesn't need a release, run `changeset add --empty`.",
     );
     process.exit(1);
   }
@@ -44,7 +44,7 @@ export default async function status(
   if (output) {
     await fs.writeFile(
       path.join(cwd, output),
-      JSON.stringify(releasePlan, undefined, 2)
+      JSON.stringify(releasePlan, undefined, 2),
     );
     return;
   }
@@ -73,7 +73,7 @@ function SimplePrint(type: VersionType, releases: Array<Release>) {
 
 function verbosePrint(
   type: VersionType,
-  releases: Array<ComprehensiveRelease>
+  releases: Array<ComprehensiveRelease>,
 ) {
   const packages = releases.filter((r) => r.type === type);
   if (packages.length) {
@@ -88,8 +88,8 @@ function verbosePrint(
   } else {
     info(
       `Running release would release ${pc.red("NO")} packages as a ${pc.green(
-        type
-      )}`
+        type,
+      )}`,
     );
   }
 }

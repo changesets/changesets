@@ -21,7 +21,7 @@ function getPrettierInstance(cwd: string): typeof prettier {
 async function writeChangeset(
   { summary, releases }: Changeset,
   cwd: string,
-  options?: { prettier?: boolean }
+  options?: { prettier?: boolean },
 ): Promise<string> {
   const changesetBase = path.resolve(cwd, ".changeset");
 
@@ -55,7 +55,7 @@ ${summary}
           ...(await prettierInstance.resolveConfig(newChangesetPath)),
           parser: "markdown",
         })
-      : changesetContents
+      : changesetContents,
   );
 
   return changesetID;

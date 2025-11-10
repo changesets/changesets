@@ -19,12 +19,12 @@ import printConfirmationMessage from "./messages.ts";
 export default async function add(
   cwd: string,
   { empty, open }: { empty?: boolean; open?: boolean },
-  config: Config
+  config: Config,
 ): Promise<void> {
   const packages = await getPackages(cwd);
   if (packages.packages.length === 0) {
     error(
-      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
+      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`,
     );
     throw new ExitError(1);
   }
@@ -34,7 +34,7 @@ export default async function add(
       !shouldSkipPackage(pkg, {
         ignore: config.ignore,
         allowPrivatePackages: config.privatePackages.version,
-      })
+      }),
   );
 
   if (versionablePackages.length === 0) {
@@ -65,14 +65,14 @@ export default async function add(
       // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
       // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
       warn(
-        `Failed to find changed packages from the "${config.baseBranch}" base branch due to error below`
+        `Failed to find changed packages from the "${config.baseBranch}" base branch due to error below`,
       );
       warn(e);
     }
 
     newChangeset = await createChangeset(
       changedPackagesNames,
-      versionablePackages
+      versionablePackages,
     );
     printConfirmationMessage(newChangeset, versionablePackages.length > 1);
 
@@ -88,7 +88,7 @@ export default async function add(
     const changesetID = await writeChangeset(newChangeset, cwd, config);
     const [{ getAddMessage }, commitOpts] = await getCommitFunctions(
       config.commit,
-      cwd
+      cwd,
     );
     if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
@@ -97,18 +97,18 @@ export default async function add(
     } else {
       log(
         pc.green(
-          `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`
-        )
+          `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`,
+        ),
       );
     }
 
     let hasMajorChange = [...newChangeset.releases].find(
-      (c) => c.type === "major"
+      (c) => c.type === "major",
     );
 
     if (hasMajorChange) {
       warn(
-        "This Changeset includes a major change and we STRONGLY recommend adding more information to the changeset:"
+        "This Changeset includes a major change and we STRONGLY recommend adding more information to the changeset:",
       );
       warn("WHAT the breaking change is");
       warn("WHY the change was made");
@@ -116,8 +116,8 @@ export default async function add(
     } else {
       log(
         pc.green(
-          "If you want to modify or expand on the changeset summary, you can find it here"
-        )
+          "If you want to modify or expand on the changeset summary, you can find it here",
+        ),
       );
     }
     const changesetPath = path.resolve(changesetBase, `${changesetID}.md`);
@@ -133,7 +133,7 @@ export default async function add(
         {
           detached: true,
           stdio: "inherit",
-        }
+        },
       );
     }
   }

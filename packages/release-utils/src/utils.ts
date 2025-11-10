@@ -25,7 +25,7 @@ export async function getVersionsByDirectory(cwd: string) {
 
 export async function getChangedPackages(
   cwd: string,
-  previousVersions: Map<string, string>
+  previousVersions: Map<string, string>,
 ) {
   let { packages } = await getPackages(cwd);
   let changedPackages = new Set<Package>();
@@ -83,7 +83,7 @@ export function getChangelogEntry(changelog: string, version: string) {
   if (headingStartInfo) {
     ast.children = (ast.children as any).slice(
       headingStartInfo.index + 1,
-      endIndex
+      endIndex,
     );
   }
   return {
@@ -102,7 +102,7 @@ onExit(() => {
 
 export async function execWithOutput(
   command: string,
-  options: { ignoreReturnCode?: boolean; cwd: string }
+  options: { ignoreReturnCode?: boolean; cwd: string },
 ) {
   process.stdout.write(`Running: ${command}` + os.EOL);
 
@@ -116,10 +116,10 @@ export async function execWithOutput(
   childProcess.child.on("stderr", (data) => process.stderr.write(data));
 
   childProcess.child.on("error", () =>
-    activeProcesses.delete(childProcess.child)
+    activeProcesses.delete(childProcess.child),
   );
   childProcess.child.on("close", () =>
-    activeProcesses.delete(childProcess.child)
+    activeProcesses.delete(childProcess.child),
   );
 
   let result = await childProcess;
@@ -128,7 +128,7 @@ export async function execWithOutput(
     throw new Error(
       `The command ${JSON.stringify(command)} failed with code ${
         childProcess.child.exitCode
-      }\n${result.stdout}\n${result.stderr}`
+      }\n${result.stdout}\n${result.stderr}`,
     );
   }
   return {
@@ -141,7 +141,7 @@ export async function execWithOutput(
 export async function spawnWithOutput(
   command: string,
   args: string[],
-  options: { ignoreReturnCode?: boolean; cwd: string }
+  options: { ignoreReturnCode?: boolean; cwd: string },
 ) {
   process.stdout.write(`Running: ${command} ${args.join(" ")}` + os.EOL);
   let childProcess = spawn(command, args, {
@@ -154,7 +154,7 @@ export async function spawnWithOutput(
     throw new Error(
       `The command "${command} ${args.join(" ")}" failed with code ${
         result.code
-      }\n${result.stdout.toString("utf8")}\n${result.stderr.toString("utf8")}`
+      }\n${result.stdout.toString("utf8")}\n${result.stderr.toString("utf8")}`,
     );
   }
   return {
@@ -166,7 +166,7 @@ export async function spawnWithOutput(
 
 export function sortChangelogEntries(
   a: { private: boolean; highestLevel: number },
-  b: { private: boolean; highestLevel: number }
+  b: { private: boolean; highestLevel: number },
 ) {
   if (a.private === b.private) {
     return b.highestLevel - a.highestLevel;
