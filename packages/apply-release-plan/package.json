@@ -4,7 +4,7 @@
   "description": "Takes a release plan and applies it to packages",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-apply-release-plan.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",

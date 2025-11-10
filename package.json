@@ -5,8 +5,8 @@
   "description": "A tool to help manage the versioning and changelogs for open source packages",
   "scripts": {
     "postinstall": "manypkg check",
-    "build": "preconstruct build",
-    "watch": "preconstruct watch",
+    "build": "tsdown",
+    "watch": "tsdown --watch",
     "format": "prettier --experimental-cli --list-different \"**/*.{js,ts,tsx,md}\"",
     "format:fix": "prettier --experimental-cli --write \"**/*.{js,ts,tsx,md}\"",
     "lint": "eslint",
@@ -50,20 +50,6 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.1",
     "vitest": "^4.1.5"
-  },
-  "preconstruct": {
-    "packages": [
-      "packages/*",
-      "scripts/*"
-    ],
-    "exports": {
-      "importConditionDefaultExport": "default"
-    },
-    "___experimentalFlags_WILL_CHANGE_IN_PATCH": {
-      "distInRoot": true,
-      "importsConditions": true,
-      "typeModule": true
-    }
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
