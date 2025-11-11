@@ -33,8 +33,10 @@
     "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
   ],
   "license": "MIT",
+  "resolutions": {
+    "vite": "npm:rolldown-vite@7.2.10"
+  },
   "devDependencies": {
-    "@babel/cli": "^7.27.0",
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-typescript": "^7.27.0",
