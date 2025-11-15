@@ -243,4 +243,16 @@ describe("parsing a changeset", () => {
       Nice simple summary"
     `);
   });
+  it("should throw if the frontmatter includes one invalid package version", () => {
+    const changesetMd = outdent`---
+    "cool-package": invalid
+    ---
+
+    Nice simple summary
+    `;
+
+    expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(
+      `"could not parse changeset - invalid frontmatter line: "cool-package": invalid"`
+    );
+  });
 });

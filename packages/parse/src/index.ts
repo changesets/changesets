@@ -31,16 +31,16 @@ export default function parseChangesetFile(contents: string): {
   const releases: Release[] = [];
 
   for (const line of lines) {
-    const m = versionRegex.exec(line);
+    const match = versionRegex.exec(line);
 
-    if (!m) {
+    if (!match) {
       throw new Error(
         `could not parse changeset - invalid frontmatter line: ${line}`
       );
     }
 
-    const name = m[1] ?? m[2] ?? m[3];
-    const type = m[4] as VersionType;
+    const name = match[1] ?? match[2] ?? match[3];
+    const type = match[4] as VersionType;
 
     releases.push({ name, type });
   }
