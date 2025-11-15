@@ -213,6 +213,20 @@ describe("parsing a changeset", () => {
       summary: "Nice simple summary",
     });
   });
+
+  it("should handle package name unquoted and version quoted", () => {
+    const changesetMd = `---
+    pkg: "minor"
+    ---
+
+    something`;
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "pkg", type: "minor" }],
+      summary: "something",
+    });
+  });
+
   it("should throw if the frontmatter is followed by non-whitespace characters on the same line", () => {
     const changesetMd = outdent`---
     "cool-package": minor
