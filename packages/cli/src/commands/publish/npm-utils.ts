@@ -4,6 +4,13 @@ import { AccessType, PackageJSON } from "@changesets/types";
 import pLimit from "p-limit";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
+import { packument } from "pacote";
+import Config from "@npmcli/config";
+import {
+  definitions,
+  flatten,
+  shorthands,
+} from "@npmcli/config/lib/definitions/index.js";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
 import { askQuestion } from "../../utils/cli-utilities";
@@ -20,6 +27,18 @@ interface PublishOptions {
 
 const npmRequestLimit = pLimit(40);
 const npmPublishLimit = pLimit(10);
+
+async function getNpmConfig() {
+  const config = new Config({
+    definitions,
+    flatten,
+    shorthands,
+    npmPath: process.env.npm_execpath || process.execPath,
+  });
+
+  await config.load();
+  return config.flat;
+}
 
 function jsonParse(input: string) {
   try {
@@ -115,35 +134,57 @@ export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestLimit(async () => {
     info(`npm info ${packageJson.name}`);
 
-    const { scope, registry } = getCorrectRegistry(packageJson);
+    const { registry } = getCorrectRegistry(packageJson);
 
-    // Due to a couple of issues with yarnpkg, we also want to override the npm registry when doing
-    // npm info.
-    // Issues: We sometimes get back cached responses, i.e old data about packages which causes
-    // `publish` to behave incorrectly. It can also cause issues when publishing private packages
-    // as they will always give a 404, which will tell `publish` to always try to publish.
-    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-    let result = await spawn("npm", [
-      "info",
-      packageJson.name,
-      `--${scope ? `${scope}:` : ""}registry=${registry}`,
-      "--json",
-    ]);
+    // Load npm config to get auth tokens from .npmrc files
+    const npmConfig = await getNpmConfig();
 
-    // Github package registry returns empty string when calling npm info
-    // for a non-existent package instead of a E404
-    if (result.stdout.toString() === "") {
+    // Use pacote with npm's flatOptions which includes auth tokens
+    const opts = {
+      ...npmConfig,
+      registry,
+      preferOnline: true,
+      fullMetadata: true,
+    };
+
+    try {
+      const result = await packument(packageJson.name, opts);
+
+      // pacote returns versions as an object { [version: string]: ManifestObject }
+      // but the rest of the codebase expects versions as an array of strings
       return {
-        error: {
-          code: "E404",
-        },
+        ...result,
+        versions: Object.keys(result.versions),
       };
+    } catch (err: any) {
+      const code = err?.code ?? err?.statusCode;
+      if (code === "E404" || code === 404) {
+        return {
+          error: {
+            code: "E404",
+            summary: err?.summary,
+            detail: err?.detail,
+          },
+        };
+      }
+      if (err?.code || err?.summary || err?.detail) {
+        return {
+          error: {
+            code: err?.code ?? "UNKNOWN",
+            summary: err?.summary,
+            detail: err?.detail,
+          },
+        };
+      }
+      throw err;
     }
-    return jsonParse(result.stdout.toString());
   });
 }
 
-export async function infoAllow404(packageJson: PackageJSON) {
+export async function infoAllow404(packageJson: PackageJSON): Promise<{
+  published: boolean;
+  pkgInfo: { versions?: string[] } & Record<string, any>;
+}> {
   let pkgInfo = await getPackageInfo(packageJson);
   if (pkgInfo.error?.code === "E404") {
     warn(`Received 404 for npm info ${pc.cyan(`"${packageJson.name}"`)}`);
