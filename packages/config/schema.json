@@ -75,6 +75,11 @@
       "description": "Determines whether Changesets should commit the results of the add and version command.",
       "default": false
     },
+    "prettier": {
+      "type": "boolean",
+      "description": "When false, Changesets won't format with Prettier",
+      "default": true
+    },
     "privatePackages": {
       "anyOf": [
         {

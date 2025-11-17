@@ -9,7 +9,7 @@ import { Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { ExitError } from "@changesets/errors";
 import { getPackages } from "@manypkg/get-packages";
-import { ExternalEditor } from "external-editor";
+import { ExternalEditor } from "@inquirer/external-editor";
 import { getCommitFunctions } from "../../commit/getCommitFunctions";
 import * as cli from "../../utils/cli-utilities";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages";
@@ -54,11 +54,21 @@ export default async function add(
       summary: ``,
     };
   } else {
-    const changedPackagesNames = (
-      await getVersionableChangedPackages(config, {
-        cwd,
-      })
-    ).map((pkg) => pkg.packageJson.name);
+    let changedPackagesNames: string[] = [];
+    try {
+      changedPackagesNames = (
+        await getVersionableChangedPackages(config, {
+          cwd,
+        })
+      ).map((pkg) => pkg.packageJson.name);
+    } catch (e: any) {
+      // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
+      // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
+      warn(
+        `Failed to find changed packages from the "${config.baseBranch}" base branch due to error below`
+      );
+      warn(e);
+    }
 
     newChangeset = await createChangeset(
       changedPackagesNames,
@@ -75,7 +85,7 @@ export default async function add(
   }
 
   if (newChangeset.confirmed) {
-    const changesetID = await writeChangeset(newChangeset, cwd);
+    const changesetID = await writeChangeset(newChangeset, cwd, config);
     const [{ getAddMessage }, commitOpts] = getCommitFunctions(
       config.commit,
       cwd
