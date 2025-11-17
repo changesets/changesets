@@ -1,5 +1,47 @@
 # @changesets/apply-release-plan
 
+## 7.0.13
+
+### Patch Changes
+
+- [#1725](https://github.com/changesets/changesets/pull/1725) [`957f24e`](https://github.com/changesets/changesets/commit/957f24ed0446494c5709189ae57583f72c716d43) Thanks [@colinaaa](https://github.com/colinaaa)! - Fix an issue that caused an incorrect `CHANGELOG` to be generated when a changeset contained a special string replacement pattern.
+
+## 7.0.12
+
+### Patch Changes
+
+- Updated dependencies [[`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d)]:
+  - @changesets/git@3.0.4
+
+## 7.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`b15e629`](https://github.com/changesets/changesets/commit/b15e6291c3e7e780ee9e58101d3069f2382569ae)]:
+  - @changesets/git@3.0.3
+
+## 7.0.10
+
+### Patch Changes
+
+- Updated dependencies [[`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998)]:
+  - @changesets/config@3.1.1
+
+## 7.0.9
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/config@3.1.0
+  - @changesets/should-skip-package@0.1.2
+
+## 7.0.8
+
+### Patch Changes
+
+- [#1562](https://github.com/changesets/changesets/pull/1562) [`a0f87f1`](https://github.com/changesets/changesets/commit/a0f87f1ce596e7c5c316edc24d5d4571e6acd4d7) Thanks [@Netail](https://github.com/Netail), [@cefn](https://github.com/cefn)! - Add an ability to pass in `contextDir` of the running script (like the `@changesets/cli`) so the changelog modules can be alternatively resolved using it
+
 ## 7.0.7
 
 ### Patch Changes
