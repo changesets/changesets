@@ -1,0 +1,5 @@
+---
+"@changesets/cli": patch
+---
+
+Tweaked a hint text printed when one confirms an empty set of packages to be released

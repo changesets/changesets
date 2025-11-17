@@ -12,7 +12,7 @@ async function getReleaseLine(changeset: NewChangeset, cwd: string) {
 
   const [commitThatAddsFile] = await getCommitsThatAddFiles(
     [`.changeset/${changeset.id}.md`],
-    { cwd, short: true }
+    { cwd }
   );
 
   return `- [${commitThatAddsFile}] ${firstLine}\n${futureLines
