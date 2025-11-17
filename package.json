@@ -35,7 +35,7 @@
   "license": "MIT",
   "devDependencies": {
     "@babel/cli": "^7.27.0",
-    "@babel/core": "^7.26.10",
+    "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-typescript": "^7.27.0",
     "@manypkg/cli": "^0.25.1",
