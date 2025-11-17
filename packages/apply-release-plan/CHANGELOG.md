@@ -1,5 +1,11 @@
 # @changesets/apply-release-plan
 
+## 7.0.13
+
+### Patch Changes
+
+- [#1725](https://github.com/changesets/changesets/pull/1725) [`957f24e`](https://github.com/changesets/changesets/commit/957f24ed0446494c5709189ae57583f72c716d43) Thanks [@colinaaa](https://github.com/colinaaa)! - Fix an issue that caused an incorrect `CHANGELOG` to be generated when a changeset contained a special string replacement pattern.
+
 ## 7.0.12
 
 ### Patch Changes
