@@ -211,31 +211,32 @@ Default value: `true`
 }
 ```
 
----
+## `privatePackages` (object or false)
 
-## `privatePackages` (object or `false`)
+This option is for setting how private packages should be handled. By default, Changesets will update the changelog for private packages and update their version, but will not create a tag. You can configure this option to change the default behavior.
 
-This option controls whether Changesets should tag and version private packages.
+### `version` (optional boolean)
 
-Default value: `{ version: true, tag: false }`
+Default value: `true`
+
+When `version` is set to `true`, Changesets will update the version for private packages. If set to `false`, Changesets will not update the version for private packages.
+
+### `tag` (optional boolean)
+
+Default value: `false`
+
+When `tag` is set to `true`, Changesets will create a tag for private packages. If set to `false`, Changesets will not create a tag for private packages.
+
+### Example
 
 ```json
 {
   "privatePackages": {
-    "tag": true,
-    "version": true
+    "version": true,
+    "tag": false
   }
 }
 ```
-
-### Fields:
-
-* `tag` (`boolean`): whether private packages should receive git tags.
-* `version` (`boolean`): whether private packages should have their versions bumped.
-
-If set to `false`, private packages will be completely ignored during tagging and versioning.
-
----
 
 ## `changedFilePatterns` (array of strings)
 

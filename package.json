@@ -36,7 +36,7 @@
   "dependencies": {
     "@babel/cli": "^7.27.0",
     "@babel/core": "^7.26.10",
-    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-env": "^7.28.5",
     "@babel/preset-typescript": "^7.27.0",
     "@manypkg/cli": "^0.22.0",
     "@preconstruct/cli": "^2.8.12",
