@@ -33,7 +33,7 @@
     "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
   ],
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "@babel/cli": "^7.27.0",
     "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.28.5",
