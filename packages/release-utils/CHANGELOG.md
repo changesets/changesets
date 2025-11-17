@@ -1,5 +1,37 @@
 # @changesets/release-utils
 
+## 0.2.5
+
+### Patch Changes
+
+- Updated dependencies [[`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d)]:
+  - @changesets/read@0.6.5
+
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@0.6.4
+
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/pre@2.0.2
+  - @changesets/read@0.6.3
+
+## 0.2.2
+
+### Patch Changes
+
+- [#1514](https://github.com/changesets/changesets/pull/1514) [`962ab91`](https://github.com/changesets/changesets/commit/962ab918bc2deb89012a0cefce10387997cc54ed) Thanks [@nicoalonsop](https://github.com/nicoalonsop)! - Update spawndamnit to fix [cross-spawn vulnerability](https://security.snyk.io/vuln/SNYK-JS-CROSSSPAWN-8303230)
+
+- Updated dependencies [[`82cacb2`](https://github.com/changesets/changesets/commit/82cacb2227cf3a215cd9d29b9fb0c860f20ba2ca)]:
+  - @changesets/read@0.6.2
+
 ## 0.2.1
 
 ### Patch Changes
