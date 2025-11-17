@@ -156,7 +156,7 @@ You would specify our github changelog generator with:
 }
 ```
 
-If you want to disable thank you messages, add `"disableThanks": true` to options.
+If you want to disable thank you messages, add `"disableThanks": true` to the options.
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 

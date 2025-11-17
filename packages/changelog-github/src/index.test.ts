@@ -41,11 +41,7 @@ jest.mock(
   }
 );
 
-const getChangeset = (
-  content: string,
-  commit: string | undefined,
-  extraOpts?: { disableThanks?: boolean }
-) => {
+const getChangeset = (content: string, commit: string | undefined) => {
   return [
     {
       ...parse(
@@ -61,7 +57,7 @@ const getChangeset = (
       commit,
     },
     "minor",
-    { repo: data.repo, ...extraOpts },
+    { repo: data.repo },
   ] as const;
 };
 
@@ -139,13 +135,19 @@ it("with multiple authors", async () => {
 });
 
 it("disables thanks if disableThanks is enabled", async () => {
-  expect(
-    await getReleaseLine(
-      ...getChangeset("", data.commit, {
-        disableThanks: true,
-      })
-    )
-  ).toEqual(
-    `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) - something\n`
+  const [changeset, releaseType, options] = getChangeset(
+    "author: @Andarist",
+    data.commit
   );
+  expect(
+    await getReleaseLine(changeset, releaseType, {
+      ...options,
+      skipAuthors: true,
+    })
+  ).toMatchInlineSnapshot(`
+    "
+
+    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) - something
+    "
+  `);
 });
