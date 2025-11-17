@@ -1,5 +1,86 @@
 # @changesets/get-release-plan
 
+## 4.0.13
+
+### Patch Changes
+
+- Updated dependencies [[`6352819`](https://github.com/changesets/changesets/commit/6352819685369daecf31f72e948d0fe92ff33485)]:
+  - @changesets/assemble-release-plan@6.0.9
+
+## 4.0.12
+
+### Patch Changes
+
+- Updated dependencies [[`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627)]:
+  - @changesets/assemble-release-plan@6.0.8
+
+## 4.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8)]:
+  - @changesets/assemble-release-plan@6.0.7
+
+## 4.0.10
+
+### Patch Changes
+
+- Updated dependencies [[`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d)]:
+  - @changesets/read@0.6.5
+
+## 4.0.9
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@0.6.4
+
+## 4.0.8
+
+### Patch Changes
+
+- Updated dependencies [[`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998)]:
+  - @changesets/config@3.1.1
+
+## 4.0.7
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/config@3.1.0
+  - @changesets/assemble-release-plan@6.0.6
+  - @changesets/pre@2.0.2
+  - @changesets/read@0.6.3
+
+## 4.0.6
+
+### Patch Changes
+
+- Updated dependencies [[`f0270f6`](https://github.com/changesets/changesets/commit/f0270f69793ddb6865f2510d334864b093cb10e3)]:
+  - @changesets/config@3.0.5
+
+## 4.0.5
+
+### Patch Changes
+
+- Updated dependencies [[`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f), [`26c8ba9`](https://github.com/changesets/changesets/commit/26c8ba9f58d3b123a19106771b4bdcb2800235cc), [`82cacb2`](https://github.com/changesets/changesets/commit/82cacb2227cf3a215cd9d29b9fb0c860f20ba2ca)]:
+  - @changesets/config@3.0.4
+  - @changesets/assemble-release-plan@6.0.5
+  - @changesets/read@0.6.2
+
+## 4.0.4
+
+### Patch Changes
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/read@0.6.1
+  - @changesets/assemble-release-plan@6.0.4
+  - @changesets/pre@2.0.1
+  - @changesets/config@3.0.3
+
 ## 4.0.3
 
 ### Patch Changes

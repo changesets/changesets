@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - next
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -13,6 +14,11 @@ jobs:
     if: github.repository == 'changesets/changesets'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write # to create release (changesets/action)
+      issues: write # to post issue comments (changesets/action)
+      pull-requests: write # to create pull request (changesets/action)
+      id-token: write # to use OpenID Connect token for provenance (changesets/action)
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci-setup
@@ -27,3 +33,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true

@@ -276,8 +276,16 @@ function getRelevantChangesets(
     const skippedPackages = [];
     const notSkippedPackages = [];
     for (const release of changeset.releases) {
+      const packageByName = packagesByName.get(release.name);
+
+      if (!packageByName) {
+        throw new Error(
+          `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
+        );
+      }
+
       if (
-        shouldSkipPackage(packagesByName.get(release.name)!, {
+        shouldSkipPackage(packageByName, {
           ignore: config.ignore,
           allowPrivatePackages: config.privatePackages.version,
         })
@@ -350,6 +358,14 @@ function getPreInfo(
   // preVersion is the map between package name and its next pre version number.
   let preVersions = new Map<string, number>();
   for (const [, pkg] of packagesByName) {
+    if (
+      shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.version,
+      })
+    ) {
+      continue;
+    }
     preVersions.set(
       pkg.packageJson.name,
       getPreVersion(pkg.packageJson.version)

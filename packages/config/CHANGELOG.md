@@ -1,5 +1,43 @@
 # @changesets/config
 
+## 3.1.1
+
+### Patch Changes
+
+- [#1590](https://github.com/changesets/changesets/pull/1590) [`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998) Thanks [@bennypowers](https://github.com/bennypowers)! - Prevent fatal error when using the newly-introduced `prettier` option
+
+## 3.1.0
+
+### Minor Changes
+
+- [#1453](https://github.com/changesets/changesets/pull/1453) [`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf) Thanks [@bennypowers](https://github.com/bennypowers)! - Added a new config option to opt-out from formatting with Prettier using `prettier: false`.
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/get-dependents-graph@2.1.3
+
+## 3.0.5
+
+### Patch Changes
+
+- [#1517](https://github.com/changesets/changesets/pull/1517) [`f0270f6`](https://github.com/changesets/changesets/commit/f0270f69793ddb6865f2510d334864b093cb10e3) Thanks [@akphi](https://github.com/akphi)! - Make `packages` an optional parameter in the `read` function. When `packages` are not passed in explicitly from the caller they now will be read based on the passed in `cwd`.
+
+## 3.0.4
+
+### Patch Changes
+
+- [#1487](https://github.com/changesets/changesets/pull/1487) [`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f) Thanks [@bluwy](https://github.com/bluwy)! - Bump `micromatch` dependency to ^4.0.8 to prevent installing version with vulnerability
+
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/get-dependents-graph@2.1.2
+  - @changesets/logger@0.1.1
+
 ## 3.0.2
 
 ### Patch Changes
