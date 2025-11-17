@@ -38,7 +38,7 @@
     "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-typescript": "^7.27.0",
-    "@manypkg/cli": "^0.22.0",
+    "@manypkg/cli": "^0.25.1",
     "@preconstruct/cli": "^2.8.12",
     "@types/fs-extra": "^5.1.0",
     "@types/jest": "^24.0.12",
