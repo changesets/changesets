@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - next
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -12,19 +13,15 @@ jobs:
     name: Release
     if: github.repository == 'changesets/changesets'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # to create release (changesets/action)
+      issues: write # to post issue comments (changesets/action)
+      pull-requests: write # to create pull request (changesets/action)
+      id-token: write # to use OpenID Connect token for provenance (changesets/action)
     steps:
-      - name: Checkout Repo
-        # https://github.com/actions/checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js 16.x
-        # https://github.com/actions/setup-node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-
-      - name: Install Dependencies
-        run: yarn
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci-setup
 
       - name: Create Release Pull Request or Publish to npm
         # https://github.com/changesets/action
@@ -36,3 +33,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
