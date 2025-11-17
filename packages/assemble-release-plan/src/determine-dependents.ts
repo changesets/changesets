@@ -1,13 +1,14 @@
-import semverSatisfies from "semver/functions/satisfies";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
+  Config,
   DependencyType,
   PackageJSON,
   VersionType,
-  Config,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
-import { InternalRelease, PreInfo } from "./types";
+import semverSatisfies from "semver/functions/satisfies";
 import { incrementVersion } from "./increment";
+import { InternalRelease, PreInfo } from "./types";
 
 /*
   WARNING:
@@ -56,7 +57,12 @@ export default function determineDependents({
         const dependentPackage = packagesByName.get(dependent);
         if (!dependentPackage) throw new Error("Dependency map is incorrect");
 
-        if (config.ignore.includes(dependent)) {
+        if (
+          shouldSkipPackage(dependentPackage, {
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
+          })
+        ) {
           type = "none";
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(
@@ -182,26 +188,27 @@ function getDependencyVersionRanges(
     versionRange: string;
   }[] = [];
   for (const type of DEPENDENCY_TYPES) {
-    const versionRange = dependentPkgJSON[type]?.[dependencyRelease.name];
+    let versionRange = dependentPkgJSON[type]?.[dependencyRelease.name];
     if (!versionRange) continue;
 
     if (versionRange.startsWith("workspace:")) {
-      dependencyVersionRanges.push({
-        depType: type,
-        versionRange:
-          // intentionally keep other workspace ranges untouched
-          // this has to be fixed but this should only be done when adding appropriate tests
-          versionRange === "workspace:*"
-            ? // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
-              dependencyRelease.oldVersion
-            : versionRange.replace(/^workspace:/, ""),
-      });
-    } else {
-      dependencyVersionRanges.push({
-        depType: type,
-        versionRange,
-      });
+      versionRange = versionRange.replace(/^workspace:/, "");
+      switch (versionRange) {
+        case "*":
+          // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
+          versionRange = dependencyRelease.oldVersion;
+          break;
+        case "^":
+        case "~":
+          versionRange = `${versionRange}${dependencyRelease.oldVersion}`;
+          break;
+        // default: keep the stripped range as is
+      }
     }
+    dependencyVersionRanges.push({
+      depType: type,
+      versionRange,
+    });
   }
   return dependencyVersionRanges;
 }

@@ -1,6 +1,6 @@
-import { join } from "path";
+import { resolve } from "path";
 import semverParse from "semver/functions/parse";
-import chalk from "chalk";
+import pc from "picocolors";
 import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { info, warn } from "@changesets/logger";
@@ -56,7 +56,7 @@ const getTwoFactorState = ({
   if (
     isCI ||
     publicPackages.some((pkg) =>
-      isCustomRegistry(pkg.packageJson.publishConfig?.registry)
+      isCustomRegistry(npmUtils.getCorrectRegistry(pkg.packageJson).registry)
     ) ||
     isCustomRegistry(process.env.npm_config_registry)
   ) {
@@ -122,16 +122,14 @@ async function publishAPackage(
   tag: string
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-  info(
-    `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
-  );
+  info(`Publishing ${pc.cyan(`"${name}"`)} at ${pc.green(`"${version}"`)}`);
 
   const publishConfirmation = await npmUtils.publish(
-    name,
+    pkg.packageJson,
     {
       cwd: pkg.dir,
       publishDir: publishConfig?.directory
-        ? join(pkg.dir, publishConfig.directory)
+        ? resolve(pkg.dir, publishConfig.directory)
         : pkg.dir,
       access: publishConfig?.access || access,
       tag,
@@ -189,9 +187,9 @@ async function getUnpublishedPackages(
       );
       if (preState !== undefined && publishedState === "only-pre") {
         info(
-          `${name} is being published to ${chalk.cyan(
+          `${name} is being published to ${pc.cyan(
             "latest"
-          )} rather than ${chalk.cyan(
+          )} rather than ${pc.cyan(
             preState.tag
           )} because there has not been a regular release of it yet`
         );
