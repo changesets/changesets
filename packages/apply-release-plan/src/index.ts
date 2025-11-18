@@ -220,7 +220,7 @@ async function getNewChangelogEntry(
     changelogPath = resolveFrom(contextDir, config.changelog[0]);
   }
 
-  let possibleChangelogFunc = require(changelogPath);
+  let possibleChangelogFunc = await import(changelogPath);
   if (possibleChangelogFunc.default) {
     possibleChangelogFunc = possibleChangelogFunc.default;
   }
