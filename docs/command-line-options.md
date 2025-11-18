@@ -6,7 +6,7 @@ The command line for changesets is the main way of interacting with it. There ar
 - add [--empty][--open]
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag]
-- status [--since-master --verbose --output=JSON_FILE.json]
+- status [--since=master --verbose --output=JSON_FILE.json]
 - pre [exit|enter {tag}]
 - tag
 
@@ -18,7 +18,7 @@ The most important commands are `add`, which is used by contributors to add info
 changeset init
 ```
 
-This command sets up the .changeset folder. It generates a readme and a config file. The config file includes the default options and comments on what these options represent. You should run this command once when you are setting up changesets.
+This command sets up the `.changeset` folder. It generates a readme and a config file. The config file includes the default options and comments on what these options represent. You should run this command once when you are setting up changesets.
 
 ## `add`
 
@@ -36,9 +36,9 @@ This is the main command people use to interact with the changesets.
 
 This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. The final step will show the changeset it will generate and confirm that you want to add it.
 
-Once confirmed, the changeset will be written a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semver bump types for them.
+Once confirmed, the changeset will be written as a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semver bump types for them.
 
-A changeset that major bumps @changesets/cli would look like this:
+A changeset that major bumps `@changesets/cli` would look like this:
 
 ```
 ---
@@ -101,7 +101,7 @@ Snapshot is used for a special kind of publishing for testing - it creates tempo
 changeset publish [--otp={token}]
 ```
 
-This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`.
+This publishes changes to npm, and creates git tags. This works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it is not, running the `npm publish`. If you are using `pnpm` as a package manager, this automatically detects it and uses `pnpm publish` instead.
 
 Because this command assumes that the last commit is the release commit, you should not commit any changes between calling version and publish. These commands are separate to enable you to check if the release changes are accurate.
 
@@ -120,7 +120,7 @@ git push --follow-tags
 ## status
 
 ```
-status [--verbose] [--output={filePath}] [--since={gitTag}]
+changeset status [--verbose] [--output={filePath}] [--since={gitTag}]
 ```
 
 The status command provides information about the changesets that currently exist. If there are no changesets present, it exits with an error status code.
@@ -136,7 +136,7 @@ The status command provides information about the changesets that currently exis
 ## pre
 
 ```
-pre [exit|enter {tag}]
+changeset pre [exit|enter {tag}]
 ```
 
 The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a pre-release, you should run changeset pre enter next(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with changeset version and changeset publish. For more information about the pre command, see the prereleases [the prereleases documentation](https://github.com/changesets/changesets/blob/master/docs/prereleases.md).
@@ -146,7 +146,7 @@ The pre command enters and exits pre mode. The command does not do any actual ve
 ## tag
 
 ```
-tag
+changeset tag
 ```
 
 The tag command creates git tags for the current version of all packages. The tags created are equivalent to those created by [`changeset publish`](#publish), but the `tag` command does not publish anything to npm.

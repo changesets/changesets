@@ -4,13 +4,14 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 
 ```json
 {
+  "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "updateInternalDependencies": "patch",
+  "fixed": [],
   "linked": [],
   "access": "restricted",
-  "baseBranch": "master",
-  "ignore": [],
-  "changelog": "@changesets/cli/changelog"
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
 }
 ```
 
@@ -100,7 +101,7 @@ If you want to use this option, you should read the documentation on [linked pac
 
 ## `updateInternalDependencies`
 
-This option sets whether, when a package that is being dependend upon changes, whether you should update what version it depends on. To make this more understandable, here is an example:
+This option sets whether, when a package that is being depended upon changes, whether you should update what version it depends on. To make this more understandable, here is an example:
 
 Say we have two packages, one depending on the other:
 
@@ -136,7 +137,7 @@ Changesets will always update the dependency if it would leave the old semver ra
 
 ## `changelog` (false or a path)
 
-This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects to be a file that exports the following:
+This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects a file that exports the following:
 
 ```
 {
@@ -157,7 +158,9 @@ You would specify our github changelog generator with:
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 
-## `bumpVersionsWithWorkspaceProtocolOnly` (boolean)
+## `bumpVersionsWithWorkspaceProtocolOnly` (optional boolean)
+
+Default value: `false`
 
 Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.
 
@@ -193,3 +196,30 @@ You can use the following placeholders for customizing the snapshot release vers
 **Default behavior**
 
 If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
+
+## `privatePackages` (object or false)
+
+This option is for setting how private packages should be handled. By default, Changesets will update the changelog for private packages and update their version, but will not create a tag. You can configure this option to change the default behavior.
+
+### `version` (optional boolean)
+
+Default value: `true`
+
+When `version` is set to `true`, Changesets will update the version for private packages. If set to `false`, Changesets will not update the version for private packages.
+
+### `tag` (optional boolean)
+
+Default value: `false`
+
+When `tag` is set to `true`, Changesets will create a tag for private packages. If set to `false`, Changesets will not create a tag for private packages.
+
+### Example
+
+```json
+{
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  }
+}
+```
