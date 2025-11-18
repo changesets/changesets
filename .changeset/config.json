@@ -1,7 +1,7 @@
 {
   "changelog": [
     "@changesets/changelog-github",
-    { "repo": "atlassian/changesets" }
+    { "repo": "changesets/changesets" }
   ],
   "baseBranch": "main",
   "commit": false,

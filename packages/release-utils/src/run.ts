@@ -1,10 +1,10 @@
 import { getPackages, Package } from "@manypkg/get-packages";
 import path from "path";
-import * as semver from "semver";
+import semverLt from "semver/functions/lt";
 import {
   execWithOutput,
   getVersionsByDirectory,
-  getChangedPackages
+  getChangedPackages,
 } from "./utils";
 import * as gitUtils from "./gitUtils";
 import { readChangesetState } from "./readChangesetState";
@@ -27,7 +27,7 @@ type PublishResult =
 
 export async function runPublish({
   script,
-  cwd = process.cwd()
+  cwd = process.cwd(),
 }: PublishOptions): Promise<PublishResult> {
   let branch = await gitUtils.getCurrentBranch(cwd);
   let [publishCommand, ...publishArgs] = script.split(/\s+/);
@@ -46,7 +46,7 @@ export async function runPublish({
 
   if (tool !== "root") {
     let newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@([^\s]+)/;
-    let packagesByName = new Map(packages.map(x => [x.packageJson.name, x]));
+    let packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
 
     for (let line of changesetPublishOutput.stdout.split("\n")) {
       let match = line.match(newTagRegex);
@@ -86,10 +86,10 @@ export async function runPublish({
   if (releasedPackages.length) {
     return {
       published: true,
-      publishedPackages: releasedPackages.map(pkg => ({
+      publishedPackages: releasedPackages.map((pkg) => ({
         name: pkg.packageJson.name,
-        version: pkg.packageJson.version
-      }))
+        version: pkg.packageJson.version,
+      })),
     };
   }
 
@@ -105,7 +105,7 @@ type VersionOptions = {
 export async function runVersion({
   script,
   cwd = process.cwd(),
-  commitMessage = "Version Packages"
+  commitMessage = "Version Packages",
 }: VersionOptions) {
   let branch = await gitUtils.getCurrentBranch(cwd);
   let versionBranch = `changeset-release/${branch}`;
@@ -127,7 +127,7 @@ export async function runVersion({
       "cli",
       "package.json"
     ));
-    let cmd = semver.lt(changesetsCliPkgJson.version, "2.0.0")
+    let cmd = semverLt(changesetsCliPkgJson.version, "2.0.0")
       ? "bump"
       : "version";
     await execWithOutput(

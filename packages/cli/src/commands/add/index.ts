@@ -1,72 +1,109 @@
-import chalk from "chalk";
-import path from "path";
+import pc from "picocolors";
 import { spawn } from "child_process";
+import path from "path";
 
-import * as cli from "../../utils/cli-utilities";
 import * as git from "@changesets/git";
-import { info, log, warn } from "@changesets/logger";
+import { error, info, log, warn } from "@changesets/logger";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
-import { getPackages } from "@manypkg/get-packages";
 import writeChangeset from "@changesets/write";
-
+import { ExitError } from "@changesets/errors";
+import { getPackages } from "@manypkg/get-packages";
+import { ExternalEditor } from "@inquirer/external-editor";
+import { getCommitFunctions } from "../../commit/getCommitFunctions";
+import * as cli from "../../utils/cli-utilities";
+import { getVersionableChangedPackages } from "../../utils/versionablePackages";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
-import { ExternalEditor } from "external-editor";
-
-type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer R>
-  ? R
-  : never;
 
 export default async function add(
   cwd: string,
   { empty, open }: { empty?: boolean; open?: boolean },
   config: Config
-) {
+): Promise<void> {
   const packages = await getPackages(cwd);
+  if (packages.packages.length === 0) {
+    error(
+      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
+    );
+    throw new ExitError(1);
+  }
+
+  const versionablePackages = packages.packages.filter(
+    (pkg) =>
+      !shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.version,
+      })
+  );
+
+  if (versionablePackages.length === 0) {
+    error("No versionable packages found");
+    error('- Ensure the packages to version are not in the "ignore" config');
+    error('- Ensure that relevant package.json files have the "version" field');
+    throw new ExitError(1);
+  }
+
   const changesetBase = path.resolve(cwd, ".changeset");
 
-  let newChangeset: UnwrapPromise<ReturnType<typeof createChangeset>>;
+  let newChangeset: Awaited<ReturnType<typeof createChangeset>>;
   if (empty) {
     newChangeset = {
       confirmed: true,
       releases: [],
-      summary: ``
+      summary: ``,
     };
   } else {
-    const changedPackages = await git.getChangedPackagesSinceRef({
-      cwd,
-      ref: config.baseBranch
-    });
-    const changePackagesName = changedPackages
-      .filter(a => a)
-      .map(pkg => pkg.packageJson.name);
-    newChangeset = await createChangeset(changePackagesName, packages.packages);
-    printConfirmationMessage(newChangeset, packages.packages.length > 1);
+    let changedPackagesNames: string[] = [];
+    try {
+      changedPackagesNames = (
+        await getVersionableChangedPackages(config, {
+          cwd,
+        })
+      ).map((pkg) => pkg.packageJson.name);
+    } catch (e: any) {
+      // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
+      // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
+      warn(
+        `Failed to find changed packages from the "${config.baseBranch}" base branch due to error below`
+      );
+      warn(e);
+    }
+
+    newChangeset = await createChangeset(
+      changedPackagesNames,
+      versionablePackages
+    );
+    printConfirmationMessage(newChangeset, versionablePackages.length > 1);
 
     if (!newChangeset.confirmed) {
       newChangeset = {
         ...newChangeset,
-        confirmed: await cli.askConfirm("Is this your desired changeset?")
+        confirmed: await cli.askConfirm("Is this your desired changeset?"),
       };
     }
   }
 
   if (newChangeset.confirmed) {
-    const changesetID = await writeChangeset(newChangeset, cwd);
-    if (config.commit) {
+    const changesetID = await writeChangeset(newChangeset, cwd, config);
+    const [{ getAddMessage }, commitOpts] = getCommitFunctions(
+      config.commit,
+      cwd
+    );
+    if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
-      await git.commit(`docs(changeset): ${newChangeset.summary}`, cwd);
-      log(chalk.green(`${empty ? "Empty " : ""}Changeset added and committed`));
+      await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
+      log(pc.green(`${empty ? "Empty " : ""}Changeset added and committed`));
     } else {
       log(
-        chalk.green(
+        pc.green(
           `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`
         )
       );
     }
 
     let hasMajorChange = [...newChangeset.releases].find(
-      c => c.type === "major"
+      (c) => c.type === "major"
     );
 
     if (hasMajorChange) {
@@ -78,13 +115,13 @@ export default async function add(
       warn("HOW a consumer should update their code");
     } else {
       log(
-        chalk.green(
+        pc.green(
           "If you want to modify or expand on the changeset summary, you can find it here"
         )
       );
     }
     const changesetPath = path.resolve(changesetBase, `${changesetID}.md`);
-    info(chalk.blue(changesetPath));
+    info(pc.blue(changesetPath));
 
     if (open) {
       // this is really a hack to reuse the logic embedded in `external-editor` related to determining the editor
@@ -95,7 +132,7 @@ export default async function add(
         externalEditor.editor.args.concat([changesetPath]),
         {
           detached: true,
-          stdio: "inherit"
+          stdio: "inherit",
         }
       );
     }

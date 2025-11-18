@@ -1,10 +1,17 @@
-# 🦋 changesets 🦋
+<p align="center">
+  <img src="./assets/images/changesets-banner-light.png" />
+</p>
 
-> A way to manage your versioning and changelogs with a focus on multi-package repositories
+<p align="center">
+  A tool to manage versioning and changelogs <br/>
+  with a focus on multi-package repositories
+</p>
+<br/>
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/cli)
+[![npm package](https://img.shields.io/npm/v/@changesets/cli?label=%40changesets%2Fcli)](https://npmjs.com/package/@changesets/cli)
+[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./packages/cli/CHANGELOG.md)
 
-The `changesets` workflow is designed to help from when people are making changes, all the way through to publishing. It lets contributors declare how their changes should be released, then we automate updating package versions, and changelogs, and publishing new versions of packages based on the provided information.
+The `changesets` workflow is designed to help when people are making changes, all the way through to publishing. It lets contributors declare how their changes should be released, then we automate updating package versions, and changelogs, and publishing new versions of packages based on the provided information.
 
 Changesets has a focus on solving these problems for multi-package repositories, and keeps packages that rely on each other within the multi-package repository up-to-date, as well as making it easy to make changes to groups of packages.
 
@@ -18,7 +25,7 @@ The **@changesets/cli** package allows you to write `changeset` files as you mak
 
 If you just want to jump in to using changesets, the [Intro to using changesets](./docs/intro-to-using-changesets.md) and [@changesets/cli](./packages/cli/README.md) docs are where you should head.
 
-If you want a detailed explanation of the the concepts behind changesets, or to understand how you would build on top
+If you want a detailed explanation of the concepts behind changesets, or to understand how you would build on top
 of changesets, check out our [detailed-explanation](./docs/detailed-explanation.md).
 
 We also have a [dictionary](./docs/dictionary.md).
@@ -43,30 +50,58 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Config file options](./docs/config-file-options.md)
 - [Decisions](./docs/decisions.md)
 - [Dictionary](./docs/dictionary.md)
+- [Fixed packages](./docs/fixed-packages.md)
 - [Linked packages](./docs/linked-packages.md)
 - [Modifying changelog format](./docs/modifying-changelog-format.md)
 - [Prereleases](./docs/prereleases.md)
 - [Problems publishing in monorepos](./docs/problems-publishing-in-monorepos.md)
 - [Snapshot releases](./docs/snapshot-releases.md)
+- [Versioning applications and other non-npm packages](./docs/versioning-apps.md)
+- [Experimental Options](./docs/experimental-options.md)
 
 ## Cool Projects already using Changesets for versioning and changelogs
 
-- [atlaskit](https://atlaskit.atlassian.com/)
+- [atlaskit](https://atlaskit.atlassian.com)
 - [emotion](https://emotion.sh/docs/introduction)
-- [keystone](https://v5.keystonejs.com/)
+- [keystone](https://keystonejs.com)
 - [react-select](https://react-select.com/home)
-- [XState](https://xstate.js.org/)
-- [pnpm](https://pnpm.js.org/)
-- [filbert-js](https://github.com/kuldeepkeshwar/filbert-js)
+- [XState](https://xstate.js.org)
+- [pnpm](https://pnpm.io)
 - [tinyhttp](https://github.com/talentlessguy/tinyhttp)
 - [Firebase Javascript SDK](https://github.com/firebase/firebase-js-sdk)
-- [Formik](https://github.com/formium/formik)
+- [Formik](https://github.com/jaredpalmer/formik)
 - [MobX](https://github.com/mobxjs/mobx)
-- [verdaccio](https://verdaccio.org/)
+- [Nhost](https://github.com/nhost/nhost)
+- [verdaccio](https://verdaccio.org)
+- [Chakra UI](https://chakra-ui.com)
+- [Astro](https://astro.build)
+- [SvelteKit](https://kit.svelte.dev)
+- [Hydrogen](https://hydrogen.shopify.dev)
+- [react-pdf](https://github.com/diegomura/react-pdf)
+- [GraphQL Code Generator](https://github.com/dotansimha/graphql-code-generator)
+- [GraphQL Yoga](https://github.com/dotansimha/graphql-yoga)
+- [GraphQL-Mesh](https://github.com/Urigo/graphql-mesh)
+- [GraphiQL](https://github.com/graphql/graphiql)
+- [wagmi](https://github.com/wagmi-dev/wagmi)
+- [refine](https://github.com/pankod/refine)
+- [Modern Web](https://modern-web.dev)
+- [Atomizer](https://github.com/acss-io/atomizer)
+- [Medusa](https://github.com/medusajs/medusa)
+- [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts)
+- [Block Protocol](https://github.com/blockprotocol/blockprotocol)
+- [Remix](https://remix.run/)
+- [Clerk](https://github.com/clerk/javascript)
+- [Hey API](https://github.com/hey-api/openapi-ts)
+- [neverthrow](https://github.com/supermacro/neverthrow)
+- [Apollo Client](https://github.com/apollographql/apollo-client)
+- [Adobe Spectrum CSS](https://github.com/adobe/spectrum-css)
+- [Adobe Spectrum Web Components](https://github.com/adobe/spectrum-web-components)
+
+<!-- NOTE: we currently only accept new entries with at least 1000 GitHub stars -->
 
 # Thanks/Inspiration
 
 - [bolt](https://github.com/boltpkg/bolt) - Brought us a strong concept of how packages in a mono-repo should be able to interconnect, and provided the initial infrastructure to get inter-package information.
-- [atlaskit](https://atlaskit.atlassian.com) - The original home of the changesets code, and where many of the ideas and processes were fermented.
+- [Atlassian](https://www.atlassian.com/) - The original idea/sponsor of the changesets code, and where many of the ideas and processes were fermented. It was originally implemented by the team behind [atlaskit](https://atlaskit.atlassian.com).
 - [lerna-semantic-release](https://github.com/atlassian/lerna-semantic-release) - put down many of the initial patterns around updating packages within a multi-package-repository, and started us thinking about how to manage dependent packages.
 - [Thinkmill](https://www.thinkmill.com.au) - For sponsoring the focused open sourcing of this project, and the version two rearchitecture.

@@ -1,11 +1,9 @@
 import yaml from "js-yaml";
 import { Release, VersionType } from "@changesets/types";
 
-const mdRegex = /\s*---([^]*?)\n\s*---\s*\n([^]*)/;
+const mdRegex = /\s*---([^]*?)\n\s*---(\s*(?:\n|$)[^]*)/;
 
-export default function parseChangesetFile(
-  contents: string
-): {
+export default function parseChangesetFile(contents: string): {
   summary: string;
   releases: Release[];
 } {
@@ -20,13 +18,12 @@ export default function parseChangesetFile(
 
   let releases: Release[];
   try {
-    const yamlStuff: { [key: string]: VersionType } = yaml.safeLoad(
-      roughReleases
-    );
+    const yamlStuff: { [key: string]: VersionType } =
+      yaml.safeLoad(roughReleases);
     if (yamlStuff) {
       releases = Object.entries(yamlStuff).map(([name, type]) => ({
         name,
-        type
+        type,
       }));
     } else {
       releases = [];

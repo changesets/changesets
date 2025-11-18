@@ -1,9 +1,4 @@
-import { AccessType } from "@changesets/types";
-
 export type CliOptions = {
-  commit?: boolean;
-  changelog?: string;
-  access?: AccessType;
   sinceMaster?: boolean;
   verbose?: boolean;
   output?: string;
@@ -12,7 +7,10 @@ export type CliOptions = {
   since?: string;
   ignore?: string | string[];
   snapshot?: string | boolean;
+  snapshotPrereleaseTemplate?: string;
+  prettier?: boolean;
   tag?: string;
+  gitTag?: boolean;
   open?: boolean;
 };
 
