@@ -2,8 +2,9 @@ import { read, parse } from "./";
 import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import { Config, WrittenConfig } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import { Packages, getPackages } from "@manypkg/get-packages";
 import { testdir } from "@changesets/test-utils";
+import outdent from "outdent";
 
 jest.mock("@changesets/logger");
 
@@ -49,6 +50,7 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
+    prettier: true,
     privatePackages: {
       tag: false,
       version: true,
@@ -64,6 +66,78 @@ test("read reads the config", async () => {
   });
 });
 
+test("read can read config based on the passed in `cwd`", async () => {
+  let cwd = await testdir({
+    ".changeset/config.json": JSON.stringify({
+      changelog: false,
+      commit: true,
+    }),
+    "package.json": JSON.stringify({
+      name: "testing",
+      version: "0.0.0",
+    }),
+  });
+  let config = await read(cwd);
+
+  expect(config).toEqual({
+    fixed: [],
+    linked: [],
+    changelog: false,
+    commit: ["@changesets/cli/commit", { skipCI: "version" }],
+    access: "restricted",
+    baseBranch: "master",
+    changedFilePatterns: ["**"],
+    updateInternalDependencies: "patch",
+    ignore: [],
+    bumpVersionsWithWorkspaceProtocolOnly: false,
+    prettier: true,
+    privatePackages: {
+      tag: false,
+      version: true,
+    },
+    ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+      onlyUpdatePeerDependentsWhenOutOfRange: false,
+      updateInternalDependents: "out-of-range",
+    },
+    snapshot: {
+      useCalculatedVersion: false,
+      prereleaseTemplate: null,
+    },
+  });
+});
+
+it("should not fail when validating ignored packages when some package depends on the root workspace", async () => {
+  const cwd = await testdir({
+    ".changeset/config.json": JSON.stringify({
+      ignore: ["other-example"],
+    }),
+    "package.json": JSON.stringify({
+      name: "zod-to-fields",
+      version: "0.1.2",
+    }),
+    "pnpm-workspace.yaml": outdent`
+          packages:
+            - examples/*
+        `,
+    "examples/react/package.json": JSON.stringify({
+      name: "react-example",
+      private: true,
+      version: "0.0.0",
+      dependencies: {
+        "zod-to-fields": "workspace:*",
+      },
+    }),
+    "examples/other/package.json": JSON.stringify({
+      name: "other-example",
+      private: true,
+      version: "0.0.0",
+    }),
+  });
+
+  const packages = await getPackages(cwd);
+  expect(() => read(cwd, packages)).not.toThrow();
+});
+
 let defaults: Config = {
   fixed: [],
   linked: [],
@@ -74,6 +148,7 @@ let defaults: Config = {
   changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
   ignore: [],
+  prettier: true,
   privatePackages: { version: true, tag: false },
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -449,7 +524,7 @@ describe("parser errors", () => {
         parse({ fixed: [["not-existing"]] }, defaultPackages);
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
-        The package or glob expression "not-existing" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+        The package or glob expression "not-existing" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch"
       `);
     });
     test("package that does not exist (using glob expressions)", () => {
@@ -457,7 +532,7 @@ describe("parser errors", () => {
         parse({ fixed: [["pkg-a", "foo/*"]] }, withPackages(["pkg-a"]));
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
-        The package or glob expression "foo/*" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+        The package or glob expression "foo/*" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch"
       `);
     });
     test("package in two fixed groups", () => {
@@ -465,7 +540,7 @@ describe("parser errors", () => {
         parse({ fixed: [["pkg-a"], ["pkg-a"]] }, withPackages(["pkg-a"]));
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
-        The package "pkg-a" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch."
+        The package "pkg-a" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch"
       `);
     });
     test("package in two fixed groups (using glob expressions)", () => {
@@ -476,8 +551,8 @@ describe("parser errors", () => {
         );
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
-        The package "pkg-a" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.
-        The package "pkg-b" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch."
+        The package "pkg-a" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch
+        The package "pkg-b" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch"
       `);
     });
   });
@@ -518,7 +593,7 @@ describe("parser errors", () => {
         parse({ linked: [["not-existing"]] }, defaultPackages);
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
-        The package or glob expression "not-existing" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+        The package or glob expression "not-existing" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch"
       `);
     });
     test("package that does not exist (using glob expressions)", () => {
@@ -526,7 +601,7 @@ describe("parser errors", () => {
         parse({ linked: [["pkg-a", "foo/*"]] }, withPackages(["pkg-a"]));
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
-        The package or glob expression "foo/*" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+        The package or glob expression "foo/*" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch"
       `);
     });
     test("package in two linked groups", () => {
@@ -534,7 +609,7 @@ describe("parser errors", () => {
         parse({ linked: [["pkg-a"], ["pkg-a"]] }, withPackages(["pkg-a"]));
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
-        The package "pkg-a" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch."
+        The package "pkg-a" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch"
       `);
     });
     test("package in two linked groups (using glob expressions)", () => {
@@ -545,8 +620,8 @@ describe("parser errors", () => {
         );
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
-        The package "pkg-a" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.
-        The package "pkg-b" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch."
+        The package "pkg-a" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch
+        The package "pkg-b" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch"
       `);
     });
   });
@@ -586,14 +661,14 @@ describe("parser errors", () => {
     expect(() => unsafeParse({ ignore: ["pkg-a"] }, defaultPackages))
       .toThrowErrorMatchingInlineSnapshot(`
       "Some errors occurred when validating the changesets config:
-      The package or glob expression "pkg-a" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+      The package or glob expression "pkg-a" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch"
     `);
   });
   test("ignore package that does not exist (using glob expressions)", () => {
     expect(() => unsafeParse({ ignore: ["pkg-*"] }, defaultPackages))
       .toThrowErrorMatchingInlineSnapshot(`
       "Some errors occurred when validating the changesets config:
-      The package or glob expression "pkg-*" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch."
+      The package or glob expression "pkg-*" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch"
     `);
   });
   test("ignore missing dependent packages", async () => {

@@ -1,6 +1,6 @@
-import { PackageGroup, VersionType } from "@changesets/types";
+import { NewChangeset, PackageGroup, VersionType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
-import semver from "semver";
+import semverGt from "semver/functions/gt";
 import { InternalRelease } from "./types";
 
 export function getHighestReleaseType(
@@ -50,11 +50,25 @@ export function getCurrentHighestVersion(
 
     if (
       highestVersion === undefined ||
-      semver.gt(pkg.packageJson.version, highestVersion)
+      semverGt(pkg.packageJson.version, highestVersion)
     ) {
       highestVersion = pkg.packageJson.version;
     }
   }
 
   return highestVersion!;
+}
+
+export function getPackageIfExists(
+  packagesByName: Map<string, Package>,
+  packageName: string,
+  changeset: Pick<NewChangeset, "id">
+): Package {
+  const pkg = packagesByName.get(packageName);
+  if (pkg) {
+    return pkg;
+  }
+  throw new Error(
+    `"${changeset.id}" changeset mentions a release for a package "${packageName}" but such a package could not be found.`
+  );
 }

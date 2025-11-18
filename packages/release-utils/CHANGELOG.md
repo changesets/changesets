@@ -1,5 +1,64 @@
 # @changesets/release-utils
 
+## 0.2.5
+
+### Patch Changes
+
+- Updated dependencies [[`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d)]:
+  - @changesets/read@0.6.5
+
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@0.6.4
+
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/pre@2.0.2
+  - @changesets/read@0.6.3
+
+## 0.2.2
+
+### Patch Changes
+
+- [#1514](https://github.com/changesets/changesets/pull/1514) [`962ab91`](https://github.com/changesets/changesets/commit/962ab918bc2deb89012a0cefce10387997cc54ed) Thanks [@nicoalonsop](https://github.com/nicoalonsop)! - Update spawndamnit to fix [cross-spawn vulnerability](https://security.snyk.io/vuln/SNYK-JS-CROSSSPAWN-8303230)
+
+- Updated dependencies [[`82cacb2`](https://github.com/changesets/changesets/commit/82cacb2227cf3a215cd9d29b9fb0c860f20ba2ca)]:
+  - @changesets/read@0.6.2
+
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [[`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55), [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890)]:
+  - @changesets/read@0.6.1
+  - @changesets/pre@2.0.1
+
+## 0.2.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+### Patch Changes
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a)]:
+  - @changesets/types@6.0.0
+  - @changesets/read@0.6.0
+  - @changesets/pre@2.0.0
+
+## 0.1.13
+
+### Patch Changes
+
+- [#1176](https://github.com/changesets/changesets/pull/1176) [`41988ce`](https://github.com/changesets/changesets/commit/41988ceb8c1cedd3857c939448bf3965494ff0a4) Thanks [@joshwooding](https://github.com/joshwooding)! - Bump [`semver`](https://github.com/npm/node-semver) dependency to v7.5.3
+
 ## 0.1.12
 
 ### Patch Changes

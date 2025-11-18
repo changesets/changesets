@@ -1,6 +1,7 @@
 # @changesets/get-github-info
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/get-github-info)
+[![npm package](https://img.shields.io/npm/v/@changesets/get-github-info)](https://npmjs.com/package/@changesets/get-github-info)
+[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 > Get the GitHub username and PR number from a commit. Intended for use with changesets.
 
@@ -35,8 +36,8 @@ const getReleaseLine = async (changeset, type) => {
   // getInfo exposes the GH username and PR number if you want them directly
   // but it also exposes a set of links for the commit, PR and GH username
   let { user, pull, links } = await getInfo({
-    // replace this will your own repo
-    repo: "Noviny/changesets",
+    // replace this with your own repo
+    repo: "changesets/changesets",
     commit: changeset.commit,
   });
   let returnVal = `- ${links.commit}${

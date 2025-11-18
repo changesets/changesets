@@ -1,6 +1,7 @@
 ## @changesets/logger
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/logger)
+[![npm package](https://img.shields.io/npm/v/@changesets/logger)](https://npmjs.com/package/@changesets/logger)
+[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 ### Usage
 
@@ -38,5 +39,5 @@ temporarilySilenceLogs();
 log("I am not logged");
 
 // Use console.log to log messages in tests if required
-console.log("Yiey, I am logged");
+console.log("Yay, I am logged");
 ```
