@@ -223,6 +223,11 @@ async function getNewChangelogEntry(
   let possibleChangelogFunc = await import(changelogPath);
   if (possibleChangelogFunc.default) {
     possibleChangelogFunc = possibleChangelogFunc.default;
+
+    // Check nested default again in case it's CJS with `__esModule` interop
+    if (possibleChangelogFunc.default) {
+      possibleChangelogFunc = possibleChangelogFunc.default;
+    }
   }
   if (
     typeof possibleChangelogFunc.getReleaseLine === "function" &&

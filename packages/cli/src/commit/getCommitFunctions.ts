@@ -17,6 +17,11 @@ export async function getCommitFunctions(
   let possibleCommitFunc = await import(commitPath);
   if (possibleCommitFunc.default) {
     possibleCommitFunc = possibleCommitFunc.default;
+
+    // Check nested default again in case it's CJS with `__esModule` interop
+    if (possibleCommitFunc.default) {
+      possibleCommitFunc = possibleCommitFunc.default;
+    }
   }
   if (
     typeof possibleCommitFunc.getAddMessage === "function" ||
