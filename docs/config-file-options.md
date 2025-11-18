@@ -54,7 +54,7 @@ If you want to prevent a package from being published to npm, set `private: true
 
 ## `baseBranch` (git branch name)
 
-The branch to which changesets will make comparisons to detect what has changed since the last commit of the base branch. This should generally set to the default branch you merge changes into, e.g. `main` or `master`.
+The branch to which changesets will make comparisons to detect what has changed since the last commit of the base branch. This should generally be set to the default branch you merge changes into, e.g. `main` or `master`.
 
 Commands that use this information accept a `--since` option which can be used to override this.
 
