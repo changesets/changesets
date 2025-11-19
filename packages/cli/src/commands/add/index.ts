@@ -18,7 +18,11 @@ import printConfirmationMessage from "./messages";
 
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  {
+    empty,
+    open,
+    enablePnpmCatalog,
+  }: { empty?: boolean; open?: boolean; enablePnpmCatalog?: boolean },
   config: Config
 ): Promise<void> {
   const packages = await getPackages(cwd);
@@ -59,6 +63,7 @@ export default async function add(
       changedPackagesNames = (
         await getVersionableChangedPackages(config, {
           cwd,
+          enablePnpmCatalog,
         })
       ).map((pkg) => pkg.packageJson.name);
     } catch (e: any) {
