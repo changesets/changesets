@@ -111,6 +111,7 @@ export default async function applyReleasePlan(
         JSON.stringify(releasePlan.preState, null, 2) + "\n"
       );
     }
+    touchedFiles.push(path.join(cwd, ".changeset", "pre.json"));
   }
 
   let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
@@ -325,7 +326,11 @@ async function prependFile(
     );
     return;
   }
-  const newChangelog = fileData.replace("\n", data);
+  const index = fileData.indexOf("\n");
+  const newChangelog =
+    index === -1
+      ? fileData + data // treat the whole file as header
+      : fileData.slice(0, index) + data + fileData.slice(index + 1);
 
   await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
 }

@@ -213,6 +213,20 @@ describe("parsing a changeset", () => {
       summary: "Nice simple summary",
     });
   });
+
+  it("should handle package name unquoted and version quoted", () => {
+    const changesetMd = `---
+    pkg: "minor"
+    ---
+
+    something`;
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "pkg", type: "minor" }],
+      summary: "something",
+    });
+  });
+
   it("should throw if the frontmatter is followed by non-whitespace characters on the same line", () => {
     const changesetMd = outdent`---
     "cool-package": minor
@@ -225,6 +239,23 @@ describe("parsing a changeset", () => {
       "could not parse changeset - invalid frontmatter: ---
       "cool-package": minor
       ---  fail
+
+      Nice simple summary"
+    `);
+  });
+
+  it("should throw when frontmatter hasn't a valid yml structure", () => {
+    const changesetMd = outdent`---
+    : minor
+    ---
+
+    Nice simple summary
+    `;
+
+    expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
+      "could not parse changeset - invalid frontmatter: ---
+      : minor
+      ---
 
       Nice simple summary"
     `);

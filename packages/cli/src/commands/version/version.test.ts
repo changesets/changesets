@@ -523,6 +523,56 @@ Awesome feature, hidden behind a feature flag
     `);
   });
 
+  it("should ignore special string replacement patterns in appended changesets", async () => {
+    const spy = jest.spyOn(fs, "writeFile");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-a/CHANGELOG.md": `# pkg-a
+
+      ## 1.0.0
+
+      ### Major Changes
+
+      - a very useful summary for the change
+      `,
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "major" }],
+        summary: "a summary with special replacement patterns `react$` $'",
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 2.0.0
+
+      ### Major Changes
+
+      - g1th4sh: a summary with special replacement patterns \`react$\` $'
+
+            ## 1.0.0
+
+            ### Major Changes
+
+            - a very useful summary for the change
+      "
+    `);
+  });
+
   describe("when there are multiple changeset commits", () => {
     it("should bump releasedPackages", async () => {
       const cwd = await testdir({
@@ -1053,7 +1103,7 @@ describe("workspace range", () => {
     ]);
   });
 
-  it("should bump dependent package when bumping a `workspace:^` dependency", async () => {
+  it("should not bump dependent package when patch bumping a `workspace:^` dependency", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -1085,7 +1135,7 @@ describe("workspace range", () => {
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
-        version: "1.0.1",
+        version: "1.0.0",
         dependencies: {
           "pkg-b": "workspace:^",
         },
@@ -1093,6 +1143,50 @@ describe("workspace range", () => {
       {
         name: "pkg-b",
         version: "1.0.1",
+      },
+    ]);
+  });
+
+  it("should bump dependent package when minor bumping a `workspace:~` dependency", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:~",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "minor" }],
+        summary: "a very useful summary for the change",
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.1",
+        dependencies: {
+          "pkg-b": "workspace:~",
+        },
+      },
+      {
+        name: "pkg-b",
+        version: "1.1.0",
       },
     ]);
   });
@@ -1152,6 +1246,105 @@ describe("workspace range", () => {
         - pkg-a@1.1.0
       "
     `);
+  });
+
+  it("should bump major bump peer-dependent when workspace:~ dependency gets a minor bump (without onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        peerDependencies: { "pkg-a": "workspace:^" },
+      }),
+    });
+
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    expect(getChangelog("pkg-b", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 2.0.0
+
+      ### Patch Changes
+
+      - Updated dependencies [g1th4sh]
+        - pkg-a@1.1.0
+      "
+    `);
+  });
+
+  it("should not bump peer-dependent when workspace:~ dependency gets a minor bump (with onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        peerDependencies: { "pkg-a": "workspace:^" },
+      }),
+    });
+
+    const spy = jest.spyOn(fs, "writeFile");
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        onlyUpdatePeerDependentsWhenOutOfRange: true,
+      },
+    });
+
+    expect(getChangelog("pkg-a", spy.mock.calls)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    // `pkg-b` should not be touched
+    expect(() => getChangelog("pkg-b", spy.mock.calls)).toThrowError();
   });
 });
 
