@@ -1,5 +1,14 @@
 # @changesets/apply-release-plan
 
+## 7.0.14
+
+### Patch Changes
+
+- [#610](https://github.com/changesets/changesets/pull/610) [`e520bf5`](https://github.com/changesets/changesets/commit/e520bf5d4dbfe96f59ca28008e87bffaf3c9dfea) Thanks [@bencergazda](https://github.com/bencergazda)! - Add `pre.json` to the version commit
+
+- Updated dependencies [[`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe)]:
+  - @changesets/config@3.1.2
+
 ## 7.0.13
 
 ### Patch Changes

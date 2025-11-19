@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 6.0.10
+
+### Patch Changes
+
+- [#1474](https://github.com/changesets/changesets/pull/1474) [`8acf5ca`](https://github.com/changesets/changesets/commit/8acf5cafd3dae397c4b75c8b87d0a21ed95c941a) Thanks [@sidharthv96](https://github.com/sidharthv96)! - fix: Throw a descriptive error if there is an issue with a package name in a changeset
+
 ## 6.0.9
 
 ### Patch Changes

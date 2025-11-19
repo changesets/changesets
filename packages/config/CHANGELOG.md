@@ -1,5 +1,11 @@
 # @changesets/config
 
+## 3.1.2
+
+### Patch Changes
+
+- [#1232](https://github.com/changesets/changesets/pull/1232) [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe) Thanks [@matthprost](https://github.com/matthprost)! - Fixed log error link mismatch to remove dot at the end
+
 ## 3.1.1
 
 ### Patch Changes
