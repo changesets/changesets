@@ -5,7 +5,7 @@ import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config, NewChangeset } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease } from "./types";
-import { getPackageIfExists } from "./utils";
+import { mapGetOrThrowInternal } from "./utils";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
@@ -20,17 +20,14 @@ export default function flattenReleases(
       // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
       .filter(
         ({ name }) =>
-          !shouldSkipPackage(
-            getPackageIfExists(packagesByName, name, changeset),
-            {
-              ignore: config.ignore,
-              allowPrivatePackages: config.privatePackages.version,
-            }
-          )
+          !shouldSkipPackage(mapGetOrThrowInternal(packagesByName, name), {
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
+          })
       )
       .forEach(({ name, type }) => {
+        let pkg = mapGetOrThrowInternal(packagesByName, name);
         let release = releases.get(name);
-        const pkg = getPackageIfExists(packagesByName, name, changeset);
         if (!release) {
           release = {
             name,

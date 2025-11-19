@@ -9,6 +9,7 @@ import { Package } from "@manypkg/get-packages";
 import semverSatisfies from "semver/functions/satisfies";
 import { incrementVersion } from "./increment";
 import { InternalRelease, PreInfo } from "./types";
+import { mapGetOrThrowInternal } from "./utils";
 
 /*
   WARNING:
@@ -44,18 +45,20 @@ export default function determineDependents({
     const nextRelease = pkgsToSearch.shift();
     if (!nextRelease) continue;
     // pkgDependents will be a list of packages that depend on nextRelease ie. ['avatar-group', 'comment']
-    const pkgDependents = dependencyGraph.get(nextRelease.name);
-    if (!pkgDependents) {
-      throw new Error(
-        `Error in determining dependents - could not find package in repository: ${nextRelease.name}`
-      );
-    }
+    const pkgDependents = mapGetOrThrowInternal(
+      dependencyGraph,
+      nextRelease.name,
+      `Error in determining dependents - could not find package in repository: ${nextRelease.name}`
+    );
     pkgDependents
       .map((dependent) => {
         let type: VersionType | undefined;
 
-        const dependentPackage = packagesByName.get(dependent);
-        if (!dependentPackage) throw new Error("Dependency map is incorrect");
+        const dependentPackage = mapGetOrThrowInternal(
+          packagesByName,
+          dependent,
+          "Dependency map is incorrect"
+        );
 
         if (
           shouldSkipPackage(dependentPackage, {

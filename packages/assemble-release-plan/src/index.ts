@@ -16,7 +16,7 @@ import flattenReleases from "./flatten-releases";
 import { incrementVersion } from "./increment";
 import matchFixedConstraint from "./match-fixed-constraint";
 import { InternalRelease, PreInfo } from "./types";
-import { getPackageIfExists } from "./utils";
+import { mapGetOrThrow, mapGetOrThrowInternal } from "./utils";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -277,14 +277,18 @@ function getRelevantChangesets(
     const skippedPackages = [];
     const notSkippedPackages = [];
     for (const release of changeset.releases) {
+      // this acts as an early validation in this package so we don't throw an internal error here
+      const packageByName = mapGetOrThrow(
+        packagesByName,
+        release.name,
+        `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
+      );
+
       if (
-        shouldSkipPackage(
-          getPackageIfExists(packagesByName, release.name, changeset),
-          {
-            ignore: config.ignore,
-            allowPrivatePackages: config.privatePackages.version,
-          }
-        )
+        shouldSkipPackage(packageByName, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        })
       ) {
         skippedPackages.push(release.name);
       } else {
@@ -319,7 +323,9 @@ function getHighestPreVersion(
   let highestPreVersion = 0;
   for (let pkg of packageGroup) {
     highestPreVersion = Math.max(
-      getPreVersion(packagesByName.get(pkg)!.packageJson.version),
+      getPreVersion(
+        mapGetOrThrowInternal(packagesByName, pkg).packageJson.version
+      ),
       highestPreVersion
     );
   }

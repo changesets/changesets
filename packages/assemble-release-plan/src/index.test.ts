@@ -535,29 +535,11 @@ describe("assemble-release-plan", () => {
         undefined
       )
     ).toThrowErrorMatchingInlineSnapshot(`
-      "Found mixed changeset big-cats-delight
-      Found ignored packages: pkg-b
-      Found not ignored packages: pkg-a
-      Mixed changesets that contain both ignored and not ignored packages are not allowed"
-    `);
-  });
-
-  it("should throw for packages not present in the project", () => {
-    setup.addChangeset({
-      id: "big-cats-delight",
-      releases: [{ name: "impossible-package", type: "major" }],
-    });
-
-    expect(() =>
-      assembleReleasePlan(
-        setup.changesets,
-        setup.packages,
-        defaultConfig,
-        undefined
-      )
-    ).toThrowErrorMatchingInlineSnapshot(
-      `""big-cats-delight" changeset mentions a release for a package "impossible-package" but such a package could not be found."`
-    );
+"Found mixed changeset big-cats-delight
+Found ignored packages: pkg-b
+Found not ignored packages: pkg-a
+Mixed changesets that contain both ignored and not ignored packages are not allowed"
+`);
   });
 
   it("should not bump a dev dependent nor its dependent when a package gets bumped", () => {
@@ -576,6 +558,28 @@ describe("assemble-release-plan", () => {
     expect(releases[0].newVersion).toEqual("1.0.1");
     expect(releases[1].name).toEqual("pkg-b");
     expect(releases[1].newVersion).toEqual("1.0.0");
+  });
+
+  it("should throw an error when a changeset contains a package that is not in the workspace", () => {
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }],
+    });
+    setup.addChangeset({
+      id: "small-dogs-sad",
+      releases: [{ name: "pkg-z", type: "minor" }],
+    });
+
+    expect(() =>
+      assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        defaultConfig,
+        undefined
+      )
+    ).toThrow(
+      "Found changeset small-dogs-sad for package pkg-z which is not in the workspace"
+    );
   });
 
   describe("fixed packages", () => {
