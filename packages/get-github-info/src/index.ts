@@ -92,6 +92,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     repos[repo].push(data);
   });
 
+  // eslint-disable-next-line no-undef -- Response is defined
   let fetchResponse: Response;
   try {
     fetchResponse = await fetch("https://api.github.com/graphql", {
