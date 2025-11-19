@@ -138,6 +138,38 @@ it("should not fail when validating ignored packages when some package depends o
   expect(() => read(cwd, packages)).not.toThrow();
 });
 
+it("should pass bumpVersionsWithWorkspaceProtocolOnly option to getDependentsGraph during validation", async () => {
+  const cwd = await testdir({
+    ".changeset/config.json": JSON.stringify({
+      bumpVersionsWithWorkspaceProtocolOnly: true,
+    }),
+    "package.json": JSON.stringify({
+      name: "root",
+      version: "1.0.0",
+    }),
+    "pnpm-workspace.yaml": outdent`
+      packages:
+        - packages/*
+    `,
+    "packages/pkg-a/package.json": JSON.stringify({
+      name: "pkg-a",
+      version: "1.0.0",
+      dependencies: {
+        "pkg-b": "workspace:^1.0.0",
+      },
+    }),
+    "packages/pkg-b/package.json": JSON.stringify({
+      name: "pkg-b",
+      version: "1.0.0",
+    }),
+  });
+
+  const packages = await getPackages(cwd);
+
+  const config = await read(cwd, packages);
+  expect(config.bumpVersionsWithWorkspaceProtocolOnly).toBe(true);
+});
+
 let defaults: Config = {
   fixed: [],
   linked: [],
