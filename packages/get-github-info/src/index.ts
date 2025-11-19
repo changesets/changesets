@@ -92,17 +92,31 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     repos[repo].push(data);
   });
 
-  const data = await fetch("https://api.github.com/graphql", {
-    method: "POST",
-    headers: {
-      Authorization: `Token ${process.env.GITHUB_TOKEN}`,
-    },
-    body: JSON.stringify({ query: makeQuery(repos) }),
-  }).then((x: any) => x.json());
+  let fetchResponse: Response;
+  try {
+    fetchResponse = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${process.env.GITHUB_TOKEN}`,
+      },
+      body: JSON.stringify({ query: makeQuery(repos) }),
+    });
+  } catch (e: any) {
+    throw new Error(
+      `An error occurred when fetching data from GitHub\n${e.message}`
+    );
+  }
+
+  let data: any;
+  try {
+    data = await fetchResponse.json();
+  } catch (e: any) {
+    throw new Error(`Failed to parse data from GitHub\n${e.message}`);
+  }
 
   if (data.errors) {
     throw new Error(
-      `An error occurred when fetching data from GitHub\n${JSON.stringify(
+      `Fetched data from GitHub returned errors\n${JSON.stringify(
         data.errors,
         null,
         2
@@ -113,9 +127,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   // this is mainly for the case where there's an authentication problem
   if (!data.data) {
     throw new Error(
-      `An error occurred when fetching data from GitHub\n${JSON.stringify(
-        data
-      )}`
+      `Fetched data from GitHub has missing data\n${JSON.stringify(data)}`
     );
   }
 
