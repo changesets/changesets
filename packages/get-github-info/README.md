@@ -58,7 +58,17 @@ You'll need to [get a GitHub personal access token](https://github.com/settings/
 GITHUB_TOKEN=token_here
 ```
 
+If you are using GitHub Enterprise Server, you can set configure `@changesets/get-github-info` to point at it using the following
+environment variables:
+
+```bash
+GITHUB_SERVER_URL=https://github.example.com
+GITHUB_GRAPHQL_URL=https://github.example.com/api/graphql
+```
+
 You can now bump your packages and changelogs with `changeset version` and it'll have the GitHub info. 🎉
+
+When used in GitHub Actions, all three environment variables will have been set already.
 
 ## API
 
