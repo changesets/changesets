@@ -68,7 +68,7 @@ GITHUB_GRAPHQL_URL=https://github.example.com/api/graphql
 
 You can now bump your packages and changelogs with `changeset version` and it'll have the GitHub info. 🎉
 
-When used in GitHub Actions, all three environment variables will have been set already.
+When used in GitHub Actions, the URL environment variables will have been set already.
 
 ## API
 
