@@ -2,4 +2,4 @@
 "@changesets/config": patch
 ---
 
-Reads the config value for `bumpVersionsWithWorkspaceProtocolOnly` during config parse to prevent noisy console errors.
+Respect config value for `bumpVersionsWithWorkspaceProtocolOnly` when validating `ignore` option to prevent spurious console errors.
