@@ -3,10 +3,20 @@ import jestInCase from "jest-in-case";
 import * as logger from "@changesets/logger";
 import { Config, WrittenConfig } from "@changesets/types";
 import { Packages, getPackages } from "@manypkg/get-packages";
-import { testdir } from "@changesets/test-utils";
+import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import outdent from "outdent";
 
 jest.mock("@changesets/logger");
+
+const consoleError = console.error;
+
+beforeEach(() => {
+  console.error = jest.fn();
+});
+
+afterEach(() => {
+  console.error = consoleError;
+});
 
 type CorrectCase = {
   packages?: string[];
@@ -138,37 +148,45 @@ it("should not fail when validating ignored packages when some package depends o
   expect(() => read(cwd, packages)).not.toThrow();
 });
 
-it("should pass bumpVersionsWithWorkspaceProtocolOnly option to getDependentsGraph during validation", async () => {
-  const cwd = await testdir({
-    ".changeset/config.json": JSON.stringify({
-      bumpVersionsWithWorkspaceProtocolOnly: true,
-    }),
-    "package.json": JSON.stringify({
-      name: "root",
-      version: "1.0.0",
-    }),
-    "pnpm-workspace.yaml": outdent`
+it(
+  "should not print spurious errors when validing ignored packages when some packages don't use workspace protocol when configured with `bumpVersionsWithWorkspaceProtocolOnly: true`",
+  temporarilySilenceLogs(async () => {
+    const cwd = await testdir({
+      ".changeset/config.json": JSON.stringify({
+        bumpVersionsWithWorkspaceProtocolOnly: true,
+        ignore: ["pkg-c"],
+      }),
+      "package.json": JSON.stringify({
+        name: "root",
+        version: "1.0.0",
+      }),
+      "pnpm-workspace.yaml": outdent`
       packages:
         - packages/*
     `,
-    "packages/pkg-a/package.json": JSON.stringify({
-      name: "pkg-a",
-      version: "1.0.0",
-      dependencies: {
-        "pkg-b": "workspace:^1.0.0",
-      },
-    }),
-    "packages/pkg-b/package.json": JSON.stringify({
-      name: "pkg-b",
-      version: "1.0.0",
-    }),
-  });
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "^0.9.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      "packages/pkg-c/package.json": JSON.stringify({
+        name: "pkg-c",
+        version: "1.0.0",
+      }),
+    });
 
-  const packages = await getPackages(cwd);
+    const packages = await getPackages(cwd);
 
-  const config = await read(cwd, packages);
-  expect(config.bumpVersionsWithWorkspaceProtocolOnly).toBe(true);
-});
+    await read(cwd, packages);
+    expect(console.error).not.toBeCalled();
+  })
+);
 
 let defaults: Config = {
   fixed: [],
