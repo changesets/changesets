@@ -9,7 +9,7 @@ const DEPENDENCY_TYPES = [
 
 export type VersionType = "major" | "minor" | "patch" | "none";
 
-export type DependencyType = typeof DEPENDENCY_TYPES[number];
+export type DependencyType = (typeof DEPENDENCY_TYPES)[number];
 
 export type AccessType = "public" | "restricted";
 
@@ -74,6 +74,7 @@ export type Config = {
   linked: Linked;
   access: AccessType;
   baseBranch: string;
+  githubRelease?: boolean;
   changedFilePatterns: readonly string[];
   /** When false, Changesets won't format with Prettier */
   prettier: boolean;
@@ -102,6 +103,7 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
+  githubRelease?: boolean;
   prettier?: boolean;
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
