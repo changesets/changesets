@@ -135,21 +135,88 @@ export type ModCompWithPackage = ComprehensiveRelease & {
   dir: string;
 };
 
-export type GetReleaseLine = (
+/**
+ * The default type for changelog options that maintains backward compatibility.
+ * Allows for either no options (`null`) or a flexible record of any options.
+ *
+ * @public
+ */
+export type DefaultChangelogOptions = null | Record<string, any>;
+
+/**
+ * Function type for generating a release line in a changelog.
+ * This function is called for each changeset to generate its corresponding changelog entry.
+ *
+ * @param changeset - The {@link NewChangesetWithCommit} data including summary and optional commit information
+ * @param type - The {@link VersionType} bump type (`"major"` | `"minor"` | `"patch"` | `"none"`)
+ * @param changelogOpts - Configuration options for the changelog generator of type `ChangelogOptions`
+ * @returns A promise that resolves to the formatted changelog line as a `string`
+ *
+ * @typeParam ChangelogOptions - The type of options passed to the changelog function. Defaults to {@link DefaultChangelogOptions}
+ * @public
+ */
+export type GetReleaseLine<ChangelogOptions = DefaultChangelogOptions> = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
-  changelogOpts: null | Record<string, any>
+  changelogOpts: ChangelogOptions
 ) => Promise<string>;
 
-export type GetDependencyReleaseLine = (
+/**
+ * Function type for generating dependency release lines in a changelog.
+ * This function is called when dependencies are updated to generate their changelog entries.
+ *
+ * @param changesets - Array of {@link NewChangesetWithCommit} that caused the dependency updates
+ * @param dependenciesUpdated - Array of {@link ModCompWithPackage} that had their dependencies updated
+ * @param changelogOpts - Configuration options for the changelog generator of type `ChangelogOptions`
+ * @returns A promise that resolves to the formatted dependency changelog lines as a `string`
+ *
+ * @typeParam ChangelogOptions - The type of options passed to the changelog function. Defaults to {@link DefaultChangelogOptions}
+ * @public
+ */
+export type GetDependencyReleaseLine<
+  ChangelogOptions = DefaultChangelogOptions
+> = (
   changesets: NewChangesetWithCommit[],
   dependenciesUpdated: ModCompWithPackage[],
-  changelogOpts: any
+  changelogOpts: ChangelogOptions
 ) => Promise<string>;
 
-export type ChangelogFunctions = {
-  getReleaseLine: GetReleaseLine;
-  getDependencyReleaseLine: GetDependencyReleaseLine;
+/**
+ * Interface defining the required functions for a changelog generator.
+ * This type can be parameterized with specific option types for better type safety.
+ *
+ * @typeParam ChangelogOptions - The type of options that will be passed to the changelog functions.
+ *                              Defaults to {@link DefaultChangelogOptions} for backward compatibility.
+ *
+ * @example
+ * For a changelog that expects specific options:
+ * ```typescript
+ * const myChangelog: ChangelogFunctions<{ repo: string; token?: string }> = {
+ *   getReleaseLine: async (changeset, type, options) => {
+ *     // options.repo is strongly typed as string
+ *     // options.token is strongly typed as string | undefined
+ *     return `- ${changeset.summary}`;
+ *   },
+ *   getDependencyReleaseLine: async (changesets, deps, options) => {
+ *     return `Updated ${deps.length} dependencies`;
+ *   }
+ * };
+ * ```
+ *
+ * @example
+ * For a changelog that doesn't use options (backward compatible):
+ * ```typescript
+ * const simpleChangelog: ChangelogFunctions = {
+ *   getReleaseLine: async (changeset, type) => `- ${changeset.summary}`,
+ *   getDependencyReleaseLine: async () => ""
+ * };
+ * ```
+ *
+ * @public
+ */
+export type ChangelogFunctions<ChangelogOptions = DefaultChangelogOptions> = {
+  getReleaseLine: GetReleaseLine<ChangelogOptions>;
+  getDependencyReleaseLine: GetDependencyReleaseLine<ChangelogOptions>;
 };
 
 export type GetAddMessage = (

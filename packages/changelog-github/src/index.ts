@@ -5,7 +5,7 @@ import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 
 config();
 
-const changelogFunctions: ChangelogFunctions = {
+const changelogFunctions: ChangelogFunctions<{ repo: string }> = {
   getDependencyReleaseLine: async (
     changesets,
     dependenciesUpdated,
