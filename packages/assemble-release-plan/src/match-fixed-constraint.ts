@@ -31,8 +31,15 @@ export default function matchFixedConstraint(
 
     // Finally, we update the packages so all of them are on the highest version
     for (let pkgName of fixedPackages) {
+      const pkg = mapGetOrThrowInternal(
+        packagesByName,
+        pkgName,
+        `Could not find package named "${pkgName}" listed in fixed group ${JSON.stringify(
+          fixedPackages
+        )}`
+      );
       if (
-        shouldSkipPackage(mapGetOrThrowInternal(packagesByName, pkgName), {
+        shouldSkipPackage(pkg, {
           ignore: config.ignore,
           allowPrivatePackages: config.privatePackages.version,
         })

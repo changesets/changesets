@@ -317,15 +317,21 @@ function getRelevantChangesets(
 }
 
 function getHighestPreVersion(
+  groupKind: "linked" | "fixed",
   packageGroup: PackageGroup,
   packagesByName: Map<string, Package>
 ): number {
   let highestPreVersion = 0;
-  for (let pkg of packageGroup) {
+  for (let pkgName of packageGroup) {
+    const pkg = mapGetOrThrowInternal(
+      packagesByName,
+      pkgName,
+      `Could not find package named "${pkgName}" listed in ${groupKind} group ${JSON.stringify(
+        packageGroup
+      )}`
+    );
     highestPreVersion = Math.max(
-      getPreVersion(
-        mapGetOrThrowInternal(packagesByName, pkg).packageJson.version
-      ),
+      getPreVersion(pkg.packageJson.version),
       highestPreVersion
     );
   }
@@ -374,13 +380,21 @@ function getPreInfo(
     );
   }
   for (let fixedGroup of config.fixed) {
-    let highestPreVersion = getHighestPreVersion(fixedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      "fixed",
+      fixedGroup,
+      packagesByName
+    );
     for (let fixedPackage of fixedGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
     }
   }
   for (let linkedGroup of config.linked) {
-    let highestPreVersion = getHighestPreVersion(linkedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      "linked",
+      linkedGroup,
+      packagesByName
+    );
     for (let linkedPackage of linkedGroup) {
       preVersions.set(linkedPackage, highestPreVersion);
     }

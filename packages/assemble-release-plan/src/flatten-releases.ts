@@ -18,15 +18,23 @@ export default function flattenReleases(
     changeset.releases
       // Filter out skipped packages because they should not trigger a release
       // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
-      .filter(
-        ({ name }) =>
-          !shouldSkipPackage(mapGetOrThrowInternal(packagesByName, name), {
-            ignore: config.ignore,
-            allowPrivatePackages: config.privatePackages.version,
-          })
-      )
+      .filter(({ name }) => {
+        const pkg = mapGetOrThrowInternal(
+          packagesByName,
+          name,
+          `Couldn't find package named "${name}" listed in changeset "${changeset.id}"`
+        );
+        return !shouldSkipPackage(pkg, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        });
+      })
       .forEach(({ name, type }) => {
-        let pkg = mapGetOrThrowInternal(packagesByName, name);
+        let pkg = mapGetOrThrowInternal(
+          packagesByName,
+          name,
+          `Couldn't find package named "${name}" listed in changeset "${changeset.id}"`
+        );
         let release = releases.get(name);
         if (!release) {
           release = {

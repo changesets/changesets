@@ -60,11 +60,11 @@ export function getCurrentHighestVersion(
 export function mapGetOrThrow<V extends {}>(
   map: Map<string, V>,
   key: string,
-  errorMessage?: string
+  errorMessage: string
 ): V {
   const value = map.get(key);
   if (value === undefined) {
-    throw new Error(errorMessage ?? `Key not found in map: ${key}`);
+    throw new Error(errorMessage);
   }
   return value;
 }
@@ -72,11 +72,11 @@ export function mapGetOrThrow<V extends {}>(
 export function mapGetOrThrowInternal<V extends {}>(
   map: Map<string, V>,
   key: string,
-  errorMessage?: string
+  errorMessage: string
 ): V {
   const value = map.get(key);
   if (value === undefined) {
-    throw new InternalError(errorMessage ?? `Key not found in map: ${key}`);
+    throw new InternalError(errorMessage);
   }
   return value;
 }
