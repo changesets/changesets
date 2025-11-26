@@ -141,7 +141,15 @@ describe("npm-utils", () => {
       expect(mockSpawn).toHaveBeenNthCalledWith(
         2,
         "pnpm",
-        ["publish", "--json", "--access", "public", "--tag", "latest", "--no-git-checks"],
+        [
+          "publish",
+          "--json",
+          "--access",
+          "public",
+          "--tag",
+          "latest",
+          "--no-git-checks",
+        ],
         expect.objectContaining({
           cwd: "/test/cwd",
         })
@@ -190,7 +198,15 @@ describe("npm-utils", () => {
 
       expect(mockSpawn).toHaveBeenCalledWith(
         "npm",
-        ["publish", "/test/publish-dir", "--json", "--access", "public", "--tag", "latest"],
+        [
+          "publish",
+          "/test/publish-dir",
+          "--json",
+          "--access",
+          "public",
+          "--tag",
+          "latest",
+        ],
         expect.any(Object)
       );
     });
@@ -210,7 +226,15 @@ describe("npm-utils", () => {
 
       expect(mockSpawn).toHaveBeenCalledWith(
         "npm",
-        ["publish", "/test/publish-dir", "--json", "--access", "public", "--tag", "latest"],
+        [
+          "publish",
+          "/test/publish-dir",
+          "--json",
+          "--access",
+          "public",
+          "--tag",
+          "latest",
+        ],
         expect.any(Object)
       );
     });
@@ -227,7 +251,15 @@ describe("npm-utils", () => {
 
       expect(mockSpawn).toHaveBeenCalledWith(
         "npm",
-        ["publish", "/test/publish-dir", "--json", "--access", "public", "--tag", "latest"],
+        [
+          "publish",
+          "/test/publish-dir",
+          "--json",
+          "--access",
+          "public",
+          "--tag",
+          "latest",
+        ],
         expect.any(Object)
       );
     });
