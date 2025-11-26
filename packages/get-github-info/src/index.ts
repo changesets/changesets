@@ -108,7 +108,24 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
       Authorization: `Token ${GITHUB_TOKEN}`,
     },
     body: JSON.stringify({ query: makeQuery(repos) }),
-  }).then((x: any) => x.json());
+  }).then(async (response: any) => {
+    let responseData;
+    try {
+      responseData = await response.json();
+    } catch (parseError) {
+      const responseText = await response.text();
+      if (!response.ok) {
+        throw new Error(
+          `GitHub API request failed with status ${response.status}: ${response.statusText}\nResponse: ${responseText}`
+        );
+      }
+      throw new Error(
+        `Failed to parse response as JSON: ${parseError}\nResponse: ${responseText}`
+      );
+    }
+
+    return responseData;
+  });
 
   if (data.errors) {
     throw new Error(
