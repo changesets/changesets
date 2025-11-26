@@ -91,7 +91,7 @@ describe("npm-utils", () => {
     it("should use bun publish when bun is detected", async () => {
       mockDetect.mockResolvedValue({
         name: "bun",
-        agent: "bun@1.0.0",
+        agent: "bun",
       });
       mockSpawn.mockResolvedValue({
         code: 0,
@@ -113,7 +113,7 @@ describe("npm-utils", () => {
     it("should use pnpm publish when pnpm is detected", async () => {
       mockDetect.mockResolvedValue({
         name: "pnpm",
-        agent: "pnpm@8.0.0",
+        agent: "pnpm",
       });
       // Mock pnpm version check
       mockSpawn
@@ -151,7 +151,7 @@ describe("npm-utils", () => {
     it("should use pnpm publish without --no-git-checks when version check fails", async () => {
       mockDetect.mockResolvedValue({
         name: "pnpm",
-        agent: "pnpm@8.0.0",
+        agent: "pnpm",
       });
       // Mock pnpm version check to fail
       mockSpawn
@@ -178,7 +178,7 @@ describe("npm-utils", () => {
     it("should use npm publish when npm is detected", async () => {
       mockDetect.mockResolvedValue({
         name: "npm",
-        agent: "npm@10.0.0",
+        agent: "npm",
       });
       mockSpawn.mockResolvedValue({
         code: 0,
@@ -198,7 +198,7 @@ describe("npm-utils", () => {
     it("should use npm publish when yarn is detected (yarn uses npm for publishing)", async () => {
       mockDetect.mockResolvedValue({
         name: "yarn",
-        agent: "yarn@1.22.0",
+        agent: "yarn",
       });
       mockSpawn.mockResolvedValue({
         code: 0,
@@ -233,7 +233,7 @@ describe("npm-utils", () => {
     });
 
     it("should return published: true when publish succeeds", async () => {
-      mockDetect.mockResolvedValue({ name: "bun", agent: "bun@1.0.0" });
+      mockDetect.mockResolvedValue({ name: "bun", agent: "bun" });
       mockSpawn.mockResolvedValue({
         code: 0,
         stdout: Buffer.from(""),
@@ -246,7 +246,7 @@ describe("npm-utils", () => {
     });
 
     it("should return published: false when publish fails", async () => {
-      mockDetect.mockResolvedValue({ name: "bun", agent: "bun@1.0.0" });
+      mockDetect.mockResolvedValue({ name: "bun", agent: "bun" });
       mockSpawn.mockResolvedValue({
         code: 1,
         stdout: Buffer.from(""),
