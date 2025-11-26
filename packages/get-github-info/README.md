@@ -58,7 +58,7 @@ You'll need to [get a GitHub personal access token](https://github.com/settings/
 GITHUB_TOKEN=token_here
 ```
 
-If you are using GitHub Enterprise Server, you can set configure `@changesets/get-github-info` to point at it using the following
+If you are using GitHub Enterprise Server, you can configure `@changesets/get-github-info` to point at it using the following
 environment variables:
 
 ```bash
