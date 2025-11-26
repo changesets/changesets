@@ -148,6 +148,33 @@ describe("npm-utils", () => {
       );
     });
 
+    it("should use pnpm publish without --no-git-checks when version check fails", async () => {
+      mockDetect.mockResolvedValue({
+        name: "pnpm",
+        agent: "pnpm@8.0.0",
+      });
+      // Mock pnpm version check to fail
+      mockSpawn
+        .mockRejectedValueOnce(new Error("pnpm not found"))
+        .mockResolvedValueOnce({
+          code: 0,
+          stdout: Buffer.from(""),
+          stderr: Buffer.from(""),
+        } as any);
+
+      await publish(packageJson, publishOpts, twoFactorState);
+
+      // Second call is publish without --no-git-checks
+      expect(mockSpawn).toHaveBeenNthCalledWith(
+        2,
+        "pnpm",
+        ["publish", "--json", "--access", "public", "--tag", "latest"],
+        expect.objectContaining({
+          cwd: "/test/cwd",
+        })
+      );
+    });
+
     it("should use npm publish when npm is detected", async () => {
       mockDetect.mockResolvedValue({
         name: "npm",
