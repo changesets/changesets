@@ -1,5 +1,14 @@
 # @changesets/changelog-github
 
+## 0.5.2
+
+### Patch Changes
+
+- [#1783](https://github.com/changesets/changesets/pull/1783) [`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a) Thanks [@mrginglymus](https://github.com/mrginglymus)! - Respect `GITHUB_SERVER_URL` environment variable when constructing URLs
+
+- Updated dependencies [[`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a)]:
+  - @changesets/get-github-info@0.7.0
+
 ## 0.5.1
 
 ### Patch Changes

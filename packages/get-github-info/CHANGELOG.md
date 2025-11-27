@@ -1,5 +1,18 @@
 # @changesets/get-github-info
 
+## 0.7.0
+
+### Minor Changes
+
+- [#1783](https://github.com/changesets/changesets/pull/1783) [`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a) Thanks [@mrginglymus](https://github.com/mrginglymus)! - Support GitHub URL environment variables
+
+  `@changesets/get-github-info` will now respect environment variables [set by GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/variables), specifically:
+
+  - `GITHUB_GRAPHQL_URL`
+  - `GITHUB_SERVER_URL`
+
+  This means GitHub Enterprise Server will be supported without any additional configuration or patching.
+
 ## 0.6.0
 
 ### Minor Changes
