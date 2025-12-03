@@ -13,6 +13,7 @@ function getPackage({
       name,
       version,
     },
+    relativeDir: "this-shouldn't-matter",
     dir: "this-shouldn't-matter",
   };
 }
@@ -44,17 +45,22 @@ function getRelease({
   return { name, type };
 }
 
-let getSimpleSetup = () => ({
+let getSimpleSetup = (): {
+  packages: Packages;
+  changesets: NewChangeset[];
+} => ({
   packages: {
-    root: {
+    rootDir: "/",
+    rootPackage: {
       packageJson: {
         name: "root",
         version: "0.0.0",
       },
-      dir: "/",
+      relativeDir: "/",
+      dir: "a",
     },
     packages: [getPackage({ name: "pkg-a", version: "1.0.0" })],
-    tool: "yarn" as const,
+    tool: { type: "yarn" as const } as Packages["tool"],
   },
   changesets: [
     getChangeset({ releases: [getRelease({ name: "pkg-a", type: "patch" })] }),

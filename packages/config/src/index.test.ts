@@ -25,19 +25,22 @@ type CorrectCase = {
 };
 
 let defaultPackages: Packages = {
-  root: {
-    packageJson: { name: "", version: "" },
+  rootDir: "/",
+  rootPackage: {
+    relativeDir: ".",
     dir: "/",
+    packageJson: { name: "", version: "" },
   },
   packages: [],
-  tool: "yarn",
+  tool: { type: "yarn" } as Packages["tool"],
 };
 
-const withPackages = (pkgNames: string[]) => ({
+const withPackages = (pkgNames: string[]): Packages => ({
   ...defaultPackages,
   packages: pkgNames.map((pkgName) => ({
-    packageJson: { name: pkgName, version: "" },
+    relativeDir: ".",
     dir: "dir",
+    packageJson: { name: pkgName, version: "" },
   })),
 });
 

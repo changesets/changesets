@@ -156,6 +156,7 @@ describe("version", () => {
     );
     expect(changedPackages).toEqual([
       {
+        relativeDir: path.join("packages", "pkg-a"),
         dir: path.join(clone, "packages", "pkg-a"),
         packageJson: {
           name: "pkg-a",
@@ -166,6 +167,7 @@ describe("version", () => {
         },
       },
       {
+        relativeDir: path.join("packages", "pkg-b"),
         dir: path.join(clone, "packages", "pkg-b"),
         packageJson: { name: "pkg-b", version: "1.1.0" },
       },
@@ -269,6 +271,7 @@ describe("version", () => {
     ).rejects.toMatchObject({ code: "ENOENT" });
     expect(changedPackages).toEqual([
       {
+        relativeDir: path.join("packages", "pkg-a"),
         dir: path.join(clone, "packages", "pkg-a"),
         packageJson: {
           name: "pkg-a",
@@ -327,6 +330,7 @@ describe("version", () => {
     });
     expect(changedPackages).toEqual([
       {
+        relativeDir: path.join("packages", "pkg-b"),
         dir: path.join(clone, "packages", "pkg-b"),
         packageJson: { name: "pkg-b", version: "1.1.0" },
       },

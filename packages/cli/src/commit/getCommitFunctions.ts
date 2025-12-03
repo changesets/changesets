@@ -11,6 +11,7 @@ export function getCommitFunctions(
     return [commitFunctions, null];
   }
   let commitOpts: any = commit[1];
+
   let changesetPath = path.join(cwd, ".changeset");
   let commitPath = resolveFrom(changesetPath, commit[0]);
 
