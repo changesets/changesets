@@ -15,6 +15,7 @@ npx changeset add --auto
 ```
 
 This command will:
+
 1. Analyze all conventional commits since the last tag for each package
 2. Determine the appropriate version bump based on commit types
 3. Generate changesets automatically for packages that need versioning

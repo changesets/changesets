@@ -472,7 +472,7 @@ describe("Auto Mode Tests", () => {
         mockConfig
       );
 
-      expect(result.bump).toBe("none");
+      expect(result.bump).toBe(null);
     });
 
     it("should handle extremely long commit messages", async () => {
@@ -536,7 +536,7 @@ describe("Auto Mode Tests", () => {
         auto: { ...mockConfig.auto, analyzer: errorAnalyzer },
       });
 
-      expect(result.bump).toBe("none");
+      expect(result.bump).toBe(null);
     });
 
     it("should handle negative maxCommits", async () => {
@@ -555,7 +555,7 @@ describe("Auto Mode Tests", () => {
         auto: { ...mockConfig.auto, maxCommits: -1 },
       });
 
-      expect(result.bump).toBe("none");
+      expect(result.bump).toBe(null);
     });
 
     it("should handle mixed commit styles (conventional and non-conventional)", async () => {
