@@ -4,6 +4,12 @@ import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 
 config();
 
+function readEnv() {
+  const GITHUB_SERVER_URL =
+    process.env.GITHUB_SERVER_URL || "https://github.com";
+  return { GITHUB_SERVER_URL };
+}
+
 const changelogFunctions: ChangelogFunctions = {
   getDependencyReleaseLine: async (
     changesets,
@@ -40,6 +46,7 @@ const changelogFunctions: ChangelogFunctions = {
     return [changesetLink, ...updatedDepenenciesList].join("\n");
   },
   getReleaseLine: async (changeset, type, options) => {
+    const { GITHUB_SERVER_URL } = readEnv();
     if (!options || !options.repo) {
       throw new Error(
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
@@ -80,7 +87,7 @@ const changelogFunctions: ChangelogFunctions = {
           const shortCommitId = commitFromSummary.slice(0, 7);
           links = {
             ...links,
-            commit: `[\`${shortCommitId}\`](https://github.com/${options.repo}/commit/${commitFromSummary})`,
+            commit: `[\`${shortCommitId}\`](${GITHUB_SERVER_URL}/${options.repo}/commit/${commitFromSummary})`,
           };
         }
         return links;
@@ -104,7 +111,7 @@ const changelogFunctions: ChangelogFunctions = {
       ? usersFromSummary
           .map(
             (userFromSummary) =>
-              `[@${userFromSummary}](https://github.com/${userFromSummary})`
+              `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`
           )
           .join(", ")
       : links.user;

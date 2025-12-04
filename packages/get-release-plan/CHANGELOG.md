@@ -1,5 +1,13 @@
 # @changesets/get-release-plan
 
+## 4.0.14
+
+### Patch Changes
+
+- Updated dependencies [[`cc28222`](https://github.com/changesets/changesets/commit/cc28222ee892b3a078fa02ee26e1cef98c171532), [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe)]:
+  - @changesets/config@3.1.2
+  - @changesets/read@0.6.6
+
 ## 5.0.0-next.1
 
 ### Major Changes

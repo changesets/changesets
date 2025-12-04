@@ -118,6 +118,7 @@ export default async function applyReleasePlan(
         JSON.stringify(releasePlan.preState, null, 2) + "\n"
       );
     }
+    touchedFiles.push(path.join(cwd, ".changeset", "pre.json"));
   }
 
   let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
@@ -330,7 +331,11 @@ async function updateChangelog(
     return;
   }
 
-  const newChangelog = fileData.replace("\n", templateString);
+  const index = fileData.indexOf("\n");
+  const newChangelog =
+    index === -1
+      ? fileData + templateString // treat the whole file as header
+      : fileData.slice(0, index) + templateString + fileData.slice(index + 1);
 
   await writeFormattedMarkdownFile(
     changelogPath,

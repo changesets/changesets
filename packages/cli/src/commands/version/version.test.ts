@@ -505,6 +505,54 @@ Awesome feature, hidden behind a feature flag
     `);
   });
 
+  it("should ignore special string replacement patterns in appended changesets", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-a/CHANGELOG.md": `# pkg-a
+
+      ## 1.0.0
+
+      ### Major Changes
+
+      - a very useful summary for the change
+      `,
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "major" }],
+        summary: "a summary with special replacement patterns `react$` $'",
+      },
+      cwd
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 2.0.0
+
+      ### Major Changes
+
+      - g1th4sh: a summary with special replacement patterns \`react$\` $'
+
+            ## 1.0.0
+
+            ### Major Changes
+
+            - a very useful summary for the change
+      "
+    `);
+  });
+
   describe("when there are multiple changeset commits", () => {
     it("should bump releasedPackages", async () => {
       const cwd = await testdir({

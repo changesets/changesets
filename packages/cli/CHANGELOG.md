@@ -1,5 +1,24 @@
 # @changesets/cli
 
+## 2.29.8
+
+### Patch Changes
+
+- [#1437](https://github.com/changesets/changesets/pull/1437) [`aa68d54`](https://github.com/changesets/changesets/commit/aa68d54faa17f825345ef3732d20e4a74423e5fd) Thanks [@with-heart](https://github.com/with-heart)! - Tweaked a hint text printed when one confirms an empty set of packages to be released
+
+- Updated dependencies [[`cc28222`](https://github.com/changesets/changesets/commit/cc28222ee892b3a078fa02ee26e1cef98c171532), [`e520bf5`](https://github.com/changesets/changesets/commit/e520bf5d4dbfe96f59ca28008e87bffaf3c9dfea), [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe)]:
+  - @changesets/config@3.1.2
+  - @changesets/apply-release-plan@7.0.14
+  - @changesets/get-release-plan@4.0.14
+  - @changesets/read@0.6.6
+
+## 2.29.7
+
+### Patch Changes
+
+- Updated dependencies [[`957f24e`](https://github.com/changesets/changesets/commit/957f24ed0446494c5709189ae57583f72c716d43)]:
+  - @changesets/apply-release-plan@7.0.13
+
 ## 3.0.0-next.1
 
 ### Major Changes

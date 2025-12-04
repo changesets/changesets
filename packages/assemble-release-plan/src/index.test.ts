@@ -636,7 +636,7 @@ describe("assemble-release-plan", () => {
       // Expected events:
       // - dependencies are checked, nothing leaves semver, nothing changes
       // - fixed are checked, pkg-a is aligned with pkg-b
-      // - depencencies are checked, in pkg-c the dependency range for pkg-a is not satisfied, so a patch bump is given to it
+      // - dependencies are checked, in pkg-c the dependency range for pkg-a is not satisfied, so a patch bump is given to it
       // - fixed are checked, pkg-c is aligned with pkg-d
       setup.addChangeset({
         id: "just-some-umbrellas",

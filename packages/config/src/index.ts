@@ -209,7 +209,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.push(
           ...getUnmatchedPatterns(fixedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`
           )
         );
 
@@ -227,7 +227,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
+            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch`
           );
         });
       }
@@ -252,7 +252,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.push(
           ...getUnmatchedPatterns(linkedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`
           )
         );
 
@@ -270,7 +270,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
+            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch`
           );
         });
       }
@@ -318,12 +318,15 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       messages.push(
         ...getUnmatchedPatterns(json.ignore, pkgNames).map(
           (pkgOrGlob) =>
-            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`
         )
       );
 
       // Validate that all dependents of ignored packages are listed in the ignore list
-      const dependentsGraph = getDependentsGraph(packages);
+      const dependentsGraph = getDependentsGraph(packages, {
+        bumpVersionsWithWorkspaceProtocolOnly:
+          json.bumpVersionsWithWorkspaceProtocolOnly,
+      });
       for (const ignoredPackage of json.ignore) {
         const dependents = dependentsGraph.get(ignoredPackage) || [];
         for (const dependent of dependents) {

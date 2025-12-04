@@ -2,7 +2,11 @@ import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config } from "@changesets/types";
 import type { Package } from "@manypkg/get-packages";
 import type { InternalRelease } from "./types.ts";
-import { getCurrentHighestVersion, getHighestReleaseType } from "./utils.ts";
+import {
+  getCurrentHighestVersion,
+  getHighestReleaseType,
+  mapGetOrThrowInternal,
+} from "./utils.ts";
 
 export default function matchFixedConstraint(
   releases: Map<string, InternalRelease>,
@@ -27,8 +31,15 @@ export default function matchFixedConstraint(
 
     // Finally, we update the packages so all of them are on the highest version
     for (let pkgName of fixedPackages) {
+      const pkg = mapGetOrThrowInternal(
+        packagesByName,
+        pkgName,
+        `Could not find package named "${pkgName}" listed in fixed group ${JSON.stringify(
+          fixedPackages
+        )}`
+      );
       if (
-        shouldSkipPackage(packagesByName.get(pkgName)!, {
+        shouldSkipPackage(pkg, {
           ignore: config.ignore,
           allowPrivatePackages: config.privatePackages.version,
         })

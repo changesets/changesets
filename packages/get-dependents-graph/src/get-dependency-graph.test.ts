@@ -116,4 +116,83 @@ describe("getting the dependency graph", function () {
       );
     })
   );
+
+  it(
+    "should error on dependencies not specified using workspace protocol when bumpVersionsWithWorkspaceProtocolOnly is false",
+    temporarilySilenceLogs(() => {
+      const { valid } = getDependencyGraph({
+        root: {
+          dir: ".",
+          packageJson: { name: "root", version: "1.0.0" },
+        },
+        packages: [
+          {
+            dir: "foo",
+            packageJson: {
+              name: "foo",
+              version: "1.0.0",
+              dependencies: {
+                bar: "0.9.0",
+              },
+            },
+          },
+          {
+            dir: "bar",
+            packageJson: {
+              name: "bar",
+              version: "1.0.0",
+            },
+          },
+        ],
+        tool: "pnpm",
+      });
+      expect(valid).toBe(false);
+      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            "Package "foo" must depend on the current version of "bar": "1.0.0" vs "0.9.0"",
+          ],
+        ]
+      `);
+    })
+  );
+
+  it(
+    "should skip dependencies not specified using workspace protocol when bumpVersionsWithWorkspaceProtocolOnly is true",
+    temporarilySilenceLogs(() => {
+      const { valid } = getDependencyGraph(
+        {
+          root: {
+            dir: ".",
+            packageJson: { name: "root", version: "1.0.0" },
+          },
+          packages: [
+            {
+              dir: "foo",
+              packageJson: {
+                name: "foo",
+                version: "1.0.0",
+                dependencies: {
+                  bar: "0.9.0",
+                },
+              },
+            },
+            {
+              dir: "bar",
+              packageJson: {
+                name: "bar",
+                version: "1.0.0",
+              },
+            },
+          ],
+          tool: "pnpm",
+        },
+        {
+          bumpVersionsWithWorkspaceProtocolOnly: true,
+        }
+      );
+      expect(valid).toBe(true);
+      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+    })
+  );
 });

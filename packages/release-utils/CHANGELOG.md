@@ -1,5 +1,12 @@
 # @changesets/release-utils
 
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@0.6.6
+
 ## 1.0.0-next.1
 
 ### Minor Changes

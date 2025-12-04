@@ -2,11 +2,20 @@ import { getInfo, getInfoFromPullRequest } from "./index.ts";
 import nock from "nock";
 import prettier from "prettier";
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { expect, test } from "vitest";
+import { expect, test, beforeEach, afterEach } from "vitest";
 
 process.env.GITHUB_TOKEN = "token";
 
-let apiPath = `/graphql`;
+const apiPath = `/graphql`;
+
+beforeEach(() => {
+  nock.disableNetConnect();
+});
+
+afterEach(() => {
+  nock.cleanAll();
+  nock.enableNetConnect();
+});
 
 test("associated with multiple PRs with only one merged", async () => {
   nock("https://api.github.com", {
@@ -398,4 +407,100 @@ test("associated with multiple PRs with only one merged", async () => {
       "user": "Andarist",
     }
   `);
+});
+
+test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
+  const originalGraphqlUrl = process.env.GITHUB_GRAPHQL_URL;
+  process.env.GITHUB_GRAPHQL_URL = "https://custom.github.com/api/graphql";
+
+  try {
+    nock("https://custom.github.com", {
+      reqheaders: {
+        Authorization: `Token ${process.env.GITHUB_TOKEN}`,
+      },
+    })
+      .post("/api/graphql", ({ query }) => {
+        expect(prettier.format(query, { parser: "graphql" }))
+          .toMatchInlineSnapshot(`
+          "query {
+            a0: repository(owner: "emotion-js", name: "emotion") {
+              aa085003: object(expression: "a085003") {
+                ... on Commit {
+                  commitUrl
+                  associatedPullRequests(first: 50) {
+                    nodes {
+                      number
+                      url
+                      mergedAt
+                      author {
+                        login
+                        url
+                      }
+                    }
+                  }
+                  author {
+                    user {
+                      login
+                      url
+                    }
+                  }
+                }
+              }
+            }
+          }
+          "
+        `);
+        return true;
+      })
+      .reply(
+        200,
+        JSON.stringify({
+          data: {
+            a0: {
+              aa085003: {
+                commitUrl:
+                  "https://custom.github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
+                associatedPullRequests: {
+                  nodes: [
+                    {
+                      number: 1613,
+                      url: "https://custom.github.com/emotion-js/emotion/pull/1613",
+                      mergedAt: "2019-11-07T06:43:58Z",
+                      author: {
+                        login: "Andarist",
+                        url: "https://custom.github.com/Andarist",
+                      },
+                    },
+                  ],
+                },
+                author: {
+                  user: {
+                    login: "Andarist",
+                    url: "https://custom.github.com/Andarist",
+                  },
+                },
+              },
+            },
+          },
+        })
+      );
+
+    let result = await getInfo({
+      commit: "a085003",
+      repo: "emotion-js/emotion",
+    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "links": {
+          "commit": "[\`a085003\`](https://custom.github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
+          "pull": "[#1613](https://custom.github.com/emotion-js/emotion/pull/1613)",
+          "user": "[@Andarist](https://custom.github.com/Andarist)",
+        },
+        "pull": 1613,
+        "user": "Andarist",
+      }
+    `);
+  } finally {
+    process.env.GITHUB_GRAPHQL_URL = originalGraphqlUrl;
+  }
 });

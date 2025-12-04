@@ -16,6 +16,7 @@ import flattenReleases from "./flatten-releases.ts";
 import { incrementVersion } from "./increment.ts";
 import matchFixedConstraint from "./match-fixed-constraint.ts";
 import type { InternalRelease, PreInfo } from "./types.ts";
+import { mapGetOrThrow, mapGetOrThrowInternal } from "./utils.ts";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -126,7 +127,7 @@ function assembleReleasePlan(
   config: OptionalProp<Config, "snapshot">,
   // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
   preState: PreState | undefined,
-  // snapshot: undefined            ->  not using snaphot
+  // snapshot: undefined            ->  not using snapshot
   // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
   // snapshot: { tag: "canary" }    ->  --snapshot canary
   snapshot?: SnapshotReleaseParameters | string | boolean
@@ -276,13 +277,12 @@ function getRelevantChangesets(
     const skippedPackages = [];
     const notSkippedPackages = [];
     for (const release of changeset.releases) {
-      const packageByName = packagesByName.get(release.name);
-
-      if (!packageByName) {
-        throw new Error(
-          `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
-        );
-      }
+      // this acts as an early validation in this package so we don't throw an internal error here
+      const packageByName = mapGetOrThrow(
+        packagesByName,
+        release.name,
+        `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
+      );
 
       if (
         shouldSkipPackage(packageByName, {
@@ -317,13 +317,21 @@ function getRelevantChangesets(
 }
 
 function getHighestPreVersion(
+  groupKind: "linked" | "fixed",
   packageGroup: PackageGroup,
   packagesByName: Map<string, Package>
 ): number {
   let highestPreVersion = 0;
-  for (let pkg of packageGroup) {
+  for (let pkgName of packageGroup) {
+    const pkg = mapGetOrThrowInternal(
+      packagesByName,
+      pkgName,
+      `Could not find package named "${pkgName}" listed in ${groupKind} group ${JSON.stringify(
+        packageGroup
+      )}`
+    );
     highestPreVersion = Math.max(
-      getPreVersion(packagesByName.get(pkg)!.packageJson.version),
+      getPreVersion(pkg.packageJson.version),
       highestPreVersion
     );
   }
@@ -372,13 +380,21 @@ function getPreInfo(
     );
   }
   for (let fixedGroup of config.fixed) {
-    let highestPreVersion = getHighestPreVersion(fixedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      "fixed",
+      fixedGroup,
+      packagesByName
+    );
     for (let fixedPackage of fixedGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
     }
   }
   for (let linkedGroup of config.linked) {
-    let highestPreVersion = getHighestPreVersion(linkedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      "linked",
+      linkedGroup,
+      packagesByName
+    );
     for (let linkedPackage of linkedGroup) {
       preVersions.set(linkedPackage, highestPreVersion);
     }
