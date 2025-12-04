@@ -9,7 +9,7 @@ const DEPENDENCY_TYPES = [
 
 export type VersionType = "major" | "minor" | "patch" | "none";
 
-export type DependencyType = typeof DEPENDENCY_TYPES[number];
+export type DependencyType = (typeof DEPENDENCY_TYPES)[number];
 
 export type AccessType = "public" | "restricted";
 
@@ -92,6 +92,18 @@ export type Config = {
     useCalculatedVersion: boolean;
     prereleaseTemplate: string | null;
   };
+  /** Configuration for auto mode commit analysis */
+  auto?: {
+    /** Maximum number of commits to analyze per package (default: 100) */
+    maxCommits?: number;
+    /** Conventional commit preset to use (default: "conventionalcommits") */
+    preset?: string;
+    /** Custom analyzer function for commit analysis */
+    analyzer?: (
+      commits: Array<{ hash: string; message: string }>,
+      preset: string
+    ) => Promise<VersionType>;
+  };
 };
 
 export type WrittenConfig = {
@@ -119,6 +131,18 @@ export type WrittenConfig = {
     prereleaseTemplate?: string;
   };
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?: ExperimentalOptions;
+  /** Configuration for auto mode commit analysis */
+  auto?: {
+    /** Maximum number of commits to analyze per package (default: 100) */
+    maxCommits?: number;
+    /** Conventional commit preset to use (default: "conventionalcommits") */
+    preset?: string;
+    /** Custom analyzer function for commit analysis (for testing) */
+    analyzer?: (
+      commits: Array<{ hash: string; message: string }>,
+      preset: string
+    ) => Promise<VersionType>;
+  };
 };
 
 export type ExperimentalOptions = {

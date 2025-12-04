@@ -145,6 +145,23 @@
           "minLength": 1
         }
       }
+    },
+    "auto": {
+      "type": "object",
+      "description": "Configuration for auto mode commit analysis",
+      "properties": {
+        "maxCommits": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Maximum number of commits to analyze per package",
+          "default": 100
+        },
+        "preset": {
+          "type": "string",
+          "description": "Conventional commit preset to use",
+          "default": "conventionalcommits"
+        }
+      }
     }
   }
 }

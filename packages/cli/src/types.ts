@@ -4,6 +4,7 @@ export type CliOptions = {
   output?: string;
   otp?: string;
   empty?: boolean;
+  auto?: boolean;
   since?: string;
   ignore?: string | string[];
   snapshot?: string | boolean;
