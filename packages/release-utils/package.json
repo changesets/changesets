@@ -27,7 +27,7 @@
     "remark-stringify": "^7.0.3",
     "semver": "^7.5.3",
     "spawndamnit": "^3.0.1",
-    "unified": "^8.3.2"
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@changesets/git": "*",
