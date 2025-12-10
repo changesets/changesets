@@ -2,7 +2,7 @@
 import termSize from "term-size";
 import { error, prefix, success } from "@changesets/logger";
 import { prompt } from "enquirer";
-import { edit } from "external-editor";
+import { edit } from "@inquirer/external-editor";
 import { symbols } from "ansi-colors";
 
 // those types are not exported from `enquirer` so we extract them here

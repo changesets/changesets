@@ -1,5 +1,33 @@
 # @changesets/changelog-github
 
+## 0.5.2
+
+### Patch Changes
+
+- [#1783](https://github.com/changesets/changesets/pull/1783) [`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a) Thanks [@mrginglymus](https://github.com/mrginglymus)! - Respect `GITHUB_SERVER_URL` environment variable when constructing URLs
+
+- Updated dependencies [[`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a)]:
+  - @changesets/get-github-info@0.7.0
+
+## 0.5.1
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+
+## 0.5.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+### Patch Changes
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a)]:
+  - @changesets/get-github-info@0.6.0
+  - @changesets/types@6.0.0
+
 ## 0.4.8
 
 ### Patch Changes

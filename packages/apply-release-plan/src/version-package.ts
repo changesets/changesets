@@ -6,6 +6,7 @@ import {
 import getVersionRangeType from "@changesets/get-version-range-type";
 import Range from "semver/classes/range";
 import semverPrerelease from "semver/functions/prerelease";
+import validRange from "semver/ranges/valid";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
 const DEPENDENCY_TYPES = [
@@ -65,7 +66,8 @@ export default function versionPackage(
 
         if (
           !usesWorkspaceRange &&
-          bumpVersionsWithWorkspaceProtocolOnly === true
+          (bumpVersionsWithWorkspaceProtocolOnly ||
+            validRange(depCurrentVersion) === null)
         ) {
           continue;
         }

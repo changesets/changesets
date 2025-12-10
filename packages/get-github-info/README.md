@@ -1,6 +1,7 @@
 # @changesets/get-github-info
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/get-github-info)
+[![npm package](https://img.shields.io/npm/v/@changesets/get-github-info)](https://npmjs.com/package/@changesets/get-github-info)
+[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
 > Get the GitHub username and PR number from a commit. Intended for use with changesets.
 
@@ -36,7 +37,7 @@ const getReleaseLine = async (changeset, type) => {
   // but it also exposes a set of links for the commit, PR and GH username
   let { user, pull, links } = await getInfo({
     // replace this with your own repo
-    repo: "Noviny/changesets",
+    repo: "changesets/changesets",
     commit: changeset.commit,
   });
   let returnVal = `- ${links.commit}${
@@ -58,6 +59,18 @@ GITHUB_TOKEN=token_here
 ```
 
 You can now bump your packages and changelogs with `changeset version` and it'll have the GitHub info. 🎉
+
+### GitHub Enterprise Server
+
+If you are using GitHub Enterprise Server, you can configure `@changesets/get-github-info` to point at it using the following
+environment variables:
+
+```bash
+GITHUB_SERVER_URL=https://github.example.com
+GITHUB_GRAPHQL_URL=https://github.example.com/api/graphql
+```
+
+When using GitHub Actions, these environment variables will already have been set.
 
 ## API
 

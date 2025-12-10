@@ -1,20 +1,22 @@
+import { InternalError } from "@changesets/errors";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
-  ReleasePlan,
   Config,
   NewChangeset,
-  PreState,
   PackageGroup,
+  PreState,
+  ReleasePlan,
 } from "@changesets/types";
+import { Package, Packages } from "@manypkg/get-packages";
+import semverParse from "semver/functions/parse";
+import applyLinks from "./apply-links";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
-import matchFixedConstraint from "./match-fixed-constraint";
-import applyLinks from "./apply-links";
 import { incrementVersion } from "./increment";
-import semverParse from "semver/functions/parse";
-import { InternalError } from "@changesets/errors";
-import { Packages, Package } from "@manypkg/get-packages";
-import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { PreInfo, InternalRelease } from "./types";
+import matchFixedConstraint from "./match-fixed-constraint";
+import { InternalRelease, PreInfo } from "./types";
+import { mapGetOrThrow, mapGetOrThrowInternal } from "./utils";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -125,7 +127,7 @@ function assembleReleasePlan(
   config: OptionalProp<Config, "snapshot">,
   // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
   preState: PreState | undefined,
-  // snapshot: undefined            ->  not using snaphot
+  // snapshot: undefined            ->  not using snapshot
   // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
   // snapshot: { tag: "canary" }    ->  --snapshot canary
   snapshot?: SnapshotReleaseParameters | string | boolean
@@ -156,7 +158,8 @@ function assembleReleasePlan(
 
   const relevantChangesets = getRelevantChangesets(
     changesets,
-    refinedConfig.ignore,
+    packagesByName,
+    refinedConfig,
     preState
   );
 
@@ -173,7 +176,7 @@ function assembleReleasePlan(
   let releases = flattenReleases(
     relevantChangesets,
     packagesByName,
-    refinedConfig.ignore
+    refinedConfig
   );
 
   let dependencyGraph = getDependentsGraph(packages, {
@@ -224,7 +227,10 @@ function assembleReleasePlan(
           });
         } else if (
           existingRelease.type === "none" &&
-          !refinedConfig.ignore.includes(pkg.packageJson.name)
+          !shouldSkipPackage(pkg, {
+            ignore: refinedConfig.ignore,
+            allowPrivatePackages: refinedConfig.privatePackages.version,
+          })
         ) {
           existingRelease.type = "patch";
         }
@@ -261,31 +267,40 @@ function assembleReleasePlan(
 
 function getRelevantChangesets(
   changesets: NewChangeset[],
-  ignored: Readonly<string[]>,
+  packagesByName: Map<string, Package>,
+  config: Config,
   preState: PreState | undefined
 ): NewChangeset[] {
   for (const changeset of changesets) {
     // Using the following 2 arrays to decide whether a changeset
-    // contains both ignored and not ignored packages
-    const ignoredPackages = [];
-    const notIgnoredPackages = [];
+    // contains both skipped and not skipped packages
+    const skippedPackages = [];
+    const notSkippedPackages = [];
     for (const release of changeset.releases) {
+      // this acts as an early validation in this package so we don't throw an internal error here
+      const packageByName = mapGetOrThrow(
+        packagesByName,
+        release.name,
+        `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
+      );
+
       if (
-        ignored.find(
-          (ignoredPackageName) => ignoredPackageName === release.name
-        )
+        shouldSkipPackage(packageByName, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        })
       ) {
-        ignoredPackages.push(release.name);
+        skippedPackages.push(release.name);
       } else {
-        notIgnoredPackages.push(release.name);
+        notSkippedPackages.push(release.name);
       }
     }
 
-    if (ignoredPackages.length > 0 && notIgnoredPackages.length > 0) {
+    if (skippedPackages.length > 0 && notSkippedPackages.length > 0) {
       throw new Error(
         `Found mixed changeset ${changeset.id}\n` +
-          `Found ignored packages: ${ignoredPackages.join(" ")}\n` +
-          `Found not ignored packages: ${notIgnoredPackages.join(" ")}\n` +
+          `Found ignored packages: ${skippedPackages.join(" ")}\n` +
+          `Found not ignored packages: ${notSkippedPackages.join(" ")}\n` +
           "Mixed changesets that contain both ignored and not ignored packages are not allowed"
       );
     }
@@ -302,13 +317,21 @@ function getRelevantChangesets(
 }
 
 function getHighestPreVersion(
+  groupKind: "linked" | "fixed",
   packageGroup: PackageGroup,
   packagesByName: Map<string, Package>
 ): number {
   let highestPreVersion = 0;
-  for (let pkg of packageGroup) {
+  for (let pkgName of packageGroup) {
+    const pkg = mapGetOrThrowInternal(
+      packagesByName,
+      pkgName,
+      `Could not find package named "${pkgName}" listed in ${groupKind} group ${JSON.stringify(
+        packageGroup
+      )}`
+    );
     highestPreVersion = Math.max(
-      getPreVersion(packagesByName.get(pkg)!.packageJson.version),
+      getPreVersion(pkg.packageJson.version),
       highestPreVersion
     );
   }
@@ -343,19 +366,35 @@ function getPreInfo(
   // preVersion is the map between package name and its next pre version number.
   let preVersions = new Map<string, number>();
   for (const [, pkg] of packagesByName) {
+    if (
+      shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.version,
+      })
+    ) {
+      continue;
+    }
     preVersions.set(
       pkg.packageJson.name,
       getPreVersion(pkg.packageJson.version)
     );
   }
   for (let fixedGroup of config.fixed) {
-    let highestPreVersion = getHighestPreVersion(fixedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      "fixed",
+      fixedGroup,
+      packagesByName
+    );
     for (let fixedPackage of fixedGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
     }
   }
   for (let linkedGroup of config.linked) {
-    let highestPreVersion = getHighestPreVersion(linkedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      "linked",
+      linkedGroup,
+      packagesByName
+    );
     for (let linkedPackage of linkedGroup) {
       preVersions.set(linkedPackage, highestPreVersion);
     }
