@@ -18,3 +18,11 @@ runs:
     - name: Install dependencies
       shell: bash
       run: yarn install --frozen-lockfile --ignore-scripts
+
+    - name: Run build
+      shell: bash
+      run: yarn preconstruct dev
+
+    - name: Verify
+      shell: bash
+      run: yarn manypkg check
