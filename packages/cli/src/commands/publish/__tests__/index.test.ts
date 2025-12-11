@@ -6,9 +6,7 @@ import type { Config } from "@changesets/types";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-let changelogPath = path.resolve(__dirname, "../../changelog");
+let changelogPath = path.resolve(import.meta.dirname, "../../changelog");
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: [changelogPath, null],
