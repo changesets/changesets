@@ -4,7 +4,7 @@
   "description": "Error classes for @changesets",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-errors.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",

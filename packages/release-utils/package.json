@@ -4,7 +4,7 @@
   "type": "module",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/release-utils",
   "exports": {
-    ".": "./dist/changesets-release-utils.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "dependencies": {

@@ -4,7 +4,7 @@
   "description": "Console log alias",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-logger.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",

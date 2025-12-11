@@ -4,7 +4,7 @@
   "description": "Get the graph of dependents in a monorepo",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-get-dependents-graph.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",

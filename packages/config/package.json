@@ -4,7 +4,7 @@
   "description": "Utilities for reading and parsing Changeset's config",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-config.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json",
     "./schema.json": "./schema.json"
   },
@@ -31,12 +31,5 @@
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
-  },
-  "preconstruct": {
-    "exports": {
-      "extra": {
-        "./schema.json": "./schema.json"
-      }
-    }
   }
 }

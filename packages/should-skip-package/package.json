@@ -4,7 +4,7 @@
   "description": "Checks if a package should be skipped for versioning or tagging purposes",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-should-skip-package.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",

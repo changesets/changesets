@@ -4,7 +4,7 @@
   "description": "Some git helpers that changesets use to get information",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-git.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",

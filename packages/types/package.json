@@ -4,7 +4,7 @@
   "description": "Common types shared between changeset packages",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-types.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",

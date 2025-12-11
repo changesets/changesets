@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Utils for testing changesets packages",
   "exports": {
-    ".": "./dist/changesets-test-utils.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
