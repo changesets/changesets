@@ -24,7 +24,8 @@ jobs:
         node_version: [22, 24, 25]
       fail-fast: false
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -40,13 +41,12 @@ jobs:
 
       - name: Vitest tests
         if: matrix.node_version != 24
-        # @changesets/release-utils depend on `--experimental-strip-types` so we exclude those test here for simplicity
-        run: yarn vitest --no-file-parallelism --exclude=packages/release-utils
+        run: node --run test
 
       # Run coverage only once on node 24 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
         if: matrix.node_version == 24
-        run: yarn vitest --no-file-parallelism --coverage
+        run: node --run test -- --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
@@ -59,31 +59,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
 
       - name: Typecheck
-        run: yarn types:check
+        run: node --run types:check
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
 
       - name: Lint
-        run: yarn lint
+        run: node --run lint
 
       - name: Format
-        run: yarn format
+        run: node --run format
 
   ci-ok:
     name: CI OK
