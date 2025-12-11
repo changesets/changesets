@@ -20,7 +20,10 @@ jobs:
         node_version: [20, 22]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
         with:
           node-version: ${{ matrix.node_version }}
@@ -52,7 +55,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
 
       - name: Typecheck
@@ -63,7 +69,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
 
       - name: Lint

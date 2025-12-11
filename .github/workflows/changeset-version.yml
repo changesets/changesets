@@ -20,7 +20,10 @@ jobs:
       pull-requests: write # to create pull request (changesets/action)
       id-token: write # to use OpenID Connect token for provenance (changesets/action)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
 
       - name: Create Release Pull Request or Publish to npm
