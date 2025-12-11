@@ -2049,7 +2049,7 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           changelog: [
-            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry.ts"),
             null,
           ],
         }
@@ -2106,7 +2106,7 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           changelog: [
-            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry.ts"),
             null,
           ],
         }
@@ -2196,7 +2196,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           changelog: [
-            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry.ts"),
             null,
           ],
           updateInternalDependencies: "patch",
@@ -2250,7 +2250,7 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           changelog: [
-            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry.ts"),
             null,
           ],
         }
@@ -2329,7 +2329,7 @@ describe("apply release plan", () => {
         },
         {
           changelog: [
-            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry.ts"),
             null,
           ],
           commit: false,
@@ -2439,7 +2439,7 @@ describe("apply release plan", () => {
         },
         {
           changelog: [
-            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry.ts"),
             null,
           ],
           commit: false,
@@ -2561,7 +2561,7 @@ describe("apply release plan", () => {
         },
         {
           changelog: [
-            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry.ts"),
             null,
           ],
           commit: false,
@@ -2697,7 +2697,7 @@ describe("apply release plan", () => {
         },
         {
           changelog: [
-            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry.ts"),
             null,
           ],
           commit: false,
@@ -2914,7 +2914,7 @@ describe("apply release plan", () => {
             {
               ...releasePlan.config,
               changelog: [
-                path.resolve(import.meta.dirname, "test-utils/failing-functions"),
+                path.resolve(import.meta.dirname, "test-utils/failing-functions.ts"),
                 null,
               ],
             }
@@ -3155,7 +3155,7 @@ describe("apply release plan", () => {
           null,
         ],
         changelog: [
-          path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry"),
+          path.resolve(import.meta.dirname, "test-utils/simple-get-changelog-entry.ts"),
           null,
         ],
       },
