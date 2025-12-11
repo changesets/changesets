@@ -10,12 +10,12 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/changelog-github",
   "dependencies": {
-    "@changesets/get-github-info": "^1.0.0-next.1",
-    "@changesets/types": "^7.0.0-next.2",
+    "@changesets/get-github-info": "workspace:^",
+    "@changesets/types": "workspace:^",
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
-    "@changesets/parse": "1.0.0-next.2",
+    "@changesets/parse": "workspace:*",
     "vitest": "^4.1.5"
   },
   "engines": {
