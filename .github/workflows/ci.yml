@@ -39,7 +39,7 @@ jobs:
         # @changesets/release-utils depend on `--experimental-strip-types` so we exclude those test here for simplicity
         run: yarn vitest --no-file-parallelism --exclude=packages/release-utils
 
-      # Run coverage only once on node 22 to avoid duplicate codecov uploads
+      # Run coverage only once on node 24 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
         if: matrix.node_version == 24
         run: yarn vitest --no-file-parallelism --coverage
