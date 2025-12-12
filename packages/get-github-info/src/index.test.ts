@@ -430,6 +430,7 @@ test("associated with multiple PRs with only one merged 2", async () => {
 });
 
 test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
+  let githubQuery = "";
   const originalGraphqlUrl = process.env.GITHUB_GRAPHQL_URL;
   process.env.GITHUB_GRAPHQL_URL = "https://custom.github.com/api/graphql";
 
@@ -440,36 +441,7 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
       },
     })
       .post("/api/graphql", ({ query }) => {
-        expect(prettier.format(query, { parser: "graphql" }))
-          .toMatchInlineSnapshot(`
-          "query {
-            a0: repository(owner: "emotion-js", name: "emotion") {
-              aa085003: object(expression: "a085003") {
-                ... on Commit {
-                  commitUrl
-                  associatedPullRequests(first: 50) {
-                    nodes {
-                      number
-                      url
-                      mergedAt
-                      author {
-                        login
-                        url
-                      }
-                    }
-                  }
-                  author {
-                    user {
-                      login
-                      url
-                    }
-                  }
-                }
-              }
-            }
-          }
-          "
-        `);
+        githubQuery = query;
         return true;
       })
       .reply(
@@ -520,6 +492,36 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
         "user": "Andarist",
       }
     `);
+    expect(await prettier.format(githubQuery, { parser: "graphql" }))
+      .toMatchInlineSnapshot(`
+        "query {
+          a0: repository(owner: "emotion-js", name: "emotion") {
+            aa085003: object(expression: "a085003") {
+              ... on Commit {
+                commitUrl
+                associatedPullRequests(first: 50) {
+                  nodes {
+                    number
+                    url
+                    mergedAt
+                    author {
+                      login
+                      url
+                    }
+                  }
+                }
+                author {
+                  user {
+                    login
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
+        "
+      `);
   } finally {
     process.env.GITHUB_GRAPHQL_URL = originalGraphqlUrl;
   }
