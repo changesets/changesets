@@ -46,6 +46,7 @@
     "eslint-plugin-n": "^17.24.0",
     "eslint-plugin-perfectionist": "^5.9.0",
     "prettier": "^3.7.4",
+    "publint": "^0.3.18",
     "tsdown": "^0.22.0-beta.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.1",

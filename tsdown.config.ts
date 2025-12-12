@@ -7,6 +7,8 @@ export const baseConfig = defineConfig({
   dts: true,
   format: "esm",
   minify: "dce-only",
+
+  publint: true,
 });
 
 export default defineConfig({
