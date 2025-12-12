@@ -35,13 +35,13 @@ jobs:
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
       - name: Vitest tests
-        if: matrix.node_version == 20
+        if: matrix.node_version != 24
         # @changesets/release-utils depend on `--experimental-strip-types` so we exclude those test here for simplicity
         run: yarn vitest --no-file-parallelism --exclude=packages/release-utils
 
       # Run coverage only once on node 22 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
-        if: matrix.node_version != 20
+        if: matrix.node_version == 24
         run: yarn vitest --no-file-parallelism --coverage
 
       - name: Upload coverage
