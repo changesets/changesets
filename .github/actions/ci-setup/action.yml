@@ -23,6 +23,6 @@ runs:
       shell: bash
       run: yarn preconstruct dev
 
-    - name: Verify
+    - name: Manypkg check
       shell: bash
       run: yarn manypkg check
