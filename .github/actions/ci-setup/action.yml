@@ -19,7 +19,7 @@ runs:
       shell: bash
       run: yarn install --frozen-lockfile --ignore-scripts
 
-    - name: Run build
+    - name: Setup dev environment
       shell: bash
       run: yarn preconstruct dev
 
