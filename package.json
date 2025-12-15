@@ -33,8 +33,10 @@
     "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
   ],
   "license": "MIT",
+  "resolutions": {
+    "vite": "npm:rolldown-vite@7.2.10"
+  },
   "devDependencies": {
-    "@babel/cli": "^7.27.0",
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-typescript": "^7.27.0",
@@ -45,7 +47,7 @@
     "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.62.0",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^4.0.15",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.1.0",
@@ -55,7 +57,7 @@
     "eslint-plugin-standard": "^5.0.0",
     "prettier": "^2.7.1",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.15"
   },
   "preconstruct": {
     "packages": [

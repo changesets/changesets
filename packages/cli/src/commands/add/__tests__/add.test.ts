@@ -211,7 +211,14 @@ describe("Add command", () => {
       {
         ...defaultConfig,
         commit: [
-          path.resolve(import.meta.dirname, "..", "..", "..", "commit"),
+          path.resolve(
+            import.meta.dirname,
+            "..",
+            "..",
+            "..",
+            "commit",
+            "index.ts"
+          ),
           null,
         ],
       }
