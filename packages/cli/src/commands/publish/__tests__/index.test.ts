@@ -33,7 +33,7 @@ describe("Publish command", () => {
         }),
       });
       await expect(
-        publishCommand(cwd, { tag: "experimental" }, modifiedDefaultConfig)
+        publishCommand(cwd, { tag: "experimental" }, modifiedDefaultConfig),
       ).rejects.toThrowError();
     });
   });

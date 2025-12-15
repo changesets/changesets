@@ -5,7 +5,7 @@ describe("@changesets/logger", () => {
   const logMessageOne = "Message 1";
   const logMessageTwo = "Message 2";
   const expectedLoggedRegex = new RegExp(
-    `(${logMessageOne})\\s(${logMessageTwo})`
+    `(${logMessageOne})\\s(${logMessageTwo})`,
   );
   describe("log", () => {
     let originalConsoleLog = console.log;
@@ -18,7 +18,7 @@ describe("@changesets/logger", () => {
     it("should  call console.log", () => {
       log(logMessageOne, logMessageTwo);
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringMatching(expectedLoggedRegex)
+        expect.stringMatching(expectedLoggedRegex),
       );
     });
   });
@@ -33,7 +33,7 @@ describe("@changesets/logger", () => {
     it("should  call console.error", () => {
       error(logMessageOne, logMessageTwo);
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringMatching(expectedLoggedRegex)
+        expect.stringMatching(expectedLoggedRegex),
       );
     });
   });
@@ -48,7 +48,7 @@ describe("@changesets/logger", () => {
     it("should  call console.error", () => {
       info(logMessageOne, logMessageTwo);
       expect(console.info).toHaveBeenCalledWith(
-        expect.stringMatching(expectedLoggedRegex)
+        expect.stringMatching(expectedLoggedRegex),
       );
     });
   });
@@ -64,7 +64,7 @@ describe("@changesets/logger", () => {
     it("should  call console.info", () => {
       warn(logMessageOne, logMessageTwo);
       expect(console.warn).toHaveBeenCalledWith(
-        expect.stringMatching(expectedLoggedRegex)
+        expect.stringMatching(expectedLoggedRegex),
       );
     });
   });
@@ -80,7 +80,7 @@ describe("@changesets/logger", () => {
     it("should  call console.info", () => {
       success(logMessageOne, logMessageTwo);
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringMatching(expectedLoggedRegex)
+        expect.stringMatching(expectedLoggedRegex),
       );
     });
   });

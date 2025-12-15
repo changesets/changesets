@@ -185,7 +185,7 @@ it(
 
     await read(cwd, packages);
     expect(console.error).not.toBeCalled();
-  })
+  }),
 );
 
 let defaults: Config = {
@@ -477,10 +477,10 @@ describe("parse", () => {
     Object.keys(correctCases).map((title) => ({
       title,
       ...correctCases[title],
-    }))
+    })),
   )("$title", ({ input, output, packages }) => {
     expect(parse(input, withPackages(packages || ["pkg-a", "pkg-b"]))).toEqual(
-      output
+      output,
     );
   });
 });
@@ -500,7 +500,7 @@ describe("parser errors", () => {
     expect(() => {
       unsafeParse(
         { changelog: ["some-module", "something", "other"] },
-        defaultPackages
+        defaultPackages,
       );
     }).toThrowErrorMatchingInlineSnapshot(`
       [Error: Some errors occurred when validating the changesets config:
@@ -597,7 +597,7 @@ describe("parser errors", () => {
       expect(() => {
         parse(
           { fixed: [["pkg-*"], ["pkg-*"]] },
-          withPackages(["pkg-a", "pkg-b"])
+          withPackages(["pkg-a", "pkg-b"]),
         );
       }).toThrowErrorMatchingInlineSnapshot(`
         [Error: Some errors occurred when validating the changesets config:
@@ -666,7 +666,7 @@ describe("parser errors", () => {
       expect(() => {
         parse(
           { linked: [["pkg-*"], ["pkg-*"]] },
-          withPackages(["pkg-a", "pkg-b"])
+          withPackages(["pkg-a", "pkg-b"]),
         );
       }).toThrowErrorMatchingInlineSnapshot(`
         [Error: Some errors occurred when validating the changesets config:
@@ -679,7 +679,7 @@ describe("parser errors", () => {
     let config = unsafeParse({ access: "private" }, defaultPackages);
     expect(config).toEqual(defaults);
     expect(logger.warn).toBeCalledWith(
-      'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".'
+      'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',
     );
   });
   test("updateInternalDependencies not patch or minor", () => {
@@ -741,8 +741,8 @@ describe("parser errors", () => {
               dir: "dir",
             },
           ],
-        }
-      )
+        },
+      ),
     ).toThrowErrorMatchingInlineSnapshot(`
       [Error: Some errors occurred when validating the changesets config:
       The package "pkg-a" depends on the ignored package "pkg-b", but "pkg-a" is not being ignored. Please add "pkg-a" to the \`ignore\` option.]
@@ -757,7 +757,7 @@ describe("parser errors", () => {
             onlyUpdatePeerDependentsWhenOutOfRange: "not true",
           },
         },
-        defaultPackages
+        defaultPackages,
       );
     }).toThrowErrorMatchingInlineSnapshot(`
       [Error: Some errors occurred when validating the changesets config:
@@ -773,7 +773,7 @@ describe("parser errors", () => {
             useCalculatedVersion: "not true",
           },
         },
-        defaultPackages
+        defaultPackages,
       );
     }).toThrowErrorMatchingInlineSnapshot(`
       [Error: Some errors occurred when validating the changesets config:
@@ -789,7 +789,7 @@ describe("parser errors", () => {
             useCalculatedVersionForSnapshots: "not true",
           },
         },
-        defaultPackages
+        defaultPackages,
       );
     }).toThrowErrorMatchingInlineSnapshot(`
       [Error: Some errors occurred when validating the changesets config:
@@ -807,7 +807,7 @@ describe("parser errors", () => {
 
   test("changed files patterns - non-string element", () => {
     expect(() =>
-      unsafeParse({ changedFilePatterns: ["src/**", 100] }, defaultPackages)
+      unsafeParse({ changedFilePatterns: ["src/**", 100] }, defaultPackages),
     ).toThrowErrorMatchingInlineSnapshot(`
       [Error: Some errors occurred when validating the changesets config:
       The \`changedFilePatterns\` option is set as [

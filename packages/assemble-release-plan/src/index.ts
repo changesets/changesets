@@ -36,7 +36,7 @@ function getPreVersion(version: string) {
 
 function getSnapshotSuffix(
   template: Config["snapshot"]["prereleaseTemplate"],
-  snapshotParameters: SnapshotReleaseParameters
+  snapshotParameters: SnapshotReleaseParameters,
 ): string {
   let snapshotRefDate = new Date();
 
@@ -64,7 +64,7 @@ function getSnapshotSuffix(
 
   if (!template.includes(`{tag}`) && placeholderValues.tag !== undefined) {
     throw new Error(
-      `Failed to compose snapshot version: "{tag}" placeholder is missing, but the snapshot parameter is defined (value: '${placeholderValues.tag}')`
+      `Failed to compose snapshot version: "{tag}" placeholder is missing, but the snapshot parameter is defined (value: '${placeholderValues.tag}')`,
     );
   }
 
@@ -73,7 +73,7 @@ function getSnapshotSuffix(
       const value = placeholderValues[key];
       if (value === undefined) {
         throw new Error(
-          `Failed to compose snapshot version: "{${key}}" placeholder is used without having a value defined!`
+          `Failed to compose snapshot version: "{${key}}" placeholder is used without having a value defined!`,
         );
       }
 
@@ -86,7 +86,7 @@ function getSnapshotVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined,
   useCalculatedVersion: boolean,
-  snapshotSuffix: string
+  snapshotSuffix: string,
 ): string {
   if (release.type === "none") {
     return release.oldVersion;
@@ -110,7 +110,7 @@ function getSnapshotVersion(
 
 function getNewVersion(
   release: InternalRelease,
-  preInfo: PreInfo | undefined
+  preInfo: PreInfo | undefined,
 ): string {
   if (release.type === "none") {
     return release.oldVersion;
@@ -130,7 +130,7 @@ function assembleReleasePlan(
   // snapshot: undefined            ->  not using snapshot
   // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
   // snapshot: { tag: "canary" }    ->  --snapshot canary
-  snapshot?: SnapshotReleaseParameters | string | boolean
+  snapshot?: SnapshotReleaseParameters | string | boolean,
 ): ReleasePlan {
   // TODO: remove `refined*` in the next major version of this package
   // just use `config` and `snapshot` parameters directly, typed as: `config: Config, snapshot?: SnapshotReleaseParameters`
@@ -149,25 +149,25 @@ function assembleReleasePlan(
     typeof snapshot === "string"
       ? { tag: snapshot }
       : typeof snapshot === "boolean"
-      ? { tag: undefined }
-      : snapshot;
+        ? { tag: undefined }
+        : snapshot;
 
   let packagesByName = new Map(
-    packages.packages.map((x) => [x.packageJson.name, x])
+    packages.packages.map((x) => [x.packageJson.name, x]),
   );
 
   const relevantChangesets = getRelevantChangesets(
     changesets,
     packagesByName,
     refinedConfig,
-    preState
+    preState,
   );
 
   const preInfo = getPreInfo(
     changesets,
     packagesByName,
     refinedConfig,
-    preState
+    preState,
   );
 
   // releases is, at this point a list of all packages we are going to releases,
@@ -176,7 +176,7 @@ function assembleReleasePlan(
   let releases = flattenReleases(
     relevantChangesets,
     packagesByName,
-    refinedConfig
+    refinedConfig,
   );
 
   let dependencyGraph = getDependentsGraph(packages, {
@@ -199,12 +199,12 @@ function assembleReleasePlan(
     let fixedConstraintUpdated = matchFixedConstraint(
       releases,
       packagesByName,
-      refinedConfig
+      refinedConfig,
     );
     let linksUpdated = applyLinks(
       releases,
       packagesByName,
-      refinedConfig.linked
+      refinedConfig.linked,
     );
 
     releasesValidated =
@@ -243,7 +243,7 @@ function assembleReleasePlan(
     refinedSnapshot &&
     getSnapshotSuffix(
       refinedConfig.snapshot.prereleaseTemplate,
-      refinedSnapshot
+      refinedSnapshot,
     );
 
   return {
@@ -256,7 +256,7 @@ function assembleReleasePlan(
               incompleteRelease,
               preInfo,
               refinedConfig.snapshot.useCalculatedVersion,
-              snapshotSuffix
+              snapshotSuffix,
             )
           : getNewVersion(incompleteRelease, preInfo),
       };
@@ -269,7 +269,7 @@ function getRelevantChangesets(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
   config: Config,
-  preState: PreState | undefined
+  preState: PreState | undefined,
 ): NewChangeset[] {
   for (const changeset of changesets) {
     // Using the following 2 arrays to decide whether a changeset
@@ -281,7 +281,7 @@ function getRelevantChangesets(
       const packageByName = mapGetOrThrow(
         packagesByName,
         release.name,
-        `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
+        `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`,
       );
 
       if (
@@ -301,7 +301,7 @@ function getRelevantChangesets(
         `Found mixed changeset ${changeset.id}\n` +
           `Found ignored packages: ${skippedPackages.join(" ")}\n` +
           `Found not ignored packages: ${notSkippedPackages.join(" ")}\n` +
-          "Mixed changesets that contain both ignored and not ignored packages are not allowed"
+          "Mixed changesets that contain both ignored and not ignored packages are not allowed",
       );
     }
   }
@@ -309,7 +309,7 @@ function getRelevantChangesets(
   if (preState && preState.mode !== "exit") {
     let usedChangesetIds = new Set(preState.changesets);
     return changesets.filter(
-      (changeset) => !usedChangesetIds.has(changeset.id)
+      (changeset) => !usedChangesetIds.has(changeset.id),
     );
   }
 
@@ -319,7 +319,7 @@ function getRelevantChangesets(
 function getHighestPreVersion(
   groupKind: "linked" | "fixed",
   packageGroup: PackageGroup,
-  packagesByName: Map<string, Package>
+  packagesByName: Map<string, Package>,
 ): number {
   let highestPreVersion = 0;
   for (let pkgName of packageGroup) {
@@ -327,12 +327,12 @@ function getHighestPreVersion(
       packagesByName,
       pkgName,
       `Could not find package named "${pkgName}" listed in ${groupKind} group ${JSON.stringify(
-        packageGroup
-      )}`
+        packageGroup,
+      )}`,
     );
     highestPreVersion = Math.max(
       getPreVersion(pkg.packageJson.version),
-      highestPreVersion
+      highestPreVersion,
     );
   }
   return highestPreVersion;
@@ -342,7 +342,7 @@ function getPreInfo(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
   config: Config,
-  preState: PreState | undefined
+  preState: PreState | undefined,
 ): PreInfo | undefined {
   if (preState === undefined) {
     return;
@@ -376,14 +376,14 @@ function getPreInfo(
     }
     preVersions.set(
       pkg.packageJson.name,
-      getPreVersion(pkg.packageJson.version)
+      getPreVersion(pkg.packageJson.version),
     );
   }
   for (let fixedGroup of config.fixed) {
     let highestPreVersion = getHighestPreVersion(
       "fixed",
       fixedGroup,
-      packagesByName
+      packagesByName,
     );
     for (let fixedPackage of fixedGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
@@ -393,7 +393,7 @@ function getPreInfo(
     let highestPreVersion = getHighestPreVersion(
       "linked",
       linkedGroup,
-      packagesByName
+      packagesByName,
     );
     for (let linkedPackage of linkedGroup) {
       preVersions.set(linkedPackage, highestPreVersion);

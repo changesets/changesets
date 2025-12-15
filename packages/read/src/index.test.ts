@@ -114,7 +114,7 @@ I'm amazed we needed to update the best package, because it was already the best
       await read(cwd);
     } catch (e) {
       expect((e as Error).message).toBe(
-        "There is no .changeset directory in this project"
+        "There is no .changeset directory in this project",
       );
       return;
     }
@@ -138,7 +138,7 @@ Everything is wrong`,
 
       --
 
-      Everything is wrong`
+      Everything is wrong`,
     );
   });
   it("should return no releases and empty summary when the changeset is empty", async () => {
@@ -218,7 +218,7 @@ Awesome feature, hidden behind a feature flag
         ],
         summary: "Awesome summary",
       },
-      path.join(cwd, "library")
+      path.join(cwd, "library"),
     );
     await add("library/.changeset", cwd);
 

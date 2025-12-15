@@ -9,7 +9,7 @@ export function shouldSkipPackage(
   }: {
     ignore: PackageGroup;
     allowPrivatePackages: boolean;
-  }
+  },
 ) {
   if (ignore.includes(packageJson.name)) {
     return true;

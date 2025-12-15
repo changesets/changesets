@@ -5,11 +5,11 @@ import type { InternalRelease } from "./types.ts";
 import { InternalError } from "@changesets/errors";
 
 export function getHighestReleaseType(
-  releases: InternalRelease[]
+  releases: InternalRelease[],
 ): VersionType {
   if (releases.length === 0) {
     throw new Error(
-      `Large internal Changesets error when calculating highest release type in the set of releases. Please contact the maintainers`
+      `Large internal Changesets error when calculating highest release type in the set of releases. Please contact the maintainers`,
     );
   }
 
@@ -35,7 +35,7 @@ export function getHighestReleaseType(
 
 export function getCurrentHighestVersion(
   packageGroup: PackageGroup,
-  packagesByName: Map<string, Package>
+  packagesByName: Map<string, Package>,
 ): string {
   let highestVersion: string | undefined;
 
@@ -43,7 +43,7 @@ export function getCurrentHighestVersion(
     let pkg = mapGetOrThrowInternal(
       packagesByName,
       pkgName,
-      `We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`
+      `We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`,
     );
 
     if (
@@ -60,7 +60,7 @@ export function getCurrentHighestVersion(
 export function mapGetOrThrow<V extends {}>(
   map: Map<string, V>,
   key: string,
-  errorMessage: string
+  errorMessage: string,
 ): V {
   const value = map.get(key);
   if (value === undefined) {
@@ -72,7 +72,7 @@ export function mapGetOrThrow<V extends {}>(
 export function mapGetOrThrowInternal<V extends {}>(
   map: Map<string, V>,
   key: string,
-  errorMessage: string
+  errorMessage: string,
 ): V {
   const value = map.get(key);
   if (value === undefined) {

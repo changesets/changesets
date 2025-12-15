@@ -32,8 +32,8 @@ describe("enterPre", () => {
 
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
+      ),
     ).toMatchInlineSnapshot(`
       {
         "changesets": [],
@@ -74,7 +74,7 @@ describe("enterPre", () => {
       }),
     });
     await expect(enterPre(cwd, "some-tag")).rejects.toBeInstanceOf(
-      PreEnterButInPreModeError
+      PreEnterButInPreModeError,
     );
   });
   it("should enter if already exited pre mode", async () => {
@@ -107,8 +107,8 @@ describe("enterPre", () => {
     await enterPre(cwd, "next");
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
+      ),
     ).toMatchInlineSnapshot(`
       {
         "changesets": [
@@ -157,8 +157,8 @@ describe("exitPre", () => {
 
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
+      ),
     ).toMatchInlineSnapshot(`
       {
         "changesets": [],
@@ -191,7 +191,7 @@ describe("exitPre", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
     await expect(exitPre(cwd)).rejects.toBeInstanceOf(
-      PreExitButNotInPreModeError
+      PreExitButNotInPreModeError,
     );
   });
 });
