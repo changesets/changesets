@@ -17,10 +17,13 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node_version: [20, 22]
+        node_version: [20, 22, 24]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
         with:
           node-version: ${{ matrix.node_version }}
@@ -32,18 +35,18 @@ jobs:
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
       - name: Vitest tests
-        if: matrix.node_version != 22
+        if: matrix.node_version != 24
         # @changesets/release-utils depend on `--experimental-strip-types` so we exclude those test here for simplicity
         run: yarn vitest --no-file-parallelism --exclude=packages/release-utils
 
-      # Run coverage only once on node 22 to avoid duplicate codecov uploads
+      # Run coverage only once on node 24 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
-        if: matrix.node_version == 22
+        if: matrix.node_version == 24
         run: yarn vitest --no-file-parallelism --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
-        if: matrix.node_version == 22
+        if: matrix.node_version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -52,7 +55,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
 
       - name: Typecheck
@@ -63,7 +69,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
 
       - name: Lint
