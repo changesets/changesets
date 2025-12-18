@@ -276,6 +276,7 @@ describe("cli", () => {
 
     const nestedDirectory = path.resolve(cwd, "packages", "pgk-b");
 
+    await expect(run([], {}, nestedDirectory)).resolves.not.toThrow();
     await expect(run(["version"], {}, nestedDirectory)).resolves.not.toThrow();
     await expect(run(["add"], {}, nestedDirectory)).resolves.not.toThrow();
     await expect(run(["publish"], {}, nestedDirectory)).resolves.not.toThrow();
