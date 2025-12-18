@@ -4,7 +4,6 @@ import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { error } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
-import { findRoot } from "@manypkg/find-root";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "fs-extra";
 import path from "path";
@@ -37,6 +36,8 @@ export async function run(
   if (hasCwdChangeset) {
     directoryWithChangeset = cwd;
   } else {
+    const { findRoot } = await import("@manypkg/find-root");
+
     try {
       const { rootDir } = await findRoot(process.cwd());
       const hasRootDirChangeset = fs.existsSync(getPathToChangeset(rootDir));
