@@ -4,6 +4,7 @@ import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { error } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config } from "@changesets/types";
+import { findRoot } from "@manypkg/find-root";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "fs-extra";
 import path from "path";
@@ -26,7 +27,31 @@ export async function run(
     return;
   }
 
-  if (!fs.existsSync(path.resolve(cwd, ".changeset"))) {
+  let directoryWithChangeset: string | null = null;
+
+  const getPathToChangeset = (directory: string) =>
+    path.resolve(directory, ".changeset");
+
+  const hasCwdChangeset = fs.existsSync(getPathToChangeset(cwd));
+
+  if (hasCwdChangeset) {
+    directoryWithChangeset = cwd;
+  } else {
+    try {
+      const { rootDir } = await findRoot(process.cwd());
+      const hasRootDirChangeset = fs.existsSync(getPathToChangeset(rootDir));
+
+      if (hasRootDirChangeset) {
+        directoryWithChangeset = rootDir;
+      }
+    } catch {
+      // could not find .changeset folder in root either, therefore
+      // keep the directoryWithChangeset variable null as it will
+      // be checked later
+    }
+  }
+
+  if (directoryWithChangeset === null) {
     error("There is no .changeset folder. ");
     error(
       "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
@@ -37,14 +62,14 @@ export async function run(
     throw new ExitError(1);
   }
 
-  const packages = await getPackages(cwd);
+  const packages = await getPackages(directoryWithChangeset);
 
   let config: Config;
   try {
-    config = await read(cwd, packages);
+    config = await read(directoryWithChangeset, packages);
   } catch (e) {
     let oldConfigExists = await fs.pathExists(
-      path.resolve(cwd, ".changeset/config.js")
+      path.resolve(directoryWithChangeset, ".changeset/config.js")
     );
     if (oldConfigExists) {
       error(
@@ -66,7 +91,7 @@ export async function run(
   if (input.length < 1) {
     const { empty, open }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
-    await add(cwd, { empty, open }, config);
+    await add(directoryWithChangeset, { empty, open }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -106,7 +131,7 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        await add(cwd, { empty, open }, config);
+        await add(directoryWithChangeset, { empty, open }, config);
         return;
       }
       case "version": {
@@ -187,19 +212,23 @@ export async function run(
           config.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
         }
 
-        await version(cwd, { snapshot }, config);
+        await version(directoryWithChangeset, { snapshot }, config);
         return;
       }
       case "publish": {
-        await publish(cwd, { otp, tag, gitTag }, config);
+        await publish(directoryWithChangeset, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
+        await status(
+          directoryWithChangeset,
+          { sinceMaster, since, verbose, output },
+          config
+        );
         return;
       }
       case "tag": {
-        await tagCommand(cwd, config);
+        await tagCommand(directoryWithChangeset, config);
         return;
       }
       case "pre": {
