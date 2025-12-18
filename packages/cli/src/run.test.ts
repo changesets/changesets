@@ -306,5 +306,11 @@ describe("cli", () => {
     const nestedDirectory = path.resolve(cwd, "packages", "pgk-b");
 
     await expect(run(["version"], {}, nestedDirectory)).rejects.toThrow();
+
+    const loggerErrorCalls = (error as any).mock.calls;
+    expect(loggerErrorCalls.length).toEqual(3);
+    expect(loggerErrorCalls[0][0].trim()).toEqual(
+      `There is no .changeset folder.`
+    );
   });
 });
