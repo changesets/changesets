@@ -46,9 +46,7 @@ export async function run(
     const { findRoot } = await import("@manypkg/find-root");
 
     try {
-      const { rootDir } = await (findRoot(
-        process.cwd()
-      ) as Promise<MonorepoRoot>);
+      const { rootDir } = await (findRoot(cwd) as Promise<MonorepoRoot>);
       const hasRootDirChangeset = fs.existsSync(getPathToChangeset(rootDir));
 
       if (hasRootDirChangeset) {

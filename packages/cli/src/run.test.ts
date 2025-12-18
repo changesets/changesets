@@ -1,6 +1,6 @@
+import path from "path";
 import { error } from "@changesets/logger";
 import { testdir } from "@changesets/test-utils";
-
 import { run } from "./run";
 import writeChangeset from "@changesets/write";
 
@@ -250,5 +250,38 @@ describe("cli", () => {
         `A tag must be passed when using prerelease enter`
       );
     });
+  });
+
+  it("should execute from nested folder", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+
+    const nestedDirectory = path.resolve(cwd, "packages", "pgk-b");
+
+    await run(["version"], {}, nestedDirectory);
+
+    const loggerErrorCalls = (error as any).mock.calls;
+    expect(loggerErrorCalls.length).toEqual(0);
   });
 });
