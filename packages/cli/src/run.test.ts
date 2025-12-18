@@ -6,6 +6,10 @@ import writeChangeset from "@changesets/write";
 
 jest.mock("@changesets/logger");
 jest.mock("./commands/version");
+jest.mock("./commands/add");
+jest.mock("./commands/publish");
+jest.mock("./commands/status");
+jest.mock("./commands/tag");
 
 describe("cli", () => {
   describe("version", () => {
@@ -269,20 +273,24 @@ describe("cli", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    await writeChangeset(
-      {
-        summary: "This is a summary",
-        releases: [{ name: "pkg-a", type: "minor" }],
-      },
-      cwd
-    );
-
     const nestedDirectory = path.resolve(cwd, "packages", "pgk-b");
 
-    await run(["version"], {}, nestedDirectory);
+    await expect(run(["version"], {}, nestedDirectory)).resolves.not.toThrow();
+    await expect(run(["add"], {}, nestedDirectory)).resolves.not.toThrow();
+    await expect(run(["publish"], {}, nestedDirectory)).resolves.not.toThrow();
+    await expect(run(["status"], {}, nestedDirectory)).resolves.not.toThrow();
+    await expect(run(["tag"], {}, nestedDirectory)).resolves.not.toThrow();
+    try {
+      await run(["pre", "enter"], {}, nestedDirectory);
+    } catch (e) {
+      // ignore the error. We just want to validate the error message
+    }
 
     const loggerErrorCalls = (error as any).mock.calls;
-    expect(loggerErrorCalls.length).toEqual(0);
+    expect(loggerErrorCalls.length).toEqual(1);
+    expect(loggerErrorCalls[0][0]).toEqual(
+      `A tag must be passed when using prerelease enter`
+    );
   });
 
   it("should throw if no changeset folder exists even if we execute from nested folder", async () => {
@@ -303,6 +311,6 @@ describe("cli", () => {
 
     const nestedDirectory = path.resolve(cwd, "packages", "pgk-b");
 
-    await expect(() => run(["version"], {}, nestedDirectory)).rejects.toThrow();
+    await expect(run(["version"], {}, nestedDirectory)).rejects.toThrow();
   });
 });

@@ -253,7 +253,7 @@ export async function run(
           throw new ExitError(1);
         }
         // @ts-ignore
-        await pre(cwd, { command, tag });
+        await pre(directoryWithChangeset, { command, tag });
         return;
       }
       case "bump": {
