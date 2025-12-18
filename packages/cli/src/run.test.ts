@@ -10,6 +10,7 @@ jest.mock("./commands/add");
 jest.mock("./commands/publish");
 jest.mock("./commands/status");
 jest.mock("./commands/tag");
+jest.mock("./commands/pre");
 
 describe("cli", () => {
   describe("version", () => {
@@ -280,17 +281,9 @@ describe("cli", () => {
     await expect(run(["publish"], {}, nestedDirectory)).resolves.not.toThrow();
     await expect(run(["status"], {}, nestedDirectory)).resolves.not.toThrow();
     await expect(run(["tag"], {}, nestedDirectory)).resolves.not.toThrow();
-    try {
-      await run(["pre", "enter"], {}, nestedDirectory);
-    } catch (e) {
-      // ignore the error. We just want to validate the error message
-    }
-
-    const loggerErrorCalls = (error as any).mock.calls;
-    expect(loggerErrorCalls.length).toEqual(1);
-    expect(loggerErrorCalls[0][0]).toEqual(
-      `A tag must be passed when using prerelease enter`
-    );
+    await expect(
+      run(["pre", "enter", "1.0.0"], {}, nestedDirectory)
+    ).resolves.not.toThrow();
   });
 
   it("should throw if no changeset folder exists even if we execute from nested folder", async () => {
