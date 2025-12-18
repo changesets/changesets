@@ -284,4 +284,25 @@ describe("cli", () => {
     const loggerErrorCalls = (error as any).mock.calls;
     expect(loggerErrorCalls.length).toEqual(0);
   });
+
+  it("should throw if no changeset folder exists even if we execute from nested folder", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    const nestedDirectory = path.resolve(cwd, "packages", "pgk-b");
+
+    await expect(() => run(["version"], {}, nestedDirectory)).rejects.toThrow();
+  });
 });
