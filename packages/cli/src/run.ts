@@ -16,6 +16,11 @@ import tagCommand from "./commands/tag";
 import version from "./commands/version";
 import { CliOptions } from "./types";
 
+interface MonorepoRoot {
+  rootDir: string;
+  tool: string;
+}
+
 export async function run(
   input: string[],
   flags: { [name: string]: any },
@@ -36,10 +41,14 @@ export async function run(
   if (hasCwdChangeset) {
     directoryWithChangeset = cwd;
   } else {
+    // @ts-expect-error find-root is an esm only package and typescript can't
+    // resolve the types with the current configuration
     const { findRoot } = await import("@manypkg/find-root");
 
     try {
-      const { rootDir } = await findRoot(process.cwd());
+      const { rootDir } = await (findRoot(
+        process.cwd()
+      ) as Promise<MonorepoRoot>);
       const hasRootDirChangeset = fs.existsSync(getPathToChangeset(rootDir));
 
       if (hasRootDirChangeset) {
