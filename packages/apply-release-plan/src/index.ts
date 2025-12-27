@@ -21,6 +21,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
 
+function importResolveFromDir(specifier: string, dir: string) {
+  return resolve(specifier, pathToFileURL(path.join(dir, "x.mjs")).toString());
+}
+
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
     return require(require.resolve("prettier", { paths: [cwd] }));
@@ -232,15 +236,9 @@ async function getNewChangelogEntry(
   let changelogPath;
 
   try {
-    changelogPath = resolve(
-      config.changelog[0],
-      pathToFileURL(changesetPath).toString()
-    );
+    changelogPath = importResolveFromDir(config.changelog[0], changesetPath);
   } catch {
-    changelogPath = resolve(
-      config.changelog[0],
-      pathToFileURL(contextDir).toString()
-    );
+    changelogPath = importResolveFromDir(config.changelog[0], contextDir);
   }
 
   let possibleChangelogFunc = await import(changelogPath);
