@@ -126,6 +126,9 @@ const changelogFunctions: ChangelogFunctions = {
       .map((l) => `  ${l}`)
       .join("\n")}`;
   },
+  getCurrentRelease: async (changesets, _options) => {
+    return changesets;
+  },
 };
 
 export default changelogFunctions;
