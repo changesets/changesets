@@ -68,7 +68,8 @@ const getTwoFactorState = ({
 
   return {
     token: null,
-    // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
+    // Note: This runs in parallel with getUnpublishedPackages
+    // The auth method detection happens later in npm-utils when needed
     isRequired: npmUtils.getTokenIsRequired(),
   };
 };

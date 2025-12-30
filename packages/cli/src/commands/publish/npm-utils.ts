@@ -87,6 +87,49 @@ async function getPublishTool(
   }
 }
 
+async function getNpmAuthMethod(): Promise<"otp" | "webauthn" | "none"> {
+  try {
+    const { scope, registry } = getCorrectRegistry();
+    const envOverride = {
+      [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]:
+        registry,
+    };
+
+    let result = await spawn("npm", ["profile", "get", "tfa", "--json"], {
+      env: Object.assign({}, process.env, envOverride),
+    });
+
+    if (result.code !== 0) {
+      return "none";
+    }
+
+    let json = jsonParse(result.stdout.toString());
+
+    // Check if 2FA is disabled
+    if (!json.tfa || !json.tfa.mode || json.tfa.mode === "disabled") {
+      return "none";
+    }
+
+    // Check for WebAuthn/Passkey
+    if (json.tfa.mode === "auth-and-writes") {
+      // Try to detect if WebAuthn is configured
+      // npm profile will show pending status for webauthn
+      const tfaStatus = json.tfa.pending || json.tfa.mode;
+      if (
+        tfaStatus.toLowerCase().includes("webauthn") ||
+        tfaStatus.toLowerCase().includes("passkey")
+      ) {
+        return "webauthn";
+      }
+      return "otp";
+    }
+
+    return "none";
+  } catch (error) {
+    return "none";
+  }
+}
+
 export async function getTokenIsRequired() {
   const { scope, registry } = getCorrectRegistry();
   // Due to a super annoying issue in yarn, we have to manually override this env variable
@@ -184,6 +227,39 @@ export let getOtpCode = async (twoFactorState: TwoFactorState) => {
   return askForOtpCode(twoFactorState);
 };
 
+async function handleWebAuthnAuth(packageJson: PackageJSON): Promise<boolean> {
+  info(
+    `WebAuthn/Passkey authentication required for ${pc.cyan(
+      `"${packageJson.name}"`
+    )}`
+  );
+  info("Opening browser for authentication...");
+
+  const { scope, registry } = getCorrectRegistry(packageJson);
+  const envOverride = {
+    [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
+  };
+
+  try {
+    // Trigger web-based authentication
+    let result = await spawn("npm", ["login", "--auth-type=web"], {
+      env: Object.assign({}, process.env, envOverride),
+      stdio: "inherit", // Allow interactive authentication
+    });
+
+    if (result.code === 0) {
+      info("Authentication successful!");
+      return true;
+    } else {
+      error("WebAuthn authentication failed");
+      return false;
+    }
+  } catch (err) {
+    error("Error during WebAuthn authentication:", err);
+    return false;
+  }
+}
+
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
@@ -205,8 +281,6 @@ async function internalPublish(
 
   const { scope, registry } = getCorrectRegistry(packageJson);
 
-  // Due to a super annoying issue in yarn, we have to manually override this env variable
-  // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
   const envOverride = {
     [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
@@ -224,32 +298,55 @@ async function internalPublish(
             env: Object.assign({}, process.env, envOverride),
           }
         );
+
   if (code !== 0) {
-    // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
-    // We want to handle this as best we can but it has some struggles:
-    // - output of those lifecycle scripts can contain JSON
-    // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
-    // Note that the `--json` output is always printed at the end so this should work
     let json =
       getLastJsonObjectFromString(stderr.toString()) ||
       getLastJsonObjectFromString(stdout.toString());
 
     if (json?.error) {
-      // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
+      const errorCode = json.error.code;
+      const errorDetail = json.error.detail || "";
+
+      // UPDATED: Enhanced 2FA error handling with WebAuthn support
       if (
-        (json.error.code === "EOTP" ||
-          (json.error.code === "E401" &&
-            json.error.detail.includes("--otp=<code>"))) &&
+        (errorCode === "EOTP" ||
+          (errorCode === "E401" && errorDetail.includes("--otp=")) ||
+          (errorCode === "E401" && errorDetail.includes("authentication"))) &&
         !isCI
       ) {
-        if (twoFactorState.token !== null) {
-          // the current otp code must be invalid since it errored
-          twoFactorState.token = null;
+        // Detect authentication method
+        const authMethod = await getNpmAuthMethod();
+
+        if (authMethod === "webauthn") {
+          info("Detected WebAuthn/Passkey authentication is required");
+
+          // Attempt WebAuthn authentication
+          const authSuccess = await handleWebAuthnAuth(packageJson);
+
+          if (authSuccess) {
+            // Retry publish after successful authentication
+            return internalPublish(packageJson, opts, {
+              token: null,
+              isRequired: Promise.resolve(true),
+            });
+          } else {
+            error(
+              "Failed to authenticate with WebAuthn. Please try again or check your npm configuration."
+            );
+            return { published: false };
+          }
+        } else {
+          // Use traditional OTP flow
+          if (twoFactorState.token !== null) {
+            warn("Invalid OTP code provided. Please try again.");
+            twoFactorState.token = null;
+          }
+          twoFactorState.isRequired = Promise.resolve(true);
+          return internalPublish(packageJson, opts, twoFactorState);
         }
-        // just in case this isn't already true
-        twoFactorState.isRequired = Promise.resolve(true);
-        return internalPublish(packageJson, opts, twoFactorState);
       }
+
       error(
         `an error occurred while publishing ${packageJson.name}: ${json.error.code}`,
         json.error.summary,
