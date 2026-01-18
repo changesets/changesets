@@ -58,7 +58,7 @@ export default async function init(cwd: string) {
     log(
       `Thanks for choosing ${pc.green(
         "changesets"
-      )} to help manage your versioning and publishing\n`
+      )} to help manage your versioning and publishing.\n`
     );
     log("You should be set up to start using changesets now!\n");
 
