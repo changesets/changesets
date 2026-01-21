@@ -124,6 +124,7 @@ export default async function applyReleasePlan(
   let finalisedRelease = releaseWithChangelogs.map((release) => {
     return versionPackage(release, versionsToUpdate, {
       updateInternalDependencies: config.updateInternalDependencies,
+      requireSemverSatisfaction: config.requireSemverSatisfaction,
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
           .onlyUpdatePeerDependentsWhenOutOfRange,
@@ -252,6 +253,7 @@ async function getNewChangelogEntry(
         changelogOpts,
         {
           updateInternalDependencies: config.updateInternalDependencies,
+          requireSemverSatisfaction: config.requireSemverSatisfaction,
           onlyUpdatePeerDependentsWhenOutOfRange:
             config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange,
