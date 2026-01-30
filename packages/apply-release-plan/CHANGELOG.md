@@ -1,5 +1,11 @@
 # @changesets/apply-release-plan
 
+## 7.0.15
+
+### Patch Changes
+
+- [#1810](https://github.com/changesets/changesets/pull/1810) [`27fd8f4`](https://github.com/changesets/changesets/commit/27fd8f41dddafcc2e96e7df39dca04d92f916a0a) Thanks [@hirasso](https://github.com/hirasso)! - Replace deprecated `String.prototype.trimRight` with [`String.prototype.trimEnd`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd)
+
 ## 7.0.14
 
 ### Patch Changes
