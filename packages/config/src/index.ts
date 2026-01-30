@@ -425,6 +425,49 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
+  // Validate auto configuration
+  if (json.auto !== undefined) {
+    if (typeof json.auto !== "object" || json.auto === null) {
+      messages.push(
+        `The \`auto\` option is set as ${JSON.stringify(
+          json.auto,
+          null,
+          2
+        )} when it must be an object or undefined`
+      );
+    } else {
+      // Validate maxCommits
+      if (json.auto.maxCommits !== undefined) {
+        if (
+          typeof json.auto.maxCommits !== "number" ||
+          json.auto.maxCommits < 1
+        ) {
+          messages.push(
+            `The \`auto.maxCommits\` option is set as ${JSON.stringify(
+              json.auto.maxCommits,
+              null,
+              2
+            )} when it must be a positive number`
+          );
+        }
+      }
+
+      // Validate preset
+      if (
+        json.auto.preset !== undefined &&
+        typeof json.auto.preset !== "string"
+      ) {
+        messages.push(
+          `The \`auto.preset\` option is set as ${JSON.stringify(
+            json.auto.preset,
+            null,
+            2
+          )} when it must be a string`
+        );
+      }
+    }
+  }
+
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
@@ -505,6 +548,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
             tag: json.privatePackages.tag ?? false,
           }
         : { version: true, tag: false },
+
+    auto: json.auto,
   };
 
   if (
