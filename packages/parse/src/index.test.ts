@@ -235,13 +235,7 @@ describe("parsing a changeset", () => {
     Nice simple summary
     `;
 
-    expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      "could not parse changeset - invalid frontmatter: ---
-      "cool-package": minor
-      ---  fail
-
-      Nice simple summary"
-    `);
+    expect(() => parse(changesetMd)).toThrow("missing or invalid frontmatter");
   });
 
   it("should throw when frontmatter hasn't a valid yml structure", () => {
@@ -252,12 +246,41 @@ describe("parsing a changeset", () => {
     Nice simple summary
     `;
 
-    expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      "could not parse changeset - invalid frontmatter: ---
-      : minor
-      ---
+    expect(() => parse(changesetMd)).toThrow("could not parse changeset");
+    expect(() => parse(changesetMd)).toThrow("invalid YAML");
+  });
 
-      Nice simple summary"
-    `);
+  it("should throw when file is completely empty", () => {
+    expect(() => parse("")).toThrow("file is empty");
+    expect(() => parse("   ")).toThrow("file is empty");
+    expect(() => parse("\n\n")).toThrow("file is empty");
+  });
+
+  it("should throw when frontmatter is missing", () => {
+    const changesetMd = "Just some content without frontmatter";
+    expect(() => parse(changesetMd)).toThrow("missing or invalid frontmatter");
+  });
+
+  it("should throw when version type is invalid", () => {
+    const changesetMd = outdent`---
+    "cool-package": invalid-type
+    ---
+
+    Nice simple summary
+    `;
+
+    expect(() => parse(changesetMd)).toThrow('invalid version type "invalid-type"');
+    expect(() => parse(changesetMd)).toThrow("major, minor, patch, none");
+  });
+
+  it("should throw with helpful message when package name is empty", () => {
+    const changesetMd = outdent`---
+    "": minor
+    ---
+
+    Nice simple summary
+    `;
+
+    expect(() => parse(changesetMd)).toThrow("invalid package name");
   });
 });
