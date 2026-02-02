@@ -87,6 +87,8 @@
     "enquirer": "^2.4.1",
     "fs-extra": "^7.0.1",
     "mri": "^1.2.0",
+    "node-fetch": "^2.5.0",
+    "open": "^10.1.0",
     "p-limit": "^2.2.0",
     "package-manager-detector": "^0.2.0",
     "picocolors": "^1.1.0",

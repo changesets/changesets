@@ -10,6 +10,7 @@ import { askQuestion } from "../../utils/cli-utilities";
 import { isCI } from "ci-info";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
+import { webAuthOpener } from "./web-auth";
 
 interface PublishOptions {
   cwd: string;
@@ -235,11 +236,36 @@ async function internalPublish(
       getLastJsonObjectFromString(stdout.toString());
 
     if (json?.error) {
-      // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
+      // Check for web-based OTP (webauthn/passkeys) - has authUrl and doneUrl in body
+      const webOtpUrls =
+        json.error.body?.authUrl && json.error.body?.doneUrl
+          ? {
+              authUrl: json.error.body.authUrl,
+              doneUrl: json.error.body.doneUrl,
+            }
+          : undefined;
+
+      if (json.error.code === "EOTP" && webOtpUrls && !isCI) {
+        if (twoFactorState.token !== null) {
+          twoFactorState.token = null;
+        }
+        // Perform web authentication (gated by otpAskLimit to prevent concurrent prompts)
+        await otpAskLimit(async () => {
+          // Check again inside the limiter - another publish might have already authenticated
+          if (twoFactorState.token !== null) {
+            return;
+          }
+          twoFactorState.token = (await webAuthOpener(webOtpUrls)).token;
+        });
+        twoFactorState.isRequired = Promise.resolve(true);
+        return internalPublish(packageJson, opts, twoFactorState);
+      }
+
+      // Classic OTP - no 2fa provided, or the 2fa is wrong (timeout or wrong code)
       if (
         (json.error.code === "EOTP" ||
           (json.error.code === "E401" &&
-            json.error.detail.includes("--otp=<code>"))) &&
+            json.error.detail?.includes("--otp=<code>"))) &&
         !isCI
       ) {
         if (twoFactorState.token !== null) {
