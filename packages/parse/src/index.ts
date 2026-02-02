@@ -13,17 +13,27 @@ function validateReleases(
     if (typeof release.name !== "string" || release.name.trim() === "") {
       throw new Error(
         `could not parse changeset - invalid package name in frontmatter.\n` +
-          `Expected a non-empty string for package name, but got: ${JSON.stringify(release.name)}\n` +
-          `Make sure your changeset frontmatter follows this format:\n` +
-          `---\n"package-name": patch\n---`
+        `Expected a non-empty string for package name, but got: ${JSON.stringify(release.name)}\n` +
+        `Make sure your changeset frontmatter follows this format:\n` +
+        `---\n"package-name": patch\n---`
+      );
+    }
+
+    if (typeof release.type !== "string") {
+      throw new Error(
+        `could not parse changeset - invalid usage of release type in frontmatter.\n` +
+        `Expected a string for release type, but got: ${typeof release.type}\n` +
+        `Make sure your changeset frontmatter follows this format:\n` +
+        `---\n"package-name": patch\n---`
       );
     }
 
     if (!validVersionTypes.includes(release.type)) {
       throw new Error(
         `could not parse changeset - invalid version type "${release.type}" for package "${release.name}".\n` +
-          `Valid version types are: ${validVersionTypes.join(", ")}\n` +
-          `Changeset contents:\n${contents}`
+        `Valid version types are: ${validVersionTypes.join(", ")}\n` +
+        `Changeset contents:\n${contents.slice(0, 200)}${contents.length > 200 ? "..." : ""
+        }`
       );
     }
   }
@@ -38,8 +48,8 @@ export default function parseChangesetFile(contents: string): {
   if (!trimmedContents) {
     throw new Error(
       `could not parse changeset - file is empty.\n` +
-        `Changesets must have frontmatter with package names and version types.\n` +
-        `Example:\n---\n"package-name": patch\n---\n\nYour changeset summary here.`
+      `Changesets must have frontmatter with package names and version types.\n` +
+      `Example:\n---\n"package-name": patch\n---\n\nYour changeset summary here.`
     );
   }
 
@@ -47,9 +57,9 @@ export default function parseChangesetFile(contents: string): {
   if (!execResult) {
     throw new Error(
       `could not parse changeset - missing or invalid frontmatter.\n` +
-        `Changesets must start with frontmatter delimited by "---".\n` +
-        `Example:\n---\n"package-name": patch\n---\n\nYour changeset summary here.\n\n` +
-        `Received content:\n${trimmedContents.slice(0, 200)}${trimmedContents.length > 200 ? "..." : ""}`
+      `Changesets must start with frontmatter delimited by "---".\n` +
+      `Example:\n---\n"package-name": patch\n---\n\nYour changeset summary here.\n\n` +
+      `Received content:\n${trimmedContents.slice(0, 200)}${trimmedContents.length > 200 ? "..." : ""}`
     );
   }
   let [, roughReleases, roughSummary] = execResult;
@@ -65,8 +75,8 @@ export default function parseChangesetFile(contents: string): {
       if (typeof yamlStuff !== "object" || Array.isArray(yamlStuff)) {
         throw new Error(
           `could not parse changeset - frontmatter must be an object mapping package names to version types.\n` +
-            `Expected format:\n---\n"package-name": patch\n---\n\n` +
-            `Received:\n${roughReleases}`
+          `Expected format:\n---\n"package-name": patch\n---\n\n` +
+          `Received:\n${roughReleases}`
         );
       }
 
@@ -83,9 +93,9 @@ export default function parseChangesetFile(contents: string): {
     }
     throw new Error(
       `could not parse changeset - invalid YAML in frontmatter.\n` +
-        `The frontmatter between the "---" delimiters must be valid YAML.\n` +
-        `YAML error: ${e instanceof Error ? e.message : String(e)}\n\n` +
-        `Frontmatter content:\n${roughReleases}`
+      `The frontmatter between the "---" delimiters must be valid YAML.\n` +
+      `YAML error: ${e instanceof Error ? e.message : String(e)}\n\n` +
+      `Frontmatter content:\n${roughReleases}`
     );
   }
 
