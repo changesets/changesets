@@ -40,7 +40,7 @@
     "@babel/preset-typescript": "^7.27.0",
     "@manypkg/cli": "^0.25.1",
     "@preconstruct/cli": "^2.8.12",
-    "@types/fs-extra": "^5.1.0",
+    "@types/fs-extra": "^11.0.4",
     "@types/jest": "^24.0.12",
     "@types/jest-in-case": "^1.0.6",
     "@types/lodash": "^4.17.13",

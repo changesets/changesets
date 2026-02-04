@@ -23,7 +23,7 @@
     "@changesets/logger": "^0.1.1",
     "@changesets/parse": "^0.4.2",
     "@changesets/types": "^6.1.0",
-    "fs-extra": "^7.0.1",
+    "fs-extra": "^11.3.2",
     "p-filter": "^2.1.0",
     "picocolors": "^1.1.0"
   },
