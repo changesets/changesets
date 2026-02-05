@@ -14,8 +14,7 @@
       "import": "./dist/changesets-config.cjs.mjs",
       "default": "./dist/changesets-config.cjs.js"
     },
-    "./package.json": "./package.json",
-    "./schema.json": "./schema.json"
+    "./package.json": "./package.json"
   },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/config",
@@ -37,12 +36,5 @@
     "@types/micromatch": "^4.0.1",
     "jest-in-case": "^1.0.2",
     "outdent": "^0.5.0"
-  },
-  "preconstruct": {
-    "exports": {
-      "extra": {
-        "./schema.json": "./schema.json"
-      }
-    }
   }
 }
