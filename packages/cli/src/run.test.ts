@@ -1,13 +1,61 @@
 import { error } from "@changesets/logger";
 import { testdir } from "@changesets/test-utils";
 
+import add from "./commands/add";
 import { run } from "./run";
 import writeChangeset from "@changesets/write";
 
 jest.mock("@changesets/logger");
+jest.mock("./commands/add");
 jest.mock("./commands/version");
 
 describe("cli", () => {
+  describe("add", () => {
+    it("should pass --msg to add when using default command", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          name: "single-package",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await run([], { msg: "summary from msg" }, cwd);
+
+      expect(add).toHaveBeenCalledWith(
+        cwd,
+        {
+          empty: undefined,
+          open: undefined,
+          msg: "summary from msg",
+        },
+        expect.any(Object)
+      );
+    });
+
+    it("should pass --msg to add command", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          name: "single-package",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await run(["add"], { msg: "summary from msg" }, cwd);
+
+      expect(add).toHaveBeenCalledWith(
+        cwd,
+        {
+          empty: undefined,
+          open: undefined,
+          msg: "summary from msg",
+        },
+        expect.any(Object)
+      );
+    });
+  });
+
   describe("version", () => {
     it("should validate package name passed in from --ignore flag", async () => {
       const cwd = await testdir({
