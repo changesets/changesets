@@ -13,6 +13,7 @@ const parsed = mri(args, {
     "otp",
     "since",
     "ignore",
+    "msg",
     "tag",
     "snapshot",
     "snapshotPrereleaseTemplate",
@@ -52,7 +53,7 @@ if (parsed.help && args.length === 1) {
     $ changeset [command]
   Commands
     init
-    add [--empty] [--open]
+    add [--empty] [--open] [--msg <text>]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]
     status [--since <branch>] [--verbose] [--output JSON_FILE.json]
