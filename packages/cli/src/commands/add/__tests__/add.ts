@@ -23,9 +23,12 @@ writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 // @ts-ignore
 git.commit.mockImplementation(() => Promise.resolve(true));
 
+// Keep track of expected ref for tests
+let expectedRef = "master";
+
 // @ts-ignore
 git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
-  expect(ref).toBe("master");
+  expect(ref).toBe(expectedRef);
   return [];
 });
 
@@ -256,6 +259,41 @@ describe("Add command", () => {
       expect.objectContaining({
         releases: [],
         summary: "",
+      })
+    );
+  });
+
+  it("should use the since flag when detecting changed packages", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    // Override the expected ref for this test
+    expectedRef = "develop";
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset(cwd, { empty: false, since: "develop" }, defaultConfig);
+
+    // Reset for other tests
+    expectedRef = "master";
+
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "summary message mock",
+        releases: [{ name: "pkg-a", type: "patch" }],
       })
     );
   });
