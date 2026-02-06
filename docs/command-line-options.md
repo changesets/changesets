@@ -3,7 +3,7 @@
 The command line for changesets is the main way of interacting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-using-changesets.md)
 
 - init
-- add [--empty][--open]
+- add [--empty] [--open] [--msg <text>]
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag]
 - status [--since=master --verbose --output=JSON_FILE.json]
@@ -65,6 +65,12 @@ A changeset created with the empty flag would look like this:
 If you set the commit option in the config, the command will add the updated changeset files and then commit them.
 
 - `--open` - opens the created changeset in an external editor
+- `--msg` - provides the changeset summary from the command line instead of prompting for it.
+  For summaries with spaces, wrap the value in quotes, for example:
+
+```
+changeset add --msg "Fix auth token refresh handling"
+```
 
 ## version
 
