@@ -23,7 +23,8 @@ export default async function tag(cwd: string, config: Config) {
     cwd,
     tool
   )) {
-    const tag = tool !== "root" ? `${name}@${newVersion}` : `v${newVersion}`;
+    const tag =
+      tool.type !== "root" ? `${name}@${newVersion}` : `v${newVersion}`;
 
     if (allExistingTags.has(tag)) {
       log("Skipping tag (already exists): ", tag);
