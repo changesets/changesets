@@ -324,7 +324,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       const privatePackageVersioning =
         json.privatePackages === false
           ? false
-          : (json.privatePackages?.version ?? true);
+          : json.privatePackages?.version ?? true;
       const packagesByName = new Map(
         packages.packages.map((x) => [x.packageJson.name, x] as const)
       );
