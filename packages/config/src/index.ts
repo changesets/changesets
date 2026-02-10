@@ -321,14 +321,28 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         bumpVersionsWithWorkspaceProtocolOnly:
           json.bumpVersionsWithWorkspaceProtocolOnly,
       });
+      const privatePackageVersioning =
+        json.privatePackages === false
+          ? false
+          : (json.privatePackages?.version ?? true);
+      const packagesByName = new Map(
+        packages.packages.map((x) => [x.packageJson.name, x] as const)
+      );
       for (const ignoredPackage of json.ignore) {
         const dependents = dependentsGraph.get(ignoredPackage) || [];
         for (const dependent of dependents) {
-          if (!json.ignore.includes(dependent)) {
-            messages.push(
-              `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please add "${dependent}" to the \`ignore\` option.`
-            );
+          if (json.ignore.includes(dependent)) {
+            continue;
           }
+          // Private packages with versioning enabled don't publish to npm,
+          // so they can safely depend on ignored packages
+          const dependentPkg = packagesByName.get(dependent);
+          if (dependentPkg?.packageJson.private && privatePackageVersioning) {
+            continue;
+          }
+          messages.push(
+            `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please add "${dependent}" to the \`ignore\` option.`
+          );
         }
       }
     }
