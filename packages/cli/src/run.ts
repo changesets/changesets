@@ -165,6 +165,14 @@ export async function run(
           for (const dependent of dependents) {
             const dependentPkg = packagesByName.get(dependent)!;
             if (
+              dependentPkg.packageJson.private &&
+              config.privatePackages.version
+            ) {
+              // Private packages with versioning enabled don't publish to npm,
+              // so they can safely depend on skipped packages
+              continue;
+            }
+            if (
               !shouldSkipPackage(dependentPkg, {
                 ignore: config.ignore,
                 allowPrivatePackages: config.privatePackages.version,
