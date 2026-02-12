@@ -7,7 +7,7 @@ import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
 import * as npmUtils from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
-import { isCI } from "ci-info";
+import { probeOtpRequirement } from "./registry-client";
 
 type PublishedState = "never" | "published" | "only-pre";
 
@@ -39,37 +39,58 @@ const isCustomRegistry = (registry?: string): boolean =>
   registry !== "https://registry.npmjs.org" &&
   registry !== "https://registry.yarnpkg.com";
 
-const getTwoFactorState = ({
+const getTwoFactorState = async ({
   otp,
   publicPackages,
 }: {
   otp?: string;
   publicPackages: Package[];
-}): TwoFactorState => {
+}): Promise<TwoFactorState> => {
   if (otp) {
     return {
       token: otp,
       isRequired: Promise.resolve(true),
+      mode: "classic",
     };
   }
 
-  if (
-    isCI ||
+  const hasCustomRegistry =
     publicPackages.some((pkg) =>
       isCustomRegistry(npmUtils.getCorrectRegistry(pkg.packageJson).registry)
-    ) ||
-    isCustomRegistry(process.env.npm_config_registry)
-  ) {
+    ) || isCustomRegistry(process.env.npm_config_registry);
+
+  if (!npmUtils.isInteractiveMode() || hasCustomRegistry) {
     return {
       token: null,
       isRequired: Promise.resolve(false),
+      mode: "none",
+    };
+  }
+
+  const registry = npmUtils.getCorrectRegistry().registry;
+  const probeResult = await probeOtpRequirement(registry);
+
+  if (probeResult.type === "web") {
+    return {
+      token: null,
+      isRequired: Promise.resolve(true),
+      mode: "web",
+      webAuthUrls: probeResult.webAuthUrls,
+    };
+  }
+
+  if (probeResult.type === "classic") {
+    return {
+      token: null,
+      isRequired: Promise.resolve(true),
+      mode: "classic",
     };
   }
 
   return {
     token: null,
-    // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
     isRequired: npmUtils.getTokenIsRequired(),
+    mode: "classic",
   };
 };
 
@@ -97,7 +118,7 @@ export default async function publishPackages({
     return [];
   }
 
-  const twoFactorState: TwoFactorState = getTwoFactorState({
+  const twoFactorState: TwoFactorState = await getTwoFactorState({
     otp,
     publicPackages,
   });

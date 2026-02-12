@@ -1,16 +1,17 @@
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import { AccessType, PackageJSON } from "@changesets/types";
+import open from "open";
 import pLimit from "p-limit";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
-import { askQuestion } from "../../utils/cli-utilities";
+import { askQuestion, askConfirm } from "../../utils/cli-utilities";
 import { isCI } from "ci-info";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
-import { webAuthOpener } from "./web-auth";
+import { pollForWebAuthToken } from "./registry-client";
 
 interface PublishOptions {
   cwd: string;
@@ -21,6 +22,10 @@ interface PublishOptions {
 
 const npmRequestLimit = pLimit(40);
 const npmPublishLimit = pLimit(10);
+
+export function isInteractiveMode(): boolean {
+  return !isCI && process.stdin.isTTY === true && process.stdout.isTTY === true;
+}
 
 function jsonParse(input: string) {
   try {
@@ -166,7 +171,7 @@ export async function infoAllow404(packageJson: PackageJSON) {
 
 let otpAskLimit = pLimit(1);
 
-let askForOtpCode = (twoFactorState: TwoFactorState) =>
+let askForClassicOtpCode = (twoFactorState: TwoFactorState) =>
   otpAskLimit(async () => {
     if (twoFactorState.token !== null) return twoFactorState.token;
     info(
@@ -178,11 +183,48 @@ let askForOtpCode = (twoFactorState: TwoFactorState) =>
     return val;
   });
 
+let askForWebAuthCode = (twoFactorState: TwoFactorState) =>
+  otpAskLimit(async () => {
+    if (twoFactorState.token !== null) return twoFactorState.token;
+    if (!twoFactorState.webAuthUrls) {
+      throw new Error("Web auth URLs not available");
+    }
+
+    const { authUrl, doneUrl } = twoFactorState.webAuthUrls;
+
+    info(`\nThis operation requires authentication via your browser.`);
+    info(`Authentication URL: ${pc.cyan(authUrl)}\n`);
+
+    const shouldOpen = await askConfirm("Open browser to authenticate?");
+    if (!shouldOpen) {
+      throw new Error("Web authentication cancelled by user");
+    }
+
+    info("Opening browser... Complete authentication to continue.");
+
+    await open(authUrl).catch(() => {
+      info(
+        pc.yellow(
+          `Could not open browser automatically. Please open this URL manually:\n${authUrl}`
+        )
+      );
+    });
+
+    const token = await pollForWebAuthToken(doneUrl);
+    twoFactorState.token = token;
+
+    info(pc.green("Authentication successful!"));
+    return token;
+  });
+
 export let getOtpCode = async (twoFactorState: TwoFactorState) => {
   if (twoFactorState.token !== null) {
     return twoFactorState.token;
   }
-  return askForOtpCode(twoFactorState);
+  if (twoFactorState.mode === "web" && twoFactorState.webAuthUrls) {
+    return askForWebAuthCode(twoFactorState);
+  }
+  return askForClassicOtpCode(twoFactorState);
 };
 
 // we have this so that we can do try a publish again after a publish without
@@ -196,7 +238,7 @@ async function internalPublish(
   let publishFlags = opts.access ? ["--access", opts.access] : [];
   publishFlags.push("--tag", opts.tag);
 
-  if ((await twoFactorState.isRequired) && !isCI) {
+  if ((await twoFactorState.isRequired) && isInteractiveMode()) {
     let otpCode = await getOtpCode(twoFactorState);
     publishFlags.push("--otp", otpCode);
   }
@@ -236,42 +278,16 @@ async function internalPublish(
       getLastJsonObjectFromString(stdout.toString());
 
     if (json?.error) {
-      if (!isCI) {
-        // Check for web-based OTP (webauthn/passkeys) - has authUrl and doneUrl in body
-        const webOtpUrls =
-          json.error.body?.authUrl && json.error.body?.doneUrl
-            ? {
-                authUrl: json.error.body.authUrl,
-                doneUrl: json.error.body.doneUrl,
-              }
-            : undefined;
-        if (json.error.code === "EOTP" && webOtpUrls) {
-          if (twoFactorState.token !== null) {
-            twoFactorState.token = null;
-          }
-          // Perform web authentication (gated by otpAskLimit to prevent concurrent prompts)
-          await otpAskLimit(async () => {
-            // Check again inside the limiter - another publish might have already authenticated
-            if (twoFactorState.token !== null) {
-              return;
-            }
-            twoFactorState.token = (await webAuthOpener(webOtpUrls)).token;
-          });
-          twoFactorState.isRequired = Promise.resolve(true);
-          return internalPublish(packageJson, opts, twoFactorState);
-        }
-
-        // Classic OTP - no 2fa provided, or the 2fa is wrong (timeout or wrong code)
+      if (isInteractiveMode()) {
+        // OTP error - token expired or invalid, retry will re-prompt
         if (
           json.error.code === "EOTP" ||
           (json.error.code === "E401" &&
             json.error.detail?.includes("--otp=<code>"))
         ) {
           if (twoFactorState.token !== null) {
-            // the current otp code must be invalid since it errored
             twoFactorState.token = null;
           }
-          // just in case this isn't already true
           twoFactorState.isRequired = Promise.resolve(true);
           return internalPublish(packageJson, opts, twoFactorState);
         }
