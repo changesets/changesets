@@ -1,4 +1,5 @@
 import npmFetch from "npm-registry-fetch";
+import { setTimeout } from "node:timers/promises";
 
 interface WebAuthUrls {
   authUrl: string;
@@ -61,14 +62,20 @@ export async function initiateWebAuth(
       body: {},
     });
 
-    if (content.loginUrl && content.doneUrl) {
+    if (
+      typeof content.loginUrl === "string" &&
+      typeof content.doneUrl === "string"
+    ) {
       return {
         authUrl: content.loginUrl,
         doneUrl: content.doneUrl,
       };
     }
   } catch (err: any) {
-    if (err.body?.loginUrl && err.body?.doneUrl) {
+    if (
+      typeof err.body?.loginUrl === "string" &&
+      typeof err.body?.doneUrl === "string"
+    ) {
       return {
         authUrl: err.body.loginUrl,
         doneUrl: err.body.doneUrl,
@@ -103,7 +110,7 @@ export async function pollForWebAuthToken(
     if (res.status === 202) {
       const retryAfter = res.headers.get("retry-after");
       const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 1000;
-      await new Promise((r) => setTimeout(r, waitMs));
+      await setTimeout(waitMs);
       continue;
     }
 

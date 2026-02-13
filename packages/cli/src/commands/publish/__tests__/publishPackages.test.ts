@@ -4,9 +4,6 @@ import { getPackages } from "@manypkg/get-packages";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 
 jest.mock("../npm-utils");
-jest.mock("ci-info", () => ({
-  isCI: true,
-}));
 
 describe("publishPackages", () => {
   silenceLogsInBlock();

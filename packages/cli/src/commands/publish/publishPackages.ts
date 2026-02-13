@@ -59,7 +59,7 @@ const getTwoFactorState = async ({
       isCustomRegistry(npmUtils.getCorrectRegistry(pkg.packageJson).registry)
     ) || isCustomRegistry(process.env.npm_config_registry);
 
-  if (!npmUtils.isInteractiveMode() || hasCustomRegistry) {
+  if (!process.stdin.isTTY || hasCustomRegistry) {
     return {
       token: null,
       isRequired: Promise.resolve(false),

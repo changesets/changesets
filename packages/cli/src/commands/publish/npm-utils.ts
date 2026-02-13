@@ -8,7 +8,6 @@ import pc from "picocolors";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
 import { askQuestion, askConfirm } from "../../utils/cli-utilities";
-import { isCI } from "ci-info";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
 import { pollForWebAuthToken } from "./registry-client";
@@ -22,10 +21,6 @@ interface PublishOptions {
 
 const npmRequestLimit = pLimit(40);
 const npmPublishLimit = pLimit(10);
-
-export function isInteractiveMode(): boolean {
-  return !isCI && process.stdin.isTTY === true && process.stdout.isTTY === true;
-}
 
 function jsonParse(input: string) {
   try {
@@ -238,7 +233,7 @@ async function internalPublish(
   let publishFlags = opts.access ? ["--access", opts.access] : [];
   publishFlags.push("--tag", opts.tag);
 
-  if ((await twoFactorState.isRequired) && isInteractiveMode()) {
+  if ((await twoFactorState.isRequired) && process.stdin.isTTY) {
     let otpCode = await getOtpCode(twoFactorState);
     publishFlags.push("--otp", otpCode);
   }
@@ -278,7 +273,7 @@ async function internalPublish(
       getLastJsonObjectFromString(stdout.toString());
 
     if (json?.error) {
-      if (isInteractiveMode()) {
+      if (process.stdin.isTTY) {
         // OTP error - token expired or invalid, retry will re-prompt
         if (
           json.error.code === "EOTP" ||
