@@ -32,8 +32,6 @@ jobs:
           # this expects you to have a script called release which does a build for your packages and calls changeset publish
           publish: yarn release
           version: yarn version-packages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish_pr_check:
     if: github.repository == 'changesets/changesets' && github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/publish-pr')
