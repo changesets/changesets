@@ -1,4 +1,4 @@
-name: Release
+name: Publish
 
 on:
   push:
@@ -11,8 +11,8 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.event_name == 'issue_comment' && github.event.issue.number || github.ref }}
 
 jobs:
-  release:
-    name: Release
+  publish:
+    name: Publish
     if: github.repository == 'changesets/changesets' && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
