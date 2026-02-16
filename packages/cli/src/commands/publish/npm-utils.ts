@@ -1,15 +1,15 @@
+import { spawnSync } from "child_process";
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import { AccessType, PackageJSON } from "@changesets/types";
-import pLimit from "p-limit";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
-import { askQuestion } from "../../utils/cli-utilities";
-import { isCI } from "ci-info";
+import { createPromiseQueue } from "../../utils/createPromiseQueue";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
+import { requiresDelegatedAuth } from "./publishPackages";
 
 interface PublishOptions {
   cwd: string;
@@ -18,8 +18,11 @@ interface PublishOptions {
   tag: string;
 }
 
-const npmRequestLimit = pLimit(40);
-const npmPublishLimit = pLimit(10);
+const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
+const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
+
+const npmRequestQueue = createPromiseQueue(NPM_REQUEST_CONCURRENCY_LIMIT);
+const npmPublishQueue = createPromiseQueue(NPM_PUBLISH_CONCURRENCY_LIMIT);
 
 function jsonParse(input: string) {
   try {
@@ -112,7 +115,7 @@ export async function getTokenIsRequired() {
 }
 
 export function getPackageInfo(packageJson: PackageJSON) {
-  return npmRequestLimit(async () => {
+  return npmRequestQueue.add(async () => {
     info(`npm info ${packageJson.name}`);
 
     const { scope, registry } = getCorrectRegistry(packageJson);
@@ -163,42 +166,17 @@ export async function infoAllow404(packageJson: PackageJSON) {
   return { published: true, pkgInfo };
 }
 
-let otpAskLimit = pLimit(1);
-
-let askForOtpCode = (twoFactorState: TwoFactorState) =>
-  otpAskLimit(async () => {
-    if (twoFactorState.token !== null) return twoFactorState.token;
-    info(
-      "This operation requires a one-time password from your authenticator."
-    );
-
-    let val = await askQuestion("Enter one-time password:");
-    twoFactorState.token = val;
-    return val;
-  });
-
-export let getOtpCode = async (twoFactorState: TwoFactorState) => {
-  if (twoFactorState.token !== null) {
-    return twoFactorState.token;
-  }
-  return askForOtpCode(twoFactorState);
-};
-
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
   packageJson: PackageJSON,
   opts: PublishOptions,
   twoFactorState: TwoFactorState
-): Promise<{ published: boolean }> {
-  let publishTool = await getPublishTool(opts.cwd);
-  let publishFlags = opts.access ? ["--access", opts.access] : [];
-  publishFlags.push("--tag", opts.tag);
+): Promise<{ published: boolean; allowRetry?: boolean }> {
+  const publishTool = await getPublishTool(opts.cwd);
 
-  if ((await twoFactorState.isRequired) && !isCI) {
-    let otpCode = await getOtpCode(twoFactorState);
-    publishFlags.push("--otp", otpCode);
-  }
+  const publishFlags = opts.access ? ["--access", opts.access] : [];
+  publishFlags.push("--tag", opts.tag);
   if (publishTool.name === "pnpm" && publishTool.shouldAddNoGitChecks) {
     publishFlags.push("--no-git-checks");
   }
@@ -211,19 +189,52 @@ async function internalPublish(
     [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
 
+  if (await requiresDelegatedAuth(twoFactorState)) {
+    const result =
+      publishTool.name === "pnpm"
+        ? spawnSync("pnpm", ["publish", ...publishFlags], {
+            env: Object.assign({}, process.env, envOverride),
+            cwd: opts.cwd,
+          })
+        : spawnSync(
+            publishTool.name,
+            ["publish", opts.publishDir, ...publishFlags],
+            {
+              env: Object.assign({}, process.env, envOverride),
+            }
+          );
+
+    if (result.status === 0) {
+      twoFactorState.allowConcurrency = true;
+      // bump for remaining packages
+      npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
+      return { published: true };
+    }
+
+    return { published: false };
+  }
+
+  // in the delegated mode we don't need the json output
+  // as we won't be handling the auth errors
+  publishFlags.push("--json");
+  if (twoFactorState.token) {
+    publishFlags.push("--otp", twoFactorState.token);
+  }
+
   let { code, stdout, stderr } =
     publishTool.name === "pnpm"
-      ? await spawn("pnpm", ["publish", "--json", ...publishFlags], {
+      ? await spawn("pnpm", ["publish", ...publishFlags], {
           env: Object.assign({}, process.env, envOverride),
           cwd: opts.cwd,
         })
       : await spawn(
           publishTool.name,
-          ["publish", opts.publishDir, "--json", ...publishFlags],
+          ["publish", opts.publishDir, ...publishFlags],
           {
             env: Object.assign({}, process.env, envOverride),
           }
         );
+
   if (code !== 0) {
     // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
     // We want to handle this as best we can but it has some struggles:
@@ -239,16 +250,22 @@ async function internalPublish(
       if (
         (json.error.code === "EOTP" ||
           (json.error.code === "E401" &&
-            json.error.detail.includes("--otp=<code>"))) &&
-        !isCI
+            json.error.detail?.includes("--otp=<code>"))) &&
+        process.stdin.isTTY
       ) {
-        if (twoFactorState.token !== null) {
-          // the current otp code must be invalid since it errored
-          twoFactorState.token = null;
-        }
+        // the current otp code must be invalid since it errored
+        twoFactorState.token = null;
         // just in case this isn't already true
         twoFactorState.isRequired = Promise.resolve(true);
-        return internalPublish(packageJson, opts, twoFactorState);
+        twoFactorState.allowConcurrency = false;
+        npmPublishQueue.setConcurrency(1);
+        return {
+          published: false,
+          // given we have just adjusted the concurrency, we need to handle the retries in the layer that requeues the publish
+          // calling internalPublish again would allow concurrent failures to run again concurrently
+          // but only one retried publish should get delegated to the npm cli and other ones should "await" its successful result before being retried
+          allowRetry: true,
+        };
       }
       error(
         `an error occurred while publishing ${packageJson.name}: ${json.error.code}`,
@@ -268,9 +285,18 @@ export function publish(
   opts: PublishOptions,
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
-  // If there are many packages to be published, it's better to limit the
-  // concurrency to avoid unwanted errors, for example from npm.
-  return npmRequestLimit(() =>
-    npmPublishLimit(() => internalPublish(packageJson, opts, twoFactorState))
-  );
+  return npmRequestQueue.add(async () => {
+    if (await requiresDelegatedAuth(twoFactorState)) {
+      npmPublishQueue.setConcurrency(1);
+    }
+
+    let result: { published: boolean; allowRetry?: boolean };
+    do {
+      result = await npmPublishQueue.add(() =>
+        internalPublish(packageJson, opts, twoFactorState)
+      );
+    } while (result.allowRetry);
+
+    return { published: result.published };
+  });
 }

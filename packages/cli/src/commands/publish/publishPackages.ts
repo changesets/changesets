@@ -7,7 +7,6 @@ import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
 import * as npmUtils from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
-import { isCI } from "ci-info";
 
 type PublishedState = "never" | "published" | "only-pre";
 
@@ -54,7 +53,7 @@ const getTwoFactorState = ({
   }
 
   if (
-    isCI ||
+    !process.stdin.isTTY ||
     publicPackages.some((pkg) =>
       isCustomRegistry(npmUtils.getCorrectRegistry(pkg.packageJson).registry)
     ) ||
@@ -71,6 +70,15 @@ const getTwoFactorState = ({
     // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
     isRequired: npmUtils.getTokenIsRequired(),
   };
+};
+
+export const requiresDelegatedAuth = async (twoFactorState: TwoFactorState) => {
+  return (
+    process.stdin.isTTY &&
+    !twoFactorState.token &&
+    !twoFactorState.allowConcurrency &&
+    (await twoFactorState.isRequired)
+  );
 };
 
 export default async function publishPackages({
@@ -97,7 +105,7 @@ export default async function publishPackages({
     return [];
   }
 
-  const twoFactorState: TwoFactorState = getTwoFactorState({
+  const twoFactorState = getTwoFactorState({
     otp,
     publicPackages,
   });
