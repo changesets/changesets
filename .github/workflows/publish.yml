@@ -5,13 +5,15 @@ on:
     branches:
       - main
       - next
+  issue_comment:
+    types: [created]
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency: ${{ github.workflow }}-${{ github.event_name == 'issue_comment' && github.event.issue.number || github.ref }}
 
 jobs:
   release:
     name: Release
-    if: github.repository == 'changesets/changesets'
+    if: github.repository == 'changesets/changesets' && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -32,3 +34,85 @@ jobs:
           version: yarn version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish_pr_check:
+    if: github.repository == 'changesets/changesets' && github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/publish-pr')
+    runs-on: ubuntu-latest
+    steps:
+      - id: report_in_progress
+        run: |
+          echo "in_progress_reaction_id=$(gh api /repos/${{github.repository}}/issues/comments/${{github.event.comment.id}}/reactions -f content='eyes' --jq '.id')" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: check_authorization
+        run: |
+          if [[ $AUTHOR_ASSOCIATION == 'MEMBER' || $AUTHOR_ASSOCIATION == 'OWNER' || $AUTHOR_ASSOCIATION == 'COLLABORATOR' ]]
+          then
+            echo "User is authorized to publish"
+          else
+            echo "User is not authorized to publish"
+            exit 1
+          fi
+        env:
+          AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
+    outputs:
+      in_progress_reaction_id: ${{ steps.report_in_progress.outputs.in_progress_reaction_id }}
+
+  publish_pr:
+    if: github.repository == 'changesets/changesets'
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    needs: publish_pr_check
+    permissions:
+      id-token: write # to use OpenID Connect token for trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout pull request
+        run: gh pr checkout ${{ github.event.issue.number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if Version Packages PR
+        id: check_version_packages
+        run: |
+          echo "version_packages=$(gh pr view ${{ github.event.issue.number }} --json headRefName --jq '.headRefName|startswith("changeset-release/")')" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # for Version Packages PR we want to publish the state from before the Version Packages commit
+      - name: Reset Version Packages PR
+        if: steps.check_version_packages.outputs.version_packages == 'true'
+        run: git reset --hard HEAD~1
+
+      - uses: ./.github/actions/ci-setup
+
+      - run: yarn changeset version --snapshot pr${{ github.event.issue.number }}
+
+      - run: yarn build
+
+      - name: Publish snapshot versions
+        run: yarn changeset publish --tag pr${{ github.event.issue.number }}
+
+      - run: gh api /repos/${{github.repository}}/issues/comments/${{github.event.comment.id}}/reactions -f content='rocket'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: gh api -X DELETE /repos/${{github.repository}}/issues/comments/${{github.event.comment.id}}/reactions/${{needs.publish_pr_check.outputs.in_progress_reaction_id}}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish_pr_report_failure:
+    needs: [publish_pr_check, publish_pr]
+    timeout-minutes: 2
+    runs-on: ubuntu-latest
+    if: failure() && github.repository == 'changesets/changesets' && (needs.publish_pr_check.result == 'failure' || needs.publish_pr.result == 'failure')
+    steps:
+      - run: gh api /repos/${{github.repository}}/issues/comments/${{github.event.comment.id}}/reactions -f content='-1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: gh api -X DELETE /repos/${{github.repository}}/issues/comments/${{github.event.comment.id}}/reactions/${{needs.publish_pr_check.outputs.in_progress_reaction_id}}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
