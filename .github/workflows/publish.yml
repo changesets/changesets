@@ -10,6 +10,8 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.event_name == 'issue_comment' && github.event.issue.number || github.ref }}
 
+permissions: {} # each job should define its own permission explicitly
+
 jobs:
   publish:
     name: Publish
@@ -63,6 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish_pr_check
     permissions:
+      contents: read # to checkout the pull request
       id-token: write # to use OpenID Connect token for trusted publishing
       issues: write # to post comments with published versions
     steps:
