@@ -38,6 +38,8 @@ jobs:
   publish_pr_check:
     if: github.repository == 'changesets/changesets' && github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/publish-pr')
     runs-on: ubuntu-latest
+    permissions:
+      issues: write # to create reactions on issue comments
     steps:
       - id: report_in_progress
         run: |
@@ -129,7 +131,7 @@ jobs:
     timeout-minutes: 2
     runs-on: ubuntu-latest
     permissions:
-      issues: write
+      issues: write # to post comments on issue
     if: failure() && github.repository == 'changesets/changesets' && (needs.publish_pr_check.result == 'failure' || needs.publish_pr.result == 'failure')
     steps:
       - run: |
