@@ -4,7 +4,7 @@ const DEPENDENCY_TYPES = [
   "dependencies",
   "devDependencies",
   "peerDependencies",
-  "optionalDependencies"
+  "optionalDependencies",
 ] as const;
 
 export type VersionType = "major" | "minor" | "patch" | "none";
@@ -53,6 +53,7 @@ export type PackageJSON = {
     access?: AccessType;
     directory?: string;
     registry?: string;
+    [registry: `${string}:registry`]: string;
   };
 };
 
@@ -61,6 +62,11 @@ export type PackageGroup = ReadonlyArray<string>;
 export type Fixed = ReadonlyArray<PackageGroup>;
 export type Linked = ReadonlyArray<PackageGroup>;
 
+export interface PrivatePackages {
+  version: boolean;
+  tag: boolean;
+}
+
 export type Config = {
   changelog: false | readonly [string, any];
   commit: false | readonly [string, any];
@@ -68,6 +74,11 @@ export type Config = {
   linked: Linked;
   access: AccessType;
   baseBranch: string;
+  changedFilePatterns: readonly string[];
+  /** When false, Changesets won't format with Prettier */
+  prettier: boolean;
+  /** Features enabled for Private packages */
+  privatePackages: PrivatePackages;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
@@ -90,6 +101,15 @@ export type WrittenConfig = {
   linked?: Linked;
   access?: AccessType;
   baseBranch?: string;
+  changedFilePatterns?: readonly string[];
+  prettier?: boolean;
+  /** Opt in to tracking non-npm / private packages */
+  privatePackages?:
+    | false
+    | {
+        version?: boolean;
+        tag?: boolean;
+      };
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;

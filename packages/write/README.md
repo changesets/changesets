@@ -9,8 +9,8 @@ const changeset = {
   summary: "A description of a minor change",
   releases: [
     { name: "@changesets/something", type: "minor" },
-    { name: "@changesets/something-else", type: "patch" }
-  ]
+    { name: "@changesets/something-else", type: "patch" },
+  ],
 };
 
 const uniqueId = await write(changeset, cwd);

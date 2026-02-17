@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import startCase from "lodash.startcase";
-import { getCommitThatAddsFile } from "@changesets/git";
+import { getCommitsThatAddFiles } from "@changesets/git";
 import { ComprehensiveRelease, NewChangeset } from "@changesets/types";
 
 import { RelevantChangesets } from "../types";
@@ -8,15 +8,15 @@ import { RelevantChangesets } from "../types";
 async function getReleaseLine(changeset: NewChangeset, cwd: string) {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
-    .map(l => l.trimRight());
+    .map((l) => l.trimEnd());
 
-  const commitThatAddsFile = await getCommitThatAddsFile(
-    `.changeset/${changeset.id}.md`,
-    cwd
+  const [commitThatAddsFile] = await getCommitsThatAddFiles(
+    [`.changeset/${changeset.id}.md`],
+    { cwd }
   );
 
   return `- [${commitThatAddsFile}] ${firstLine}\n${futureLines
-    .map(l => `  ${l}`)
+    .map((l) => `  ${l}`)
     .join("\n")}`;
 }
 
@@ -25,7 +25,7 @@ async function getReleaseLines(
   type: keyof RelevantChangesets,
   cwd: string
 ) {
-  const releaseLines = obj[type].map(changeset =>
+  const releaseLines = obj[type].map((changeset) =>
     getReleaseLine(changeset, cwd)
   );
   if (!releaseLines.length) return "";
@@ -62,8 +62,8 @@ export default async function defaultChangelogGetter(
     `## ${release.newVersion}`,
     majorReleaseLines,
     minorReleaseLines,
-    patchReleaseLines
+    patchReleaseLines,
   ]
-    .filter(line => line)
+    .filter((line) => line)
     .join("\n");
 }

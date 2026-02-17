@@ -1,5 +1,78 @@
 # @changesets/git
 
+## 3.0.4
+
+### Patch Changes
+
+- [#1636](https://github.com/changesets/changesets/pull/1636) [`f73f84a`](https://github.com/changesets/changesets/commit/f73f84ac2d84d3ccf5ff55c0fc78aaaf3f3da20d) Thanks [@Netail](https://github.com/Netail)! - Correctly resolve new changesets with `since` option when the `.changeset` directory is not directly in the git root
+
+## 3.0.3
+
+### Patch Changes
+
+- [#1620](https://github.com/changesets/changesets/pull/1620) [`b15e629`](https://github.com/changesets/changesets/commit/b15e6291c3e7e780ee9e58101d3069f2382569ae) Thanks [@Netail](https://github.com/Netail)! - Make sure that git diff always returns the paths relative to the git root in case diff.relative has been set to true in the git config
+
+## 3.0.2
+
+### Patch Changes
+
+- [#1487](https://github.com/changesets/changesets/pull/1487) [`7323704`](https://github.com/changesets/changesets/commit/7323704dff6e76f488370db384579b86c95c866f) Thanks [@bluwy](https://github.com/bluwy)! - Bump `micromatch` dependency to ^4.0.8 to prevent installing version with vulnerability
+
+- [#1514](https://github.com/changesets/changesets/pull/1514) [`962ab91`](https://github.com/changesets/changesets/commit/962ab918bc2deb89012a0cefce10387997cc54ed) Thanks [@nicoalonsop](https://github.com/nicoalonsop)! - Update spawndamnit to fix [cross-spawn vulnerability](https://security.snyk.io/vuln/SNYK-JS-CROSSSPAWN-8303230)
+
+## 3.0.1
+
+### Patch Changes
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+## 3.0.0
+
+### Major Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+### Patch Changes
+
+- Updated dependencies [[`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a)]:
+  - @changesets/errors@0.2.0
+  - @changesets/types@6.0.0
+
+## 2.0.0
+
+### Major Changes
+
+- [#1029](https://github.com/changesets/changesets/pull/1029) [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7) Thanks [@Andarist](https://github.com/Andarist)! - `getCommitsThatAddFiles` accepts an options object argument now where you can use `cwd` option.
+
+  ```diff
+  -getCommitsThatAddFiles(paths, cwd);
+  +getCommitsThatAddFiles(paths, { cwd });
+  ```
+
+- [#1029](https://github.com/changesets/changesets/pull/1029) [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7) Thanks [@Andarist](https://github.com/Andarist)! - `getCurrentCommitId` and `getCommitsThatAddFiles` return full commit hashes now instead of short ones. You can get short ones by using the `short: true` option.
+
+- [#1029](https://github.com/changesets/changesets/pull/1029) [`598136a`](https://github.com/changesets/changesets/commit/598136a32a00b620c9521d7a7151fbbc721c17d7) Thanks [@Andarist](https://github.com/Andarist)! - Previously deprecated `getCommitThatAddsFile` has been removed while `getCommitsThatAddFiles` is still available.
+
+### Minor Changes
+
+- [#1033](https://github.com/changesets/changesets/pull/1033) [`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2) Thanks [@Andarist](https://github.com/Andarist)! - `getChangedPackagesSinceRef` accepts now a new `changedFilePatterns` option. It can be used to determine which packages should be classified as changed. You can pass an array of glob patterns to it.
+
+### Patch Changes
+
+- Updated dependencies [[`521205d`](https://github.com/changesets/changesets/commit/521205dc8c70fe71b181bd3c4bb7c9c6d2e721d2)]:
+  - @changesets/types@5.2.1
+
+## 1.5.0
+
+### Minor Changes
+
+- [#662](https://github.com/changesets/changesets/pull/662) [`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Add `tagExists` & `remoteTagExists` git helpers
+
+### Patch Changes
+
+- Updated dependencies [[`8c08469`](https://github.com/changesets/changesets/commit/8c0846977597ddaf51aaeb35f1f0f9428bf8ba14)]:
+  - @changesets/types@5.2.0
+
 ## 1.4.1
 
 ### Patch Changes

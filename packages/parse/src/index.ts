@@ -3,9 +3,7 @@ import { Release, VersionType } from "@changesets/types";
 
 const mdRegex = /\s*---([^]*?)\n\s*---(\s*(?:\n|$)[^]*)/;
 
-export default function parseChangesetFile(
-  contents: string
-): {
+export default function parseChangesetFile(contents: string): {
   summary: string;
   releases: Release[];
 } {
@@ -20,13 +18,14 @@ export default function parseChangesetFile(
 
   let releases: Release[];
   try {
-    const yamlStuff: { [key: string]: VersionType } = yaml.safeLoad(
-      roughReleases
-    );
+    const yamlStuff = yaml.load(roughReleases) as
+      | Record<string, VersionType>
+      | undefined;
+
     if (yamlStuff) {
       releases = Object.entries(yamlStuff).map(([name, type]) => ({
         name,
-        type
+        type,
       }));
     } else {
       releases = [];

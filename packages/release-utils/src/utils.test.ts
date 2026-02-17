@@ -84,18 +84,18 @@ test("it sorts the things right", () => {
     {
       name: "a",
       highestLevel: BumpLevels.major,
-      private: true
+      private: true,
     },
     {
       name: "b",
       highestLevel: BumpLevels.patch,
-      private: false
+      private: false,
     },
     {
       name: "c",
       highestLevel: BumpLevels.major,
-      private: false
-    }
+      private: false,
+    },
   ];
   expect(things.sort(sortChangelogEntries)).toMatchSnapshot();
 });

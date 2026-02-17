@@ -75,6 +75,25 @@
       "description": "Determines whether Changesets should commit the results of the add and version command.",
       "default": false
     },
+    "prettier": {
+      "type": "boolean",
+      "description": "When false, Changesets won't format with Prettier",
+      "default": true
+    },
+    "privatePackages": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "tag": { "type": "boolean" },
+            "version": { "type": "boolean" }
+          }
+        },
+        {
+          "const": false
+        }
+      ]
+    },
     "access": {
       "enum": ["restricted", "public"],
       "type": "string",
@@ -85,6 +104,14 @@
       "type": "string",
       "default": "master",
       "description": "Determines the branch that Changesets uses when finding what packages have changed."
+    },
+    "changedFilePatterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": ["**"],
+      "description": "Glob patterns for changed files that should determining the package as changed."
     },
     "ignore": {
       "type": "array",

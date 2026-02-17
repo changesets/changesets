@@ -1,5 +1,30 @@
 # @changesets/get-github-info
 
+## 0.7.0
+
+### Minor Changes
+
+- [#1783](https://github.com/changesets/changesets/pull/1783) [`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a) Thanks [@mrginglymus](https://github.com/mrginglymus)! - Support GitHub URL environment variables
+
+  `@changesets/get-github-info` will now respect environment variables [set by GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/variables), specifically:
+
+  - `GITHUB_GRAPHQL_URL`
+  - `GITHUB_SERVER_URL`
+
+  This means GitHub Enterprise Server will be supported without any additional configuration or patching.
+
+## 0.6.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
+## 0.5.2
+
+### Patch Changes
+
+- [#1035](https://github.com/changesets/changesets/pull/1035) [`b360d50`](https://github.com/changesets/changesets/commit/b360d50809ed2a0e28f3fc482c242776f44b5851) Thanks [@Kikobeats](https://github.com/Kikobeats)! - Improved the error message for a missing `GITHUB_TOKEN` to include the information about the required permissions.
+
 ## 0.5.1
 
 ### Patch Changes
@@ -42,7 +67,7 @@
 
 - [`503154db`](https://github.com/changesets/changesets/commit/503154db39fe8ab88a1176e4569c48078bcf5569) [#257](https://github.com/changesets/changesets/pull/257) Thanks [@Noviny](https://github.com/Noviny)! - Modify the Author query to match github's changes to their graphql
 
-* [`16bf3017`](https://github.com/changesets/changesets/commit/16bf3017dbf25d498fee028bf9806d15edd61be9) [#229](https://github.com/changesets/changesets/pull/229) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix the author of a PR not being queried
+- [`16bf3017`](https://github.com/changesets/changesets/commit/16bf3017dbf25d498fee028bf9806d15edd61be9) [#229](https://github.com/changesets/changesets/pull/229) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Fix the author of a PR not being queried
 
 ## 0.4.0
 

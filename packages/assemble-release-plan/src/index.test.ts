@@ -27,7 +27,7 @@ describe("assemble-release-plan", () => {
       type: "patch",
       newVersion: "1.0.1",
       oldVersion: "1.0.0",
-      changesets: ["strange-words-combine"]
+      changesets: ["strange-words-combine"],
     });
   });
 
@@ -38,7 +38,7 @@ describe("assemble-release-plan", () => {
       defaultConfig,
       undefined,
       {
-        tag: undefined
+        tag: undefined,
       }
     );
 
@@ -53,7 +53,7 @@ describe("assemble-release-plan", () => {
       defaultConfig,
       undefined,
       {
-        tag: "foo"
+        tag: "foo",
       }
     );
 
@@ -67,8 +67,8 @@ describe("assemble-release-plan", () => {
       releases: [
         { name: "pkg-b", type: "patch" },
         { name: "pkg-c", type: "patch" },
-        { name: "pkg-d", type: "major" }
-      ]
+        { name: "pkg-d", type: "major" },
+      ],
     });
 
     let { releases } = assembleReleasePlan(
@@ -91,7 +91,7 @@ describe("assemble-release-plan", () => {
   it("should handle two changesets for a package", () => {
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -112,24 +112,24 @@ describe("assemble-release-plan", () => {
       releases: [
         { name: "pkg-a", type: "none" },
         { name: "pkg-b", type: "none" },
-        { name: "pkg-c", type: "none" }
-      ]
+        { name: "pkg-c", type: "none" },
+      ],
     });
     setup.addChangeset({
       id: "big-cats-wonder",
       releases: [
         { name: "pkg-a", type: "patch" },
         { name: "pkg-b", type: "minor" },
-        { name: "pkg-c", type: "major" }
-      ]
+        { name: "pkg-c", type: "major" },
+      ],
     });
     setup.addChangeset({
       id: "big-cats-yelp",
       releases: [
         { name: "pkg-a", type: "none" },
         { name: "pkg-b", type: "none" },
-        { name: "pkg-c", type: "none" }
-      ]
+        { name: "pkg-c", type: "none" },
+      ],
     });
 
     let { releases } = assembleReleasePlan(
@@ -157,7 +157,7 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -216,7 +216,7 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-b", "pkg-a", "*");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -236,7 +236,7 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-c", "pkg-a", "workspace:^1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -244,7 +244,7 @@ describe("assemble-release-plan", () => {
       setup.packages,
       {
         ...defaultConfig,
-        bumpVersionsWithWorkspaceProtocolOnly: true
+        bumpVersionsWithWorkspaceProtocolOnly: true,
       },
       undefined
     );
@@ -261,7 +261,7 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-c", "pkg-a", "workspace:^");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -269,7 +269,7 @@ describe("assemble-release-plan", () => {
       setup.packages,
       {
         ...defaultConfig,
-        bumpVersionsWithWorkspaceProtocolOnly: true
+        bumpVersionsWithWorkspaceProtocolOnly: true,
       },
       undefined
     );
@@ -291,7 +291,7 @@ describe("assemble-release-plan", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -314,8 +314,8 @@ describe("assemble-release-plan", () => {
       id: "big-cats-delight",
       releases: [
         { name: "pkg-a", type: "major" },
-        { name: "pkg-c", type: "major" }
-      ]
+        { name: "pkg-c", type: "major" },
+      ],
     });
 
     let { releases } = assembleReleasePlan(
@@ -338,7 +338,7 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-b", type: "none" }]
+      releases: [{ name: "pkg-b", type: "none" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -358,7 +358,7 @@ describe("assemble-release-plan", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "link:../pkg-a");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -376,7 +376,7 @@ describe("assemble-release-plan", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "file:../pkg-a");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -394,7 +394,7 @@ describe("assemble-release-plan", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
       id: "nonsense-words-combine",
-      releases: [{ name: "pkg-a", type: "minor" }]
+      releases: [{ name: "pkg-a", type: "minor" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -413,18 +413,18 @@ describe("assemble-release-plan", () => {
   it("should assemble release plan without ignored packages", () => {
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
     setup.addChangeset({
       id: "small-dogs-sad",
-      releases: [{ name: "pkg-b", type: "minor" }]
+      releases: [{ name: "pkg-b", type: "minor" }],
     });
     const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
         ...defaultConfig,
-        ignore: ["pkg-b"]
+        ignore: ["pkg-b"],
       },
       undefined
     );
@@ -437,18 +437,18 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
     setup.addChangeset({
       id: "small-dogs-sad",
-      releases: [{ name: "pkg-b", type: "minor" }]
+      releases: [{ name: "pkg-b", type: "minor" }],
     });
     const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
         ...defaultConfig,
-        ignore: ["pkg-b"]
+        ignore: ["pkg-b"],
       },
       undefined
     );
@@ -464,18 +464,18 @@ describe("assemble-release-plan", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
     setup.addChangeset({
       id: "small-dogs-sad",
-      releases: [{ name: "pkg-b", type: "minor" }]
+      releases: [{ name: "pkg-b", type: "minor" }],
     });
     const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
         ...defaultConfig,
-        ignore: ["pkg-b"]
+        ignore: ["pkg-b"],
       },
       undefined
     );
@@ -491,18 +491,18 @@ describe("assemble-release-plan", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "1.0.0");
     setup.addChangeset({
       id: "big-cats-delight",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
     setup.addChangeset({
       id: "small-dogs-sad",
-      releases: [{ name: "pkg-b", type: "minor" }]
+      releases: [{ name: "pkg-b", type: "minor" }],
     });
     const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
         ...defaultConfig,
-        ignore: ["pkg-b"]
+        ignore: ["pkg-b"],
       },
       undefined
     );
@@ -520,8 +520,8 @@ describe("assemble-release-plan", () => {
       id: "big-cats-delight",
       releases: [
         { name: "pkg-a", type: "major" },
-        { name: "pkg-b", type: "minor" }
-      ]
+        { name: "pkg-b", type: "minor" },
+      ],
     });
 
     expect(() =>
@@ -530,7 +530,7 @@ describe("assemble-release-plan", () => {
         setup.packages,
         {
           ...defaultConfig,
-          ignore: ["pkg-b"]
+          ignore: ["pkg-b"],
         },
         undefined
       )
@@ -542,11 +542,51 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 `);
   });
 
+  it("should not bump a dev dependent nor its dependent when a package gets bumped", () => {
+    setup.updateDevDependency("pkg-b", "pkg-a", "1.0.0");
+    setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
+
+    let { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      defaultConfig,
+      undefined
+    );
+
+    expect(releases.length).toBe(2);
+    expect(releases[0].name).toEqual("pkg-a");
+    expect(releases[0].newVersion).toEqual("1.0.1");
+    expect(releases[1].name).toEqual("pkg-b");
+    expect(releases[1].newVersion).toEqual("1.0.0");
+  });
+
+  it("should throw an error when a changeset contains a package that is not in the workspace", () => {
+    setup.addChangeset({
+      id: "big-cats-delight",
+      releases: [{ name: "pkg-a", type: "major" }],
+    });
+    setup.addChangeset({
+      id: "small-dogs-sad",
+      releases: [{ name: "pkg-z", type: "minor" }],
+    });
+
+    expect(() =>
+      assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        defaultConfig,
+        undefined
+      )
+    ).toThrow(
+      "Found changeset small-dogs-sad for package pkg-z which is not in the workspace"
+    );
+  });
+
   describe("fixed packages", () => {
     it("should assemble release plan for fixed packages", () => {
       setup.addChangeset({
         id: "just-some-umbrellas",
-        releases: [{ name: "pkg-a", type: "minor" }]
+        releases: [{ name: "pkg-a", type: "minor" }],
       });
 
       let { releases } = assembleReleasePlan(
@@ -554,7 +594,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          fixed: [["pkg-a", "pkg-b"]]
+          fixed: [["pkg-a", "pkg-b"]],
         },
         undefined
       );
@@ -568,8 +608,8 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         id: "just-some-umbrellas",
         releases: [
           { name: "pkg-b", type: "minor" },
-          { name: "pkg-a", type: "patch" }
-        ]
+          { name: "pkg-a", type: "patch" },
+        ],
       });
 
       setup.updatePackage("pkg-c", "2.0.0");
@@ -579,7 +619,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          fixed: [["pkg-a", "pkg-b", "pkg-c"]]
+          fixed: [["pkg-a", "pkg-b", "pkg-c"]],
         },
         undefined
       );
@@ -594,15 +634,15 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       // Expected events:
       // - dependencies are checked, nothing leaves semver, nothing changes
       // - fixed are checked, pkg-a is aligned with pkg-b
-      // - depencencies are checked, in pkg-c the dependency range for pkg-a is not satisfied, so a patch bump is given to it
+      // - dependencies are checked, in pkg-c the dependency range for pkg-a is not satisfied, so a patch bump is given to it
       // - fixed are checked, pkg-c is aligned with pkg-d
       setup.addChangeset({
         id: "just-some-umbrellas",
-        releases: [{ name: "pkg-b", type: "major" }]
+        releases: [{ name: "pkg-b", type: "major" }],
       });
       setup.addChangeset({
         id: "totally-average-verbiage",
-        releases: [{ name: "pkg-d", type: "minor" }]
+        releases: [{ name: "pkg-d", type: "minor" }],
       });
 
       setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
@@ -614,8 +654,8 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
           ...defaultConfig,
           fixed: [
             ["pkg-a", "pkg-b"],
-            ["pkg-c", "pkg-d"]
-          ]
+            ["pkg-c", "pkg-d"],
+          ],
         },
         undefined
       );
@@ -633,11 +673,11 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     it("should assemble release plan where a fixed constraint causes a dependency to need changing which causes a second fixed group to update 2", () => {
       setup.addChangeset({
         id: "just-some-umbrellas",
-        releases: [{ name: "pkg-a", type: "major" }]
+        releases: [{ name: "pkg-a", type: "major" }],
       });
       setup.addChangeset({
         id: "totally-average-verbiage",
-        releases: [{ name: "pkg-d", type: "minor" }]
+        releases: [{ name: "pkg-d", type: "minor" }],
       });
 
       setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
@@ -649,8 +689,8 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
           ...defaultConfig,
           fixed: [
             ["pkg-a", "pkg-b"],
-            ["pkg-c", "pkg-d"]
-          ]
+            ["pkg-c", "pkg-d"],
+          ],
         },
         undefined
       );
@@ -673,8 +713,8 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
           ...defaultConfig,
           fixed: [
             ["pkg-a", "pkg-b"],
-            ["pkg-c", "pkg-d"]
-          ]
+            ["pkg-c", "pkg-d"],
+          ],
         },
         undefined
       );
@@ -687,7 +727,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 
       setup.addChangeset({
         id: "some-id",
-        releases: [{ type: "minor", name: "pkg-a" }]
+        releases: [{ type: "minor", name: "pkg-a" }],
       });
 
       let { releases } = assembleReleasePlan(
@@ -695,7 +735,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          fixed: [["pkg-a", "pkg-c"]]
+          fixed: [["pkg-a", "pkg-c"]],
         },
         undefined
       );
@@ -703,16 +743,16 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases).toMatchObject([
         {
           name: "pkg-a",
-          newVersion: "1.1.0"
+          newVersion: "1.1.0",
         },
         {
           name: "pkg-c",
-          newVersion: "1.1.0"
+          newVersion: "1.1.0",
         },
         {
           name: "pkg-b",
-          newVersion: "2.0.0"
-        }
+          newVersion: "2.0.0",
+        },
       ]);
     });
   });
@@ -721,7 +761,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     it("should assemble release plan for linked packages", () => {
       setup.addChangeset({
         id: "just-some-umbrellas",
-        releases: [{ name: "pkg-b", type: "major" }]
+        releases: [{ name: "pkg-b", type: "major" }],
       });
 
       let { releases } = assembleReleasePlan(
@@ -729,7 +769,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          linked: [["pkg-a", "pkg-b"]]
+          linked: [["pkg-a", "pkg-b"]],
         },
         undefined
       );
@@ -743,8 +783,8 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         id: "just-some-umbrellas",
         releases: [
           { name: "pkg-b", type: "minor" },
-          { name: "pkg-a", type: "patch" }
-        ]
+          { name: "pkg-a", type: "patch" },
+        ],
       });
 
       setup.updatePackage("pkg-c", "2.0.0");
@@ -754,7 +794,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          linked: [["pkg-a", "pkg-b", "pkg-c"]]
+          linked: [["pkg-a", "pkg-b", "pkg-c"]],
         },
         undefined
       );
@@ -773,11 +813,11 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     */
       setup.addChangeset({
         id: "just-some-umbrellas",
-        releases: [{ name: "pkg-b", type: "major" }]
+        releases: [{ name: "pkg-b", type: "major" }],
       });
       setup.addChangeset({
         id: "totally-average-verbiage",
-        releases: [{ name: "pkg-d", type: "minor" }]
+        releases: [{ name: "pkg-d", type: "minor" }],
       });
 
       setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
@@ -789,8 +829,8 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
           ...defaultConfig,
           linked: [
             ["pkg-a", "pkg-b"],
-            ["pkg-c", "pkg-d"]
-          ]
+            ["pkg-c", "pkg-d"],
+          ],
         },
         undefined
       );
@@ -809,8 +849,8 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
           ...defaultConfig,
           linked: [
             ["pkg-a", "pkg-b"],
-            ["pkg-c", "pkg-d"]
-          ]
+            ["pkg-c", "pkg-d"],
+          ],
         },
         undefined
       );
@@ -822,7 +862,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 
       setup.addChangeset({
         id: "some-id",
-        releases: [{ type: "minor", name: "pkg-c" }]
+        releases: [{ type: "minor", name: "pkg-c" }],
       });
 
       let { releases } = assembleReleasePlan(
@@ -830,7 +870,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          linked: [["pkg-a", "pkg-c"]]
+          linked: [["pkg-a", "pkg-c"]],
         },
         undefined
       );
@@ -838,16 +878,16 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases).toMatchObject([
         {
           name: "pkg-a",
-          newVersion: "1.1.0"
+          newVersion: "1.1.0",
         },
         {
           name: "pkg-c",
-          newVersion: "1.1.0"
+          newVersion: "1.1.0",
         },
         {
           name: "pkg-b",
-          newVersion: "2.0.0"
-        }
+          newVersion: "2.0.0",
+        },
       ]);
     });
   });
@@ -858,13 +898,13 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.changesets,
         setup.packages,
         {
-          ...defaultConfig
+          ...defaultConfig,
         },
         {
           changesets: [],
           tag: "next",
           initialVersions: {},
-          mode: "exit"
+          mode: "exit",
         }
       );
 
@@ -882,16 +922,16 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.changesets,
         setup.packages,
         {
-          ...defaultConfig
+          ...defaultConfig,
         },
         {
           changesets: ["strange-words-combine"],
           tag: "next",
           initialVersions: {
             "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0"
+            "pkg-b": "1.0.0",
           },
-          mode: "exit"
+          mode: "exit",
         }
       );
 
@@ -912,16 +952,16 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          ignore: ["pkg-b"]
+          ignore: ["pkg-b"],
         },
         {
           changesets: ["strange-words-combine"],
           tag: "next",
           initialVersions: {
             "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0"
+            "pkg-b": "1.0.0",
           },
-          mode: "exit"
+          mode: "exit",
         }
       );
 
@@ -939,9 +979,9 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [
           {
             name: "pkg-a",
-            type: "major"
-          }
-        ]
+            type: "major",
+          },
+        ],
       });
       setup.updatePackage("pkg-a", "2.0.0-next.0");
 
@@ -951,15 +991,15 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [
           {
             name: "pkg-a",
-            type: "minor"
-          }
-        ]
+            type: "minor",
+          },
+        ],
       });
       const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
-          ...defaultConfig
+          ...defaultConfig,
         },
         {
           changesets: ["major-bumping-one"],
@@ -967,9 +1007,9 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
           initialVersions: {
             "pkg-a": "1.0.0",
             "pkg-b": "1.0.0",
-            "pkg-c": "1.0.0"
+            "pkg-c": "1.0.0",
           },
-          mode: "pre"
+          mode: "pre",
         }
       );
 
@@ -985,7 +1025,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       setup.updateDependency("pkg-c", "pkg-b", "workspace:^1.0.0");
       setup.addChangeset({
         id: "big-cats-delight",
-        releases: [{ name: "pkg-b", type: "none" }]
+        releases: [{ name: "pkg-b", type: "none" }],
       });
 
       let { releases } = assembleReleasePlan(
@@ -1005,7 +1045,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       setup.updateDependency("pkg-c", "pkg-b", "workspace:*");
       setup.addChangeset({
         id: "big-cats-delight",
-        releases: [{ name: "pkg-b", type: "none" }]
+        releases: [{ name: "pkg-b", type: "none" }],
       });
 
       let { releases } = assembleReleasePlan(
@@ -1036,6 +1076,108 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[1].name).toEqual("pkg-b");
       expect(releases[1].oldVersion).toEqual("1.0.0");
       expect(releases[1].newVersion).toEqual("1.0.1");
+    });
+  });
+
+  describe("updateInternalDependents: always", () => {
+    it("should bump a direct dependent when a dependency package gets bumped", () => {
+      setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            updateInternalDependents: "always",
+          },
+        },
+        undefined
+      );
+
+      expect(releases.length).toBe(2);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("1.0.1");
+    });
+
+    it("should bump a transitive dependent when a dependency package gets bumped", () => {
+      setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
+      setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            updateInternalDependents: "always",
+          },
+        },
+        undefined
+      );
+
+      expect(releases.length).toBe(3);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("1.0.1");
+      expect(releases[2].name).toEqual("pkg-c");
+      expect(releases[2].newVersion).toEqual("1.0.1");
+    });
+
+    it("not bump a dependent package when a dependency has `none` changeset", () => {
+      setup.updateDependency("pkg-b", "pkg-c", "^1.0.0");
+      setup.addChangeset({
+        id: "stuff-and-nonsense",
+        releases: [{ name: "pkg-c", type: "none" }],
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            updateInternalDependents: "always",
+          },
+        },
+        undefined
+      );
+
+      expect(releases.length).toBe(2);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[1].name).toEqual("pkg-c");
+      expect(releases[1].newVersion).toEqual("1.0.0");
+    });
+
+    it("should not bump a dev dependent nor its dependent when a package gets bumped", () => {
+      setup.updateDevDependency("pkg-b", "pkg-a", "^1.0.0");
+      setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+            ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+            updateInternalDependents: "always",
+          },
+        },
+        undefined
+      );
+
+      expect(releases.length).toBe(2);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].newVersion).toEqual("1.0.0");
     });
   });
 });
@@ -1069,7 +1211,7 @@ describe("version update thoroughness", () => {
   it("should path a pinned and tilde dependents when minor versioning", () => {
     setup.addChangeset({
       id: "stuff-and-nonsense",
-      releases: [{ name: "pkg-a", type: "minor" }]
+      releases: [{ name: "pkg-a", type: "minor" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -1090,7 +1232,7 @@ describe("version update thoroughness", () => {
   it("should patch pinned, tilde and caret dependents when a major versioning", () => {
     setup.addChangeset({
       id: "stuff-and-nonsense",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -1140,7 +1282,7 @@ describe("bumping peerDeps", () => {
     setup.changesets = [];
     setup.addChangeset({
       id: "anyway-the-windblows",
-      releases: [{ name: "pkg-a", type: "none" }]
+      releases: [{ name: "pkg-a", type: "none" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -1172,7 +1314,7 @@ describe("bumping peerDeps", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
-      releases: [{ name: "pkg-a", type: "minor" }]
+      releases: [{ name: "pkg-a", type: "minor" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -1192,7 +1334,7 @@ describe("bumping peerDeps", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -1213,7 +1355,7 @@ describe("bumping peerDeps", () => {
     setup.changesets = [];
     setup.addChangeset({
       id: "anyway-the-windblows",
-      releases: [{ name: "pkg-a", type: "none" }]
+      releases: [{ name: "pkg-a", type: "none" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -1245,7 +1387,7 @@ describe("bumping peerDeps", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
-      releases: [{ name: "pkg-a", type: "minor" }]
+      releases: [{ name: "pkg-a", type: "minor" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -1265,7 +1407,7 @@ describe("bumping peerDeps", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
-      releases: [{ name: "pkg-a", type: "major" }]
+      releases: [{ name: "pkg-a", type: "major" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -1287,7 +1429,7 @@ describe("bumping peerDeps", () => {
     setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
     setup.addChangeset({
       id: "anyway-the-windblows",
-      releases: [{ name: "pkg-a", type: "minor" }]
+      releases: [{ name: "pkg-a", type: "minor" }],
     });
 
     let { releases } = assembleReleasePlan(
@@ -1300,15 +1442,15 @@ describe("bumping peerDeps", () => {
     expect(releases.length).toBe(3);
     expect(releases[0]).toMatchObject({
       name: "pkg-a",
-      newVersion: "1.1.0"
+      newVersion: "1.1.0",
     });
     expect(releases[1]).toMatchObject({
       name: "pkg-b",
-      newVersion: "2.0.0"
+      newVersion: "2.0.0",
     });
     expect(releases[2]).toMatchObject({
       name: "pkg-c",
-      newVersion: "1.0.1"
+      newVersion: "1.0.1",
     });
   });
 
@@ -1317,7 +1459,7 @@ describe("bumping peerDeps", () => {
       setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
       setup.addChangeset({
         id: "anyway-the-windblows",
-        releases: [{ name: "pkg-a", type: "minor" }]
+        releases: [{ name: "pkg-a", type: "minor" }],
       });
       let { releases } = assembleReleasePlan(
         setup.changesets,
@@ -1326,8 +1468,8 @@ describe("bumping peerDeps", () => {
           ...defaultConfig,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            onlyUpdatePeerDependentsWhenOutOfRange: true
-          }
+            onlyUpdatePeerDependentsWhenOutOfRange: true,
+          },
         },
         undefined
       );
@@ -1335,11 +1477,13 @@ describe("bumping peerDeps", () => {
       expect(releases[0].name).toEqual("pkg-a");
       expect(releases[0].newVersion).toEqual("1.1.0");
     });
-  });
 
-  describe("updateInternalDependents: always", () => {
-    it("should bump a direct dependent when a dependency package gets bumped", () => {
-      setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
+    it("should major bump dependent when leaving range", () => {
+      setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
+      setup.addChangeset({
+        id: "anyway-the-windblows",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      });
 
       let { releases } = assembleReleasePlan(
         setup.changesets,
@@ -1348,72 +1492,18 @@ describe("bumping peerDeps", () => {
           ...defaultConfig,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            updateInternalDependents: "always"
-          }
+            onlyUpdatePeerDependentsWhenOutOfRange: true,
+          },
         },
         undefined
       );
 
       expect(releases.length).toBe(2);
       expect(releases[0].name).toEqual("pkg-a");
-      expect(releases[0].newVersion).toEqual("1.0.1");
+      expect(releases[0].newVersion).toEqual("1.1.0");
       expect(releases[1].name).toEqual("pkg-b");
-      expect(releases[1].newVersion).toEqual("1.0.1");
+      expect(releases[1].newVersion).toEqual("2.0.0");
     });
-
-    it("should bump a transitive dependent when a dependency package gets bumped", () => {
-      setup.addPackage("pkg-c", "1.0.0");
-      setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
-      setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
-
-      let { releases } = assembleReleasePlan(
-        setup.changesets,
-        setup.packages,
-        {
-          ...defaultConfig,
-          ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-            ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-            updateInternalDependents: "always"
-          }
-        },
-        undefined
-      );
-
-      expect(releases.length).toBe(3);
-      expect(releases[0].name).toEqual("pkg-a");
-      expect(releases[0].newVersion).toEqual("1.0.1");
-      expect(releases[1].name).toEqual("pkg-b");
-      expect(releases[1].newVersion).toEqual("1.0.1");
-      expect(releases[2].name).toEqual("pkg-c");
-      expect(releases[2].newVersion).toEqual("1.0.1");
-    });
-  });
-
-  it("should major bump dependent when leaving range", () => {
-    setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
-    setup.addChangeset({
-      id: "anyway-the-windblows",
-      releases: [{ name: "pkg-a", type: "minor" }]
-    });
-
-    let { releases } = assembleReleasePlan(
-      setup.changesets,
-      setup.packages,
-      {
-        ...defaultConfig,
-        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-          onlyUpdatePeerDependentsWhenOutOfRange: true
-        }
-      },
-      undefined
-    );
-
-    expect(releases.length).toBe(2);
-    expect(releases[0].name).toEqual("pkg-a");
-    expect(releases[0].newVersion).toEqual("1.1.0");
-    expect(releases[1].name).toEqual("pkg-b");
-    expect(releases[1].newVersion).toEqual("2.0.0");
   });
 });
 
