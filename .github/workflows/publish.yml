@@ -105,7 +105,6 @@ jobs:
         run: yarn changeset publish --tag "${{ steps.snapshot_version.outputs.publish_tag }}"
 
       - name: Post comment with published version
-        continue-on-error: true
         run: |
           cat <<'BODY' > /tmp/comment-body.md
           Published snapshot version `${{ steps.snapshot_version.outputs.version }}` in response to [this comment](${{ github.event.comment.html_url }}).
@@ -126,8 +125,21 @@ jobs:
     needs: [publish_pr_check, publish_pr]
     timeout-minutes: 2
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     if: failure() && github.repository == 'changesets/changesets' && (needs.publish_pr_check.result == 'failure' || needs.publish_pr.result == 'failure')
     steps:
+      - run: |
+          FAILED_JOB_ID=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --jq '[.jobs[] | select(.conclusion == "failure")][0].id')
+          LINK="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${FAILED_JOB_ID}"
+
+          cat <<BODY > /tmp/comment-body.md
+          Snapshot publish triggered by [this comment](${{ github.event.comment.html_url }}) failed. [See the failed job](${LINK}).
+          BODY
+          gh issue comment "${{ github.event.issue.number }}" --body-file /tmp/comment-body.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - run: gh api /repos/${{github.repository}}/issues/comments/${{github.event.comment.id}}/reactions -f content='-1'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
