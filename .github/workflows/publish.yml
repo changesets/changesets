@@ -64,6 +64,7 @@ jobs:
     needs: publish_pr_check
     permissions:
       id-token: write # to use OpenID Connect token for trusted publishing
+      issues: write # to post comments with published versions
     steps:
       - uses: actions/checkout@v4
 
@@ -86,12 +87,32 @@ jobs:
 
       - uses: ./.github/actions/ci-setup
 
-      - run: yarn changeset version --snapshot pr${{ github.event.issue.number }}
+      - name: Compute snapshot version
+        id: snapshot_version
+        run: |
+          PUBLISH_TAG="pr${{ github.event.issue.number }}"
+          SNAPSHOT_TAG="${PUBLISH_TAG}.$(git rev-parse --short HEAD)"
+
+          echo "publish_tag=$PUBLISH_TAG" >> "$GITHUB_OUTPUT"
+          echo "snapshot_tag=$SNAPSHOT_TAG" >> "$GITHUB_OUTPUT"
+          echo "version=0.0.0-$SNAPSHOT_TAG" >> "$GITHUB_OUTPUT"
+
+      - run: yarn changeset version --snapshot "${{ steps.snapshot_version.outputs.snapshot_tag }}" --snapshot-prerelease-template "{tag}"
 
       - run: yarn build
 
       - name: Publish snapshot versions
-        run: yarn changeset publish --tag pr${{ github.event.issue.number }}
+        run: yarn changeset publish --tag "${{ steps.snapshot_version.outputs.publish_tag }}"
+
+      - name: Post comment with published version
+        continue-on-error: true
+        run: |
+          cat <<'BODY' > /tmp/comment-body.md
+          Published snapshot version `${{ steps.snapshot_version.outputs.version }}` in response to [this comment](${{ github.event.comment.html_url }}).
+          BODY
+          gh issue comment "${{ github.event.issue.number }}" --body-file /tmp/comment-body.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: gh api /repos/${{github.repository}}/issues/comments/${{github.event.comment.id}}/reactions -f content='rocket'
         env:
