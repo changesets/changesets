@@ -5,7 +5,7 @@ import path from "path";
 import * as git from "@changesets/git";
 import { error, info, log, warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config } from "@changesets/types";
+import { Config, VersionType } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { ExitError } from "@changesets/errors";
 import { getPackages } from "@manypkg/get-packages";
@@ -15,10 +15,17 @@ import * as cli from "../../utils/cli-utilities";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages";
 import createChangeset from "./createChangeset";
 import printConfirmationMessage from "./messages";
+import { getRecommendedBump } from "./auto-mode";
+
+// Types for auto mode functionality
+export type AutoModeRelease = {
+  name: string;
+  type: VersionType;
+};
 
 export default async function add(
   cwd: string,
-  { empty, open }: { empty?: boolean; open?: boolean },
+  { empty, open, auto }: { empty?: boolean; open?: boolean; auto?: boolean },
   config: Config
 ): Promise<void> {
   const packages = await getPackages(cwd);
@@ -32,8 +39,8 @@ export default async function add(
   const versionablePackages = packages.packages.filter(
     (pkg) =>
       !shouldSkipPackage(pkg, {
-        ignore: config.ignore,
-        allowPrivatePackages: config.privatePackages.version,
+        ignore: config.ignore || [],
+        allowPrivatePackages: config.privatePackages?.version || false,
       })
   );
 
@@ -53,6 +60,62 @@ export default async function add(
       releases: [],
       summary: ``,
     };
+  } else if (auto) {
+    // Auto mode: analyze only packages with committed changes
+    const releases: AutoModeRelease[] = [];
+    const skippedPackages: string[] = [];
+
+    info(
+      `Auto mode: Analyzing all versionable packages for committed changes...`
+    );
+
+    for (const pkg of versionablePackages as any[]) {
+      const pkgName = pkg.packageJson.name;
+      info(`Auto mode: Analyzing package ${pkgName}...`);
+      const result = await getRecommendedBump(
+        pkgName,
+        pkg.dir,
+        config,
+        config.auto?.analyzer
+      );
+
+      if (result.bump) {
+        releases.push({ name: pkgName, type: result.bump });
+      } else {
+        // Package has no commits or no conventional commits - skip it
+        skippedPackages.push(pkgName);
+      }
+    }
+
+    if (skippedPackages.length > 0) {
+      warn(
+        `Auto mode: Skipped ${
+          skippedPackages.length
+        } packages: ${skippedPackages.join(", ")}`
+      );
+    }
+
+    if (releases.length === 0) {
+      warn(
+        "Auto mode: No packages with valid bumps found. This might indicate:"
+      );
+      warn("- No commits in the current branch affect packages");
+      warn("- No conventional commits in the analyzed packages");
+      warn("- All commits are filtered out or ignored");
+      warn("Exiting without creating changeset...");
+      return;
+    } else {
+      info(
+        `Auto mode: Successfully analyzed ${releases.length} packages with bumps`
+      );
+    }
+
+    newChangeset = {
+      confirmed: true,
+      releases,
+      summary:
+        "Auto-generated changeset based on conventional commit analysis.",
+    };
   } else {
     let changedPackagesNames: string[] = [];
     try {
@@ -60,7 +123,7 @@ export default async function add(
         await getVersionableChangedPackages(config, {
           cwd,
         })
-      ).map((pkg) => pkg.packageJson.name);
+      ).map((pkg: any) => pkg.packageJson.name);
     } catch (e: any) {
       // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
       // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
@@ -138,3 +201,5 @@ export default async function add(
     }
   }
 }
+
+export { add as addChangeset };

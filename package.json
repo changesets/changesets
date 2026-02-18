@@ -49,6 +49,7 @@
     "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.62.0",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.1.0",
