@@ -123,7 +123,7 @@ jobs:
       - name: Post failure comment
         if: failure()
         run: |
-          FAILED_JOB_ID=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --jq '[.jobs[] | select(.conclusion == "failure")][0].id')
+          FAILED_JOB_ID=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --jq ".jobs[] | select(.name == \"$GITHUB_JOB\") | .id")
           LINK="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${FAILED_JOB_ID}"
 
           cat <<BODY > /tmp/comment-body.md
