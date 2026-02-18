@@ -6,6 +6,7 @@ export type CliOptions = {
   empty?: boolean;
   since?: string;
   ignore?: string | string[];
+  msg?: string;
   snapshot?: string | boolean;
   snapshotPrereleaseTemplate?: string;
   prettier?: boolean;
