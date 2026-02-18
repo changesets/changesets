@@ -35,6 +35,15 @@ function jsonParse(input: string) {
   }
 }
 
+export const isCustomRegistry = (registry?: string): boolean => {
+  registry = normalizeRegistry(registry);
+  return (
+    !!registry &&
+    registry !== "https://registry.npmjs.org" &&
+    registry !== "https://registry.yarnpkg.com"
+  );
+};
+
 interface RegistryInfo {
   scope?: string;
   registry: string;

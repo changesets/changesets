@@ -5,7 +5,13 @@ import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
-import * as npmUtils from "./npm-utils";
+import {
+  isCustomRegistry,
+  getCorrectRegistry,
+  getTokenIsRequired,
+  publish,
+  infoAllow404,
+} from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
 
 type PublishedState = "never" | "published" | "only-pre";
@@ -33,11 +39,6 @@ function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   return "latest";
 }
 
-const isCustomRegistry = (registry?: string): boolean =>
-  !!registry &&
-  registry !== "https://registry.npmjs.org" &&
-  registry !== "https://registry.yarnpkg.com";
-
 const getTwoFactorState = ({
   otp,
   publicPackages,
@@ -55,7 +56,7 @@ const getTwoFactorState = ({
   if (
     !process.stdin.isTTY ||
     publicPackages.some((pkg) =>
-      isCustomRegistry(npmUtils.getCorrectRegistry(pkg.packageJson).registry)
+      isCustomRegistry(getCorrectRegistry(pkg.packageJson).registry)
     ) ||
     isCustomRegistry(process.env.npm_config_registry)
   ) {
@@ -68,7 +69,7 @@ const getTwoFactorState = ({
   return {
     token: null,
     // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
-    isRequired: npmUtils.getTokenIsRequired(),
+    isRequired: getTokenIsRequired(),
   };
 };
 
@@ -132,7 +133,7 @@ async function publishAPackage(
   const { name, version, publishConfig } = pkg.packageJson;
   info(`Publishing ${pc.cyan(`"${name}"`)} at ${pc.green(`"${version}"`)}`);
 
-  const publishConfirmation = await npmUtils.publish(
+  const publishConfirmation = await publish(
     pkg.packageJson,
     {
       cwd: pkg.dir,
@@ -158,7 +159,7 @@ async function getUnpublishedPackages(
 ) {
   const results: Array<PkgInfo> = await Promise.all(
     packages.map(async ({ packageJson }) => {
-      const response = await npmUtils.infoAllow404(packageJson);
+      const response = await infoAllow404(packageJson);
       let publishedState: PublishedState = "never";
       if (response.published) {
         publishedState = "published";
