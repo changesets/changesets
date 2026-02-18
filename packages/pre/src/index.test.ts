@@ -1,4 +1,4 @@
-import { enterPre, exitPre, readPreState } from "./index";
+import { enterPre, exitPre, isActivePre, readPreState } from "./index";
 import * as fs from "fs-extra";
 import path from "path";
 import {
@@ -6,6 +6,58 @@ import {
   PreExitButNotInPreModeError,
 } from "@changesets/errors";
 import { testdir } from "@changesets/test-utils";
+
+describe("isActivePre", () => {
+  it("should provide 'true' when in pre", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    await enterPre(cwd, "next");
+
+    expect(await isActivePre(cwd)).toBe(true);
+  });
+  it("should provide 'false' when not in pre", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    expect(await isActivePre(cwd)).toBe(false);
+
+    await enterPre(cwd, "next");
+    await exitPre(cwd);
+
+    expect(await isActivePre(cwd)).toBe(false);
+  });
+});
 
 describe("enterPre", () => {
   it("should enter", async () => {

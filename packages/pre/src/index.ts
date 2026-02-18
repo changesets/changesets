@@ -29,6 +29,11 @@ export async function readPreState(cwd: string): Promise<PreState | undefined> {
   return preState;
 }
 
+export async function isActivePre(cwd: string) {
+  let preState = await readPreState(cwd);
+  return preState?.mode === "pre";
+}
+
 export async function exitPre(cwd: string) {
   let preStatePath = path.resolve(cwd, ".changeset", "pre.json");
   // TODO: verify that the pre state isn't broken

@@ -8,9 +8,13 @@ Enter and exit pre mode in a Changesets repo.
 ## Usage
 
 ```ts
-import { enterPre, exitPre } from "@changesets/pre";
+import { isActivePre, enterPre, exitPre } from "@changesets/pre";
+
+console.log(`Pre Active: ${await isActivePre(cwd)}`;
 
 await enterPre(cwd, tag);
+
+console.log(`Pre Active: ${await isActivePre(cwd)}`;
 
 let preState = await readPreState(cwd);
 
@@ -25,6 +29,7 @@ This package is used by internally by Changesets to enter and exit pre mode alon
 ```ts
 import { PreState } from "@changesets/types";
 
+export function isActivePre(cwd: string): Promise<boolean>;
 export function enterPre(cwd: string, tag: string): Promise<void>;
 export function exitPre(cwd: string): Promise<void>;
 export function readPreState(cwd: string): Promise<PreState>;
