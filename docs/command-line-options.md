@@ -6,7 +6,7 @@ The command line for changesets is the main way of interacting with it. There ar
 - add [--empty][--open]
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag]
-- status [--since=master --verbose --output=JSON_FILE.json]
+- status [--since=master --verbose --strict --output=JSON_FILE.json]
 - pre [exit|enter {tag}]
 - tag
 
@@ -120,12 +120,14 @@ git push --follow-tags
 ## status
 
 ```
-changeset status [--verbose] [--output={filePath}] [--since={gitTag}]
+changeset status [--verbose] [--strict] [--output={filePath}] [--since={gitTag}]
 ```
 
 The status command provides information about the changesets that currently exist. If there are no changesets present, it exits with an error status code.
 
 - `--verbose` - use if you want to know the new versions, and get a link to the relevant changeset summary.
+
+- `--strict` - by default, if there are tracked packages with changes, `status` will not fail if there is a changeset for any package. If `--strict` is provided, `status` will check if the changed packages are all included in the changeset, and will fail if any of them is not included.
 
 - `--output` - allows you to write the JSON object of the status output for consumption by other tools, such as CI.
 

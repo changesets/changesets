@@ -171,12 +171,14 @@ git push --follow-tags
 ### status
 
 ```shell
-changeset status [--verbose] [--output={filePath}] [--since={gitTag}]
+changeset status [--verbose] [--strict] [--output={filePath}] [--since={gitTag}]
 ```
 
 The status command provides information about the changesets that currently exist. If there are changes to packages but no changesets are present, it exits with error status code `1`.
 
 - `--verbose` - use if you want to know the new versions, and get a link to the relevant changeset summary.
+
+- `--strict` - use if you want to fail if any specific changed package is not included in the changeset.
 
 - `--output` - allows you to write the json object of the status out, for consumption by other tools, such as CI.
 

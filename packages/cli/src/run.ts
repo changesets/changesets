@@ -82,6 +82,7 @@ export async function run(
       ignore,
       snapshot,
       snapshotPrereleaseTemplate,
+      strict,
       tag,
       open,
       gitTag,
@@ -195,7 +196,11 @@ export async function run(
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
+        await status(
+          cwd,
+          { sinceMaster, since, verbose, output, strict },
+          config
+        );
         return;
       }
       case "tag": {
