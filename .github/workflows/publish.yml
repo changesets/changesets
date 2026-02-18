@@ -43,11 +43,13 @@ jobs:
       contents: read # to checkout the pull request
       id-token: write # to use OpenID Connect token for trusted publishing
       issues: write # to post comments and reactions
+      pull-requests: write # to post reactions on PR comments
     steps:
       - name: Report in-progress reaction
         id: report_in_progress
         run: |
-          echo "in_progress_reaction_id=$(gh api /repos/${{github.repository}}/issues/comments/${{github.event.comment.id}}/reactions -f content='eyes' --jq '.id')" >> "$GITHUB_OUTPUT"
+          REACTION_ID=$(gh api /repos/${{github.repository}}/issues/comments/${{github.event.comment.id}}/reactions -f content='eyes' --jq '.id')
+          echo "in_progress_reaction_id=$REACTION_ID" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -74,13 +76,14 @@ jobs:
       - name: Check if Version Packages PR
         id: check_version_packages
         run: |
-          echo "version_packages=$(gh pr view ${{ github.event.issue.number }} --json headRefName --jq '.headRefName|startswith("changeset-release/")')" >> "$GITHUB_OUTPUT"
+          IS_VERSION_PACKAGES_PR=$(gh pr view ${{ github.event.issue.number }} --json headRefName --jq '.headRefName|startswith("changeset-release/")')
+          echo "is_version_packages_pr=$IS_VERSION_PACKAGES_PR" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # for Version Packages PR we want to publish the state from before the Version Packages commit
       - name: Reset Version Packages PR
-        if: steps.check_version_packages.outputs.version_packages == 'true'
+        if: steps.check_version_packages.outputs.is_version_packages_pr == 'true'
         run: git reset --hard HEAD~1
 
       - uses: ./.github/actions/ci-setup
@@ -96,6 +99,8 @@ jobs:
           echo "version=0.0.0-$SNAPSHOT_TAG" >> "$GITHUB_OUTPUT"
 
       - run: yarn changeset version --snapshot "${{ steps.snapshot_version.outputs.snapshot_tag }}" --snapshot-prerelease-template "{tag}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: yarn build
 
