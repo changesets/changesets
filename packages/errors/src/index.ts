@@ -30,6 +30,12 @@ export class PreEnterButInPreModeError extends ExtendableError {
   }
 }
 
+export class PreEnterButInRequestedPreModeError extends ExtendableError {
+  constructor() {
+    super("already in specified pre mode");
+  }
+}
+
 export class InternalError extends ExtendableError {
   constructor(message: string) {
     super(message);
