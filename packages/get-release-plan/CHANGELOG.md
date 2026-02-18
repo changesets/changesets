@@ -1,5 +1,12 @@
 # @changesets/get-release-plan
 
+## 4.0.15
+
+### Patch Changes
+
+- Updated dependencies [[`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94)]:
+  - @changesets/config@3.1.3
+
 ## 4.0.14
 
 ### Patch Changes
