@@ -210,12 +210,14 @@ async function internalPublish(
         ? spawnSync("pnpm", ["publish", ...publishFlags], {
             env: Object.assign({}, process.env, envOverride),
             cwd: opts.cwd,
+            stdio: "inherit",
           })
         : spawnSync(
             publishTool.name,
             ["publish", opts.publishDir, ...publishFlags],
             {
               env: Object.assign({}, process.env, envOverride),
+              stdio: "inherit",
             }
           );
 
