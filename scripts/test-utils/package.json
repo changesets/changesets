@@ -22,7 +22,7 @@
   "dependencies": {
     "@changesets/logger": "^0.1.1",
     "fixturez": "^1.1.0",
-    "fs-extra": "^7.0.1",
+    "fs-extra": "^11.3.2",
     "spawndamnit": "^3.0.1"
   }
 }
