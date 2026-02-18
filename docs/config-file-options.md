@@ -11,11 +11,12 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "access": "restricted",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
+  "requireSemverSatisfaction": false,
   "ignore": []
 }
 ```
 
-> NOTE: the `linked`, `fixed`, `updateInternalDependencies`, `bumpVersionsWithWorkspaceProtocolOnly`, and `ignore` options are only for behaviour in monorepos.
+> NOTE: the `linked`, `fixed`, `updateInternalDependencies`, `requireSemverSatisfaction`, `bumpVersionsWithWorkspaceProtocolOnly`, and `ignore` options are only for behaviour in monorepos.
 
 ## `commit` (`boolean`, or module path as a `string`, or a tuple like `[modulePath: string, options: any]`)
 
@@ -134,6 +135,34 @@ Using `minor` allows consumers to more actively control their own deduplication 
 Changesets will always update the dependency if it would leave the old semver range.
 
 > ⚠ Note: this is only applied for packages which are already released in the current release. If A depends on B and we only release B then A won't be bumped.
+
+## `requireSemverSatisfaction`
+
+Set this option to `true` if you want `changeset version` to skip updating internal dependencies if the new version you are releasing does not satisfy the semantic version range declared by your internal dependencies. This is particularly useful if you make breaking changes in one package but don't want to update your other packages at the same time.
+
+For example, if you change `pkg-spoon` from v1.5.2 to v2.0.0, and you have another package named `pkg-soup` that declares the dependency:
+
+```json
+{
+  "name": "pkg-soup",
+  "dependencies": {
+    "pkg-spoon": "^1.5.2"
+  }
+}
+```
+
+Setting `requireSemverSatisfaction` to `true` will NOT make an update to `pkg-soup` when running `changeset version`.
+
+Leaving this option `false` (default) will update `pkg-soup`'s package.json to:
+
+```json
+{
+  "name": "pkg-soup",
+  "dependencies": {
+    "pkg-spoon": "^2.0.0"
+  }
+}
+```
 
 ## `changelog` (false or a path)
 
