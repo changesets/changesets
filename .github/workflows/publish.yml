@@ -76,14 +76,14 @@ jobs:
       - name: Check if Version Packages PR
         id: check_version_packages
         run: |
-          VERSION_PACKAGES=$(gh pr view ${{ github.event.issue.number }} --json headRefName --jq '.headRefName|startswith("changeset-release/")')
-          echo "version_packages=$VERSION_PACKAGES" >> "$GITHUB_OUTPUT"
+          IS_VERSION_PACKAGES_PR=$(gh pr view ${{ github.event.issue.number }} --json headRefName --jq '.headRefName|startswith("changeset-release/")')
+          echo "is_version_packages_pr=$IS_VERSION_PACKAGES_PR" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # for Version Packages PR we want to publish the state from before the Version Packages commit
       - name: Reset Version Packages PR
-        if: steps.check_version_packages.outputs.version_packages == 'true'
+        if: steps.check_version_packages.outputs.is_version_packages_pr == 'true'
         run: git reset --hard HEAD~1
 
       - uses: ./.github/actions/ci-setup
