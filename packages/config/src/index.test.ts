@@ -749,6 +749,32 @@ describe("parser errors", () => {
     `);
   });
 
+  test("ignore should not require private versioned dependents to also be ignored", () => {
+    expect(() =>
+      unsafeParse(
+        { ignore: ["pkg-b"] },
+        {
+          ...defaultPackages,
+          packages: [
+            {
+              packageJson: {
+                name: "pkg-a",
+                private: true,
+                version: "1.0.0",
+                dependencies: { "pkg-b": "1.0.0" },
+              },
+              dir: "dir",
+            },
+            {
+              packageJson: { name: "pkg-b", version: "1.0.0" },
+              dir: "dir",
+            },
+          ],
+        }
+      )
+    ).not.toThrow();
+  });
+
   test("onlyUpdatePeerDependentsWhenOutOfRange non-boolean", () => {
     expect(() => {
       unsafeParse(
