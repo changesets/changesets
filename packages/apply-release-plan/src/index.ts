@@ -68,7 +68,10 @@ export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
   config: Config = defaultConfig,
-  snapshot?: string | boolean,
+  options: {
+    snapshot?: string | boolean;
+    globalChangelog?: boolean;
+  } = {},
   contextDir = __dirname
 ) {
   let cwd = packages.root.dir;
@@ -102,7 +105,7 @@ export default async function applyReleasePlan(
     contextDir
   );
 
-  if (releasePlan.preState !== undefined && snapshot === undefined) {
+  if (releasePlan.preState !== undefined && options.snapshot === undefined) {
     if (releasePlan.preState.mode === "exit") {
       await fs.remove(path.join(cwd, ".changeset", "pre.json"));
     } else {
@@ -129,7 +132,7 @@ export default async function applyReleasePlan(
           .onlyUpdatePeerDependentsWhenOutOfRange,
       bumpVersionsWithWorkspaceProtocolOnly:
         config.bumpVersionsWithWorkspaceProtocolOnly,
-      snapshot,
+      snapshot: options.snapshot,
     });
   });
 
@@ -143,9 +146,20 @@ export default async function applyReleasePlan(
     await updatePackageJson(pkgJSONPath, packageJson);
     touchedFiles.push(pkgJSONPath);
 
-    if (changelog && changelog.length > 0) {
+    if (changelog && changelog.title.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
-      await updateChangelog(changelogPath, changelog, name, prettierInstance);
+      let changelogText = changelog.title;
+
+      if (changelog.body.length > 0) {
+        changelogText += `\n${changelog.body}`;
+      }
+
+      await updateChangelog(
+        changelogPath,
+        changelogText,
+        name,
+        prettierInstance
+      );
       touchedFiles.push(changelogPath);
     }
   }
@@ -183,6 +197,29 @@ export default async function applyReleasePlan(
         }
       })
     );
+  }
+
+  if (options.globalChangelog) {
+    let output = "";
+
+    for (let release of finalisedRelease) {
+      const { changelog, name, newVersion } = release;
+
+      if (changelog && changelog.body.length > 0) {
+        output += `## ${name}@${newVersion}\n\n${changelog.body}\n`;
+      }
+    }
+
+    if (output.length > 0) {
+      const changelogPath = path.resolve(cwd, "CHANGELOG.md");
+      await updateChangelog(
+        changelogPath,
+        output,
+        "Changelog",
+        prettierInstance
+      );
+      touchedFiles.push(changelogPath);
+    }
   }
 
   // We return the touched files to be committed in the cli
