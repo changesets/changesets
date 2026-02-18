@@ -40,14 +40,19 @@ interface RegistryInfo {
   registry: string;
 }
 
+function normalizeRegistry(registry: string | undefined) {
+  return registry && registry.replace(/\/+$/, "");
+}
+
 export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   const packageName = packageJson?.name;
 
   if (packageName?.startsWith("@")) {
     const scope = packageName.split("/")[0];
-    const scopedRegistry =
+    const scopedRegistry = normalizeRegistry(
       packageJson!.publishConfig?.[`${scope}:registry`] ||
-      process.env[`npm_config_${scope}:registry`];
+        process.env[`npm_config_${scope}:registry`]
+    );
     if (scopedRegistry) {
       return {
         scope,
@@ -56,8 +61,9 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
     }
   }
 
-  const registry =
-    packageJson?.publishConfig?.registry || process.env.npm_config_registry;
+  const registry = normalizeRegistry(
+    packageJson?.publishConfig?.registry || process.env.npm_config_registry
+  );
 
   return {
     scope: undefined,
