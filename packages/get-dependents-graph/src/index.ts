@@ -15,8 +15,8 @@ export function getDependentsGraph(
   const dependentsLookup: {
     [key: string]: { pkg: Package; dependents: Array<string> };
   } = {
-    [packages.root.packageJson.name]: {
-      pkg: packages.root,
+    [packages.rootPackage!.packageJson.name]: {
+      pkg: packages.rootPackage!,
       dependents: [],
     },
   };

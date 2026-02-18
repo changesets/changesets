@@ -73,10 +73,10 @@ export default function getDependencyGraph(
   let valid = true;
 
   const packagesByName: { [key: string]: Package } = {
-    [packages.root.packageJson.name]: packages.root,
+    [packages.rootPackage!.packageJson.name]: packages.rootPackage!,
   };
 
-  const queue = [packages.root];
+  const queue = [packages.rootPackage!];
 
   for (const pkg of packages.packages) {
     queue.push(pkg);
