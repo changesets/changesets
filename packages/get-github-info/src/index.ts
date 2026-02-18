@@ -1,4 +1,3 @@
-// @ts-ignore
 import fetch from "node-fetch";
 import DataLoader from "dataloader";
 
