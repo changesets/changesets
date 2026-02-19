@@ -15,11 +15,11 @@ const changelogFunctions: ChangelogFunctions = {
   getDependencyReleaseLine: async (
     changesets,
     dependenciesUpdated,
-    options
+    options,
   ) => {
     if (!options.repo) {
       throw new Error(
-        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
+        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]',
       );
     }
     if (dependenciesUpdated.length === 0) return "";
@@ -34,14 +34,14 @@ const changelogFunctions: ChangelogFunctions = {
             });
             return links.commit;
           }
-        })
+        }),
       )
     )
       .filter((_) => _)
       .join(", ")}]:`;
 
     const updatedDepenenciesList = dependenciesUpdated.map(
-      (dependency) => `  - ${dependency.name}@${dependency.newVersion}`
+      (dependency) => `  - ${dependency.name}@${dependency.newVersion}`,
     );
 
     return [changesetLink, ...updatedDepenenciesList].join("\n");
@@ -50,7 +50,7 @@ const changelogFunctions: ChangelogFunctions = {
     const { GITHUB_SERVER_URL } = readEnv();
     if (!options || !options.repo) {
       throw new Error(
-        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
+        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]',
       );
     }
 
@@ -112,7 +112,7 @@ const changelogFunctions: ChangelogFunctions = {
       ? usersFromSummary
           .map(
             (userFromSummary) =>
-              `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`
+              `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`,
           )
           .join(", ")
       : links.user;
@@ -126,7 +126,7 @@ const changelogFunctions: ChangelogFunctions = {
     const linkifyIssueRefs = (line: string): string =>
       line.replace(
         /(?<!\[.*?)(?<!\()#(\d+)(?![\w/])(?![^[]*\])/g,
-        `[#$1](${GITHUB_SERVER_URL}/${options!.repo}/issues/$1)`
+        `[#$1](${GITHUB_SERVER_URL}/${options!.repo}/issues/$1)`,
       );
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine)}\n${futureLines
