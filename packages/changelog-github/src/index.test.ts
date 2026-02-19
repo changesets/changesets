@@ -118,6 +118,30 @@ describe.each(["author", "user"])(
   }
 );
 
+it("linkifies issue references in summary", async () => {
+  expect(
+    await getReleaseLine(
+      ...getChangeset(
+        "fixes #1234 and #5678",
+        data.commit
+      )
+    )
+  ).toContain(
+    "[#1234](https://github.com/emotion-js/emotion/issues/1234)"
+  );
+});
+
+it("does not double-linkify existing markdown links", async () => {
+  expect(
+    await getReleaseLine(
+      ...getChangeset(
+        "see [#1234](https://github.com/emotion-js/emotion/issues/1234)",
+        data.commit
+      )
+    )
+  ).not.toContain("issues/1234)](");
+});
+
 it("with multiple authors", async () => {
   expect(
     await getReleaseLine(
