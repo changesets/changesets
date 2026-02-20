@@ -123,9 +123,15 @@ const changelogFunctions: ChangelogFunctions = {
       users === null ? "" : ` Thanks ${users}!`,
     ].join("");
 
-    return `\n\n-${prefix ? `${prefix} -` : ""} ${firstLine}\n${futureLines
-      .map((l) => `  ${l}`)
-      .join("\n")}`;
+    const linkifyIssueRefs = (line: string): string =>
+      line.replace(
+        /(?<!\[.*?)(?<!\()#(\d+)(?![\w/])(?![^[]*\])/g,
+        `[#$1](${GITHUB_SERVER_URL}/${options!.repo}/issues/$1)`
+      );
+
+    return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(
+      firstLine
+    )}\n${futureLines.map((l) => `  ${linkifyIssueRefs(l)}`).join("\n")}`;
   },
 };
 
