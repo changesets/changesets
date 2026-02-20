@@ -38,7 +38,7 @@ jest.mock(
         };
       },
     };
-  },
+  }
 );
 
 const getChangeset = (content: string, commit: string | undefined) => {
@@ -51,7 +51,7 @@ const getChangeset = (content: string, commit: string | undefined) => {
 
   something
   ${content}
-  `,
+  `
       ),
       id: "some-id",
       commit,
@@ -79,25 +79,25 @@ describe.each([data.commit, "wrongcommit", undefined])(
             await getReleaseLine(
               ...getChangeset(
                 `${keyword}: ${kind === "with #" ? "#" : ""}${data.pull}`,
-                commitFromChangeset,
-              ),
-            ),
+                commitFromChangeset
+              )
+            )
           ).toEqual(
-            `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
+            `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`
           );
         });
-      },
+      }
     );
     test("override commit with commit keyword", async () => {
       expect(
         await getReleaseLine(
-          ...getChangeset(`commit: ${data.commit}`, commitFromChangeset),
-        ),
+          ...getChangeset(`commit: ${data.commit}`, commitFromChangeset)
+        )
       ).toEqual(
-        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
+        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`
       );
     });
-  },
+  }
 );
 
 describe.each(["author", "user"])(
@@ -108,19 +108,19 @@ describe.each(["author", "user"])(
         await getReleaseLine(
           ...getChangeset(
             `${keyword}: ${kind === "with @" ? "@" : ""}other`,
-            data.commit,
-          ),
-        ),
+            data.commit
+          )
+        )
       ).toEqual(
-        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@other](https://github.com/other)! - something\n`,
+        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@other](https://github.com/other)! - something\n`
       );
     });
-  },
+  }
 );
 
 it("linkifies issue references in summary", async () => {
   expect(
-    await getReleaseLine(...getChangeset("fixes #1234 and #5678", data.commit)),
+    await getReleaseLine(...getChangeset("fixes #1234 and #5678", data.commit))
   ).toContain("[#1234](https://github.com/emotion-js/emotion/issues/1234)");
 });
 
@@ -129,9 +129,9 @@ it("does not double-linkify existing markdown links", async () => {
     await getReleaseLine(
       ...getChangeset(
         "see [#1234](https://github.com/emotion-js/emotion/issues/1234)",
-        data.commit,
-      ),
-    ),
+        data.commit
+      )
+    )
   ).not.toContain("issues/1234)](");
 });
 
@@ -140,9 +140,9 @@ it("with multiple authors", async () => {
     await getReleaseLine(
       ...getChangeset(
         ["author: @Andarist", "author: @mitchellhamilton"].join("\n"),
-        data.commit,
-      ),
-    ),
+        data.commit
+      )
+    )
   ).toMatchInlineSnapshot(`
     "
 
