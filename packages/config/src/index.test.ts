@@ -775,6 +775,85 @@ describe("parser errors", () => {
     ).not.toThrow();
   });
 
+  test("ignore should still require non-private dependents to be ignored even with privatePackages.version enabled", () => {
+    expect(() =>
+      unsafeParse(
+        { ignore: ["pkg-b"] },
+        {
+          ...defaultPackages,
+          packages: [
+            {
+              packageJson: {
+                name: "pkg-a",
+                version: "1.0.0",
+                dependencies: { "pkg-b": "1.0.0" },
+              },
+              dir: "dir",
+            },
+            {
+              packageJson: { name: "pkg-b", version: "1.0.0" },
+              dir: "dir",
+            },
+          ],
+        }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The package "pkg-a" depends on the ignored package "pkg-b", but "pkg-a" is not being ignored. Please add "pkg-a" to the \`ignore\` option."
+    `);
+  });
+
+  test("ignore should not require dev dependents of ignored packages to also be ignored", () => {
+    expect(() =>
+      unsafeParse(
+        { ignore: ["pkg-b"] },
+        {
+          ...defaultPackages,
+          packages: [
+            {
+              packageJson: {
+                name: "pkg-a",
+                version: "1.0.0",
+                devDependencies: { "pkg-b": "1.0.0" },
+              },
+              dir: "dir",
+            },
+            {
+              packageJson: { name: "pkg-b", version: "1.0.0" },
+              dir: "dir",
+            },
+          ],
+        }
+      )
+    ).not.toThrow();
+  });
+
+  test("ignore should not require private dependents to be ignored even when privatePackages versioning is disabled", () => {
+    expect(() =>
+      unsafeParse(
+        { ignore: ["pkg-b"], privatePackages: false },
+        {
+          ...defaultPackages,
+          packages: [
+            {
+              packageJson: {
+                name: "pkg-a",
+                private: true,
+                version: "1.0.0",
+                dependencies: { "pkg-b": "1.0.0" },
+              },
+              dir: "dir",
+            },
+            {
+              packageJson: { name: "pkg-b", version: "1.0.0" },
+              dir: "dir",
+            },
+          ],
+        }
+      )
+    ).not.toThrow();
+  });
+
   test("onlyUpdatePeerDependentsWhenOutOfRange non-boolean", () => {
     expect(() => {
       unsafeParse(

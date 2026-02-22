@@ -157,11 +157,8 @@ describe("cli", () => {
         }),
         ".changeset/config.json": JSON.stringify({}),
       });
-      try {
-        await run(["version"], { ignore: ["pkg-b"] }, cwd);
-      } catch (e) {
-        // ignore the error. We just want to validate the error message
-      }
+
+      await run(["version"], { ignore: ["pkg-b"] }, cwd);
 
       const loggerErrorCalls = (error as any).mock.calls;
       expect(loggerErrorCalls.length).toEqual(0);

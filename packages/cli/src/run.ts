@@ -164,12 +164,11 @@ export async function run(
           const dependents = dependentsGraph.get(skippedPackage) || [];
           for (const dependent of dependents) {
             const dependentPkg = packagesByName.get(dependent)!;
-            if (
-              dependentPkg.packageJson.private &&
-              config.privatePackages.version
-            ) {
+            if (dependentPkg.packageJson.private) {
               // Private packages with versioning enabled don't publish to npm,
-              // so they can safely depend on skipped packages
+              // so they can safely depend on skipped packages.
+              // This also does seem to hold for private packages with other publish targets (like a VS Code extension)
+              // as those typically have to prebundle dependencies.
               continue;
             }
             if (
