@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs-extra";
+import yaml from "js-yaml";
 import spawn from "spawndamnit";
 import fileUrl from "file-url";
 import { gitdir, tempdir } from "@changesets/test-utils";
@@ -17,6 +18,7 @@ import {
   getAllTags,
   tagExists,
   getCurrentCommitId,
+  getChangedDependencyPackagesInCatalogSinceRef,
 } from "./";
 
 async function getCommitCount(cwd: string) {
@@ -724,6 +726,138 @@ describe("git", () => {
         "pkg-a",
       ]);
     });
+
+    it("should not return package as changed when a catalog update does not impact it", async () => {
+      const workspace = {
+        packages: ["pkg-a"],
+        catalog: {
+          "@babel/core": "^7.27.4",
+        },
+      };
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          name: "@monorepo",
+          private: true,
+        }),
+        "pkg-a/package.json": JSON.stringify({
+          name: "@monorepo/pkg-a",
+          dependencies: {
+            "@babel/core": "^7.27.4",
+          },
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+        "pnpm-workspace.yaml": yaml.dump(workspace),
+      });
+
+      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+      workspace.catalog["@babel/core"] = "^7.28.0";
+      await fs.outputFile(
+        path.join(cwd, "pnpm-workspace.yaml"),
+        yaml.dump(workspace)
+      );
+
+      await add("pnpm-workspace.yaml", cwd);
+      await commit("Update catalog", cwd);
+
+      const changedPackages = await getChangedPackagesSinceRef({
+        cwd,
+        ref: "main",
+        changedFilePatterns: ["src/**"],
+      });
+
+      expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([]);
+    });
+
+    it("should return package as changed when a catalog update impacts it", async () => {
+      const workspace = {
+        packages: ["pkg-a"],
+        catalog: {
+          "@babel/core": "^7.27.4",
+        },
+      };
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          name: "@monorepo",
+          private: true,
+        }),
+        "pkg-a/package.json": JSON.stringify({
+          name: "@monorepo/pkg-a",
+          dependencies: {
+            "@babel/core": "catalog:",
+          },
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+        "pnpm-workspace.yaml": yaml.dump(workspace),
+      });
+
+      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+      workspace.catalog["@babel/core"] = "^7.28.0";
+      await fs.outputFile(
+        path.join(cwd, "pnpm-workspace.yaml"),
+        yaml.dump(workspace)
+      );
+
+      await add("pnpm-workspace.yaml", cwd);
+      await commit("Update catalog", cwd);
+
+      const changedPackages = await getChangedPackagesSinceRef({
+        cwd,
+        ref: "main",
+        changedFilePatterns: ["src/**"],
+        includeCatalogUpdates: true,
+      });
+
+      expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([
+        "@monorepo/pkg-a",
+      ]);
+    });
+
+    it("should ignore catalog updates without the feature flag", async () => {
+      const workspace = {
+        packages: ["pkg-a"],
+        catalog: {
+          "@babel/core": "^7.27.4",
+        },
+      };
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          name: "@monorepo",
+          private: true,
+        }),
+        "pkg-a/package.json": JSON.stringify({
+          name: "@monorepo/pkg-a",
+          dependencies: {
+            "@babel/core": "catalog:",
+          },
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+        "pnpm-workspace.yaml": yaml.dump(workspace),
+      });
+
+      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+      workspace.catalog["@babel/core"] = "^7.28.0";
+      await fs.outputFile(
+        path.join(cwd, "pnpm-workspace.yaml"),
+        yaml.dump(workspace)
+      );
+
+      await add("pnpm-workspace.yaml", cwd);
+      await commit("Update catalog", cwd);
+
+      const changedPackages = await getChangedPackagesSinceRef({
+        cwd,
+        ref: "main",
+        changedFilePatterns: ["src/**"],
+      });
+
+      expect(changedPackages.map((pkg) => pkg.packageJson.name)).not.toContain(
+        "@monorepo/pkg-a"
+      );
+      expect(changedPackages).toHaveLength(0);
+    });
   });
 
   describe("getChangedChangesetFilesSinceRef", () => {
@@ -848,6 +982,140 @@ describe("git", () => {
         ref: "main",
       });
       expect(files).toEqual([`.changeset/${changesetId}.md`]);
+    });
+  });
+
+  describe("getChangedPackagesInCatalogSinceRef", () => {
+    it("should return an empty list if there is no pnpm workspace", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      const changedPackages =
+        await getChangedDependencyPackagesInCatalogSinceRef({
+          cwd,
+          ref: "main",
+        });
+      expect(changedPackages).toHaveLength(0);
+    });
+
+    it("should return an empty list if there is no catalog in the pnpm workspace", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+        "pnpm-workspace.yaml": JSON.stringify({
+          packages: ["packages/*"],
+        }),
+      });
+
+      const changedPackages =
+        await getChangedDependencyPackagesInCatalogSinceRef({
+          cwd,
+          ref: "main",
+        });
+      expect(changedPackages).toHaveLength(0);
+    });
+
+    it("should return an empty list if there are no changed packages in the catalog", async () => {
+      const workspace = {
+        packages: ["pkg-a"],
+        catalog: {
+          "@babel/core": "^7.27.4",
+        },
+      };
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+        }),
+        "pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+        "pnpm-workspace.yaml": yaml.dump(workspace),
+      });
+
+      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+      // Add a package to the workspace
+      workspace.packages.push("pkg-b");
+      await fs.outputFile(
+        path.join(cwd, "pnpm-workspace.yaml"),
+        yaml.dump(workspace)
+      );
+
+      const newPackagePath = "pkg-b/package.json";
+
+      await fs.outputFile(
+        path.join(cwd, newPackagePath),
+        JSON.stringify({
+          name: "pkg-b",
+        })
+      );
+
+      await add(newPackagePath, cwd);
+      await add("pnpm-workspace.yaml", cwd);
+      await commit("Update workspace", cwd);
+
+      const changedPackages =
+        await getChangedDependencyPackagesInCatalogSinceRef({
+          cwd,
+          ref: "main",
+        });
+      expect(changedPackages).toHaveLength(0);
+    });
+
+    it("should return a list if a catalog update impacts a package", async () => {
+      const workspace = {
+        packages: ["pkg-a"],
+        catalog: {
+          "@babel/core": "^7.27.4",
+        },
+      };
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+        }),
+        "pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          dependencies: {
+            "@babel/core": "catalog:",
+          },
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+        "pnpm-workspace.yaml": yaml.dump(workspace),
+      });
+
+      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+      workspace.catalog["@babel/core"] = "^7.28.0";
+      await fs.outputFile(
+        path.join(cwd, "pnpm-workspace.yaml"),
+        yaml.dump(workspace)
+      );
+
+      await add("pnpm-workspace.yaml", cwd);
+      await commit("Update catalog", cwd);
+
+      const changedPackages =
+        await getChangedDependencyPackagesInCatalogSinceRef({
+          cwd,
+          ref: "main",
+        });
+      expect(changedPackages).toHaveLength(1);
+      expect(changedPackages[0]).toEqual("@babel/core");
     });
   });
 });

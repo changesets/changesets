@@ -7,7 +7,15 @@ import { run } from "./run";
 const args = process.argv.slice(2);
 
 const parsed = mri(args, {
-  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot"],
+  boolean: [
+    "sinceMaster",
+    "verbose",
+    "empty",
+    "open",
+    "gitTag",
+    "snapshot",
+    "enablePnpmCatalog",
+  ],
   string: [
     "output",
     "otp",
@@ -25,6 +33,7 @@ const parsed = mri(args, {
     "since-master": "sinceMaster",
     "git-tag": "gitTag",
     "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
+    "enable-pnpm-catalog": "enablePnpmCatalog",
     // Deprecated flags
     "update-changelog": "updateChangelog",
     "is-public": "isPublic",
@@ -52,10 +61,10 @@ if (parsed.help && args.length === 1) {
     $ changeset [command]
   Commands
     init
-    add [--empty] [--open]
+    add [--empty] [--open] [--enable-pnpm-catalog]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]
-    status [--since <branch>] [--verbose] [--output JSON_FILE.json]
+    status [--since <branch>] [--verbose] [--output JSON_FILE.json] [--enable-pnpm-catalog]
     pre <enter|exit> <tag>
     tag
 
