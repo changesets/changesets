@@ -42,8 +42,8 @@ function mockGlobalDate<
   };
 }
 
-let changelogPath = path.resolve(__dirname, "../../changelog");
-let commitPath = path.resolve(__dirname, "../../commit");
+let changelogPath = path.resolve(__dirname, "../../changelog.ts");
+let commitPath = path.resolve(__dirname, "../../commit/index.ts");
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: [changelogPath, null],

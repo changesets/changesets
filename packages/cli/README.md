@@ -109,7 +109,15 @@ or
 changeset add [--empty] [--open]
 ```
 
+or
+
+```shell
+changeset add --auto
+```
+
 This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
+
+With the `--auto` flag, the command will automatically generate changesets based on conventional commit analysis. It analyzes commits since the last tag for each package and determines the appropriate version bump (patch, minor, or major) based on conventional commit types. See [Auto Mode Documentation](../../docs/auto-mode.md) for more details.
 
 Once confirmed, the changeset will write a Markdown file that contains the summary and YAML front matter which stores the packages that will be released and the semver bump types for them.
 
