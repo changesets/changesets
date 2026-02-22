@@ -21,8 +21,12 @@ interface PublishOptions {
 const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
 const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
 
-const npmRequestQueue = createPromiseQueue(NPM_REQUEST_CONCURRENCY_LIMIT);
-const npmPublishQueue = createPromiseQueue(NPM_PUBLISH_CONCURRENCY_LIMIT);
+export const npmRequestQueue = createPromiseQueue(
+  NPM_REQUEST_CONCURRENCY_LIMIT
+);
+export const npmPublishQueue = createPromiseQueue(
+  NPM_PUBLISH_CONCURRENCY_LIMIT
+);
 
 function jsonParse(input: string) {
   try {
@@ -204,7 +208,7 @@ async function internalPublish(
     [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
 
-  if (await requiresDelegatedAuth(twoFactorState)) {
+  if (requiresDelegatedAuth(twoFactorState)) {
     const result =
       publishTool.name === "pnpm"
         ? spawnSync("pnpm", ["publish", ...publishFlags], {
@@ -271,9 +275,9 @@ async function internalPublish(
         process.stdin.isTTY
       ) {
         // the current otp code must be invalid since it errored
-        twoFactorState.token = null;
+        twoFactorState.token = undefined;
         // just in case this isn't already true
-        twoFactorState.isRequired = Promise.resolve(true);
+        twoFactorState.isRequired = true;
         twoFactorState.allowConcurrency = false;
         npmPublishQueue.setConcurrency(1);
         return {
@@ -303,10 +307,6 @@ export function publish(
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
   return npmRequestQueue.add(async () => {
-    if (await requiresDelegatedAuth(twoFactorState)) {
-      npmPublishQueue.setConcurrency(1);
-    }
-
     let result: { published: boolean; allowRetry?: boolean };
     do {
       result = await npmPublishQueue.add(() =>

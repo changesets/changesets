@@ -11,6 +11,7 @@ import {
   getTokenIsRequired,
   publish,
   infoAllow404,
+  npmPublishQueue,
 } from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
 
@@ -39,17 +40,17 @@ function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   return "latest";
 }
 
-const getTwoFactorState = ({
+const getTwoFactorState = async ({
   otp,
   publicPackages,
 }: {
   otp?: string;
   publicPackages: Package[];
-}): TwoFactorState => {
+}): Promise<TwoFactorState> => {
   if (otp) {
     return {
       token: otp,
-      isRequired: Promise.resolve(true),
+      isRequired: true,
     };
   }
 
@@ -61,24 +62,23 @@ const getTwoFactorState = ({
     isCustomRegistry(process.env.npm_config_registry)
   ) {
     return {
-      token: null,
-      isRequired: Promise.resolve(false),
+      token: undefined,
+      isRequired: false,
     };
   }
 
   return {
-    token: null,
-    // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
-    isRequired: getTokenIsRequired(),
+    token: undefined,
+    isRequired: await getTokenIsRequired(),
   };
 };
 
-export const requiresDelegatedAuth = async (twoFactorState: TwoFactorState) => {
+export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
   return (
     process.stdin.isTTY &&
     !twoFactorState.token &&
     !twoFactorState.allowConcurrency &&
-    (await twoFactorState.isRequired)
+    twoFactorState.isRequired
   );
 };
 
@@ -106,10 +106,14 @@ export default async function publishPackages({
     return [];
   }
 
-  const twoFactorState = getTwoFactorState({
+  const twoFactorState = await getTwoFactorState({
     otp,
     publicPackages,
   });
+
+  if (requiresDelegatedAuth(twoFactorState)) {
+    npmPublishQueue.setConcurrency(1);
+  }
 
   return Promise.all(
     unpublishedPackagesInfo.map((pkgInfo) => {
