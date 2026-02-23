@@ -355,10 +355,12 @@ describe("parsing a changeset", () => {
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
       "could not parse changeset - invalid package name in frontmatter.
       Expected a non-empty string for package name, but got: ""
-      Make sure your changeset frontmatter follows this format:
+      Changeset contents:
       ---
-      "package-name": patch
-      ---"
+      "": minor
+      ---
+
+      Nice simple summary"
     `);
   });
 });

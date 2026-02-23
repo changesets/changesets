@@ -3,14 +3,20 @@ import { Release, VersionType } from "@changesets/types";
 
 const mdRegex = /\s*---([^]*?)\n\s*---(\s*(?:\n|$)[^]*)/;
 
-function validateReleases(releases: Release[], contents: string): void {
-  const validVersionTypes: readonly VersionType[] = [
-    "major",
-    "minor",
-    "patch",
-    "none",
-  ];
+const EXAMPLE_FORMAT = `---\n"package-name": patch\n---`;
 
+const validVersionTypes: readonly VersionType[] = [
+  "major",
+  "minor",
+  "patch",
+  "none",
+];
+
+function truncate(s: string, max = 200): string {
+  return s.length > max ? s.slice(0, max) + "..." : s;
+}
+
+function validateReleases(releases: Release[], contents: string): void {
   for (const release of releases) {
     if (typeof release.name !== "string" || release.name.trim() === "") {
       throw new Error(
@@ -18,17 +24,15 @@ function validateReleases(releases: Release[], contents: string): void {
           `Expected a non-empty string for package name, but got: ${JSON.stringify(
             release.name
           )}\n` +
-          `Make sure your changeset frontmatter follows this format:\n` +
-          `---\n"package-name": patch\n---`
+          `Changeset contents:\n${truncate(contents)}`
       );
     }
 
     if (typeof release.type !== "string") {
       throw new Error(
-        `could not parse changeset - invalid usage of release type in frontmatter.\n` +
+        `could not parse changeset - invalid release type for package "${release.name}".\n` +
           `Expected a string for release type, but got: ${typeof release.type}\n` +
-          `Make sure your changeset frontmatter follows this format:\n` +
-          `---\n"package-name": patch\n---`
+          `Changeset contents:\n${truncate(contents)}`
       );
     }
 
@@ -38,9 +42,7 @@ function validateReleases(releases: Release[], contents: string): void {
           release.type
         )} for package "${release.name}".\n` +
           `Valid version types are: ${validVersionTypes.join(", ")}\n` +
-          `Changeset contents:\n${contents.slice(0, 200)}${
-            contents.length > 200 ? "..." : ""
-          }`
+          `Changeset contents:\n${truncate(contents)}`
       );
     }
   }
@@ -56,7 +58,7 @@ export default function parseChangesetFile(contents: string): {
     throw new Error(
       `could not parse changeset - file is empty.\n` +
         `Changesets must have frontmatter with package names and version types.\n` +
-        `Example:\n---\n"package-name": patch\n---\n\nYour changeset summary here.`
+        `Example:\n${EXAMPLE_FORMAT}\n\nYour changeset summary here.`
     );
   }
 
@@ -65,10 +67,8 @@ export default function parseChangesetFile(contents: string): {
     throw new Error(
       `could not parse changeset - missing or invalid frontmatter.\n` +
         `Changesets must start with frontmatter delimited by "---".\n` +
-        `Example:\n---\n"package-name": patch\n---\n\nYour changeset summary here.\n` +
-        `Received content:\n${trimmedContents.slice(0, 200)}${
-          trimmedContents.length > 200 ? "..." : ""
-        }`
+        `Example:\n${EXAMPLE_FORMAT}\n\nYour changeset summary here.\n` +
+        `Received content:\n${truncate(trimmedContents)}`
     );
   }
   let [, roughReleases, roughSummary] = execResult;
@@ -91,7 +91,7 @@ export default function parseChangesetFile(contents: string): {
     if (typeof yamlStuff !== "object" || Array.isArray(yamlStuff)) {
       throw new Error(
         `could not parse changeset - frontmatter must be an object mapping package names to version types.\n` +
-          `Expected format:\n---\n"package-name": patch\n---\n` +
+          `Expected format:\n${EXAMPLE_FORMAT}\n` +
           `Received:\n${roughReleases}`
       );
     }
