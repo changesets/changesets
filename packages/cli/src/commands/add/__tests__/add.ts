@@ -22,15 +22,8 @@ jest.mock("@changesets/write");
 writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 // @ts-ignore
 git.commit.mockImplementation(() => Promise.resolve(true));
-
-// Keep track of expected ref for tests
-let expectedRef = "master";
-
 // @ts-ignore
-git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
-  expect(ref).toBe(expectedRef);
-  return [];
-});
+git.getChangedPackagesSinceRef.mockImplementation(() => []);
 
 // @ts-ignore
 const mockUserResponses = (mockResponses) => {
@@ -90,6 +83,13 @@ const mockUserResponses = (mockResponses) => {
 
 describe("Add command", () => {
   silenceLogsInBlock();
+
+  beforeEach(() => {
+    // @ts-ignore
+    git.getChangedPackagesSinceRef.mockReset();
+    // @ts-ignore
+    git.getChangedPackagesSinceRef.mockImplementation(() => []);
+  });
 
   it("should generate changeset to patch a single package", async () => {
     const cwd = await testdir({
@@ -404,21 +404,27 @@ describe("Add command", () => {
       }),
     });
 
-    // Override the expected ref for this test
-    expectedRef = "develop";
+    // @ts-ignore
+    git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
+      if (ref === "develop") {
+        return [{ packageJson: { name: "pkg-b" }, dir: "" }];
+      }
+      return [];
+    });
 
-    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    mockUserResponses({ releases: { "pkg-b": "patch" } });
     await addChangeset(cwd, { empty: false, since: "develop" }, defaultConfig);
 
-    // Reset for other tests
-    expectedRef = "master";
+    expect(git.getChangedPackagesSinceRef).toHaveBeenCalledWith(
+      expect.objectContaining({ ref: "develop" })
+    );
 
     // @ts-ignore
     const call = writeChangeset.mock.calls[0][0];
     expect(call).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
-        releases: [{ name: "pkg-a", type: "patch" }],
+        releases: [{ name: "pkg-b", type: "patch" }],
       })
     );
   });
