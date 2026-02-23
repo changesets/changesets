@@ -64,9 +64,9 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open, msg }: CliOptions = flags;
+    const { empty, open, message }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
-    await add(cwd, { empty, open, msg }, config);
+    await add(cwd, { empty, open, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -85,7 +85,7 @@ export async function run(
       tag,
       open,
       gitTag,
-      msg,
+      message,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -107,7 +107,7 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        await add(cwd, { empty, open, msg }, config);
+        await add(cwd, { empty, open, message }, config);
         return;
       }
       case "version": {

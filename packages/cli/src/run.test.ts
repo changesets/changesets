@@ -11,7 +11,7 @@ jest.mock("./commands/version");
 
 describe("cli", () => {
   describe("add", () => {
-    it("should pass --msg to add when using default command", async () => {
+    it("should pass --message to add when using default command", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           name: "single-package",
@@ -20,20 +20,20 @@ describe("cli", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
 
-      await run([], { msg: "summary from msg" }, cwd);
+      await run([], { message: "summary from message" }, cwd);
 
       expect(add).toHaveBeenCalledWith(
         cwd,
         {
           empty: undefined,
           open: undefined,
-          msg: "summary from msg",
+          message: "summary from message",
         },
         expect.any(Object)
       );
     });
 
-    it("should pass --msg to add command", async () => {
+    it("should pass --message to add command", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           name: "single-package",
@@ -42,14 +42,14 @@ describe("cli", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
 
-      await run(["add"], { msg: "summary from msg" }, cwd);
+      await run(["add"], { message: "summary from message" }, cwd);
 
       expect(add).toHaveBeenCalledWith(
         cwd,
         {
           empty: undefined,
           open: undefined,
-          msg: "summary from msg",
+          message: "summary from message",
         },
         expect.any(Object)
       );

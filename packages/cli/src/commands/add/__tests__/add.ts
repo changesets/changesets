@@ -260,7 +260,7 @@ describe("Add command", () => {
     );
   });
 
-  it("should use summary passed via msg and keep confirmation flow", async () => {
+  it("should use summary passed via message and keep confirmation flow", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -276,7 +276,7 @@ describe("Add command", () => {
 
     await addChangeset(
       cwd,
-      { empty: false, msg: "summary from msg" },
+      { empty: false, message: "summary from message" },
       defaultConfig
     );
 
@@ -284,7 +284,7 @@ describe("Add command", () => {
     const call = writeChangeset.mock.calls[0][0];
     expect(call).toEqual(
       expect.objectContaining({
-        summary: "summary from msg",
+        summary: "summary from message",
         releases: [{ name: "single-package", type: "minor" }],
       })
     );
@@ -293,7 +293,7 @@ describe("Add command", () => {
     expect(askQuestionWithEditor).not.toHaveBeenCalled();
   });
 
-  it("should allow empty summary when msg is an empty string", async () => {
+  it("should allow empty summary when message is an empty string", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -307,7 +307,7 @@ describe("Add command", () => {
     // @ts-ignore
     askConfirm.mockReturnValueOnce(Promise.resolve(true));
 
-    await addChangeset(cwd, { empty: false, msg: "" }, defaultConfig);
+    await addChangeset(cwd, { empty: false, message: "" }, defaultConfig);
 
     // @ts-ignore
     const call = writeChangeset.mock.calls[0][0];
@@ -321,7 +321,7 @@ describe("Add command", () => {
     expect(askQuestionWithEditor).not.toHaveBeenCalled();
   });
 
-  it("should allow using msg with empty changesets", async () => {
+  it("should allow using message with empty changesets", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -335,7 +335,7 @@ describe("Add command", () => {
 
     await addChangeset(
       cwd,
-      { empty: true, msg: "empty changeset summary" },
+      { empty: true, message: "empty changeset summary" },
       defaultConfig
     );
 

@@ -109,7 +109,7 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 export default async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Package[],
-  summaryFromCli?: string
+  messageFromCli?: string
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
@@ -236,10 +236,10 @@ export default async function createChangeset(
     releases.push({ name: pkg.packageJson.name, type });
   }
 
-  if (summaryFromCli !== undefined) {
+  if (messageFromCli !== undefined) {
     return {
       confirmed: false,
-      summary: summaryFromCli,
+      summary: messageFromCli,
       releases,
     };
   }

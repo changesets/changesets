@@ -13,7 +13,7 @@ const parsed = mri(args, {
     "otp",
     "since",
     "ignore",
-    "msg",
+    "message",
     "tag",
     "snapshot",
     "snapshotPrereleaseTemplate",
@@ -22,6 +22,7 @@ const parsed = mri(args, {
     // Short flags
     v: "verbose",
     o: "output",
+    m: "message",
     // Support kebab-case flags
     "since-master": "sinceMaster",
     "git-tag": "gitTag",
@@ -53,7 +54,7 @@ if (parsed.help && args.length === 1) {
     $ changeset [command]
   Commands
     init
-    add [--empty] [--open] [--msg <text>]
+    add [--empty] [--open] [--message <text>]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]
     status [--since <branch>] [--verbose] [--output JSON_FILE.json]
