@@ -34,7 +34,9 @@ function validateReleases(releases: Release[], contents: string): void {
 
     if (!validVersionTypes.includes(release.type)) {
       throw new Error(
-        `could not parse changeset - invalid version type "${release.type}" for package "${release.name}".\n` +
+        `could not parse changeset - invalid version type ${JSON.stringify(
+          release.type
+        )} for package "${release.name}".\n` +
           `Valid version types are: ${validVersionTypes.join(", ")}\n` +
           `Changeset contents:\n${contents.slice(0, 200)}${
             contents.length > 200 ? "..." : ""
@@ -73,40 +75,33 @@ export default function parseChangesetFile(contents: string): {
   let summary = roughSummary.trim();
 
   let releases: Release[];
+  let yamlStuff: Record<string, VersionType> | undefined;
   try {
-    const yamlStuff = yaml.load(roughReleases) as
-      | Record<string, VersionType>
-      | undefined;
-
-    if (yamlStuff) {
-      if (typeof yamlStuff !== "object" || Array.isArray(yamlStuff)) {
-        throw new Error(
-          `could not parse changeset - frontmatter must be an object mapping package names to version types.\n` +
-            `Expected format:\n---\n"package-name": patch\n---\n` +
-            `Received:\n${roughReleases}`
-        );
-      }
-
-      releases = Object.entries(yamlStuff).map(([name, type]) => ({
-        name,
-        type,
-      }));
-    } else {
-      releases = [];
-    }
+    yamlStuff = yaml.load(roughReleases) as typeof yamlStuff;
   } catch (e) {
-    if (
-      e instanceof Error &&
-      e.message.startsWith("could not parse changeset")
-    ) {
-      throw e;
-    }
     throw new Error(
       `could not parse changeset - invalid YAML in frontmatter.\n` +
         `The frontmatter between the "---" delimiters must be valid YAML.\n` +
         `YAML error: ${e instanceof Error ? e.message : String(e)}\n` +
         `Frontmatter content:\n${roughReleases}`
     );
+  }
+
+  if (yamlStuff) {
+    if (typeof yamlStuff !== "object" || Array.isArray(yamlStuff)) {
+      throw new Error(
+        `could not parse changeset - frontmatter must be an object mapping package names to version types.\n` +
+          `Expected format:\n---\n"package-name": patch\n---\n` +
+          `Received:\n${roughReleases}`
+      );
+    }
+
+    releases = Object.entries(yamlStuff).map(([name, type]) => ({
+      name,
+      type,
+    }));
+  } else {
+    releases = [];
   }
 
   validateReleases(releases, contents);

@@ -1,6 +1,5 @@
 import fs from "fs-extra";
 import path from "node:path";
-import outdent from "outdent";
 
 import read from "./";
 import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";
@@ -118,7 +117,8 @@ I'm amazed we needed to update the best package, because it was already the best
     }
     expect("never run this because we returned above").toBe(true);
   });
-  it("should error on broken changeset?", async () => {
+  
+  it("should error on broken changeset", async () => {
     const cwd = await testdir({
       ".changeset/broken-changeset.md": `---
 
@@ -129,14 +129,8 @@ I'm amazed we needed to update the best package, because it was already the best
 Everything is wrong`,
     });
 
-    expect(read(cwd)).rejects.toThrow(
-      outdent`could not parse changeset - invalid frontmatter: ---
-
-      "cool-package": minor
-
-      --
-
-      Everything is wrong`
+    await expect(read(cwd)).rejects.toThrow(
+      "could not parse changeset - missing or invalid frontmatter."
     );
   });
   it("should return no releases and empty summary when the changeset is empty", async () => {
