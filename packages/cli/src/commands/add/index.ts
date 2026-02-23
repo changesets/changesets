@@ -18,7 +18,12 @@ import printConfirmationMessage from "./messages";
 
 export default async function add(
   cwd: string,
-  { empty, open, since }: { empty?: boolean; open?: boolean; since?: string },
+  {
+    empty,
+    open,
+    since,
+    message,
+  }: { empty?: boolean; open?: boolean; since?: string; message?: string },
   config: Config
 ): Promise<void> {
   const packages = await getPackages(cwd);
@@ -51,7 +56,7 @@ export default async function add(
     newChangeset = {
       confirmed: true,
       releases: [],
-      summary: ``,
+      summary: message ?? "",
     };
   } else {
     let changedPackagesNames: string[] = [];
@@ -67,14 +72,17 @@ export default async function add(
       // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
       const branch = since ?? config.baseBranch;
       warn(
-        `Failed to find changed packages from the "${branch}" ${since ? "ref" : "base branch"} due to error below`
+        `Failed to find changed packages from the "${branch}" ${
+          since ? "ref" : "base branch"
+        } due to error below`
       );
       warn(e);
     }
 
     newChangeset = await createChangeset(
       changedPackagesNames,
-      versionablePackages
+      versionablePackages,
+      message
     );
     printConfirmationMessage(newChangeset, versionablePackages.length > 1);
 
