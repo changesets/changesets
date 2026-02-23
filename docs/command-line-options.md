@@ -66,11 +66,6 @@ If you set the commit option in the config, the command will add the updated cha
 
 - `--open` - opens the created changeset in an external editor
 - `--message` (or `-m`) - provides the changeset summary from the command line instead of prompting for it.
-  For summaries with spaces, wrap the value in quotes, for example:
-
-```
-changeset add --message "Fix auth token refresh handling"
-```
 
 ## version
 
