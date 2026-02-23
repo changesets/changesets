@@ -5,6 +5,19 @@ import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 
 config();
 
+// "match what you skip, capture what you want": the left alternative
+// consumes markdown links so the right alternative only matches bare refs
+function linkifyIssueRefs(
+  line: string,
+  { serverUrl, repo }: { serverUrl: string; repo: string }
+): string {
+  return line.replace(/\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g, (match, issue) =>
+    // PRs and issues are the same thing on GitHub (to some extent, of course)
+    // this relies on GitHub redirecting from /issues/1234 to /pull/1234 when necessary
+    issue ? `[#${issue}](${serverUrl}/${repo}/issues/${issue})` : match
+  );
+}
+
 function readEnv() {
   const GITHUB_SERVER_URL =
     process.env.GITHUB_SERVER_URL || "https://github.com";
@@ -123,8 +136,17 @@ const changelogFunctions: ChangelogFunctions = {
       users === null ? "" : ` Thanks ${users}!`,
     ].join("");
 
-    return `\n\n-${prefix ? `${prefix} -` : ""} ${firstLine}\n${futureLines
-      .map((l) => `  ${l}`)
+    return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {
+      serverUrl: GITHUB_SERVER_URL,
+      repo: options!.repo,
+    })}\n${futureLines
+      .map(
+        (l) =>
+          `  ${linkifyIssueRefs(l, {
+            serverUrl: GITHUB_SERVER_URL,
+            repo: options!.repo,
+          })}`
+      )
       .join("\n")}`;
   },
 };
