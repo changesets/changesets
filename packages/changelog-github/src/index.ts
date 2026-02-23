@@ -12,6 +12,8 @@ function linkifyIssueRefs(
   { serverUrl, repo }: { serverUrl: string; repo: string }
 ): string {
   return line.replace(/\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g, (match, issue) =>
+    // PRs and issues are the same thing on GitHub (to some extent, of course)
+    // this relies on GitHub redirecting from /issues/1234 to /pull/1234 when necessary
     issue ? `[#${issue}](${serverUrl}/${repo}/issues/${issue})` : match
   );
 }
