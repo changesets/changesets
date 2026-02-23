@@ -1686,10 +1686,10 @@
   resolved "https://registry.yarnpkg.com/@types/jest-diff/-/jest-diff-20.0.1.tgz#35cc15b9c4f30a18ef21852e255fdb02f6d59b89"
   integrity sha512-yALhelO3i0hqZwhjtcr6dYyaLoCHbAMshwtj6cGxTvHZAKXHsYGdff6E8EPw3xLKY0ELUTQ69Q1rQiJENnccMA==
 
-"@types/jest-in-case@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@types/jest-in-case/-/jest-in-case-1.0.6.tgz#1099525666c45d91df4f344f109cc32324e8fe78"
-  integrity sha512-2VhZGKiji20QLG0gtcNftDmAaSmxoOLUvPW771ZDfi25IpNATGutn5wBnmqWz1Q7NIR6pqraDqrXXpq75wg/GA==
+"@types/jest-in-case@^1.0.9":
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/@types/jest-in-case/-/jest-in-case-1.0.9.tgz#1cc6b6271f309d5537018900d6e8a8b9d6868a01"
+  integrity sha512-tapHpzWGjCC/hxYJyzbJ/5ZV6rA2153Sve5lGJUAIA1Jzrphfp27TznAWfGeXf+d8TLN7zMujaC0UwNQwSJaQg==
   dependencies:
     "@types/jest" "*"
     "@types/node" "*"
