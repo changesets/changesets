@@ -260,6 +260,131 @@ describe("Add command", () => {
     );
   });
 
+  it("should use summary passed via message and keep confirmation flow", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+    });
+
+    // @ts-ignore
+    askList.mockReturnValueOnce(Promise.resolve("minor"));
+    // @ts-ignore
+    askConfirm.mockReturnValueOnce(Promise.resolve(true));
+
+    await addChangeset(
+      cwd,
+      { empty: false, message: "summary from message" },
+      defaultConfig
+    );
+
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "summary from message",
+        releases: [{ name: "single-package", type: "minor" }],
+      })
+    );
+    expect(askConfirm).toHaveBeenCalledWith("Is this your desired changeset?");
+    expect(askQuestion).not.toHaveBeenCalled();
+    expect(askQuestionWithEditor).not.toHaveBeenCalled();
+  });
+
+  it("should allow empty summary when message is an empty string", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+    });
+
+    // @ts-ignore
+    askList.mockReturnValueOnce(Promise.resolve("patch"));
+    // @ts-ignore
+    askConfirm.mockReturnValueOnce(Promise.resolve(true));
+
+    await addChangeset(cwd, { empty: false, message: "" }, defaultConfig);
+
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "",
+        releases: [{ name: "single-package", type: "patch" }],
+      })
+    );
+    expect(askQuestion).not.toHaveBeenCalled();
+    expect(askQuestionWithEditor).not.toHaveBeenCalled();
+  });
+
+  it("should use summary passed via message in a monorepo and skip summary prompt", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset(
+      cwd,
+      { empty: false, message: "monorepo summary from message" },
+      defaultConfig
+    );
+
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(
+      expect.objectContaining({
+        summary: "monorepo summary from message",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      })
+    );
+    expect(askConfirm).toHaveBeenCalledWith("Is this your desired changeset?");
+    expect(askQuestion).not.toHaveBeenCalled();
+    expect(askQuestionWithEditor).not.toHaveBeenCalled();
+  });
+
+  it("should allow using message with empty changesets", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    await addChangeset(
+      cwd,
+      { empty: true, message: "empty changeset summary" },
+      defaultConfig
+    );
+
+    // @ts-ignore
+    const call = writeChangeset.mock.calls[0][0];
+    expect(call).toEqual(
+      expect.objectContaining({
+        releases: [],
+        summary: "empty changeset summary",
+      })
+    );
+  });
+
   it("should not include ignored packages in the prompt", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
