@@ -244,7 +244,6 @@ describe("parsing a changeset", () => {
       ---
 
       Your changeset summary here.
-
       Received content:
       ---
       "cool-package": minor
@@ -267,10 +266,9 @@ describe("parsing a changeset", () => {
       The frontmatter between the "---" delimiters must be valid YAML.
       YAML error: incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line (2:1)
 
-       1 | 
+       1 |
        2 | : minor
       -----^
-
       Frontmatter content:
 
       : minor"
@@ -321,7 +319,6 @@ describe("parsing a changeset", () => {
       ---
 
       Your changeset summary here.
-
       Received content:
       Just some content without frontmatter"
     `);
