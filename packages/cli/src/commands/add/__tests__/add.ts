@@ -22,8 +22,6 @@ jest.mock("@changesets/write");
 writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
 // @ts-ignore
 git.commit.mockImplementation(() => Promise.resolve(true));
-// @ts-ignore
-git.getChangedPackagesSinceRef.mockImplementation(() => []);
 
 // @ts-ignore
 const mockUserResponses = (mockResponses) => {
@@ -88,7 +86,10 @@ describe("Add command", () => {
     // @ts-ignore
     git.getChangedPackagesSinceRef.mockReset();
     // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(() => []);
+    git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
+      expect(ref).toBe("master");
+      return [];
+    });
   });
 
   it("should generate changeset to patch a single package", async () => {
@@ -388,7 +389,7 @@ describe("Add command", () => {
     );
   });
 
-  it("should use the since flag when detecting changed packages", async () => {
+  it("should support the since option for detecting changed packages", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
