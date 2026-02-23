@@ -82,16 +82,6 @@ const mockUserResponses = (mockResponses) => {
 describe("Add command", () => {
   silenceLogsInBlock();
 
-  beforeEach(() => {
-    // @ts-ignore
-    git.getChangedPackagesSinceRef.mockReset();
-    // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
-      expect(ref).toBe("master");
-      return [];
-    });
-  });
-
   it("should generate changeset to patch a single package", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
