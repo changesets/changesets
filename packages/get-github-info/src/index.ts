@@ -101,7 +101,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     repos[repo].push(data);
   });
 
-  let fetchResponse: Response;
+  let fetchResponse;
   try {
     fetchResponse = await fetch(GITHUB_GRAPHQL_URL, {
       method: "POST",
@@ -116,7 +116,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     );
   }
 
-  let data: any;
+  let data;
   try {
     data = await fetchResponse.json();
   } catch (e: any) {
