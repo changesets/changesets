@@ -1,4 +1,5 @@
 export type TwoFactorState = {
-  token: string | null;
-  isRequired: Promise<boolean>;
+  token: string | undefined;
+  isRequired: boolean;
+  allowConcurrency?: boolean;
 };
