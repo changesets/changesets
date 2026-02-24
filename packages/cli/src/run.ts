@@ -16,50 +16,20 @@ import tagCommand from "./commands/tag";
 import version from "./commands/version";
 import { CliOptions } from "./types";
 
-interface MonorepoRoot {
-  rootDir: string;
-  tool: string;
-}
-
 export async function run(
   input: string[],
   flags: { [name: string]: any },
   cwd: string
 ) {
+  const packages = await getPackages(cwd);
+  const rootDir = packages.root.dir;
+
   if (input[0] === "init") {
-    await init(cwd);
+    await init(rootDir);
     return;
   }
 
-  let directoryWithChangeset: string | null = null;
-
-  const getPathToChangeset = (directory: string) =>
-    path.resolve(directory, ".changeset");
-
-  const hasCwdChangeset = fs.existsSync(getPathToChangeset(cwd));
-
-  if (hasCwdChangeset) {
-    directoryWithChangeset = cwd;
-  } else {
-    // @ts-expect-error find-root is an esm only package and typescript can't
-    // resolve the types with the current configuration
-    const { findRoot } = await import("@manypkg/find-root");
-
-    try {
-      const { rootDir } = await (findRoot(cwd) as Promise<MonorepoRoot>);
-      const hasRootDirChangeset = fs.existsSync(getPathToChangeset(rootDir));
-
-      if (hasRootDirChangeset) {
-        directoryWithChangeset = rootDir;
-      }
-    } catch {
-      // could not find .changeset folder in root either, therefore
-      // keep the directoryWithChangeset variable null as it will
-      // be checked later
-    }
-  }
-
-  if (directoryWithChangeset === null) {
+  if (!fs.existsSync(path.resolve(rootDir, ".changeset"))) {
     error("There is no .changeset folder. ");
     error(
       "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
@@ -70,14 +40,12 @@ export async function run(
     throw new ExitError(1);
   }
 
-  const packages = await getPackages(directoryWithChangeset);
-
   let config: Config;
   try {
-    config = await read(directoryWithChangeset, packages);
+    config = await read(rootDir, packages);
   } catch (e) {
     let oldConfigExists = await fs.pathExists(
-      path.resolve(directoryWithChangeset, ".changeset/config.js")
+      path.resolve(rootDir, ".changeset/config.js")
     );
     if (oldConfigExists) {
       error(
@@ -99,7 +67,7 @@ export async function run(
   if (input.length < 1) {
     const { empty, open, since, message }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
-    await add(directoryWithChangeset, { empty, open, since, message }, config);
+    await add(rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -140,11 +108,7 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        await add(
-          directoryWithChangeset,
-          { empty, open, since, message },
-          config
-        );
+        await add(rootDir, { empty, open, since, message }, config);
         return;
       }
       case "version": {
@@ -225,23 +189,19 @@ export async function run(
           config.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
         }
 
-        await version(directoryWithChangeset, { snapshot }, config);
+        await version(rootDir, { snapshot }, config);
         return;
       }
       case "publish": {
-        await publish(directoryWithChangeset, { otp, tag, gitTag }, config);
+        await publish(rootDir, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
-        await status(
-          directoryWithChangeset,
-          { sinceMaster, since, verbose, output },
-          config
-        );
+        await status(rootDir, { sinceMaster, since, verbose, output }, config);
         return;
       }
       case "tag": {
-        await tagCommand(directoryWithChangeset, config);
+        await tagCommand(rootDir, config);
         return;
       }
       case "pre": {
@@ -257,8 +217,7 @@ export async function run(
           error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);
         }
-        // @ts-ignore
-        await pre(directoryWithChangeset, { command, tag });
+        await pre(rootDir, { command, tag });
         return;
       }
       case "bump": {
