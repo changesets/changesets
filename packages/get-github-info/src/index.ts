@@ -90,7 +90,12 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } = readEnv();
   if (!GITHUB_TOKEN) {
     throw new Error(
-      `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`
+      `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new?scopes=read:user,repo:status&description=changesets-${new Date()
+        .toISOString()
+        .substring(
+          0,
+          10
+        )} with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`
     );
   }
   let repos: ReposWithCommitsAndPRsToFetch = {};
