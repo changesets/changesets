@@ -81,6 +81,8 @@ export type Config = {
   privatePackages: PrivatePackages;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
+  /** Only update internal dependencies if the new version(s) satisfy the semver range */
+  requireSemverSatisfaction: boolean;
   ignore: ReadonlyArray<string>;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
@@ -112,6 +114,8 @@ export type WrittenConfig = {
       };
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
+  /** Only update internal dependencies if the new version(s) satisfy the semver range */
+  requireSemverSatisfaction?: boolean;
   ignore?: ReadonlyArray<string>;
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   snapshot?: {
