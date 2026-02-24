@@ -47,3 +47,14 @@ For example:
 It will match all packages starting with `pkg-`.
 
 **The glob expressions must be defined according to the [micromatch](https://www.npmjs.com/package/micromatch) format.**
+
+## Git Tag Format
+
+When publishing fixed packages, the git tag format depends on your configuration:
+
+- **Single fixed group containing all workspace packages**: Uses root-style tags (`v1.0.0`)
+  - Example: If your workspace has `pkg-a` and `pkg-b`, and `fixed: [["pkg-a", "pkg-b"]]`, publishing will create tag `v1.0.0`
+- **Multiple fixed groups or mixed fixed/non-fixed packages**: Uses package-style tags (`pkg-name@1.0.0`)
+  - Example: If you have `fixed: [["pkg-a", "pkg-b"], ["pkg-c", "pkg-d"]]`, tags will be `pkg-a@1.0.0`, `pkg-b@1.0.0`, etc.
+
+This behavior ensures that when all packages in a monorepo are versioned together as a single unit, they share a single version tag, similar to single-package repositories.
