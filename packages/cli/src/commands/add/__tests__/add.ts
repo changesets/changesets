@@ -2,9 +2,11 @@ import path from "path";
 import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir, gitdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 import { error as loggerError } from "@changesets/logger";
+import fs from "fs-extra";
+import spawn from "spawndamnit";
 
 import {
   askCheckboxPlus,
@@ -379,8 +381,15 @@ describe("Add command", () => {
     );
   });
 
-  it("should support the since option for detecting changed packages", async () => {
-    const cwd = await testdir({
+  it("should detect changed packages since the given ref", async () => {
+    const realGit = jest.requireActual("@changesets/git");
+    (git.getChangedPackagesSinceRef as jest.Mock).mockImplementation(
+      realGit.getChangedPackagesSinceRef
+    );
+    (git.add as jest.Mock).mockImplementation(realGit.add);
+    (git.commit as jest.Mock).mockImplementation(realGit.commit);
+
+    const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
         workspaces: ["packages/*"],
@@ -393,25 +402,38 @@ describe("Add command", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    git.getChangedPackagesSinceRef.mockImplementation(({ ref }) => {
-      if (ref === "develop") {
-        return [{ packageJson: { name: "pkg-b" }, dir: "" }];
-      }
-      return [];
-    });
+    await spawn("git", ["checkout", "-b", "foo"], { cwd });
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-a/a.js"),
+      'export default "a"'
+    );
+    await git.add(".", cwd);
+    await git.commit("update pkg-a", cwd);
+
+    await spawn("git", ["checkout", "-b", "bar"], { cwd });
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "b"'
+    );
+    await git.add(".", cwd);
+    await git.commit("update pkg-b", cwd);
 
     mockUserResponses({ releases: { "pkg-b": "patch" } });
-    await addChangeset(cwd, { empty: false, since: "develop" }, defaultConfig);
+    await addChangeset(cwd, { empty: false, since: "foo" }, defaultConfig);
 
-    expect(git.getChangedPackagesSinceRef).toHaveBeenCalledWith(
-      expect.objectContaining({ ref: "develop" })
+    expect(askCheckboxPlus).toHaveBeenCalledWith(
+      expect.stringContaining("Which packages"),
+      [
+        { name: "changed packages", choices: ["pkg-b"] },
+        { name: "unchanged packages", choices: ["pkg-a"] },
+      ],
+      expect.any(Function)
     );
 
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
+    const call = (writeChangeset as jest.Mock).mock.calls[0][0];
     expect(call).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
