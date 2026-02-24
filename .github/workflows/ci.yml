@@ -24,7 +24,7 @@ jobs:
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
       - name: Jest tests
-        run: node --experimental-vm-modules ./node_modules/.bin/jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
+        run: node jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4

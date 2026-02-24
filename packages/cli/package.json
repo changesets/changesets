@@ -81,7 +81,6 @@
     "@changesets/types": "^6.1.0",
     "@changesets/write": "^0.4.0",
     "@inquirer/external-editor": "^1.0.2",
-    "@manypkg/find-root": "^3.1.0",
     "@manypkg/get-packages": "^1.1.3",
     "ansi-colors": "^4.1.3",
     "ci-info": "^3.7.0",
