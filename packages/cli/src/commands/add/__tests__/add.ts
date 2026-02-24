@@ -3,8 +3,8 @@ import stripAnsi from "strip-ansi";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir, gitdir } from "@changesets/test-utils";
-import writeChangeset from "@changesets/write";
 import { error as loggerError } from "@changesets/logger";
+import getChangesets from "@changesets/read";
 import fs from "fs-extra";
 import spawn from "spawndamnit";
 
@@ -18,12 +18,6 @@ import {
 import addChangeset from "..";
 
 jest.mock("../../../utils/cli-utilities");
-jest.mock("@changesets/git");
-jest.mock("@changesets/write");
-// @ts-ignore
-writeChangeset.mockImplementation(() => Promise.resolve("abcdefg"));
-// @ts-ignore
-git.commit.mockImplementation(() => Promise.resolve(true));
 
 // @ts-ignore
 const mockUserResponses = (mockResponses) => {
@@ -103,9 +97,9 @@ describe("Add command", () => {
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
 
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "pkg-a", type: "patch" }],
@@ -145,9 +139,9 @@ describe("Add command", () => {
       });
       await addChangeset(cwd, { empty: false }, defaultConfig);
 
-      // @ts-ignore
-      const call = writeChangeset.mock.calls[0][0];
-      expect(call).toEqual(
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
         expect.objectContaining({
           summary: expectedSummary,
           releases: [{ name: "pkg-a", type: "patch" }],
@@ -190,9 +184,9 @@ describe("Add command", () => {
 
     await addChangeset(cwd, { empty: false }, defaultConfig);
 
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "single-package", type: "minor" }],
@@ -201,7 +195,7 @@ describe("Add command", () => {
   });
 
   it("should commit when the commit flag is passed in", async () => {
-    const cwd = await testdir({
+    const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
         workspaces: ["packages/*"],
@@ -228,8 +222,10 @@ describe("Add command", () => {
         commit: [path.resolve(__dirname, "..", "..", "..", "commit"), null],
       }
     );
-    expect(git.add).toHaveBeenCalledTimes(1);
-    expect(git.commit).toHaveBeenCalledTimes(1);
+
+    const result = await spawn("git", ["log", "--oneline", "-1"], { cwd });
+    const lastCommitMsg = result.stdout.toString("utf-8").trim();
+    expect(lastCommitMsg).toContain("docs(changeset): summary message mock");
   });
 
   it("should create empty changeset when empty flag is passed in", async () => {
@@ -246,9 +242,9 @@ describe("Add command", () => {
 
     await addChangeset(cwd, { empty: true }, defaultConfig);
 
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         releases: [],
         summary: "",
@@ -276,9 +272,9 @@ describe("Add command", () => {
       defaultConfig
     );
 
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         summary: "summary from message",
         releases: [{ name: "single-package", type: "minor" }],
@@ -305,9 +301,9 @@ describe("Add command", () => {
 
     await addChangeset(cwd, { empty: false, message: "" }, defaultConfig);
 
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         summary: "",
         releases: [{ name: "single-package", type: "patch" }],
@@ -340,9 +336,9 @@ describe("Add command", () => {
       defaultConfig
     );
 
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         summary: "monorepo summary from message",
         releases: [{ name: "pkg-a", type: "patch" }],
@@ -371,9 +367,9 @@ describe("Add command", () => {
       defaultConfig
     );
 
-    // @ts-ignore
-    const call = writeChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         releases: [],
         summary: "empty changeset summary",
@@ -382,13 +378,6 @@ describe("Add command", () => {
   });
 
   it("should detect changed packages since the given ref", async () => {
-    const realGit = jest.requireActual("@changesets/git");
-    (git.getChangedPackagesSinceRef as jest.Mock).mockImplementation(
-      realGit.getChangedPackagesSinceRef
-    );
-    (git.add as jest.Mock).mockImplementation(realGit.add);
-    (git.commit as jest.Mock).mockImplementation(realGit.commit);
-
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
@@ -433,8 +422,9 @@ describe("Add command", () => {
       expect.any(Function)
     );
 
-    const call = (writeChangeset as jest.Mock).mock.calls[0][0];
-    expect(call).toEqual(
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "pkg-b", type: "patch" }],
