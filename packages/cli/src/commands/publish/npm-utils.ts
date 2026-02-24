@@ -89,24 +89,37 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
 
 async function getPublishTool(
   cwd: string
-): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
+): Promise<
+  | { name: "npm" }
+  | { name: "pnpm"; shouldAddNoGitChecks: boolean }
+  | { name: "bun" }
+> {
   const pm = await detect({ cwd });
-  if (!pm || pm.name !== "pnpm") return { name: "npm" };
-  try {
-    let result = await spawn("pnpm", ["--version"], { cwd });
-    let version = result.stdout.toString().trim();
-    let parsed = semverParse(version);
-    return {
-      name: "pnpm",
-      shouldAddNoGitChecks:
-        parsed?.major === undefined ? false : parsed.major >= 5,
-    };
-  } catch (e) {
-    return {
-      name: "pnpm",
-      shouldAddNoGitChecks: false,
-    };
+  if (!pm) return { name: "npm" };
+
+  if (pm.name === "bun") {
+    return { name: "bun" };
   }
+
+  if (pm.name === "pnpm") {
+    try {
+      let result = await spawn("pnpm", ["--version"], { cwd });
+      let version = result.stdout.toString().trim();
+      let parsed = semverParse(version);
+      return {
+        name: "pnpm",
+        shouldAddNoGitChecks:
+          parsed?.major === undefined ? false : parsed.major >= 5,
+      };
+    } catch (e) {
+      return {
+        name: "pnpm",
+        shouldAddNoGitChecks: false,
+      };
+    }
+  }
+
+  return { name: "npm" };
 }
 
 export async function getTokenIsRequired() {
@@ -247,6 +260,11 @@ async function internalPublish(
       ? await spawn("pnpm", ["publish", ...publishFlags], {
           env: Object.assign({}, process.env, envOverride),
           cwd: opts.cwd,
+        })
+      : publishTool.name === "bun"
+      ? await spawn("bun", ["publish", ...publishFlags], {
+          env: Object.assign({}, process.env, envOverride),
+          cwd: opts.publishDir,
         })
       : await spawn(
           publishTool.name,
