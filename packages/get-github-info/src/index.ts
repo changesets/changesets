@@ -1,6 +1,14 @@
-// @ts-ignore
 import fetch from "node-fetch";
 import DataLoader from "dataloader";
+
+function readEnv() {
+  const GITHUB_GRAPHQL_URL =
+    process.env.GITHUB_GRAPHQL_URL || "https://api.github.com/graphql";
+  const GITHUB_SERVER_URL =
+    process.env.GITHUB_SERVER_URL || "https://github.com";
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+  return { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN };
+}
 
 const validRepoNameRegex = /^[\w.-]+\/[\w.-]+$/;
 
@@ -79,9 +87,10 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
 // getReleaseLine will be called a large number of times but it'll be called at the same time
 // so instead of doing a bunch of network requests, we can do a single one.
 const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
-  if (!process.env.GITHUB_TOKEN) {
+  const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } = readEnv();
+  if (!GITHUB_TOKEN) {
     throw new Error(
-      "Please create a GitHub personal access token at https://github.com/settings/tokens/new with `read:user` and `repo:status` permissions and add it as the GITHUB_TOKEN environment variable"
+      `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`
     );
   }
   let repos: ReposWithCommitsAndPRsToFetch = {};
@@ -92,13 +101,12 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     repos[repo].push(data);
   });
 
-  // eslint-disable-next-line no-undef -- Response is defined
   let fetchResponse: Response;
   try {
-    fetchResponse = await fetch("https://api.github.com/graphql", {
+    fetchResponse = await fetch(GITHUB_GRAPHQL_URL, {
       method: "POST",
       headers: {
-        Authorization: `Token ${process.env.GITHUB_TOKEN}`,
+        Authorization: `Token ${GITHUB_TOKEN}`,
       },
       body: JSON.stringify({ query: makeQuery(repos) }),
     });
@@ -270,7 +278,7 @@ export async function getInfoFromPullRequest(request: {
       commit: commit
         ? `[\`${commit.abbreviatedOid.slice(0, 7)}\`](${commit.commitUrl})`
         : null,
-      pull: `[#${request.pull}](https://github.com/${request.repo}/pull/${request.pull})`,
+      pull: `[#${request.pull}](${data.url})`,
       user: user ? `[@${user.login}](${user.url})` : null,
     },
   };

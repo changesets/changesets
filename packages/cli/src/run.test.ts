@@ -1,13 +1,61 @@
+import path from "path";
 import { error } from "@changesets/logger";
 import { testdir } from "@changesets/test-utils";
-
+import add from "./commands/add";
 import { run } from "./run";
 import writeChangeset from "@changesets/write";
 
 jest.mock("@changesets/logger");
+jest.mock("./commands/add");
 jest.mock("./commands/version");
 
 describe("cli", () => {
+  describe("add", () => {
+    it("should pass --message to add when using default command", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          name: "single-package",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await run([], { message: "summary from message" }, cwd);
+
+      expect(add).toHaveBeenCalledWith(
+        cwd,
+        {
+          empty: undefined,
+          open: undefined,
+          message: "summary from message",
+        },
+        expect.any(Object)
+      );
+    });
+
+    it("should pass --message to add command", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          name: "single-package",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await run(["add"], { message: "summary from message" }, cwd);
+
+      expect(add).toHaveBeenCalledWith(
+        cwd,
+        {
+          empty: undefined,
+          open: undefined,
+          message: "summary from message",
+        },
+        expect.any(Object)
+      );
+    });
+  });
+
   describe("version", () => {
     it("should validate package name passed in from --ignore flag", async () => {
       const cwd = await testdir({
@@ -250,5 +298,59 @@ describe("cli", () => {
         `A tag must be passed when using prerelease enter`
       );
     });
+  });
+
+  it("should be able to add a changesed when called from subdirectory", async () => {
+    const rootDir = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    const cwd = path.resolve(rootDir, "packages", "pkg-a");
+
+    await run([], { message: "test" }, cwd);
+
+    expect(add).toHaveBeenCalledWith(
+      rootDir,
+      {
+        empty: undefined,
+        open: undefined,
+        message: "test",
+      },
+      expect.any(Object)
+    );
+  });
+
+  it("should throw when .changeset folder is missing when called from subdirectory", async () => {
+    const rootDir = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    const cwd = path.resolve(rootDir, "packages", "pkg-a");
+
+    try {
+      await run(["version"], {}, cwd);
+    } catch (e) {
+      // ignore the error. We just want to validate the error message
+    }
+
+    const loggerErrorCalls = (error as any).mock.calls;
+    expect(loggerErrorCalls[0][0].trim()).toEqual(
+      "There is no .changeset folder."
+    );
   });
 });

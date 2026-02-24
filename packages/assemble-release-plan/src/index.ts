@@ -16,7 +16,7 @@ import flattenReleases from "./flatten-releases";
 import { incrementVersion } from "./increment";
 import matchFixedConstraint from "./match-fixed-constraint";
 import { InternalRelease, PreInfo } from "./types";
-import { getPackageIfExists } from "./utils";
+import { mapGetOrThrow, mapGetOrThrowInternal } from "./utils";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -277,14 +277,18 @@ function getRelevantChangesets(
     const skippedPackages = [];
     const notSkippedPackages = [];
     for (const release of changeset.releases) {
+      // this acts as an early validation in this package so we don't throw an internal error here
+      const packageByName = mapGetOrThrow(
+        packagesByName,
+        release.name,
+        `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
+      );
+
       if (
-        shouldSkipPackage(
-          getPackageIfExists(packagesByName, release.name, changeset),
-          {
-            ignore: config.ignore,
-            allowPrivatePackages: config.privatePackages.version,
-          }
-        )
+        shouldSkipPackage(packageByName, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        })
       ) {
         skippedPackages.push(release.name);
       } else {
@@ -313,13 +317,21 @@ function getRelevantChangesets(
 }
 
 function getHighestPreVersion(
+  groupKind: "linked" | "fixed",
   packageGroup: PackageGroup,
   packagesByName: Map<string, Package>
 ): number {
   let highestPreVersion = 0;
-  for (let pkg of packageGroup) {
+  for (let pkgName of packageGroup) {
+    const pkg = mapGetOrThrowInternal(
+      packagesByName,
+      pkgName,
+      `Could not find package named "${pkgName}" listed in ${groupKind} group ${JSON.stringify(
+        packageGroup
+      )}`
+    );
     highestPreVersion = Math.max(
-      getPreVersion(packagesByName.get(pkg)!.packageJson.version),
+      getPreVersion(pkg.packageJson.version),
       highestPreVersion
     );
   }
@@ -368,13 +380,21 @@ function getPreInfo(
     );
   }
   for (let fixedGroup of config.fixed) {
-    let highestPreVersion = getHighestPreVersion(fixedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      "fixed",
+      fixedGroup,
+      packagesByName
+    );
     for (let fixedPackage of fixedGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
     }
   }
   for (let linkedGroup of config.linked) {
-    let highestPreVersion = getHighestPreVersion(linkedGroup, packagesByName);
+    let highestPreVersion = getHighestPreVersion(
+      "linked",
+      linkedGroup,
+      packagesByName
+    );
     for (let linkedPackage of linkedGroup) {
       preVersions.set(linkedPackage, highestPreVersion);
     }

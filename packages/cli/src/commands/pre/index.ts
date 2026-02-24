@@ -8,12 +8,12 @@ import {
 } from "@changesets/errors";
 
 export default async function pre(
-  cwd: string,
+  rootDir: string,
   options: { command: "enter"; tag: string } | { command: "exit"; tag?: string }
 ) {
   if (options.command === "enter") {
     try {
-      await enterPre(cwd, options.tag);
+      await enterPre(rootDir, options.tag);
       logger.success(`Entered pre mode with tag ${pc.cyan(options.tag)}`);
       logger.info(
         "Run `changeset version` to version packages with prerelease versions"
@@ -30,7 +30,7 @@ export default async function pre(
     }
   } else {
     try {
-      await exitPre(cwd);
+      await exitPre(rootDir);
       logger.success(`Exited pre mode`);
       logger.info(
         "Run `changeset version` to version packages with normal versions"

@@ -1,7 +1,8 @@
-import { NewChangeset, PackageGroup, VersionType } from "@changesets/types";
+import { PackageGroup, VersionType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import semverGt from "semver/functions/gt";
 import { InternalRelease } from "./types";
+import { InternalError } from "@changesets/errors";
 
 export function getHighestReleaseType(
   releases: InternalRelease[]
@@ -39,14 +40,11 @@ export function getCurrentHighestVersion(
   let highestVersion: string | undefined;
 
   for (let pkgName of packageGroup) {
-    let pkg = packagesByName.get(pkgName);
-
-    if (!pkg) {
-      console.error(
-        `FATAL ERROR IN CHANGESETS! We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`
-      );
-      throw new Error(`fatal: could not resolve linked packages`);
-    }
+    let pkg = mapGetOrThrowInternal(
+      packagesByName,
+      pkgName,
+      `We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`
+    );
 
     if (
       highestVersion === undefined ||
@@ -59,16 +57,26 @@ export function getCurrentHighestVersion(
   return highestVersion!;
 }
 
-export function getPackageIfExists(
-  packagesByName: Map<string, Package>,
-  packageName: string,
-  changeset: Pick<NewChangeset, "id">
-): Package {
-  const pkg = packagesByName.get(packageName);
-  if (pkg) {
-    return pkg;
+export function mapGetOrThrow<V extends {}>(
+  map: Map<string, V>,
+  key: string,
+  errorMessage: string
+): V {
+  const value = map.get(key);
+  if (value === undefined) {
+    throw new Error(errorMessage);
   }
-  throw new Error(
-    `"${changeset.id}" changeset mentions a release for a package "${packageName}" but such a package could not be found.`
-  );
+  return value;
+}
+
+export function mapGetOrThrowInternal<V extends {}>(
+  map: Map<string, V>,
+  key: string,
+  errorMessage: string
+): V {
+  const value = map.get(key);
+  if (value === undefined) {
+    throw new InternalError(errorMessage);
+  }
+  return value;
 }

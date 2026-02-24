@@ -93,7 +93,9 @@ function isArray<T>(
 
 export let read = async (cwd: string, packages?: Packages) => {
   packages ??= await getPackages(cwd);
-  let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
+  let json = await fs.readJSON(
+    path.join(packages.root.dir, ".changeset", "config.json")
+  );
   return parse(json, packages);
 };
 
@@ -317,7 +319,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       );
 
       // Validate that all dependents of ignored packages are listed in the ignore list
-      const dependentsGraph = getDependentsGraph(packages);
+      const dependentsGraph = getDependentsGraph(packages, {
+        bumpVersionsWithWorkspaceProtocolOnly:
+          json.bumpVersionsWithWorkspaceProtocolOnly,
+      });
       for (const ignoredPackage of json.ignore) {
         const dependents = dependentsGraph.get(ignoredPackage) || [];
         for (const dependent of dependents) {
