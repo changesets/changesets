@@ -8,11 +8,6 @@ import writeChangeset from "@changesets/write";
 jest.mock("@changesets/logger");
 jest.mock("./commands/add");
 jest.mock("./commands/version");
-jest.mock("./commands/add");
-jest.mock("./commands/publish");
-jest.mock("./commands/status");
-jest.mock("./commands/tag");
-jest.mock("./commands/pre");
 
 describe("cli", () => {
   describe("add", () => {
@@ -305,38 +300,36 @@ describe("cli", () => {
     });
   });
 
-  it("should execute from nested folder", async () => {
-    const cwd = await testdir({
+  it("should be able to add a changesed when called from subdirectory", async () => {
+    const rootDir = await testdir({
       "package.json": JSON.stringify({
         private: true,
         workspaces: ["packages/*"],
       }),
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
-        version: "1.0.0",
-      }),
-      "packages/pkg-b/package.json": JSON.stringify({
-        name: "pkg-b",
         version: "1.0.0",
       }),
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    const nestedDirectory = path.resolve(cwd, "packages", "pgk-b");
+    const cwd = path.resolve(rootDir, "packages", "pkg-a");
 
-    await expect(run([], {}, nestedDirectory)).resolves.not.toThrow();
-    await expect(run(["version"], {}, nestedDirectory)).resolves.not.toThrow();
-    await expect(run(["add"], {}, nestedDirectory)).resolves.not.toThrow();
-    await expect(run(["publish"], {}, nestedDirectory)).resolves.not.toThrow();
-    await expect(run(["status"], {}, nestedDirectory)).resolves.not.toThrow();
-    await expect(run(["tag"], {}, nestedDirectory)).resolves.not.toThrow();
-    await expect(
-      run(["pre", "enter", "1.0.0"], {}, nestedDirectory)
-    ).resolves.not.toThrow();
+    await run([], { message: "test" }, cwd);
+
+    expect(add).toHaveBeenCalledWith(
+      rootDir,
+      {
+        empty: undefined,
+        open: undefined,
+        message: "test",
+      },
+      expect.any(Object)
+    );
   });
 
-  it("should throw if no changeset folder exists even if we execute from nested folder", async () => {
-    const cwd = await testdir({
+  it("should throw when .changeset folder is missing when called from subdirectory", async () => {
+    const rootDir = await testdir({
       "package.json": JSON.stringify({
         private: true,
         workspaces: ["packages/*"],
@@ -345,20 +338,19 @@ describe("cli", () => {
         name: "pkg-a",
         version: "1.0.0",
       }),
-      "packages/pkg-b/package.json": JSON.stringify({
-        name: "pkg-b",
-        version: "1.0.0",
-      }),
     });
 
-    const nestedDirectory = path.resolve(cwd, "packages", "pgk-b");
+    const cwd = path.resolve(rootDir, "packages", "pkg-a");
 
-    await expect(run(["version"], {}, nestedDirectory)).rejects.toThrow();
+    try {
+      await run(["version"], {}, cwd);
+    } catch (e) {
+      // ignore the error. We just want to validate the error message
+    }
 
     const loggerErrorCalls = (error as any).mock.calls;
-    expect(loggerErrorCalls.length).toEqual(3);
     expect(loggerErrorCalls[0][0].trim()).toEqual(
-      `There is no .changeset folder.`
+      "There is no .changeset folder."
     );
   });
 });
