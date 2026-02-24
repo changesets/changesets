@@ -21,8 +21,9 @@ export default async function add(
   {
     empty,
     open,
+    since,
     message,
-  }: { empty?: boolean; open?: boolean; message?: string },
+  }: { empty?: boolean; open?: boolean; since?: string; message?: string },
   config: Config
 ): Promise<void> {
   const packages = await getPackages(cwd);
@@ -63,13 +64,17 @@ export default async function add(
       changedPackagesNames = (
         await getVersionableChangedPackages(config, {
           cwd,
+          ref: since,
         })
       ).map((pkg) => pkg.packageJson.name);
     } catch (e: any) {
       // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
       // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
+      const branch = since ?? config.baseBranch;
       warn(
-        `Failed to find changed packages from the "${config.baseBranch}" base branch due to error below`
+        `Failed to find changed packages from the "${branch}" ${
+          since ? "ref" : "base branch"
+        } due to error below`
       );
       warn(e);
     }

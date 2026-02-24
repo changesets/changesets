@@ -3,7 +3,7 @@
 The command line for changesets is the main way of interacting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-using-changesets.md)
 
 - init
-- add [--empty] [--open] [--message <text>]
+- add [--empty] [--open] [--since <ref>] [--message <text>]
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag]
 - status [--since=master --verbose --output=JSON_FILE.json]
@@ -66,6 +66,12 @@ If you set the commit option in the config, the command will add the updated cha
 
 - `--open` - opens the created changeset in an external editor
 - `--message` (or `-m`) - provides the changeset summary from the command line instead of prompting for it.
+
+- `--since` - uses the provided branch, tag, or git ref (such as `main` or a git commit hash) to detect which packages have changed when populating the list of changed packages in the CLI. This is useful in gitflow workflows where you have multiple target branches and `baseBranch` in the config doesn't cover all use cases. If not provided, the command falls back to the `baseBranch` value in your `.changeset/config.json`.
+
+```
+changeset add --since=develop
+```
 
 ## version
 
