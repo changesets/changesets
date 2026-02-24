@@ -3,6 +3,7 @@ import {
   Config,
   NewChangeset,
   ComprehensiveRelease,
+  PreState,
 } from "@changesets/types";
 import * as git from "@changesets/git";
 import fs from "fs-extra";
@@ -3296,6 +3297,60 @@ describe("apply release plan", () => {
 
       expect(releasePlan.changesets.length).toBeGreaterThan(0);
       expect(changesetsDeleted).toBe(true);
+    });
+
+    it("should include pre.json in pre-release", async () => {
+      const releasePlan = new FakeReleasePlan();
+      const preState: PreState = {
+        mode: "pre",
+        tag: "beta",
+        initialVersions: {
+          "pkg-a": "1.0.0",
+          "pkg-b": "1.0.0",
+        },
+        changesets: [],
+      };
+
+      let { tempDir } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+          ".changeset/pre.json": JSON.stringify(preState),
+        },
+        {
+          ...releasePlan.getReleasePlan(),
+          preState,
+        },
+        {
+          ...releasePlan.config,
+          commit: [
+            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            null,
+          ],
+        }
+      );
+
+      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+
+      expect(gitCmd.stdout.toString()).toContain(
+        "modified:   .changeset/pre.json"
+      );
+      expect(gitCmd.stdout.toString()).toContain(
+        "modified:   packages/pkg-a/package.json"
+      );
     });
   });
 });

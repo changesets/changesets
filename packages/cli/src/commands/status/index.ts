@@ -53,7 +53,7 @@ export default async function status(
 
   if (output) {
     await fs.writeFile(
-      path.join(cwd, output),
+      path.resolve(cwd, output),
       JSON.stringify(releasePlan, undefined, 2)
     );
     return;

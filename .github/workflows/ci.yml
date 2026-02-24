@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: [main]
+  merge_group:
+    branches: [main]
 
 permissions:
   contents: read
@@ -61,14 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs: [test, typecheck, lint]
-    env:
-      FAILURE: ${{ contains(join(needs.*.result, ','), 'failure') }}
     steps:
-      - name: Check for failure
-        run: |
-          echo $FAILURE
-          if [ "$FAILURE" = "false" ]; then
-            exit 0
-          else
-            exit 1
-          fi
+      - name: Exit with error if some jobs are not successful
+        run: exit 1
+        if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'skipped') || contains(needs.*.result, 'cancelled')) }}

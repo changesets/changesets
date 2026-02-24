@@ -1,5 +1,13 @@
 # @changesets/config
 
+## 3.1.2
+
+### Patch Changes
+
+- [#1535](https://github.com/changesets/changesets/pull/1535) [`cc28222`](https://github.com/changesets/changesets/commit/cc28222ee892b3a078fa02ee26e1cef98c171532) Thanks [@joerobot](https://github.com/joerobot)! - Respect config value for `bumpVersionsWithWorkspaceProtocolOnly` when validating `ignore` option to prevent spurious console errors.
+
+- [#1232](https://github.com/changesets/changesets/pull/1232) [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe) Thanks [@matthprost](https://github.com/matthprost)! - Fixed log error link mismatch to remove dot at the end
+
 ## 3.1.1
 
 ### Patch Changes

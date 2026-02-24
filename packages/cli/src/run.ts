@@ -21,12 +21,15 @@ export async function run(
   flags: { [name: string]: any },
   cwd: string
 ) {
+  const packages = await getPackages(cwd);
+  const rootDir = packages.root.dir;
+
   if (input[0] === "init") {
-    await init(cwd);
+    await init(rootDir);
     return;
   }
 
-  if (!fs.existsSync(path.resolve(cwd, ".changeset"))) {
+  if (!fs.existsSync(path.resolve(rootDir, ".changeset"))) {
     error("There is no .changeset folder. ");
     error(
       "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
@@ -37,14 +40,12 @@ export async function run(
     throw new ExitError(1);
   }
 
-  const packages = await getPackages(cwd);
-
   let config: Config;
   try {
-    config = await read(cwd, packages);
+    config = await read(rootDir, packages);
   } catch (e) {
     let oldConfigExists = await fs.pathExists(
-      path.resolve(cwd, ".changeset/config.js")
+      path.resolve(rootDir, ".changeset/config.js")
     );
     if (oldConfigExists) {
       error(
@@ -64,9 +65,9 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open }: CliOptions = flags;
+    const { empty, open, since, message }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
-    await add(cwd, { empty, open }, config);
+    await add(rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -85,6 +86,7 @@ export async function run(
       tag,
       open,
       gitTag,
+      message,
     }: CliOptions = flags;
     const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
 
@@ -106,7 +108,7 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        await add(cwd, { empty, open }, config);
+        await add(rootDir, { empty, open, since, message }, config);
         return;
       }
       case "version": {
@@ -187,19 +189,19 @@ export async function run(
           config.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
         }
 
-        await version(cwd, { snapshot }, config);
+        await version(rootDir, { snapshot }, config);
         return;
       }
       case "publish": {
-        await publish(cwd, { otp, tag, gitTag }, config);
+        await publish(rootDir, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
+        await status(rootDir, { sinceMaster, since, verbose, output }, config);
         return;
       }
       case "tag": {
-        await tagCommand(cwd, config);
+        await tagCommand(rootDir, config);
         return;
       }
       case "pre": {
@@ -212,11 +214,10 @@ export async function run(
         }
         let tag = input[2];
         if (command === "enter" && typeof tag !== "string") {
-          error(`A tag must be passed when using prerelese enter`);
+          error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);
         }
-        // @ts-ignore
-        await pre(cwd, { command, tag });
+        await pre(rootDir, { command, tag });
         return;
       }
       case "bump": {

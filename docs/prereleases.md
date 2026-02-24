@@ -2,7 +2,7 @@
 
 > Warning! Prereleases are very complicated! Using them requires a thorough understanding of all parts of npm publishes. Mistakes can lead to repository and publish states that are very hard to fix.
 
-> Warning: If you decide to do prereleases from the main branch of your repository, without having a branch for your last stable release without the prerelease changes, you will block other changes until you are ready to exit prerelease mode. We thoroughly recommend only running prereleases from a branch other than the main branch.
+> Warning: If you decide to do prereleases from the default branch of your repository, without having a branch for your last stable release without the prerelease changes, you will block other changes until you are ready to exit prerelease mode. We thoroughly recommend only running prereleases from a branch other than the default branch.
 
 You might want to release a version of your packages before you do an actual release, Changesets lets you do this but there are some caveats because of the complexity that monorepos add that are important to understand.
 
@@ -46,7 +46,7 @@ The repo would now look like this:
 
 ```
 packages/
-  pkg-a@1.0.1-next.0 has dep on pkg-b@^2.0.1
+  pkg-a@1.0.1-next.0 has dep on pkg-b@^2.1.0-next.0
   pkg-b@2.1.0-next.0 has no deps
   pkg-c@3.0.0 has no deps
 .changeset/
@@ -72,7 +72,7 @@ Let's say we add some changesets and a new package so our repo looks like this
 
 ```
 packages/
-  pkg-a@1.0.1-next.0 has dep on pkg-b@^2.0.1
+  pkg-a@1.0.1-next.0 has dep on pkg-b@^2.1.0-next.0
   pkg-b@2.1.0-next.0 has no deps
   pkg-c@3.0.0 has no deps
   pkg-d@0.0.0 has no deps
@@ -91,7 +91,7 @@ The version command will behave just like it does for the first versioning of a 
 
 ```
 packages/
-  pkg-a@1.1.0-next.1 has dep on pkg-b@^2.0.1
+  pkg-a@1.1.0-next.1 has dep on pkg-b@^2.1.0-next.0
   pkg-b@2.1.0-next.0 has no deps
   pkg-c@3.0.1-next.0 has no deps
   pkg-d@1.0.0-next.0 has no deps
@@ -128,7 +128,7 @@ The version command will apply any changesets currently in the repo and then rem
 
 ```
 packages/
-  pkg-a@1.1.0 has dep on pkg-b@^2.0.1
+  pkg-a@1.1.0 has dep on pkg-b@^2.1.0
   pkg-b@2.1.0 has no deps
   pkg-c@3.0.1 has no deps
   pkg-d@1.0.0 has no deps

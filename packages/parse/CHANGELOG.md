@@ -1,5 +1,11 @@
 # @changesets/parse
 
+## 0.4.2
+
+### Patch Changes
+
+- [#1772](https://github.com/changesets/changesets/pull/1772) [`4c5a207`](https://github.com/changesets/changesets/commit/4c5a2078e45d1d269ecc65c3c24b898ed6451245) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Update `js-yaml` to `v4`
+
 ## 0.4.1
 
 ### Patch Changes
