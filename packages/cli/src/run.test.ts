@@ -1,6 +1,6 @@
+import path from "path";
 import { error } from "@changesets/logger";
 import { testdir } from "@changesets/test-utils";
-
 import add from "./commands/add";
 import { run } from "./run";
 import writeChangeset from "@changesets/write";
@@ -298,5 +298,59 @@ describe("cli", () => {
         `A tag must be passed when using prerelease enter`
       );
     });
+  });
+
+  it("should be able to add a changesed when called from subdirectory", async () => {
+    const rootDir = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    const cwd = path.resolve(rootDir, "packages", "pkg-a");
+
+    await run([], { message: "test" }, cwd);
+
+    expect(add).toHaveBeenCalledWith(
+      rootDir,
+      {
+        empty: undefined,
+        open: undefined,
+        message: "test",
+      },
+      expect.any(Object)
+    );
+  });
+
+  it("should throw when .changeset folder is missing when called from subdirectory", async () => {
+    const rootDir = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    const cwd = path.resolve(rootDir, "packages", "pkg-a");
+
+    try {
+      await run(["version"], {}, cwd);
+    } catch (e) {
+      // ignore the error. We just want to validate the error message
+    }
+
+    const loggerErrorCalls = (error as any).mock.calls;
+    expect(loggerErrorCalls[0][0].trim()).toEqual(
+      "There is no .changeset folder."
+    );
   });
 });

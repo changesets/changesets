@@ -93,7 +93,9 @@ function isArray<T>(
 
 export let read = async (cwd: string, packages?: Packages) => {
   packages ??= await getPackages(cwd);
-  let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
+  let json = await fs.readJSON(
+    path.join(packages.root.dir, ".changeset", "config.json")
+  );
   return parse(json, packages);
 };
 

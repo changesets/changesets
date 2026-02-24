@@ -48,7 +48,10 @@ test("read reads the config", async () => {
       commit: true,
     }),
   });
-  let config = await read(cwd, defaultPackages);
+  let config = await read(cwd, {
+    ...defaultPackages,
+    root: { ...defaultPackages.root, dir: cwd },
+  });
   expect(config).toEqual({
     fixed: [],
     linked: [],
