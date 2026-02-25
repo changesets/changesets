@@ -51,21 +51,33 @@ async function setupRepoAndClone(cwd: string) {
 describe("version", () => {
   it("returns the right changed packages and pushes to the remote", async () => {
     const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-        dependencies: {
-          "pkg-b": "1.0.0",
+      "package.json": JSON.stringify(
+        {
+          private: true,
+          workspaces: ["packages/*"],
         },
-      }),
-      "packages/pkg-b/package.json": JSON.stringify({
-        name: "pkg-b",
-        version: "1.0.0",
-      }),
+        null,
+        2
+      ),
+      "packages/pkg-a/package.json": JSON.stringify(
+        {
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        },
+        null,
+        2
+      ),
+      "packages/pkg-b/package.json": JSON.stringify(
+        {
+          name: "pkg-b",
+          version: "1.0.0",
+        },
+        null,
+        2
+      ),
       ".changeset/config.json": JSON.stringify({}),
     });
 
@@ -174,17 +186,25 @@ describe("version", () => {
 
   it("only includes bumped packages in the returned changed packages", async () => {
     const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-        dependencies: {
-          "pkg-b": "1.0.0",
+      "package.json": JSON.stringify(
+        {
+          private: true,
+          workspaces: ["packages/*"],
         },
-      }),
+        null,
+        2
+      ),
+      "packages/pkg-a/package.json": JSON.stringify(
+        {
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        },
+        null,
+        2
+      ),
       "packages/pkg-b/package.json": JSON.stringify(
         {
           name: "pkg-b",

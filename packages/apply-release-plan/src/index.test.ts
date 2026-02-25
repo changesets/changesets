@@ -205,10 +205,7 @@ describe("apply release plan", () => {
         if (!pkgPath) throw new Error(`could not find an updated package json`);
         let pkgJSON = await fs.readFile(pkgPath, { encoding: "utf-8" });
 
-        expect(pkgJSON).toStrictEqual(`{
-  "name": "pkg-a",
-  "version": "1.1.0"
-}`);
+        expect(pkgJSON).toBe(`{"name":"pkg-a","version":"1.1.0"}`);
       });
       it("should not remove trailing newlines in a package.json if they exist", async () => {
         const releasePlan = new FakeReleasePlan();
@@ -228,10 +225,7 @@ describe("apply release plan", () => {
         if (!pkgPath) throw new Error(`could not find an updated package json`);
         let pkgJSON = await fs.readFile(pkgPath, { encoding: "utf-8" });
 
-        expect(pkgJSON).toStrictEqual(`{
-  "name": "pkg-a",
-  "version": "1.1.0"
-}\n`);
+        expect(pkgJSON).toBe(`{"name":"pkg-a","version":"1.1.0"}\n`);
       });
     });
 
