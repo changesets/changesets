@@ -268,11 +268,9 @@ export default async function createChangeset(
       );
     }
 
-    summary = await cli.askQuestion("");
+    summary = await cli.askQuestion("Summary");
     while (summary.length === 0) {
-      summary = await cli.askQuestion(
-        "\n\n# A summary is required for the changelog! 😪"
-      );
+      summary = await cli.askQuestion("A summary is required! Please enter a summary");
     }
   }
 
