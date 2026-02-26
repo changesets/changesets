@@ -21,8 +21,15 @@
   "dependencies": {
     "@changesets/types": "^6.1.0",
     "fs-extra": "^7.0.1",
-    "human-id": "^4.1.1",
+    "human-id": "^4.1.1"
+  },
+  "peerDependencies": {
     "prettier": "^2.7.1"
+  },
+  "peerDependenciesMeta": {
+    "prettier": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@changesets/parse": "*",
