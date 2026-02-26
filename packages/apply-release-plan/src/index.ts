@@ -326,11 +326,19 @@ async function prependFile(
     );
     return;
   }
-  const index = fileData.indexOf("\n");
-  const newChangelog =
-    index === -1
-      ? fileData + data // treat the whole file as header
-      : fileData.slice(0, index) + data + fileData.slice(index + 1);
+  const firstLine = fileData.split("\n")[0];
+  const isVersionHeading = /^#{1,6}\s+\d+\.\d+/.test(firstLine);
+  let newChangelog: string;
+  if (isVersionHeading) {
+    // File starts with a version heading (no package title) - prepend before everything
+    newChangelog = data.trimStart() + "\n\n" + fileData;
+  } else {
+    const index = fileData.indexOf("\n");
+    newChangelog =
+      index === -1
+        ? fileData + data // treat the whole file as header
+        : fileData.slice(0, index) + data + fileData.slice(index + 1);
+  }
 
   await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
 }
