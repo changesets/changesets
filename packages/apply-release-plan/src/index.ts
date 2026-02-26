@@ -24,7 +24,7 @@ function getPrettierInstance(cwd: string): typeof prettier {
     if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
       throw err;
     }
-    return prettier;
+    return require("prettier");
   }
 }
 
