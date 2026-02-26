@@ -12,7 +12,7 @@ import { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
 import fs from "fs-extra";
 import path from "path";
-import prettier from "prettier";
+import type prettier from "prettier";
 import resolveFrom from "resolve-from";
 import getChangelogEntry from "./get-changelog-entry";
 import versionPackage from "./version-package";
@@ -24,7 +24,7 @@ function getPrettierInstance(cwd: string): typeof prettier {
     if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
       throw err;
     }
-    return prettier;
+    return require("prettier");
   }
 }
 
