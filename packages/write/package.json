@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@changesets/parse": "*",
-    "@changesets/test-utils": "*"
+    "@changesets/test-utils": "*",
+    "prettier": "^2.7.1"
   }
 }
