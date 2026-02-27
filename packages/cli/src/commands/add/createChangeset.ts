@@ -17,17 +17,17 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
     log(
       yellow(
         `If you are unsure if this is correct, contact the package's maintainers ${red(
-          "before committing this changeset"
-        )}.`
-      )
+          "before committing this changeset",
+        )}.`,
+      ),
     );
 
     let shouldReleaseFirstMajor = await cli.askConfirm(
       bold(
         `Are you sure you want to release the ${red(
-          "first major version"
-        )} of ${pkgJSON.name}?`
-      )
+          "first major version",
+        )} of ${pkgJSON.name}?`,
+      ),
     );
     return shouldReleaseFirstMajor;
   }
@@ -36,7 +36,7 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
 
 async function getPackagesToRelease(
   changedPackages: Array<string>,
-  allPackages: Array<Package>
+  allPackages: Array<Package>,
 ) {
   function askInitialReleaseQuestion(defaultChoiceList: Array<any>) {
     return cli.askCheckboxPlus(
@@ -50,13 +50,13 @@ async function getPackagesToRelease(
         if (Array.isArray(x)) {
           return x
             .filter(
-              (x) => x !== "changed packages" && x !== "unchanged packages"
+              (x) => x !== "changed packages" && x !== "unchanged packages",
             )
             .map((x) => cyan(x))
             .join(", ");
         }
         return x;
-      }
+      },
     );
   }
 
@@ -82,7 +82,7 @@ async function getPackagesToRelease(
       do {
         error("You must select at least one package to release");
         error(
-          "(Press space to mark/unmark one option. Press enter to confirm.)"
+          "(Press space to mark/unmark one option. Press enter to confirm.)",
         );
 
         packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
@@ -90,7 +90,7 @@ async function getPackagesToRelease(
     }
     return packagesToRelease.filter(
       (pkgName) =>
-        pkgName !== "changed packages" && pkgName !== "unchanged packages"
+        pkgName !== "changed packages" && pkgName !== "unchanged packages",
     );
   }
   return [allPackages[0].packageJson.name];
@@ -98,7 +98,7 @@ async function getPackagesToRelease(
 
 function getPkgJsonsByName(packages: Package[]) {
   return new Map(
-    packages.map(({ packageJson }) => [packageJson.name, packageJson])
+    packages.map(({ packageJson }) => [packageJson.name, packageJson]),
   );
 }
 
@@ -109,14 +109,14 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 export default async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Package[],
-  messageFromCli?: string
+  messageFromCli?: string,
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
   if (allPackages.length > 1) {
     const packagesToRelease = await getPackagesToRelease(
       changedPackages,
-      allPackages
+      allPackages,
     );
 
     let pkgJsonsByName = getPkgJsonsByName(allPackages);
@@ -134,7 +134,7 @@ export default async function createChangeset(
                 name: pkgName,
                 message: formatPkgNameAndVersion(
                   pkgName,
-                  pkgJsonsByName.get(pkgName)!.version
+                  pkgJsonsByName.get(pkgName)!.version,
                 ),
               };
             }),
@@ -150,7 +150,7 @@ export default async function createChangeset(
               .join(", ");
           }
           return x;
-        }
+        },
       )
     ).filter((x) => x !== "all packages");
 
@@ -180,7 +180,7 @@ export default async function createChangeset(
                   name: pkgName,
                   message: formatPkgNameAndVersion(
                     pkgName,
-                    pkgJsonsByName.get(pkgName)!.version
+                    pkgJsonsByName.get(pkgName)!.version,
                   ),
                 };
               }),
@@ -196,7 +196,7 @@ export default async function createChangeset(
                 .join(", ");
             }
             return x;
-          }
+          },
         )
       ).filter((x) => x !== "all packages");
 
@@ -211,7 +211,10 @@ export default async function createChangeset(
       log(`The following packages will be ${blue("patch")} bumped:`);
       pkgsLeftToGetBumpTypeFor.forEach((pkgName) => {
         log(
-          formatPkgNameAndVersion(pkgName, pkgJsonsByName.get(pkgName)!.version)
+          formatPkgNameAndVersion(
+            pkgName,
+            pkgJsonsByName.get(pkgName)!.version,
+          ),
         );
       });
 
@@ -223,9 +226,9 @@ export default async function createChangeset(
     let pkg = allPackages[0];
     let type = await cli.askList(
       `What kind of change is this for ${green(
-        pkg.packageJson.name
+        pkg.packageJson.name,
       )}? (current version is ${pkg.packageJson.version})`,
-      ["patch", "minor", "major"]
+      ["patch", "minor", "major"],
     );
     if (type === "major") {
       let shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
@@ -245,7 +248,7 @@ export default async function createChangeset(
   }
 
   log(
-    "Please enter a summary for this change (this will be in the changelogs)."
+    "Please enter a summary for this change (this will be in the changelogs).",
   );
   log(gray("  (submit empty line to open external editor)"));
 
@@ -253,7 +256,7 @@ export default async function createChangeset(
   if (summary.length === 0) {
     try {
       summary = cli.askQuestionWithEditor(
-        "\n\n# Please enter a summary for your changes.\n# An empty message aborts the editor."
+        "\n\n# Please enter a summary for your changes.\n# An empty message aborts the editor.",
       );
       if (summary.length > 0) {
         return {
@@ -264,14 +267,14 @@ export default async function createChangeset(
       }
     } catch (err) {
       log(
-        "An error happened using external editor. Please type your summary here:"
+        "An error happened using external editor. Please type your summary here:",
       );
     }
 
-    summary = await cli.askQuestion("");
+    summary = await cli.askQuestion("Summary");
     while (summary.length === 0) {
       summary = await cli.askQuestion(
-        "\n\n# A summary is required for the changelog! 😪"
+        "A summary is required! Please enter a summary",
       );
     }
   }
