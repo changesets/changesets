@@ -239,3 +239,21 @@ it("with multiple authors", async () => {
     "
   `);
 });
+
+it("disables thanks if disableThanks is enabled", async () => {
+  const [changeset, releaseType, options] = getChangeset(
+    "author: @Andarist",
+    data.commit
+  );
+  expect(
+    await getReleaseLine(changeset, releaseType, {
+      ...options,
+      skipAuthors: true,
+    })
+  ).toMatchInlineSnapshot(`
+    "
+
+    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) - something
+    "
+  `);
+});
