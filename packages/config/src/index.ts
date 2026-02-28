@@ -320,17 +320,30 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
       // Validate that all dependents of ignored packages are listed in the ignore list
       const dependentsGraph = getDependentsGraph(packages, {
+        ignoreDevDependencies: true,
         bumpVersionsWithWorkspaceProtocolOnly:
           json.bumpVersionsWithWorkspaceProtocolOnly,
       });
+      const packagesByName = new Map(
+        packages.packages.map((x) => [x.packageJson.name, x] as const)
+      );
       for (const ignoredPackage of json.ignore) {
         const dependents = dependentsGraph.get(ignoredPackage) || [];
         for (const dependent of dependents) {
-          if (!json.ignore.includes(dependent)) {
-            messages.push(
-              `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please add "${dependent}" to the \`ignore\` option.`
-            );
+          if (json.ignore.includes(dependent)) {
+            continue;
           }
+          // Private packages with versioning enabled don't publish to npm,
+          // so they can safely depend on ignored packages.
+          // This also does seem to hold for private packages with other publish targets (like a VS Code extension)
+          // as those typically have to prebundle dependencies.
+          const dependentPkg = packagesByName.get(dependent);
+          if (dependentPkg?.packageJson.private) {
+            continue;
+          }
+          messages.push(
+            `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please add "${dependent}" to the \`ignore\` option.`
+          );
         }
       }
     }
