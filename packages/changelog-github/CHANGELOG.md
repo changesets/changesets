@@ -1,5 +1,18 @@
 # @changesets/changelog-github
 
+## 0.6.0
+
+### Minor Changes
+
+- [#1850](https://github.com/changesets/changesets/pull/1850) [`fd0bc2e`](https://github.com/changesets/changesets/commit/fd0bc2e997a7bf603415489d10fcac0ca129badf) Thanks [@mixelburg](https://github.com/mixelburg)! - Linkify issue references in changelog entries.
+
+### Patch Changes
+
+- [#1810](https://github.com/changesets/changesets/pull/1810) [`27fd8f4`](https://github.com/changesets/changesets/commit/27fd8f41dddafcc2e96e7df39dca04d92f916a0a) Thanks [@hirasso](https://github.com/hirasso)! - Replace deprecated `String.prototype.trimRight` with [`String.prototype.trimEnd`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd)
+
+- Updated dependencies [[`d4b8ad8`](https://github.com/changesets/changesets/commit/d4b8ad8158fe4d900abc5052dacaa8be1f41a232), [`e462d89`](https://github.com/changesets/changesets/commit/e462d892af560d0e3cf5d2f04da230751fbd05ca)]:
+  - @changesets/get-github-info@0.8.0
+
 ## 0.5.2
 
 ### Patch Changes
