@@ -1,5 +1,11 @@
 # @changesets/config
 
+## 3.1.3
+
+### Patch Changes
+
+- [#1834](https://github.com/changesets/changesets/pull/1834) [`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94) Thanks [@RodrigoHamuy](https://github.com/RodrigoHamuy)! - Export `schema.json` in the package's `exports` field to make it accessible when using modern package managers.
+
 ## 3.1.2
 
 ### Patch Changes

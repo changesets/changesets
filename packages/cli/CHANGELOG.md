@@ -1,5 +1,37 @@
 # @changesets/cli
 
+## 2.30.0
+
+### Minor Changes
+
+- [#1840](https://github.com/changesets/changesets/pull/1840) [`057cca2`](https://github.com/changesets/changesets/commit/057cca222321816b6c8c6f6c52130185b364de36) Thanks [@wotan-allfather](https://github.com/wotan-allfather)! - Add `--since` flag to `add` command
+
+  The `add` command now supports a `--since` flag that allows you to specify which branch, tag, or git ref to use when detecting changed packages. This is useful for gitflow workflows where you have multiple target branches and the `baseBranch` config option doesn't cover all use cases.
+
+  Example: `changeset add --since=develop`
+
+  If not provided, the command falls back to the `baseBranch` value in your `.changeset/config.json`.
+
+- [#1845](https://github.com/changesets/changesets/pull/1845) [`2b4a66a`](https://github.com/changesets/changesets/commit/2b4a66a36497fd5504186dcc6ae9e287c8403de6) Thanks [@Andarist](https://github.com/Andarist)! - Delegate OTP prompting to the package manager instead of handling it in-process. This allows Changesets to use the package manager's native web auth support.
+
+- [#1774](https://github.com/changesets/changesets/pull/1774) [`667fe5a`](https://github.com/changesets/changesets/commit/667fe5aacf04dbefcf2532584ff2753b8417855a) Thanks [@bluwy](https://github.com/bluwy)! - Support importing custom `commit` option ES module. Previously, it used `require()` which only worked for CJS modules, however now it uses `import()` which supports both CJS and ES modules.
+
+- [#1839](https://github.com/changesets/changesets/pull/1839) [`73b1809`](https://github.com/changesets/changesets/commit/73b18099517b00a3c7b70c417b7f7f1bfaa24931) Thanks [@leochiu-a](https://github.com/leochiu-a)! - Add a `--message` (`-m`) flag to `changeset add` (and default `changeset`) so the changeset summary can be provided from the command line. When `--message` is present, the summary prompt is skipped while the final confirmation step is kept.
+
+- [#1806](https://github.com/changesets/changesets/pull/1806) [`0e8e01e`](https://github.com/changesets/changesets/commit/0e8e01e93358bdc8c318c608dd3b0e4af8219049) Thanks [@luisadame](https://github.com/luisadame)! - Changeset CLI can now be run from the nested directories in the project, where the `.changeset` directory has to be found in one of the parent directories
+
+### Patch Changes
+
+- [#1849](https://github.com/changesets/changesets/pull/1849) [`9dc3230`](https://github.com/changesets/changesets/commit/9dc32308e4d208964b648a788ba4eee1003c273c) Thanks [@Andarist](https://github.com/Andarist)! - Compute the terminal's size lazily to avoid spurious stderr output in non-interactive mode
+
+- [#1776](https://github.com/changesets/changesets/pull/1776) [`503fcaa`](https://github.com/changesets/changesets/commit/503fcaae57c397e14a52da7700dc5cb8e7cbd551) Thanks [@bluwy](https://github.com/bluwy)! - Support absolute paths in `changeset status --output <path>`
+
+- Updated dependencies [[`667fe5a`](https://github.com/changesets/changesets/commit/667fe5aacf04dbefcf2532584ff2753b8417855a), [`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94), [`27fd8f4`](https://github.com/changesets/changesets/commit/27fd8f41dddafcc2e96e7df39dca04d92f916a0a)]:
+  - @changesets/apply-release-plan@7.1.0
+  - @changesets/config@3.1.3
+  - @changesets/get-release-plan@4.0.15
+  - @changesets/read@0.6.7
+
 ## 2.29.8
 
 ### Patch Changes
