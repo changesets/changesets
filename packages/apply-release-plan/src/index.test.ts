@@ -2062,6 +2062,49 @@ describe("apply release plan", () => {
 
       - Hey, let's have fun with testing!`);
     });
+    it("should insert new entry before existing version heading when no package title", async () => {
+      const releasePlan = new FakeReleasePlan();
+      let { changedFiles } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
+        releasePlan.getReleasePlan(),
+        {
+          ...releasePlan.config,
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null,
+          ],
+        },
+        undefined,
+        async (tempDir) => {
+          await fs.writeFile(
+            path.join(tempDir, "packages", "pkg-a", "CHANGELOG.md"),
+            "## 1.0.0\n\n### Minor Changes\n\n- Initial release\n"
+          );
+        }
+      );
+
+      let readmePath = changedFiles.find((a) =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+      );
+
+      if (!readmePath) throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+
+      const idx110 = readme.indexOf("## 1.1.0");
+      const idx100 = readme.indexOf("## 1.0.0");
+      expect(idx110).not.toBe(-1);
+      expect(idx100).not.toBe(-1);
+      expect(idx110).toBeLessThan(idx100);
+    });
     it("should update a changelog for two packages", async () => {
       const releasePlan = new FakeReleasePlan(
         [],
