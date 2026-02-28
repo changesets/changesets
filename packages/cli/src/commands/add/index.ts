@@ -96,7 +96,7 @@ export default async function add(
 
   if (newChangeset.confirmed) {
     const changesetID = await writeChangeset(newChangeset, cwd, config);
-    const [{ getAddMessage }, commitOpts] = getCommitFunctions(
+    const [{ getAddMessage }, commitOpts] = await getCommitFunctions(
       config.commit,
       cwd
     );
