@@ -6,6 +6,7 @@ import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 import { Config, Changeset } from "@changesets/types";
 import { defaultConfig } from "@changesets/config";
+import { ExitError } from "@changesets/errors";
 import { getPackages } from "@manypkg/get-packages";
 import pre from "../pre";
 import version from "./index";
@@ -119,7 +120,7 @@ describe("running version in a simple project", () => {
   silenceLogsInBlock();
 
   describe("when there are no changeset commits", () => {
-    it("should warn if no changeset commits exist", async () => {
+    it("should warn and exit with code 1 if no changeset commits exist", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
@@ -131,7 +132,9 @@ describe("running version in a simple project", () => {
         }),
         ".changeset/config.json": JSON.stringify({}),
       });
-      await version(cwd, defaultOptions, modifiedDefaultConfig);
+      await expect(
+        version(cwd, defaultOptions, modifiedDefaultConfig)
+      ).rejects.toThrow(ExitError);
       // @ts-ignore
       const loggerWarnCalls = warn.mock.calls;
       expect(loggerWarnCalls.length).toEqual(1);
