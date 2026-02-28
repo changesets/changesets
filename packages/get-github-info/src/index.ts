@@ -128,6 +128,13 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     throw new Error(`Failed to parse data from GitHub\n${e.message}`);
   }
 
+  if (!data) {
+    // this can happen while testing locally and the commit queried is not present on the main branch
+    throw new Error(
+      `An error occurred when fetching data from GitHub, no value found`
+    );
+  }
+
   if (data.errors) {
     throw new Error(
       `Fetched data from GitHub returned errors\n${JSON.stringify(
