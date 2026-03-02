@@ -1,6 +1,6 @@
 {
   "name": "@changesets/config",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Utilities for reading and parsing Changeset's config",
   "main": "dist/changesets-config.cjs.js",
   "module": "dist/changesets-config.esm.js",
@@ -14,7 +14,8 @@
       "import": "./dist/changesets-config.cjs.mjs",
       "default": "./dist/changesets-config.cjs.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./schema.json": "./schema.json"
   },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/config",
@@ -26,6 +27,7 @@
     "@changesets/errors": "^0.2.0",
     "@changesets/get-dependents-graph": "^2.1.3",
     "@changesets/logger": "^0.1.1",
+    "@changesets/should-skip-package": "^0.1.2",
     "@changesets/types": "^6.1.0",
     "@manypkg/get-packages": "^1.1.3",
     "fs-extra": "^7.0.1",
@@ -36,5 +38,12 @@
     "@types/micromatch": "^4.0.1",
     "jest-in-case": "^1.0.2",
     "outdent": "^0.5.0"
+  },
+  "preconstruct": {
+    "exports": {
+      "extra": {
+        "./schema.json": "./schema.json"
+      }
+    }
   }
 }

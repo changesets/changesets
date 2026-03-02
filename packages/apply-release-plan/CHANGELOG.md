@@ -1,5 +1,20 @@
 # @changesets/apply-release-plan
 
+## 7.0.14
+
+### Patch Changes
+
+- [#610](https://github.com/changesets/changesets/pull/610) [`e520bf5`](https://github.com/changesets/changesets/commit/e520bf5d4dbfe96f59ca28008e87bffaf3c9dfea) Thanks [@bencergazda](https://github.com/bencergazda)! - Add `pre.json` to the version commit
+
+- Updated dependencies [[`cc28222`](https://github.com/changesets/changesets/commit/cc28222ee892b3a078fa02ee26e1cef98c171532), [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe)]:
+  - @changesets/config@3.1.2
+
+## 7.0.13
+
+### Patch Changes
+
+- [#1725](https://github.com/changesets/changesets/pull/1725) [`957f24e`](https://github.com/changesets/changesets/commit/957f24ed0446494c5709189ae57583f72c716d43) Thanks [@colinaaa](https://github.com/colinaaa)! - Fix an issue that caused an incorrect `CHANGELOG` to be generated when a changeset contained a special string replacement pattern.
+
 ## 7.0.12
 
 ### Patch Changes
