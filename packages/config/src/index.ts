@@ -316,7 +316,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )
       );
 
-      // Validate that all dependents of ignored packages are listed in the ignore list
+      // Validate that all dependents of ignored packages are listed in the ignore list.
+      // devDependencies are excluded because they don't affect published consumers —
+      // a stale devDep range on an ignored package is harmless.
+      // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
+      // update devDep ranges in package.json even though they don't cause version bumps.
       const dependentsGraph = getDependentsGraph(packages, {
         ignoreDevDependencies: true,
         bumpVersionsWithWorkspaceProtocolOnly:
@@ -331,9 +335,9 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           if (json.ignore.includes(dependent)) {
             continue;
           }
-          // Private packages with versioning enabled don't publish to npm,
+          // Private packages don't publish to npm,
           // so they can safely depend on ignored packages.
-          // This also does seem to hold for private packages with other publish targets (like a VS Code extension)
+          // This also holds for private packages with other publish targets (like a VS Code extension)
           // as those typically have to prebundle dependencies.
           const dependentPkg = packagesByName.get(dependent);
           if (dependentPkg?.packageJson.private) {
