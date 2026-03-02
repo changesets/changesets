@@ -147,7 +147,11 @@ export async function run(
           packages.packages.map((x) => [x.packageJson.name, x])
         );
 
-        // validate that all dependents of skipped packages are also skipped
+        // Validate that all dependents of skipped packages are also skipped.
+        // devDependencies are excluded because they don't affect published consumers —
+        // a stale devDep range on a skipped package is harmless.
+        // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
+        // update devDep ranges in package.json even though they don't cause version bumps.
         const dependentsGraph = getDependentsGraph(packages, {
           ignoreDevDependencies: true,
           bumpVersionsWithWorkspaceProtocolOnly:
@@ -166,6 +170,13 @@ export async function run(
           const dependents = dependentsGraph.get(skippedPackage) || [];
           for (const dependent of dependents) {
             const dependentPkg = packagesByName.get(dependent)!;
+            if (dependentPkg.packageJson.private) {
+              // Private packages don't publish to npm,
+              // so they can safely depend on skipped packages.
+              // This also holds for private packages with other publish targets (like a VS Code extension)
+              // as those typically have to prebundle dependencies.
+              continue;
+            }
             if (
               !shouldSkipPackage(dependentPkg, {
                 ignore: config.ignore,
