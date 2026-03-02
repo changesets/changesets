@@ -83,7 +83,7 @@ async function testSetup(
   releasePlan: ReleasePlan,
   config?: Config,
   snapshot?: string | undefined,
-  setupFunc?: (tempDir: string) => Promise<void>
+  setupFunc?: (tempDir: string) => Promise<unknown>
 ) {
   if (!config) {
     config = {
