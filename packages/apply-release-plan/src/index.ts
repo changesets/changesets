@@ -331,11 +331,23 @@ async function prependFile(
     );
     return;
   }
-  const index = fileData.indexOf("\n");
-  const newChangelog =
-    index === -1
-      ? fileData + data // treat the whole file as header
-      : fileData.slice(0, index) + data + fileData.slice(index + 1);
+
+  let newChangelog: string;
+
+  // Require just 2 version numbers here, assuming `## 1.1` is a valid version heading.
+  // Our version headings start with ##, we are more permissive here though.
+  // Note: we also need to handle prerelease versions here but that's already covered by the regex.
+  const isVersionHeading = /^#{1,6}\s+\d+\.\d+/.test(fileData);
+  if (isVersionHeading) {
+    // file starts with a version heading (no package title) - prepend before everything
+    newChangelog = data.trimStart() + fileData;
+  } else {
+    const index = fileData.indexOf("\n");
+    newChangelog =
+      index === -1
+        ? fileData + data // treat the whole file as header
+        : fileData.slice(0, index) + data + fileData.slice(index + 1);
+  }
 
   await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
 }
