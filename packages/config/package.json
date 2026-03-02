@@ -27,6 +27,7 @@
     "@changesets/errors": "^0.2.0",
     "@changesets/get-dependents-graph": "^2.1.3",
     "@changesets/logger": "^0.1.1",
+    "@changesets/should-skip-package": "^0.1.2",
     "@changesets/types": "^6.1.0",
     "@manypkg/get-packages": "^1.1.3",
     "fs-extra": "^7.0.1",

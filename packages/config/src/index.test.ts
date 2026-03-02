@@ -745,7 +745,7 @@ describe("parser errors", () => {
       )
     ).toThrowErrorMatchingInlineSnapshot(`
       "Some errors occurred when validating the changesets config:
-      The package "pkg-a" depends on the ignored package "pkg-b", but "pkg-a" is not being ignored. Please add "pkg-a" to the \`ignore\` option."
+      The package "pkg-a" depends on the skipped package "pkg-b", but "pkg-a" is not being skipped. Please add "pkg-a" to the \`ignore\` option."
     `);
   });
 
@@ -799,7 +799,7 @@ describe("parser errors", () => {
       )
     ).toThrowErrorMatchingInlineSnapshot(`
       "Some errors occurred when validating the changesets config:
-      The package "pkg-a" depends on the ignored package "pkg-b", but "pkg-a" is not being ignored. Please add "pkg-a" to the \`ignore\` option."
+      The package "pkg-a" depends on the skipped package "pkg-b", but "pkg-a" is not being skipped. Please add "pkg-a" to the \`ignore\` option."
     `);
   });
 
@@ -852,6 +852,38 @@ describe("parser errors", () => {
         }
       )
     ).not.toThrow();
+  });
+
+  test("should error when a public package depends on a private package skipped via privatePackages.version: false", () => {
+    expect(() =>
+      unsafeParse(
+        { privatePackages: { version: false, tag: false } },
+        {
+          ...defaultPackages,
+          packages: [
+            {
+              packageJson: {
+                name: "pkg-a",
+                version: "1.0.0",
+                dependencies: { "pkg-b": "1.0.0" },
+              },
+              dir: "dir",
+            },
+            {
+              packageJson: {
+                name: "pkg-b",
+                private: true,
+                version: "1.0.0",
+              },
+              dir: "dir",
+            },
+          ],
+        }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The package "pkg-a" depends on the skipped package "pkg-b", but "pkg-a" is not being skipped. Please add "pkg-a" to the \`ignore\` option."
+    `);
   });
 
   test("onlyUpdatePeerDependentsWhenOutOfRange non-boolean", () => {
