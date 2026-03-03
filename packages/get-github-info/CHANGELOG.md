@@ -1,5 +1,15 @@
 # @changesets/get-github-info
 
+## 0.8.0
+
+### Minor Changes
+
+- [#1758](https://github.com/changesets/changesets/pull/1758) [`e462d89`](https://github.com/changesets/changesets/commit/e462d892af560d0e3cf5d2f04da230751fbd05ca) Thanks [@jdeniau](https://github.com/jdeniau)! - Add scopes automatically in the GitHub new token link in the printed error message
+
+### Patch Changes
+
+- [#1781](https://github.com/changesets/changesets/pull/1781) [`d4b8ad8`](https://github.com/changesets/changesets/commit/d4b8ad8158fe4d900abc5052dacaa8be1f41a232) Thanks [@bluwy](https://github.com/bluwy)! - Improve error messages when fail to fetch data from GitHub
+
 ## 0.7.0
 
 ### Minor Changes
