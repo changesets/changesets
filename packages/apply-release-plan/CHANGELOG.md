@@ -1,5 +1,20 @@
 # @changesets/apply-release-plan
 
+## 7.1.0
+
+### Minor Changes
+
+- [#1774](https://github.com/changesets/changesets/pull/1774) [`667fe5a`](https://github.com/changesets/changesets/commit/667fe5aacf04dbefcf2532584ff2753b8417855a) Thanks [@bluwy](https://github.com/bluwy)! - Support importing custom `changelog` option ES module. Previously, it used `require()` which only worked for CJS modules, however now it uses `import()` which supports both CJS and ES modules.
+
+### Patch Changes
+
+- [#1859](https://github.com/changesets/changesets/pull/1859) [`1772598`](https://github.com/changesets/changesets/commit/1772598270a59ba1fa7b0ef7e675fce6a575f850) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix changelog entry insertion when no package title is present in the `CHANGELOG.md` file.
+
+- [#1810](https://github.com/changesets/changesets/pull/1810) [`27fd8f4`](https://github.com/changesets/changesets/commit/27fd8f41dddafcc2e96e7df39dca04d92f916a0a) Thanks [@hirasso](https://github.com/hirasso)! - Replace deprecated `String.prototype.trimRight` with [`String.prototype.trimEnd`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd)
+
+- Updated dependencies [[`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6)]:
+  - @changesets/config@3.1.3
+
 ## 7.0.14
 
 ### Patch Changes

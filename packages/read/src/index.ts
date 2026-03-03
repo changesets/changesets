@@ -19,10 +19,10 @@ async function filterChangesetsSinceRef(
 }
 
 export default async function getChangesets(
-  cwd: string,
+  rootDir: string,
   sinceRef?: string
 ): Promise<Array<NewChangeset>> {
-  let changesetBase = path.join(cwd, ".changeset");
+  let changesetBase = path.join(rootDir, ".changeset");
   let contents: string[];
   try {
     contents = await fs.readdir(changesetBase);

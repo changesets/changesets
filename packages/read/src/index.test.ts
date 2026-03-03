@@ -1,5 +1,4 @@
 import path from "node:path";
-import { outdent } from "outdent";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, it } from "vitest";
 
@@ -100,6 +99,7 @@ I'm amazed we needed to update the best package, because it was already the best
       },
     ]);
   });
+
   it("should return an empty array when no changesets are found", async () => {
     const cwd = await testdir({});
     await fs.mkdir(path.join(cwd, ".changeset"), { recursive: true });
@@ -107,6 +107,7 @@ I'm amazed we needed to update the best package, because it was already the best
     const changesets = await read(cwd);
     expect(changesets).toEqual([]);
   });
+
   it("should error when there is no changeset folder", async () => {
     const cwd = await testdir({});
 
@@ -120,7 +121,8 @@ I'm amazed we needed to update the best package, because it was already the best
     }
     expect("never run this because we returned above").toBe(true);
   });
-  it("should error on broken changeset?", async () => {
+
+  it("should error on broken changeset", async () => {
     const cwd = await testdir({
       ".changeset/broken-changeset.md": `---
 
@@ -131,16 +133,26 @@ I'm amazed we needed to update the best package, because it was already the best
 Everything is wrong`,
     });
 
-    await expect(read(cwd)).rejects.toThrow(
-      outdent`could not parse changeset - invalid frontmatter: ---
+    await expect(read(cwd)).rejects.toThrowErrorMatchingInlineSnapshot(`
+      [Error: could not parse changeset - missing or invalid frontmatter.
+      Changesets must start with frontmatter delimited by "---".
+      Example:
+      ---
+      "package-name": patch
+      ---
+
+      Your changeset summary here.
+      Received content:
+      ---
 
       "cool-package": minor
 
       --
 
-      Everything is wrong`
-    );
+      Everything is wrong]
+    `);
   });
+
   it("should return no releases and empty summary when the changeset is empty", async () => {
     const cwd = await testdir({
       ".changeset/empty-like-void.md": `---
@@ -156,6 +168,7 @@ Everything is wrong`,
       },
     ]);
   });
+
   it("should filter out ignored changesets", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

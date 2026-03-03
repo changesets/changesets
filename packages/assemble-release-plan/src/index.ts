@@ -179,6 +179,10 @@ function assembleReleasePlan(
     refinedConfig
   );
 
+  // Unlike the config/CLI validation graphs, this graph intentionally includes
+  // devDependencies. While devDeps don't cause version bumps (determineDependents
+  // assigns type "none"), they must appear in the release plan so that
+  // apply-release-plan can update their version ranges in package.json.
   let dependencyGraph = getDependentsGraph(packages, {
     bumpVersionsWithWorkspaceProtocolOnly:
       refinedConfig.bumpVersionsWithWorkspaceProtocolOnly,

@@ -246,6 +246,11 @@ async function getNewChangelogEntry(
   let possibleChangelogFunc = await import(changelogPath);
   if (possibleChangelogFunc.default) {
     possibleChangelogFunc = possibleChangelogFunc.default;
+
+    // Check nested default again in case it's CJS with `__esModule` interop
+    if (possibleChangelogFunc.default) {
+      possibleChangelogFunc = possibleChangelogFunc.default;
+    }
   }
   if (
     typeof possibleChangelogFunc.getReleaseLine === "function" &&
@@ -331,11 +336,21 @@ async function updateChangelog(
     return;
   }
 
-  const index = fileData.indexOf("\n");
-  const newChangelog =
-    index === -1
-      ? fileData + templateString // treat the whole file as header
-      : fileData.slice(0, index) + templateString + fileData.slice(index + 1);
+  // Require just 2 version numbers here, assuming `## 1.1` is a valid version heading.
+  // Our version headings start with ##, we are more permissive here though.
+  // Note: we also need to handle prerelease versions here but that's already covered by the regex.
+  const isVersionHeading = /^#{1,6}\s+\d+\.\d+/.test(fileData);
+
+  let newChangelog: string;
+  if (isVersionHeading) {
+    newChangelog = templateString.trimStart() + fileData;
+  } else {
+    const index = fileData.indexOf("\n");
+    newChangelog =
+      index === -1
+        ? fileData + templateString // treat the whole file as header
+        : fileData.slice(0, index) + templateString + fileData.slice(index + 1);
+  }
 
   await writeFormattedMarkdownFile(
     changelogPath,

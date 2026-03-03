@@ -6,6 +6,10 @@ on:
     branches:
       - main
       - next
+  merge_group:
+    branches:
+      - main
+      - next
 
 permissions:
   contents: read

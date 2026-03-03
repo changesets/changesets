@@ -21,13 +21,16 @@ export async function run(
   flags: { [name: string]: any },
   cwd: string
 ) {
+  const packages = await getPackages(cwd);
+  const rootDir = packages.root.dir;
+
   if (input[0] === "init") {
-    await init(cwd);
+    await init(rootDir);
     return;
   }
 
   try {
-    await fs.access(path.resolve(cwd, ".changeset"));
+    await fs.access(path.resolve(rootDir, ".changeset"));
   } catch (err) {
     error("There is no .changeset folder. ");
     error(
@@ -39,14 +42,12 @@ export async function run(
     throw new ExitError(1);
   }
 
-  const packages = await getPackages(cwd);
-
   let config: Config;
   try {
-    config = await read(cwd, packages);
+    config = await read(rootDir, packages);
   } catch (e) {
     let oldConfigExists = await fs
-      .access(path.resolve(cwd, ".changeset/config.js"))
+      .access(path.resolve(rootDir, ".changeset/config.js"))
       .then(
         () => true,
         () => false
@@ -69,9 +70,9 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open }: CliOptions = flags;
+    const { empty, open, since, message }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
-    await add(cwd, { empty, open }, config);
+    await add(rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -89,6 +90,7 @@ export async function run(
       tag,
       open,
       gitTag,
+      message,
     }: CliOptions = flags;
     // Command line options need to be undefined, otherwise their
     // default value overrides the user's provided config in their
@@ -97,7 +99,7 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        await add(cwd, { empty, open }, config);
+        await add(rootDir, { empty, open, since, message }, config);
         return;
       }
       case "version": {
@@ -136,7 +138,11 @@ export async function run(
           packages.packages.map((x) => [x.packageJson.name, x])
         );
 
-        // validate that all dependents of skipped packages are also skipped
+        // Validate that all dependents of skipped packages are also skipped.
+        // devDependencies are excluded because they don't affect published consumers —
+        // a stale devDep range on a skipped package is harmless.
+        // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
+        // update devDep ranges in package.json even though they don't cause version bumps.
         const dependentsGraph = getDependentsGraph(packages, {
           ignoreDevDependencies: true,
           bumpVersionsWithWorkspaceProtocolOnly:
@@ -155,6 +161,13 @@ export async function run(
           const dependents = dependentsGraph.get(skippedPackage) || [];
           for (const dependent of dependents) {
             const dependentPkg = packagesByName.get(dependent)!;
+            if (dependentPkg.packageJson.private) {
+              // Private packages don't publish to npm,
+              // so they can safely depend on skipped packages.
+              // This also holds for private packages with other publish targets (like a VS Code extension)
+              // as those typically have to prebundle dependencies.
+              continue;
+            }
             if (
               !shouldSkipPackage(dependentPkg, {
                 ignore: config.ignore,
@@ -178,19 +191,19 @@ export async function run(
           config.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
         }
 
-        await version(cwd, { snapshot }, config);
+        await version(rootDir, { snapshot }, config);
         return;
       }
       case "publish": {
-        await publish(cwd, { otp, tag, gitTag }, config);
+        await publish(rootDir, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
-        await status(cwd, { since, verbose, output }, config);
+        await status(rootDir, { since, verbose, output }, config);
         return;
       }
       case "tag": {
-        await tagCommand(cwd, config);
+        await tagCommand(rootDir, config);
         return;
       }
       case "pre": {
@@ -206,8 +219,7 @@ export async function run(
           error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);
         }
-        // @ts-ignore
-        await pre(cwd, { command, tag });
+        await pre(rootDir, { command, tag });
         return;
       }
       case "bump": {

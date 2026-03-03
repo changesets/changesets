@@ -89,7 +89,12 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } = readEnv();
   if (!GITHUB_TOKEN) {
     throw new Error(
-      `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`
+      `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new?scopes=read:user,repo:status&description=changesets-${new Date()
+        .toISOString()
+        .substring(
+          0,
+          10
+        )} with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`
     );
   }
   let repos: ReposWithCommitsAndPRsToFetch = {};
@@ -100,17 +105,31 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     repos[repo].push(data);
   });
 
-  const data = await fetch(GITHUB_GRAPHQL_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Token ${GITHUB_TOKEN}`,
-    },
-    body: JSON.stringify({ query: makeQuery(repos) }),
-  }).then((x: any) => x.json());
+  let fetchResponse;
+  try {
+    fetchResponse = await fetch(GITHUB_GRAPHQL_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${GITHUB_TOKEN}`,
+      },
+      body: JSON.stringify({ query: makeQuery(repos) }),
+    });
+  } catch (e: any) {
+    throw new Error(
+      `An error occurred when fetching data from GitHub\n${e.message}`
+    );
+  }
+
+  let data;
+  try {
+    data = await fetchResponse.json();
+  } catch (e: any) {
+    throw new Error(`Failed to parse data from GitHub\n${e.message}`);
+  }
 
   if (data.errors) {
     throw new Error(
-      `An error occurred when fetching data from GitHub\n${JSON.stringify(
+      `Fetched data from GitHub returned errors\n${JSON.stringify(
         data.errors,
         null,
         2
@@ -121,9 +140,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   // this is mainly for the case where there's an authentication problem
   if (!data.data) {
     throw new Error(
-      `An error occurred when fetching data from GitHub\n${JSON.stringify(
-        data
-      )}`
+      `Fetched data from GitHub has missing data\n${JSON.stringify(data)}`
     );
   }
 

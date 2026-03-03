@@ -3,26 +3,22 @@ import path from "path";
 import { stripVTControlCharacters } from "node:util";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import writeChangeset from "@changesets/write";
+import {
+  silenceLogsInBlock,
+  testdir,
+  gitdir,
+  outputFile,
+} from "@changesets/test-utils";
 import * as logger from "@changesets/logger";
+import getChangesets from "@changesets/read";
+import spawn from "spawndamnit";
 
 import * as utils from "../../../utils/cli-utilities.ts";
 import addChangeset from "../index.ts";
 
 vi.mock("../../../utils/cli-utilities");
 const mockedUtils = vi.mocked(utils);
-vi.mock("@changesets/git");
-const mockedGit = vi.mocked(git);
-vi.mock("@changesets/write");
-const mockedWriteChangeset = vi.mocked(writeChangeset);
-vi.mock("@changesets/logger");
-mockedWriteChangeset.mockImplementation(async () => "abcdefg");
-mockedGit.commit.mockImplementation(async () => true);
-mockedGit.getChangedPackagesSinceRef.mockImplementation(async ({ ref }) => {
-  expect(ref).toBe("master");
-  return [];
-});
+
 const mockUserResponses = (mockResponses: {
   releases: Record<string, "patch" | "minor" | "major">;
   consoleSummaries?: string[];
@@ -101,8 +97,10 @@ describe("Add command", () => {
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
-    const call = mockedWriteChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "pkg-a", type: "patch" }],
@@ -140,8 +138,10 @@ describe("Add command", () => {
         editorSummaries,
       });
       await addChangeset(cwd, { empty: false }, defaultConfig);
-      const call = mockedWriteChangeset.mock.calls[0][0];
-      expect(call).toEqual(
+
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
         expect.objectContaining({
           summary: expectedSummary,
           releases: [{ name: "pkg-a", type: "patch" }],
@@ -176,8 +176,10 @@ describe("Add command", () => {
     });
 
     await addChangeset(cwd, { empty: false }, defaultConfig);
-    const call = mockedWriteChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "single-package", type: "minor" }],
@@ -186,7 +188,7 @@ describe("Add command", () => {
   });
 
   it("should commit when the commit flag is passed in", async () => {
-    const cwd = await testdir({
+    const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
         workspaces: ["packages/*"],
@@ -216,8 +218,10 @@ describe("Add command", () => {
         ],
       }
     );
-    expect(git.add).toHaveBeenCalledTimes(1);
-    expect(git.commit).toHaveBeenCalledTimes(1);
+
+    const result = await spawn("git", ["log", "--oneline", "-1"], { cwd });
+    const lastCommitMsg = result.stdout.toString("utf-8").trim();
+    expect(lastCommitMsg).toContain("docs(changeset): summary message mock");
   });
 
   it("should create empty changeset when empty flag is passed in", async () => {
@@ -233,11 +237,193 @@ describe("Add command", () => {
     });
 
     await addChangeset(cwd, { empty: true }, defaultConfig);
-    const call = mockedWriteChangeset.mock.calls[0][0];
-    expect(call).toEqual(
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
       expect.objectContaining({
         releases: [],
         summary: "",
+      })
+    );
+  });
+
+  it("should use summary passed via message and keep confirmation flow", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+    });
+
+    mockedUtils.askList.mockReturnValueOnce(Promise.resolve("minor"));
+    mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
+
+    await addChangeset(
+      cwd,
+      { empty: false, message: "summary from message" },
+      defaultConfig
+    );
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "summary from message",
+        releases: [{ name: "single-package", type: "minor" }],
+      })
+    );
+    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
+      "Is this your desired changeset?"
+    );
+    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
+  });
+
+  it("should allow empty summary when message is an empty string", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+    });
+
+    mockedUtils.askList.mockReturnValueOnce(Promise.resolve("patch"));
+    mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
+
+    await addChangeset(cwd, { empty: false, message: "" }, defaultConfig);
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "",
+        releases: [{ name: "single-package", type: "patch" }],
+      })
+    );
+    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
+  });
+
+  it("should use summary passed via message in a monorepo and skip summary prompt", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset(
+      cwd,
+      { empty: false, message: "monorepo summary from message" },
+      defaultConfig
+    );
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "monorepo summary from message",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      })
+    );
+    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
+      "Is this your desired changeset?"
+    );
+    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
+  });
+
+  it("should allow using message with empty changesets", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    await addChangeset(
+      cwd,
+      { empty: true, message: "empty changeset summary" },
+      defaultConfig
+    );
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        releases: [],
+        summary: "empty changeset summary",
+      })
+    );
+  });
+
+  it("should detect changed packages since the given ref", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    await spawn("git", ["checkout", "-b", "foo"], { cwd });
+    await outputFile(
+      path.join(cwd, "packages/pkg-a/a.js"),
+      'export default "a"'
+    );
+    await git.add(".", cwd);
+    await git.commit("update pkg-a", cwd);
+
+    await spawn("git", ["checkout", "-b", "bar"], { cwd });
+    await outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "b"'
+    );
+    await git.add(".", cwd);
+    await git.commit("update pkg-b", cwd);
+
+    mockUserResponses({ releases: { "pkg-b": "patch" } });
+    await addChangeset(cwd, { empty: false, since: "foo" }, defaultConfig);
+
+    expect(mockedUtils.askCheckboxPlus).toHaveBeenCalledWith(
+      expect.stringContaining("Which packages"),
+      [
+        { name: "changed packages", choices: ["pkg-b"] },
+        { name: "unchanged packages", choices: ["pkg-a"] },
+      ],
+      expect.any(Function)
+    );
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "summary message mock",
+        releases: [{ name: "pkg-b", type: "patch" }],
       })
     );
   });

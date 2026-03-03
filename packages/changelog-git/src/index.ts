@@ -11,7 +11,7 @@ const getReleaseLine = async (
 ) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
-    .map((l) => l.trimRight());
+    .map((l) => l.trimEnd());
 
   let returnVal = `- ${
     changeset.commit ? `${changeset.commit.slice(0, 7)}: ` : ""

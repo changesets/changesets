@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./dist/changesets-config.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./schema.json": "./schema.json"
   },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/config",
@@ -17,6 +18,7 @@
     "@changesets/errors": "^1.0.0-next.1",
     "@changesets/get-dependents-graph": "^3.0.0-next.1",
     "@changesets/logger": "^1.0.0-next.1",
+    "@changesets/should-skip-package": "^1.0.0-next.1",
     "@changesets/types": "^7.0.0-next.1",
     "@manypkg/get-packages": "^1.1.3",
     "micromatch": "^4.0.8"
@@ -29,5 +31,12 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "preconstruct": {
+    "exports": {
+      "extra": {
+        "./schema.json": "./schema.json"
+      }
+    }
   }
 }
