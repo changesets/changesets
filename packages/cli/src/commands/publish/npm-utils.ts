@@ -133,18 +133,34 @@ export async function getTokenIsRequired() {
   return json.tfa.mode === "auth-and-writes";
 }
 
+// `npm info <pkg> --json` (aka `npm view`) behavior:
+//
+// - Bare package name starts with version string `'latest'`. If
+//   `dist-tags['latest']` exists, it's replaced with that value (e.g.
+//   `'1.0.0'`). Then ALL versions are filtered through
+//   `semver.satisfies(v, version, loose=true)`. When `latest` resolved to
+//   an exact version, this is effectively an exact match. When `latest`
+//   doesn't exist, the literal string `'latest'` reaches satisfies and
+//   matches nothing — zero results, empty stdout.
+// - Prereleases are invisible: satisfies runs WITHOUT `includePrerelease`,
+//   so no range (not even `*`) matches prerelease versions.
+// - When at least one version matches, the JSON output includes a `versions`
+//   array with ALL published versions including prereleases (bleeds through
+//   from the packument, unfiltered).
+// - npmjs.org auto-assigns `latest` on first publish in addition to the
+//   provided --tag, so bare queries always work there. GitHub Packages does
+//   NOT auto-assign `latest`, so the empty-stdout case above applies.
+// - `npm info <pkg>@<exact-prerelease> --json` works as long as that
+//   version exists on the registry: exact strings pass `semver.satisfies`,
+//   and the output still includes the full `versions` history (same
+//   packument merge). Returns empty when the version doesn't exist yet.
 export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestQueue.add(async () => {
     info(`npm info ${packageJson.name}`);
 
     const { scope, registry } = getCorrectRegistry(packageJson);
 
-    // Due to a couple of issues with yarnpkg, we also want to override the npm registry when doing
-    // npm info.
-    // Issues: We sometimes get back cached responses, i.e old data about packages which causes
-    // `publish` to behave incorrectly. It can also cause issues when publishing private packages
-    // as they will always give a 404, which will tell `publish` to always try to publish.
-    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
+    // We need to start with a bare query to handle the case where the local version doesn't exist yet on the registry.
     let result = await spawn("npm", [
       "info",
       packageJson.name,
@@ -152,8 +168,20 @@ export function getPackageInfo(packageJson: PackageJSON) {
       "--json",
     ]);
 
-    // Github package registry returns empty string when calling npm info
-    // for a non-existent package instead of a E404
+    // Bare query returned nothing — retry with exact version specifier
+    // to handle prerelease-only packages on registries without auto-`latest`.
+    if (result.stdout.toString() === "") {
+      result = await spawn("npm", [
+        "info",
+        `${packageJson.name}@${packageJson.version}`,
+        `--${scope ? `${scope}:` : ""}registry=${registry}`,
+        "--json",
+      ]);
+    }
+
+    // Normalize, just in case. The above prerelease-only package query should already have returned:
+    // - either a result (when the package+version exists)
+    // - or an error with: "code": "E404", "summary": "No match found for version $VERSION",
     if (result.stdout.toString() === "") {
       return {
         error: {
