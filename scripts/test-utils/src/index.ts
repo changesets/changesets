@@ -134,7 +134,10 @@ export async function gitdir(dir: Fixture) {
   return cwd;
 }
 
-export function setEnvironmentVariable(name: string, value: string | undefined) {
+export function setEnvironmentVariable(
+  name: string,
+  value: string | undefined
+) {
   const hadValue = Object.hasOwn(process.env, name);
   const originalValue = process.env[name];
 
