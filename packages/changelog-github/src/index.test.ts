@@ -1,3 +1,4 @@
+import { setEnvironmentVariable } from "@changesets/test-utils";
 import changelogFunctions from "./index";
 import parse from "@changesets/parse";
 
@@ -241,7 +242,7 @@ it("with multiple authors", async () => {
 });
 
 it("uses repo name from env var", async () => {
-  process.env.GITHUB_REPOSITORY = data.repo;
+  const cleanup = setEnvironmentVariable("GITHUB_REPOSITORY", data.repo);
   const [changeset, bump] = getChangeset("fixes #1234 and #5678", data.commit);
   expect(await getReleaseLine(changeset, bump, null)).toMatchInlineSnapshot(`
     "
@@ -250,5 +251,5 @@ it("uses repo name from env var", async () => {
         fixes [#1234](https://github.com/emotion-js/emotion/issues/1234) and [#5678](https://github.com/emotion-js/emotion/issues/5678)"
   `);
 
-  process.env.GITHUB_REPOSITORY = undefined;
+  cleanup();
 });

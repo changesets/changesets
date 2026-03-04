@@ -24,6 +24,7 @@
     "dotenv": "^8.1.0"
   },
   "devDependencies": {
-    "@changesets/parse": "*"
+    "@changesets/parse": "*",
+    "@changesets/test-utils": "*"
   }
 }
