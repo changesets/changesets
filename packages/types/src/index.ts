@@ -1,4 +1,4 @@
-// NB: Bolt check uses a different dependnecy set to every other package.
+// NB: Bolt check uses a different dependency set to every other package.
 // You need think before you use this.
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -175,3 +175,18 @@ export type PreState = {
   };
   changesets: string[];
 };
+
+export interface ChangesetsPackage {
+  dir: string;
+  packageJson: PackageJSON;
+}
+
+export type ChangesetsPackagesTool = {
+  type: "yarn" | "bolt" | "pnpm" | "lerna" | "root";
+};
+
+export interface ChangesetsPackages {
+  root: ChangesetsPackage;
+  packages: Array<ChangesetsPackage>;
+  tool: ChangesetsPackagesTool;
+}

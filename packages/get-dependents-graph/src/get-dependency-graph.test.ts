@@ -39,7 +39,6 @@ describe("getting the dependency graph", function () {
           },
         },
       ],
-      tool: "pnpm",
     });
     expect(graph.get("foo")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
@@ -71,7 +70,6 @@ describe("getting the dependency graph", function () {
           },
         },
       ],
-      tool: "pnpm",
     });
     expect(graph.get("foo-example")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
@@ -105,7 +103,6 @@ describe("getting the dependency graph", function () {
             },
           },
         ],
-        tool: "pnpm",
       });
       expect(valid).toBeFalsy();
       expect((console.error as any).mock.calls).toHaveLength(1);
@@ -144,7 +141,6 @@ describe("getting the dependency graph", function () {
             },
           },
         ],
-        tool: "pnpm",
       });
       expect(valid).toBe(false);
       expect(
@@ -183,7 +179,6 @@ describe("getting the dependency graph", function () {
               },
             },
           ],
-          tool: "pnpm",
         },
         {
           bumpVersionsWithWorkspaceProtocolOnly: true,

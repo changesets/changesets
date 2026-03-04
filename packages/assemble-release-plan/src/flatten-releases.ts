@@ -2,14 +2,17 @@
 // package listed in the changesets
 
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config, NewChangeset } from "@changesets/types";
-import type { Package } from "@manypkg/get-packages";
+import type {
+  Config,
+  NewChangeset,
+  ChangesetsPackage,
+} from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import { mapGetOrThrowInternal } from "./utils.ts";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
-  packagesByName: Map<string, Package>,
+  packagesByName: Map<string, ChangesetsPackage>,
   config: Config,
 ): Map<string, InternalRelease> {
   let releases: Map<string, InternalRelease> = new Map();

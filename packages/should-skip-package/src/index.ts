@@ -1,8 +1,7 @@
-import type { Package } from "@manypkg/get-packages";
-import type { PackageGroup } from "@changesets/types";
+import type { PackageGroup, ChangesetsPackage } from "@changesets/types";
 
 export function shouldSkipPackage(
-  { packageJson }: Package,
+  { packageJson }: ChangesetsPackage,
   {
     ignore,
     allowPrivatePackages,

@@ -1,5 +1,4 @@
-import type { Linked } from "@changesets/types";
-import type { Package } from "@manypkg/get-packages";
+import type { Linked, ChangesetsPackage } from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import { getCurrentHighestVersion, getHighestReleaseType } from "./utils.ts";
 
@@ -17,7 +16,7 @@ import { getCurrentHighestVersion, getHighestReleaseType } from "./utils.ts";
 */
 export default function applyLinks(
   releases: Map<string, InternalRelease>,
-  packagesByName: Map<string, Package>,
+  packagesByName: Map<string, ChangesetsPackage>,
   linked: Linked,
 ): boolean {
   let updated = false;

@@ -16,5 +16,14 @@ export default async function getReleasePlan(
   const config = passedConfig ? { ...readConfig, ...passedConfig } : readConfig;
   const changesets = await readChangesets(packages.root.dir, sinceRef);
 
-  return assembleReleasePlan(changesets, packages, config, preState);
+  return assembleReleasePlan(
+    changesets,
+    {
+      root: packages.root,
+      packages: packages.packages,
+      tool: { type: packages.tool },
+    },
+    config,
+    preState,
+  );
 }

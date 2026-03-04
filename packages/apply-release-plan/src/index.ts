@@ -3,12 +3,12 @@ import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   ChangelogFunctions,
+  ChangesetsPackages,
   Config,
   ModCompWithPackage,
   NewChangeset,
   ReleasePlan,
 } from "@changesets/types";
-import type { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
 import fs from "node:fs/promises";
 import path from "path";
@@ -70,12 +70,16 @@ async function getCommitsThatAddChangesets(
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
-  packages: Packages,
+  packages: ChangesetsPackages,
   config: Config = defaultConfig,
   snapshot?: string | boolean,
   contextDir = path.dirname(fileURLToPath(import.meta.url)),
 ) {
-  let cwd = packages.root.dir;
+  let cwd = packages.root?.dir;
+
+  if (!cwd) {
+    throw new Error(`Could not find root package`);
+  }
 
   let touchedFiles = [];
 
