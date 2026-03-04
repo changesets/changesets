@@ -18,18 +18,26 @@ function linkifyIssueRefs(
   );
 }
 
-function readEnv(options: null | Record<string, any>) {
+function readEnv() {
   const GITHUB_SERVER_URL =
     process.env.GITHUB_SERVER_URL || "https://github.com";
-  const GITHUB_REPOSITORY: string =
-    options?.repo || process.env.GITHUB_REPOSITORY || "";
+  const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY || "";
+  return { GITHUB_SERVER_URL, GITHUB_REPOSITORY };
+}
 
-  if (!GITHUB_REPOSITORY) {
+function resolveRepository(
+  envVar: string,
+  options: null | Record<string, any>
+) {
+  const repo = options?.repo || envVar;
+
+  if (!repo) {
     throw new Error(
       'Please provide a repo to this changelog generator via options ("changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]) or via GITHUB_REPOSITORY env variable'
     );
   }
-  return { GITHUB_SERVER_URL, GITHUB_REPOSITORY };
+
+  return repo;
 }
 
 const changelogFunctions: ChangelogFunctions = {
@@ -38,7 +46,8 @@ const changelogFunctions: ChangelogFunctions = {
     dependenciesUpdated,
     options
   ) => {
-    const { GITHUB_REPOSITORY } = readEnv(options);
+    const { GITHUB_REPOSITORY } = readEnv();
+    const repo = resolveRepository(GITHUB_REPOSITORY, options);
     if (dependenciesUpdated.length === 0) return "";
 
     const changesetLink = `- Updated dependencies [${(
@@ -46,7 +55,7 @@ const changelogFunctions: ChangelogFunctions = {
         changesets.map(async (cs) => {
           if (cs.commit) {
             let { links } = await getInfo({
-              repo: GITHUB_REPOSITORY,
+              repo,
               commit: cs.commit,
             });
             return links.commit;
@@ -64,7 +73,8 @@ const changelogFunctions: ChangelogFunctions = {
     return [changesetLink, ...updatedDepenenciesList].join("\n");
   },
   getReleaseLine: async (changeset, type, options) => {
-    const { GITHUB_SERVER_URL, GITHUB_REPOSITORY } = readEnv(options);
+    const { GITHUB_SERVER_URL, GITHUB_REPOSITORY } = readEnv();
+    const repo = resolveRepository(GITHUB_REPOSITORY, options);
 
     let prFromSummary: number | undefined;
     let commitFromSummary: string | undefined;
@@ -93,14 +103,14 @@ const changelogFunctions: ChangelogFunctions = {
     const links = await (async () => {
       if (prFromSummary !== undefined) {
         let { links } = await getInfoFromPullRequest({
-          repo: GITHUB_REPOSITORY,
+          repo,
           pull: prFromSummary,
         });
         if (commitFromSummary) {
           const shortCommitId = commitFromSummary.slice(0, 7);
           links = {
             ...links,
-            commit: `[\`${shortCommitId}\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${commitFromSummary})`,
+            commit: `[\`${shortCommitId}\`](${GITHUB_SERVER_URL}/${repo}/commit/${commitFromSummary})`,
           };
         }
         return links;
@@ -108,7 +118,7 @@ const changelogFunctions: ChangelogFunctions = {
       const commitToFetchFrom = commitFromSummary || changeset.commit;
       if (commitToFetchFrom) {
         let { links } = await getInfo({
-          repo: GITHUB_REPOSITORY,
+          repo,
           commit: commitToFetchFrom,
         });
         return links;
@@ -137,13 +147,13 @@ const changelogFunctions: ChangelogFunctions = {
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {
       serverUrl: GITHUB_SERVER_URL,
-      repo: GITHUB_REPOSITORY,
+      repo,
     })}\n${futureLines
       .map(
         (l) =>
           `  ${linkifyIssueRefs(l, {
             serverUrl: GITHUB_SERVER_URL,
-            repo: GITHUB_REPOSITORY,
+            repo,
           })}`
       )
       .join("\n")}`;
