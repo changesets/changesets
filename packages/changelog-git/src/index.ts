@@ -7,7 +7,7 @@ import type {
 
 const getReleaseLine = async (
   changeset: NewChangesetWithCommit,
-  _type: VersionType
+  _type: VersionType,
 ) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
@@ -26,7 +26,7 @@ const getReleaseLine = async (
 
 const getDependencyReleaseLine = async (
   changesets: NewChangesetWithCommit[],
-  dependenciesUpdated: ModCompWithPackage[]
+  dependenciesUpdated: ModCompWithPackage[],
 ) => {
   if (dependenciesUpdated.length === 0) return "";
 
@@ -34,11 +34,11 @@ const getDependencyReleaseLine = async (
     (changeset) =>
       `- Updated dependencies${
         changeset.commit ? ` [${changeset.commit.slice(0, 7)}]` : ""
-      }`
+      }`,
   );
 
   const updatedDependenciesList = dependenciesUpdated.map(
-    (dependency) => `  - ${dependency.name}@${dependency.newVersion}`
+    (dependency) => `  - ${dependency.name}@${dependency.newVersion}`,
   );
 
   return [...changesetLinks, ...updatedDependenciesList].join("\n");

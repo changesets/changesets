@@ -59,10 +59,10 @@ const mockUserResponses = (mockResponses: {
     let i = 0;
     let j = 0;
     mockedUtils.askQuestion.mockImplementation(
-      async () => mockResponses.consoleSummaries![i++]
+      async () => mockResponses.consoleSummaries![i++],
     );
     mockedUtils.askQuestionWithEditor.mockImplementation(
-      () => mockResponses.editorSummaries![j++]
+      () => mockResponses.editorSummaries![j++],
     );
   } else {
     mockedUtils.askQuestion.mockResolvedValue(summary);
@@ -104,7 +104,7 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "pkg-a", type: "patch" }],
-      })
+      }),
     );
   });
 
@@ -145,9 +145,9 @@ describe("Add command", () => {
         expect.objectContaining({
           summary: expectedSummary,
           releases: [{ name: "pkg-a", type: "patch" }],
-        })
+        }),
       );
-    }
+    },
   );
 
   it("should generate a changeset in a single package repo", async () => {
@@ -183,7 +183,7 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "single-package", type: "minor" }],
-      })
+      }),
     );
   });
 
@@ -216,7 +216,7 @@ describe("Add command", () => {
           path.resolve(import.meta.dirname, "..", "..", "..", "commit"),
           null,
         ],
-      }
+      },
     );
 
     const result = await spawn("git", ["log", "--oneline", "-1"], { cwd });
@@ -244,7 +244,7 @@ describe("Add command", () => {
       expect.objectContaining({
         releases: [],
         summary: "",
-      })
+      }),
     );
   });
 
@@ -263,7 +263,7 @@ describe("Add command", () => {
     await addChangeset(
       cwd,
       { empty: false, message: "summary from message" },
-      defaultConfig
+      defaultConfig,
     );
 
     const changesets = await getChangesets(cwd);
@@ -272,10 +272,10 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary from message",
         releases: [{ name: "single-package", type: "minor" }],
-      })
+      }),
     );
     expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
-      "Is this your desired changeset?"
+      "Is this your desired changeset?",
     );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
     expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
@@ -301,7 +301,7 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "",
         releases: [{ name: "single-package", type: "patch" }],
-      })
+      }),
     );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
     expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
@@ -327,7 +327,7 @@ describe("Add command", () => {
     await addChangeset(
       cwd,
       { empty: false, message: "monorepo summary from message" },
-      defaultConfig
+      defaultConfig,
     );
 
     const changesets = await getChangesets(cwd);
@@ -336,10 +336,10 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "monorepo summary from message",
         releases: [{ name: "pkg-a", type: "patch" }],
-      })
+      }),
     );
     expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
-      "Is this your desired changeset?"
+      "Is this your desired changeset?",
     );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
     expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
@@ -360,7 +360,7 @@ describe("Add command", () => {
     await addChangeset(
       cwd,
       { empty: true, message: "empty changeset summary" },
-      defaultConfig
+      defaultConfig,
     );
 
     const changesets = await getChangesets(cwd);
@@ -369,7 +369,7 @@ describe("Add command", () => {
       expect.objectContaining({
         releases: [],
         summary: "empty changeset summary",
-      })
+      }),
     );
   });
 
@@ -393,7 +393,7 @@ describe("Add command", () => {
     await spawn("git", ["checkout", "-b", "foo"], { cwd });
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "a"'
+      'export default "a"',
     );
     await git.add(".", cwd);
     await git.commit("update pkg-a", cwd);
@@ -401,7 +401,7 @@ describe("Add command", () => {
     await spawn("git", ["checkout", "-b", "bar"], { cwd });
     await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
-      'export default "b"'
+      'export default "b"',
     );
     await git.add(".", cwd);
     await git.commit("update pkg-b", cwd);
@@ -415,7 +415,7 @@ describe("Add command", () => {
         { name: "changed packages", choices: ["pkg-b"] },
         { name: "unchanged packages", choices: ["pkg-a"] },
       ],
-      expect.any(Function)
+      expect.any(Function),
     );
 
     const changesets = await getChangesets(cwd);
@@ -424,7 +424,7 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "pkg-b", type: "patch" }],
-      })
+      }),
     );
   });
 
@@ -462,7 +462,7 @@ describe("Add command", () => {
     await addChangeset(
       cwd,
       { empty: false },
-      { ...defaultConfig, ignore: ["pkg-b"] }
+      { ...defaultConfig, ignore: ["pkg-b"] },
     );
     const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
@@ -525,7 +525,7 @@ describe("Add command", () => {
           version: false,
           tag: false,
         },
-      }
+      },
     );
     const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
@@ -541,7 +541,7 @@ describe("Add command", () => {
     });
 
     await expect(() =>
-      addChangeset(cwd, { empty: false }, defaultConfig)
+      addChangeset(cwd, { empty: false }, defaultConfig),
     ).rejects.toThrow("The process exited with code: 1");
 
     expect(loggerErrorSpy).toHaveBeenCalledTimes(3);
@@ -576,7 +576,7 @@ describe("Add command", () => {
     });
 
     await expect(() =>
-      addChangeset(cwd, { empty: false }, defaultConfig)
+      addChangeset(cwd, { empty: false }, defaultConfig),
     ).rejects.toThrow("The process exited with code: 1");
 
     expect(loggerErrorSpy).toHaveBeenCalledTimes(3);

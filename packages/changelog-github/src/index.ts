@@ -8,12 +8,12 @@ config();
 // consumes markdown links so the right alternative only matches bare refs
 function linkifyIssueRefs(
   line: string,
-  { serverUrl, repo }: { serverUrl: string; repo: string }
+  { serverUrl, repo }: { serverUrl: string; repo: string },
 ): string {
   return line.replace(/\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g, (match, issue) =>
     // PRs and issues are the same thing on GitHub (to some extent, of course)
     // this relies on GitHub redirecting from /issues/1234 to /pull/1234 when necessary
-    issue ? `[#${issue}](${serverUrl}/${repo}/issues/${issue})` : match
+    issue ? `[#${issue}](${serverUrl}/${repo}/issues/${issue})` : match,
   );
 }
 
@@ -27,11 +27,11 @@ const changelogFunctions: ChangelogFunctions = {
   getDependencyReleaseLine: async (
     changesets,
     dependenciesUpdated,
-    options
+    options,
   ) => {
     if (!options.repo) {
       throw new Error(
-        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
+        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]',
       );
     }
     if (dependenciesUpdated.length === 0) return "";
@@ -46,14 +46,14 @@ const changelogFunctions: ChangelogFunctions = {
             });
             return links.commit;
           }
-        })
+        }),
       )
     )
       .filter((_) => _)
       .join(", ")}]:`;
 
     const updatedDepenenciesList = dependenciesUpdated.map(
-      (dependency) => `  - ${dependency.name}@${dependency.newVersion}`
+      (dependency) => `  - ${dependency.name}@${dependency.newVersion}`,
     );
 
     return [changesetLink, ...updatedDepenenciesList].join("\n");
@@ -62,7 +62,7 @@ const changelogFunctions: ChangelogFunctions = {
     const { GITHUB_SERVER_URL } = readEnv();
     if (!options || !options.repo) {
       throw new Error(
-        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
+        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]',
       );
     }
 
@@ -124,7 +124,7 @@ const changelogFunctions: ChangelogFunctions = {
       ? usersFromSummary
           .map(
             (userFromSummary) =>
-              `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`
+              `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`,
           )
           .join(", ")
       : links.user;
@@ -144,7 +144,7 @@ const changelogFunctions: ChangelogFunctions = {
           `  ${linkifyIssueRefs(l, {
             serverUrl: GITHUB_SERVER_URL,
             repo: options!.repo,
-          })}`
+          })}`,
       )
       .join("\n")}`;
   },

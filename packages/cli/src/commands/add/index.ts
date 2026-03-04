@@ -24,12 +24,12 @@ export default async function add(
     since,
     message,
   }: { empty?: boolean; open?: boolean; since?: string; message?: string },
-  config: Config
+  config: Config,
 ): Promise<void> {
   const packages = await getPackages(cwd);
   if (packages.packages.length === 0) {
     error(
-      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`
+      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`,
     );
     throw new ExitError(1);
   }
@@ -39,7 +39,7 @@ export default async function add(
       !shouldSkipPackage(pkg, {
         ignore: config.ignore,
         allowPrivatePackages: config.privatePackages.version,
-      })
+      }),
   );
 
   if (versionablePackages.length === 0) {
@@ -74,7 +74,7 @@ export default async function add(
       warn(
         `Failed to find changed packages from the "${branch}" ${
           since ? "ref" : "base branch"
-        } due to error below`
+        } due to error below`,
       );
       warn(e);
     }
@@ -82,7 +82,7 @@ export default async function add(
     newChangeset = await createChangeset(
       changedPackagesNames,
       versionablePackages,
-      message
+      message,
     );
     printConfirmationMessage(newChangeset, versionablePackages.length > 1);
 
@@ -98,7 +98,7 @@ export default async function add(
     const changesetID = await writeChangeset(newChangeset, cwd, config);
     const [{ getAddMessage }, commitOpts] = await getCommitFunctions(
       config.commit,
-      cwd
+      cwd,
     );
     if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
@@ -107,18 +107,18 @@ export default async function add(
     } else {
       log(
         pc.green(
-          `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`
-        )
+          `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`,
+        ),
       );
     }
 
     let hasMajorChange = [...newChangeset.releases].find(
-      (c) => c.type === "major"
+      (c) => c.type === "major",
     );
 
     if (hasMajorChange) {
       warn(
-        "This Changeset includes a major change and we STRONGLY recommend adding more information to the changeset:"
+        "This Changeset includes a major change and we STRONGLY recommend adding more information to the changeset:",
       );
       warn("WHAT the breaking change is");
       warn("WHY the change was made");
@@ -126,8 +126,8 @@ export default async function add(
     } else {
       log(
         pc.green(
-          "If you want to modify or expand on the changeset summary, you can find it here"
-        )
+          "If you want to modify or expand on the changeset summary, you can find it here",
+        ),
       );
     }
     const changesetPath = path.resolve(changesetBase, `${changesetID}.md`);
@@ -143,7 +143,7 @@ export default async function add(
         {
           detached: true,
           stdio: "inherit",
-        }
+        },
       );
     }
   }
