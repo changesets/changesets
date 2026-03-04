@@ -533,7 +533,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   const ignoreMatcher = picomatch((json.ignore as string[] | undefined) ?? []);
-  const ignore =
+  const ignoreConfig =
     json.ignore === undefined
       ? defaultWrittenConfig.ignore
       : pkgNames.filter((pkgName) => !ignoreMatcher(pkgName));
@@ -565,7 +565,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.updateInternalDependencies
         : json.updateInternalDependencies,
 
-    ignore,
+    ignore: ignoreConfig,
 
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,
