@@ -1,8 +1,11 @@
 // This is a modified version of the graph-getting in bolt
 import Range from "semver/classes/range.js";
 import pc from "picocolors";
-import type { Packages, Package } from "@manypkg/get-packages";
-import type { PackageJSON } from "@changesets/types";
+import type {
+  ChangesetsPackage,
+  ChangesetsPackages,
+  PackageJSON,
+} from "@changesets/types";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -54,7 +57,7 @@ const getValidRange = (potentialRange: string) => {
 };
 
 export default function getDependencyGraph(
-  packages: Packages,
+  packages: Pick<ChangesetsPackages, "packages" | "root">,
   {
     ignoreDevDependencies = false,
     bumpVersionsWithWorkspaceProtocolOnly = false,
@@ -63,17 +66,17 @@ export default function getDependencyGraph(
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   } = {},
 ): {
-  graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
+  graph: Map<string, { pkg: ChangesetsPackage; dependencies: Array<string> }>;
   valid: boolean;
 } {
   const graph = new Map<
     string,
-    { pkg: Package; dependencies: Array<string> }
+    { pkg: ChangesetsPackage; dependencies: Array<string> }
   >();
   let valid = true;
 
-  const packagesByName: { [key: string]: Package } = {
-    [packages.root.packageJson.name]: packages.root,
+  const packagesByName: { [key: string]: ChangesetsPackage } = {
+    [packages.root!.packageJson.name]: packages.root!,
   };
 
   const queue = [packages.root];
@@ -84,10 +87,10 @@ export default function getDependencyGraph(
   }
 
   for (const pkg of queue) {
-    const { name } = pkg.packageJson;
+    const { name } = pkg!.packageJson;
     const dependencies = [];
     const allDependencies = getAllDependencies(
-      pkg.packageJson,
+      pkg!.packageJson,
       ignoreDevDependencies,
     );
 
@@ -132,7 +135,7 @@ export default function getDependencyGraph(
       dependencies.push(depName);
     }
 
-    graph.set(name, { pkg, dependencies });
+    graph.set(name, { pkg: pkg!, dependencies });
   }
   return { graph, valid };
 }

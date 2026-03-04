@@ -124,10 +124,12 @@ async function testSetup(
     await git.commit("first commit", tempDir);
   }
 
+  const { root, packages, tool } = await getPackages(tempDir);
+
   return {
     changedFiles: await applyReleasePlan(
       releasePlan,
-      await getPackages(tempDir),
+      { root, packages, tool: { type: tool } },
       config,
       snapshot,
     ),
@@ -140,6 +142,16 @@ async function readJson(path: string) {
 }
 
 describe("apply release plan", () => {
+  it("should error if root package is not present", async () => {
+    const releasePlan = new FakeReleasePlan();
+    await expect(() =>
+      applyReleasePlan(releasePlan.getReleasePlan(), {
+        // @ts-expect-error testing empty object
+        root: {},
+      }),
+    ).rejects.toThrow("Could not find root package");
+  });
+
   describe("versioning", () => {
     describe("formatting", () => {
       it("should not reformat a small array in a package.json", async () => {
@@ -2947,9 +2959,10 @@ describe("apply release plan", () => {
       await git.commit("first commit", tempDir);
 
       try {
+        const { root, packages, tool } = await getPackages(tempDir);
         await applyReleasePlan(
           releasePlan.getReleasePlan(),
-          await getPackages(tempDir),
+          { root, packages, tool: { type: tool } },
           releasePlan.config,
         );
       } catch (e) {
@@ -2997,9 +3010,11 @@ describe("apply release plan", () => {
         await git.commit("first commit", tempDir);
 
         try {
+          const { root, packages, tool } = await getPackages(tempDir);
+
           await applyReleasePlan(
             releasePlan.getReleasePlan(),
-            await getPackages(tempDir),
+            { root, packages, tool: { type: tool } },
             {
               ...releasePlan.config,
               changelog: [

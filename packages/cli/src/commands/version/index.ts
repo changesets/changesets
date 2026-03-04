@@ -62,11 +62,11 @@ export default async function version(
     return;
   }
 
-  let packages = await getPackages(cwd);
+  const { root, packages, tool } = await getPackages(cwd);
 
-  let releasePlan = assembleReleasePlan(
+  const releasePlan = assembleReleasePlan(
     changesets,
-    packages,
+    { root, packages, tool: { type: tool } },
     releaseConfig,
     preState,
     options.snapshot
@@ -79,9 +79,9 @@ export default async function version(
       : undefined,
   );
 
-  let [...touchedFiles] = await applyReleasePlan(
+  const [...touchedFiles] = await applyReleasePlan(
     releasePlan,
-    packages,
+    { root, packages, tool: { type: tool } },
     releaseConfig,
     options.snapshot,
     path.dirname(fileURLToPath(import.meta.url)),
