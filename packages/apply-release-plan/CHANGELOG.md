@@ -1,5 +1,11 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.2
+
+### Minor Changes
+
+- [#1744](https://github.com/changesets/changesets/pull/1744) [`303cacd`](https://github.com/changesets/changesets/commit/303cacdde85c94f2ef4d1408b401165ff25d263d) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped the default Prettier version used in the absence of the local installation to v3
+
 ## 7.1.0
 
 ### Minor Changes
