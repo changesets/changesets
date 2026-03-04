@@ -24,6 +24,7 @@ export let defaultWrittenConfig = {
   access: "restricted",
   baseBranch: "master",
   updateInternalDependencies: "patch",
+  requireSemverSatisfaction: false,
   ignore: [] as ReadonlyArray<string>,
 } as const;
 
@@ -548,6 +549,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       json.updateInternalDependencies === undefined
         ? defaultWrittenConfig.updateInternalDependencies
         : json.updateInternalDependencies,
+
+    requireSemverSatisfaction:
+      json.requireSemverSatisfaction === undefined
+        ? defaultWrittenConfig.requireSemverSatisfaction
+        : json.requireSemverSatisfaction,
 
     ignore:
       json.ignore === undefined
