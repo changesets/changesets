@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "path";
 import { getPackages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
-import micromatch from "micromatch";
+import picomatch from "picomatch";
 import type { Package } from "@changesets/types";
 
 export async function add(pathToFile: string, cwd: string) {
@@ -287,9 +287,10 @@ export async function getChangedPackagesSinceRef({
           }
         }
 
+        const matcher = picomatch(changedFilePatterns as string[]);
         return (
           changedPackageFiles.length > 0 &&
-          micromatch(changedPackageFiles, changedFilePatterns).length > 0
+          changedPackageFiles.some((file) => matcher(file))
         );
       })
   );
