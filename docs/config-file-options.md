@@ -154,6 +154,14 @@ You would specify our github changelog generator with:
 
 ```json
 {
+  "changelog": "@changesets/changelog-github"
+}
+```
+
+Alternatively, you can provide the repo name via options:
+
+```json
+{
   "changelog": ["@changesets/changelog-github", { "repo": "<org>/<repo>" }]
 }
 ```

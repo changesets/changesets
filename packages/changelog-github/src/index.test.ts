@@ -239,3 +239,16 @@ it("with multiple authors", async () => {
     "
   `);
 });
+
+it("uses repo name from env var", async () => {
+  process.env.GITHUB_REPOSITORY = data.repo;
+  const [changeset, bump] = getChangeset("fixes #1234 and #5678", data.commit);
+  expect(await getReleaseLine(changeset, bump, null)).toMatchInlineSnapshot(`
+    "
+
+    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        fixes [#1234](https://github.com/emotion-js/emotion/issues/1234) and [#5678](https://github.com/emotion-js/emotion/issues/5678)"
+  `);
+
+  process.env.GITHUB_REPOSITORY = undefined;
+});
