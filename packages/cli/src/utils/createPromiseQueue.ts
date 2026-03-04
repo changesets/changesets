@@ -49,7 +49,7 @@ export function createPromiseQueue(concurrency: number) {
         active--;
         job.reject(error);
         run();
-      }
+      },
     );
   }
 

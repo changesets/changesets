@@ -13,7 +13,7 @@ async function outputFile(filePath: string, content: string) {
 }
 
 export async function readPreState(
-  rootDir: string
+  rootDir: string,
 ): Promise<PreState | undefined> {
   let preStatePath = path.resolve(rootDir, ".changeset", "pre.json");
   // TODO: verify that the pre state isn't broken
@@ -47,7 +47,7 @@ export async function exitPre(rootDir: string) {
 
   await outputFile(
     preStatePath,
-    JSON.stringify({ ...preState, mode: "exit" }, null, 2) + "\n"
+    JSON.stringify({ ...preState, mode: "exit" }, null, 2) + "\n",
   );
 }
 

@@ -42,7 +42,7 @@ async function setupRepoAndClone(cwd: string) {
     ["clone", "--depth", "1", pathToFileURL(cwd).toString(), "."],
     {
       cwd: clone,
-    }
+    },
   );
   await spawn("git", ["checkout", "-b", "some-other-branch"], { cwd });
   return { clone, mainBranch };
@@ -85,7 +85,7 @@ describe("version", () => {
           summary: "Awesome feature",
         },
       ],
-      cwd
+      cwd,
     );
 
     const { clone, mainBranch } = await setupRepoAndClone(cwd);
@@ -103,8 +103,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-a",
@@ -118,8 +118,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-b",
@@ -129,8 +129,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toEqual(
       expect.stringContaining(`# pkg-a
 
@@ -138,13 +138,13 @@ describe("version", () => {
 
 ### Minor Changes
 
-`)
+`),
     );
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toEqual(
       expect.stringContaining(`# pkg-b
 
@@ -152,7 +152,7 @@ describe("version", () => {
 
 ### Minor Changes
 
-`)
+`),
     );
     expect(changedPackages).toEqual([
       {
@@ -191,7 +191,7 @@ describe("version", () => {
           version: "1.0.0",
         },
         null,
-        2
+        2,
       ),
       ".changeset/config.json": JSON.stringify({}),
     });
@@ -208,7 +208,7 @@ describe("version", () => {
           summary: "Awesome feature",
         },
       ],
-      cwd
+      cwd,
     );
 
     const { clone, mainBranch } = await setupRepoAndClone(cwd);
@@ -226,8 +226,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-a",
@@ -241,8 +241,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-b",
@@ -253,8 +253,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toEqual(
       expect.stringContaining(`# pkg-a
 
@@ -262,10 +262,10 @@ describe("version", () => {
 
 ### Minor Changes
 
-`)
+`),
     );
     await expect(
-      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8")
+      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8"),
     ).rejects.toMatchObject({ code: "ENOENT" });
     expect(changedPackages).toEqual([
       {
@@ -315,7 +315,7 @@ describe("version", () => {
           summary: "Awesome feature",
         },
       ],
-      cwd
+      cwd,
     );
 
     const { clone } = await setupRepoAndClone(cwd);
@@ -398,7 +398,7 @@ describe("publish", () => {
     });
     let tagsResult = await spawn("git", ["tag"], { cwd });
     expect(tagsResult.stdout.toString("utf8").trim()).toEqual(
-      "pkg-a@1.0.0\npkg-b@1.0.0"
+      "pkg-a@1.0.0\npkg-b@1.0.0",
     );
   });
 });

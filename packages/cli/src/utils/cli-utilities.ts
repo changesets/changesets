@@ -49,7 +49,7 @@ let cancelFlow = () => {
 async function askCheckboxPlus(
   message: string,
   choices: Array<any>,
-  format?: (arg: any) => any
+  format?: (arg: any) => any,
 ): Promise<Array<string>> {
   const name = `CheckboxPlus-${serialId()}`;
 
@@ -124,7 +124,7 @@ async function askConfirm(message: string): Promise<boolean> {
 
 async function askList<Choice extends string>(
   message: string,
-  choices: Choice[]
+  choices: Choice[],
 ): Promise<Choice> {
   const name = `List-${serialId()}`;
 
