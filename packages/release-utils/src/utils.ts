@@ -6,7 +6,7 @@ import { toString as mdastNodeToString } from "mdast-util-to-string";
 import os from "os";
 import { fromMarkdown as stringToMdast } from "mdast-util-from-markdown";
 import { toMarkdown as mdastToString } from "mdast-util-to-markdown";
-import spawn from "spawndamnit";
+import { exec as spawn } from "tinyexec";
 import { onExit } from "signal-exit";
 
 const exec = promisify(cp.exec);
@@ -144,23 +144,23 @@ export async function spawnWithOutput(
   options: { ignoreReturnCode?: boolean; cwd: string },
 ) {
   process.stdout.write(`Running: ${command} ${args.join(" ")}` + os.EOL);
-  let childProcess = spawn(command, args, {
-    cwd: options.cwd,
+  let spawned = spawn(command, args, {
+    nodeOptions: { cwd: options.cwd },
   });
-  childProcess.on("stdout", (data) => process.stdout.write(data));
-  childProcess.on("stderr", (data) => process.stderr.write(data));
-  let result = await childProcess;
-  if (!options?.ignoreReturnCode && result.code !== 0) {
+  spawned.process!.on("stdout", (data) => process.stdout.write(data));
+  spawned.process!.on("stderr", (data) => process.stderr.write(data));
+  let result = await spawned;
+  if (!options?.ignoreReturnCode && result.exitCode !== 0) {
     throw new Error(
       `The command "${command} ${args.join(" ")}" failed with code ${
-        result.code
-      }\n${result.stdout.toString("utf8")}\n${result.stderr.toString("utf8")}`,
+        result.exitCode
+      }\n${result.stdout}\n${result.stderr}`,
     );
   }
   return {
-    code: result.code,
-    stdout: result.stdout.toString("utf8"),
-    stderr: result.stderr.toString("utf8"),
+    code: result.exitCode,
+    stdout: result.stdout,
+    stderr: result.stderr,
   };
 }
 

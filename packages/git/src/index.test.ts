@@ -1,5 +1,5 @@
 import path from "path";
-import spawn from "spawndamnit";
+import { exec as spawn } from "tinyexec";
 import { pathToFileURL } from "node:url";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, it } from "vitest";
@@ -21,7 +21,9 @@ import {
 } from "./index.ts";
 
 async function getCommitCount(cwd: string) {
-  const cmd = await spawn("git", ["rev-list", "--count", "HEAD"], { cwd });
+  const cmd = await spawn("git", ["rev-list", "--count", "HEAD"], {
+    nodeOptions: { cwd },
+  });
   return parseInt(cmd.stdout.toString(), 10);
 }
 
@@ -54,7 +56,9 @@ describe("git", () => {
       const mainSha = await getCurrentCommitId({ cwd });
 
       // Create a new branch, and add a commit to it.
-      await spawn("git", ["checkout", "-b", "my-branch"], { cwd });
+      await spawn("git", ["checkout", "-b", "my-branch"], {
+        nodeOptions: { cwd },
+      });
 
       await outputFile(path.join(cwd, "b.js"), 'export default "updated b"');
       await commit("update b", cwd);
@@ -80,7 +84,7 @@ describe("git", () => {
       await add("a.js", cwd);
 
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
-        cwd,
+        nodeOptions: { cwd },
       });
       const stagedFiles = gitCmd.stdout
         .toString()
@@ -103,7 +107,7 @@ describe("git", () => {
       await add("c.js", cwd);
 
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
-        cwd,
+        nodeOptions: { cwd },
       });
       const stagedFiles = gitCmd.stdout
         .toString()
@@ -132,7 +136,7 @@ describe("git", () => {
       await add("foo", cwd);
 
       const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
-        cwd,
+        nodeOptions: { cwd },
       });
       const stagedFiles = gitCmd.stdout
         .toString()
@@ -154,7 +158,7 @@ describe("git", () => {
       await commit("update a.js", cwd);
 
       const gitCmd = await spawn("git", ["log", "-1", "--pretty=%B"], {
-        cwd,
+        nodeOptions: { cwd },
       });
       const commitMessage = gitCmd.stdout.toString().trim();
 
@@ -182,14 +186,16 @@ describe("git", () => {
         "a.js": 'export default "a"',
       });
 
-      const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+      const head = await spawn("git", ["rev-parse", "HEAD"], {
+        nodeOptions: { cwd },
+      });
       await tag("tag_message", cwd);
 
       // Gets the hash of the commit the tag is referring to, not the hash of the tag itself
       const tagRef = await spawn(
         "git",
         ["rev-list", "-n", "1", "tag_message"],
-        { cwd },
+        { nodeOptions: { cwd } },
       );
       expect(tagRef).toEqual(head);
     });
@@ -201,7 +207,7 @@ describe("git", () => {
       });
 
       const initialHead = await spawn("git", ["rev-parse", "HEAD"], {
-        cwd,
+        nodeOptions: { cwd },
       });
       await tag("tag_message", cwd);
 
@@ -209,19 +215,21 @@ describe("git", () => {
       await add("b.js", cwd);
       await commit("update b", cwd);
 
-      const newHead = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+      const newHead = await spawn("git", ["rev-parse", "HEAD"], {
+        nodeOptions: { cwd },
+      });
       await tag("new_tag", cwd);
 
       // Gets the hash of the commit the tag is referring to, not the hash of the tag itself
       const firstTagRef = await spawn(
         "git",
         ["rev-list", "-n", "1", "tag_message"],
-        { cwd },
+        { nodeOptions: { cwd } },
       );
       const secondTagRef = await spawn(
         "git",
         ["rev-list", "-n", "1", "new_tag"],
-        { cwd },
+        { nodeOptions: { cwd } },
       );
 
       expect(firstTagRef).toEqual(initialHead);
@@ -256,7 +264,9 @@ describe("git", () => {
       });
 
       const headSha = await getCurrentCommitId({ cwd });
-      const commitHash = await getCommitsThatAddFiles(["a.js"], { cwd });
+      const commitHash = await getCommitsThatAddFiles(["a.js"], {
+        cwd,
+      });
 
       expect(commitHash).toEqual([headSha]);
     });
@@ -303,7 +313,7 @@ describe("git", () => {
             ".",
           ],
           {
-            cwd: cloneDir,
+            nodeOptions: { cwd: cloneDir },
           },
         );
         return cloneDir;
@@ -535,7 +545,9 @@ describe("git", () => {
       await add("packages/pkg-a/a.js", cwd);
       await commit("update a.js", cwd);
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await spawn("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
         ref: "main",
@@ -563,7 +575,9 @@ describe("git", () => {
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await spawn("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
       await outputFile(
         path.join(cwd, "packages/pkg-b/package.json"),
@@ -608,7 +622,9 @@ describe("git", () => {
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await spawn("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const newFilePath = "packages/pkg-a/examples/example-a/file.js";
 
@@ -644,7 +660,9 @@ describe("git", () => {
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await spawn("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const newFilePath = "packages/pkg-a/examples/example-a/file.js";
 
@@ -677,7 +695,9 @@ describe("git", () => {
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await spawn("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const newFilePath = "packages/pkg-a/__tests__/file.js";
 
@@ -706,7 +726,9 @@ describe("git", () => {
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await spawn("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const newFilePath = "packages/pkg-a/src/index.js";
 
@@ -794,7 +816,9 @@ describe("git", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
 
-      await spawn("git", ["checkout", "-b", "some-branch"], { cwd });
+      await spawn("git", ["checkout", "-b", "some-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const changesetId = await writeChangeset(
         {
@@ -830,7 +854,7 @@ describe("git", () => {
       });
 
       await spawn("git", ["config", "diff.relative", "true"], {
-        cwd,
+        nodeOptions: { cwd },
       });
 
       const changesetId = await writeChangeset(
