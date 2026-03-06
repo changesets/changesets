@@ -125,9 +125,12 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   try {
     data = await fetchResponse.json();
   } catch (e) {
-    throw new Error(`Failed to parse data from GitHub\n${(e as Error).message}`, {
-      cause: e,
-    });
+    throw new Error(
+      `Failed to parse data from GitHub\n${(e as Error).message}`,
+      {
+        cause: e,
+      },
+    );
   }
 
   if (data.errors) {
