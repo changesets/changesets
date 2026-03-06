@@ -1,5 +1,4 @@
 import path from "node:path";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, it } from "vitest";
 
 import read from "./index.ts";

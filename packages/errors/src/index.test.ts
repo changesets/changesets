@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { beforeEach, describe, expect, it } from "vitest";
 import { GitError } from "./index.ts";
 

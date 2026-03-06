@@ -159,7 +159,7 @@ describe("running version in a simple project", () => {
     });
   });
 
-  it("should not touch package.json of an ignored package when it is not a dependent of any releasedPackages ", async () => {
+  it("should not touch package.json of an ignored package when it is not a dependent of any releasedPackages", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
