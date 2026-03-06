@@ -18,7 +18,6 @@ import { createRequire } from "node:module";
 import path from "path";
 
 const require = createRequire(import.meta.url);
-// eslint-disable-next-line import/no-commonjs
 const packageJson = require("../package.json");
 
 export let defaultWrittenConfig = {
