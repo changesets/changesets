@@ -1,7 +1,6 @@
 import { getPackages, type Package } from "@manypkg/get-packages";
 import cp, { type ChildProcess } from "node:child_process";
 import { promisify } from "node:util";
-import { SIGTERM } from "node:constants";
 import { toString as mdastNodeToString } from "mdast-util-to-string";
 import os from "os";
 import { fromMarkdown as stringToMdast } from "mdast-util-from-markdown";
@@ -96,7 +95,7 @@ const activeProcesses = new Set<ChildProcess>();
 
 onExit(() => {
   for (let child of activeProcesses) {
-    child.kill(SIGTERM);
+    child.kill("SIGTERM");
   }
 });
 

@@ -1,7 +1,6 @@
 import path from "path";
 import spawn from "spawndamnit";
 import { pathToFileURL } from "node:url";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, it } from "vitest";
 import { gitdir, outputFile, tempdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";

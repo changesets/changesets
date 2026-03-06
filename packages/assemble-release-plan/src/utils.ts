@@ -57,7 +57,7 @@ export function getCurrentHighestVersion(
   return highestVersion!;
 }
 
-export function mapGetOrThrow<V extends {}>(
+export function mapGetOrThrow<V>(
   map: Map<string, V>,
   key: string,
   errorMessage: string,
@@ -69,7 +69,7 @@ export function mapGetOrThrow<V extends {}>(
   return value;
 }
 
-export function mapGetOrThrowInternal<V extends {}>(
+export function mapGetOrThrowInternal<V>(
   map: Map<string, V>,
   key: string,
   errorMessage: string,
