@@ -31,7 +31,7 @@ export async function run(
 
   try {
     await fs.access(path.resolve(rootDir, ".changeset"));
-  } catch (err) {
+  } catch {
     error("There is no .changeset folder. ");
     error(
       "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up.",
