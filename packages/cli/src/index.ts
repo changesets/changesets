@@ -66,7 +66,6 @@ if (parsed.help && args.length === 1) {
 
 // Version should only be shown if it's the only argument passed
 if (parsed.version && args.length === 1) {
-  // eslint-disable-next-line import/no-extraneous-dependencies
   console.log(require("@changesets/cli/package.json").version);
   process.exit(0);
 }
@@ -90,10 +89,7 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
 
 ## Versions
 
-- @changesets/cli@${
-        // eslint-disable-next-line import/no-extraneous-dependencies
-        require("@changesets/cli/package.json").version
-      }
+- @changesets/cli@${require("@changesets/cli/package.json").version}
 - node@${process.version}
 
 ## Extra details

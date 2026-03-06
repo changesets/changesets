@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, it, test } from "vitest";
 import {
   ComprehensiveRelease,
@@ -86,7 +85,7 @@ async function testSetup(
   fixture: Fixture,
   releasePlan: ReleasePlan,
   config?: Config,
-  snapshot?: string | undefined,
+  snapshot?: string,
   setupFunc?: (tempDir: string) => Promise<unknown>,
 ) {
   if (!config) {
