@@ -58,6 +58,16 @@ export default defineConfig(
     },
   },
   {
+    files: ["**/*.test.*"],
+    rules: {
+      "n/no-unsupported-features/node-builtins": [
+        "error",
+        // TODO: remove when minimum version is >=20.16
+        { ignores: ["import.meta.dirname"] },
+      ],
+    },
+  },
+  {
     files: ["**/*.{js,mjs}"],
     ...tseslint.configs.disableTypeChecked,
   },
