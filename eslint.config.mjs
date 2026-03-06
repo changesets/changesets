@@ -41,7 +41,6 @@ export default defineConfig(
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-return": "off",
-      "@typescript-eslint/no-unused-vars": ["off", { caughtErrors: "none" }], // TODO enable and fix errors
       "@typescript-eslint/require-await": "off", // TODO enable and fix errors
       "@typescript-eslint/unbound-method": "off",
       "n/no-extraneous-import": "off",

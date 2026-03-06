@@ -77,7 +77,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], { ignore: "pkg-c" }, cwd);
-      } catch (e) {
+      } catch {
         // ignore errors. We just want to validate the error message
       }
 
@@ -110,7 +110,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], { ignore: ["pkg-b"] }, cwd);
-      } catch (e) {
+      } catch {
         // ignore the error. We just want to validate the error message
       }
 
@@ -149,7 +149,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], { ignore: ["pkg-b"] }, cwd);
-      } catch (e) {
+      } catch {
         // ignore the error. We just want to validate the error message
       }
 
@@ -185,7 +185,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], {}, cwd);
-      } catch (e) {
+      } catch {
         // ignore the error. We just want to validate the error message
       }
 
@@ -273,7 +273,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], { ignore: "pkg-b" }, cwd);
-      } catch (e) {
+      } catch {
         // ignore errors. We just want to validate the error message
       }
 
@@ -357,7 +357,7 @@ describe("cli", () => {
       });
       try {
         await run(["pre", "enter"], {}, cwd);
-      } catch (e) {
+      } catch {
         // ignore the error. We just want to validate the error message
       }
 
@@ -417,7 +417,7 @@ describe("cli", () => {
 
     try {
       await run(["version"], {}, cwd);
-    } catch (e) {
+    } catch {
       // ignore the error. We just want to validate the error message
     }
 
