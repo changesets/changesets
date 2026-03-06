@@ -2105,7 +2105,10 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry",
+            ),
             null,
           ],
         },
