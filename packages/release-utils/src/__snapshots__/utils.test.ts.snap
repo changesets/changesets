@@ -35,7 +35,7 @@ exports[`it works 1`] = `
 "
 `;
 
-exports[`it works 2`] = `
+exports[`it works again! 1`] = `
 "### Patch Changes
 
 * [19fe6c1b](https://github.com/keystonejs/keystone-5/commit/19fe6c1b):
