@@ -84,6 +84,7 @@ export default function parseChangesetFile(contents: string): {
         `The frontmatter between the "---" delimiters must be valid YAML.\n` +
         `YAML error: ${e instanceof Error ? e.message : String(e)}\n` +
         `Frontmatter content:\n${roughReleases}`,
+      { cause: e },
     );
   }
 
