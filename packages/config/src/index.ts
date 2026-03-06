@@ -86,7 +86,7 @@ const havePackageGroupsCorrectShape = (
 // TODO: it might be possible to remove this if improvements to `Array.isArray` ever land
 // related thread: github.com/microsoft/TypeScript/issues/36554
 function isArray<T>(
-  arg: T | {},
+  arg: T | object,
 ): arg is T extends readonly any[]
   ? unknown extends T
     ? never
