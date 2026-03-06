@@ -4,7 +4,6 @@ import spawn from "spawndamnit";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 type PartialMockMethods<T> = Partial<{
   [K in keyof T as T[K] extends (...args: never) => unknown
@@ -96,7 +95,7 @@ export const temporarilySilenceLogs =
     }
   };
 
-let f = fixturez(__dirname);
+let f = fixturez(import.meta.dirname);
 
 export interface Fixture extends Record<string, string> {}
 
@@ -155,13 +154,7 @@ export async function outputFile(
 
 export async function linkNodeModules(cwd: string) {
   await fsp.symlink(
-    path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      "..",
-      "..",
-      "..",
-      "node_modules",
-    ),
+    path.join(import.meta.dirname, "..", "..", "..", "node_modules"),
     path.join(cwd, "node_modules"),
   );
 }

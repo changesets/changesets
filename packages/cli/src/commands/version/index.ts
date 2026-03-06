@@ -1,7 +1,8 @@
 import pc from "picocolors";
 import path from "path";
 import * as git from "@changesets/git";
-import { log, warn, error } from "@changesets/logger";
+import { getCurrentCommitId } from "@changesets/git";
+import { error, log, warn } from "@changesets/logger";
 import type { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
@@ -10,8 +11,6 @@ import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
-import { getCurrentCommitId } from "@changesets/git";
-import { fileURLToPath } from "node:url";
 
 let importantSeparator = pc.red(
   "===============================IMPORTANT!===============================",
@@ -84,7 +83,7 @@ export default async function version(
     packages,
     releaseConfig,
     options.snapshot,
-    path.dirname(fileURLToPath(import.meta.url)),
+    import.meta.dirname,
   );
 
   const [{ getVersionMessage }, commitOpts] = await getCommitFunctions(

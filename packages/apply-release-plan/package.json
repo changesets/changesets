@@ -17,7 +17,6 @@
     "@changesets/types": "^7.0.0-next.1",
     "@manypkg/get-packages": "^1.1.3",
     "detect-indent": "^6.0.0",
-    "import-meta-resolve": "^4.1.0",
     "prettier": "^3.7.4",
     "semver": "^7.5.3"
   },
@@ -27,6 +26,6 @@
     "spawndamnit": "^3.0.1"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.19.0"
   }
 }
