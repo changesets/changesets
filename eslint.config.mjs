@@ -13,6 +13,7 @@ export default defineConfig(
       "**/__fixtures__/**",
       "**/scratchings.js",
       "packages/cli/bin.js",
+      "**/*.snap",
     ],
   },
   {
