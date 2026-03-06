@@ -337,7 +337,7 @@ test("throws error on missing repo name", async () => {
   };
 
   await expect(async () =>
-    // @ts-expect-error
+    // @ts-expect-error: missing data for test
     getInfo(request),
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `[Error: Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo]`,

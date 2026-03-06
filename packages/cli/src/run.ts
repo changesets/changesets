@@ -71,7 +71,6 @@ export async function run(
 
   if (input.length < 1) {
     const { empty, open, since, message }: CliOptions = flags;
-    // @ts-ignore if this is undefined, we have already exited
     await add(rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(

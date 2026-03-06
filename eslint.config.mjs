@@ -33,9 +33,6 @@ export default defineConfig(
       parserOptions: { projectService: true },
     },
     rules: {
-      "@typescript-eslint/await-thenable": "off", // TODO enable and fix errors
-      "@typescript-eslint/ban-ts-comment": "off", // TODO enable and fix errors
-      "@typescript-eslint/no-empty-object-type": "off", // TODO enable and fix errors
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-floating-promises": "off", // TODO enable and fix errors
       "@typescript-eslint/no-unnecessary-type-assertion": "off", // TODO enable and fix errors

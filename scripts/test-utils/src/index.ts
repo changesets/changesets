@@ -97,7 +97,7 @@ export const temporarilySilenceLogs =
 
 let f = fixturez(import.meta.dirname);
 
-export interface Fixture extends Record<string, string> {}
+export type Fixture = Record<string, string>
 
 export async function testdir(dir: Fixture) {
   const temp = f.temp();
