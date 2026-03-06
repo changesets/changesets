@@ -1,15 +1,12 @@
 // NB: Bolt check uses a different dependnecy set to every other package.
 // You need think before you use this.
-const DEPENDENCY_TYPES = [
-  "dependencies",
-  "devDependencies",
-  "peerDependencies",
-  "optionalDependencies",
-] as const;
-
 export type VersionType = "major" | "minor" | "patch" | "none";
 
-export type DependencyType = (typeof DEPENDENCY_TYPES)[number];
+export type DependencyType =
+  | "dependencies"
+  | "devDependencies"
+  | "peerDependencies"
+  | "optionalDependencies";
 
 export type AccessType = "public" | "restricted";
 
