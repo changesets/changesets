@@ -19,6 +19,7 @@ vi.mock(
       commit: `[\`${data.commit}\`](https://github.com/${data.repo}/commit/${data.commit})`,
     };
     return {
+      /* eslint-disable vitest/no-standalone-expect */
       async getInfo({ commit, repo }) {
         expect(commit).toBe(data.commit);
         expect(repo).toBe(data.repo);
@@ -37,6 +38,7 @@ vi.mock(
           links,
         };
       },
+      /* eslint-enable vitest/no-standalone-expect */
     };
   },
 );
