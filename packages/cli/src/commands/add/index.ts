@@ -1,15 +1,14 @@
 import pc from "picocolors";
-import { spawn } from "child_process";
-import path from "path";
+import path from "node:path";
+import launchEditor from "launch-editor";
 
 import * as git from "@changesets/git";
-import { error, info, log, warn } from "@changesets/logger";
+import { ExitError } from "@changesets/errors";
+import { log } from "@clack/prompts";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
-import { ExitError } from "@changesets/errors";
 import { getPackages } from "@manypkg/get-packages";
-import { ExternalEditor } from "@inquirer/external-editor";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 import * as cli from "../../utils/cli-utilities.ts";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
@@ -28,7 +27,7 @@ export default async function add(
 ): Promise<void> {
   const packages = await getPackages(cwd);
   if (packages.packages.length === 0) {
-    error(
+    log.error(
       `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`,
     );
     throw new ExitError(1);
@@ -43,9 +42,13 @@ export default async function add(
   );
 
   if (versionablePackages.length === 0) {
-    error("No versionable packages found");
-    error('- Ensure the packages to version are not in the "ignore" config');
-    error('- Ensure that relevant package.json files have the "version" field');
+    log.error(
+      `
+No versionable packages found
+  ${pc.italic("Ensure the packages to version are not ignored by the config")}
+  ${pc.italic("Ensure that relevant package.json files have a `version` field")}
+`.trim(),
+    );
     throw new ExitError(1);
   }
 
@@ -67,16 +70,15 @@ export default async function add(
           ref: since,
         })
       ).map((pkg) => pkg.packageJson.name);
-    } catch (e: any) {
+    } catch (error) {
       // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
       // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
-      const branch = since ?? config.baseBranch;
-      warn(
-        `Failed to find changed packages from the "${branch}" ${
-          since ? "ref" : "base branch"
-        } due to error below`,
+      log.warn(
+        `
+Failed to identify which packages have changed since the ${since ? "ref" : "base branch"} due to an error:
+${(error as Error).toString()}
+`.trim(),
       );
-      warn(e);
     }
 
     newChangeset = await createChangeset(
@@ -103,9 +105,11 @@ export default async function add(
     if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
       await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
-      log(pc.green(`${empty ? "Empty " : ""}Changeset added and committed`));
+      log.info(
+        pc.green(`${empty ? "Empty " : ""}Changeset added and committed`),
+      );
     } else {
-      log(
+      log.info(
         pc.green(
           `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`,
         ),
@@ -117,34 +121,30 @@ export default async function add(
     );
 
     if (hasMajorChange) {
-      warn(
-        "This Changeset includes a major change and we STRONGLY recommend adding more information to the changeset:",
+      log.warn(
+        `
+This Changeset includes a major change and we STRONGLY recommend adding more information to the changeset:
+  WHAT the breaking change is
+  WHY the change was made
+  HOW a consumer should update their code
+`.trim(),
       );
-      warn("WHAT the breaking change is");
-      warn("WHY the change was made");
-      warn("HOW a consumer should update their code");
     } else {
-      log(
+      log.info(
         pc.green(
           "If you want to modify or expand on the changeset summary, you can find it here",
         ),
       );
     }
-    const changesetPath = path.resolve(changesetBase, `${changesetID}.md`);
-    info(pc.blue(changesetPath));
+
+    const changesetPath = path.relative(
+      process.cwd(),
+      path.join(changesetBase, `${changesetID}.md`),
+    );
+    log.info(pc.blue(changesetPath));
 
     if (open) {
-      // this is really a hack to reuse the logic embedded in `external-editor` related to determining the editor
-      const externalEditor = new ExternalEditor();
-      externalEditor.cleanup();
-      spawn(
-        externalEditor.editor.bin,
-        externalEditor.editor.args.concat([changesetPath]),
-        {
-          detached: true,
-          stdio: "inherit",
-        },
-      );
+      launchEditor(changesetPath);
     }
   }
 }

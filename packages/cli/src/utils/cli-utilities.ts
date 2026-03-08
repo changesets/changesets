@@ -31,9 +31,17 @@ async function askMultiselect<Value>(
   return result;
 }
 
-async function askQuestion(message: string, notEmpty = false): Promise<string> {
+type QuestionOptions = {
+  placeholder?: string;
+  notEmpty?: boolean;
+};
+async function askQuestion(
+  message: string,
+  { placeholder, notEmpty }: QuestionOptions = {},
+): Promise<string> {
   const result = await text({
     message,
+    placeholder,
     validate: (input = "") =>
       notEmpty && input.length === 0 ? `Can't be empty.` : undefined,
   });
