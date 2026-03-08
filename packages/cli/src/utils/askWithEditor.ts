@@ -16,7 +16,7 @@ export async function askWithEditor(
   launchEditor(tmpFile);
 
   const done = await confirm({
-    message: "Opening external editor... Select Yes when ready to continue.",
+    message: "Opening external editor...",
     active: "Continue",
     inactive: "Cancel",
     initialValue: true,
