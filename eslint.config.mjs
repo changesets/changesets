@@ -33,6 +33,9 @@ export default defineConfig(
       parserOptions: { projectService: true },
     },
     rules: {
+      eqeqeq: ["off", "always", { null: "never", undefined: "never" }], // TODO enable and fix errors
+      "prefer-const": "off", // TODO enable and fix errors
+
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-floating-promises": "off", // TODO enable and fix errors
       "@typescript-eslint/no-unnecessary-type-assertion": "off", // TODO enable and fix errors
@@ -43,6 +46,8 @@ export default defineConfig(
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/require-await": "off", // TODO enable and fix errors
       "@typescript-eslint/unbound-method": "off",
+
+      "n/prefer-node-protocol": "off", // TODO enable and fix errors
       "n/no-extraneous-import": "off",
       "n/no-missing-import": "off",
       "n/no-process-exit": "off",
@@ -51,7 +56,6 @@ export default defineConfig(
         "error",
         { allowExperimental: true },
       ],
-      "prefer-const": "off", // TODO either enable and fix or add comment why not
     },
   },
   {
