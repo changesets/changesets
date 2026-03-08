@@ -76,10 +76,14 @@ const cwd = process.cwd();
 
 intro("🦋");
 
-run(parsed._, parsed, cwd).catch((err) => {
-  if (err instanceof InternalError) {
-    log.error(
-      `
+run(parsed._, parsed, cwd)
+  .then(() => {
+    outro("👋");
+  })
+  .catch((err) => {
+    if (err instanceof InternalError) {
+      log.error(
+        `
 The following error is an internal unexpected error, these should never happen.
 Please open an issue with the following link:
 https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(`Unexpected error during ${parsed._[0] || "add"} command`)}&body=${encodeURIComponent(`## Error
@@ -99,15 +103,15 @@ ${/* eslint-disable-next-line import/no-extraneous-dependencies */ ""}
 <!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->
 `)}
       `.trim(),
-    );
-  }
+      );
+    }
 
-  if (err instanceof ExitError) {
-    outro(pc.red(`🦋 Exited with code ${err.code}`));
-    return process.exit(err.code);
-  }
+    if (err instanceof ExitError) {
+      outro(pc.red(`🦋 Exited with code ${err.code}`));
+      return process.exit(err.code);
+    }
 
-  log.error(err);
-  outro(pc.red("🦋 Exited with code 1"));
-  process.exit(1);
-});
+    log.error(err);
+    outro(pc.red("🦋 Exited with code 1"));
+    process.exit(1);
+  });
