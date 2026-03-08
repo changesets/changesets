@@ -6,7 +6,9 @@ import { confirm, isCancel } from "@clack/prompts";
 
 // Does not exit the process if canceled but returns an empty string instead
 // This is because we often want to handle the case rather than exiting immediately
-export async function askWithEditor(initialContents = ""): Promise<"" | string> {
+export async function askWithEditor(
+  initialContents = "",
+): Promise<"" | string> {
   const tmpDir = await fs.mkdtemp(tmpdir());
   const tmpFile = path.join(tmpDir, "changeset.md");
 
