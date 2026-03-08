@@ -1,5 +1,5 @@
 import pc from "picocolors";
-import { log } from "@changesets/logger";
+import { log } from "@clack/prompts";
 import type { Release, VersionType } from "@changesets/types";
 
 export default function printConfirmationMessage(
@@ -14,19 +14,22 @@ export default function printConfirmationMessage(
       .filter((release) => release.type === type)
       .map((release) => release.name);
   }
-  log("\n=== Summary of changesets ===");
+
   const majorReleases = getReleasesOfType("major");
   const minorReleases = getReleasesOfType("minor");
   const patchReleases = getReleasesOfType("patch");
 
-  if (majorReleases.length > 0)
-    log(`${pc.bold(pc.green("major"))}:  ${majorReleases.join(", ")}`);
-  if (minorReleases.length > 0)
-    log(`${pc.bold(pc.green("minor"))}:  ${minorReleases.join(", ")}`);
-  if (patchReleases.length > 0)
-    log(`${pc.bold(pc.green("patch"))}:  ${patchReleases.join(", ")}`);
-
-  log("");
+  let msg = pc.bold("Summary of changesets:");
+  if (majorReleases.length > 0) {
+    msg += `\n${pc.bold(pc.green("major"))}:  ${majorReleases.join(", ")}`;
+  }
+  if (minorReleases.length > 0) {
+    msg += `\n${pc.bold(pc.green("minor"))}:  ${minorReleases.join(", ")}`;
+  }
+  if (patchReleases.length > 0) {
+    msg += `\n${pc.bold(pc.green("patch"))}:  ${patchReleases.join(", ")}`;
+  }
+  log.info(msg);
 
   if (repoHasMultiplePackages) {
     const message =
@@ -34,6 +37,6 @@ export default function printConfirmationMessage(
       pc.redBright("patch bumped") +
       " when this changeset is applied.";
 
-    log(message + "\n");
+    log.info(message);
   }
 }
