@@ -114,7 +114,9 @@ export default async function createChangeset(
     let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 
     let pkgsThatShouldBeMajorBumped = await cli.askMultiselect<string>(
-      bold(`Which packages should have a ${red("major")} bump?`),
+      bold(
+        `Which packages should have a ${red("major")} ${gray(`(${red("X")}.X.X)`)} bump?`,
+      ),
       {
         "all packages": packagesToRelease.map((pkgName) => ({
           label: formatPkgNameAndVersion(
@@ -142,7 +144,9 @@ export default async function createChangeset(
 
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
       let pkgsThatShouldBeMinorBumped = await cli.askMultiselect(
-        bold(`Which packages should have a ${green("minor")} bump?`),
+        bold(
+          `Which packages should have a ${green("minor")} ${gray(`(X.${green("X")}.X)`)} bump?`,
+        ),
         {
           "all packages": [...pkgsLeftToGetBumpTypeFor].map((pkgName) => ({
             label: formatPkgNameAndVersion(
@@ -162,17 +166,14 @@ export default async function createChangeset(
     }
 
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
+      const patchBumpedPackages = [...pkgsLeftToGetBumpTypeFor].map((pkgName) =>
+        formatPkgNameAndVersion(pkgName, pkgJsonsByName.get(pkgName)!.version),
+      );
       log.info(
         `
-The following packages will be ${blue("patch")} bumped:
-${gray(
-  [...pkgsLeftToGetBumpTypeFor]
-    .map((pkgName) =>
-      formatPkgNameAndVersion(pkgName, pkgJsonsByName.get(pkgName)!.version),
-    )
-    .join(", "),
-)}
-`.trim(),
+The following packages will be ${blue("patch")} ${gray(`(X.X.${blue("X")})`)} bumped:
+${gray(patchBumpedPackages.join(", "))}
+        `.trim(),
       );
 
       for (const pkgName of pkgsLeftToGetBumpTypeFor) {
