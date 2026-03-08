@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, type Mock, vi } from "vitest";
 import fixturez from "fixturez";
-import { exec as spawn } from "tinyexec";
+import { exec } from "tinyexec";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
@@ -115,34 +115,34 @@ export const tempdir = f.temp;
 
 export async function gitdir(dir: Fixture) {
   const cwd = await testdir(dir);
-  await spawn("git", ["init"], { nodeOptions: { cwd } });
+  await exec("git", ["init"], { nodeOptions: { cwd } });
   // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
   {
-    const { stdout } = await spawn(
+    const { stdout } = await exec(
       "git",
       ["rev-parse", "--abbrev-ref", "HEAD"],
       { nodeOptions: { cwd } },
     );
     if (stdout.trim() !== "main") {
-      await spawn("git", ["checkout", "-b", "main"], { nodeOptions: { cwd } });
+      await exec("git", ["checkout", "-b", "main"], { nodeOptions: { cwd } });
     }
   }
-  await spawn("git", ["config", "user.email", "x@y.z"], {
+  await exec("git", ["config", "user.email", "x@y.z"], {
     nodeOptions: { cwd },
   });
-  await spawn("git", ["config", "user.name", "xyz"], { nodeOptions: { cwd } });
-  await spawn("git", ["config", "commit.gpgSign", "false"], {
+  await exec("git", ["config", "user.name", "xyz"], { nodeOptions: { cwd } });
+  await exec("git", ["config", "commit.gpgSign", "false"], {
     nodeOptions: { cwd },
   });
-  await spawn("git", ["config", "tag.gpgSign", "false"], {
+  await exec("git", ["config", "tag.gpgSign", "false"], {
     nodeOptions: { cwd },
   });
-  await spawn("git", ["config", "tag.forceSignAnnotated", "false"], {
+  await exec("git", ["config", "tag.forceSignAnnotated", "false"], {
     nodeOptions: { cwd },
   });
 
-  await spawn("git", ["add", "."], { nodeOptions: { cwd } });
-  await spawn("git", ["commit", "-m", "initial commit", "--allow-empty"], {
+  await exec("git", ["add", "."], { nodeOptions: { cwd } });
+  await exec("git", ["commit", "-m", "initial commit", "--allow-empty"], {
     nodeOptions: { cwd },
   });
 
