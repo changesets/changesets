@@ -3,6 +3,7 @@ import { defineConfig } from "tsdown/config";
 export const baseConfig = defineConfig({
   entry: "src/index.ts",
   outDir: "dist",
+  exports: true,
 
   dts: { parallel: true },
   format: "esm",
