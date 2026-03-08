@@ -1,9 +1,10 @@
-import { expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
   BumpLevels,
   getChangelogEntry,
   sortChangelogEntries,
 } from "./utils.ts";
+import { exec } from "tinyexec";
 
 let changelog = `# @keystone-alpha/email
 
@@ -72,35 +73,48 @@ let changelog = `# @keystone-alpha/email
   - Update mjml-dependency
 `;
 
-test("it works", () => {
-  let entry = getChangelogEntry(changelog, "3.0.0");
-  expect(entry.content).toMatchSnapshot();
-  expect(entry.highestLevel).toBe(BumpLevels.major);
+describe("getChangelogEntry", () => {
+  test("it works", () => {
+    let entry = getChangelogEntry(changelog, "3.0.0");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.major);
+  });
+
+  test("it works", () => {
+    let entry = getChangelogEntry(changelog, "3.0.1");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.patch);
+  });
+
+  test("it sorts the things right", () => {
+    let things = [
+      {
+        name: "a",
+        highestLevel: BumpLevels.major,
+        private: true,
+      },
+      {
+        name: "b",
+        highestLevel: BumpLevels.patch,
+        private: false,
+      },
+      {
+        name: "c",
+        highestLevel: BumpLevels.major,
+        private: false,
+      },
+    ];
+    expect(things.sort(sortChangelogEntries)).toMatchSnapshot();
+  });
 });
 
-test("it works", () => {
-  let entry = getChangelogEntry(changelog, "3.0.1");
-  expect(entry.content).toMatchSnapshot();
-  expect(entry.highestLevel).toBe(BumpLevels.patch);
-});
-
-test("it sorts the things right", () => {
-  let things = [
-    {
-      name: "a",
-      highestLevel: BumpLevels.major,
-      private: true,
-    },
-    {
-      name: "b",
-      highestLevel: BumpLevels.patch,
-      private: false,
-    },
-    {
-      name: "c",
-      highestLevel: BumpLevels.major,
-      private: false,
-    },
-  ];
-  expect(things.sort(sortChangelogEntries)).toMatchSnapshot();
+describe("exec", () => {
+  test("works like the old execWithOutput function", async () => {
+    let result = await exec(
+      "node -e \"console.error('error'); console.log('log')\"",
+      [],
+      { nodeOptions: { cwd: process.cwd() } },
+    );
+    expect(result).toMatchSnapshot();
+  });
 });

@@ -40,9 +40,7 @@ async function setupRepoAndClone(cwd: string) {
     // Note: a file:// URL is needed in order to make a shallow clone of
     // a local repo
     ["clone", "--depth", "1", pathToFileURL(cwd).toString(), "."],
-    {
-      nodeOptions: { cwd: clone },
-    },
+    { nodeOptions: { cwd: clone } },
   );
   await spawn("git", ["checkout", "-b", "some-other-branch"], {
     nodeOptions: { cwd },
@@ -308,12 +306,7 @@ describe("version", () => {
     await writeChangesets(
       [
         {
-          releases: [
-            {
-              name: "pkg-b",
-              type: "minor",
-            },
-          ],
+          releases: [{ name: "pkg-b", type: "minor" }],
           summary: "Awesome feature",
         },
       ],
@@ -324,9 +317,7 @@ describe("version", () => {
 
     await linkNodeModules(clone);
 
-    let { changedPackages } = await runVersion({
-      cwd: clone,
-    });
+    let { changedPackages } = await runVersion({ cwd: clone });
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-b"),
@@ -351,7 +342,12 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node --experimental-strip-types -e "const git = await import('@changesets/git'); console.log('🦋 New tag: v1.0.0'); git.tag('v1.0.0', process.cwd());"`,
+      command: "node",
+      args: [
+        "--experimental-strip-types",
+        "-e",
+        `const git = await import('@changesets/git'); console.log('🦋 New tag: v1.0.0'); git.tag('v1.0.0', process.cwd());`,
+      ],
       cwd: clone,
     });
 
@@ -362,6 +358,7 @@ describe("publish", () => {
     let tagsResult = await spawn("git", ["tag"], { nodeOptions: { cwd } });
     expect(tagsResult.stdout.trim()).toEqual("v1.0.0");
   });
+
   test("multi package repo", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -387,7 +384,12 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node --experimental-strip-types -e "const git = await import('@changesets/git'); console.log('🦋 New tag: pkg-a@1.0.0'); console.log('🦋 New tag: pkg-b@1.0.0'); git.tag('pkg-a@1.0.0', process.cwd()); git.tag('pkg-b@1.0.0', process.cwd());"`,
+      command: "node",
+      args: [
+        "--experimental-strip-types",
+        "-e",
+        `const git = await import('@changesets/git'); console.log('🦋 New tag: pkg-a@1.0.0'); console.log('🦋 New tag: pkg-b@1.0.0'); git.tag('pkg-a@1.0.0', process.cwd()); git.tag('pkg-b@1.0.0', process.cwd());`,
+      ],
       cwd: clone,
     });
 

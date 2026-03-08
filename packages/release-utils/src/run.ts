@@ -1,20 +1,17 @@
+import path from "node:path";
+import { createRequire } from "node:module";
+import { exec } from "tinyexec";
 import { getPackages, type Package } from "@manypkg/get-packages";
 import semverLt from "semver/functions/lt.js";
-import {
-  spawnWithOutput,
-  getVersionsByDirectory,
-  getChangedPackages,
-  execWithOutput,
-} from "./utils.ts";
+import { getChangedPackages, getVersionsByDirectory } from "./utils.ts";
 import * as gitUtils from "./gitUtils.ts";
 import { readChangesetState } from "./readChangesetState.ts";
-import { createRequire } from "node:module";
-import path from "node:path";
 
 const require = createRequire(import.meta.url);
 
 type PublishOptions = {
-  script: string;
+  command: string;
+  args?: string[];
   cwd?: string;
 };
 
@@ -30,13 +27,14 @@ type PublishResult =
     };
 
 export async function runPublish({
-  script,
+  command,
+  args = [],
   cwd = process.cwd(),
 }: PublishOptions): Promise<PublishResult> {
   let branch = await gitUtils.getCurrentBranch(cwd);
 
-  const { stdout: changesetPublishOutput } = await execWithOutput(script, {
-    cwd,
+  const { stdout: changesetPublishOutput } = await exec(command, args, {
+    nodeOptions: { cwd },
   });
 
   await gitUtils.pullBranch(branch, cwd);
@@ -46,7 +44,7 @@ export async function runPublish({
   let releasedPackages: Package[] = [];
 
   if (tool !== "root") {
-    let newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@([^\s]+)/;
+    let newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/;
     let packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
 
     for (let line of changesetPublishOutput.split("\n")) {
@@ -118,9 +116,7 @@ export async function runVersion({
   let versionsByDirectory = await getVersionsByDirectory(cwd);
 
   if (script) {
-    await execWithOutput(script, {
-      cwd,
-    });
+    await exec(script, [], { nodeOptions: { cwd } });
   } else {
     let changesetsCliPkgJsonPath = require.resolve(
       "@changesets/cli/package.json",
@@ -140,7 +136,7 @@ export async function runVersion({
         ? "bump"
         : "version",
     );
-    await spawnWithOutput("node", args, { cwd });
+    await exec("node", args, { nodeOptions: { cwd } });
   }
 
   let changedPackages = await getChangedPackages(cwd, versionsByDirectory);

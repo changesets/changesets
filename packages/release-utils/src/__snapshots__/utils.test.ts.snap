@@ -1,6 +1,26 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`it sorts the things right 1`] = `
+exports[`exec > it works 1`] = `
+{
+  "exitCode": 0,
+  "stderr": "error
+",
+  "stdout": "log
+",
+}
+`;
+
+exports[`exec > works like the old execWithOutput function 1`] = `
+{
+  "exitCode": 0,
+  "stderr": "error
+",
+  "stdout": "log
+",
+}
+`;
+
+exports[`getChangelogEntry > it sorts the things right 1`] = `
 [
   {
     "highestLevel": 3,
@@ -20,7 +40,7 @@ exports[`it sorts the things right 1`] = `
 ]
 `;
 
-exports[`it works 1`] = `
+exports[`getChangelogEntry > it works 1`] = `
 "### Major Changes
 
 * [2164a779](https://github.com/keystonejs/keystone-5/commit/2164a779):
@@ -35,7 +55,7 @@ exports[`it works 1`] = `
 "
 `;
 
-exports[`it works 2`] = `
+exports[`getChangelogEntry > it works 2`] = `
 "### Patch Changes
 
 * [19fe6c1b](https://github.com/keystonejs/keystone-5/commit/19fe6c1b):
