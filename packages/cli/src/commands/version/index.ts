@@ -1,4 +1,3 @@
-import pc from "picocolors";
 import path from "path";
 import * as git from "@changesets/git";
 import type { Config } from "@changesets/types";
@@ -10,6 +9,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
+import { importantWarning } from "../../utils/cli-utilities.ts";
 
 export default async function version(
   cwd: string,
@@ -34,18 +34,16 @@ export default async function version(
         `
 Snapshot release is not allowed in pre mode.
 To resolve this exit the pre mode by running \`changeset pre exit\`.
-      `.trim(),
+        `.trim(),
       );
       throw new ExitError(1);
     } else {
-      // TODO: replace with note()
-      log.warn(
+      importantWarning(
         `
-${pc.yellow("======== IMPORTANT ========")}
 You are in prerelease mode!
 If you meant to do a normal release you should revert these changes and run \`changeset pre exit\`.
 You can then run \`changeset version\` again to do a normal release.
-      `.trim(),
+        `,
       );
     }
   }
@@ -69,7 +67,7 @@ You can then run \`changeset version\` again to do a normal release.
       ? {
           tag: options.snapshot === true ? undefined : options.snapshot,
           commit: config.snapshot.prereleaseTemplate?.includes("{commit}")
-            ? await getCurrentCommitId({ cwd })
+            ? await git.getCurrentCommitId({ cwd })
             : undefined,
         }
       : undefined,
