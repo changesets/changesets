@@ -1,5 +1,6 @@
 import type { CommitFunctions } from "@changesets/types";
 import path from "path";
+import { resolve } from "import-meta-resolve";
 import { pathToFileURL } from "node:url";
 
 export async function getCommitFunctions(
@@ -12,10 +13,7 @@ export async function getCommitFunctions(
   }
   let commitOpts: any = commit[1];
   let changesetPath = path.join(cwd, ".changeset");
-  let commitPath = import.meta.resolve(
-    commit[0],
-    pathToFileURL(changesetPath).toString(),
-  );
+  let commitPath = resolve(commit[0], pathToFileURL(changesetPath).toString());
 
   let possibleCommitFunc = await import(commitPath);
   if (possibleCommitFunc.default) {
