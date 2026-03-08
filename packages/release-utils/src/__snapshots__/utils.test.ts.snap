@@ -1,15 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`exec > it works 1`] = `
-{
-  "exitCode": 0,
-  "stderr": "error
-",
-  "stdout": "log
-",
-}
-`;
-
 exports[`exec > works like the old execWithOutput function 1`] = `
 {
   "exitCode": 0,
