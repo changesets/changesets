@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "3.0.0-next.1",
+  "version": "3.0.0-next.2",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "bin": {
     "changeset": "bin.js"
@@ -42,7 +42,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@changesets/apply-release-plan": "^8.0.0-next.1",
+    "@changesets/apply-release-plan": "^8.0.0-next.2",
     "@changesets/assemble-release-plan": "^7.0.0-next.1",
     "@changesets/changelog-git": "^1.0.0-next.1",
     "@changesets/config": "^4.0.0-next.1",
