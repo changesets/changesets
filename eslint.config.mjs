@@ -47,25 +47,17 @@ export default defineConfig(
       "@typescript-eslint/require-await": "off", // TODO enable and fix errors
       "@typescript-eslint/unbound-method": "off",
 
-      "n/prefer-node-protocol": "off", // TODO enable and fix errors
+      // these rules are slow, require extensive config, and/or don't provide much
       "n/no-extraneous-import": "off",
       "n/no-missing-import": "off",
       "n/no-process-exit": "off",
       "n/no-unpublished-import": "off",
+
       "n/no-unsupported-features/node-builtins": [
         "error",
-        { allowExperimental: true },
+        { ignores: ["fetch", "fs/promises.cp", "import.meta.dirname"], },
       ],
-    },
-  },
-  {
-    files: ["**/*.test.*"],
-    rules: {
-      "n/no-unsupported-features/node-builtins": [
-        "error",
-        // TODO: remove when minimum version is >=20.16
-        { ignores: ["import.meta.dirname"] },
-      ],
+      "n/prefer-node-protocol": "off", // TODO enable and fix errors
     },
   },
   {
