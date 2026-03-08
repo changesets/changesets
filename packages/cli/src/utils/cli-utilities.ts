@@ -3,14 +3,20 @@ import {
   confirm,
   groupMultiselect,
   isCancel,
+  note,
   Option,
   select,
   text,
 } from "@clack/prompts";
+import pc from "picocolors";
 
 function cancelFlow(): never {
   cancel("Cancelled... 👋 ");
   process.exit(0);
+}
+
+function importantWarning(message: string): void {
+  note(message.trim(), pc.yellow("IMPORTANT"), { format: pc.white });
 }
 
 export type MultiselectOptions<Value> = Record<string, Option<Value>[]>;
@@ -83,4 +89,11 @@ async function askList<Value extends string>(
   return result as Value;
 }
 
-export { askQuestion, askConfirm, askList, cancelFlow, askMultiselect };
+export {
+  askConfirm,
+  askList,
+  askMultiselect,
+  askQuestion,
+  cancelFlow,
+  importantWarning,
+};

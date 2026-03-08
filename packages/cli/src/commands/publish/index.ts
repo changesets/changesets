@@ -3,10 +3,11 @@ import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import type { Config, PreState } from "@changesets/types";
-import { log, note, spinner } from "@clack/prompts";
+import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import pc from "picocolors";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { importantWarning } from "../../utils/cli-utilities.ts";
 
 function formatPackageList(
   pkgs: Array<{ name: string; newVersion: string }>,
@@ -20,13 +21,11 @@ function formatPackageList(
 
 function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   if (preState) {
-    note(
+    importantWarning(
       `
 You are in prerelease mode, so packages will be published to the ${pc.cyan(preState.tag)} npm tag,
 ${pc.red("except")} for packages that have not had normal releases, which will be published to ${pc.cyan("latest")}.
-      `.trim(),
-      pc.yellow("IMPORTANT"),
-      { format: pc.white },
+      `,
     );
 
     // TODO: add confirm?
