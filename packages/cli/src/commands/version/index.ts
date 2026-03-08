@@ -38,6 +38,7 @@ To resolve this exit the pre mode by running \`changeset pre exit\`.
       );
       throw new ExitError(1);
     } else {
+      // TODO: replace with note()
       log.warn(
         `
 ${pc.yellow("======== IMPORTANT ========")}
