@@ -14,6 +14,7 @@ import * as cli from "../../utils/cli-utilities.ts";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
 import createChangeset from "./createChangeset.ts";
 import printConfirmationMessage from "./messages.ts";
+import { importantWarning } from "../../utils/cli-utilities.ts";
 
 export default async function add(
   cwd: string,
@@ -102,16 +103,19 @@ ${(error as Error).toString()}
       config.commit,
       cwd,
     );
+
+    let finalLogMessageLines: string[] = [];
+
     if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
       await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
-      log.info(
-        pc.green(`${empty ? "Empty " : ""}Changeset added and committed`),
+      finalLogMessageLines.push(
+        pc.green(`${empty ? "Empty " : ""}Changeset added and committed!`),
       );
     } else {
-      log.info(
+      finalLogMessageLines.push(
         pc.green(
-          `${empty ? "Empty " : ""}Changeset added! - you can now commit it\n`,
+          `${empty ? "Empty " : ""}Changeset added - you can now commit it!`,
         ),
       );
     }
@@ -121,18 +125,18 @@ ${(error as Error).toString()}
     );
 
     if (hasMajorChange) {
-      log.warn(
+      importantWarning(
         `
 This Changeset includes a major change and we STRONGLY recommend adding more information to the changeset:
   WHAT the breaking change is
   WHY the change was made
   HOW a consumer should update their code
-`.trim(),
+        `,
       );
     } else {
-      log.info(
+      finalLogMessageLines.push(
         pc.green(
-          "If you want to modify or expand on the changeset summary, you can find it here",
+          "If you want to modify or expand on the changeset summary, you can find it here:",
         ),
       );
     }
@@ -141,7 +145,9 @@ This Changeset includes a major change and we STRONGLY recommend adding more inf
       process.cwd(),
       path.join(changesetBase, `${changesetID}.md`),
     );
-    log.info(pc.blue(changesetPath));
+    finalLogMessageLines.push(pc.blue(changesetPath));
+
+    log.info(finalLogMessageLines.join("\n"));
 
     if (open) {
       launchEditor(changesetPath);
