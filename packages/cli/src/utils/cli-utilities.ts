@@ -2,9 +2,10 @@ import {
   cancel,
   confirm,
   groupMultiselect,
+  type GroupMultiSelectOptions,
   isCancel,
   note,
-  Option,
+  type Option,
   select,
   text,
 } from "@clack/prompts";
@@ -22,13 +23,15 @@ function importantWarning(message: string): void {
 export type MultiselectOptions<Value> = Record<string, Option<Value>[]>;
 async function askMultiselect<Value>(
   message: string,
-  options: MultiselectOptions<Value>,
+  values: MultiselectOptions<Value>,
+  options?: Pick<GroupMultiSelectOptions<Value>, "message" | "options">,
 ): Promise<Value[]> {
   const result = await groupMultiselect({
-    message,
     selectableGroups: true,
-    options,
-    required: false,
+    required: true,
+    ...options,
+    message,
+    options: values,
   });
 
   if (isCancel(result)) {
