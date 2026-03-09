@@ -358,13 +358,6 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           2
         )} when the only valid values are undefined or an array of package names`
       );
-    } else {
-      messages.push(
-        ...getUnmatchedPatterns(json.ignore, pkgNames).map(
-          (pkgOrGlob) =>
-            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`
-        )
-      );
     }
   }
 
