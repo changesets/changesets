@@ -154,13 +154,19 @@ export async function getTokenIsRequired() {
 //   version exists on the registry: exact strings pass `semver.satisfies`,
 //   and the output still includes the full `versions` history (same
 //   packument merge). Returns empty when the version doesn't exist yet.
+// - Consequence: the exact-version fallback only provides data when
+//   localVersion is already published. For a new unpublished version both
+//   queries return empty → no versions list → only-pre detection is not
+//   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
+//   published with preState.tag rather than "latest".
 export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestQueue.add(async () => {
     info(`npm info ${packageJson.name}`);
 
     const { scope, registry } = getCorrectRegistry(packageJson);
 
-    // We need to start with a bare query to handle the case where the local version doesn't exist yet on the registry.
+    // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
+    // bleed-through, enabling only-pre detection downstream. Returns empty when no `latest` exists.
     let result = await spawn("npm", [
       "info",
       packageJson.name,
