@@ -111,8 +111,8 @@ describe("getChangelogEntry", () => {
 describe("exec", () => {
   test("works like the old execWithOutput function", async () => {
     let result = await exec(
-      "node -e \"console.error('error'); console.log('log')\"",
-      [],
+      "node",
+      ["-e", `console.error('error'); console.log('log')`],
       { nodeOptions: { cwd: process.cwd() } },
     );
     expect(result).toMatchSnapshot();
