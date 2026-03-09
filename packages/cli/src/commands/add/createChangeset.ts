@@ -34,17 +34,6 @@ async function getPackagesToRelease(
   changedPackages: Array<string>,
   allPackages: Array<Package>,
 ): Promise<string[]> {
-  function askInitialReleaseQuestion(
-    defaultChoiceList: MultiselectOptions<string>,
-  ) {
-    return cli.askMultiselect(
-      // TODO: Make this wording better
-      // TODO: take objects and be fancy with matching
-      `Which packages would you like to include?`,
-      defaultChoiceList,
-    );
-  }
-
   if (allPackages.length > 1) {
     const unchangedPackagesNames = allPackages
       .map(({ packageJson }) => packageJson.name)
@@ -55,28 +44,26 @@ async function getPackagesToRelease(
         [
           [
             "changed packages",
-            changedPackages.map((value) => ({ value })).toSorted(),
+            changedPackages
+              .toSorted((a, b) => a.localeCompare(b))
+              .map((value) => ({ value })),
           ],
           [
             "unchanged packages",
-            unchangedPackagesNames.map((value) => ({ value })).toSorted(),
+            unchangedPackagesNames
+              .toSorted((a, b) => a.localeCompare(b))
+              .map((value) => ({ value })),
           ],
         ] as const
       ).filter(([_, choices]) => choices.length !== 0),
     );
 
-    let packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
+    const packagesToRelease = await cli.askMultiselect(
+      // TODO: Make this wording better
+      "Which packages were affected by the changes you made?",
+      defaultChoiceList,
+    );
 
-    if (packagesToRelease.length === 0) {
-      do {
-        log.error("You must select at least one package to release");
-        log.error(
-          "(Press space to mark/unmark one option. Press enter to confirm.)",
-        );
-
-        packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
-      } while (packagesToRelease.length === 0);
-    }
     return packagesToRelease.filter(
       (pkgName) =>
         pkgName !== "changed packages" && pkgName !== "unchanged packages",
