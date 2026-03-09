@@ -6,26 +6,20 @@ import semverLt from "semver/functions/lt.js";
 
 import { askWithEditor } from "../../utils/askWithEditor.ts";
 import * as cli from "../../utils/cli-utilities.ts";
-import type { MultiselectOptions } from "../../utils/cli-utilities.ts";
+import { importantWarning } from "../../utils/cli-utilities.ts";
 
-const { green, yellow, red, bold, blue, gray } = pc;
-
-async function confirmMajorRelease(pkgJSON: PackageJSON) {
-  if (semverLt(pkgJSON.version, "1.0.0")) {
-    // prettier-ignore
-    log.warn(`
-🦋 ${yellow(`Releasing a major version for ${green(pkgJSON.name)} will be its ${red('first major release')}.`)}
-   ${yellow(`If you are unsure if this is correct, contact the package's maintainers ${red("before committing this changeset")}.`)}   
-`.trim())
-
-    let shouldReleaseFirstMajor = await cli.askConfirm(
-      bold(
-        `Are you sure you want to release the ${red(
-          "first major version",
-        )} of ${pkgJSON.name}?`,
-      ),
+async function confirmMajorRelease({ name, version }: PackageJSON) {
+  if (semverLt(version, "1.0.0")) {
+    importantWarning(
+      `
+The ${pc.red("major")} version of ${pc.blue(name)} will be its ${pc.red("first major release")} (1.0.0).
+If you are unsure if this is correct, contact the package's maintainers ${pc.red("before committing this changeset")}.   
+      `,
     );
-    return shouldReleaseFirstMajor;
+
+    return cli.askConfirm(
+      `Are you sure you want to release the ${pc.red("first major version")} of ${name}?`,
+    );
   }
   return true;
 }
@@ -79,7 +73,7 @@ function getPkgJsonsByName(packages: Array<Package>) {
 }
 
 function formatPkgNameAndVersion(pkgName: string, version: string) {
-  return `${bold(pkgName)}@${bold(version)}`;
+  return `${pc.bold(pkgName)}@${pc.bold(version)}`;
 }
 
 export default async function createChangeset(
@@ -101,8 +95,8 @@ export default async function createChangeset(
     let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 
     let pkgsThatShouldBeMajorBumped = await cli.askMultiselect<string>(
-      bold(
-        `Which packages should have a ${red("major")} ${gray(`(${red("X")}.X.X)`)} bump?`,
+      pc.bold(
+        `Which packages should have a ${pc.red("major")} ${pc.gray(`(${pc.red("X")}.X.X)`)} bump?`,
       ),
       {
         "all packages": packagesToRelease.map((pkgName) => ({
@@ -131,8 +125,8 @@ export default async function createChangeset(
 
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
       let pkgsThatShouldBeMinorBumped = await cli.askMultiselect(
-        bold(
-          `Which packages should have a ${green("minor")} ${gray(`(X.${green("X")}.X)`)} bump?`,
+        pc.bold(
+          `Which packages should have a ${pc.green("minor")} ${pc.gray(`(X.${pc.green("X")}.X)`)} bump?`,
         ),
         {
           "all packages": [...pkgsLeftToGetBumpTypeFor].map((pkgName) => ({
@@ -158,8 +152,8 @@ export default async function createChangeset(
       );
       log.info(
         `
-The following packages will be ${blue("patch")} ${gray(`(X.X.${blue("X")})`)} bumped:
-${gray(patchBumpedPackages.join(", "))}
+The following packages will be ${pc.blue("patch")} ${pc.gray(`(X.X.${pc.blue("X")})`)} bumped:
+${pc.gray(patchBumpedPackages.join(", "))}
         `.trim(),
       );
 
@@ -170,7 +164,7 @@ ${gray(patchBumpedPackages.join(", "))}
   } else {
     let pkg = allPackages[0];
     let type = await cli.askList(
-      `What kind of change is this for ${green(
+      `What kind of change is this for ${pc.green(
         pkg.packageJson.name,
       )}? (current version is ${pkg.packageJson.version})`,
       ["patch", "minor", "major"],
@@ -211,7 +205,7 @@ ${gray(patchBumpedPackages.join(", "))}
       }
     } catch (err) {
       summary = await cli.askQuestion(
-        `${red(
+        `${pc.red(
           "An error happened using external editor. Please type your summary here:",
         )}`,
         { notEmpty: true },
