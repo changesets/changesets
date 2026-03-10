@@ -76,7 +76,7 @@ export default function getDependencyGraph(
   let valid = true;
 
   const packagesByName: { [key: string]: ChangesetsPackage } = {
-    [packages.root!.packageJson.name]: packages.root!,
+    [packages.root.packageJson.name]: packages.root,
   };
 
   const queue = [packages.root];
