@@ -176,17 +176,17 @@ export type PreState = {
   changesets: string[];
 };
 
-export interface ChangesetsPackage {
+export interface Package {
   dir: string;
   packageJson: PackageJSON;
 }
 
-export type ChangesetsPackagesTool = {
+export type PackagesTool = {
   type: "yarn" | "bolt" | "pnpm" | "lerna" | "root";
 };
 
-export interface ChangesetsPackages {
-  root: ChangesetsPackage;
-  packages: Array<ChangesetsPackage>;
-  tool: ChangesetsPackagesTool;
+export interface Packages {
+  root: Package;
+  packages: Array<Package>;
+  tool: PackagesTool;
 }

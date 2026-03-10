@@ -7,8 +7,8 @@ import type {
   PackageGroup,
   PreState,
   ReleasePlan,
-  ChangesetsPackage,
-  ChangesetsPackages,
+  Package,
+  Packages,
 } from "@changesets/types";
 import semverParse from "semver/functions/parse.js";
 import applyLinks from "./apply-links.ts";
@@ -124,7 +124,7 @@ type OptionalProp<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 function assembleReleasePlan(
   changesets: NewChangeset[],
-  packages: ChangesetsPackages,
+  packages: Packages,
   config: OptionalProp<Config, "snapshot">,
   // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
   preState: PreState | undefined,
@@ -272,7 +272,7 @@ function assembleReleasePlan(
 
 function getRelevantChangesets(
   changesets: NewChangeset[],
-  packagesByName: Map<string, ChangesetsPackage>,
+  packagesByName: Map<string, Package>,
   config: Config,
   preState: PreState | undefined,
 ): NewChangeset[] {
@@ -324,7 +324,7 @@ function getRelevantChangesets(
 function getHighestPreVersion(
   groupKind: "linked" | "fixed",
   packageGroup: PackageGroup,
-  packagesByName: Map<string, ChangesetsPackage>,
+  packagesByName: Map<string, Package>,
 ): number {
   let highestPreVersion = 0;
   for (let pkgName of packageGroup) {
@@ -345,7 +345,7 @@ function getHighestPreVersion(
 
 function getPreInfo(
   changesets: NewChangeset[],
-  packagesByName: Map<string, ChangesetsPackage>,
+  packagesByName: Map<string, Package>,
   config: Config,
   preState: PreState | undefined,
 ): PreInfo | undefined {

@@ -1,11 +1,7 @@
 // This is a modified version of the graph-getting in bolt
 import Range from "semver/classes/range.js";
 import pc from "picocolors";
-import type {
-  ChangesetsPackage,
-  ChangesetsPackages,
-  PackageJSON,
-} from "@changesets/types";
+import type { Package, Packages, PackageJSON } from "@changesets/types";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -57,7 +53,7 @@ const getValidRange = (potentialRange: string) => {
 };
 
 export default function getDependencyGraph(
-  packages: Pick<ChangesetsPackages, "packages" | "root">,
+  packages: Pick<Packages, "packages" | "root">,
   {
     ignoreDevDependencies = false,
     bumpVersionsWithWorkspaceProtocolOnly = false,
@@ -66,16 +62,16 @@ export default function getDependencyGraph(
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   } = {},
 ): {
-  graph: Map<string, { pkg: ChangesetsPackage; dependencies: Array<string> }>;
+  graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
   valid: boolean;
 } {
   const graph = new Map<
     string,
-    { pkg: ChangesetsPackage; dependencies: Array<string> }
+    { pkg: Package; dependencies: Array<string> }
   >();
   let valid = true;
 
-  const packagesByName: { [key: string]: ChangesetsPackage } = {
+  const packagesByName: { [key: string]: Package } = {
     [packages.root.packageJson.name]: packages.root,
   };
 

@@ -2,8 +2,8 @@ import type {
   NewChangeset,
   Release,
   VersionType,
-  ChangesetsPackages,
-  ChangesetsPackage,
+  Packages,
+  Package,
 } from "@changesets/types";
 
 function getPackage({
@@ -12,7 +12,7 @@ function getPackage({
 }: {
   name: string;
   version: string;
-}): ChangesetsPackage {
+}): Package {
   return {
     packageJson: {
       name,
@@ -60,20 +60,17 @@ let getSimpleSetup = () => ({
     },
     packages: [getPackage({ name: "pkg-a", version: "1.0.0" })],
     tool: { type: "yarn" },
-  } satisfies ChangesetsPackages,
+  } satisfies Packages,
   changesets: [
     getChangeset({ releases: [getRelease({ name: "pkg-a", type: "patch" })] }),
   ] satisfies Array<NewChangeset>,
 });
 
 class FakeFullState {
-  packages: ChangesetsPackages;
+  packages: Packages;
   changesets: NewChangeset[];
 
-  constructor(custom?: {
-    packages?: ChangesetsPackages;
-    changesets?: NewChangeset[];
-  }) {
+  constructor(custom?: { packages?: Packages; changesets?: NewChangeset[] }) {
     let { packages, changesets } = { ...getSimpleSetup(), ...custom };
     this.packages = packages;
     this.changesets = changesets;

@@ -4,11 +4,7 @@ import semverLt from "semver/functions/lt.js";
 
 import * as cli from "../../utils/cli-utilities.ts";
 import { error, log } from "@changesets/logger";
-import type {
-  Release,
-  PackageJSON,
-  ChangesetsPackage,
-} from "@changesets/types";
+import type { Release, PackageJSON, Package } from "@changesets/types";
 import { ExitError } from "@changesets/errors";
 
 const { green, yellow, red, bold, blue, cyan, gray } = pc;
@@ -39,7 +35,7 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
 
 async function getPackagesToRelease(
   changedPackages: Array<string>,
-  allPackages: Array<ChangesetsPackage>,
+  allPackages: Array<Package>,
 ) {
   function askInitialReleaseQuestion(defaultChoiceList: Array<any>) {
     return cli.askCheckboxPlus(
@@ -99,7 +95,7 @@ async function getPackagesToRelease(
   return [allPackages[0].packageJson.name];
 }
 
-function getPkgJsonsByName(packages: Array<ChangesetsPackage>) {
+function getPkgJsonsByName(packages: Array<Package>) {
   return new Map(
     packages.map(({ packageJson }) => [packageJson.name, packageJson]),
   );
@@ -111,7 +107,7 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Array<ChangesetsPackage>,
+  allPackages: Array<Package>,
   messageFromCli?: string,
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];

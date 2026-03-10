@@ -3,7 +3,7 @@ import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   ChangelogFunctions,
-  ChangesetsPackages,
+  Packages,
   Config,
   ModCompWithPackage,
   NewChangeset,
@@ -70,7 +70,7 @@ async function getCommitsThatAddChangesets(
 
 export default async function applyReleasePlan(
   releasePlan: ReleasePlan,
-  packages: ChangesetsPackages,
+  packages: Packages,
   config: Config = defaultConfig,
   snapshot?: string | boolean,
   contextDir = path.dirname(fileURLToPath(import.meta.url)),

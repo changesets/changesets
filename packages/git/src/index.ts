@@ -4,7 +4,7 @@ import path from "path";
 import { getPackages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import micromatch from "micromatch";
-import type { ChangesetsPackage } from "@changesets/types";
+import type { Package } from "@changesets/types";
 
 export async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
@@ -263,7 +263,7 @@ export async function getChangedPackagesSinceRef({
   cwd: string;
   ref: string;
   changedFilePatterns?: readonly string[];
-}): Promise<ChangesetsPackage[]> {
+}): Promise<Package[]> {
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
 
   return (

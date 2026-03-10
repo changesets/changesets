@@ -1,14 +1,11 @@
 import * as git from "@changesets/git";
 import type { PublishedResult } from "../commands/publish/publishPackages.ts";
-import type {
-  ChangesetsPackage,
-  ChangesetsPackagesTool,
-} from "@changesets/types";
+import type { Package, PackagesTool } from "@changesets/types";
 
 export async function getUntaggedPackages(
-  packages: Array<ChangesetsPackage>,
+  packages: Array<Package>,
   cwd: string,
-  tool: ChangesetsPackagesTool["type"],
+  tool: PackagesTool["type"],
 ) {
   const packageWithTags = await Promise.all(
     packages.map(async (pkg) => {

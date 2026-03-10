@@ -1,7 +1,7 @@
-import type { PackageGroup, ChangesetsPackage } from "@changesets/types";
+import type { PackageGroup, Package } from "@changesets/types";
 
 export function shouldSkipPackage(
-  { packageJson }: ChangesetsPackage,
+  { packageJson }: Package,
   {
     ignore,
     allowPrivatePackages,

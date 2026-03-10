@@ -1,8 +1,4 @@
-import type {
-  PackageGroup,
-  VersionType,
-  ChangesetsPackage,
-} from "@changesets/types";
+import type { PackageGroup, VersionType, Package } from "@changesets/types";
 import semverGt from "semver/functions/gt.js";
 import type { InternalRelease } from "./types.ts";
 import { InternalError } from "@changesets/errors";
@@ -38,7 +34,7 @@ export function getHighestReleaseType(
 
 export function getCurrentHighestVersion(
   packageGroup: PackageGroup,
-  packagesByName: Map<string, ChangesetsPackage>,
+  packagesByName: Map<string, Package>,
 ): string {
   let highestVersion: string | undefined;
 

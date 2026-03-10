@@ -4,7 +4,7 @@ import type {
   DependencyType,
   PackageJSON,
   VersionType,
-  ChangesetsPackage,
+  Package,
 } from "@changesets/types";
 import semverSatisfies from "semver/functions/satisfies.js";
 import { incrementVersion } from "./increment.ts";
@@ -31,7 +31,7 @@ export default function determineDependents({
   config,
 }: {
   releases: Map<string, InternalRelease>;
-  packagesByName: Map<string, ChangesetsPackage>;
+  packagesByName: Map<string, Package>;
   dependencyGraph: Map<string, string[]>;
   preInfo: PreInfo | undefined;
   config: Config;

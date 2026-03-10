@@ -1,20 +1,19 @@
-import type { ChangesetsPackage, ChangesetsPackages } from "@changesets/types";
+import type { Package, Packages } from "@changesets/types";
 import getDependencyGraph from "./get-dependency-graph.ts";
 
 export function getDependentsGraph(
-  packages: Pick<ChangesetsPackages, "packages" | "root">,
+  packages: Pick<Packages, "packages" | "root">,
   opts?: {
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   },
 ) {
-  const graph: Map<string, { pkg: ChangesetsPackage; dependents: string[] }> =
-    new Map();
+  const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
   const { graph: dependencyGraph } = getDependencyGraph(packages, opts);
 
   const dependentsLookup: {
-    [key: string]: { pkg: ChangesetsPackage; dependents: Array<string> };
+    [key: string]: { pkg: Package; dependents: Array<string> };
   } = {
     [packages.root.packageJson.name]: {
       pkg: packages.root,

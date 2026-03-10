@@ -1,5 +1,5 @@
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config, ChangesetsPackage } from "@changesets/types";
+import type { Config, Package } from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import {
   getCurrentHighestVersion,
@@ -9,7 +9,7 @@ import {
 
 export default function matchFixedConstraint(
   releases: Map<string, InternalRelease>,
-  packagesByName: Map<string, ChangesetsPackage>,
+  packagesByName: Map<string, Package>,
   config: Config,
 ): boolean {
   let updated = false;
