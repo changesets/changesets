@@ -1,4 +1,5 @@
 import path from "path";
+import pc from "picocolors";
 import * as git from "@changesets/git";
 import type { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
@@ -13,9 +14,7 @@ import { importantWarning } from "../../utils/cli-utilities.ts";
 
 export default async function version(
   cwd: string,
-  options: {
-    snapshot?: string | boolean;
-  },
+  options: { snapshot?: string | boolean },
   config: Config,
 ) {
   const releaseConfig = {
@@ -33,7 +32,7 @@ export default async function version(
       log.error(
         `
 Snapshot release is not allowed in pre mode.
-To resolve this exit the pre mode by running \`changeset pre exit\`.
+To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
         `.trim(),
       );
       throw new ExitError(1);
@@ -41,8 +40,8 @@ To resolve this exit the pre mode by running \`changeset pre exit\`.
       importantWarning(
         `
 You are in prerelease mode!
-If you meant to do a normal release you should revert these changes and run \`changeset pre exit\`.
-You can then run \`changeset version\` again to do a normal release.
+If you meant to do a normal release you should revert these changes and run ${pc.cyan("changeset pre exit")}.
+You can then run ${pc.cyan("changeset version")} again to do a normal release.
         `,
       );
     }
@@ -101,12 +100,12 @@ You can then run \`changeset version\` again to do a normal release.
     if (!commit) {
       log.error("Changesets ran into trouble committing your files");
     } else {
-      log.info(
+      log.success(
         "All files have been updated and committed. You're ready to publish!",
       );
     }
   } else {
-    log.info(
+    log.success(
       "All files have been updated. Review them and commit at your leisure",
     );
   }

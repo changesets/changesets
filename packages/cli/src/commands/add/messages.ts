@@ -29,14 +29,15 @@ export default function printConfirmationMessage(
   if (patchReleases.length > 0) {
     msg += `\n${pc.bold(pc.green("patch"))}:  ${patchReleases.join(", ")}`;
   }
-  log.info(msg);
+  log.success(msg);
 
   if (repoHasMultiplePackages) {
-    const message =
-      "Note: All dependents of these packages that will be incompatible with the new version will be " +
-      pc.redBright("patch bumped") +
-      " when this changeset is applied.";
-
-    log.info(message);
+    log.info(
+      `
+Note: All packages that depend on these whose required versions 
+will be incompatible will also be ${pc.green("patch")} bumped
+when this changeset is applied.
+      `.trim(),
+    );
   }
 }

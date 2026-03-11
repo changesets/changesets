@@ -50,7 +50,7 @@ export default async function publish(
     log.error(
       `
 Releasing under custom tag is not allowed in pre mode!
-To resolve this exit the pre mode by running \`changeset pre exit\`.
+To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
       `.trim(),
     );
     throw new ExitError(1);

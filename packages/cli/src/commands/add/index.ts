@@ -147,7 +147,7 @@ This Changeset includes a major change and we STRONGLY recommend adding more inf
     );
     finalLogMessageLines.push(pc.blue(changesetPath));
 
-    log.info(finalLogMessageLines.join("\n"));
+    log.success(finalLogMessageLines.join("\n"));
 
     if (open) {
       launchEditor(changesetPath);
