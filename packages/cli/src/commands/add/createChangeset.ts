@@ -164,9 +164,7 @@ ${pc.gray(patchBumpedPackages.join(", "))}
   } else {
     let pkg = allPackages[0];
     let type = await cli.askList(
-      `What kind of change is this for ${pc.green(
-        pkg.packageJson.name,
-      )}? (current version is ${pkg.packageJson.version})`,
+      `What kind of change is this for ${pc.blue(pkg.packageJson.name)}? ${pc.gray(`(current version is ${pkg.packageJson.version})`)}`,
       ["patch", "minor", "major"],
     );
     if (type === "major") {

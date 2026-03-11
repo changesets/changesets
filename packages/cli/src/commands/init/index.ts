@@ -29,7 +29,7 @@ ${pc.blue(".changeset/config.json")}
           `.trim(),
         );
       } else {
-        log.info(
+        log.success(
           `
 It looks like you don't have a config file
 The default config file will be written to ${pc.blue(".changeset/config.json")}
@@ -41,7 +41,7 @@ The default config file will be written to ${pc.blue(".changeset/config.json")}
         defaultConfig,
       );
     } else {
-      log.info(
+      log.success(
         `It looks like you already have ${pc.green("Changesets")} initialized. You should be able to run changeset commands no problems.`,
       );
     }
@@ -54,7 +54,7 @@ The default config file will be written to ${pc.blue(".changeset/config.json")}
       defaultConfig,
     );
 
-    log.info(
+    log.success(
       `
 Thanks for choosing ${pc.green("Changesets")} to help manage your versioning and publishing.
 You should be set up to start using changesets now!
