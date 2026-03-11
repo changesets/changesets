@@ -4,7 +4,6 @@ import {
   getChangelogEntry,
   sortChangelogEntries,
 } from "./utils.ts";
-import { exec } from "tinyexec";
 
 let changelog = `# @keystone-alpha/email
 
