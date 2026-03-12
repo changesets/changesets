@@ -36,7 +36,20 @@ export function shouldUpdateDependencyBasedOnConfig(
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
 ): boolean {
-  if (!semverSatisfies(release.version, depVersionRange)) {
+  // Strip the workspace: protocol prefix before semver comparison.
+  // workspace:^1.2.3 is a valid range once the prefix is removed; semver can't
+  // parse the full "workspace:^1.2.3" string and would always treat it as out of
+  // range, causing unnecessary version bumps.
+  const range = depVersionRange.startsWith("workspace:")
+    ? depVersionRange.slice("workspace:".length)
+    : depVersionRange;
+
+  // Implicit workspace aliases (^, ~, *) are not real semver ranges — they mean
+  // "current workspace version". version-package.ts handles them with a separate
+  // continue, so we skip the range check for them here.
+  const isImplicitWorkspaceAlias = range === "^" || range === "~" || range === "*";
+
+  if (!isImplicitWorkspaceAlias && !semverSatisfies(release.version, range)) {
     // Dependencies leaving semver range should always be updated
     return true;
   }
