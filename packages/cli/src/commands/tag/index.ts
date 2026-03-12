@@ -57,8 +57,10 @@ export default async function tag(cwd: string, config: Config) {
 
   const lines = [
     "Created tags:",
-    untaggedPackages.map((pkg) => `   - ${buildTagMessage(tool, pkg)}`).join(`\n`),
-  ]
+    untaggedPackages
+      .map((pkg) => `   - ${buildTagMessage(tool, pkg)}`)
+      .join(`\n`),
+  ];
   if (skippedTags.length !== 0) {
     lines.push(
       "Skipped tags (already exist):",
