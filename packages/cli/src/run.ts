@@ -1,9 +1,10 @@
+import pc from "picocolors";
 import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { error } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config } from "@changesets/types";
+import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "node:fs/promises";
 import path from "path";
@@ -32,12 +33,12 @@ export async function run(
   try {
     await fs.access(path.resolve(rootDir, ".changeset"));
   } catch (err) {
-    error("There is no .changeset folder. ");
-    error(
-      "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up.",
-    );
-    error(
-      "If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration.",
+    log.error(
+      `
+There is no .changeset folder.
+If this is the first time ${pc.green("Changesets")} have been used in this project, run ${pc.cyan("changeset init")} to get set up.
+If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration.
+      `.trim(),
     );
     throw new ExitError(1);
   }
@@ -53,15 +54,15 @@ export async function run(
         () => false,
       );
     if (oldConfigExists) {
-      error(
-        "It looks like you're using the version 1 `.changeset/config.js` file",
-      );
-      error("You'll need to convert it to a `.changeset/config.json` file");
-      error(
-        "The format of the config object has significantly changed in v2 as well",
-      );
-      error(
-        " - we thoroughly recommend looking at the changelog for this package for what has changed",
+      log.error(
+        `
+It looks like you're using the version 1 ${pc.blue(".changeset/config.js")} file.
+You'll need to convert it to ${pc.blue(".changeset/config.json")}, and update the
+config as the options have significantly changed as well in v2.
+We thoroughly recommend looking at the changelog for this package for what has changed.
+Changesets will create a new file with default options, remember to migrate your old config to it:
+${pc.blue(".changeset/config.json")}
+          `.trim(),
       );
       throw new ExitError(1);
     } else {
@@ -74,7 +75,7 @@ export async function run(
     // @ts-ignore if this is undefined, we have already exited
     await add(rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
-    error(
+    log.error(
       "Too many arguments passed to changesets - we only accept the command name as an argument",
     );
   } else {
@@ -120,7 +121,7 @@ export async function run(
         for (const pkgName of ignoreArrayFromCmd || []) {
           if (!pkgNames.has(pkgName)) {
             messages.push(
-              `The package "${pkgName}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
+              `The package "${pc.blue(pkgName)}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
             );
           }
         }
@@ -178,14 +179,14 @@ export async function run(
               })
             ) {
               messages.push(
-                `The package "${dependent}" depends on the skipped package "${skippedPackage}" (either by \`ignore\` option or by \`privatePackages.version\`), but "${dependent}" is not being skipped. Please pass "${dependent}" to the \`--ignore\` flag.`,
+                `The package "${pc.blue(dependent)}" depends on the skipped package "${pc.blue(skippedPackage)}" (either by \`ignore\` option or by \`privatePackages.version\`), but "${pc.blue(dependent)}" is not being skipped. Please pass "${pc.blue(dependent)}" to the \`--ignore\` flag.`,
               );
             }
           }
         }
 
         if (messages.length > 0) {
-          error(messages.join("\n"));
+          log.error(messages.join("\n"));
 
           throw new ExitError(1);
         }
@@ -212,39 +213,39 @@ export async function run(
       case "pre": {
         let command = input[1];
         if (command !== "enter" && command !== "exit") {
-          error(
-            "`enter`, `exit` or `snapshot` must be passed after prerelease",
+          log.error(
+            `${pc.cyan("enter")}, ${pc.cyan("exit")} or ${pc.cyan("snapshot")} must be passed after prerelease`,
           );
           throw new ExitError(1);
         }
         let tag = input[2];
         if (command === "enter" && typeof tag !== "string") {
-          error(`A tag must be passed when using prerelease enter`);
+          log.error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);
         }
         await pre(rootDir, { command, tag });
         return;
       }
       case "bump": {
-        error(
-          'In version 2 of changesets, "bump" has been renamed to "version" - see our changelog for an explanation',
-        );
-        error(
-          "To fix this, use `changeset version` instead, and update any scripts that use changesets",
+        log.error(
+          `
+In version 2 of changesets, ${pc.red("bump")} has been renamed to ${pc.cyan("version")} - see our changelog for an explanation
+To fix this, use ${pc.cyan("changeset version")} instead, and update any scripts that use changesets
+          `.trim(),
         );
         throw new ExitError(1);
       }
       case "release": {
-        error(
-          'In version 2 of changesets, "release" has been renamed to "publish" - see our changelog for an explanation',
-        );
-        error(
-          "To fix this, use `changeset publish` instead, and update any scripts that use changesets",
+        log.error(
+          `
+In version 2 of changesets, ${pc.red("release")} has been renamed to ${pc.cyan("publish")} - see our changelog for an explanation
+To fix this, use ${pc.cyan("changeset publish")} instead, and update any scripts that use changesets
+          `.trim(),
         );
         throw new ExitError(1);
       }
       default: {
-        error(`Invalid command ${input[0]} was provided`);
+        log.error(`Unknown command: ${pc.red(input[0])}`);
         throw new ExitError(1);
       }
     }
