@@ -134,7 +134,7 @@ ${pc.blue(".changeset/config.json")}
         for (const pkgName of ignoreArrayFromCmd || []) {
           if (!pkgNames.has(pkgName)) {
             messages.push(
-              `The package "${pc.blue(pkgName)}" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
+              `The package ${pc.blue(pkgName)} is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
             );
           }
         }
@@ -189,7 +189,7 @@ ${pc.blue(".changeset/config.json")}
               })
             ) {
               messages.push(
-                `The package "${pc.blue(dependent)}" depends on the skipped package "${pc.blue(skippedPackage)}" (either by \`ignore\` option or by \`privatePackages.version\`), but "${pc.blue(dependent)}" is not being skipped. Please pass "${pc.blue(dependent)}" to the \`--ignore\` flag.`,
+                `The package ${pc.blue(dependent)} depends on the skipped package ${pc.blue(skippedPackage)} (either by \`ignore\` option or by \`privatePackages.version\`), but ${pc.blue(dependent)} is not being skipped. Please pass ${pc.blue(dependent)} to the ${pc.cyan("--ignore")} flag.`,
               );
             }
           }
