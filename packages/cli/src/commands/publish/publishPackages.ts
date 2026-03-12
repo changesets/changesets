@@ -1,4 +1,4 @@
-import { info, warn } from "@changesets/logger";
+import { log, spinner } from "@clack/prompts";
 import type { AccessType, PreState } from "@changesets/types";
 import type { Package } from "@changesets/types";
 import { resolve } from "path";
@@ -134,7 +134,10 @@ async function publishAPackage(
   tag: string,
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-  info(`Publishing ${pc.cyan(`"${name}"`)} at ${pc.green(`"${version}"`)}`);
+
+  // TODO: maybe use padding: 0 here
+  const s = spinner();
+  s.start(`Publishing ${pc.blue(name)}@${pc.green(version)}`);
 
   const publishConfirmation = await publish(
     pkg.packageJson,
@@ -148,6 +151,7 @@ async function publishAPackage(
     },
     twoFactorState,
   );
+  s.stop(`Published ${pc.blue(name)}@${pc.green(version)}`);
 
   return {
     name,
@@ -194,22 +198,19 @@ async function getUnpublishedPackages(
     const { name, publishedState, localVersion, publishedVersions } = pkgInfo;
     if (!publishedVersions.includes(localVersion)) {
       packagesToPublish.push(pkgInfo);
-      info(
-        `${name} is being published because our local version (${localVersion}) has not been published on npm`,
-      );
+      const lines = [
+        `${pc.blue(name)} is being published because our local version (${pc.green(localVersion)}) has not been published to npm`,
+      ];
       if (preState !== undefined && publishedState === "only-pre") {
-        info(
-          `${name} is being published to ${pc.cyan(
-            "latest",
-          )} rather than ${pc.cyan(
-            preState.tag,
-          )} because there has not been a regular release of it yet`,
+        lines.push(
+          `${pc.blue(name)} is being published to ${pc.cyan("latest")} rather than ${pc.cyan(preState.tag)} because there has not been a regular release of it yet`,
         );
       }
+      log.info(lines.join("\n"));
     } else {
       // If the local version is behind npm, something is wrong, we warn here, and by not getting published later, it will fail
-      warn(
-        `${name} is not being published because version ${localVersion} is already published on npm`,
+      log.warn(
+        `${pc.blue(name)} is not being published because version ${pc.green(localVersion)} is already published to npm`,
       );
     }
   }

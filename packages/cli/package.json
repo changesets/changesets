@@ -50,7 +50,6 @@
     "@changesets/get-dependents-graph": "^3.0.0-next.1",
     "@changesets/get-release-plan": "^5.0.0-next.1",
     "@changesets/git": "^4.0.0-next.1",
-    "@changesets/logger": "^1.0.0-next.1",
     "@changesets/pre": "^3.0.0-next.1",
     "@changesets/read": "^1.0.0-next.1",
     "@changesets/should-skip-package": "^1.0.0-next.1",

@@ -42,7 +42,6 @@ let defaultOptions = {
 const consoleError = console.error;
 
 vi.mock("human-id");
-vi.mock("@changesets/logger");
 
 vi.mock("@changesets/git");
 const mockedGit = vi.mocked(git);
