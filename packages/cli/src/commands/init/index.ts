@@ -18,25 +18,13 @@ export default async function init(cwd: string) {
 
   if (existsSync(changesetBase)) {
     if (!existsSync(path.join(changesetBase, "config.json"))) {
-      if (existsSync(path.join(changesetBase, "config.js"))) {
-        log.error(
-          `
-It looks like you're using the version 1 ${pc.blue(".changeset/config.js")} file.
-You'll need to convert it to ${pc.blue(".changeset/config.json")}, and update
-the config as the options have significantly changed as well in v2.
-We thoroughly recommend looking at the changelog for this package for what has changed.
-Changesets will create a new file with default options, remember to migrate your old config to it:
-${pc.blue(".changeset/config.json")}
-          `.trim(),
-        );
-      } else {
-        log.success(
-          `
+      log.success(
+        `
 It looks like you don't have a config file
 The default config file will be written to ${pc.blue(".changeset/config.json")}
-          `.trim(),
-        );
-      }
+        `.trim(),
+      );
+
       await fs.writeFile(
         path.resolve(changesetBase, "config.json"),
         defaultConfig,
