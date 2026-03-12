@@ -441,6 +441,7 @@ describe("Add command", () => {
         "changed packages": [{ value: "pkg-b" }],
         "unchanged packages": [{ value: "pkg-a" }],
       },
+      { required: true },
     );
 
     const changesets = await getChangesets(cwd);

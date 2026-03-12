@@ -11,12 +11,12 @@ import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import {
   linkNodeModules,
-  mockedLogger,
   silenceLogsInBlock,
   testdir,
 } from "@changesets/test-utils";
 import type { Changeset, Config } from "@changesets/types";
 import writeChangeset from "@changesets/write";
+import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { humanId } from "human-id";
 import assert from "node:assert/strict";
@@ -24,6 +24,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import pre from "../pre/index.ts";
 import version from "./index.ts";
+
+vi.mock("@clack/prompts");
+const mockedLogger = vi.mocked(log);
 
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
@@ -108,10 +111,9 @@ describe("running version in a simple project", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
       await version(cwd, defaultOptions, modifiedDefaultConfig);
-      const loggerWarnCalls = mockedLogger.warn!.mock.calls;
-      expect(loggerWarnCalls.length).toEqual(1);
-      expect(loggerWarnCalls[0][0]).toEqual(
-        "No unreleased changesets found, exiting.",
+      expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
+        "No unreleased changesets found.",
       );
     });
   });
