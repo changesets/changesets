@@ -1,15 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import fs from "node:fs/promises";
 import path from "path";
-import pc from "picocolors";
 import { ExitError } from "@changesets/errors";
-import {
-  mockedLogger,
-  silenceLogsInBlock,
-  testdir,
-} from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { log } from "@clack/prompts";
 
 import pre from "./index.ts";
+
+vi.mock("@clack/prompts");
+const mockedLogger = vi.mocked(log);
 
 silenceLogsInBlock();
 
@@ -35,8 +34,11 @@ describe("enterPre", () => {
       mode: "pre",
       tag: "next",
     });
-    expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${pc.cyan("next")}`,
+    expect(mockedLogger.success).toHaveBeenCalledWith(
+      expect.stringContaining("Entered pre mode with tag"),
+    );
+    expect(mockedLogger.success).toHaveBeenCalledWith(
+      expect.stringContaining("next"),
     );
   });
   it("should throw if already in pre", async () => {
@@ -58,11 +60,17 @@ describe("enterPre", () => {
     await expect(
       pre(cwd, { command: "enter", tag: "next" }),
     ).rejects.toBeInstanceOf(ExitError);
-    expect(mockedLogger.error).toBeCalledWith(
-      "`changeset pre enter` cannot be run when in pre mode",
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("changeset pre enter"),
     );
-    expect(mockedLogger.info).toBeCalledWith(
-      "If you're trying to exit pre mode, run `changeset pre exit`",
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("cannot be run when in pre mode"),
+    );
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("If you're trying to exit"),
+    );
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("changeset pre exit"),
     );
   });
   it("should enter if already exited pre mode", async () => {
@@ -92,8 +100,11 @@ describe("enterPre", () => {
       mode: "pre",
       tag: "next",
     });
-    expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${pc.cyan("next")}`,
+    expect(mockedLogger.success).toHaveBeenCalledWith(
+      expect.stringContaining("Entered pre mode with tag"),
+    );
+    expect(mockedLogger.success).toHaveBeenCalledWith(
+      expect.stringContaining("next"),
     );
   });
 });
@@ -139,11 +150,17 @@ describe("exitPre", () => {
     await expect(pre(cwd, { command: "exit" })).rejects.toBeInstanceOf(
       ExitError,
     );
-    expect(mockedLogger.error).toBeCalledWith(
-      "`changeset pre exit` can only be run when in pre mode",
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("changeset pre exit"),
     );
-    expect(mockedLogger.info).toBeCalledWith(
-      "If you're trying to enter pre mode, run `changeset pre enter`",
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("can only be run when in pre mode"),
+    );
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("If you're trying to enter pre mode, run "),
+    );
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("changeset pre enter"),
     );
   });
 });
