@@ -7,14 +7,16 @@ import { getPackages, type Tool } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 
 function buildTag(tool: Tool, pkg: { name: string; newVersion: string }) {
-  return tool ? `${pkg.name}@${pkg.newVersion}` : `v${pkg.newVersion}`;
+  return tool !== "root"
+    ? `${pkg.name}@${pkg.newVersion}`
+    : `v${pkg.newVersion}`;
 }
 
 function buildTagMessage(
   tool: Tool,
   pkg: { name: string; newVersion: string },
 ) {
-  return tool
+  return tool !== "root"
     ? `${pc.blue(pkg.name)}@${pc.green(pkg.newVersion)}`
     : pc.cyan(`v${pkg.newVersion}`);
 }
@@ -50,6 +52,8 @@ export default async function tag(cwd: string, config: Config) {
 
   for (const pkg of untaggedPackages) {
     const tag = buildTag(tool, pkg);
+    if (allExistingTags.has(tag)) continue;
+
     await git.tag(tag, cwd);
 
     p.advance(1, buildTagMessage(tool, pkg));
