@@ -110,7 +110,7 @@ describe("running version in a simple project", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
       await version(cwd, defaultOptions, modifiedDefaultConfig);
-      expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.warn).toHaveBeenCalledOnce();
       expect(mockedLogger.warn).toHaveBeenCalledWith(
         "No unreleased changesets found.",
       );

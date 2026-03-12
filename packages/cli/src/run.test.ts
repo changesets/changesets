@@ -1,14 +1,13 @@
 import path from "path";
 import { describe, expect, it, vi } from "vitest";
-import {
-  mockedLogger,
-  silenceLogsInBlock,
-  testdir,
-} from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import add from "./commands/add/index.ts";
 import { run } from "./run.ts";
 import writeChangeset from "@changesets/write";
+import { stripVTControlCharacters } from "node:util";
+import { log } from "@clack/prompts";
 
+const mockedLogger = vi.mocked(log);
 vi.mock("./commands/add");
 vi.mock("./commands/version");
 
@@ -80,10 +79,10 @@ describe("cli", () => {
         // ignore errors. We just want to validate the error message
       }
 
-      const loggerErrorCalls = mockedLogger.error!.mock.calls;
-      expect(loggerErrorCalls.length).toEqual(1);
-      expect(loggerErrorCalls[0][0]).toEqual(
-        `The package "pkg-c" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
+      expect(mockedLogger.error).toHaveBeenCalledOnce();
+      const arg = mockedLogger.error.mock.calls[0][0];
+      expect(stripVTControlCharacters(arg)).toEqual(
+        `The package pkg-c is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
       );
     });
 
@@ -112,10 +111,10 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = mockedLogger.error!.mock.calls;
-      expect(loggerErrorCalls.length).toEqual(1);
-      expect(loggerErrorCalls[0][0]).toMatchInlineSnapshot(
-        `"The package "pkg-a" depends on the skipped package "pkg-b" (either by \`ignore\` option or by \`privatePackages.version\`), but "pkg-a" is not being skipped. Please pass "pkg-a" to the \`--ignore\` flag."`,
+      expect(mockedLogger.error).toHaveBeenCalledOnce();
+      const arg = mockedLogger.error.mock.calls[0][0];
+      expect(stripVTControlCharacters(arg)).toEqual(
+        `The package pkg-a depends on the skipped package pkg-b (either by \`ignore\` option or by \`privatePackages.version\`), but pkg-a is not being skipped. Please pass pkg-a to the --ignore flag.`,
       );
     });
 
@@ -150,8 +149,7 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = mockedLogger.error!.mock.calls;
-      expect(loggerErrorCalls.length).toEqual(0);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
     });
 
     it("should not throw on a dev dependent on an unversioned private package", async () => {
@@ -185,8 +183,7 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = mockedLogger.error!.mock.calls;
-      expect(loggerErrorCalls.length).toEqual(0);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
     });
 
     it("should not throw if a versioned private package depends on an ignored package", async () => {
@@ -213,8 +210,7 @@ describe("cli", () => {
 
       await run(["version"], { ignore: ["pkg-b"] }, cwd);
 
-      const loggerErrorCalls = mockedLogger.error!.mock.calls;
-      expect(loggerErrorCalls.length).toEqual(0);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
     });
 
     it("should not throw if a package only has a devDependency on an ignored package", async () => {
@@ -239,8 +235,7 @@ describe("cli", () => {
 
       await run(["version"], { ignore: ["pkg-b"] }, cwd);
 
-      const loggerErrorCalls = mockedLogger.error!.mock.calls;
-      expect(loggerErrorCalls.length).toEqual(0);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
     });
 
     it("should throw if `--ignore` flag is used while ignore array is also defined in the config file ", async () => {
@@ -270,9 +265,9 @@ describe("cli", () => {
         // ignore errors. We just want to validate the error message
       }
 
-      const loggerErrorCalls = mockedLogger.error!.mock.calls;
-      expect(loggerErrorCalls.length).toEqual(1);
-      expect(loggerErrorCalls[0][0]).toEqual(
+      expect(mockedLogger.error).toHaveBeenCalledOnce();
+      const arg = mockedLogger.error.mock.calls[0][0];
+      expect(stripVTControlCharacters(arg)).toEqual(
         `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`,
       );
     });
@@ -407,9 +402,9 @@ describe("cli", () => {
       // ignore the error. We just want to validate the error message
     }
 
-    const loggerErrorCalls = mockedLogger.error!.mock.calls;
-    expect(loggerErrorCalls[0][0].trim()).toEqual(
-      "There is no .changeset folder.",
+    const arg = mockedLogger.error.mock.calls[0][0];
+    expect(stripVTControlCharacters(arg)).toEqual(
+      expect.stringContaining("There is no .changeset folder."),
     );
   });
 });
