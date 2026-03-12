@@ -35,7 +35,7 @@ export default function printConfirmationMessage(
     log.info(
       `
 Note: All packages that depend on these whose required versions 
-will be incompatible will also be ${pc.green("patch")} bumped
+will be incompatible will also be ${pc.blue("patch")} bumped
 when this changeset is applied.
       `.trim(),
     );
