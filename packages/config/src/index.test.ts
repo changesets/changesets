@@ -1,4 +1,4 @@
-import { describe, expect, it, test, vi, beforeEach, afterEach } from "vitest";
+import { beforeEach, describe, expect, it, test, vi } from "vitest";
 import { parse, read } from "./index.ts";
 import type { Config, Packages, WrittenConfig } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
@@ -6,14 +6,8 @@ import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
 import path from "path";
 
-const consoleError = console.error;
-
 beforeEach(() => {
-  console.error = vi.fn();
-});
-
-afterEach(() => {
-  console.error = consoleError;
+  vi.spyOn(console, "error");
 });
 
 type CorrectCase = {
@@ -681,7 +675,6 @@ describe("parser errors", () => {
     });
   });
   test("access private warns and sets to restricted", () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
     let config = unsafeParse({ access: "private" }, defaultPackages);
     expect(config).toEqual(defaults);
     expect(console.error).toBeCalledWith(
