@@ -63,8 +63,8 @@ ${printPackageList(releases, verbose)}
 
 const typeColors = {
   major: pc.red,
-  minor: pc.blue,
-  patch: pc.green,
+  minor: pc.green,
+  patch: pc.blue,
 } as const;
 
 function printPackageList(releases: ComprehensiveRelease[], verbose?: boolean) {
