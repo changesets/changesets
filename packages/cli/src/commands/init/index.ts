@@ -43,7 +43,7 @@ The default config file will be written to ${pc.blue(".changeset/config.json")}
       );
     } else {
       log.success(
-        `It looks like you already have ${pc.green("Changesets")} initialized. You should be able to run changeset commands no problems.`,
+        `It looks like you already have ${pc.green("Changesets")} initialized.\nYou should be able to run changeset commands no problems.`,
       );
     }
   } else {
