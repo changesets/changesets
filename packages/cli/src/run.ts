@@ -3,7 +3,6 @@ import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "node:fs/promises";
@@ -43,32 +42,7 @@ If you expected there to be changesets, you should check git history for when th
     throw new ExitError(1);
   }
 
-  let config: Config;
-  try {
-    config = await read(rootDir, { root, packages, tool: { type: tool } });
-  } catch (e) {
-    let oldConfigExists = await fs
-      .access(path.resolve(rootDir, ".changeset/config.js"))
-      .then(
-        () => true,
-        () => false,
-      );
-    if (oldConfigExists) {
-      log.error(
-        `
-It looks like you're using the version 1 ${pc.blue(".changeset/config.js")} file.
-You'll need to convert it to ${pc.blue(".changeset/config.json")}, and update
-the config as the options have significantly changed as well in v2.
-We thoroughly recommend looking at the changelog for this package for what has changed.
-Changesets will create a new file with default options, remember to migrate your old config to it:
-${pc.blue(".changeset/config.json")}
-          `.trim(),
-      );
-      throw new ExitError(1);
-    } else {
-      throw e;
-    }
-  }
+  let config = await read(rootDir, { root, packages, tool: { type: tool } });
 
   if (input.length < 1) {
     const { empty, open, since, message }: CliOptions = flags;
