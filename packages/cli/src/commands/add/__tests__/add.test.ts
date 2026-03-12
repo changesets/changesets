@@ -88,7 +88,7 @@ const mockUserResponses = (mockResponses: {
 beforeEach(() => {
   vi.resetAllMocks();
   vi.restoreAllMocks();
-})
+});
 
 describe("Add command", () => {
   silenceLogsInBlock();
