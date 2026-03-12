@@ -1,6 +1,6 @@
 declare module "spawndamnit" {
-  import { SpawnOptions } from "child_process";
-  import { EventEmitter } from "events";
+  import type { SpawnOptions } from "child_process";
+  import type { EventEmitter } from "events";
 
   function spawn(
     cmd: string,

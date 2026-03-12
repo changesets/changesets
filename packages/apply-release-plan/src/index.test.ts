@@ -1,5 +1,5 @@
 import { describe, expect, it, test } from "vitest";
-import {
+import type {
   ComprehensiveRelease,
   Config,
   NewChangeset,
@@ -17,7 +17,7 @@ import { defaultConfig } from "@changesets/config";
 import applyReleasePlan from "./index.ts";
 import { getPackages } from "@manypkg/get-packages";
 import {
-  Fixture,
+  type Fixture,
   outputFile,
   temporarilySilenceLogs,
   testdir,

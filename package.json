@@ -49,6 +49,7 @@
     "@vitest/eslint-plugin": "1.6.10",
     "eslint": "10.0.3",
     "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-import-lite": "0.5.2",
     "eslint-plugin-n": "17.24.0",
     "prettier": "^3.7.4",
     "typescript": "5.9.3",

@@ -4,6 +4,7 @@ import node from "eslint-plugin-n";
 import tseslint from "typescript-eslint";
 import vitest from "@vitest/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
+import importLite from "eslint-plugin-import-lite";
 
 export default defineConfig(
   {
@@ -17,12 +18,18 @@ export default defineConfig(
     ],
   },
   {
-    plugins: { js, node, tseslint, vitest },
+    plugins: {
+      js,
+      node,
+      tseslint,
+      vitest,
+    },
     extends: [
       "js/recommended",
       "node/flat/recommended",
       "tseslint/recommended",
       "tseslint/recommendedTypeChecked",
+      importLite.configs.recommended,
       "vitest/recommended",
     ],
     linterOptions: {
@@ -35,6 +42,19 @@ export default defineConfig(
     rules: {
       eqeqeq: ["off", "always", { null: "never", undefined: "never" }], // TODO enable and fix errors
       "prefer-const": "off", // TODO enable and fix errors
+
+      "@typescript-eslint/consistent-type-exports": [
+        "error",
+        { fixMixedExportsWithInlineTypeSpecifier: true },
+      ],
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { fixStyle: "inline-type-imports", disallowTypeAnnotations: false },
+      ],
+      "import-lite/consistent-type-specifier-style": [
+        "error",
+        "prefer-top-level",
+      ],
 
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-floating-promises": "off", // TODO enable and fix errors
@@ -53,11 +73,13 @@ export default defineConfig(
       "n/no-process-exit": "off",
       "n/no-unpublished-import": "off",
 
+      "n/prefer-node-protocol": "off", // TODO enable and fix errors
       "n/no-unsupported-features/node-builtins": [
         "error",
-        { ignores: ["fetch", "fs/promises.cp", "import.meta.dirname"], },
+        { ignores: ["fetch", "fs/promises.cp", "import.meta.dirname"] },
       ],
-      "n/prefer-node-protocol": "off", // TODO enable and fix errors
+
+      "import-lite/no-mutable-exports": "off", // TODO enable and fix errors
     },
   },
   {

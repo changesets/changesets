@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, type Mock, vi } from "vitest";
 import fixturez from "fixturez";
 import spawn from "spawndamnit";
-import fs from "node:fs";
+import type fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 
