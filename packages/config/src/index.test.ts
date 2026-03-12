@@ -1,12 +1,9 @@
 import { describe, expect, it, test, vi, beforeEach, afterEach } from "vitest";
 import { parse, read } from "./index.ts";
-import * as logger from "@changesets/logger";
-import type { Config, WrittenConfig, Packages } from "@changesets/types";
+import type { Config, Packages, WrittenConfig } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
-
-vi.mock("@changesets/logger");
 
 const consoleError = console.error;
 
@@ -681,9 +678,10 @@ describe("parser errors", () => {
     });
   });
   test("access private warns and sets to restricted", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
     let config = unsafeParse({ access: "private" }, defaultPackages);
     expect(config).toEqual(defaults);
-    expect(logger.warn).toBeCalledWith(
+    expect(console.error).toBeCalledWith(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',
     );
   });
