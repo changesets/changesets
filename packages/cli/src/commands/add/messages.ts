@@ -21,13 +21,13 @@ export default function printConfirmationMessage(
 
   let msg = pc.bold("Summary of changesets:");
   if (majorReleases.length > 0) {
-    msg += `\n${pc.bold(pc.green("major"))}:  ${majorReleases.join(", ")}`;
+    msg += `\n${pc.bold(pc.red("major"))}:  ${majorReleases.join(", ")}`;
   }
   if (minorReleases.length > 0) {
     msg += `\n${pc.bold(pc.green("minor"))}:  ${minorReleases.join(", ")}`;
   }
   if (patchReleases.length > 0) {
-    msg += `\n${pc.bold(pc.green("patch"))}:  ${patchReleases.join(", ")}`;
+    msg += `\n${pc.bold(pc.blue("patch"))}:  ${patchReleases.join(", ")}`;
   }
   log.success(msg);
 
