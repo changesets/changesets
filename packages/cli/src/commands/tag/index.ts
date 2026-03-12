@@ -1,7 +1,8 @@
+import pc from "picocolors";
 import * as git from "@changesets/git";
-import { log } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config } from "@changesets/types";
+import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 
@@ -27,9 +28,9 @@ export default async function tag(cwd: string, config: Config) {
       tool.type !== "root" ? `${name}@${newVersion}` : `v${newVersion}`;
 
     if (allExistingTags.has(tag)) {
-      log("Skipping tag (already exists): ", tag);
+      log.info("Skipping tag (already exists): ${pc.cyan(tag)}");
     } else {
-      log("New tag: ", tag);
+      log.success(`New tag: ${pc.cyan(tag)}`);
       await git.tag(tag, cwd);
     }
   }
