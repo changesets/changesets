@@ -24,11 +24,11 @@ export type MultiselectOptions<Value> = Record<string, Option<Value>[]>;
 async function askMultiselect<Value>(
   message: string,
   values: MultiselectOptions<Value>,
-  options?: Pick<GroupMultiSelectOptions<Value>, "message" | "options">,
+  options?: Omit<GroupMultiSelectOptions<Value>, "message" | "options">,
 ): Promise<Value[]> {
   const result = await groupMultiselect({
     selectableGroups: true,
-    required: true,
+    required: false,
     ...options,
     message,
     options: values,

@@ -56,6 +56,7 @@ async function getPackagesToRelease(
       // TODO: Make this wording better
       "Which packages were affected by the changes you made?",
       defaultChoiceList,
+      { required: true },
     );
 
     return packagesToRelease.filter(
