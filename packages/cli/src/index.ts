@@ -1,6 +1,6 @@
 import mri from "mri";
 import { ExitError, InternalError } from "@changesets/errors";
-import { error } from "@changesets/logger";
+import { error, warn } from "@changesets/logger";
 import { format } from "util";
 import { run } from "./run";
 
@@ -42,6 +42,45 @@ const parsed = mri(args, {
 // try to coerce it as a boolean
 if (parsed.snapshot === "" && args[args.indexOf("--snapshot") + 1] !== "") {
   parsed.snapshot = true;
+}
+
+// Warn about any flags that are not recognised by the CLI
+const knownFlags = new Set([
+  // boolean flags
+  "sinceMaster",
+  "verbose",
+  "empty",
+  "open",
+  "gitTag",
+  "snapshot",
+  // string flags
+  "output",
+  "otp",
+  "since",
+  "ignore",
+  "message",
+  "tag",
+  "snapshotPrereleaseTemplate",
+  // canonical names produced by alias resolution (deprecated in v2, still handled)
+  "updateChangelog",
+  "isPublic",
+  "skipCI",
+  "commit",
+  // built-in mri flags
+  "help",
+  "version",
+]);
+
+const unknownFlags = Object.keys(parsed).filter(
+  (key) => key !== "_" && !knownFlags.has(key)
+);
+
+if (unknownFlags.length > 0) {
+  warn(
+    `Unknown ${unknownFlags.length === 1 ? "flag" : "flags"}: ${unknownFlags
+      .map((f) => `--${f}`)
+      .join(", ")}`
+  );
 }
 
 // Help message should only be shown if it's the only argument passed
