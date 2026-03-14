@@ -12,8 +12,8 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
         shouldUpdateDependencyBasedOnConfig(
           { version: "2.0.0", type: "major" },
           { depVersionRange: "^1.0.0", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).toBe(true);
     });
 
@@ -22,8 +22,11 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
         shouldUpdateDependencyBasedOnConfig(
           { version: "1.0.1", type: "patch" },
           { depVersionRange: "^1.0.0", depType: "dependencies" },
-          { minReleaseType: "minor", onlyUpdatePeerDependentsWhenOutOfRange: false }
-        )
+          {
+            minReleaseType: "minor",
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+          },
+        ),
       ).toBe(false);
     });
   });
@@ -35,8 +38,11 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
         shouldUpdateDependencyBasedOnConfig(
           { version: "1.0.1", type: "patch" },
           { depVersionRange: "workspace:^1.0.0", depType: "dependencies" },
-          { minReleaseType: "minor", onlyUpdatePeerDependentsWhenOutOfRange: false }
-        )
+          {
+            minReleaseType: "minor",
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+          },
+        ),
       ).toBe(false);
     });
 
@@ -46,8 +52,8 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
         shouldUpdateDependencyBasedOnConfig(
           { version: "2.0.0", type: "major" },
           { depVersionRange: "workspace:^1.0.0", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).toBe(true);
     });
 
@@ -56,8 +62,11 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
         shouldUpdateDependencyBasedOnConfig(
           { version: "1.2.4", type: "patch" },
           { depVersionRange: "workspace:~1.2.3", depType: "dependencies" },
-          { minReleaseType: "minor", onlyUpdatePeerDependentsWhenOutOfRange: false }
-        )
+          {
+            minReleaseType: "minor",
+            onlyUpdatePeerDependentsWhenOutOfRange: false,
+          },
+        ),
       ).toBe(false);
     });
 
@@ -66,8 +75,8 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
         shouldUpdateDependencyBasedOnConfig(
           { version: "1.3.0", type: "minor" },
           { depVersionRange: "workspace:~1.2.3", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).toBe(true);
     });
   });
@@ -79,8 +88,8 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
         shouldUpdateDependencyBasedOnConfig(
           { version: "1.1.0", type: "minor" },
           { depVersionRange: "workspace:^", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).not.toThrow();
     });
 
@@ -89,8 +98,8 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
         shouldUpdateDependencyBasedOnConfig(
           { version: "1.1.0", type: "minor" },
           { depVersionRange: "workspace:~", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).not.toThrow();
     });
 
@@ -99,8 +108,8 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
         shouldUpdateDependencyBasedOnConfig(
           { version: "1.1.0", type: "minor" },
           { depVersionRange: "workspace:*", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).not.toThrow();
     });
   });
