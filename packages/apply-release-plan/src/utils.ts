@@ -34,7 +34,7 @@ export function shouldUpdateDependencyBasedOnConfig(
   }: {
     minReleaseType: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-  },
+  }
 ): boolean {
   // Strip the workspace: protocol prefix before semver comparison.
   // workspace:^1.2.3 is a valid range once the prefix is removed; semver can't
