@@ -20,7 +20,7 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/get-github-info",
   "dependencies": {
     "dataloader": "^1.4.0",
-    "node-fetch": "^2.5.0"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "nock": "^11.7.0",
