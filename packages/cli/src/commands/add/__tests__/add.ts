@@ -604,4 +604,296 @@ describe("Add command", () => {
       ]
     `);
   });
+
+  describe("non-interactive mode", () => {
+    it("should create changeset with --packages and --type and --message", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+
+      await addChangeset(
+        cwd,
+        {
+          empty: false,
+          packages: ["pkg-a"],
+          type: "minor",
+          message: "Add feature X",
+        },
+        defaultConfig
+      );
+
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
+        expect.objectContaining({
+          summary: "Add feature X",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        })
+      );
+      expect(askCheckboxPlus).not.toHaveBeenCalled();
+      expect(askQuestion).not.toHaveBeenCalled();
+      expect(askConfirm).not.toHaveBeenCalled();
+    });
+
+    it("should create changeset with multiple packages and same type", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+
+      await addChangeset(
+        cwd,
+        {
+          empty: false,
+          packages: ["pkg-a", "pkg-b"],
+          type: "patch",
+          message: "Fix typo",
+        },
+        defaultConfig
+      );
+
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
+        expect.objectContaining({
+          summary: "Fix typo",
+          releases: [
+            { name: "pkg-a", type: "patch" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        })
+      );
+    });
+
+    it("should support mixed bump types via colon syntax", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+
+      await addChangeset(
+        cwd,
+        {
+          empty: false,
+          packages: ["pkg-a:minor", "pkg-b:patch"],
+          message: "Feature in A, fix in B",
+        },
+        defaultConfig
+      );
+
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
+        expect.objectContaining({
+          summary: "Feature in A, fix in B",
+          releases: [
+            { name: "pkg-a", type: "minor" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        })
+      );
+    });
+
+    it("should support a single --packages flag as string", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+      });
+
+      await addChangeset(
+        cwd,
+        {
+          empty: false,
+          packages: "pkg-a:patch",
+          message: "Fix bug",
+        },
+        defaultConfig
+      );
+
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
+        expect.objectContaining({
+          summary: "Fix bug",
+          releases: [{ name: "pkg-a", type: "patch" }],
+        })
+      );
+    });
+
+    it("should error when package is not found in the project", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+      });
+
+      await expect(() =>
+        addChangeset(
+          cwd,
+          {
+            empty: false,
+            packages: ["nonexistent-pkg"],
+            type: "patch",
+            message: "Fix bug",
+          },
+          defaultConfig
+        )
+      ).rejects.toThrow("The process exited with code: 1");
+    });
+
+    it("should error when no bump type is provided for a package without colon syntax", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+      });
+
+      await expect(() =>
+        addChangeset(
+          cwd,
+          {
+            empty: false,
+            packages: ["pkg-a"],
+            message: "Fix bug",
+          },
+          defaultConfig
+        )
+      ).rejects.toThrow("The process exited with code: 1");
+    });
+
+    it("should error when invalid bump type is used in colon syntax", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+      });
+
+      await expect(() =>
+        addChangeset(
+          cwd,
+          {
+            empty: false,
+            packages: ["pkg-a:invalid"],
+            message: "Fix bug",
+          },
+          defaultConfig
+        )
+      ).rejects.toThrow("The process exited with code: 1");
+    });
+
+    it("should handle scoped package names with colon syntax", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "@scope/pkg-a",
+          version: "1.0.0",
+        }),
+      });
+
+      await addChangeset(
+        cwd,
+        {
+          empty: false,
+          packages: ["@scope/pkg-a:minor"],
+          message: "Add feature",
+        },
+        defaultConfig
+      );
+
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
+        expect.objectContaining({
+          summary: "Add feature",
+          releases: [{ name: "@scope/pkg-a", type: "minor" }],
+        })
+      );
+    });
+
+    it("should fall back to interactive mode when only --packages is provided without --message", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+
+      mockUserResponses({ releases: { "pkg-a": "patch" } });
+      await addChangeset(
+        cwd,
+        {
+          empty: false,
+          packages: ["pkg-a"],
+          type: "patch",
+        },
+        defaultConfig
+      );
+
+      // Should have gone through interactive flow since --message was not provided
+      expect(askCheckboxPlus).toHaveBeenCalled();
+    });
+  });
 });

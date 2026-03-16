@@ -8,6 +8,7 @@ import { getPackages } from "@manypkg/get-packages";
 import fs from "fs-extra";
 import path from "path";
 import add from "./commands/add";
+import changed from "./commands/changed";
 import init from "./commands/init";
 import pre from "./commands/pre";
 import publish from "./commands/publish";
@@ -65,9 +66,9 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open, since, message }: CliOptions = flags;
+    const { empty, open, since, message, packages: pkgs, type, all }: CliOptions = flags;
     // @ts-ignore if this is undefined, we have already exited
-    await add(rootDir, { empty, open, since, message }, config);
+    await add(rootDir, { empty, open, since, message, packages: pkgs, type, all }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -106,9 +107,18 @@ export async function run(
     // config file. For this reason, we only assign them to this
     // object as and when they exist.
 
+    const pkgs = flags.packages;
+
     switch (input[0]) {
       case "add": {
-        await add(rootDir, { empty, open, since, message }, config);
+        const all = flags.all;
+        const type = flags.type;
+        await add(rootDir, { empty, open, since, message, packages: pkgs, type, all }, config);
+        return;
+      }
+      case "changed": {
+        const json = flags.json;
+        await changed(rootDir, { since, json }, config);
         return;
       }
       case "version": {
