@@ -1,5 +1,11 @@
 # @changesets/parse
 
+## 0.4.3
+
+### Patch Changes
+
+- [#1831](https://github.com/changesets/changesets/pull/1831) [`1f91879`](https://github.com/changesets/changesets/commit/1f91879d4977c49593619b07e1374cd804f16757) Thanks [@murataslan1](https://github.com/murataslan1)! - Improve error messages for malformed changeset files. The new error messages explain what went wrong, show what was received, and provide examples of the correct format.
+
 ## 0.4.2
 
 ### Patch Changes

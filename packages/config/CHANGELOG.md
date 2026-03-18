@@ -1,5 +1,15 @@
 # @changesets/config
 
+## 3.1.3
+
+### Patch Changes
+
+- [#1834](https://github.com/changesets/changesets/pull/1834) [`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94) Thanks [@RodrigoHamuy](https://github.com/RodrigoHamuy)! - Export `schema.json` in the package's `exports` field to make it accessible when using modern package managers.
+
+- [#1842](https://github.com/changesets/changesets/pull/1842) [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6) Thanks [@RodrigoHamuy](https://github.com/RodrigoHamuy)! - Allow private packages to depend on skipped packages without requiring them to also be skipped. `devDependencies` on skipped packages no longer trigger a validation error in config parsing (aligning with the existing CLI behavior). The config validation for skipped-package dependents now also covers packages skipped via `privatePackages.version: false`, not just those in the `ignore` list.
+
+- [#1842](https://github.com/changesets/changesets/pull/1842) [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6) Thanks [@RodrigoHamuy](https://github.com/RodrigoHamuy)! - Added shape validation for the `privatePackages` config option.
+
 ## 3.1.2
 
 ### Patch Changes
