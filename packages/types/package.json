@@ -1,21 +1,15 @@
 {
   "name": "@changesets/types",
-  "version": "6.1.0",
+  "version": "7.0.0-next.1",
   "description": "Common types shared between changeset packages",
-  "main": "dist/changesets-types.cjs.js",
-  "module": "dist/changesets-types.esm.js",
+  "type": "module",
   "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/changesets-types.cjs.mjs",
-        "default": "./dist/changesets-types.cjs.js"
-      },
-      "module": "./dist/changesets-types.esm.js",
-      "import": "./dist/changesets-types.cjs.mjs",
-      "default": "./dist/changesets-types.cjs.js"
-    },
+    ".": "./dist/changesets-types.js",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/types"
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/types",
+  "engines": {
+    "node": ">=20.19.0"
+  }
 }

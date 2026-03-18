@@ -1,4 +1,4 @@
-import { NewChangeset } from "@changesets/types";
+import type { NewChangeset } from "@changesets/types";
 
 export type RelevantChangesets = {
   major: NewChangeset[];

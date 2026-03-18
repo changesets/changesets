@@ -102,7 +102,7 @@
     },
     "baseBranch": {
       "type": "string",
-      "default": "master",
+      "default": "main",
       "description": "Determines the branch that Changesets uses when finding what packages have changed."
     },
     "changedFilePatterns": {

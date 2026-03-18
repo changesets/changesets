@@ -1,8 +1,11 @@
-import { Changeset } from "@changesets/types";
-import fs from "fs-extra";
-import humanId from "human-id";
+import type { Changeset } from "@changesets/types";
+import fs from "node:fs/promises";
+import { humanId } from "human-id";
 import path from "path";
 import prettier from "prettier";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
@@ -16,12 +19,10 @@ function getPrettierInstance(cwd: string): typeof prettier {
 }
 
 async function writeChangeset(
-  changeset: Changeset,
+  { summary, releases }: Changeset,
   rootDir: string,
-  options?: { prettier?: boolean }
+  options?: { prettier?: boolean },
 ): Promise<string> {
-  const { summary, releases } = changeset;
-
   const changesetBase = path.resolve(rootDir, ".changeset");
 
   // Worth understanding that the ID merely needs to be a unique hash to avoid git conflicts
@@ -45,7 +46,8 @@ ${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
 ${summary}
   `;
 
-  await fs.outputFile(
+  await fs.mkdir(path.dirname(newChangesetPath), { recursive: true });
+  await fs.writeFile(
     newChangesetPath,
     prettierInstance
       ? // Prettier v3 returns a promise
@@ -53,7 +55,7 @@ ${summary}
           ...(await prettierInstance.resolveConfig(newChangesetPath)),
           parser: "markdown",
         })
-      : changesetContents
+      : changesetContents,
   );
 
   return changesetID;

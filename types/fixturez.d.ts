@@ -5,13 +5,15 @@ type Opts = {
 };
 
 declare module "fixturez" {
-  export default function (
+  function fixturez(
     cwd: string,
-    opts?: Opts
+    opts?: Opts,
   ): {
     find: (a: string) => string;
     temp: () => string;
     copy: (a: string) => string;
     cleanup: () => any;
   };
+
+  export = fixturez;
 }

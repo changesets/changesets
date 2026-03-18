@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import DataLoader from "dataloader";
 
 function readEnv() {
@@ -35,7 +34,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
               .map((data) =>
                 data.kind === "commit"
                   ? `a${data.commit}: object(expression: ${JSON.stringify(
-                      data.commit
+                      data.commit,
                     )}) {
             ... on Commit {
             commitUrl
@@ -67,10 +66,10 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
                       commitUrl
                       abbreviatedOid
                     }
-                  }`
+                  }`,
               )
               .join("\n")}
-          }`
+          }`,
           )
           .join("\n")}
         }
@@ -94,8 +93,8 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
         .toISOString()
         .substring(
           0,
-          10
-        )} with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`
+          10,
+        )} with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`,
     );
   }
   let repos: ReposWithCommitsAndPRsToFetch = {};
@@ -117,7 +116,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     });
   } catch (e: any) {
     throw new Error(
-      `An error occurred when fetching data from GitHub\n${e.message}`
+      `An error occurred when fetching data from GitHub\n${e.message}`,
     );
   }
 
@@ -133,15 +132,15 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
       `Fetched data from GitHub returned errors\n${JSON.stringify(
         data.errors,
         null,
-        2
-      )}`
+        2,
+      )}`,
     );
   }
 
   // this is mainly for the case where there's an authentication problem
   if (!data.data) {
     throw new Error(
-      `Fetched data from GitHub has missing data\n${JSON.stringify(data)}`
+      `Fetched data from GitHub has missing data\n${JSON.stringify(data)}`,
     );
   }
 
@@ -170,7 +169,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     ({ repo, ...data }) =>
       cleanedData[repo][data.kind][
         data.kind === "pull" ? data.pull : data.commit
-      ]
+      ],
   );
 });
 
@@ -192,13 +191,13 @@ export async function getInfo(request: {
 
   if (!request.repo) {
     throw new Error(
-      "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"
+      "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo",
     );
   }
 
   if (!validRepoNameRegex.test(request.repo)) {
     throw new Error(
-      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`
+      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`,
     );
   }
 
@@ -261,13 +260,13 @@ export async function getInfoFromPullRequest(request: {
 
   if (!request.repo) {
     throw new Error(
-      "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"
+      "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo",
     );
   }
 
   if (!validRepoNameRegex.test(request.repo)) {
     throw new Error(
-      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`
+      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`,
     );
   }
 

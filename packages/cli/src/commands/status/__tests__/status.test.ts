@@ -1,13 +1,14 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
-import { gitdir, silenceLogsInBlock } from "@changesets/test-utils";
-import { ReleasePlan } from "@changesets/types";
+import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
+import type { ReleasePlan } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
-import status from "..";
+import status from "../index.ts";
 
 async function readConfig(cwd: string) {
   return read(cwd, await getPackages(cwd));
@@ -44,7 +45,7 @@ describe("status", () => {
   silenceLogsInBlock();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should get the status for a simple changeset and return the release object", async () => {
@@ -62,16 +63,16 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
@@ -79,7 +80,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -128,16 +129,16 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
@@ -145,7 +146,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: undefined },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -190,14 +191,13 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
 
     await git.add(".", cwd);
@@ -221,15 +221,14 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -253,21 +252,20 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     await git.add(".", cwd);
@@ -295,9 +293,9 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
 
     await writeChangeset(
@@ -305,7 +303,7 @@ describe("status", () => {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     await git.add(".", cwd);
@@ -316,10 +314,10 @@ describe("status", () => {
     const probsUndefined = await status(
       cwd,
       { since: "main", output },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
-    const releaseObj = await fs.readFile(path.join(cwd, output), "utf-8");
+    const releaseObj = await fs.readFile(path.join(cwd, output), "utf8");
 
     expect(probsUndefined).toEqual(undefined);
     expect(replaceHumanIds(JSON.parse(releaseObj))).toMatchInlineSnapshot(`
@@ -366,14 +364,13 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/unrelated.json"),
-      JSON.stringify({})
+      JSON.stringify({}),
     );
 
     await git.add(".", cwd);
@@ -382,7 +379,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -409,14 +406,13 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/src/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
 
     await git.add(".", cwd);
@@ -445,16 +441,16 @@ describe("status", () => {
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
@@ -462,7 +458,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -515,14 +511,13 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
-      'export default "updated b"'
+      'export default "updated b"',
     );
     await git.add(".", cwd);
     await git.commit("updated b", cwd);
@@ -530,7 +525,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -565,14 +560,13 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    jest.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
     await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
 
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
-      'export default "updated b"'
+      'export default "updated b"',
     );
     await git.add(".", cwd);
     await git.commit("updated b", cwd);
@@ -580,7 +574,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();

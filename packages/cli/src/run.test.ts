@@ -1,13 +1,18 @@
 import path from "path";
-import { error } from "@changesets/logger";
-import { testdir } from "@changesets/test-utils";
-import add from "./commands/add";
-import { run } from "./run";
+import { describe, expect, it, vi } from "vitest";
+import {
+  mockedLogger,
+  silenceLogsInBlock,
+  testdir,
+} from "@changesets/test-utils";
+import add from "./commands/add/index.ts";
+import { run } from "./run.ts";
 import writeChangeset from "@changesets/write";
 
-jest.mock("@changesets/logger");
-jest.mock("./commands/add");
-jest.mock("./commands/version");
+vi.mock("./commands/add");
+vi.mock("./commands/version");
+
+silenceLogsInBlock();
 
 describe("cli", () => {
   describe("add", () => {
@@ -29,7 +34,7 @@ describe("cli", () => {
           open: undefined,
           message: "summary from message",
         },
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -51,7 +56,7 @@ describe("cli", () => {
           open: undefined,
           message: "summary from message",
         },
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
@@ -75,10 +80,10 @@ describe("cli", () => {
         // ignore errors. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toEqual(
-        `The package "pkg-c" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`
+        `The package "pkg-c" is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
       );
     });
 
@@ -107,10 +112,10 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toMatchInlineSnapshot(
-        `"The package "pkg-a" depends on the skipped package "pkg-b" (either by \`ignore\` option or by \`privatePackages.version\`), but "pkg-a" is not being skipped. Please pass "pkg-a" to the \`--ignore\` flag."`
+        `"The package "pkg-a" depends on the skipped package "pkg-b" (either by \`ignore\` option or by \`privatePackages.version\`), but "pkg-a" is not being skipped. Please pass "pkg-a" to the \`--ignore\` flag."`,
       );
     });
 
@@ -145,7 +150,7 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(0);
     });
 
@@ -180,7 +185,7 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(0);
     });
 
@@ -208,7 +213,7 @@ describe("cli", () => {
 
       await run(["version"], { ignore: ["pkg-b"] }, cwd);
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(0);
     });
 
@@ -234,7 +239,7 @@ describe("cli", () => {
 
       await run(["version"], { ignore: ["pkg-b"] }, cwd);
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(0);
     });
 
@@ -265,10 +270,10 @@ describe("cli", () => {
         // ignore errors. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toEqual(
-        `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`
+        `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`,
       );
     });
 
@@ -291,7 +296,7 @@ describe("cli", () => {
           summary: "This is a summary",
           releases: [{ name: "pkg-a", type: "minor" }],
         },
-        cwd
+        cwd,
       );
 
       await expect(run(["version"], {}, cwd)).resolves.not.toThrow();
@@ -316,13 +321,13 @@ describe("cli", () => {
           summary: "This is a summary",
           releases: [{ name: "pkg-a", type: "minor" }],
         },
-        cwd
+        cwd,
       );
 
       await expect(run(["version"], {}, cwd)).rejects
         .toThrowErrorMatchingInlineSnapshot(`
-        "Some errors occurred when validating the changesets config:
-        The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean"
+        [Error: Some errors occurred when validating the changesets config:
+        The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean]
       `);
     });
   });
@@ -346,10 +351,10 @@ describe("cli", () => {
         // ignore the error. We just want to validate the error message
       }
 
-      const loggerErrorCalls = (error as any).mock.calls;
+      const loggerErrorCalls = mockedLogger.error!.mock.calls;
       expect(loggerErrorCalls.length).toEqual(1);
       expect(loggerErrorCalls[0][0]).toEqual(
-        `A tag must be passed when using prerelease enter`
+        `A tag must be passed when using prerelease enter`,
       );
     });
   });
@@ -378,7 +383,7 @@ describe("cli", () => {
         open: undefined,
         message: "test",
       },
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
@@ -402,9 +407,9 @@ describe("cli", () => {
       // ignore the error. We just want to validate the error message
     }
 
-    const loggerErrorCalls = (error as any).mock.calls;
+    const loggerErrorCalls = mockedLogger.error!.mock.calls;
     expect(loggerErrorCalls[0][0].trim()).toEqual(
-      "There is no .changeset folder."
+      "There is no .changeset folder.",
     );
   });
 });

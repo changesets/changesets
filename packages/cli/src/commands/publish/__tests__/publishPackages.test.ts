@@ -1,15 +1,20 @@
-import publishPackages from "../publishPackages";
-import * as npmUtils from "../npm-utils";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import publishPackages from "../publishPackages.ts";
+import * as npmUtils from "../npm-utils.ts";
 import { getPackages } from "@manypkg/get-packages";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 
-jest.mock("../npm-utils");
+vi.mock("../npm-utils");
+const mockedNpmUtils = vi.mocked(npmUtils);
+vi.mock("ci-info", () => ({
+  isCI: true,
+}));
 
 describe("publishPackages", () => {
   silenceLogsInBlock();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("when isCI", () => {
@@ -25,16 +30,14 @@ describe("publishPackages", () => {
         }),
       });
 
-      // @ts-ignore
-      npmUtils.infoAllow404.mockImplementation(() => ({
+      mockedNpmUtils.infoAllow404.mockImplementation(async () => ({
         published: false,
         pkgInfo: {
           version: "1.0.0",
         },
       }));
 
-      // @ts-ignore
-      npmUtils.publish.mockImplementation(() => ({
+      mockedNpmUtils.publish.mockImplementation(async () => ({
         published: true,
       }));
 
@@ -43,7 +46,7 @@ describe("publishPackages", () => {
         access: "public",
         preState: undefined,
       });
-      expect(npmUtils.getTokenIsRequired).not.toHaveBeenCalled();
+      expect(mockedNpmUtils.getTokenIsRequired).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,9 +1,10 @@
-// @ts-ignore it's not worth writing a TS declaration file in this repo for a tiny module we use once like this
-import termSize from "term-size";
 import { error, prefix, success } from "@changesets/logger";
-import { prompt } from "enquirer";
+import enuirer from "enquirer";
 import { edit } from "@inquirer/external-editor";
-import { symbols } from "ansi-colors";
+import ansiColors from "ansi-colors";
+
+const { prompt } = enuirer;
+const { symbols } = ansiColors;
 
 // those types are not exported from `enquirer` so we extract them here
 // so we can make type assertions using them because `enquirer` types do no support `prefix` right now
@@ -38,9 +39,7 @@ const serialId: () => number = (function () {
   return () => id++;
 })();
 
-// this can exec tput so we make it compute lazily to avoid such side effects at init time
-let limit: number | undefined;
-const getLimit = () => (limit ??= Math.max(termSize().rows - 5, 10));
+const limit = Math.max(process.stdout.rows - 5, 10);
 
 let cancelFlow = () => {
   success("Cancelled... 👋 ");
@@ -50,7 +49,7 @@ let cancelFlow = () => {
 async function askCheckboxPlus(
   message: string,
   choices: Array<any>,
-  format?: (arg: any) => any
+  format?: (arg: any) => any,
 ): Promise<Array<string>> {
   const name = `CheckboxPlus-${serialId()}`;
 
@@ -62,7 +61,7 @@ async function askCheckboxPlus(
     multiple: true,
     choices,
     format,
-    limit: getLimit(),
+    limit,
     onCancel: cancelFlow,
     symbols: {
       indicator: symbols.radioOff,
@@ -125,7 +124,7 @@ async function askConfirm(message: string): Promise<boolean> {
 
 async function askList<Choice extends string>(
   message: string,
-  choices: Choice[]
+  choices: Choice[],
 ): Promise<Choice> {
   const name = `List-${serialId()}`;
 

@@ -1,13 +1,13 @@
-import {
+import type {
   ComprehensiveRelease,
   PackageJSON,
   VersionType,
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
-import Range from "semver/classes/range";
-import semverPrerelease from "semver/functions/prerelease";
-import validRange from "semver/ranges/valid";
-import { shouldUpdateDependencyBasedOnConfig } from "./utils";
+import Range from "semver/classes/range.js";
+import semverPrerelease from "semver/functions/prerelease.js";
+import validRange from "semver/ranges/valid.js";
+import { shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -33,7 +33,7 @@ export default function versionPackage(
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
     snapshot?: string | boolean | undefined;
-  }
+  },
 ) {
   let { newVersion, packageJson } = release;
 
@@ -57,7 +57,7 @@ export default function versionPackage(
             {
               minReleaseType: updateInternalDependencies,
               onlyUpdatePeerDependentsWhenOutOfRange,
-            }
+            },
           )
         ) {
           continue;
@@ -75,7 +75,7 @@ export default function versionPackage(
         if (usesWorkspaceRange) {
           const workspaceDepVersion = depCurrentVersion.replace(
             /^workspace:/,
-            ""
+            "",
           );
           if (
             workspaceDepVersion === "*" ||

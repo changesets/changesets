@@ -18,6 +18,40 @@
 
 - [#1232](https://github.com/changesets/changesets/pull/1232) [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe) Thanks [@matthprost](https://github.com/matthprost)! - Fixed log error link mismatch to remove dot at the end
 
+## 4.0.0-next.1
+
+### Major Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+- [#1650](https://github.com/changesets/changesets/pull/1650) [`b83787f`](https://github.com/changesets/changesets/commit/b83787fb090dc03ad566a7d8b7e286dbe93e2301) Thanks [@bluwy](https://github.com/bluwy)! - Change the `defaultWrittenConfig` `baseBranch` value from `"master"` to `"main"`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d)]:
+  - @changesets/get-dependents-graph@3.0.0-next.1
+  - @changesets/errors@1.0.0-next.1
+  - @changesets/logger@1.0.0-next.1
+  - @changesets/types@7.0.0-next.1
+
+## 4.0.0-next.0
+
+### Major Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replace `fs-extra` usage with `node:fs`
+
+- Updated dependencies [[`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/get-dependents-graph@3.0.0-next.0
+  - @changesets/errors@1.0.0-next.0
+  - @changesets/logger@1.0.0-next.0
+  - @changesets/types@7.0.0-next.0
+
 ## 3.1.1
 
 ### Patch Changes
@@ -375,7 +409,6 @@
 - [`a679b1d`](https://github.com/changesets/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62) [#204](https://github.com/changesets/changesets/pull/204) Thanks [@Andarist](https://github.com/Andarist)! - Correctly handle the 'access' flag for packages
 
   Previously, we had access as "public" or "private", access "private" isn't valid. This was a confusing because there are three states for publishing a package:
-
   - `private: true` - the package will not be published to npm (worked)
   - `access: public` - the package will be publicly published to npm (even if it uses a scope) (worked)
   - `access: restricted` - the package will be published to npm, but only visible/accessible by those who are part of the scope. This technically worked, but we were passing the wrong bit of information in.

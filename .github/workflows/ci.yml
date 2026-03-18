@@ -3,21 +3,34 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+      - next
   merge_group:
-    branches: [main]
+    branches:
+      - main
+      - next
 
 permissions:
   contents: read
 
 jobs:
   test:
-    name: Test
+    name: "Test using Node ${{ matrix.node_version }}"
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      matrix:
+        node_version: [20, 22, 24]
+      fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
+        with:
+          node-version: ${{ matrix.node_version }}
 
       - name: Check Git version
         run: git --version
@@ -25,11 +38,19 @@ jobs:
       - name: Setup mock Git user
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
-      - name: Jest tests
-        run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
+      - name: Vitest tests
+        if: matrix.node_version != 24
+        # @changesets/release-utils depend on `--experimental-strip-types` so we exclude those test here for simplicity
+        run: yarn vitest --no-file-parallelism --exclude=packages/release-utils
+
+      # Run coverage only once on node 24 to avoid duplicate codecov uploads
+      - name: Vitest tests with coverage
+        if: matrix.node_version == 24
+        run: yarn vitest --no-file-parallelism --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
+        if: matrix.node_version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -38,7 +59,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
 
       - name: Typecheck
@@ -49,7 +73,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
 
       - name: Lint

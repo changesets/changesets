@@ -1,5 +1,7 @@
-import { incrementVersion } from "./increment";
-import { InternalRelease, PreInfo } from "./types";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, it } from "vitest";
+import { incrementVersion } from "./increment.ts";
+import type { InternalRelease, PreInfo } from "./types.ts";
 
 describe("incrementVersion", () => {
   describe("pre mode", () => {

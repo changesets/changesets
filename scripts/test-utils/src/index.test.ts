@@ -1,12 +1,13 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { silenceLogsInBlock } from "./index.ts"; // this has to be imported before `@changesets/logger`
 import { log } from "@changesets/logger";
-import { silenceLogsInBlock } from "./";
 
 describe("temporarilySilenceLogs", () => {
   silenceLogsInBlock();
   describe("log", () => {
     let originalConsoleLog = console.log;
     beforeEach(() => {
-      console.log = jest.fn();
+      console.log = vi.fn();
     });
     afterEach(() => {
       console.log = originalConsoleLog;

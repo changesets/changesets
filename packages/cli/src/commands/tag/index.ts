@@ -1,9 +1,9 @@
 import * as git from "@changesets/git";
 import { log } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
+import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 
 export default async function tag(cwd: string, config: Config) {
   const { packages, tool } = await getPackages(cwd);
@@ -15,13 +15,13 @@ export default async function tag(cwd: string, config: Config) {
       !shouldSkipPackage(pkg, {
         ignore: config.ignore,
         allowPrivatePackages: config.privatePackages.tag,
-      })
+      }),
   );
 
   for (const { name, newVersion } of await getUntaggedPackages(
     taggablePackages,
     cwd,
-    tool
+    tool,
   )) {
     const tag = tool !== "root" ? `${name}@${newVersion}` : `v${newVersion}`;
 

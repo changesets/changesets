@@ -10,6 +10,26 @@
 
 - [#1781](https://github.com/changesets/changesets/pull/1781) [`d4b8ad8`](https://github.com/changesets/changesets/commit/d4b8ad8158fe4d900abc5052dacaa8be1f41a232) Thanks [@bluwy](https://github.com/bluwy)! - Improve error messages when fail to fetch data from GitHub
 
+## 1.0.0-next.1
+
+### Minor Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+## 1.0.0-next.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Minor Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+### Patch Changes
+
+- [#1613](https://github.com/changesets/changesets/pull/1613) [`5b02e2f`](https://github.com/changesets/changesets/commit/5b02e2f61d2a1335293016f81efb0386a0ed7967) Thanks [@bluwy](https://github.com/bluwy)! - Remove `node-fetch` dependency
+
 ## 0.7.0
 
 ### Minor Changes
@@ -17,7 +37,6 @@
 - [#1783](https://github.com/changesets/changesets/pull/1783) [`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a) Thanks [@mrginglymus](https://github.com/mrginglymus)! - Support GitHub URL environment variables
 
   `@changesets/get-github-info` will now respect environment variables [set by GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/variables), specifically:
-
   - `GITHUB_GRAPHQL_URL`
   - `GITHUB_SERVER_URL`
 

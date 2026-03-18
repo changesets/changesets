@@ -1,11 +1,12 @@
-import { createPromiseQueue } from "./createPromiseQueue";
+import { describe, expect, it, vi } from "vitest";
+import { createPromiseQueue } from "./createPromiseQueue.ts";
 
 function asyncSpy(implementation: () => unknown = () => {}) {
-  return jest.fn().mockImplementation(async () => implementation());
+  return vi.fn().mockImplementation(async () => implementation());
 }
 
 function syncSpy(implementation: () => unknown = () => {}) {
-  return jest.fn().mockImplementation(() => implementation());
+  return vi.fn().mockImplementation(() => implementation());
 }
 
 describe("createPromiseQueue", () => {

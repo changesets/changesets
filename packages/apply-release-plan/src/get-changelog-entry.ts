@@ -1,9 +1,10 @@
-import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
-
-import { ModCompWithPackage } from "@changesets/types";
-import startCase from "lodash.startcase";
-import { shouldUpdateDependencyBasedOnConfig } from "./utils";
-import validRange from "semver/ranges/valid";
+import type {
+  ChangelogFunctions,
+  ModCompWithPackage,
+  NewChangesetWithCommit,
+} from "@changesets/types";
+import validRange from "semver/ranges/valid.js";
+import { capitalize, shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -13,12 +14,12 @@ type ChangelogLines = {
 
 async function generateChangesForVersionTypeMarkdown(
   obj: ChangelogLines,
-  type: keyof ChangelogLines
+  type: keyof ChangelogLines,
 ) {
   let releaseLines = await Promise.all(obj[type]);
   releaseLines = releaseLines.filter((x) => x);
   if (releaseLines.length) {
-    return `### ${startCase(type)} Changes\n\n${releaseLines.join("\n")}\n`;
+    return `### ${capitalize(type)} Changes\n\n${releaseLines.join("\n")}\n`;
   }
 }
 
@@ -35,7 +36,7 @@ export default async function getChangelogEntry(
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-  }
+  },
 ) {
   if (release.type === "none") return null;
 
@@ -53,7 +54,7 @@ export default async function getChangelogEntry(
     const rls = cs.releases.find((r) => r.name === release.name);
     if (rls && rls.type !== "none") {
       changelogLines[rls.type].push(
-        changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts)
+        changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts),
       );
     }
   });
@@ -76,7 +77,7 @@ export default async function getChangelogEntry(
         {
           minReleaseType: updateInternalDependencies,
           onlyUpdatePeerDependentsWhenOutOfRange,
-        }
+        },
       )
     );
   });
@@ -90,15 +91,15 @@ export default async function getChangelogEntry(
   });
 
   let relevantChangesets = changesets.filter((cs) =>
-    relevantChangesetIds.has(cs.id)
+    relevantChangesetIds.has(cs.id),
   );
 
   changelogLines.patch.push(
     changelogFuncs.getDependencyReleaseLine(
       relevantChangesets,
       dependentReleases,
-      changelogOpts
-    )
+      changelogOpts,
+    ),
   );
 
   return [

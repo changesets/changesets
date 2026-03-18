@@ -4,7 +4,7 @@ inputs:
   node-version:
     description: "Node.js version"
     required: false
-    default: 20
+    default: 24
 
 runs:
   using: composite
@@ -17,4 +17,12 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: yarn install --frozen-lockfile
+      run: yarn install --frozen-lockfile --ignore-scripts
+
+    - name: Setup dev environment
+      shell: bash
+      run: yarn preconstruct dev
+
+    - name: Manypkg check
+      shell: bash
+      run: yarn manypkg check

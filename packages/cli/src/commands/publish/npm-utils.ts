@@ -1,15 +1,15 @@
-import { spawnSync } from "child_process";
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
-import { AccessType, PackageJSON } from "@changesets/types";
+import type { AccessType, PackageJSON } from "@changesets/types";
+import { spawnSync } from "child_process";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
+import semverParse from "semver/functions/parse.js";
 import spawn from "spawndamnit";
-import semverParse from "semver/functions/parse";
-import { createPromiseQueue } from "../../utils/createPromiseQueue";
-import { TwoFactorState } from "../../utils/types";
-import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
-import { requiresDelegatedAuth } from "./publishPackages";
+import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
+import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
+import type { TwoFactorState } from "../../utils/types.ts";
+import { requiresDelegatedAuth } from "./publishPackages.ts";
 
 interface PublishOptions {
   cwd: string;
@@ -22,10 +22,10 @@ const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
 const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
 
 export const npmRequestQueue = createPromiseQueue(
-  NPM_REQUEST_CONCURRENCY_LIMIT
+  NPM_REQUEST_CONCURRENCY_LIMIT,
 );
 export const npmPublishQueue = createPromiseQueue(
-  NPM_PUBLISH_CONCURRENCY_LIMIT
+  NPM_PUBLISH_CONCURRENCY_LIMIT,
 );
 
 function jsonParse(input: string) {
@@ -64,7 +64,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
     const scope = packageName.split("/")[0];
     const scopedRegistry = normalizeRegistry(
       packageJson!.publishConfig?.[`${scope}:registry`] ||
-        process.env[`npm_config_${scope}:registry`]
+        process.env[`npm_config_${scope}:registry`],
     );
     if (scopedRegistry) {
       return {
@@ -75,7 +75,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   }
 
   const registry = normalizeRegistry(
-    packageJson?.publishConfig?.registry || process.env.npm_config_registry
+    packageJson?.publishConfig?.registry || process.env.npm_config_registry,
   );
 
   return {
@@ -88,7 +88,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
 }
 
 async function getPublishTool(
-  cwd: string
+  cwd: string,
 ): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
   const pm = await detect({ cwd });
   if (!pm || pm.name !== "pnpm") return { name: "npm" };
@@ -122,7 +122,7 @@ export async function getTokenIsRequired() {
   if (result.code !== 0) {
     error(
       "error while checking if token is required",
-      result.stderr.toString().trim() || result.stdout.toString().trim()
+      result.stderr.toString().trim() || result.stdout.toString().trim(),
     );
     return false;
   }
@@ -175,7 +175,7 @@ export async function infoAllow404(packageJson: PackageJSON) {
     error(
       `Received an unknown error code: ${
         pkgInfo.error.code
-      } for npm info ${pc.cyan(`"${packageJson.name}"`)}`
+      } for npm info ${pc.cyan(`"${packageJson.name}"`)}`,
     );
     error(pkgInfo.error.summary);
     if (pkgInfo.error.detail) error(pkgInfo.error.detail);
@@ -190,7 +190,7 @@ export async function infoAllow404(packageJson: PackageJSON) {
 async function internalPublish(
   packageJson: PackageJSON,
   opts: PublishOptions,
-  twoFactorState: TwoFactorState
+  twoFactorState: TwoFactorState,
 ): Promise<{ published: boolean; allowRetry?: boolean }> {
   const publishTool = await getPublishTool(opts.cwd);
 
@@ -222,7 +222,7 @@ async function internalPublish(
             {
               env: Object.assign({}, process.env, envOverride),
               stdio: "inherit",
-            }
+            },
           );
 
     if (result.status === 0) {
@@ -253,7 +253,7 @@ async function internalPublish(
           ["publish", opts.publishDir, ...publishFlags],
           {
             env: Object.assign({}, process.env, envOverride),
-          }
+          },
         );
 
   if (code !== 0) {
@@ -291,7 +291,7 @@ async function internalPublish(
       error(
         `an error occurred while publishing ${packageJson.name}: ${json.error.code}`,
         json.error.summary,
-        json.error.detail ? "\n" + json.error.detail : ""
+        json.error.detail ? "\n" + json.error.detail : "",
       );
     }
 
@@ -304,13 +304,13 @@ async function internalPublish(
 export function publish(
   packageJson: PackageJSON,
   opts: PublishOptions,
-  twoFactorState: TwoFactorState
+  twoFactorState: TwoFactorState,
 ): Promise<{ published: boolean }> {
   return npmRequestQueue.add(async () => {
     let result: { published: boolean; allowRetry?: boolean };
     do {
       result = await npmPublishQueue.add(() =>
-        internalPublish(packageJson, opts, twoFactorState)
+        internalPublish(packageJson, opts, twoFactorState),
       );
     } while (result.allowRetry);
 

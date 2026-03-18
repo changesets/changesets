@@ -1,26 +1,30 @@
+import { describe, expect, it, vi } from "vitest";
 import path from "path";
-import stripAnsi from "strip-ansi";
+import { stripVTControlCharacters } from "node:util";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
-import { silenceLogsInBlock, testdir, gitdir } from "@changesets/test-utils";
-import { error as loggerError } from "@changesets/logger";
+import {
+  silenceLogsInBlock,
+  testdir,
+  gitdir,
+  outputFile,
+} from "@changesets/test-utils";
+import * as logger from "@changesets/logger";
 import getChangesets from "@changesets/read";
-import fs from "fs-extra";
 import spawn from "spawndamnit";
 
-import {
-  askCheckboxPlus,
-  askConfirm,
-  askQuestionWithEditor,
-  askQuestion,
-  askList,
-} from "../../../utils/cli-utilities";
-import addChangeset from "..";
+import * as utils from "../../../utils/cli-utilities.ts";
+import addChangeset from "../index.ts";
 
-jest.mock("../../../utils/cli-utilities");
+vi.mock("../../../utils/cli-utilities");
+const mockedUtils = vi.mocked(utils);
 
-// @ts-ignore
-const mockUserResponses = (mockResponses) => {
+const mockUserResponses = (mockResponses: {
+  releases: Record<string, "patch" | "minor" | "major">;
+  consoleSummaries?: string[];
+  editorSummaries?: string[];
+  summary?: string;
+}) => {
   const summary = mockResponses.summary || "summary message mock";
   let majorReleases: Array<string> = [];
   let minorReleases: Array<string> = [];
@@ -37,38 +41,35 @@ const mockUserResponses = (mockResponses) => {
     majorReleases,
     minorReleases,
   ];
-  // @ts-ignore
-  askCheckboxPlus.mockImplementation(() => {
+  mockedUtils.askCheckboxPlus.mockImplementation(async () => {
     if (callCount === returnValues.length) {
       throw new Error(`There was an unexpected call to askCheckboxPlus`);
     }
     return returnValues[callCount++];
   });
 
-  let confirmAnswers = {
+  let confirmAnswers: Record<string, boolean> = {
     "Is this your desired changeset?": true,
   };
 
-  if (mockResponses.consoleSummaries && mockResponses.editorSummaries) {
+  if (
+    mockResponses.consoleSummaries != null &&
+    mockResponses.editorSummaries != null
+  ) {
     let i = 0;
     let j = 0;
-    // @ts-ignore
-    askQuestion.mockImplementation(() => mockResponses.consoleSummaries[i++]);
-    // @ts-ignore
-    askQuestionWithEditor.mockImplementation(
-      () => mockResponses.editorSummaries[j++]
+    mockedUtils.askQuestion.mockImplementation(
+      async () => mockResponses.consoleSummaries![i++],
+    );
+    mockedUtils.askQuestionWithEditor.mockImplementation(
+      () => mockResponses.editorSummaries![j++],
     );
   } else {
-    // @ts-ignore
-    askQuestion.mockReturnValueOnce(summary);
+    mockedUtils.askQuestion.mockResolvedValue(summary);
   }
-
-  // @ts-ignore
-  askConfirm.mockImplementation((question) => {
-    question = stripAnsi(question);
-    // @ts-ignore
+  mockedUtils.askConfirm.mockImplementation(async (question) => {
+    question = stripVTControlCharacters(question);
     if (confirmAnswers[question]) {
-      // @ts-ignore
       return confirmAnswers[question];
     }
     throw new Error(`An answer could not be found for ${question}`);
@@ -103,7 +104,7 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "pkg-a", type: "patch" }],
-      })
+      }),
     );
   });
 
@@ -115,7 +116,6 @@ describe("Add command", () => {
     ${["", "summary after error"]}            | ${1 /* mock implementation will throw */} | ${"summary after error"}
   `(
     "should read summary",
-    // @ts-ignore
     async ({ consoleSummaries, editorSummaries, expectedSummary }) => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
@@ -145,9 +145,9 @@ describe("Add command", () => {
         expect.objectContaining({
           summary: expectedSummary,
           releases: [{ name: "pkg-a", type: "patch" }],
-        })
+        }),
       );
-    }
+    },
   );
 
   it("should generate a changeset in a single package repo", async () => {
@@ -160,23 +160,16 @@ describe("Add command", () => {
     });
 
     const summary = "summary message mock";
+    mockedUtils.askList.mockResolvedValueOnce("minor");
 
-    // @ts-ignore
-    askList.mockReturnValueOnce(Promise.resolve("minor"));
-
-    let confirmAnswers = {
+    let confirmAnswers: Record<string, boolean> = {
       "Is this your desired changeset?": true,
     };
-    // @ts-ignore
-    askQuestion.mockReturnValueOnce("");
-    // @ts-ignore
-    askQuestionWithEditor.mockReturnValueOnce(summary);
-    // @ts-ignore
-    askConfirm.mockImplementation((question) => {
-      question = stripAnsi(question);
-      // @ts-ignore
+    mockedUtils.askQuestion.mockResolvedValue("");
+    mockedUtils.askQuestionWithEditor.mockReturnValueOnce(summary);
+    mockedUtils.askConfirm.mockImplementation(async (question) => {
+      question = stripVTControlCharacters(question);
       if (confirmAnswers[question]) {
-        // @ts-ignore
         return confirmAnswers[question];
       }
       throw new Error(`An answer could not be found for ${question}`);
@@ -190,7 +183,7 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "single-package", type: "minor" }],
-      })
+      }),
     );
   });
 
@@ -219,8 +212,18 @@ describe("Add command", () => {
       { empty: false },
       {
         ...defaultConfig,
-        commit: [path.resolve(__dirname, "..", "..", "..", "commit"), null],
-      }
+        commit: [
+          path.resolve(
+            import.meta.dirname,
+            "..",
+            "..",
+            "..",
+            "commit",
+            "index.ts",
+          ),
+          null,
+        ],
+      },
     );
 
     const result = await spawn("git", ["log", "--oneline", "-1"], { cwd });
@@ -248,7 +251,7 @@ describe("Add command", () => {
       expect.objectContaining({
         releases: [],
         summary: "",
-      })
+      }),
     );
   });
 
@@ -261,15 +264,13 @@ describe("Add command", () => {
       }),
     });
 
-    // @ts-ignore
-    askList.mockReturnValueOnce(Promise.resolve("minor"));
-    // @ts-ignore
-    askConfirm.mockReturnValueOnce(Promise.resolve(true));
+    mockedUtils.askList.mockReturnValueOnce(Promise.resolve("minor"));
+    mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
 
     await addChangeset(
       cwd,
       { empty: false, message: "summary from message" },
-      defaultConfig
+      defaultConfig,
     );
 
     const changesets = await getChangesets(cwd);
@@ -278,11 +279,13 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary from message",
         releases: [{ name: "single-package", type: "minor" }],
-      })
+      }),
     );
-    expect(askConfirm).toHaveBeenCalledWith("Is this your desired changeset?");
-    expect(askQuestion).not.toHaveBeenCalled();
-    expect(askQuestionWithEditor).not.toHaveBeenCalled();
+    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
+      "Is this your desired changeset?",
+    );
+    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
   });
 
   it("should allow empty summary when message is an empty string", async () => {
@@ -294,10 +297,8 @@ describe("Add command", () => {
       }),
     });
 
-    // @ts-ignore
-    askList.mockReturnValueOnce(Promise.resolve("patch"));
-    // @ts-ignore
-    askConfirm.mockReturnValueOnce(Promise.resolve(true));
+    mockedUtils.askList.mockReturnValueOnce(Promise.resolve("patch"));
+    mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
 
     await addChangeset(cwd, { empty: false, message: "" }, defaultConfig);
 
@@ -307,10 +308,10 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "",
         releases: [{ name: "single-package", type: "patch" }],
-      })
+      }),
     );
-    expect(askQuestion).not.toHaveBeenCalled();
-    expect(askQuestionWithEditor).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
   });
 
   it("should use summary passed via message in a monorepo and skip summary prompt", async () => {
@@ -333,7 +334,7 @@ describe("Add command", () => {
     await addChangeset(
       cwd,
       { empty: false, message: "monorepo summary from message" },
-      defaultConfig
+      defaultConfig,
     );
 
     const changesets = await getChangesets(cwd);
@@ -342,11 +343,13 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "monorepo summary from message",
         releases: [{ name: "pkg-a", type: "patch" }],
-      })
+      }),
     );
-    expect(askConfirm).toHaveBeenCalledWith("Is this your desired changeset?");
-    expect(askQuestion).not.toHaveBeenCalled();
-    expect(askQuestionWithEditor).not.toHaveBeenCalled();
+    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
+      "Is this your desired changeset?",
+    );
+    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
   });
 
   it("should allow using message with empty changesets", async () => {
@@ -364,7 +367,7 @@ describe("Add command", () => {
     await addChangeset(
       cwd,
       { empty: true, message: "empty changeset summary" },
-      defaultConfig
+      defaultConfig,
     );
 
     const changesets = await getChangesets(cwd);
@@ -373,7 +376,7 @@ describe("Add command", () => {
       expect.objectContaining({
         releases: [],
         summary: "empty changeset summary",
-      })
+      }),
     );
   });
 
@@ -395,17 +398,17 @@ describe("Add command", () => {
     });
 
     await spawn("git", ["checkout", "-b", "foo"], { cwd });
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "a"'
+      'export default "a"',
     );
     await git.add(".", cwd);
     await git.commit("update pkg-a", cwd);
 
     await spawn("git", ["checkout", "-b", "bar"], { cwd });
-    await fs.outputFile(
+    await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
-      'export default "b"'
+      'export default "b"',
     );
     await git.add(".", cwd);
     await git.commit("update pkg-b", cwd);
@@ -413,13 +416,13 @@ describe("Add command", () => {
     mockUserResponses({ releases: { "pkg-b": "patch" } });
     await addChangeset(cwd, { empty: false, since: "foo" }, defaultConfig);
 
-    expect(askCheckboxPlus).toHaveBeenCalledWith(
+    expect(mockedUtils.askCheckboxPlus).toHaveBeenCalledWith(
       expect.stringContaining("Which packages"),
       [
         { name: "changed packages", choices: ["pkg-b"] },
         { name: "unchanged packages", choices: ["pkg-a"] },
       ],
-      expect.any(Function)
+      expect.any(Function),
     );
 
     const changesets = await getChangesets(cwd);
@@ -428,7 +431,7 @@ describe("Add command", () => {
       expect.objectContaining({
         summary: "summary message mock",
         releases: [{ name: "pkg-b", type: "patch" }],
-      })
+      }),
     );
   });
 
@@ -466,11 +469,9 @@ describe("Add command", () => {
     await addChangeset(
       cwd,
       { empty: false },
-      { ...defaultConfig, ignore: ["pkg-b"] }
+      { ...defaultConfig, ignore: ["pkg-b"] },
     );
-
-    // @ts-ignore
-    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
 
@@ -496,9 +497,7 @@ describe("Add command", () => {
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
-
-    // @ts-ignore
-    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
 
@@ -533,16 +532,14 @@ describe("Add command", () => {
           version: false,
           tag: false,
         },
-      }
+      },
     );
-
-    // @ts-ignore
-    const { choices } = askCheckboxPlus.mock.calls[0][1][0];
+    const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
     expect(choices).toEqual(["pkg-a", "pkg-c"]);
   });
 
   it("should exit with an error when there are no versionable packages in a single-package repo", async () => {
-    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+    const loggerErrorSpy = vi.spyOn(logger, "error");
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -551,11 +548,11 @@ describe("Add command", () => {
     });
 
     await expect(() =>
-      addChangeset(cwd, { empty: false }, defaultConfig)
+      addChangeset(cwd, { empty: false }, defaultConfig),
     ).rejects.toThrow("The process exited with code: 1");
 
-    expect(loggerErrorMock).toHaveBeenCalledTimes(3);
-    expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
+    expect(loggerErrorSpy).toHaveBeenCalledTimes(3);
+    expect(loggerErrorSpy.mock.calls).toMatchInlineSnapshot(`
       [
         [
           "No versionable packages found",
@@ -571,7 +568,7 @@ describe("Add command", () => {
   });
 
   it("should exit with an error when there are no versionable packages in a monorepo", async () => {
-    const loggerErrorMock = loggerError as jest.Mock<typeof loggerError>;
+    const loggerErrorSpy = vi.spyOn(logger, "error");
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -586,11 +583,11 @@ describe("Add command", () => {
     });
 
     await expect(() =>
-      addChangeset(cwd, { empty: false }, defaultConfig)
+      addChangeset(cwd, { empty: false }, defaultConfig),
     ).rejects.toThrow("The process exited with code: 1");
 
-    expect(loggerErrorMock).toHaveBeenCalledTimes(3);
-    expect(loggerErrorMock.mock.calls).toMatchInlineSnapshot(`
+    expect(loggerErrorSpy).toHaveBeenCalledTimes(3);
+    expect(loggerErrorSpy.mock.calls).toMatchInlineSnapshot(`
       [
         [
           "No versionable packages found",

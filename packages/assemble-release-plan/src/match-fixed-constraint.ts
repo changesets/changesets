@@ -1,24 +1,24 @@
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
-import { InternalRelease } from "./types";
+import type { Config } from "@changesets/types";
+import type { Package } from "@manypkg/get-packages";
+import type { InternalRelease } from "./types.ts";
 import {
   getCurrentHighestVersion,
   getHighestReleaseType,
   mapGetOrThrowInternal,
-} from "./utils";
+} from "./utils.ts";
 
 export default function matchFixedConstraint(
   releases: Map<string, InternalRelease>,
   packagesByName: Map<string, Package>,
-  config: Config
+  config: Config,
 ): boolean {
   let updated = false;
 
   for (let fixedPackages of config.fixed) {
     let releasingFixedPackages = [...releases.values()].filter(
       (release) =>
-        fixedPackages.includes(release.name) && release.type !== "none"
+        fixedPackages.includes(release.name) && release.type !== "none",
     );
 
     if (releasingFixedPackages.length === 0) continue;
@@ -26,7 +26,7 @@ export default function matchFixedConstraint(
     let highestReleaseType = getHighestReleaseType(releasingFixedPackages);
     let highestVersion = getCurrentHighestVersion(
       fixedPackages,
-      packagesByName
+      packagesByName,
     );
 
     // Finally, we update the packages so all of them are on the highest version
@@ -35,8 +35,8 @@ export default function matchFixedConstraint(
         packagesByName,
         pkgName,
         `Could not find package named "${pkgName}" listed in fixed group ${JSON.stringify(
-          fixedPackages
-        )}`
+          fixedPackages,
+        )}`,
       );
       if (
         shouldSkipPackage(pkg, {

@@ -1,12 +1,14 @@
-import fs from "fs-extra";
+import { describe, expect, it, vi } from "vitest";
+import fs from "node:fs/promises";
 import path from "path";
 import parse from "@changesets/parse";
-import writeChangeset from "./";
+import writeChangeset from "./index.ts";
 
-import humanId from "human-id";
+import { humanId } from "human-id";
 import { testdir } from "@changesets/test-utils";
 
-jest.mock("human-id");
+vi.mock("human-id");
+const mockedHumanId = vi.mocked(humanId);
 
 describe("simple project", () => {
   it("should write a changeset", async () => {
@@ -22,19 +24,18 @@ describe("simple project", () => {
     });
 
     const changesetID = "ascii";
-    // @ts-ignore
-    humanId.mockReturnValueOnce(changesetID);
+    mockedHumanId.mockReturnValueOnce(changesetID);
 
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
-    const mdContent = await fs.readFile(mdPath, "utf-8");
+    const mdContent = await fs.readFile(mdPath, "utf8");
 
     expect(parse(mdContent)).toEqual({
       summary: "This is a summary",
@@ -55,8 +56,7 @@ describe("simple project", () => {
     });
 
     const changesetID = "ascii";
-    // @ts-ignore
-    humanId.mockReturnValueOnce(changesetID);
+    mockedHumanId.mockReturnValueOnce(changesetID);
 
     const summary = `This is a summary
 ~~~html
@@ -71,7 +71,7 @@ describe("simple project", () => {
       cwd,
       {
         prettier: false,
-      }
+      },
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
@@ -96,8 +96,7 @@ describe("simple project", () => {
     });
 
     const changesetID = "ascii";
-    // @ts-ignore
-    humanId.mockReturnValueOnce(changesetID);
+    mockedHumanId.mockReturnValueOnce(changesetID);
 
     const summary = `This is a summary
 ~~~html
@@ -109,7 +108,7 @@ describe("simple project", () => {
         summary,
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
@@ -142,19 +141,18 @@ describe("simple project", () => {
     });
 
     const changesetID = "ascii";
-    // @ts-ignore
-    humanId.mockReturnValueOnce(changesetID);
+    mockedHumanId.mockReturnValueOnce(changesetID);
 
     await writeChangeset(
       {
         summary: "",
         releases: [],
       },
-      cwd
+      cwd,
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
-    const mdContent = await fs.readFile(mdPath, "utf-8");
+    const mdContent = await fs.readFile(mdPath, "utf8");
 
     expect(parse(mdContent)).toEqual({
       summary: "",

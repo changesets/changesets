@@ -1,16 +1,16 @@
-import { execWithOutput } from "./utils";
+import { spawnWithOutput } from "./utils.ts";
 
 export const getCurrentBranch = async (cwd: string) => {
-  const { stdout } = await execWithOutput(
+  const { stdout } = await spawnWithOutput(
     "git",
     ["rev-parse", "--abbrev-ref", "HEAD"],
-    { cwd }
+    { cwd },
   );
   return stdout.trim();
 };
 
 export const pullBranch = async (branch: string, cwd: string) => {
-  await execWithOutput("git", ["pull", "origin", branch], { cwd });
+  await spawnWithOutput("git", ["pull", "origin", branch], { cwd });
 };
 
 export const push = async (
@@ -19,9 +19,9 @@ export const push = async (
     force,
     includeTags,
     cwd,
-  }: { force?: boolean; includeTags?: boolean; cwd: string }
+  }: { force?: boolean; includeTags?: boolean; cwd: string },
 ) => {
-  await execWithOutput(
+  await spawnWithOutput(
     "git",
     [
       "push",
@@ -30,15 +30,15 @@ export const push = async (
       includeTags && "--tags",
       force && "--force",
     ].filter((x): x is string => !!x),
-    { cwd }
+    { cwd },
   );
 };
 
 export const switchToMaybeExistingBranch = async (
   branch: string,
-  cwd: string
+  cwd: string,
 ) => {
-  let { stderr } = await execWithOutput("git", ["checkout", branch], {
+  let { stderr } = await spawnWithOutput("git", ["checkout", branch], {
     ignoreReturnCode: true,
     cwd,
   });
@@ -46,27 +46,27 @@ export const switchToMaybeExistingBranch = async (
     .toString()
     .includes(`Switched to a new branch '${branch}'`);
   if (isCreatingBranch) {
-    await execWithOutput("git", ["checkout", "-b", branch], { cwd });
+    await spawnWithOutput("git", ["checkout", "-b", branch], { cwd });
   }
 };
 
 export const reset = async (
   pathSpec: string,
   mode: "hard" | "soft" | "mixed" = "hard",
-  cwd: string
+  cwd: string,
 ) => {
-  await execWithOutput("git", ["reset", `--${mode}`, pathSpec], { cwd });
+  await spawnWithOutput("git", ["reset", `--${mode}`, pathSpec], { cwd });
 };
 
 export const commitAll = async (message: string, cwd: string) => {
-  await execWithOutput("git", ["add", "."], {
+  await spawnWithOutput("git", ["add", "."], {
     cwd,
   });
-  await execWithOutput("git", ["commit", "-m", message], { cwd });
+  await spawnWithOutput("git", ["commit", "-m", message], { cwd });
 };
 
 export const checkIfClean = async (cwd: string): Promise<boolean> => {
-  const { stdout } = await execWithOutput("git", ["status", "--porcelain"], {
+  const { stdout } = await spawnWithOutput("git", ["status", "--porcelain"], {
     cwd,
   });
   return !stdout.length;

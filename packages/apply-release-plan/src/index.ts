@@ -1,21 +1,25 @@
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import {
+import type {
   ChangelogFunctions,
   Config,
   ModCompWithPackage,
   NewChangeset,
   ReleasePlan,
 } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import type { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import prettier from "prettier";
-import resolveFrom from "resolve-from";
-import getChangelogEntry from "./get-changelog-entry";
-import versionPackage from "./version-package";
+import { resolve } from "import-meta-resolve";
+import getChangelogEntry from "./get-changelog-entry.ts";
+import versionPackage from "./version-package.ts";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
+
+const require = createRequire(import.meta.url);
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
@@ -33,7 +37,7 @@ function stringDefined(s: string | undefined): s is string {
 }
 async function getCommitsThatAddChangesets(
   changesetIds: string[],
-  cwd: string
+  cwd: string,
 ) {
   const paths = changesetIds.map((id) => `.changeset/${id}.md`);
   const commits = await git.getCommitsThatAddFiles(paths, { cwd });
@@ -69,14 +73,14 @@ export default async function applyReleasePlan(
   packages: Packages,
   config: Config = defaultConfig,
   snapshot?: string | boolean,
-  contextDir = __dirname
+  contextDir = import.meta.dirname,
 ) {
   let cwd = packages.root.dir;
 
   let touchedFiles = [];
 
   const packagesByName = new Map(
-    packages.packages.map((x) => [x.packageJson.name, x])
+    packages.packages.map((x) => [x.packageJson.name, x]),
   );
 
   let { releases, changesets } = releasePlan;
@@ -85,7 +89,7 @@ export default async function applyReleasePlan(
     let pkg = packagesByName.get(release.name);
     if (!pkg)
       throw new Error(
-        `Could not find matching package for release of: ${release.name}`
+        `Could not find matching package for release of: ${release.name}`,
       );
     return {
       ...release,
@@ -99,16 +103,19 @@ export default async function applyReleasePlan(
     changesets,
     config,
     cwd,
-    contextDir
+    contextDir,
   );
 
   if (releasePlan.preState !== undefined && snapshot === undefined) {
     if (releasePlan.preState.mode === "exit") {
-      await fs.remove(path.join(cwd, ".changeset", "pre.json"));
+      await fs.rm(path.join(cwd, ".changeset", "pre.json"), {
+        recursive: true,
+        force: true,
+      });
     } else {
       await fs.writeFile(
         path.join(cwd, ".changeset", "pre.json"),
-        JSON.stringify(releasePlan.preState, null, 2) + "\n"
+        JSON.stringify(releasePlan.preState, null, 2) + "\n",
       );
     }
     touchedFiles.push(path.join(cwd, ".changeset", "pre.json"));
@@ -159,7 +166,12 @@ export default async function applyReleasePlan(
       changesets.map(async (changeset) => {
         let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
         let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
-        if (await fs.pathExists(changesetPath)) {
+        if (
+          await fs.access(changesetPath).then(
+            () => true,
+            () => false,
+          )
+        ) {
           // DO NOT remove changeset for skipped packages
           // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
           // At this point, we know there is no such changeset, because otherwise the program would've already failed,
@@ -170,18 +182,23 @@ export default async function applyReleasePlan(
               shouldSkipPackage(packagesByName.get(release.name)!, {
                 ignore: config.ignore,
                 allowPrivatePackages: config.privatePackages.version,
-              })
+              }),
             )
           ) {
             touchedFiles.push(changesetPath);
-            await fs.remove(changesetPath);
+            await fs.rm(changesetPath, { recursive: true, force: true });
           }
           // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
-        } else if (await fs.pathExists(changesetFolderPath)) {
+        } else if (
+          await fs.access(changesetFolderPath).then(
+            () => true,
+            () => false,
+          )
+        ) {
           touchedFiles.push(changesetFolderPath);
-          await fs.remove(changesetFolderPath);
+          await fs.rm(changesetFolderPath, { recursive: true, force: true });
         }
-      })
+      }),
     );
   }
 
@@ -194,14 +211,14 @@ async function getNewChangelogEntry(
   changesets: NewChangeset[],
   config: Config,
   cwd: string,
-  contextDir: string
+  contextDir: string,
 ) {
   if (!config.changelog) {
     return Promise.resolve(
       releasesWithPackage.map((release) => ({
         ...release,
         changelog: null,
-      }))
+      })),
     );
   }
 
@@ -215,9 +232,15 @@ async function getNewChangelogEntry(
   let changelogPath;
 
   try {
-    changelogPath = resolveFrom(changesetPath, config.changelog[0]);
+    changelogPath = resolve(
+      config.changelog[0],
+      pathToFileURL(changesetPath).toString(),
+    );
   } catch {
-    changelogPath = resolveFrom(contextDir, config.changelog[0]);
+    changelogPath = resolve(
+      config.changelog[0],
+      pathToFileURL(contextDir).toString(),
+    );
   }
 
   let possibleChangelogFunc = await import(changelogPath);
@@ -240,7 +263,7 @@ async function getNewChangelogEntry(
 
   let commits = await getCommitsThatAddChangesets(
     changesets.map((cs) => cs.id),
-    cwd
+    cwd,
   );
   let moddedChangesets = changesets.map((cs, i) => ({
     ...cs,
@@ -260,20 +283,20 @@ async function getNewChangelogEntry(
           onlyUpdatePeerDependentsWhenOutOfRange:
             config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange,
-        }
+        },
       );
 
       return {
         ...release,
         changelog,
       };
-    })
+    }),
   ).catch((e) => {
     console.error(
-      "The following error was encountered while generating changelog entries"
+      "The following error was encountered while generating changelog entries",
     );
     console.error(
-      "We have escaped applying the changesets, and no files should have been affected"
+      "We have escaped applying the changesets, and no files should have been affected",
     );
     throw e;
   });
@@ -283,30 +306,64 @@ async function updateChangelog(
   changelogPath: string,
   changelog: string,
   name: string,
-  prettierInstance: typeof prettier | undefined
+  prettierInstance: typeof prettier | undefined,
 ) {
   let templateString = `\n\n${changelog.trim()}\n`;
+  let fileData;
 
   try {
-    if (fs.existsSync(changelogPath)) {
-      await prependFile(changelogPath, templateString, name, prettierInstance);
-    } else {
-      await writeFormattedMarkdownFile(
-        changelogPath,
-        `# ${name}${templateString}`,
-        prettierInstance
-      );
+    fileData = (await fs.readFile(changelogPath)).toString();
+  } catch (err: any) {
+    if (err?.code !== "ENOENT") {
+      throw err;
     }
-  } catch (e) {
-    console.warn(e);
+    await writeFormattedMarkdownFile(
+      changelogPath,
+      `# ${name}${templateString}`,
+      prettierInstance,
+    );
+    return;
   }
+
+  // if the file exists but doesn't have the header, we'll add it in
+  if (!fileData) {
+    const completelyNewChangelog = `# ${name}${templateString}`;
+    await writeFormattedMarkdownFile(
+      changelogPath,
+      completelyNewChangelog,
+      prettierInstance,
+    );
+    return;
+  }
+
+  // Require just 2 version numbers here, assuming `## 1.1` is a valid version heading.
+  // Our version headings start with ##, we are more permissive here though.
+  // Note: we also need to handle prerelease versions here but that's already covered by the regex.
+  const isVersionHeading = /^#{1,6}\s+\d+\.\d+/.test(fileData);
+
+  let newChangelog: string;
+  if (isVersionHeading) {
+    newChangelog = templateString.trimStart() + fileData;
+  } else {
+    const index = fileData.indexOf("\n");
+    newChangelog =
+      index === -1
+        ? fileData + templateString // treat the whole file as header
+        : fileData.slice(0, index) + templateString + fileData.slice(index + 1);
+  }
+
+  await writeFormattedMarkdownFile(
+    changelogPath,
+    newChangelog,
+    prettierInstance,
+  );
 }
 
 async function updatePackageJson(
   pkgJsonPath: string,
-  pkgJson: any
+  pkgJson: any,
 ): Promise<void> {
-  const pkgRaw = await fs.readFile(pkgJsonPath, "utf-8");
+  const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
   const indent = detectIndent(pkgRaw).indent || "  ";
   const stringified =
     JSON.stringify(pkgJson, null, indent) + (pkgRaw.endsWith("\n") ? "\n" : "");
@@ -314,48 +371,10 @@ async function updatePackageJson(
   return fs.writeFile(pkgJsonPath, stringified);
 }
 
-async function prependFile(
-  filePath: string,
-  data: string,
-  name: string,
-  prettierInstance: typeof prettier | undefined
-) {
-  const fileData = fs.readFileSync(filePath).toString();
-  // if the file exists but doesn't have the header, we'll add it in
-  if (!fileData) {
-    const completelyNewChangelog = `# ${name}${data}`;
-    await writeFormattedMarkdownFile(
-      filePath,
-      completelyNewChangelog,
-      prettierInstance
-    );
-    return;
-  }
-
-  let newChangelog: string;
-
-  // Require just 2 version numbers here, assuming `## 1.1` is a valid version heading.
-  // Our version headings start with ##, we are more permissive here though.
-  // Note: we also need to handle prerelease versions here but that's already covered by the regex.
-  const isVersionHeading = /^#{1,6}\s+\d+\.\d+/.test(fileData);
-  if (isVersionHeading) {
-    // file starts with a version heading (no package title) - prepend before everything
-    newChangelog = data.trimStart() + fileData;
-  } else {
-    const index = fileData.indexOf("\n");
-    newChangelog =
-      index === -1
-        ? fileData + data // treat the whole file as header
-        : fileData.slice(0, index) + data + fileData.slice(index + 1);
-  }
-
-  await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
-}
-
 async function writeFormattedMarkdownFile(
   filePath: string,
   content: string,
-  prettierInstance: typeof prettier | undefined
+  prettierInstance: typeof prettier | undefined,
 ) {
   await fs.writeFile(
     filePath,
@@ -366,6 +385,6 @@ async function writeFormattedMarkdownFile(
           filepath: filePath,
           parser: "markdown",
         })
-      : content
+      : content,
   );
 }

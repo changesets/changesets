@@ -1,10 +1,12 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { stripVTControlCharacters } from "node:util";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
-import getDependencyGraph from "./get-dependency-graph";
+import getDependencyGraph from "./get-dependency-graph.ts";
 
 const consoleError = console.error;
 
 beforeEach(() => {
-  console.error = jest.fn();
+  console.error = vi.fn();
 });
 
 afterEach(() => {
@@ -106,14 +108,13 @@ describe("getting the dependency graph", function () {
         tool: "pnpm",
       });
       expect(valid).toBeFalsy();
-      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
-        [
-          [
-            "Package [36m"foo"[39m must depend on the current version of [36m"bar"[39m: [32m"1.0.0"[39m vs [31m"link:../bar"[39m",
-          ],
-        ]
-      `);
-    })
+      expect((console.error as any).mock.calls).toHaveLength(1);
+      expect(
+        stripVTControlCharacters((console.error as any).mock.calls[0][0]),
+      ).toBe(
+        `Package "foo" must depend on the current version of "bar": "1.0.0" vs "link:../bar"`,
+      );
+    }),
   );
 
   it(
@@ -146,14 +147,12 @@ describe("getting the dependency graph", function () {
         tool: "pnpm",
       });
       expect(valid).toBe(false);
-      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
-        [
-          [
-            "Package [36m"foo"[39m must depend on the current version of [36m"bar"[39m: [32m"1.0.0"[39m vs [31m"0.9.0"[39m",
-          ],
-        ]
-      `);
-    })
+      expect(
+        stripVTControlCharacters((console.error as any).mock.calls[0][0]),
+      ).toMatchInlineSnapshot(
+        `"Package "foo" must depend on the current version of "bar": "1.0.0" vs "0.9.0""`,
+      );
+    }),
   );
 
   it(
@@ -188,10 +187,10 @@ describe("getting the dependency graph", function () {
         },
         {
           bumpVersionsWithWorkspaceProtocolOnly: true,
-        }
+        },
       );
       expect(valid).toBe(true);
       expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
-    })
+    }),
   );
 });

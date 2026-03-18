@@ -1,19 +1,18 @@
-import { resolve } from "path";
-import semverParse from "semver/functions/parse";
-import pc from "picocolors";
-import { AccessType } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
 import { info, warn } from "@changesets/logger";
-import { PreState } from "@changesets/types";
+import type { AccessType, PreState } from "@changesets/types";
+import type { Package } from "@manypkg/get-packages";
+import { resolve } from "path";
+import pc from "picocolors";
+import semverParse from "semver/functions/parse.js";
+import type { TwoFactorState } from "../../utils/types.ts";
 import {
-  isCustomRegistry,
   getCorrectRegistry,
   getTokenIsRequired,
+  isCustomRegistry,
   publish,
-  infoAllow404,
   npmPublishQueue,
-} from "./npm-utils";
-import { TwoFactorState } from "../../utils/types";
+  infoAllow404,
+} from "./npm-utils.ts";
 
 type PublishedState = "never" | "published" | "only-pre";
 
@@ -57,7 +56,7 @@ const getTwoFactorState = async ({
   if (
     !process.stdin.isTTY ||
     publicPackages.some((pkg) =>
-      isCustomRegistry(getCorrectRegistry(pkg.packageJson).registry)
+      isCustomRegistry(getCorrectRegistry(pkg.packageJson).registry),
     ) ||
     isCustomRegistry(process.env.npm_config_registry)
   ) {
@@ -99,7 +98,7 @@ export default async function publishPackages({
   const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
-    preState
+    preState,
   );
 
   if (unpublishedPackagesInfo.length === 0) {
@@ -122,9 +121,9 @@ export default async function publishPackages({
         pkg,
         access,
         twoFactorState,
-        getReleaseTag(pkgInfo, preState, tag)
+        getReleaseTag(pkgInfo, preState, tag),
       );
-    })
+    }),
   );
 }
 
@@ -132,7 +131,7 @@ async function publishAPackage(
   pkg: Package,
   access: AccessType,
   twoFactorState: TwoFactorState,
-  tag: string
+  tag: string,
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
   info(`Publishing ${pc.cyan(`"${name}"`)} at ${pc.green(`"${version}"`)}`);
@@ -147,7 +146,7 @@ async function publishAPackage(
       access: publishConfig?.access || access,
       tag,
     },
-    twoFactorState
+    twoFactorState,
   );
 
   return {
@@ -159,7 +158,7 @@ async function publishAPackage(
 
 async function getUnpublishedPackages(
   packages: Array<Package>,
-  preState: PreState | undefined
+  preState: PreState | undefined,
 ) {
   const results: Array<PkgInfo> = await Promise.all(
     packages.map(async ({ packageJson }) => {
@@ -172,7 +171,7 @@ async function getUnpublishedPackages(
             response.pkgInfo.versions &&
             response.pkgInfo.versions.every(
               (version: string) =>
-                semverParse(version)!.prerelease[0] === preState.tag
+                semverParse(version)!.prerelease[0] === preState.tag,
             )
           ) {
             publishedState = "only-pre";
@@ -186,7 +185,7 @@ async function getUnpublishedPackages(
         publishedState,
         publishedVersions: response.pkgInfo.versions || [],
       };
-    })
+    }),
   );
 
   const packagesToPublish: Array<PkgInfo> = [];
@@ -196,21 +195,21 @@ async function getUnpublishedPackages(
     if (!publishedVersions.includes(localVersion)) {
       packagesToPublish.push(pkgInfo);
       info(
-        `${name} is being published because our local version (${localVersion}) has not been published on npm`
+        `${name} is being published because our local version (${localVersion}) has not been published on npm`,
       );
       if (preState !== undefined && publishedState === "only-pre") {
         info(
           `${name} is being published to ${pc.cyan(
-            "latest"
+            "latest",
           )} rather than ${pc.cyan(
-            preState.tag
-          )} because there has not been a regular release of it yet`
+            preState.tag,
+          )} because there has not been a regular release of it yet`,
         );
       }
     } else {
       // If the local version is behind npm, something is wrong, we warn here, and by not getting published later, it will fail
       warn(
-        `${name} is not being published because version ${localVersion} is already published on npm`
+        `${name} is not being published because version ${localVersion} is already published on npm`,
       );
     }
   }

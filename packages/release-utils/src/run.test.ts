@@ -1,29 +1,29 @@
+import { beforeEach, describe, expect, it, test, vi } from "vitest";
 import { add, commit } from "@changesets/git";
-import { silenceLogsInBlock, tempdir, testdir } from "@changesets/test-utils";
-import { Changeset } from "@changesets/types";
+import {
+  linkNodeModules,
+  silenceLogsInBlock,
+  tempdir,
+  testdir,
+} from "@changesets/test-utils";
+import type { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
-import fileUrl from "file-url";
-import fs from "fs-extra";
+import { pathToFileURL } from "node:url";
+import fs from "node:fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
-import { getCurrentBranch } from "./gitUtils";
-import { runPublish, runVersion } from "./run";
+import { getCurrentBranch } from "./gitUtils.ts";
+import { runPublish, runVersion } from "./run.ts";
 
-const linkNodeModules = async (cwd: string) => {
-  await fs.symlink(
-    path.join(__dirname, "..", "..", "..", "node_modules"),
-    path.join(cwd, "node_modules")
-  );
-};
 const writeChangesets = (changesets: Changeset[], cwd: string) => {
   return Promise.all(changesets.map((commit) => writeChangeset(commit, cwd)));
 };
 
-jest.setTimeout(10000);
+vi.setConfig({ testTimeout: 10000 });
 silenceLogsInBlock();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 async function setupRepoAndClone(cwd: string) {
@@ -39,10 +39,10 @@ async function setupRepoAndClone(cwd: string) {
     "git",
     // Note: a file:// URL is needed in order to make a shallow clone of
     // a local repo
-    ["clone", "--depth", "1", fileUrl(cwd), "."],
+    ["clone", "--depth", "1", pathToFileURL(cwd).toString(), "."],
     {
       cwd: clone,
-    }
+    },
   );
   await spawn("git", ["checkout", "-b", "some-other-branch"], { cwd });
   return { clone, mainBranch };
@@ -85,7 +85,7 @@ describe("version", () => {
           summary: "Awesome feature",
         },
       ],
-      cwd
+      cwd,
     );
 
     const { clone, mainBranch } = await setupRepoAndClone(cwd);
@@ -103,8 +103,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf-8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-a",
@@ -118,8 +118,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf-8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-b",
@@ -129,8 +129,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf-8"
-      )
+        "utf8",
+      ),
     ).toEqual(
       expect.stringContaining(`# pkg-a
 
@@ -138,13 +138,13 @@ describe("version", () => {
 
 ### Minor Changes
 
-`)
+`),
     );
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
-        "utf-8"
-      )
+        "utf8",
+      ),
     ).toEqual(
       expect.stringContaining(`# pkg-b
 
@@ -152,7 +152,7 @@ describe("version", () => {
 
 ### Minor Changes
 
-`)
+`),
     );
     expect(changedPackages).toEqual([
       {
@@ -191,7 +191,7 @@ describe("version", () => {
           version: "1.0.0",
         },
         null,
-        2
+        2,
       ),
       ".changeset/config.json": JSON.stringify({}),
     });
@@ -208,7 +208,7 @@ describe("version", () => {
           summary: "Awesome feature",
         },
       ],
-      cwd
+      cwd,
     );
 
     const { clone, mainBranch } = await setupRepoAndClone(cwd);
@@ -226,8 +226,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf-8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-a",
@@ -241,8 +241,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf-8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-b",
@@ -253,8 +253,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf-8"
-      )
+        "utf8",
+      ),
     ).toEqual(
       expect.stringContaining(`# pkg-a
 
@@ -262,10 +262,10 @@ describe("version", () => {
 
 ### Minor Changes
 
-`)
+`),
     );
     await expect(
-      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf-8")
+      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8"),
     ).rejects.toMatchObject({ code: "ENOENT" });
     expect(changedPackages).toEqual([
       {
@@ -315,7 +315,7 @@ describe("version", () => {
           summary: "Awesome feature",
         },
       ],
-      cwd
+      cwd,
     );
 
     const { clone } = await setupRepoAndClone(cwd);
@@ -349,7 +349,7 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node ${require.resolve("./fake-publish-script-single-package")}`,
+      script: `node --experimental-strip-types -e "const git = await import('@changesets/git'); console.log('🦋 New tag: v1.0.0'); git.tag('v1.0.0', process.cwd());"`,
       cwd: clone,
     });
 
@@ -385,7 +385,7 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node ${require.resolve("./fake-publish-script-multi-package")}`,
+      script: `node --experimental-strip-types -e "const git = await import('@changesets/git'); console.log('🦋 New tag: pkg-a@1.0.0'); console.log('🦋 New tag: pkg-b@1.0.0'); git.tag('pkg-a@1.0.0', process.cwd()); git.tag('pkg-b@1.0.0', process.cwd());"`,
       cwd: clone,
     });
 
@@ -398,7 +398,7 @@ describe("publish", () => {
     });
     let tagsResult = await spawn("git", ["tag"], { cwd });
     expect(tagsResult.stdout.toString("utf8").trim()).toEqual(
-      "pkg-a@1.0.0\npkg-b@1.0.0"
+      "pkg-a@1.0.0\npkg-b@1.0.0",
     );
   });
 });

@@ -1,8 +1,8 @@
 /**
  * Shared utility functions and business logic
  */
-import semverSatisfies from "semver/functions/satisfies";
-import { VersionType } from "@changesets/types";
+import semverSatisfies from "semver/functions/satisfies.js";
+import type { VersionType } from "@changesets/types";
 
 const bumpTypes = ["none", "patch", "minor", "major"];
 
@@ -34,7 +34,7 @@ export function shouldUpdateDependencyBasedOnConfig(
   }: {
     minReleaseType: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-  }
+  },
 ): boolean {
   if (!semverSatisfies(release.version, depVersionRange)) {
     // Dependencies leaving semver range should always be updated
@@ -48,4 +48,8 @@ export function shouldUpdateDependencyBasedOnConfig(
     shouldUpdate = !onlyUpdatePeerDependentsWhenOutOfRange;
   }
   return shouldUpdate;
+}
+
+export function capitalize(str: string) {
+  return str[0].toUpperCase() + str.slice(1);
 }

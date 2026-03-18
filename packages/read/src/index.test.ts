@@ -1,8 +1,10 @@
-import fs from "fs-extra";
 import path from "node:path";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, it } from "vitest";
 
-import read from "./";
+import read from "./index.ts";
 import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import fs from "node:fs/promises";
 import writeChangeset from "@changesets/write";
 import { add } from "@changesets/git";
 
@@ -100,7 +102,7 @@ I'm amazed we needed to update the best package, because it was already the best
 
   it("should return an empty array when no changesets are found", async () => {
     const cwd = await testdir({});
-    await fs.mkdir(path.join(cwd, ".changeset"));
+    await fs.mkdir(path.join(cwd, ".changeset"), { recursive: true });
 
     const changesets = await read(cwd);
     expect(changesets).toEqual([]);
@@ -113,7 +115,7 @@ I'm amazed we needed to update the best package, because it was already the best
       await read(cwd);
     } catch (e) {
       expect((e as Error).message).toBe(
-        "There is no .changeset directory in this project"
+        "There is no .changeset directory in this project",
       );
       return;
     }
@@ -132,7 +134,7 @@ Everything is wrong`,
     });
 
     await expect(read(cwd)).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "could not parse changeset - missing or invalid frontmatter.
+      [Error: could not parse changeset - missing or invalid frontmatter.
       Changesets must start with frontmatter delimited by "---".
       Example:
       ---
@@ -147,7 +149,7 @@ Everything is wrong`,
 
       --
 
-      Everything is wrong"
+      Everything is wrong]
     `);
   });
 
@@ -207,30 +209,6 @@ Awesome feature, hidden behind a feature flag
       },
     ]);
   });
-
-  it("should read an old changeset", async () => {
-    const cwd = await testdir({
-      ".changeset/basic-changeset/changes.json": JSON.stringify({
-        releases: [
-          {
-            name: "cool-package",
-            type: "minor",
-          },
-        ],
-        dependents: [],
-      }),
-      ".changeset/basic-changeset/changes.md": `Nice simple summary`,
-    });
-
-    const changesets = await read(cwd);
-    expect(changesets).toEqual([
-      {
-        releases: [{ name: "cool-package", type: "minor" }],
-        summary: "Nice simple summary",
-        id: "basic-changeset",
-      },
-    ]);
-  });
   it("should read a nested changeset relative to git root", async () => {
     const cwd = await gitdir({
       "library/package.json": JSON.stringify({
@@ -253,7 +231,7 @@ Awesome feature, hidden behind a feature flag
         ],
         summary: "Awesome summary",
       },
-      path.join(cwd, "library")
+      path.join(cwd, "library"),
     );
     await add("library/.changeset", cwd);
 

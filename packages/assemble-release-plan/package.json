@@ -1,32 +1,26 @@
 {
   "name": "@changesets/assemble-release-plan",
-  "version": "6.0.9",
+  "version": "7.0.0-next.1",
   "description": "Reads changesets and adds information on dependents that need bumping",
-  "main": "dist/changesets-assemble-release-plan.cjs.js",
-  "module": "dist/changesets-assemble-release-plan.esm.js",
+  "type": "module",
   "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/changesets-assemble-release-plan.cjs.mjs",
-        "default": "./dist/changesets-assemble-release-plan.cjs.js"
-      },
-      "module": "./dist/changesets-assemble-release-plan.esm.js",
-      "import": "./dist/changesets-assemble-release-plan.cjs.mjs",
-      "default": "./dist/changesets-assemble-release-plan.cjs.js"
-    },
+    ".": "./dist/changesets-assemble-release-plan.js",
     "./package.json": "./package.json"
   },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/assemble-release-plan",
   "dependencies": {
-    "@changesets/errors": "^0.2.0",
-    "@changesets/get-dependents-graph": "^2.1.3",
-    "@changesets/should-skip-package": "^0.1.2",
-    "@changesets/types": "^6.1.0",
+    "@changesets/errors": "^1.0.0-next.1",
+    "@changesets/get-dependents-graph": "^3.0.0-next.1",
+    "@changesets/should-skip-package": "^1.0.0-next.1",
+    "@changesets/types": "^7.0.0-next.1",
     "@manypkg/get-packages": "^1.1.3",
     "semver": "^7.5.3"
   },
   "devDependencies": {
-    "@changesets/config": "*"
+    "@changesets/config": "4.0.0-next.1"
+  },
+  "engines": {
+    "node": ">=20.19.0"
   }
 }

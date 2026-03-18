@@ -1,21 +1,23 @@
-import publishPackages from "../publishPackages";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import publishPackages from "../publishPackages.ts";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import runRelease from "..";
+import runRelease from "../index.ts";
 
-jest.mock("../../../utils/cli-utilities");
-jest.mock("@changesets/git");
-jest.mock("../publishPackages");
+vi.mock("../../../utils/cli-utilities");
+vi.mock("@changesets/git");
+const mockGit = vi.mocked(git);
+vi.mock("../publishPackages");
+const mockedPublishPackages = vi.mocked(publishPackages);
 
-// @ts-ignore
-git.tag.mockImplementation(() => Promise.resolve(true));
+mockGit.tag.mockImplementation(async () => true);
 
 describe("running release", () => {
   silenceLogsInBlock();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("When there is no changeset commits", () => {
@@ -41,13 +43,10 @@ describe("running release", () => {
         }),
       });
 
-      // @ts-ignore
-      publishPackages.mockImplementation(() =>
-        Promise.resolve([
-          { name: "pkg-a", newVersion: "1.1.0", published: true },
-          { name: "pkg-b", newVersion: "1.0.1", published: true },
-        ])
-      );
+      mockedPublishPackages.mockImplementation(async () => [
+        { name: "pkg-a", newVersion: "1.1.0", published: true },
+        { name: "pkg-b", newVersion: "1.0.1", published: true },
+      ]);
 
       await runRelease(cwd, {}, defaultConfig);
 

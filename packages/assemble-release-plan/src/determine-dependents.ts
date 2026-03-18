@@ -1,15 +1,15 @@
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import {
+import type {
   Config,
   DependencyType,
   PackageJSON,
   VersionType,
 } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
-import semverSatisfies from "semver/functions/satisfies";
-import { incrementVersion } from "./increment";
-import { InternalRelease, PreInfo } from "./types";
-import { mapGetOrThrowInternal } from "./utils";
+import type { Package } from "@manypkg/get-packages";
+import semverSatisfies from "semver/functions/satisfies.js";
+import { incrementVersion } from "./increment.ts";
+import type { InternalRelease, PreInfo } from "./types.ts";
+import { mapGetOrThrowInternal } from "./utils.ts";
 
 /*
   WARNING:
@@ -48,7 +48,7 @@ export default function determineDependents({
     const pkgDependents = mapGetOrThrowInternal(
       dependencyGraph,
       nextRelease.name,
-      `Error in determining dependents - could not find package in repository: ${nextRelease.name}`
+      `Error in determining dependents - could not find package in repository: ${nextRelease.name}`,
     );
     pkgDependents
       .map((dependent) => {
@@ -57,7 +57,7 @@ export default function determineDependents({
         const dependentPackage = mapGetOrThrowInternal(
           packagesByName,
           dependent,
-          "Dependency map is incorrect"
+          "Dependency map is incorrect",
         );
 
         if (
@@ -70,7 +70,7 @@ export default function determineDependents({
         } else {
           const dependencyVersionRanges = getDependencyVersionRanges(
             dependentPackage.packageJson,
-            nextRelease
+            nextRelease,
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
@@ -97,7 +97,7 @@ export default function determineDependents({
                 .updateInternalDependents === "always" ||
                 !semverSatisfies(
                   incrementVersion(nextRelease, preInfo),
-                  versionRange
+                  versionRange,
                 ))
             ) {
               switch (depType) {
@@ -133,9 +133,9 @@ export default function determineDependents({
       })
       .filter(
         (
-          dependentItem
+          dependentItem,
         ): dependentItem is typeof dependentItem & { type: VersionType } =>
-          !!dependentItem.type
+          !!dependentItem.type,
       )
       .forEach(({ name, type, pkgJSON }) => {
         // At this point, we know if we are making a change
@@ -175,7 +175,7 @@ export default function determineDependents({
 */
 function getDependencyVersionRanges(
   dependentPkgJSON: PackageJSON,
-  dependencyRelease: InternalRelease
+  dependencyRelease: InternalRelease,
 ): {
   depType: DependencyType;
   versionRange: string;

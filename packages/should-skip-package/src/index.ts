@@ -1,5 +1,5 @@
-import { Package } from "@manypkg/get-packages";
-import { PackageGroup } from "@changesets/types";
+import type { Package } from "@manypkg/get-packages";
+import type { PackageGroup } from "@changesets/types";
 
 export function shouldSkipPackage(
   { packageJson }: Package,
@@ -9,7 +9,7 @@ export function shouldSkipPackage(
   }: {
     ignore: PackageGroup;
     allowPrivatePackages: boolean;
-  }
+  },
 ) {
   if (ignore.includes(packageJson.name)) {
     return true;
