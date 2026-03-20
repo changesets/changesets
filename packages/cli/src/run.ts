@@ -66,9 +66,10 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open, since, message, packages: pkgs, type, all }: CliOptions = flags;
+    const { empty, open, since, message, type, all }: CliOptions = flags;
+    const packages = normalizePackageFlag(flags.package);
     // @ts-ignore if this is undefined, we have already exited
-    await add(rootDir, { empty, open, since, message, packages: pkgs, type, all }, config);
+    await add(rootDir, { empty, open, since, message, packages, type, all }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -107,13 +108,12 @@ export async function run(
     // config file. For this reason, we only assign them to this
     // object as and when they exist.
 
-    const pkgs = flags.packages;
-
     switch (input[0]) {
       case "add": {
         const all = flags.all;
         const type = flags.type;
-        await add(rootDir, { empty, open, since, message, packages: pkgs, type, all }, config);
+        const packages = normalizePackageFlag(flags.package);
+        await add(rootDir, { empty, open, since, message, packages, type, all }, config);
         return;
       }
       case "changed": {
@@ -265,4 +265,11 @@ export async function run(
       }
     }
   }
+}
+
+function normalizePackageFlag(
+  value: string | string[] | undefined
+): string[] | undefined {
+  if (value === undefined) return undefined;
+  return Array.isArray(value) ? value : [value];
 }

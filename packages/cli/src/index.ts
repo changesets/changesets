@@ -26,7 +26,7 @@ const parsed = mri(args, {
     "tag",
     "snapshot",
     "snapshotPrereleaseTemplate",
-    "packages",
+    "package",
     "type",
   ],
   alias: {
@@ -34,7 +34,7 @@ const parsed = mri(args, {
     v: "verbose",
     o: "output",
     m: "message",
-    p: "packages",
+    p: "package",
     t: "type",
     // Support kebab-case flags
     "since-master": "sinceMaster",
@@ -67,7 +67,7 @@ if (parsed.help && args.length === 1) {
     $ changeset [command]
   Commands
     init
-    add [--empty] [--open] [--since <branch>] [--message <text>] [--packages <name[:type]>...] [--all] [--type <patch|minor|major>]
+    add [--empty] [--open] [--since <branch>] [--message <text>] [--package <name>...] [--all] [--type <patch|minor|major>]
     changed [--since <branch>] [--json]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]

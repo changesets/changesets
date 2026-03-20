@@ -5,7 +5,7 @@ import path from "path";
 import * as git from "@changesets/git";
 import { error, info, log, warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config, Release, VersionType } from "@changesets/types";
+import { Config, Release } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { ExitError } from "@changesets/errors";
 import { getPackages } from "@manypkg/get-packages";
@@ -23,15 +23,15 @@ export default async function add(
     open,
     since,
     message,
-    packages: pkgFlags,
-    type: defaultType,
+    packages: selectedPackages,
+    type,
     all,
   }: {
     empty?: boolean;
     open?: boolean;
     since?: string;
     message?: string;
-    packages?: string | string[];
+    packages?: string[];
     type?: string;
     all?: boolean;
   },
@@ -62,15 +62,9 @@ export default async function add(
 
   const changesetBase = path.resolve(cwd, ".changeset");
 
-  // Normalize --packages to an array
-  const packagesList: string[] | undefined = pkgFlags
-    ? Array.isArray(pkgFlags)
-      ? pkgFlags
-      : [pkgFlags]
-    : undefined;
-
   // Check if we have enough info for non-interactive mode
-  const hasPackageSelection = all || (packagesList && packagesList.length > 0);
+  const hasPackageSelection =
+    all || (selectedPackages && selectedPackages.length > 0);
   const hasMessage = message !== undefined;
   const isNonInteractive = hasPackageSelection && hasMessage && !empty;
 
@@ -83,8 +77,8 @@ export default async function add(
     };
   } else if (isNonInteractive) {
     newChangeset = await buildNonInteractiveChangeset({
-      packagesList,
-      defaultType,
+      packages: selectedPackages,
+      type,
       all,
       since,
       message: message!,
@@ -185,41 +179,9 @@ export default async function add(
 
 const validBumpTypes = new Set<string>(["patch", "minor", "major"]);
 
-function parsePackageFlag(
-  flag: string,
-  defaultType: string | undefined
-): { name: string; type: VersionType } {
-  const colonIndex = flag.lastIndexOf(":");
-  if (colonIndex !== -1) {
-    const name = flag.slice(0, colonIndex);
-    const type = flag.slice(colonIndex + 1);
-    if (!validBumpTypes.has(type)) {
-      error(
-        `Invalid bump type "${type}" for package "${name}". Must be one of: patch, minor, major`
-      );
-      throw new ExitError(1);
-    }
-    return { name, type: type as VersionType };
-  }
-
-  if (!defaultType) {
-    error(
-      `No bump type specified for package "${flag}". Use --type or specify inline as "${flag}:patch"`
-    );
-    throw new ExitError(1);
-  }
-  if (!validBumpTypes.has(defaultType)) {
-    error(
-      `Invalid bump type "${defaultType}". Must be one of: patch, minor, major`
-    );
-    throw new ExitError(1);
-  }
-  return { name: flag, type: defaultType as VersionType };
-}
-
 async function buildNonInteractiveChangeset({
-  packagesList,
-  defaultType,
+  packages,
+  type,
   all,
   since,
   message,
@@ -227,8 +189,8 @@ async function buildNonInteractiveChangeset({
   config,
   cwd,
 }: {
-  packagesList: string[] | undefined;
-  defaultType: string | undefined;
+  packages: string[] | undefined;
+  type: string | undefined;
   all?: boolean;
   since?: string;
   message: string;
@@ -236,30 +198,37 @@ async function buildNonInteractiveChangeset({
   config: Config;
   cwd: string;
 }): Promise<{ confirmed: boolean; summary: string; releases: Release[] }> {
+  if (!type) {
+    error("--type is required when using non-interactive mode");
+    throw new ExitError(1);
+  }
+  if (!validBumpTypes.has(type)) {
+    error(
+      `Invalid bump type "${type}". Must be one of: patch, minor, major`
+    );
+    throw new ExitError(1);
+  }
+
   const versionableNames = new Set(
     versionablePackages.map((pkg) => pkg.packageJson.name)
   );
 
   const releases: Release[] = [];
 
-  // Collect explicit --packages flags with their overrides
-  const explicitOverrides = new Map<string, VersionType>();
-  if (packagesList) {
-    for (const flag of packagesList) {
-      const parsed = parsePackageFlag(flag, defaultType);
-      if (!versionableNames.has(parsed.name)) {
+  if (packages) {
+    for (const name of packages) {
+      if (!versionableNames.has(name)) {
         error(
-          `The package "${parsed.name}" was not found in the project. ` +
+          `The package "${name}" was not found in the project. ` +
             `Available packages: ${[...versionableNames].join(", ")}`
         );
         throw new ExitError(1);
       }
-      explicitOverrides.set(parsed.name, parsed.type);
+      releases.push({ name, type: type as Release["type"] });
     }
   }
 
   if (all) {
-    // Resolve all changed packages
     const changedPackages = await getVersionableChangedPackages(config, {
       cwd,
       ref: since,
@@ -270,38 +239,12 @@ async function buildNonInteractiveChangeset({
       throw new ExitError(1);
     }
 
+    const alreadyAdded = new Set(releases.map((r) => r.name));
     for (const pkg of changedPackages) {
       const name = pkg.packageJson.name;
-      const override = explicitOverrides.get(name);
-      if (override) {
-        releases.push({ name, type: override });
-        explicitOverrides.delete(name);
-      } else {
-        if (!defaultType) {
-          error(
-            `--type is required when using --all without specifying a bump type for each package via --packages name:type`
-          );
-          throw new ExitError(1);
-        }
-        if (!validBumpTypes.has(defaultType)) {
-          error(
-            `Invalid bump type "${defaultType}". Must be one of: patch, minor, major`
-          );
-          throw new ExitError(1);
-        }
-        releases.push({ name, type: defaultType as VersionType });
+      if (!alreadyAdded.has(name)) {
+        releases.push({ name, type: type as Release["type"] });
       }
-    }
-
-    // Add any explicit overrides for packages not in the changed set
-    // (user explicitly requested them)
-    for (const [name, type] of explicitOverrides) {
-      releases.push({ name, type });
-    }
-  } else {
-    // Only explicit packages
-    for (const [name, type] of explicitOverrides) {
-      releases.push({ name, type });
     }
   }
 

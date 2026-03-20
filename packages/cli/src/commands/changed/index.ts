@@ -1,4 +1,4 @@
-import { error, log } from "@changesets/logger";
+import { log } from "@changesets/logger";
 import { Config } from "@changesets/types";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages";
 
@@ -13,9 +13,10 @@ export default async function changed(
   },
   config: Config
 ): Promise<void> {
+  const ref = since ?? config.baseBranch;
   const changedPackages = await getVersionableChangedPackages(config, {
     cwd,
-    ref: since,
+    ref,
   });
 
   if (json) {
@@ -26,8 +27,9 @@ export default async function changed(
     log(JSON.stringify(output, null, 2));
   } else {
     if (changedPackages.length === 0) {
-      error("No changed packages found");
+      log(`No changed packages found since "${ref}"`);
     } else {
+      log(`Changed packages since "${ref}":`);
       for (const pkg of changedPackages) {
         log(pkg.packageJson.name);
       }
