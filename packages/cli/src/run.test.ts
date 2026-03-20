@@ -132,11 +132,7 @@ describe("cli", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
 
-      await run(
-        ["add"],
-        { all: true, type: "patch", message: "Fix all" },
-        cwd
-      );
+      await run(["add"], { all: true, type: "patch", message: "Fix all" }, cwd);
 
       expect(add).toHaveBeenCalledWith(
         cwd,

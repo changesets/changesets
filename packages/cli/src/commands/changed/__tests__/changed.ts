@@ -2,7 +2,7 @@ import path from "path";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, gitdir } from "@changesets/test-utils";
-import { log, error as loggerError } from "@changesets/logger";
+import { log } from "@changesets/logger";
 import fs from "fs-extra";
 
 import changed from "..";
@@ -10,7 +10,6 @@ import changed from "..";
 jest.mock("@changesets/logger", () => ({
   ...jest.requireActual("@changesets/logger"),
   log: jest.fn(),
-  error: jest.fn(),
 }));
 
 describe("Changed command", () => {
@@ -84,12 +83,10 @@ describe("Changed command", () => {
 
     expect(lastCall).toBeDefined();
     const output = JSON.parse(lastCall![0]);
-    expect(output).toEqual([
-      expect.objectContaining({ name: "pkg-a" }),
-    ]);
+    expect(output).toEqual([expect.objectContaining({ name: "pkg-a" })]);
   });
 
-  it("should show error when no changed packages found", async () => {
+  it("should log message when no changed packages found", async () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
@@ -104,6 +101,6 @@ describe("Changed command", () => {
 
     await changed(cwd, { since: "HEAD" }, defaultConfig);
 
-    expect(loggerError).toHaveBeenCalledWith("No changed packages found");
+    expect(log).toHaveBeenCalledWith('No changed packages found since "HEAD"');
   });
 });

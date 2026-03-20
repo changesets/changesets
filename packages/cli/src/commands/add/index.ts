@@ -203,9 +203,7 @@ async function buildNonInteractiveChangeset({
     throw new ExitError(1);
   }
   if (!validBumpTypes.has(type)) {
-    error(
-      `Invalid bump type "${type}". Must be one of: patch, minor, major`
-    );
+    error(`Invalid bump type "${type}". Must be one of: patch, minor, major`);
     throw new ExitError(1);
   }
 
