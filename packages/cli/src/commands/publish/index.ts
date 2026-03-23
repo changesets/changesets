@@ -82,9 +82,11 @@ export default async function publish(
     warn("No unpublished projects to publish");
   }
 
-  const successfulNpmPublishes = publishedPackages.filter((p) => p.published);
+  const successfulNpmPublishes = publishedPackages.filter(
+    (p) => p.result === "published"
+  );
   const unsuccessfulNpmPublishes = publishedPackages.filter(
-    (p) => !p.published
+    (p) => p.result === "failed"
   );
 
   if (successfulNpmPublishes.length > 0) {
