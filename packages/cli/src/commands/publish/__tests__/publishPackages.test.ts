@@ -196,7 +196,7 @@ describe("publishPackages", () => {
     );
   });
 
-  it("publishes with preState.tag on GitHub Packages when new version not yet published", async () => {
+  it("publishes with specified tag on GitHub Packages when new version not yet published", async () => {
     // GitHub Packages does not auto-assign latest on first publish. When both
     // the bare query and the exact-version fallback return empty, there is no
     // versions list to detect only-pre, so the package is tagged with
