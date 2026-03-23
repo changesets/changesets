@@ -2216,12 +2216,12 @@ baseline-browser-mapping@^2.8.19:
   resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.8.23.tgz#cd43e17eff5cbfb67c92153e7fe856cf6d426421"
   integrity sha512-616V5YX4bepJFzNyOfce5Fa8fDJMfoxzOIzDCZwaGL8MKVpFrXqfNUoIpRn9YMI5pXf/VKgzjB4htFMsFKKdiQ==
 
-better-path-resolve@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/better-path-resolve/-/better-path-resolve-1.0.0.tgz#13a35a1104cdd48a7b74bf8758f96a1ee613f99d"
-  integrity sha512-pbnl5XzGBdrFU/wT4jqmJVPn2B6UHPBOhzMQkY/SPUPB6QtUXtmBHBIwCbXJol93mOpGMnQyP/+BB19q04xj7g==
+better-path-resolve@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/better-path-resolve/-/better-path-resolve-2.0.0.tgz#440e91369696d7298e8938d86d69848a91e71d0d"
+  integrity sha512-VvvsZgI0upmMbG1iEFiQ7hRG+fDJwmw7iFfKLzBVNhRd2ycauJ3+3w50ESX+pS2tvS9R2hMzijwE+vinDyqQzQ==
   dependencies:
-    is-windows "^1.0.0"
+    is-windows "^1.0.2"
 
 binary-extensions@^2.0.0:
   version "2.2.0"
@@ -4014,12 +4014,12 @@ is-string@^1.1.1:
     call-bound "^1.0.3"
     has-tostringtag "^1.0.2"
 
-is-subdir@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/is-subdir/-/is-subdir-1.1.1.tgz#423e66902f9c5f159b9cc4826c820df083059538"
-  integrity sha512-VYpq0S7gPBVkkmfwkvGnx1EL9UVIo87NQyNcgMiNUdQCws3CJm5wj2nB+XPL7zigvjxhuZgp3bl2yBcKkSIj1w==
+is-subdir@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/is-subdir/-/is-subdir-2.0.0.tgz#5c99942020791a4b3143d2848252eda417da3ffc"
+  integrity sha512-iOXmZKniv4jGFMSYc1K3V/XNl30X1d/m86BKTiDeE2MDULREgBiNpLXsqQKjyETOkWbOyXNQD4M4AZCH51pm7g==
   dependencies:
-    better-path-resolve "1.0.0"
+    better-path-resolve "^2.0.0"
 
 is-symbol@^1.0.3:
   version "1.0.4"
@@ -4076,7 +4076,7 @@ is-whitespace-character@^1.0.0:
   resolved "https://registry.yarnpkg.com/is-whitespace-character/-/is-whitespace-character-1.0.4.tgz#0858edd94a95594c7c9dd0b5c174ec6e45ee4aa7"
   integrity sha512-SDweEzfIZM0SJV0EUga669UTKlmL0Pq8Lno0QDQsPnvECB3IM2aP0gdx5TrU0A01MAPfViaZiI2V1QMZLaKK5w==
 
-is-windows@^1.0.0:
+is-windows@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/is-windows/-/is-windows-1.0.2.tgz#d1850eb9791ecd18e6182ce12a30f396634bb19d"
   integrity sha512-eXK1UInq2bPmjyX6e3VHIzMLobc4J94i4AWn+Hpq3OU5KkrRC96OAcR3PRJ/pGu6m8TRnBHP9dkXQVsT/COVIA==
