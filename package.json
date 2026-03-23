@@ -44,7 +44,7 @@
     "@types/jest": "^24.0.12",
     "@types/jest-in-case": "^1.0.6",
     "@types/lodash": "^4.17.13",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.5.0",
     "@types/node-fetch": "^2.6.13",
     "@types/prettier": "^2.7.1",
     "@types/semver": "^7.7.1",
