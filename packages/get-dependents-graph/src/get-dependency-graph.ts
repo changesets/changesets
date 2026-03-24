@@ -53,7 +53,7 @@ const getValidRange = (potentialRange: string) => {
 };
 
 export default function getDependencyGraph(
-  packages: Pick<Packages, "packages" | "root">,
+  packages: Packages,
   {
     ignoreDevDependencies = false,
     bumpVersionsWithWorkspaceProtocolOnly = false,
@@ -86,7 +86,7 @@ export default function getDependencyGraph(
     const { name } = pkg!.packageJson;
     const dependencies = [];
     const allDependencies = getAllDependencies(
-      pkg!.packageJson,
+      pkg.packageJson,
       ignoreDevDependencies,
     );
 
@@ -131,7 +131,7 @@ export default function getDependencyGraph(
       dependencies.push(depName);
     }
 
-    graph.set(name, { pkg: pkg!, dependencies });
+    graph.set(name, { pkg, dependencies });
   }
   return { graph, valid };
 }

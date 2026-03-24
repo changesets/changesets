@@ -2,7 +2,7 @@ import type { Package, Packages } from "@changesets/types";
 import getDependencyGraph from "./get-dependency-graph.ts";
 
 export function getDependentsGraph(
-  packages: Pick<Packages, "packages" | "root">,
+  packages: Packages,
   opts?: {
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;

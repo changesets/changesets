@@ -75,11 +75,7 @@ export default async function applyReleasePlan(
   snapshot?: string | boolean,
   contextDir = path.dirname(fileURLToPath(import.meta.url)),
 ) {
-  let cwd = packages.root?.dir;
-
-  if (!cwd) {
-    throw new Error(`Could not find root package`);
-  }
+  let cwd = packages.root.dir;
 
   let touchedFiles = [];
 

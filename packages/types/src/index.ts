@@ -181,12 +181,10 @@ export interface Package {
   packageJson: PackageJSON;
 }
 
-export type PackagesTool = {
-  type: "yarn" | "bolt" | "pnpm" | "lerna" | "root";
-};
-
 export interface Packages {
   root: Package;
   packages: Array<Package>;
-  tool: PackagesTool;
+  tool: {
+    type: "yarn" | "pnpm" | "lerna" | "root";
+  };
 }
