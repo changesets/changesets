@@ -29,7 +29,7 @@ export async function getUntaggedPackages(
       untagged.push({
         name: packageWithTag.pkg.packageJson.name,
         newVersion: packageWithTag.pkg.packageJson.version,
-        published: false,
+        result: "published",
       });
     }
   }
