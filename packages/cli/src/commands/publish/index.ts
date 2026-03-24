@@ -1,4 +1,4 @@
-import publishPackages, { PublishedResult } from "./publishPackages";
+import publishPackages from "./publishPackages";
 import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
@@ -120,7 +120,7 @@ export default async function publish(
 
 async function tagPublish(
   tool: string,
-  packageReleases: PublishedResult[],
+  packageReleases: Array<{ name: string; newVersion: string }>,
   cwd: string
 ) {
   if (tool !== "root") {
