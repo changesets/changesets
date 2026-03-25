@@ -43,6 +43,7 @@ export async function run(
   const rootDir = packages.root.dir;
 
   if (input[0] === "init") {
+    validateCommandFlags("init", flags);
     await init(rootDir);
     return;
   }
