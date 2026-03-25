@@ -1,5 +1,16 @@
 # @changesets/get-release-plan
 
+## 5.0.0-next.2
+
+### Patch Changes
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c)]:
+  - @changesets/types@7.0.0-next.2
+  - @changesets/assemble-release-plan@7.0.0-next.2
+  - @changesets/config@4.0.0-next.2
+  - @changesets/pre@3.0.0-next.2
+  - @changesets/read@1.0.0-next.2
+
 ## 4.0.15
 
 ### Patch Changes
