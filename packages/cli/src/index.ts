@@ -71,13 +71,9 @@ if (parsed.help) {
   Usage
     $ changeset [command]
   Commands
-    init
-    add [--empty] [--open] [--since <branch>] [--message <text>]
-    version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
-    publish [--tag <name>] [--otp <code>] [--no-git-tag]
-    status [--since <branch>] [--verbose] [--output JSON_FILE.json]
-    pre <enter|exit> <tag>
-    tag
+${Object.values(COMMAND_HELP)
+  .map((cmd) => `    ${cmd}`)
+  .join("\n")}
 
     `
     );
