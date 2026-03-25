@@ -1,5 +1,4 @@
-import type { Linked } from "@changesets/types";
-import type { Package } from "@manypkg/get-packages";
+import type { Linked, Package } from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import { getCurrentHighestVersion, getHighestReleaseType } from "./utils.ts";
 

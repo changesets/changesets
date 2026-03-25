@@ -1,5 +1,10 @@
-import type { NewChangeset, Release, VersionType } from "@changesets/types";
-import type { Package, Packages } from "@manypkg/get-packages";
+import type {
+  NewChangeset,
+  Release,
+  VersionType,
+  Packages,
+  Package,
+} from "@changesets/types";
 
 function getPackage({
   name,
@@ -54,11 +59,11 @@ let getSimpleSetup = () => ({
       dir: "/",
     },
     packages: [getPackage({ name: "pkg-a", version: "1.0.0" })],
-    tool: "yarn" as const,
-  },
+    tool: { type: "yarn" },
+  } satisfies Packages,
   changesets: [
     getChangeset({ releases: [getRelease({ name: "pkg-a", type: "patch" })] }),
-  ],
+  ] satisfies Array<NewChangeset>,
 });
 
 class FakeFullState {

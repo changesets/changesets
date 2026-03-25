@@ -1,6 +1,5 @@
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config } from "@changesets/types";
-import type { Package } from "@manypkg/get-packages";
+import type { Config, Package } from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import {
   getCurrentHighestVersion,

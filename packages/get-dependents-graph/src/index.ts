@@ -1,4 +1,4 @@
-import type { Packages, Package } from "@manypkg/get-packages";
+import type { Package, Packages } from "@changesets/types";
 import getDependencyGraph from "./get-dependency-graph.ts";
 
 export function getDependentsGraph(

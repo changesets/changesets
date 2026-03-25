@@ -7,8 +7,9 @@ import type {
   PackageGroup,
   PreState,
   ReleasePlan,
+  Package,
+  Packages,
 } from "@changesets/types";
-import type { Package, Packages } from "@manypkg/get-packages";
 import semverParse from "semver/functions/parse.js";
 import applyLinks from "./apply-links.ts";
 import determineDependents from "./determine-dependents.ts";

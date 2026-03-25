@@ -1,9 +1,10 @@
 import spawn from "spawndamnit";
 import fs from "node:fs/promises";
 import path from "path";
-import { getPackages, type Package } from "@manypkg/get-packages";
+import { getPackages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import micromatch from "micromatch";
+import type { Package } from "@changesets/types";
 
 export async function add(pathToFile: string, cwd: string) {
   const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
