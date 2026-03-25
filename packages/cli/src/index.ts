@@ -35,9 +35,6 @@ const parsed = mri(args, {
   ],
   // mri mutates the alias object passed to it, so we need to copy it here to maintain the original object
   alias: { ...aliases },
-  default: {
-    gitTag: true,
-  },
 });
 
 // `mri` doesn't handle mixed boolean and strings well. It'll always try to coerce it as
