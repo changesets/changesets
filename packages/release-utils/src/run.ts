@@ -1,4 +1,5 @@
-import { getPackages, type Package } from "@manypkg/get-packages";
+import { getPackages } from "@manypkg/get-packages";
+import type { Package } from "@changesets/types";
 import semverLt from "semver/functions/lt.js";
 import {
   spawnWithOutput,

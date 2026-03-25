@@ -185,6 +185,6 @@ export interface Packages {
   root: Package;
   packages: Array<Package>;
   tool: {
-    type: "yarn" | "pnpm" | "lerna" | "root";
+    type: "yarn" | "pnpm" | "lerna" | "bolt" | "root";
   };
 }

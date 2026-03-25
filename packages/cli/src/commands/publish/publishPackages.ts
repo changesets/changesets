@@ -1,6 +1,6 @@
 import { info, warn } from "@changesets/logger";
 import type { AccessType, PreState } from "@changesets/types";
-import type { Package } from "@manypkg/get-packages";
+import type { Package } from "@changesets/types";
 import { resolve } from "path";
 import pc from "picocolors";
 import semverParse from "semver/functions/parse.js";

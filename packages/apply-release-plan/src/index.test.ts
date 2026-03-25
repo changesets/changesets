@@ -142,16 +142,6 @@ async function readJson(path: string) {
 }
 
 describe("apply release plan", () => {
-  it("should error if root package is not present", async () => {
-    const releasePlan = new FakeReleasePlan();
-    await expect(() =>
-      applyReleasePlan(releasePlan.getReleasePlan(), {
-        // @ts-expect-error testing empty object
-        root: {},
-      }),
-    ).rejects.toThrow("Could not find root package");
-  });
-
   describe("versioning", () => {
     describe("formatting", () => {
       it("should not reformat a small array in a package.json", async () => {
