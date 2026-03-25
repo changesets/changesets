@@ -28,8 +28,10 @@ describe("init", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
     });
 
     await initializeCommand(cwd);
@@ -43,8 +45,10 @@ describe("init", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
     });
 
     await initializeCommand(cwd);
@@ -59,8 +63,10 @@ describe("init", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/config.json": JSON.stringify({
         changelog: false,
       }),
