@@ -1,7 +1,8 @@
 import mri from "mri";
 import { ExitError, InternalError } from "@changesets/errors";
-import { error, warn } from "@changesets/logger";
+import { error } from "@changesets/logger";
 import { format } from "util";
+import { COMMAND_HELP } from "./help";
 import { run } from "./run";
 
 const args = process.argv.slice(2);
@@ -43,56 +44,6 @@ const parsed = mri(args, {
 if (parsed.snapshot === "" && args[args.indexOf("--snapshot") + 1] !== "") {
   parsed.snapshot = true;
 }
-
-// Warn about any flags that are not recognised by the CLI
-const knownFlags = new Set([
-  // boolean flags
-  "sinceMaster",
-  "verbose",
-  "empty",
-  "open",
-  "gitTag",
-  "snapshot",
-  // string flags
-  "output",
-  "otp",
-  "since",
-  "ignore",
-  "message",
-  "tag",
-  "snapshotPrereleaseTemplate",
-  // canonical names produced by alias resolution (deprecated in v2, still handled)
-  "updateChangelog",
-  "isPublic",
-  "skipCI",
-  "commit",
-  // built-in mri flags
-  "help",
-  "version",
-]);
-
-const unknownFlags = Object.keys(parsed).filter(
-  (key) => key !== "_" && !knownFlags.has(key)
-);
-
-if (unknownFlags.length > 0) {
-  warn(
-    `Unknown ${unknownFlags.length === 1 ? "flag" : "flags"}: ${unknownFlags
-      .map((f) => `--${f}`)
-      .join(", ")}`
-  );
-}
-
-const COMMAND_HELP: Record<string, string> = {
-  init: "init",
-  add: "add [--empty] [--open] [--since <branch>] [--message <text>]",
-  version:
-    "version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]",
-  publish: "publish [--tag <name>] [--otp <code>] [--no-git-tag]",
-  status: "status [--since <branch>] [--verbose] [--output JSON_FILE.json]",
-  pre: "pre <enter|exit> <tag>",
-  tag: "tag",
-};
 
 if (parsed.help) {
   const command = parsed._[0];
