@@ -33,7 +33,7 @@ export default function versionPackage(
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
     snapshot?: string | boolean | undefined;
-  }
+  },
 ) {
   let { newVersion, packageJson } = release;
 
@@ -57,7 +57,7 @@ export default function versionPackage(
             {
               minReleaseType: updateInternalDependencies,
               onlyUpdatePeerDependentsWhenOutOfRange,
-            }
+            },
           )
         ) {
           continue;
@@ -75,7 +75,7 @@ export default function versionPackage(
         if (usesWorkspaceRange) {
           const workspaceDepVersion = depCurrentVersion.replace(
             /^workspace:/,
-            ""
+            "",
           );
           if (
             workspaceDepVersion === "*" ||

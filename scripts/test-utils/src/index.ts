@@ -1,10 +1,9 @@
-import { Mock, vi } from "vitest";
+import { afterEach, beforeEach, type Mock, vi } from "vitest";
 import fixturez from "fixturez";
 import spawn from "spawndamnit";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 type PartialMockMethods<T> = Partial<{
   [K in keyof T as T[K] extends (...args: never) => unknown
@@ -96,7 +95,7 @@ export const temporarilySilenceLogs =
     }
   };
 
-let f = fixturez(__dirname);
+let f = fixturez(import.meta.dirname);
 
 export interface Fixture extends Record<string, string> {}
 
@@ -107,7 +106,7 @@ export async function testdir(dir: Fixture) {
       const fullPath = path.join(temp, filename);
       await fsp.mkdir(path.dirname(fullPath), { recursive: true });
       await fsp.writeFile(fullPath, dir[filename]);
-    })
+    }),
   );
   return temp;
 }
@@ -122,7 +121,7 @@ export async function gitdir(dir: Fixture) {
     const { stdout } = await spawn(
       "git",
       ["rev-parse", "--abbrev-ref", "HEAD"],
-      { cwd }
+      { cwd },
     );
     if (stdout.toString("utf8").trim() !== "main") {
       await spawn("git", ["checkout", "-b", "main"], { cwd });
@@ -147,29 +146,15 @@ export async function gitdir(dir: Fixture) {
 export async function outputFile(
   filePath: string,
   content: string,
-  encoding = "utf8" as fs.ObjectEncodingOptions
+  encoding = "utf8" as fs.ObjectEncodingOptions,
 ) {
   await fsp.mkdir(path.dirname(filePath), { recursive: true });
   await fsp.writeFile(filePath, content, encoding);
 }
 
-// `fs.exists` is deprecated, and Node recommends this for asynchronous existence checks.
-export async function pathExists(p: string) {
-  return fsp.access(p).then(
-    () => true,
-    () => false
-  );
-}
-
 export async function linkNodeModules(cwd: string) {
   await fsp.symlink(
-    path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      "..",
-      "..",
-      "..",
-      "node_modules"
-    ),
-    path.join(cwd, "node_modules")
+    path.join(import.meta.dirname, "..", "..", "..", "node_modules"),
+    path.join(cwd, "node_modules"),
   );
 }

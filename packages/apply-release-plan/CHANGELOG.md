@@ -1,5 +1,50 @@
 # @changesets/apply-release-plan
 
+## 7.1.0
+
+### Minor Changes
+
+- [#1774](https://github.com/changesets/changesets/pull/1774) [`667fe5a`](https://github.com/changesets/changesets/commit/667fe5aacf04dbefcf2532584ff2753b8417855a) Thanks [@bluwy](https://github.com/bluwy)! - Support importing custom `changelog` option ES module. Previously, it used `require()` which only worked for CJS modules, however now it uses `import()` which supports both CJS and ES modules.
+
+### Patch Changes
+
+- [#1859](https://github.com/changesets/changesets/pull/1859) [`1772598`](https://github.com/changesets/changesets/commit/1772598270a59ba1fa7b0ef7e675fce6a575f850) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix changelog entry insertion when no package title is present in the `CHANGELOG.md` file.
+
+- [#1810](https://github.com/changesets/changesets/pull/1810) [`27fd8f4`](https://github.com/changesets/changesets/commit/27fd8f41dddafcc2e96e7df39dca04d92f916a0a) Thanks [@hirasso](https://github.com/hirasso)! - Replace deprecated `String.prototype.trimRight` with [`String.prototype.trimEnd`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd)
+
+- Updated dependencies [[`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6)]:
+  - @changesets/config@3.1.3
+
+## 7.0.14
+
+### Patch Changes
+
+- [#610](https://github.com/changesets/changesets/pull/610) [`e520bf5`](https://github.com/changesets/changesets/commit/e520bf5d4dbfe96f59ca28008e87bffaf3c9dfea) Thanks [@bencergazda](https://github.com/bencergazda)! - Add `pre.json` to the version commit
+
+- Updated dependencies [[`cc28222`](https://github.com/changesets/changesets/commit/cc28222ee892b3a078fa02ee26e1cef98c171532), [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe)]:
+  - @changesets/config@3.1.2
+
+## 7.0.13
+
+### Patch Changes
+
+- [#1725](https://github.com/changesets/changesets/pull/1725) [`957f24e`](https://github.com/changesets/changesets/commit/957f24ed0446494c5709189ae57583f72c716d43) Thanks [@colinaaa](https://github.com/colinaaa)! - Fix an issue that caused an incorrect `CHANGELOG` to be generated when a changeset contained a special string replacement pattern.
+
+## 8.0.0-next.1
+
+### Major Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d), [`b83787f`](https://github.com/changesets/changesets/commit/b83787fb090dc03ad566a7d8b7e286dbe93e2301)]:
+  - @changesets/get-version-range-type@1.0.0-next.1
+  - @changesets/should-skip-package@1.0.0-next.1
+  - @changesets/config@4.0.0-next.1
+  - @changesets/types@7.0.0-next.1
+  - @changesets/git@4.0.0-next.1
+
 ## 8.0.0-next.0
 
 ### Major Changes
@@ -502,7 +547,6 @@
 - [`a679b1d`](https://github.com/changesets/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62) [#204](https://github.com/changesets/changesets/pull/204) Thanks [@Andarist](https://github.com/Andarist)! - Correctly handle the 'access' flag for packages
 
   Previously, we had access as "public" or "private", access "private" isn't valid. This was a confusing because there are three states for publishing a package:
-
   - `private: true` - the package will not be published to npm (worked)
   - `access: public` - the package will be publicly published to npm (even if it uses a scope) (worked)
   - `access: restricted` - the package will be published to npm, but only visible/accessible by those who are part of the scope. This technically worked, but we were passing the wrong bit of information in.

@@ -1,11 +1,11 @@
 import * as git from "@changesets/git";
-import type { Package, Tool } from "@manypkg/get-packages";
 import type { PublishedResult } from "../commands/publish/publishPackages.ts";
+import type { Package, Packages } from "@changesets/types";
 
 export async function getUntaggedPackages(
-  packages: Package[],
+  packages: Array<Package>,
   cwd: string,
-  tool: Tool
+  tool: Packages["tool"],
 ) {
   const packageWithTags = await Promise.all(
     packages.map(async (pkg) => {
@@ -19,7 +19,7 @@ export async function getUntaggedPackages(
       );
 
       return { pkg, isMissingTag };
-    })
+    }),
   );
 
   const untagged: PublishedResult[] = [];

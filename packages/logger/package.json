@@ -1,6 +1,6 @@
 {
   "name": "@changesets/logger",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "Console log alias",
   "type": "module",
   "exports": {
@@ -13,9 +13,9 @@
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
-    "vitest": "^3.0.6"
+    "vitest": "^4.0.18"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.19.0"
   }
 }

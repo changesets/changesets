@@ -1,4 +1,12 @@
-import { Mock, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+} from "vitest";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import {
@@ -17,37 +25,6 @@ import path from "node:path";
 import pre from "../pre/index.ts";
 import version from "./index.ts";
 
-function mockGlobalDate<
-  Args extends any[],
-  Return extends Promise<void> | void
->(
-  testFn: (...args: Args) => Return,
-  fixedDate: string = "2021-12-13T00:07:30.879Z"
-) {
-  return async (...args: Args) => {
-    const originalDate = Date;
-    const MockedDate = class MockedDate extends Date {
-      constructor() {
-        super(fixedDate);
-      }
-
-      static now() {
-        return new MockedDate().getTime();
-      }
-    } as typeof Date;
-
-    // eslint-disable-next-line no-global-assign
-    Date = MockedDate;
-
-    try {
-      await testFn(...args);
-    } finally {
-      // eslint-disable-next-line no-global-assign
-      Date = originalDate;
-    }
-  };
-}
-
 let modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: ["@changesets/cli/changelog", null],
@@ -61,28 +38,22 @@ let defaultOptions = {
 // This is from bolt's error log
 const consoleError = console.error;
 
-vi.mock("../../utils/cli-utilities");
-vi.mock("@changesets/git");
 vi.mock("human-id");
 vi.mock("@changesets/logger");
 
-// @ts-ignore
-git.add.mockImplementation(() => Promise.resolve(true));
-// @ts-ignore
-git.commit.mockImplementation(() => Promise.resolve(true));
-// @ts-ignore
-git.getCommitsThatAddFiles.mockImplementation((changesetIds) =>
-  Promise.resolve(changesetIds.map(() => "g1th4sh"))
+vi.mock("@changesets/git");
+const mockedGit = vi.mocked(git);
+mockedGit.add.mockImplementation(async () => true);
+mockedGit.commit.mockImplementation(async () => true);
+mockedGit.getCommitsThatAddFiles.mockImplementation(async (changesetIds) =>
+  changesetIds.map(() => "g1th4sh"),
 );
-// @ts-ignore
-git.getCurrentCommitId.mockImplementation(() => Promise.resolve("abcdef"));
-
-// @ts-ignore
-git.tag.mockImplementation(() => Promise.resolve(true));
+mockedGit.getCurrentCommitId.mockImplementation(async () => "abcdef");
+mockedGit.tag.mockImplementation(async () => true);
 
 const writeChangesets = (changesets: Changeset[], cwd: string) => {
   return Promise.all(
-    changesets.map((changeset) => writeChangeset(changeset, cwd))
+    changesets.map((changeset) => writeChangeset(changeset, cwd)),
   );
 };
 
@@ -112,6 +83,8 @@ beforeEach(() => {
   });
 
   console.error = vi.fn();
+
+  vi.setSystemTime(vi.getRealSystemTime());
 });
 
 afterEach(() => {
@@ -139,7 +112,7 @@ describe("running version in a simple project", () => {
       const loggerWarnCalls = mockedLogger.warn!.mock.calls;
       expect(loggerWarnCalls.length).toEqual(1);
       expect(loggerWarnCalls[0][0]).toEqual(
-        "No unreleased changesets found, exiting."
+        "No unreleased changesets found, exiting.",
       );
     });
   });
@@ -174,16 +147,16 @@ describe("running version in a simple project", () => {
             ],
           },
         ],
-        cwd
+        cwd,
       );
 
       await version(cwd, defaultOptions, modifiedDefaultConfig);
 
       expect(await getPkgJSON("pkg-a", cwd)).toEqual(
-        expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
+        expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
       );
       expect(await getPkgJSON("pkg-b", cwd)).toEqual(
-        expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
+        expect.objectContaining({ name: "pkg-b", version: "1.0.1" }),
       );
     });
   });
@@ -192,6 +165,7 @@ describe("running version in a simple project", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -214,7 +188,7 @@ describe("running version in a simple project", () => {
           releases: [{ name: "pkg-a", type: "minor" }],
         },
       ],
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, {
@@ -236,6 +210,7 @@ describe("running version in a simple project", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -262,7 +237,7 @@ describe("running version in a simple project", () => {
           releases: [{ name: "pkg-b", type: "patch" }],
         },
       ],
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, {
@@ -292,6 +267,7 @@ describe("running version in a simple project", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -307,7 +283,7 @@ describe("running version in a simple project", () => {
           releases: [{ name: "pkg-a", type: "minor" }],
         },
       ],
-      cwd
+      cwd,
     );
     const spy = vi.spyOn(git, "commit");
 
@@ -320,6 +296,7 @@ describe("running version in a simple project", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -348,7 +325,7 @@ describe("running version in a simple project", () => {
           ],
         },
       ],
-      cwd
+      cwd,
     );
     const spy = vi.spyOn(git, "add");
 
@@ -363,25 +340,25 @@ describe("running version in a simple project", () => {
 
     expect(spy).toHaveBeenCalledWith(
       path.join("packages", "pkg-a", "package.json"),
-      cwd
+      cwd,
     );
     expect(spy).toHaveBeenCalledWith(
       path.join("packages", "pkg-a", "CHANGELOG.md"),
-      cwd
+      cwd,
     );
 
     expect(spy).toHaveBeenCalledWith(
       path.join("packages", "pkg-b", "package.json"),
-      cwd
+      cwd,
     );
     expect(spy).toHaveBeenCalledWith(
       path.join("packages", "pkg-b", "CHANGELOG.md"),
-      cwd
+      cwd,
     );
 
     expect(spy).toHaveBeenCalledWith(
       path.join(".changeset", `${ids[0]}.md`),
-      cwd
+      cwd,
     );
   });
 
@@ -389,6 +366,7 @@ describe("running version in a simple project", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -417,7 +395,7 @@ describe("running version in a simple project", () => {
           ],
         },
       ],
-      cwd
+      cwd,
     );
     const spy = vi.spyOn(git, "commit");
 
@@ -443,6 +421,7 @@ describe("running version in a simple project", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -518,7 +497,7 @@ Awesome feature, hidden behind a feature flag
         releases: [{ name: "pkg-a", type: "major" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -538,6 +517,56 @@ Awesome feature, hidden behind a feature flag
           "version": "2.0.0",
         },
       ]
+    `);
+  });
+
+  it("should ignore special string replacement patterns in appended changesets", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-a/CHANGELOG.md": `# pkg-a
+
+      ## 1.0.0
+
+      ### Major Changes
+
+      - a very useful summary for the change
+      `,
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "major" }],
+        summary: "a summary with special replacement patterns `react$` $'",
+      },
+      cwd,
+    );
+
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 2.0.0
+
+      ### Major Changes
+
+      - g1th4sh: a summary with special replacement patterns \`react$\` $'
+
+            ## 1.0.0
+
+            ### Major Changes
+
+            - a very useful summary for the change
+      "
     `);
   });
 
@@ -575,16 +604,16 @@ Awesome feature, hidden behind a feature flag
             ],
           },
         ],
-        cwd
+        cwd,
       );
 
       await version(cwd, defaultOptions, modifiedDefaultConfig);
 
       expect(await getPkgJSON("pkg-a", cwd)).toEqual(
-        expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
+        expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
       );
       expect(await getPkgJSON("pkg-b", cwd)).toEqual(
-        expect.objectContaining({ name: "pkg-b", version: "1.0.1" })
+        expect.objectContaining({ name: "pkg-b", version: "1.0.1" }),
       );
     });
 
@@ -621,7 +650,7 @@ Awesome feature, hidden behind a feature flag
             ],
           },
         ],
-        cwd
+        cwd,
       );
       await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -630,14 +659,14 @@ Awesome feature, hidden behind a feature flag
         expect.objectContaining({
           name: "pkg-a",
           version: "1.1.0",
-        })
+        }),
       );
       // second should be a patch
       expect(await getPkgJSON("pkg-b", cwd)).toEqual(
         expect.objectContaining({
           name: "pkg-b",
           version: "1.0.1",
-        })
+        }),
       );
     });
     it("should delete the changeset files", async () => {
@@ -675,15 +704,15 @@ Awesome feature, hidden behind a feature flag
             ],
           },
         ],
-        cwd
+        cwd,
       );
       expect((await fs.readdir(path.resolve(cwd, ".changeset"))).length).toBe(
-        3
+        3,
       );
 
       await version(cwd, defaultOptions, modifiedDefaultConfig);
       expect((await fs.readdir(path.resolve(cwd, ".changeset"))).length).toBe(
-        1
+        1,
       );
     });
   });
@@ -694,6 +723,7 @@ describe("fixed", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -716,7 +746,7 @@ describe("fixed", () => {
           releases: [{ name: "pkg-a", type: "minor" }],
         },
       ],
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, {
@@ -725,10 +755,10 @@ describe("fixed", () => {
     });
 
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
-      expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
+      expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
     );
     expect(await getPkgJSON("pkg-b", cwd)).toEqual(
-      expect.objectContaining({ name: "pkg-b", version: "1.1.0" })
+      expect.objectContaining({ name: "pkg-b", version: "1.1.0" }),
     );
   });
 
@@ -736,6 +766,7 @@ describe("fixed", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -758,7 +789,7 @@ describe("fixed", () => {
           releases: [{ name: "pkg-b", type: "patch" }],
         },
       ],
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, {
@@ -789,6 +820,7 @@ describe("fixed", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -812,7 +844,7 @@ describe("fixed", () => {
           releases: [{ name: "pkg-a", type: "minor" }],
         },
       ],
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, {
@@ -848,7 +880,7 @@ describe("fixed", () => {
           releases: [{ name: "pkg-a", type: "minor" }],
         },
       ],
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, {
@@ -896,6 +928,7 @@ describe("linked", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -921,7 +954,7 @@ describe("linked", () => {
           ],
         },
       ],
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, {
@@ -930,10 +963,10 @@ describe("linked", () => {
     });
 
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
-      expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
+      expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
     );
     expect(await getPkgJSON("pkg-b", cwd)).toEqual(
-      expect.objectContaining({ name: "pkg-b", version: "1.1.0" })
+      expect.objectContaining({ name: "pkg-b", version: "1.1.0" }),
     );
   });
 
@@ -941,6 +974,7 @@ describe("linked", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -963,7 +997,7 @@ describe("linked", () => {
           releases: [{ name: "pkg-a", type: "minor" }],
         },
       ],
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, {
@@ -972,7 +1006,7 @@ describe("linked", () => {
     });
 
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
-      expect.objectContaining({ name: "pkg-a", version: "1.1.0" })
+      expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
     );
   });
 });
@@ -982,6 +1016,7 @@ describe("workspace range", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1008,7 +1043,7 @@ describe("workspace range", () => {
           ],
         },
       ],
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -1032,6 +1067,7 @@ describe("workspace range", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1053,7 +1089,7 @@ describe("workspace range", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -1073,10 +1109,11 @@ describe("workspace range", () => {
     ]);
   });
 
-  it("should bump dependent package when bumping a `workspace:^` dependency", async () => {
+  it("should not bump dependent package when patch bumping a `workspace:^` dependency", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1098,7 +1135,53 @@ describe("workspace range", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    let packages = await getPackages(cwd);
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:^",
+        },
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1",
+      },
+    ]);
+  });
+
+  it("should bump dependent package when minor bumping a `workspace:~` dependency", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "workspace:~",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "minor" }],
+        summary: "a very useful summary for the change",
+      },
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -1108,12 +1191,12 @@ describe("workspace range", () => {
         name: "pkg-a",
         version: "1.0.1",
         dependencies: {
-          "pkg-b": "workspace:^",
+          "pkg-b": "workspace:~",
         },
       },
       {
         name: "pkg-b",
-        version: "1.0.1",
+        version: "1.1.0",
       },
     ]);
   });
@@ -1122,6 +1205,7 @@ describe("workspace range", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1141,7 +1225,7 @@ describe("workspace range", () => {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
@@ -1174,6 +1258,107 @@ describe("workspace range", () => {
       "
     `);
   });
+
+  it("should bump major bump peer-dependent when workspace:~ dependency gets a minor bump (without onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        peerDependencies: { "pkg-a": "workspace:^" },
+      }),
+    });
+
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd,
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+
+    expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    expect(await getChangelog("pkg-b", cwd)).toMatchInlineSnapshot(`
+      "# pkg-b
+
+      ## 2.0.0
+
+      ### Patch Changes
+
+      - Updated dependencies [g1th4sh]
+        - pkg-a@1.1.0
+      "
+    `);
+  });
+
+  it("should not bump peer-dependent when workspace:~ dependency gets a minor bump (with onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        peerDependencies: { "pkg-a": "workspace:^" },
+      }),
+    });
+
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd,
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        onlyUpdatePeerDependentsWhenOutOfRange: true,
+      },
+    });
+
+    expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
+      "# pkg-a
+
+      ## 1.1.0
+
+      ### Minor Changes
+
+      - g1th4sh: This is a summary
+      "
+    `);
+
+    // `pkg-b` should not be touched
+    await expect(() => getChangelog("pkg-b", cwd)).rejects.toThrowError();
+  });
 });
 
 describe("same package in different dependency types", () => {
@@ -1181,6 +1366,7 @@ describe("same package in different dependency types", () => {
     let cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1209,7 +1395,7 @@ describe("same package in different dependency types", () => {
         ],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -1239,6 +1425,7 @@ describe("snapshot release", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1264,7 +1451,7 @@ describe("snapshot release", () => {
           ],
         },
       ],
-      cwd
+      cwd,
     );
     await version(
       cwd,
@@ -1274,20 +1461,20 @@ describe("snapshot release", () => {
       {
         ...modifiedDefaultConfig,
         commit: false,
-      }
+      },
     );
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
       expect.objectContaining({
         name: "pkg-a",
         version: expect.stringContaining("0.0.0-experimental-"),
-      })
+      }),
     );
 
     expect(await getPkgJSON("pkg-b", cwd)).toEqual(
       expect.objectContaining({
         name: "pkg-b",
         version: expect.stringContaining("0.0.0-experimental-"),
-      })
+      }),
     );
   });
 
@@ -1295,6 +1482,7 @@ describe("snapshot release", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1320,7 +1508,7 @@ describe("snapshot release", () => {
           ],
         },
       ],
-      cwd
+      cwd,
     );
     const spy = vi.spyOn(git, "commit");
 
@@ -1334,7 +1522,7 @@ describe("snapshot release", () => {
       {
         ...modifiedDefaultConfig,
         commit: ["@changesets/cli/commit", null],
-      }
+      },
     );
 
     expect(spy).not.toHaveBeenCalled();
@@ -1344,6 +1532,7 @@ describe("snapshot release", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1357,7 +1546,7 @@ describe("snapshot release", () => {
         releases: [{ name: "pkg-a", type: "none" }],
         summary: "some internal stuff",
       },
-      cwd
+      cwd,
     );
 
     await version(
@@ -1365,7 +1554,7 @@ describe("snapshot release", () => {
       {
         snapshot: true,
       },
-      modifiedDefaultConfig
+      modifiedDefaultConfig,
     );
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
@@ -1379,48 +1568,49 @@ describe("snapshot release", () => {
     `);
   });
 
-  it(
-    "should not bump version of an ignored package when its dependency gets updated",
-    mockGlobalDate(async () => {
-      const cwd = await testdir({
-        "package.json": JSON.stringify({
-          private: true,
-          workspaces: ["packages/*"],
-        }),
-        "package-lock.json": "",
-        "packages/pkg-a/package.json": JSON.stringify({
-          name: "pkg-a",
-          version: "1.0.0",
-          dependencies: {
-            "pkg-b": "1.0.0",
-          },
-        }),
-        "packages/pkg-b/package.json": JSON.stringify({
-          name: "pkg-b",
-          version: "1.0.0",
-        }),
-      });
-      await writeChangeset(
-        {
-          releases: [{ name: "pkg-b", type: "major" }],
-          summary: "a very useful summary",
-        },
-        cwd
-      );
+  it("should not bump version of an ignored package when its dependency gets updated", async () => {
+    vi.setSystemTime("2021-12-13T00:07:30.879Z");
 
-      await version(
-        cwd,
-        {
-          snapshot: true,
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
         },
-        {
-          ...modifiedDefaultConfig,
-          ignore: ["pkg-a"],
-        }
-      );
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "major" }],
+        summary: "a very useful summary",
+      },
+      cwd,
+    );
 
-      expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
-        .toMatchInlineSnapshot(`
+    await version(
+      cwd,
+      {
+        snapshot: true,
+      },
+      {
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      },
+    );
+
+    expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
+      .toMatchInlineSnapshot(`
         [
           {
             "dependencies": {
@@ -1435,8 +1625,7 @@ describe("snapshot release", () => {
           },
         ]
       `);
-    })
-  );
+  });
 
   describe("snapshotPrereleaseTemplate", () => {
     it('should throw an error when "{tag}" and empty snapshot is used', async () => {
@@ -1468,7 +1657,7 @@ describe("snapshot release", () => {
             ],
           },
         ],
-        cwd
+        cwd,
       );
 
       await expect(
@@ -1482,10 +1671,10 @@ describe("snapshot release", () => {
               ...modifiedDefaultConfig.snapshot,
               prereleaseTemplate: `{tag}.{commit}`,
             },
-          }
-        )
+          },
+        ),
       ).rejects.toThrow(
-        'Failed to compose snapshot version: "{tag}" placeholder is used without having a value defined!'
+        'Failed to compose snapshot version: "{tag}" placeholder is used without having a value defined!',
       );
     });
 
@@ -1518,7 +1707,7 @@ describe("snapshot release", () => {
             ],
           },
         ],
-        cwd
+        cwd,
       );
 
       await expect(
@@ -1532,10 +1721,10 @@ describe("snapshot release", () => {
               ...modifiedDefaultConfig.snapshot,
               prereleaseTemplate: `{commit}`,
             },
-          }
-        )
+          },
+        ),
       ).rejects.toThrow(
-        "Failed to compose snapshot version: \"{tag}\" placeholder is missing, but the snapshot parameter is defined (value: 'test')"
+        "Failed to compose snapshot version: \"{tag}\" placeholder is missing, but the snapshot parameter is defined (value: 'test')",
       );
     });
 
@@ -1559,66 +1748,66 @@ describe("snapshot release", () => {
       [null, "alpha", "0.0.0-alpha-20211213000730"],
     ])(
       "should customize release correctly based on snapshotPrereleaseTemplate template: %s (tag: '%s')",
-      mockGlobalDate(
-        async (snapshotTemplate, snapshotValue, expectedResult) => {
-          const cwd = await testdir({
-            "package.json": JSON.stringify({
-              private: true,
-              workspaces: ["packages/*"],
-            }),
-            "package-lock.json": "",
-            "packages/pkg-a/package.json": JSON.stringify({
-              name: "pkg-a",
-              version: "1.0.0",
-              dependencies: {
-                "pkg-b": "1.0.0",
-              },
-            }),
-            "packages/pkg-b/package.json": JSON.stringify({
-              name: "pkg-b",
-              version: "1.0.0",
-            }),
-          });
-          await writeChangesets(
-            [
-              {
-                summary: "This is a summary too",
-                releases: [
-                  { name: "pkg-a", type: "minor" },
-                  { name: "pkg-b", type: "patch" },
-                ],
-              },
-            ],
-            cwd
-          );
-          await version(
-            cwd,
-            { snapshot: snapshotValue },
+      async (snapshotTemplate, snapshotValue, expectedResult) => {
+        vi.setSystemTime("2021-12-13T00:07:30.879Z");
+
+        const cwd = await testdir({
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "yarn.lock": "",
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        });
+        await writeChangesets(
+          [
             {
-              ...modifiedDefaultConfig,
-              commit: false,
-              snapshot: {
-                ...modifiedDefaultConfig.snapshot,
-                prereleaseTemplate: snapshotTemplate as string,
-              },
-            }
-          );
+              summary: "This is a summary too",
+              releases: [
+                { name: "pkg-a", type: "minor" },
+                { name: "pkg-b", type: "patch" },
+              ],
+            },
+          ],
+          cwd,
+        );
+        await version(
+          cwd,
+          { snapshot: snapshotValue },
+          {
+            ...modifiedDefaultConfig,
+            commit: false,
+            snapshot: {
+              ...modifiedDefaultConfig.snapshot,
+              prereleaseTemplate: snapshotTemplate as string,
+            },
+          },
+        );
 
-          expect(await getPkgJSON("pkg-a", cwd)).toEqual(
-            expect.objectContaining({
-              name: "pkg-a",
-              version: expectedResult,
-            })
-          );
+        expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+          expect.objectContaining({
+            name: "pkg-a",
+            version: expectedResult,
+          }),
+        );
 
-          expect(await getPkgJSON("pkg-b", cwd)).toEqual(
-            expect.objectContaining({
-              name: "pkg-b",
-              version: expectedResult,
-            })
-          );
-        }
-      )
+        expect(await getPkgJSON("pkg-b", cwd)).toEqual(
+          expect.objectContaining({
+            name: "pkg-b",
+            version: expectedResult,
+          }),
+        );
+      },
     );
   });
 
@@ -1652,7 +1841,7 @@ describe("snapshot release", () => {
             ],
           },
         ],
-        cwd
+        cwd,
       );
       await version(
         cwd,
@@ -1666,20 +1855,20 @@ describe("snapshot release", () => {
             useCalculatedVersion: true,
             prereleaseTemplate: null,
           },
-        }
+        },
       );
       expect(await getPkgJSON("pkg-a", cwd)).toEqual(
         expect.objectContaining({
           name: "pkg-a",
           version: expect.stringContaining("1.1.0-experimental-"),
-        })
+        }),
       );
 
       expect(await getPkgJSON("pkg-b", cwd)).toEqual(
         expect.objectContaining({
           name: "pkg-b",
           version: expect.stringContaining("1.0.1-experimental-"),
-        })
+        }),
       );
     });
 
@@ -1700,7 +1889,7 @@ describe("snapshot release", () => {
           releases: [{ name: "pkg-a", type: "none" }],
           summary: "some internal stuff",
         },
-        cwd
+        cwd,
       );
 
       await version(
@@ -1714,7 +1903,7 @@ describe("snapshot release", () => {
             useCalculatedVersion: true,
             prereleaseTemplate: null,
           },
-        }
+        },
       );
 
       expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
@@ -1728,52 +1917,52 @@ describe("snapshot release", () => {
       `);
     });
 
-    it(
-      "should not bump version of an ignored package when its dependency gets updated",
-      mockGlobalDate(async () => {
-        const cwd = await testdir({
-          "package.json": JSON.stringify({
-            private: true,
-            workspaces: ["packages/*"],
-          }),
-          "package-lock.json": "",
-          "packages/pkg-a/package.json": JSON.stringify({
-            name: "pkg-a",
-            version: "1.0.0",
-            dependencies: {
-              "pkg-b": "1.0.0",
-            },
-          }),
-          "packages/pkg-b/package.json": JSON.stringify({
-            name: "pkg-b",
-            version: "1.0.0",
-          }),
-        });
-        await writeChangeset(
-          {
-            releases: [{ name: "pkg-b", type: "major" }],
-            summary: "a very useful summary",
-          },
-          cwd
-        );
+    it("should not bump version of an ignored package when its dependency gets updated", async () => {
+      vi.setSystemTime("2021-12-13T00:07:30.879Z");
 
-        await version(
-          cwd,
-          {
-            snapshot: true,
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "yarn.lock": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
           },
-          {
-            ...modifiedDefaultConfig,
-            ignore: ["pkg-a"],
-            snapshot: {
-              useCalculatedVersion: true,
-              prereleaseTemplate: null,
-            },
-          }
-        );
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+      });
+      await writeChangeset(
+        {
+          releases: [{ name: "pkg-b", type: "major" }],
+          summary: "a very useful summary",
+        },
+        cwd,
+      );
 
-        expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
-          .toMatchInlineSnapshot(`
+      await version(
+        cwd,
+        {
+          snapshot: true,
+        },
+        {
+          ...modifiedDefaultConfig,
+          ignore: ["pkg-a"],
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null,
+          },
+        },
+      );
+
+      expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
+        .toMatchInlineSnapshot(`
           [
             {
               "dependencies": {
@@ -1788,8 +1977,7 @@ describe("snapshot release", () => {
             },
           ]
         `);
-      })
-    );
+    });
   });
 });
 
@@ -1798,6 +1986,7 @@ describe("updateInternalDependents: always", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1818,7 +2007,7 @@ describe("updateInternalDependents: always", () => {
         summary: "This is not a summary",
         releases: [{ name: "pkg-b", type: "patch" }],
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
@@ -1835,13 +2024,13 @@ describe("updateInternalDependents: always", () => {
         dependencies: {
           "pkg-b": "^1.0.1",
         },
-      })
+      }),
     );
     expect(await getPkgJSON("pkg-b", cwd)).toEqual(
       expect.objectContaining({
         name: "pkg-b",
         version: "1.0.1",
-      })
+      }),
     );
     expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
       "# pkg-a
@@ -1870,6 +2059,7 @@ describe("updateInternalDependents: always", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1894,7 +2084,7 @@ describe("updateInternalDependents: always", () => {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
@@ -1908,7 +2098,7 @@ describe("updateInternalDependents: always", () => {
       expect.objectContaining({
         name: "pkg-a",
         version: "1.1.0",
-      })
+      }),
     );
     expect(await getPkgJSON("pkg-b", cwd)).toEqual(
       expect.objectContaining({
@@ -1917,7 +2107,7 @@ describe("updateInternalDependents: always", () => {
         devDependencies: {
           "pkg-a": "1.1.0",
         },
-      })
+      }),
     );
     // `pkg-c` should not be touched
     expect(await getPkgJSON("pkg-c", cwd)).toEqual(
@@ -1925,7 +2115,7 @@ describe("updateInternalDependents: always", () => {
         name: "pkg-c",
         version: "1.0.0",
         dependencies: { "pkg-b": "1.0.0" },
-      })
+      }),
     );
 
     expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
@@ -1942,10 +2132,10 @@ describe("updateInternalDependents: always", () => {
     // pkg-b and - pkg-c are not being released so changelogs should not be
     // generated for them
     await expect(
-      fs.access(await getFilePath("pkg-b", "CHANGELOG.md", cwd))
+      fs.access(await getFilePath("pkg-b", "CHANGELOG.md", cwd)),
     ).rejects.toThrow();
     await expect(
-      fs.access(await getFilePath("pkg-c", "CHANGELOG.md", cwd))
+      fs.access(await getFilePath("pkg-c", "CHANGELOG.md", cwd)),
     ).rejects.toThrow();
   });
 
@@ -1953,6 +2143,7 @@ describe("updateInternalDependents: always", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -1972,7 +2163,7 @@ describe("updateInternalDependents: always", () => {
         summary: "This is some fix",
         releases: [{ name: "pkg-b", type: "patch" }],
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
@@ -1987,7 +2178,7 @@ describe("updateInternalDependents: always", () => {
       expect.objectContaining({
         name: "pkg-a",
         version: "1.0.0",
-      })
+      }),
     );
 
     expect(await getPkgJSON("pkg-b", cwd)).toEqual(
@@ -1995,12 +2186,12 @@ describe("updateInternalDependents: always", () => {
         name: "pkg-b",
         version: "1.0.1",
         dependencies: { "pkg-a": "bulbasaur" },
-      })
+      }),
     );
 
     // shouldn't be created
     await expect(
-      fs.access(await getFilePath("pkg-a", "CHANGELOG.md", cwd))
+      fs.access(await getFilePath("pkg-a", "CHANGELOG.md", cwd)),
     ).rejects.toThrow();
 
     expect(await getChangelog("pkg-b", cwd)).toMatchInlineSnapshot(`
@@ -2019,6 +2210,7 @@ describe("updateInternalDependents: always", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2038,14 +2230,14 @@ describe("updateInternalDependents: always", () => {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await writeChangeset(
       {
         summary: "This is some fix",
         releases: [{ name: "pkg-b", type: "patch" }],
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, {
       ...modifiedDefaultConfig,
@@ -2059,14 +2251,14 @@ describe("updateInternalDependents: always", () => {
       expect.objectContaining({
         name: "pkg-a",
         version: "1.1.0",
-      })
+      }),
     );
     expect(await getPkgJSON("pkg-b", cwd)).toEqual(
       expect.objectContaining({
         name: "pkg-b",
         version: "1.0.1",
         dependencies: { "pkg-a": "bulbasaur" },
-      })
+      }),
     );
 
     expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
@@ -2098,6 +2290,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2119,7 +2312,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     let packages = (await getPackages(cwd))!;
@@ -2141,7 +2334,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "patch" }],
         summary: "a very useful summary",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -2164,7 +2357,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "patch" }],
         summary: "a very useful summary for the second change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     packages = (await getPackages(cwd))!;
@@ -2186,7 +2379,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "minor" }],
         summary: "a very useful summary for the third change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     packages = (await getPackages(cwd))!;
@@ -2224,8 +2417,8 @@ describe("pre", () => {
     expect(
       await fs.readFile(
         path.join(packages.packages[0].dir, "CHANGELOG.md"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "# pkg-a
 
@@ -2271,8 +2464,8 @@ describe("pre", () => {
     expect(
       await fs.readFile(
         path.join(packages.packages[1].dir, "CHANGELOG.md"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "# pkg-b
 
@@ -2294,6 +2487,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2315,7 +2509,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -2342,8 +2536,8 @@ describe("pre", () => {
           version: "0.0.0",
         },
         null,
-        2
-      ) + "\n"
+        2,
+      ) + "\n",
     );
     await writeChangeset(
       {
@@ -2353,7 +2547,7 @@ describe("pre", () => {
         ],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     packages = (await getPackages(cwd))!;
@@ -2380,6 +2574,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2400,7 +2595,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "minor" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     let packages = (await getPackages(cwd))!;
@@ -2423,7 +2618,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "patch" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     packages = (await getPackages(cwd))!;
@@ -2445,6 +2640,7 @@ describe("pre", () => {
     let cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2466,7 +2662,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -2508,6 +2704,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2528,7 +2725,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "major" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
 
     await pre(cwd, { command: "enter", tag: "next" });
@@ -2552,7 +2749,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "minor" }],
         summary: "a very useful summary for the second change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     packages = (await getPackages(cwd))!;
@@ -2573,6 +2770,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2595,7 +2793,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "major" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -2618,7 +2816,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "minor" }],
         summary: "a very useful summary for the second change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
     packages = (await getPackages(cwd))!;
@@ -2640,6 +2838,7 @@ describe("pre", () => {
     let cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2660,7 +2859,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "major" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
 
     await pre(cwd, { command: "enter", tag: "next" });
@@ -2683,6 +2882,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2703,7 +2903,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "major" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
 
     await writeChangeset(
@@ -2711,7 +2911,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "major" }],
         summary: "a very useful summary for the first change",
       },
-      cwd
+      cwd,
     );
 
     await pre(cwd, { command: "enter", tag: "next" });
@@ -2737,6 +2937,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2759,7 +2960,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
@@ -2783,6 +2984,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2806,7 +3008,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-a", type: "patch" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -2833,7 +3035,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -2860,6 +3062,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2883,7 +3086,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -2910,6 +3113,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2933,7 +3137,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -2960,6 +3164,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -2983,7 +3188,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -3010,6 +3215,7 @@ describe("pre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -3033,7 +3239,7 @@ describe("pre", () => {
         releases: [{ name: "pkg-b", type: "patch" }],
         summary: "a very useful summary for the change",
       },
-      cwd
+      cwd,
     );
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
@@ -3054,6 +3260,85 @@ describe("pre", () => {
         },
       ]
     `);
+  });
+
+  it("should version successfully when skipping a private package without a version field", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        private: true,
+        // no version
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+    });
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary for the first change",
+      },
+      cwd,
+    );
+    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        private: true,
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1-next.0",
+      },
+    ]);
+  });
+
+  it("should version successfully a private package when tagging for them is disabled", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        private: true,
+        version: "1.0.0",
+      }),
+    });
+    await pre(cwd, { command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "patch" }],
+        summary: "a very useful summary for the first change",
+      },
+      cwd,
+    );
+    await version(cwd, defaultOptions, {
+      ...modifiedDefaultConfig,
+      privatePackages: {
+        tag: false,
+        version: true,
+      },
+    });
+    let packages = (await getPackages(cwd))!;
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        private: true,
+        version: "1.0.1-next.0",
+      },
+    ]);
   });
 
   describe("linked", () => {
@@ -3085,7 +3370,7 @@ describe("pre", () => {
           releases: [{ name: "pkg-a", type: "minor" }],
           summary: "a very useful summary",
         },
-        cwd
+        cwd,
       );
       await version(cwd, defaultOptions, linkedConfig);
       let packages = (await getPackages(cwd))!;
@@ -3108,7 +3393,7 @@ describe("pre", () => {
           releases: [{ name: "pkg-b", type: "patch" }],
           summary: "a very useful summary",
         },
-        cwd
+        cwd,
       );
       await version(cwd, defaultOptions, linkedConfig);
       packages = (await getPackages(cwd))!;
@@ -3129,7 +3414,7 @@ describe("pre", () => {
           releases: [{ name: "pkg-a", type: "patch" }],
           summary: "a very useful summary",
         },
-        cwd
+        cwd,
       );
       await version(cwd, defaultOptions, linkedConfig);
       packages = (await getPackages(cwd))!;
@@ -3149,7 +3434,7 @@ describe("pre", () => {
           releases: [{ name: "pkg-a", type: "patch" }],
           summary: "a very useful summary",
         },
-        cwd
+        cwd,
       );
       await version(cwd, defaultOptions, linkedConfig);
       packages = (await getPackages(cwd))!;
@@ -3199,7 +3484,7 @@ describe("pre", () => {
           releases: [{ name: "pkg-a", type: "minor" }],
           summary: "a very useful summary",
         },
-        cwd
+        cwd,
       );
       await version(cwd, defaultOptions, linkedConfig);
       let packages = (await getPackages(cwd))!;
@@ -3225,7 +3510,7 @@ describe("pre", () => {
           releases: [{ name: "pkg-c", type: "patch" }],
           summary: "a very useful summary",
         },
-        cwd
+        cwd,
       );
       await version(cwd, defaultOptions, linkedConfig);
       packages = (await getPackages(cwd))!;
@@ -3274,7 +3559,7 @@ describe("pre", () => {
           releases: [{ name: "pkg-b", type: "patch" }],
           summary: "a very useful summary",
         },
-        cwd
+        cwd,
       );
       await version(cwd, defaultOptions, linkedConfig);
       let packages = (await getPackages(cwd))!;
@@ -3299,6 +3584,7 @@ describe("with privatePackages", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",

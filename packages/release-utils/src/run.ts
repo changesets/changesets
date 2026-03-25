@@ -1,4 +1,5 @@
-import { getPackages, type Package } from "@manypkg/get-packages";
+import { getPackages } from "@manypkg/get-packages";
+import type { Package } from "@changesets/types";
 import semverLt from "semver/functions/lt.js";
 import {
   spawnWithOutput,
@@ -59,7 +60,7 @@ export async function runPublish({
       if (pkg === undefined) {
         throw new Error(
           `Package "${pkgName}" not found.` +
-            "This is probably a bug in the action, please open an issue"
+            "This is probably a bug in the action, please open an issue",
         );
       }
       releasedPackages.push(pkg);
@@ -68,7 +69,7 @@ export async function runPublish({
     if (packages.length === 0) {
       throw new Error(
         `No package found.` +
-          "This is probably a bug in the action, please open an issue"
+          "This is probably a bug in the action, please open an issue",
       );
     }
     let pkg = packages[0];
@@ -126,7 +127,7 @@ export async function runVersion({
       "@changesets/cli/package.json",
       {
         paths: [cwd],
-      }
+      },
     );
     const args = [];
     // this is done just so our tests can run with the types stripped since they are run with source files
@@ -138,7 +139,7 @@ export async function runVersion({
     args.push(
       semverLt(require(changesetsCliPkgJsonPath).version, "2.0.0")
         ? "bump"
-        : "version"
+        : "version",
     );
     await spawnWithOutput("node", args, { cwd });
   }

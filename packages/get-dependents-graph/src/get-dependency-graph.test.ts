@@ -1,10 +1,9 @@
-import path from "node:path";
-import { vi } from "vitest";
-import stripAnsi from "strip-ansi";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { stripVTControlCharacters } from "node:util";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 import getDependencyGraph from "./get-dependency-graph.ts";
-import { Package } from "@manypkg/get-packages";
-import { PnpmTool } from "@manypkg/tools";
+import { Package } from "@changesets/types";
+import path from "node:path";
 
 const consoleError = console.error;
 
@@ -20,15 +19,16 @@ describe("getting the dependency graph", function () {
   it("should skip dependencies specified through the link protocol", function () {
     const rootPackage: Package = {
       dir: path.resolve(),
-      relativeDir: ".",
       packageJson: { name: "root", version: "1.0.0" },
     };
     const { graph, valid } = getDependencyGraph(
       {
+        tool: { type: "yarn" },
+        rootDir: rootPackage.dir,
+        rootPackage,
         packages: [
           {
-            dir: path.resolve("foo"),
-            relativeDir: "foo",
+            dir: "foo",
             packageJson: {
               name: "foo",
               version: "1.0.0",
@@ -38,19 +38,15 @@ describe("getting the dependency graph", function () {
             },
           },
           {
-            dir: path.resolve("bar"),
-            relativeDir: "bar",
+            dir: "bar",
             packageJson: {
               name: "bar",
               version: "1.0.0",
             },
           },
         ],
-        rootPackage,
-        rootDir: path.resolve(),
-        tool: PnpmTool,
       },
-      rootPackage
+      rootPackage,
     );
     expect(graph.get("foo")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
@@ -60,15 +56,16 @@ describe("getting the dependency graph", function () {
   it("should skip dependencies specified using a tag", function () {
     const rootPackage: Package = {
       dir: path.resolve(),
-      relativeDir: ".",
       packageJson: { name: "root", version: "1.0.0" },
     };
     const { graph, valid } = getDependencyGraph(
       {
+        tool: { type: "yarn" },
+        rootDir: rootPackage.dir,
+        rootPackage,
         packages: [
           {
-            dir: path.resolve("examples/foo"),
-            relativeDir: "examples/foo",
+            dir: "examples/foo",
             packageJson: {
               name: "foo-example",
               version: "1.0.0",
@@ -78,19 +75,15 @@ describe("getting the dependency graph", function () {
             },
           },
           {
-            dir: path.resolve("packages/bar"),
-            relativeDir: "packages/bar",
+            dir: "packages/bar",
             packageJson: {
               name: "bar",
               version: "1.0.0",
             },
           },
         ],
-        rootPackage,
-        rootDir: path.resolve(),
-        tool: PnpmTool,
       },
-      rootPackage
+      rootPackage,
     );
     expect(graph.get("foo-example")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
@@ -102,15 +95,16 @@ describe("getting the dependency graph", function () {
     temporarilySilenceLogs(() => {
       const rootPackage: Package = {
         dir: path.resolve(),
-        relativeDir: ".",
         packageJson: { name: "root", version: "1.0.0" },
       };
       const { valid } = getDependencyGraph(
         {
+          tool: { type: "yarn" },
+          rootDir: rootPackage.dir,
+          rootPackage,
           packages: [
             {
-              dir: path.resolve("foo"),
-              relativeDir: "foo",
+              dir: "foo",
               packageJson: {
                 name: "foo",
                 version: "1.0.0",
@@ -120,25 +114,108 @@ describe("getting the dependency graph", function () {
               },
             },
             {
-              dir: path.resolve("bar"),
-              relativeDir: "bar",
+              dir: "bar",
               packageJson: {
                 name: "bar",
                 version: "1.0.0",
               },
             },
           ],
-          rootPackage,
-          rootDir: path.resolve(),
-          tool: PnpmTool,
         },
-        rootPackage
+        rootPackage,
       );
       expect(valid).toBeFalsy();
       expect((console.error as any).mock.calls).toHaveLength(1);
-      expect(stripAnsi((console.error as any).mock.calls[0][0])).toBe(
-        `Package "foo" must depend on the current version of "bar": "1.0.0" vs "link:../bar"`
+      expect(
+        stripVTControlCharacters((console.error as any).mock.calls[0][0]),
+      ).toBe(
+        `Package "foo" must depend on the current version of "bar": "1.0.0" vs "link:../bar"`,
       );
-    })
+    }),
+  );
+
+  it(
+    "should error on dependencies not specified using workspace protocol when bumpVersionsWithWorkspaceProtocolOnly is false",
+    temporarilySilenceLogs(() => {
+      const rootPackage: Package = {
+        dir: path.resolve(),
+        packageJson: { name: "root", version: "1.0.0" },
+      };
+      const { valid } = getDependencyGraph(
+        {
+          tool: { type: "yarn" },
+          rootDir: rootPackage.dir,
+          rootPackage,
+          packages: [
+            {
+              dir: "foo",
+              packageJson: {
+                name: "foo",
+                version: "1.0.0",
+                dependencies: {
+                  bar: "0.9.0",
+                },
+              },
+            },
+            {
+              dir: "bar",
+              packageJson: {
+                name: "bar",
+                version: "1.0.0",
+              },
+            },
+          ],
+        },
+        rootPackage,
+      );
+      expect(valid).toBe(false);
+      expect(
+        stripVTControlCharacters((console.error as any).mock.calls[0][0]),
+      ).toMatchInlineSnapshot(
+        `"Package "foo" must depend on the current version of "bar": "1.0.0" vs "0.9.0""`,
+      );
+    }),
+  );
+
+  it(
+    "should skip dependencies not specified using workspace protocol when bumpVersionsWithWorkspaceProtocolOnly is true",
+    temporarilySilenceLogs(() => {
+      const rootPackage: Package = {
+        dir: path.resolve(),
+        packageJson: { name: "root", version: "1.0.0" },
+      };
+      const { valid } = getDependencyGraph(
+        {
+          tool: { type: "yarn" },
+          rootDir: rootPackage.dir,
+          rootPackage,
+          packages: [
+            {
+              dir: "foo",
+              packageJson: {
+                name: "foo",
+                version: "1.0.0",
+                dependencies: {
+                  bar: "0.9.0",
+                },
+              },
+            },
+            {
+              dir: "bar",
+              packageJson: {
+                name: "bar",
+                version: "1.0.0",
+              },
+            },
+          ],
+        },
+        rootPackage,
+        {
+          bumpVersionsWithWorkspaceProtocolOnly: true,
+        },
+      );
+      expect(valid).toBe(true);
+      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+    }),
   );
 });

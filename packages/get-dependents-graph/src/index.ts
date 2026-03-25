@@ -1,4 +1,4 @@
-import type { Packages, Package } from "@manypkg/get-packages";
+import type { Package, Packages } from "@changesets/types";
 import getDependencyGraph from "./get-dependency-graph.ts";
 
 export function getDependentsGraph(
@@ -6,7 +6,7 @@ export function getDependentsGraph(
   opts?: {
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-  }
+  },
 ) {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
@@ -18,7 +18,7 @@ export function getDependentsGraph(
   const { graph: dependencyGraph } = getDependencyGraph(
     packages,
     rootPackage,
-    opts
+    opts,
   );
 
   const dependentsLookup: {

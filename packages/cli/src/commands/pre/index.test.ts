@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import fs from "node:fs/promises";
 import path from "path";
 import pc from "picocolors";
@@ -17,6 +18,7 @@ describe("enterPre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -25,8 +27,8 @@ describe("enterPre", () => {
 
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
+      ),
     ).toMatchObject({
       changesets: [],
       initialVersions: {},
@@ -34,13 +36,14 @@ describe("enterPre", () => {
       tag: "next",
     });
     expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${pc.cyan("next")}`
+      `Entered pre mode with tag ${pc.cyan("next")}`,
     );
   });
   it("should throw if already in pre", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -53,19 +56,20 @@ describe("enterPre", () => {
     });
 
     await expect(
-      pre(cwd, { command: "enter", tag: "next" })
+      pre(cwd, { command: "enter", tag: "next" }),
     ).rejects.toBeInstanceOf(ExitError);
     expect(mockedLogger.error).toBeCalledWith(
-      "`changeset pre enter` cannot be run when in pre mode"
+      "`changeset pre enter` cannot be run when in pre mode",
     );
     expect(mockedLogger.info).toBeCalledWith(
-      "If you're trying to exit pre mode, run `changeset pre exit`"
+      "If you're trying to exit pre mode, run `changeset pre exit`",
     );
   });
   it("should enter if already exited pre mode", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -80,8 +84,8 @@ describe("enterPre", () => {
     await pre(cwd, { command: "enter", tag: "next" });
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
+      ),
     ).toEqual({
       changesets: [],
       initialVersions: {},
@@ -89,7 +93,7 @@ describe("enterPre", () => {
       tag: "next",
     });
     expect(mockedLogger.success).toBeCalledWith(
-      `Entered pre mode with tag ${pc.cyan("next")}`
+      `Entered pre mode with tag ${pc.cyan("next")}`,
     );
   });
 });
@@ -99,6 +103,7 @@ describe("exitPre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -113,8 +118,8 @@ describe("exitPre", () => {
 
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
+      ),
     ).toEqual({
       changesets: [],
       initialVersions: {},
@@ -126,18 +131,19 @@ describe("exitPre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
     });
     await expect(pre(cwd, { command: "exit" })).rejects.toBeInstanceOf(
-      ExitError
+      ExitError,
     );
     expect(mockedLogger.error).toBeCalledWith(
-      "`changeset pre exit` can only be run when in pre mode"
+      "`changeset pre exit` can only be run when in pre mode",
     );
     expect(mockedLogger.info).toBeCalledWith(
-      "If you're trying to enter pre mode, run `changeset pre enter`"
+      "If you're trying to enter pre mode, run `changeset pre enter`",
     );
   });
 });

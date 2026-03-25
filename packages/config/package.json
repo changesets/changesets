@@ -1,11 +1,12 @@
 {
   "name": "@changesets/config",
-  "version": "4.0.0-next.0",
+  "version": "4.0.0-next.1",
   "description": "Utilities for reading and parsing Changeset's config",
   "type": "module",
   "exports": {
     ".": "./dist/changesets-config.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./schema.json": "./schema.json"
   },
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/config",
@@ -14,21 +15,28 @@
     "schema.json"
   ],
   "dependencies": {
-    "@changesets/errors": "^1.0.0-next.0",
-    "@changesets/get-dependents-graph": "^3.0.0-next.0",
-    "@changesets/logger": "^1.0.0-next.0",
-    "@changesets/types": "^7.0.0-next.0",
+    "@changesets/errors": "^1.0.0-next.1",
+    "@changesets/get-dependents-graph": "^3.0.0-next.1",
+    "@changesets/logger": "^1.0.0-next.1",
+    "@changesets/should-skip-package": "^1.0.0-next.1",
+    "@changesets/types": "^7.0.0-next.1",
     "@manypkg/get-packages": "^3.0.0",
-    "@manypkg/tools": "^2.0.0",
     "micromatch": "^4.0.8"
   },
   "devDependencies": {
-    "@changesets/test-utils": "0.0.9-next.0",
+    "@changesets/test-utils": "0.0.9-next.1",
     "@types/micromatch": "^4.0.1",
     "outdent": "^0.8.0",
-    "vitest": "^3.0.6"
+    "vitest": "^4.0.18"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.19.0"
+  },
+  "preconstruct": {
+    "exports": {
+      "extra": {
+        "./schema.json": "./schema.json"
+      }
+    }
   }
 }

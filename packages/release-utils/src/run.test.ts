@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { beforeEach, describe, expect, it, test, vi } from "vitest";
 import { add, commit } from "@changesets/git";
 import {
   linkNodeModules,
@@ -8,7 +8,7 @@ import {
 } from "@changesets/test-utils";
 import type { Changeset } from "@changesets/types";
 import writeChangeset from "@changesets/write";
-import fileUrl from "file-url";
+import { pathToFileURL } from "node:url";
 import fs from "node:fs/promises";
 import path from "path";
 import spawn from "spawndamnit";
@@ -39,10 +39,10 @@ async function setupRepoAndClone(cwd: string) {
     "git",
     // Note: a file:// URL is needed in order to make a shallow clone of
     // a local repo
-    ["clone", "--depth", "1", fileUrl(cwd), "."],
+    ["clone", "--depth", "1", pathToFileURL(cwd).toString(), "."],
     {
       cwd: clone,
-    }
+    },
   );
   await spawn("git", ["checkout", "-b", "some-other-branch"], { cwd });
   return { clone, mainBranch };
@@ -53,6 +53,7 @@ describe("version", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -86,7 +87,7 @@ describe("version", () => {
           summary: "Awesome feature",
         },
       ],
-      cwd
+      cwd,
     );
 
     const { clone, mainBranch } = await setupRepoAndClone(cwd);
@@ -104,8 +105,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-a",
@@ -119,8 +120,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-b",
@@ -130,8 +131,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toEqual(
       expect.stringContaining(`# pkg-a
 
@@ -139,13 +140,13 @@ describe("version", () => {
 
 ### Minor Changes
 
-`)
+`),
     );
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toEqual(
       expect.stringContaining(`# pkg-b
 
@@ -153,7 +154,7 @@ describe("version", () => {
 
 ### Minor Changes
 
-`)
+`),
     );
     expect(changedPackages).toEqual([
       {
@@ -179,6 +180,7 @@ describe("version", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -195,7 +197,7 @@ describe("version", () => {
           version: "1.0.0",
         },
         null,
-        2
+        2,
       ),
       ".changeset/config.json": JSON.stringify({}),
     });
@@ -212,7 +214,7 @@ describe("version", () => {
           summary: "Awesome feature",
         },
       ],
-      cwd
+      cwd,
     );
 
     const { clone, mainBranch } = await setupRepoAndClone(cwd);
@@ -230,8 +232,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "package.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-a",
@@ -245,8 +247,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toMatchInlineSnapshot(`
       "{
         "name": "pkg-b",
@@ -257,8 +259,8 @@ describe("version", () => {
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toEqual(
       expect.stringContaining(`# pkg-a
 
@@ -266,10 +268,10 @@ describe("version", () => {
 
 ### Minor Changes
 
-`)
+`),
     );
     await expect(
-      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8")
+      fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8"),
     ).rejects.toMatchObject({ code: "ENOENT" });
     expect(changedPackages).toEqual([
       {
@@ -290,6 +292,7 @@ describe("version", () => {
     let cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -321,7 +324,7 @@ describe("version", () => {
           summary: "Awesome feature",
         },
       ],
-      cwd
+      cwd,
     );
 
     const { clone } = await setupRepoAndClone(cwd);
@@ -371,6 +374,7 @@ describe("publish", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -406,7 +410,7 @@ describe("publish", () => {
     });
     let tagsResult = await spawn("git", ["tag"], { cwd });
     expect(tagsResult.stdout.toString("utf8").trim()).toEqual(
-      "pkg-a@1.0.0\npkg-b@1.0.0"
+      "pkg-a@1.0.0\npkg-b@1.0.0",
     );
   });
 });

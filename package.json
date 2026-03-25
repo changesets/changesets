@@ -10,8 +10,8 @@
     "postinstall": "preconstruct dev && manypkg check",
     "lint": "yarn eslint . --ext .ts,.tsx,.js",
     "types:check": "tsc",
-    "format": "prettier --list-different \"**/*.{js,ts,tsx,md}\"",
-    "format:fix": "prettier --write \"**/*.{js,ts,tsx,md}\"",
+    "format": "prettier --experimental-cli --list-different \"**/*.{js,ts,tsx,md}\"",
+    "format:fix": "prettier --experimental-cli --write \"**/*.{js,ts,tsx,md}\"",
     "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js",
     "check-all": "yarn test && yarn types:check && yarn lint && yarn format",
     "version-packages": "yarn changeset version && yarn format:fix",
@@ -33,21 +33,20 @@
     "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
   ],
   "license": "MIT",
+  "resolutions": {
+    "vite": "npm:vite@8.0.0-beta.16"
+  },
   "devDependencies": {
-    "@babel/cli": "^7.27.0",
-    "@babel/core": "^7.26.10",
-    "@babel/preset-env": "^7.26.9",
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
     "@babel/preset-typescript": "^7.27.0",
-    "@manypkg/cli": "^0.24.0",
+    "@manypkg/cli": "^0.25.1",
     "@preconstruct/cli": "^2.8.12",
-    "@types/js-yaml": "^3.12.1",
-    "@types/lodash": "^4.17.13",
-    "@types/node": "^22.14.1",
-    "@types/prettier": "^2.7.1",
-    "@types/semver": "^7.5.0",
+    "@types/node": "^24.10.1",
+    "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.62.0",
-    "@vitest/coverage-v8": "^3.0.6",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.1.0",
@@ -55,9 +54,9 @@
     "eslint-plugin-n": "^15.5.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
-    "prettier": "^2.7.1",
+    "prettier": "^3.7.4",
     "typescript": "^5.8.3",
-    "vitest": "^3.0.6"
+    "vitest": "^4.0.18"
   },
   "preconstruct": {
     "packages": [
@@ -73,8 +72,7 @@
       "typeModule": true
     }
   },
-  "prettier": {},
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.19.0"
   }
 }

@@ -5,7 +5,7 @@ import { pathToFileURL } from "node:url";
 
 export async function getCommitFunctions(
   commit: false | readonly [string, any],
-  cwd: string
+  cwd: string,
 ): Promise<[CommitFunctions, any]> {
   let commitFunctions: CommitFunctions = {};
   if (!commit) {
@@ -18,6 +18,11 @@ export async function getCommitFunctions(
   let possibleCommitFunc = await import(commitPath);
   if (possibleCommitFunc.default) {
     possibleCommitFunc = possibleCommitFunc.default;
+
+    // Check nested default again in case it's CJS with `__esModule` interop
+    if (possibleCommitFunc.default) {
+      possibleCommitFunc = possibleCommitFunc.default;
+    }
   }
   if (
     typeof possibleCommitFunc.getAddMessage === "function" ||

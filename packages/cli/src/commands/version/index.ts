@@ -1,7 +1,8 @@
 import pc from "picocolors";
 import path from "path";
 import * as git from "@changesets/git";
-import { log, warn, error } from "@changesets/logger";
+import { getCurrentCommitId } from "@changesets/git";
+import { error, log, warn } from "@changesets/logger";
 import type { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
@@ -10,15 +11,13 @@ import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
-import { getCurrentCommitId } from "@changesets/git";
-import { fileURLToPath } from "node:url";
 
 let importantSeparator = pc.red(
-  "===============================IMPORTANT!==============================="
+  "===============================IMPORTANT!===============================",
 );
 
 let importantEnd = pc.red(
-  "----------------------------------------------------------------------"
+  "----------------------------------------------------------------------",
 );
 
 export default async function version(
@@ -26,7 +25,7 @@ export default async function version(
   options: {
     snapshot?: string | boolean;
   },
-  config: Config
+  config: Config,
 ) {
   const releaseConfig = {
     ...config,
@@ -47,7 +46,7 @@ export default async function version(
     } else {
       warn("You are in prerelease mode");
       warn(
-        "If you meant to do a normal release you should revert these changes and run `changeset pre exit`"
+        "If you meant to do a normal release you should revert these changes and run `changeset pre exit`",
       );
       warn("You can then run `changeset version` again to do a normal release");
     }
@@ -62,9 +61,9 @@ export default async function version(
     return;
   }
 
-  let packages = await getPackages(cwd);
+  const packages = await getPackages(cwd);
 
-  let releasePlan = assembleReleasePlan(
+  const releasePlan = assembleReleasePlan(
     changesets,
     packages,
     releaseConfig,
@@ -76,20 +75,20 @@ export default async function version(
             ? await getCurrentCommitId({ cwd })
             : undefined,
         }
-      : undefined
+      : undefined,
   );
 
-  let [...touchedFiles] = await applyReleasePlan(
+  const [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
     releaseConfig,
     options.snapshot,
-    path.dirname(fileURLToPath(import.meta.url))
+    import.meta.dirname,
   );
 
   const [{ getVersionMessage }, commitOpts] = await getCommitFunctions(
     releaseConfig.commit,
-    cwd
+    cwd,
   );
   if (getVersionMessage) {
     let touchedFile: string | undefined;
@@ -101,14 +100,14 @@ export default async function version(
 
     const commit = await git.commit(
       await getVersionMessage(releasePlan, commitOpts),
-      cwd
+      cwd,
     );
 
     if (!commit) {
       error("Changesets ran into trouble committing your files");
     } else {
       log(
-        "All files have been updated and committed. You're ready to publish!"
+        "All files have been updated and committed. You're ready to publish!",
       );
     }
   } else {

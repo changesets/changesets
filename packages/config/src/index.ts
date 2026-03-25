@@ -1,23 +1,21 @@
-import fs from "node:fs/promises";
-import path from "path";
-import micromatch from "micromatch";
 import { ValidationError } from "@changesets/errors";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { warn } from "@changesets/logger";
-import {
-  type Package,
-  type Packages,
-  getPackages,
-} from "@manypkg/get-packages";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   Config,
-  WrittenConfig,
   Fixed,
   Linked,
+  Package,
   PackageGroup,
+  Packages,
+  WrittenConfig,
 } from "@changesets/types";
-import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { getPackages } from "@manypkg/get-packages";
+import micromatch from "micromatch";
+import fs from "node:fs/promises";
 import { createRequire } from "node:module";
-import { RootTool } from "@manypkg/tools";
+import path from "path";
 
 const require = createRequire(import.meta.url);
 // eslint-disable-next-line import/no-commonjs
@@ -40,7 +38,7 @@ function flatten<T>(arr: Array<T[]>): T[] {
 }
 
 function getNormalizedChangelogOption(
-  thing: false | readonly [string, any] | string
+  thing: false | readonly [string, any] | string,
 ): Config["changelog"] {
   if (thing === false) {
     return false;
@@ -52,7 +50,7 @@ function getNormalizedChangelogOption(
 }
 
 function getNormalizedCommitOption(
-  thing: boolean | readonly [string, any] | string
+  thing: boolean | readonly [string, any] | string,
 ): Config["commit"] {
   if (thing === false) {
     return false;
@@ -68,22 +66,22 @@ function getNormalizedCommitOption(
 
 function getUnmatchedPatterns(
   listOfPackageNamesOrGlob: readonly string[],
-  pkgNames: readonly string[]
+  pkgNames: readonly string[],
 ): string[] {
   return listOfPackageNamesOrGlob.filter(
     (pkgNameOrGlob) =>
-      !pkgNames.some((pkgName) => micromatch.isMatch(pkgName, pkgNameOrGlob))
+      !pkgNames.some((pkgName) => micromatch.isMatch(pkgName, pkgNameOrGlob)),
   );
 }
 
 const havePackageGroupsCorrectShape = (
-  pkgGroups: ReadonlyArray<PackageGroup>
+  pkgGroups: ReadonlyArray<PackageGroup>,
 ) => {
   return (
     isArray(pkgGroups) &&
     pkgGroups.every(
       (arr) =>
-        isArray(arr) && arr.every((pkgName) => typeof pkgName === "string")
+        isArray(arr) && arr.every((pkgName) => typeof pkgName === "string"),
     )
   );
 };
@@ -91,7 +89,7 @@ const havePackageGroupsCorrectShape = (
 // TODO: it might be possible to remove this if improvements to `Array.isArray` ever land
 // related thread: github.com/microsoft/TypeScript/issues/36554
 function isArray<T>(
-  arg: T | {}
+  arg: T | {},
 ): arg is T extends readonly any[]
   ? unknown extends T
     ? never
@@ -103,7 +101,10 @@ function isArray<T>(
 export let read = async (cwd: string, packages?: Packages) => {
   packages ??= await getPackages(cwd);
   let json = JSON.parse(
-    await fs.readFile(path.join(cwd, ".changeset", "config.json"), "utf8")
+    await fs.readFile(
+      path.join(packages?.rootDir, ".changeset", "config.json"),
+      "utf8",
+    ),
   );
   return parse(json, packages);
 };
@@ -111,7 +112,7 @@ export let read = async (cwd: string, packages?: Packages) => {
 export let parse = (json: WrittenConfig, packages: Packages): Config => {
   let messages = [];
   let pkgNames: readonly string[] = packages.packages.map(
-    ({ packageJson }) => packageJson.name
+    ({ packageJson }) => packageJson.name,
   );
 
   if (
@@ -128,8 +129,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       `The \`changelog\` option is set as ${JSON.stringify(
         json.changelog,
         null,
-        2
-      )} when the only valid values are undefined, false, a module path(e.g. "@changesets/cli/changelog" or "./some-module") or a tuple with a module path and config for the changelog generator(e.g. ["@changesets/cli/changelog", { someOption: true }])`
+        2,
+      )} when the only valid values are undefined, false, a module path(e.g. "@changesets/cli/changelog" or "./some-module") or a tuple with a module path and config for the changelog generator(e.g. ["@changesets/cli/changelog", { someOption: true }])`,
     );
   }
 
@@ -137,7 +138,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if ((json.access as string) === "private") {
     normalizedAccess = "restricted";
     warn(
-      'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".'
+      'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',
     );
   }
   if (
@@ -149,8 +150,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       `The \`access\` option is set as ${JSON.stringify(
         normalizedAccess,
         null,
-        2
-      )} when the only valid values are undefined, "public" or "restricted"`
+        2,
+      )} when the only valid values are undefined, "public" or "restricted"`,
     );
   }
 
@@ -168,8 +169,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       `The \`commit\` option is set as ${JSON.stringify(
         json.commit,
         null,
-        2
-      )} when the only valid values are undefined or a boolean or a module path (e.g. "@changesets/cli/commit" or "./some-module") or a tuple with a module path and config for the commit message generator (e.g. ["@changesets/cli/commit", { "skipCI": "version" }])`
+        2,
+      )} when the only valid values are undefined or a boolean or a module path (e.g. "@changesets/cli/commit" or "./some-module") or a tuple with a module path and config for the commit message generator (e.g. ["@changesets/cli/commit", { "skipCI": "version" }])`,
     );
   }
   if (json.baseBranch !== undefined && typeof json.baseBranch !== "string") {
@@ -177,8 +178,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       `The \`baseBranch\` option is set as ${JSON.stringify(
         json.baseBranch,
         null,
-        2
-      )} but the \`baseBranch\` option can only be set as a string`
+        2,
+      )} but the \`baseBranch\` option can only be set as a string`,
     );
   }
 
@@ -191,8 +192,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       `The \`changedFilePatterns\` option is set as ${JSON.stringify(
         json.changedFilePatterns,
         null,
-        2
-      )} but the \`changedFilePatterns\` option can only be set as an array of strings`
+        2,
+      )} but the \`changedFilePatterns\` option can only be set as an array of strings`,
     );
   }
 
@@ -203,8 +204,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         `The \`fixed\` option is set as ${JSON.stringify(
           json.fixed,
           null,
-          2
-        )} when the only valid values are undefined or an array of arrays of package names`
+          2,
+        )} when the only valid values are undefined or an array of arrays of package names`,
       );
     } else {
       let foundPkgNames = new Set<string>();
@@ -214,8 +215,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.push(
           ...getUnmatchedPatterns(fixedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
-          )
+              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`,
+          ),
         );
 
         let expandedFixedGroup = micromatch(pkgNames, fixedGroup);
@@ -232,7 +233,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
+            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch`,
           );
         });
       }
@@ -246,8 +247,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         `The \`linked\` option is set as ${JSON.stringify(
           json.linked,
           null,
-          2
-        )} when the only valid values are undefined or an array of arrays of package names`
+          2,
+        )} when the only valid values are undefined or an array of arrays of package names`,
       );
     } else {
       let foundPkgNames = new Set<string>();
@@ -257,8 +258,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.push(
           ...getUnmatchedPatterns(linkedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
-          )
+              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`,
+          ),
         );
 
         let expandedLinkedGroup = micromatch(pkgNames, linkedGroup);
@@ -275,7 +276,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
+            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch`,
           );
         });
       }
@@ -288,7 +289,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   allFixedPackages.forEach((pkgName) => {
     if (allLinkedPackages.has(pkgName)) {
       messages.push(
-        `The package "${pkgName}" can be found in both fixed and linked groups. A package can only be either fixed or linked.`
+        `The package "${pkgName}" can be found in both fixed and linked groups. A package can only be either fixed or linked.`,
       );
     }
   });
@@ -301,10 +302,57 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       `The \`updateInternalDependencies\` option is set as ${JSON.stringify(
         json.updateInternalDependencies,
         null,
-        2
-      )} but can only be 'patch' or 'minor'`
+        2,
+      )} but can only be 'patch' or 'minor'`,
     );
   }
+  if (json.privatePackages !== undefined && json.privatePackages !== false) {
+    if (typeof json.privatePackages !== "object") {
+      messages.push(
+        `The \`privatePackages\` option is set as ${JSON.stringify(
+          json.privatePackages,
+          null,
+          2,
+        )} when the only valid values are undefined, false, or an object with optional boolean \`version\` and \`tag\` properties`,
+      );
+    } else {
+      if (
+        json.privatePackages.version !== undefined &&
+        typeof json.privatePackages.version !== "boolean"
+      ) {
+        messages.push(
+          `The \`privatePackages.version\` option is set as ${JSON.stringify(
+            json.privatePackages.version,
+            null,
+            2,
+          )} but the only valid values are undefined or a boolean`,
+        );
+      }
+      if (
+        json.privatePackages.tag !== undefined &&
+        typeof json.privatePackages.tag !== "boolean"
+      ) {
+        messages.push(
+          `The \`privatePackages.tag\` option is set as ${JSON.stringify(
+            json.privatePackages.tag,
+            null,
+            2,
+          )} but the only valid values are undefined or a boolean`,
+        );
+      }
+    }
+  }
+
+  const privatePackages: { version: boolean; tag: boolean } =
+    json.privatePackages === false
+      ? { tag: false, version: false }
+      : json.privatePackages
+        ? {
+            version: json.privatePackages.version ?? true,
+            tag: json.privatePackages.tag ?? false,
+          }
+        : { version: true, tag: false };
+
   if (json.ignore) {
     if (
       !(
@@ -316,28 +364,71 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         `The \`ignore\` option is set as ${JSON.stringify(
           json.ignore,
           null,
-          2
-        )} when the only valid values are undefined or an array of package names`
+          2,
+        )} when the only valid values are undefined or an array of package names`,
       );
     } else {
       messages.push(
         ...getUnmatchedPatterns(json.ignore, pkgNames).map(
           (pkgOrGlob) =>
-            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
-        )
+            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`,
+        ),
       );
+    }
+  }
 
-      // Validate that all dependents of ignored packages are listed in the ignore list
-      const dependentsGraph = getDependentsGraph(packages);
-      for (const ignoredPackage of json.ignore) {
-        const dependents = dependentsGraph.get(ignoredPackage) || [];
-        for (const dependent of dependents) {
-          if (!json.ignore.includes(dependent)) {
-            messages.push(
-              `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please add "${dependent}" to the \`ignore\` option.`
-            );
-          }
+  // Validate that dependents of skipped packages are also skipped.
+  // A package is "skipped" if it's in the ignore list, or if it's private
+  // and privatePackages.version is false.
+  // devDependencies are excluded because they don't affect published consumers —
+  // a stale devDep range on a skipped package is harmless.
+  // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
+  // update devDep ranges in package.json even though they don't cause version bumps.
+  const ignore = isArray(json.ignore) ? json.ignore : [];
+  if (ignore.length || !privatePackages.version) {
+    const dependentsGraph = getDependentsGraph(packages, {
+      ignoreDevDependencies: true,
+      bumpVersionsWithWorkspaceProtocolOnly:
+        json.bumpVersionsWithWorkspaceProtocolOnly,
+    });
+    const packagesByName = new Map(
+      packages.packages.map((x) => [x.packageJson.name, x] as const),
+    );
+
+    for (const pkg of packages.packages) {
+      if (
+        !shouldSkipPackage(pkg, {
+          ignore,
+          allowPrivatePackages: privatePackages.version,
+        })
+      ) {
+        continue;
+      }
+      const skippedPackage = pkg.packageJson.name;
+      const dependents = dependentsGraph.get(skippedPackage) || [];
+      for (const dependent of dependents) {
+        const dependentPkg = packagesByName.get(dependent);
+        if (!dependentPkg) {
+          continue;
         }
+        if (
+          shouldSkipPackage(dependentPkg, {
+            ignore,
+            allowPrivatePackages: privatePackages.version,
+          })
+        ) {
+          continue;
+        }
+        // Private packages don't publish to npm,
+        // so they can safely depend on skipped packages.
+        // This also holds for private packages with other publish targets (like a VS Code extension)
+        // as those typically have to prebundle dependencies.
+        if (dependentPkg.packageJson.private) {
+          continue;
+        }
+        messages.push(
+          `The package "${dependent}" depends on the skipped package "${skippedPackage}", but "${dependent}" is not being skipped. Please add "${dependent}" to the \`ignore\` option.`,
+        );
       }
     }
   }
@@ -347,8 +438,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       `The \`prettier\` option is set as ${JSON.stringify(
         json.prettier,
         null,
-        2
-      )} when the only valid values are undefined or a boolean`
+        2,
+      )} when the only valid values are undefined or a boolean`,
     );
   }
 
@@ -363,8 +454,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         `The \`snapshot.useCalculatedVersion\` option is set as ${JSON.stringify(
           snapshot.useCalculatedVersion,
           null,
-          2
-        )} when the only valid values are undefined or a boolean`
+          2,
+        )} when the only valid values are undefined or a boolean`,
       );
     }
     if (
@@ -375,8 +466,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         `The \`snapshot.prereleaseTemplate\` option is set as ${JSON.stringify(
           snapshot.prereleaseTemplate,
           null,
-          2
-        )} when the only valid values are undefined, or a template string.`
+          2,
+        )} when the only valid values are undefined, or a template string.`,
       );
     }
   }
@@ -396,8 +487,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         `The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as ${JSON.stringify(
           onlyUpdatePeerDependentsWhenOutOfRange,
           null,
-          2
-        )} when the only valid values are undefined or a boolean`
+          2,
+        )} when the only valid values are undefined or a boolean`,
       );
     }
 
@@ -409,8 +500,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         `The \`updateInternalDependents\` option is set as ${JSON.stringify(
           updateInternalDependents,
           null,
-          2
-        )} but can only be 'always' or 'out-of-range'`
+          2,
+        )} but can only be 'always' or 'out-of-range'`,
       );
     }
     if (
@@ -418,7 +509,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       useCalculatedVersionForSnapshots !== undefined
     ) {
       console.warn(
-        `Experimental flag "useCalculatedVersionForSnapshots" is deprecated since snapshot feature became stable. Please use "snapshot.useCalculatedVersion" instead.`
+        `Experimental flag "useCalculatedVersionForSnapshots" is deprecated since snapshot feature became stable. Please use "snapshot.useCalculatedVersion" instead.`,
       );
 
       if (typeof useCalculatedVersionForSnapshots !== "boolean") {
@@ -426,8 +517,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           `The \`useCalculatedVersionForSnapshots\` option is set as ${JSON.stringify(
             useCalculatedVersionForSnapshots,
             null,
-            2
-          )} when the only valid values are undefined or a boolean`
+            2,
+          )} when the only valid values are undefined or a boolean`,
         );
       }
     }
@@ -436,7 +527,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   if (messages.length) {
     throw new ValidationError(
       `Some errors occurred when validating the changesets config:\n` +
-        messages.join("\n")
+        messages.join("\n"),
     );
   }
 
@@ -444,14 +535,14 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     changelog: getNormalizedChangelogOption(
       json.changelog === undefined
         ? defaultWrittenConfig.changelog
-        : json.changelog
+        : json.changelog,
     ),
     access:
       normalizedAccess === undefined
         ? defaultWrittenConfig.access
         : normalizedAccess,
     commit: getNormalizedCommitOption(
-      json.commit === undefined ? defaultWrittenConfig.commit : json.commit
+      json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
     ),
     fixed,
     linked,
@@ -481,10 +572,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         json.snapshot?.useCalculatedVersion !== undefined
           ? json.snapshot.useCalculatedVersion
           : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              ?.useCalculatedVersionForSnapshots !== undefined
-          ? json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-              ?.useCalculatedVersionForSnapshots
-          : false,
+                ?.useCalculatedVersionForSnapshots !== undefined
+            ? json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                ?.useCalculatedVersionForSnapshots
+            : false,
     },
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -504,15 +595,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     prettier: typeof json.prettier === "boolean" ? json.prettier : true,
 
     // TODO consider enabling this by default in the next major version
-    privatePackages:
-      json.privatePackages === false
-        ? { tag: false, version: false }
-        : json.privatePackages
-        ? {
-            version: json.privatePackages.version ?? true,
-            tag: json.privatePackages.tag ?? false,
-          }
-        : { version: true, tag: false },
+    privatePackages,
   };
 
   if (
@@ -520,7 +603,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     config.privatePackages.tag === true
   ) {
     throw new ValidationError(
-      `The \`privatePackages.tag\` option is set to \`true\` but \`privatePackages.version\` is set to \`false\`. This is not allowed.`
+      `The \`privatePackages.tag\` option is set to \`true\` but \`privatePackages.version\` is set to \`false\`. This is not allowed.`,
     );
   }
 
@@ -529,7 +612,6 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
 let fakePackage: Package = {
   dir: "",
-  relativeDir: "",
   packageJson: {
     name: "",
     version: "",
@@ -537,8 +619,8 @@ let fakePackage: Package = {
 };
 
 export let defaultConfig = parse(defaultWrittenConfig, {
+  tool: { type: "root" },
+  rootDir: fakePackage.dir,
   rootPackage: fakePackage,
-  rootDir: "",
-  tool: RootTool,
   packages: [fakePackage],
 });

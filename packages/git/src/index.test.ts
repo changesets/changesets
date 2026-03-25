@@ -1,21 +1,23 @@
 import path from "path";
 import spawn from "spawndamnit";
-import fileUrl from "file-url";
+import { pathToFileURL } from "node:url";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, it } from "vitest";
 import { gitdir, outputFile, tempdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 
 import {
-  getCommitsThatAddFiles,
-  getChangedFilesSince,
   add,
   commit,
-  tag,
-  getDivergedCommit,
-  getChangedPackagesSinceRef,
-  getChangedChangesetFilesSinceRef,
   getAllTags,
-  tagExists,
+  getChangedChangesetFilesSinceRef,
+  getChangedFilesSince,
+  getChangedPackagesSinceRef,
+  getCommitsThatAddFiles,
   getCurrentCommitId,
+  getDivergedCommit,
+  tag,
+  tagExists,
 } from "./index.ts";
 
 async function getCommitCount(cwd: string) {
@@ -121,11 +123,11 @@ describe("git", () => {
 
       await outputFile(
         path.join(cwd, "foo/a.js"),
-        'export default "updated a"'
+        'export default "updated a"',
       );
       await outputFile(
         path.join(cwd, "foo/b.js"),
-        'export default "updated b"'
+        'export default "updated b"',
       );
       await add("foo", cwd);
 
@@ -187,7 +189,7 @@ describe("git", () => {
       const tagRef = await spawn(
         "git",
         ["rev-list", "-n", "1", "tag_message"],
-        { cwd }
+        { cwd },
       );
       expect(tagRef).toEqual(head);
     });
@@ -214,12 +216,12 @@ describe("git", () => {
       const firstTagRef = await spawn(
         "git",
         ["rev-list", "-n", "1", "tag_message"],
-        { cwd }
+        { cwd },
       );
       const secondTagRef = await spawn(
         "git",
         ["rev-list", "-n", "1", "new_tag"],
-        { cwd }
+        { cwd },
       );
 
       expect(firstTagRef).toEqual(initialHead);
@@ -285,7 +287,7 @@ describe("git", () => {
 
       async function createShallowClone(
         depth: number,
-        cwd: string
+        cwd: string,
       ): Promise<string> {
         // Make a 1-commit-deep shallow clone of this repo
         const cloneDir = tempdir();
@@ -293,10 +295,16 @@ describe("git", () => {
           "git",
           // Note: a file:// URL is needed in order to make a shallow clone of
           // a local repo
-          ["clone", "--depth", depth.toString(), fileUrl(cwd), "."],
+          [
+            "clone",
+            "--depth",
+            depth.toString(),
+            pathToFileURL(cwd).toString(),
+            ".",
+          ],
           {
             cwd: cloneDir,
-          }
+          },
         );
         return cloneDir;
       }
@@ -348,7 +356,7 @@ describe("git", () => {
         const originalRepoDepth = await getCommitCount(cwd);
         expect(await getCommitCount(clone)).toBeGreaterThan(5);
         expect(await getCommitCount(clone)).toBeLessThan(originalRepoDepth);
-      });
+      }, 10_000);
 
       it("reads the SHA of a file-add even if the first commit of a repo", async () => {
         const cwd = await gitdir({
@@ -370,7 +378,7 @@ describe("git", () => {
         // We should have fully deepened
         const originalRepoDepth = await getCommitCount(cwd);
         expect(await getCommitCount(clone)).toEqual(originalRepoDepth);
-      });
+      }, 10_000);
 
       it("can return SHAs for multiple files including return blanks for missing files", async () => {
         const cwd = await gitdir({
@@ -393,11 +401,11 @@ describe("git", () => {
 
         const commits = await getCommitsThatAddFiles(
           ["b.js", "this-file-does-not-exist", "c.js"],
-          { cwd: clone }
+          { cwd: clone },
         );
 
         expect(commits).toEqual([originalCommit1, undefined, originalCommit2]);
-      });
+      }, 10_000);
     });
   });
 
@@ -473,14 +481,14 @@ describe("git", () => {
 
       await outputFile(
         path.join(cwd, "packages/pkg-b/b.js"),
-        'export default "updated b"'
+        'export default "updated b"',
       );
       await add("packages/pkg-b/b.js", cwd);
       await commit("update b.js", cwd);
 
       await outputFile(
         path.join(cwd, "packages/pkg-c/c.js"),
-        'export default "updated c"'
+        'export default "updated c"',
       );
       await add("packages/pkg-c/c.js", cwd);
       await commit("update c.js", cwd);
@@ -523,7 +531,7 @@ describe("git", () => {
 
       await outputFile(
         path.join(cwd, "packages/pkg-a/a.js"),
-        'export default "updated a"'
+        'export default "updated a"',
       );
       await add("packages/pkg-a/a.js", cwd);
       await commit("update a.js", cwd);
@@ -564,7 +572,7 @@ describe("git", () => {
         JSON.stringify({
           name: "pkg-b",
           private: true,
-        })
+        }),
       );
       await commit("update pkg-b", cwd);
 
@@ -573,7 +581,7 @@ describe("git", () => {
         JSON.stringify({
           name: "pkg-d",
           private: true,
-        })
+        }),
       );
       await commit("update pkg-d", cwd);
 
@@ -609,7 +617,7 @@ describe("git", () => {
 
       await outputFile(
         path.join(cwd, newFilePath),
-        "console.log('hello world');"
+        "console.log('hello world');",
       );
 
       await add(newFilePath, cwd);
@@ -646,7 +654,7 @@ describe("git", () => {
 
       await outputFile(
         path.join(cwd, newFilePath),
-        "console.log('hello world');"
+        "console.log('hello world');",
       );
 
       await add(newFilePath, cwd);
@@ -710,7 +718,7 @@ describe("git", () => {
 
       await outputFile(
         path.join(cwd, newFilePath),
-        "export const answer = 42;"
+        "export const answer = 42;",
       );
 
       await add(newFilePath, cwd);
@@ -772,7 +780,7 @@ describe("git", () => {
           ],
           summary: "Awesome summary",
         },
-        cwd
+        cwd,
       );
       await add(".changeset", cwd);
 
@@ -807,7 +815,7 @@ describe("git", () => {
           ],
           summary: "Awesome summary",
         },
-        cwd
+        cwd,
       );
       await add(".changeset", cwd);
 
@@ -845,7 +853,7 @@ describe("git", () => {
           ],
           summary: "Awesome summary",
         },
-        cwd
+        cwd,
       );
       await add(".changeset", cwd);
 

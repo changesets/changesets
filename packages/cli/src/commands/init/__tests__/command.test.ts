@@ -1,11 +1,9 @@
+import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "path";
 import { defaultWrittenConfig } from "@changesets/config";
-import {
-  pathExists,
-  silenceLogsInBlock,
-  testdir,
-} from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 
 import initializeCommand from "../index.ts";
 
@@ -20,16 +18,17 @@ describe("init", () => {
     const cwd = await testdir({});
     const { readmePath, configPath } = getPaths(cwd);
 
-    expect(await pathExists(readmePath)).toBe(false);
-    expect(await pathExists(configPath)).toBe(false);
+    expect(existsSync(readmePath)).toBe(false);
+    expect(existsSync(configPath)).toBe(false);
     await initializeCommand(cwd);
-    expect(await pathExists(readmePath)).toBe(true);
-    expect(await pathExists(configPath)).toBe(true);
+    expect(existsSync(readmePath)).toBe(true);
+    expect(existsSync(configPath)).toBe(true);
   });
   it("should write the default config if it doesn't exist", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -38,14 +37,15 @@ describe("init", () => {
     await initializeCommand(cwd);
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8"),
+      ),
     ).toEqual(defaultWrittenConfig);
   });
   it("should add newline at the end of config", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -63,6 +63,7 @@ describe("init", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
@@ -74,8 +75,8 @@ describe("init", () => {
     await initializeCommand(cwd);
     expect(
       JSON.parse(
-        await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8")
-      )
+        await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8"),
+      ),
     ).toEqual({
       changelog: false,
     });
