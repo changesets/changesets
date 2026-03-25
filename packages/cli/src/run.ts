@@ -17,14 +17,17 @@ import version from "./commands/version";
 import { COMMAND_HELP } from "./help";
 import { CliOptions } from "./types";
 
-function validateCommandFlags(command: keyof typeof COMMAND_HELP, flags: Record<string, unknown>) {
+function validateCommandFlags(
+  command: keyof typeof COMMAND_HELP,
+  flags: Record<string, unknown>
+) {
   const unknownFlags = Object.keys(flags);
 
   if (unknownFlags.length > 0) {
     error(
-      `Unknown ${unknownFlags.length === 1 ? "flag" : "flags"} for ${command}: ${unknownFlags
-        .map((flag) => `--${flag}`)
-        .join(", ")}`
+      `Unknown ${
+        unknownFlags.length === 1 ? "flag" : "flags"
+      } for ${command}: ${unknownFlags.map((flag) => `--${flag}`).join(", ")}`
     );
     error(`Usage: changeset ${COMMAND_HELP[command]}`);
     throw new ExitError(1);
@@ -88,7 +91,12 @@ export async function run(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
   } else {
-    const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"] as const;
+    const deadFlags = [
+      "updateChangelog",
+      "isPublic",
+      "skipCI",
+      "commit",
+    ] as const;
 
     deadFlags.forEach((flag) => {
       if (flags[flag]) {
@@ -114,8 +122,12 @@ export async function run(
         return;
       }
       case "version": {
-        const { ignore, snapshot, snapshotPrereleaseTemplate, ...rest }: CliOptions =
-          flags;
+        const {
+          ignore,
+          snapshot,
+          snapshotPrereleaseTemplate,
+          ...rest
+        }: CliOptions = flags;
         validateCommandFlags("version", rest);
         let ignoreArrayFromCmd: undefined | string[];
         if (typeof ignore === "string") {

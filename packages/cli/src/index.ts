@@ -33,7 +33,8 @@ const parsed = mri(args, {
     "snapshot",
     "snapshotPrereleaseTemplate",
   ],
-  alias: aliases,
+  // mri mutates the alias object passed to it, so we need to copy it here to maintain the original object
+  alias: { ...aliases },
   default: {
     gitTag: true,
   },
