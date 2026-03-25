@@ -2,8 +2,7 @@
 // package listed in the changesets
 
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config, NewChangeset } from "@changesets/types";
-import type { Package } from "@manypkg/get-packages";
+import type { Config, NewChangeset, Package } from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import { mapGetOrThrowInternal } from "./utils.ts";
 

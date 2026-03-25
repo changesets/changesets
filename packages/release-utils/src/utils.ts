@@ -1,7 +1,8 @@
-import { getPackages, type Package } from "@manypkg/get-packages";
-import { toString as mdastNodeToString } from "mdast-util-to-string";
+import type { Package } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 import { fromMarkdown as stringToMdast } from "mdast-util-from-markdown";
 import { toMarkdown as mdastToString } from "mdast-util-to-markdown";
+import { toString as mdastNodeToString } from "mdast-util-to-string";
 
 export const BumpLevels = {
   dep: 0,

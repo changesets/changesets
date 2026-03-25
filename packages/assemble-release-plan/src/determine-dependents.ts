@@ -4,8 +4,8 @@ import type {
   DependencyType,
   PackageJSON,
   VersionType,
+  Package,
 } from "@changesets/types";
-import type { Package } from "@manypkg/get-packages";
 import semverSatisfies from "semver/functions/satisfies.js";
 import { incrementVersion } from "./increment.ts";
 import type { InternalRelease, PreInfo } from "./types.ts";

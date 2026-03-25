@@ -124,10 +124,12 @@ async function testSetup(
     await git.commit("first commit", tempDir);
   }
 
+  const { root, packages, tool } = await getPackages(tempDir);
+
   return {
     changedFiles: await applyReleasePlan(
       releasePlan,
-      await getPackages(tempDir),
+      { root, packages, tool: { type: tool } },
       config,
       snapshot,
     ),
@@ -2950,9 +2952,10 @@ describe("apply release plan", () => {
       await git.commit("first commit", tempDir);
 
       try {
+        const { root, packages, tool } = await getPackages(tempDir);
         await applyReleasePlan(
           releasePlan.getReleasePlan(),
-          await getPackages(tempDir),
+          { root, packages, tool: { type: tool } },
           releasePlan.config,
         );
       } catch (e) {
@@ -3002,9 +3005,11 @@ describe("apply release plan", () => {
         await git.commit("first commit", tempDir);
 
         try {
+          const { root, packages, tool } = await getPackages(tempDir);
+
           await applyReleasePlan(
             releasePlan.getReleasePlan(),
-            await getPackages(tempDir),
+            { root, packages, tool: { type: tool } },
             {
               ...releasePlan.config,
               changelog: [

@@ -21,8 +21,8 @@ export async function run(
   flags: { [name: string]: any },
   cwd: string,
 ) {
-  const packages = await getPackages(cwd);
-  const rootDir = packages.root.dir;
+  const { root, packages, tool } = await getPackages(cwd);
+  const rootDir = root.dir;
 
   if (input[0] === "init") {
     await init(rootDir);
@@ -44,7 +44,7 @@ export async function run(
 
   let config: Config;
   try {
-    config = await read(rootDir, packages);
+    config = await read(rootDir, { root, packages, tool: { type: tool } });
   } catch (e) {
     let oldConfigExists = await fs
       .access(path.resolve(rootDir, ".changeset/config.js"))
@@ -113,7 +113,7 @@ export async function run(
 
         // Validate that items in ignoreArrayFromCmd are valid project names
         let pkgNames = new Set(
-          packages.packages.map(({ packageJson }) => packageJson.name),
+          packages.map(({ packageJson }) => packageJson.name),
         );
 
         const messages = [];
@@ -135,7 +135,7 @@ export async function run(
         }
 
         const packagesByName = new Map(
-          packages.packages.map((x) => [x.packageJson.name, x]),
+          packages.map((x) => [x.packageJson.name, x]),
         );
 
         // Validate that all dependents of skipped packages are also skipped.
@@ -143,12 +143,15 @@ export async function run(
         // a stale devDep range on a skipped package is harmless.
         // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
         // update devDep ranges in package.json even though they don't cause version bumps.
-        const dependentsGraph = getDependentsGraph(packages, {
-          ignoreDevDependencies: true,
-          bumpVersionsWithWorkspaceProtocolOnly:
-            config.bumpVersionsWithWorkspaceProtocolOnly,
-        });
-        for (const pkg of packages.packages) {
+        const dependentsGraph = getDependentsGraph(
+          { root, packages, tool: { type: tool } },
+          {
+            ignoreDevDependencies: true,
+            bumpVersionsWithWorkspaceProtocolOnly:
+              config.bumpVersionsWithWorkspaceProtocolOnly,
+          },
+        );
+        for (const pkg of packages) {
           if (
             !shouldSkipPackage(pkg, {
               ignore: config.ignore,

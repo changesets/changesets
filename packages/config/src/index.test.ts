@@ -1,8 +1,8 @@
 import { describe, expect, it, test, vi, beforeEach, afterEach } from "vitest";
 import { parse, read } from "./index.ts";
 import * as logger from "@changesets/logger";
-import type { Config, WrittenConfig } from "@changesets/types";
-import { getPackages, type Packages } from "@manypkg/get-packages";
+import type { Config, WrittenConfig, Packages } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
 
@@ -30,7 +30,7 @@ let defaultPackages: Packages = {
     dir: "/",
   },
   packages: [],
-  tool: "yarn",
+  tool: { type: "yarn" },
 };
 
 const withPackages = (pkgNames: string[]) => ({
@@ -148,7 +148,9 @@ it("should not fail when validating ignored packages when some package depends o
   });
 
   const packages = await getPackages(cwd);
-  expect(() => read(cwd, packages)).not.toThrow();
+  expect(() =>
+    read(cwd, { ...packages, tool: defaultPackages.tool }),
+  ).not.toThrow();
 });
 
 it(
@@ -186,7 +188,7 @@ it(
 
     const packages = await getPackages(cwd);
 
-    await read(cwd, packages);
+    await read(cwd, { ...packages, tool: defaultPackages.tool });
     expect(console.error).not.toBeCalled();
   }),
 );

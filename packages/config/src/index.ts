@@ -7,9 +7,10 @@ import type {
   Fixed,
   Linked,
   PackageGroup,
+  Packages,
   WrittenConfig,
 } from "@changesets/types";
-import { type Packages, getPackages } from "@manypkg/get-packages";
+import { getPackages } from "@manypkg/get-packages";
 import micromatch from "micromatch";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -97,7 +98,10 @@ function isArray<T>(
 }
 
 export let read = async (cwd: string, packages?: Packages) => {
-  packages ??= await getPackages(cwd);
+  if (!packages) {
+    const { root, packages: pkgs, tool } = await getPackages(cwd);
+    packages = { root, packages: pkgs, tool: { type: tool } };
+  }
   let json = JSON.parse(
     await fs.readFile(
       path.join(packages.root.dir, ".changeset", "config.json"),
@@ -618,6 +622,6 @@ let fakePackage = {
 
 export let defaultConfig = parse(defaultWrittenConfig, {
   root: fakePackage,
-  tool: "root",
+  tool: { type: "root" },
   packages: [fakePackage],
 });

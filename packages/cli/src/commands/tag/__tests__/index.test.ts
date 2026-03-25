@@ -8,7 +8,8 @@ import tag from "../index.ts";
 vi.mock("@changesets/git");
 
 async function readConfig(cwd: string) {
-  return read(cwd, await getPackages(cwd));
+  const { root, packages, tool } = await getPackages(cwd);
+  return read(cwd, { root, packages, tool: { type: tool } });
 }
 
 describe("tag command", () => {

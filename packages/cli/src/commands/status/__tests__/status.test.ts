@@ -11,7 +11,8 @@ import { exec } from "tinyexec";
 import status from "../index.ts";
 
 async function readConfig(cwd: string) {
-  return read(cwd, await getPackages(cwd));
+  const { root, packages, tool } = await getPackages(cwd);
+  return read(cwd, { root, packages, tool: { type: tool } });
 }
 
 function replaceHumanIds(releaseObj: ReleasePlan | undefined) {

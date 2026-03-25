@@ -16,6 +16,7 @@ afterEach(() => {
 describe("getting the dependency graph", function () {
   it("should skip dependencies specified through the link protocol", function () {
     const { graph, valid } = getDependencyGraph({
+      tool: { type: "yarn" },
       root: {
         dir: ".",
         packageJson: { name: "root", version: "1.0.0" },
@@ -39,7 +40,6 @@ describe("getting the dependency graph", function () {
           },
         },
       ],
-      tool: "pnpm",
     });
     expect(graph.get("foo")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
@@ -48,6 +48,7 @@ describe("getting the dependency graph", function () {
 
   it("should skip dependencies specified using a tag", function () {
     const { graph, valid } = getDependencyGraph({
+      tool: { type: "yarn" },
       root: {
         dir: ".",
         packageJson: { name: "root", version: "1.0.0" },
@@ -71,7 +72,6 @@ describe("getting the dependency graph", function () {
           },
         },
       ],
-      tool: "pnpm",
     });
     expect(graph.get("foo-example")!.dependencies).toStrictEqual([]);
     expect(valid).toBeTruthy();
@@ -82,6 +82,7 @@ describe("getting the dependency graph", function () {
     "should set valid to false if the link protocol is used in a non-dev dep",
     temporarilySilenceLogs(() => {
       const { valid } = getDependencyGraph({
+        tool: { type: "yarn" },
         root: {
           dir: ".",
           packageJson: { name: "root", version: "1.0.0" },
@@ -105,7 +106,6 @@ describe("getting the dependency graph", function () {
             },
           },
         ],
-        tool: "pnpm",
       });
       expect(valid).toBeFalsy();
       expect((console.error as any).mock.calls).toHaveLength(1);
@@ -121,6 +121,7 @@ describe("getting the dependency graph", function () {
     "should error on dependencies not specified using workspace protocol when bumpVersionsWithWorkspaceProtocolOnly is false",
     temporarilySilenceLogs(() => {
       const { valid } = getDependencyGraph({
+        tool: { type: "yarn" },
         root: {
           dir: ".",
           packageJson: { name: "root", version: "1.0.0" },
@@ -144,7 +145,6 @@ describe("getting the dependency graph", function () {
             },
           },
         ],
-        tool: "pnpm",
       });
       expect(valid).toBe(false);
       expect(
@@ -160,6 +160,7 @@ describe("getting the dependency graph", function () {
     temporarilySilenceLogs(() => {
       const { valid } = getDependencyGraph(
         {
+          tool: { type: "yarn" },
           root: {
             dir: ".",
             packageJson: { name: "root", version: "1.0.0" },
@@ -183,7 +184,6 @@ describe("getting the dependency graph", function () {
               },
             },
           ],
-          tool: "pnpm",
         },
         {
           bumpVersionsWithWorkspaceProtocolOnly: true,

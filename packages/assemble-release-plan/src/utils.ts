@@ -1,5 +1,4 @@
-import type { PackageGroup, VersionType } from "@changesets/types";
-import type { Package } from "@manypkg/get-packages";
+import type { PackageGroup, VersionType, Package } from "@changesets/types";
 import semverGt from "semver/functions/gt.js";
 import type { InternalRelease } from "./types.ts";
 import { InternalError } from "@changesets/errors";

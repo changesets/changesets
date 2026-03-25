@@ -1,11 +1,12 @@
-import path from "node:path";
-import { createRequire } from "node:module";
-import { exec } from "tinyexec";
-import { getPackages, type Package } from "@manypkg/get-packages";
+import { getPackages } from "@manypkg/get-packages";
+import type { Package } from "@changesets/types";
 import semverLt from "semver/functions/lt.js";
 import { getChangedPackages, getVersionsByDirectory } from "./utils.ts";
 import * as gitUtils from "./gitUtils.ts";
 import { readChangesetState } from "./readChangesetState.ts";
+import { createRequire } from "node:module";
+import { exec } from "tinyexec";
+import path from "node:path";
 
 const require = createRequire(import.meta.url);
 
