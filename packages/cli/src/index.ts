@@ -1,6 +1,6 @@
 import mri from "mri";
 import { ExitError, InternalError } from "@changesets/errors";
-import { format } from "util";
+import { format } from "node:util";
 import { run } from "./run.ts";
 import { createRequire } from "node:module";
 import { intro, log, outro } from "@clack/prompts";
