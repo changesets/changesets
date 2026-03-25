@@ -27,12 +27,6 @@ You are in prerelease mode, so packages will be published to the ${pc.cyan(preSt
 ${pc.red("except")} for packages that have not had normal releases, which will be published to ${pc.cyan("latest")}.
       `,
     );
-
-    // TODO: add confirm?
-    // const result = await askConfirm("Is this what you want?");
-    // if (!result) {
-    //   return cancelFlow();
-    // }
   } else if (tag !== "latest") {
     log.warn(`Packages will be released under the ${tag} tag.`);
   }
