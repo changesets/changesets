@@ -3,6 +3,7 @@ import type {
   VersionType,
   ChangelogFunctions,
   ModCompWithPackage,
+  GetCurrentRelease,
 } from "@changesets/types";
 
 const getReleaseLine = async (
@@ -44,9 +45,14 @@ const getDependencyReleaseLine = async (
   return [...changesetLinks, ...updatedDependenciesList].join("\n");
 };
 
+const getCurrentRelease:GetCurrentRelease = async (changesets: string, _changelogOpts: null | Record<string, any>) => {
+  return changesets;
+};
+
 const defaultChangelogFunctions: ChangelogFunctions = {
   getReleaseLine,
   getDependencyReleaseLine,
+  getCurrentRelease,
 };
 
 export default defaultChangelogFunctions;
