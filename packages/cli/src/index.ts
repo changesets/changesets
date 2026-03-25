@@ -7,7 +7,15 @@ import { run } from "./run";
 const args = process.argv.slice(2);
 
 const parsed = mri(args, {
-  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot"],
+  boolean: [
+    "sinceMaster",
+    "verbose",
+    "empty",
+    "open",
+    "gitTag",
+    "snapshot",
+    "strict",
+  ],
   string: [
     "output",
     "otp",
@@ -57,7 +65,7 @@ if (parsed.help && args.length === 1) {
     add [--empty] [--open] [--since <branch>] [--message <text>]
     version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
     publish [--tag <name>] [--otp <code>] [--no-git-tag]
-    status [--since <branch>] [--verbose] [--output JSON_FILE.json]
+    status [--since <branch>] [--verbose] [--strict] [--output JSON_FILE.json]
     pre <enter|exit> <tag>
     tag
 

@@ -590,4 +590,148 @@ describe("status", () => {
       preState: undefined,
     });
   });
+
+  it("should not exit early with a non-zero error code if changeset for any package and not in strict mode", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-a/src/a.js": 'export default "a"',
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/src/b.js": 'export default "b"',
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    // @ts-ignore
+    jest.spyOn(process, "exit").mockImplementation(() => {});
+
+    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-a/a.js"),
+      'export default "updated a"'
+    );
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "updated b"'
+    );
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+
+    await git.add(".", cwd);
+    await git.commit("updated a and b", cwd);
+
+    await status(cwd, { since: "main" }, await readConfig(cwd));
+    expect(process.exit).not.toHaveBeenCalled();
+  });
+
+  it("should exit early with a non-zero error code if changeset for any package and in strict mode", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-a/src/a.js": 'export default "a"',
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/src/b.js": 'export default "b"',
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    // @ts-ignore
+    jest.spyOn(process, "exit").mockImplementation(() => {});
+
+    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-a/a.js"),
+      'export default "updated a"'
+    );
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "updated b"'
+    );
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd
+    );
+
+    await git.add(".", cwd);
+    await git.commit("updated a and b", cwd);
+
+    await status(cwd, { since: "main", strict: true }, await readConfig(cwd));
+    expect(process.exit).toHaveBeenCalled();
+  });
+
+  it("should not exit early with a non-zero error code if changeset for all packages and in strict mode", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-a/src/a.js": 'export default "a"',
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/src/b.js": 'export default "b"',
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    // @ts-ignore
+    jest.spyOn(process, "exit").mockImplementation(() => {});
+
+    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-a/a.js"),
+      'export default "updated a"'
+    );
+    await fs.outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "updated b"'
+    );
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [
+          { name: "pkg-a", type: "minor" },
+          { name: "pkg-b", type: "minor" },
+        ],
+      },
+      cwd
+    );
+
+    await git.add(".", cwd);
+    await git.commit("updated a and b", cwd);
+
+    await status(cwd, { since: "main", strict: true }, await readConfig(cwd));
+    expect(process.exit).not.toHaveBeenCalled();
+  });
 });

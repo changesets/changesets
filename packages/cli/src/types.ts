@@ -9,6 +9,7 @@ export type CliOptions = {
   message?: string;
   snapshot?: string | boolean;
   snapshotPrereleaseTemplate?: string;
+  strict?: boolean;
   prettier?: boolean;
   tag?: string;
   gitTag?: boolean;
