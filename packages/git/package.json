@@ -14,7 +14,7 @@
     "@changesets/types": "^7.0.0-next.1",
     "@manypkg/get-packages": "^3.0.0",
     "micromatch": "^4.0.8",
-    "spawndamnit": "^3.0.1"
+    "tinyexec": "^1.0.2"
   },
   "devDependencies": {
     "@changesets/test-utils": "0.0.9-next.1",

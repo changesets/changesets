@@ -5,7 +5,7 @@ import { spawnSync } from "child_process";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
 import semverParse from "semver/functions/parse.js";
-import spawn from "spawndamnit";
+import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
 import type { TwoFactorState } from "../../utils/types.ts";
@@ -93,7 +93,7 @@ async function getPublishTool(
   const pm = await detect({ cwd });
   if (!pm || pm.name !== "pnpm") return { name: "npm" };
   try {
-    let result = await spawn("pnpm", ["--version"], { cwd });
+    let result = await exec("pnpm", ["--version"], { nodeOptions: { cwd } });
     let version = result.stdout.toString().trim();
     let parsed = semverParse(version);
     return {
@@ -116,10 +116,10 @@ export async function getTokenIsRequired() {
   const envOverride = {
     [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
-  let result = await spawn("npm", ["profile", "get", "--json"], {
-    env: Object.assign({}, process.env, envOverride),
+  let result = await exec("npm", ["profile", "get", "--json"], {
+    nodeOptions: { env: Object.assign({}, process.env, envOverride) },
   });
-  if (result.code !== 0) {
+  if (result.exitCode !== 0) {
     error(
       "error while checking if token is required",
       result.stderr.toString().trim() || result.stdout.toString().trim(),
@@ -145,7 +145,7 @@ export function getPackageInfo(packageJson: PackageJSON) {
     // `publish` to behave incorrectly. It can also cause issues when publishing private packages
     // as they will always give a 404, which will tell `publish` to always try to publish.
     // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-    let result = await spawn("npm", [
+    let result = await exec("npm", [
       "info",
       packageJson.name,
       `--${scope ? `${scope}:` : ""}registry=${registry}`,
@@ -242,21 +242,21 @@ async function internalPublish(
     publishFlags.push("--otp", twoFactorState.token);
   }
 
-  let { code, stdout, stderr } =
+  let { exitCode, stdout, stderr } =
     publishTool.name === "pnpm"
-      ? await spawn("pnpm", ["publish", ...publishFlags], {
-          env: Object.assign({}, process.env, envOverride),
-          cwd: opts.cwd,
+      ? await exec("pnpm", ["publish", ...publishFlags], {
+          nodeOptions: {
+            env: Object.assign({}, process.env, envOverride),
+            cwd: opts.cwd,
+          },
         })
-      : await spawn(
+      : await exec(
           publishTool.name,
           ["publish", opts.publishDir, ...publishFlags],
-          {
-            env: Object.assign({}, process.env, envOverride),
-          },
+          { nodeOptions: { env: Object.assign({}, process.env, envOverride) } },
         );
 
-  if (code !== 0) {
+  if (exitCode !== 0) {
     // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
     // We want to handle this as best we can but it has some struggles:
     // - output of those lifecycle scripts can contain JSON

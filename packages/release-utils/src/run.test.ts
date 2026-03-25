@@ -11,7 +11,7 @@ import writeChangeset from "@changesets/write";
 import { pathToFileURL } from "node:url";
 import fs from "node:fs/promises";
 import path from "path";
-import spawn from "spawndamnit";
+import { exec } from "tinyexec";
 import { getCurrentBranch } from "./gitUtils.ts";
 import { runPublish, runVersion } from "./run.ts";
 
@@ -27,7 +27,7 @@ beforeEach(() => {
 });
 
 async function setupRepoAndClone(cwd: string) {
-  await spawn("git", ["init"], { cwd });
+  await exec("git", ["init"], { nodeOptions: { cwd } });
   await add(".", cwd);
   await commit("commit1", cwd);
 
@@ -35,16 +35,16 @@ async function setupRepoAndClone(cwd: string) {
 
   // Make a 1-commit-deep shallow clone of this repo
   let clone = tempdir();
-  await spawn(
+  await exec(
     "git",
     // Note: a file:// URL is needed in order to make a shallow clone of
     // a local repo
     ["clone", "--depth", "1", pathToFileURL(cwd).toString(), "."],
-    {
-      cwd: clone,
-    },
+    { nodeOptions: { cwd: clone } },
   );
-  await spawn("git", ["checkout", "-b", "some-other-branch"], { cwd });
+  await exec("git", ["checkout", "-b", "some-other-branch"], {
+    nodeOptions: { cwd },
+  });
   return { clone, mainBranch };
 }
 
@@ -98,8 +98,8 @@ describe("version", () => {
       cwd: clone,
     });
 
-    await spawn("git", ["checkout", `changeset-release/${mainBranch}`], {
-      cwd,
+    await exec("git", ["checkout", `changeset-release/${mainBranch}`], {
+      nodeOptions: { cwd },
     });
 
     expect(
@@ -225,8 +225,8 @@ describe("version", () => {
       cwd: clone,
     });
 
-    await spawn("git", ["checkout", `changeset-release/${mainBranch}`], {
-      cwd,
+    await exec("git", ["checkout", `changeset-release/${mainBranch}`], {
+      nodeOptions: { cwd },
     });
 
     expect(
@@ -315,12 +315,7 @@ describe("version", () => {
     await writeChangesets(
       [
         {
-          releases: [
-            {
-              name: "pkg-b",
-              type: "minor",
-            },
-          ],
+          releases: [{ name: "pkg-b", type: "minor" }],
           summary: "Awesome feature",
         },
       ],
@@ -331,9 +326,7 @@ describe("version", () => {
 
     await linkNodeModules(clone);
 
-    let { changedPackages } = await runVersion({
-      cwd: clone,
-    });
+    let { changedPackages } = await runVersion({ cwd: clone });
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-b"),
@@ -359,7 +352,12 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node --experimental-strip-types -e "const git = await import('@changesets/git'); console.log('🦋 New tag: v1.0.0'); git.tag('v1.0.0', process.cwd());"`,
+      command: "node",
+      args: [
+        "--experimental-strip-types",
+        "-e",
+        `const git = await import('@changesets/git'); console.log('🦋 New tag: v1.0.0'); git.tag('v1.0.0', process.cwd());`,
+      ],
       cwd: clone,
     });
 
@@ -367,9 +365,10 @@ describe("publish", () => {
       published: true,
       publishedPackages: [{ name: "single-package", version: "1.0.0" }],
     });
-    let tagsResult = await spawn("git", ["tag"], { cwd });
-    expect(tagsResult.stdout.toString("utf8").trim()).toEqual("v1.0.0");
+    let tagsResult = await exec("git", ["tag"], { nodeOptions: { cwd } });
+    expect(tagsResult.stdout.trim()).toEqual("v1.0.0");
   });
+
   test("multi package repo", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -397,7 +396,12 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     let result = await runPublish({
-      script: `node --experimental-strip-types -e "const git = await import('@changesets/git'); console.log('🦋 New tag: pkg-a@1.0.0'); console.log('🦋 New tag: pkg-b@1.0.0'); git.tag('pkg-a@1.0.0', process.cwd()); git.tag('pkg-b@1.0.0', process.cwd());"`,
+      command: "node",
+      args: [
+        "--experimental-strip-types",
+        "-e",
+        `const git = await import('@changesets/git'); console.log('🦋 New tag: pkg-a@1.0.0'); console.log('🦋 New tag: pkg-b@1.0.0'); git.tag('pkg-a@1.0.0', process.cwd()); git.tag('pkg-b@1.0.0', process.cwd());`,
+      ],
       cwd: clone,
     });
 
@@ -408,9 +412,7 @@ describe("publish", () => {
         { name: "pkg-b", version: "1.0.0" },
       ],
     });
-    let tagsResult = await spawn("git", ["tag"], { cwd });
-    expect(tagsResult.stdout.toString("utf8").trim()).toEqual(
-      "pkg-a@1.0.0\npkg-b@1.0.0",
-    );
+    let tagsResult = await exec("git", ["tag"], { nodeOptions: { cwd } });
+    expect(tagsResult.stdout.trim()).toEqual("pkg-a@1.0.0\npkg-b@1.0.0");
   });
 });

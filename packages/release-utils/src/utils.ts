@@ -1,16 +1,8 @@
-import { getPackages } from "@manypkg/get-packages";
 import type { Package } from "@changesets/types";
-import cp, { type ChildProcess } from "node:child_process";
-import { promisify } from "node:util";
-import { SIGTERM } from "node:constants";
-import { toString as mdastNodeToString } from "mdast-util-to-string";
-import os from "os";
+import { getPackages } from "@manypkg/get-packages";
 import { fromMarkdown as stringToMdast } from "mdast-util-from-markdown";
 import { toMarkdown as mdastToString } from "mdast-util-to-markdown";
-import spawn from "spawndamnit";
-import { onExit } from "signal-exit";
-
-const exec = promisify(cp.exec);
+import { toString as mdastNodeToString } from "mdast-util-to-string";
 
 export const BumpLevels = {
   dep: 0,
@@ -90,78 +82,6 @@ export function getChangelogEntry(changelog: string, version: string) {
   return {
     content: mdastToString(ast),
     highestLevel,
-  };
-}
-
-const activeProcesses = new Set<ChildProcess>();
-
-onExit(() => {
-  for (let child of activeProcesses) {
-    child.kill(SIGTERM);
-  }
-});
-
-export async function execWithOutput(
-  command: string,
-  options: { ignoreReturnCode?: boolean; cwd: string },
-) {
-  process.stdout.write(`Running: ${command}` + os.EOL);
-
-  let childProcess = exec(command, {
-    cwd: options.cwd,
-  });
-
-  activeProcesses.add(childProcess.child);
-
-  childProcess.child.on("stdout", (data) => process.stdout.write(data));
-  childProcess.child.on("stderr", (data) => process.stderr.write(data));
-
-  childProcess.child.on("error", () =>
-    activeProcesses.delete(childProcess.child),
-  );
-  childProcess.child.on("close", () =>
-    activeProcesses.delete(childProcess.child),
-  );
-
-  let result = await childProcess;
-
-  if (!options?.ignoreReturnCode && childProcess.child.exitCode !== 0) {
-    throw new Error(
-      `The command ${JSON.stringify(command)} failed with code ${
-        childProcess.child.exitCode
-      }\n${result.stdout}\n${result.stderr}`,
-    );
-  }
-  return {
-    code: childProcess.child.exitCode,
-    stdout: result.stdout,
-    stderr: result.stderr,
-  };
-}
-
-export async function spawnWithOutput(
-  command: string,
-  args: string[],
-  options: { ignoreReturnCode?: boolean; cwd: string },
-) {
-  process.stdout.write(`Running: ${command} ${args.join(" ")}` + os.EOL);
-  let childProcess = spawn(command, args, {
-    cwd: options.cwd,
-  });
-  childProcess.on("stdout", (data) => process.stdout.write(data));
-  childProcess.on("stderr", (data) => process.stderr.write(data));
-  let result = await childProcess;
-  if (!options?.ignoreReturnCode && result.code !== 0) {
-    throw new Error(
-      `The command "${command} ${args.join(" ")}" failed with code ${
-        result.code
-      }\n${result.stdout.toString("utf8")}\n${result.stderr.toString("utf8")}`,
-    );
-  }
-  return {
-    code: result.code,
-    stdout: result.stdout.toString("utf8"),
-    stderr: result.stderr.toString("utf8"),
   };
 }
 
