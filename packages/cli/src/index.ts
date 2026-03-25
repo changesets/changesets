@@ -6,6 +6,20 @@ import { COMMAND_HELP } from "./help";
 import { run } from "./run";
 
 const args = process.argv.slice(2);
+const aliases = {
+  // Short flags
+  v: "verbose",
+  o: "output",
+  m: "message",
+  // Support kebab-case flags
+  "since-master": "sinceMaster",
+  "git-tag": "gitTag",
+  "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
+  // Deprecated flags
+  "update-changelog": "updateChangelog",
+  "is-public": "isPublic",
+  "skip-c-i": "skipCI",
+};
 
 const parsed = mri(args, {
   boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot"],
@@ -19,20 +33,7 @@ const parsed = mri(args, {
     "snapshot",
     "snapshotPrereleaseTemplate",
   ],
-  alias: {
-    // Short flags
-    v: "verbose",
-    o: "output",
-    m: "message",
-    // Support kebab-case flags
-    "since-master": "sinceMaster",
-    "git-tag": "gitTag",
-    "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
-    // Deprecated flags
-    "update-changelog": "updateChangelog",
-    "is-public": "isPublic",
-    "skip-c-i": "skipCI",
-  },
+  alias: aliases,
   default: {
     gitTag: true,
   },
@@ -79,8 +80,12 @@ if (parsed.version && args.length === 1) {
 }
 
 const cwd = process.cwd();
+const flags = { ...parsed };
+for (const flag of ["_", ...Object.keys(aliases)]) {
+  delete flags[flag];
+}
 
-run(parsed._, parsed, cwd).catch((err) => {
+run(parsed._, flags, cwd).catch((err) => {
   if (err instanceof InternalError) {
     error(
       "The following error is an internal unexpected error, these should never happen."
