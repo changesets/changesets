@@ -1,5 +1,4 @@
 import path from "node:path";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, it } from "vitest";
 
 import read from "./index.ts";
@@ -114,6 +113,7 @@ I'm amazed we needed to update the best package, because it was already the best
     try {
       await read(cwd);
     } catch (e) {
+      // eslint-disable-next-line vitest/no-conditional-expect
       expect((e as Error).message).toBe(
         "There is no .changeset directory in this project",
       );

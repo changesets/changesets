@@ -114,17 +114,23 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
       },
       body: JSON.stringify({ query: makeQuery(repos) }),
     });
-  } catch (e: any) {
+  } catch (e) {
     throw new Error(
-      `An error occurred when fetching data from GitHub\n${e.message}`,
+      `An error occurred when fetching data from GitHub\n${(e as Error).message}`,
+      { cause: e },
     );
   }
 
   let data;
   try {
     data = await fetchResponse.json();
-  } catch (e: any) {
-    throw new Error(`Failed to parse data from GitHub\n${e.message}`);
+  } catch (e) {
+    throw new Error(
+      `Failed to parse data from GitHub\n${(e as Error).message}`,
+      {
+        cause: e,
+      },
+    );
   }
 
   if (data.errors) {

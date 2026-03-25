@@ -264,7 +264,7 @@ export default async function createChangeset(
           releases,
         };
       }
-    } catch (err) {
+    } catch {
       log(
         "An error happened using external editor. Please type your summary here:",
       );

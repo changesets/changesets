@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, type Mock, vi } from "vitest";
 import fixturez from "fixturez";
 import spawn from "spawndamnit";
-import fs from "node:fs";
+import type fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 
@@ -97,7 +97,7 @@ export const temporarilySilenceLogs =
 
 let f = fixturez(import.meta.dirname);
 
-export interface Fixture extends Record<string, string> {}
+export type Fixture = Record<string, string>;
 
 export async function testdir(dir: Fixture) {
   const temp = f.temp();

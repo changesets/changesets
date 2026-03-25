@@ -76,7 +76,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], { ignore: "pkg-c" }, cwd);
-      } catch (e) {
+      } catch {
         // ignore errors. We just want to validate the error message
       }
 
@@ -108,7 +108,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], { ignore: ["pkg-b"] }, cwd);
-      } catch (e) {
+      } catch {
         // ignore the error. We just want to validate the error message
       }
 
@@ -146,7 +146,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], { ignore: ["pkg-b"] }, cwd);
-      } catch (e) {
+      } catch {
         // ignore the error. We just want to validate the error message
       }
 
@@ -181,7 +181,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], {}, cwd);
-      } catch (e) {
+      } catch {
         // ignore the error. We just want to validate the error message
       }
 
@@ -243,7 +243,7 @@ describe("cli", () => {
       expect(loggerErrorCalls.length).toEqual(0);
     });
 
-    it("should throw if `--ignore` flag is used while ignore array is also defined in the config file ", async () => {
+    it("should throw if `--ignore` flag is used while ignore array is also defined in the config file", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
@@ -266,7 +266,7 @@ describe("cli", () => {
       });
       try {
         await run(["version"], { ignore: "pkg-b" }, cwd);
-      } catch (e) {
+      } catch {
         // ignore errors. We just want to validate the error message
       }
 
@@ -347,7 +347,7 @@ describe("cli", () => {
       });
       try {
         await run(["pre", "enter"], {}, cwd);
-      } catch (e) {
+      } catch {
         // ignore the error. We just want to validate the error message
       }
 
@@ -403,7 +403,7 @@ describe("cli", () => {
 
     try {
       await run(["version"], {}, cwd);
-    } catch (e) {
+    } catch {
       // ignore the error. We just want to validate the error message
     }
 
