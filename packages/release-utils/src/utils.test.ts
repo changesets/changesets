@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
   BumpLevels,
   getChangelogEntry,
@@ -72,35 +72,37 @@ let changelog = `# @keystone-alpha/email
   - Update mjml-dependency
 `;
 
-test("it works", () => {
-  let entry = getChangelogEntry(changelog, "3.0.0");
-  expect(entry.content).toMatchSnapshot();
-  expect(entry.highestLevel).toBe(BumpLevels.major);
-});
+describe("getChangelogEntry", () => {
+  test("it works", () => {
+    let entry = getChangelogEntry(changelog, "3.0.0");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.major);
+  });
 
-test("it works", () => {
-  let entry = getChangelogEntry(changelog, "3.0.1");
-  expect(entry.content).toMatchSnapshot();
-  expect(entry.highestLevel).toBe(BumpLevels.patch);
-});
+  test("it works", () => {
+    let entry = getChangelogEntry(changelog, "3.0.1");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.patch);
+  });
 
-test("it sorts the things right", () => {
-  let things = [
-    {
-      name: "a",
-      highestLevel: BumpLevels.major,
-      private: true,
-    },
-    {
-      name: "b",
-      highestLevel: BumpLevels.patch,
-      private: false,
-    },
-    {
-      name: "c",
-      highestLevel: BumpLevels.major,
-      private: false,
-    },
-  ];
-  expect(things.sort(sortChangelogEntries)).toMatchSnapshot();
+  test("it sorts the things right", () => {
+    let things = [
+      {
+        name: "a",
+        highestLevel: BumpLevels.major,
+        private: true,
+      },
+      {
+        name: "b",
+        highestLevel: BumpLevels.patch,
+        private: false,
+      },
+      {
+        name: "c",
+        highestLevel: BumpLevels.major,
+        private: false,
+      },
+    ];
+    expect(things.sort(sortChangelogEntries)).toMatchSnapshot();
+  });
 });

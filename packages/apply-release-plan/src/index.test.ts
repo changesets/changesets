@@ -12,7 +12,7 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "path";
 import { outdent } from "outdent";
-import spawn from "spawndamnit";
+import { exec } from "tinyexec";
 import { defaultConfig } from "@changesets/config";
 
 import applyReleasePlan from "./index.ts";
@@ -119,7 +119,7 @@ async function testSetup(
   }
 
   if (config.commit) {
-    await spawn("git", ["init"], { cwd: tempDir });
+    await exec("git", ["init"], { nodeOptions: { cwd: tempDir } });
     await git.add(".", tempDir);
     await git.commit("first commit", tempDir);
   }
@@ -2946,7 +2946,7 @@ describe("apply release plan", () => {
         }),
       });
 
-      await spawn("git", ["init"], { cwd: tempDir });
+      await exec("git", ["init"], { nodeOptions: { cwd: tempDir } });
 
       await git.add(".", tempDir);
       await git.commit("first commit", tempDir);
@@ -2963,7 +2963,9 @@ describe("apply release plan", () => {
           "Could not find matching package for release of: impossible-package",
         );
 
-        let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+        let gitCmd = await exec("git", ["status"], {
+          nodeOptions: { cwd: tempDir },
+        });
 
         expect(gitCmd.stdout.toString().includes("nothing to commit")).toEqual(
           true,
@@ -2997,7 +2999,7 @@ describe("apply release plan", () => {
           }),
         });
 
-        await spawn("git", ["init"], { cwd: tempDir });
+        await exec("git", ["init"], { nodeOptions: { cwd: tempDir } });
 
         await git.add(".", tempDir);
         await git.commit("first commit", tempDir);
@@ -3022,7 +3024,9 @@ describe("apply release plan", () => {
         } catch (e) {
           expect((e as Error).message).toEqual("no chance");
 
-          let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+          let gitCmd = await exec("git", ["status"], {
+            nodeOptions: { cwd: tempDir },
+          });
 
           expect(
             gitCmd.stdout.toString().includes("nothing to commit"),
@@ -3273,11 +3277,10 @@ describe("apply release plan", () => {
       setupFunc,
     );
 
-    let thing = await spawn("git", ["rev-list", "HEAD"], { cwd: tempDir });
-    let commits = thing.stdout
-      .toString("utf8")
-      .split("\n")
-      .filter((x) => x);
+    let thing = await exec("git", ["rev-list", "HEAD"], {
+      nodeOptions: { cwd: tempDir },
+    });
+    let commits = thing.stdout.split("\n").filter((x) => x);
 
     let lastCommit = commits[commits.length - 1].substring(0, 7);
 
@@ -3331,7 +3334,9 @@ describe("apply release plan", () => {
         },
       );
 
-      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+      let gitCmd = await exec("git", ["status"], {
+        nodeOptions: { cwd: tempDir },
+      });
 
       expect(gitCmd.stdout.toString()).toContain(
         "Changes not staged for commit",
@@ -3341,7 +3346,9 @@ describe("apply release plan", () => {
         "modified:   packages/pkg-a/package.json",
       );
 
-      let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
+      let lastCommit = await exec("git", ["log", "-1"], {
+        nodeOptions: { cwd: tempDir },
+      });
 
       expect(lastCommit.stdout.toString()).toContain("first commit");
     });
@@ -3398,7 +3405,9 @@ describe("apply release plan", () => {
 
       expect(changesetExists).toEqual(false);
 
-      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+      let gitCmd = await exec("git", ["status"], {
+        nodeOptions: { cwd: tempDir },
+      });
 
       const changesetsDeleted = releasePlan.changesets.reduce(
         (prev, { id }) => {
@@ -3461,7 +3470,9 @@ describe("apply release plan", () => {
         },
       );
 
-      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+      let gitCmd = await exec("git", ["status"], {
+        nodeOptions: { cwd: tempDir },
+      });
 
       expect(gitCmd.stdout.toString()).toContain(
         "modified:   .changeset/pre.json",
