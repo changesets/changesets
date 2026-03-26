@@ -29,18 +29,7 @@ export const npmPublishQueue = createPromiseQueue(
   NPM_PUBLISH_CONCURRENCY_LIMIT,
 );
 
-function jsonParse(input: string) {
-  try {
-    return JSON.parse(input);
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      console.error("error parsing json:", input);
-    }
-    throw err;
-  }
-}
-
-export const isCustomRegistry = (registry?: string): boolean => {
+export function isCustomRegistry(registry?: string): boolean {
   return (
     !!registry &&
     registry !== NPM_REGISTRY &&
@@ -48,7 +37,7 @@ export const isCustomRegistry = (registry?: string): boolean => {
     registry !== YARN_REGISTRY &&
     registry !== `${YARN_REGISTRY}/`
   );
-};
+}
 
 interface RegistryInfo {
   scope?: string;
@@ -121,7 +110,7 @@ ${result.stderr.toString().trim() || result.stdout.toString().trim()}
     );
     return false;
   }
-  const json = jsonParse(result.stdout.toString());
+  const json = JSON.parse(result.stdout.toString());
   if (json.error || !json.tfa || !json.tfa.mode) {
     return false;
   }
@@ -188,7 +177,8 @@ export function getPackageInfo(packageJson: PackageJSON) {
         },
       };
     }
-    return jsonParse(result.stdout.toString());
+
+    return JSON.parse(result.stdout.toString());
   });
 }
 

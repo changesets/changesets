@@ -20,17 +20,10 @@ export async function readPreState(
   let preState: PreState | undefined;
   try {
     const contents = await fs.readFile(preStatePath, "utf8");
-    try {
-      preState = JSON.parse(contents);
-    } catch (err) {
-      if (err instanceof SyntaxError) {
-        console.error("error parsing json:", contents);
-      }
-      throw err;
-    }
+    preState = JSON.parse(contents);
   } catch (err) {
     if ((err as any).code !== "ENOENT") {
-      throw err;
+      throw new Error("Failed to parse pre state.", { cause: err });
     }
   }
   return preState;
