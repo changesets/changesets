@@ -2,9 +2,24 @@ import mri from "mri";
 import { ExitError, InternalError } from "@changesets/errors";
 import { error } from "@changesets/logger";
 import { format } from "util";
+import { COMMAND_HELP } from "./help";
 import { run } from "./run";
 
 const args = process.argv.slice(2);
+const aliases = {
+  // Short flags
+  v: "verbose",
+  o: "output",
+  m: "message",
+  // Support kebab-case flags
+  "since-master": "sinceMaster",
+  "git-tag": "gitTag",
+  "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
+  // Deprecated flags
+  "update-changelog": "updateChangelog",
+  "is-public": "isPublic",
+  "skip-c-i": "skipCI",
+};
 
 const parsed = mri(args, {
   boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot"],
@@ -18,23 +33,8 @@ const parsed = mri(args, {
     "snapshot",
     "snapshotPrereleaseTemplate",
   ],
-  alias: {
-    // Short flags
-    v: "verbose",
-    o: "output",
-    m: "message",
-    // Support kebab-case flags
-    "since-master": "sinceMaster",
-    "git-tag": "gitTag",
-    "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
-    // Deprecated flags
-    "update-changelog": "updateChangelog",
-    "is-public": "isPublic",
-    "skip-c-i": "skipCI",
-  },
-  default: {
-    gitTag: true,
-  },
+  // mri mutates the alias object passed to it, so we need to copy it here to maintain the original object
+  alias: { ...aliases },
 });
 
 // `mri` doesn't handle mixed boolean and strings well. It'll always try to coerce it as
@@ -43,17 +43,6 @@ const parsed = mri(args, {
 if (parsed.snapshot === "" && args[args.indexOf("--snapshot") + 1] !== "") {
   parsed.snapshot = true;
 }
-
-const COMMAND_HELP: Record<string, string> = {
-  init: "init",
-  add: "add [--empty] [--open] [--since <branch>] [--message <text>]",
-  version:
-    "version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]",
-  publish: "publish [--tag <name>] [--otp <code>] [--no-git-tag]",
-  status: "status [--since <branch>] [--verbose] [--output JSON_FILE.json]",
-  pre: "pre <enter|exit> <tag>",
-  tag: "tag",
-};
 
 if (parsed.help) {
   const command = parsed._[0];
@@ -89,8 +78,12 @@ if (parsed.version && args.length === 1) {
 }
 
 const cwd = process.cwd();
+const flags = { ...parsed };
+for (const flag of ["_", ...Object.keys(aliases)]) {
+  delete flags[flag];
+}
 
-run(parsed._, parsed, cwd).catch((err) => {
+run(parsed._, flags, cwd).catch((err) => {
   if (err instanceof InternalError) {
     error(
       "The following error is an internal unexpected error, these should never happen."
