@@ -274,14 +274,8 @@ async function getNewChangelogEntry(
         changelog,
       };
     }),
-  ).catch((e) => {
-    console.error(
-      "The following error was encountered while generating changelog entries",
-    );
-    console.error(
-      "We have escaped applying the changesets, and no files should have been affected",
-    );
-    throw e;
+  ).catch((error) => {
+    throw new Error("Failed to generate changelog entries.", { cause: error });
   });
 }
 

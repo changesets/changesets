@@ -20,7 +20,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { outdent } from "outdent";
 import { exec } from "tinyexec";
 import { describe, expect, it, test } from "vitest";
-import applyReleasePlan from "./index.ts";
+import { applyReleasePlan } from "./index.ts";
 
 const changesetsCliChangelogPath = path.resolve(
   import.meta.dirname,
@@ -2981,46 +2981,29 @@ describe("apply release plan", () => {
         await git.add(".", tempDir);
         await git.commit("first commit", tempDir);
 
-        try {
-          const packages = await getPackages(tempDir);
+        const packages = await getPackages(tempDir);
+        const promise = applyReleasePlan(releasePlan.getReleasePlan(), packages, {
+          ...releasePlan.config,
+          changelog: [
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/failing-functions.ts",
+            ),
+            null,
+          ],
+        });
 
-          await applyReleasePlan(releasePlan.getReleasePlan(), packages, {
-            ...releasePlan.config,
-            changelog: [
-              path.resolve(
-                import.meta.dirname,
-                "test-utils/failing-functions.ts",
-              ),
-              null,
-            ],
-          });
-        } catch (e) {
-          // eslint-disable-next-line vitest/no-conditional-expect
-          expect((e as Error).message).toEqual("no chance");
+        await expect(promise).rejects.toThrow(
+          "Failed to generate changelog entries.",
+        );
 
-          const gitCmd = await exec("git", ["status"], {
-            nodeOptions: { cwd: tempDir },
-          });
+        let gitCmd = await exec("git", ["status"], {
+          nodeOptions: { cwd: tempDir },
+        });
 
-          // eslint-disable-next-line vitest/no-conditional-expect
-          expect(
-            gitCmd.stdout.toString().includes("nothing to commit"),
-          ).toEqual(true);
-          // eslint-disable-next-line vitest/no-conditional-expect
-          expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
-            [
-              [
-                "The following error was encountered while generating changelog entries",
-              ],
-              [
-                "We have escaped applying the changesets, and no files should have been affected",
-              ],
-            ]
-          `);
-          return;
-        }
-
-        throw new Error("Expected test to exit before this point");
+        expect(gitCmd.stdout.toString().includes("nothing to commit")).toEqual(
+          true,
+        );
       }),
     );
   });
