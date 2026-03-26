@@ -105,15 +105,17 @@ export const read = async (cwd: string, packages?: Packages) => {
   return parse(json, packages);
 };
 
-type ParseResult = {
-  config: Config;
-  errors: [];
-  warnings: string[];
-} | {
-  config: null;
-  errors: string[];
-  warnings: string[];
-}
+type ParseResult =
+  | {
+      config: Config;
+      errors: [];
+      warnings: string[];
+    }
+  | {
+      config: null;
+      errors: string[];
+      warnings: string[];
+    };
 
 export const parse = (json: WrittenConfig, packages: Packages): ParseResult => {
   const errors: string[] = [];

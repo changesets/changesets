@@ -13,6 +13,6 @@ const { config, errors, warnings } = await read(process.cwd(), workspaces);
 const { config, errors, warnings } = parse({ commit: true }, workspaces);
 
 if (config == null) {
-  console.error(errors.join("\n"))
+  console.error(errors.join("\n"));
 }
 ```
