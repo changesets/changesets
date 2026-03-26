@@ -10,10 +10,6 @@ export async function add(pathToFile: string, cwd: string) {
   const gitCmd = await exec("git", ["add", pathToFile], {
     nodeOptions: { cwd },
   });
-
-  if (gitCmd.exitCode !== 0) {
-    console.log(pathToFile, gitCmd.stderr.toString());
-  }
   return gitCmd.exitCode === 0;
 }
 
