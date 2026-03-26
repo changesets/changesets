@@ -2,7 +2,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 // this requires that the package is built _after_ bumping versions before publishing
 import manifest from "@changesets/config/package.json" with { type: "json" };
-import { ValidationError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
@@ -106,8 +105,20 @@ export const read = async (cwd: string, packages?: Packages) => {
   return parse(json, packages);
 };
 
-export const parse = (json: WrittenConfig, packages: Packages): Config => {
-  const messages = [];
+type ParseResult = {
+  config: Config;
+  errors: [];
+  warnings: string[];
+} | {
+  config: null;
+  errors: string[];
+  warnings: string[];
+}
+
+export const parse = (json: WrittenConfig, packages: Packages): ParseResult => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
   const pkgNames: readonly string[] = packages.packages.map(
     ({ packageJson }) => packageJson.name,
   );
@@ -122,7 +133,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       typeof json.changelog[0] === "string"
     )
   ) {
-    messages.push(
+    errors.push(
       `The \`changelog\` option is set as ${JSON.stringify(
         json.changelog,
         null,
@@ -134,8 +145,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   let normalizedAccess: WrittenConfig["access"] = json.access;
   if ((json.access as string) === "private") {
     normalizedAccess = "restricted";
-    // TODO: replace with returning errors/warnings
-    console.error(
+    warnings.push(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',
     );
   }
@@ -144,7 +154,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     normalizedAccess !== "restricted" &&
     normalizedAccess !== "public"
   ) {
-    messages.push(
+    errors.push(
       `The \`access\` option is set as ${JSON.stringify(
         normalizedAccess,
         null,
@@ -163,7 +173,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       typeof json.commit[0] === "string"
     )
   ) {
-    messages.push(
+    errors.push(
       `The \`commit\` option is set as ${JSON.stringify(
         json.commit,
         null,
@@ -172,7 +182,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
   if (json.baseBranch != null && typeof json.baseBranch !== "string") {
-    messages.push(
+    errors.push(
       `The \`baseBranch\` option is set as ${JSON.stringify(
         json.baseBranch,
         null,
@@ -186,7 +196,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     (!isArray(json.changedFilePatterns) ||
       !json.changedFilePatterns.every((pattern) => typeof pattern === "string"))
   ) {
-    messages.push(
+    errors.push(
       `The \`changedFilePatterns\` option is set as ${JSON.stringify(
         json.changedFilePatterns,
         null,
@@ -198,7 +208,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   const fixed: string[][] = [];
   if (json.fixed != null) {
     if (!havePackageGroupsCorrectShape(json.fixed)) {
-      messages.push(
+      errors.push(
         `The \`fixed\` option is set as ${JSON.stringify(
           json.fixed,
           null,
@@ -210,7 +220,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       const duplicatedPkgNames = new Set<string>();
 
       for (const fixedGroup of json.fixed) {
-        messages.push(
+        errors.push(
           ...getUnmatchedPatterns(fixedGroup, pkgNames).map(
             (pkgOrGlob) =>
               `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://npmx.dev/picomatch.`,
@@ -230,7 +240,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
 
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
-          messages.push(
+          errors.push(
             `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://npmx.dev/picomatch.`,
           );
         });
@@ -241,7 +251,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   const linked: string[][] = [];
   if (json.linked != null) {
     if (!havePackageGroupsCorrectShape(json.linked)) {
-      messages.push(
+      errors.push(
         `The \`linked\` option is set as ${JSON.stringify(
           json.linked,
           null,
@@ -253,7 +263,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       const duplicatedPkgNames = new Set<string>();
 
       for (const linkedGroup of json.linked) {
-        messages.push(
+        errors.push(
           ...getUnmatchedPatterns(linkedGroup, pkgNames).map(
             (pkgOrGlob) =>
               `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://npmx.dev/picomatch.`,
@@ -273,7 +283,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
 
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
-          messages.push(
+          errors.push(
             `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://npmx.dev/picomatch.`,
           );
         });
@@ -286,7 +296,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
 
   allFixedPackages.forEach((pkgName) => {
     if (allLinkedPackages.has(pkgName)) {
-      messages.push(
+      errors.push(
         `The package "${pkgName}" can be found in both fixed and linked groups. A package can only be either fixed or linked.`,
       );
     }
@@ -296,7 +306,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     json.updateInternalDependencies != null &&
     !["patch", "minor"].includes(json.updateInternalDependencies)
   ) {
-    messages.push(
+    errors.push(
       `The \`updateInternalDependencies\` option is set as ${JSON.stringify(
         json.updateInternalDependencies,
         null,
@@ -306,7 +316,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   }
   if (json.privatePackages != null && json.privatePackages !== false) {
     if (typeof json.privatePackages !== "object") {
-      messages.push(
+      errors.push(
         `The \`privatePackages\` option is set as ${JSON.stringify(
           json.privatePackages,
           null,
@@ -318,7 +328,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
         json.privatePackages.version != null &&
         typeof json.privatePackages.version !== "boolean"
       ) {
-        messages.push(
+        errors.push(
           `The \`privatePackages.version\` option is set as ${JSON.stringify(
             json.privatePackages.version,
             null,
@@ -330,7 +340,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
         json.privatePackages.tag != null &&
         typeof json.privatePackages.tag !== "boolean"
       ) {
-        messages.push(
+        errors.push(
           `The \`privatePackages.tag\` option is set as ${JSON.stringify(
             json.privatePackages.tag,
             null,
@@ -358,7 +368,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
         json.ignore.every((pkgName) => typeof pkgName === "string")
       )
     ) {
-      messages.push(
+      errors.push(
         `The \`ignore\` option is set as ${JSON.stringify(
           json.ignore,
           null,
@@ -366,7 +376,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or an array of package names`,
       );
     } else {
-      messages.push(
+      errors.push(
         ...getUnmatchedPatterns(json.ignore, pkgNames).map(
           (pkgOrGlob) =>
             `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://npmx.dev/picomatch.`,
@@ -424,7 +434,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
         if (dependentPkg.packageJson.private) {
           continue;
         }
-        messages.push(
+        errors.push(
           `The package "${dependent}" depends on the skipped package "${skippedPackage}", but "${dependent}" is not being skipped. Please add "${dependent}" to the \`ignore\` option.`,
         );
       }
@@ -437,7 +447,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       json.format,
     )
   ) {
-    messages.push(
+    errors.push(
       `The \`format\` option is set as ${JSON.stringify(
         json.format,
         null,
@@ -453,7 +463,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       snapshot.useCalculatedVersion != null &&
       typeof snapshot.useCalculatedVersion !== "boolean"
     ) {
-      messages.push(
+      errors.push(
         `The \`snapshot.useCalculatedVersion\` option is set as ${JSON.stringify(
           snapshot.useCalculatedVersion,
           null,
@@ -465,7 +475,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       snapshot.prereleaseTemplate != null &&
       typeof snapshot.prereleaseTemplate !== "string"
     ) {
-      messages.push(
+      errors.push(
         `The \`snapshot.prereleaseTemplate\` option is set as ${JSON.stringify(
           snapshot.prereleaseTemplate,
           null,
@@ -483,7 +493,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       onlyUpdatePeerDependentsWhenOutOfRange != null &&
       typeof onlyUpdatePeerDependentsWhenOutOfRange !== "boolean"
     ) {
-      messages.push(
+      errors.push(
         `The \`onlyUpdatePeerDependentsWhenOutOfRange\` option is set as ${JSON.stringify(
           onlyUpdatePeerDependentsWhenOutOfRange,
           null,
@@ -496,7 +506,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       updateInternalDependents != null &&
       !["always", "out-of-range"].includes(updateInternalDependents)
     ) {
-      messages.push(
+      errors.push(
         `The \`updateInternalDependents\` option is set as ${JSON.stringify(
           updateInternalDependents,
           null,
@@ -506,11 +516,12 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
-  if (messages.length) {
-    throw new ValidationError(
-      `Some errors occurred when validating the changesets config:\n` +
-        messages.join("\n"),
-    );
+  if (errors.length !== 0) {
+    return {
+      errors,
+      warnings,
+      config: null,
+    };
   }
 
   const config: Config = {
@@ -576,12 +587,24 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     config.privatePackages.version === false &&
     config.privatePackages.tag === true
   ) {
-    throw new ValidationError(
+    errors.push(
       `The \`privatePackages.tag\` option is set to \`true\` but \`privatePackages.version\` is set to \`false\`. This is not allowed.`,
     );
   }
 
-  return config;
+  if (errors.length !== 0) {
+    return {
+      config: null,
+      errors,
+      warnings,
+    };
+  }
+
+  return {
+    config,
+    errors: [],
+    warnings,
+  };
 };
 
 function globMatch(

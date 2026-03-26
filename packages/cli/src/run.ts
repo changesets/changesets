@@ -52,7 +52,14 @@ If you expected there to be changesets, you should check git history for when th
     throw new ExitError(1);
   }
 
-  const config = await read(packages.rootDir, packages);
+  const { config, errors, warnings } = await read(packages.rootDir, packages);
+  if (warnings.length !== 0) {
+    log.warn(warnings.join("\n"));
+  }
+  if (config == null) {
+    log.error(errors.join("\n"));
+    throw new ExitError(1);
+  }
 
   if (input.length < 1) {
     const { empty, open, since, message, ...rest }: CliOptions = flags;

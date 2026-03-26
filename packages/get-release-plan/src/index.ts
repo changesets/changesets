@@ -10,9 +10,18 @@ export async function getReleasePlan(
   sinceRef?: string,
   passedConfig?: Config,
 ): Promise<ReleasePlan> {
-  const packages = await getPackages(cwd);
-  const preState = await readPreState(packages.rootDir);
-  const readConfig = await read(packages.rootDir, packages);
+  const { rootDir, packages, tool } = await getPackages(cwd);
+  const preState = await readPreState(rootDir);
+
+  const { config: readConfig } = await read(rootDir, {
+    rootDir,
+    packages,
+    tool: { type: tool },
+  });
+  if (readConfig == null) {
+    throw new Error("Found errors in config.");
+  }
+
   const config = passedConfig ? { ...readConfig, ...passedConfig } : readConfig;
   const changesets = await readChangesets(packages.rootDir, sinceRef);
 

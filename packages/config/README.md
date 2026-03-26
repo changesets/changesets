@@ -6,19 +6,13 @@
 [![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 ```tsx
-import { parse, read, ValidationError } from "@changesets/config";
+import { parse, read } from "@changesets/config";
 
-let config = await read(process.cwd(), workspaces);
+const { config, errors, warnings } = await read(process.cwd(), workspaces);
 
-let config = parse({ commit: true }, workspaces);
+const { config, errors, warnings } = parse({ commit: true }, workspaces);
 
-try {
-  return parse({ commit: true }, workspaces);
-} catch (err) {
-  if (err instanceof ValidationError) {
-    let message = err.message;
-  } else {
-    throw err;
-  }
+if (config == null) {
+  console.error(errors.join("\n"))
 }
 ```

@@ -6,8 +6,6 @@ export class GitError extends Error {
   }
 }
 
-export class ValidationError extends Error {}
-
 export class ExitError extends Error {
   code: number;
   constructor(code: number) {
