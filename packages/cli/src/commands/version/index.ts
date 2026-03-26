@@ -187,11 +187,12 @@ function validateSkippedDependents(
   // a stale devDep range on a skipped package is harmless.
   // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
   // update devDep ranges in package.json even though they don't cause version bumps.
-  const dependentsGraph = getDependentsGraph(packages, {
+  const { graph: dependentsGraph, warnings } = getDependentsGraph(packages, {
     ignoreDevDependencies: true,
     bumpVersionsWithWorkspaceProtocolOnly:
       config.bumpVersionsWithWorkspaceProtocolOnly,
   });
+  messages.push(...warnings);
 
   for (const pkg of packages.packages) {
     if (

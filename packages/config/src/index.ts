@@ -396,11 +396,15 @@ export const parse = (json: WrittenConfig, packages: Packages): ParseResult => {
   // update devDep ranges in package.json even though they don't cause version bumps.
   const ignore = isArray(json.ignore) ? json.ignore : [];
   if (ignore.length || !privatePackages.version) {
-    const dependentsGraph = getDependentsGraph(packages, {
+    const { graph, warnings: graphWarnings } = getDependentsGraph(packages, {
       ignoreDevDependencies: true,
       bumpVersionsWithWorkspaceProtocolOnly:
         json.bumpVersionsWithWorkspaceProtocolOnly,
     });
+    if (graphWarnings.length !== 0) {
+      warnings.push(...graphWarnings);
+    }
+
     const packagesByName = new Map(
       packages.packages.map((x) => [x.packageJson.name, x] as const),
     );
@@ -415,7 +419,7 @@ export const parse = (json: WrittenConfig, packages: Packages): ParseResult => {
         continue;
       }
       const skippedPackage = pkg.packageJson.name;
-      const dependents = dependentsGraph.get(skippedPackage) || [];
+      const dependents = graph.get(skippedPackage) || [];
       for (const dependent of dependents) {
         const dependentPkg = packagesByName.get(dependent);
         if (!dependentPkg) {

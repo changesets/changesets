@@ -152,7 +152,7 @@ export function assembleReleasePlan(
   // devDependencies. While devDeps don't cause version bumps (determineDependents
   // assigns type "none"), they must appear in the release plan so that
   // apply-release-plan can update their version ranges in package.json.
-  const dependencyGraph = getDependentsGraph(packages, {
+  const { graph } = getDependentsGraph(packages, {
     bumpVersionsWithWorkspaceProtocolOnly:
       config.bumpVersionsWithWorkspaceProtocolOnly,
   });
@@ -164,7 +164,7 @@ export function assembleReleasePlan(
       releases,
       packagesByName,
       rootDir: packages.rootDir,
-      dependencyGraph,
+      dependencyGraph: graph,
       preInfo,
       config,
     });

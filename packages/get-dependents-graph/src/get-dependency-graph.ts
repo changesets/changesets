@@ -64,22 +64,21 @@ export function getDependencyGraph(
   } = {},
 ): {
   graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
-  valid: boolean;
+  warnings: string[];
 } {
+  const warnings: string[] = [];
+
   const graph = new Map<
     string,
     { pkg: Package; dependencies: Array<string> }
   >();
-  let valid = true;
-
+  const queue = [rootPackage];
   const packagesByName: { [key: string]: Package } = {
     [rootPackage.packageJson.name]: rootPackage,
   };
   const relativePathsByName: { [key: string]: string } = {
     [rootPackage.packageJson.name]: ".",
   };
-
-  const queue = [rootPackage];
 
   for (const pkg of packages.packages) {
     queue.push(pkg);
@@ -134,10 +133,8 @@ export function getDependencyGraph(
       const range = getValidRange(depRange);
 
       if ((range && !range.test(expected)) || isProtocolRange(depRange)) {
-        valid = false;
-        // TODO: replace with returning errors/warnings
-        console.error(
-          `Package ${pc.blue(name)} must depend on the current version of ${pc.blue(depName)}: ${pc.green(expected)} vs ${pc.red(rawDepRange)}`,
+        warnings.push(
+          `Package ${pc.blue(name)} must depend on the current version of ${pc.blue(depName)}: ${pc.green(expected)} vs ${pc.red(depRange)}`,
         );
         continue;
       }
@@ -153,5 +150,5 @@ export function getDependencyGraph(
 
     graph.set(name, { pkg, dependencies });
   }
-  return { graph, valid };
+  return { graph, warnings };
 }

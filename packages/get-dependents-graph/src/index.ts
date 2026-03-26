@@ -1,21 +1,26 @@
 import type { Package, Packages } from "@changesets/types";
 import { getDependencyGraph } from "./get-dependency-graph.ts";
 
+type GetDependentsGraphResult = {
+  graph: Map<string, string[]>;
+  warnings: string[];
+};
+
 export function getDependentsGraph(
   packages: Packages,
   opts?: {
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   },
-) {
+): GetDependentsGraphResult {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
   const rootPackage = packages.rootPackage;
   if (rootPackage == null) {
-    return new Map();
+    return { graph: new Map(), warnings: [] };
   }
 
-  const { graph: dependencyGraph } = getDependencyGraph(
+  const { graph: dependencyGraph, warnings } = getDependencyGraph(
     packages,
     rootPackage,
     opts,
@@ -59,5 +64,5 @@ export function getDependentsGraph(
     simplifiedDependentsGraph.set(pkgName, pkgInfo.dependents);
   });
 
-  return simplifiedDependentsGraph;
+  return { graph: simplifiedDependentsGraph, warnings };
 }
