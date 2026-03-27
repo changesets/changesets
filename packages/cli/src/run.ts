@@ -85,7 +85,16 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open, since, message, type, all, package: pkg, ...rest }: CliOptions = flags;
+    const {
+      empty,
+      open,
+      since,
+      message,
+      type,
+      all,
+      package: pkg,
+      ...rest
+    }: CliOptions = flags;
     const packages = normalizePackageFlag(pkg);
     validateCommandFlags("add", rest);
     await add(
@@ -123,7 +132,16 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        const { empty, open, since, message, type, all, package: pkg, ...rest }: CliOptions = flags;
+        const {
+          empty,
+          open,
+          since,
+          message,
+          type,
+          all,
+          package: pkg,
+          ...rest
+        }: CliOptions = flags;
         const packages = normalizePackageFlag(pkg);
         validateCommandFlags("add", rest);
         await add(
