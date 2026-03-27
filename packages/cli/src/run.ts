@@ -15,7 +15,25 @@ import publish from "./commands/publish";
 import status from "./commands/status";
 import tagCommand from "./commands/tag";
 import version from "./commands/version";
+import { COMMAND_HELP } from "./help";
 import { CliOptions } from "./types";
+
+function validateCommandFlags(
+  command: keyof typeof COMMAND_HELP,
+  flags: Record<string, unknown>
+) {
+  const unknownFlags = Object.keys(flags);
+
+  if (unknownFlags.length > 0) {
+    error(
+      `Unknown ${
+        unknownFlags.length === 1 ? "flag" : "flags"
+      } for ${command}: ${unknownFlags.map((flag) => `--${flag}`).join(", ")}`
+    );
+    error(`Usage: changeset ${COMMAND_HELP[command]}`);
+    throw new ExitError(1);
+  }
+}
 
 export async function run(
   input: string[],
@@ -26,6 +44,7 @@ export async function run(
   const rootDir = packages.root.dir;
 
   if (input[0] === "init") {
+    validateCommandFlags("init", flags);
     await init(rootDir);
     return;
   }
@@ -66,9 +85,9 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open, since, message, type, all }: CliOptions = flags;
-    const packages = normalizePackageFlag(flags.package);
-    // @ts-ignore if this is undefined, we have already exited
+    const { empty, open, since, message, type, all, package: pkg, ...rest }: CliOptions = flags;
+    const packages = normalizePackageFlag(pkg);
+    validateCommandFlags("add", rest);
     await add(
       rootDir,
       { empty, open, since, message, packages, type, all },
@@ -79,22 +98,12 @@ export async function run(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
   } else {
-    const {
-      sinceMaster,
-      since,
-      verbose,
-      output,
-      otp,
-      empty,
-      ignore,
-      snapshot,
-      snapshotPrereleaseTemplate,
-      tag,
-      open,
-      gitTag,
-      message,
-    }: CliOptions = flags;
-    const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
+    const deadFlags = [
+      "updateChangelog",
+      "isPublic",
+      "skipCI",
+      "commit",
+    ] as const;
 
     deadFlags.forEach((flag) => {
       if (flags[flag]) {
@@ -114,9 +123,9 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        const all = flags.all;
-        const type = flags.type;
-        const packages = normalizePackageFlag(flags.package);
+        const { empty, open, since, message, type, all, package: pkg, ...rest }: CliOptions = flags;
+        const packages = normalizePackageFlag(pkg);
+        validateCommandFlags("add", rest);
         await add(
           rootDir,
           { empty, open, since, message, packages, type, all },
@@ -125,11 +134,19 @@ export async function run(
         return;
       }
       case "changed": {
-        const json = flags.json;
+        const { since, json, ...rest }: CliOptions = flags;
+        validateCommandFlags("changed", rest);
         await changed(rootDir, { since, json }, config);
         return;
       }
       case "version": {
+        const {
+          ignore,
+          snapshot,
+          snapshotPrereleaseTemplate,
+          ...rest
+        }: CliOptions = flags;
+        validateCommandFlags("version", rest);
         let ignoreArrayFromCmd: undefined | string[];
         if (typeof ignore === "string") {
           ignoreArrayFromCmd = [ignore];
@@ -222,18 +239,25 @@ export async function run(
         return;
       }
       case "publish": {
+        const { otp, tag, gitTag, ...rest }: CliOptions = flags;
+        validateCommandFlags("publish", rest);
         await publish(rootDir, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
+        const { sinceMaster, since, verbose, output, ...rest }: CliOptions =
+          flags;
+        validateCommandFlags("status", rest);
         await status(rootDir, { sinceMaster, since, verbose, output }, config);
         return;
       }
       case "tag": {
+        validateCommandFlags("tag", flags);
         await tagCommand(rootDir, config);
         return;
       }
       case "pre": {
+        validateCommandFlags("pre", flags);
         let command = input[1];
         if (command !== "enter" && command !== "exit") {
           error(
