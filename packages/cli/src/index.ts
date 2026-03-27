@@ -57,26 +57,41 @@ if (parsed.snapshot === "" && args[args.indexOf("--snapshot") + 1] !== "") {
   parsed.snapshot = true;
 }
 
-// Help message should only be shown if it's the only argument passed
-if (parsed.help && args.length === 1) {
-  console.log(
-    `
+const COMMAND_HELP: Record<string, string> = {
+  init: "init",
+  add: "add [--empty] [--open] [--since <branch>] [--message <text>] [--package <name>...] [--all] [--type <patch|minor|major>]",
+  changed: "changed [--since <branch>] [--json]",
+  version:
+    "version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]",
+  publish: "publish [--tag <name>] [--otp <code>] [--no-git-tag]",
+  status: "status [--since <branch>] [--verbose] [--output JSON_FILE.json]",
+  pre: "pre <enter|exit> <tag>",
+  tag: "tag",
+};
+
+if (parsed.help) {
+  const command = parsed._[0];
+  if (command && COMMAND_HELP[command]) {
+    console.log(`
+  Usage
+    $ changeset ${COMMAND_HELP[command]}
+
+    `);
+  } else {
+    console.log(
+      `
   Organise your package versioning and publishing to make both contributors and maintainers happy
 
   Usage
     $ changeset [command]
   Commands
-    init
-    add [--empty] [--open] [--since <branch>] [--message <text>] [--package <name>...] [--all] [--type <patch|minor|major>]
-    changed [--since <branch>] [--json]
-    version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
-    publish [--tag <name>] [--otp <code>] [--no-git-tag]
-    status [--since <branch>] [--verbose] [--output JSON_FILE.json]
-    pre <enter|exit> <tag>
-    tag
+${Object.values(COMMAND_HELP)
+  .map((cmd) => `    ${cmd}`)
+  .join("\n")}
 
     `
-  );
+    );
+  }
   process.exit(0);
 }
 
