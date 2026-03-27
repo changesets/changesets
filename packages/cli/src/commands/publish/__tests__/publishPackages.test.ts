@@ -138,7 +138,7 @@ describe("publishPackages", () => {
     });
 
     expect(result).toEqual([
-      { name: "pkg-a", newVersion: "1.0.0-beta.1", published: true },
+      { name: "pkg-a", newVersion: "1.0.0-beta.1", result: "published" },
     ]);
   });
 
@@ -185,7 +185,7 @@ describe("publishPackages", () => {
     });
 
     expect(result).toEqual([
-      { name: "pkg-a", newVersion: "1.0.0-beta.1", published: true },
+      { name: "pkg-a", newVersion: "1.0.0-beta.1", result: "published" },
     ]);
 
     const publishCall = mockSpawn.mock.calls.find(
@@ -234,7 +234,7 @@ describe("publishPackages", () => {
     });
 
     expect(result).toEqual([
-      { name: "pkg-a", newVersion: "1.0.0-beta.1", published: true },
+      { name: "pkg-a", newVersion: "1.0.0-beta.1", result: "published" },
     ]);
 
     const publishCall = mockSpawn.mock.calls.find(
