@@ -1,9 +1,10 @@
 import mri from "mri";
 import { ExitError, InternalError } from "@changesets/errors";
-import { error } from "@changesets/logger";
-import { format } from "util";
+import { format } from "node:util";
 import { run } from "./run.ts";
 import { createRequire } from "node:module";
+import { intro, log, outro } from "@clack/prompts";
+import pc from "picocolors";
 
 const require = createRequire(import.meta.url);
 
@@ -73,38 +74,44 @@ if (parsed.version && args.length === 1) {
 
 const cwd = process.cwd();
 
-run(parsed._, parsed, cwd).catch((err) => {
-  if (err instanceof InternalError) {
-    error(
-      "The following error is an internal unexpected error, these should never happen.",
-    );
-    error("Please open an issue with the following link");
-    error(
-      `https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(
-        `Unexpected error during ${parsed._[0] || "add"} command`,
-      )}&body=${encodeURIComponent(`## Error
+intro("🦋");
+
+run(parsed._, parsed, cwd)
+  .then(() => {
+    outro("", { withGuide: false });
+  })
+  .catch((err) => {
+    if (err instanceof InternalError) {
+      log.error(
+        `
+The following error is an internal unexpected error, these should never happen.
+Please open an issue with the following link:
+https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(`Unexpected error during ${parsed._[0] || "add"} command`)}&body=${encodeURIComponent(`## Error
 
 \`\`\`
-${format("", err).replace(process.cwd(), "<cwd>")}
+${format(err).replace(process.cwd().replace(/\\/g, "/"), "<cwd>")}
 \`\`\`
 
 ## Versions
 
-- @changesets/cli@${
-        // eslint-disable-next-line import/no-extraneous-dependencies
-        require("@changesets/cli/package.json").version
-      }
+${/* eslint-disable-next-line import/no-extraneous-dependencies */ ""}
+- @changesets/cli@${require("@changesets/cli/package.json").version}
 - node@${process.version}
 
 ## Extra details
 
 <!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->
-`)}`,
-    );
-  }
-  if (err instanceof ExitError) {
-    return process.exit(err.code);
-  }
-  error(err);
-  process.exit(1);
-});
+`)}
+      `.trim(),
+      );
+    }
+
+    if (err instanceof ExitError) {
+      outro(pc.red(`🦋 Exited with code ${err.code}`));
+      return process.exit(err.code);
+    }
+
+    log.error(err.stack);
+    outro(pc.red("🦋 Exited with code 1"));
+    process.exit(1);
+  });

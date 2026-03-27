@@ -113,11 +113,7 @@ export default function getDependencyGraph(
       if ((range && !range.test(expected)) || isProtocolRange(depRange)) {
         valid = false;
         console.error(
-          `Package ${pc.cyan(
-            `"${name}"`,
-          )} must depend on the current version of ${pc.cyan(
-            `"${depName}"`,
-          )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${depRange}"`)}`,
+          `Package ${pc.blue(name)} must depend on the current version of ${pc.blue(depName)}: ${pc.green(expected)} vs ${pc.red(depRange)}`,
         );
         continue;
       }

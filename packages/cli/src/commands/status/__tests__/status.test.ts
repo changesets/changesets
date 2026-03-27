@@ -196,8 +196,6 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
-
     await exec("git", ["checkout", "-b", "new-branch"], {
       nodeOptions: { cwd },
     });
@@ -210,9 +208,8 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    await status(cwd, { since: "main" }, await readConfig(cwd));
-
-    expect(process.exit).toHaveBeenCalledWith(1);
+    const promise = status(cwd, { since: "main" }, await readConfig(cwd));
+    await expect(promise).rejects.toThrow();
   });
 
   it("should not exit early with a non-zero error code when there are no changed packages", async () => {
@@ -421,8 +418,6 @@ describe("status", () => {
       }),
     });
 
-    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
-
     await exec("git", ["checkout", "-b", "new-branch"], {
       nodeOptions: { cwd },
     });
@@ -435,9 +430,8 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    await status(cwd, { since: "main" }, await readConfig(cwd));
-
-    expect(process.exit).toHaveBeenCalledWith(1);
+    const promise = status(cwd, { since: "main" }, await readConfig(cwd));
+    await expect(promise).rejects.toThrow();
   });
 
   it("should not exit early with a non-zero error code when there are changed packages matching the pattern and appropriate changeset", async () => {

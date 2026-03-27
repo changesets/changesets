@@ -1,29 +1,23 @@
-import { afterEach, beforeEach, type Mock, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
+import * as clack from "@clack/prompts";
 import fixturez from "fixturez";
 import { exec } from "tinyexec";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 
-type PartialMockMethods<T> = Partial<{
-  [K in keyof T as T[K] extends (...args: never) => unknown
-    ? K
-    : never]: T[K] extends (...args: never) => unknown ? Mock<T[K]> : never;
-}>;
+export const mockedLogger = vi.mocked(clack);
 
-export const mockedLogger: PartialMockMethods<
-  typeof import("@changesets/logger")
-> = {};
-
-vi.mock(import("@changesets/logger"), async (importOriginal) => {
-  const mod = await importOriginal();
+vi.mock("@clack/prompts", async (importOriginal) => {
   return {
-    prefix: mod.prefix,
-    error: (...args) => (mockedLogger.error ?? mod.error)(...args),
-    info: (...args) => (mockedLogger.info ?? mod.info)(...args),
-    log: (...args) => (mockedLogger.log ?? mod.log)(...args),
-    warn: (...args) => (mockedLogger.warn ?? mod.warn)(...args),
-    success: (...args) => (mockedLogger.success ?? mod.success)(...args),
+    ...(await importOriginal()),
+    note: vi.fn(),
+    log: {
+      info: vi.fn(),
+      success: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    },
   };
 });
 
@@ -38,12 +32,6 @@ const createLogSilencer = () => {
 
   return {
     setup() {
-      mockedLogger.error = vi.fn();
-      mockedLogger.info = vi.fn();
-      mockedLogger.log = vi.fn();
-      mockedLogger.warn = vi.fn();
-      mockedLogger.success = vi.fn();
-
       console.error = vi.fn();
       console.info = vi.fn();
       console.log = vi.fn();
@@ -53,12 +41,6 @@ const createLogSilencer = () => {
       process.stderr.write = vi.fn();
 
       return () => {
-        mockedLogger.error = undefined;
-        mockedLogger.info = undefined;
-        mockedLogger.log = undefined;
-        mockedLogger.warn = undefined;
-        mockedLogger.success = undefined;
-
         console.error = originalConsoleError;
         console.info = originalConsoleInfo;
         console.log = originalConsoleLog;

@@ -1,153 +1,89 @@
-import { error, prefix, success } from "@changesets/logger";
-import enuirer from "enquirer";
-import { edit } from "@inquirer/external-editor";
-import ansiColors from "ansi-colors";
+import {
+  cancel,
+  confirm,
+  groupMultiselect,
+  type GroupMultiSelectOptions,
+  isCancel,
+  note,
+  type Option,
+  select,
+  text,
+} from "@clack/prompts";
+import pc from "picocolors";
 
-const { prompt } = enuirer;
-const { symbols } = ansiColors;
-
-// those types are not exported from `enquirer` so we extract them here
-// so we can make type assertions using them because `enquirer` types do no support `prefix` right now
-type PromptOptions = Extract<Parameters<typeof prompt>[0], { type: string }>;
-type ArrayPromptOptions = Extract<
-  PromptOptions,
-  {
-    type:
-      | "autocomplete"
-      | "editable"
-      | "form"
-      | "multiselect"
-      | "select"
-      | "survey"
-      | "list"
-      | "scale";
+async function cancelable<T>(task: () => Promise<T | symbol>) {
+  const result = await task();
+  if (isCancel(result)) {
+    cancel("Canceled... 👋 ");
+    process.exit(0);
   }
->;
-type BooleanPromptOptions = Extract<PromptOptions, { type: "confirm" }>;
-type StringPromptOptions = Extract<
-  PromptOptions,
-  { type: "input" | "invisible" | "list" | "password" | "text" }
->;
+  return result;
+}
 
-/* Notes on using inquirer:
- * Each question needs a key, as inquirer is assembling an object behind-the-scenes.
- * At each call, the entire responses object is returned, so we need a unique
- * identifier for the name every time. This is why we are using serial IDs
- */
-const serialId: () => number = (function () {
-  let id = 0;
-  return () => id++;
-})();
+function importantWarning(message: string): void {
+  note(message.trim(), pc.yellow("IMPORTANT"), { format: pc.white });
+}
 
-const limit = Math.max(process.stdout.rows - 5, 10);
+export type MultiselectOptions<Value> = Record<string, Option<Value>[]>;
 
-let cancelFlow = () => {
-  success("Cancelled... 👋 ");
-  process.exit();
-};
-
-async function askCheckboxPlus(
+async function askMultiselect<Value>(
   message: string,
-  choices: Array<any>,
-  format?: (arg: any) => any,
-): Promise<Array<string>> {
-  const name = `CheckboxPlus-${serialId()}`;
-
-  return prompt({
-    type: "autocomplete",
-    name,
-    message,
-    prefix,
-    multiple: true,
-    choices,
-    format,
-    limit,
-    onCancel: cancelFlow,
-    symbols: {
-      indicator: symbols.radioOff,
-      checked: symbols.radioOn,
-    },
-    indicator(state: any, choice: any) {
-      return choice.enabled ? state.symbols.checked : state.symbols.indicator;
-    },
-  } as ArrayPromptOptions)
-    .then((responses: any) => responses[name])
-    .catch((err: unknown) => {
-      error(err);
-    });
-}
-
-async function askQuestion(message: string): Promise<string> {
-  const name = `Question-${serialId()}`;
-
-  return prompt([
-    {
-      type: "input",
+  values: MultiselectOptions<Value>,
+  options?: Omit<GroupMultiSelectOptions<Value>, "message" | "options">,
+): Promise<Value[]> {
+  return cancelable(async () =>
+    groupMultiselect({
+      selectableGroups: true,
+      required: false,
+      ...options,
       message,
-      name,
-      prefix,
-      onCancel: cancelFlow,
-    } as StringPromptOptions,
-  ])
-    .then((responses: any) => responses[name])
-    .catch((err: unknown) => {
-      error(err);
-    });
+      options: values,
+    }),
+  );
 }
 
-function askQuestionWithEditor(message: string): string {
-  const response = edit(message, { postfix: ".md" });
-  return response
-    .replace(/^#.*\n?/gm, "")
-    .replace(/\n+$/g, "")
-    .trim();
+type QuestionOptions = {
+  placeholder?: string;
+  notEmpty?: boolean;
+};
+async function askQuestion(
+  message: string,
+  { placeholder, notEmpty }: QuestionOptions = {},
+): Promise<string> {
+  return cancelable(() =>
+    text({
+      message,
+      placeholder,
+      validate: (input = "") =>
+        notEmpty && input.length === 0 ? `Can't be empty.` : undefined,
+    }),
+  );
 }
 
 async function askConfirm(message: string): Promise<boolean> {
-  const name = `Confirm-${serialId()}`;
-
-  return prompt([
-    {
+  return cancelable(() =>
+    confirm({
       message,
-      name,
-      prefix,
-      type: "confirm",
-      initial: true,
-      onCancel: cancelFlow,
-    } as BooleanPromptOptions,
-  ])
-    .then((responses: any) => responses[name])
-    .catch((err: unknown) => {
-      error(err);
-    });
+      initialValue: true,
+    }),
+  );
 }
 
-async function askList<Choice extends string>(
+async function askList<Value extends string>(
   message: string,
-  choices: Choice[],
-): Promise<Choice> {
-  const name = `List-${serialId()}`;
-
-  return prompt([
-    {
-      choices,
+  choices: Value[] | Option<Value>[],
+): Promise<Value> {
+  return cancelable(() => {
+    const options = choices.map<Option<Value>>((choice) =>
+      typeof choice === "string"
+        ? ({ value: choice } as Option<Value>)
+        : choice,
+    );
+    return select({
       message,
-      name,
-      prefix,
-      type: "select",
-      onCancel: cancelFlow,
-    } as ArrayPromptOptions,
-  ])
-    .then((responses: any) => responses[name])
-    .catch((err: unknown) => {
-      error(err);
+      options,
     });
+  });
 }
 
-export {
-  askCheckboxPlus,
-  askQuestion,
-  askQuestionWithEditor,
-  askConfirm,
-  askList,
-};
+export { askConfirm, askList, askMultiselect, askQuestion, importantWarning };

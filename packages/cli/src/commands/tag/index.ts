@@ -1,9 +1,25 @@
+import pc from "picocolors";
 import * as git from "@changesets/git";
-import { log } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config } from "@changesets/types";
-import { getPackages } from "@manypkg/get-packages";
+import { log, progress } from "@clack/prompts";
+import { getPackages, type Tool } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+
+function buildTag(tool: Tool, pkg: { name: string; newVersion: string }) {
+  return tool !== "root"
+    ? `${pkg.name}@${pkg.newVersion}`
+    : `v${pkg.newVersion}`;
+}
+
+function buildTagMessage(
+  tool: Tool,
+  pkg: { name: string; newVersion: string },
+) {
+  return tool !== "root"
+    ? `${pc.blue(pkg.name)}@${pc.green(pkg.newVersion)}`
+    : pc.cyan(`v${pkg.newVersion}`);
+}
 
 export default async function tag(cwd: string, config: Config) {
   const { packages, tool } = await getPackages(cwd);
@@ -18,18 +34,43 @@ export default async function tag(cwd: string, config: Config) {
       }),
   );
 
-  for (const { name, newVersion } of await getUntaggedPackages(
+  const untaggedPackages = await getUntaggedPackages(
     taggablePackages,
     cwd,
     tool,
-  )) {
-    const tag = tool !== "root" ? `${name}@${newVersion}` : `v${newVersion}`;
-
-    if (allExistingTags.has(tag)) {
-      log("Skipping tag (already exists): ", tag);
-    } else {
-      log("New tag: ", tag);
-      await git.tag(tag, cwd);
-    }
+  );
+  const skippedTags = untaggedPackages.filter((pkg) =>
+    allExistingTags.has(buildTag(tool, pkg)),
+  );
+  if (untaggedPackages.length === 0) {
+    log.info("Did not find any packages that need to be tagged.");
+    return;
   }
+
+  const p = progress({ max: untaggedPackages.length - skippedTags.length });
+  p.start("Creating tags...");
+
+  for (const pkg of untaggedPackages) {
+    const tag = buildTag(tool, pkg);
+    if (allExistingTags.has(tag)) continue;
+
+    await git.tag(tag, cwd);
+
+    p.advance(1, buildTagMessage(tool, pkg));
+  }
+
+  const lines = [
+    "Created tags:",
+    untaggedPackages
+      .map((pkg) => `   - ${buildTagMessage(tool, pkg)}`)
+      .join(`\n`),
+  ];
+  if (skippedTags.length !== 0) {
+    lines.push(
+      "Skipped tags (already exist):",
+      ...skippedTags.map((pkg) => buildTagMessage(tool, pkg)),
+    );
+  }
+
+  p.stop(lines.join("\n"));
 }
