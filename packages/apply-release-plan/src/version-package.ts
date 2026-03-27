@@ -22,7 +22,7 @@ export default function versionPackage(
     packageJson: PackageJSON;
     dir: string;
   },
-  versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
+  versionsToUpdate: Array<{ name: string; version: string; oldVersion: string; type: VersionType }>,
   {
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
@@ -42,14 +42,14 @@ export default function versionPackage(
   for (let depType of DEPENDENCY_TYPES) {
     let deps = packageJson[depType];
     if (deps) {
-      for (let { name, version, type } of versionsToUpdate) {
+      for (let { name, version, oldVersion, type } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
         if (
           !depCurrentVersion ||
           depCurrentVersion.startsWith("file:") ||
           depCurrentVersion.startsWith("link:") ||
           !shouldUpdateDependencyBasedOnConfig(
-            { version, type },
+            { version, oldVersion, type },
             {
               depVersionRange: depCurrentVersion,
               depType,
