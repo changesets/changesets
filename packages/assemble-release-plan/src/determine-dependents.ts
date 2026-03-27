@@ -39,6 +39,7 @@ export default function determineDependents({
   let updated = false;
   // NOTE this is intended to be called recursively
   let pkgsToSearch = [...releases.values()];
+  const isPreMode = preInfo?.state?.mode === "pre";
 
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
@@ -97,7 +98,13 @@ export default function determineDependents({
                 .updateInternalDependents === "always" ||
                 !semverSatisfies(
                   incrementVersion(nextRelease, preInfo),
-                  versionRange
+                  versionRange,
+                  {
+                    includePrerelease:
+                      isPreMode &&
+                      config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+                        .onlyUpdatePeerDependentsWhenOutOfRange,
+                  }
                 ))
             ) {
               switch (depType) {
@@ -233,6 +240,7 @@ function shouldBumpMajor({
   preInfo: PreInfo | undefined;
   onlyUpdatePeerDependentsWhenOutOfRange: boolean;
 }) {
+  const isPreMode = preInfo?.state?.mode === "pre";
   // we check if it is a peerDependency because if it is, our dependent bump type might need to be major.
   return (
     depType === "peerDependencies" &&
@@ -241,7 +249,9 @@ function shouldBumpMajor({
     // 1. If onlyUpdatePeerDependentsWhenOutOfRange set to true, bump major if the version is leaving the range.
     // 2. If onlyUpdatePeerDependentsWhenOutOfRange set to false, bump major regardless whether or not the version is leaving the range.
     (!onlyUpdatePeerDependentsWhenOutOfRange ||
-      !semverSatisfies(incrementVersion(nextRelease, preInfo), versionRange)) &&
+      !semverSatisfies(incrementVersion(nextRelease, preInfo), versionRange, {
+        includePrerelease: isPreMode && onlyUpdatePeerDependentsWhenOutOfRange,
+      })) &&
     // bump major only if the dependent doesn't already has a major release.
     (!releases.has(dependent) ||
       (releases.has(dependent) && releases.get(dependent)!.type !== "major"))
