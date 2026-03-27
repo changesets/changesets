@@ -1,8 +1,5 @@
 {
-  "changelog": [
-    "@changesets/changelog-github",
-    { "repo": "changesets/changesets" }
-  ],
+  "changelog": "@changesets/changelog-github",
   "baseBranch": "main",
   "commit": false,
   "access": "public",
