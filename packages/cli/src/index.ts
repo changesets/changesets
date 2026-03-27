@@ -111,7 +111,7 @@ ${/* eslint-disable-next-line import/no-extraneous-dependencies */ ""}
       return process.exit(err.code);
     }
 
-    log.error(err);
+    log.error(err.stack);
     outro(pc.red("🦋 Exited with code 1"));
     process.exit(1);
   });
