@@ -108,7 +108,8 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Package[]
+  allPackages: Package[],
+  messageFromCli?: string
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
@@ -235,6 +236,14 @@ export default async function createChangeset(
     releases.push({ name: pkg.packageJson.name, type });
   }
 
+  if (messageFromCli !== undefined) {
+    return {
+      confirmed: false,
+      summary: messageFromCli,
+      releases,
+    };
+  }
+
   log(
     "Please enter a summary for this change (this will be in the changelogs)."
   );
@@ -259,10 +268,10 @@ export default async function createChangeset(
       );
     }
 
-    summary = await cli.askQuestion("");
+    summary = await cli.askQuestion("Summary");
     while (summary.length === 0) {
       summary = await cli.askQuestion(
-        "\n\n# A summary is required for the changelog! 😪"
+        "A summary is required! Please enter a summary"
       );
     }
   }

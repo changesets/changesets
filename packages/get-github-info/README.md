@@ -32,7 +32,7 @@ const { getInfo } = require("@changesets/get-github-info");
 const getReleaseLine = async (changeset, type) => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
-    .map((l) => l.trimRight());
+    .map((l) => l.trimEnd());
   // getInfo exposes the GH username and PR number if you want them directly
   // but it also exposes a set of links for the commit, PR and GH username
   let { user, pull, links } = await getInfo({
@@ -52,7 +52,7 @@ const getReleaseLine = async (changeset, type) => {
 // ...
 ```
 
-You'll need to [get a GitHub personal access token](https://github.com/settings/tokens/new) with `read:user` and `repo:status` permissions, and add it to a `.env` file.
+You'll need to [get a GitHub personal access token](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions, and add it to a `.env` file.
 
 ```bash
 GITHUB_TOKEN=token_here

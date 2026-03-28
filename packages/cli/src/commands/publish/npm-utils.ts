@@ -1,15 +1,15 @@
+import { spawnSync } from "child_process";
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import { AccessType, PackageJSON } from "@changesets/types";
-import pLimit from "p-limit";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
 import spawn from "spawndamnit";
 import semverParse from "semver/functions/parse";
-import { askQuestion } from "../../utils/cli-utilities";
-import { isCI } from "ci-info";
+import { createPromiseQueue } from "../../utils/createPromiseQueue";
 import { TwoFactorState } from "../../utils/types";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString";
+import { requiresDelegatedAuth } from "./publishPackages";
 
 interface PublishOptions {
   cwd: string;
@@ -18,8 +18,15 @@ interface PublishOptions {
   tag: string;
 }
 
-const npmRequestLimit = pLimit(40);
-const npmPublishLimit = pLimit(10);
+const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
+const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
+
+export const npmRequestQueue = createPromiseQueue(
+  NPM_REQUEST_CONCURRENCY_LIMIT
+);
+export const npmPublishQueue = createPromiseQueue(
+  NPM_PUBLISH_CONCURRENCY_LIMIT
+);
 
 function jsonParse(input: string) {
   try {
@@ -32,9 +39,22 @@ function jsonParse(input: string) {
   }
 }
 
+export const isCustomRegistry = (registry?: string): boolean => {
+  registry = normalizeRegistry(registry);
+  return (
+    !!registry &&
+    registry !== "https://registry.npmjs.org" &&
+    registry !== "https://registry.yarnpkg.com"
+  );
+};
+
 interface RegistryInfo {
   scope?: string;
   registry: string;
+}
+
+function normalizeRegistry(registry: string | undefined) {
+  return registry && registry.replace(/\/+$/, "");
 }
 
 export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
@@ -42,9 +62,10 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
 
   if (packageName?.startsWith("@")) {
     const scope = packageName.split("/")[0];
-    const scopedRegistry =
+    const scopedRegistry = normalizeRegistry(
       packageJson!.publishConfig?.[`${scope}:registry`] ||
-      process.env[`npm_config_${scope}:registry`];
+        process.env[`npm_config_${scope}:registry`]
+    );
     if (scopedRegistry) {
       return {
         scope,
@@ -53,8 +74,9 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
     }
   }
 
-  const registry =
-    packageJson?.publishConfig?.registry || process.env.npm_config_registry;
+  const registry = normalizeRegistry(
+    packageJson?.publishConfig?.registry || process.env.npm_config_registry
+  );
 
   return {
     scope: undefined,
@@ -111,18 +133,40 @@ export async function getTokenIsRequired() {
   return json.tfa.mode === "auth-and-writes";
 }
 
+// `npm info <pkg> --json` (aka `npm view`) behavior:
+//
+// - Bare package name starts with version string `'latest'`. If
+//   `dist-tags['latest']` exists, it's replaced with that value (e.g.
+//   `'1.0.0'`). Then ALL versions are filtered through
+//   `semver.satisfies(v, version, loose=true)`. When `latest` resolved to
+//   an exact version, this is effectively an exact match. When `latest`
+//   doesn't exist, the literal string `'latest'` reaches satisfies and
+//   matches nothing — zero results, empty stdout.
+// - Prereleases are invisible: satisfies runs WITHOUT `includePrerelease`,
+//   so no range (not even `*`) matches prerelease versions.
+// - When at least one version matches, the JSON output includes a `versions`
+//   array with ALL published versions including prereleases (bleeds through
+//   from the packument, unfiltered).
+// - npmjs.org auto-assigns `latest` on first publish in addition to the
+//   provided --tag, so bare queries always work there. GitHub Packages does
+//   NOT auto-assign `latest`, so the empty-stdout case above applies.
+// - `npm info <pkg>@<exact-prerelease> --json` works as long as that
+//   version exists on the registry: exact strings pass `semver.satisfies`,
+//   and the output still includes the full `versions` history (same
+//   packument merge). Returns empty when the version doesn't exist yet.
+// - Consequence: the exact-version fallback only provides data when
+//   localVersion is already published. For a new unpublished version both
+//   queries return empty → no versions list → only-pre detection is not
+//   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
+//   published with preState.tag rather than "latest".
 export function getPackageInfo(packageJson: PackageJSON) {
-  return npmRequestLimit(async () => {
+  return npmRequestQueue.add(async () => {
     info(`npm info ${packageJson.name}`);
 
     const { scope, registry } = getCorrectRegistry(packageJson);
 
-    // Due to a couple of issues with yarnpkg, we also want to override the npm registry when doing
-    // npm info.
-    // Issues: We sometimes get back cached responses, i.e old data about packages which causes
-    // `publish` to behave incorrectly. It can also cause issues when publishing private packages
-    // as they will always give a 404, which will tell `publish` to always try to publish.
-    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
+    // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
+    // bleed-through, enabling only-pre detection downstream. Returns empty when no `latest` exists.
     let result = await spawn("npm", [
       "info",
       packageJson.name,
@@ -130,8 +174,20 @@ export function getPackageInfo(packageJson: PackageJSON) {
       "--json",
     ]);
 
-    // Github package registry returns empty string when calling npm info
-    // for a non-existent package instead of a E404
+    // Bare query returned nothing — retry with exact version specifier
+    // to handle prerelease-only packages on registries without auto-`latest`.
+    if (result.stdout.toString() === "") {
+      result = await spawn("npm", [
+        "info",
+        `${packageJson.name}@${packageJson.version}`,
+        `--${scope ? `${scope}:` : ""}registry=${registry}`,
+        "--json",
+      ]);
+    }
+
+    // Normalize, just in case. The above prerelease-only package query should already have returned:
+    // - either a result (when the package+version exists)
+    // - or an error with: "code": "E404", "summary": "No match found for version $VERSION",
     if (result.stdout.toString() === "") {
       return {
         error: {
@@ -163,42 +219,17 @@ export async function infoAllow404(packageJson: PackageJSON) {
   return { published: true, pkgInfo };
 }
 
-let otpAskLimit = pLimit(1);
-
-let askForOtpCode = (twoFactorState: TwoFactorState) =>
-  otpAskLimit(async () => {
-    if (twoFactorState.token !== null) return twoFactorState.token;
-    info(
-      "This operation requires a one-time password from your authenticator."
-    );
-
-    let val = await askQuestion("Enter one-time password:");
-    twoFactorState.token = val;
-    return val;
-  });
-
-export let getOtpCode = async (twoFactorState: TwoFactorState) => {
-  if (twoFactorState.token !== null) {
-    return twoFactorState.token;
-  }
-  return askForOtpCode(twoFactorState);
-};
-
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
   packageJson: PackageJSON,
   opts: PublishOptions,
   twoFactorState: TwoFactorState
-): Promise<{ published: boolean }> {
-  let publishTool = await getPublishTool(opts.cwd);
-  let publishFlags = opts.access ? ["--access", opts.access] : [];
-  publishFlags.push("--tag", opts.tag);
+): Promise<{ published: boolean; allowRetry?: boolean }> {
+  const publishTool = await getPublishTool(opts.cwd);
 
-  if ((await twoFactorState.isRequired) && !isCI) {
-    let otpCode = await getOtpCode(twoFactorState);
-    publishFlags.push("--otp", otpCode);
-  }
+  const publishFlags = opts.access ? ["--access", opts.access] : [];
+  publishFlags.push("--tag", opts.tag);
   if (publishTool.name === "pnpm" && publishTool.shouldAddNoGitChecks) {
     publishFlags.push("--no-git-checks");
   }
@@ -211,19 +242,54 @@ async function internalPublish(
     [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
 
+  if (requiresDelegatedAuth(twoFactorState)) {
+    const result =
+      publishTool.name === "pnpm"
+        ? spawnSync("pnpm", ["publish", ...publishFlags], {
+            env: Object.assign({}, process.env, envOverride),
+            cwd: opts.cwd,
+            stdio: "inherit",
+          })
+        : spawnSync(
+            publishTool.name,
+            ["publish", opts.publishDir, ...publishFlags],
+            {
+              env: Object.assign({}, process.env, envOverride),
+              stdio: "inherit",
+            }
+          );
+
+    if (result.status === 0) {
+      twoFactorState.allowConcurrency = true;
+      // bump for remaining packages
+      npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
+      return { published: true };
+    }
+
+    return { published: false };
+  }
+
+  // in the delegated mode we don't need the json output
+  // as we won't be handling the auth errors
+  publishFlags.push("--json");
+  if (twoFactorState.token) {
+    publishFlags.push("--otp", twoFactorState.token);
+  }
+
   let { code, stdout, stderr } =
     publishTool.name === "pnpm"
-      ? await spawn("pnpm", ["publish", "--json", ...publishFlags], {
+      ? await spawn("pnpm", ["publish", ...publishFlags], {
           env: Object.assign({}, process.env, envOverride),
           cwd: opts.cwd,
         })
       : await spawn(
           publishTool.name,
-          ["publish", opts.publishDir, "--json", ...publishFlags],
+          ["publish", opts.publishDir, ...publishFlags],
           {
             env: Object.assign({}, process.env, envOverride),
           }
         );
+
   if (code !== 0) {
     // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
     // We want to handle this as best we can but it has some struggles:
@@ -239,16 +305,22 @@ async function internalPublish(
       if (
         (json.error.code === "EOTP" ||
           (json.error.code === "E401" &&
-            json.error.detail.includes("--otp=<code>"))) &&
-        !isCI
+            json.error.detail?.includes("--otp=<code>"))) &&
+        process.stdin.isTTY
       ) {
-        if (twoFactorState.token !== null) {
-          // the current otp code must be invalid since it errored
-          twoFactorState.token = null;
-        }
+        // the current otp code must be invalid since it errored
+        twoFactorState.token = undefined;
         // just in case this isn't already true
-        twoFactorState.isRequired = Promise.resolve(true);
-        return internalPublish(packageJson, opts, twoFactorState);
+        twoFactorState.isRequired = true;
+        twoFactorState.allowConcurrency = false;
+        npmPublishQueue.setConcurrency(1);
+        return {
+          published: false,
+          // given we have just adjusted the concurrency, we need to handle the retries in the layer that requeues the publish
+          // calling internalPublish again would allow concurrent failures to run again concurrently
+          // but only one retried publish should get delegated to the npm cli and other ones should "await" its successful result before being retried
+          allowRetry: true,
+        };
       }
       error(
         `an error occurred while publishing ${packageJson.name}: ${json.error.code}`,
@@ -268,9 +340,14 @@ export function publish(
   opts: PublishOptions,
   twoFactorState: TwoFactorState
 ): Promise<{ published: boolean }> {
-  // If there are many packages to be published, it's better to limit the
-  // concurrency to avoid unwanted errors, for example from npm.
-  return npmRequestLimit(() =>
-    npmPublishLimit(() => internalPublish(packageJson, opts, twoFactorState))
-  );
+  return npmRequestQueue.add(async () => {
+    let result: { published: boolean; allowRetry?: boolean };
+    do {
+      result = await npmPublishQueue.add(() =>
+        internalPublish(packageJson, opts, twoFactorState)
+      );
+    } while (result.allowRetry);
+
+    return { published: result.published };
+  });
 }
