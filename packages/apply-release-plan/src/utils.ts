@@ -16,7 +16,7 @@ function getBumpLevel(type: VersionType) {
 }
 
 export function shouldUpdateDependencyBasedOnConfig(
-  release: { version: string; type: VersionType },
+  release: { version: string; oldVersion: string; type: VersionType },
   {
     depVersionRange,
     depType,
@@ -36,6 +36,19 @@ export function shouldUpdateDependencyBasedOnConfig(
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
 ): boolean {
+  const usesWorkspaceRange = depVersionRange.startsWith("workspace:");
+  if (usesWorkspaceRange) {
+    depVersionRange = depVersionRange.replace(/^workspace:/, "");
+    switch (depVersionRange) {
+      case "*":
+        // given the old range was exact, we can short circuit and return true
+        return true;
+      case "^":
+      case "~":
+        depVersionRange = `${depVersionRange}${release.oldVersion}`;
+        break;
+    }
+  }
   if (!semverSatisfies(release.version, depVersionRange)) {
     // Dependencies leaving semver range should always be updated
     return true;
