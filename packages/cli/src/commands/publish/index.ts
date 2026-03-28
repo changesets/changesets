@@ -1,12 +1,12 @@
-import publishPackages, { PublishedResult } from "./publishPackages";
+import publishPackages from "./publishPackages";
 import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
-import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import pc from "picocolors";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages";
+import applyGitTag from "../../utils/applyGitTag";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map((p) => `${p.name}@${p.newVersion}`).join("\n");
@@ -57,6 +57,7 @@ export default async function publish(
   }
 
   const { packages, tool } = await getPackages(cwd);
+  const allAreFixed = packages.length === config.fixed[0]?.length;
 
   const tagPrivatePackages =
     config.privatePackages && config.privatePackages.tag;
@@ -97,7 +98,8 @@ export default async function publish(
       // fail if we are behind the base branch).
       log(`Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`);
 
-      await tagPublish(tool, successfulNpmPublishes, cwd);
+      // When all packages are fixed then force the root-style tag format.
+      await applyGitTag(cwd, tool, successfulNpmPublishes, allAreFixed);
     }
   }
 
@@ -105,7 +107,8 @@ export default async function publish(
     success("found untagged projects:");
     logReleases(untaggedPrivatePackageReleases);
 
-    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
+    // When all packages are fixed then force the root-style tag format.
+    await applyGitTag(cwd, tool, untaggedPrivatePackageReleases, allAreFixed);
   }
 
   if (unsuccessfulNpmPublishes.length > 0) {
@@ -113,23 +116,5 @@ export default async function publish(
 
     logReleases(unsuccessfulNpmPublishes);
     throw new ExitError(1);
-  }
-}
-
-async function tagPublish(
-  tool: string,
-  packageReleases: PublishedResult[],
-  cwd: string
-) {
-  if (tool !== "root") {
-    for (const pkg of packageReleases) {
-      const tag = `${pkg.name}@${pkg.newVersion}`;
-      log("New tag: ", tag);
-      await git.tag(tag, cwd);
-    }
-  } else {
-    const tag = `v${packageReleases[0].newVersion}`;
-    log("New tag: ", tag);
-    await git.tag(tag, cwd);
   }
 }

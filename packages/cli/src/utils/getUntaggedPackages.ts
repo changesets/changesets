@@ -1,18 +1,21 @@
 import * as git from "@changesets/git";
+import { PackageJSON } from "@changesets/types";
 import { Package, Tool } from "@manypkg/get-packages";
 import { PublishedResult } from "../commands/publish/publishPackages";
 
 export async function getUntaggedPackages(
-  packages: Package[],
+  packages: (PackageJSON | Package)[],
   cwd: string,
   tool: Tool
 ) {
+  const normalizedPackages = packages.map((pkg) =>
+    "packageJson" in pkg ? pkg.packageJson : pkg
+  );
+
   const packageWithTags = await Promise.all(
-    packages.map(async (pkg) => {
+    normalizedPackages.map(async (pkg) => {
       const tagName =
-        tool === "root"
-          ? `v${pkg.packageJson.version}`
-          : `${pkg.packageJson.name}@${pkg.packageJson.version}`;
+        tool === "root" ? `v${pkg.version}` : `${pkg.name}@${pkg.version}`;
       const isMissingTag = !(
         (await git.tagExists(tagName, cwd)) ||
         (await git.remoteTagExists(tagName))
@@ -27,8 +30,8 @@ export async function getUntaggedPackages(
   for (const packageWithTag of packageWithTags) {
     if (packageWithTag.isMissingTag) {
       untagged.push({
-        name: packageWithTag.pkg.packageJson.name,
-        newVersion: packageWithTag.pkg.packageJson.version,
+        name: packageWithTag.pkg.name,
+        newVersion: packageWithTag.pkg.version,
         published: false,
       });
     }

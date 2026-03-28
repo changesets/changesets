@@ -10,6 +10,8 @@ jest.mock("../publishPackages");
 
 // @ts-ignore
 git.tag.mockImplementation(() => Promise.resolve(true));
+// @ts-ignore
+git.getAllTags.mockImplementation(() => Promise.resolve(new Set()));
 
 describe("running release", () => {
   silenceLogsInBlock();
