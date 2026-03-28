@@ -10,23 +10,23 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
     it("returns true when version leaves the semver range", () => {
       expect(
         shouldUpdateDependencyBasedOnConfig(
-          { version: "2.0.0", type: "major" },
+          { version: "2.0.0", oldVersion: "1.0.0", type: "major" },
           { depVersionRange: "^1.0.0", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).toBe(true);
     });
 
     it("returns false when version stays within the semver range and bump is below min", () => {
       expect(
         shouldUpdateDependencyBasedOnConfig(
-          { version: "1.0.1", type: "patch" },
+          { version: "1.0.1", oldVersion: "1.0.0", type: "patch" },
           { depVersionRange: "^1.0.0", depType: "dependencies" },
           {
             minReleaseType: "minor",
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-          }
-        )
+          },
+        ),
       ).toBe(false);
     });
   });
@@ -36,13 +36,13 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
       // 1.0.1 satisfies ^1.0.0 — should NOT force an update
       expect(
         shouldUpdateDependencyBasedOnConfig(
-          { version: "1.0.1", type: "patch" },
+          { version: "1.0.1", oldVersion: "1.0.0", type: "patch" },
           { depVersionRange: "workspace:^1.0.0", depType: "dependencies" },
           {
             minReleaseType: "minor",
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-          }
-        )
+          },
+        ),
       ).toBe(false);
     });
 
@@ -50,33 +50,33 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
       // 2.0.0 does not satisfy ^1.0.0 — should always update
       expect(
         shouldUpdateDependencyBasedOnConfig(
-          { version: "2.0.0", type: "major" },
+          { version: "2.0.0", oldVersion: "1.0.0", type: "major" },
           { depVersionRange: "workspace:^1.0.0", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).toBe(true);
     });
 
     it("returns false when version satisfies workspace:~1.2.3 and bump is below min", () => {
       expect(
         shouldUpdateDependencyBasedOnConfig(
-          { version: "1.2.4", type: "patch" },
+          { version: "1.2.4", oldVersion: "1.2.3", type: "patch" },
           { depVersionRange: "workspace:~1.2.3", depType: "dependencies" },
           {
             minReleaseType: "minor",
             onlyUpdatePeerDependentsWhenOutOfRange: false,
-          }
-        )
+          },
+        ),
       ).toBe(false);
     });
 
     it("returns true when version leaves workspace:~1.2.3 range", () => {
       expect(
         shouldUpdateDependencyBasedOnConfig(
-          { version: "1.3.0", type: "minor" },
+          { version: "1.3.0", oldVersion: "1.2.3", type: "minor" },
           { depVersionRange: "workspace:~1.2.3", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).toBe(true);
     });
   });
@@ -86,30 +86,30 @@ describe("shouldUpdateDependencyBasedOnConfig", () => {
       // workspace:^ is not a real semver range; it should not crash
       expect(() =>
         shouldUpdateDependencyBasedOnConfig(
-          { version: "1.1.0", type: "minor" },
+          { version: "1.1.0", oldVersion: "1.0.0", type: "minor" },
           { depVersionRange: "workspace:^", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).not.toThrow();
     });
 
     it("does not throw for workspace:~", () => {
       expect(() =>
         shouldUpdateDependencyBasedOnConfig(
-          { version: "1.1.0", type: "minor" },
+          { version: "1.1.0", oldVersion: "1.0.0", type: "minor" },
           { depVersionRange: "workspace:~", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).not.toThrow();
     });
 
     it("does not throw for workspace:*", () => {
       expect(() =>
         shouldUpdateDependencyBasedOnConfig(
-          { version: "1.1.0", type: "minor" },
+          { version: "1.1.0", oldVersion: "1.0.0", type: "minor" },
           { depVersionRange: "workspace:*", depType: "dependencies" },
-          base
-        )
+          base,
+        ),
       ).not.toThrow();
     });
   });
