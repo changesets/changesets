@@ -5,6 +5,7 @@ import type { Config, WrittenConfig, Packages } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
+import path from "path";
 
 vi.mock("@changesets/logger");
 
@@ -25,10 +26,11 @@ type CorrectCase = {
 };
 
 let defaultPackages: Packages = {
-  root: {
+  rootPackage: {
     packageJson: { name: "", version: "" },
     dir: "/",
   },
+  rootDir: "/",
   packages: [],
   tool: { type: "yarn" },
 };
@@ -37,7 +39,7 @@ const withPackages = (pkgNames: string[]) => ({
   ...defaultPackages,
   packages: pkgNames.map((pkgName) => ({
     packageJson: { name: pkgName, version: "" },
-    dir: "dir",
+    dir: path.resolve("dir"),
   })),
 });
 
@@ -50,7 +52,8 @@ test("read reads the config", async () => {
   });
   let config = await read(cwd, {
     ...defaultPackages,
-    root: { ...defaultPackages.root, dir: cwd },
+    rootDir: cwd,
+    rootPackage: { ...defaultPackages.rootPackage!, dir: cwd },
   });
   expect(config).toEqual({
     fixed: [],

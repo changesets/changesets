@@ -5,12 +5,12 @@ import type { Package, Packages } from "@changesets/types";
 export async function getUntaggedPackages(
   packages: Array<Package>,
   cwd: string,
-  tool: Packages["tool"]["type"],
+  tool: Packages["tool"],
 ) {
   const packageWithTags = await Promise.all(
     packages.map(async (pkg) => {
       const tagName =
-        tool === "root"
+        tool.type === "root"
           ? `v${pkg.packageJson.version}`
           : `${pkg.packageJson.name}@${pkg.packageJson.version}`;
       const isMissingTag = !(

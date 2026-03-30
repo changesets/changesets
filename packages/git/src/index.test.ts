@@ -530,6 +530,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -559,6 +560,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -612,6 +614,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*", "packages/*/examples/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -650,6 +653,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*/examples/*", "packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -688,6 +692,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -719,6 +724,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -757,6 +763,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -776,6 +783,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -808,6 +816,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -845,6 +854,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
