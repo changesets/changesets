@@ -1,4 +1,3 @@
-import { spawnSync } from "child_process";
 import { ExitError } from "@changesets/errors";
 import { error, info, warn } from "@changesets/logger";
 import { AccessType, PackageJSON } from "@changesets/types";
@@ -219,13 +218,26 @@ export async function infoAllow404(packageJson: PackageJSON) {
   return { published: true, pkgInfo };
 }
 
+// we check `npm info` before publishing but `npm info` can return stale data at times
+// so we need to gracefully handle this situation
+function isAlreadyPublishedError(output: string): boolean {
+  return output.includes(
+    "cannot publish over the previously published version"
+  );
+}
+
+type InternalPublishResult =
+  | { result: "published" }
+  | { result: "skipped" }
+  | { result: "failed"; allowRetry?: boolean };
+
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
   packageJson: PackageJSON,
   opts: PublishOptions,
   twoFactorState: TwoFactorState
-): Promise<{ published: boolean; allowRetry?: boolean }> {
+): Promise<InternalPublishResult> {
   const publishTool = await getPublishTool(opts.cwd);
 
   const publishFlags = opts.access ? ["--access", opts.access] : [];
@@ -243,30 +255,48 @@ async function internalPublish(
   };
 
   if (requiresDelegatedAuth(twoFactorState)) {
-    const result =
+    // it's not easily controllable but ideally no other work should happen until this is done
+    // we specifically don't want any other output to interfere with the delegated auth flow
+    const child =
       publishTool.name === "pnpm"
-        ? spawnSync("pnpm", ["publish", ...publishFlags], {
+        ? spawn("pnpm", ["publish", ...publishFlags], {
             env: Object.assign({}, process.env, envOverride),
             cwd: opts.cwd,
-            stdio: "inherit",
+            stdio: ["inherit", "inherit", "pipe"],
           })
-        : spawnSync(
+        : spawn(
             publishTool.name,
             ["publish", opts.publishDir, ...publishFlags],
             {
               env: Object.assign({}, process.env, envOverride),
-              stdio: "inherit",
+              stdio: ["inherit", "inherit", "pipe"],
             }
           );
 
-    if (result.status === 0) {
+    child.on("stderr", (data: Buffer) => process.stderr.write(data));
+
+    const result = await child;
+
+    if (result.code === 0) {
       twoFactorState.allowConcurrency = true;
       // bump for remaining packages
       npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
-      return { published: true };
+      return { result: "published" };
     }
 
-    return { published: false };
+    // in the delegated mode all tested npm versions (v3-v10) log the error to stderr
+    if (isAlreadyPublishedError(result.stderr.toString())) {
+      // given this error happened in the delegated mode, the user was prompted to log in
+      // for that reason, it's nice to show this warning to the user so they are not confused by the printed error
+      warn(
+        `${packageJson.name} is already published (likely a stale registry data led to a duplicate publish attempt)`
+      );
+      twoFactorState.allowConcurrency = true;
+      npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
+      return { result: "skipped" };
+    }
+
+    return { result: "failed" };
   }
 
   // in the delegated mode we don't need the json output
@@ -301,6 +331,13 @@ async function internalPublish(
       getLastJsonObjectFromString(stdout.toString());
 
     if (json?.error) {
+      if (
+        json.error.code === "E403" &&
+        isAlreadyPublishedError(json.error.summary)
+      ) {
+        // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
+        return { result: "skipped" };
+      }
       // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
       if (
         (json.error.code === "EOTP" ||
@@ -315,7 +352,7 @@ async function internalPublish(
         twoFactorState.allowConcurrency = false;
         npmPublishQueue.setConcurrency(1);
         return {
-          published: false,
+          result: "failed",
           // given we have just adjusted the concurrency, we need to handle the retries in the layer that requeues the publish
           // calling internalPublish again would allow concurrent failures to run again concurrently
           // but only one retried publish should get delegated to the npm cli and other ones should "await" its successful result before being retried
@@ -330,24 +367,24 @@ async function internalPublish(
     }
 
     error(stderr.toString() || stdout.toString());
-    return { published: false };
+    return { result: "failed" };
   }
-  return { published: true };
+  return { result: "published" };
 }
 
 export function publish(
   packageJson: PackageJSON,
   opts: PublishOptions,
   twoFactorState: TwoFactorState
-): Promise<{ published: boolean }> {
+): Promise<{ result: "published" | "skipped" | "failed" }> {
   return npmRequestQueue.add(async () => {
-    let result: { published: boolean; allowRetry?: boolean };
+    let result: InternalPublishResult;
     do {
       result = await npmPublishQueue.add(() =>
         internalPublish(packageJson, opts, twoFactorState)
       );
-    } while (result.allowRetry);
+    } while (result.result === "failed" && result.allowRetry);
 
-    return { published: result.published };
+    return { result: result.result };
   });
 }

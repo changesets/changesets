@@ -1,6 +1,5 @@
 import * as git from "@changesets/git";
 import { Package, Tool } from "@manypkg/get-packages";
-import { PublishedResult } from "../commands/publish/publishPackages";
 
 export async function getUntaggedPackages(
   packages: Package[],
@@ -22,14 +21,13 @@ export async function getUntaggedPackages(
     })
   );
 
-  const untagged: PublishedResult[] = [];
+  const untagged: Array<{ name: string; newVersion: string }> = [];
 
   for (const packageWithTag of packageWithTags) {
     if (packageWithTag.isMissingTag) {
       untagged.push({
         name: packageWithTag.pkg.packageJson.name,
         newVersion: packageWithTag.pkg.packageJson.version,
-        published: false,
       });
     }
   }
