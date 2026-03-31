@@ -8,8 +8,7 @@ import tag from "../index.ts";
 vi.mock("@changesets/git");
 
 async function readConfig(cwd: string) {
-  const { root, packages, tool } = await getPackages(cwd);
-  return read(cwd, { root, packages, tool: { type: tool } });
+  return read(cwd, await getPackages(cwd));
 }
 
 describe("tag command", () => {
@@ -22,6 +21,7 @@ describe("tag command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -51,6 +51,7 @@ describe("tag command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",

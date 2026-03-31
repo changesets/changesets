@@ -75,7 +75,7 @@ export default async function applyReleasePlan(
   snapshot?: string | boolean,
   contextDir = import.meta.dirname,
 ) {
-  let cwd = packages.root.dir;
+  let cwd = packages.rootDir;
 
   let touchedFiles = [];
 

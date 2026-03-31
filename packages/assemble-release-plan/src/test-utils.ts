@@ -1,3 +1,4 @@
+import path from "node:path";
 import type {
   NewChangeset,
   Release,
@@ -18,7 +19,7 @@ function getPackage({
       name,
       version,
     },
-    dir: "this-shouldn't-matter",
+    dir: path.resolve(name),
   };
 }
 
@@ -51,13 +52,14 @@ function getRelease({
 
 let getSimpleSetup = () => ({
   packages: {
-    root: {
+    rootPackage: {
       packageJson: {
         name: "root",
         version: "0.0.0",
       },
       dir: "/",
     },
+    rootDir: "/",
     packages: [getPackage({ name: "pkg-a", version: "1.0.0" })],
     tool: { type: "yarn" },
   } satisfies Packages,

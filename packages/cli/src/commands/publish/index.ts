@@ -105,7 +105,7 @@ ${formatPackageList(successfulNpmPublishes)}
       p.start(
         `Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`,
       );
-      await tagPublish(tool, successfulNpmPublishes, cwd);
+      await tagPublish(tool.type, successfulNpmPublishes, cwd);
       p.stop(`Created git tag${successfulNpmPublishes.length > 1 ? "s" : ""}.`);
     }
   }
@@ -122,7 +122,7 @@ ${formatPackageList(untaggedPrivatePackageReleases, pc.yellowBright)}
     p.start(
       `Creating git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}...`,
     );
-    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
+    await tagPublish(tool.type, untaggedPrivatePackageReleases, cwd);
     p.stop(
       `Created git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}.`,
     );

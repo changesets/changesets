@@ -55,11 +55,11 @@ You can then run ${pc.cyan("changeset version")} again to do a normal release.
     return;
   }
 
-  const { root, packages, tool } = await getPackages(cwd);
+  const packages = await getPackages(cwd);
 
   const releasePlan = assembleReleasePlan(
     changesets,
-    { root, packages, tool: { type: tool } },
+    packages,
     releaseConfig,
     preState,
     options.snapshot
@@ -74,7 +74,7 @@ You can then run ${pc.cyan("changeset version")} again to do a normal release.
 
   const [...touchedFiles] = await applyReleasePlan(
     releasePlan,
-    { root, packages, tool: { type: tool } },
+    packages,
     releaseConfig,
     options.snapshot,
     import.meta.dirname,

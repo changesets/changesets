@@ -97,8 +97,10 @@ describe("Add command", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -138,6 +140,7 @@ describe("Add command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -207,8 +210,10 @@ describe("Add command", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -254,8 +259,10 @@ describe("Add command", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -337,8 +344,10 @@ describe("Add command", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "yarn.lock": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -375,8 +384,10 @@ describe("Add command", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "yarn.lock": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -403,8 +414,10 @@ describe("Add command", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "yarn.lock": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -458,8 +471,10 @@ describe("Add command", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.3",
@@ -499,8 +514,10 @@ describe("Add command", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -526,8 +543,10 @@ describe("Add command", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -589,6 +608,7 @@ describe("Add command", () => {
       "package.json": JSON.stringify({
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
       }),

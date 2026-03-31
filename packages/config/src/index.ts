@@ -5,6 +5,7 @@ import type {
   Config,
   Fixed,
   Linked,
+  Package,
   PackageGroup,
   Packages,
   WrittenConfig,
@@ -97,13 +98,10 @@ function isArray<T>(
 }
 
 export let read = async (cwd: string, packages?: Packages) => {
-  if (!packages) {
-    const { root, packages: pkgs, tool } = await getPackages(cwd);
-    packages = { root, packages: pkgs, tool: { type: tool } };
-  }
+  packages ??= await getPackages(cwd);
   let json = JSON.parse(
     await fs.readFile(
-      path.join(packages.root.dir, ".changeset", "config.json"),
+      path.join(packages?.rootDir, ".changeset", "config.json"),
       "utf8",
     ),
   );
@@ -611,7 +609,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
   return config;
 };
 
-let fakePackage = {
+let fakePackage: Package = {
   dir: "",
   packageJson: {
     name: "",
@@ -620,7 +618,8 @@ let fakePackage = {
 };
 
 export let defaultConfig = parse(defaultWrittenConfig, {
-  root: fakePackage,
   tool: { type: "root" },
+  rootDir: fakePackage.dir,
+  rootPackage: fakePackage,
   packages: [fakePackage],
 });

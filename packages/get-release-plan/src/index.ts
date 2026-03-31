@@ -10,24 +10,11 @@ export default async function getReleasePlan(
   sinceRef?: string,
   passedConfig?: Config,
 ): Promise<ReleasePlan> {
-  const { root, packages, tool } = await getPackages(cwd);
-  const preState = await readPreState(root.dir);
-  const readConfig = await read(root.dir, {
-    root,
-    packages,
-    tool: { type: tool },
-  });
+  const packages = await getPackages(cwd);
+  const preState = await readPreState(packages.rootDir);
+  const readConfig = await read(packages.rootDir, packages);
   const config = passedConfig ? { ...readConfig, ...passedConfig } : readConfig;
-  const changesets = await readChangesets(root.dir, sinceRef);
+  const changesets = await readChangesets(packages.rootDir, sinceRef);
 
-  return assembleReleasePlan(
-    changesets,
-    {
-      root,
-      packages,
-      tool: { type: tool },
-    },
-    config,
-    preState,
-  );
+  return assembleReleasePlan(changesets, packages, config, preState);
 }

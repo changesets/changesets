@@ -21,6 +21,7 @@ describe("Publish command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",

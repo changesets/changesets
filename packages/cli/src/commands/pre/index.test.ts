@@ -17,8 +17,10 @@ describe("enterPre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
     });
     await pre(cwd, { command: "enter", tag: "next" });
 
@@ -43,8 +45,10 @@ describe("enterPre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
         initialVersions: {},
@@ -73,8 +77,10 @@ describe("enterPre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
         initialVersions: {},
@@ -108,8 +114,10 @@ describe("exitPre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
         initialVersions: {},
@@ -134,8 +142,10 @@ describe("exitPre", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
     });
     await expect(pre(cwd, { command: "exit" })).rejects.toBeInstanceOf(
       ExitError,

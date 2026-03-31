@@ -1,22 +1,22 @@
 import pc from "picocolors";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config } from "@changesets/types";
+import type { Config, Packages } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
-import { getPackages, type Tool } from "@manypkg/get-packages";
+import { getPackages } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 
-function buildTag(tool: Tool, pkg: { name: string; newVersion: string }) {
-  return tool !== "root"
+function buildTag(tool: Packages["tool"], pkg: { name: string; newVersion: string }) {
+  return tool.type !== "root"
     ? `${pkg.name}@${pkg.newVersion}`
     : `v${pkg.newVersion}`;
 }
 
 function buildTagMessage(
-  tool: Tool,
+  tool: Packages["tool"],
   pkg: { name: string; newVersion: string },
 ) {
-  return tool !== "root"
+  return tool.type !== "root"
     ? `${pc.blue(pkg.name)}@${pc.green(pkg.newVersion)}`
     : pc.cyan(`v${pkg.newVersion}`);
 }

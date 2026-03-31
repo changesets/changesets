@@ -182,9 +182,10 @@ export interface Package {
 }
 
 export interface Packages {
-  root: Package;
+  rootDir: string;
+  rootPackage?: Package;
   packages: Array<Package>;
   tool: {
-    type: "yarn" | "pnpm" | "lerna" | "bolt" | "root";
+    type: "yarn" | "pnpm" | "lerna" | "bolt" | "root" | (string & {});
   };
 }
