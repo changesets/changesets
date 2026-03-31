@@ -46,9 +46,7 @@ export default async function getChangesets(
 
   let changesets = contents.filter(
     (file) =>
-      !file.startsWith(".") &&
-      file.endsWith(".md") &&
-      !/^[A-Z]/.test(file)
+      !file.startsWith(".") && file.endsWith(".md") && !/^[A-Z]/.test(file)
   );
 
   const changesetContents = changesets.map(async (file) => {
