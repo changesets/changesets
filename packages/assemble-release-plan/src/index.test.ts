@@ -1077,6 +1077,42 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[1].oldVersion).toEqual("1.0.0");
       expect(releases[1].newVersion).toEqual("1.0.1");
     });
+    it("should assemble release plan without workspace path dependencies when the dependent has a changeset type of none", () => {
+      setup.updateDependency("pkg-c", "pkg-b", "workspace:packages/pkg-b");
+      setup.addChangeset({
+        id: "big-cats-delight",
+        releases: [{ name: "pkg-b", type: "none" }],
+      });
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        defaultConfig,
+        undefined
+      );
+
+      expect(releases.length).toEqual(2);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].oldVersion).toEqual("1.0.0");
+      expect(releases[1].newVersion).toEqual("1.0.0");
+    });
+    it("should assemble release plan with workspace path dependencies", () => {
+      setup.updateDependency("pkg-b", "pkg-a", "workspace:packages/pkg-a");
+
+      let { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        defaultConfig,
+        undefined
+      );
+
+      expect(releases.length).toEqual(2);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[1].name).toEqual("pkg-b");
+      expect(releases[1].oldVersion).toEqual("1.0.0");
+      expect(releases[1].newVersion).toEqual("1.0.1");
+    });
   });
 
   describe("updateInternalDependents: always", () => {
