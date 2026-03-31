@@ -24,6 +24,7 @@ async function generateChangesForVersionTypeMarkdown(
 
 // release is the package and version we are releasing
 export default async function getChangelogEntry(
+  cwd: string,
   release: ModCompWithPackage,
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
@@ -68,7 +69,13 @@ export default async function getChangelogEntry(
       versionRange &&
       (usesWorkspaceRange || validRange(versionRange) !== null) &&
       shouldUpdateDependencyBasedOnConfig(
-        { type: rel.type, version: rel.newVersion, oldVersion: rel.oldVersion },
+        cwd,
+        {
+          type: rel.type,
+          version: rel.newVersion,
+          oldVersion: rel.oldVersion,
+          dir: rel.dir,
+        },
         {
           depVersionRange: versionRange,
           depType: dependencyVersionRange ? "dependencies" : "peerDependencies",

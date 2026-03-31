@@ -2,7 +2,9 @@
  * Shared utility functions and business logic
  */
 import semverSatisfies from "semver/functions/satisfies";
+import validRange from "semver/ranges/valid";
 import { VersionType } from "@changesets/types";
+import path from "node:path";
 
 const bumpTypes = ["none", "patch", "minor", "major"];
 
@@ -16,7 +18,13 @@ function getBumpLevel(type: VersionType) {
 }
 
 export function shouldUpdateDependencyBasedOnConfig(
-  release: { version: string; oldVersion: string; type: VersionType },
+  cwd: string,
+  release: {
+    version: string;
+    oldVersion: string;
+    type: VersionType;
+    dir: string;
+  },
   {
     depVersionRange,
     depType,
@@ -47,6 +55,15 @@ export function shouldUpdateDependencyBasedOnConfig(
       case "~":
         depVersionRange = `${depVersionRange}${release.oldVersion}`;
         break;
+      default: {
+        if (!validRange(depVersionRange)) {
+          return (
+            path.posix.normalize(depVersionRange) ===
+            path.relative(cwd, release.dir).replace(/\\/g, "/")
+          );
+        }
+        // fallthrough
+      }
     }
   }
   if (!semverSatisfies(release.version, depVersionRange)) {

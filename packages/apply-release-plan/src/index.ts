@@ -120,12 +120,14 @@ export default async function applyReleasePlan(
       version: newVersion,
       oldVersion,
       type,
+      dir: packagesByName.get(name)!.dir,
     })
   );
 
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map((release) => {
     return versionPackage(release, versionsToUpdate, {
+      cwd,
       updateInternalDependencies: config.updateInternalDependencies,
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
@@ -253,6 +255,7 @@ async function getNewChangelogEntry(
   return Promise.all(
     releasesWithPackage.map(async (release) => {
       let changelog = await getChangelogEntry(
+        cwd,
         release,
         releasesWithPackage,
         moddedChangesets,
