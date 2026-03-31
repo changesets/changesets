@@ -6,7 +6,10 @@ import { log, progress } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 
-function buildTag(tool: Packages["tool"], pkg: { name: string; newVersion: string }) {
+function buildTag(
+  tool: Packages["tool"],
+  pkg: { name: string; newVersion: string },
+) {
   return tool.type !== "root"
     ? `${pkg.name}@${pkg.newVersion}`
     : `v${pkg.newVersion}`;
