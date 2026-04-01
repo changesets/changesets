@@ -1,5 +1,12 @@
 # @changesets/changelog-git
 
+## 1.0.0-next.2
+
+### Patch Changes
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c)]:
+  - @changesets/types@7.0.0-next.2
+
 ## 1.0.0-next.1
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@changesets/apply-release-plan",
-  "version": "8.0.0-next.1",
+  "version": "8.0.0-next.2",
   "description": "Takes a release plan and applies it to packages",
   "type": "module",
   "exports": {
@@ -10,18 +10,18 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/apply-release-plan",
   "dependencies": {
-    "@changesets/config": "^4.0.0-next.1",
+    "@changesets/config": "^4.0.0-next.2",
     "@changesets/get-version-range-type": "^1.0.0-next.1",
-    "@changesets/git": "^4.0.0-next.1",
-    "@changesets/should-skip-package": "^1.0.0-next.1",
-    "@changesets/types": "^7.0.0-next.1",
+    "@changesets/git": "^4.0.0-next.2",
+    "@changesets/should-skip-package": "^1.0.0-next.2",
+    "@changesets/types": "^7.0.0-next.2",
     "detect-indent": "^6.0.0",
     "import-meta-resolve": "^4.2.0",
     "prettier": "^3.7.4",
     "semver": "^7.5.3"
   },
   "devDependencies": {
-    "@changesets/test-utils": "0.0.9-next.1",
+    "@changesets/test-utils": "0.0.9-next.2",
     "@manypkg/get-packages": "^3.0.0",
     "outdent": "^0.8.0",
     "tinyexec": "^1.0.2"
