@@ -3401,7 +3401,7 @@ describe("apply release plan", () => {
         - pkg-b@1.2.1`);
     });
 
-    it("should add updated dependencies line for patch bumped workspace path aliases because they represent the exact current workspace", async () => {
+    it("should add updated dependencies line for patch bumped workspace path aliases because they represent the exact old version", async () => {
       let { changedFiles } = await testSetup(
         {
           "package.json": JSON.stringify({

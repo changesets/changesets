@@ -195,7 +195,7 @@ describe("getting the dependency graph", function () {
     })
   );
 
-  it("should treat workspace path dependencies as valid local dependencies", function () {
+  it("should treat workspace path dependencies as valid local dependencies", () => {
     const { graph, valid } = getDependencyGraph({
       root: {
         dir: ".",
