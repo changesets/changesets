@@ -2,7 +2,7 @@
 import termSize from "term-size";
 import { error, prefix, success } from "@changesets/logger";
 import { prompt } from "enquirer";
-import { edit } from "external-editor";
+import { edit } from "@inquirer/external-editor";
 import { symbols } from "ansi-colors";
 
 // those types are not exported from `enquirer` so we extract them here
@@ -38,7 +38,9 @@ const serialId: () => number = (function () {
   return () => id++;
 })();
 
-const limit = Math.max(termSize().rows - 5, 10);
+// this can exec tput so we make it compute lazily to avoid such side effects at init time
+let limit: number | undefined;
+const getLimit = () => (limit ??= Math.max(termSize().rows - 5, 10));
 
 let cancelFlow = () => {
   success("Cancelled... 👋 ");
@@ -60,7 +62,7 @@ async function askCheckboxPlus(
     multiple: true,
     choices,
     format,
-    limit,
+    limit: getLimit(),
     onCancel: cancelFlow,
     symbols: {
       indicator: symbols.radioOff,

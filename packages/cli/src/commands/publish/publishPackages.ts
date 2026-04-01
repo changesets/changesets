@@ -1,13 +1,19 @@
-import { join } from "path";
+import { resolve } from "path";
 import semverParse from "semver/functions/parse";
-import chalk from "chalk";
+import pc from "picocolors";
 import { AccessType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { info, warn } from "@changesets/logger";
 import { PreState } from "@changesets/types";
-import * as npmUtils from "./npm-utils";
+import {
+  isCustomRegistry,
+  getCorrectRegistry,
+  getTokenIsRequired,
+  publish,
+  infoAllow404,
+  npmPublishQueue,
+} from "./npm-utils";
 import { TwoFactorState } from "../../utils/types";
-import { isCI } from "ci-info";
 
 type PublishedState = "never" | "published" | "only-pre";
 
@@ -21,7 +27,7 @@ type PkgInfo = {
 export type PublishedResult = {
   name: string;
   newVersion: string;
-  published: boolean;
+  result: "published" | "skipped" | "failed";
 };
 
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
@@ -34,43 +40,46 @@ function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   return "latest";
 }
 
-const isCustomRegistry = (registry?: string): boolean =>
-  !!registry &&
-  registry !== "https://registry.npmjs.org" &&
-  registry !== "https://registry.yarnpkg.com";
-
-const getTwoFactorState = ({
+const getTwoFactorState = async ({
   otp,
   publicPackages,
 }: {
   otp?: string;
   publicPackages: Package[];
-}): TwoFactorState => {
+}): Promise<TwoFactorState> => {
   if (otp) {
     return {
       token: otp,
-      isRequired: Promise.resolve(true),
+      isRequired: true,
     };
   }
 
   if (
-    isCI ||
+    !process.stdin.isTTY ||
     publicPackages.some((pkg) =>
-      isCustomRegistry(pkg.packageJson.publishConfig?.registry)
+      isCustomRegistry(getCorrectRegistry(pkg.packageJson).registry)
     ) ||
     isCustomRegistry(process.env.npm_config_registry)
   ) {
     return {
-      token: null,
-      isRequired: Promise.resolve(false),
+      token: undefined,
+      isRequired: false,
     };
   }
 
   return {
-    token: null,
-    // note: we're not awaiting this here, we want this request to happen in parallel with getUnpublishedPackages
-    isRequired: npmUtils.getTokenIsRequired(),
+    token: undefined,
+    isRequired: await getTokenIsRequired(),
   };
+};
+
+export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
+  return (
+    process.stdin.isTTY &&
+    !twoFactorState.token &&
+    !twoFactorState.allowConcurrency &&
+    twoFactorState.isRequired
+  );
 };
 
 export default async function publishPackages({
@@ -97,10 +106,14 @@ export default async function publishPackages({
     return [];
   }
 
-  const twoFactorState: TwoFactorState = getTwoFactorState({
+  const twoFactorState = await getTwoFactorState({
     otp,
     publicPackages,
   });
+
+  if (requiresDelegatedAuth(twoFactorState)) {
+    npmPublishQueue.setConcurrency(1);
+  }
 
   return Promise.all(
     unpublishedPackagesInfo.map((pkgInfo) => {
@@ -122,16 +135,14 @@ async function publishAPackage(
   tag: string
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-  info(
-    `Publishing ${chalk.cyan(`"${name}"`)} at ${chalk.green(`"${version}"`)}`
-  );
+  info(`Publishing ${pc.cyan(`"${name}"`)} at ${pc.green(`"${version}"`)}`);
 
-  const publishConfirmation = await npmUtils.publish(
-    name,
+  const publishConfirmation = await publish(
+    pkg.packageJson,
     {
       cwd: pkg.dir,
       publishDir: publishConfig?.directory
-        ? join(pkg.dir, publishConfig.directory)
+        ? resolve(pkg.dir, publishConfig.directory)
         : pkg.dir,
       access: publishConfig?.access || access,
       tag,
@@ -142,7 +153,7 @@ async function publishAPackage(
   return {
     name,
     newVersion: version,
-    published: publishConfirmation.published,
+    result: publishConfirmation.result,
   };
 }
 
@@ -152,7 +163,7 @@ async function getUnpublishedPackages(
 ) {
   const results: Array<PkgInfo> = await Promise.all(
     packages.map(async ({ packageJson }) => {
-      const response = await npmUtils.infoAllow404(packageJson);
+      const response = await infoAllow404(packageJson);
       let publishedState: PublishedState = "never";
       if (response.published) {
         publishedState = "published";
@@ -189,9 +200,9 @@ async function getUnpublishedPackages(
       );
       if (preState !== undefined && publishedState === "only-pre") {
         info(
-          `${name} is being published to ${chalk.cyan(
+          `${name} is being published to ${pc.cyan(
             "latest"
-          )} rather than ${chalk.cyan(
+          )} rather than ${pc.cyan(
             preState.tag
           )} because there has not been a regular release of it yet`
         );

@@ -3,6 +3,7 @@ import { ChangelogFunctions, NewChangesetWithCommit } from "@changesets/types";
 import { ModCompWithPackage } from "@changesets/types";
 import startCase from "lodash.startcase";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
+import validRange from "semver/ranges/valid";
 
 type ChangelogLines = {
   major: Array<Promise<string>>;
@@ -23,6 +24,7 @@ async function generateChangesForVersionTypeMarkdown(
 
 // release is the package and version we are releasing
 export default async function getChangelogEntry(
+  cwd: string,
   release: ModCompWithPackage,
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
@@ -62,10 +64,18 @@ export default async function getChangelogEntry(
       release.packageJson.peerDependencies?.[rel.name];
 
     const versionRange = dependencyVersionRange || peerDependencyVersionRange;
+    const usesWorkspaceRange = versionRange?.startsWith("workspace:");
     return (
       versionRange &&
+      (usesWorkspaceRange || validRange(versionRange) !== null) &&
       shouldUpdateDependencyBasedOnConfig(
-        { type: rel.type, version: rel.newVersion },
+        cwd,
+        {
+          type: rel.type,
+          version: rel.newVersion,
+          oldVersion: rel.oldVersion,
+          dir: rel.dir,
+        },
         {
           depVersionRange: versionRange,
           depType: dependencyVersionRange ? "dependencies" : "peerDependencies",

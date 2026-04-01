@@ -8,11 +8,11 @@ import { RelevantChangesets } from "../types";
 async function getReleaseLine(changeset: NewChangeset, cwd: string) {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
-    .map((l) => l.trimRight());
+    .map((l) => l.trimEnd());
 
   const [commitThatAddsFile] = await getCommitsThatAddFiles(
     [`.changeset/${changeset.id}.md`],
-    { cwd, short: true }
+    { cwd }
   );
 
   return `- [${commitThatAddsFile}] ${firstLine}\n${futureLines

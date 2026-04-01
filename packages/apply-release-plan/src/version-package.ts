@@ -6,6 +6,7 @@ import {
 import getVersionRangeType from "@changesets/get-version-range-type";
 import Range from "semver/classes/range";
 import semverPrerelease from "semver/functions/prerelease";
+import validRange from "semver/ranges/valid";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils";
 
 const DEPENDENCY_TYPES = [
@@ -21,13 +22,21 @@ export default function versionPackage(
     packageJson: PackageJSON;
     dir: string;
   },
-  versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
+  versionsToUpdate: Array<{
+    name: string;
+    version: string;
+    oldVersion: string;
+    type: VersionType;
+    dir: string;
+  }>,
   {
+    cwd,
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
     bumpVersionsWithWorkspaceProtocolOnly,
     snapshot,
   }: {
+    cwd: string;
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
@@ -41,14 +50,15 @@ export default function versionPackage(
   for (let depType of DEPENDENCY_TYPES) {
     let deps = packageJson[depType];
     if (deps) {
-      for (let { name, version, type } of versionsToUpdate) {
+      for (let { name, version, oldVersion, type, dir } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
         if (
           !depCurrentVersion ||
           depCurrentVersion.startsWith("file:") ||
           depCurrentVersion.startsWith("link:") ||
           !shouldUpdateDependencyBasedOnConfig(
-            { version, type },
+            cwd,
+            { version, oldVersion, type, dir },
             {
               depVersionRange: depCurrentVersion,
               depType,
@@ -65,7 +75,8 @@ export default function versionPackage(
 
         if (
           !usesWorkspaceRange &&
-          bumpVersionsWithWorkspaceProtocolOnly === true
+          (bumpVersionsWithWorkspaceProtocolOnly ||
+            validRange(depCurrentVersion) === null)
         ) {
           continue;
         }
@@ -78,7 +89,8 @@ export default function versionPackage(
           if (
             workspaceDepVersion === "*" ||
             workspaceDepVersion === "^" ||
-            workspaceDepVersion === "~"
+            workspaceDepVersion === "~" ||
+            validRange(workspaceDepVersion) === null
           ) {
             continue;
           }

@@ -1,32 +1,54 @@
-import { Config } from "@changesets/types";
-import fs from "fs-extra";
-import path from "path";
-import { getPackages } from "@manypkg/get-packages";
-import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { error } from "@changesets/logger";
 import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
-
-import init from "./commands/init";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { error } from "@changesets/logger";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
+import { Config } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
+import fs from "fs-extra";
+import path from "path";
 import add from "./commands/add";
-import version from "./commands/version";
+import init from "./commands/init";
+import pre from "./commands/pre";
 import publish from "./commands/publish";
 import status from "./commands/status";
-import pre from "./commands/pre";
 import tagCommand from "./commands/tag";
+import version from "./commands/version";
+import { COMMAND_HELP } from "./help";
 import { CliOptions } from "./types";
+
+function validateCommandFlags(
+  command: keyof typeof COMMAND_HELP,
+  flags: Record<string, unknown>
+) {
+  const unknownFlags = Object.keys(flags);
+
+  if (unknownFlags.length > 0) {
+    error(
+      `Unknown ${
+        unknownFlags.length === 1 ? "flag" : "flags"
+      } for ${command}: ${unknownFlags.map((flag) => `--${flag}`).join(", ")}`
+    );
+    error(`Usage: changeset ${COMMAND_HELP[command]}`);
+    throw new ExitError(1);
+  }
+}
 
 export async function run(
   input: string[],
   flags: { [name: string]: any },
   cwd: string
 ) {
+  const packages = await getPackages(cwd);
+  const rootDir = packages.root.dir;
+
   if (input[0] === "init") {
-    await init(cwd);
+    validateCommandFlags("init", flags);
+    await init(rootDir);
     return;
   }
 
-  if (!fs.existsSync(path.resolve(cwd, ".changeset"))) {
+  if (!fs.existsSync(path.resolve(rootDir, ".changeset"))) {
     error("There is no .changeset folder. ");
     error(
       "If this is the first time `changesets` have been used in this project, run `yarn changeset init` to get set up."
@@ -37,14 +59,12 @@ export async function run(
     throw new ExitError(1);
   }
 
-  const packages = await getPackages(cwd);
-
   let config: Config;
   try {
-    config = await read(cwd, packages);
+    config = await read(rootDir, packages);
   } catch (e) {
     let oldConfigExists = await fs.pathExists(
-      path.resolve(cwd, ".changeset/config.js")
+      path.resolve(rootDir, ".changeset/config.js")
     );
     if (oldConfigExists) {
       error(
@@ -64,29 +84,20 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open }: CliOptions = flags;
-    // @ts-ignore if this is undefined, we have already exited
-    await add(cwd, { empty, open }, config);
+    const { empty, open, since, message, ...rest }: CliOptions = flags;
+    validateCommandFlags("add", rest);
+    await add(rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
     );
   } else {
-    const {
-      sinceMaster,
-      since,
-      verbose,
-      output,
-      otp,
-      empty,
-      ignore,
-      snapshot,
-      snapshotPrereleaseTemplate,
-      tag,
-      open,
-      gitTag,
-    }: CliOptions = flags;
-    const deadFlags = ["updateChangelog", "isPublic", "skipCI", "commit"];
+    const deadFlags = [
+      "updateChangelog",
+      "isPublic",
+      "skipCI",
+      "commit",
+    ] as const;
 
     deadFlags.forEach((flag) => {
       if (flags[flag]) {
@@ -106,10 +117,19 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        await add(cwd, { empty, open }, config);
+        const { empty, open, since, message, ...rest }: CliOptions = flags;
+        validateCommandFlags("add", rest);
+        await add(rootDir, { empty, open, since, message }, config);
         return;
       }
       case "version": {
+        const {
+          ignore,
+          snapshot,
+          snapshotPrereleaseTemplate,
+          ...rest
+        }: CliOptions = flags;
+        validateCommandFlags("version", rest);
         let ignoreArrayFromCmd: undefined | string[];
         if (typeof ignore === "string") {
           ignoreArrayFromCmd = [ignore];
@@ -141,17 +161,48 @@ export async function run(
           config.ignore = ignoreArrayFromCmd;
         }
 
-        // Validate that all dependents of ignored packages are listed in the ignore list
+        const packagesByName = new Map(
+          packages.packages.map((x) => [x.packageJson.name, x])
+        );
+
+        // Validate that all dependents of skipped packages are also skipped.
+        // devDependencies are excluded because they don't affect published consumers —
+        // a stale devDep range on a skipped package is harmless.
+        // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
+        // update devDep ranges in package.json even though they don't cause version bumps.
         const dependentsGraph = getDependentsGraph(packages, {
+          ignoreDevDependencies: true,
           bumpVersionsWithWorkspaceProtocolOnly:
             config.bumpVersionsWithWorkspaceProtocolOnly,
         });
-        for (const ignoredPackage of config.ignore) {
-          const dependents = dependentsGraph.get(ignoredPackage) || [];
+        for (const pkg of packages.packages) {
+          if (
+            !shouldSkipPackage(pkg, {
+              ignore: config.ignore,
+              allowPrivatePackages: config.privatePackages.version,
+            })
+          ) {
+            continue;
+          }
+          const skippedPackage = pkg.packageJson.name;
+          const dependents = dependentsGraph.get(skippedPackage) || [];
           for (const dependent of dependents) {
-            if (!config.ignore.includes(dependent)) {
+            const dependentPkg = packagesByName.get(dependent)!;
+            if (dependentPkg.packageJson.private) {
+              // Private packages don't publish to npm,
+              // so they can safely depend on skipped packages.
+              // This also holds for private packages with other publish targets (like a VS Code extension)
+              // as those typically have to prebundle dependencies.
+              continue;
+            }
+            if (
+              !shouldSkipPackage(dependentPkg, {
+                ignore: config.ignore,
+                allowPrivatePackages: config.privatePackages.version,
+              })
+            ) {
               messages.push(
-                `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please pass "${dependent}" to the \`--ignore\` flag.`
+                `The package "${dependent}" depends on the skipped package "${skippedPackage}" (either by \`ignore\` option or by \`privatePackages.version\`), but "${dependent}" is not being skipped. Please pass "${dependent}" to the \`--ignore\` flag.`
               );
             }
           }
@@ -167,22 +218,29 @@ export async function run(
           config.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
         }
 
-        await version(cwd, { snapshot }, config);
+        await version(rootDir, { snapshot }, config);
         return;
       }
       case "publish": {
-        await publish(cwd, { otp, tag, gitTag }, config);
+        const { otp, tag, gitTag, ...rest }: CliOptions = flags;
+        validateCommandFlags("publish", rest);
+        await publish(rootDir, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
-        await status(cwd, { sinceMaster, since, verbose, output }, config);
+        const { sinceMaster, since, verbose, output, ...rest }: CliOptions =
+          flags;
+        validateCommandFlags("status", rest);
+        await status(rootDir, { sinceMaster, since, verbose, output }, config);
         return;
       }
       case "tag": {
-        await tagCommand(cwd);
+        validateCommandFlags("tag", flags);
+        await tagCommand(rootDir, config);
         return;
       }
       case "pre": {
+        validateCommandFlags("pre", flags);
         let command = input[1];
         if (command !== "enter" && command !== "exit") {
           error(
@@ -192,11 +250,10 @@ export async function run(
         }
         let tag = input[2];
         if (command === "enter" && typeof tag !== "string") {
-          error(`A tag must be passed when using prerelese enter`);
+          error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);
         }
-        // @ts-ignore
-        await pre(cwd, { command, tag });
+        await pre(rootDir, { command, tag });
         return;
       }
       case "bump": {

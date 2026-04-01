@@ -2,10 +2,10 @@ import { CommitFunctions } from "@changesets/types";
 import path from "path";
 import resolveFrom from "resolve-from";
 
-export function getCommitFunctions(
+export async function getCommitFunctions(
   commit: false | readonly [string, any],
   cwd: string
-): [CommitFunctions, any] {
+): Promise<[CommitFunctions, any]> {
   let commitFunctions: CommitFunctions = {};
   if (!commit) {
     return [commitFunctions, null];
@@ -14,9 +14,14 @@ export function getCommitFunctions(
   let changesetPath = path.join(cwd, ".changeset");
   let commitPath = resolveFrom(changesetPath, commit[0]);
 
-  let possibleCommitFunc = require(commitPath);
+  let possibleCommitFunc = await import(commitPath);
   if (possibleCommitFunc.default) {
     possibleCommitFunc = possibleCommitFunc.default;
+
+    // Check nested default again in case it's CJS with `__esModule` interop
+    if (possibleCommitFunc.default) {
+      possibleCommitFunc = possibleCommitFunc.default;
+    }
   }
   if (
     typeof possibleCommitFunc.getAddMessage === "function" ||

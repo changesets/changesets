@@ -4,13 +4,14 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 
 ```json
 {
+  "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "updateInternalDependencies": "patch",
+  "fixed": [],
   "linked": [],
   "access": "restricted",
-  "baseBranch": "master",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
   "ignore": [],
-  "changelog": "@changesets/cli/changelog",
   "bumpOnDevDependencies": []
 }
 ```
@@ -54,9 +55,11 @@ If you want to prevent a package from being published to npm, set `private: true
 
 ## `baseBranch` (git branch name)
 
-The branch to which changesets will make comparisons. A number of internal changesets features use git to compare present changesets against another branch. This defaults what branch will be used for these comparisons. This should generally set to the major branch you merge changes into. Commands that use this information accept a `--since` option which can be used to override this.
+The branch to which changesets will make comparisons to detect what has changed since the last commit of the base branch. This should generally be set to the default branch you merge changes into, e.g. `main` or `master`.
 
-> To help make coding a more inclusive experience, we recommend changing the name of your `master` branch to `main`.
+Commands that use this information accept a `--since` option which can be used to override this.
+
+Locally, make sure the base branch exists and is up to date so changesets can make accurate comparisons.
 
 ## `ignore` (array of packages)
 
@@ -137,7 +140,7 @@ Changesets will always update the dependency if it would leave the old semver ra
 
 ## `changelog` (false or a path)
 
-This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects to be a file that exports the following:
+This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects a file that exports the following:
 
 ```
 {
@@ -158,7 +161,9 @@ You would specify our github changelog generator with:
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 
-## `bumpVersionsWithWorkspaceProtocolOnly` (boolean)
+## `bumpVersionsWithWorkspaceProtocolOnly` (optional boolean)
+
+Default value: `false`
 
 Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.
 
@@ -204,3 +209,30 @@ Some projects bundle some or all of their dependencies into built files. In thes
 By default, changes to `devDependencies` won't cause Changesets to bump dependent packages. You can use this option to override that behavior for one or more `devDependencies`.
 
 This option takes package names (i.e. `["@bundled/foo", "@bundled/bar"]`) or patterns (i.e. `["@bundled/*"]`).
+
+## `privatePackages` (object or false)
+
+This option is for setting how private packages should be handled. By default, Changesets will update the changelog for private packages and update their version, but will not create a tag. You can configure this option to change the default behavior.
+
+### `version` (optional boolean)
+
+Default value: `true`
+
+When `version` is set to `true`, Changesets will update the version for private packages. If set to `false`, Changesets will not update the version for private packages.
+
+### `tag` (optional boolean)
+
+Default value: `false`
+
+When `tag` is set to `true`, Changesets will create a tag for private packages. If set to `false`, Changesets will not create a tag for private packages.
+
+### Example
+
+```json
+{
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  }
+}
+```

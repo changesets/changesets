@@ -1,8 +1,8 @@
+import { Changeset } from "@changesets/types";
 import fs from "fs-extra";
+import humanId from "human-id";
 import path from "path";
 import prettier from "prettier";
-import humanId from "human-id";
-import { Changeset } from "@changesets/types";
 
 function getPrettierInstance(cwd: string): typeof prettier {
   try {
@@ -17,11 +17,12 @@ function getPrettierInstance(cwd: string): typeof prettier {
 
 async function writeChangeset(
   changeset: Changeset,
-  cwd: string
+  rootDir: string,
+  options?: { prettier?: boolean }
 ): Promise<string> {
   const { summary, releases } = changeset;
 
-  const changesetBase = path.resolve(cwd, ".changeset");
+  const changesetBase = path.resolve(rootDir, ".changeset");
 
   // Worth understanding that the ID merely needs to be a unique hash to avoid git conflicts
   // experimenting with human readable ids to make finding changesets easier
@@ -30,9 +31,8 @@ async function writeChangeset(
     capitalize: false,
   });
 
-  const prettierInstance = getPrettierInstance(cwd);
-  const prettierConfig = await prettierInstance.resolveConfig(cwd);
-
+  const prettierInstance =
+    options?.prettier !== false ? getPrettierInstance(rootDir) : undefined;
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
   // NOTE: The quotation marks in here are really important even though they are
@@ -47,11 +47,13 @@ ${summary}
 
   await fs.outputFile(
     newChangesetPath,
-    // Prettier v3 returns a promise
-    await prettierInstance.format(changesetContents, {
-      ...prettierConfig,
-      parser: "markdown",
-    })
+    prettierInstance
+      ? // Prettier v3 returns a promise
+        await prettierInstance.format(changesetContents, {
+          ...(await prettierInstance.resolveConfig(newChangesetPath)),
+          parser: "markdown",
+        })
+      : changesetContents
   );
 
   return changesetID;

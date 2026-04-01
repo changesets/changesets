@@ -1,6 +1,6 @@
 {
   "name": "@changesets/errors",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Error classes for @changesets",
   "main": "dist/changesets-errors.cjs.js",
   "module": "dist/changesets-errors.esm.js",
@@ -19,6 +19,6 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/errors",
   "dependencies": {
-    "extendable-error": "^0.1.5"
+    "extendable-error": "^0.1.7"
   }
 }

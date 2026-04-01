@@ -1,5 +1,34 @@
 # @changesets/get-github-info
 
+## 0.8.0
+
+### Minor Changes
+
+- [#1758](https://github.com/changesets/changesets/pull/1758) [`e462d89`](https://github.com/changesets/changesets/commit/e462d892af560d0e3cf5d2f04da230751fbd05ca) Thanks [@jdeniau](https://github.com/jdeniau)! - Add scopes automatically in the GitHub new token link in the printed error message
+
+### Patch Changes
+
+- [#1781](https://github.com/changesets/changesets/pull/1781) [`d4b8ad8`](https://github.com/changesets/changesets/commit/d4b8ad8158fe4d900abc5052dacaa8be1f41a232) Thanks [@bluwy](https://github.com/bluwy)! - Improve error messages when fail to fetch data from GitHub
+
+## 0.7.0
+
+### Minor Changes
+
+- [#1783](https://github.com/changesets/changesets/pull/1783) [`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a) Thanks [@mrginglymus](https://github.com/mrginglymus)! - Support GitHub URL environment variables
+
+  `@changesets/get-github-info` will now respect environment variables [set by GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/variables), specifically:
+
+  - `GITHUB_GRAPHQL_URL`
+  - `GITHUB_SERVER_URL`
+
+  This means GitHub Enterprise Server will be supported without any additional configuration or patching.
+
+## 0.6.0
+
+### Minor Changes
+
+- [#1185](https://github.com/changesets/changesets/pull/1185) [`a971652`](https://github.com/changesets/changesets/commit/a971652ec1403aab3fb89eb2f1640bd5012b895a) Thanks [@Andarist](https://github.com/Andarist)! - `package.json#exports` have been added to limit what (and how) code might be imported from the package.
+
 ## 0.5.2
 
 ### Patch Changes

@@ -1,14 +1,18 @@
-import semverSatisfies from "semver/functions/satisfies";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
+  Config,
   DependencyType,
   PackageJSON,
   VersionType,
-  Config,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import micromatch from "micromatch";
-import { InternalRelease, PreInfo } from "./types";
+import path from "node:path";
+import semverSatisfies from "semver/functions/satisfies";
+import validRange from "semver/ranges/valid";
 import { incrementVersion } from "./increment";
+import { InternalRelease, PreInfo } from "./types";
+import { mapGetOrThrowInternal } from "./utils";
 
 /*
   WARNING:
@@ -25,12 +29,14 @@ import { incrementVersion } from "./increment";
 export default function determineDependents({
   releases,
   packagesByName,
+  rootDir,
   dependencyGraph,
   preInfo,
   config,
 }: {
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
+  rootDir: string;
   dependencyGraph: Map<string, string[]>;
   preInfo: PreInfo | undefined;
   config: Config;
@@ -44,25 +50,39 @@ export default function determineDependents({
     const nextRelease = pkgsToSearch.shift();
     if (!nextRelease) continue;
     // pkgDependents will be a list of packages that depend on nextRelease ie. ['avatar-group', 'comment']
-    const pkgDependents = dependencyGraph.get(nextRelease.name);
-    if (!pkgDependents) {
-      throw new Error(
-        `Error in determining dependents - could not find package in repository: ${nextRelease.name}`
-      );
-    }
+    const pkgDependents = mapGetOrThrowInternal(
+      dependencyGraph,
+      nextRelease.name,
+      `Error in determining dependents - could not find package in repository: ${nextRelease.name}`
+    );
     pkgDependents
       .map((dependent) => {
         let type: VersionType | undefined;
 
-        const dependentPackage = packagesByName.get(dependent);
-        if (!dependentPackage) throw new Error("Dependency map is incorrect");
+        const dependentPackage = mapGetOrThrowInternal(
+          packagesByName,
+          dependent,
+          "Dependency map is incorrect"
+        );
 
-        if (config.ignore.includes(dependent)) {
+        if (
+          shouldSkipPackage(dependentPackage, {
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
+          })
+        ) {
           type = "none";
         } else {
+          const dependencyPackage = mapGetOrThrowInternal(
+            packagesByName,
+            nextRelease.name,
+            "Dependency map is incorrect"
+          );
           const dependencyVersionRanges = getDependencyVersionRanges(
+            rootDir,
             dependentPackage.packageJson,
-            nextRelease
+            nextRelease,
+            dependencyPackage
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
@@ -177,8 +197,10 @@ export default function determineDependents({
   dependency lists. For example, a package that is both a peerDepenency and a devDependency.
 */
 function getDependencyVersionRanges(
+  rootDir: string,
   dependentPkgJSON: PackageJSON,
-  dependencyRelease: InternalRelease
+  dependencyRelease: InternalRelease,
+  dependencyPackage: Package
 ): {
   depType: DependencyType;
   versionRange: string;
@@ -194,26 +216,39 @@ function getDependencyVersionRanges(
     versionRange: string;
   }[] = [];
   for (const type of DEPENDENCY_TYPES) {
-    const versionRange = dependentPkgJSON[type]?.[dependencyRelease.name];
+    let versionRange = dependentPkgJSON[type]?.[dependencyRelease.name];
     if (!versionRange) continue;
 
     if (versionRange.startsWith("workspace:")) {
-      dependencyVersionRanges.push({
-        depType: type,
-        versionRange:
-          // intentionally keep other workspace ranges untouched
-          // this has to be fixed but this should only be done when adding appropriate tests
-          versionRange === "workspace:*"
-            ? // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
-              dependencyRelease.oldVersion
-            : versionRange.replace(/^workspace:/, ""),
-      });
-    } else {
-      dependencyVersionRanges.push({
-        depType: type,
-        versionRange,
-      });
+      versionRange = versionRange.replace(/^workspace:/, "");
+      switch (versionRange) {
+        case "*":
+          // workspace:* actually means the current exact version, and not a wildcard similar to a reguler * range
+          versionRange = dependencyRelease.oldVersion;
+          break;
+        case "^":
+        case "~":
+          versionRange = `${versionRange}${dependencyRelease.oldVersion}`;
+          break;
+        default: {
+          if (!validRange(versionRange)) {
+            if (
+              path.posix.normalize(versionRange) ===
+              path.relative(rootDir, dependencyPackage.dir).replace(/\\/g, "/")
+            ) {
+              versionRange = dependencyRelease.oldVersion;
+            } else {
+              continue;
+            }
+          }
+          // fallthrough: keep the stripped range as is
+        }
+      }
     }
+    dependencyVersionRanges.push({
+      depType: type,
+      versionRange,
+    });
   }
   return dependencyVersionRanges;
 }

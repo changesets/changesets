@@ -32,7 +32,7 @@ In your CI process, add a step that runs:
 changeset status --since=main
 ```
 
-This will exit with exit code 1 if there have been no new changesets since master.
+This will exit with exit code 1 if there have been no new changesets since main.
 
 In some cases, you may _want_ to merge a change without doing any releases (such as when you only change tests or build tools). In this case, you can run `changeset --empty`. This will add a special changeset that does not release anything.
 

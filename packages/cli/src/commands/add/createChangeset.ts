@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import pc from "picocolors";
 
 import semverLt from "semver/functions/lt";
 
@@ -8,7 +8,7 @@ import { Release, PackageJSON } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { ExitError } from "@changesets/errors";
 
-const { green, yellow, red, bold, blue, cyan } = chalk;
+const { green, yellow, red, bold, blue, cyan, gray } = pc;
 
 async function confirmMajorRelease(pkgJSON: PackageJSON) {
   if (semverLt(pkgJSON.version, "1.0.0")) {
@@ -81,7 +81,9 @@ async function getPackagesToRelease(
     if (packagesToRelease.length === 0) {
       do {
         error("You must select at least one package to release");
-        error("(You most likely hit enter instead of space!)");
+        error(
+          "(Press space to mark/unmark one option. Press enter to confirm.)"
+        );
 
         packagesToRelease = await askInitialReleaseQuestion(defaultChoiceList);
       } while (packagesToRelease.length === 0);
@@ -106,7 +108,8 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
 
 export default async function createChangeset(
   changedPackages: Array<string>,
-  allPackages: Package[]
+  allPackages: Package[],
+  messageFromCli?: string
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
@@ -233,10 +236,18 @@ export default async function createChangeset(
     releases.push({ name: pkg.packageJson.name, type });
   }
 
+  if (messageFromCli !== undefined) {
+    return {
+      confirmed: false,
+      summary: messageFromCli,
+      releases,
+    };
+  }
+
   log(
     "Please enter a summary for this change (this will be in the changelogs)."
   );
-  log(chalk.gray("  (submit empty line to open external editor)"));
+  log(gray("  (submit empty line to open external editor)"));
 
   let summary = await cli.askQuestion("Summary");
   if (summary.length === 0) {
@@ -257,10 +268,10 @@ export default async function createChangeset(
       );
     }
 
-    summary = await cli.askQuestion("");
+    summary = await cli.askQuestion("Summary");
     while (summary.length === 0) {
       summary = await cli.askQuestion(
-        "\n\n# A summary is required for the changelog! 😪"
+        "A summary is required! Please enter a summary"
       );
     }
   }
