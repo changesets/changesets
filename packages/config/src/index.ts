@@ -587,6 +587,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
     // TODO consider enabling this by default in the next major version
     privatePackages,
+
+    bumpOnDevDependencies: [],
   };
 
   if (
