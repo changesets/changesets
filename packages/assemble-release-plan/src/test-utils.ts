@@ -13,7 +13,7 @@ function getPackage({
       name,
       version,
     },
-    dir: "this-shouldn't-matter",
+    dir: `/packages/${name.replace(/^@/, "").replace(/\//g, "-")}`,
   };
 }
 

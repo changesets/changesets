@@ -194,6 +194,7 @@ function assembleReleasePlan(
     let dependentAdded = determineDependents({
       releases,
       packagesByName,
+      rootDir: packages.root.dir,
       dependencyGraph,
       preInfo,
       config: refinedConfig,

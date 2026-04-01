@@ -6,7 +6,9 @@ import {
   VersionType,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
+import path from "node:path";
 import semverSatisfies from "semver/functions/satisfies";
+import validRange from "semver/ranges/valid";
 import { incrementVersion } from "./increment";
 import { InternalRelease, PreInfo } from "./types";
 import { mapGetOrThrowInternal } from "./utils";
@@ -26,12 +28,14 @@ import { mapGetOrThrowInternal } from "./utils";
 export default function determineDependents({
   releases,
   packagesByName,
+  rootDir,
   dependencyGraph,
   preInfo,
   config,
 }: {
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
+  rootDir: string;
   dependencyGraph: Map<string, string[]>;
   preInfo: PreInfo | undefined;
   config: Config;
@@ -68,9 +72,16 @@ export default function determineDependents({
         ) {
           type = "none";
         } else {
+          const dependencyPackage = mapGetOrThrowInternal(
+            packagesByName,
+            nextRelease.name,
+            "Dependency map is incorrect"
+          );
           const dependencyVersionRanges = getDependencyVersionRanges(
+            rootDir,
             dependentPackage.packageJson,
-            nextRelease
+            nextRelease,
+            dependencyPackage
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
@@ -174,8 +185,10 @@ export default function determineDependents({
   dependency lists. For example, a package that is both a peerDepenency and a devDependency.
 */
 function getDependencyVersionRanges(
+  rootDir: string,
   dependentPkgJSON: PackageJSON,
-  dependencyRelease: InternalRelease
+  dependencyRelease: InternalRelease,
+  dependencyPackage: Package
 ): {
   depType: DependencyType;
   versionRange: string;
@@ -205,7 +218,19 @@ function getDependencyVersionRanges(
         case "~":
           versionRange = `${versionRange}${dependencyRelease.oldVersion}`;
           break;
-        // default: keep the stripped range as is
+        default: {
+          if (!validRange(versionRange)) {
+            if (
+              path.posix.normalize(versionRange) ===
+              path.relative(rootDir, dependencyPackage.dir).replace(/\\/g, "/")
+            ) {
+              versionRange = dependencyRelease.oldVersion;
+            } else {
+              continue;
+            }
+          }
+          // fallthrough: keep the stripped range as is
+        }
       }
     }
     dependencyVersionRanges.push({
