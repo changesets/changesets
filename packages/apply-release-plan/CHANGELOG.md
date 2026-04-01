@@ -1,5 +1,25 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.2
+
+### Major Changes
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+### Minor Changes
+
+- [#1744](https://github.com/changesets/changesets/pull/1744) [`303cacd`](https://github.com/changesets/changesets/commit/303cacdde85c94f2ef4d1408b401165ff25d263d) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped the default Prettier version used in the absence of the local installation to v3
+
+### Patch Changes
+
+- [#1875](https://github.com/changesets/changesets/pull/1875) [`12f20ea`](https://github.com/changesets/changesets/commit/12f20ea75fb5a440a378bd2bf6072a6bd749fd57) Thanks [@beeequeue](https://github.com/beeequeue)! - Replaced `spawndamnit` with `tinyexec`
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2), [`12f20ea`](https://github.com/changesets/changesets/commit/12f20ea75fb5a440a378bd2bf6072a6bd749fd57)]:
+  - @changesets/types@7.0.0-next.2
+  - @changesets/config@4.0.0-next.2
+  - @changesets/git@4.0.0-next.2
+  - @changesets/should-skip-package@1.0.0-next.2
+
 ## 7.1.0
 
 ### Minor Changes
