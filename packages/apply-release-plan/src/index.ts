@@ -236,7 +236,9 @@ async function getNewChangelogEntry(
   }
   if (
     typeof possibleChangelogFunc.getReleaseLine === "function" &&
-    typeof possibleChangelogFunc.getDependencyReleaseLine === "function"
+    typeof possibleChangelogFunc.getDependencyReleaseLine === "function" &&
+    (possibleChangelogFunc.getVersionLine === undefined ||
+      typeof possibleChangelogFunc.getVersionLine === "function")
   ) {
     getChangelogFuncs = possibleChangelogFunc;
   } else {
