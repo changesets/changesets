@@ -711,18 +711,15 @@ describe("parser errors", () => {
     `);
   });
   test("ignore package that does not exist", () => {
-    expect(() => unsafeParse({ ignore: ["pkg-a"] }, defaultPackages))
-      .toThrowErrorMatchingInlineSnapshot(`
-      "Some errors occurred when validating the changesets config:
-      The package or glob expression "pkg-a" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch"
-    `);
+    // Should not throw - unmatched ignore patterns are allowed (e.g. for
+    // dynamically generated packages that may not always be present)
+    const config = unsafeParse({ ignore: ["pkg-a"] }, defaultPackages);
+    expect(config.ignore).toEqual([]);
   });
   test("ignore package that does not exist (using glob expressions)", () => {
-    expect(() => unsafeParse({ ignore: ["pkg-*"] }, defaultPackages))
-      .toThrowErrorMatchingInlineSnapshot(`
-      "Some errors occurred when validating the changesets config:
-      The package or glob expression "pkg-*" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch"
-    `);
+    // Should not throw - unmatched glob patterns in ignore are allowed
+    const config = unsafeParse({ ignore: ["pkg-*"] }, defaultPackages);
+    expect(config.ignore).toEqual([]);
   });
   test("ignore missing dependent packages", async () => {
     expect(() =>
