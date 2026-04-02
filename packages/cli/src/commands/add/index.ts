@@ -5,7 +5,7 @@ import path from "path";
 import * as git from "@changesets/git";
 import { error, info, log, warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import { Config } from "@changesets/types";
+import { Config, Release } from "@changesets/types";
 import writeChangeset from "@changesets/write";
 import { ExitError } from "@changesets/errors";
 import { getPackages } from "@manypkg/get-packages";
@@ -23,7 +23,18 @@ export default async function add(
     open,
     since,
     message,
-  }: { empty?: boolean; open?: boolean; since?: string; message?: string },
+    packages: selectedPackages,
+    type,
+    all,
+  }: {
+    empty?: boolean;
+    open?: boolean;
+    since?: string;
+    message?: string;
+    packages?: string[];
+    type?: string;
+    all?: boolean;
+  },
   config: Config
 ): Promise<void> {
   const packages = await getPackages(cwd);
@@ -51,6 +62,12 @@ export default async function add(
 
   const changesetBase = path.resolve(cwd, ".changeset");
 
+  // Check if we have enough info for non-interactive mode
+  const hasPackageSelection =
+    all || (selectedPackages && selectedPackages.length > 0);
+  const hasMessage = message !== undefined;
+  const isNonInteractive = hasPackageSelection && hasMessage && !empty;
+
   let newChangeset: Awaited<ReturnType<typeof createChangeset>>;
   if (empty) {
     newChangeset = {
@@ -58,6 +75,17 @@ export default async function add(
       releases: [],
       summary: message ?? "",
     };
+  } else if (isNonInteractive) {
+    newChangeset = await buildNonInteractiveChangeset({
+      packages: selectedPackages,
+      type,
+      all,
+      since,
+      message: message!,
+      versionablePackages,
+      config,
+      cwd,
+    });
   } else {
     let changedPackagesNames: string[] = [];
     try {
@@ -147,4 +175,90 @@ export default async function add(
       );
     }
   }
+}
+
+const validBumpTypes = new Set<string>(["patch", "minor", "major"]);
+
+async function buildNonInteractiveChangeset({
+  packages,
+  type,
+  all,
+  since,
+  message,
+  versionablePackages,
+  config,
+  cwd,
+}: {
+  packages: string[] | undefined;
+  type: string | undefined;
+  all?: boolean;
+  since?: string;
+  message: string;
+  versionablePackages: Awaited<ReturnType<typeof getPackages>>["packages"];
+  config: Config;
+  cwd: string;
+}): Promise<{ confirmed: boolean; summary: string; releases: Release[] }> {
+  if (!type) {
+    error("--type is required when using non-interactive mode");
+    throw new ExitError(1);
+  }
+  if (!validBumpTypes.has(type)) {
+    error(`Invalid bump type "${type}". Must be one of: patch, minor, major`);
+    throw new ExitError(1);
+  }
+
+  const versionableNames = new Set(
+    versionablePackages.map((pkg) => pkg.packageJson.name)
+  );
+
+  const releases: Release[] = [];
+
+  if (packages) {
+    for (const name of packages) {
+      if (!versionableNames.has(name)) {
+        error(
+          `The package "${name}" was not found in the project. ` +
+            `Available packages: ${[...versionableNames].join(", ")}`
+        );
+        throw new ExitError(1);
+      }
+      releases.push({ name, type: type as Release["type"] });
+    }
+  }
+
+  if (all) {
+    const changedPackages = await getVersionableChangedPackages(config, {
+      cwd,
+      ref: since,
+    });
+
+    if (changedPackages.length === 0) {
+      error("No changed packages found");
+      throw new ExitError(1);
+    }
+
+    const alreadyAdded = new Set(releases.map((r) => r.name));
+    for (const pkg of changedPackages) {
+      const name = pkg.packageJson.name;
+      if (!alreadyAdded.has(name)) {
+        releases.push({ name, type: type as Release["type"] });
+      }
+    }
+  }
+
+  if (releases.length === 0) {
+    error("No packages to release");
+    throw new ExitError(1);
+  }
+
+  printConfirmationMessage(
+    { releases, summary: message },
+    versionablePackages.length > 1
+  );
+
+  return {
+    confirmed: true,
+    summary: message,
+    releases,
+  };
 }

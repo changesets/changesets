@@ -13,6 +13,10 @@ export type CliOptions = {
   tag?: string;
   gitTag?: boolean;
   open?: boolean;
+  package?: string | string[];
+  type?: string;
+  all?: boolean;
+  json?: boolean;
 };
 
 export type CommandOptions = CliOptions & {

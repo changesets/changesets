@@ -24,11 +24,9 @@ describe("cli", () => {
 
       expect(add).toHaveBeenCalledWith(
         cwd,
-        {
-          empty: undefined,
-          open: undefined,
+        expect.objectContaining({
           message: "summary from message",
-        },
+        }),
         expect.any(Object)
       );
     });
@@ -46,11 +44,103 @@ describe("cli", () => {
 
       expect(add).toHaveBeenCalledWith(
         cwd,
-        {
-          empty: undefined,
-          open: undefined,
+        expect.objectContaining({
           message: "summary from message",
-        },
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it("should normalize a single --package flag to an array", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          name: "single-package",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await run(
+        ["add"],
+        { package: "pkg-a", type: "patch", message: "Fix bug" },
+        cwd
+      );
+
+      expect(add).toHaveBeenCalledWith(
+        cwd,
+        expect.objectContaining({
+          packages: ["pkg-a"],
+          type: "patch",
+          message: "Fix bug",
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it("should pass multiple --package flags as an array", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          name: "single-package",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await run(
+        ["add"],
+        { package: ["pkg-a", "pkg-b"], type: "minor", message: "Add feature" },
+        cwd
+      );
+
+      expect(add).toHaveBeenCalledWith(
+        cwd,
+        expect.objectContaining({
+          packages: ["pkg-a", "pkg-b"],
+          type: "minor",
+          message: "Add feature",
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it("should pass packages as undefined when --package is not provided", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          name: "single-package",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await run(["add"], { message: "summary" }, cwd);
+
+      expect(add).toHaveBeenCalledWith(
+        cwd,
+        expect.objectContaining({
+          packages: undefined,
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it("should pass --all flag to add command", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          name: "single-package",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await run(["add"], { all: true, type: "patch", message: "Fix all" }, cwd);
+
+      expect(add).toHaveBeenCalledWith(
+        cwd,
+        expect.objectContaining({
+          all: true,
+          type: "patch",
+          message: "Fix all",
+        }),
         expect.any(Object)
       );
     });
@@ -373,11 +463,9 @@ describe("cli", () => {
 
     expect(add).toHaveBeenCalledWith(
       rootDir,
-      {
-        empty: undefined,
-        open: undefined,
+      expect.objectContaining({
         message: "test",
-      },
+      }),
       expect.any(Object)
     );
   });
