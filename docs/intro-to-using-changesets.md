@@ -17,7 +17,7 @@ The second two steps can be made part of a CI process.
 ## Add the changeset tool
 
 ```shell
-yarn add @changesets/cli && yarn changeset init
+yarn add -D @changesets/cli && yarn changeset init
 ```
 
 or

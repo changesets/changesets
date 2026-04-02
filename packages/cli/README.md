@@ -3,7 +3,7 @@
 [![npm package](https://img.shields.io/npm/v/@changesets/cli)](https://npmjs.com/package/@changesets/cli)
 [![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
 
-The primary implementation of [changesets](https://github.com/Noviny/changesets). Helps you manage the versioning
+The primary implementation of [changesets](https://github.com/changesets/changesets). Helps you manage the versioning
 and changelog entries for your packages, with a focus on versioning within a mono-repository (though we support
 single-package repositories too).
 
@@ -100,13 +100,13 @@ To publish public packages to NPM, you'll need to edit `.changeset/config.json` 
 ### add
 
 ```shell
-changeset [--empty] [--open]
+changeset [--empty] [--open] [--message <text>]
 ```
 
 or
 
 ```shell
-changeset add [--empty] [--open]
+changeset add [--empty] [--open] [--message <text>]
 ```
 
 This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
@@ -137,6 +137,7 @@ A changeset created with the `empty` flag would look like this:
 If you set the `commit` option in the config, the command will add the updated changeset files and then commit them.
 
 - `--open` - opens the created changeset in an external editor
+- `--message` (or `-m`) - provides the changeset summary from the command line instead of prompting for it.
 
 ### version
 

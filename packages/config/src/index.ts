@@ -13,6 +13,7 @@ import {
 } from "@changesets/types";
 import packageJson from "../package.json";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 
 export let defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
@@ -93,7 +94,9 @@ function isArray<T>(
 
 export let read = async (cwd: string, packages?: Packages) => {
   packages ??= await getPackages(cwd);
-  let json = await fs.readJSON(path.join(cwd, ".changeset", "config.json"));
+  let json = await fs.readJSON(
+    path.join(packages.root.dir, ".changeset", "config.json")
+  );
   return parse(json, packages);
 };
 
@@ -203,7 +206,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.push(
           ...getUnmatchedPatterns(fixedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`
           )
         );
 
@@ -221,7 +224,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
+            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch`
           );
         });
       }
@@ -246,7 +249,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.push(
           ...getUnmatchedPatterns(linkedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`
           )
         );
 
@@ -264,7 +267,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch.`
+            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch`
           );
         });
       }
@@ -294,6 +297,53 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but can only be 'patch' or 'minor'`
     );
   }
+  if (json.privatePackages !== undefined && json.privatePackages !== false) {
+    if (typeof json.privatePackages !== "object") {
+      messages.push(
+        `The \`privatePackages\` option is set as ${JSON.stringify(
+          json.privatePackages,
+          null,
+          2
+        )} when the only valid values are undefined, false, or an object with optional boolean \`version\` and \`tag\` properties`
+      );
+    } else {
+      if (
+        json.privatePackages.version !== undefined &&
+        typeof json.privatePackages.version !== "boolean"
+      ) {
+        messages.push(
+          `The \`privatePackages.version\` option is set as ${JSON.stringify(
+            json.privatePackages.version,
+            null,
+            2
+          )} but the only valid values are undefined or a boolean`
+        );
+      }
+      if (
+        json.privatePackages.tag !== undefined &&
+        typeof json.privatePackages.tag !== "boolean"
+      ) {
+        messages.push(
+          `The \`privatePackages.tag\` option is set as ${JSON.stringify(
+            json.privatePackages.tag,
+            null,
+            2
+          )} but the only valid values are undefined or a boolean`
+        );
+      }
+    }
+  }
+
+  const privatePackages: { version: boolean; tag: boolean } =
+    json.privatePackages === false
+      ? { tag: false, version: false }
+      : json.privatePackages
+      ? {
+          version: json.privatePackages.version ?? true,
+          tag: json.privatePackages.tag ?? false,
+        }
+      : { version: true, tag: false };
+
   if (json.ignore) {
     if (
       !(
@@ -312,21 +362,64 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       messages.push(
         ...getUnmatchedPatterns(json.ignore, pkgNames).map(
           (pkgOrGlob) =>
-            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch.`
+            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`
         )
       );
+    }
+  }
 
-      // Validate that all dependents of ignored packages are listed in the ignore list
-      const dependentsGraph = getDependentsGraph(packages);
-      for (const ignoredPackage of json.ignore) {
-        const dependents = dependentsGraph.get(ignoredPackage) || [];
-        for (const dependent of dependents) {
-          if (!json.ignore.includes(dependent)) {
-            messages.push(
-              `The package "${dependent}" depends on the ignored package "${ignoredPackage}", but "${dependent}" is not being ignored. Please add "${dependent}" to the \`ignore\` option.`
-            );
-          }
+  // Validate that dependents of skipped packages are also skipped.
+  // A package is "skipped" if it's in the ignore list, or if it's private
+  // and privatePackages.version is false.
+  // devDependencies are excluded because they don't affect published consumers —
+  // a stale devDep range on a skipped package is harmless.
+  // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
+  // update devDep ranges in package.json even though they don't cause version bumps.
+  const ignore = isArray(json.ignore) ? json.ignore : [];
+  if (ignore.length || !privatePackages.version) {
+    const dependentsGraph = getDependentsGraph(packages, {
+      ignoreDevDependencies: true,
+      bumpVersionsWithWorkspaceProtocolOnly:
+        json.bumpVersionsWithWorkspaceProtocolOnly,
+    });
+    const packagesByName = new Map(
+      packages.packages.map((x) => [x.packageJson.name, x] as const)
+    );
+
+    for (const pkg of packages.packages) {
+      if (
+        !shouldSkipPackage(pkg, {
+          ignore,
+          allowPrivatePackages: privatePackages.version,
+        })
+      ) {
+        continue;
+      }
+      const skippedPackage = pkg.packageJson.name;
+      const dependents = dependentsGraph.get(skippedPackage) || [];
+      for (const dependent of dependents) {
+        const dependentPkg = packagesByName.get(dependent);
+        if (!dependentPkg) {
+          continue;
         }
+        if (
+          shouldSkipPackage(dependentPkg, {
+            ignore,
+            allowPrivatePackages: privatePackages.version,
+          })
+        ) {
+          continue;
+        }
+        // Private packages don't publish to npm,
+        // so they can safely depend on skipped packages.
+        // This also holds for private packages with other publish targets (like a VS Code extension)
+        // as those typically have to prebundle dependencies.
+        if (dependentPkg.packageJson.private) {
+          continue;
+        }
+        messages.push(
+          `The package "${dependent}" depends on the skipped package "${skippedPackage}", but "${dependent}" is not being skipped. Please add "${dependent}" to the \`ignore\` option.`
+        );
       }
     }
   }
@@ -493,15 +586,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     prettier: typeof json.prettier === "boolean" ? json.prettier : true,
 
     // TODO consider enabling this by default in the next major version
-    privatePackages:
-      json.privatePackages === false
-        ? { tag: false, version: false }
-        : json.privatePackages
-        ? {
-            version: json.privatePackages.version ?? true,
-            tag: json.privatePackages.tag ?? false,
-          }
-        : { version: true, tag: false },
+    privatePackages,
   };
 
   if (

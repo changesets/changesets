@@ -1,4 +1,4 @@
-import publishPackages, { PublishedResult } from "./publishPackages";
+import publishPackages from "./publishPackages";
 import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
@@ -82,9 +82,11 @@ export default async function publish(
     warn("No unpublished projects to publish");
   }
 
-  const successfulNpmPublishes = publishedPackages.filter((p) => p.published);
+  const successfulNpmPublishes = publishedPackages.filter(
+    (p) => p.result === "published"
+  );
   const unsuccessfulNpmPublishes = publishedPackages.filter(
-    (p) => !p.published
+    (p) => p.result === "failed"
   );
 
   if (successfulNpmPublishes.length > 0) {
@@ -118,7 +120,7 @@ export default async function publish(
 
 async function tagPublish(
   tool: string,
-  packageReleases: PublishedResult[],
+  packageReleases: Array<{ name: string; newVersion: string }>,
   cwd: string
 ) {
   if (tool !== "root") {

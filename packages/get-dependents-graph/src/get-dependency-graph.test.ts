@@ -115,4 +115,158 @@ describe("getting the dependency graph", function () {
       `);
     })
   );
+
+  it(
+    "should error on dependencies not specified using workspace protocol when bumpVersionsWithWorkspaceProtocolOnly is false",
+    temporarilySilenceLogs(() => {
+      const { valid } = getDependencyGraph({
+        root: {
+          dir: ".",
+          packageJson: { name: "root", version: "1.0.0" },
+        },
+        packages: [
+          {
+            dir: "foo",
+            packageJson: {
+              name: "foo",
+              version: "1.0.0",
+              dependencies: {
+                bar: "0.9.0",
+              },
+            },
+          },
+          {
+            dir: "bar",
+            packageJson: {
+              name: "bar",
+              version: "1.0.0",
+            },
+          },
+        ],
+        tool: "pnpm",
+      });
+      expect(valid).toBe(false);
+      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            "Package [36m"foo"[39m must depend on the current version of [36m"bar"[39m: [32m"1.0.0"[39m vs [31m"0.9.0"[39m",
+          ],
+        ]
+      `);
+    })
+  );
+
+  it(
+    "should skip dependencies not specified using workspace protocol when bumpVersionsWithWorkspaceProtocolOnly is true",
+    temporarilySilenceLogs(() => {
+      const { valid } = getDependencyGraph(
+        {
+          root: {
+            dir: ".",
+            packageJson: { name: "root", version: "1.0.0" },
+          },
+          packages: [
+            {
+              dir: "foo",
+              packageJson: {
+                name: "foo",
+                version: "1.0.0",
+                dependencies: {
+                  bar: "0.9.0",
+                },
+              },
+            },
+            {
+              dir: "bar",
+              packageJson: {
+                name: "bar",
+                version: "1.0.0",
+              },
+            },
+          ],
+          tool: "pnpm",
+        },
+        {
+          bumpVersionsWithWorkspaceProtocolOnly: true,
+        }
+      );
+      expect(valid).toBe(true);
+      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+    })
+  );
+
+  it("should treat workspace path dependencies as valid local dependencies", () => {
+    const { graph, valid } = getDependencyGraph({
+      root: {
+        dir: ".",
+        packageJson: { name: "root", version: "1.0.0" },
+      },
+      packages: [
+        {
+          dir: "packages/foo",
+          packageJson: {
+            name: "foo",
+            version: "1.0.0",
+            dependencies: {
+              bar: "workspace:packages/bar",
+            },
+          },
+        },
+        {
+          dir: "packages/bar",
+          packageJson: {
+            name: "bar",
+            version: "1.0.0",
+          },
+        },
+      ],
+      tool: "pnpm",
+    });
+
+    expect(graph.get("foo")!.dependencies).toStrictEqual(["bar"]);
+    expect(valid).toBeTruthy();
+    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+  });
+
+  it(
+    "should error on mismatched workspace path dependencies",
+    temporarilySilenceLogs(() => {
+      const { graph, valid } = getDependencyGraph({
+        root: {
+          dir: ".",
+          packageJson: { name: "root", version: "1.0.0" },
+        },
+        packages: [
+          {
+            dir: "packages/foo",
+            packageJson: {
+              name: "foo",
+              version: "1.0.0",
+              dependencies: {
+                bar: "workspace:packages/not-bar",
+              },
+            },
+          },
+          {
+            dir: "packages/bar",
+            packageJson: {
+              name: "bar",
+              version: "1.0.0",
+            },
+          },
+        ],
+        tool: "pnpm",
+      });
+
+      expect(graph.get("foo")!.dependencies).toStrictEqual([]);
+      expect(valid).toBe(false);
+      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            "Package [36m"foo"[39m must depend on the current version of [36m"bar"[39m: [32m"1.0.0"[39m vs [31m"workspace:packages/not-bar"[39m",
+          ],
+        ]
+      `);
+    })
+  );
 });

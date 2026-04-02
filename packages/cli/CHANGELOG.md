@@ -1,5 +1,76 @@
 # @changesets/cli
 
+## 2.30.0
+
+### Minor Changes
+
+- [#1840](https://github.com/changesets/changesets/pull/1840) [`057cca2`](https://github.com/changesets/changesets/commit/057cca222321816b6c8c6f6c52130185b364de36) Thanks [@wotan-allfather](https://github.com/wotan-allfather)! - Add `--since` flag to `add` command
+
+  The `add` command now supports a `--since` flag that allows you to specify which branch, tag, or git ref to use when detecting changed packages. This is useful for gitflow workflows where you have multiple target branches and the `baseBranch` config option doesn't cover all use cases.
+
+  Example: `changeset add --since=develop`
+
+  If not provided, the command falls back to the `baseBranch` value in your `.changeset/config.json`.
+
+- [#1845](https://github.com/changesets/changesets/pull/1845) [`2b4a66a`](https://github.com/changesets/changesets/commit/2b4a66a36497fd5504186dcc6ae9e287c8403de6) Thanks [@Andarist](https://github.com/Andarist)! - Delegate OTP prompting to the package manager instead of handling it in-process. This allows Changesets to use the package manager's native web auth support.
+
+- [#1774](https://github.com/changesets/changesets/pull/1774) [`667fe5a`](https://github.com/changesets/changesets/commit/667fe5aacf04dbefcf2532584ff2753b8417855a) Thanks [@bluwy](https://github.com/bluwy)! - Support importing custom `commit` option ES module. Previously, it used `require()` which only worked for CJS modules, however now it uses `import()` which supports both CJS and ES modules.
+
+- [#1839](https://github.com/changesets/changesets/pull/1839) [`73b1809`](https://github.com/changesets/changesets/commit/73b18099517b00a3c7b70c417b7f7f1bfaa24931) Thanks [@leochiu-a](https://github.com/leochiu-a)! - Add a `--message` (`-m`) flag to `changeset add` (and default `changeset`) so the changeset summary can be provided from the command line. When `--message` is present, the summary prompt is skipped while the final confirmation step is kept.
+
+- [#1806](https://github.com/changesets/changesets/pull/1806) [`0e8e01e`](https://github.com/changesets/changesets/commit/0e8e01e93358bdc8c318c608dd3b0e4af8219049) Thanks [@luisadame](https://github.com/luisadame)! - Changeset CLI can now be run from the nested directories in the project, where the `.changeset` directory has to be found in one of the parent directories
+
+### Patch Changes
+
+- [#1849](https://github.com/changesets/changesets/pull/1849) [`9dc3230`](https://github.com/changesets/changesets/commit/9dc32308e4d208964b648a788ba4eee1003c273c) Thanks [@Andarist](https://github.com/Andarist)! - Compute the terminal's size lazily to avoid spurious stderr output in non-interactive mode
+
+- [#1857](https://github.com/changesets/changesets/pull/1857) [`2a73025`](https://github.com/changesets/changesets/commit/2a7302577d2923dc7db5025003d8aa58fb627ff9) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix confusing prompt labels when entering changeset summary after external editor fallback
+
+- [#1842](https://github.com/changesets/changesets/pull/1842) [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6) Thanks [@RodrigoHamuy](https://github.com/RodrigoHamuy)! - Allow private packages to depend on skipped packages without requiring them to also be skipped. Private packages are not published to npm, so it is safe for them to have dependencies on ignored or unversioned packages.
+
+- [#1776](https://github.com/changesets/changesets/pull/1776) [`503fcaa`](https://github.com/changesets/changesets/commit/503fcaae57c397e14a52da7700dc5cb8e7cbd551) Thanks [@bluwy](https://github.com/bluwy)! - Support absolute paths in `changeset status --output <path>`
+
+- Updated dependencies [[`667fe5a`](https://github.com/changesets/changesets/commit/667fe5aacf04dbefcf2532584ff2753b8417855a), [`1772598`](https://github.com/changesets/changesets/commit/1772598270a59ba1fa7b0ef7e675fce6a575f850), [`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6), [`27fd8f4`](https://github.com/changesets/changesets/commit/27fd8f41dddafcc2e96e7df39dca04d92f916a0a)]:
+  - @changesets/apply-release-plan@7.1.0
+  - @changesets/config@3.1.3
+  - @changesets/get-release-plan@4.0.15
+  - @changesets/read@0.6.7
+
+## 2.29.8
+
+### Patch Changes
+
+- [#1437](https://github.com/changesets/changesets/pull/1437) [`aa68d54`](https://github.com/changesets/changesets/commit/aa68d54faa17f825345ef3732d20e4a74423e5fd) Thanks [@with-heart](https://github.com/with-heart)! - Tweaked a hint text printed when one confirms an empty set of packages to be released
+
+- Updated dependencies [[`cc28222`](https://github.com/changesets/changesets/commit/cc28222ee892b3a078fa02ee26e1cef98c171532), [`e520bf5`](https://github.com/changesets/changesets/commit/e520bf5d4dbfe96f59ca28008e87bffaf3c9dfea), [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe)]:
+  - @changesets/config@3.1.2
+  - @changesets/apply-release-plan@7.0.14
+  - @changesets/get-release-plan@4.0.14
+  - @changesets/read@0.6.6
+
+## 2.29.7
+
+### Patch Changes
+
+- Updated dependencies [[`957f24e`](https://github.com/changesets/changesets/commit/957f24ed0446494c5709189ae57583f72c716d43)]:
+  - @changesets/apply-release-plan@7.0.13
+
+## 2.29.6
+
+### Patch Changes
+
+- [#1712](https://github.com/changesets/changesets/pull/1712) [`a3563b0`](https://github.com/changesets/changesets/commit/a3563b0d6c84e7142541493dea0c89acdc339b93) Thanks [@benmccann](https://github.com/benmccann)! - Switch to maintained fork of `external-editor`
+
+## 2.29.5
+
+### Patch Changes
+
+- [#1693](https://github.com/changesets/changesets/pull/1693) [`6352819`](https://github.com/changesets/changesets/commit/6352819685369daecf31f72e948d0fe92ff33485) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `workspace:^` and `workspace:~` dependency ranges not being semantically treated as, respectively, `^CURRENT_VERSION` and `~CURRENT_VERSION`. This led to dependent packages being, at times, bumped too often when their dependencies with those ranges were bumped.
+
+- Updated dependencies [[`6352819`](https://github.com/changesets/changesets/commit/6352819685369daecf31f72e948d0fe92ff33485)]:
+  - @changesets/assemble-release-plan@6.0.9
+  - @changesets/get-release-plan@4.0.13
+
 ## 2.29.4
 
 ### Patch Changes

@@ -111,17 +111,23 @@ export default async function applyReleasePlan(
         JSON.stringify(releasePlan.preState, null, 2) + "\n"
       );
     }
+    touchedFiles.push(path.join(cwd, ".changeset", "pre.json"));
   }
 
-  let versionsToUpdate = releases.map(({ name, newVersion, type }) => ({
-    name,
-    version: newVersion,
-    type,
-  }));
+  let versionsToUpdate = releases.map(
+    ({ name, newVersion, oldVersion, type }) => ({
+      name,
+      version: newVersion,
+      oldVersion,
+      type,
+      dir: packagesByName.get(name)!.dir,
+    })
+  );
 
   // iterate over releases updating packages
   let finalisedRelease = releaseWithChangelogs.map((release) => {
     return versionPackage(release, versionsToUpdate, {
+      cwd,
       updateInternalDependencies: config.updateInternalDependencies,
       onlyUpdatePeerDependentsWhenOutOfRange:
         config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
@@ -219,9 +225,14 @@ async function getNewChangelogEntry(
     changelogPath = resolveFrom(contextDir, config.changelog[0]);
   }
 
-  let possibleChangelogFunc = require(changelogPath);
+  let possibleChangelogFunc = await import(changelogPath);
   if (possibleChangelogFunc.default) {
     possibleChangelogFunc = possibleChangelogFunc.default;
+
+    // Check nested default again in case it's CJS with `__esModule` interop
+    if (possibleChangelogFunc.default) {
+      possibleChangelogFunc = possibleChangelogFunc.default;
+    }
   }
   if (
     typeof possibleChangelogFunc.getReleaseLine === "function" &&
@@ -244,6 +255,7 @@ async function getNewChangelogEntry(
   return Promise.all(
     releasesWithPackage.map(async (release) => {
       let changelog = await getChangelogEntry(
+        cwd,
         release,
         releasesWithPackage,
         moddedChangesets,
@@ -325,7 +337,23 @@ async function prependFile(
     );
     return;
   }
-  const newChangelog = fileData.replace("\n", data);
+
+  let newChangelog: string;
+
+  // Require just 2 version numbers here, assuming `## 1.1` is a valid version heading.
+  // Our version headings start with ##, we are more permissive here though.
+  // Note: we also need to handle prerelease versions here but that's already covered by the regex.
+  const isVersionHeading = /^#{1,6}\s+\d+\.\d+/.test(fileData);
+  if (isVersionHeading) {
+    // file starts with a version heading (no package title) - prepend before everything
+    newChangelog = data.trimStart() + fileData;
+  } else {
+    const index = fileData.indexOf("\n");
+    newChangelog =
+      index === -1
+        ? fileData + data // treat the whole file as header
+        : fileData.slice(0, index) + data + fileData.slice(index + 1);
+  }
 
   await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
 }
