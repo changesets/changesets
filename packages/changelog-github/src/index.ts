@@ -148,6 +148,9 @@ const changelogFunctions: ChangelogFunctions = {
       )
       .join("\n")}`;
   },
+  getCurrentRelease: async (changesets, _options) => {
+    return changesets;
+  },
 };
 
 export default changelogFunctions;
