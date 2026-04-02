@@ -47,6 +47,27 @@ Nice simple summary
       },
     ]);
   });
+  it("should ignore uppercase .md files (AGENTS.md, CLAUDE.md, etc.)", async () => {
+    const cwd = await testdir({
+      ".changeset/AGENTS.md": `Instructions for AI coding agents`,
+      ".changeset/CLAUDE.md": `Project context for Claude`,
+      ".changeset/one-chance.md": `---
+"cool-package": minor
+---
+
+Nice simple summary
+`,
+    });
+
+    const changesets = await read(cwd);
+    expect(changesets).toEqual([
+      {
+        releases: [{ name: "cool-package", type: "minor" }],
+        summary: "Nice simple summary",
+        id: "one-chance",
+      },
+    ]);
+  });
   it("read a changeset that isn't a three word id", async () => {
     // I just want it enshrined in the tests that the file name's format
     // is in no way part of the changeset spec
