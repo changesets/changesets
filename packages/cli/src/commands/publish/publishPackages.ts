@@ -1,4 +1,4 @@
-import { log, spinner } from "@clack/prompts";
+import { log, spinner, progress } from "@clack/prompts";
 import type { AccessType, PreState } from "@changesets/types";
 import type { Package } from "@changesets/types";
 import { resolve } from "path";
@@ -93,7 +93,7 @@ export default async function publishPackages({
   otp?: string;
   preState: PreState | undefined;
   tag?: string;
-}) {
+}): Promise<PublishedResult[]> {
   const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
   const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
   const unpublishedPackagesInfo = await getUnpublishedPackages(
@@ -105,26 +105,45 @@ export default async function publishPackages({
     return [];
   }
 
-  const twoFactorState = await getTwoFactorState({
-    otp,
-    publicPackages,
-  });
-
-  if (requiresDelegatedAuth(twoFactorState)) {
+  const twoFactorState = await getTwoFactorState({ otp, publicPackages });
+  const hasToDelegate = requiresDelegatedAuth(twoFactorState);
+  if (hasToDelegate) {
     npmPublishQueue.setConcurrency(1);
   }
 
-  return Promise.all(
-    unpublishedPackagesInfo.map((pkgInfo) => {
-      let pkg = packagesByName.get(pkgInfo.name)!;
-      return publishAPackage(
-        pkg,
-        access,
-        twoFactorState,
-        getReleaseTag(pkgInfo, preState, tag),
-      );
-    }),
-  );
+  const publishPromises = unpublishedPackagesInfo.map((pkgInfo) => {
+    let pkg = packagesByName.get(pkgInfo.name)!;
+    return publishAPackage(
+      pkg,
+      access,
+      twoFactorState,
+      getReleaseTag(pkgInfo, preState, tag),
+    );
+  });
+
+  if (!hasToDelegate && unpublishedPackagesInfo.length > 1) {
+    const p = progress({ max: unpublishedPackagesInfo.length });
+    const results = await Promise.all(
+      publishPromises.map(async (publishPromise) => {
+        const result = await publishPromise;
+        p.advance();
+        return result;
+      }),
+    );
+
+    p.stop(`Published ${publishPromises.length} packages!`);
+    return results;
+  } else {
+    return Promise.all(
+      publishPromises.map(async (publishPromise) => {
+        const result = await publishPromise;
+        log.success(
+          `Published ${pc.blue(result.name)}@${pc.green(result.newVersion)}!`,
+        );
+        return result;
+      }),
+    );
+  }
 }
 
 async function publishAPackage(
@@ -134,10 +153,6 @@ async function publishAPackage(
   tag: string,
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
-
-  // TODO: maybe use padding: 0 here
-  const s = spinner();
-  s.start(`Publishing ${pc.blue(name)}@${pc.green(version)}`);
 
   const publishConfirmation = await publish(
     pkg.packageJson,
@@ -151,7 +166,6 @@ async function publishAPackage(
     },
     twoFactorState,
   );
-  s.stop(`Published ${pc.blue(name)}@${pc.green(version)}`);
 
   return {
     name,
