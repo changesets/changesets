@@ -61,7 +61,7 @@ export default async function version(
     (preState === undefined || preState.mode !== "exit")
   ) {
     warn("No unreleased changesets found, exiting.");
-    return;
+    throw new ExitError(1);
   }
 
   let packages = await getPackages(cwd);
