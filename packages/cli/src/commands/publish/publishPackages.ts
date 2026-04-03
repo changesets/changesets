@@ -123,6 +123,8 @@ export default async function publishPackages({
 
   if (!hasToDelegate && unpublishedPackagesInfo.length > 1) {
     const p = progress({ max: unpublishedPackagesInfo.length });
+    p.start("Publishing packages...")
+
     const results = await Promise.all(
       publishPromises.map(async (publishPromise) => {
         const result = await publishPromise;
@@ -207,26 +209,34 @@ async function getUnpublishedPackages(
   );
 
   const packagesToPublish: Array<PkgInfo> = [];
+  const previewLines: string[] = [];
+  let alreadyPublishedCount = 0;
 
   for (const pkgInfo of results) {
     const { name, publishedState, localVersion, publishedVersions } = pkgInfo;
     if (!publishedVersions.includes(localVersion)) {
       packagesToPublish.push(pkgInfo);
-      const lines = [
-        `${pc.blue(name)} is being published because our local version (${pc.green(localVersion)}) has not been published to npm`,
-      ];
+      previewLines.push(
+        `${pc.blue(name)}@${pc.green(localVersion)}`,
+      );
       if (preState !== undefined && publishedState === "only-pre") {
-        lines.push(
-          `${pc.blue(name)} is being published to ${pc.cyan("latest")} rather than ${pc.cyan(preState.tag)} because there has not been a regular release of it yet`,
+        previewLines.push(
+          `${pc.gray("└")} will be published to ${pc.cyan("latest")} rather than ${pc.cyan(preState.tag)} as it will be its first published version.`,
         );
       }
-      log.info(lines.join("\n"));
     } else {
-      // If the local version is behind npm, something is wrong, we warn here, and by not getting published later, it will fail
-      log.warn(
-        `${pc.blue(name)} is not being published because version ${pc.green(localVersion)} is already published to npm`,
-      );
+      alreadyPublishedCount++;
     }
+  }
+
+  if (packagesToPublish.length !== 0) {
+    log.info(
+      `
+These packages will be published as they were not found on npm:
+${previewLines.join("\n")}
+${pc.gray(`${alreadyPublishedCount} packages are already published.`)}
+      `.trim(),
+    );
   }
 
   return packagesToPublish;
