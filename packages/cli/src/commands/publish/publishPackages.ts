@@ -1,6 +1,5 @@
-import { log, spinner, progress } from "@clack/prompts";
-import type { AccessType, PreState } from "@changesets/types";
-import type { Package } from "@changesets/types";
+import { log, progress } from "@clack/prompts";
+import type { AccessType, Package, PreState } from "@changesets/types";
 import { resolve } from "path";
 import pc from "picocolors";
 import semverParse from "semver/functions/parse.js";
@@ -8,10 +7,10 @@ import type { TwoFactorState } from "../../utils/types.ts";
 import {
   getCorrectRegistry,
   getTokenIsRequired,
-  isCustomRegistry,
-  publish,
-  npmPublishQueue,
   infoAllow404,
+  isCustomRegistry,
+  npmPublishQueue,
+  publish,
 } from "./npm-utils.ts";
 
 type PublishedState = "never" | "published" | "only-pre";
@@ -123,7 +122,7 @@ export default async function publishPackages({
 
   if (!hasToDelegate && unpublishedPackagesInfo.length > 1) {
     const p = progress({ max: unpublishedPackagesInfo.length });
-    p.start("Publishing packages...")
+    p.start("Publishing packages...");
 
     const results = await Promise.all(
       publishPromises.map(async (publishPromise) => {
@@ -216,9 +215,7 @@ async function getUnpublishedPackages(
     const { name, publishedState, localVersion, publishedVersions } = pkgInfo;
     if (!publishedVersions.includes(localVersion)) {
       packagesToPublish.push(pkgInfo);
-      previewLines.push(
-        `${pc.blue(name)}@${pc.green(localVersion)}`,
-      );
+      previewLines.push(`${pc.blue(name)}@${pc.green(localVersion)}`);
       if (preState !== undefined && publishedState === "only-pre") {
         previewLines.push(
           `${pc.gray("└")} will be published to ${pc.cyan("latest")} rather than ${pc.cyan(preState.tag)} as it will be its first published version.`,
