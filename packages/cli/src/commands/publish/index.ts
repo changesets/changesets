@@ -58,8 +58,6 @@ To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
   const tagPrivatePackages =
     config.privatePackages && config.privatePackages.tag;
 
-  const p = spinner();
-  p.start("Publishing packages...");
   const publishedPackages = await publishPackages({
     packages,
     // if not public, we won't pass the access, and it works as normal
@@ -68,7 +66,6 @@ To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
     preState,
     tag: releaseTag,
   });
-  p.stop("Published packages.");
 
   const privatePackages = packages.filter(
     (pkg) => pkg.packageJson.private && pkg.packageJson.version,
