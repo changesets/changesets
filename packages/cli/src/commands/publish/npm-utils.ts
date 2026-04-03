@@ -1,6 +1,6 @@
 import { ExitError } from "@changesets/errors";
-import { error, info, warn } from "@changesets/logger";
 import type { AccessType, PackageJSON } from "@changesets/types";
+import { log } from "@clack/prompts";
 import { spawnSync } from "child_process";
 import { detect } from "package-manager-detector";
 import pc from "picocolors";
@@ -120,9 +120,11 @@ export async function getTokenIsRequired() {
     nodeOptions: { env: Object.assign({}, process.env, envOverride) },
   });
   if (result.exitCode !== 0) {
-    error(
-      "error while checking if token is required",
-      result.stderr.toString().trim() || result.stdout.toString().trim(),
+    log.error(
+      `
+error while checking if token is required
+${result.stderr.toString().trim() || result.stdout.toString().trim()}
+      `.trim(),
     );
     return false;
   }
@@ -135,8 +137,6 @@ export async function getTokenIsRequired() {
 
 export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestQueue.add(async () => {
-    info(`npm info ${packageJson.name}`);
-
     const { scope, registry } = getCorrectRegistry(packageJson);
 
     // Due to a couple of issues with yarnpkg, we also want to override the npm registry when doing
@@ -168,17 +168,16 @@ export function getPackageInfo(packageJson: PackageJSON) {
 export async function infoAllow404(packageJson: PackageJSON) {
   let pkgInfo = await getPackageInfo(packageJson);
   if (pkgInfo.error?.code === "E404") {
-    warn(`Received 404 for npm info ${pc.cyan(`"${packageJson.name}"`)}`);
+    log.warn(`Received 404 for ${pc.cyan(`npm info ${packageJson.name}`)}`);
     return { published: false, pkgInfo: {} };
   }
   if (pkgInfo.error) {
-    error(
-      `Received an unknown error code: ${
-        pkgInfo.error.code
-      } for npm info ${pc.cyan(`"${packageJson.name}"`)}`,
+    log.error(
+      `
+Received an unknown error code: ${pkgInfo.error.code} for ${pc.cyan(`npm info ${packageJson.name}`)}
+${pkgInfo.error.summary}${pkgInfo.error.detail ? `\n${pkgInfo.error.detail}` : ""}
+      `.trim(),
     );
-    error(pkgInfo.error.summary);
-    if (pkgInfo.error.detail) error(pkgInfo.error.detail);
 
     throw new ExitError(1);
   }
@@ -288,14 +287,15 @@ async function internalPublish(
           allowRetry: true,
         };
       }
-      error(
-        `an error occurred while publishing ${packageJson.name}: ${json.error.code}`,
-        json.error.summary,
-        json.error.detail ? "\n" + json.error.detail : "",
+      log.error(
+        `
+An error occurred while publishing ${packageJson.name}: ${json.error.code}
+${json.error.summary}${json.error.detail ? `\n${json.error.detail}` : ""}
+        `.trim(),
       );
     }
 
-    error(stderr.toString() || stdout.toString());
+    log.error(stderr.toString() || stdout.toString());
     return { published: false };
   }
   return { published: true };

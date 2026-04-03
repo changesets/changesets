@@ -1,5 +1,5 @@
 import pc from "picocolors";
-import { log } from "@changesets/logger";
+import { log } from "@clack/prompts";
 import type { Release, VersionType } from "@changesets/types";
 
 export default function printConfirmationMessage(
@@ -14,26 +14,30 @@ export default function printConfirmationMessage(
       .filter((release) => release.type === type)
       .map((release) => release.name);
   }
-  log("\n=== Summary of changesets ===");
+
   const majorReleases = getReleasesOfType("major");
   const minorReleases = getReleasesOfType("minor");
   const patchReleases = getReleasesOfType("patch");
 
-  if (majorReleases.length > 0)
-    log(`${pc.bold(pc.green("major"))}:  ${majorReleases.join(", ")}`);
-  if (minorReleases.length > 0)
-    log(`${pc.bold(pc.green("minor"))}:  ${minorReleases.join(", ")}`);
-  if (patchReleases.length > 0)
-    log(`${pc.bold(pc.green("patch"))}:  ${patchReleases.join(", ")}`);
-
-  log("");
+  let msg = pc.bold("Summary of changesets:");
+  if (majorReleases.length > 0) {
+    msg += `\n${pc.bold(pc.red("major"))}:  ${majorReleases.join(", ")}`;
+  }
+  if (minorReleases.length > 0) {
+    msg += `\n${pc.bold(pc.green("minor"))}:  ${minorReleases.join(", ")}`;
+  }
+  if (patchReleases.length > 0) {
+    msg += `\n${pc.bold(pc.blue("patch"))}:  ${patchReleases.join(", ")}`;
+  }
+  log.success(msg);
 
   if (repoHasMultiplePackages) {
-    const message =
-      "Note: All dependents of these packages that will be incompatible with the new version will be " +
-      pc.redBright("patch bumped") +
-      " when this changeset is applied.";
-
-    log(message + "\n");
+    log.info(
+      `
+Note: All packages that depend on these whose required versions 
+will be incompatible will also be ${pc.blue("patch")} bumped
+when this changeset is applied.
+      `.trim(),
+    );
   }
 }
