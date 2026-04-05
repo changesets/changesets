@@ -5,6 +5,25 @@ import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 
 config();
 
+// "match what you skip, capture what you want": the left alternative
+// consumes markdown links so the right alternative only matches bare refs
+function linkifyIssueRefs(
+  line: string,
+  { serverUrl, repo }: { serverUrl: string; repo: string }
+): string {
+  return line.replace(/\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g, (match, issue) =>
+    // PRs and issues are the same thing on GitHub (to some extent, of course)
+    // this relies on GitHub redirecting from /issues/1234 to /pull/1234 when necessary
+    issue ? `[#${issue}](${serverUrl}/${repo}/issues/${issue})` : match
+  );
+}
+
+function readEnv() {
+  const GITHUB_SERVER_URL =
+    process.env.GITHUB_SERVER_URL || "https://github.com";
+  return { GITHUB_SERVER_URL };
+}
+
 const changelogFunctions: ChangelogFunctions = {
   getDependencyReleaseLine: async (
     changesets,
@@ -41,6 +60,7 @@ const changelogFunctions: ChangelogFunctions = {
     return [changesetLink, ...updatedDepenenciesList].join("\n");
   },
   getReleaseLine: async (changeset, type, options) => {
+    const { GITHUB_SERVER_URL } = readEnv();
     if (!options || !options.repo) {
       throw new Error(
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
@@ -69,7 +89,7 @@ const changelogFunctions: ChangelogFunctions = {
 
     const [firstLine, ...futureLines] = replacedChangelog
       .split("\n")
-      .map((l) => l.trimRight());
+      .map((l) => l.trimEnd());
 
     const links = await (async () => {
       if (prFromSummary !== undefined) {
@@ -81,7 +101,7 @@ const changelogFunctions: ChangelogFunctions = {
           const shortCommitId = commitFromSummary.slice(0, 7);
           links = {
             ...links,
-            commit: `[\`${shortCommitId}\`](https://github.com/${options.repo}/commit/${commitFromSummary})`,
+            commit: `[\`${shortCommitId}\`](${GITHUB_SERVER_URL}/${options.repo}/commit/${commitFromSummary})`,
           };
         }
         return links;
@@ -105,7 +125,7 @@ const changelogFunctions: ChangelogFunctions = {
       ? usersFromSummary
           .map(
             (userFromSummary) =>
-              `[@${userFromSummary}](https://github.com/${userFromSummary})`
+              `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`
           )
           .join(", ")
       : links.user;
@@ -116,8 +136,17 @@ const changelogFunctions: ChangelogFunctions = {
       users === null ? "" : ` Thanks ${users}!`,
     ].join("");
 
-    return `\n\n-${prefix ? `${prefix} -` : ""} ${firstLine}\n${futureLines
-      .map((l) => `  ${l}`)
+    return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {
+      serverUrl: GITHUB_SERVER_URL,
+      repo: options!.repo,
+    })}\n${futureLines
+      .map(
+        (l) =>
+          `  ${linkifyIssueRefs(l, {
+            serverUrl: GITHUB_SERVER_URL,
+            repo: options!.repo,
+          })}`
+      )
       .join("\n")}`;
   },
 };

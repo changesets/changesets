@@ -3,6 +3,7 @@ import Range from "semver/classes/range";
 import pc from "picocolors";
 import { Packages, Package } from "@manypkg/get-packages";
 import { PackageJSON } from "@changesets/types";
+import path from "node:path";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -75,12 +76,18 @@ export default function getDependencyGraph(
   const packagesByName: { [key: string]: Package } = {
     [packages.root.packageJson.name]: packages.root,
   };
+  const relativePathsByName: { [key: string]: string } = {
+    [packages.root.packageJson.name]: ".",
+  };
 
   const queue = [packages.root];
 
   for (const pkg of packages.packages) {
     queue.push(pkg);
     packagesByName[pkg.packageJson.name] = pkg;
+    relativePathsByName[pkg.packageJson.name] = path
+      .relative(packages.root.dir, pkg.dir)
+      .replace(/\\/g, "/");
   }
 
   for (const pkg of queue) {
@@ -96,6 +103,7 @@ export default function getDependencyGraph(
       if (!match) continue;
 
       const expected = match.packageJson.version;
+      const rawDepRange = depRange;
       const usesWorkspaceRange = depRange.startsWith("workspace:");
 
       if (usesWorkspaceRange) {
@@ -103,6 +111,23 @@ export default function getDependencyGraph(
 
         if (depRange === "*" || depRange === "^" || depRange === "~") {
           dependencies.push(depName);
+          continue;
+        }
+
+        if (path.posix.normalize(depRange) === relativePathsByName[depName]) {
+          dependencies.push(depName);
+          continue;
+        }
+
+        if (!getValidRange(depRange)) {
+          valid = false;
+          console.error(
+            `Package ${pc.cyan(
+              `"${name}"`
+            )} must depend on the current version of ${pc.cyan(
+              `"${depName}"`
+            )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${rawDepRange}"`)}`
+          );
           continue;
         }
       } else if (bumpVersionsWithWorkspaceProtocolOnly) {
@@ -118,7 +143,7 @@ export default function getDependencyGraph(
             `"${name}"`
           )} must depend on the current version of ${pc.cyan(
             `"${depName}"`
-          )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${depRange}"`)}`
+          )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${rawDepRange}"`)}`
         );
         continue;
       }
