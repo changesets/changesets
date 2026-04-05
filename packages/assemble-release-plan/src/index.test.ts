@@ -892,7 +892,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     });
   });
 
-  describe.only("groups packages", () => {
+  describe("groups packages", () => {
     it("should bump only target when target is update not source", () => {
       setup.changesets = [];
       setup.addChangeset({
