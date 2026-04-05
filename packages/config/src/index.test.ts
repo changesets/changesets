@@ -738,7 +738,10 @@ describe("parser errors", () => {
 
     test("using groups and linked alongside", () => {
       expect(() => {
-        parse({ groups: [["pkg-a", "pkg-a"]], linked: [["pkg-a"]] }, withPackages(["pkg-a"]));
+        parse(
+          { groups: [["pkg-a", "pkg-a"]], linked: [["pkg-a"]] },
+          withPackages(["pkg-a"])
+        );
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
         The \`groups\` option cannot be used alongside the \`linked\` or \`fixed\` options. Please use only the \`groups\` option as it is a more flexible alternative to both \`linked\` and \`fixed\`."
@@ -747,7 +750,10 @@ describe("parser errors", () => {
 
     test("using groups and fixed alongside", () => {
       expect(() => {
-        parse({ groups: [["pkg-a", "pkg-a"]], fixed: [["pkg-a"]] }, withPackages(["pkg-a"]));
+        parse(
+          { groups: [["pkg-a", "pkg-a"]], fixed: [["pkg-a"]] },
+          withPackages(["pkg-a"])
+        );
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
         The \`groups\` option cannot be used alongside the \`linked\` or \`fixed\` options. Please use only the \`groups\` option as it is a more flexible alternative to both \`linked\` and \`fixed\`."
@@ -756,7 +762,10 @@ describe("parser errors", () => {
 
     test("groups glob expression should match only one target package", () => {
       expect(() => {
-        parse({ groups: [["pkg-a", "pkg-glob-*"]] }, withPackages(["pkg-a", "pkg-glob-1", "pkg-glob-2"]));
+        parse(
+          { groups: [["pkg-a", "pkg-glob-*"]] },
+          withPackages(["pkg-a", "pkg-glob-1", "pkg-glob-2"])
+        );
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
         The target side of the group "pkg-glob-*" in the \`groups\` option must resolve to exactly one package, but it resolves to [pkg-glob-1, pkg-glob-2]."
@@ -765,7 +774,10 @@ describe("parser errors", () => {
 
     test("groups glob expression should match only one source package", () => {
       expect(() => {
-        parse({ groups: [["pkg-glob-*", "pkg-a"]] }, withPackages(["pkg-a", "pkg-glob-1", "pkg-glob-2"]));
+        parse(
+          { groups: [["pkg-glob-*", "pkg-a"]] },
+          withPackages(["pkg-a", "pkg-glob-1", "pkg-glob-2"])
+        );
       }).toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
         The source side of the group "pkg-glob-*" in the \`groups\` option must resolve to exactly one package, but it resolves to [pkg-glob-1, pkg-glob-2]."

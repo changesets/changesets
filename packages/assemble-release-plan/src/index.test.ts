@@ -905,9 +905,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          groups: [
-            ["pkg-a", "pkg-c"],
-          ],
+          groups: [["pkg-a", "pkg-c"]],
         },
         undefined
       );
@@ -928,9 +926,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          groups: [
-            ["pkg-a", "pkg-b"],
-          ],
+          groups: [["pkg-a", "pkg-b"]],
         },
         undefined
       );
@@ -940,7 +936,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[1].newVersion).toEqual("2.0.0");
     });
 
-    it('should bump all targets for one source update', () => {
+    it("should bump all targets for one source update", () => {
       setup.addChangeset({
         id: "just-some-umbrellas",
         releases: [{ name: "pkg-a", type: "minor" }],
@@ -953,7 +949,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
           ...defaultConfig,
           groups: [
             ["pkg-a", "pkg-b"],
-            ["pkg-a", "pkg-c"]
+            ["pkg-a", "pkg-c"],
           ],
         },
         undefined
@@ -965,7 +961,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[2].newVersion).toEqual("1.1.0");
     });
 
-    it('should bump first source then targets for multiple source updates', () => {
+    it("should bump first source then targets for multiple source updates", () => {
       setup.addChangeset({
         id: "just-some-umbrellas",
         releases: [{ name: "pkg-a", type: "patch" }],
@@ -1003,7 +999,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[3].newVersion).toEqual("1.0.1");
     });
 
-    it('should bump one source and then chain update through rest of deps', () => {
+    it("should bump one source and then chain update through rest of deps", () => {
       setup.addChangeset({
         id: "just-some-umbrellas",
         releases: [{ name: "pkg-a", type: "patch" }],
@@ -1035,7 +1031,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     });
 
     // TODO: (To answer) Test for circular groupings, I'm not sure yet if we want to allow this or error
-    it('should not create infinite loop for circular groupings', () => {
+    it("should not create infinite loop for circular groupings", () => {
       setup.addChangeset({
         id: "just-some-umbrellas",
         releases: [{ name: "pkg-a", type: "patch" }],
@@ -1050,7 +1046,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             ["pkg-a", "pkg-b"],
             ["pkg-b", "pkg-c"],
             ["pkg-c", "pkg-d"],
-            ['pkg-d', 'pkg-a'],
+            ["pkg-d", "pkg-a"],
           ],
         },
         undefined
@@ -1083,7 +1079,10 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          groups: [["pkg-a", "pkg-b"], ['pkg-a', 'pkg-c']],
+          groups: [
+            ["pkg-a", "pkg-b"],
+            ["pkg-a", "pkg-c"],
+          ],
         },
         undefined
       );
@@ -1163,9 +1162,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.packages,
         {
           ...defaultConfig,
-          groups: [
-            ["pkg-a", "pkg-b"],
-          ],
+          groups: [["pkg-a", "pkg-b"]],
         },
         undefined
       );
