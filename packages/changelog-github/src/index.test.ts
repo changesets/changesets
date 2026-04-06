@@ -37,6 +37,8 @@ jest.mock(
           links,
         };
       },
+      setBatchSize() {},
+      clearCache() {},
     };
   }
 );
