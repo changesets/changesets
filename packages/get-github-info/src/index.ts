@@ -81,23 +81,30 @@ const DEFAULT_BATCH_SIZE = 100;
 
 let configuredBatchSize: number | undefined;
 
+function isValidBatchSize(value: number): boolean {
+  return Number.isFinite(value) && Number.isInteger(value) && value > 0;
+}
+
 /**
  * Set the batch size for GitHub GraphQL API requests.
  * This controls how many commits/PRs are looked up in a single query.
  * Can also be set via the CHANGESET_GITHUB_BATCH_SIZE environment variable.
  */
 export function setBatchSize(size: number) {
+  if (!isValidBatchSize(size)) {
+    throw new RangeError("Batch size must be a finite integer greater than 0");
+  }
   configuredBatchSize = size;
 }
 
 function getBatchSize(): number {
-  if (configuredBatchSize !== undefined && configuredBatchSize > 0) {
+  if (configuredBatchSize !== undefined) {
     return configuredBatchSize;
   }
   const envVal = process.env.CHANGESET_GITHUB_BATCH_SIZE;
   if (envVal) {
     const parsed = parseInt(envVal, 10);
-    if (!isNaN(parsed) && parsed > 0) {
+    if (isValidBatchSize(parsed)) {
       return parsed;
     }
   }
@@ -185,7 +192,7 @@ async function fetchBatch(
 }
 
 // why are we using dataloader?
-// it provides use with two things
+// it provides us with two things
 // 1. caching
 // since getInfo will be called inside of changeset's getReleaseLine
 // and there could be a lot of release lines for a single commit
@@ -212,7 +219,7 @@ const GHDataLoader = new DataLoader<RequestData, any>(
     const results: any[] = new Array(requests.length);
 
     if (totalBatches > 1) {
-      console.log(
+      console.error(
         `Fetching GitHub info for ${requests.length} items in ${totalBatches} batches (batch size: ${batchSize})`
       );
     }
@@ -222,7 +229,7 @@ const GHDataLoader = new DataLoader<RequestData, any>(
     for (let offset = 0; offset < requests.length; offset += batchSize) {
       const batchNum = Math.floor(offset / batchSize) + 1;
       if (totalBatches > 1) {
-        console.log(`Fetching batch ${batchNum}/${totalBatches}...`);
+        console.error(`Fetching batch ${batchNum}/${totalBatches}...`);
       }
       const batch = requests.slice(offset, offset + batchSize);
       const batchResults = await fetchBatch(batch, {

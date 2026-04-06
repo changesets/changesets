@@ -11,6 +11,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  clearCache();
   nock.cleanAll();
   nock.enableNetConnect();
 });
@@ -408,7 +409,6 @@ test("associated with multiple PRs with only one merged", async () => {
 });
 
 test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
-  clearCache();
   const originalGraphqlUrl = process.env.GITHUB_GRAPHQL_URL;
   process.env.GITHUB_GRAPHQL_URL = "https://custom.github.com/api/graphql";
 

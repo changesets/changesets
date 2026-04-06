@@ -39,8 +39,8 @@ const changelogFunctions: ChangelogFunctions = {
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
       );
     }
-    if (options.batchSize) {
-      setBatchSize(options.batchSize);
+    if (options.batchSize != null) {
+      setBatchSize(Number(options.batchSize));
     }
     if (dependenciesUpdated.length === 0) return "";
 
@@ -73,8 +73,8 @@ const changelogFunctions: ChangelogFunctions = {
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
       );
     }
-    if (options.batchSize) {
-      setBatchSize(options.batchSize);
+    if (options.batchSize != null) {
+      setBatchSize(Number(options.batchSize));
     }
 
     let prFromSummary: number | undefined;
