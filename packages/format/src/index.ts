@@ -112,7 +112,9 @@ async function formatWithOxfmt(content: string, filePath: string, cwd: string) {
   });
 }
 
-export function getMarkdownFormat(options?: LegacyFormatOptions): MarkdownFormat {
+export function getMarkdownFormat(
+  options?: LegacyFormatOptions
+): MarkdownFormat {
   if (options?.format !== undefined) {
     return options.format;
   }

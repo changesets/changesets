@@ -361,5 +361,8 @@ async function writeFormattedMarkdownFile(
   cwd: string,
   format: MarkdownFormat
 ) {
-  await fs.writeFile(filePath, await formatMarkdown(content, filePath, cwd, format));
+  await fs.writeFile(
+    filePath,
+    await formatMarkdown(content, filePath, cwd, format)
+  );
 }

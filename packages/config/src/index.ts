@@ -430,10 +430,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
-  if (
-    json.format !== undefined &&
-    json.prettier !== undefined
-  ) {
+  if (json.format !== undefined && json.prettier !== undefined) {
     messages.push(
       "The `format` option cannot be used together with the legacy `prettier` option. Please use only `format`."
     );
