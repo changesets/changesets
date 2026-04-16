@@ -2568,6 +2568,68 @@ describe("apply release plan", () => {
       - Hey, let's have fun with testing!`);
     });
 
+    it("should format changelog markdown with oxfmt when configured", async () => {
+      let { changedFiles } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: `This is a summary
+~~~html
+<style>custom-element::part(thing) {color:blue}</style>
+~~~`,
+              releases: [{ name: "pkg-a", type: "minor" }],
+            },
+          ],
+          releases: [
+            {
+              name: "pkg-a",
+              type: "minor",
+              oldVersion: "1.0.0",
+              newVersion: "1.1.0",
+              changesets: ["quick-lions-devour"],
+            },
+          ],
+          preState: undefined,
+        },
+        {
+          ...defaultConfig,
+          changelog: [
+            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            null,
+          ],
+          format: "oxfmt",
+          prettier: false,
+        }
+      );
+
+      let readmePath = changedFiles.find((a) =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+      );
+
+      if (!readmePath) throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+
+      expect(readme).toContain(`  \`\`\`html
+  <style>
+    custom-element::part(thing) {
+      color: blue;
+    }
+  </style>
+  \`\`\``);
+      expect(readme).not.toContain("~~~html");
+    });
+
     it("should insert new entry before existing version heading when no package title is present", async () => {
       const releasePlan = new FakeReleasePlan();
       let { changedFiles } = await testSetup(

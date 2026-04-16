@@ -297,6 +297,31 @@ describe("cli", () => {
       await expect(run(["version"], {}, cwd)).resolves.not.toThrow();
     });
 
+    it('should not throw if `format: "oxfmt"` is configured', async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          format: "oxfmt",
+        }),
+      });
+      await writeChangeset(
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+
+      await expect(run(["version"], {}, cwd)).resolves.not.toThrow();
+    });
+
     it('should throw if `prettier: "string"` is configured', async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
@@ -323,6 +348,35 @@ describe("cli", () => {
         .toThrowErrorMatchingInlineSnapshot(`
         "Some errors occurred when validating the changesets config:
         The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean"
+      `);
+    });
+
+    it('should throw if `format: "biome"` is configured', async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          format: "biome",
+        }),
+      });
+      await writeChangeset(
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+        cwd
+      );
+
+      await expect(run(["version"], {}, cwd)).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+        "Some errors occurred when validating the changesets config:
+        The \`format\` option is set as "biome" when the only valid values are undefined, false, "prettier" or "oxfmt""
       `);
     });
   });

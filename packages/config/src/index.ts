@@ -58,6 +58,12 @@ function getNormalizedCommitOption(
   return thing;
 }
 
+function isValidFormatOption(
+  format: WrittenConfig["format"]
+): format is Config["format"] {
+  return format === false || format === "prettier" || format === "oxfmt";
+}
+
 function getUnmatchedPatterns(
   listOfPackageNamesOrGlob: readonly string[],
   pkgNames: readonly string[]
@@ -424,6 +430,22 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
+  if (json.format !== undefined && json.prettier !== undefined) {
+    messages.push(
+      "The `format` option cannot be used together with the legacy `prettier` option. Please use only `format`."
+    );
+  }
+
+  if (json.format !== undefined && !isValidFormatOption(json.format)) {
+    messages.push(
+      `The \`format\` option is set as ${JSON.stringify(
+        json.format,
+        null,
+        2
+      )} when the only valid values are undefined, false, "prettier" or "oxfmt"`
+    );
+  }
+
   if (json.prettier !== undefined && typeof json.prettier !== "boolean") {
     messages.push(
       `The \`prettier\` option is set as ${JSON.stringify(
@@ -522,6 +544,14 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
+  const format = isValidFormatOption(json.format)
+    ? json.format
+    : typeof json.prettier === "boolean"
+    ? json.prettier
+      ? "prettier"
+      : false
+    : "prettier";
+
   let config: Config = {
     changelog: getNormalizedChangelogOption(
       json.changelog === undefined
@@ -583,7 +613,8 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           ?.updateInternalDependents ?? "out-of-range",
     },
 
-    prettier: typeof json.prettier === "boolean" ? json.prettier : true,
+    format,
+    prettier: format === "prettier",
 
     // TODO consider enabling this by default in the next major version
     privatePackages,
