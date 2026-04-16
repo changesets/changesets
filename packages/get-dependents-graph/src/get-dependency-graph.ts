@@ -4,6 +4,7 @@ import pc from "picocolors";
 import { Packages, Package } from "@manypkg/get-packages";
 import { PackageJSON } from "@changesets/types";
 import path from "node:path";
+import { readPnpmCatalog } from "./read-pnpm-catalog";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -90,6 +91,8 @@ export default function getDependencyGraph(
       .replace(/\\/g, "/");
   }
 
+  const catalog = readPnpmCatalog(packages.root.dir);
+
   for (const pkg of queue) {
     const { name } = pkg.packageJson;
     const dependencies = [];
@@ -104,6 +107,13 @@ export default function getDependencyGraph(
 
       const expected = match.packageJson.version;
       const rawDepRange = depRange;
+
+      if (depRange === "catalog:") {
+        const catalogVersion = catalog[depName];
+        if (!catalogVersion) continue;
+        depRange = catalogVersion;
+      }
+
       const usesWorkspaceRange = depRange.startsWith("workspace:");
 
       if (usesWorkspaceRange) {

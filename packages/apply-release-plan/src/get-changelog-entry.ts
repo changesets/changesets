@@ -65,9 +65,10 @@ export default async function getChangelogEntry(
 
     const versionRange = dependencyVersionRange || peerDependencyVersionRange;
     const usesWorkspaceRange = versionRange?.startsWith("workspace:");
+    const usesCatalogRange = versionRange === "catalog:";
     return (
       versionRange &&
-      (usesWorkspaceRange || validRange(versionRange) !== null) &&
+      (usesWorkspaceRange || usesCatalogRange || validRange(versionRange) !== null) &&
       shouldUpdateDependencyBasedOnConfig(
         cwd,
         {
