@@ -1,24 +1,13 @@
-import { Changeset } from "@changesets/types";
+import { formatMarkdown, getMarkdownFormat } from "@changesets/format";
+import { Changeset, MarkdownFormat } from "@changesets/types";
 import fs from "fs-extra";
 import humanId from "human-id";
 import path from "path";
-import prettier from "prettier";
-
-function getPrettierInstance(cwd: string): typeof prettier {
-  try {
-    return require(require.resolve("prettier", { paths: [cwd] }));
-  } catch (err) {
-    if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
-      throw err;
-    }
-    return prettier;
-  }
-}
 
 async function writeChangeset(
   changeset: Changeset,
   rootDir: string,
-  options?: { prettier?: boolean }
+  options?: { format?: MarkdownFormat; prettier?: boolean }
 ): Promise<string> {
   const { summary, releases } = changeset;
 
@@ -31,8 +20,6 @@ async function writeChangeset(
     capitalize: false,
   });
 
-  const prettierInstance =
-    options?.prettier !== false ? getPrettierInstance(rootDir) : undefined;
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
   // NOTE: The quotation marks in here are really important even though they are
@@ -47,13 +34,12 @@ ${summary}
 
   await fs.outputFile(
     newChangesetPath,
-    prettierInstance
-      ? // Prettier v3 returns a promise
-        await prettierInstance.format(changesetContents, {
-          ...(await prettierInstance.resolveConfig(newChangesetPath)),
-          parser: "markdown",
-        })
-      : changesetContents
+    await formatMarkdown(
+      changesetContents,
+      newChangesetPath,
+      rootDir,
+      getMarkdownFormat(options)
+    )
   );
 
   return changesetID;

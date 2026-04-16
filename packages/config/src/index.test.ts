@@ -62,6 +62,7 @@ test("read reads the config", async () => {
     changedFilePatterns: ["**"],
     updateInternalDependencies: "patch",
     ignore: [],
+    format: "prettier",
     bumpVersionsWithWorkspaceProtocolOnly: false,
     prettier: true,
     privatePackages: {
@@ -102,6 +103,7 @@ test("read can read config based on the passed in `cwd`", async () => {
     changedFilePatterns: ["**"],
     updateInternalDependencies: "patch",
     ignore: [],
+    format: "prettier",
     bumpVersionsWithWorkspaceProtocolOnly: false,
     prettier: true,
     privatePackages: {
@@ -201,6 +203,7 @@ let defaults: Config = {
   changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
   ignore: [],
+  format: "prettier",
   prettier: true,
   privatePackages: { version: true, tag: false },
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -404,6 +407,36 @@ let correctCases: Record<string, CorrectCase> = {
       updateInternalDependencies: "patch",
     },
   },
+  "format prettier": {
+    input: {
+      format: "prettier",
+    },
+    output: {
+      ...defaults,
+      format: "prettier",
+      prettier: true,
+    },
+  },
+  "format oxfmt": {
+    input: {
+      format: "oxfmt",
+    },
+    output: {
+      ...defaults,
+      format: "oxfmt",
+      prettier: false,
+    },
+  },
+  "legacy prettier false": {
+    input: {
+      prettier: false,
+    },
+    output: {
+      ...defaults,
+      format: false,
+      prettier: false,
+    },
+  },
   ignore: {
     input: {
       ignore: ["pkg-a", "pkg-b"],
@@ -539,6 +572,22 @@ describe("parser errors", () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "Some errors occurred when validating the changesets config:
       The \`commit\` option is set as {} when the only valid values are undefined or a boolean or a module path (e.g. "@changesets/cli/commit" or "./some-module") or a tuple with a module path and config for the commit message generator (e.g. ["@changesets/cli/commit", { "skipCI": "version" }])"
+    `);
+  });
+  test("format invalid value", () => {
+    expect(() => {
+      unsafeParse({ format: "biome" }, defaultPackages);
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The \`format\` option is set as "biome" when the only valid values are undefined, false, "prettier" or "oxfmt""
+    `);
+  });
+  test("format cannot be combined with prettier", () => {
+    expect(() => {
+      unsafeParse({ format: "oxfmt", prettier: false }, defaultPackages);
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The \`format\` option cannot be used together with the legacy \`prettier\` option. Please use only \`format\`."
     `);
   });
   describe("fixed", () => {

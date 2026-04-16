@@ -12,6 +12,7 @@ export type VersionType = "major" | "minor" | "patch" | "none";
 export type DependencyType = typeof DEPENDENCY_TYPES[number];
 
 export type AccessType = "public" | "restricted";
+export type MarkdownFormat = "prettier" | "oxfmt" | false;
 
 export type Release = { name: string; type: VersionType };
 
@@ -75,7 +76,9 @@ export type Config = {
   access: AccessType;
   baseBranch: string;
   changedFilePatterns: readonly string[];
-  /** When false, Changesets won't format with Prettier */
+  /** Which formatter to use for generated markdown files. */
+  format?: MarkdownFormat;
+  /** @deprecated Use `format` instead. */
   prettier: boolean;
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
@@ -102,6 +105,8 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
+  format?: MarkdownFormat;
+  /** @deprecated Use `format` instead. */
   prettier?: boolean;
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:

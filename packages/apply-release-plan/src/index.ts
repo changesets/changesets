@@ -1,9 +1,11 @@
 import { defaultConfig } from "@changesets/config";
+import { formatMarkdown, getMarkdownFormat } from "@changesets/format";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import {
   ChangelogFunctions,
   Config,
+  MarkdownFormat,
   ModCompWithPackage,
   NewChangeset,
   ReleasePlan,
@@ -12,21 +14,9 @@ import { Packages } from "@manypkg/get-packages";
 import detectIndent from "detect-indent";
 import fs from "fs-extra";
 import path from "path";
-import prettier from "prettier";
 import resolveFrom from "resolve-from";
 import getChangelogEntry from "./get-changelog-entry";
 import versionPackage from "./version-package";
-
-function getPrettierInstance(cwd: string): typeof prettier {
-  try {
-    return require(require.resolve("prettier", { paths: [cwd] }));
-  } catch (err) {
-    if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
-      throw err;
-    }
-    return prettier;
-  }
-}
 
 function stringDefined(s: string | undefined): s is string {
   return !!s;
@@ -138,9 +128,6 @@ export default async function applyReleasePlan(
     });
   });
 
-  let prettierInstance =
-    config.prettier !== false ? getPrettierInstance(cwd) : undefined;
-
   for (let release of finalisedRelease) {
     let { changelog, packageJson, dir, name } = release;
 
@@ -150,7 +137,13 @@ export default async function applyReleasePlan(
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
-      await updateChangelog(changelogPath, changelog, name, prettierInstance);
+      await updateChangelog(
+        changelogPath,
+        changelog,
+        name,
+        cwd,
+        getMarkdownFormat(config)
+      );
       touchedFiles.push(changelogPath);
     }
   }
@@ -289,18 +282,20 @@ async function updateChangelog(
   changelogPath: string,
   changelog: string,
   name: string,
-  prettierInstance: typeof prettier | undefined
+  cwd: string,
+  format: MarkdownFormat
 ) {
   let templateString = `\n\n${changelog.trim()}\n`;
 
   try {
     if (fs.existsSync(changelogPath)) {
-      await prependFile(changelogPath, templateString, name, prettierInstance);
+      await prependFile(changelogPath, templateString, name, cwd, format);
     } else {
       await writeFormattedMarkdownFile(
         changelogPath,
         `# ${name}${templateString}`,
-        prettierInstance
+        cwd,
+        format
       );
     }
   } catch (e) {
@@ -324,7 +319,8 @@ async function prependFile(
   filePath: string,
   data: string,
   name: string,
-  prettierInstance: typeof prettier | undefined
+  cwd: string,
+  format: MarkdownFormat
 ) {
   const fileData = fs.readFileSync(filePath).toString();
   // if the file exists but doesn't have the header, we'll add it in
@@ -333,7 +329,8 @@ async function prependFile(
     await writeFormattedMarkdownFile(
       filePath,
       completelyNewChangelog,
-      prettierInstance
+      cwd,
+      format
     );
     return;
   }
@@ -355,23 +352,14 @@ async function prependFile(
         : fileData.slice(0, index) + data + fileData.slice(index + 1);
   }
 
-  await writeFormattedMarkdownFile(filePath, newChangelog, prettierInstance);
+  await writeFormattedMarkdownFile(filePath, newChangelog, cwd, format);
 }
 
 async function writeFormattedMarkdownFile(
   filePath: string,
   content: string,
-  prettierInstance: typeof prettier | undefined
+  cwd: string,
+  format: MarkdownFormat
 ) {
-  await fs.writeFile(
-    filePath,
-    prettierInstance
-      ? // Prettier v3 returns a promise
-        await prettierInstance.format(content, {
-          ...(await prettierInstance.resolveConfig(filePath)),
-          filepath: filePath,
-          parser: "markdown",
-        })
-      : content
-  );
+  await fs.writeFile(filePath, await formatMarkdown(content, filePath, cwd, format));
 }

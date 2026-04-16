@@ -6,6 +6,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 {
   "changelog": "@changesets/cli/changelog",
   "commit": false,
+  "format": "prettier",
   "fixed": [],
   "linked": [],
   "access": "restricted",
@@ -41,6 +42,40 @@ You would specify a custom commit message generator with:
 ```
 
 This is similar to how the [changelog generator functions work](#changelog-false-or-a-path).
+
+## `format` (`false | "prettier" | "oxfmt"`)
+
+This option controls how Changesets formats generated markdown files like `.changeset/*.md` and `CHANGELOG.md`.
+
+By default, Changesets uses `"prettier"`. Setting `format: false` disables markdown formatting entirely. Setting `format: "oxfmt"` uses `oxfmt` instead.
+
+```json
+{
+  "format": "oxfmt"
+}
+```
+
+> NOTE: this only affects generated markdown files. `package.json` files still preserve their existing indentation and trailing newline style.
+
+### Legacy `prettier` option
+
+Changesets still accepts the older `prettier` boolean for backward compatibility:
+
+```json
+{
+  "prettier": false
+}
+```
+
+This behaves the same as:
+
+```json
+{
+  "format": false
+}
+```
+
+You should not set both `format` and `prettier` in the same config file.
 
 ## `access` (`restricted` | `public`)
 
