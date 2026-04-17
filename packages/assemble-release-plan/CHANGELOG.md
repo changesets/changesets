@@ -1,5 +1,14 @@
 # @changesets/assemble-release-plan
 
+## 6.0.10
+
+### Patch Changes
+
+- [#1888](https://github.com/changesets/changesets/pull/1888) [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix dependent bump detection for workspace path references. Dependencies declared with specifiers like `workspace:packages/pkg` are now resolved correctly when deciding whether dependents need a release.
+
+- Updated dependencies [[`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464)]:
+  - @changesets/get-dependents-graph@2.1.4
+
 ## 6.0.9
 
 ### Patch Changes
