@@ -1,5 +1,14 @@
 # @changesets/apply-release-plan
 
+## 7.1.1
+
+### Patch Changes
+
+- [#1888](https://github.com/changesets/changesets/pull/1888) [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix workspace protocol dependency updates for explicit ranges, aliases, and path references. Valid `workspace:` dependency forms are now preserved and only rewritten when the referenced release leaves the supported range or path.
+
+- Updated dependencies []:
+  - @changesets/config@3.1.4
+
 ## 7.1.0
 
 ### Minor Changes
