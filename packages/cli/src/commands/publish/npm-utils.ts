@@ -29,15 +29,6 @@ export const npmPublishQueue = createPromiseQueue(
   NPM_PUBLISH_CONCURRENCY_LIMIT
 );
 
-function isDefaultRegistry(registry: string | undefined): boolean {
-  return (
-    registry === NPM_REGISTRY ||
-    registry === `${NPM_REGISTRY}/` ||
-    registry === YARN_REGISTRY ||
-    registry === `${YARN_REGISTRY}/`
-  );
-}
-
 function jsonParse(input: string) {
   try {
     return JSON.parse(input);
@@ -50,7 +41,13 @@ function jsonParse(input: string) {
 }
 
 export const isCustomRegistry = (registry?: string): boolean => {
-  return !!registry && !isDefaultRegistry(registry);
+  return (
+    !!registry &&
+    registry !== NPM_REGISTRY &&
+    registry !== `${NPM_REGISTRY}/` &&
+    registry !== YARN_REGISTRY &&
+    registry !== `${YARN_REGISTRY}/`
+  );
 };
 
 interface RegistryInfo {
@@ -79,7 +76,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
 
   return {
     scope: undefined,
-    registry: !registry || isDefaultRegistry(registry) ? NPM_REGISTRY : registry,
+    registry: !registry || !isCustomRegistry(registry) ? NPM_REGISTRY : registry,
   };
 }
 
