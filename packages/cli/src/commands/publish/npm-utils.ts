@@ -19,6 +19,8 @@ interface PublishOptions {
 
 const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
 const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
+const NPM_REGISTRY = "https://registry.npmjs.org/";
+const YARN_REGISTRY = "https://registry.yarnpkg.com/";
 
 export const npmRequestQueue = createPromiseQueue(
   NPM_REQUEST_CONCURRENCY_LIMIT
@@ -40,11 +42,7 @@ function jsonParse(input: string) {
 
 export const isCustomRegistry = (registry?: string): boolean => {
   registry = normalizeRegistry(registry);
-  return (
-    !!registry &&
-    registry !== "https://registry.npmjs.org" &&
-    registry !== "https://registry.yarnpkg.com"
-  );
+  return !!registry && registry !== NPM_REGISTRY && registry !== YARN_REGISTRY;
 };
 
 interface RegistryInfo {
@@ -53,7 +51,19 @@ interface RegistryInfo {
 }
 
 function normalizeRegistry(registry: string | undefined) {
-  return registry && registry.replace(/\/+$/, "");
+  if (!registry) {
+    return registry;
+  }
+
+  try {
+    const url = new URL(registry);
+    if (!url.pathname.endsWith("/")) {
+      url.pathname = `${url.pathname}/`;
+    }
+    return url.toString();
+  } catch {
+    return registry;
+  }
 }
 
 export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
@@ -79,10 +89,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
 
   return {
     scope: undefined,
-    registry:
-      !registry || registry === "https://registry.yarnpkg.com"
-        ? "https://registry.npmjs.org"
-        : registry,
+    registry: !registry || registry === YARN_REGISTRY ? NPM_REGISTRY : registry,
   };
 }
 
