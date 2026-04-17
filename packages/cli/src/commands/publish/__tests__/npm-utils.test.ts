@@ -46,12 +46,12 @@ describe("getCorrectRegistry", () => {
     process.env["npm_config_@acme:registry"] =
       "https://registry.example.com/acme";
 
-    expect(
-      getCorrectRegistry({ name: "@acme/pkg", version: "1.0.0" })
-    ).toEqual({
-      scope: "@acme",
-      registry: "https://registry.example.com/acme",
-    });
+    expect(getCorrectRegistry({ name: "@acme/pkg", version: "1.0.0" })).toEqual(
+      {
+        scope: "@acme",
+        registry: "https://registry.example.com/acme",
+      }
+    );
   });
 
   it("uses publishConfig.registry when provided", () => {
@@ -82,7 +82,9 @@ describe("getCorrectRegistry", () => {
   it("preserves registry URLs that already end with a slash", () => {
     process.env.npm_config_registry = "https://nexus.example.com/npm/";
 
-    expect(getCorrectRegistry().registry).toBe("https://nexus.example.com/npm/");
+    expect(getCorrectRegistry().registry).toBe(
+      "https://nexus.example.com/npm/"
+    );
   });
 
   it("preserves query params and hashes exactly", () => {
