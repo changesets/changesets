@@ -43,7 +43,8 @@ describe("getCorrectRegistry", () => {
 
   it("prefers the scoped registry over the default registry", () => {
     process.env.npm_config_registry = "https://registry.example.com/default";
-    process.env["npm_config_@acme:registry"] = "https://registry.example.com/acme";
+    process.env["npm_config_@acme:registry"] =
+      "https://registry.example.com/acme";
 
     expect(
       getCorrectRegistry({ name: "@acme/pkg", version: "1.0.0" })
