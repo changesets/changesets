@@ -12,29 +12,33 @@ afterAll(() => {
 
 describe("getCorrectRegistry", () => {
   it("falls back to the npm registry when no registry is configured", () => {
-    expect(getCorrectRegistry().registry).toBe("https://registry.npmjs.org/");
+    expect(getCorrectRegistry().registry).toBe("https://registry.npmjs.org");
   });
 
   it("maps the yarn registry to the npm registry", () => {
     process.env.npm_config_registry = "https://registry.yarnpkg.com";
 
-    expect(getCorrectRegistry().registry).toBe("https://registry.npmjs.org/");
+    expect(getCorrectRegistry().registry).toBe("https://registry.npmjs.org");
   });
 
-  it("adds a trailing slash to path-based registries from npm config", () => {
+  it("maps the normalized npm registry to the canonical npm registry", () => {
+    process.env.npm_config_registry = "https://registry.npmjs.org/";
+
+    expect(getCorrectRegistry().registry).toBe("https://registry.npmjs.org");
+  });
+
+  it("preserves path-based registries from npm config", () => {
     process.env.npm_config_registry = "https://nexus.example.com/npm";
 
-    expect(getCorrectRegistry().registry).toBe(
-      "https://nexus.example.com/npm/"
-    );
+    expect(getCorrectRegistry().registry).toBe("https://nexus.example.com/npm");
   });
 
-  it("adds a trailing slash to scoped registries from npm config", () => {
+  it("preserves scoped registries from npm config", () => {
     process.env["npm_config_@acme:registry"] = "https://nexus.example.com/npm";
 
     expect(
       getCorrectRegistry({ name: "@acme/pkg", version: "1.0.0" }).registry
-    ).toBe("https://nexus.example.com/npm/");
+    ).toBe("https://nexus.example.com/npm");
   });
 
   it("prefers the scoped registry over the default registry", () => {
@@ -45,7 +49,7 @@ describe("getCorrectRegistry", () => {
       getCorrectRegistry({ name: "@acme/pkg", version: "1.0.0" })
     ).toEqual({
       scope: "@acme",
-      registry: "https://registry.example.com/acme/",
+      registry: "https://registry.example.com/acme",
     });
   });
 
@@ -56,7 +60,7 @@ describe("getCorrectRegistry", () => {
         version: "1.0.0",
         publishConfig: { registry: "https://registry.example.com/npm" },
       }).registry
-    ).toBe("https://registry.example.com/npm/");
+    ).toBe("https://registry.example.com/npm");
   });
 
   it("uses publishConfig scoped registry when provided", () => {
@@ -70,7 +74,7 @@ describe("getCorrectRegistry", () => {
       })
     ).toEqual({
       scope: "@acme",
-      registry: "https://registry.example.com/acme/",
+      registry: "https://registry.example.com/acme",
     });
   });
 
@@ -80,13 +84,19 @@ describe("getCorrectRegistry", () => {
     expect(getCorrectRegistry().registry).toBe("https://nexus.example.com/npm/");
   });
 
-  it("normalizes the pathname while preserving query params and hashes", () => {
+  it("preserves query params and hashes exactly", () => {
     process.env.npm_config_registry =
       "https://nexus.example.com/npm?token=abc#fragment";
 
     expect(getCorrectRegistry().registry).toBe(
-      "https://nexus.example.com/npm/?token=abc#fragment"
+      "https://nexus.example.com/npm?token=abc#fragment"
     );
+  });
+
+  it("maps the normalized yarn registry to the npm registry", () => {
+    process.env.npm_config_registry = "https://registry.yarnpkg.com/";
+
+    expect(getCorrectRegistry().registry).toBe("https://registry.npmjs.org");
   });
 });
 

@@ -19,8 +19,8 @@ interface PublishOptions {
 
 const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
 const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
-const NPM_REGISTRY = "https://registry.npmjs.org/";
-const YARN_REGISTRY = "https://registry.yarnpkg.com/";
+const NPM_REGISTRY = "https://registry.npmjs.org";
+const YARN_REGISTRY = "https://registry.yarnpkg.com";
 
 export const npmRequestQueue = createPromiseQueue(
   NPM_REQUEST_CONCURRENCY_LIMIT
@@ -28,6 +28,15 @@ export const npmRequestQueue = createPromiseQueue(
 export const npmPublishQueue = createPromiseQueue(
   NPM_PUBLISH_CONCURRENCY_LIMIT
 );
+
+function isDefaultRegistry(
+  registry: string | undefined,
+  defaultRegistry: string
+): boolean {
+  return (
+    registry === defaultRegistry || registry === `${defaultRegistry}/`
+  );
+}
 
 function jsonParse(input: string) {
   try {
@@ -41,8 +50,11 @@ function jsonParse(input: string) {
 }
 
 export const isCustomRegistry = (registry?: string): boolean => {
-  registry = normalizeRegistry(registry);
-  return !!registry && registry !== NPM_REGISTRY && registry !== YARN_REGISTRY;
+  return (
+    !!registry &&
+    !isDefaultRegistry(registry, NPM_REGISTRY) &&
+    !isDefaultRegistry(registry, YARN_REGISTRY)
+  );
 };
 
 interface RegistryInfo {
@@ -50,31 +62,14 @@ interface RegistryInfo {
   registry: string;
 }
 
-function normalizeRegistry(registry: string | undefined) {
-  if (!registry) {
-    return registry;
-  }
-
-  try {
-    const url = new URL(registry);
-    if (!url.pathname.endsWith("/")) {
-      url.pathname = `${url.pathname}/`;
-    }
-    return url.toString();
-  } catch {
-    return registry;
-  }
-}
-
 export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   const packageName = packageJson?.name;
 
   if (packageName?.startsWith("@")) {
     const scope = packageName.split("/")[0];
-    const scopedRegistry = normalizeRegistry(
+    const scopedRegistry =
       packageJson!.publishConfig?.[`${scope}:registry`] ||
-        process.env[`npm_config_${scope}:registry`]
-    );
+      process.env[`npm_config_${scope}:registry`];
     if (scopedRegistry) {
       return {
         scope,
@@ -83,13 +78,17 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
     }
   }
 
-  const registry = normalizeRegistry(
-    packageJson?.publishConfig?.registry || process.env.npm_config_registry
-  );
+  const registry =
+    packageJson?.publishConfig?.registry || process.env.npm_config_registry;
 
   return {
     scope: undefined,
-    registry: !registry || registry === YARN_REGISTRY ? NPM_REGISTRY : registry,
+    registry:
+      !registry ||
+      isDefaultRegistry(registry, NPM_REGISTRY) ||
+      isDefaultRegistry(registry, YARN_REGISTRY)
+        ? NPM_REGISTRY
+        : registry,
   };
 }
 
