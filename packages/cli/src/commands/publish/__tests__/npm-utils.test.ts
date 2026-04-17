@@ -21,7 +21,7 @@ describe("getCorrectRegistry", () => {
     expect(getCorrectRegistry().registry).toBe("https://registry.npmjs.org");
   });
 
-  it("maps the normalized npm registry to the canonical npm registry", () => {
+  it("maps the slash-suffixed npm registry to the canonical npm registry", () => {
     process.env.npm_config_registry = "https://registry.npmjs.org/";
 
     expect(getCorrectRegistry().registry).toBe("https://registry.npmjs.org");
@@ -78,7 +78,7 @@ describe("getCorrectRegistry", () => {
     });
   });
 
-  it("leaves already-normalized URLs unchanged", () => {
+  it("preserves registry URLs that already end with a slash", () => {
     process.env.npm_config_registry = "https://nexus.example.com/npm/";
 
     expect(getCorrectRegistry().registry).toBe("https://nexus.example.com/npm/");
@@ -93,7 +93,7 @@ describe("getCorrectRegistry", () => {
     );
   });
 
-  it("maps the normalized yarn registry to the npm registry", () => {
+  it("maps the slash-suffixed yarn registry to the npm registry", () => {
     process.env.npm_config_registry = "https://registry.yarnpkg.com/";
 
     expect(getCorrectRegistry().registry).toBe("https://registry.npmjs.org");
@@ -105,12 +105,12 @@ describe("isCustomRegistry", () => {
     expect(isCustomRegistry(undefined)).toBe(false);
   });
 
-  it("treats npm and yarn default registries as non-custom after normalization", () => {
+  it("treats npm and yarn default registries as non-custom", () => {
     expect(isCustomRegistry("https://registry.npmjs.org")).toBe(false);
     expect(isCustomRegistry("https://registry.yarnpkg.com")).toBe(false);
   });
 
-  it("treats already-normalized default registries as non-custom", () => {
+  it("treats slash-suffixed default registries as non-custom", () => {
     expect(isCustomRegistry("https://registry.npmjs.org/")).toBe(false);
     expect(isCustomRegistry("https://registry.yarnpkg.com/")).toBe(false);
   });

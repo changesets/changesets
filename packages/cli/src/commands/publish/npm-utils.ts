@@ -76,7 +76,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
 
   return {
     scope: undefined,
-    registry: !registry || !isCustomRegistry(registry) ? NPM_REGISTRY : registry,
+    registry: !isCustomRegistry(registry) ? NPM_REGISTRY : registry,
   };
 }
 
