@@ -19,6 +19,8 @@ interface PublishOptions {
 
 const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
 const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
+const NPM_REGISTRY = "https://registry.npmjs.org";
+const YARN_REGISTRY = "https://registry.yarnpkg.com";
 
 export const npmRequestQueue = createPromiseQueue(
   NPM_REQUEST_CONCURRENCY_LIMIT
@@ -39,11 +41,12 @@ function jsonParse(input: string) {
 }
 
 export const isCustomRegistry = (registry?: string): boolean => {
-  registry = normalizeRegistry(registry);
   return (
     !!registry &&
-    registry !== "https://registry.npmjs.org" &&
-    registry !== "https://registry.yarnpkg.com"
+    registry !== NPM_REGISTRY &&
+    registry !== `${NPM_REGISTRY}/` &&
+    registry !== YARN_REGISTRY &&
+    registry !== `${YARN_REGISTRY}/`
   );
 };
 
@@ -52,19 +55,14 @@ interface RegistryInfo {
   registry: string;
 }
 
-function normalizeRegistry(registry: string | undefined) {
-  return registry && registry.replace(/\/+$/, "");
-}
-
 export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   const packageName = packageJson?.name;
 
   if (packageName?.startsWith("@")) {
     const scope = packageName.split("/")[0];
-    const scopedRegistry = normalizeRegistry(
+    const scopedRegistry =
       packageJson!.publishConfig?.[`${scope}:registry`] ||
-        process.env[`npm_config_${scope}:registry`]
-    );
+      process.env[`npm_config_${scope}:registry`];
     if (scopedRegistry) {
       return {
         scope,
@@ -73,16 +71,13 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
     }
   }
 
-  const registry = normalizeRegistry(
-    packageJson?.publishConfig?.registry || process.env.npm_config_registry
-  );
+  const registry =
+    packageJson?.publishConfig?.registry || process.env.npm_config_registry;
 
   return {
     scope: undefined,
     registry:
-      !registry || registry === "https://registry.yarnpkg.com"
-        ? "https://registry.npmjs.org"
-        : registry,
+      !registry || !isCustomRegistry(registry) ? NPM_REGISTRY : registry,
   };
 }
 
