@@ -3,6 +3,7 @@ import * as fs from "fs-extra";
 import path from "path";
 import {
   PreEnterButInPreModeError,
+  PreEnterButInRequestedPreModeError,
   PreExitButNotInPreModeError,
 } from "@changesets/errors";
 import { testdir } from "@changesets/test-utils";
@@ -41,7 +42,40 @@ describe("enterPre", () => {
       }
     `);
   });
-  it("should throw if already in pre", async () => {
+
+  it("should throw PreEnterButInRequestedPreModeError if already in pre for specified tag", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        changesets: [],
+        initialVersions: {
+          "pkg-a": "1.0.0",
+          "pkg-b": "1.0.0",
+        },
+        mode: "pre",
+        tag: "next",
+      }),
+    });
+    await expect(enterPre(cwd, "next")).rejects.toBeInstanceOf(
+      PreEnterButInRequestedPreModeError
+    );
+  });
+
+  it("should throw PreEnterButInPreModeError if already in pre for a different tag", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -72,6 +106,7 @@ describe("enterPre", () => {
       PreEnterButInPreModeError
     );
   });
+
   it("should enter if already exited pre mode", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
