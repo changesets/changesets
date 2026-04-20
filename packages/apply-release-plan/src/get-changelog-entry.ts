@@ -32,9 +32,11 @@ export default async function getChangelogEntry(
   changelogOpts: any,
   {
     updateInternalDependencies,
+    requireSemverSatisfaction,
     onlyUpdatePeerDependentsWhenOutOfRange,
   }: {
     updateInternalDependencies: "patch" | "minor";
+    requireSemverSatisfaction: boolean;
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   }
 ) {
@@ -82,6 +84,7 @@ export default async function getChangelogEntry(
         },
         {
           minReleaseType: updateInternalDependencies,
+          requireSemverSatisfaction,
           onlyUpdatePeerDependentsWhenOutOfRange,
         }
       )

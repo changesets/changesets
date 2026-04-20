@@ -32,12 +32,14 @@ export default function versionPackage(
   {
     cwd,
     updateInternalDependencies,
+    requireSemverSatisfaction,
     onlyUpdatePeerDependentsWhenOutOfRange,
     bumpVersionsWithWorkspaceProtocolOnly,
     snapshot,
   }: {
     cwd: string;
     updateInternalDependencies: "patch" | "minor";
+    requireSemverSatisfaction: boolean;
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
     snapshot?: string | boolean | undefined;
@@ -66,6 +68,7 @@ export default function versionPackage(
             {
               minReleaseType: updateInternalDependencies,
               onlyUpdatePeerDependentsWhenOutOfRange,
+              requireSemverSatisfaction,
             }
           )
         ) {
