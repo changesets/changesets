@@ -222,7 +222,7 @@ export async function run(
         return;
       }
       case "publish": {
-        const { otp, tag, gitTag, ...rest }: CliOptions = flags;
+        const { otp, tag, gitTag, snapshot, ...rest }: CliOptions = flags;
         validateCommandFlags("publish", rest);
         await publish(rootDir, { otp, tag, gitTag }, config);
         return;
