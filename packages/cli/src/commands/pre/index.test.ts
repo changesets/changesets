@@ -4,12 +4,13 @@ import { ExitError } from "@changesets/errors";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { log } from "@clack/prompts";
 import { describe, expect, it, vi } from "vitest";
-import { pre } from "./index.ts";
+import { runCommand } from "../../gunshi/testing.ts";
+import { preEnterCommand, preExitCommand } from "./index.ts";
+
+silenceLogsInBlock();
 
 vi.mock("@clack/prompts");
 const mockedLogger = vi.mocked(log);
-
-silenceLogsInBlock();
 
 describe("enterPre", () => {
   it("should enter", async () => {
@@ -21,7 +22,12 @@ describe("enterPre", () => {
       }),
       "package-lock.json": "",
     });
-    await pre(cwd, { command: "enter", tag: "next" });
+
+    await runCommand({
+      cwd,
+      command: preEnterCommand,
+      values: { tag: "next" },
+    });
 
     expect(
       JSON.parse(
@@ -40,6 +46,7 @@ describe("enterPre", () => {
       expect.stringContaining("next"),
     );
   });
+
   it("should throw if already in pre", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -56,9 +63,13 @@ describe("enterPre", () => {
       }),
     });
 
-    await expect(
-      pre(cwd, { command: "enter", tag: "next" }),
-    ).rejects.toBeInstanceOf(ExitError);
+    const promise = runCommand({
+      cwd,
+      command: preEnterCommand,
+      values: { tag: "next" },
+    });
+    await expect(promise).rejects.toBeInstanceOf(ExitError);
+
     expect(mockedLogger.error).toHaveBeenCalledWith(
       expect.stringContaining("changeset pre enter"),
     );
@@ -72,6 +83,7 @@ describe("enterPre", () => {
       expect.stringContaining("changeset pre exit"),
     );
   });
+
   it("should enter if already exited pre mode", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -88,7 +100,12 @@ describe("enterPre", () => {
       }),
     });
 
-    await pre(cwd, { command: "enter", tag: "next" });
+    await runCommand({
+      cwd,
+      command: preEnterCommand,
+      values: { tag: "next" },
+    });
+
     expect(
       JSON.parse(
         await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
@@ -124,7 +141,11 @@ describe("exitPre", () => {
         tag: "next",
       }),
     });
-    await pre(cwd, { command: "exit" });
+
+    await runCommand({
+      cwd,
+      command: preExitCommand,
+    });
 
     expect(
       JSON.parse(
@@ -146,9 +167,13 @@ describe("exitPre", () => {
       }),
       "package-lock.json": "",
     });
-    await expect(pre(cwd, { command: "exit" })).rejects.toBeInstanceOf(
-      ExitError,
-    );
+
+    const promise = runCommand({
+      cwd,
+      command: preExitCommand,
+    });
+    await expect(promise).rejects.toBeInstanceOf(ExitError);
+
     expect(mockedLogger.error).toHaveBeenCalledWith(
       expect.stringContaining("changeset pre exit"),
     );

@@ -3,19 +3,19 @@ import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import getChangesets from "@changesets/read";
+import {
+  gitdir,
+  outputFile,
+  silenceLogsInBlock,
+  testdir,
+} from "@changesets/test-utils";
 import * as clack from "@clack/prompts";
 import { exec } from "tinyexec";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { runCommand } from "../../../gunshi/testing.ts";
 import { askWithEditor } from "../../../utils/askWithEditor.ts";
 import * as utils from "../../../utils/cli-utilities.ts";
-import { add as addChangeset } from "../index.ts";
-// [keep-order] test-utils has to be after `../index.ts`
-import {
-  silenceLogsInBlock,
-  testdir,
-  gitdir,
-  outputFile,
-} from "@changesets/test-utils";
+import { addCommand } from "../index.ts";
 
 vi.mock("../../../utils/askWithEditor");
 const mockedAskWithEditor = vi.mocked(askWithEditor);
@@ -112,7 +112,11 @@ describe("Add command", () => {
     });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(cwd, { empty: false }, defaultConfig);
+    await runCommand({
+      cwd,
+      command: addCommand,
+      config: defaultConfig,
+    });
 
     const changesets = await getChangesets(cwd);
     expect(changesets.length).toBe(1);
@@ -156,7 +160,11 @@ describe("Add command", () => {
         consoleSummaries,
         editorSummaries,
       });
-      await addChangeset(cwd, { empty: false }, defaultConfig);
+      await runCommand({
+        cwd,
+        command: addCommand,
+        config: defaultConfig,
+      });
 
       const changesets = await getChangesets(cwd);
       expect(changesets.length).toBe(1);
@@ -194,7 +202,11 @@ describe("Add command", () => {
       throw new Error(`An answer could not be found for ${question}`);
     });
 
-    await addChangeset(cwd, { empty: false }, defaultConfig);
+    await runCommand({
+      cwd,
+      command: addCommand,
+      config: defaultConfig,
+    });
 
     const changesets = await getChangesets(cwd);
     expect(changesets.length).toBe(1);
@@ -228,10 +240,10 @@ describe("Add command", () => {
     });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(
+    await runCommand({
       cwd,
-      { empty: false },
-      {
+      command: addCommand,
+      config: {
         ...defaultConfig,
         commit: [
           path.resolve(
@@ -245,7 +257,8 @@ describe("Add command", () => {
           null,
         ],
       },
-    );
+      values: { empty: false },
+    });
 
     const result = await exec("git", ["log", "--oneline", "-1"], {
       nodeOptions: { cwd },
@@ -269,7 +282,12 @@ describe("Add command", () => {
       }),
     });
 
-    await addChangeset(cwd, { empty: true }, defaultConfig);
+    await runCommand({
+      cwd,
+      command: addCommand,
+      config: defaultConfig,
+      values: { empty: true },
+    });
 
     const changesets = await getChangesets(cwd);
     expect(changesets.length).toBe(1);
@@ -293,11 +311,12 @@ describe("Add command", () => {
     mockedUtils.askList.mockReturnValueOnce(Promise.resolve("minor"));
     mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
 
-    await addChangeset(
+    await runCommand({
       cwd,
-      { empty: false, message: "summary from message" },
-      defaultConfig,
-    );
+      command: addCommand,
+      config: defaultConfig,
+      values: { message: "summary from message" },
+    });
 
     const changesets = await getChangesets(cwd);
     expect(changesets.length).toBe(1);
@@ -326,7 +345,12 @@ describe("Add command", () => {
     mockedUtils.askList.mockReturnValueOnce(Promise.resolve("patch"));
     mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
 
-    await addChangeset(cwd, { empty: false, message: "" }, defaultConfig);
+    await runCommand({
+      cwd,
+      command: addCommand,
+      config: defaultConfig,
+      values: { message: "" },
+    });
 
     const changesets = await getChangesets(cwd);
     expect(changesets.length).toBe(1);
@@ -359,11 +383,12 @@ describe("Add command", () => {
     });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(
+    await runCommand({
       cwd,
-      { empty: false, message: "monorepo summary from message" },
-      defaultConfig,
-    );
+      command: addCommand,
+      config: defaultConfig,
+      values: { message: "monorepo summary from message" },
+    });
 
     const changesets = await getChangesets(cwd);
     expect(changesets.length).toBe(1);
@@ -394,11 +419,12 @@ describe("Add command", () => {
       }),
     });
 
-    await addChangeset(
+    await runCommand({
       cwd,
-      { empty: true, message: "empty changeset summary" },
-      defaultConfig,
-    );
+      command: addCommand,
+      config: defaultConfig,
+      values: { empty: true, message: "empty changeset summary" },
+    });
 
     const changesets = await getChangesets(cwd);
     expect(changesets.length).toBe(1);
@@ -446,7 +472,12 @@ describe("Add command", () => {
     await git.commit("update pkg-b", cwd);
 
     mockUserResponses({ releases: { "pkg-b": "patch" } });
-    await addChangeset(cwd, { empty: false, since: "foo" }, defaultConfig);
+    await runCommand({
+      cwd,
+      command: addCommand,
+      config: defaultConfig,
+      values: { since: "foo" },
+    });
 
     expect(mockedUtils.askMultiselect).toHaveBeenCalledWith(
       expect.stringContaining("Which packages"),
@@ -500,11 +531,11 @@ describe("Add command", () => {
     });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(
+    await runCommand({
       cwd,
-      { empty: false },
-      { ...defaultConfig, ignore: ["pkg-b"] },
-    );
+      command: addCommand,
+      config: { ...defaultConfig, ignore: ["pkg-b"] },
+    });
     const choices =
       mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
     expect(choices).toMatchObject([{ value: "pkg-a" }, { value: "pkg-c" }]);
@@ -533,7 +564,11 @@ describe("Add command", () => {
     });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(cwd, { empty: false }, defaultConfig);
+    await runCommand({
+      cwd,
+      command: addCommand,
+      config: defaultConfig,
+    });
     const choices =
       mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
     expect(choices).toStrictEqual([{ value: "pkg-a" }, { value: "pkg-c" }]);
@@ -563,17 +598,17 @@ describe("Add command", () => {
     });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset(
+    await runCommand({
       cwd,
-      { empty: false },
-      {
+      command: addCommand,
+      config: {
         ...defaultConfig,
         privatePackages: {
           version: false,
           tag: false,
         },
       },
-    );
+    });
     const choices =
       mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
     expect(choices).toStrictEqual([{ value: "pkg-a" }, { value: "pkg-c" }]);
@@ -588,9 +623,12 @@ describe("Add command", () => {
       }),
     });
 
-    await expect(() =>
-      addChangeset(cwd, { empty: false }, defaultConfig),
-    ).rejects.toThrow("The process exited with code: 1");
+    const promise = runCommand({
+      cwd,
+      command: addCommand,
+      config: defaultConfig,
+    });
+    await expect(promise).rejects.toThrow("The process exited with code: 1");
 
     expect(loggerErrorSpy).toHaveBeenCalledOnce();
     const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
@@ -617,9 +655,12 @@ describe("Add command", () => {
       }),
     });
 
-    await expect(() =>
-      addChangeset(cwd, { empty: false }, defaultConfig),
-    ).rejects.toThrow("The process exited with code: 1");
+    const promise = runCommand({
+      cwd,
+      command: addCommand,
+      config: defaultConfig,
+    });
+    await expect(promise).rejects.toThrow("The process exited with code: 1");
 
     expect(loggerErrorSpy).toHaveBeenCalledOnce();
     const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);

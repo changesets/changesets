@@ -1,24 +1,42 @@
 import {
-  PreExitButNotInPreModeError,
-  PreEnterButInPreModeError,
   ExitError,
+  PreEnterButInPreModeError,
+  PreExitButNotInPreModeError,
 } from "@changesets/errors";
-import { exitPre, enterPre } from "@changesets/pre";
-import { log } from "@clack/prompts";
+import { enterPre, exitPre } from "@changesets/pre";
+import { log, outro } from "@clack/prompts";
+import { define } from "gunshi";
 import pc from "picocolors";
+import { defineWithContext } from "../../gunshi/context.ts";
 
-export async function pre(
-  rootDir: string,
-  options:
-    | { command: "enter"; tag: string }
-    | { command: "exit"; tag?: string },
-) {
-  if (options.command === "enter") {
+export const preEnterCommand = defineWithContext({
+  name: "enter",
+  description: "Enter pre-release mode",
+  examples: "changeset pre enter next",
+  args: {
+    tag: {
+      type: "positional",
+      required: true,
+    },
+  },
+  run: async (ctx) => {
+    const { tag } = ctx.values;
+
+    if (tag == null || tag.length === 0) {
+      log.error(
+        `
+You need to pass a tag name to enter pre mode.
+${pc.cyan("changesets pre enter <tag>")}
+        `.trim(),
+      );
+      throw new ExitError(1);
+    }
+
     try {
-      await enterPre(rootDir, options.tag);
+      await enterPre(ctx.extensions.packages.rootDir, tag);
       log.success(
         `
-Entered pre mode with tag ${pc.green(options.tag)}!
+Entered pre mode with tag ${pc.green(tag)}!
 Run ${pc.cyan("changeset version")} to version packages with prerelease versions.
         `.trim(),
       );
@@ -34,13 +52,19 @@ If you're trying to exit pre mode, run ${pc.cyan("changeset pre exit")}.
       }
       throw err;
     }
-  } else {
+  },
+});
+
+export const preExitCommand = defineWithContext({
+  name: "exit",
+  description: "Exit pre-release mode",
+  run: async (ctx) => {
     try {
-      await exitPre(rootDir);
-      log.success(
+      await exitPre(ctx.extensions.packages.rootDir);
+      outro(
         `
 Exited pre mode!
-Run ${pc.cyan("changeset version")} to version packages with normal versions.
+   Run ${pc.cyan("changeset version")} to version packages with normal versions.
         `.trim(),
       );
     } catch (err) {
@@ -55,5 +79,15 @@ If you're trying to enter pre mode, run ${pc.cyan("changeset pre enter")}.
       }
       throw err;
     }
-  }
-}
+  },
+});
+
+export const preCommand = define({
+  name: "pre",
+  description: "Enter or exit pre-release mode",
+  examples: `
+changeset pre enter next
+changeset pre exit
+            `.trim(),
+  subCommands: { enter: preEnterCommand, exit: preExitCommand },
+});
