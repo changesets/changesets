@@ -133,18 +133,20 @@ ${formatPackageList(untaggedPrivatePackageReleases, c.yellowBright)}
       `.trim(),
     );
 
-    const p = spinner();
-    p.start(
-      `Creating git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}...`,
-    );
-    await tagPublish(
-      packages.tool.type,
-      untaggedPrivatePackageReleases,
-      packages.rootDir,
-    );
-    p.stop(
-      `Created git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}.`,
-    );
+    if (options?.gitTag ?? true) {
+      const p = spinner();
+      p.start(
+        `Creating git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}...`,
+      );
+      await tagPublish(
+        packages.tool.type,
+        untaggedPrivatePackageReleases,
+        packages.rootDir,
+      );
+      p.stop(
+        `Created git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}.`,
+      );
+    }
   }
 
   if (unsuccessfulNpmPublishes.length > 0) {
