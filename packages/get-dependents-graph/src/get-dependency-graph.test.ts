@@ -294,13 +294,11 @@ describe("getting the dependency graph", function () {
 
       expect(graph.get("foo")!.dependencies).toStrictEqual([]);
       expect(valid).toBe(false);
-      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
-        [
-          [
-            "Package "foo" must depend on the current version of "bar": "1.0.0" vs "workspace:packages/not-bar"",
-          ],
-        ]
-      `);
+      expect(
+        stripVTControlCharacters((console.error as any).mock.calls[0][0]),
+      ).toMatchInlineSnapshot(
+        `"Package "foo" must depend on the current version of "bar": "1.0.0" vs "workspace:packages/not-bar""`,
+      );
     }),
   );
 });
