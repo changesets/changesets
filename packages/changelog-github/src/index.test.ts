@@ -1,3 +1,4 @@
+import { setEnvironmentVariable } from "@changesets/test-utils";
 import changelogFunctions from "./index";
 import parse from "@changesets/parse";
 
@@ -238,4 +239,23 @@ it("with multiple authors", async () => {
     - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist), [@mitchellhamilton](https://github.com/mitchellhamilton)! - something
     "
   `);
+});
+
+it("uses repo name from env var", async () => {
+  const cleanup = setEnvironmentVariable("GITHUB_REPOSITORY", data.repo);
+
+  try {
+    const [changeset, bump] = getChangeset(
+      "fixes #1234 and #5678",
+      data.commit
+    );
+    expect(await getReleaseLine(changeset, bump, null)).toMatchInlineSnapshot(`
+    "
+
+    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        fixes [#1234](https://github.com/emotion-js/emotion/issues/1234) and [#5678](https://github.com/emotion-js/emotion/issues/5678)"
+  `);
+  } finally {
+    cleanup();
+  }
 });
