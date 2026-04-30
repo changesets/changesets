@@ -8,6 +8,7 @@ import { getPackages } from "@manypkg/get-packages";
 import fs from "fs-extra";
 import path from "path";
 import add from "./commands/add";
+import changed from "./commands/changed";
 import init from "./commands/init";
 import pre from "./commands/pre";
 import publish from "./commands/publish";
@@ -84,9 +85,23 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open, since, message, ...rest }: CliOptions = flags;
+    const {
+      empty,
+      open,
+      since,
+      message,
+      type,
+      all,
+      package: pkg,
+      ...rest
+    }: CliOptions = flags;
+    const packages = normalizePackageFlag(pkg);
     validateCommandFlags("add", rest);
-    await add(rootDir, { empty, open, since, message }, config);
+    await add(
+      rootDir,
+      { empty, open, since, message, packages, type, all },
+      config
+    );
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument"
@@ -117,9 +132,29 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
-        const { empty, open, since, message, ...rest }: CliOptions = flags;
+        const {
+          empty,
+          open,
+          since,
+          message,
+          type,
+          all,
+          package: pkg,
+          ...rest
+        }: CliOptions = flags;
+        const packages = normalizePackageFlag(pkg);
         validateCommandFlags("add", rest);
-        await add(rootDir, { empty, open, since, message }, config);
+        await add(
+          rootDir,
+          { empty, open, since, message, packages, type, all },
+          config
+        );
+        return;
+      }
+      case "changed": {
+        const { since, json, ...rest }: CliOptions = flags;
+        validateCommandFlags("changed", rest);
+        await changed(rootDir, { since, json }, config);
         return;
       }
       case "version": {
@@ -280,4 +315,11 @@ export async function run(
       }
     }
   }
+}
+
+function normalizePackageFlag(
+  value: string | string[] | undefined
+): string[] | undefined {
+  if (value === undefined) return undefined;
+  return Array.isArray(value) ? value : [value];
 }

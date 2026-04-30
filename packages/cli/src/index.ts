@@ -11,6 +11,8 @@ const aliases = {
   v: "verbose",
   o: "output",
   m: "message",
+  p: "package",
+  t: "type",
   // Support kebab-case flags
   "since-master": "sinceMaster",
   "git-tag": "gitTag",
@@ -22,7 +24,16 @@ const aliases = {
 };
 
 const parsed = mri(args, {
-  boolean: ["sinceMaster", "verbose", "empty", "open", "gitTag", "snapshot"],
+  boolean: [
+    "sinceMaster",
+    "verbose",
+    "empty",
+    "open",
+    "gitTag",
+    "snapshot",
+    "all",
+    "json",
+  ],
   string: [
     "output",
     "otp",
@@ -32,6 +43,8 @@ const parsed = mri(args, {
     "tag",
     "snapshot",
     "snapshotPrereleaseTemplate",
+    "package",
+    "type",
   ],
   // mri mutates the alias object passed to it, so we need to copy it here to maintain the original object
   alias: { ...aliases },
