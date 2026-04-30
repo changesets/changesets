@@ -6,6 +6,7 @@ import {
   VersionType,
 } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
+import micromatch from "micromatch";
 import path from "node:path";
 import semverSatisfies from "semver/functions/satisfies";
 import validRange from "semver/ranges/valid";
@@ -120,6 +121,17 @@ export default function determineDependents({
                   }
                   break;
                 case "devDependencies": {
+                  if (
+                    config.bumpOnDevDependencies.length > 0 &&
+                    micromatch([nextRelease.name], config.bumpOnDevDependencies)
+                      .length > 0
+                  ) {
+                    if (type !== "major" && type !== "minor") {
+                      type = "patch";
+                    }
+                    break;
+                  }
+
                   // We don't need a version bump if the package is only in the devDependencies of the dependent package
                   if (
                     type !== "major" &&
