@@ -24,12 +24,12 @@ function validateCommandFlags(
   const unknownFlags = Object.keys(flags);
 
   if (unknownFlags.length > 0) {
-    error(
-      `Unknown ${
-        unknownFlags.length === 1 ? "flag" : "flags"
-      } for ${command}: ${unknownFlags.map((flag) => `--${flag}`).join(", ")}`,
+    log.error(
+      `
+Unknown flag${unknownFlags.length > 1 ? "s" : ""} for ${pc.cyan(command)}: ${unknownFlags.map((flag) => `--${flag}`).join(", ")}
+Usage: changeset ${COMMAND_HELP[command]}
+      `.trim(),
     );
-    error(`Usage: changeset ${COMMAND_HELP[command]}`);
     throw new ExitError(1);
   }
 }
