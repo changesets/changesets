@@ -9,25 +9,25 @@
 
 > Note: This assumes you already have changesets setup.
 
-To use `@changesets/get-github-info`, you'll need to install it and you'll probably also want `dotenv` to provide a GitHub personal access token via a `.env` file.
+To use `@changesets/get-github-info`, you'll need to install it.
 
 ```bash
-yarn add --dev @changesets/get-github-info dotenv
+yarn add --dev @changesets/get-github-info
 ```
 
 or
 
 ```bash
-npm install --save-dev @changesets/get-github-info dotenv
+npm install --save-dev @changesets/get-github-info
 ```
 
 Then you can use it in your `.changeset/config.js` like this.
 
 ```jsx
-import dotenv from "dotenv";
+import { loadEnvFile } from "node:process";
 import { getInfo } from "@changesets/get-github-info";
 
-dotenv.config();
+loadEnvFile();
 // ...
 
 const getReleaseLine = async (changeset, type) => {

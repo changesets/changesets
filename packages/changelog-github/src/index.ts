@@ -1,8 +1,15 @@
+import { loadEnvFile } from "node:process";
 import type { ChangelogFunctions } from "@changesets/types";
-import { config } from "dotenv";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 
-config();
+try {
+  loadEnvFile();
+} catch (err: any) {
+  // Ignore error if .env file doesn't exist, but log other errors
+  if (err.code !== "ENOENT") {
+    console.error("Failed to load .env file", err);
+  }
+}
 
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
