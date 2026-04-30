@@ -5,6 +5,7 @@ import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { Config, NewChangeset } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import { InternalRelease } from "./types";
+import { mapGetOrThrowInternal } from "./utils";
 
 export default function flattenReleases(
   changesets: NewChangeset[],
@@ -17,21 +18,24 @@ export default function flattenReleases(
     changeset.releases
       // Filter out skipped packages because they should not trigger a release
       // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
-      .filter(
-        ({ name }) =>
-          !shouldSkipPackage(packagesByName.get(name)!, {
-            ignore: config.ignore,
-            allowPrivatePackages: config.privatePackages.version,
-          })
-      )
+      .filter(({ name }) => {
+        const pkg = mapGetOrThrowInternal(
+          packagesByName,
+          name,
+          `Couldn't find package named "${name}" listed in changeset "${changeset.id}"`
+        );
+        return !shouldSkipPackage(pkg, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        });
+      })
       .forEach(({ name, type }) => {
+        let pkg = mapGetOrThrowInternal(
+          packagesByName,
+          name,
+          `Couldn't find package named "${name}" listed in changeset "${changeset.id}"`
+        );
         let release = releases.get(name);
-        let pkg = packagesByName.get(name);
-        if (!pkg) {
-          throw new Error(
-            `"${changeset.id}" changeset mentions a release for a package "${name}" but such a package could not be found.`
-          );
-        }
         if (!release) {
           release = {
             name,

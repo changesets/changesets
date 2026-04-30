@@ -7,8 +7,10 @@ import {
   PreEnterButInPreModeError,
 } from "@changesets/errors";
 
-export async function readPreState(cwd: string): Promise<PreState | undefined> {
-  let preStatePath = path.resolve(cwd, ".changeset", "pre.json");
+export async function readPreState(
+  rootDir: string
+): Promise<PreState | undefined> {
+  let preStatePath = path.resolve(rootDir, ".changeset", "pre.json");
   // TODO: verify that the pre state isn't broken
   let preState: PreState | undefined;
   try {
@@ -29,10 +31,10 @@ export async function readPreState(cwd: string): Promise<PreState | undefined> {
   return preState;
 }
 
-export async function exitPre(cwd: string) {
-  let preStatePath = path.resolve(cwd, ".changeset", "pre.json");
+export async function exitPre(rootDir: string) {
+  let preStatePath = path.resolve(rootDir, ".changeset", "pre.json");
   // TODO: verify that the pre state isn't broken
-  let preState = await readPreState(cwd);
+  let preState = await readPreState(rootDir);
 
   if (preState === undefined) {
     throw new PreExitButNotInPreModeError();
@@ -44,8 +46,8 @@ export async function exitPre(cwd: string) {
   );
 }
 
-export async function enterPre(cwd: string, tag: string) {
-  let packages = await getPackages(cwd);
+export async function enterPre(rootDir: string, tag: string) {
+  let packages = await getPackages(rootDir);
   let preStatePath = path.resolve(packages.root.dir, ".changeset", "pre.json");
   let preState: PreState | undefined = await readPreState(packages.root.dir);
   // can't reenter if pre mode still exists, but we should allow exited pre mode to be reentered
