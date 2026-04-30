@@ -1,6 +1,6 @@
 {
   "name": "@changesets/pre",
-  "version": "3.0.0-next.1",
+  "version": "3.0.0-next.2",
   "description": "Utils to make a Changesets repo enter and exit pre mode",
   "type": "module",
   "exports": {
@@ -11,11 +11,11 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/pre",
   "dependencies": {
     "@changesets/errors": "^1.0.0-next.1",
-    "@changesets/types": "^7.0.0-next.1",
+    "@changesets/types": "^7.0.0-next.2",
     "@manypkg/get-packages": "^3.0.0"
   },
   "devDependencies": {
-    "@changesets/test-utils": "0.0.9-next.1"
+    "@changesets/test-utils": "0.0.9-next.2"
   },
   "engines": {
     "node": ">=20.19.0"

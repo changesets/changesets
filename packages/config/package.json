@@ -1,6 +1,6 @@
 {
   "name": "@changesets/config",
-  "version": "4.0.0-next.1",
+  "version": "4.0.0-next.2",
   "description": "Utilities for reading and parsing Changeset's config",
   "type": "module",
   "exports": {
@@ -16,15 +16,15 @@
   ],
   "dependencies": {
     "@changesets/errors": "^1.0.0-next.1",
-    "@changesets/get-dependents-graph": "^3.0.0-next.1",
+    "@changesets/get-dependents-graph": "^3.0.0-next.2",
     "@changesets/logger": "^1.0.0-next.1",
-    "@changesets/should-skip-package": "^1.0.0-next.1",
-    "@changesets/types": "^7.0.0-next.1",
+    "@changesets/should-skip-package": "^1.0.0-next.2",
+    "@changesets/types": "^7.0.0-next.2",
     "@manypkg/get-packages": "^3.0.0",
     "micromatch": "^4.0.8"
   },
   "devDependencies": {
-    "@changesets/test-utils": "0.0.9-next.1",
+    "@changesets/test-utils": "0.0.9-next.2",
     "@types/micromatch": "^4.0.1",
     "outdent": "^0.8.0",
     "vitest": "^4.1.2"
