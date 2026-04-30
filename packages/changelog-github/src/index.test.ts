@@ -248,7 +248,7 @@ it("disables thanks if disableThanks is enabled", async () => {
   expect(
     await getReleaseLine(changeset, releaseType, {
       ...options,
-      skipAuthors: true,
+      disableThanks: true,
     })
   ).toMatchInlineSnapshot(`
     "

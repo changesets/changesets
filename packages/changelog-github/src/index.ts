@@ -121,7 +121,7 @@ const changelogFunctions: ChangelogFunctions = {
       };
     })();
 
-    const users = options.skipAuthors
+    const users = options.disableThanks
       ? null
       : usersFromSummary.length
       ? usersFromSummary
