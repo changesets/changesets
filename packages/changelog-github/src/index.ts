@@ -1,7 +1,11 @@
 import { ChangelogFunctions } from "@changesets/types";
 // @ts-ignore
 import { config } from "dotenv";
-import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
+import {
+  getInfo,
+  getInfoFromPullRequest,
+  setBatchSize,
+} from "@changesets/get-github-info";
 
 config();
 
@@ -35,6 +39,9 @@ const changelogFunctions: ChangelogFunctions = {
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
       );
     }
+    if (options.batchSize != null) {
+      setBatchSize(Number(options.batchSize));
+    }
     if (dependenciesUpdated.length === 0) return "";
 
     const changesetLink = `- Updated dependencies [${(
@@ -65,6 +72,9 @@ const changelogFunctions: ChangelogFunctions = {
       throw new Error(
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]'
       );
+    }
+    if (options.batchSize != null) {
+      setBatchSize(Number(options.batchSize));
     }
 
     let prFromSummary: number | undefined;

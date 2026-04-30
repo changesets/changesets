@@ -1,4 +1,4 @@
-import { getInfo, getInfoFromPullRequest } from ".";
+import { getInfo, getInfoFromPullRequest, clearCache, setBatchSize } from ".";
 import nock from "nock";
 import prettier from "prettier";
 
@@ -11,6 +11,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  clearCache();
   nock.cleanAll();
   nock.enableNetConnect();
 });
@@ -499,6 +500,82 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
       }
     `);
   } finally {
-    process.env.GITHUB_GRAPHQL_URL = originalGraphqlUrl;
+    if (originalGraphqlUrl === undefined) {
+      delete process.env.GITHUB_GRAPHQL_URL;
+    } else {
+      process.env.GITHUB_GRAPHQL_URL = originalGraphqlUrl;
+    }
   }
+});
+
+test("setBatchSize throws on invalid values", () => {
+  expect(() => setBatchSize(0)).toThrow(RangeError);
+  expect(() => setBatchSize(-1)).toThrow(RangeError);
+  expect(() => setBatchSize(1.5)).toThrow(RangeError);
+  expect(() => setBatchSize(NaN)).toThrow(RangeError);
+  expect(() => setBatchSize(Infinity)).toThrow(RangeError);
+});
+
+test("setBatchSize accepts valid values", () => {
+  setBatchSize(1);
+  setBatchSize(50);
+  setBatchSize(100);
+});
+
+test("batches requests when batch size is smaller than request count", async () => {
+  setBatchSize(1);
+
+  function makeCommitData(commit: string, prNumber: number) {
+    return {
+      [`a${commit}`]: {
+        commitUrl: `https://github.com/emotion-js/emotion/commit/${commit}`,
+        associatedPullRequests: {
+          nodes: [
+            {
+              number: prNumber,
+              url: `https://github.com/emotion-js/emotion/pull/${prNumber}`,
+              mergedAt: "2019-11-07T06:43:58Z",
+              author: {
+                login: "Andarist",
+                url: "https://github.com/Andarist",
+              },
+            },
+          ],
+        },
+        author: {
+          user: {
+            login: "Andarist",
+            url: "https://github.com/Andarist",
+          },
+        },
+      },
+    };
+  }
+
+  // With batch size 1 and 2 different commits, we expect 2 separate GraphQL calls
+  nock("https://api.github.com", {
+    reqheaders: {
+      Authorization: `Token ${process.env.GITHUB_TOKEN}`,
+    },
+  })
+    .post(apiPath)
+    .reply(
+      200,
+      JSON.stringify({ data: { a0: makeCommitData("a085003", 1613) } })
+    )
+    .post(apiPath)
+    .reply(
+      200,
+      JSON.stringify({ data: { a0: makeCommitData("b085004", 1614) } })
+    );
+
+  const [result1, result2] = await Promise.all([
+    getInfo({ commit: "a085003", repo: "emotion-js/emotion" }),
+    getInfo({ commit: "b085004", repo: "emotion-js/emotion" }),
+  ]);
+
+  expect(result1.pull).toBe(1613);
+  expect(result1.user).toBe("Andarist");
+  expect(result2.pull).toBe(1614);
+  expect(result2.user).toBe("Andarist");
 });
