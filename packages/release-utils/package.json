@@ -16,7 +16,6 @@
     "mdast-util-to-markdown": "^2.1.2",
     "mdast-util-to-string": "^4.0.0",
     "semver": "^7.5.3",
-    "signal-exit": "^4.1.0",
     "tinyexec": "^1.0.2"
   },
   "devDependencies": {
