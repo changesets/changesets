@@ -26,7 +26,7 @@ type PkgInfo = {
 export type PublishedResult = {
   name: string;
   newVersion: string;
-  published: boolean;
+  result: "published" | "skipped" | "failed";
 };
 
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
@@ -152,7 +152,7 @@ async function publishAPackage(
   return {
     name,
     newVersion: version,
-    published: publishConfirmation.published,
+    result: publishConfirmation.result,
   };
 }
 

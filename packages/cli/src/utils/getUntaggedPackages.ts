@@ -1,5 +1,4 @@
 import * as git from "@changesets/git";
-import type { PublishedResult } from "../commands/publish/publishPackages.ts";
 import type { Package, Packages } from "@changesets/types";
 
 export async function getUntaggedPackages(
@@ -22,14 +21,13 @@ export async function getUntaggedPackages(
     }),
   );
 
-  const untagged: PublishedResult[] = [];
+  const untagged: Array<{ name: string; newVersion: string }> = [];
 
   for (const packageWithTag of packageWithTags) {
     if (packageWithTag.isMissingTag) {
       untagged.push({
         name: packageWithTag.pkg.packageJson.name,
         newVersion: packageWithTag.pkg.packageJson.version,
-        published: false,
       });
     }
   }

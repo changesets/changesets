@@ -14,7 +14,25 @@ import publish from "./commands/publish/index.ts";
 import status from "./commands/status/index.ts";
 import tagCommand from "./commands/tag/index.ts";
 import version from "./commands/version/index.ts";
+import { COMMAND_HELP } from "./help.ts";
 import type { CliOptions } from "./types.ts";
+
+function validateCommandFlags(
+  command: keyof typeof COMMAND_HELP,
+  flags: Record<string, unknown>,
+) {
+  const unknownFlags = Object.keys(flags);
+
+  if (unknownFlags.length > 0) {
+    error(
+      `Unknown ${
+        unknownFlags.length === 1 ? "flag" : "flags"
+      } for ${command}: ${unknownFlags.map((flag) => `--${flag}`).join(", ")}`,
+    );
+    error(`Usage: changeset ${COMMAND_HELP[command]}`);
+    throw new ExitError(1);
+  }
+}
 
 export async function run(
   input: string[],
@@ -24,6 +42,7 @@ export async function run(
   const packages = await getPackages(cwd);
 
   if (input[0] === "init") {
+    validateCommandFlags("init", flags);
     await init(packages.rootDir);
     return;
   }
@@ -69,28 +88,14 @@ export async function run(
   }
 
   if (input.length < 1) {
-    const { empty, open, since, message }: CliOptions = flags;
-    // @ts-ignore if this is undefined, we have already exited
+    const { empty, open, since, message, ...rest }: CliOptions = flags;
+    validateCommandFlags("add", rest);
     await add(packages.rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     error(
       "Too many arguments passed to changesets - we only accept the command name as an argument",
     );
   } else {
-    const {
-      since,
-      verbose,
-      output,
-      otp,
-      empty,
-      ignore,
-      snapshot,
-      snapshotPrereleaseTemplate,
-      tag,
-      open,
-      gitTag,
-      message,
-    }: CliOptions = flags;
     // Command line options need to be undefined, otherwise their
     // default value overrides the user's provided config in their
     // config file. For this reason, we only assign them to this
@@ -98,10 +103,19 @@ export async function run(
 
     switch (input[0]) {
       case "add": {
+        const { empty, open, since, message, ...rest }: CliOptions = flags;
+        validateCommandFlags("add", rest);
         await add(packages.rootDir, { empty, open, since, message }, config);
         return;
       }
       case "version": {
+        const {
+          ignore,
+          snapshot,
+          snapshotPrereleaseTemplate,
+          ...rest
+        }: CliOptions = flags;
+        validateCommandFlags("version", rest);
         let ignoreArrayFromCmd: undefined | string[];
         if (typeof ignore === "string") {
           ignoreArrayFromCmd = [ignore];
@@ -194,18 +208,24 @@ export async function run(
         return;
       }
       case "publish": {
+        const { otp, tag, gitTag, ...rest }: CliOptions = flags;
+        validateCommandFlags("publish", rest);
         await publish(packages.rootDir, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
+        const { since, verbose, output, ...rest }: CliOptions = flags;
+        validateCommandFlags("status", rest);
         await status(packages.rootDir, { since, verbose, output }, config);
         return;
       }
       case "tag": {
+        validateCommandFlags("tag", flags);
         await tagCommand(packages.rootDir, config);
         return;
       }
       case "pre": {
+        validateCommandFlags("pre", flags);
         let command = input[1];
         if (command !== "enter" && command !== "exit") {
           error(

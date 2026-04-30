@@ -218,4 +218,89 @@ describe("getting the dependency graph", function () {
       expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
     }),
   );
+
+  it("should treat workspace path dependencies as valid local dependencies", () => {
+    const rootPackage: Package = {
+      dir: path.resolve(),
+      packageJson: { name: "root", version: "1.0.0" },
+    };
+    const { graph, valid } = getDependencyGraph(
+      {
+        tool: { type: "pnpm" },
+        rootDir: rootPackage.dir,
+        rootPackage,
+        packages: [
+          {
+            dir: "packages/foo",
+            packageJson: {
+              name: "foo",
+              version: "1.0.0",
+              dependencies: {
+                bar: "workspace:packages/bar",
+              },
+            },
+          },
+          {
+            dir: "packages/bar",
+            packageJson: {
+              name: "bar",
+              version: "1.0.0",
+            },
+          },
+        ],
+      },
+      rootPackage,
+    );
+
+    expect(graph.get("foo")!.dependencies).toStrictEqual(["bar"]);
+    expect(valid).toBeTruthy();
+    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+  });
+
+  it(
+    "should error on mismatched workspace path dependencies",
+    temporarilySilenceLogs(() => {
+      const rootPackage: Package = {
+        dir: path.resolve(),
+        packageJson: { name: "root", version: "1.0.0" },
+      };
+      const { graph, valid } = getDependencyGraph(
+        {
+          tool: { type: "pnpm" },
+          rootDir: rootPackage.dir,
+          rootPackage,
+          packages: [
+            {
+              dir: "packages/foo",
+              packageJson: {
+                name: "foo",
+                version: "1.0.0",
+                dependencies: {
+                  bar: "workspace:packages/not-bar",
+                },
+              },
+            },
+            {
+              dir: "packages/bar",
+              packageJson: {
+                name: "bar",
+                version: "1.0.0",
+              },
+            },
+          ],
+        },
+        rootPackage,
+      );
+
+      expect(graph.get("foo")!.dependencies).toStrictEqual([]);
+      expect(valid).toBe(false);
+      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            "Package "foo" must depend on the current version of "bar": "1.0.0" vs "workspace:packages/not-bar"",
+          ],
+        ]
+      `);
+    }),
+  );
 });

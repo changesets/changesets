@@ -1,4 +1,3 @@
-import path from "node:path";
 import type {
   NewChangeset,
   Release,
@@ -19,7 +18,7 @@ function getPackage({
       name,
       version,
     },
-    dir: path.resolve(name),
+    dir: `/packages/${name.replace(/^@/, "").replace(/\//g, "-")}`,
   };
 }
 

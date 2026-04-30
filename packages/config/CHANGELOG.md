@@ -1,5 +1,12 @@
 # @changesets/config
 
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [[`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464)]:
+  - @changesets/get-dependents-graph@2.1.4
+
 ## 3.1.3
 
 ### Patch Changes

@@ -45,8 +45,8 @@ describe("running release", () => {
       });
 
       mockedPublishPackages.mockImplementation(async () => [
-        { name: "pkg-a", newVersion: "1.1.0", published: true },
-        { name: "pkg-b", newVersion: "1.0.1", published: true },
+        { name: "pkg-a", newVersion: "1.1.0", result: "published" },
+        { name: "pkg-b", newVersion: "1.0.1", result: "published" },
       ]);
 
       await runRelease(cwd, {}, defaultConfig);

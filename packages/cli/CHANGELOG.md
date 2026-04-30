@@ -1,5 +1,30 @@
 # @changesets/cli
 
+## 2.31.0
+
+### Minor Changes
+
+- [#1889](https://github.com/changesets/changesets/pull/1889) [`96ca062`](https://github.com/changesets/changesets/commit/96ca062272605c14f77a64043f50a0a3a278c57f) Thanks [@mixelburg](https://github.com/mixelburg)! - Error on unsupported flags for individual CLI commands and print the matching command usage to make mistakes easier to spot.
+
+- [#1873](https://github.com/changesets/changesets/pull/1873) [`42943b7`](https://github.com/changesets/changesets/commit/42943b74d7a455ed03b93dd85e1c0a15f45db37f) Thanks [@mixelburg](https://github.com/mixelburg)! - Respond to `--help` on all subcommands. Previously, `--help` was only handled when it was the sole argument; passing it alongside a subcommand (e.g. `changeset version --help`) would silently execute the command instead. Now `--help` always exits early and prints per-command usage when a known subcommand is provided, or the general help text otherwise.
+
+### Patch Changes
+
+- [`d2121dc`](https://github.com/changesets/changesets/commit/d2121dc3d86b55f76de6022ccfcde843ed4b884a) Thanks [@Andarist](https://github.com/Andarist)! - Fix npm auth for path-based registries during publish by preserving configured registry URLs instead of normalizing them.
+
+- [#1888](https://github.com/changesets/changesets/pull/1888) [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix several `changeset version` issues with workspace protocol dependencies. Valid explicit `workspace:` ranges and aliases are no longer rewritten unnecessarily, and workspace path references are handled correctly during versioning.
+
+- [#1903](https://github.com/changesets/changesets/pull/1903) [`5c4731f`](https://github.com/changesets/changesets/commit/5c4731fea82ce880500ac5e1c55ff372f7a4efe2) Thanks [@Andarist](https://github.com/Andarist)! - Gracefully handle stale `npm info` data leading to duplicate publish attempts.
+
+- [#1867](https://github.com/changesets/changesets/pull/1867) [`f61e716`](https://github.com/changesets/changesets/commit/f61e7166c349d4934e4acc9b47f3d028c212ecc1) Thanks [@Andarist](https://github.com/Andarist)! - Improved detection for `published` state of prerelease-only packages without `latest` dist-tag on GitHub Packages registry.
+
+- Updated dependencies [[`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464), [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464), [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464)]:
+  - @changesets/assemble-release-plan@6.0.10
+  - @changesets/get-dependents-graph@2.1.4
+  - @changesets/apply-release-plan@7.1.1
+  - @changesets/get-release-plan@4.0.16
+  - @changesets/config@3.1.4
+
 ## 2.30.0
 
 ### Minor Changes

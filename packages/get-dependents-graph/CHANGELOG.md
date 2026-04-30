@@ -1,5 +1,11 @@
 # @changesets/get-dependents-graph
 
+## 2.1.4
+
+### Patch Changes
+
+- [#1888](https://github.com/changesets/changesets/pull/1888) [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix dependency graph validation for workspace path references. Valid `workspace:packages/pkg` specifiers are now treated as local dependencies instead of being rejected as invalid ranges.
+
 ## 3.0.0-next.1
 
 ### Major Changes
