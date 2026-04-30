@@ -121,7 +121,9 @@ const changelogFunctions: ChangelogFunctions = {
       };
     })();
 
-    const users = usersFromSummary.length
+    const users = options.disableThanks
+      ? null
+      : usersFromSummary.length
       ? usersFromSummary
           .map(
             (userFromSummary) =>
