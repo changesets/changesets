@@ -1,8 +1,12 @@
+import { loadEnvFile } from "node:process";
 import type { ChangelogFunctions } from "@changesets/types";
-import { config } from "dotenv";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 
-config();
+try {
+  loadEnvFile();
+} catch {
+  // Ignore error if .env file does not exist
+}
 
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
