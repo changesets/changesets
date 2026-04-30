@@ -31,7 +31,7 @@ jobs:
 
       - name: Create Release Pull Request or Publish to npm
         # https://github.com/changesets/action
-        uses: changesets/action@v1
+        uses: changesets/action@6a0a831ff30acef54f2c6aa1cbbc1096b066edaf # v1
         with:
           # this expects you to have a script called release which does a build for your packages and calls changeset publish
           publish: yarn release
