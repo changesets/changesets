@@ -20,7 +20,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { outdent } from "outdent";
 import { exec } from "tinyexec";
 import { describe, expect, it, test } from "vitest";
-import applyReleasePlan from "./index.ts";
+import applyReleasePlan, { updateVersionField } from "./index.ts";
 
 const changesetsCliChangelogPath = path.resolve(
   import.meta.dirname,
@@ -3447,5 +3447,40 @@ describe("apply release plan", () => {
         "modified:   packages/pkg-a/package.json",
       );
     });
+  });
+});
+
+describe("updateVersionField", () => {
+  it("should update the version with a new value", () => {
+    const data = JSON.stringify({ version: "1.2.4" });
+    const value = "2.0.0";
+
+    expect(updateVersionField(data, value)).toEqual(
+      JSON.stringify({ version: value }),
+    );
+  });
+
+  it("should update a file with pretty formatting", () => {
+    const data = JSON.stringify(
+      { name: "foo", version: "1.2.4", dependencies: {} },
+      null,
+      2,
+    );
+    const value = "2.0.0";
+
+    expect(updateVersionField(data, value)).toEqual(
+      JSON.stringify(
+        { name: "foo", version: value, dependencies: {} },
+        null,
+        2,
+      ),
+    );
+  });
+
+  it("should not affect the formatting of the file", () => {
+    const data = '{\t  \t\n\t"version"    :\t\t"1.0.0",\n\t}';
+    expect(updateVersionField(data, "2.0.0")).toEqual(
+      data.replace("1.0.0", "2.0.0"),
+    );
   });
 });

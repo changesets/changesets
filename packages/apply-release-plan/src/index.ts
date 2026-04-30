@@ -13,7 +13,6 @@ import type {
   NewChangeset,
   ReleasePlan,
 } from "@changesets/types";
-import detectIndent from "detect-indent";
 import { resolve } from "import-meta-resolve";
 import prettier from "prettier";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
@@ -153,10 +152,10 @@ export async function applyReleasePlan(
     config.prettier !== false ? getPrettierInstance(cwd) : undefined;
 
   for (const release of finalisedRelease) {
-    const { changelog, packageJson, dir, name } = release;
+    const { changelog, newVersion, dir, name } = release;
 
     const pkgJSONPath = path.resolve(dir, "package.json");
-    await updatePackageJson(pkgJSONPath, packageJson);
+    await updateVersionFieldInFile(pkgJSONPath, newVersion);
     touchedFiles.push(pkgJSONPath);
 
     if (changelog && changelog.length > 0) {
@@ -363,16 +362,23 @@ async function updateChangelog(
   );
 }
 
-async function updatePackageJson(
-  pkgJsonPath: string,
-  pkgJson: any,
-): Promise<void> {
-  const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
-  const indent = detectIndent(pkgRaw).indent || "  ";
-  const stringified =
-    JSON.stringify(pkgJson, null, indent) + (pkgRaw.endsWith("\n") ? "\n" : "");
+// https://regexr.com/8lrc7
+const versionFieldRegex = /(\s*"version"\s*:\s*")[^"\\]*(")/;
 
-  return fs.writeFile(pkgJsonPath, stringified);
+export function updateVersionField(
+  jsonString: string,
+  newVersion: string,
+): string {
+  return jsonString.replace(versionFieldRegex, `$1${newVersion}$2`);
+}
+
+async function updateVersionFieldInFile(
+  filePath: string,
+  newVersion: string,
+): Promise<void> {
+  const jsonString = await fs.readFile(filePath, "utf8");
+
+  return fs.writeFile(filePath, updateVersionField(jsonString, newVersion));
 }
 
 /** @deprecated Use named export `applyReleasePlan` instead */

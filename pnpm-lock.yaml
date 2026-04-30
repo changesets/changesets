@@ -84,9 +84,6 @@ importers:
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
-      detect-indent:
-        specifier: ^7.0.2
-        version: 7.0.2
       import-meta-resolve:
         specifier: ^4.2.0
         version: 4.2.0

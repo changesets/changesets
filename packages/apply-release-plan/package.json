@@ -15,7 +15,6 @@
     "@changesets/git": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",
-    "detect-indent": "^7.0.2",
     "import-meta-resolve": "^4.2.0",
     "prettier": "^3.7.4",
     "semver": "^7.5.3"
