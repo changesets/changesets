@@ -39,7 +39,7 @@ describe("publishPackages", () => {
       }));
 
       mockedNpmUtils.publish.mockImplementation(async () => ({
-        published: true,
+        result: "published",
       }));
 
       await publishPackages({
