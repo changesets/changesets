@@ -100,7 +100,13 @@ export default function determineDependents({
                     .onlyUpdatePeerDependentsWhenOutOfRange,
               })
             ) {
-              type = "major";
+              // For 0.x versions, peer dependency major bump should be minor
+              // since semver allows breaking changes in minor versions for 0.x
+              if (dependentPackage.packageJson.version.startsWith("0.")) {
+                type = "minor";
+              } else {
+                type = "major";
+              }
             } else if (
               (!releases.has(dependent) ||
                 releases.get(dependent)!.type === "none") &&
