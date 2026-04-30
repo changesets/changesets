@@ -27,11 +27,7 @@ Then you can use it in your `.changeset/config.js` like this.
 import { loadEnvFile } from "node:process";
 import { getInfo } from "@changesets/get-github-info";
 
-try {
-  loadEnvFile();
-} catch {
-  // Ignore error if .env file does not exist
-}
+loadEnvFile();
 // ...
 
 const getReleaseLine = async (changeset, type) => {

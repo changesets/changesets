@@ -3,9 +3,12 @@ import type { ChangelogFunctions } from "@changesets/types";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 
 try {
-  loadEnvFile();
-} catch {
-  // Ignore error if .env file does not exist
+  loadEnvFile()
+} catch (err: any) {
+  // Ignore error if .env file doesn't exist, but log other errors
+  if (err.code !== "ENOENT") {
+    console.error("Failed to load .env file", err)
+  }
 }
 
 // "match what you skip, capture what you want": the left alternative
