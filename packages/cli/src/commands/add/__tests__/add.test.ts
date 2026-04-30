@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import path from "path";
 import { stripVTControlCharacters } from "node:util";
 import * as git from "@changesets/git";
@@ -9,20 +9,23 @@ import {
   gitdir,
   outputFile,
 } from "@changesets/test-utils";
-import * as logger from "@changesets/logger";
+import * as clack from "@clack/prompts";
 import getChangesets from "@changesets/read";
 import { exec } from "tinyexec";
 
+import { askWithEditor } from "../../../utils/askWithEditor.ts";
 import * as utils from "../../../utils/cli-utilities.ts";
 import addChangeset from "../index.ts";
 
+vi.mock("../../../utils/askWithEditor");
+const mockedAskWithEditor = vi.mocked(askWithEditor);
 vi.mock("../../../utils/cli-utilities");
 const mockedUtils = vi.mocked(utils);
 
 const mockUserResponses = (mockResponses: {
   releases: Record<string, "patch" | "minor" | "major">;
-  consoleSummaries?: string[];
-  editorSummaries?: string[];
+  consoleSummaries?: readonly string[];
+  editorSummaries?: readonly (string | number)[];
   summary?: string;
 }) => {
   const summary = mockResponses.summary || "summary message mock";
@@ -41,9 +44,9 @@ const mockUserResponses = (mockResponses: {
     majorReleases,
     minorReleases,
   ];
-  mockedUtils.askCheckboxPlus.mockImplementation(async () => {
+  mockedUtils.askMultiselect.mockImplementation(async () => {
     if (callCount === returnValues.length) {
-      throw new Error(`There was an unexpected call to askCheckboxPlus`);
+      throw new Error(`There was an unexpected call to askMultiselect`);
     }
     return returnValues[callCount++];
   });
@@ -56,14 +59,20 @@ const mockUserResponses = (mockResponses: {
     mockResponses.consoleSummaries != null &&
     mockResponses.editorSummaries != null
   ) {
-    let i = 0;
-    let j = 0;
-    mockedUtils.askQuestion.mockImplementation(
-      async () => mockResponses.consoleSummaries![i++],
-    );
-    mockedUtils.askQuestionWithEditor.mockImplementation(
-      () => mockResponses.editorSummaries![j++],
-    );
+    for (let i = 0; i < mockResponses.consoleSummaries.length; i++) {
+      const response = mockResponses.consoleSummaries[i];
+      mockedUtils.askQuestion.mockResolvedValue(response);
+    }
+    for (let j = 0; j < mockResponses.editorSummaries.length; j++) {
+      const response = mockResponses.editorSummaries[j];
+      if (typeof response === "string") {
+        mockedAskWithEditor.mockResolvedValueOnce(response);
+      } else {
+        mockedAskWithEditor.mockRejectedValueOnce(
+          new Error("Editor cancelled"),
+        );
+      }
+    }
   } else {
     mockedUtils.askQuestion.mockResolvedValue(summary);
   }
@@ -75,6 +84,11 @@ const mockUserResponses = (mockResponses: {
     throw new Error(`An answer could not be found for ${question}`);
   });
 };
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
+});
 
 describe("Add command", () => {
   silenceLogsInBlock();
@@ -110,15 +124,17 @@ describe("Add command", () => {
     );
   });
 
-  it.each`
-    consoleSummaries                          | editorSummaries                           | expectedSummary
-    ${["summary on step 1"]}                  | ${[]}                                     | ${"summary on step 1"}
-    ${[""]}                                   | ${["summary in external editor"]}         | ${"summary in external editor"}
-    ${["", "summary after editor cancelled"]} | ${[""]}                                   | ${"summary after editor cancelled"}
-    ${["", "summary after error"]}            | ${1 /* mock implementation will throw */} | ${"summary after error"}
-  `(
-    "should read summary",
-    async ({ consoleSummaries, editorSummaries, expectedSummary }) => {
+  // prettier-ignore
+  const cases = [
+    // console                                editor                          expected
+    [["summary on step 1"],                   [],                             "summary on step 1"],
+    [[""],                                    ["summary in external editor"], "summary in external editor"],
+    [["", "summary after editor cancelled"],  [""],                           "summary after editor cancelled"],
+    [["", "summary after error"],             [1],                            "summary after error"],
+  ] as const;
+  it.each(cases)(
+    "should read summary ($2)",
+    async (consoleSummaries, editorSummaries, expectedSummary) => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
@@ -169,7 +185,7 @@ describe("Add command", () => {
       "Is this your desired changeset?": true,
     };
     mockedUtils.askQuestion.mockResolvedValue("");
-    mockedUtils.askQuestionWithEditor.mockReturnValueOnce(summary);
+    mockedAskWithEditor.mockResolvedValueOnce(summary);
     mockedUtils.askConfirm.mockImplementation(async (question) => {
       question = stripVTControlCharacters(question);
       if (confirmAnswers[question]) {
@@ -295,7 +311,7 @@ describe("Add command", () => {
       "Is this your desired changeset?",
     );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
-    expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
+    expect(mockedAskWithEditor).not.toHaveBeenCalled();
   });
 
   it("should allow empty summary when message is an empty string", async () => {
@@ -321,7 +337,7 @@ describe("Add command", () => {
       }),
     );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
-    expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
+    expect(mockedAskWithEditor).not.toHaveBeenCalled();
   });
 
   it("should use summary passed via message in a monorepo and skip summary prompt", async () => {
@@ -361,7 +377,7 @@ describe("Add command", () => {
       "Is this your desired changeset?",
     );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
-    expect(mockedUtils.askQuestionWithEditor).not.toHaveBeenCalled();
+    expect(mockedAskWithEditor).not.toHaveBeenCalled();
   });
 
   it("should allow using message with empty changesets", async () => {
@@ -432,13 +448,13 @@ describe("Add command", () => {
     mockUserResponses({ releases: { "pkg-b": "patch" } });
     await addChangeset(cwd, { empty: false, since: "foo" }, defaultConfig);
 
-    expect(mockedUtils.askCheckboxPlus).toHaveBeenCalledWith(
+    expect(mockedUtils.askMultiselect).toHaveBeenCalledWith(
       expect.stringContaining("Which packages"),
-      [
-        { name: "changed packages", choices: ["pkg-b"] },
-        { name: "unchanged packages", choices: ["pkg-a"] },
-      ],
-      expect.any(Function),
+      {
+        "changed packages": [{ value: "pkg-b" }],
+        "unchanged packages": [{ value: "pkg-a" }],
+      },
+      { required: true },
     );
 
     const changesets = await getChangesets(cwd);
@@ -489,8 +505,9 @@ describe("Add command", () => {
       { empty: false },
       { ...defaultConfig, ignore: ["pkg-b"] },
     );
-    const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
-    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+    const choices =
+      mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
+    expect(choices).toMatchObject([{ value: "pkg-a" }, { value: "pkg-c" }]);
   });
 
   it("should not include private packages without a version in the prompt", async () => {
@@ -517,8 +534,9 @@ describe("Add command", () => {
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
     await addChangeset(cwd, { empty: false }, defaultConfig);
-    const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
-    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+    const choices =
+      mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
+    expect(choices).toStrictEqual([{ value: "pkg-a" }, { value: "pkg-c" }]);
   });
 
   it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
@@ -556,12 +574,13 @@ describe("Add command", () => {
         },
       },
     );
-    const { choices } = mockedUtils.askCheckboxPlus.mock.calls[0][1][0];
-    expect(choices).toEqual(["pkg-a", "pkg-c"]);
+    const choices =
+      mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
+    expect(choices).toStrictEqual([{ value: "pkg-a" }, { value: "pkg-c" }]);
   });
 
   it("should exit with an error when there are no versionable packages in a single-package repo", async () => {
-    const loggerErrorSpy = vi.spyOn(logger, "error");
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -573,24 +592,17 @@ describe("Add command", () => {
       addChangeset(cwd, { empty: false }, defaultConfig),
     ).rejects.toThrow("The process exited with code: 1");
 
-    expect(loggerErrorSpy).toHaveBeenCalledTimes(3);
-    expect(loggerErrorSpy.mock.calls).toMatchInlineSnapshot(`
-      [
-        [
-          "No versionable packages found",
-        ],
-        [
-          "- Ensure the packages to version are not in the "ignore" config",
-        ],
-        [
-          "- Ensure that relevant package.json files have the "version" field",
-        ],
-      ]
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toMatchInlineSnapshot(`
+        "No versionable packages found
+          Ensure the packages to version are not ignored by the config
+          Ensure that relevant package.json files have a \`version\` field"
     `);
   });
 
   it("should exit with an error when there are no versionable packages in a monorepo", async () => {
-    const loggerErrorSpy = vi.spyOn(logger, "error");
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
 
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -609,19 +621,12 @@ describe("Add command", () => {
       addChangeset(cwd, { empty: false }, defaultConfig),
     ).rejects.toThrow("The process exited with code: 1");
 
-    expect(loggerErrorSpy).toHaveBeenCalledTimes(3);
-    expect(loggerErrorSpy.mock.calls).toMatchInlineSnapshot(`
-      [
-        [
-          "No versionable packages found",
-        ],
-        [
-          "- Ensure the packages to version are not in the "ignore" config",
-        ],
-        [
-          "- Ensure that relevant package.json files have the "version" field",
-        ],
-      ]
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toMatchInlineSnapshot(`
+        "No versionable packages found
+          Ensure the packages to version are not ignored by the config
+          Ensure that relevant package.json files have a \`version\` field"
     `);
   });
 });

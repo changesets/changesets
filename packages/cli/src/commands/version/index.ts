@@ -1,30 +1,20 @@
-import pc from "picocolors";
 import path from "path";
+import pc from "picocolors";
 import * as git from "@changesets/git";
-import { getCurrentCommitId } from "@changesets/git";
-import { error, log, warn } from "@changesets/logger";
 import type { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
 import readChangesets from "@changesets/read";
 import assembleReleasePlan from "@changesets/assemble-release-plan";
+import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
-
-let importantSeparator = pc.red(
-  "===============================IMPORTANT!===============================",
-);
-
-let importantEnd = pc.red(
-  "----------------------------------------------------------------------",
-);
+import { importantWarning } from "../../utils/cli-utilities.ts";
 
 export default async function version(
   cwd: string,
-  options: {
-    snapshot?: string | boolean;
-  },
+  options: { snapshot?: string | boolean },
   config: Config,
 ) {
   const releaseConfig = {
@@ -38,26 +28,30 @@ export default async function version(
   ]);
 
   if (preState?.mode === "pre") {
-    warn(importantSeparator);
     if (options.snapshot !== undefined) {
-      error("Snapshot release is not allowed in pre mode");
-      log("To resolve this exit the pre mode by running `changeset pre exit`");
+      log.error(
+        `
+Snapshot release is not allowed in pre mode.
+To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
+        `.trim(),
+      );
       throw new ExitError(1);
     } else {
-      warn("You are in prerelease mode");
-      warn(
-        "If you meant to do a normal release you should revert these changes and run `changeset pre exit`",
+      importantWarning(
+        `
+You are in prerelease mode!
+If you meant to do a normal release you should revert these changes and run ${pc.cyan("changeset pre exit")}.
+You can then run ${pc.cyan("changeset version")} again to do a normal release.
+        `,
       );
-      warn("You can then run `changeset version` again to do a normal release");
     }
-    warn(importantEnd);
   }
 
   if (
     changesets.length === 0 &&
     (preState === undefined || preState.mode !== "exit")
   ) {
-    warn("No unreleased changesets found, exiting.");
+    log.warn("No unreleased changesets found.");
     return;
   }
 
@@ -72,7 +66,7 @@ export default async function version(
       ? {
           tag: options.snapshot === true ? undefined : options.snapshot,
           commit: config.snapshot.prereleaseTemplate?.includes("{commit}")
-            ? await getCurrentCommitId({ cwd })
+            ? await git.getCurrentCommitId({ cwd })
             : undefined,
         }
       : undefined,
@@ -104,13 +98,15 @@ export default async function version(
     );
 
     if (!commit) {
-      error("Changesets ran into trouble committing your files");
+      log.error("Changesets ran into trouble committing your files");
     } else {
-      log(
+      log.success(
         "All files have been updated and committed. You're ready to publish!",
       );
     }
   } else {
-    log("All files have been updated. Review them and commit at your leisure");
+    log.success(
+      "All files have been updated. Review them and commit at your leisure",
+    );
   }
 }
