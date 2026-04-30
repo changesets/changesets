@@ -297,7 +297,7 @@ describe("getting the dependency graph", function () {
       expect(
         stripVTControlCharacters((console.error as any).mock.calls[0][0]),
       ).toMatchInlineSnapshot(
-        `"Package "foo" must depend on the current version of "bar": "1.0.0" vs "workspace:packages/not-bar""`,
+        `"Package foo must depend on the current version of bar: 1.0.0 vs workspace:packages/not-bar"`,
       );
     }),
   );
