@@ -1,11 +1,32 @@
 import DataLoader from "dataloader";
+import { parseEnv } from "node:util";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-function readEnv() {
+async function readEnvFile() {
+  const envFile = path.resolve(process.cwd(), ".env");
+  let content: string | undefined;
+  try {
+    content = await fs.readFile(envFile, "utf-8");
+  } catch {
+    return {};
+  }
+  return parseEnv(content);
+}
+
+async function readEnv() {
+  let envFileEnv;
   const GITHUB_GRAPHQL_URL =
-    process.env.GITHUB_GRAPHQL_URL || "https://api.github.com/graphql";
+    process.env.GITHUB_GRAPHQL_URL ||
+    (envFileEnv ??= await readEnvFile()).GITHUB_GRAPHQL_URL ||
+    "https://api.github.com/graphql";
   const GITHUB_SERVER_URL =
-    process.env.GITHUB_SERVER_URL || "https://github.com";
-  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    process.env.GITHUB_SERVER_URL ||
+    (envFileEnv ??= await readEnvFile()).GITHUB_SERVER_URL ||
+    "https://github.com";
+  const GITHUB_TOKEN =
+    process.env.GITHUB_TOKEN ||
+    (envFileEnv ??= await readEnvFile()).GITHUB_TOKEN;
   return { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN };
 }
 
@@ -86,7 +107,8 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
 // getReleaseLine will be called a large number of times but it'll be called at the same time
 // so instead of doing a bunch of network requests, we can do a single one.
 const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
-  const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } = readEnv();
+  const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } =
+    await readEnv();
   if (!GITHUB_TOKEN) {
     throw new Error(
       `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new?scopes=read:user,repo:status&description=changesets-${new Date()

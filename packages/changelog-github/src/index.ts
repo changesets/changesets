@@ -1,15 +1,8 @@
-import { loadEnvFile } from "node:process";
+import { parseEnv } from "node:util";
+import fs from "node:fs/promises";
+import path from "node:path";
 import type { ChangelogFunctions } from "@changesets/types";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
-
-try {
-  loadEnvFile();
-} catch (err: any) {
-  // Ignore error if .env file doesn't exist, but log other errors
-  if (err.code !== "ENOENT") {
-    console.error("Failed to load .env file", err);
-  }
-}
 
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
@@ -24,9 +17,22 @@ function linkifyIssueRefs(
   );
 }
 
-function readEnv() {
+async function readEnvFile() {
+  const envFile = path.resolve(process.cwd(), ".env");
+  let content: string | undefined;
+  try {
+    content = await fs.readFile(envFile, "utf-8");
+  } catch {
+    return {};
+  }
+  return parseEnv(content);
+}
+
+async function readEnv() {
   const GITHUB_SERVER_URL =
-    process.env.GITHUB_SERVER_URL || "https://github.com";
+    process.env.GITHUB_SERVER_URL ||
+    (await readEnvFile())?.GITHUB_SERVER_URL ||
+    "https://github.com";
   return { GITHUB_SERVER_URL };
 }
 
@@ -66,7 +72,7 @@ const changelogFunctions: ChangelogFunctions = {
     return [changesetLink, ...updatedDepenenciesList].join("\n");
   },
   getReleaseLine: async (changeset, type, options) => {
-    const { GITHUB_SERVER_URL } = readEnv();
+    const { GITHUB_SERVER_URL } = await readEnv();
     if (!options || !options.repo) {
       throw new Error(
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]',
