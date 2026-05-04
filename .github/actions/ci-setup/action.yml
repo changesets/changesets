@@ -34,8 +34,8 @@ runs:
 
     - name: Set up dev environment
       shell: bash
-      run: pnpm dlx preconstruct dev
+      run: pnpm preconstruct dev
 
     - name: Check with manypkg
       shell: bash
-      run: pnpm dlx manypkg check
+      run: pnpm manypkg check
