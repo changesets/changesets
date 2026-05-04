@@ -9,21 +9,9 @@
 
 > Note: This assumes you already have changesets setup.
 
-To use `@changesets/get-github-info`, you'll need to install it.
+You can use `@changesets/get-github-info` like this if you have a [custom changelog formatter](https://github.com/changesets/changesets/blob/main/docs/modifying-changelog-format.md).
 
-```bash
-yarn add --dev @changesets/get-github-info
-```
-
-or
-
-```bash
-npm install --save-dev @changesets/get-github-info
-```
-
-Then you can use it in your `.changeset/config.js` like this.
-
-```jsx
+```js
 import { getInfo } from "@changesets/get-github-info";
 
 // ...
