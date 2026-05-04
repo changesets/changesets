@@ -3,7 +3,7 @@ import { exec } from "tinyexec";
 import { pathToFileURL } from "node:url";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, it } from "vitest";
-import { gitdir, outputFile, tempdir } from "@changesets/test-utils";
+import { gitdir, outputFile, testdir } from "@changesets/test-utils";
 import writeChangeset from "@changesets/write";
 
 import {
@@ -298,7 +298,7 @@ describe("git", () => {
         cwd: string,
       ): Promise<string> {
         // Make a 1-commit-deep shallow clone of this repo
-        const cloneDir = tempdir();
+        const cloneDir = await testdir();
         await exec(
           "git",
           // Note: a file:// URL is needed in order to make a shallow clone of

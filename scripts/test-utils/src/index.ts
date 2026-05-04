@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, type Mock, vi } from "vitest";
-import fixturez from "fixturez";
+import { afterEach, beforeEach, type Mock, onTestFinished, vi } from "vitest";
+import { createFixture, FileTree } from "fs-fixture";
 import { exec } from "tinyexec";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
@@ -95,23 +95,13 @@ export const temporarilySilenceLogs =
     }
   };
 
-let f = fixturez(import.meta.dirname);
+export type Fixture = FileTree;
 
-export interface Fixture extends Record<string, string> {}
-
-export async function testdir(dir: Fixture) {
-  const temp = f.temp();
-  await Promise.all(
-    Object.keys(dir).map(async (filename) => {
-      const fullPath = path.join(temp, filename);
-      await fsp.mkdir(path.dirname(fullPath), { recursive: true });
-      await fsp.writeFile(fullPath, dir[filename]);
-    }),
-  );
-  return temp;
+export async function testdir(dir?: Fixture) {
+  const fixture = await createFixture(dir);
+  onTestFinished(() => fixture.rm());
+  return fixture.path;
 }
-
-export const tempdir = f.temp;
 
 export async function gitdir(dir: Fixture) {
   const cwd = await testdir(dir);
