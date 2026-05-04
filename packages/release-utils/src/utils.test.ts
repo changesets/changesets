@@ -85,6 +85,57 @@ describe("getChangelogEntry", () => {
     expect(entry.highestLevel).toBe(BumpLevels.patch);
   });
 
+  test("it works with code blocks", () => {
+    let changelogWithCodeBlocks = `# Changelog
+
+## 1.0.0
+
+### Major Changes
+
+\`\`\`
+# not a heading
+## not a heading
+### not a heading
+\`\`\`
+
+## 0.0.1
+
+Initial release`;
+    let entry = getChangelogEntry(changelogWithCodeBlocks, "1.0.0");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.major);
+  });
+
+  test("it works with nested code blocks", () => {
+    let changelogWithCodeBlocks = `# Changelog
+
+## 1.0.0
+
+### Major Changes
+
+\`\`\`\`
+# not a heading
+## not a heading
+### not a heading
+
+\`\`\`
+# not a heading
+## not a heading
+### not a heading
+\`\`\`
+
+\`\`\`\`
+
+## 0.0.1
+
+Initial release`;
+    let entry = getChangelogEntry(changelogWithCodeBlocks, "1.0.0");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.major);
+  });
+});
+
+describe("sortChangelogEntries", () => {
   test("it sorts the things right", () => {
     let things = [
       {
