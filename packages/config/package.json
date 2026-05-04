@@ -27,10 +27,10 @@
     "@changesets/test-utils": "0.0.9-next.2",
     "@types/picomatch": "4.0.3",
     "outdent": "^0.8.0",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.5"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": "^22 || >=24"
   },
   "preconstruct": {
     "exports": {

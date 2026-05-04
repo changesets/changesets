@@ -1,13 +1,5 @@
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type Mock,
-  vi,
-} from "vitest";
 import { defaultConfig } from "@changesets/config";
+import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import {
   linkNodeModules,
@@ -22,6 +14,15 @@ import { humanId } from "human-id";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+} from "vitest";
 import pre from "../pre/index.ts";
 import version from "./index.ts";
 
@@ -95,7 +96,7 @@ silenceLogsInBlock();
 
 describe("running version in a simple project", () => {
   describe("when there are no changeset commits", () => {
-    it("should warn if no changeset commits exist", async () => {
+    it("should warn and exit with code 1 if no changeset commits exist", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
@@ -108,7 +109,9 @@ describe("running version in a simple project", () => {
         }),
         ".changeset/config.json": JSON.stringify({}),
       });
-      await version(cwd, defaultOptions, modifiedDefaultConfig);
+      await expect(
+        version(cwd, defaultOptions, modifiedDefaultConfig),
+      ).rejects.toThrow(ExitError);
       const loggerWarnCalls = mockedLogger.warn!.mock.calls;
       expect(loggerWarnCalls.length).toEqual(1);
       expect(loggerWarnCalls[0][0]).toEqual(

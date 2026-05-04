@@ -1,5 +1,6 @@
 import pc from "picocolors";
-import path from "path";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import * as git from "@changesets/git";
 import { getCurrentCommitId } from "@changesets/git";
 import { error, log, warn } from "@changesets/logger";
@@ -58,7 +59,7 @@ export default async function version(
     (preState === undefined || preState.mode !== "exit")
   ) {
     warn("No unreleased changesets found, exiting.");
-    return;
+    throw new ExitError(1);
   }
 
   const packages = await getPackages(cwd);
@@ -78,17 +79,20 @@ export default async function version(
       : undefined,
   );
 
-  const [...touchedFiles] = await applyReleasePlan(
+  const contextDir = path.dirname(fileURLToPath(import.meta.url));
+
+  let [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
     releaseConfig,
     options.snapshot,
-    import.meta.dirname,
+    contextDir,
   );
 
   const [{ getVersionMessage }, commitOpts] = await getCommitFunctions(
     releaseConfig.commit,
     cwd,
+    contextDir,
   );
   if (getVersionMessage) {
     let touchedFile: string | undefined;

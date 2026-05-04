@@ -16,9 +16,9 @@
   },
   "devDependencies": {
     "@changesets/test-utils": "0.0.9-next.2",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.5"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": "^22 || >=24"
   }
 }

@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node_version: [20, 22, 24]
+        node_version: [22, 24, 25]
       fail-fast: false
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1

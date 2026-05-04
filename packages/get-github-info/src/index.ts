@@ -1,11 +1,36 @@
 import DataLoader from "dataloader";
+import { parseEnv } from "node:util";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-function readEnv() {
+async function readEnvFile() {
+  const envFile = path.resolve(process.cwd(), ".env");
+  let content: string | undefined;
+  try {
+    content = await fs.readFile(envFile, "utf-8");
+  } catch {
+    return {};
+  }
+  return parseEnv(content);
+}
+
+let cachedEnv: ReturnType<typeof readEnvFile> | undefined;
+function readEnvFileCached() {
+  cachedEnv ??= readEnvFile();
+  return cachedEnv;
+}
+
+async function readEnv() {
   const GITHUB_GRAPHQL_URL =
-    process.env.GITHUB_GRAPHQL_URL || "https://api.github.com/graphql";
+    process.env.GITHUB_GRAPHQL_URL ||
+    (await readEnvFileCached()).GITHUB_GRAPHQL_URL ||
+    "https://api.github.com/graphql";
   const GITHUB_SERVER_URL =
-    process.env.GITHUB_SERVER_URL || "https://github.com";
-  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    process.env.GITHUB_SERVER_URL ||
+    (await readEnvFileCached()).GITHUB_SERVER_URL ||
+    "https://github.com";
+  const GITHUB_TOKEN =
+    process.env.GITHUB_TOKEN || (await readEnvFileCached()).GITHUB_TOKEN;
   return { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN };
 }
 
@@ -33,9 +58,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
             ${repos[repo]
               .map((data) =>
                 data.kind === "commit"
-                  ? `a${data.commit}: object(expression: ${JSON.stringify(
-                      data.commit,
-                    )}) {
+                  ? `a${data.commit}: object(expression: ${JSON.stringify(data.commit)}) {
             ... on Commit {
             commitUrl
             associatedPullRequests(first: 50) {
@@ -86,7 +109,8 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
 // getReleaseLine will be called a large number of times but it'll be called at the same time
 // so instead of doing a bunch of network requests, we can do a single one.
 const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
-  const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } = readEnv();
+  const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } =
+    await readEnv();
   if (!GITHUB_TOKEN) {
     throw new Error(
       `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new?scopes=read:user,repo:status&description=changesets-${new Date()
@@ -129,11 +153,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
 
   if (data.errors) {
     throw new Error(
-      `Fetched data from GitHub returned errors\n${JSON.stringify(
-        data.errors,
-        null,
-        2,
-      )}`,
+      `Fetched data from GitHub returned errors\n${JSON.stringify(data.errors, null, 2)}`,
     );
   }
 

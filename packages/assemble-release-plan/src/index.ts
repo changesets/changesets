@@ -120,39 +120,17 @@ function getNewVersion(
   return incrementVersion(release, preInfo);
 }
 
-type OptionalProp<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
 function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
-  config: OptionalProp<Config, "snapshot">,
+  config: Config,
   // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
   preState: PreState | undefined,
   // snapshot: undefined            ->  not using snapshot
   // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
   // snapshot: { tag: "canary" }    ->  --snapshot canary
-  snapshot?: SnapshotReleaseParameters | string | boolean,
+  snapshot?: SnapshotReleaseParameters,
 ): ReleasePlan {
-  // TODO: remove `refined*` in the next major version of this package
-  // just use `config` and `snapshot` parameters directly, typed as: `config: Config, snapshot?: SnapshotReleaseParameters`
-  const refinedConfig: Config = config.snapshot
-    ? (config as Config)
-    : {
-        ...config,
-        snapshot: {
-          prereleaseTemplate: null,
-          useCalculatedVersion: (
-            config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH as any
-          ).useCalculatedVersionForSnapshots,
-        },
-      };
-  const refinedSnapshot: SnapshotReleaseParameters | undefined =
-    typeof snapshot === "string"
-      ? { tag: snapshot }
-      : typeof snapshot === "boolean"
-        ? { tag: undefined }
-        : snapshot;
-
   let packagesByName = new Map(
     packages.packages.map((x) => [x.packageJson.name, x]),
   );
@@ -160,25 +138,16 @@ function assembleReleasePlan(
   const relevantChangesets = getRelevantChangesets(
     changesets,
     packagesByName,
-    refinedConfig,
+    config,
     preState,
   );
 
-  const preInfo = getPreInfo(
-    changesets,
-    packagesByName,
-    refinedConfig,
-    preState,
-  );
+  const preInfo = getPreInfo(changesets, packagesByName, config, preState);
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(
-    relevantChangesets,
-    packagesByName,
-    refinedConfig,
-  );
+  let releases = flattenReleases(relevantChangesets, packagesByName, config);
 
   // Unlike the config/CLI validation graphs, this graph intentionally includes
   // devDependencies. While devDeps don't cause version bumps (determineDependents
@@ -186,7 +155,7 @@ function assembleReleasePlan(
   // apply-release-plan can update their version ranges in package.json.
   let dependencyGraph = getDependentsGraph(packages, {
     bumpVersionsWithWorkspaceProtocolOnly:
-      refinedConfig.bumpVersionsWithWorkspaceProtocolOnly,
+      config.bumpVersionsWithWorkspaceProtocolOnly,
   });
 
   let releasesValidated = false;
@@ -198,20 +167,16 @@ function assembleReleasePlan(
       rootDir: packages.rootDir,
       dependencyGraph,
       preInfo,
-      config: refinedConfig,
+      config,
     });
 
     // `releases` might get mutated here
     let fixedConstraintUpdated = matchFixedConstraint(
       releases,
       packagesByName,
-      refinedConfig,
+      config,
     );
-    let linksUpdated = applyLinks(
-      releases,
-      packagesByName,
-      refinedConfig.linked,
-    );
+    let linksUpdated = applyLinks(releases, packagesByName, config.linked);
 
     releasesValidated =
       !linksUpdated && !dependentAdded && !fixedConstraintUpdated;
@@ -234,8 +199,8 @@ function assembleReleasePlan(
         } else if (
           existingRelease.type === "none" &&
           !shouldSkipPackage(pkg, {
-            ignore: refinedConfig.ignore,
-            allowPrivatePackages: refinedConfig.privatePackages.version,
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
           })
         ) {
           existingRelease.type = "patch";
@@ -246,11 +211,7 @@ function assembleReleasePlan(
 
   // Caching the snapshot version here and use this if it is snapshot release
   const snapshotSuffix =
-    refinedSnapshot &&
-    getSnapshotSuffix(
-      refinedConfig.snapshot.prereleaseTemplate,
-      refinedSnapshot,
-    );
+    snapshot && getSnapshotSuffix(config.snapshot.prereleaseTemplate, snapshot);
 
   return {
     changesets: relevantChangesets,
@@ -261,7 +222,7 @@ function assembleReleasePlan(
           ? getSnapshotVersion(
               incompleteRelease,
               preInfo,
-              refinedConfig.snapshot.useCalculatedVersion,
+              config.snapshot.useCalculatedVersion,
               snapshotSuffix,
             )
           : getNewVersion(incompleteRelease, preInfo),
