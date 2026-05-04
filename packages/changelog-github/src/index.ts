@@ -28,10 +28,16 @@ async function readEnvFile() {
   return parseEnv(content);
 }
 
+let cachedEnv: ReturnType<typeof readEnvFile> | undefined;
+function readEnvFileCached() {
+  cachedEnv ??= readEnvFile();
+  return cachedEnv;
+}
+
 async function readEnv() {
   const GITHUB_SERVER_URL =
     process.env.GITHUB_SERVER_URL ||
-    (await readEnvFile())?.GITHUB_SERVER_URL ||
+    (await readEnvFileCached()).GITHUB_SERVER_URL ||
     "https://github.com";
   return { GITHUB_SERVER_URL };
 }

@@ -14,19 +14,23 @@ async function readEnvFile() {
   return parseEnv(content);
 }
 
+let cachedEnv: ReturnType<typeof readEnvFile> | undefined;
+function readEnvFileCached() {
+  cachedEnv ??= readEnvFile();
+  return cachedEnv;
+}
+
 async function readEnv() {
-  let envFileEnv;
   const GITHUB_GRAPHQL_URL =
     process.env.GITHUB_GRAPHQL_URL ||
-    (envFileEnv ??= await readEnvFile()).GITHUB_GRAPHQL_URL ||
+    (await readEnvFileCached()).GITHUB_GRAPHQL_URL ||
     "https://api.github.com/graphql";
   const GITHUB_SERVER_URL =
     process.env.GITHUB_SERVER_URL ||
-    (envFileEnv ??= await readEnvFile()).GITHUB_SERVER_URL ||
+    (await readEnvFileCached()).GITHUB_SERVER_URL ||
     "https://github.com";
   const GITHUB_TOKEN =
-    process.env.GITHUB_TOKEN ||
-    (envFileEnv ??= await readEnvFile()).GITHUB_TOKEN;
+    process.env.GITHUB_TOKEN || (await readEnvFileCached()).GITHUB_TOKEN;
   return { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN };
 }
 
@@ -54,9 +58,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
             ${repos[repo]
               .map((data) =>
                 data.kind === "commit"
-                  ? `a${data.commit}: object(expression: ${JSON.stringify(
-                      data.commit,
-                    )}) {
+                  ? `a${data.commit}: object(expression: ${JSON.stringify(data.commit)}) {
             ... on Commit {
             commitUrl
             associatedPullRequests(first: 50) {
@@ -151,11 +153,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
 
   if (data.errors) {
     throw new Error(
-      `Fetched data from GitHub returned errors\n${JSON.stringify(
-        data.errors,
-        null,
-        2,
-      )}`,
+      `Fetched data from GitHub returned errors\n${JSON.stringify(data.errors, null, 2)}`,
     );
   }
 
