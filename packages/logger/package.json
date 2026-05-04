@@ -13,9 +13,9 @@
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.5"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": "^22 || >=24"
   }
 }
