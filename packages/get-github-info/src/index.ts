@@ -121,7 +121,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
         )} with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`,
     );
   }
-  let repos: ReposWithCommitsAndPRsToFetch = {};
+  const repos: ReposWithCommitsAndPRsToFetch = {};
   requests.forEach(({ repo, ...data }) => {
     if (repos[repo] === undefined) {
       repos[repo] = [];
@@ -170,12 +170,12 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     );
   }
 
-  let cleanedData: Record<
+  const cleanedData: Record<
     string,
     { commit: Record<string, any>; pull: Record<string, any> }
   > = {};
   Object.keys(repos).forEach((repo, index) => {
-    let output: { commit: Record<string, any>; pull: Record<string, any> } = {
+    const output: { commit: Record<string, any>; pull: Record<string, any> } = {
       commit: {},
       pull: {},
     };
@@ -233,7 +233,7 @@ export async function getInfo(request: {
     user = data.author.user;
   }
 
-  let associatedPullRequest =
+  const associatedPullRequest =
     data.associatedPullRequests &&
     data.associatedPullRequests.nodes &&
     data.associatedPullRequests.nodes.length
@@ -297,9 +297,9 @@ export async function getInfoFromPullRequest(request: {
   }
 
   const data = await GHDataLoader.load({ kind: "pull", ...request });
-  let user = data?.author;
+  const user = data?.author;
 
-  let commit = data?.mergeCommit;
+  const commit = data?.mergeCommit;
 
   return {
     user: user ? user.login : null,

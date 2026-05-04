@@ -43,14 +43,14 @@ export default function versionPackage(
     snapshot?: string | boolean | undefined;
   },
 ) {
-  let { newVersion, packageJson } = release;
+  const { newVersion, packageJson } = release;
 
   packageJson.version = newVersion;
 
-  for (let depType of DEPENDENCY_TYPES) {
-    let deps = packageJson[depType];
+  for (const depType of DEPENDENCY_TYPES) {
+    const deps = packageJson[depType];
     if (deps) {
-      for (let { name, version, oldVersion, type, dir } of versionsToUpdate) {
+      for (const { name, version, oldVersion, type, dir } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
         if (
           !depCurrentVersion ||

@@ -22,7 +22,7 @@ export default async function getChangesets(
   rootDir: string,
   sinceRef?: string,
 ): Promise<Array<NewChangeset>> {
-  let changesetBase = path.join(rootDir, ".changeset");
+  const changesetBase = path.join(rootDir, ".changeset");
   let contents: string[];
   try {
     contents = await fs.readdir(changesetBase);
@@ -43,7 +43,7 @@ export default async function getChangesets(
     );
   }
 
-  let changesets = contents.filter(
+  const changesets = contents.filter(
     (file) =>
       !file.startsWith(".") &&
       file.endsWith(".md") &&

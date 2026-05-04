@@ -115,7 +115,7 @@ export default async function publishPackages({
 
   return Promise.all(
     unpublishedPackagesInfo.map((pkgInfo) => {
-      let pkg = packagesByName.get(pkgInfo.name)!;
+      const pkg = packagesByName.get(pkgInfo.name)!;
       return publishAPackage(
         pkg,
         access,

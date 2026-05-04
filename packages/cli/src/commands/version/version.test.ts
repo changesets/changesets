@@ -26,12 +26,12 @@ import {
 import pre from "../pre/index.ts";
 import version from "./index.ts";
 
-let modifiedDefaultConfig: Config = {
+const modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: ["@changesets/cli/changelog", null],
 };
 
-let defaultOptions = {
+const defaultOptions = {
   snapshot: undefined,
 };
 
@@ -455,7 +455,7 @@ Awesome feature, hidden behind a feature flag
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
-    let packages = await getPackages(cwd);
+    const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
@@ -1050,7 +1050,7 @@ describe("workspace range", () => {
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
-    let packages = await getPackages(cwd);
+    const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
@@ -1096,7 +1096,7 @@ describe("workspace range", () => {
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
-    let packages = await getPackages(cwd);
+    const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
@@ -1142,7 +1142,7 @@ describe("workspace range", () => {
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
-    let packages = await getPackages(cwd);
+    const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
@@ -1188,7 +1188,7 @@ describe("workspace range", () => {
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
-    let packages = await getPackages(cwd);
+    const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
@@ -1366,7 +1366,7 @@ describe("workspace range", () => {
 
 describe("same package in different dependency types", () => {
   it("should update different range types correctly", async () => {
-    let cwd = await testdir({
+    const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -1403,7 +1403,7 @@ describe("same package in different dependency types", () => {
 
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
-    let packages = (await getPackages(cwd))!;
+    const packages = (await getPackages(cwd))!;
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         devDependencies: {
@@ -2640,7 +2640,7 @@ describe("pre", () => {
   });
   // https://github.com/changesets/changesets/pull/382#discussion_r434434182
   it("should bump patch version for packages that had prereleases, but caret dependencies are still in range", async () => {
-    let cwd = await testdir({
+    const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -2838,7 +2838,7 @@ describe("pre", () => {
   });
 
   it("should not bump packages through devDependencies", async () => {
-    let cwd = await testdir({
+    const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -2867,7 +2867,7 @@ describe("pre", () => {
 
     await pre(cwd, { command: "enter", tag: "next" });
     await version(cwd, defaultOptions, modifiedDefaultConfig);
-    let packages = (await getPackages(cwd))!;
+    const packages = (await getPackages(cwd))!;
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
@@ -2922,7 +2922,7 @@ describe("pre", () => {
       ...modifiedDefaultConfig,
       ignore: ["pkg-a"],
     });
-    let packages = (await getPackages(cwd))!;
+    const packages = (await getPackages(cwd))!;
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
@@ -2967,7 +2967,7 @@ describe("pre", () => {
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
 
-    let packages = await getPackages(cwd);
+    const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
@@ -3292,7 +3292,7 @@ describe("pre", () => {
       cwd,
     );
     await version(cwd, defaultOptions, modifiedDefaultConfig);
-    let packages = (await getPackages(cwd))!;
+    const packages = (await getPackages(cwd))!;
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
@@ -3334,7 +3334,7 @@ describe("pre", () => {
         version: true,
       },
     });
-    let packages = (await getPackages(cwd))!;
+    const packages = (await getPackages(cwd))!;
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",
@@ -3346,7 +3346,7 @@ describe("pre", () => {
 
   describe("linked", () => {
     it("should work with linked", async () => {
-      let linkedConfig = {
+      const linkedConfig = {
         ...modifiedDefaultConfig,
         linked: [["pkg-a", "pkg-b"]],
       };
@@ -3455,11 +3455,11 @@ describe("pre", () => {
     });
 
     it("should use the highest bump type between all prereleases for a linked package when versioning a dependent package", async () => {
-      let linkedConfig = {
+      const linkedConfig = {
         ...modifiedDefaultConfig,
         linked: [["pkg-a", "pkg-b"]],
       };
-      let cwd = await testdir({
+      const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
           workspaces: ["packages/*"],
@@ -3535,11 +3535,11 @@ describe("pre", () => {
       ]);
     });
     it("should not bump a linked package if its linked devDep gets released", async () => {
-      let linkedConfig = {
+      const linkedConfig = {
         ...modifiedDefaultConfig,
         linked: [["pkg-a", "pkg-b"]],
       };
-      let cwd = await testdir({
+      const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
           workspaces: ["packages/*"],
@@ -3565,7 +3565,7 @@ describe("pre", () => {
         cwd,
       );
       await version(cwd, defaultOptions, linkedConfig);
-      let packages = (await getPackages(cwd))!;
+      const packages = (await getPackages(cwd))!;
 
       expect(packages.packages.map((x) => x.packageJson)).toEqual([
         {
@@ -3619,7 +3619,7 @@ Nice simple summary, much wow
       },
     });
 
-    let packages = await getPackages(cwd);
+    const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
         name: "pkg-a",

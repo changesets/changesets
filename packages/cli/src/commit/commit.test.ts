@@ -18,7 +18,7 @@ const simpleChangeset2: NewChangeset = {
   id: "abc123fh",
 };
 
-let simpleReleasePlan: ReleasePlan = {
+const simpleReleasePlan: ReleasePlan = {
   changesets: [simpleChangeset],
   releases: [
     {
@@ -32,7 +32,7 @@ let simpleReleasePlan: ReleasePlan = {
   preState: undefined,
 };
 
-let secondReleasePlan: ReleasePlan = {
+const secondReleasePlan: ReleasePlan = {
   changesets: [simpleChangeset, simpleChangeset2],
   releases: [
     {
@@ -122,7 +122,7 @@ describe("defaultCommitFunctions", () => {
   });
 
   it("should handle a multiple releases from one changeset", async () => {
-    let releasePlan: ReleasePlan = {
+    const releasePlan: ReleasePlan = {
       changesets: [simpleChangeset, simpleChangeset2],
       releases: [
         {

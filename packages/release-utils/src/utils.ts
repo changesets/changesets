@@ -12,7 +12,7 @@ export const BumpLevels = {
 } as const;
 
 export async function getVersionsByDirectory(cwd: string) {
-  let { packages } = await getPackages(cwd);
+  const { packages } = await getPackages(cwd);
   return new Map(packages.map((x) => [x.dir, x.packageJson.version]));
 }
 
@@ -20,10 +20,10 @@ export async function getChangedPackages(
   cwd: string,
   previousVersions: Map<string, string>,
 ) {
-  let { packages } = await getPackages(cwd);
-  let changedPackages = new Set<Package>();
+  const { packages } = await getPackages(cwd);
+  const changedPackages = new Set<Package>();
 
-  for (let pkg of packages) {
+  for (const pkg of packages) {
     const previousVersion = previousVersions.get(pkg.dir);
     if (previousVersion !== pkg.packageJson.version) {
       changedPackages.add(pkg);
@@ -34,11 +34,11 @@ export async function getChangedPackages(
 }
 
 export function getChangelogEntry(changelog: string, version: string) {
-  let ast = stringToMdast(changelog);
+  const ast = stringToMdast(changelog);
 
   let highestLevel: number = BumpLevels.dep;
 
-  let nodes = ast.children;
+  const nodes = ast.children;
   let headingStartInfo:
     | {
         index: number;
@@ -48,12 +48,12 @@ export function getChangelogEntry(changelog: string, version: string) {
   let endIndex: number | undefined;
 
   for (let i = 0; i < nodes.length; i++) {
-    let node = nodes[i];
+    const node = nodes[i];
     if (node.type === "heading") {
-      let stringified: string = mdastNodeToString(node);
-      let match = stringified.toLowerCase().match(/(major|minor|patch)/);
+      const stringified: string = mdastNodeToString(node);
+      const match = stringified.toLowerCase().match(/(major|minor|patch)/);
       if (match !== null) {
-        let level = BumpLevels[match[0] as "major" | "minor" | "patch"];
+        const level = BumpLevels[match[0] as "major" | "minor" | "patch"];
         highestLevel = Math.max(level, highestLevel);
       }
       if (headingStartInfo === undefined && stringified === version) {

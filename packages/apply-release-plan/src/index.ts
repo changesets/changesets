@@ -79,18 +79,18 @@ export default async function applyReleasePlan(
   snapshot?: string | boolean,
   contextDir = import.meta.dirname,
 ) {
-  let cwd = packages.rootDir;
+  const cwd = packages.rootDir;
 
-  let touchedFiles = [];
+  const touchedFiles = [];
 
   const packagesByName = new Map(
     packages.packages.map((x) => [x.packageJson.name, x]),
   );
 
-  let { releases, changesets } = releasePlan;
+  const { releases, changesets } = releasePlan;
 
-  let releasesWithPackage = releases.map((release) => {
-    let pkg = packagesByName.get(release.name);
+  const releasesWithPackage = releases.map((release) => {
+    const pkg = packagesByName.get(release.name);
     if (!pkg)
       throw new Error(
         `Could not find matching package for release of: ${release.name}`,
@@ -102,7 +102,7 @@ export default async function applyReleasePlan(
   });
 
   // I think this might be the wrong place to do this, but gotta do it somewhere -  add changelog entries to releases
-  let releaseWithChangelogs = await getNewChangelogEntry(
+  const releaseWithChangelogs = await getNewChangelogEntry(
     releasesWithPackage,
     changesets,
     config,
@@ -125,7 +125,7 @@ export default async function applyReleasePlan(
     touchedFiles.push(path.join(cwd, ".changeset", "pre.json"));
   }
 
-  let versionsToUpdate = releases.map(
+  const versionsToUpdate = releases.map(
     ({ name, newVersion, oldVersion, type }) => ({
       name,
       version: newVersion,
@@ -136,7 +136,7 @@ export default async function applyReleasePlan(
   );
 
   // iterate over releases updating packages
-  let finalisedRelease = releaseWithChangelogs.map((release) => {
+  const finalisedRelease = releaseWithChangelogs.map((release) => {
     return versionPackage(release, versionsToUpdate, {
       cwd,
       updateInternalDependencies: config.updateInternalDependencies,
@@ -149,11 +149,11 @@ export default async function applyReleasePlan(
     });
   });
 
-  let prettierInstance =
+  const prettierInstance =
     config.prettier !== false ? getPrettierInstance(cwd) : undefined;
 
-  for (let release of finalisedRelease) {
-    let { changelog, packageJson, dir, name } = release;
+  for (const release of finalisedRelease) {
+    const { changelog, packageJson, dir, name } = release;
 
     const pkgJSONPath = path.resolve(dir, "package.json");
     await updatePackageJson(pkgJSONPath, packageJson);
@@ -170,11 +170,11 @@ export default async function applyReleasePlan(
     releasePlan.preState === undefined ||
     releasePlan.preState.mode === "exit"
   ) {
-    let changesetFolder = path.resolve(cwd, ".changeset");
+    const changesetFolder = path.resolve(cwd, ".changeset");
     await Promise.all(
       changesets.map(async (changeset) => {
-        let changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
-        let changesetFolderPath = path.resolve(changesetFolder, changeset.id);
+        const changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
+        const changesetFolderPath = path.resolve(changesetFolder, changeset.id);
         if (
           await fs.access(changesetPath).then(
             () => true,
@@ -237,7 +237,7 @@ async function getNewChangelogEntry(
   };
 
   const changelogOpts = config.changelog[1];
-  let changesetPath = path.join(cwd, ".changeset");
+  const changesetPath = path.join(cwd, ".changeset");
   let changelogPath;
 
   try {
@@ -264,18 +264,18 @@ async function getNewChangelogEntry(
     throw new Error("Could not resolve changelog generation functions");
   }
 
-  let commits = await getCommitsThatAddChangesets(
+  const commits = await getCommitsThatAddChangesets(
     changesets.map((cs) => cs.id),
     cwd,
   );
-  let moddedChangesets = changesets.map((cs, i) => ({
+  const moddedChangesets = changesets.map((cs, i) => ({
     ...cs,
     commit: commits[i],
   }));
 
   return Promise.all(
     releasesWithPackage.map(async (release) => {
-      let changelog = await getChangelogEntry(
+      const changelog = await getChangelogEntry(
         cwd,
         release,
         releasesWithPackage,
@@ -312,7 +312,7 @@ async function updateChangelog(
   name: string,
   prettierInstance: typeof prettier | undefined,
 ) {
-  let templateString = `\n\n${changelog.trim()}\n`;
+  const templateString = `\n\n${changelog.trim()}\n`;
   let fileData;
 
   try {

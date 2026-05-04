@@ -42,7 +42,7 @@ export default function determineDependents({
 }): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
-  let pkgsToSearch = [...releases.values()];
+  const pkgsToSearch = [...releases.values()];
 
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
@@ -163,7 +163,7 @@ export default function determineDependents({
 
           pkgsToSearch.push(existing);
         } else {
-          let newDependent: InternalRelease = {
+          const newDependent: InternalRelease = {
             name,
             type,
             oldVersion: pkgJSON.version,

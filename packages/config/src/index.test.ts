@@ -25,7 +25,7 @@ type CorrectCase = {
   output: Config;
 };
 
-let defaultPackages: Packages = {
+const defaultPackages: Packages = {
   rootPackage: {
     packageJson: { name: "", version: "" },
     dir: "/",
@@ -44,13 +44,13 @@ const withPackages = (pkgNames: string[]) => ({
 });
 
 test("read reads the config", async () => {
-  let cwd = await testdir({
+  const cwd = await testdir({
     ".changeset/config.json": JSON.stringify({
       changelog: false,
       commit: true,
     }),
   });
-  let config = await read(cwd, {
+  const config = await read(cwd, {
     ...defaultPackages,
     rootDir: cwd,
     rootPackage: { ...defaultPackages.rootPackage!, dir: cwd },
@@ -83,7 +83,7 @@ test("read reads the config", async () => {
 });
 
 test("read can read config based on the passed in `cwd`", async () => {
-  let cwd = await testdir({
+  const cwd = await testdir({
     ".changeset/config.json": JSON.stringify({
       changelog: false,
       commit: true,
@@ -93,7 +93,7 @@ test("read can read config based on the passed in `cwd`", async () => {
       version: "0.0.0",
     }),
   });
-  let config = await read(cwd);
+  const config = await read(cwd);
 
   expect(config).toEqual({
     fixed: [],
@@ -196,7 +196,7 @@ it(
   }),
 );
 
-let defaults: Config = {
+const defaults: Config = {
   fixed: [],
   linked: [],
   changelog: ["@changesets/cli/changelog", null],
@@ -219,7 +219,7 @@ let defaults: Config = {
   bumpVersionsWithWorkspaceProtocolOnly: false,
 };
 
-let correctCases: Record<string, CorrectCase> = {
+const correctCases: Record<string, CorrectCase> = {
   defaults: {
     input: {},
     output: defaults,
@@ -479,7 +479,7 @@ describe("parse", () => {
   });
 });
 
-let unsafeParse = parse as any;
+const unsafeParse = parse as any;
 
 describe("parser errors", () => {
   test("changelog invalid value", () => {
@@ -670,7 +670,7 @@ describe("parser errors", () => {
     });
   });
   test("access private warns and sets to restricted", () => {
-    let config = unsafeParse({ access: "private" }, defaultPackages);
+    const config = unsafeParse({ access: "private" }, defaultPackages);
     expect(config).toEqual(defaults);
     expect(logger.warn).toBeCalledWith(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',

@@ -59,7 +59,7 @@ export default async function getChangelogEntry(
       );
     }
   });
-  let dependentReleases = releases.filter((rel) => {
+  const dependentReleases = releases.filter((rel) => {
     const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
     const peerDependencyVersionRange =
       release.packageJson.peerDependencies?.[rel.name];
@@ -89,7 +89,7 @@ export default async function getChangelogEntry(
     );
   });
 
-  let relevantChangesetIds: Set<string> = new Set();
+  const relevantChangesetIds: Set<string> = new Set();
 
   dependentReleases.forEach((rel) => {
     rel.changesets.forEach((cs) => {
@@ -97,7 +97,7 @@ export default async function getChangelogEntry(
     });
   });
 
-  let relevantChangesets = changesets.filter((cs) =>
+  const relevantChangesets = changesets.filter((cs) =>
     relevantChangesetIds.has(cs.id),
   );
 

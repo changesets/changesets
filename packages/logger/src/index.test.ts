@@ -8,7 +8,7 @@ describe("@changesets/logger", () => {
     `(${logMessageOne})\\s(${logMessageTwo})`,
   );
   describe("log", () => {
-    let originalConsoleLog = console.log;
+    const originalConsoleLog = console.log;
     beforeEach(() => {
       console.log = vi.fn();
     });
@@ -23,7 +23,7 @@ describe("@changesets/logger", () => {
     });
   });
   describe("error", () => {
-    let originalConsoleError = console.error;
+    const originalConsoleError = console.error;
     beforeEach(() => {
       console.error = vi.fn();
     });
@@ -38,7 +38,7 @@ describe("@changesets/logger", () => {
     });
   });
   describe("info", () => {
-    let originalConsoleInfo = console.info;
+    const originalConsoleInfo = console.info;
     beforeEach(() => {
       console.info = vi.fn();
     });
@@ -54,7 +54,7 @@ describe("@changesets/logger", () => {
   });
 
   describe("warn", () => {
-    let originalConsoleWarn = console.warn;
+    const originalConsoleWarn = console.warn;
     beforeEach(() => {
       console.warn = vi.fn();
     });
@@ -70,7 +70,7 @@ describe("@changesets/logger", () => {
   });
 
   describe("success", () => {
-    let originalConsoleLog = console.log;
+    const originalConsoleLog = console.log;
     beforeEach(() => {
       console.log = vi.fn();
     });

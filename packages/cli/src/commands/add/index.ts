@@ -114,7 +114,7 @@ export default async function add(
       );
     }
 
-    let hasMajorChange = [...newChangeset.releases].find(
+    const hasMajorChange = [...newChangeset.releases].find(
       (c) => c.type === "major",
     );
 

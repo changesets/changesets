@@ -25,7 +25,7 @@ type SnapshotReleaseParameters = {
 };
 
 function getPreVersion(version: string) {
-  let parsed = semverParse(version)!;
+  const parsed = semverParse(version)!;
   let preVersion =
     parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
   if (typeof preVersion !== "number") {
@@ -39,7 +39,7 @@ function getSnapshotSuffix(
   template: Config["snapshot"]["prereleaseTemplate"],
   snapshotParameters: SnapshotReleaseParameters,
 ): string {
-  let snapshotRefDate = new Date();
+  const snapshotRefDate = new Date();
 
   const placeholderValues = {
     commit: snapshotParameters.commit,
@@ -131,7 +131,7 @@ function assembleReleasePlan(
   // snapshot: { tag: "canary" }    ->  --snapshot canary
   snapshot?: SnapshotReleaseParameters,
 ): ReleasePlan {
-  let packagesByName = new Map(
+  const packagesByName = new Map(
     packages.packages.map((x) => [x.packageJson.name, x]),
   );
 
@@ -147,13 +147,13 @@ function assembleReleasePlan(
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(relevantChangesets, packagesByName, config);
+  const releases = flattenReleases(relevantChangesets, packagesByName, config);
 
   // Unlike the config/CLI validation graphs, this graph intentionally includes
   // devDependencies. While devDeps don't cause version bumps (determineDependents
   // assigns type "none"), they must appear in the release plan so that
   // apply-release-plan can update their version ranges in package.json.
-  let dependencyGraph = getDependentsGraph(packages, {
+  const dependencyGraph = getDependentsGraph(packages, {
     bumpVersionsWithWorkspaceProtocolOnly:
       config.bumpVersionsWithWorkspaceProtocolOnly,
   });
@@ -161,7 +161,7 @@ function assembleReleasePlan(
   let releasesValidated = false;
   while (releasesValidated === false) {
     // The map passed in to determineDependents will be mutated
-    let dependentAdded = determineDependents({
+    const dependentAdded = determineDependents({
       releases,
       packagesByName,
       rootDir: packages.rootDir,
@@ -171,19 +171,19 @@ function assembleReleasePlan(
     });
 
     // `releases` might get mutated here
-    let fixedConstraintUpdated = matchFixedConstraint(
+    const fixedConstraintUpdated = matchFixedConstraint(
       releases,
       packagesByName,
       config,
     );
-    let linksUpdated = applyLinks(releases, packagesByName, config.linked);
+    const linksUpdated = applyLinks(releases, packagesByName, config.linked);
 
     releasesValidated =
       !linksUpdated && !dependentAdded && !fixedConstraintUpdated;
   }
 
   if (preInfo?.state.mode === "exit") {
-    for (let pkg of packages.packages) {
+    for (const pkg of packages.packages) {
       // If a package had a prerelease, but didn't trigger a version bump in the regular release,
       // we want to give it a patch release.
       // Detailed explanation at https://github.com/changesets/changesets/pull/382#discussion_r434434182
@@ -274,7 +274,7 @@ function getRelevantChangesets(
   }
 
   if (preState && preState.mode !== "exit") {
-    let usedChangesetIds = new Set(preState.changesets);
+    const usedChangesetIds = new Set(preState.changesets);
     return changesets.filter(
       (changeset) => !usedChangesetIds.has(changeset.id),
     );
@@ -289,7 +289,7 @@ function getHighestPreVersion(
   packagesByName: Map<string, Package>,
 ): number {
   let highestPreVersion = 0;
-  for (let pkgName of packageGroup) {
+  for (const pkgName of packageGroup) {
     const pkg = mapGetOrThrowInternal(
       packagesByName,
       pkgName,
@@ -315,7 +315,7 @@ function getPreInfo(
     return;
   }
 
-  let updatedPreState = {
+  const updatedPreState = {
     ...preState,
     changesets: changesets.map((changeset) => changeset.id),
     initialVersions: {
@@ -331,7 +331,7 @@ function getPreInfo(
   }
   // Populate preVersion
   // preVersion is the map between package name and its next pre version number.
-  let preVersions = new Map<string, number>();
+  const preVersions = new Map<string, number>();
   for (const [, pkg] of packagesByName) {
     if (
       shouldSkipPackage(pkg, {
@@ -346,23 +346,23 @@ function getPreInfo(
       getPreVersion(pkg.packageJson.version),
     );
   }
-  for (let fixedGroup of config.fixed) {
-    let highestPreVersion = getHighestPreVersion(
+  for (const fixedGroup of config.fixed) {
+    const highestPreVersion = getHighestPreVersion(
       "fixed",
       fixedGroup,
       packagesByName,
     );
-    for (let fixedPackage of fixedGroup) {
+    for (const fixedPackage of fixedGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
     }
   }
-  for (let linkedGroup of config.linked) {
-    let highestPreVersion = getHighestPreVersion(
+  for (const linkedGroup of config.linked) {
+    const highestPreVersion = getHighestPreVersion(
       "linked",
       linkedGroup,
       packagesByName,
     );
-    for (let linkedPackage of linkedGroup) {
+    for (const linkedPackage of linkedGroup) {
       preVersions.set(linkedPackage, highestPreVersion);
     }
   }
