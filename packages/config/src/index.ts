@@ -68,9 +68,10 @@ function getUnmatchedPatterns(
   listOfPackageNamesOrGlob: readonly string[],
   pkgNames: readonly string[],
 ): string[] {
-  const matcher = picomatch(listOfPackageNamesOrGlob as string[]);
-
-  return pkgNames.filter((pkgName) => !matcher(pkgName));
+  return listOfPackageNamesOrGlob.filter((pkgOrGlob) => {
+    const matcher = picomatch(pkgOrGlob);
+    return !pkgNames.some((pkgName) => matcher(pkgName));
+  });
 }
 
 const havePackageGroupsCorrectShape = (
@@ -218,8 +219,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           ),
         );
 
-        const groupMatcher = picomatch(fixedGroup as string[]);
-        let expandedFixedGroup = pkgNames.filter((item) => groupMatcher(item));
+        const expandedFixedGroup = globMatch(pkgNames, fixedGroup);
         fixed.push(expandedFixedGroup);
 
         for (let fixedPkgName of expandedFixedGroup) {
@@ -262,8 +262,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           ),
         );
 
-        const linkMatcher = picomatch(linkedGroup as string[]);
-        let expandedLinkedGroup = pkgNames.filter((item) => linkMatcher(item));
+        let expandedLinkedGroup = globMatch(pkgNames, linkedGroup);
         linked.push(expandedLinkedGroup);
 
         for (let linkedPkgName of expandedLinkedGroup) {
@@ -532,12 +531,6 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
-  const ignoreMatcher = picomatch((json.ignore as string[] | undefined) ?? []);
-  const ignoreConfig =
-    json.ignore === undefined
-      ? defaultWrittenConfig.ignore
-      : pkgNames.filter((pkgName) => !ignoreMatcher(pkgName));
-
   let config: Config = {
     changelog: getNormalizedChangelogOption(
       json.changelog === undefined
@@ -565,7 +558,10 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         ? defaultWrittenConfig.updateInternalDependencies
         : json.updateInternalDependencies,
 
-    ignore: ignoreConfig,
+    ignore:
+      json.ignore === undefined
+        ? defaultWrittenConfig.ignore
+        : globMatch(pkgNames, json.ignore),
 
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,
@@ -613,6 +609,32 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
   return config;
 };
+
+function globMatch(
+  paths: readonly string[],
+  patterns?: readonly string[],
+): string[] {
+  if (!patterns) return paths as string[];
+
+  const matchers = patterns.map((p) => picomatch(p, undefined, true));
+  return paths.filter((path) => {
+    let passed = false;
+    for (const matcher of matchers) {
+      if (!passed) {
+        // If not passed yet, only match positive matches
+        if (!matcher.state.negated && matcher(path)) {
+          passed = true;
+        }
+      } else {
+        // If passed, only match negative/negated matches
+        if (matcher.state.negated && !matcher(path)) {
+          passed = false;
+        }
+      }
+    }
+    return passed;
+  });
+}
 
 let fakePackage: Package = {
   dir: "",

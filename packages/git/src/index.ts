@@ -287,10 +287,9 @@ export async function getChangedPackagesSinceRef({
           }
         }
 
-        const matcher = picomatch(changedFilePatterns as string[]);
         return (
           changedPackageFiles.length > 0 &&
-          changedPackageFiles.some((file) => matcher(file))
+          globMatchSome(changedPackageFiles, changedFilePatterns)
         );
       })
   );
@@ -334,4 +333,30 @@ export async function remoteTagExists(tagStr: string) {
   const output = gitCmd.stdout.toString().trim();
   const tagExists = !!output;
   return tagExists;
+}
+
+function globMatchSome(
+  paths: readonly string[],
+  patterns?: readonly string[],
+): boolean {
+  if (!patterns) return paths.length > 0;
+
+  const matchers = patterns.map((p) => picomatch(p, undefined, true));
+  return paths.some((path) => {
+    let passed = false;
+    for (const matcher of matchers) {
+      if (!passed) {
+        // If not passed yet, only match positive matches
+        if (!matcher.state.negated && matcher(path)) {
+          passed = true;
+        }
+      } else {
+        // If passed, only match negative/negated matches
+        if (matcher.state.negated && !matcher(path)) {
+          passed = false;
+        }
+      }
+    }
+    return passed;
+  });
 }
