@@ -76,7 +76,7 @@ export default defineConfig(
       "n/prefer-node-protocol": "off", // TODO enable and fix errors
       "n/no-unsupported-features/node-builtins": [
         "error",
-        { ignores: ["fetch", "fs/promises.cp", "import.meta.dirname"] },
+        { ignores: ["fs/promises.cp", "import.meta.dirname"] },
       ],
 
       "import-lite/no-mutable-exports": "off", // TODO enable and fix errors
