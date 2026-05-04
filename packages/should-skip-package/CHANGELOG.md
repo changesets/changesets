@@ -1,5 +1,23 @@
 # @changesets/should-skip-package
 
+## 1.0.0-next.2
+
+### Patch Changes
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c)]:
+  - @changesets/types@7.0.0-next.2
+
+## 1.0.0-next.1
+
+### Minor Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d)]:
+  - @changesets/types@7.0.0-next.1
+
 ## 1.0.0-next.0
 
 ### Major Changes

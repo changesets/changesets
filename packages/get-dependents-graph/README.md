@@ -9,7 +9,9 @@ Small helper utility extracted from bolt to get a graph of relationships between
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { getPackages } from "@manypkg/get-packages";
 
-let { graph, valid } = getDependentsGraph(await getPackages(cwd));
+const packages = await getPackages(cwd);
+
+let { graph, valid } = getDependentsGraph(packages);
 ```
 
 Mostly published for use in [changesets](https://www.npmjs.com/package/@changesets/cli)

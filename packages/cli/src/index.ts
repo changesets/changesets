@@ -2,12 +2,22 @@ import mri from "mri";
 import { ExitError, InternalError } from "@changesets/errors";
 import { error } from "@changesets/logger";
 import { format } from "util";
+import { COMMAND_HELP } from "./help.ts";
 import { run } from "./run.ts";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 
 const args = process.argv.slice(2);
+const aliases = {
+  // Short flags
+  v: "verbose",
+  o: "output",
+  m: "message",
+  // Support kebab-case flags
+  "git-tag": "gitTag",
+  "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
+};
 
 const parsed = mri(args, {
   boolean: ["verbose", "empty", "open", "gitTag", "snapshot"],
@@ -16,21 +26,13 @@ const parsed = mri(args, {
     "otp",
     "since",
     "ignore",
+    "message",
     "tag",
     "snapshot",
     "snapshotPrereleaseTemplate",
   ],
-  alias: {
-    // Short flags
-    v: "verbose",
-    o: "output",
-    // Support kebab-case flags
-    "git-tag": "gitTag",
-    "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
-  },
-  default: {
-    gitTag: true,
-  },
+  // mri mutates the alias object passed to it, so we need to copy it here to maintain the original object
+  alias: { ...aliases },
 });
 
 // `mri` doesn't handle mixed boolean and strings well. It'll always try to coerce it as
@@ -40,25 +42,29 @@ if (parsed.snapshot === "" && args[args.indexOf("--snapshot") + 1] !== "") {
   parsed.snapshot = true;
 }
 
-// Help message should only be shown if it's the only argument passed
-if (parsed.help && args.length === 1) {
-  console.log(
-    `
+if (parsed.help) {
+  const command = parsed._[0];
+  if (command && COMMAND_HELP[command]) {
+    console.log(`
+  Usage
+    $ changeset ${COMMAND_HELP[command]}
+
+    `);
+  } else {
+    console.log(
+      `
   Organise your package versioning and publishing to make both contributors and maintainers happy
 
   Usage
     $ changeset [command]
   Commands
-    init
-    add [--empty] [--open]
-    version [--ignore] [--snapshot <?name>] [--snapshot-prerelease-template <template>]
-    publish [--tag <name>] [--otp <code>] [--no-git-tag]
-    status [--since <branch>] [--verbose] [--output JSON_FILE.json]
-    pre <enter|exit> <tag>
-    tag
+${Object.values(COMMAND_HELP)
+  .map((cmd) => `    ${cmd}`)
+  .join("\n")}
 
-    `
-  );
+    `,
+    );
+  }
   process.exit(0);
 }
 
@@ -70,16 +76,20 @@ if (parsed.version && args.length === 1) {
 }
 
 const cwd = process.cwd();
+const flags = { ...parsed };
+for (const flag of ["_", ...Object.keys(aliases)]) {
+  delete flags[flag];
+}
 
-run(parsed._, parsed, cwd).catch((err) => {
+run(parsed._, flags, cwd).catch((err) => {
   if (err instanceof InternalError) {
     error(
-      "The following error is an internal unexpected error, these should never happen."
+      "The following error is an internal unexpected error, these should never happen.",
     );
     error("Please open an issue with the following link");
     error(
       `https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(
-        `Unexpected error during ${parsed._[0] || "add"} command`
+        `Unexpected error during ${parsed._[0] || "add"} command`,
       )}&body=${encodeURIComponent(`## Error
 
 \`\`\`
@@ -97,7 +107,7 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
 ## Extra details
 
 <!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->
-`)}`
+`)}`,
     );
   }
   if (err instanceof ExitError) {

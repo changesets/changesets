@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
@@ -7,11 +7,12 @@ import writeChangeset from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "node:fs/promises";
 import path from "path";
-import spawn from "spawndamnit";
+import { exec } from "tinyexec";
 import status from "../index.ts";
 
 async function readConfig(cwd: string) {
-  return read(cwd, await getPackages(cwd));
+  const packages = await getPackages(cwd);
+  return read(cwd, packages);
 }
 
 function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
@@ -52,8 +53,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -61,18 +64,20 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
@@ -80,7 +85,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -116,8 +121,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -127,18 +134,20 @@ describe("status", () => {
       }),
     });
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
@@ -146,7 +155,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: undefined },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -182,8 +191,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -191,14 +202,15 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
 
     await git.add(".", cwd);
@@ -213,8 +225,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -222,15 +236,16 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -245,8 +260,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -254,21 +271,22 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     await git.add(".", cwd);
@@ -285,8 +303,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -294,11 +314,13 @@ describe("status", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
 
     await writeChangeset(
@@ -306,7 +328,7 @@ describe("status", () => {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     await git.add(".", cwd);
@@ -317,7 +339,7 @@ describe("status", () => {
     const probsUndefined = await status(
       cwd,
       { since: "main", output },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     const releaseObj = await fs.readFile(path.join(cwd, output), "utf8");
@@ -356,8 +378,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -367,14 +391,15 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/unrelated.json"),
-      JSON.stringify({})
+      JSON.stringify({}),
     );
 
     await git.add(".", cwd);
@@ -383,7 +408,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -398,8 +423,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -410,14 +437,15 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/src/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
 
     await git.add(".", cwd);
@@ -432,8 +460,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -444,18 +474,20 @@ describe("status", () => {
       }),
     });
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"'
+      'export default "updated a"',
     );
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
@@ -463,7 +495,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
@@ -499,8 +531,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -516,14 +550,15 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
-      'export default "updated b"'
+      'export default "updated b"',
     );
     await git.add(".", cwd);
     await git.commit("updated b", cwd);
@@ -531,7 +566,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();
@@ -546,8 +581,10 @@ describe("status", () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -566,14 +603,15 @@ describe("status", () => {
       }),
     });
 
-    // @ts-ignore
-    vi.spyOn(process, "exit").mockImplementation(() => {});
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await outputFile(
       path.join(cwd, "packages/pkg-b/b.js"),
-      'export default "updated b"'
+      'export default "updated b"',
     );
     await git.add(".", cwd);
     await git.commit("updated b", cwd);
@@ -581,7 +619,7 @@ describe("status", () => {
     const releaseObj = await status(
       cwd,
       { since: "main" },
-      await readConfig(cwd)
+      await readConfig(cwd),
     );
 
     expect(process.exit).not.toHaveBeenCalled();

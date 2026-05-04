@@ -1,20 +1,18 @@
-import { getPackages, type Package } from "@manypkg/get-packages";
+import { getPackages } from "@manypkg/get-packages";
+import type { Package } from "@changesets/types";
 import semverLt from "semver/functions/lt.js";
-import {
-  spawnWithOutput,
-  getVersionsByDirectory,
-  getChangedPackages,
-  execWithOutput,
-} from "./utils.ts";
+import { getChangedPackages, getVersionsByDirectory } from "./utils.ts";
 import * as gitUtils from "./gitUtils.ts";
 import { readChangesetState } from "./readChangesetState.ts";
 import { createRequire } from "node:module";
+import { exec } from "tinyexec";
 import path from "node:path";
 
 const require = createRequire(import.meta.url);
 
 type PublishOptions = {
-  script: string;
+  command: string;
+  args?: string[];
   cwd?: string;
 };
 
@@ -30,13 +28,14 @@ type PublishResult =
     };
 
 export async function runPublish({
-  script,
+  command,
+  args = [],
   cwd = process.cwd(),
 }: PublishOptions): Promise<PublishResult> {
   let branch = await gitUtils.getCurrentBranch(cwd);
 
-  const { stdout: changesetPublishOutput } = await execWithOutput(script, {
-    cwd,
+  const { stdout: changesetPublishOutput } = await exec(command, args, {
+    nodeOptions: { cwd },
   });
 
   await gitUtils.pullBranch(branch, cwd);
@@ -45,8 +44,8 @@ export async function runPublish({
   let { packages, tool } = await getPackages(cwd);
   let releasedPackages: Package[] = [];
 
-  if (tool !== "root") {
-    let newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@([^\s]+)/;
+  if (tool.type !== "root") {
+    let newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/;
     let packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
 
     for (let line of changesetPublishOutput.split("\n")) {
@@ -59,7 +58,7 @@ export async function runPublish({
       if (pkg === undefined) {
         throw new Error(
           `Package "${pkgName}" not found.` +
-            "This is probably a bug in the action, please open an issue"
+            "This is probably a bug in the action, please open an issue",
         );
       }
       releasedPackages.push(pkg);
@@ -68,7 +67,7 @@ export async function runPublish({
     if (packages.length === 0) {
       throw new Error(
         `No package found.` +
-          "This is probably a bug in the action, please open an issue"
+          "This is probably a bug in the action, please open an issue",
       );
     }
     let pkg = packages[0];
@@ -118,15 +117,13 @@ export async function runVersion({
   let versionsByDirectory = await getVersionsByDirectory(cwd);
 
   if (script) {
-    await execWithOutput(script, {
-      cwd,
-    });
+    await exec(script, [], { nodeOptions: { cwd } });
   } else {
     let changesetsCliPkgJsonPath = require.resolve(
       "@changesets/cli/package.json",
       {
         paths: [cwd],
-      }
+      },
     );
     const args = [];
     // this is done just so our tests can run with the types stripped since they are run with source files
@@ -138,9 +135,9 @@ export async function runVersion({
     args.push(
       semverLt(require(changesetsCliPkgJsonPath).version, "2.0.0")
         ? "bump"
-        : "version"
+        : "version",
     );
-    await spawnWithOutput("node", args, { cwd });
+    await exec("node", args, { nodeOptions: { cwd } });
   }
 
   let changedPackages = await getChangedPackages(cwd, versionsByDirectory);

@@ -1,5 +1,80 @@
 # @changesets/get-release-plan
 
+## 5.0.0-next.2
+
+### Major Changes
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+### Patch Changes
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2)]:
+  - @changesets/types@7.0.0-next.2
+  - @changesets/assemble-release-plan@7.0.0-next.2
+  - @changesets/config@4.0.0-next.2
+  - @changesets/pre@3.0.0-next.2
+  - @changesets/read@1.0.0-next.2
+
+## 4.0.16
+
+### Patch Changes
+
+- Updated dependencies [[`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464)]:
+  - @changesets/assemble-release-plan@6.0.10
+  - @changesets/config@3.1.4
+
+## 4.0.15
+
+### Patch Changes
+
+- Updated dependencies [[`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6)]:
+  - @changesets/config@3.1.3
+  - @changesets/read@0.6.7
+
+## 4.0.14
+
+### Patch Changes
+
+- Updated dependencies [[`cc28222`](https://github.com/changesets/changesets/commit/cc28222ee892b3a078fa02ee26e1cef98c171532), [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe)]:
+  - @changesets/config@3.1.2
+  - @changesets/read@0.6.6
+
+## 5.0.0-next.1
+
+### Major Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d), [`b83787f`](https://github.com/changesets/changesets/commit/b83787fb090dc03ad566a7d8b7e286dbe93e2301)]:
+  - @changesets/assemble-release-plan@7.0.0-next.1
+  - @changesets/config@4.0.0-next.1
+  - @changesets/types@7.0.0-next.1
+  - @changesets/read@1.0.0-next.1
+  - @changesets/pre@3.0.0-next.1
+
+## 4.0.13
+
+### Patch Changes
+
+- Updated dependencies [[`6352819`](https://github.com/changesets/changesets/commit/6352819685369daecf31f72e948d0fe92ff33485)]:
+  - @changesets/assemble-release-plan@6.0.9
+
+## 4.0.12
+
+### Patch Changes
+
+- Updated dependencies [[`65d6632`](https://github.com/changesets/changesets/commit/65d663278867b0495d49e9e3e9c5c4c0158b8627)]:
+  - @changesets/assemble-release-plan@6.0.8
+
+## 4.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8)]:
+  - @changesets/assemble-release-plan@6.0.7
+
 ## 5.0.0-next.0
 
 ### Major Changes

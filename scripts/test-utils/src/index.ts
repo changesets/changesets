@@ -1,10 +1,9 @@
-import { Mock, vi } from "vitest";
+import { afterEach, beforeEach, type Mock, vi } from "vitest";
 import fixturez from "fixturez";
-import spawn from "spawndamnit";
+import { exec } from "tinyexec";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 type PartialMockMethods<T> = Partial<{
   [K in keyof T as T[K] extends (...args: never) => unknown
@@ -96,7 +95,7 @@ export const temporarilySilenceLogs =
     }
   };
 
-let f = fixturez(__dirname);
+let f = fixturez(import.meta.dirname);
 
 export interface Fixture extends Record<string, string> {}
 
@@ -107,7 +106,7 @@ export async function testdir(dir: Fixture) {
       const fullPath = path.join(temp, filename);
       await fsp.mkdir(path.dirname(fullPath), { recursive: true });
       await fsp.writeFile(fullPath, dir[filename]);
-    })
+    }),
   );
   return temp;
 }
@@ -116,29 +115,35 @@ export const tempdir = f.temp;
 
 export async function gitdir(dir: Fixture) {
   const cwd = await testdir(dir);
-  await spawn("git", ["init"], { cwd });
+  await exec("git", ["init"], { nodeOptions: { cwd } });
   // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
   {
-    const { stdout } = await spawn(
+    const { stdout } = await exec(
       "git",
       ["rev-parse", "--abbrev-ref", "HEAD"],
-      { cwd }
+      { nodeOptions: { cwd } },
     );
-    if (stdout.toString("utf8").trim() !== "main") {
-      await spawn("git", ["checkout", "-b", "main"], { cwd });
+    if (stdout.trim() !== "main") {
+      await exec("git", ["checkout", "-b", "main"], { nodeOptions: { cwd } });
     }
   }
-  await spawn("git", ["config", "user.email", "x@y.z"], { cwd });
-  await spawn("git", ["config", "user.name", "xyz"], { cwd });
-  await spawn("git", ["config", "commit.gpgSign", "false"], { cwd });
-  await spawn("git", ["config", "tag.gpgSign", "false"], { cwd });
-  await spawn("git", ["config", "tag.forceSignAnnotated", "false"], {
-    cwd,
+  await exec("git", ["config", "user.email", "x@y.z"], {
+    nodeOptions: { cwd },
+  });
+  await exec("git", ["config", "user.name", "xyz"], { nodeOptions: { cwd } });
+  await exec("git", ["config", "commit.gpgSign", "false"], {
+    nodeOptions: { cwd },
+  });
+  await exec("git", ["config", "tag.gpgSign", "false"], {
+    nodeOptions: { cwd },
+  });
+  await exec("git", ["config", "tag.forceSignAnnotated", "false"], {
+    nodeOptions: { cwd },
   });
 
-  await spawn("git", ["add", "."], { cwd });
-  await spawn("git", ["commit", "-m", "initial commit", "--allow-empty"], {
-    cwd,
+  await exec("git", ["add", "."], { nodeOptions: { cwd } });
+  await exec("git", ["commit", "-m", "initial commit", "--allow-empty"], {
+    nodeOptions: { cwd },
   });
 
   return cwd;
@@ -147,29 +152,15 @@ export async function gitdir(dir: Fixture) {
 export async function outputFile(
   filePath: string,
   content: string,
-  encoding = "utf8" as fs.ObjectEncodingOptions
+  encoding = "utf8" as fs.ObjectEncodingOptions,
 ) {
   await fsp.mkdir(path.dirname(filePath), { recursive: true });
   await fsp.writeFile(filePath, content, encoding);
 }
 
-// `fs.exists` is deprecated, and Node recommends this for asynchronous existence checks.
-export async function pathExists(p: string) {
-  return fsp.access(p).then(
-    () => true,
-    () => false
-  );
-}
-
 export async function linkNodeModules(cwd: string) {
   await fsp.symlink(
-    path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      "..",
-      "..",
-      "..",
-      "node_modules"
-    ),
-    path.join(cwd, "node_modules")
+    path.join(import.meta.dirname, "..", "..", "..", "node_modules"),
+    path.join(cwd, "node_modules"),
   );
 }

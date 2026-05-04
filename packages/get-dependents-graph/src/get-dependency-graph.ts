@@ -1,8 +1,8 @@
 // This is a modified version of the graph-getting in bolt
 import Range from "semver/classes/range.js";
 import pc from "picocolors";
-import type { Packages, Package } from "@manypkg/get-packages";
-import type { PackageJSON } from "@changesets/types";
+import type { Package, Packages, PackageJSON } from "@changesets/types";
+import path from "node:path";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -13,7 +13,7 @@ const DEPENDENCY_TYPES = [
 
 const getAllDependencies = (
   config: PackageJSON,
-  ignoreDevDependencies: boolean
+  ignoreDevDependencies: boolean,
 ) => {
   const allDependencies = new Map<string, string>();
 
@@ -55,13 +55,14 @@ const getValidRange = (potentialRange: string) => {
 
 export default function getDependencyGraph(
   packages: Packages,
+  rootPackage: Package,
   {
     ignoreDevDependencies = false,
     bumpVersionsWithWorkspaceProtocolOnly = false,
   }: {
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-  } = {}
+  } = {},
 ): {
   graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
   valid: boolean;
@@ -73,22 +74,28 @@ export default function getDependencyGraph(
   let valid = true;
 
   const packagesByName: { [key: string]: Package } = {
-    [packages.root.packageJson.name]: packages.root,
+    [rootPackage.packageJson.name]: rootPackage,
+  };
+  const relativePathsByName: { [key: string]: string } = {
+    [rootPackage.packageJson.name]: ".",
   };
 
-  const queue = [packages.root];
+  const queue = [rootPackage];
 
   for (const pkg of packages.packages) {
     queue.push(pkg);
     packagesByName[pkg.packageJson.name] = pkg;
+    relativePathsByName[pkg.packageJson.name] = path
+      .relative(rootPackage.dir, pkg.dir)
+      .replace(/\\/g, "/");
   }
 
   for (const pkg of queue) {
-    const { name } = pkg.packageJson;
+    const { name } = pkg!.packageJson;
     const dependencies = [];
     const allDependencies = getAllDependencies(
       pkg.packageJson,
-      ignoreDevDependencies
+      ignoreDevDependencies,
     );
 
     for (let [depName, depRange] of allDependencies) {
@@ -96,6 +103,7 @@ export default function getDependencyGraph(
       if (!match) continue;
 
       const expected = match.packageJson.version;
+      const rawDepRange = depRange;
       const usesWorkspaceRange = depRange.startsWith("workspace:");
 
       if (usesWorkspaceRange) {
@@ -103,6 +111,23 @@ export default function getDependencyGraph(
 
         if (depRange === "*" || depRange === "^" || depRange === "~") {
           dependencies.push(depName);
+          continue;
+        }
+
+        if (path.posix.normalize(depRange) === relativePathsByName[depName]) {
+          dependencies.push(depName);
+          continue;
+        }
+
+        if (!getValidRange(depRange)) {
+          valid = false;
+          console.error(
+            `Package ${pc.cyan(
+              `"${name}"`,
+            )} must depend on the current version of ${pc.cyan(
+              `"${depName}"`,
+            )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${rawDepRange}"`)}`,
+          );
           continue;
         }
       } else if (bumpVersionsWithWorkspaceProtocolOnly) {
@@ -115,10 +140,10 @@ export default function getDependencyGraph(
         valid = false;
         console.error(
           `Package ${pc.cyan(
-            `"${name}"`
+            `"${name}"`,
           )} must depend on the current version of ${pc.cyan(
-            `"${depName}"`
-          )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${depRange}"`)}`
+            `"${depName}"`,
+          )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${rawDepRange}"`)}`,
         );
         continue;
       }

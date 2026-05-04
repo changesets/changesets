@@ -75,6 +75,7 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [verdaccio](https://verdaccio.org)
 - [Chakra UI](https://chakra-ui.com)
 - [Astro](https://astro.build)
+- [Biome](https://biomejs.dev)
 - [SvelteKit](https://kit.svelte.dev)
 - [Hydrogen](https://hydrogen.shopify.dev)
 - [react-pdf](https://github.com/diegomura/react-pdf)
@@ -94,6 +95,9 @@ To make releasing easier, you can use [this changesets github action](https://gi
 - [Hey API](https://github.com/hey-api/openapi-ts)
 - [neverthrow](https://github.com/supermacro/neverthrow)
 - [Apollo Client](https://github.com/apollographql/apollo-client)
+- [Adobe Spectrum CSS](https://github.com/adobe/spectrum-css)
+- [Adobe Spectrum Web Components](https://github.com/adobe/spectrum-web-components)
+- [React Email](https://react.email)
 
 <!-- NOTE: we currently only accept new entries with at least 1000 GitHub stars -->
 

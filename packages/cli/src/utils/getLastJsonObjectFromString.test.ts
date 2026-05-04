@@ -1,9 +1,10 @@
+import { describe, expect, it } from "vitest";
 import { getLastJsonObjectFromString } from "./getLastJsonObjectFromString.ts";
 
 describe("getLastJsonObjectFromString", () => {
   it("should handle stringified object", () => {
     expect(
-      getLastJsonObjectFromString(JSON.stringify({ test: "foo" }))
+      getLastJsonObjectFromString(JSON.stringify({ test: "foo" })),
     ).toEqual({ test: "foo" });
   });
 
@@ -13,8 +14,8 @@ describe("getLastJsonObjectFromString", () => {
         JSON.stringify({
           test: "foo",
           bar: { baz: { qwe: "rty" }, arr: [1, 2, 3, 4] },
-        })
-      )
+        }),
+      ),
     ).toEqual({
       test: "foo",
       bar: { baz: { qwe: "rty" }, arr: [1, 2, 3, 4] },
@@ -24,24 +25,24 @@ describe("getLastJsonObjectFromString", () => {
   it("should handle leading whitespace", () => {
     expect(
       getLastJsonObjectFromString(
-        `   \n\n  ${JSON.stringify({ test: "foo", baz: { qwe: "rty" } })}`
-      )
+        `   \n\n  ${JSON.stringify({ test: "foo", baz: { qwe: "rty" } })}`,
+      ),
     ).toEqual({ test: "foo", baz: { qwe: "rty" } });
   });
 
   it("should handle trailing whitespace", () => {
     expect(
       getLastJsonObjectFromString(
-        `${JSON.stringify({ test: "foo", baz: { qwe: "rty" } })}   \n\n  `
-      )
+        `${JSON.stringify({ test: "foo", baz: { qwe: "rty" } })}   \n\n  `,
+      ),
     ).toEqual({ test: "foo", baz: { qwe: "rty" } });
   });
 
   it("should handle trailing text", () => {
     expect(
       getLastJsonObjectFromString(
-        `${JSON.stringify({ test: "foo", baz: { qwe: "rty" } })}   \n\n  test`
-      )
+        `${JSON.stringify({ test: "foo", baz: { qwe: "rty" } })}   \n\n  test`,
+      ),
     ).toEqual({ test: "foo", baz: { qwe: "rty" } });
   });
 
@@ -51,8 +52,8 @@ describe("getLastJsonObjectFromString", () => {
         `${JSON.stringify({
           test: "foo",
           baz: { qwe: "rty" },
-        })}   \n\n  ${JSON.stringify({ much: "awesome" })}`
-      )
+        })}   \n\n  ${JSON.stringify({ much: "awesome" })}`,
+      ),
     ).toEqual({ much: "awesome" });
   });
 

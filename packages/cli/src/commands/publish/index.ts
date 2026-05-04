@@ -1,4 +1,4 @@
-import publishPackages, { type PublishedResult } from "./publishPackages.ts";
+import publishPackages from "./publishPackages.ts";
 import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
@@ -14,11 +14,11 @@ function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
 }
 
 let importantSeparator = pc.red(
-  "===============================IMPORTANT!==============================="
+  "===============================IMPORTANT!===============================",
 );
 
 let importantEnd = pc.red(
-  "----------------------------------------------------------------------"
+  "----------------------------------------------------------------------",
 );
 
 function showNonLatestTagWarning(tag?: string, preState?: PreState) {
@@ -26,11 +26,11 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   if (preState) {
     warn(
       `You are in prerelease mode so packages will be published to the ${pc.cyan(
-        preState.tag
+        preState.tag,
       )}
         dist tag except for packages that have not had normal releases which will be published to ${pc.cyan(
-          "latest"
-        )}`
+          "latest",
+        )}`,
     );
   } else if (tag !== "latest") {
     warn(`Packages will be released under the ${tag} tag`);
@@ -41,7 +41,7 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
 export default async function publish(
   cwd: string,
   { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
-  config: Config
+  config: Config,
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
   let preState = await readPreState(cwd);
@@ -69,7 +69,7 @@ export default async function publish(
     tag: releaseTag,
   });
   const privatePackages = packages.filter(
-    (pkg) => pkg.packageJson.private && pkg.packageJson.version
+    (pkg) => pkg.packageJson.private && pkg.packageJson.version,
   );
   const untaggedPrivatePackageReleases = tagPrivatePackages
     ? await getUntaggedPackages(privatePackages, cwd, tool)
@@ -82,9 +82,11 @@ export default async function publish(
     warn("No unpublished projects to publish");
   }
 
-  const successfulNpmPublishes = publishedPackages.filter((p) => p.published);
+  const successfulNpmPublishes = publishedPackages.filter(
+    (p) => p.result === "published",
+  );
   const unsuccessfulNpmPublishes = publishedPackages.filter(
-    (p) => !p.published
+    (p) => p.result === "failed",
   );
 
   if (successfulNpmPublishes.length > 0) {
@@ -97,7 +99,7 @@ export default async function publish(
       // fail if we are behind the base branch).
       log(`Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`);
 
-      await tagPublish(tool, successfulNpmPublishes, cwd);
+      await tagPublish(tool.type, successfulNpmPublishes, cwd);
     }
   }
 
@@ -105,7 +107,7 @@ export default async function publish(
     success("found untagged projects:");
     logReleases(untaggedPrivatePackageReleases);
 
-    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
+    await tagPublish(tool.type, untaggedPrivatePackageReleases, cwd);
   }
 
   if (unsuccessfulNpmPublishes.length > 0) {
@@ -118,8 +120,8 @@ export default async function publish(
 
 async function tagPublish(
   tool: string,
-  packageReleases: PublishedResult[],
-  cwd: string
+  packageReleases: Array<{ name: string; newVersion: string }>,
+  cwd: string,
 ) {
   if (tool !== "root") {
     for (const pkg of packageReleases) {

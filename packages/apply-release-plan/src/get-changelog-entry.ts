@@ -14,7 +14,7 @@ type ChangelogLines = {
 
 async function generateChangesForVersionTypeMarkdown(
   obj: ChangelogLines,
-  type: keyof ChangelogLines
+  type: keyof ChangelogLines,
 ) {
   let releaseLines = await Promise.all(obj[type]);
   releaseLines = releaseLines.filter((x) => x);
@@ -25,6 +25,7 @@ async function generateChangesForVersionTypeMarkdown(
 
 // release is the package and version we are releasing
 export default async function getChangelogEntry(
+  cwd: string,
   release: ModCompWithPackage,
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
@@ -36,7 +37,7 @@ export default async function getChangelogEntry(
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-  }
+  },
 ) {
   if (release.type === "none") return null;
 
@@ -54,7 +55,7 @@ export default async function getChangelogEntry(
     const rls = cs.releases.find((r) => r.name === release.name);
     if (rls && rls.type !== "none") {
       changelogLines[rls.type].push(
-        changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts)
+        changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts),
       );
     }
   });
@@ -69,7 +70,13 @@ export default async function getChangelogEntry(
       versionRange &&
       (usesWorkspaceRange || validRange(versionRange) !== null) &&
       shouldUpdateDependencyBasedOnConfig(
-        { type: rel.type, version: rel.newVersion },
+        cwd,
+        {
+          type: rel.type,
+          version: rel.newVersion,
+          oldVersion: rel.oldVersion,
+          dir: rel.dir,
+        },
         {
           depVersionRange: versionRange,
           depType: dependencyVersionRange ? "dependencies" : "peerDependencies",
@@ -77,7 +84,7 @@ export default async function getChangelogEntry(
         {
           minReleaseType: updateInternalDependencies,
           onlyUpdatePeerDependentsWhenOutOfRange,
-        }
+        },
       )
     );
   });
@@ -91,15 +98,15 @@ export default async function getChangelogEntry(
   });
 
   let relevantChangesets = changesets.filter((cs) =>
-    relevantChangesetIds.has(cs.id)
+    relevantChangesetIds.has(cs.id),
   );
 
   changelogLines.patch.push(
     changelogFuncs.getDependencyReleaseLine(
       relevantChangesets,
       dependentReleases,
-      changelogOpts
-    )
+      changelogOpts,
+    ),
   );
 
   return [

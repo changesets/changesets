@@ -1,32 +1,33 @@
-import spawn from "spawndamnit";
+import { exec } from "tinyexec";
 import fs from "node:fs/promises";
 import path from "path";
-import { getPackages, type Package } from "@manypkg/get-packages";
+import { getPackages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import micromatch from "micromatch";
+import type { Package } from "@changesets/types";
 
 export async function add(pathToFile: string, cwd: string) {
-  const gitCmd = await spawn("git", ["add", pathToFile], { cwd });
+  const gitCmd = await exec("git", ["add", pathToFile], {
+    nodeOptions: { cwd },
+  });
 
-  if (gitCmd.code !== 0) {
+  if (gitCmd.exitCode !== 0) {
     console.log(pathToFile, gitCmd.stderr.toString());
   }
-  return gitCmd.code === 0;
+  return gitCmd.exitCode === 0;
 }
 
 export async function commit(message: string, cwd: string) {
-  const gitCmd = await spawn(
-    "git",
-    ["commit", "-m", message, "--allow-empty"],
-    { cwd }
-  );
-  return gitCmd.code === 0;
+  const gitCmd = await exec("git", ["commit", "-m", message, "--allow-empty"], {
+    nodeOptions: { cwd },
+  });
+  return gitCmd.exitCode === 0;
 }
 
 export async function getAllTags(cwd: string): Promise<Set<string>> {
-  const gitCmd = await spawn("git", ["tag"], { cwd });
+  const gitCmd = await exec("git", ["tag"], { nodeOptions: { cwd } });
 
-  if (gitCmd.code !== 0) {
+  if (gitCmd.exitCode !== 0) {
     throw new Error(gitCmd.stderr.toString());
   }
 
@@ -39,16 +40,20 @@ export async function getAllTags(cwd: string): Promise<Set<string>> {
 export async function tag(tagStr: string, cwd: string) {
   // NOTE: it's important we use the -m flag to create annotated tag otherwise 'git push --follow-tags' won't actually push
   // the tags
-  const gitCmd = await spawn("git", ["tag", tagStr, "-m", tagStr], { cwd });
-  return gitCmd.code === 0;
+  const gitCmd = await exec("git", ["tag", tagStr, "-m", tagStr], {
+    nodeOptions: { cwd },
+  });
+  return gitCmd.exitCode === 0;
 }
 
 // Find the commit where we diverged from `ref` at using `git merge-base`
 export async function getDivergedCommit(cwd: string, ref: string) {
-  const cmd = await spawn("git", ["merge-base", ref, "HEAD"], { cwd });
-  if (cmd.code !== 0) {
+  const cmd = await exec("git", ["merge-base", ref, "HEAD"], {
+    nodeOptions: { cwd },
+  });
+  if (cmd.exitCode !== 0) {
     throw new Error(
-      `Failed to find where HEAD diverged from "${ref}". Does "${ref}" exist and it's synced with remote?`
+      `Failed to find where HEAD diverged from "${ref}". Does "${ref}" exist and it's synced with remote?`,
     );
   }
   return cmd.stdout.toString().trim();
@@ -62,7 +67,7 @@ export async function getDivergedCommit(cwd: string, ref: string) {
  */
 export async function getCommitsThatAddFiles(
   gitPaths: string[],
-  { cwd, short = false }: { cwd: string; short?: boolean }
+  { cwd, short = false }: { cwd: string; short?: boolean },
 ): Promise<(string | undefined)[]> {
   // Maps gitPath to commit SHA
   const map = new Map<string, string>();
@@ -75,7 +80,7 @@ export async function getCommitsThatAddFiles(
     const commitInfos = await Promise.all(
       remaining.map(async (gitPath: string) => {
         const [commitSha, parentSha] = (
-          await spawn(
+          await exec(
             "git",
             [
               "log",
@@ -84,13 +89,13 @@ export async function getCommitsThatAddFiles(
               short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
               gitPath,
             ],
-            { cwd }
+            { nodeOptions: { cwd } },
           )
         ).stdout
           .toString()
           .split(":");
         return { path: gitPath, commitSha, parentSha };
-      })
+      }),
     );
 
     // To collect commits without parents (usually because they're absent from
@@ -137,8 +142,8 @@ export async function getCommitsThatAddFiles(
 
 export async function isRepoShallow({ cwd }: { cwd: string }) {
   const isShallowRepoOutput = (
-    await spawn("git", ["rev-parse", "--is-shallow-repository"], {
-      cwd,
+    await exec("git", ["rev-parse", "--is-shallow-repository"], {
+      nodeOptions: { cwd },
     })
   ).stdout
     .toString()
@@ -150,7 +155,7 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
 
     // Firstly, find the .git folder for the repo; note that this will be relative to the repo dir
     const gitDir = (
-      await spawn("git", ["rev-parse", "--git-dir"], { cwd })
+      await exec("git", ["rev-parse", "--git-dir"], { nodeOptions: { cwd } })
     ).stdout
       .toString()
       .trim();
@@ -172,16 +177,16 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
 }
 
 export async function deepenCloneBy({ by, cwd }: { by: number; cwd: string }) {
-  await spawn("git", ["fetch", `--deepen=${by}`], { cwd });
+  await exec("git", ["fetch", `--deepen=${by}`], { nodeOptions: { cwd } });
 }
 async function getRepoRoot({ cwd }: { cwd: string }) {
-  const { stdout, code, stderr } = await spawn(
+  const { stdout, exitCode, stderr } = await exec(
     "git",
     ["rev-parse", "--show-toplevel"],
-    { cwd }
+    { nodeOptions: { cwd } },
   );
 
-  if (code !== 0) {
+  if (exitCode !== 0) {
     throw new Error(stderr.toString());
   }
 
@@ -199,14 +204,14 @@ export async function getChangedFilesSince({
 }): Promise<Array<string>> {
   const divergedAt = await getDivergedCommit(cwd, ref);
   // Now we can find which files we added
-  const cmd = await spawn(
+  const cmd = await exec(
     "git",
     ["diff", "--name-only", "--no-relative", divergedAt],
-    { cwd }
+    { nodeOptions: { cwd } },
   );
-  if (cmd.code !== 0) {
+  if (cmd.exitCode !== 0) {
     throw new Error(
-      `Failed to diff against ${divergedAt}. Is ${divergedAt} a valid ref?`
+      `Failed to diff against ${divergedAt}. Is ${divergedAt} a valid ref?`,
     );
   }
 
@@ -232,12 +237,12 @@ export async function getChangedChangesetFilesSinceRef({
   try {
     const divergedAt = await getDivergedCommit(cwd, ref);
     // Now we can find which files we added
-    const cmd = await spawn(
+    const cmd = await exec(
       "git",
       ["diff", "--name-only", "--diff-filter=d", "--no-relative", divergedAt],
       {
-        cwd,
-      }
+        nodeOptions: { cwd },
+      },
     );
 
     let tester = /.changeset\/[^/]+\.md$/;
@@ -291,7 +296,9 @@ export async function getChangedPackagesSinceRef({
 }
 
 export async function tagExists(tagStr: string, cwd: string) {
-  const gitCmd = await spawn("git", ["tag", "-l", tagStr], { cwd });
+  const gitCmd = await exec("git", ["tag", "-l", tagStr], {
+    nodeOptions: { cwd },
+  });
   const output = gitCmd.stdout.toString().trim();
   const tagExists = !!output;
   return tagExists;
@@ -305,10 +312,10 @@ export async function getCurrentCommitId({
   short?: boolean;
 }): Promise<string> {
   return (
-    await spawn(
+    await exec(
       "git",
       ["rev-parse", short && "--short", "HEAD"].filter<string>(Boolean as any),
-      { cwd }
+      { nodeOptions: { cwd } },
     )
   ).stdout
     .toString()
@@ -316,7 +323,7 @@ export async function getCurrentCommitId({
 }
 
 export async function remoteTagExists(tagStr: string) {
-  const gitCmd = await spawn("git", [
+  const gitCmd = await exec("git", [
     "ls-remote",
     "--tags",
     "origin",

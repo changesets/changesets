@@ -8,7 +8,7 @@ export type ChangesetState = {
 };
 
 export async function readChangesetState(
-  cwd: string = process.cwd()
+  cwd: string = process.cwd(),
 ): Promise<ChangesetState> {
   let preState = await readPreState(cwd);
   let isInPreMode = preState !== undefined && preState.mode === "pre";

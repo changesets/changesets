@@ -1,5 +1,4 @@
-import type { Linked } from "@changesets/types";
-import type { Package } from "@manypkg/get-packages";
+import type { Linked, Package } from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import { getCurrentHighestVersion, getHighestReleaseType } from "./utils.ts";
 
@@ -18,7 +17,7 @@ import { getCurrentHighestVersion, getHighestReleaseType } from "./utils.ts";
 export default function applyLinks(
   releases: Map<string, InternalRelease>,
   packagesByName: Map<string, Package>,
-  linked: Linked
+  linked: Linked,
 ): boolean {
   let updated = false;
 
@@ -27,7 +26,7 @@ export default function applyLinks(
     // First we filter down to all the relevant releases for one set of linked packages
     let releasingLinkedPackages = [...releases.values()].filter(
       (release) =>
-        linkedPackages.includes(release.name) && release.type !== "none"
+        linkedPackages.includes(release.name) && release.type !== "none",
     );
 
     // If we proceed any further we do extra work with calculating highestVersion for things that might
@@ -37,7 +36,7 @@ export default function applyLinks(
     let highestReleaseType = getHighestReleaseType(releasingLinkedPackages);
     let highestVersion = getCurrentHighestVersion(
       linkedPackages,
-      packagesByName
+      packagesByName,
     );
 
     // Finally, we update the packages so all of them are on the highest version
