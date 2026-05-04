@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, type Mock, onTestFinished, vi } from "vitest";
-import { createFixture, FileTree } from "fs-fixture";
+import { createFixture, type FileTree } from "fs-fixture";
 import { exec } from "tinyexec";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
