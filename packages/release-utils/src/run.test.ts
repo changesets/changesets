@@ -350,7 +350,14 @@ describe("publish", () => {
 
     await linkNodeModules(clone);
 
-    const gitModulePath = path.resolve(import.meta.dirname, "..", "..", "git", "dist", "changesets-git.js")
+    const gitModulePath = path.resolve(
+      import.meta.dirname,
+      "..",
+      "..",
+      "git",
+      "dist",
+      "changesets-git.js",
+    );
 
     let result = await runPublish({
       command: "node",
@@ -396,7 +403,14 @@ describe("publish", () => {
 
     await linkNodeModules(clone);
 
-    const gitModulePath = path.resolve(import.meta.dirname, "..", "..", "git", "dist", "changesets-git.js")
+    const gitModulePath = path.resolve(
+      import.meta.dirname,
+      "..",
+      "..",
+      "git",
+      "dist",
+      "changesets-git.js",
+    );
 
     let result = await runPublish({
       command: "node",
