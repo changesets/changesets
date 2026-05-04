@@ -1478,7 +1478,7 @@
     "@typescript-eslint/types" "5.62.0"
     eslint-visitor-keys "^3.3.0"
 
-"@vitest/coverage-v8@4.1.5":
+"@vitest/coverage-v8@^4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@vitest/coverage-v8/-/coverage-v8-4.1.5.tgz#26bbdbebecd66be77fa1b63a9ed985dd86a3ba85"
   integrity sha512-38C0/Ddb7HcRG0Z4/DUem8x57d2p9jYgp18mkaYswEOQBGsI1CG4f/hjm0ZCeaJfWhSZ4k7jgs29V1Zom7Ki9A==
@@ -4586,7 +4586,7 @@ validate-npm-package-name@^6.0.0:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vitest@4.1.5:
+vitest@^4.1.5:
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/vitest/-/vitest-4.1.5.tgz#cda189c0cd9dd1c920be477c0f371b64ec14782a"
   integrity sha512-9Xx1v3/ih3m9hN+SbfkUyy0JAs72ap3r7joc87XL6jwF0jGg6mFBvQ1SrwaX+h8BlkX6Hz9shdd1uo6AF+ZGpg==

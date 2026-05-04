@@ -27,7 +27,7 @@
     "@changesets/test-utils": "0.0.9-next.2",
     "@types/micromatch": "^4.0.1",
     "outdent": "^0.8.0",
-    "vitest": "4.1.5"
+    "vitest": "^4.1.5"
   },
   "engines": {
     "node": "^22 || >=24"
