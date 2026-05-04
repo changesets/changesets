@@ -142,21 +142,12 @@ function assembleReleasePlan(
     preState,
   );
 
-  const preInfo = getPreInfo(
-    changesets,
-    packagesByName,
-    config,
-    preState,
-  );
+  const preInfo = getPreInfo(changesets, packagesByName, config, preState);
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(
-    relevantChangesets,
-    packagesByName,
-    config,
-  );
+  let releases = flattenReleases(relevantChangesets, packagesByName, config);
 
   // Unlike the config/CLI validation graphs, this graph intentionally includes
   // devDependencies. While devDeps don't cause version bumps (determineDependents
@@ -185,11 +176,7 @@ function assembleReleasePlan(
       packagesByName,
       config,
     );
-    let linksUpdated = applyLinks(
-      releases,
-      packagesByName,
-      config.linked,
-    );
+    let linksUpdated = applyLinks(releases, packagesByName, config.linked);
 
     releasesValidated =
       !linksUpdated && !dependentAdded && !fixedConstraintUpdated;
@@ -224,11 +211,7 @@ function assembleReleasePlan(
 
   // Caching the snapshot version here and use this if it is snapshot release
   const snapshotSuffix =
-    snapshot &&
-    getSnapshotSuffix(
-      config.snapshot.prereleaseTemplate,
-      snapshot,
-    );
+    snapshot && getSnapshotSuffix(config.snapshot.prereleaseTemplate, snapshot);
 
   return {
     changesets: relevantChangesets,
