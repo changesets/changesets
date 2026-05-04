@@ -23,11 +23,6 @@ type ArrayPromptOptions = Extract<
       | "scale";
   }
 >;
-type BooleanPromptOptions = Extract<PromptOptions, { type: "confirm" }>;
-type StringPromptOptions = Extract<
-  PromptOptions,
-  { type: "input" | "invisible" | "list" | "password" | "text" }
->;
 
 /* Notes on using inquirer:
  * Each question needs a key, as inquirer is assembling an object behind-the-scenes.
@@ -87,7 +82,7 @@ async function askQuestion(message: string): Promise<string> {
       name,
       prefix,
       onCancel: cancelFlow,
-    } as StringPromptOptions,
+    },
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
@@ -114,7 +109,7 @@ async function askConfirm(message: string): Promise<boolean> {
       type: "confirm",
       initial: true,
       onCancel: cancelFlow,
-    } as BooleanPromptOptions,
+    },
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {
@@ -136,7 +131,7 @@ async function askList<Choice extends string>(
       prefix,
       type: "select",
       onCancel: cancelFlow,
-    } as ArrayPromptOptions,
+    },
   ])
     .then((responses: any) => responses[name])
     .catch((err: unknown) => {

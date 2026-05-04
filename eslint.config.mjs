@@ -58,7 +58,6 @@ export default defineConfig(
 
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-floating-promises": "off", // TODO enable and fix errors
-      "@typescript-eslint/no-unnecessary-type-assertion": "off", // TODO enable and fix errors
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-call": "off",

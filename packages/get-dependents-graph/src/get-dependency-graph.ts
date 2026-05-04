@@ -91,7 +91,7 @@ export default function getDependencyGraph(
   }
 
   for (const pkg of queue) {
-    const { name } = pkg!.packageJson;
+    const { name } = pkg.packageJson;
     const dependencies = [];
     const allDependencies = getAllDependencies(
       pkg.packageJson,
