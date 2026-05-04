@@ -79,7 +79,7 @@ describe("getChangelogEntry", () => {
     expect(entry.highestLevel).toBe(BumpLevels.major);
   });
 
-  test("it works", () => {
+  test("it works again!", () => {
     let entry = getChangelogEntry(changelog, "3.0.1");
     expect(entry.content).toMatchSnapshot();
     expect(entry.highestLevel).toBe(BumpLevels.patch);

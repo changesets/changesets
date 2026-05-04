@@ -135,6 +135,7 @@ export async function getCommitsThatAddFiles(
       }
       break;
     }
+    // eslint-disable-next-line no-constant-condition
   } while (true);
 
   return gitPaths.map((p) => map.get(p));

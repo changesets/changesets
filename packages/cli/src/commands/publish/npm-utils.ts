@@ -95,7 +95,7 @@ async function getPublishTool(
       shouldAddNoGitChecks:
         parsed?.major === undefined ? false : parsed.major >= 5,
     };
-  } catch (e) {
+  } catch {
     return {
       name: "pnpm",
       shouldAddNoGitChecks: false,
