@@ -27,8 +27,10 @@ export default async function getChangesets(
   try {
     contents = await fs.readdir(changesetBase);
   } catch (err) {
-    if ((err as any).code === "ENOENT") {
-      throw new Error("There is no .changeset directory in this project");
+    if ((err as { code: string }).code === "ENOENT") {
+      throw new Error("There is no .changeset directory in this project", {
+        cause: err,
+      });
     }
     throw err;
   }

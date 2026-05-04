@@ -6,7 +6,7 @@ export const getLastJsonObjectFromString = (str: string) => {
 
     try {
       return JSON.parse(str);
-    } catch (err) {
+    } catch {
       // move past the potentially leading `{` so the regexp in the loop can try to match for the next `{`
       str = str.slice(1);
     }

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stripVTControlCharacters } from "node:util";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
 import getDependencyGraph from "./get-dependency-graph.ts";
-import { Package } from "@changesets/types";
+import type { Package } from "@changesets/types";
 import path from "node:path";
 
 const consoleError = console.error;

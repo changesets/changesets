@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { expect, test } from "vitest";
 import getVersionRangeType from "./index.ts";
 
