@@ -173,7 +173,10 @@ export default async function applyReleasePlan(
     const changesetFolder = path.resolve(cwd, ".changeset");
     await Promise.all(
       changesets.map(async (changeset) => {
-        const changesetPath = path.resolve(changesetFolder, `${changeset.id}.md`);
+        const changesetPath = path.resolve(
+          changesetFolder,
+          `${changeset.id}.md`,
+        );
         const changesetFolderPath = path.resolve(changesetFolder, changeset.id);
         if (
           await fs.access(changesetPath).then(

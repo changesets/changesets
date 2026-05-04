@@ -46,7 +46,9 @@ export async function runPublish({
 
   if (tool.type !== "root") {
     const newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/;
-    const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
+    const packagesByName = new Map(
+      packages.map((x) => [x.packageJson.name, x]),
+    );
 
     for (const line of changesetPublishOutput.split("\n")) {
       const match = line.match(newTagRegex);

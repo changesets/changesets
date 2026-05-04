@@ -97,7 +97,10 @@ test("associated with multiple PRs with only one merged", async () => {
       }),
     );
 
-  const result = await getInfo({ commit: "a085003", repo: "emotion-js/emotion" });
+  const result = await getInfo({
+    commit: "a085003",
+    repo: "emotion-js/emotion",
+  });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
 
   expect(await prettier.format(githubQuery, { parser: "graphql" }))
@@ -213,7 +216,10 @@ test("associated with multiple PRs with multiple merged gets the one that was me
       }),
     );
 
-  const result = await getInfo({ commit: "a085003", repo: "emotion-js/emotion" });
+  const result = await getInfo({
+    commit: "a085003",
+    repo: "emotion-js/emotion",
+  });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
 
   expect(await prettier.format(githubQuery, { parser: "graphql" }))
