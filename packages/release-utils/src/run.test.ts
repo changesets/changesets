@@ -3,7 +3,6 @@ import { add, commit } from "@changesets/git";
 import {
   linkNodeModules,
   silenceLogsInBlock,
-  tempdir,
   testdir,
 } from "@changesets/test-utils";
 import type { Changeset } from "@changesets/types";
@@ -34,7 +33,7 @@ async function setupRepoAndClone(cwd: string) {
   const mainBranch = await getCurrentBranch(cwd);
 
   // Make a 1-commit-deep shallow clone of this repo
-  let clone = tempdir();
+  let clone = await testdir();
   await exec(
     "git",
     // Note: a file:// URL is needed in order to make a shallow clone of
