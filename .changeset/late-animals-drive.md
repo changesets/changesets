@@ -2,4 +2,4 @@
 "@changesets/changelog-github": patch
 ---
 
-Use `loadEnvFile` instead of `dotenv` to load the `.env` file
+Use `parseEnv` instead of `dotenv` to load the `.env` file and avoid loading them to `process.env`
