@@ -1,4 +1,4 @@
-import { Mock, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
@@ -21,6 +21,7 @@ describe("tag command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -50,6 +51,7 @@ describe("tag command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -68,7 +70,7 @@ describe("tag command", () => {
         new Set([
           // pkg-a should not be re-tagged
           "pkg-a@1.0.0",
-        ])
+        ]),
       );
 
       expect(git.tag).not.toHaveBeenCalled();

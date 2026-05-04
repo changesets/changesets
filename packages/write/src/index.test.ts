@@ -1,21 +1,24 @@
-import { vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import fs from "node:fs/promises";
 import path from "path";
 import parse from "@changesets/parse";
 import writeChangeset from "./index.ts";
 
-import humanId from "human-id";
+import { humanId } from "human-id";
 import { testdir } from "@changesets/test-utils";
 
 vi.mock("human-id");
+const mockedHumanId = vi.mocked(humanId);
 
 describe("simple project", () => {
   it("should write a changeset", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -23,15 +26,14 @@ describe("simple project", () => {
     });
 
     const changesetID = "ascii";
-    // @ts-ignore
-    humanId.mockReturnValueOnce(changesetID);
+    mockedHumanId.mockReturnValueOnce(changesetID);
 
     await writeChangeset(
       {
         summary: "This is a summary",
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
@@ -47,8 +49,10 @@ describe("simple project", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -56,8 +60,7 @@ describe("simple project", () => {
     });
 
     const changesetID = "ascii";
-    // @ts-ignore
-    humanId.mockReturnValueOnce(changesetID);
+    mockedHumanId.mockReturnValueOnce(changesetID);
 
     const summary = `This is a summary
 ~~~html
@@ -72,7 +75,7 @@ describe("simple project", () => {
       cwd,
       {
         prettier: false,
-      }
+      },
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
@@ -88,8 +91,10 @@ describe("simple project", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -97,8 +102,7 @@ describe("simple project", () => {
     });
 
     const changesetID = "ascii";
-    // @ts-ignore
-    humanId.mockReturnValueOnce(changesetID);
+    mockedHumanId.mockReturnValueOnce(changesetID);
 
     const summary = `This is a summary
 ~~~html
@@ -110,7 +114,7 @@ describe("simple project", () => {
         summary,
         releases: [{ name: "pkg-a", type: "minor" }],
       },
-      cwd
+      cwd,
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
@@ -134,8 +138,10 @@ describe("simple project", () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -143,15 +149,14 @@ describe("simple project", () => {
     });
 
     const changesetID = "ascii";
-    // @ts-ignore
-    humanId.mockReturnValueOnce(changesetID);
+    mockedHumanId.mockReturnValueOnce(changesetID);
 
     await writeChangeset(
       {
         summary: "",
         releases: [],
       },
-      cwd
+      cwd,
     );
 
     const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);

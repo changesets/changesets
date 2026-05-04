@@ -1,28 +1,28 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, it, test } from "vitest";
 import {
-  ReleasePlan,
+  ComprehensiveRelease,
   Config,
   NewChangeset,
-  ComprehensiveRelease,
+  ReleasePlan,
+  PreState,
 } from "@changesets/types";
 import * as git from "@changesets/git";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "path";
 import { outdent } from "outdent";
-import spawn from "spawndamnit";
+import { exec } from "tinyexec";
 import { defaultConfig } from "@changesets/config";
 
 import applyReleasePlan from "./index.ts";
 import { getPackages } from "@manypkg/get-packages";
 import {
-  temporarilySilenceLogs,
-  testdir,
   Fixture,
   outputFile,
-  pathExists,
+  temporarilySilenceLogs,
+  testdir,
 } from "@changesets/test-utils";
-import { fileURLToPath } from "node:url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 class FakeReleasePlan {
   changesets: NewChangeset[];
@@ -32,7 +32,7 @@ class FakeReleasePlan {
   constructor(
     changesets: NewChangeset[] = [],
     releases: ComprehensiveRelease[] = [],
-    config: Partial<Config> = {}
+    config: Partial<Config> = {},
   ) {
     const baseChangeset: NewChangeset = {
       id: "quick-lions-devour",
@@ -87,7 +87,7 @@ async function testSetup(
   releasePlan: ReleasePlan,
   config?: Config,
   snapshot?: string | undefined,
-  setupFunc?: (tempDir: string) => Promise<any>
+  setupFunc?: (tempDir: string) => Promise<unknown>,
 ) {
   if (!config) {
     config = {
@@ -119,17 +119,19 @@ async function testSetup(
   }
 
   if (config.commit) {
-    await spawn("git", ["init"], { cwd: tempDir });
+    await exec("git", ["init"], { nodeOptions: { cwd: tempDir } });
     await git.add(".", tempDir);
     await git.commit("first commit", tempDir);
   }
 
+  const packages = await getPackages(tempDir);
+
   return {
     changedFiles: await applyReleasePlan(
       releasePlan,
-      await getPackages(tempDir),
+      packages,
       config,
-      snapshot
+      snapshot,
     ),
     tempDir,
   };
@@ -155,7 +157,7 @@ describe("apply release plan", () => {
 }`,
           },
           releasePlan.getReleasePlan(),
-          releasePlan.config
+          releasePlan.config,
         );
         let pkgPath = changedFiles.find((a) => a.endsWith(`package.json`));
 
@@ -180,11 +182,11 @@ describe("apply release plan", () => {
                 version: "1.0.0",
               },
               null,
-              "\t"
+              "\t",
             ),
           },
           releasePlan.getReleasePlan(),
-          releasePlan.config
+          releasePlan.config,
         );
         let pkgPath = changedFiles.find((a) => a.endsWith(`package.json`));
 
@@ -206,7 +208,7 @@ describe("apply release plan", () => {
             }),
           },
           releasePlan.getReleasePlan(),
-          releasePlan.config
+          releasePlan.config,
         );
         let pkgPath = changedFiles.find((a) => a.endsWith(`package.json`));
 
@@ -229,7 +231,7 @@ describe("apply release plan", () => {
               }) + "\n",
           },
           releasePlan.getReleasePlan(),
-          releasePlan.config
+          releasePlan.config,
         );
         let pkgPath = changedFiles.find((a) => a.endsWith(`package.json`));
 
@@ -251,16 +253,17 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
           }),
         },
         releasePlan.getReleasePlan(),
-        releasePlan.config
+        releasePlan.config,
       );
       let pkgPath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
@@ -271,6 +274,7 @@ describe("apply release plan", () => {
         version: "1.1.0",
       });
     });
+
     it("should not update ranges set to *", async () => {
       const releasePlan = new FakeReleasePlan(
         [
@@ -288,7 +292,7 @@ describe("apply release plan", () => {
             oldVersion: "1.0.0",
             type: "minor",
           },
-        ]
+        ],
       );
       let { changedFiles } = await testSetup(
         {
@@ -296,6 +300,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -309,10 +314,10 @@ describe("apply release plan", () => {
           }),
         },
         releasePlan.getReleasePlan(),
-        releasePlan.config
+        releasePlan.config,
       );
       let pkgPath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
@@ -326,6 +331,7 @@ describe("apply release plan", () => {
         },
       });
     });
+
     it("should update workspace ranges", async () => {
       const releasePlan = new FakeReleasePlan(
         [
@@ -343,7 +349,7 @@ describe("apply release plan", () => {
             oldVersion: "1.0.0",
             type: "minor",
           },
-        ]
+        ],
       );
       let { changedFiles } = await testSetup(
         {
@@ -351,6 +357,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -364,10 +371,10 @@ describe("apply release plan", () => {
           }),
         },
         releasePlan.getReleasePlan(),
-        releasePlan.config
+        releasePlan.config,
       );
       let pkgPath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
@@ -381,6 +388,7 @@ describe("apply release plan", () => {
         },
       });
     });
+
     it("should not update workspace version aliases", async () => {
       const releasePlan = new FakeReleasePlan(
         [
@@ -422,7 +430,7 @@ describe("apply release plan", () => {
             oldVersion: "1.0.0",
             type: "minor",
           },
-        ]
+        ],
       );
       let { changedFiles } = await testSetup(
         {
@@ -430,6 +438,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -453,10 +462,10 @@ describe("apply release plan", () => {
           }),
         },
         releasePlan.getReleasePlan(),
-        releasePlan.config
+        releasePlan.config,
       );
       let pkgPath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
@@ -472,6 +481,7 @@ describe("apply release plan", () => {
         },
       });
     });
+
     it("should update workspace ranges only with bumpVersionsWithWorkspaceProtocolOnly", async () => {
       const releasePlan = new FakeReleasePlan(
         [
@@ -502,7 +512,7 @@ describe("apply release plan", () => {
         ],
         {
           bumpVersionsWithWorkspaceProtocolOnly: true,
-        }
+        },
       );
       let { changedFiles } = await testSetup(
         {
@@ -510,6 +520,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -530,10 +541,10 @@ describe("apply release plan", () => {
           }),
         },
         releasePlan.getReleasePlan(),
-        releasePlan.config
+        releasePlan.config,
       );
       let pkgAPath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
 
       if (!pkgAPath) throw new Error(`could not find an updated package json`);
@@ -548,7 +559,7 @@ describe("apply release plan", () => {
       });
 
       let pkgCPath = changedFiles.find((a) =>
-        a.endsWith(`pkg-c${path.sep}package.json`)
+        a.endsWith(`pkg-c${path.sep}package.json`),
       );
 
       if (!pkgCPath) throw new Error(`could not find an updated package json`);
@@ -562,6 +573,7 @@ describe("apply release plan", () => {
         },
       });
     });
+
     it("should update a version for two packages with different new versions", async () => {
       const releasePlan = new FakeReleasePlan(
         [],
@@ -573,7 +585,7 @@ describe("apply release plan", () => {
             newVersion: "2.0.0",
             changesets: [],
           },
-        ]
+        ],
       );
 
       let { changedFiles } = await testSetup(
@@ -582,6 +594,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -595,13 +608,13 @@ describe("apply release plan", () => {
           }),
         },
         releasePlan.getReleasePlan(),
-        releasePlan.config
+        releasePlan.config,
       );
       let pkgPathA = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
       let pkgPathB = changedFiles.find((b) =>
-        b.endsWith(`pkg-b${path.sep}package.json`)
+        b.endsWith(`pkg-b${path.sep}package.json`),
       );
 
       if (!pkgPathA || !pkgPathB) {
@@ -619,6 +632,7 @@ describe("apply release plan", () => {
         version: "2.0.0",
       });
     });
+
     it("should not update the version of the dependent package if the released dep is a dev dep", async () => {
       let { changedFiles } = await testSetup(
         {
@@ -626,6 +640,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -687,13 +702,13 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
-        }
+        },
       );
       let pkgPathA = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
       let pkgPathB = changedFiles.find((b) =>
-        b.endsWith(`pkg-b${path.sep}package.json`)
+        b.endsWith(`pkg-b${path.sep}package.json`),
       );
 
       if (!pkgPathA || !pkgPathB) {
@@ -714,6 +729,7 @@ describe("apply release plan", () => {
         version: "1.1.0",
       });
     });
+
     it("should skip dependencies that have the same name as the package", async () => {
       let { tempDir } = await testSetup(
         {
@@ -764,7 +780,7 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
-        }
+        },
       );
 
       let pkgJSON = await readJson(path.join(tempDir, "package.json"));
@@ -777,6 +793,7 @@ describe("apply release plan", () => {
         },
       });
     });
+
     it("should not update dependent versions when a package has a changeset type of none", async () => {
       let { changedFiles } = await testSetup(
         {
@@ -784,6 +801,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -815,13 +833,13 @@ describe("apply release plan", () => {
           ],
           preState: undefined,
         },
-        { ...defaultConfig, changelog: false }
+        { ...defaultConfig, changelog: false },
       );
       let pkgPathA = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
       let pkgPathB = changedFiles.find((b) =>
-        b.endsWith(`pkg-b${path.sep}package.json`)
+        b.endsWith(`pkg-b${path.sep}package.json`),
       );
 
       expect(pkgPathA).toBeUndefined();
@@ -834,6 +852,7 @@ describe("apply release plan", () => {
         version: "1.0.0",
       });
     });
+
     it("should not update workspace dependent versions when a package has a changeset type of none", async () => {
       let { changedFiles } = await testSetup(
         {
@@ -841,6 +860,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -872,13 +892,13 @@ describe("apply release plan", () => {
           ],
           preState: undefined,
         },
-        { ...defaultConfig, changelog: false }
+        { ...defaultConfig, changelog: false },
       );
       let pkgPathA = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
       let pkgPathB = changedFiles.find((b) =>
-        b.endsWith(`pkg-b${path.sep}package.json`)
+        b.endsWith(`pkg-b${path.sep}package.json`),
       );
 
       expect(pkgPathA).toBeUndefined();
@@ -891,6 +911,7 @@ describe("apply release plan", () => {
         version: "1.0.0",
       });
     });
+
     it("should use exact versioning when snapshot release is applied, and ignore any range modifiers", async () => {
       const releasePlan = new FakeReleasePlan(
         [
@@ -908,7 +929,7 @@ describe("apply release plan", () => {
             oldVersion: "1.0.0",
             type: "minor",
           },
-        ]
+        ],
       );
       let { changedFiles } = await testSetup(
         {
@@ -916,6 +937,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -930,11 +952,11 @@ describe("apply release plan", () => {
         },
         releasePlan.getReleasePlan(),
         releasePlan.config,
-        "canary"
+        "canary",
       );
 
       let pkgPath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}package.json`)
+        a.endsWith(`pkg-a${path.sep}package.json`),
       );
 
       if (!pkgPath) throw new Error(`could not find an updated package json`);
@@ -959,6 +981,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1023,13 +1046,13 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
-            }
+            },
           );
           let pkgPathA = changedFiles.find((a) =>
-            a.endsWith(`pkg-a${path.sep}package.json`)
+            a.endsWith(`pkg-a${path.sep}package.json`),
           );
           let pkgPathB = changedFiles.find((b) =>
-            b.endsWith(`pkg-b${path.sep}package.json`)
+            b.endsWith(`pkg-b${path.sep}package.json`),
           );
 
           if (!pkgPathA || !pkgPathB) {
@@ -1060,6 +1083,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1140,13 +1164,13 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
-            }
+            },
           );
           let pkgPathA = changedFiles.find((a) =>
-            a.endsWith(`pkg-a${path.sep}package.json`)
+            a.endsWith(`pkg-a${path.sep}package.json`),
           );
           let pkgPathB = changedFiles.find((b) =>
-            b.endsWith(`pkg-b${path.sep}package.json`)
+            b.endsWith(`pkg-b${path.sep}package.json`),
           );
 
           if (!pkgPathA || !pkgPathB) {
@@ -1178,6 +1202,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1242,13 +1267,13 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
-            }
+            },
           );
           let pkgPathA = changedFiles.find((a) =>
-            a.endsWith(`pkg-a${path.sep}package.json`)
+            a.endsWith(`pkg-a${path.sep}package.json`),
           );
           let pkgPathB = changedFiles.find((b) =>
-            b.endsWith(`pkg-b${path.sep}package.json`)
+            b.endsWith(`pkg-b${path.sep}package.json`),
           );
 
           if (!pkgPathA || !pkgPathB) {
@@ -1279,6 +1304,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1343,13 +1369,13 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
-            }
+            },
           );
           let pkgPathA = changedFiles.find((a) =>
-            a.endsWith(`pkg-a${path.sep}package.json`)
+            a.endsWith(`pkg-a${path.sep}package.json`),
           );
           let pkgPathB = changedFiles.find((b) =>
-            b.endsWith(`pkg-b${path.sep}package.json`)
+            b.endsWith(`pkg-b${path.sep}package.json`),
           );
 
           if (!pkgPathA || !pkgPathB) {
@@ -1380,6 +1406,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1444,13 +1471,13 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
-            }
+            },
           );
           let pkgPathA = changedFiles.find((a) =>
-            a.endsWith(`pkg-a${path.sep}package.json`)
+            a.endsWith(`pkg-a${path.sep}package.json`),
           );
           let pkgPathB = changedFiles.find((b) =>
-            b.endsWith(`pkg-b${path.sep}package.json`)
+            b.endsWith(`pkg-b${path.sep}package.json`),
           );
 
           if (!pkgPathA || !pkgPathB) {
@@ -1484,6 +1511,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1548,13 +1576,13 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
-            }
+            },
           );
           let pkgPathA = changedFiles.find((a) =>
-            a.endsWith(`pkg-a${path.sep}package.json`)
+            a.endsWith(`pkg-a${path.sep}package.json`),
           );
           let pkgPathB = changedFiles.find((b) =>
-            b.endsWith(`pkg-b${path.sep}package.json`)
+            b.endsWith(`pkg-b${path.sep}package.json`),
           );
 
           if (!pkgPathA || !pkgPathB) {
@@ -1585,6 +1613,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1665,13 +1694,13 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
-            }
+            },
           );
           let pkgPathA = changedFiles.find((a) =>
-            a.endsWith(`pkg-a${path.sep}package.json`)
+            a.endsWith(`pkg-a${path.sep}package.json`),
           );
           let pkgPathB = changedFiles.find((b) =>
-            b.endsWith(`pkg-b${path.sep}package.json`)
+            b.endsWith(`pkg-b${path.sep}package.json`),
           );
 
           if (!pkgPathA || !pkgPathB) {
@@ -1703,6 +1732,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1775,13 +1805,13 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
-            }
+            },
           );
           let pkgPathA = changedFiles.find((a) =>
-            a.endsWith(`pkg-a${path.sep}package.json`)
+            a.endsWith(`pkg-a${path.sep}package.json`),
           );
           let pkgPathB = changedFiles.find((b) =>
-            b.endsWith(`pkg-b${path.sep}package.json`)
+            b.endsWith(`pkg-b${path.sep}package.json`),
           );
 
           if (!pkgPathA || !pkgPathB) {
@@ -1812,6 +1842,7 @@ describe("apply release plan", () => {
                 private: true,
                 workspaces: ["packages/*"],
               }),
+              "package-lock.json": "",
               "packages/pkg-a/package.json": JSON.stringify({
                 name: "pkg-a",
                 version: "1.0.3",
@@ -1876,13 +1907,13 @@ describe("apply release plan", () => {
                 useCalculatedVersion: false,
                 prereleaseTemplate: null,
               },
-            }
+            },
           );
           let pkgPathA = changedFiles.find((a) =>
-            a.endsWith(`pkg-a${path.sep}package.json`)
+            a.endsWith(`pkg-a${path.sep}package.json`),
           );
           let pkgPathB = changedFiles.find((b) =>
-            b.endsWith(`pkg-b${path.sep}package.json`)
+            b.endsWith(`pkg-b${path.sep}package.json`),
           );
 
           if (!pkgPathA || !pkgPathB) {
@@ -1917,6 +1948,7 @@ describe("apply release plan", () => {
               private: true,
               workspaces: ["packages/*"],
             }),
+            "package-lock.json": "",
             "packages/depended-upon/package.json": JSON.stringify({
               name: "depended-upon",
               version: "1.0.0",
@@ -1978,13 +2010,13 @@ describe("apply release plan", () => {
               useCalculatedVersion: false,
               prereleaseTemplate: null,
             },
-          }
+          },
         );
         let pkgPathDependent = changedFiles.find((a) =>
-          a.endsWith(`has-peer-dep${path.sep}package.json`)
+          a.endsWith(`has-peer-dep${path.sep}package.json`),
         );
         let pkgPathDepended = changedFiles.find((b) =>
-          b.endsWith(`depended-upon${path.sep}package.json`)
+          b.endsWith(`depended-upon${path.sep}package.json`),
         );
 
         if (!pkgPathDependent || !pkgPathDepended) {
@@ -2007,6 +2039,7 @@ describe("apply release plan", () => {
       });
     });
   });
+
   describe("changelogs", () => {
     it("should not generate any changelogs", async () => {
       const releasePlan = new FakeReleasePlan();
@@ -2016,6 +2049,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2025,13 +2059,14 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           changelog: false,
-        }
+        },
       );
 
       expect(
-        changedFiles.find((a) => a.endsWith(`pkg-a${path.sep}CHANGELOG.md`))
+        changedFiles.find((a) => a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)),
       ).toBeUndefined();
     });
+
     it("should update a changelog for one package", async () => {
       const releasePlan = new FakeReleasePlan();
       let { changedFiles } = await testSetup(
@@ -2040,6 +2075,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2049,14 +2085,17 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry.ts",
+            ),
             null,
           ],
-        }
+        },
       );
 
       let readmePath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
       );
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
@@ -2070,6 +2109,59 @@ describe("apply release plan", () => {
 
       - Hey, let's have fun with testing!`);
     });
+
+    it("should insert new entry before existing version heading when no package title is present", async () => {
+      const releasePlan = new FakeReleasePlan();
+      let { changedFiles } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "yarn.lock": "",
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+          "packages/pkg-a/CHANGELOG.md":
+            "## 1.0.0\n\n### Minor Changes\n\n- Initial release\n",
+        },
+        releasePlan.getReleasePlan(),
+        {
+          ...releasePlan.config,
+          changelog: [
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry",
+            ),
+            null,
+          ],
+        },
+      );
+
+      let readmePath = changedFiles.find((a) =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
+      );
+
+      if (!readmePath) throw new Error(`could not find an updated changelog`);
+      let readme = await fs.readFile(readmePath, "utf-8");
+
+      expect(readme).toMatchInlineSnapshot(`
+        "## 1.1.0
+
+        ### Minor Changes
+
+        - Hey, let's have fun with testing!
+
+        ## 1.0.0
+
+        ### Minor Changes
+
+        - Initial release
+        "
+      `);
+    });
+
     it("should update a changelog for two packages", async () => {
       const releasePlan = new FakeReleasePlan(
         [],
@@ -2081,7 +2173,7 @@ describe("apply release plan", () => {
             newVersion: "2.0.0",
             changesets: [],
           },
-        ]
+        ],
       );
 
       let { changedFiles } = await testSetup(
@@ -2090,6 +2182,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2106,17 +2199,20 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry.ts",
+            ),
             null,
           ],
-        }
+        },
       );
 
       let readmePath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
       );
       let readmePathB = changedFiles.find((a) =>
-        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`),
       );
 
       if (!readmePath || !readmePathB)
@@ -2140,6 +2236,7 @@ describe("apply release plan", () => {
 
       ## 2.0.0`);
     });
+
     it("should not update the changelog if only devDeps changed", async () => {
       let { changedFiles } = await testSetup(
         {
@@ -2147,6 +2244,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2196,7 +2294,10 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry.ts",
+            ),
             null,
           ],
           updateInternalDependencies: "patch",
@@ -2211,10 +2312,10 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
-        }
+        },
       );
       let pkgAChangelogPath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
       );
 
       expect(pkgAChangelogPath).toBeUndefined();
@@ -2241,6 +2342,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2250,14 +2352,17 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry.ts",
+            ),
             null,
           ],
-        }
+        },
       );
 
       let readmePath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
       );
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
@@ -2272,7 +2377,7 @@ describe("apply release plan", () => {
           "  get it while it's hot!\n",
           "- New feature, much wow\n",
           "  look at this shiny stuff!",
-        ].join("\n")
+        ].join("\n"),
       );
     });
 
@@ -2283,6 +2388,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.3",
@@ -2329,7 +2435,10 @@ describe("apply release plan", () => {
         },
         {
           changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry.ts",
+            ),
             null,
           ],
           commit: false,
@@ -2350,14 +2459,14 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
-        }
+        },
       );
 
       let readmePath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
       );
       let readmePathB = changedFiles.find((a) =>
-        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`),
       );
 
       if (!readmePath || !readmePathB)
@@ -2393,6 +2502,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.3",
@@ -2439,7 +2549,10 @@ describe("apply release plan", () => {
         },
         {
           changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry.ts",
+            ),
             null,
           ],
           commit: false,
@@ -2460,14 +2573,14 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
-        }
+        },
       );
 
       let readmePath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
       );
       let readmePathB = changedFiles.find((a) =>
-        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`),
       );
 
       if (!readmePath || !readmePathB)
@@ -2499,6 +2612,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.3",
@@ -2561,7 +2675,10 @@ describe("apply release plan", () => {
         },
         {
           changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry.ts",
+            ),
             null,
           ],
           commit: false,
@@ -2582,17 +2699,17 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
-        }
+        },
       );
 
       let readmePath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
       );
       let readmePathB = changedFiles.find((a) =>
-        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`),
       );
       let readmePathC = changedFiles.find((a) =>
-        a.endsWith(`pkg-c${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-c${path.sep}CHANGELOG.md`),
       );
 
       if (!readmePath || !readmePathB || !readmePathC)
@@ -2635,6 +2752,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.3",
@@ -2697,7 +2815,10 @@ describe("apply release plan", () => {
         },
         {
           changelog: [
-            path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-changelog-entry.ts",
+            ),
             null,
           ],
           commit: false,
@@ -2718,17 +2839,17 @@ describe("apply release plan", () => {
             useCalculatedVersion: false,
             prereleaseTemplate: null,
           },
-        }
+        },
       );
 
       let readmePath = changedFiles.find((a) =>
-        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
       );
       let readmePathB = changedFiles.find((a) =>
-        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-b${path.sep}CHANGELOG.md`),
       );
       let readmePathC = changedFiles.find((a) =>
-        a.endsWith(`pkg-c${path.sep}CHANGELOG.md`)
+        a.endsWith(`pkg-c${path.sep}CHANGELOG.md`),
       );
 
       if (!readmePath || !readmePathB || !readmePathC)
@@ -2764,6 +2885,7 @@ describe("apply release plan", () => {
       - Hey, let's have fun with testing!`);
     });
   });
+
   describe("should error and not write if", () => {
     // This is skipped as *for now* we are assuming we have been passed
     // valid releasePlans - this may get work done on it in the future
@@ -2776,6 +2898,7 @@ describe("apply release plan", () => {
               private: true,
               workspaces: ["packages/*"],
             }),
+            "package-lock.json": "",
             "packages/pkg-a/package.json": JSON.stringify({
               name: "pkg-a",
               version: "1.0.0",
@@ -2806,7 +2929,7 @@ describe("apply release plan", () => {
               },
             ],
             preState: undefined,
-          }
+          },
         );
         changedFiles = testResults.changedFiles;
       } catch (e) {
@@ -2817,10 +2940,11 @@ describe("apply release plan", () => {
 
       throw new Error(
         `expected error but instead got changed files: \n${changedFiles.join(
-          "\n"
-        )}`
+          "\n",
+        )}`,
       );
     });
+
     it("a package cannot be found", async () => {
       let releasePlan = new FakeReleasePlan(
         [],
@@ -2832,7 +2956,7 @@ describe("apply release plan", () => {
             newVersion: "1.0.0",
             changesets: [],
           },
-        ]
+        ],
       );
 
       let tempDir = await testdir({
@@ -2840,6 +2964,7 @@ describe("apply release plan", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -2853,32 +2978,36 @@ describe("apply release plan", () => {
         }),
       });
 
-      await spawn("git", ["init"], { cwd: tempDir });
+      await exec("git", ["init"], { nodeOptions: { cwd: tempDir } });
 
       await git.add(".", tempDir);
       await git.commit("first commit", tempDir);
 
       try {
+        const packages = await getPackages(tempDir);
         await applyReleasePlan(
           releasePlan.getReleasePlan(),
-          await getPackages(tempDir),
-          releasePlan.config
+          packages,
+          releasePlan.config,
         );
       } catch (e) {
         expect((e as Error).message).toEqual(
-          "Could not find matching package for release of: impossible-package"
+          "Could not find matching package for release of: impossible-package",
         );
 
-        let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+        let gitCmd = await exec("git", ["status"], {
+          nodeOptions: { cwd: tempDir },
+        });
 
         expect(gitCmd.stdout.toString().includes("nothing to commit")).toEqual(
-          true
+          true,
         );
         return;
       }
 
       throw new Error("Expected test to exit before this point");
     });
+
     it(
       "a provided changelog function fails",
       temporarilySilenceLogs(async () => {
@@ -2889,6 +3018,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2902,30 +3032,33 @@ describe("apply release plan", () => {
           }),
         });
 
-        await spawn("git", ["init"], { cwd: tempDir });
+        await exec("git", ["init"], { nodeOptions: { cwd: tempDir } });
 
         await git.add(".", tempDir);
         await git.commit("first commit", tempDir);
 
         try {
-          await applyReleasePlan(
-            releasePlan.getReleasePlan(),
-            await getPackages(tempDir),
-            {
-              ...releasePlan.config,
-              changelog: [
-                path.resolve(__dirname, "test-utils/failing-functions"),
-                null,
-              ],
-            }
-          );
+          const packages = await getPackages(tempDir);
+
+          await applyReleasePlan(releasePlan.getReleasePlan(), packages, {
+            ...releasePlan.config,
+            changelog: [
+              path.resolve(
+                import.meta.dirname,
+                "test-utils/failing-functions.ts",
+              ),
+              null,
+            ],
+          });
         } catch (e) {
           expect((e as Error).message).toEqual("no chance");
 
-          let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+          let gitCmd = await exec("git", ["status"], {
+            nodeOptions: { cwd: tempDir },
+          });
 
           expect(
-            gitCmd.stdout.toString().includes("nothing to commit")
+            gitCmd.stdout.toString().includes("nothing to commit"),
           ).toEqual(true);
           expect((console.error as any).mock.calls).toMatchInlineSnapshot(`
             [
@@ -2941,14 +3074,15 @@ describe("apply release plan", () => {
         }
 
         throw new Error("Expected test to exit before this point");
-      })
+      }),
     );
   });
+
   describe("changesets", () => {
     it("should delete one changeset after it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetPath: string;
+      let changesetPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -2957,7 +3091,7 @@ describe("apply release plan", () => {
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
             return outputFile(thisPath, content);
-          })
+          }),
         );
 
       await testSetup(
@@ -2966,6 +3100,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -2974,17 +3109,17 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config,
         undefined,
-        setupFunc
+        setupFunc,
       );
 
-      // @ts-ignore this is possibly bad
-      let changesetExists = await pathExists(changesetPath);
+      let changesetExists = existsSync(changesetPath);
       expect(changesetExists).toEqual(false);
     });
+
     it("should NOT delete changesets for ignored packages", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetPath: string;
+      let changesetPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -2993,7 +3128,7 @@ describe("apply release plan", () => {
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
             return outputFile(thisPath, content);
-          })
+          }),
         );
 
       await testSetup(
@@ -3002,6 +3137,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3010,17 +3146,17 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         { ...releasePlan.config, ignore: ["pkg-a"] },
         undefined,
-        setupFunc
+        setupFunc,
       );
 
-      // @ts-ignore this is possibly bad
-      let changesetExists = await pathExists(changesetPath);
+      let changesetExists = existsSync(changesetPath);
       expect(changesetExists).toEqual(true);
     });
+
     it("should NOT delete changesets for private unversioned packages", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetPath: string;
+      let changesetPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -3029,7 +3165,7 @@ describe("apply release plan", () => {
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
             return outputFile(thisPath, content);
-          })
+          }),
         );
 
       await testSetup(
@@ -3038,6 +3174,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3050,18 +3187,18 @@ describe("apply release plan", () => {
           privatePackages: { version: false, tag: false },
         },
         undefined,
-        setupFunc
+        setupFunc,
       );
 
-      // @ts-ignore this is possibly bad
-      let changesetExists = await pathExists(changesetPath);
+      let changesetExists = existsSync(changesetPath);
       expect(changesetExists).toEqual(true);
     });
+
     it("should delete an old format changeset if it is applied", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetMDPath: string;
-      let changesetJSONPath: string;
+      let changesetMDPath!: string;
+      let changesetJSONPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -3072,20 +3209,20 @@ describe("apply release plan", () => {
                 tempDir,
                 ".changeset",
                 id,
-                `changes.md`
+                `changes.md`,
               );
               changesetJSONPath = path.resolve(
                 tempDir,
                 ".changeset",
                 id,
-                `changes.json`
+                `changes.json`,
               );
               await outputFile(changesetMDPath, summary);
               await outputFile(
                 changesetJSONPath,
-                JSON.stringify({ id, summary })
+                JSON.stringify({ id, summary }),
               );
-            })
+            }),
         );
 
       await testSetup(
@@ -3094,6 +3231,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3102,13 +3240,11 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         releasePlan.config,
         undefined,
-        setupFunc
+        setupFunc,
       );
 
-      // @ts-ignore this is possibly bad
-      let mdPathExists = await pathExists(changesetMDPath);
-      // @ts-ignore this is possibly bad
-      let JSONPathExists = await pathExists(changesetJSONPath);
+      let mdPathExists = existsSync(changesetMDPath);
+      let JSONPathExists = existsSync(changesetJSONPath);
 
       expect(mdPathExists).toEqual(false);
       expect(JSONPathExists).toEqual(false);
@@ -3128,17 +3264,17 @@ describe("apply release plan", () => {
             tempDir,
             ".changeset",
             id,
-            `changes.md`
+            `changes.md`,
           );
           changesetJSONPath = path.resolve(
             tempDir,
             ".changeset",
             id,
-            `changes.json`
+            `changes.json`,
           );
           await outputFile(changesetMDPath, summary);
           await outputFile(changesetJSONPath, JSON.stringify({ id, summary }));
-        })
+        }),
       );
 
     let { tempDir } = await testSetup(
@@ -3147,6 +3283,7 @@ describe("apply release plan", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -3156,31 +3293,36 @@ describe("apply release plan", () => {
       {
         ...releasePlan.config,
         commit: [
-          path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+          path.resolve(
+            import.meta.dirname,
+            "test-utils/simple-get-commit-entry",
+          ),
           null,
         ],
         changelog: [
-          path.resolve(__dirname, "test-utils/simple-get-changelog-entry"),
+          path.resolve(
+            import.meta.dirname,
+            "test-utils/simple-get-changelog-entry.ts",
+          ),
           null,
         ],
       },
       undefined,
-      setupFunc
+      setupFunc,
     );
 
-    let thing = await spawn("git", ["rev-list", "HEAD"], { cwd: tempDir });
-    let commits = thing.stdout
-      .toString("utf8")
-      .split("\n")
-      .filter((x) => x);
+    let thing = await exec("git", ["rev-list", "HEAD"], {
+      nodeOptions: { cwd: tempDir },
+    });
+    let commits = thing.stdout.split("\n").filter((x) => x);
 
     let lastCommit = commits[commits.length - 1].substring(0, 7);
 
     expect(
       await fs.readFile(
         path.join(tempDir, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf8"
-      )
+        "utf8",
+      ),
     ).toBe(`# pkg-a
 
 ## 1.1.0
@@ -3201,6 +3343,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3217,23 +3360,30 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           commit: [
-            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-commit-entry",
+            ),
             null,
           ],
-        }
+        },
       );
 
-      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+      let gitCmd = await exec("git", ["status"], {
+        nodeOptions: { cwd: tempDir },
+      });
 
       expect(gitCmd.stdout.toString()).toContain(
-        "Changes not staged for commit"
+        "Changes not staged for commit",
       );
 
       expect(gitCmd.stdout.toString()).toContain(
-        "modified:   packages/pkg-a/package.json"
+        "modified:   packages/pkg-a/package.json",
       );
 
-      let lastCommit = await spawn("git", ["log", "-1"], { cwd: tempDir });
+      let lastCommit = await exec("git", ["log", "-1"], {
+        nodeOptions: { cwd: tempDir },
+      });
 
       expect(lastCommit.stdout.toString()).toContain("first commit");
     });
@@ -3241,7 +3391,7 @@ describe("apply release plan", () => {
     it("should remove applied changesets", async () => {
       const releasePlan = new FakeReleasePlan();
 
-      let changesetPath: string;
+      let changesetPath!: string;
 
       const setupFunc = (tempDir: string) =>
         Promise.all(
@@ -3250,7 +3400,7 @@ describe("apply release plan", () => {
             changesetPath = thisPath;
             const content = `---\n---\n${summary}`;
             return outputFile(thisPath, content);
-          })
+          }),
         );
 
       let { tempDir } = await testSetup(
@@ -3259,6 +3409,7 @@ describe("apply release plan", () => {
             private: true,
             workspaces: ["packages/*"],
           }),
+          "package-lock.json": "",
           "packages/pkg-a/package.json": JSON.stringify({
             name: "pkg-a",
             version: "1.0.0",
@@ -3275,20 +3426,24 @@ describe("apply release plan", () => {
         {
           ...releasePlan.config,
           commit: [
-            path.resolve(__dirname, "test-utils/simple-get-commit-entry"),
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-commit-entry",
+            ),
             null,
           ],
         },
         undefined,
-        setupFunc
+        setupFunc,
       );
 
-      // @ts-ignore this is possibly bad
-      let changesetExists = await pathExists(changesetPath);
+      let changesetExists = existsSync(changesetPath);
 
       expect(changesetExists).toEqual(false);
 
-      let gitCmd = await spawn("git", ["status"], { cwd: tempDir });
+      let gitCmd = await exec("git", ["status"], {
+        nodeOptions: { cwd: tempDir },
+      });
 
       const changesetsDeleted = releasePlan.changesets.reduce(
         (prev, { id }) => {
@@ -3297,11 +3452,71 @@ describe("apply release plan", () => {
             gitCmd.stdout.toString().includes(`deleted:    .changeset/${id}.md`)
           );
         },
-        true
+        true,
       );
 
       expect(releasePlan.changesets.length).toBeGreaterThan(0);
       expect(changesetsDeleted).toBe(true);
+    });
+
+    it("should include pre.json in pre-release", async () => {
+      const releasePlan = new FakeReleasePlan();
+      const preState: PreState = {
+        mode: "pre",
+        tag: "beta",
+        initialVersions: {
+          "pkg-a": "1.0.0",
+          "pkg-b": "1.0.0",
+        },
+        changesets: [],
+      };
+
+      let { tempDir } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "yarn.lock": "",
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+          ".changeset/pre.json": JSON.stringify(preState),
+        },
+        {
+          ...releasePlan.getReleasePlan(),
+          preState,
+        },
+        {
+          ...releasePlan.config,
+          commit: [
+            path.resolve(
+              import.meta.dirname,
+              "test-utils/simple-get-commit-entry",
+            ),
+            null,
+          ],
+        },
+      );
+
+      let gitCmd = await exec("git", ["status"], {
+        nodeOptions: { cwd: tempDir },
+      });
+
+      expect(gitCmd.stdout.toString()).toContain(
+        "modified:   .changeset/pre.json",
+      );
+      expect(gitCmd.stdout.toString()).toContain(
+        "modified:   packages/pkg-a/package.json",
+      );
     });
   });
 });

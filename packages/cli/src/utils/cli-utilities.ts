@@ -1,6 +1,6 @@
 import { error, prefix, success } from "@changesets/logger";
 import enuirer from "enquirer";
-import { edit } from "external-editor";
+import { edit } from "@inquirer/external-editor";
 import ansiColors from "ansi-colors";
 
 const { prompt } = enuirer;
@@ -49,7 +49,7 @@ let cancelFlow = () => {
 async function askCheckboxPlus(
   message: string,
   choices: Array<any>,
-  format?: (arg: any) => any
+  format?: (arg: any) => any,
 ): Promise<Array<string>> {
   const name = `CheckboxPlus-${serialId()}`;
 
@@ -124,7 +124,7 @@ async function askConfirm(message: string): Promise<boolean> {
 
 async function askList<Choice extends string>(
   message: string,
-  choices: Choice[]
+  choices: Choice[],
 ): Promise<Choice> {
   const name = `List-${serialId()}`;
 

@@ -1,5 +1,10 @@
-import type { NewChangeset, Release, VersionType } from "@changesets/types";
-import type { Package, Packages } from "@manypkg/get-packages";
+import type {
+  NewChangeset,
+  Release,
+  VersionType,
+  Packages,
+  Package,
+} from "@changesets/types";
 
 function getPackage({
   name,
@@ -13,7 +18,7 @@ function getPackage({
       name,
       version,
     },
-    dir: "this-shouldn't-matter",
+    dir: `/packages/${name.replace(/^@/, "").replace(/\//g, "-")}`,
   };
 }
 
@@ -22,7 +27,7 @@ function getChangeset(
     id?: string;
     summary?: string;
     releases?: Array<Release>;
-  } = {}
+  } = {},
 ): NewChangeset {
   let id = data.id || "strange-words-combine";
   let summary = data.summary || "base summary whatever";
@@ -46,19 +51,20 @@ function getRelease({
 
 let getSimpleSetup = () => ({
   packages: {
-    root: {
+    rootPackage: {
       packageJson: {
         name: "root",
         version: "0.0.0",
       },
       dir: "/",
     },
+    rootDir: "/",
     packages: [getPackage({ name: "pkg-a", version: "1.0.0" })],
-    tool: "yarn" as const,
-  },
+    tool: { type: "yarn" },
+  } satisfies Packages,
   changesets: [
     getChangeset({ releases: [getRelease({ name: "pkg-a", type: "patch" })] }),
-  ],
+  ] satisfies Array<NewChangeset>,
 });
 
 class FakeFullState {
@@ -76,12 +82,12 @@ class FakeFullState {
       id?: string;
       summary?: string;
       releases?: Array<Release>;
-    } = {}
+    } = {},
   ) {
     let changeset = getChangeset(data);
     if (this.changesets.find((c) => c.id === changeset.id)) {
       throw new Error(
-        `tried to add a second changeset with same id: ${changeset.id}`
+        `tried to add a second changeset with same id: ${changeset.id}`,
       );
     }
     this.changesets.push(changeset);
@@ -116,11 +122,11 @@ class FakeFullState {
     let pkg = getPackage({ name, version });
     if (
       this.packages.packages.find(
-        (c) => c.packageJson.name === pkg.packageJson.name
+        (c) => c.packageJson.name === pkg.packageJson.name,
       )
     ) {
       throw new Error(
-        `tried to add a second package with same name': ${pkg.packageJson.name}`
+        `tried to add a second package with same name': ${pkg.packageJson.name}`,
       );
     }
     this.packages.packages.push(pkg);
@@ -129,7 +135,7 @@ class FakeFullState {
     let pkg = this.packages.packages.find((c) => c.packageJson.name === name);
     if (!pkg) {
       throw new Error(
-        `could not update package ${name} because it doesn't exist - try addWorskpace`
+        `could not update package ${name} because it doesn't exist - try addWorskpace`,
       );
     }
     pkg.packageJson.version = version;
