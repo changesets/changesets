@@ -10,7 +10,7 @@ function importResolveFromDir(specifier: string, dir: string) {
 export async function getCommitFunctions(
   commit: false | readonly [string, any],
   cwd: string,
-  contextDir: string
+  contextDir: string,
 ): Promise<[CommitFunctions, any]> {
   let commitFunctions: CommitFunctions = {};
   if (!commit) {

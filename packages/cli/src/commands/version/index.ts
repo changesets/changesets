@@ -86,13 +86,13 @@ export default async function version(
     packages,
     releaseConfig,
     options.snapshot,
-    contextDir
+    contextDir,
   );
 
   const [{ getVersionMessage }, commitOpts] = await getCommitFunctions(
     releaseConfig.commit,
     cwd,
-    contextDir
+    contextDir,
   );
   if (getVersionMessage) {
     let touchedFile: string | undefined;

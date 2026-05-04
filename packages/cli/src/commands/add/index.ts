@@ -100,7 +100,7 @@ export default async function add(
     const [{ getAddMessage }, commitOpts] = await getCommitFunctions(
       config.commit,
       cwd,
-      path.dirname(fileURLToPath(import.meta.url))
+      path.dirname(fileURLToPath(import.meta.url)),
     );
     if (getAddMessage) {
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
