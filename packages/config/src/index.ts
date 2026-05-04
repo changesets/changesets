@@ -592,6 +592,10 @@ function globMatch(
 
   const matchers = patterns.map((p) => picomatch(p, undefined, true));
   return paths.filter((path) => {
+    if (path.includes("\\")) {
+      path = path.replace(/\\/g, "/");
+    }
+
     let passed = false;
     for (const matcher of matchers) {
       if (!passed) {

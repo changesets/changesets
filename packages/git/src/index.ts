@@ -344,6 +344,10 @@ function globMatchSome(
 
   const matchers = patterns.map((p) => picomatch(p, undefined, true));
   return paths.some((path) => {
+    if (path.includes("\\")) {
+      path = path.replace(/\\/g, "/");
+    }
+
     let passed = false;
     for (const matcher of matchers) {
       if (!passed) {
