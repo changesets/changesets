@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 7.0.0-next.2
+
+### Minor Changes
+
+- [#1872](https://github.com/changesets/changesets/pull/1872) [`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Export `Package` and `Packages` from `@changesets/types`. They are meant to be used instead of the types from `@manypkg/get-packages`.
+
 ## 7.0.0-next.1
 
 ### Major Changes

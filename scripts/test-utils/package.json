@@ -1,6 +1,6 @@
 {
   "name": "@changesets/test-utils",
-  "version": "0.0.9-next.1",
+  "version": "0.0.9-next.2",
   "private": true,
   "type": "module",
   "description": "Utils for testing changesets packages",
@@ -13,7 +13,7 @@
   "dependencies": {
     "@changesets/logger": "^1.0.0-next.1",
     "fixturez": "^1.1.0",
-		"tinyexec": "^1.0.2",
+    "tinyexec": "^1.0.2",
     "vitest": "^4.1.2"
   },
   "engines": {

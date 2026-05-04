@@ -1,6 +1,6 @@
 {
   "name": "@changesets/should-skip-package",
-  "version": "1.0.0-next.1",
+  "version": "1.0.0-next.2",
   "description": "Checks if a package should be skipped for versioning or tagging purposes",
   "type": "module",
   "exports": {
@@ -10,10 +10,10 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/should-skip-package",
   "dependencies": {
-    "@changesets/types": "^7.0.0-next.1"
+    "@changesets/types": "^7.0.0-next.2"
   },
   "devDependencies": {
-    "@changesets/test-utils": "0.0.9-next.1"
+    "@changesets/test-utils": "0.0.9-next.2"
   },
   "engines": {
     "node": ">=20.19.0"

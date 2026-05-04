@@ -1,5 +1,11 @@
 # @changesets/test-utils
 
+## 0.0.9-next.2
+
+### Patch Changes
+
+- [#1875](https://github.com/changesets/changesets/pull/1875) [`12f20ea`](https://github.com/changesets/changesets/commit/12f20ea75fb5a440a378bd2bf6072a6bd749fd57) Thanks [@beeequeue](https://github.com/beeequeue)! - Replaced `spawndamnit` with `tinyexec`
+
 ## 0.0.9-next.1
 
 ### Patch Changes
