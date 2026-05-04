@@ -30,7 +30,7 @@ export default async function add(
   const packages = await getPackages(cwd);
   if (packages.packages.length === 0) {
     error(
-      `No packages found. You might have ${packages.tool} workspaces configured but no packages yet?`,
+      `No packages found. You might have ${packages.tool.type} workspaces configured but no packages yet?`,
     );
     throw new ExitError(1);
   }
