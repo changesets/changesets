@@ -24,10 +24,8 @@ npm install --save-dev @changesets/get-github-info
 Then you can use it in your `.changeset/config.js` like this.
 
 ```jsx
-import { loadEnvFile } from "node:process";
 import { getInfo } from "@changesets/get-github-info";
 
-loadEnvFile();
 // ...
 
 const getReleaseLine = async (changeset, type) => {
@@ -53,7 +51,7 @@ const getReleaseLine = async (changeset, type) => {
 // ...
 ```
 
-You'll need to [get a GitHub personal access token](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions, and add it to a `.env` file.
+You'll need to [get a GitHub personal access token](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions, and add it to a `.env` file (it'll be loaded automatically).
 
 ```bash
 GITHUB_TOKEN=token_here
