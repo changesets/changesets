@@ -1,7 +1,7 @@
-// NB: Bolt check uses a different dependency set to every other package.
-// You need think before you use this.
 export type VersionType = "major" | "minor" | "patch" | "none";
 
+// NB: Bolt check uses a different dependency set to every other package.
+// You need think before you use this.
 export type DependencyType =
   | "dependencies"
   | "devDependencies"
