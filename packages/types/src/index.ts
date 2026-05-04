@@ -131,13 +131,13 @@ export type GetReleaseLine = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
   changelogOpts: null | Record<string, any>,
-) => Promise<string>;
+) => string | Promise<string>;
 
 export type GetDependencyReleaseLine = (
   changesets: NewChangesetWithCommit[],
   dependenciesUpdated: ModCompWithPackage[],
   changelogOpts: any,
-) => Promise<string>;
+) => string | Promise<string>;
 
 export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
@@ -147,12 +147,12 @@ export type ChangelogFunctions = {
 export type GetAddMessage = (
   changeset: Changeset,
   commitOptions: any,
-) => Promise<string>;
+) => string | Promise<string>;
 
 export type GetVersionMessage = (
   releasePlan: ReleasePlan,
   commitOptions: any,
-) => Promise<string>;
+) => string | Promise<string>;
 
 export type CommitFunctions = {
   getAddMessage?: GetAddMessage;
