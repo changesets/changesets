@@ -36,9 +36,9 @@ ${releasesLines}
 ${skipCI ? `\n[skip ci]\n` : ""}`;
 };
 
-const defaultCommitFunctions: Required<CommitFunctions> = {
+const defaultCommitFunctions = {
   getAddMessage,
   getVersionMessage,
-};
+} satisfies Required<CommitFunctions>;
 
 export default defaultCommitFunctions;
