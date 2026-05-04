@@ -158,7 +158,7 @@ describe("version", () => {
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-a"),
-        relativeDir: "packages/pkg-a",
+        relativeDir: path.join("packages", "pkg-a"),
         packageJson: {
           name: "pkg-a",
           version: "1.1.0",
@@ -169,7 +169,7 @@ describe("version", () => {
       },
       {
         dir: path.join(clone, "packages", "pkg-b"),
-        relativeDir: "packages/pkg-b",
+        relativeDir: path.join("packages", "pkg-b"),
         packageJson: { name: "pkg-b", version: "1.1.0" },
       },
     ]);
@@ -275,7 +275,7 @@ describe("version", () => {
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-a"),
-        relativeDir: "packages/pkg-a",
+        relativeDir: path.join("packages", "pkg-a"),
         packageJson: {
           name: "pkg-a",
           version: "1.1.0",
@@ -329,7 +329,7 @@ describe("version", () => {
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-b"),
-        relativeDir: "packages/pkg-b",
+        relativeDir: path.join("packages", "pkg-b"),
         packageJson: { name: "pkg-b", version: "1.1.0" },
       },
     ]);
