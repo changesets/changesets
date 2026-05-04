@@ -68,6 +68,15 @@ function getUnmatchedPatterns(
   );
 }
 
+function getUnmatchedPackageNames(
+  listOfPackageNamesOrGlob: readonly string[],
+  pkgNames: readonly string[]
+): string[] {
+  return getUnmatchedPatterns(listOfPackageNamesOrGlob, pkgNames).filter(
+    (pkgNameOrGlob) => !micromatch.scan(pkgNameOrGlob).isGlob
+  );
+}
+
 const havePackageGroupsCorrectShape = (
   pkgGroups: ReadonlyArray<PackageGroup>
 ) => {
@@ -360,7 +369,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       );
     } else {
       messages.push(
-        ...getUnmatchedPatterns(json.ignore, pkgNames).map(
+        ...getUnmatchedPackageNames(json.ignore, pkgNames).map(
           (pkgOrGlob) =>
             `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`
         )
