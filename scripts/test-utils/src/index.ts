@@ -105,6 +105,7 @@ export async function testdir(dir?: Fixture) {
 
 export async function gitdir(dir: Fixture) {
   const cwd = await testdir(dir);
+
   await exec("git", ["init"], { nodeOptions: { cwd } });
   // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
   {
@@ -117,19 +118,18 @@ export async function gitdir(dir: Fixture) {
       await exec("git", ["checkout", "-b", "main"], { nodeOptions: { cwd } });
     }
   }
-  await exec("git", ["config", "user.email", "x@y.z"], {
-    nodeOptions: { cwd },
-  });
-  await exec("git", ["config", "user.name", "xyz"], { nodeOptions: { cwd } });
-  await exec("git", ["config", "commit.gpgSign", "false"], {
-    nodeOptions: { cwd },
-  });
-  await exec("git", ["config", "tag.gpgSign", "false"], {
-    nodeOptions: { cwd },
-  });
-  await exec("git", ["config", "tag.forceSignAnnotated", "false"], {
-    nodeOptions: { cwd },
-  });
+
+  const gitConfig = `
+[user]
+    email = x@y.z
+    name = xyz
+[commit]
+    gpgSign = false
+[tag]
+    gpgSign = false
+    forceSignAnnotated = false
+  `.trim();
+  await fsp.appendFile(path.join(cwd, ".git/config"), gitConfig, "utf8");
 
   await exec("git", ["add", "."], { nodeOptions: { cwd } });
   await exec("git", ["commit", "-m", "initial commit", "--allow-empty"], {
