@@ -12,7 +12,7 @@ import type {
   WrittenConfig,
 } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import micromatch from "micromatch";
+import picomatch from "picomatch";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "path";
@@ -67,10 +67,10 @@ function getUnmatchedPatterns(
   listOfPackageNamesOrGlob: readonly string[],
   pkgNames: readonly string[],
 ): string[] {
-  return listOfPackageNamesOrGlob.filter(
-    (pkgNameOrGlob) =>
-      !pkgNames.some((pkgName) => micromatch.isMatch(pkgName, pkgNameOrGlob)),
-  );
+  return listOfPackageNamesOrGlob.filter((pkgOrGlob) => {
+    const matcher = picomatch(pkgOrGlob);
+    return !pkgNames.some((pkgName) => matcher(pkgName));
+  });
 }
 
 const havePackageGroupsCorrectShape = (
@@ -214,11 +214,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.push(
           ...getUnmatchedPatterns(fixedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`,
+              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/picomatch.`,
           ),
         );
 
-        let expandedFixedGroup = micromatch(pkgNames, fixedGroup);
+        const expandedFixedGroup = globMatch(pkgNames, fixedGroup);
         fixed.push(expandedFixedGroup);
 
         for (let fixedPkgName of expandedFixedGroup) {
@@ -232,7 +232,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch`,
+            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/picomatch.`,
           );
         });
       }
@@ -257,11 +257,11 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         messages.push(
           ...getUnmatchedPatterns(linkedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`,
+              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/picomatch.`,
           ),
         );
 
-        let expandedLinkedGroup = micromatch(pkgNames, linkedGroup);
+        let expandedLinkedGroup = globMatch(pkgNames, linkedGroup);
         linked.push(expandedLinkedGroup);
 
         for (let linkedPkgName of expandedLinkedGroup) {
@@ -275,7 +275,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/micromatch`,
+            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/picomatch.`,
           );
         });
       }
@@ -370,7 +370,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       messages.push(
         ...getUnmatchedPatterns(json.ignore, pkgNames).map(
           (pkgOrGlob) =>
-            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/micromatch`,
+            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/picomatch.`,
         ),
       );
     }
@@ -539,7 +539,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     ignore:
       json.ignore === undefined
         ? defaultWrittenConfig.ignore
-        : micromatch(pkgNames, json.ignore),
+        : globMatch(pkgNames, json.ignore),
 
     bumpVersionsWithWorkspaceProtocolOnly:
       json.bumpVersionsWithWorkspaceProtocolOnly === true,
@@ -583,6 +583,32 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
 
   return config;
 };
+
+function globMatch(
+  paths: readonly string[],
+  patterns?: readonly string[],
+): string[] {
+  if (!patterns) return paths as string[];
+
+  const matchers = patterns.map((p) => picomatch(p, undefined, true));
+  return paths.filter((path) => {
+    let passed = false;
+    for (const matcher of matchers) {
+      if (!passed) {
+        // If not passed yet, only match positive matches
+        if (!matcher.state.negated && matcher(path)) {
+          passed = true;
+        }
+      } else {
+        // If passed, only match negative/negated matches
+        if (matcher.state.negated && !matcher(path)) {
+          passed = false;
+        }
+      }
+    }
+    return passed;
+  });
+}
 
 let fakePackage: Package = {
   dir: "",
