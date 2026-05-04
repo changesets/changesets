@@ -2131,7 +2131,7 @@ describe("apply release plan", () => {
           changelog: [
             path.resolve(
               import.meta.dirname,
-              "test-utils/simple-get-changelog-entry",
+              "test-utils/simple-get-changelog-entry.ts",
             ),
             null,
           ],
