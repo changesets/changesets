@@ -4,18 +4,18 @@
   "private": true,
   "description": "A tool to help manage the versioning and changelogs for open source packages",
   "scripts": {
-    "test": "vitest",
+    "postinstall": "preconstruct dev && manypkg check",
     "build": "preconstruct build",
     "watch": "preconstruct watch",
-    "postinstall": "preconstruct dev && manypkg check",
-    "lint": "yarn eslint . --ext .ts,.tsx,.js",
-    "types:check": "tsc",
     "format": "prettier --experimental-cli --list-different \"**/*.{js,ts,tsx,md}\"",
     "format:fix": "prettier --experimental-cli --write \"**/*.{js,ts,tsx,md}\"",
-    "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js",
-    "check-all": "yarn test && yarn types:check && yarn lint && yarn format",
-    "version-packages": "yarn changeset version && yarn format:fix",
-    "release": "yarn build && yarn changeset publish"
+    "lint": "eslint . --ext .ts,.tsx,.js",
+    "test": "vitest",
+    "types:check": "tsc",
+    "check-all": "node --run build && node --run test -- run && node --run types:check && node --run lint && node --run format",
+    "version-packages": "node --run changeset version && node --run format:fix",
+    "release": "node --run build && node --run changeset publish",
+    "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js"
   },
   "repository": {
     "type": "git",
