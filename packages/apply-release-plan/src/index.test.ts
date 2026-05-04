@@ -51,6 +51,7 @@ class FakeReleasePlan {
       changedFilePatterns: ["**"],
       baseBranch: "main",
       updateInternalDependencies: "patch",
+      requireSemverSatisfaction: false,
       ignore: [],
       prettier: true,
       privatePackages: { version: true, tag: false },
@@ -95,6 +96,7 @@ async function testSetup(
       changedFilePatterns: ["**"],
       baseBranch: "main",
       updateInternalDependencies: "patch",
+      requireSemverSatisfaction: false,
       ignore: [],
       prettier: true,
       privatePackages: { version: true, tag: false },
@@ -692,6 +694,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
+          requireSemverSatisfaction: false,
           prettier: true,
           privatePackages: { version: true, tag: false },
           ignore: [],
@@ -770,6 +773,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
+          requireSemverSatisfaction: false,
           prettier: true,
           privatePackages: { version: true, tag: false },
           ignore: [],
@@ -1032,6 +1036,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1149,6 +1154,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1251,6 +1257,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1352,6 +1359,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1453,6 +1461,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1557,6 +1566,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1769,6 +1779,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1879,6 +1890,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -1980,6 +1992,7 @@ describe("apply release plan", () => {
               changedFilePatterns: ["**"],
               baseBranch: "main",
               updateInternalDependencies,
+              requireSemverSatisfaction: false,
               ignore: [],
               prettier: true,
               privatePackages: { version: true, tag: false },
@@ -2402,6 +2415,269 @@ describe("apply release plan", () => {
           });
         });
       });
+
+      describe("requireSemverSatisfaction option", () => {
+        it("should update dependency if requireSemverSatisfaction is false and new version is out of range", async () => {
+          const fixture = {
+            "package.json": JSON.stringify({
+              private: true,
+              workspaces: ["packages/*"],
+            }),
+            "packages/pkg-a/package.json": JSON.stringify({
+              name: "pkg-a",
+              version: "1.0.0",
+              dependencies: {
+                "pkg-b": "^1.0.0",
+              },
+            }),
+            "packages/pkg-b/package.json": JSON.stringify({
+              name: "pkg-b",
+              version: "1.0.0",
+            }),
+            ".changeset/config.json": JSON.stringify({
+              ...defaultConfig,
+              requireSemverSatisfaction: false,
+            }),
+          };
+
+          const releasePlan: ReleasePlan = {
+            changesets: [
+              {
+                id: "test-changeset",
+                summary: "bumps pkg-b to 2.0.0",
+                releases: [{ name: "pkg-b", type: "major" }],
+              },
+            ],
+            releases: [
+              {
+                name: "pkg-b",
+                type: "major",
+                oldVersion: "1.0.0",
+                newVersion: "2.0.0",
+                changesets: ["test-changeset"],
+              },
+              {
+                name: "pkg-a",
+                type: "patch",
+                oldVersion: "1.0.0",
+                newVersion: "1.0.1",
+                changesets: ["test-changeset"],
+              },
+            ],
+            preState: undefined,
+          };
+
+          const packages = await getPackages(await testdir(fixture));
+          const config = JSON.parse(
+            await fs.readFile(
+              path.join(packages.root.dir, ".changeset/config.json"),
+              "utf-8"
+            )
+          ) as Config;
+
+          await applyReleasePlan(releasePlan, packages, config);
+
+          const pkgADir = packages.packages.find(
+            (p) => p.packageJson.name === "pkg-a"
+          )?.dir;
+          if (!pkgADir) throw new Error("pkg-a not found in test setup");
+
+          const pkgAJson = JSON.parse(
+            await fs.readFile(path.join(pkgADir, "package.json"), "utf-8")
+          );
+          expect(pkgAJson.dependencies["pkg-b"]).toBe("^2.0.0");
+        });
+
+        it("should NOT update dependency if requireSemverSatisfaction is true and new version is out of range", async () => {
+          const fixture = {
+            "package.json": JSON.stringify({
+              private: true,
+              workspaces: ["packages/*"],
+            }),
+            "packages/pkg-a/package.json": JSON.stringify({
+              name: "pkg-a",
+              version: "1.0.0",
+              dependencies: {
+                "pkg-b": "^1.0.0", // Existing range
+              },
+            }),
+            "packages/pkg-b/package.json": JSON.stringify({
+              name: "pkg-b",
+              version: "1.0.0",
+            }),
+          };
+          const tempDir = await testdir(fixture);
+
+          const releasePlan: ReleasePlan = {
+            changesets: [
+              {
+                id: "test-changeset-no-update",
+                summary: "bumps pkg-b to 2.0.0 but should not update dependent",
+                releases: [{ name: "pkg-b", type: "major" }],
+              },
+            ],
+            releases: [
+              {
+                name: "pkg-b",
+                type: "major",
+                oldVersion: "1.0.0",
+                newVersion: "2.0.0", // New version, out of range for ^1.0.0
+                changesets: ["test-changeset-no-update"],
+              },
+              {
+                name: "pkg-a",
+                type: "patch",
+                oldVersion: "1.0.0",
+                newVersion: "1.0.1",
+                changesets: ["test-changeset-no-update"],
+              },
+            ],
+            preState: undefined,
+          };
+
+          const packages = await getPackages(tempDir);
+          // Explicitly define the config for this test
+          const config: Config = {
+            ...defaultConfig,
+            requireSemverSatisfaction: true,
+            changelog: defaultConfig.changelog || false,
+            commit: defaultConfig.commit || false,
+            fixed: defaultConfig.fixed || [],
+            linked: defaultConfig.linked || [],
+            access: defaultConfig.access || "restricted",
+            baseBranch: defaultConfig.baseBranch || "master",
+            updateInternalDependencies:
+              defaultConfig.updateInternalDependencies || "patch",
+            ignore: defaultConfig.ignore || [],
+            changedFilePatterns: defaultConfig.changedFilePatterns || ["**"],
+            bumpVersionsWithWorkspaceProtocolOnly:
+              defaultConfig.bumpVersionsWithWorkspaceProtocolOnly || false,
+            prettier: defaultConfig.prettier !== false,
+            privatePackages: defaultConfig.privatePackages || {
+              version: true,
+              tag: false,
+            },
+            snapshot: defaultConfig.snapshot || {
+              useCalculatedVersion: false,
+              prereleaseTemplate: null,
+            },
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH:
+              defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH || {
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                updateInternalDependents: "out-of-range",
+              },
+          };
+
+          await applyReleasePlan(releasePlan, packages, config);
+
+          const pkgAJson = JSON.parse(
+            await fs.readFile(
+              path.join(
+                packages.packages.find((p) => p.packageJson.name === "pkg-a")!
+                  .dir,
+                "package.json"
+              ),
+              "utf-8"
+            )
+          );
+          expect(pkgAJson.dependencies["pkg-b"]).toBe("^1.0.0"); // Should NOT change
+        });
+
+        it("should update dependency if requireSemverSatisfaction is true and new version is IN range", async () => {
+          const fixture = {
+            "package.json": JSON.stringify({
+              private: true,
+              workspaces: ["packages/*"],
+            }),
+            "packages/pkg-a/package.json": JSON.stringify({
+              name: "pkg-a",
+              version: "1.0.0",
+              dependencies: {
+                "pkg-b": "^1.0.0", // Existing range
+              },
+            }),
+            "packages/pkg-b/package.json": JSON.stringify({
+              name: "pkg-b",
+              version: "1.0.0",
+            }),
+          };
+          const tempDir = await testdir(fixture);
+
+          const releasePlan: ReleasePlan = {
+            changesets: [
+              {
+                id: "test-changeset-in-range",
+                summary: "bumps pkg-b to 1.0.1",
+                releases: [{ name: "pkg-b", type: "patch" }],
+              },
+            ],
+            releases: [
+              {
+                name: "pkg-b",
+                type: "patch",
+                oldVersion: "1.0.0",
+                newVersion: "1.0.1", // New version, IN range for ^1.0.0
+                changesets: ["test-changeset-in-range"],
+              },
+              {
+                name: "pkg-a",
+                type: "patch",
+                oldVersion: "1.0.0",
+                newVersion: "1.0.1",
+                changesets: ["test-changeset-in-range"],
+              },
+            ],
+            preState: undefined,
+          };
+
+          const packages = await getPackages(tempDir);
+          // Explicitly define the config for this test
+          const config: Config = {
+            ...defaultConfig,
+            requireSemverSatisfaction: true, // Enable the feature
+            changelog: defaultConfig.changelog || false,
+            commit: defaultConfig.commit || false,
+            fixed: defaultConfig.fixed || [],
+            linked: defaultConfig.linked || [],
+            access: defaultConfig.access || "restricted",
+            baseBranch: defaultConfig.baseBranch || "master",
+            updateInternalDependencies:
+              defaultConfig.updateInternalDependencies || "patch",
+            ignore: defaultConfig.ignore || [],
+            changedFilePatterns: defaultConfig.changedFilePatterns || ["**"],
+            bumpVersionsWithWorkspaceProtocolOnly:
+              defaultConfig.bumpVersionsWithWorkspaceProtocolOnly || false,
+            prettier: defaultConfig.prettier !== false,
+            privatePackages: defaultConfig.privatePackages || {
+              version: true,
+              tag: false,
+            },
+            snapshot: defaultConfig.snapshot || {
+              useCalculatedVersion: false,
+              prereleaseTemplate: null,
+            },
+            ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH:
+              defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH || {
+                onlyUpdatePeerDependentsWhenOutOfRange: false,
+                updateInternalDependents: "out-of-range",
+              },
+          };
+
+          await applyReleasePlan(releasePlan, packages, config);
+
+          const pkgAJson = JSON.parse(
+            await fs.readFile(
+              path.join(
+                packages.packages.find((p) => p.packageJson.name === "pkg-a")!
+                  .dir,
+                "package.json"
+              ),
+              "utf-8"
+            )
+          );
+          expect(pkgAJson.dependencies["pkg-b"]).toBe("^1.0.1"); // Should update
+        });
+      });
     });
 
     describe("onlyUpdatePeerDependentsWhenOutOfRange set to true", () => {
@@ -2462,6 +2738,7 @@ describe("apply release plan", () => {
             changedFilePatterns: ["**"],
             baseBranch: "main",
             updateInternalDependencies: "patch",
+            requireSemverSatisfaction: false,
             ignore: [],
             prettier: true,
             privatePackages: { version: true, tag: false },
@@ -2747,6 +3024,7 @@ describe("apply release plan", () => {
             null,
           ],
           updateInternalDependencies: "patch",
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
@@ -2886,6 +3164,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "patch",
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
@@ -2996,6 +3275,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "minor",
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
@@ -3848,6 +4128,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "minor",
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
@@ -3984,6 +4265,7 @@ describe("apply release plan", () => {
           changedFilePatterns: ["**"],
           baseBranch: "main",
           updateInternalDependencies: "minor",
+          requireSemverSatisfaction: false,
           ignore: [],
           prettier: true,
           privatePackages: { version: true, tag: false },
