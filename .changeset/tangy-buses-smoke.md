@@ -1,4 +1,5 @@
 ---
+"@changesets/cli": major
 "@changesets/assemble-release-plan": major
 "@changesets/config": major
 "@changesets/types": major
