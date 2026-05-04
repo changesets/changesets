@@ -21,4 +21,4 @@
 "@changesets/pre": major
 ---
 
-Bumps minimum node version to `>=20.19.0`
+Bumped supported Node versions to `^22 || >=24`
