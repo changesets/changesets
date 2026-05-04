@@ -9,7 +9,7 @@ Usage
 
 ```ts
 import assembleReleasePlan from "@changesets/assemble-release-plan";
-import readChangesets from "@changesets/read";
+import { readChangesets } from "@changesets/read";
 import { read } from "@changesets/config";
 import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";

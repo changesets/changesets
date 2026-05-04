@@ -14,7 +14,7 @@ import { getCurrentHighestVersion, getHighestReleaseType } from "./utils.ts";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-export default function applyLinks(
+export function applyLinks(
   releases: Map<string, InternalRelease>,
   packagesByName: Map<string, Package>,
   linked: Linked,

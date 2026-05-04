@@ -8,7 +8,7 @@ import {
   testdir,
 } from "@changesets/test-utils";
 import type { Changeset, Config } from "@changesets/types";
-import writeChangeset from "@changesets/write";
+import { writeChangeset } from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import { humanId } from "human-id";
 import assert from "node:assert/strict";
@@ -23,8 +23,8 @@ import {
   type Mock,
   vi,
 } from "vitest";
-import pre from "../pre/index.ts";
-import version from "./index.ts";
+import { pre } from "../pre/index.ts";
+import { version } from "./index.ts";
 
 const modifiedDefaultConfig: Config = {
   ...defaultConfig,

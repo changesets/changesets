@@ -33,6 +33,8 @@ async function getReleaseLines(
   return `### ${capitalize(type)} Changes\n\n${resolvedLines.join("")}`;
 }
 
+// plugin, needs default export
+// eslint-disable-next-line import-lite/no-default-export
 export default async function defaultChangelogGetter(
   release: ComprehensiveRelease,
   relevantChangesets: RelevantChangesets,

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stripVTControlCharacters } from "node:util";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
-import getDependencyGraph from "./get-dependency-graph.ts";
+import { getDependencyGraph } from "./get-dependency-graph.ts";
 import type { Package } from "@changesets/types";
 import path from "node:path";
 

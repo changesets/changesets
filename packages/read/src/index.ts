@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
-import path from "path";
-import parse from "@changesets/parse";
+import path from "node:path";
+import { parseChangesetFile } from "@changesets/parse";
 import type { NewChangeset } from "@changesets/types";
 import * as git from "@changesets/git";
 
@@ -18,7 +18,7 @@ async function filterChangesetsSinceRef(
   return changesets.filter((dir) => newHashes.includes(dir));
 }
 
-export default async function getChangesets(
+export async function readChangesets(
   rootDir: string,
   sinceRef?: string,
 ): Promise<Array<NewChangeset>> {
@@ -53,7 +53,11 @@ export default async function getChangesets(
   const changesetContents = changesets.map(async (file) => {
     const changeset = await fs.readFile(path.join(changesetBase, file), "utf8");
 
-    return { ...parse(changeset), id: file.replace(".md", "") };
+    return { ...parseChangesetFile(changeset), id: file.replace(".md", "") };
   });
   return await Promise.all(changesetContents);
 }
+
+/** @deprecated Use named export `readChangesets` instead */
+const readChangesetsDefault = readChangesets;
+export default readChangesetsDefault;

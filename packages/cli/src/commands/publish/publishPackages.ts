@@ -80,7 +80,7 @@ export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
   );
 };
 
-export default async function publishPackages({
+export async function publishPackages({
   packages,
   access,
   otp,

@@ -1,4 +1,4 @@
-import publishPackages from "./publishPackages.ts";
+import { publishPackages } from "./publishPackages.ts";
 import { ExitError } from "@changesets/errors";
 import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
@@ -38,7 +38,7 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   warn(importantEnd);
 }
 
-export default async function publish(
+export async function publish(
   cwd: string,
   { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
   config: Config,

@@ -18,7 +18,7 @@ function getPrettierInstance(cwd: string): typeof prettier {
   }
 }
 
-async function writeChangeset(
+export async function writeChangeset(
   { summary, releases }: Changeset,
   rootDir: string,
   options?: { prettier?: boolean },
@@ -61,4 +61,6 @@ ${summary}
   return changesetID;
 }
 
-export default writeChangeset;
+/** @deprecated Use named export `writeChangeset` instead */
+const writeChangesetDefault = writeChangeset;
+export default writeChangesetDefault;

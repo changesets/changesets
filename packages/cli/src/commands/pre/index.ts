@@ -7,7 +7,7 @@ import {
   ExitError,
 } from "@changesets/errors";
 
-export default async function pre(
+export async function pre(
   rootDir: string,
   options:
     | { command: "enter"; tag: string }

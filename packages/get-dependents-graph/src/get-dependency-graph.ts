@@ -53,7 +53,7 @@ const getValidRange = (potentialRange: string) => {
   }
 };
 
-export default function getDependencyGraph(
+export function getDependencyGraph(
   packages: Packages,
   rootPackage: Package,
   {

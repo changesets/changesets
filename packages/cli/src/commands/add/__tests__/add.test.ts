@@ -14,7 +14,7 @@ import getChangesets from "@changesets/read";
 import { exec } from "tinyexec";
 
 import * as utils from "../../../utils/cli-utilities.ts";
-import addChangeset from "../index.ts";
+import { add as addChangeset } from "../index.ts";
 
 vi.mock("../../../utils/cli-utilities");
 const mockedUtils = vi.mocked(utils);

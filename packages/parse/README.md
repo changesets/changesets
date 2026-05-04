@@ -6,7 +6,7 @@
 Parses a changeset from its written format to a data object.
 
 ```js
-import parse from "@changesets/parse";
+import { parseChangesetFile } from "@changesets/parse";
 
 const changeset = `---
 "@changesets/something": minor
@@ -15,7 +15,7 @@ const changeset = `---
 
 A description of a minor change`;
 
-const parsedChangeset = parse(changeset);
+const parsedChangeset = parseChangesetFile(changeset);
 ```
 
 For example, it can convert:

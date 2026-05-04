@@ -14,8 +14,8 @@ import fs from "node:fs/promises";
 import path from "path";
 import prettier from "prettier";
 import { resolve } from "import-meta-resolve";
-import getChangelogEntry from "./get-changelog-entry.ts";
-import versionPackage from "./version-package.ts";
+import { getChangelogEntry } from "./get-changelog-entry.ts";
+import { versionPackage } from "./version-package.ts";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 
@@ -72,7 +72,7 @@ async function getCommitsThatAddChangesets(
   return commits;
 }
 
-export default async function applyReleasePlan(
+export async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
   config: Config = defaultConfig,
@@ -377,6 +377,10 @@ async function updatePackageJson(
 
   return fs.writeFile(pkgJsonPath, stringified);
 }
+
+/** @deprecated Use named export `applyReleasePlan` instead */
+const applyReleasePlanDefault = applyReleasePlan;
+export default applyReleasePlanDefault;
 
 async function writeFormattedMarkdownFile(
   filePath: string,

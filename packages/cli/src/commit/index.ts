@@ -41,4 +41,5 @@ const defaultCommitFunctions = {
   getVersionMessage,
 } satisfies Required<CommitFunctions>;
 
+// CommitFunctions require a default export
 export default defaultCommitFunctions;

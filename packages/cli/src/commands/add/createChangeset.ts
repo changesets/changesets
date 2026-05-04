@@ -105,7 +105,7 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
   return `${bold(pkgName)}@${bold(version)}`;
 }
 
-export default async function createChangeset(
+export async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Array<Package>,
   messageFromCli?: string,

@@ -7,7 +7,7 @@ import {
   mapGetOrThrowInternal,
 } from "./utils.ts";
 
-export default function matchFixedConstraint(
+export function matchFixedConstraint(
   releases: Map<string, InternalRelease>,
   packagesByName: Map<string, Package>,
   config: Config,

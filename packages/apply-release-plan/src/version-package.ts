@@ -3,7 +3,7 @@ import type {
   PackageJSON,
   VersionType,
 } from "@changesets/types";
-import getVersionRangeType from "@changesets/get-version-range-type";
+import { getVersionRangeType } from "@changesets/get-version-range-type";
 import Range from "semver/classes/range.js";
 import semverPrerelease from "semver/functions/prerelease.js";
 import validRange from "semver/ranges/valid.js";
@@ -16,7 +16,7 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
-export default function versionPackage(
+export function versionPackage(
   release: ComprehensiveRelease & {
     changelog: string | null;
     packageJson: PackageJSON;

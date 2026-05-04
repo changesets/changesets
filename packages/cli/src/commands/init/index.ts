@@ -13,7 +13,7 @@ const pkgPath = path.dirname(require.resolve("@changesets/cli/package.json"));
 
 const defaultConfig = `${JSON.stringify(defaultWrittenConfig, null, 2)}\n`;
 
-export default async function init(cwd: string) {
+export async function init(cwd: string) {
   const changesetBase = path.resolve(cwd, ".changeset");
 
   if (existsSync(changesetBase)) {
