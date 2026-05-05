@@ -5,7 +5,7 @@ import {
   sortChangelogEntries,
 } from "./utils.ts";
 
-let changelog = `# @keystone-alpha/email
+const changelog = `# @keystone-alpha/email
 
 ## 3.0.1
 
@@ -74,19 +74,19 @@ let changelog = `# @keystone-alpha/email
 
 describe("getChangelogEntry", () => {
   test("it works", () => {
-    let entry = getChangelogEntry(changelog, "3.0.0");
+    const entry = getChangelogEntry(changelog, "3.0.0");
     expect(entry.content).toMatchSnapshot();
     expect(entry.highestLevel).toBe(BumpLevels.major);
   });
 
   test("it works again!", () => {
-    let entry = getChangelogEntry(changelog, "3.0.1");
+    const entry = getChangelogEntry(changelog, "3.0.1");
     expect(entry.content).toMatchSnapshot();
     expect(entry.highestLevel).toBe(BumpLevels.patch);
   });
 
   test("it works with code blocks", () => {
-    let changelogWithCodeBlocks = `# Changelog
+    const changelogWithCodeBlocks = `# Changelog
 
 ## 1.0.0
 
@@ -101,13 +101,13 @@ describe("getChangelogEntry", () => {
 ## 0.0.1
 
 Initial release`;
-    let entry = getChangelogEntry(changelogWithCodeBlocks, "1.0.0");
+    const entry = getChangelogEntry(changelogWithCodeBlocks, "1.0.0");
     expect(entry.content).toMatchSnapshot();
     expect(entry.highestLevel).toBe(BumpLevels.major);
   });
 
   test("it works with nested code blocks", () => {
-    let changelogWithCodeBlocks = `# Changelog
+    const changelogWithCodeBlocks = `# Changelog
 
 ## 1.0.0
 
@@ -129,7 +129,7 @@ Initial release`;
 ## 0.0.1
 
 Initial release`;
-    let entry = getChangelogEntry(changelogWithCodeBlocks, "1.0.0");
+    const entry = getChangelogEntry(changelogWithCodeBlocks, "1.0.0");
     expect(entry.content).toMatchSnapshot();
     expect(entry.highestLevel).toBe(BumpLevels.major);
   });
@@ -137,7 +137,7 @@ Initial release`;
 
 describe("sortChangelogEntries", () => {
   test("it sorts the things right", () => {
-    let things = [
+    const things = [
       {
         name: "a",
         highestLevel: BumpLevels.major,

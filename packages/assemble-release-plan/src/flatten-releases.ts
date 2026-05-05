@@ -6,12 +6,12 @@ import type { Config, NewChangeset, Package } from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import { mapGetOrThrowInternal } from "./utils.ts";
 
-export default function flattenReleases(
+export function flattenReleases(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
   config: Config,
 ): Map<string, InternalRelease> {
-  let releases: Map<string, InternalRelease> = new Map();
+  const releases: Map<string, InternalRelease> = new Map();
 
   changesets.forEach((changeset) => {
     changeset.releases
@@ -29,7 +29,7 @@ export default function flattenReleases(
         });
       })
       .forEach(({ name, type }) => {
-        let pkg = mapGetOrThrowInternal(
+        const pkg = mapGetOrThrowInternal(
           packagesByName,
           name,
           `Couldn't find package named "${name}" listed in changeset "${changeset.id}"`,

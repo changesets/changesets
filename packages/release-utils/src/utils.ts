@@ -9,7 +9,7 @@ export const BumpLevels = {
 } as const;
 
 export async function getVersionsByDirectory(cwd: string) {
-  let { packages } = await getPackages(cwd);
+  const { packages } = await getPackages(cwd);
   return new Map(packages.map((x) => [x.dir, x.packageJson.version]));
 }
 
@@ -17,10 +17,10 @@ export async function getChangedPackages(
   cwd: string,
   previousVersions: Map<string, string>,
 ) {
-  let { packages } = await getPackages(cwd);
-  let changedPackages = new Set<Package>();
+  const { packages } = await getPackages(cwd);
+  const changedPackages = new Set<Package>();
 
-  for (let pkg of packages) {
+  for (const pkg of packages) {
     const previousVersion = previousVersions.get(pkg.dir);
     if (previousVersion !== pkg.packageJson.version) {
       changedPackages.add(pkg);

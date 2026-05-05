@@ -6,22 +6,22 @@ import { getCurrentCommitId } from "@changesets/git";
 import { error, log, warn } from "@changesets/logger";
 import type { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
-import readChangesets from "@changesets/read";
-import assembleReleasePlan from "@changesets/assemble-release-plan";
+import { readChangesets } from "@changesets/read";
+import { assembleReleasePlan } from "@changesets/assemble-release-plan";
 import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 
-let importantSeparator = pc.red(
+const importantSeparator = pc.red(
   "===============================IMPORTANT!===============================",
 );
 
-let importantEnd = pc.red(
+const importantEnd = pc.red(
   "----------------------------------------------------------------------",
 );
 
-export default async function version(
+export async function version(
   cwd: string,
   options: {
     snapshot?: string | boolean;
@@ -81,7 +81,7 @@ export default async function version(
 
   const contextDir = path.dirname(fileURLToPath(import.meta.url));
 
-  let [...touchedFiles] = await applyReleasePlan(
+  const [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
     releaseConfig,

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import read from "./index.ts";
 import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import fs from "node:fs/promises";
-import writeChangeset from "@changesets/write";
+import { writeChangeset } from "@changesets/write";
 import { add } from "@changesets/git";
 
 silenceLogsInBlock();

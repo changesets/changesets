@@ -5,11 +5,11 @@ import type {
   ModCompWithPackage,
 } from "@changesets/types";
 
-const getReleaseLine = async (
+const getReleaseLine = (
   changeset: NewChangesetWithCommit,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _type: VersionType,
-) => {
+): string => {
   const [firstLine, ...futureLines] = changeset.summary
     .split("\n")
     .map((l) => l.trimEnd());
@@ -25,10 +25,10 @@ const getReleaseLine = async (
   return returnVal;
 };
 
-const getDependencyReleaseLine = async (
+const getDependencyReleaseLine = (
   changesets: NewChangesetWithCommit[],
   dependenciesUpdated: ModCompWithPackage[],
-) => {
+): string => {
   if (dependenciesUpdated.length === 0) return "";
 
   const changesetLinks = changesets.map(
@@ -45,9 +45,10 @@ const getDependencyReleaseLine = async (
   return [...changesetLinks, ...updatedDependenciesList].join("\n");
 };
 
-const defaultChangelogFunctions: ChangelogFunctions = {
+const defaultChangelogFunctions = {
   getReleaseLine,
   getDependencyReleaseLine,
-};
+} satisfies ChangelogFunctions;
 
+// ChangelogFunctions require a default export
 export default defaultChangelogFunctions;

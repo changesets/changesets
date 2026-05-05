@@ -6,14 +6,14 @@ import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "node:fs/promises";
-import path from "path";
-import add from "./commands/add/index.ts";
-import init from "./commands/init/index.ts";
-import pre from "./commands/pre/index.ts";
-import publish from "./commands/publish/index.ts";
-import status from "./commands/status/index.ts";
-import tagCommand from "./commands/tag/index.ts";
-import version from "./commands/version/index.ts";
+import path from "node:path";
+import { add } from "./commands/add/index.ts";
+import { init } from "./commands/init/index.ts";
+import { pre } from "./commands/pre/index.ts";
+import { publish } from "./commands/publish/index.ts";
+import { status } from "./commands/status/index.ts";
+import { tag as tagCommand } from "./commands/tag/index.ts";
+import { version } from "./commands/version/index.ts";
 import { COMMAND_HELP } from "./help.ts";
 import type { CliOptions } from "./types.ts";
 
@@ -64,7 +64,7 @@ export async function run(
   try {
     config = await read(packages.rootDir, packages);
   } catch (e) {
-    let oldConfigExists = await fs
+    const oldConfigExists = await fs
       .access(path.resolve(packages.rootDir, ".changeset/config.js"))
       .then(
         () => true,
@@ -125,7 +125,7 @@ export async function run(
         }
 
         // Validate that items in ignoreArrayFromCmd are valid project names
-        let pkgNames = new Set(
+        const pkgNames = new Set(
           packages.packages.map(({ packageJson }) => packageJson.name),
         );
 
@@ -226,14 +226,14 @@ export async function run(
       }
       case "pre": {
         validateCommandFlags("pre", flags);
-        let command = input[1];
+        const command = input[1];
         if (command !== "enter" && command !== "exit") {
           error(
             "`enter`, `exit` or `snapshot` must be passed after prerelease",
           );
           throw new ExitError(1);
         }
-        let tag = input[2];
+        const tag = input[2];
         if (command === "enter" && typeof tag !== "string") {
           error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);

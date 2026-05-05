@@ -97,7 +97,10 @@ test("associated with multiple PRs with only one merged", async () => {
       }),
     );
 
-  let result = await getInfo({ commit: "a085003", repo: "emotion-js/emotion" });
+  const result = await getInfo({
+    commit: "a085003",
+    repo: "emotion-js/emotion",
+  });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
 
   expect(await prettier.format(githubQuery, { parser: "graphql" }))
@@ -213,7 +216,10 @@ test("associated with multiple PRs with multiple merged gets the one that was me
       }),
     );
 
-  let result = await getInfo({ commit: "a085003", repo: "emotion-js/emotion" });
+  const result = await getInfo({
+    commit: "a085003",
+    repo: "emotion-js/emotion",
+  });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
 
   expect(await prettier.format(githubQuery, { parser: "graphql" }))
@@ -293,7 +299,7 @@ test("gets the author of the associated pull request if it exists rather than th
       }),
     );
 
-  let result = await getInfo({
+  const result = await getInfo({
     commit: "c7e9c69",
     repo: "JedWatson/react-select",
   });
@@ -391,7 +397,7 @@ test("associated with multiple PRs with only one merged 2", async () => {
       }),
     );
 
-  let result = await getInfoFromPullRequest({
+  const result = await getInfoFromPullRequest({
     pull: 1613,
     repo: "emotion-js/emotion",
   });
@@ -476,7 +482,7 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
         }),
       );
 
-    let result = await getInfo({
+    const result = await getInfo({
       commit: "a085003",
       repo: "emotion-js/emotion",
     });

@@ -20,7 +20,7 @@ import path from "path";
 const require = createRequire(import.meta.url);
 const packageJson = require("../package.json");
 
-export let defaultWrittenConfig = {
+export const defaultWrittenConfig = {
   $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
   changelog: "@changesets/cli/changelog",
   commit: false,
@@ -97,9 +97,9 @@ function isArray<T>(
   return Array.isArray(arg);
 }
 
-export let read = async (cwd: string, packages?: Packages) => {
+export const read = async (cwd: string, packages?: Packages) => {
   packages ??= await getPackages(cwd);
-  let json = JSON.parse(
+  const json = JSON.parse(
     await fs.readFile(
       path.join(packages?.rootDir, ".changeset", "config.json"),
       "utf8",
@@ -108,9 +108,9 @@ export let read = async (cwd: string, packages?: Packages) => {
   return parse(json, packages);
 };
 
-export let parse = (json: WrittenConfig, packages: Packages): Config => {
-  let messages = [];
-  let pkgNames: readonly string[] = packages.packages.map(
+export const parse = (json: WrittenConfig, packages: Packages): Config => {
+  const messages = [];
+  const pkgNames: readonly string[] = packages.packages.map(
     ({ packageJson }) => packageJson.name,
   );
 
@@ -196,7 +196,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
-  let fixed: string[][] = [];
+  const fixed: string[][] = [];
   if (json.fixed !== undefined) {
     if (!havePackageGroupsCorrectShape(json.fixed)) {
       messages.push(
@@ -207,21 +207,21 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or an array of arrays of package names`,
       );
     } else {
-      let foundPkgNames = new Set<string>();
-      let duplicatedPkgNames = new Set<string>();
+      const foundPkgNames = new Set<string>();
+      const duplicatedPkgNames = new Set<string>();
 
-      for (let fixedGroup of json.fixed) {
+      for (const fixedGroup of json.fixed) {
         messages.push(
           ...getUnmatchedPatterns(fixedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/picomatch.`,
+              `The package or glob expression "${pkgOrGlob}" specified in the \`fixed\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://npmx.dev/picomatch.`,
           ),
         );
 
         const expandedFixedGroup = globMatch(pkgNames, fixedGroup);
         fixed.push(expandedFixedGroup);
 
-        for (let fixedPkgName of expandedFixedGroup) {
+        for (const fixedPkgName of expandedFixedGroup) {
           if (foundPkgNames.has(fixedPkgName)) {
             duplicatedPkgNames.add(fixedPkgName);
           }
@@ -232,14 +232,14 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/picomatch.`,
+            `The package "${pkgName}" is defined in multiple sets of fixed packages. Packages can only be defined in a single set of fixed packages. If you are using glob expressions, make sure that they are valid according to https://npmx.dev/picomatch.`,
           );
         });
       }
     }
   }
 
-  let linked: string[][] = [];
+  const linked: string[][] = [];
   if (json.linked !== undefined) {
     if (!havePackageGroupsCorrectShape(json.linked)) {
       messages.push(
@@ -250,21 +250,21 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
         )} when the only valid values are undefined or an array of arrays of package names`,
       );
     } else {
-      let foundPkgNames = new Set<string>();
-      let duplicatedPkgNames = new Set<string>();
+      const foundPkgNames = new Set<string>();
+      const duplicatedPkgNames = new Set<string>();
 
-      for (let linkedGroup of json.linked) {
+      for (const linkedGroup of json.linked) {
         messages.push(
           ...getUnmatchedPatterns(linkedGroup, pkgNames).map(
             (pkgOrGlob) =>
-              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/picomatch.`,
+              `The package or glob expression "${pkgOrGlob}" specified in the \`linked\` option does not match any package in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://npmx.dev/picomatch.`,
           ),
         );
 
-        let expandedLinkedGroup = globMatch(pkgNames, linkedGroup);
+        const expandedLinkedGroup = globMatch(pkgNames, linkedGroup);
         linked.push(expandedLinkedGroup);
 
-        for (let linkedPkgName of expandedLinkedGroup) {
+        for (const linkedPkgName of expandedLinkedGroup) {
           if (foundPkgNames.has(linkedPkgName)) {
             duplicatedPkgNames.add(linkedPkgName);
           }
@@ -275,7 +275,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       if (duplicatedPkgNames.size) {
         duplicatedPkgNames.forEach((pkgName) => {
           messages.push(
-            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://www.npmjs.com/package/picomatch.`,
+            `The package "${pkgName}" is defined in multiple sets of linked packages. Packages can only be defined in a single set of linked packages. If you are using glob expressions, make sure that they are valid according to https://npmx.dev/picomatch.`,
           );
         });
       }
@@ -370,7 +370,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
       messages.push(
         ...getUnmatchedPatterns(json.ignore, pkgNames).map(
           (pkgOrGlob) =>
-            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://www.npmjs.com/package/picomatch.`,
+            `The package or glob expression "${pkgOrGlob}" is specified in the \`ignore\` option but it is not found in the project. You may have misspelled the package name or provided an invalid glob expression. Note that glob expressions must be defined according to https://npmx.dev/picomatch.`,
         ),
       );
     }
@@ -509,7 +509,7 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
 
-  let config: Config = {
+  const config: Config = {
     changelog: getNormalizedChangelogOption(
       json.changelog === undefined
         ? defaultWrittenConfig.changelog
@@ -592,6 +592,10 @@ function globMatch(
 
   const matchers = patterns.map((p) => picomatch(p, undefined, true));
   return paths.filter((path) => {
+    if (path.includes("\\")) {
+      path = path.replace(/\\/g, "/");
+    }
+
     let passed = false;
     for (const matcher of matchers) {
       if (!passed) {
@@ -610,7 +614,7 @@ function globMatch(
   });
 }
 
-let fakePackage: Package = {
+const fakePackage: Package = {
   dir: "",
   packageJson: {
     name: "",
@@ -618,7 +622,7 @@ let fakePackage: Package = {
   },
 };
 
-export let defaultConfig = parse(defaultWrittenConfig, {
+export const defaultConfig = parse(defaultWrittenConfig, {
   tool: { type: "root" },
   rootDir: fakePackage.dir,
   rootPackage: fakePackage,

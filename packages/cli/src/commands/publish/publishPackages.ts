@@ -80,7 +80,7 @@ export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
   );
 };
 
-export default async function publishPackages({
+export async function publishPackages({
   packages,
   access,
   otp,
@@ -115,7 +115,7 @@ export default async function publishPackages({
 
   return Promise.all(
     unpublishedPackagesInfo.map((pkgInfo) => {
-      let pkg = packagesByName.get(pkgInfo.name)!;
+      const pkg = packagesByName.get(pkgInfo.name)!;
       return publishAPackage(
         pkg,
         access,

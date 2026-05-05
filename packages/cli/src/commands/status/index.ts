@@ -1,7 +1,7 @@
 import pc from "picocolors";
 import fs from "node:fs/promises";
 import path from "path";
-import getReleasePlan from "@changesets/get-release-plan";
+import { getReleasePlan } from "@changesets/get-release-plan";
 import { error, info, log } from "@changesets/logger";
 import type {
   ComprehensiveRelease,
@@ -11,7 +11,7 @@ import type {
 } from "@changesets/types";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
 
-export default async function status(
+export async function status(
   cwd: string,
   {
     since,

@@ -41,7 +41,6 @@ export default defineConfig(
     },
     rules: {
       eqeqeq: ["off", "always", { null: "never", undefined: "never" }], // TODO enable and fix errors
-      "prefer-const": "off", // TODO enable and fix errors
 
       "@typescript-eslint/consistent-type-exports": [
         "error",
@@ -57,14 +56,11 @@ export default defineConfig(
       ],
 
       "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-floating-promises": "off", // TODO enable and fix errors
-      "@typescript-eslint/no-unnecessary-type-assertion": "off", // TODO enable and fix errors
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-return": "off",
-      "@typescript-eslint/require-await": "off", // TODO enable and fix errors
       "@typescript-eslint/unbound-method": "off",
 
       // these rules are slow, require extensive config, and/or don't provide much
@@ -79,12 +75,30 @@ export default defineConfig(
         { ignores: ["fs/promises.cp", "import.meta.dirname"] },
       ],
 
+      "import-lite/no-default-export": "error",
       "import-lite/no-mutable-exports": "off", // TODO enable and fix errors
+    },
+  },
+  {
+    files: [
+      "**/index.ts", // to be removed in next release (v4) when we are dropping default export
+      "**/vitest.config.mts",
+      "**/eslint.config.mjs",
+    ],
+    rules: {
+      "import-lite/no-default-export": "off",
     },
   },
   {
     files: ["**/*.{js,mjs}"],
     ...tseslint.configs.disableTypeChecked,
+  },
+  {
+    files: ["**/*.test.*"],
+    rules: {
+      // mock functions often have to be async to match the original fn
+      "@typescript-eslint/require-await": "off",
+    },
   },
   eslintConfigPrettier,
 );

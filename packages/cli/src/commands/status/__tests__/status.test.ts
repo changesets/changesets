@@ -3,12 +3,12 @@ import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
 import type { ReleasePlan } from "@changesets/types";
-import writeChangeset from "@changesets/write";
+import { writeChangeset } from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "node:fs/promises";
 import path from "path";
 import { exec } from "tinyexec";
-import status from "../index.ts";
+import { status } from "../index.ts";
 
 async function readConfig(cwd: string) {
   const packages = await getPackages(cwd);
@@ -297,7 +297,7 @@ describe("status", () => {
     expect(process.exit).not.toHaveBeenCalled();
   });
 
-  it.skip("should respect the verbose flag", () => false);
+  it.todo("should respect the verbose flag", () => false);
 
   it("should respect the output flag", async () => {
     const cwd = await gitdir({

@@ -10,14 +10,14 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/read",
   "dependencies": {
-    "@changesets/git": "^4.0.0-next.2",
-    "@changesets/parse": "^1.0.0-next.2",
-    "@changesets/types": "^7.0.0-next.2",
+    "@changesets/git": "workspace:^",
+    "@changesets/parse": "workspace:^",
+    "@changesets/types": "workspace:^",
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
-    "@changesets/test-utils": "0.0.9-next.2",
-    "@changesets/write": "1.0.0-next.2",
+    "@changesets/test-utils": "workspace:*",
+    "@changesets/write": "workspace:*",
     "outdent": "^0.8.0"
   },
   "engines": {

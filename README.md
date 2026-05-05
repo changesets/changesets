@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="./assets/images/changesets-banner-light.png" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/images/changesets-banner-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/images/changesets-banner-light.png">
+    <img alt="" src="./assets/images/changesets-banner-light.png" />
+  </picture>
 </p>
 
 <p align="center">
@@ -8,8 +12,8 @@
 </p>
 <br/>
 
-[![npm package](https://img.shields.io/npm/v/@changesets/cli?label=%40changesets%2Fcli)](https://npmjs.com/package/@changesets/cli)
-[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./packages/cli/CHANGELOG.md)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/cli?name=true)](https://npmx.dev/package/@changesets/cli)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./packages/cli/CHANGELOG.md)
 
 The `changesets` workflow is designed to help when people are making changes, all the way through to publishing. It lets contributors declare how their changes should be released, then we automate updating package versions, and changelogs, and publishing new versions of packages based on the provided information.
 

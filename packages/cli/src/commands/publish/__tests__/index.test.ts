@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import publishCommand from "../index.ts";
+import { publish as publishCommand } from "../index.ts";
 import { defaultConfig } from "@changesets/config";
 import * as path from "path";
 import type { Config } from "@changesets/types";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 
-let changelogPath = path.resolve(import.meta.dirname, "../../changelog");
-let modifiedDefaultConfig: Config = {
+const changelogPath = path.resolve(import.meta.dirname, "../../changelog");
+const modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: [changelogPath, null],
 };

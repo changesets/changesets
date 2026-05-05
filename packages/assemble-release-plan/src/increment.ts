@@ -12,7 +12,7 @@ export function incrementVersion(
 
   let version = semverInc(release.oldVersion, release.type)!;
   if (preInfo !== undefined && preInfo.state.mode !== "exit") {
-    let preVersion = mapGetOrThrowInternal(
+    const preVersion = mapGetOrThrowInternal(
       preInfo.preVersions,
       release.name,
       `preVersion for ${release.name} does not exist when preState is defined`,

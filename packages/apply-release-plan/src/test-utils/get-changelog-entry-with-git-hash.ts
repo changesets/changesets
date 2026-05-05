@@ -33,25 +33,27 @@ async function getReleaseLines(
   return `### ${capitalize(type)} Changes\n\n${resolvedLines.join("")}`;
 }
 
+// plugin, needs default export
+// eslint-disable-next-line import-lite/no-default-export
 export default async function defaultChangelogGetter(
   release: ComprehensiveRelease,
   relevantChangesets: RelevantChangesets,
   options: { cwd: string },
 ) {
-  let { cwd } = options;
+  const { cwd } = options;
 
   // First, we construct the release lines, summaries of changesets that caused us to be released
-  let majorReleaseLines = await getReleaseLines(
+  const majorReleaseLines = await getReleaseLines(
     relevantChangesets,
     "major",
     cwd,
   );
-  let minorReleaseLines = await getReleaseLines(
+  const minorReleaseLines = await getReleaseLines(
     relevantChangesets,
     "minor",
     cwd,
   );
-  let patchReleaseLines = await getReleaseLines(
+  const patchReleaseLines = await getReleaseLines(
     relevantChangesets,
     "patch",
     cwd,

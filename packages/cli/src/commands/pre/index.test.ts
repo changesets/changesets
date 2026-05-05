@@ -9,7 +9,7 @@ import {
   testdir,
 } from "@changesets/test-utils";
 
-import pre from "./index.ts";
+import { pre } from "./index.ts";
 
 silenceLogsInBlock();
 

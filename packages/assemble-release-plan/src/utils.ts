@@ -14,7 +14,7 @@ export function getHighestReleaseType(
 
   let highestReleaseType: VersionType = "none";
 
-  for (let release of releases) {
+  for (const release of releases) {
     switch (release.type) {
       case "major":
         return "major";
@@ -38,8 +38,8 @@ export function getCurrentHighestVersion(
 ): string {
   let highestVersion: string | undefined;
 
-  for (let pkgName of packageGroup) {
-    let pkg = mapGetOrThrowInternal(
+  for (const pkgName of packageGroup) {
+    const pkg = mapGetOrThrowInternal(
       packagesByName,
       pkgName,
       `We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`,

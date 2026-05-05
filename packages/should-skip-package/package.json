@@ -10,10 +10,10 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/should-skip-package",
   "dependencies": {
-    "@changesets/types": "^7.0.0-next.2"
+    "@changesets/types": "workspace:^"
   },
   "devDependencies": {
-    "@changesets/test-utils": "0.0.9-next.2"
+    "@changesets/test-utils": "workspace:*"
   },
   "engines": {
     "node": "^22 || >=24"

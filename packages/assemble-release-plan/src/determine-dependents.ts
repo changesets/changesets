@@ -25,7 +25,7 @@ import { mapGetOrThrowInternal } from "./utils.ts";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-export default function determineDependents({
+export function determineDependents({
   releases,
   packagesByName,
   rootDir,
@@ -42,7 +42,7 @@ export default function determineDependents({
 }): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
-  let pkgsToSearch = [...releases.values()];
+  const pkgsToSearch = [...releases.values()];
 
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
@@ -163,7 +163,7 @@ export default function determineDependents({
 
           pkgsToSearch.push(existing);
         } else {
-          let newDependent: InternalRelease = {
+          const newDependent: InternalRelease = {
             name,
             type,
             oldVersion: pkgJSON.version,

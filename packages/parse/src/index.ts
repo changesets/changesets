@@ -48,7 +48,7 @@ function validateReleases(releases: Release[], contents: string): void {
   }
 }
 
-export default function parseChangesetFile(contents: string): {
+export function parseChangesetFile(contents: string): {
   summary: string;
   releases: Release[];
 } {
@@ -71,8 +71,8 @@ export default function parseChangesetFile(contents: string): {
         `Received content:\n${truncate(trimmedContents)}`,
     );
   }
-  let [, roughReleases, roughSummary] = execResult;
-  let summary = roughSummary.trim();
+  const [, roughReleases, roughSummary] = execResult;
+  const summary = roughSummary.trim();
 
   let releases: Release[];
   let yamlStuff: Record<string, VersionType> | undefined;
@@ -109,3 +109,7 @@ export default function parseChangesetFile(contents: string): {
 
   return { releases, summary };
 }
+
+/** @deprecated Use named export `parseChangesetFile` instead */
+const parseChangesetFileDefault = parseChangesetFile;
+export default parseChangesetFileDefault;

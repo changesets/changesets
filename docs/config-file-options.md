@@ -73,7 +73,7 @@ There are two caveats to this.
 
 These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos.md).
 
-> NOTE: you can also provide glob expressions to match the packages, according to the [picomatch](https://www.npmjs.com/package/picomatch) format.
+> NOTE: you can also provide glob expressions to match the packages, according to the [picomatch](https://npmx.dev/picomatch) format.
 
 ## `fixed` (array of arrays of package names)
 
