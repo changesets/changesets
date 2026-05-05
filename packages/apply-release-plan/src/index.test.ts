@@ -23,6 +23,15 @@ import {
   testdir,
 } from "@changesets/test-utils";
 
+const changesetsCliChangelogPath = path.resolve(
+  import.meta.dirname,
+  "../../cli/dist/changesets-cli-changelog.js",
+);
+const changesetsCliCommitPath = path.resolve(
+  import.meta.dirname,
+  "../../cli/dist/changesets-cli-commit.js",
+);
+
 class FakeReleasePlan {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
@@ -2083,13 +2092,7 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
-          changelog: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-changelog-entry.ts",
-            ),
-            null,
-          ],
+          changelog: [changesetsCliChangelogPath, null],
         },
       );
 
@@ -2128,13 +2131,7 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
-          changelog: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-changelog-entry.ts",
-            ),
-            null,
-          ],
+          changelog: [changesetsCliChangelogPath, null],
         },
       );
 
@@ -2197,13 +2194,7 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
-          changelog: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-changelog-entry.ts",
-            ),
-            null,
-          ],
+          changelog: [changesetsCliChangelogPath, null],
         },
       );
 
@@ -2292,13 +2283,7 @@ describe("apply release plan", () => {
           access: "restricted",
           baseBranch: "main",
           changedFilePatterns: ["**"],
-          changelog: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-changelog-entry.ts",
-            ),
-            null,
-          ],
+          changelog: [changesetsCliChangelogPath, null],
           updateInternalDependencies: "patch",
           ignore: [],
           prettier: true,
@@ -2350,13 +2335,7 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
-          changelog: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-changelog-entry.ts",
-            ),
-            null,
-          ],
+          changelog: [changesetsCliChangelogPath, null],
         },
       );
 
@@ -2433,13 +2412,7 @@ describe("apply release plan", () => {
           preState: undefined,
         },
         {
-          changelog: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-changelog-entry.ts",
-            ),
-            null,
-          ],
+          changelog: [changesetsCliChangelogPath, null],
           commit: false,
           fixed: [],
           linked: [],
@@ -2547,13 +2520,7 @@ describe("apply release plan", () => {
           preState: undefined,
         },
         {
-          changelog: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-changelog-entry.ts",
-            ),
-            null,
-          ],
+          changelog: [changesetsCliChangelogPath, null],
           commit: false,
           fixed: [],
           linked: [],
@@ -2673,13 +2640,7 @@ describe("apply release plan", () => {
           preState: undefined,
         },
         {
-          changelog: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-changelog-entry.ts",
-            ),
-            null,
-          ],
+          changelog: [changesetsCliChangelogPath, null],
           commit: false,
           fixed: [],
           linked: [],
@@ -2813,13 +2774,7 @@ describe("apply release plan", () => {
           preState: undefined,
         },
         {
-          changelog: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-changelog-entry.ts",
-            ),
-            null,
-          ],
+          changelog: [changesetsCliChangelogPath, null],
           commit: false,
           fixed: [],
           linked: [],
@@ -3297,20 +3252,8 @@ describe("apply release plan", () => {
       releasePlan.getReleasePlan(),
       {
         ...releasePlan.config,
-        commit: [
-          path.resolve(
-            import.meta.dirname,
-            "test-utils/simple-get-commit-entry",
-          ),
-          null,
-        ],
-        changelog: [
-          path.resolve(
-            import.meta.dirname,
-            "test-utils/simple-get-changelog-entry.ts",
-          ),
-          null,
-        ],
+        commit: [changesetsCliCommitPath, null],
+        changelog: [changesetsCliChangelogPath, null],
       },
       undefined,
       setupFunc,
@@ -3364,13 +3307,7 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
-          commit: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-commit-entry",
-            ),
-            null,
-          ],
+          commit: [changesetsCliCommitPath, null],
         },
       );
 
@@ -3430,13 +3367,7 @@ describe("apply release plan", () => {
         releasePlan.getReleasePlan(),
         {
           ...releasePlan.config,
-          commit: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-commit-entry",
-            ),
-            null,
-          ],
+          commit: [changesetsCliCommitPath, null],
         },
         undefined,
         setupFunc,
@@ -3502,13 +3433,7 @@ describe("apply release plan", () => {
         },
         {
           ...releasePlan.config,
-          commit: [
-            path.resolve(
-              import.meta.dirname,
-              "test-utils/simple-get-commit-entry",
-            ),
-            null,
-          ],
+          commit: [changesetsCliCommitPath, null],
         },
       );
 
