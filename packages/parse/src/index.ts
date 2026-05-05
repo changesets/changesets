@@ -1,5 +1,5 @@
-import yaml from "js-yaml";
 import type { Release, VersionType } from "@changesets/types";
+import yaml from "js-yaml";
 
 const mdRegex = /\s*---([^]*?)\n\s*---(\s*(?:\n|$)[^]*)/;
 

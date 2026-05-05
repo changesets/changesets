@@ -1,11 +1,11 @@
-import { describe, expect, it, test, vi, beforeEach, afterEach } from "vitest";
-import { parse, read } from "./index.ts";
+import path from "node:path";
 import * as logger from "@changesets/logger";
+import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import type { Config, WrittenConfig, Packages } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
-import path from "node:path";
+import { describe, expect, it, test, vi, beforeEach, afterEach } from "vitest";
+import { parse, read } from "./index.ts";
 
 vi.mock("@changesets/logger");
 

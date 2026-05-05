@@ -1,14 +1,13 @@
-import { describe, expect, it } from "vitest";
 import fs from "node:fs/promises";
 import path from "node:path";
-import pc from "picocolors";
 import { ExitError } from "@changesets/errors";
 import {
   mockedLogger,
   silenceLogsInBlock,
   testdir,
 } from "@changesets/test-utils";
-
+import pc from "picocolors";
+import { describe, expect, it } from "vitest";
 import { pre } from "./index.ts";
 
 silenceLogsInBlock();

@@ -1,6 +1,6 @@
-import type { Config } from "@changesets/types";
 import { getChangedPackagesSinceRef } from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
+import type { Config } from "@changesets/types";
 
 export async function getVersionableChangedPackages(
   config: Config,

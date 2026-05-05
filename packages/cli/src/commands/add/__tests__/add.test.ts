@@ -1,18 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
 import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
-import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
+import * as git from "@changesets/git";
+import * as logger from "@changesets/logger";
+import getChangesets from "@changesets/read";
 import {
   silenceLogsInBlock,
   testdir,
   gitdir,
   outputFile,
 } from "@changesets/test-utils";
-import * as logger from "@changesets/logger";
-import getChangesets from "@changesets/read";
 import { exec } from "tinyexec";
-
+import { describe, expect, it, vi } from "vitest";
 import * as utils from "../../../utils/cli-utilities.ts";
 import { add as addChangeset } from "../index.ts";
 

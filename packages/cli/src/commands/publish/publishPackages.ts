@@ -1,6 +1,6 @@
+import { resolve } from "node:path";
 import { info, warn } from "@changesets/logger";
 import type { AccessType, PreState, Package } from "@changesets/types";
-import { resolve } from "node:path";
 import pc from "picocolors";
 import semverParse from "semver/functions/parse.js";
 import type { TwoFactorState } from "../../utils/types.ts";

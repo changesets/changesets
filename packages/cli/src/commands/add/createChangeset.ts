@@ -1,11 +1,9 @@
-import pc from "picocolors";
-
-import semverLt from "semver/functions/lt.js";
-
-import * as cli from "../../utils/cli-utilities.ts";
+import { ExitError } from "@changesets/errors";
 import { error, log } from "@changesets/logger";
 import type { Release, PackageJSON, Package } from "@changesets/types";
-import { ExitError } from "@changesets/errors";
+import pc from "picocolors";
+import semverLt from "semver/functions/lt.js";
+import * as cli from "../../utils/cli-utilities.ts";
 
 const { green, yellow, red, bold, blue, cyan, gray } = pc;
 

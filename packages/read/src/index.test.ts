@@ -1,11 +1,10 @@
-import path from "node:path";
-import { describe, expect, it } from "vitest";
-
-import read from "./index.ts";
-import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import fs from "node:fs/promises";
-import { writeChangeset } from "@changesets/write";
+import path from "node:path";
 import { add } from "@changesets/git";
+import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { writeChangeset } from "@changesets/write";
+import { describe, expect, it } from "vitest";
+import read from "./index.ts";
 
 silenceLogsInBlock();
 

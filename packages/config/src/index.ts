@@ -1,3 +1,6 @@
+import fs from "node:fs/promises";
+import { createRequire } from "node:module";
+import path from "node:path";
 import { ValidationError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { warn } from "@changesets/logger";
@@ -13,9 +16,6 @@ import type {
 } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import picomatch from "picomatch";
-import fs from "node:fs/promises";
-import { createRequire } from "node:module";
-import path from "node:path";
 
 const require = createRequire(import.meta.url);
 const packageJson = require("../package.json");

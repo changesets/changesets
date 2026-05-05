@@ -1,7 +1,7 @@
-import DataLoader from "dataloader";
-import { parseEnv } from "node:util";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { parseEnv } from "node:util";
+import DataLoader from "dataloader";
 
 async function readEnvFile() {
   const envFile = path.resolve(process.cwd(), ".env");

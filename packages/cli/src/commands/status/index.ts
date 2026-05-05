@@ -1,4 +1,3 @@
-import pc from "picocolors";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getReleasePlan } from "@changesets/get-release-plan";
@@ -9,6 +8,7 @@ import type {
   Release,
   VersionType,
 } from "@changesets/types";
+import pc from "picocolors";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
 
 export async function status(

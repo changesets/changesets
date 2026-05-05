@@ -1,4 +1,3 @@
-import { enterPre, exitPre, readPreState } from "./index.ts";
 import fs from "node:fs/promises";
 import path from "node:path";
 import {
@@ -7,6 +6,7 @@ import {
 } from "@changesets/errors";
 import { testdir } from "@changesets/test-utils";
 import { describe, expect, it, test } from "vitest";
+import { enterPre, exitPre, readPreState } from "./index.ts";
 
 describe("enterPre", () => {
   it("should enter", async () => {

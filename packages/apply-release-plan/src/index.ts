@@ -1,3 +1,7 @@
+import fs from "node:fs/promises";
+import { createRequire } from "node:module";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
@@ -10,14 +14,10 @@ import type {
   ReleasePlan,
 } from "@changesets/types";
 import detectIndent from "detect-indent";
-import fs from "node:fs/promises";
-import path from "node:path";
-import prettier from "prettier";
 import { resolve } from "import-meta-resolve";
+import prettier from "prettier";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
 import { versionPackage } from "./version-package.ts";
-import { createRequire } from "node:module";
-import { pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
 

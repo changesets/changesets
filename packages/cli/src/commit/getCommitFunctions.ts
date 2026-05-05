@@ -1,7 +1,7 @@
-import type { CommitFunctions } from "@changesets/types";
 import path from "node:path";
-import { resolve } from "import-meta-resolve";
 import { pathToFileURL } from "node:url";
+import type { CommitFunctions } from "@changesets/types";
+import { resolve } from "import-meta-resolve";
 
 function importResolveFromDir(specifier: string, dir: string) {
   return resolve(specifier, pathToFileURL(path.join(dir, "x.mjs")).toString());

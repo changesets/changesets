@@ -1,8 +1,8 @@
-import { parseEnv } from "node:util";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { ChangelogFunctions } from "@changesets/types";
+import { parseEnv } from "node:util";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
+import type { ChangelogFunctions } from "@changesets/types";
 
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs

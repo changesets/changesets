@@ -1,13 +1,13 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
 import type { ReleasePlan } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { exec } from "tinyexec";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { status } from "../index.ts";
 
 async function readConfig(cwd: string) {
