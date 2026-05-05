@@ -15,16 +15,16 @@
     "schema.json"
   ],
   "dependencies": {
-    "@changesets/errors": "^1.0.0-next.1",
-    "@changesets/get-dependents-graph": "^3.0.0-next.2",
-    "@changesets/logger": "^1.0.0-next.1",
-    "@changesets/should-skip-package": "^1.0.0-next.2",
-    "@changesets/types": "^7.0.0-next.2",
+    "@changesets/errors": "workspace:^",
+    "@changesets/get-dependents-graph": "workspace:^",
+    "@changesets/logger": "workspace:^",
+    "@changesets/should-skip-package": "workspace:^",
+    "@changesets/types": "workspace:^",
     "@manypkg/get-packages": "^3.0.0",
     "picomatch": "^4.0.4"
   },
   "devDependencies": {
-    "@changesets/test-utils": "0.0.9-next.2",
+    "@changesets/test-utils": "workspace:*",
     "@types/picomatch": "4.0.3",
     "outdent": "^0.8.0",
     "vitest": "^4.1.5"

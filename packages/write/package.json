@@ -10,13 +10,13 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/write",
   "dependencies": {
-    "@changesets/types": "^7.0.0-next.2",
+    "@changesets/types": "workspace:^",
     "human-id": "^4.1.1",
     "prettier": "^3.7.4"
   },
   "devDependencies": {
-    "@changesets/parse": "1.0.0-next.2",
-    "@changesets/test-utils": "0.0.9-next.2",
+    "@changesets/parse": "workspace:*",
+    "@changesets/test-utils": "workspace:*",
     "vitest": "^4.1.5"
   },
   "engines": {

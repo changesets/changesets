@@ -8,9 +8,9 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@changesets/pre": "^3.0.0-next.2",
-    "@changesets/read": "^1.0.0-next.2",
-    "@changesets/types": "^7.0.0-next.2",
+    "@changesets/pre": "workspace:^",
+    "@changesets/read": "workspace:^",
+    "@changesets/types": "workspace:^",
     "@manypkg/get-packages": "^3.0.0",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-to-markdown": "^2.1.2",
@@ -19,9 +19,9 @@
     "tinyexec": "^1.0.2"
   },
   "devDependencies": {
-    "@changesets/git": "4.0.0-next.2",
-    "@changesets/test-utils": "0.0.9-next.2",
-    "@changesets/write": "1.0.0-next.2",
+    "@changesets/git": "workspace:*",
+    "@changesets/test-utils": "workspace:*",
+    "@changesets/write": "workspace:*",
     "vitest": "^4.1.5"
   },
   "engines": {

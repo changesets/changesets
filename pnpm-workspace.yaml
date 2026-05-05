@@ -1,0 +1,11 @@
+packages:
+  - packages/*
+  - scripts/*
+
+allowBuilds:
+  esbuild: false
+
+dedupePeers: true
+dedupePeerDependents: true
+
+shellEmulator: true

@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/parse",
   "dependencies": {
-    "@changesets/types": "^7.0.0-next.2",
+    "@changesets/types": "workspace:^",
     "js-yaml": "^4.1.1"
   },
   "devDependencies": {
