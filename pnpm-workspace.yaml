@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - scripts/*
+  - site
 
 allowBuilds:
   esbuild: false
@@ -9,3 +10,6 @@ dedupePeers: true
 dedupePeerDependents: true
 
 shellEmulator: true
+
+overrides:
+  'vitepress>vite': ^8.0.0

@@ -1,0 +1,15 @@
+{
+  "name": "@changesets/docs",
+  "private": true,
+  "version": "0.0.1",
+  "description": "The official documentation for Changesets",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^2.0.0-alpha.17"
+  }
+}
