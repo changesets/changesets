@@ -92,8 +92,7 @@ async function getPublishTool(
     const parsed = semverParse(version);
     return {
       name: "pnpm",
-      shouldAddNoGitChecks:
-        parsed?.major === undefined ? false : parsed.major >= 5,
+      shouldAddNoGitChecks: parsed?.major == null ? false : parsed.major >= 5,
     };
   } catch {
     return {

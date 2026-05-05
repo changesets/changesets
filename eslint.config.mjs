@@ -40,7 +40,15 @@ export default defineConfig(
       parserOptions: { projectService: true },
     },
     rules: {
+      // enforce using `x == null` for nullish checks (no triple equals, no undefined)
       eqeqeq: ["error", "always", { null: "never" }],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "BinaryExpression:has(Identifier[name='undefined'])",
+          message: "Use `== null` instead of comparing with `undefined`.",
+        },
+      ],
 
       "@typescript-eslint/consistent-type-exports": [
         "error",

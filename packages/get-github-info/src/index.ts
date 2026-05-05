@@ -123,7 +123,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   }
   const repos: ReposWithCommitsAndPRsToFetch = {};
   requests.forEach(({ repo, ...data }) => {
-    if (repos[repo] === undefined) {
+    if (repos[repo] == null) {
       repos[repo] = [];
     }
     repos[repo].push(data);
@@ -280,7 +280,7 @@ export async function getInfoFromPullRequest(request: {
     user: string | null;
   };
 }> {
-  if (request.pull === undefined) {
+  if (request.pull == null) {
     throw new Error("Please pass a pull request number");
   }
 

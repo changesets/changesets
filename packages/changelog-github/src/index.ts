@@ -110,7 +110,7 @@ const changelogFunctions: ChangelogFunctions = {
       .map((l) => l.trimEnd());
 
     const links = await (async () => {
-      if (prFromSummary !== undefined) {
+      if (prFromSummary != null) {
         let { links } = await getInfoFromPullRequest({
           repo: options.repo,
           pull: prFromSummary,

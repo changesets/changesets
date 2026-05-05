@@ -4,8 +4,7 @@ import util from "util";
 export const prefix: string = "🦋 ";
 
 function format(args: Array<any>, customPrefix?: string) {
-  const fullPrefix =
-    prefix + (customPrefix === undefined ? "" : " " + customPrefix);
+  const fullPrefix = prefix + (customPrefix == null ? "" : " " + customPrefix);
   return (
     fullPrefix +
     util

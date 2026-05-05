@@ -56,7 +56,7 @@ export function getChangelogEntry(changelog: string, version: string) {
         const level = BumpLevels[match[0] as "major" | "minor" | "patch"];
         highestLevel = Math.max(level, highestLevel);
       }
-      if (headingStartInfo === undefined && stringified === version) {
+      if (headingStartInfo == null && stringified === version) {
         headingStartInfo = {
           index: i,
           depth: node.depth,
@@ -64,8 +64,8 @@ export function getChangelogEntry(changelog: string, version: string) {
         continue;
       }
       if (
-        endIndex === undefined &&
-        headingStartInfo !== undefined &&
+        endIndex == null &&
+        headingStartInfo != null &&
         headingStartInfo.depth === node.depth
       ) {
         endIndex = i;

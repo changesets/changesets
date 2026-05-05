@@ -57,7 +57,7 @@ export async function runPublish({
       }
       const pkgName = match[1];
       const pkg = packagesByName.get(pkgName);
-      if (pkg === undefined) {
+      if (pkg == null) {
         throw new Error(
           `Package "${pkgName}" not found.` +
             "This is probably a bug in the action, please open an issue",
