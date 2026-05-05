@@ -8,6 +8,7 @@ export const baseConfig = defineConfig({
   dts: { parallel: true },
   format: "esm",
   minify: "dce-only",
+  platform: "node",
 
   checks: { pluginTimings: false },
   publint: true,
