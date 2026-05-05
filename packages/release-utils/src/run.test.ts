@@ -347,7 +347,7 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     const gitModulePath = new URL(
-      "../../git/dist/changesets-git.js",
+      "../../git/dist/index.mjs",
       import.meta.url,
     ).href;
 
@@ -396,7 +396,7 @@ describe("publish", () => {
     await linkNodeModules(clone);
 
     const gitModulePath = new URL(
-      "../../git/dist/changesets-git.js",
+      "../../git/dist/index.mjs",
       import.meta.url,
     ).href;
 
