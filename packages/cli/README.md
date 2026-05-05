@@ -7,9 +7,8 @@ The primary implementation of [changesets](https://github.com/changesets/changes
 and changelog entries for your packages, with a focus on versioning within a mono-repository (though we support
 single-package repositories too).
 
-This package is intended as a successor to `@atlaskit/build-releases` with a more general focus. It works in
-[bolt](https://www.npmjs.com/package/bolt) multi-package repositories, [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) multi-package repositories, and
-in single-package repositories.
+This package is intended as a successor to `@atlaskit/build-releases` with a more general focus.
+It supports single-package repositories as well as [pnpm](https://pnpm.io/workspaces), [yarn](https://yarnpkg.com/features/workspaces), and [npm](https://docs.npmjs.com/cli/v11/using-npm/workspaces) workspaces.
 
 ## Getting Started
 

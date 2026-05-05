@@ -14,4 +14,4 @@ const packages = await getPackages(cwd);
 let { graph, valid } = getDependentsGraph(packages);
 ```
 
-Mostly published for use in [changesets](https://www.npmjs.com/package/@changesets/cli)
+Mostly published for use in [changesets](https://npmx.dev/@changesets/cli)
