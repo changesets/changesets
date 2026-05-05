@@ -57,14 +57,11 @@ export default defineConfig(
       ],
 
       "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-floating-promises": "off", // TODO enable and fix errors
-      "@typescript-eslint/no-unnecessary-type-assertion": "off", // TODO enable and fix errors
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-return": "off",
-      "@typescript-eslint/require-await": "off", // TODO enable and fix errors
       "@typescript-eslint/unbound-method": "off",
 
       // these rules are slow, require extensive config, and/or don't provide much
@@ -85,6 +82,13 @@ export default defineConfig(
   {
     files: ["**/*.{js,mjs}"],
     ...tseslint.configs.disableTypeChecked,
+  },
+  {
+    files: ["**/*.test.*"],
+    rules: {
+      // mock functions often have to be async to match the original fn
+      "@typescript-eslint/require-await": "off",
+    },
   },
   eslintConfigPrettier,
 );
