@@ -12,4 +12,6 @@ dedupePeerDependents: true
 shellEmulator: true
 
 overrides:
+  'vitepress>@docsearch/js': '-'
+  'vitepress>@docsearch/sidepanel-js': '-'
   'vitepress>vite': ^8.0.0
