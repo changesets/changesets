@@ -17,6 +17,7 @@ jobs:
     name: Publish
     if: github.repository == 'changesets/changesets' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    environment: npm
     timeout-minutes: 20
     permissions:
       contents: write # to create release (changesets/action)
@@ -41,6 +42,7 @@ jobs:
   #   if: github.repository == 'changesets/changesets' && github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/publish-pr')
   #   timeout-minutes: 20
   #   runs-on: ubuntu-latest
+  #   environment: npm
   #   permissions:
   #     contents: read # to checkout the pull request
   #     id-token: write # to use OpenID Connect token for trusted publishing
