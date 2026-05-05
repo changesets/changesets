@@ -238,13 +238,13 @@ export async function getInfo(request: {
     data.associatedPullRequests.nodes &&
     data.associatedPullRequests.nodes.length
       ? (data.associatedPullRequests.nodes as any[]).sort((a, b) => {
-          if (a.mergedAt === null && b.mergedAt === null) {
+          if (a.mergedAt == null && b.mergedAt == null) {
             return 0;
           }
-          if (a.mergedAt === null) {
+          if (a.mergedAt == null) {
             return 1;
           }
-          if (b.mergedAt === null) {
+          if (b.mergedAt == null) {
             return -1;
           }
           a = new Date(a.mergedAt);

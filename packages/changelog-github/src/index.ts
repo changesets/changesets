@@ -149,9 +149,9 @@ const changelogFunctions: ChangelogFunctions = {
       : links.user;
 
     const prefix = [
-      links.pull === null ? "" : ` ${links.pull}`,
-      links.commit === null ? "" : ` ${links.commit}`,
-      users === null ? "" : ` Thanks ${users}!`,
+      links.pull == null ? "" : ` ${links.pull}`,
+      links.commit == null ? "" : ` ${links.commit}`,
+      users == null ? "" : ` Thanks ${users}!`,
     ].join("");
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {

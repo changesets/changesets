@@ -70,7 +70,7 @@ export async function getChangelogEntry(
     const usesWorkspaceRange = versionRange?.startsWith("workspace:");
     return (
       versionRange &&
-      (usesWorkspaceRange || validRange(versionRange) !== null) &&
+      (usesWorkspaceRange || validRange(versionRange) != null) &&
       shouldUpdateDependencyBasedOnConfig(
         cwd,
         {

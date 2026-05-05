@@ -76,7 +76,7 @@ export function versionPackage(
         if (
           !usesWorkspaceRange &&
           (bumpVersionsWithWorkspaceProtocolOnly ||
-            validRange(depCurrentVersion) === null)
+            validRange(depCurrentVersion) == null)
         ) {
           continue;
         }
@@ -90,7 +90,7 @@ export function versionPackage(
             workspaceDepVersion === "*" ||
             workspaceDepVersion === "^" ||
             workspaceDepVersion === "~" ||
-            validRange(workspaceDepVersion) === null
+            validRange(workspaceDepVersion) == null
           ) {
             continue;
           }
@@ -104,7 +104,7 @@ export function versionPackage(
           new Range(depCurrentVersion).range !== "" ||
           // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-          semverPrerelease(version) !== null
+          semverPrerelease(version) != null
         ) {
           let newNewRange = snapshot
             ? version

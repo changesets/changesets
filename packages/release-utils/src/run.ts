@@ -52,7 +52,7 @@ export async function runPublish({
 
     for (const line of changesetPublishOutput.split("\n")) {
       const match = line.match(newTagRegex);
-      if (match === null) {
+      if (match == null) {
         continue;
       }
       const pkgName = match[1];

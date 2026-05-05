@@ -28,8 +28,8 @@ const getReleaseLine = async (changeset, type) => {
     commit: changeset.commit,
   });
   let returnVal = `- ${links.commit}${
-    links.pull === null ? "" : ` ${links.pull}`
-  }${links.user === null ? "" : ` Thanks ${links.user}!`}: ${firstLine}`;
+    links.pull == null ? "" : ` ${links.pull}`
+  }${links.user == null ? "" : ` Thanks ${links.user}!`}: ${firstLine}`;
   if (futureLines.length > 0) {
     returnVal += `\n${futureLines.map((l) => `  ${l}`).join("\n")}`;
   }

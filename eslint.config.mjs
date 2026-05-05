@@ -40,7 +40,7 @@ export default defineConfig(
       parserOptions: { projectService: true },
     },
     rules: {
-      eqeqeq: ["off", "always", { null: "never", undefined: "never" }], // TODO enable and fix errors
+      eqeqeq: ["error", "always", { null: "never" }],
 
       "@typescript-eslint/consistent-type-exports": [
         "error",
