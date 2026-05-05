@@ -55,7 +55,9 @@ export default async function getChangelogEntry(
     const rls = cs.releases.find((r) => r.name === release.name);
     if (rls && rls.type !== "none") {
       changelogLines[rls.type].push(
-        changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts),
+        Promise.resolve(
+          changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts),
+        ),
       );
     }
   });
@@ -102,10 +104,12 @@ export default async function getChangelogEntry(
   );
 
   changelogLines.patch.push(
-    changelogFuncs.getDependencyReleaseLine(
-      relevantChangesets,
-      dependentReleases,
-      changelogOpts,
+    Promise.resolve(
+      changelogFuncs.getDependencyReleaseLine(
+        relevantChangesets,
+        dependentReleases,
+        changelogOpts,
+      ),
     ),
   );
 

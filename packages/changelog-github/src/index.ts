@@ -156,13 +156,13 @@ const changelogFunctions: ChangelogFunctions = {
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {
       serverUrl: GITHUB_SERVER_URL,
-      repo: options!.repo,
+      repo: options.repo,
     })}\n${futureLines
       .map(
         (l) =>
           `  ${linkifyIssueRefs(l, {
             serverUrl: GITHUB_SERVER_URL,
-            repo: options!.repo,
+            repo: options.repo,
           })}`,
       )
       .join("\n")}`;

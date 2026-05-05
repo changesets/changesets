@@ -1,3 +1,5 @@
+type MaybePromise<T> = T | Promise<T>;
+
 export type VersionType = "major" | "minor" | "patch" | "none";
 
 // NB: Bolt check uses a different dependency set to every other package.
@@ -131,13 +133,13 @@ export type GetReleaseLine = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
   changelogOpts: null | Record<string, any>,
-) => Promise<string>;
+) => MaybePromise<string>;
 
 export type GetDependencyReleaseLine = (
   changesets: NewChangesetWithCommit[],
   dependenciesUpdated: ModCompWithPackage[],
   changelogOpts: any,
-) => Promise<string>;
+) => MaybePromise<string>;
 
 export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
@@ -147,12 +149,12 @@ export type ChangelogFunctions = {
 export type GetAddMessage = (
   changeset: Changeset,
   commitOptions: any,
-) => Promise<string>;
+) => MaybePromise<string>;
 
 export type GetVersionMessage = (
   releasePlan: ReleasePlan,
   commitOptions: any,
-) => Promise<string>;
+) => MaybePromise<string>;
 
 export type CommitFunctions = {
   getAddMessage?: GetAddMessage;
