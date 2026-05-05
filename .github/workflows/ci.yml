@@ -41,17 +41,17 @@ jobs:
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
       - name: Vitest tests
-        if: matrix.node_version != 24
+        if: matrix.node_version != 26
         run: pnpm test
 
       # Run coverage only once on node 24 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
-        if: matrix.node_version == 24
+        if: matrix.node_version == 26
         run: pnpm test --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
-        if: matrix.node_version == 24
+        if: matrix.node_version == 26
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
