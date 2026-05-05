@@ -6,7 +6,7 @@ import type { ReleasePlan } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import { exec } from "tinyexec";
 import { status } from "../index.ts";
 

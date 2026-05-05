@@ -1,6 +1,6 @@
 import pc from "picocolors";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import { getReleasePlan } from "@changesets/get-release-plan";
 import { error, info, log } from "@changesets/logger";
 import type {

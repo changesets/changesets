@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import path from "path";
+import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";

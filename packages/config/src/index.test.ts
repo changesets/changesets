@@ -5,7 +5,7 @@ import type { Config, WrittenConfig, Packages } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
-import path from "path";
+import path from "node:path";
 
 vi.mock("@changesets/logger");
 

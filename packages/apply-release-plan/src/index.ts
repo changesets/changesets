@@ -11,7 +11,7 @@ import type {
 } from "@changesets/types";
 import detectIndent from "detect-indent";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import prettier from "prettier";
 import { resolve } from "import-meta-resolve";
 import { getChangelogEntry } from "./get-changelog-entry.ts";

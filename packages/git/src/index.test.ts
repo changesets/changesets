@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { exec } from "tinyexec";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";

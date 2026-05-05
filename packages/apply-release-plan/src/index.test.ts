@@ -9,7 +9,7 @@ import type {
 import * as git from "@changesets/git";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import { outdent } from "outdent";
 import { exec } from "tinyexec";
 import { defaultConfig } from "@changesets/config";

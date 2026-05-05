@@ -77,7 +77,7 @@ export default defineConfig(
       "n/no-process-exit": "off",
       "n/no-unpublished-import": "off",
 
-      "n/prefer-node-protocol": "off", // TODO enable and fix errors
+      "n/prefer-node-protocol": "error",
       "n/no-unsupported-features/node-builtins": [
         "error",
         { ignores: ["fs/promises.cp", "import.meta.dirname"] },

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { publish as publishCommand } from "../index.ts";
 import { defaultConfig } from "@changesets/config";
-import * as path from "path";
+import * as path from "node:path";
 import type { Config } from "@changesets/types";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 

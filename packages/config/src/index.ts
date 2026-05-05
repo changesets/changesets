@@ -15,7 +15,7 @@ import { getPackages } from "@manypkg/get-packages";
 import picomatch from "picomatch";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
-import path from "path";
+import path from "node:path";
 
 const require = createRequire(import.meta.url);
 const packageJson = require("../package.json");

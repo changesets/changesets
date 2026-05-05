@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import parse from "@changesets/parse";
 import writeChangeset from "./index.ts";
 

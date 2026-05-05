@@ -1,6 +1,6 @@
 import { enterPre, exitPre, readPreState } from "./index.ts";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import {
   PreEnterButInPreModeError,
   PreExitButNotInPreModeError,

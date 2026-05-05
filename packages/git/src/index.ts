@@ -1,6 +1,6 @@
 import { exec } from "tinyexec";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import { getPackages } from "@manypkg/get-packages";
 import { GitError } from "@changesets/errors";
 import picomatch from "picomatch";

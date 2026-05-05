@@ -1,5 +1,5 @@
 import type { CommitFunctions } from "@changesets/types";
-import path from "path";
+import path from "node:path";
 import { resolve } from "import-meta-resolve";
 import { pathToFileURL } from "node:url";
 
