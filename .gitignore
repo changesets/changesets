@@ -5,3 +5,4 @@ node_modules/
 .env
 *error.log
 scratchings.js
+/site/.vitepress/cache/
