@@ -38,8 +38,8 @@ jobs:
         uses: changesets/action@v1
         with:
           # this expects you to have a script called release which does a build for your packages and calls changeset publish
-          publish: yarn release
-          version: yarn version-packages
+          publish: pnpm release
+          version: pnpm version-packages
 
   # publish_pr:
   #   if: github.repository == 'changesets/changesets' && github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/publish-pr')
@@ -106,14 +106,14 @@ jobs:
   #         echo "snapshot_tag=$SNAPSHOT_TAG" >> "$GITHUB_OUTPUT"
   #         echo "version=0.0.0-$SNAPSHOT_TAG" >> "$GITHUB_OUTPUT"
 
-  #     - run: yarn changeset version --snapshot "${{ steps.snapshot_version.outputs.snapshot_tag }}" --snapshot-prerelease-template "{tag}"
+  #     - run: pnpm changeset version --snapshot "${{ steps.snapshot_version.outputs.snapshot_tag }}" --snapshot-prerelease-template "{tag}"
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  #     - run: yarn build
+  #     - run: pnpm build
 
   #     - name: Publish snapshot versions
-  #       run: yarn changeset publish --tag "${{ steps.snapshot_version.outputs.publish_tag }}"
+  #       run: pnpm changeset publish --tag "${{ steps.snapshot_version.outputs.publish_tag }}"
 
   #     - name: Post comment with published version
   #       run: |
