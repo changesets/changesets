@@ -3,7 +3,7 @@ import { exec } from "tinyexec";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import { gitdir, outputFile, testdir } from "@changesets/test-utils";
-import writeChangeset from "@changesets/write";
+import { writeChangeset } from "@changesets/write";
 
 import {
   add,

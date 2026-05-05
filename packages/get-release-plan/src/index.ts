@@ -1,11 +1,11 @@
-import assembleReleasePlan from "@changesets/assemble-release-plan";
-import readChangesets from "@changesets/read";
+import { assembleReleasePlan } from "@changesets/assemble-release-plan";
+import { readChangesets } from "@changesets/read";
 import { read } from "@changesets/config";
 import type { Config, ReleasePlan } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 
-export default async function getReleasePlan(
+export async function getReleasePlan(
   cwd: string,
   sinceRef?: string,
   passedConfig?: Config,
@@ -18,3 +18,7 @@ export default async function getReleasePlan(
 
   return assembleReleasePlan(changesets, packages, config, preState);
 }
+
+/** @deprecated Use named export `getReleasePlan` instead */
+const getReleasePlanDefault = getReleasePlan;
+export default getReleasePlanDefault;

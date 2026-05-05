@@ -75,7 +75,18 @@ export default defineConfig(
         { ignores: ["fs/promises.cp", "import.meta.dirname"] },
       ],
 
+      "import-lite/no-default-export": "error",
       "import-lite/no-mutable-exports": "off", // TODO enable and fix errors
+    },
+  },
+  {
+    files: [
+      "**/index.ts", // to be removed in next release (v4) when we are dropping default export
+      "**/vitest.config.mts",
+      "**/eslint.config.mjs",
+    ],
+    rules: {
+      "import-lite/no-default-export": "off",
     },
   },
   {

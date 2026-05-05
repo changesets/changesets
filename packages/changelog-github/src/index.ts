@@ -169,4 +169,5 @@ const changelogFunctions: ChangelogFunctions = {
   },
 };
 
+// ChangelogFunctions require a default export
 export default changelogFunctions;

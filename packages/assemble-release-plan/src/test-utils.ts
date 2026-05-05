@@ -67,7 +67,7 @@ const getSimpleSetup = () => ({
   ] satisfies Array<NewChangeset>,
 });
 
-class FakeFullState {
+export class FakeFullState {
   packages: Packages;
   changesets: NewChangeset[];
 
@@ -141,5 +141,3 @@ class FakeFullState {
     pkg.packageJson.version = version;
   }
 }
-
-export default FakeFullState;

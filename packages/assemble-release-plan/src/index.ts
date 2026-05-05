@@ -11,11 +11,11 @@ import type {
   Packages,
 } from "@changesets/types";
 import semverParse from "semver/functions/parse.js";
-import applyLinks from "./apply-links.ts";
-import determineDependents from "./determine-dependents.ts";
-import flattenReleases from "./flatten-releases.ts";
+import { applyLinks } from "./apply-links.ts";
+import { determineDependents } from "./determine-dependents.ts";
+import { flattenReleases } from "./flatten-releases.ts";
 import { incrementVersion } from "./increment.ts";
-import matchFixedConstraint from "./match-fixed-constraint.ts";
+import { matchFixedConstraint } from "./match-fixed-constraint.ts";
 import type { InternalRelease, PreInfo } from "./types.ts";
 import { mapGetOrThrow, mapGetOrThrowInternal } from "./utils.ts";
 
@@ -120,7 +120,7 @@ function getNewVersion(
   return incrementVersion(release, preInfo);
 }
 
-function assembleReleasePlan(
+export function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
   config: Config,
@@ -373,4 +373,6 @@ function getPreInfo(
   };
 }
 
-export default assembleReleasePlan;
+/** @deprecated Use named export `assembleReleasePlan` instead */
+const assembleReleasePlanDefault = assembleReleasePlan;
+export default assembleReleasePlanDefault;

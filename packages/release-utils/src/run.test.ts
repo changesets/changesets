@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, test, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { add, commit } from "@changesets/git";
 import {
   linkNodeModules,
@@ -6,16 +6,18 @@ import {
   testdir,
 } from "@changesets/test-utils";
 import type { Changeset } from "@changesets/types";
-import writeChangeset from "@changesets/write";
+import { writeChangeset } from "@changesets/write";
 import { pathToFileURL } from "node:url";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import { exec } from "tinyexec";
 import { getCurrentBranch } from "./gitUtils.ts";
 import { runPublish, runVersion } from "./run.ts";
 
 const writeChangesets = (changesets: Changeset[], cwd: string) => {
-  return Promise.all(changesets.map((commit) => writeChangeset(commit, cwd)));
+  return Promise.all(
+    changesets.map((changeset) => writeChangeset(changeset, cwd)),
+  );
 };
 
 vi.setConfig({ testTimeout: 10000 });
@@ -132,29 +134,25 @@ describe("version", () => {
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
         "utf8",
       ),
-    ).toEqual(
-      expect.stringContaining(`# pkg-a
+    ).toContain(`# pkg-a
 
 ## 1.1.0
 
 ### Minor Changes
 
-`),
-    );
+`);
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
         "utf8",
       ),
-    ).toEqual(
-      expect.stringContaining(`# pkg-b
+    ).toContain(`# pkg-b
 
 ## 1.1.0
 
 ### Minor Changes
 
-`),
-    );
+`);
     expect(changedPackages).toEqual([
       {
         dir: path.join(clone, "packages", "pkg-a"),
@@ -260,15 +258,13 @@ describe("version", () => {
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
         "utf8",
       ),
-    ).toEqual(
-      expect.stringContaining(`# pkg-a
+    ).toContain(`# pkg-a
 
 ## 1.1.0
 
 ### Minor Changes
 
-`),
-    );
+`);
     await expect(
       fs.readFile(path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"), "utf8"),
     ).rejects.toMatchObject({ code: "ENOENT" });
@@ -337,7 +333,7 @@ describe("version", () => {
 });
 
 describe("publish", () => {
-  test("single package repo", async () => {
+  it("publishes packages in a single package repo", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -373,7 +369,7 @@ describe("publish", () => {
     expect(tagsResult.stdout.trim()).toEqual("v1.0.0");
   });
 
-  test("multi package repo", async () => {
+  it("publishes packages in a multi package repo", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,

@@ -3,7 +3,7 @@
 Writes a changeset to a file.
 
 ```js
-import write from "@changesets/write";
+import { writeChangeset } from "@changesets/write";
 
 const changeset = {
   summary: "A description of a minor change",
@@ -13,7 +13,7 @@ const changeset = {
   ],
 };
 
-const uniqueId = await write(changeset, cwd);
+const uniqueId = await writeChangeset(changeset, cwd);
 console.log(uniqueId); // orange-foxes-waggle
 ```
 

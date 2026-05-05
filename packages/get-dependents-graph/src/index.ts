@@ -1,5 +1,5 @@
 import type { Package, Packages } from "@changesets/types";
-import getDependencyGraph from "./get-dependency-graph.ts";
+import { getDependencyGraph } from "./get-dependency-graph.ts";
 
 export function getDependentsGraph(
   packages: Packages,

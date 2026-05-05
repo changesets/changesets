@@ -2,7 +2,7 @@ import pc from "picocolors";
 import { log } from "@changesets/logger";
 import type { Release, VersionType } from "@changesets/types";
 
-export default function printConfirmationMessage(
+export function printConfirmationMessage(
   changeset: {
     releases: Array<Release>;
     summary: string;
