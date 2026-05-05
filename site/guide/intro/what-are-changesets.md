@@ -1,5 +1,7 @@
 # What are changesets?
 
+<!-- NOTE: new docs copied from readme -->
+
 The changesets workflow is designed to help when people are making changes, all the way through to publishing. It lets contributors declare how their changes should be released, then we automate updating `package versions`, and `changelogs`, and `publishing new versions` of packages based on the provided information.
 
 Changesets has a focus on solving these problems for multi-package repositories, and keeps packages that rely on each other within the multi-package repository up-to-date, as well as making it easy to make changes to groups of packages.

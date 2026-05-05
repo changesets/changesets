@@ -4,26 +4,25 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 
 ```json
 {
+  "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "updateInternalDependencies": "patch",
+  "fixed": [],
   "linked": [],
   "access": "restricted",
   "baseBranch": "master",
+  "updateInternalDependencies": "patch",
   "ignore": [],
-  "changelog": "@changesets/cli/changelog"
+  "bumpVersionsWithWorkspaceProtocolOnly": false,
+  "changedFilePatterns": ["**"],
+  "prettier": true,
+  "privatePackages": { "version": true, "tag": false }
 }
 ```
 
 > [!NOTE]
 > The `linked`, `fixed`, `updateInternalDependencies`, `bumpVersionsWithWorkspaceProtocolOnly`, and `ignore` options are only for behaviour in monorepos.
 
-## `commit`
-
-> [!NOTE] Type:
->
-> - `boolean`
-> - `string`(module path)
-> - a tuple like `[modulePath: string, options: any]`
+## `commit` (`boolean`, or module path as a `string`, or a tuple like `[modulePath: string, options: any]`)
 
 This option is for setting if the `changeset add` command and the `changeset version` commands will also add and commit the changed files using git, and how the commit messages should be generated for them.
 
@@ -46,14 +45,9 @@ You would specify a custom commit message generator with:
 }
 ```
 
-This is similar to how the [changelog generator functions work](#changelog).
+This is similar to how the [changelog generator functions work](#changelog-false-or-a-path).
 
-## `access`
-
-> [!NOTE] Type:
->
-> - `restricted`
-> - `public`
+## `access` (`restricted` | `public`)
 
 This sets how packages are published - if `access: "restricted"`, packages will be published as private, requiring log in to an npm account with access to install. If `access: "public"`, the packages will be made available on the public registry.
 
@@ -63,22 +57,15 @@ This can be overridden in specific packages by setting the `access` in a package
 
 If you want to prevent a package from being published to npm, set `private: true` in that package's `package.json`
 
-## `baseBranch`
+## `baseBranch` (git branch name)
 
-> [!NOTE] Type:
->
-> - `string` (git branch name)
+The branch to which changesets will make comparisons to detect what has changed since the last commit of the base branch. This should generally be set to the default branch you merge changes into, e.g. `main` or `master`.
 
-The branch to which changesets will make comparisons. A number of internal changesets features use git to compare present changesets against another branch. This defaults what branch will be used for these comparisons. This should generally set to the major branch you merge changes into. Commands that use this information accept a `--since` option which can be used to override this.
+Commands that use this information accept a `--since` option which can be used to override this.
 
-> [!TIP]
-> To help make coding a more inclusive experience, we recommend changing the name of your `master` branch to `main`.
+Locally, make sure the base branch exists and is up to date so changesets can make accurate comparisons.
 
-## `ignore`
-
-> [!NOTE] Type:
->
-> - `string[]` (names of packages)
+## `ignore` (array of packages)
 
 This option allows you to specify some packages that will not be published, even if they are referenced in changesets. Instead, those changesets will be skipped until they are removed from this array.
 
@@ -90,16 +77,12 @@ There are two caveats to this.
 1. If the package is mentioned in a changeset that also includes a package that is not ignored, publishing will fail.
 2. If the package requires one of its dependencies to be updated as part of a publish.
 
-These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](/faq/publishing-in-monorepos).
+These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](../../faq/publishing-in-monorepos.md).
 
 > [!TIP]
 > You can also provide glob expressions to match the packages, according to the [micromatch](https://www.npmjs.com/package/micromatch) format.
 
-## `fixed`
-
-> [!NOTE] Type:
->
-> - `string[][]` (array of arrays of package names)
+## `fixed` (array of arrays of package names)
 
 This option can be used to declare that packages should be version-bumped and published together. As an example, if you have a `@changesets/button` component and a `@changesets/theme` component and you want to make sure that when one gets bumped to `1.1.0`, the other is also bumped to `1.1.0` regardless if it has any change or not. To achieve this you would have the config:
 
@@ -109,13 +92,9 @@ This option can be used to declare that packages should be version-bumped and pu
 }
 ```
 
-If you want to use this option, you should read the documentation on [fixed packages](/guide/advance/fixed-packages) to fully understand the implementation and implications.
+If you want to use this option, you should read the documentation on [fixed packages](../advance/fixed-packages.md) to fully understand the implementation and implications.
 
-## `linked`
-
-> [!NOTE] Type:
->
-> - `string[][]` (array of arrays of package names)
+## `linked` (array of arrays of package names)
 
 This option can be used to declare that packages should 'share' a version, instead of being versioned completely independently. As an example, if you have a `@changesets/button` component and a `@changesets/theme` component and you want to make sure that when one gets bumped to `2.0.0`, the other is also bumped to `2.0.0`. To achieve this you would have the config:
 
@@ -125,17 +104,12 @@ This option can be used to declare that packages should 'share' a version, inste
 }
 ```
 
-If you want to use this option, you should read the documentation on [linked packages](/guide/advance/linked-packages) to fully understand the implementation and implications.
+If you want to use this option, you should read the documentation on [linked packages](../advance/linked-packages.md) to fully understand the implementation and implications.
 
-> [!CAUTION]
+> [!WARNING]
 > This does not do what some other tools do, which is make sure when any package is published, all other packages are also published with the same version.
 
-## `updateInternalDependencies` <Badge type="warning" text="Experimental" />
-
-> [!NOTE] Type:
->
-> - `out-of-range`
-> - `always`
+## `updateInternalDependencies`
 
 This option sets whether, when a package that is being depended upon changes, whether you should update what version it depends on. To make this more understandable, here is an example:
 
@@ -172,14 +146,9 @@ Changesets will always update the dependency if it would leave the old semver ra
 > [!WARNING]
 > This is only applied for packages which are already released in the current release. If A depends on B and we only release B then A won't be bumped.
 
-## `changelog`
+## `changelog` (false or a path)
 
-> [!NOTE] Type:
->
-> - `false`
-> - `string` (path to a file)
-
-This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects to be a file that exports the following:
+This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects a file that exports the following:
 
 ```
 {
@@ -198,29 +167,21 @@ You would specify our github changelog generator with:
 }
 ```
 
-For more details on these functions and information on how to write your own see [changelog-functions](/guide/advance/modifying-changelog-format)
+If you want to disable thank you messages, add `"disableThanks": true` to the options.
 
-## `bumpVersionsWithWorkspaceProtocolOnly`
+For more details on these functions and information on how to write your own see [changelog-functions](../advance/modifying-changelog-format.md)
 
-> [!NOTE] Type:
->
-> - `boolean`
+## `bumpVersionsWithWorkspaceProtocolOnly` (optional boolean)
+
+Default value: `false`
 
 Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.
 
-## `snapshot`
-
-> [!NOTE] Type
->
-> - `object` (optional)
+## `snapshot` (object or undefined)
 
 Default value: `undefined`
 
-### `useCalculatedVersion`
-
-> [!NOTE] Type:
->
-> - `boolean` (optional)
+### `useCalculatedVersion` (optional boolean)
 
 Default value: `false`
 
@@ -228,11 +189,7 @@ When `changesets version --snapshot` is used, the default behavior is to use `0.
 
 Setting `useCalculatedVersion: true` will change the default behavior and will use the calculated version, based on the changeset files.
 
-### `prereleaseTemplate`
-
-> [!NOTE] Type:
->
-> - `string` (optional)
+### `prereleaseTemplate` (optional string)
 
 Default value: `undefined` (see note below)
 
@@ -253,3 +210,62 @@ You can use the following placeholders for customizing the snapshot release vers
 **Default behavior**
 
 If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
+
+## `prettier` (optional boolean)
+
+This option configures whether Changesets will format its output using Prettier. When set to `false`, Changesets will skip formatting with Prettier.
+
+Default value: `true`
+
+```json
+{
+  "prettier": false
+}
+```
+
+## `privatePackages` (object or false)
+
+This option is for setting how private packages should be handled. By default, Changesets will update the changelog for private packages and update their version, but will not create a tag. You can configure this option to change the default behavior.
+
+### `version` (optional boolean)
+
+Default value: `true`
+
+When `version` is set to `true`, Changesets will update the version for private packages. If set to `false`, Changesets will not update the version for private packages.
+
+### `tag` (optional boolean)
+
+Default value: `false`
+
+When `tag` is set to `true`, Changesets will create a tag for private packages. If set to `false`, Changesets will not create a tag for private packages.
+
+### Example
+
+```json
+{
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  }
+}
+```
+
+## `changedFilePatterns` (array of strings)
+
+Glob patterns for changed files that should mark a package as changed. Useful to fine-tune what counts as a change (e.g. only source files, ignoring test files, etc).
+
+Default value:
+
+```json
+{
+  "changedFilePatterns": ["**"]
+}
+```
+
+Example:
+
+```json
+{
+  "changedFilePatterns": ["src/**", "lib/**"]
+}
+```

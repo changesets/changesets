@@ -4,7 +4,7 @@ Snapshot releases are a way to release your changes for testing without updating
 
 ## Starting Off
 
-Create changesets as normal, as described in [adding a changeset](/guide/basic/adding-a-changeset). When you are ready to release a snapshot, you should make a dedicated branch for doing so.
+Create changesets as normal, as described in [adding a changeset](../../guide/basic/adding-a-changeset.md). When you are ready to release a snapshot, you should make a dedicated branch for doing so.
 
 ## Versioning your packages
 
@@ -30,7 +30,7 @@ After running the `yarn changeset version` command, you can use the `changeset p
 
 You can use the `--no-git-tag` CLI flag when running `changeset publish` if you plan to publish snapshot releases locally or you are pushing [git tags](http://npm.github.io/publishing-pkgs-docs/updating/using-tags.html) to a remote from your CI environment.
 
-When you run `changeset publish --no-git-tag --snapshot`, changesets will skip creating git tags for published snapshot packages. That means that git tags can still be created whenever pushing stable versions (with a regular `changeset publish`), and you can safely publish snapshot releases locally, without creating unnecessary tags.
+When you run `changeset publish --no-git-tag`, changesets will skip creating git tags for published snapshot packages. That means that git tags can still be created whenever pushing stable versions (with a regular `changeset publish`), and you can safely publish snapshot releases locally, without creating unnecessary tags.
 
 ## Using a snapshot version
 
