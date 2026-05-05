@@ -346,10 +346,8 @@ describe("publish", () => {
 
     await linkNodeModules(clone);
 
-    const gitModulePath = new URL(
-      "../../git/dist/index.mjs",
-      import.meta.url,
-    ).href;
+    const gitModulePath = new URL("../../git/dist/index.mjs", import.meta.url)
+      .href;
 
     const result = await runPublish({
       command: "node",
@@ -395,10 +393,8 @@ describe("publish", () => {
 
     await linkNodeModules(clone);
 
-    const gitModulePath = new URL(
-      "../../git/dist/index.mjs",
-      import.meta.url,
-    ).href;
+    const gitModulePath = new URL("../../git/dist/index.mjs", import.meta.url)
+      .href;
 
     const result = await runPublish({
       command: "node",
