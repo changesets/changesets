@@ -1,7 +1,7 @@
 ## @changesets/cli 🦋
 
-[![npm package](https://img.shields.io/npm/v/@changesets/cli)](https://npmjs.com/package/@changesets/cli)
-[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/cli?name=true)](https://npmx.dev/package/@changesets/cli)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 The primary implementation of [changesets](https://github.com/changesets/changesets). Helps you manage the versioning
 and changelog entries for your packages, with a focus on versioning within a mono-repository (though we support
