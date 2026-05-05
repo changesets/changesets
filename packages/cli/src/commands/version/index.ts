@@ -13,11 +13,11 @@ import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 
-let importantSeparator = pc.red(
+const importantSeparator = pc.red(
   "===============================IMPORTANT!===============================",
 );
 
-let importantEnd = pc.red(
+const importantEnd = pc.red(
   "----------------------------------------------------------------------",
 );
 
@@ -81,7 +81,7 @@ export default async function version(
 
   const contextDir = path.dirname(fileURLToPath(import.meta.url));
 
-  let [...touchedFiles] = await applyReleasePlan(
+  const [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
     releaseConfig,

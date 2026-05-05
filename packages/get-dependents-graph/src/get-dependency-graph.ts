@@ -91,13 +91,14 @@ export default function getDependencyGraph(
   }
 
   for (const pkg of queue) {
-    const { name } = pkg!.packageJson;
+    const { name } = pkg.packageJson;
     const dependencies = [];
     const allDependencies = getAllDependencies(
       pkg.packageJson,
       ignoreDevDependencies,
     );
 
+    // eslint-disable-next-line prefer-const
     for (let [depName, depRange] of allDependencies) {
       const match = packagesByName[depName];
       if (!match) continue;

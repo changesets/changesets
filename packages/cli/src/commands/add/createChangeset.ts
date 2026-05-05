@@ -21,7 +21,7 @@ async function confirmMajorRelease(pkgJSON: PackageJSON) {
       ),
     );
 
-    let shouldReleaseFirstMajor = await cli.askConfirm(
+    const shouldReleaseFirstMajor = await cli.askConfirm(
       bold(
         `Are you sure you want to release the ${red(
           "first major version",
@@ -118,11 +118,11 @@ export default async function createChangeset(
       allPackages,
     );
 
-    let pkgJsonsByName = getPkgJsonsByName(allPackages);
+    const pkgJsonsByName = getPkgJsonsByName(allPackages);
 
-    let pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
+    const pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 
-    let pkgsThatShouldBeMajorBumped = (
+    const pkgsThatShouldBeMajorBumped = (
       await cli.askCheckboxPlus(
         bold(`Which packages should have a ${red("major")} bump?`),
         [
@@ -157,9 +157,9 @@ export default async function createChangeset(
       // for packages that are under v1, we want to make sure major releases are intended,
       // as some repo-wide sweeping changes have mistakenly release first majors
       // of packages.
-      let pkgJson = pkgJsonsByName.get(pkgName)!;
+      const pkgJson = pkgJsonsByName.get(pkgName)!;
 
-      let shouldReleaseFirstMajor = await confirmMajorRelease(pkgJson);
+      const shouldReleaseFirstMajor = await confirmMajorRelease(pkgJson);
       if (shouldReleaseFirstMajor) {
         pkgsLeftToGetBumpTypeFor.delete(pkgName);
 
@@ -168,7 +168,7 @@ export default async function createChangeset(
     }
 
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
-      let pkgsThatShouldBeMinorBumped = (
+      const pkgsThatShouldBeMinorBumped = (
         await cli.askCheckboxPlus(
           bold(`Which packages should have a ${green("minor")} bump?`),
           [
@@ -222,15 +222,15 @@ export default async function createChangeset(
       }
     }
   } else {
-    let pkg = allPackages[0];
-    let type = await cli.askList(
+    const pkg = allPackages[0];
+    const type = await cli.askList(
       `What kind of change is this for ${green(
         pkg.packageJson.name,
       )}? (current version is ${pkg.packageJson.version})`,
       ["patch", "minor", "major"],
     );
     if (type === "major") {
-      let shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
+      const shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
       if (!shouldReleaseAsMajor) {
         throw new ExitError(1);
       }

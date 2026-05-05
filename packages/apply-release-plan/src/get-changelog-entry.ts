@@ -55,11 +55,13 @@ export default async function getChangelogEntry(
     const rls = cs.releases.find((r) => r.name === release.name);
     if (rls && rls.type !== "none") {
       changelogLines[rls.type].push(
-        changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts),
+        Promise.resolve(
+          changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts),
+        ),
       );
     }
   });
-  let dependentReleases = releases.filter((rel) => {
+  const dependentReleases = releases.filter((rel) => {
     const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
     const peerDependencyVersionRange =
       release.packageJson.peerDependencies?.[rel.name];
@@ -89,7 +91,7 @@ export default async function getChangelogEntry(
     );
   });
 
-  let relevantChangesetIds: Set<string> = new Set();
+  const relevantChangesetIds: Set<string> = new Set();
 
   dependentReleases.forEach((rel) => {
     rel.changesets.forEach((cs) => {
@@ -97,15 +99,17 @@ export default async function getChangelogEntry(
     });
   });
 
-  let relevantChangesets = changesets.filter((cs) =>
+  const relevantChangesets = changesets.filter((cs) =>
     relevantChangesetIds.has(cs.id),
   );
 
   changelogLines.patch.push(
-    changelogFuncs.getDependencyReleaseLine(
-      relevantChangesets,
-      dependentReleases,
-      changelogOpts,
+    Promise.resolve(
+      changelogFuncs.getDependencyReleaseLine(
+        relevantChangesets,
+        dependentReleases,
+        changelogOpts,
+      ),
     ),
   );
 

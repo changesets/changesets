@@ -15,7 +15,7 @@ describe("assemble-release-plan", () => {
   });
 
   it("should assemble release plan for basic setup", () => {
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -33,7 +33,7 @@ describe("assemble-release-plan", () => {
   });
 
   it("should assemble release plan for basic setup with snapshot", () => {
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -48,7 +48,7 @@ describe("assemble-release-plan", () => {
   });
 
   it("should assemble release plan for basic setup with snapshot and tag", () => {
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -72,7 +72,7 @@ describe("assemble-release-plan", () => {
       ],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -95,7 +95,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -133,7 +133,7 @@ describe("assemble-release-plan", () => {
       ],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -161,7 +161,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -179,7 +179,7 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-a", "1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -198,7 +198,7 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -220,7 +220,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -240,7 +240,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
@@ -265,7 +265,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
@@ -295,7 +295,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -319,7 +319,7 @@ describe("assemble-release-plan", () => {
       ],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -342,7 +342,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-b", type: "none" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -362,7 +362,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -380,7 +380,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -398,7 +398,7 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -547,7 +547,7 @@ describe("assemble-release-plan", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -590,7 +590,7 @@ describe("assemble-release-plan", () => {
         releases: [{ name: "pkg-a", type: "minor" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -615,7 +615,7 @@ describe("assemble-release-plan", () => {
 
       setup.updatePackage("pkg-c", "2.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -648,7 +648,7 @@ describe("assemble-release-plan", () => {
 
       setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -683,7 +683,7 @@ describe("assemble-release-plan", () => {
 
       setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -707,7 +707,7 @@ describe("assemble-release-plan", () => {
       expect(releases[3].newVersion).toEqual("1.1.0");
     });
     it("should return an empty release array when no changes will occur", () => {
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         [],
         setup.packages,
         {
@@ -731,7 +731,7 @@ describe("assemble-release-plan", () => {
         releases: [{ type: "minor", name: "pkg-a" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -765,7 +765,7 @@ describe("assemble-release-plan", () => {
         releases: [{ name: "pkg-b", type: "major" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -790,7 +790,7 @@ describe("assemble-release-plan", () => {
 
       setup.updatePackage("pkg-c", "2.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -823,7 +823,7 @@ describe("assemble-release-plan", () => {
 
       setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -843,7 +843,7 @@ describe("assemble-release-plan", () => {
       expect(releases[3].newVersion).toEqual("1.1.0");
     });
     it("should return an empty release array when no changes will occur", () => {
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         [],
         setup.packages,
         {
@@ -866,7 +866,7 @@ describe("assemble-release-plan", () => {
         releases: [{ type: "minor", name: "pkg-c" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1029,7 +1029,7 @@ describe("assemble-release-plan", () => {
         releases: [{ name: "pkg-b", type: "none" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
@@ -1049,7 +1049,7 @@ describe("assemble-release-plan", () => {
         releases: [{ name: "pkg-b", type: "none" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
@@ -1065,7 +1065,7 @@ describe("assemble-release-plan", () => {
     it("should assemble release plan with workspace:* dependencies", () => {
       setup.updateDependency("pkg-b", "pkg-a", "workspace:*");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
@@ -1085,7 +1085,7 @@ describe("assemble-release-plan", () => {
         releases: [{ name: "pkg-b", type: "none" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
@@ -1101,7 +1101,7 @@ describe("assemble-release-plan", () => {
     it("should assemble release plan with workspace path dependencies", () => {
       setup.updateDependency("pkg-b", "pkg-a", "workspace:packages/pkg-a");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
@@ -1120,7 +1120,7 @@ describe("assemble-release-plan", () => {
     it("should bump a direct dependent when a dependency package gets bumped", () => {
       setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1144,7 +1144,7 @@ describe("assemble-release-plan", () => {
       setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
       setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1173,7 +1173,7 @@ describe("assemble-release-plan", () => {
         releases: [{ name: "pkg-c", type: "none" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1197,7 +1197,7 @@ describe("assemble-release-plan", () => {
       setup.updateDevDependency("pkg-b", "pkg-a", "^1.0.0");
       setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1233,7 +1233,7 @@ describe("version update thoroughness", () => {
   });
 
   it("should patch a single pinned dependent", () => {
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1251,7 +1251,7 @@ describe("version update thoroughness", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1272,7 +1272,7 @@ describe("version update thoroughness", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1301,7 +1301,7 @@ describe("bumping peerDeps", () => {
   it("should patch a pinned peerDep", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1322,7 +1322,7 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "none" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1336,7 +1336,7 @@ describe("bumping peerDeps", () => {
   it("should not bump the dependent when bumping a tilde peerDep by a patch", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1354,7 +1354,7 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1374,7 +1374,7 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1395,7 +1395,7 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "none" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1409,7 +1409,7 @@ describe("bumping peerDeps", () => {
   it("should not bump dependent when bumping caret peerDep by patch", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1427,7 +1427,7 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1447,7 +1447,7 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1469,7 +1469,7 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
@@ -1498,7 +1498,7 @@ describe("bumping peerDeps", () => {
         id: "anyway-the-windblows",
         releases: [{ name: "pkg-a", type: "minor" }],
       });
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1522,7 +1522,7 @@ describe("bumping peerDeps", () => {
         releases: [{ name: "pkg-a", type: "minor" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {

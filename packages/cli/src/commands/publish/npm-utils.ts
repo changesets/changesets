@@ -87,9 +87,9 @@ async function getPublishTool(
   const pm = await detect({ cwd });
   if (!pm || pm.name !== "pnpm") return { name: "npm" };
   try {
-    let result = await exec("pnpm", ["--version"], { nodeOptions: { cwd } });
-    let version = result.stdout.toString().trim();
-    let parsed = semverParse(version);
+    const result = await exec("pnpm", ["--version"], { nodeOptions: { cwd } });
+    const version = result.stdout.toString().trim();
+    const parsed = semverParse(version);
     return {
       name: "pnpm",
       shouldAddNoGitChecks:
@@ -110,7 +110,7 @@ export async function getTokenIsRequired() {
   const envOverride = {
     [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
-  let result = await exec("npm", ["profile", "get", "--json"], {
+  const result = await exec("npm", ["profile", "get", "--json"], {
     nodeOptions: { env: Object.assign({}, process.env, envOverride) },
   });
   if (result.exitCode !== 0) {
@@ -120,7 +120,7 @@ export async function getTokenIsRequired() {
     );
     return false;
   }
-  let json = jsonParse(result.stdout.toString());
+  const json = jsonParse(result.stdout.toString());
   if (json.error || !json.tfa || !json.tfa.mode) {
     return false;
   }
@@ -194,7 +194,7 @@ export function getPackageInfo(packageJson: PackageJSON) {
 }
 
 export async function infoAllow404(packageJson: PackageJSON) {
-  let pkgInfo = await getPackageInfo(packageJson);
+  const pkgInfo = await getPackageInfo(packageJson);
   if (pkgInfo.error?.code === "E404") {
     warn(`Received 404 for npm info ${pc.cyan(`"${packageJson.name}"`)}`);
     return { published: false, pkgInfo: {} };
@@ -303,7 +303,7 @@ async function internalPublish(
     publishFlags.push("--otp", twoFactorState.token);
   }
 
-  let { exitCode, stdout, stderr } =
+  const { exitCode, stdout, stderr } =
     publishTool.name === "pnpm"
       ? await exec("pnpm", ["publish", ...publishFlags], {
           nodeOptions: {
@@ -323,7 +323,7 @@ async function internalPublish(
     // - output of those lifecycle scripts can contain JSON
     // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
     // Note that the `--json` output is always printed at the end so this should work
-    let json =
+    const json =
       getLastJsonObjectFromString(stderr.toString()) ||
       getLastJsonObjectFromString(stdout.toString());
 

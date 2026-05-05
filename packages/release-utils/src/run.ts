@@ -32,7 +32,7 @@ export async function runPublish({
   args = [],
   cwd = process.cwd(),
 }: PublishOptions): Promise<PublishResult> {
-  let branch = await gitUtils.getCurrentBranch(cwd);
+  const branch = await gitUtils.getCurrentBranch(cwd);
 
   const { stdout: changesetPublishOutput } = await exec(command, args, {
     nodeOptions: { cwd },
@@ -41,20 +41,22 @@ export async function runPublish({
   await gitUtils.pullBranch(branch, cwd);
   await gitUtils.push(branch, { includeTags: true, cwd });
 
-  let { packages, tool } = await getPackages(cwd);
-  let releasedPackages: Package[] = [];
+  const { packages, tool } = await getPackages(cwd);
+  const releasedPackages: Package[] = [];
 
   if (tool.type !== "root") {
-    let newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/;
-    let packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
+    const newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/;
+    const packagesByName = new Map(
+      packages.map((x) => [x.packageJson.name, x]),
+    );
 
-    for (let line of changesetPublishOutput.split("\n")) {
-      let match = line.match(newTagRegex);
+    for (const line of changesetPublishOutput.split("\n")) {
+      const match = line.match(newTagRegex);
       if (match === null) {
         continue;
       }
-      let pkgName = match[1];
-      let pkg = packagesByName.get(pkgName);
+      const pkgName = match[1];
+      const pkg = packagesByName.get(pkgName);
       if (pkg === undefined) {
         throw new Error(
           `Package "${pkgName}" not found.` +
@@ -70,11 +72,11 @@ export async function runPublish({
           "This is probably a bug in the action, please open an issue",
       );
     }
-    let pkg = packages[0];
-    let newTagRegex = /New tag:/;
+    const pkg = packages[0];
+    const newTagRegex = /New tag:/;
 
-    for (let line of changesetPublishOutput.split("\n")) {
-      let match = line.match(newTagRegex);
+    for (const line of changesetPublishOutput.split("\n")) {
+      const match = line.match(newTagRegex);
 
       if (match) {
         releasedPackages.push(pkg);
@@ -107,19 +109,19 @@ export async function runVersion({
   cwd = process.cwd(),
   commitMessage = "Version Packages",
 }: VersionOptions) {
-  let branch = await gitUtils.getCurrentBranch(cwd);
-  let versionBranch = `changeset-release/${branch}`;
-  let { preState } = await readChangesetState(cwd);
+  const branch = await gitUtils.getCurrentBranch(cwd);
+  const versionBranch = `changeset-release/${branch}`;
+  const { preState } = await readChangesetState(cwd);
 
   await gitUtils.switchToMaybeExistingBranch(versionBranch, cwd);
   await gitUtils.reset("HEAD", undefined, cwd);
 
-  let versionsByDirectory = await getVersionsByDirectory(cwd);
+  const versionsByDirectory = await getVersionsByDirectory(cwd);
 
   if (script) {
     await exec(script, [], { nodeOptions: { cwd } });
   } else {
-    let changesetsCliPkgJsonPath = require.resolve(
+    const changesetsCliPkgJsonPath = require.resolve(
       "@changesets/cli/package.json",
       {
         paths: [cwd],
@@ -140,7 +142,7 @@ export async function runVersion({
     await exec("node", args, { nodeOptions: { cwd } });
   }
 
-  let changedPackages = await getChangedPackages(cwd, versionsByDirectory);
+  const changedPackages = await getChangedPackages(cwd, versionsByDirectory);
 
   // project with `commit: true` setting could have already committed files
   if (!(await gitUtils.checkIfClean(cwd))) {

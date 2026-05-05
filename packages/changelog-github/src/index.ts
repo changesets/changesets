@@ -59,7 +59,7 @@ const changelogFunctions: ChangelogFunctions = {
       await Promise.all(
         changesets.map(async (cs) => {
           if (cs.commit) {
-            let { links } = await getInfo({
+            const { links } = await getInfo({
               repo: options.repo,
               commit: cs.commit,
             });
@@ -87,11 +87,11 @@ const changelogFunctions: ChangelogFunctions = {
 
     let prFromSummary: number | undefined;
     let commitFromSummary: string | undefined;
-    let usersFromSummary: string[] = [];
+    const usersFromSummary: string[] = [];
 
     const replacedChangelog = changeset.summary
       .replace(/^\s*(?:pr|pull|pull\s+request):\s*#?(\d+)/im, (_, pr) => {
-        let num = Number(pr);
+        const num = Number(pr);
         if (!isNaN(num)) prFromSummary = num;
         return "";
       })
@@ -126,7 +126,7 @@ const changelogFunctions: ChangelogFunctions = {
       }
       const commitToFetchFrom = commitFromSummary || changeset.commit;
       if (commitToFetchFrom) {
-        let { links } = await getInfo({
+        const { links } = await getInfo({
           repo: options.repo,
           commit: commitToFetchFrom,
         });
@@ -156,13 +156,13 @@ const changelogFunctions: ChangelogFunctions = {
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {
       serverUrl: GITHUB_SERVER_URL,
-      repo: options!.repo,
+      repo: options.repo,
     })}\n${futureLines
       .map(
         (l) =>
           `  ${linkifyIssueRefs(l, {
             serverUrl: GITHUB_SERVER_URL,
-            repo: options!.repo,
+            repo: options.repo,
           })}`,
       )
       .join("\n")}`;

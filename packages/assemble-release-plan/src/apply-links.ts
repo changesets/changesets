@@ -22,9 +22,9 @@ export default function applyLinks(
   let updated = false;
 
   // We do this for each set of linked packages
-  for (let linkedPackages of linked) {
+  for (const linkedPackages of linked) {
     // First we filter down to all the relevant releases for one set of linked packages
-    let releasingLinkedPackages = [...releases.values()].filter(
+    const releasingLinkedPackages = [...releases.values()].filter(
       (release) =>
         linkedPackages.includes(release.name) && release.type !== "none",
     );
@@ -33,14 +33,14 @@ export default function applyLinks(
     // not need one, as they only have workspace based packages
     if (releasingLinkedPackages.length === 0) continue;
 
-    let highestReleaseType = getHighestReleaseType(releasingLinkedPackages);
-    let highestVersion = getCurrentHighestVersion(
+    const highestReleaseType = getHighestReleaseType(releasingLinkedPackages);
+    const highestVersion = getCurrentHighestVersion(
       linkedPackages,
       packagesByName,
     );
 
     // Finally, we update the packages so all of them are on the highest version
-    for (let linkedPackage of releasingLinkedPackages) {
+    for (const linkedPackage of releasingLinkedPackages) {
       if (linkedPackage.type !== highestReleaseType) {
         updated = true;
         linkedPackage.type = highestReleaseType;

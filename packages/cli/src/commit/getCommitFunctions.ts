@@ -16,8 +16,8 @@ export async function getCommitFunctions(
   if (!commit) {
     return [commitFunctions, null];
   }
-  let commitOpts: any = commit[1];
-  let changesetPath = path.join(cwd, ".changeset");
+  const commitOpts: any = commit[1];
+  const changesetPath = path.join(cwd, ".changeset");
   let commitPath;
 
   try {
