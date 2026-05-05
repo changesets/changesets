@@ -1,15 +1,14 @@
-// NB: Bolt check uses a different dependnecy set to every other package.
-// You need think before you use this.
-const DEPENDENCY_TYPES = [
-  "dependencies",
-  "devDependencies",
-  "peerDependencies",
-  "optionalDependencies",
-] as const;
+type MaybePromise<T> = T | Promise<T>;
 
 export type VersionType = "major" | "minor" | "patch" | "none";
 
-export type DependencyType = typeof DEPENDENCY_TYPES[number];
+// NB: Bolt check uses a different dependency set to every other package.
+// You need think before you use this.
+export type DependencyType =
+  | "dependencies"
+  | "devDependencies"
+  | "peerDependencies"
+  | "optionalDependencies";
 
 export type AccessType = "public" | "restricted";
 
@@ -53,6 +52,7 @@ export type PackageJSON = {
     access?: AccessType;
     directory?: string;
     registry?: string;
+    [registry: `${string}:registry`]: string;
   };
 };
 
@@ -74,6 +74,8 @@ export type Config = {
   access: AccessType;
   baseBranch: string;
   changedFilePatterns: readonly string[];
+  /** When false, Changesets won't format with Prettier */
+  prettier: boolean;
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
@@ -81,10 +83,7 @@ export type Config = {
   ignore: ReadonlyArray<string>;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Omit<
-    Required<ExperimentalOptions>,
-    "useCalculatedVersionForSnapshots"
-  >;
+  ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<ExperimentalOptions>;
   snapshot: {
     useCalculatedVersion: boolean;
     prereleaseTemplate: string | null;
@@ -99,6 +98,7 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
+  prettier?: boolean;
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
     | false
@@ -120,8 +120,6 @@ export type WrittenConfig = {
 export type ExperimentalOptions = {
   onlyUpdatePeerDependentsWhenOutOfRange?: boolean;
   updateInternalDependents?: "always" | "out-of-range";
-  /** @deprecated Since snapshot feature is now stable, you should migrate to use "snapshot.useCalculatedVersion". */
-  useCalculatedVersionForSnapshots?: boolean;
 };
 
 export type NewChangesetWithCommit = NewChangeset & { commit?: string };
@@ -134,14 +132,14 @@ export type ModCompWithPackage = ComprehensiveRelease & {
 export type GetReleaseLine = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
-  changelogOpts: null | Record<string, any>
-) => Promise<string>;
+  changelogOpts: null | Record<string, any>,
+) => MaybePromise<string>;
 
 export type GetDependencyReleaseLine = (
   changesets: NewChangesetWithCommit[],
   dependenciesUpdated: ModCompWithPackage[],
-  changelogOpts: any
-) => Promise<string>;
+  changelogOpts: any,
+) => MaybePromise<string>;
 
 export type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
@@ -150,13 +148,13 @@ export type ChangelogFunctions = {
 
 export type GetAddMessage = (
   changeset: Changeset,
-  commitOptions: any
-) => Promise<string>;
+  commitOptions: any,
+) => MaybePromise<string>;
 
 export type GetVersionMessage = (
   releasePlan: ReleasePlan,
-  commitOptions: any
-) => Promise<string>;
+  commitOptions: any,
+) => MaybePromise<string>;
 
 export type CommitFunctions = {
   getAddMessage?: GetAddMessage;
@@ -171,3 +169,17 @@ export type PreState = {
   };
   changesets: string[];
 };
+
+export interface Package {
+  dir: string;
+  packageJson: PackageJSON;
+}
+
+export interface Packages {
+  rootDir: string;
+  rootPackage?: Package;
+  packages: Array<Package>;
+  tool: {
+    type: "yarn" | "pnpm" | "lerna" | "bolt" | "root" | (string & {});
+  };
+}

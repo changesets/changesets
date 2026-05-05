@@ -4,13 +4,14 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
 
 ```json
 {
+  "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "updateInternalDependencies": "patch",
+  "fixed": [],
   "linked": [],
   "access": "restricted",
-  "baseBranch": "master",
-  "ignore": [],
-  "changelog": "@changesets/cli/changelog"
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
 }
 ```
 
@@ -53,9 +54,11 @@ If you want to prevent a package from being published to npm, set `private: true
 
 ## `baseBranch` (git branch name)
 
-The branch to which changesets will make comparisons. A number of internal changesets features use git to compare present changesets against another branch. This defaults what branch will be used for these comparisons. This should generally set to the major branch you merge changes into. Commands that use this information accept a `--since` option which can be used to override this.
+The branch to which changesets will make comparisons to detect what has changed since the last commit of the base branch. This should generally be set to the default branch you merge changes into, e.g. `main` or `master`.
 
-> To help make coding a more inclusive experience, we recommend changing the name of your `master` branch to `main`.
+Commands that use this information accept a `--since` option which can be used to override this.
+
+Locally, make sure the base branch exists and is up to date so changesets can make accurate comparisons.
 
 ## `ignore` (array of packages)
 
@@ -70,7 +73,7 @@ There are two caveats to this.
 
 These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos.md).
 
-> NOTE: you can also provide glob expressions to match the packages, according to the [micromatch](https://www.npmjs.com/package/micromatch) format.
+> NOTE: you can also provide glob expressions to match the packages, according to the [picomatch](https://www.npmjs.com/package/picomatch) format.
 
 ## `fixed` (array of arrays of package names)
 
@@ -136,7 +139,7 @@ Changesets will always update the dependency if it would leave the old semver ra
 
 ## `changelog` (false or a path)
 
-This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects to be a file that exports the following:
+This option is for setting how the changelog for packages should be generated. If it is `false`, no changelogs will be generated. Setting it to a string specifies a path from where we will load the changelog generation functions. It expects a file that exports the following:
 
 ```
 {
@@ -157,7 +160,9 @@ You would specify our github changelog generator with:
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 
-## `bumpVersionsWithWorkspaceProtocolOnly` (boolean)
+## `bumpVersionsWithWorkspaceProtocolOnly` (optional boolean)
+
+Default value: `false`
 
 Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.
 
@@ -193,3 +198,30 @@ You can use the following placeholders for customizing the snapshot release vers
 **Default behavior**
 
 If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
+
+## `privatePackages` (object or false)
+
+This option is for setting how private packages should be handled. By default, Changesets will update the changelog for private packages and update their version, but will not create a tag. You can configure this option to change the default behavior.
+
+### `version` (optional boolean)
+
+Default value: `true`
+
+When `version` is set to `true`, Changesets will update the version for private packages. If set to `false`, Changesets will not update the version for private packages.
+
+### `tag` (optional boolean)
+
+Default value: `false`
+
+When `tag` is set to `true`, Changesets will create a tag for private packages. If set to `false`, Changesets will not create a tag for private packages.
+
+### Example
+
+```json
+{
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  }
+}
+```

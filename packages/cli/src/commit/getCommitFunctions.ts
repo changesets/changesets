@@ -1,22 +1,39 @@
-import { CommitFunctions } from "@changesets/types";
+import type { CommitFunctions } from "@changesets/types";
 import path from "path";
-import resolveFrom from "resolve-from";
+import { resolve } from "import-meta-resolve";
+import { pathToFileURL } from "node:url";
 
-export function getCommitFunctions(
+function importResolveFromDir(specifier: string, dir: string) {
+  return resolve(specifier, pathToFileURL(path.join(dir, "x.mjs")).toString());
+}
+
+export async function getCommitFunctions(
   commit: false | readonly [string, any],
-  cwd: string
-): [CommitFunctions, any] {
+  cwd: string,
+  contextDir: string,
+): Promise<[CommitFunctions, any]> {
   let commitFunctions: CommitFunctions = {};
   if (!commit) {
     return [commitFunctions, null];
   }
-  let commitOpts: any = commit[1];
-  let changesetPath = path.join(cwd, ".changeset");
-  let commitPath = resolveFrom(changesetPath, commit[0]);
+  const commitOpts: any = commit[1];
+  const changesetPath = path.join(cwd, ".changeset");
+  let commitPath;
 
-  let possibleCommitFunc = require(commitPath);
+  try {
+    commitPath = importResolveFromDir(commit[0], changesetPath);
+  } catch {
+    commitPath = importResolveFromDir(commit[0], contextDir);
+  }
+
+  let possibleCommitFunc = await import(commitPath);
   if (possibleCommitFunc.default) {
     possibleCommitFunc = possibleCommitFunc.default;
+
+    // Check nested default again in case it's CJS with `__esModule` interop
+    if (possibleCommitFunc.default) {
+      possibleCommitFunc = possibleCommitFunc.default;
+    }
   }
   if (
     typeof possibleCommitFunc.getAddMessage === "function" ||

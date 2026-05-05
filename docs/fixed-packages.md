@@ -46,4 +46,4 @@ For example:
 
 It will match all packages starting with `pkg-`.
 
-**The glob expressions must be defined according to the [micromatch](https://www.npmjs.com/package/micromatch) format.**
+**The glob expressions must be defined according to the [picomatch](https://www.npmjs.com/package/picomatch) format.**

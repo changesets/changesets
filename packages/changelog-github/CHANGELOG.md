@@ -1,5 +1,71 @@
 # @changesets/changelog-github
 
+## 1.0.0-next.2
+
+### Patch Changes
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c)]:
+  - @changesets/types@7.0.0-next.2
+
+## 0.6.0
+
+### Minor Changes
+
+- [#1850](https://github.com/changesets/changesets/pull/1850) [`fd0bc2e`](https://github.com/changesets/changesets/commit/fd0bc2e997a7bf603415489d10fcac0ca129badf) Thanks [@mixelburg](https://github.com/mixelburg)! - Linkify issue references in changelog entries.
+
+### Patch Changes
+
+- [#1810](https://github.com/changesets/changesets/pull/1810) [`27fd8f4`](https://github.com/changesets/changesets/commit/27fd8f41dddafcc2e96e7df39dca04d92f916a0a) Thanks [@hirasso](https://github.com/hirasso)! - Replace deprecated `String.prototype.trimRight` with [`String.prototype.trimEnd`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd)
+
+- Updated dependencies [[`d4b8ad8`](https://github.com/changesets/changesets/commit/d4b8ad8158fe4d900abc5052dacaa8be1f41a232), [`e462d89`](https://github.com/changesets/changesets/commit/e462d892af560d0e3cf5d2f04da230751fbd05ca)]:
+  - @changesets/get-github-info@0.8.0
+
+## 0.5.2
+
+### Patch Changes
+
+- [#1783](https://github.com/changesets/changesets/pull/1783) [`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a) Thanks [@mrginglymus](https://github.com/mrginglymus)! - Respect `GITHUB_SERVER_URL` environment variable when constructing URLs
+
+- Updated dependencies [[`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a)]:
+  - @changesets/get-github-info@0.7.0
+
+## 1.0.0-next.1
+
+### Minor Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d)]:
+  - @changesets/get-github-info@1.0.0-next.1
+  - @changesets/types@7.0.0-next.1
+
+## 1.0.0-next.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Minor Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1615](https://github.com/changesets/changesets/pull/1615) [`4b962cc`](https://github.com/changesets/changesets/commit/4b962cc6e5c56ca519c3d5c00bdec59c754a43cc) Thanks [@bluwy](https://github.com/bluwy)! - Bump `dotenv` dependency to v16
+
+### Patch Changes
+
+- Updated dependencies [[`5b02e2f`](https://github.com/changesets/changesets/commit/5b02e2f61d2a1335293016f81efb0386a0ed7967), [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/get-github-info@1.0.0-next.0
+  - @changesets/types@7.0.0-next.0
+
+## 0.5.1
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+
 ## 0.5.0
 
 ### Minor Changes

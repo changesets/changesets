@@ -1,5 +1,101 @@
 # @changesets/config
 
+## 4.0.0-next.2
+
+### Major Changes
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+### Patch Changes
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2)]:
+  - @changesets/types@7.0.0-next.2
+  - @changesets/get-dependents-graph@3.0.0-next.2
+  - @changesets/should-skip-package@1.0.0-next.2
+
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [[`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464)]:
+  - @changesets/get-dependents-graph@2.1.4
+
+## 3.1.3
+
+### Patch Changes
+
+- [#1834](https://github.com/changesets/changesets/pull/1834) [`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94) Thanks [@RodrigoHamuy](https://github.com/RodrigoHamuy)! - Export `schema.json` in the package's `exports` field to make it accessible when using modern package managers.
+
+- [#1842](https://github.com/changesets/changesets/pull/1842) [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6) Thanks [@RodrigoHamuy](https://github.com/RodrigoHamuy)! - Allow private packages to depend on skipped packages without requiring them to also be skipped. `devDependencies` on skipped packages no longer trigger a validation error in config parsing (aligning with the existing CLI behavior). The config validation for skipped-package dependents now also covers packages skipped via `privatePackages.version: false`, not just those in the `ignore` list.
+
+- [#1842](https://github.com/changesets/changesets/pull/1842) [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6) Thanks [@RodrigoHamuy](https://github.com/RodrigoHamuy)! - Added shape validation for the `privatePackages` config option.
+
+## 3.1.2
+
+### Patch Changes
+
+- [#1535](https://github.com/changesets/changesets/pull/1535) [`cc28222`](https://github.com/changesets/changesets/commit/cc28222ee892b3a078fa02ee26e1cef98c171532) Thanks [@joerobot](https://github.com/joerobot)! - Respect config value for `bumpVersionsWithWorkspaceProtocolOnly` when validating `ignore` option to prevent spurious console errors.
+
+- [#1232](https://github.com/changesets/changesets/pull/1232) [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe) Thanks [@matthprost](https://github.com/matthprost)! - Fixed log error link mismatch to remove dot at the end
+
+## 4.0.0-next.1
+
+### Major Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+- [#1650](https://github.com/changesets/changesets/pull/1650) [`b83787f`](https://github.com/changesets/changesets/commit/b83787fb090dc03ad566a7d8b7e286dbe93e2301) Thanks [@bluwy](https://github.com/bluwy)! - Change the `defaultWrittenConfig` `baseBranch` value from `"master"` to `"main"`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d)]:
+  - @changesets/get-dependents-graph@3.0.0-next.1
+  - @changesets/errors@1.0.0-next.1
+  - @changesets/logger@1.0.0-next.1
+  - @changesets/types@7.0.0-next.1
+
+## 4.0.0-next.0
+
+### Major Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replace `fs-extra` usage with `node:fs`
+
+- Updated dependencies [[`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/get-dependents-graph@3.0.0-next.0
+  - @changesets/errors@1.0.0-next.0
+  - @changesets/logger@1.0.0-next.0
+  - @changesets/types@7.0.0-next.0
+
+## 3.1.1
+
+### Patch Changes
+
+- [#1590](https://github.com/changesets/changesets/pull/1590) [`b9df596`](https://github.com/changesets/changesets/commit/b9df59627623bcf211ddbdab4df7cc07028d4998) Thanks [@bennypowers](https://github.com/bennypowers)! - Prevent fatal error when using the newly-introduced `prettier` option
+
+## 3.1.0
+
+### Minor Changes
+
+- [#1453](https://github.com/changesets/changesets/pull/1453) [`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf) Thanks [@bennypowers](https://github.com/bennypowers)! - Added a new config option to opt-out from formatting with Prettier using `prettier: false`.
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+  - @changesets/get-dependents-graph@2.1.3
+
+## 3.0.5
+
+### Patch Changes
+
+- [#1517](https://github.com/changesets/changesets/pull/1517) [`f0270f6`](https://github.com/changesets/changesets/commit/f0270f69793ddb6865f2510d334864b093cb10e3) Thanks [@akphi](https://github.com/akphi)! - Make `packages` an optional parameter in the `read` function. When `packages` are not passed in explicitly from the caller they now will be read based on the passed in `cwd`.
+
 ## 3.0.4
 
 ### Patch Changes
@@ -333,7 +429,6 @@
 - [`a679b1d`](https://github.com/changesets/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62) [#204](https://github.com/changesets/changesets/pull/204) Thanks [@Andarist](https://github.com/Andarist)! - Correctly handle the 'access' flag for packages
 
   Previously, we had access as "public" or "private", access "private" isn't valid. This was a confusing because there are three states for publishing a package:
-
   - `private: true` - the package will not be published to npm (worked)
   - `access: public` - the package will be publicly published to npm (even if it uses a scope) (worked)
   - `access: restricted` - the package will be published to npm, but only visible/accessible by those who are part of the scope. This technically worked, but we were passing the wrong bit of information in.

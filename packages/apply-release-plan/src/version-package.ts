@@ -1,13 +1,13 @@
-import {
+import type {
   ComprehensiveRelease,
   PackageJSON,
   VersionType,
 } from "@changesets/types";
 import getVersionRangeType from "@changesets/get-version-range-type";
-import Range from "semver/classes/range";
-import semverPrerelease from "semver/functions/prerelease";
-import validRange from "semver/ranges/valid";
-import { shouldUpdateDependencyBasedOnConfig } from "./utils";
+import Range from "semver/classes/range.js";
+import semverPrerelease from "semver/functions/prerelease.js";
+import validRange from "semver/ranges/valid.js";
+import { shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -22,34 +22,43 @@ export default function versionPackage(
     packageJson: PackageJSON;
     dir: string;
   },
-  versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
+  versionsToUpdate: Array<{
+    name: string;
+    version: string;
+    oldVersion: string;
+    type: VersionType;
+    dir: string;
+  }>,
   {
+    cwd,
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
     bumpVersionsWithWorkspaceProtocolOnly,
     snapshot,
   }: {
+    cwd: string;
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
     snapshot?: string | boolean | undefined;
-  }
+  },
 ) {
-  let { newVersion, packageJson } = release;
+  const { newVersion, packageJson } = release;
 
   packageJson.version = newVersion;
 
-  for (let depType of DEPENDENCY_TYPES) {
-    let deps = packageJson[depType];
+  for (const depType of DEPENDENCY_TYPES) {
+    const deps = packageJson[depType];
     if (deps) {
-      for (let { name, version, type } of versionsToUpdate) {
+      for (const { name, version, oldVersion, type, dir } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
         if (
           !depCurrentVersion ||
           depCurrentVersion.startsWith("file:") ||
           depCurrentVersion.startsWith("link:") ||
           !shouldUpdateDependencyBasedOnConfig(
-            { version, type },
+            cwd,
+            { version, oldVersion, type, dir },
             {
               depVersionRange: depCurrentVersion,
               depType,
@@ -57,7 +66,7 @@ export default function versionPackage(
             {
               minReleaseType: updateInternalDependencies,
               onlyUpdatePeerDependentsWhenOutOfRange,
-            }
+            },
           )
         ) {
           continue;
@@ -75,12 +84,13 @@ export default function versionPackage(
         if (usesWorkspaceRange) {
           const workspaceDepVersion = depCurrentVersion.replace(
             /^workspace:/,
-            ""
+            "",
           );
           if (
             workspaceDepVersion === "*" ||
             workspaceDepVersion === "^" ||
-            workspaceDepVersion === "~"
+            workspaceDepVersion === "~" ||
+            validRange(workspaceDepVersion) === null
           ) {
             continue;
           }

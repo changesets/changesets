@@ -1,4 +1,4 @@
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import { getChangedPackagesSinceRef } from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 
@@ -10,7 +10,7 @@ export async function getVersionableChangedPackages(
   }: {
     cwd: string;
     ref?: string;
-  }
+  },
 ) {
   const changedPackages = await getChangedPackagesSinceRef({
     ref: ref ?? config.baseBranch,
@@ -22,6 +22,6 @@ export async function getVersionableChangedPackages(
       !shouldSkipPackage(pkg, {
         ignore: config.ignore,
         allowPrivatePackages: config.privatePackages.version,
-      })
+      }),
   );
 }

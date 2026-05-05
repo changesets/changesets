@@ -3,19 +3,35 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+      - next
+  merge_group:
+    branches:
+      - main
+      - next
 
 permissions:
   contents: read
 
 jobs:
   test:
-    name: Test
+    name: "Test using Node ${{ matrix.node_version }}"
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      matrix:
+        node_version: [22, 24, 25]
+      fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
+        with:
+          node-version: ${{ matrix.node_version }}
 
       - name: Check Git version
         run: git --version
@@ -23,11 +39,18 @@ jobs:
       - name: Setup mock Git user
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
-      - name: Jest tests
-        run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
+      - name: Vitest tests
+        if: matrix.node_version != 24
+        run: node --run test
+
+      # Run coverage only once on node 24 to avoid duplicate codecov uploads
+      - name: Vitest tests with coverage
+        if: matrix.node_version == 24
+        run: node --run test -- --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
+        if: matrix.node_version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -36,39 +59,40 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
 
       - name: Typecheck
-        run: yarn types:check
+        run: node --run types:check
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
 
       - name: Lint
-        run: yarn lint
+        run: node --run lint
 
       - name: Format
-        run: yarn format
+        run: node --run format
 
   ci-ok:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
     needs: [test, typecheck, lint]
-    env:
-      FAILURE: ${{ contains(join(needs.*.result, ','), 'failure') }}
     steps:
-      - name: Check for failure
-        run: |
-          echo $FAILURE
-          if [ "$FAILURE" = "false" ]; then
-            exit 0
-          else
-            exit 1
-          fi
+      - name: Exit with error if some jobs are not successful
+        run: exit 1
+        if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'skipped') || contains(needs.*.result, 'cancelled')) }}

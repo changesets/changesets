@@ -1,11 +1,12 @@
-import publishCommand from "../index";
+import { describe, expect, it } from "vitest";
+import publishCommand from "../index.ts";
 import { defaultConfig } from "@changesets/config";
 import * as path from "path";
-import { Config } from "@changesets/types";
+import type { Config } from "@changesets/types";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 
-let changelogPath = path.resolve(__dirname, "../../changelog");
-let modifiedDefaultConfig: Config = {
+const changelogPath = path.resolve(import.meta.dirname, "../../changelog");
+const modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: [changelogPath, null],
 };
@@ -20,6 +21,7 @@ describe("Publish command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -29,7 +31,7 @@ describe("Publish command", () => {
         }),
       });
       await expect(
-        publishCommand(cwd, { tag: "experimental" }, modifiedDefaultConfig)
+        publishCommand(cwd, { tag: "experimental" }, modifiedDefaultConfig),
       ).rejects.toThrowError();
     });
   });

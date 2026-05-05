@@ -1,8 +1,10 @@
 /**
  * Shared utility functions and business logic
  */
-import semverSatisfies from "semver/functions/satisfies";
-import { VersionType } from "@changesets/types";
+import semverSatisfies from "semver/functions/satisfies.js";
+import validRange from "semver/ranges/valid.js";
+import type { VersionType } from "@changesets/types";
+import path from "node:path";
 
 const bumpTypes = ["none", "patch", "minor", "major"];
 
@@ -16,7 +18,13 @@ function getBumpLevel(type: VersionType) {
 }
 
 export function shouldUpdateDependencyBasedOnConfig(
-  release: { version: string; type: VersionType },
+  cwd: string,
+  release: {
+    version: string;
+    oldVersion: string;
+    type: VersionType;
+    dir: string;
+  },
   {
     depVersionRange,
     depType,
@@ -34,8 +42,30 @@ export function shouldUpdateDependencyBasedOnConfig(
   }: {
     minReleaseType: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-  }
+  },
 ): boolean {
+  const usesWorkspaceRange = depVersionRange.startsWith("workspace:");
+  if (usesWorkspaceRange) {
+    depVersionRange = depVersionRange.replace(/^workspace:/, "");
+    switch (depVersionRange) {
+      case "*":
+        // given the old range was exact, we can short circuit and return true
+        return true;
+      case "^":
+      case "~":
+        depVersionRange = `${depVersionRange}${release.oldVersion}`;
+        break;
+      default: {
+        if (!validRange(depVersionRange)) {
+          return (
+            path.posix.normalize(depVersionRange) ===
+            path.relative(cwd, release.dir).replace(/\\/g, "/")
+          );
+        }
+        // fallthrough
+      }
+    }
+  }
   if (!semverSatisfies(release.version, depVersionRange)) {
     // Dependencies leaving semver range should always be updated
     return true;
@@ -48,4 +78,8 @@ export function shouldUpdateDependencyBasedOnConfig(
     shouldUpdate = !onlyUpdatePeerDependentsWhenOutOfRange;
   }
   return shouldUpdate;
+}
+
+export function capitalize(str: string) {
+  return str[0].toUpperCase() + str.slice(1);
 }

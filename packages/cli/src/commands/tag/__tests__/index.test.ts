@@ -1,10 +1,11 @@
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { getPackages } from "@manypkg/get-packages";
-import tag from "../index";
+import tag from "../index.ts";
 
-jest.mock("@changesets/git");
+vi.mock("@changesets/git");
 
 async function readConfig(cwd: string) {
   return read(cwd, await getPackages(cwd));
@@ -20,6 +21,7 @@ describe("tag command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -34,13 +36,13 @@ describe("tag command", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
 
-      (git.getAllTags as jest.Mock).mockReturnValue(new Set());
+      (git.getAllTags as Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
       await tag(cwd, await readConfig(cwd));
       expect(git.tag).toHaveBeenCalledTimes(2);
-      expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("pkg-a@1.0.0");
-      expect((git.tag as jest.Mock).mock.calls[1][0]).toEqual("pkg-b@1.0.0");
+      expect((git.tag as Mock).mock.calls[0][0]).toEqual("pkg-a@1.0.0");
+      expect((git.tag as Mock).mock.calls[1][0]).toEqual("pkg-b@1.0.0");
     });
 
     it("skips tags that already exist", async () => {
@@ -49,6 +51,7 @@ describe("tag command", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
           version: "1.0.0",
@@ -63,17 +66,17 @@ describe("tag command", () => {
         ".changeset/config.json": JSON.stringify({}),
       });
 
-      (git.getAllTags as jest.Mock).mockReturnValue(
+      (git.getAllTags as Mock).mockReturnValue(
         new Set([
           // pkg-a should not be re-tagged
           "pkg-a@1.0.0",
-        ])
+        ]),
       );
 
       expect(git.tag).not.toHaveBeenCalled();
       await tag(cwd, await readConfig(cwd));
       expect(git.tag).toHaveBeenCalledTimes(1);
-      expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("pkg-b@1.0.0");
+      expect((git.tag as Mock).mock.calls[0][0]).toEqual("pkg-b@1.0.0");
     });
   });
 
@@ -92,12 +95,12 @@ describe("tag command", () => {
           },
         }),
       });
-      (git.getAllTags as jest.Mock).mockReturnValue(new Set());
+      (git.getAllTags as Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
       await tag(cwd, await readConfig(cwd));
       expect(git.tag).toHaveBeenCalledTimes(1);
-      expect((git.tag as jest.Mock).mock.calls[0][0]).toEqual("v1.0.0");
+      expect((git.tag as Mock).mock.calls[0][0]).toEqual("v1.0.0");
     });
 
     it("does not tag on private", async () => {
@@ -109,7 +112,7 @@ describe("tag command", () => {
         }),
         ".changeset/config.json": JSON.stringify({}),
       });
-      (git.getAllTags as jest.Mock).mockReturnValue(new Set());
+      (git.getAllTags as Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
       await tag(cwd, await readConfig(cwd));

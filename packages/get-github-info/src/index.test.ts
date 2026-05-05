@@ -1,48 +1,31 @@
-import { getInfo, getInfoFromPullRequest } from ".";
+import { getInfo, getInfoFromPullRequest } from "./index.ts";
 import nock from "nock";
 import prettier from "prettier";
+import { expect, test, beforeEach, afterEach } from "vitest";
 
 process.env.GITHUB_TOKEN = "token";
 
-let apiPath = `/graphql`;
+const apiPath = `/graphql`;
+
+beforeEach(() => {
+  nock.disableNetConnect();
+});
+
+afterEach(() => {
+  nock.cleanAll();
+  nock.enableNetConnect();
+});
 
 test("associated with multiple PRs with only one merged", async () => {
+  let githubQuery = "";
+
   nock("https://api.github.com", {
     reqheaders: {
       Authorization: `Token ${process.env.GITHUB_TOKEN}`,
     },
   })
     .post(apiPath, ({ query }) => {
-      expect(prettier.format(query, { parser: "graphql" }))
-        .toMatchInlineSnapshot(`
-        "query {
-          a0: repository(owner: "emotion-js", name: "emotion") {
-            aa085003: object(expression: "a085003") {
-              ... on Commit {
-                commitUrl
-                associatedPullRequests(first: 50) {
-                  nodes {
-                    number
-                    url
-                    mergedAt
-                    author {
-                      login
-                      url
-                    }
-                  }
-                }
-                author {
-                  user {
-                    login
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
-        "
-      `);
+      githubQuery = query;
       return true;
     })
     .reply(
@@ -111,49 +94,57 @@ test("associated with multiple PRs with only one merged", async () => {
             },
           },
         },
-      })
+      }),
     );
-  let result = await getInfo({ commit: "a085003", repo: "emotion-js/emotion" });
+
+  const result = await getInfo({
+    commit: "a085003",
+    repo: "emotion-js/emotion",
+  });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
+
+  expect(await prettier.format(githubQuery, { parser: "graphql" }))
+    .toMatchInlineSnapshot(`
+    "query {
+      a0: repository(owner: "emotion-js", name: "emotion") {
+        aa085003: object(expression: "a085003") {
+          ... on Commit {
+            commitUrl
+            associatedPullRequests(first: 50) {
+              nodes {
+                number
+                url
+                mergedAt
+                author {
+                  login
+                  url
+                }
+              }
+            }
+            author {
+              user {
+                login
+                url
+              }
+            }
+          }
+        }
+      }
+    }
+    "
+  `);
 });
 
 test("associated with multiple PRs with multiple merged gets the one that was merged first", async () => {
+  let githubQuery = "";
+
   nock("https://api.github.com", {
     reqheaders: {
       Authorization: `Token ${process.env.GITHUB_TOKEN}`,
     },
   })
     .post(apiPath, ({ query }) => {
-      expect(prettier.format(query, { parser: "graphql" }))
-        .toMatchInlineSnapshot(`
-        "query {
-          a0: repository(owner: "emotion-js", name: "emotion") {
-            aa085003: object(expression: "a085003") {
-              ... on Commit {
-                commitUrl
-                associatedPullRequests(first: 50) {
-                  nodes {
-                    number
-                    url
-                    mergedAt
-                    author {
-                      login
-                      url
-                    }
-                  }
-                }
-                author {
-                  user {
-                    login
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
-        "
-      `);
+      githubQuery = query;
       return true;
     })
     .reply(
@@ -222,49 +213,57 @@ test("associated with multiple PRs with multiple merged gets the one that was me
             },
           },
         },
-      })
+      }),
     );
-  let result = await getInfo({ commit: "a085003", repo: "emotion-js/emotion" });
+
+  const result = await getInfo({
+    commit: "a085003",
+    repo: "emotion-js/emotion",
+  });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
+
+  expect(await prettier.format(githubQuery, { parser: "graphql" }))
+    .toMatchInlineSnapshot(`
+    "query {
+      a0: repository(owner: "emotion-js", name: "emotion") {
+        aa085003: object(expression: "a085003") {
+          ... on Commit {
+            commitUrl
+            associatedPullRequests(first: 50) {
+              nodes {
+                number
+                url
+                mergedAt
+                author {
+                  login
+                  url
+                }
+              }
+            }
+            author {
+              user {
+                login
+                url
+              }
+            }
+          }
+        }
+      }
+    }
+    "
+  `);
 });
 
 test("gets the author of the associated pull request if it exists rather than the author of the changeset", async () => {
+  let githubQuery = "";
+
   nock("https://api.github.com", {
     reqheaders: {
       Authorization: `Token ${process.env.GITHUB_TOKEN}`,
     },
   })
     .post(apiPath, ({ query }) => {
-      expect(prettier.format(query, { parser: "graphql" }))
-        .toMatchInlineSnapshot(`
-        "query {
-          a0: repository(owner: "JedWatson", name: "react-select") {
-            ac7e9c69: object(expression: "c7e9c69") {
-              ... on Commit {
-                commitUrl
-                associatedPullRequests(first: 50) {
-                  nodes {
-                    number
-                    url
-                    mergedAt
-                    author {
-                      login
-                      url
-                    }
-                  }
-                }
-                author {
-                  user {
-                    login
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
-        "
-      `);
+      githubQuery = query;
       return true;
     })
     .reply(
@@ -297,67 +296,83 @@ test("gets the author of the associated pull request if it exists rather than th
             },
           },
         },
-      })
+      }),
     );
-  let result = await getInfo({
+
+  const result = await getInfo({
     commit: "c7e9c69",
     repo: "JedWatson/react-select",
   });
   expect(result).toMatchObject({ pull: 3682, user: "lmvco" });
+
+  expect(await prettier.format(githubQuery, { parser: "graphql" }))
+    .toMatchInlineSnapshot(`
+    "query {
+      a0: repository(owner: "JedWatson", name: "react-select") {
+        ac7e9c69: object(expression: "c7e9c69") {
+          ... on Commit {
+            commitUrl
+            associatedPullRequests(first: 50) {
+              nodes {
+                number
+                url
+                mergedAt
+                author {
+                  login
+                  url
+                }
+              }
+            }
+            author {
+              user {
+                login
+                url
+              }
+            }
+          }
+        }
+      }
+    }
+    "
+  `);
 });
 
-test("throws error on missing repo name", () => {
+test("throws error on missing repo name", async () => {
   const request = {
     commit: "c7e9c69",
   };
 
-  expect(async () =>
-    // @ts-expect-error
-    getInfo(request)
+  await expect(async () =>
+    // @ts-expect-error: missing data for test
+    getInfo(request),
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"`
+    `[Error: Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo]`,
   );
 });
 
-test("throws error on invalid repo name", () => {
+test("throws error on invalid repo name", async () => {
   const request = {
     commit: "c7e9c69",
     repo: "https://github.com/JedWatson/react-select",
   };
 
-  expect(async () =>
-    getInfo(request)
+  await expect(async () =>
+    getInfo(request),
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "^[\\w.-]+\\/[\\w.-]+$" pattern)"`
+    `[Error: Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "^[\\w.-]+\\/[\\w.-]+$" pattern)]`,
   );
 });
 
-test("associated with multiple PRs with only one merged", async () => {
+test("associated with multiple PRs with only one merged 2", async () => {
+  let githubQuery = "";
+
   nock("https://api.github.com", {
     reqheaders: {
       Authorization: `Token ${process.env.GITHUB_TOKEN}`,
     },
   })
     .post(apiPath, ({ query }) => {
-      expect(prettier.format(query, { parser: "graphql" }))
-        .toMatchInlineSnapshot(`
-        "query {
-          a0: repository(owner: "emotion-js", name: "emotion") {
-            pr__1613: pullRequest(number: 1613) {
-              url
-              author {
-                login
-                url
-              }
-              mergeCommit {
-                commitUrl
-                abbreviatedOid
-              }
-            }
-          }
-        }
-        "
-      `);
+      githubQuery = query;
       return true;
     })
     .reply(
@@ -379,9 +394,10 @@ test("associated with multiple PRs with only one merged", async () => {
             },
           },
         },
-      })
+      }),
     );
-  let result = await getInfoFromPullRequest({
+
+  const result = await getInfoFromPullRequest({
     pull: 1613,
     repo: "emotion-js/emotion",
   });
@@ -396,4 +412,122 @@ test("associated with multiple PRs with only one merged", async () => {
       "user": "Andarist",
     }
   `);
+
+  expect(await prettier.format(githubQuery, { parser: "graphql" }))
+    .toMatchInlineSnapshot(`
+    "query {
+      a0: repository(owner: "emotion-js", name: "emotion") {
+        pr__1613: pullRequest(number: 1613) {
+          url
+          author {
+            login
+            url
+          }
+          mergeCommit {
+            commitUrl
+            abbreviatedOid
+          }
+        }
+      }
+    }
+    "
+  `);
+});
+
+test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
+  let githubQuery = "";
+  const originalGraphqlUrl = process.env.GITHUB_GRAPHQL_URL;
+  process.env.GITHUB_GRAPHQL_URL = "https://custom.github.com/api/graphql";
+
+  try {
+    nock("https://custom.github.com", {
+      reqheaders: {
+        Authorization: `Token ${process.env.GITHUB_TOKEN}`,
+      },
+    })
+      .post("/api/graphql", ({ query }) => {
+        githubQuery = query;
+        return true;
+      })
+      .reply(
+        200,
+        JSON.stringify({
+          data: {
+            a0: {
+              aa085003: {
+                commitUrl:
+                  "https://custom.github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
+                associatedPullRequests: {
+                  nodes: [
+                    {
+                      number: 1613,
+                      url: "https://custom.github.com/emotion-js/emotion/pull/1613",
+                      mergedAt: "2019-11-07T06:43:58Z",
+                      author: {
+                        login: "Andarist",
+                        url: "https://custom.github.com/Andarist",
+                      },
+                    },
+                  ],
+                },
+                author: {
+                  user: {
+                    login: "Andarist",
+                    url: "https://custom.github.com/Andarist",
+                  },
+                },
+              },
+            },
+          },
+        }),
+      );
+
+    const result = await getInfo({
+      commit: "a085003",
+      repo: "emotion-js/emotion",
+    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "links": {
+          "commit": "[\`a085003\`](https://custom.github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
+          "pull": "[#1613](https://custom.github.com/emotion-js/emotion/pull/1613)",
+          "user": "[@Andarist](https://custom.github.com/Andarist)",
+        },
+        "pull": 1613,
+        "user": "Andarist",
+      }
+    `);
+    expect(await prettier.format(githubQuery, { parser: "graphql" }))
+      .toMatchInlineSnapshot(`
+        "query {
+          a0: repository(owner: "emotion-js", name: "emotion") {
+            aa085003: object(expression: "a085003") {
+              ... on Commit {
+                commitUrl
+                associatedPullRequests(first: 50) {
+                  nodes {
+                    number
+                    url
+                    mergedAt
+                    author {
+                      login
+                      url
+                    }
+                  }
+                }
+                author {
+                  user {
+                    login
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
+        "
+      `);
+  } finally {
+    process.env.GITHUB_GRAPHQL_URL = originalGraphqlUrl;
+  }
 });
