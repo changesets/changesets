@@ -98,6 +98,7 @@ export default function getDependencyGraph(
       ignoreDevDependencies,
     );
 
+    // eslint-disable-next-line prefer-const
     for (let [depName, depRange] of allDependencies) {
       const match = packagesByName[depName];
       if (!match) continue;

@@ -64,7 +64,7 @@ export async function run(
   try {
     config = await read(packages.rootDir, packages);
   } catch (e) {
-    let oldConfigExists = await fs
+    const oldConfigExists = await fs
       .access(path.resolve(packages.rootDir, ".changeset/config.js"))
       .then(
         () => true,
@@ -125,7 +125,7 @@ export async function run(
         }
 
         // Validate that items in ignoreArrayFromCmd are valid project names
-        let pkgNames = new Set(
+        const pkgNames = new Set(
           packages.packages.map(({ packageJson }) => packageJson.name),
         );
 
@@ -226,14 +226,14 @@ export async function run(
       }
       case "pre": {
         validateCommandFlags("pre", flags);
-        let command = input[1];
+        const command = input[1];
         if (command !== "enter" && command !== "exit") {
           error(
             "`enter`, `exit` or `snapshot` must be passed after prerelease",
           );
           throw new ExitError(1);
         }
-        let tag = input[2];
+        const tag = input[2];
         if (command === "enter" && typeof tag !== "string") {
           error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);

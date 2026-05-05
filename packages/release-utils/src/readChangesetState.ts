@@ -10,13 +10,13 @@ export type ChangesetState = {
 export async function readChangesetState(
   cwd: string = process.cwd(),
 ): Promise<ChangesetState> {
-  let preState = await readPreState(cwd);
-  let isInPreMode = preState !== undefined && preState.mode === "pre";
+  const preState = await readPreState(cwd);
+  const isInPreMode = preState !== undefined && preState.mode === "pre";
 
   let changesets = await readChangesets(cwd);
 
   if (isInPreMode && preState !== undefined) {
-    let changesetsToFilter = new Set(preState.changesets);
+    const changesetsToFilter = new Set(preState.changesets);
     changesets = changesets.filter((x) => !changesetsToFilter.has(x.id));
   }
 

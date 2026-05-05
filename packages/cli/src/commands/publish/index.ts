@@ -13,11 +13,11 @@ function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   log(mappedPkgs);
 }
 
-let importantSeparator = pc.red(
+const importantSeparator = pc.red(
   "===============================IMPORTANT!===============================",
 );
 
-let importantEnd = pc.red(
+const importantEnd = pc.red(
   "----------------------------------------------------------------------",
 );
 
@@ -44,7 +44,7 @@ export default async function publish(
   config: Config,
 ) {
   const releaseTag = tag && tag.length > 0 ? tag : undefined;
-  let preState = await readPreState(cwd);
+  const preState = await readPreState(cwd);
 
   if (releaseTag && preState && preState.mode === "pre") {
     error("Releasing under custom tag is not allowed in pre mode");

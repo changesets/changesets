@@ -36,7 +36,7 @@ const serialId: () => number = (function () {
 
 const limit = Math.max(process.stdout.rows - 5, 10);
 
-let cancelFlow = () => {
+const cancelFlow = () => {
   success("Cancelled... 👋 ");
   process.exit();
 };

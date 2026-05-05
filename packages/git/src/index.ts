@@ -100,7 +100,7 @@ export async function getCommitsThatAddFiles(
 
     // To collect commits without parents (usually because they're absent from
     // a shallow clone).
-    let commitsWithMissingParents = [];
+    const commitsWithMissingParents = [];
 
     for (const info of commitInfos) {
       if (info.commitSha) {
@@ -246,7 +246,7 @@ export async function getChangedChangesetFilesSinceRef({
       },
     );
 
-    let tester = /.changeset\/[^/]+\.md$/;
+    const tester = /.changeset\/[^/]+\.md$/;
 
     const files = cmd.stdout
       .toString()
@@ -344,6 +344,10 @@ function globMatchSome(
 
   const matchers = patterns.map((p) => picomatch(p, undefined, true));
   return paths.some((path) => {
+    if (path.includes("\\")) {
+      path = path.replace(/\\/g, "/");
+    }
+
     let passed = false;
     for (const matcher of matchers) {
       if (!passed) {

@@ -38,20 +38,20 @@ export default async function defaultChangelogGetter(
   relevantChangesets: RelevantChangesets,
   options: { cwd: string },
 ) {
-  let { cwd } = options;
+  const { cwd } = options;
 
   // First, we construct the release lines, summaries of changesets that caused us to be released
-  let majorReleaseLines = await getReleaseLines(
+  const majorReleaseLines = await getReleaseLines(
     relevantChangesets,
     "major",
     cwd,
   );
-  let minorReleaseLines = await getReleaseLines(
+  const minorReleaseLines = await getReleaseLines(
     relevantChangesets,
     "minor",
     cwd,
   );
-  let patchReleaseLines = await getReleaseLines(
+  const patchReleaseLines = await getReleaseLines(
     relevantChangesets,
     "patch",
     cwd,

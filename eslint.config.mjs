@@ -41,7 +41,6 @@ export default defineConfig(
     },
     rules: {
       eqeqeq: ["off", "always", { null: "never", undefined: "never" }], // TODO enable and fix errors
-      "prefer-const": "off", // TODO enable and fix errors
 
       "@typescript-eslint/consistent-type-exports": [
         "error",

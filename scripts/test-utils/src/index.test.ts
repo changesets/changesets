@@ -5,7 +5,7 @@ import { log } from "@changesets/logger";
 describe("temporarilySilenceLogs", () => {
   silenceLogsInBlock();
   describe("log", () => {
-    let originalConsoleLog = console.log;
+    const originalConsoleLog = console.log;
     beforeEach(() => {
       console.log = vi.fn();
     });

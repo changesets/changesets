@@ -26,8 +26,8 @@ const mockUserResponses = (mockResponses: {
   summary?: string;
 }) => {
   const summary = mockResponses.summary || "summary message mock";
-  let majorReleases: Array<string> = [];
-  let minorReleases: Array<string> = [];
+  const majorReleases: Array<string> = [];
+  const minorReleases: Array<string> = [];
   Object.entries(mockResponses.releases).forEach(([pkgName, type]) => {
     if (type === "major") {
       majorReleases.push(pkgName);
@@ -36,7 +36,7 @@ const mockUserResponses = (mockResponses: {
     }
   });
   let callCount = 0;
-  let returnValues = [
+  const returnValues = [
     Object.keys(mockResponses.releases),
     majorReleases,
     minorReleases,
@@ -48,7 +48,7 @@ const mockUserResponses = (mockResponses: {
     return returnValues[callCount++];
   });
 
-  let confirmAnswers: Record<string, boolean> = {
+  const confirmAnswers: Record<string, boolean> = {
     "Is this your desired changeset?": true,
   };
 
@@ -165,7 +165,7 @@ describe("Add command", () => {
     const summary = "summary message mock";
     mockedUtils.askList.mockResolvedValueOnce("minor");
 
-    let confirmAnswers: Record<string, boolean> = {
+    const confirmAnswers: Record<string, boolean> = {
       "Is this your desired changeset?": true,
     };
     mockedUtils.askQuestion.mockResolvedValue("");

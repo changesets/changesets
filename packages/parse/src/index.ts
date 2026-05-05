@@ -71,8 +71,8 @@ export default function parseChangesetFile(contents: string): {
         `Received content:\n${truncate(trimmedContents)}`,
     );
   }
-  let [, roughReleases, roughSummary] = execResult;
-  let summary = roughSummary.trim();
+  const [, roughReleases, roughSummary] = execResult;
+  const summary = roughSummary.trim();
 
   let releases: Release[];
   let yamlStuff: Record<string, VersionType> | undefined;
