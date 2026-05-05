@@ -76,7 +76,7 @@ export default defineConfig(
       ],
 
       "import-lite/no-default-export": "error",
-      "import-lite/no-mutable-exports": "off", // TODO enable and fix errors
+      "import-lite/no-mutable-exports": "error",
     },
   },
   {
