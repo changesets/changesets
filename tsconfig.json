@@ -1,15 +1,12 @@
 {
+  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "Node16",
-    "moduleResolution": "Node16",
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
-    "libReplacement": false,
-    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
     "strict": true,
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["./", "./packages/*"],
+  "include": ["./", "./packages/*"]
 }

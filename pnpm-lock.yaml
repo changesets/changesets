@@ -15,6 +15,9 @@ importers:
       '@manypkg/cli':
         specifier: ^0.25.1
         version: 0.25.1
+      '@tsconfig/node22':
+        specifier: ^22.0.5
+        version: 22.0.5
       '@types/node':
         specifier: ^24.12.2
         version: 24.12.2
@@ -910,6 +913,9 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@tsconfig/node22@22.0.5':
+    resolution: {integrity: sha512-hLf2ld+sYN/BtOJjHUWOk568dvjFQkHnLNa6zce25GIH+vxKfvTgm3qpaH6ToF5tu/NN0IH66s+Bb5wElHrLcw==}
 
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
@@ -2260,6 +2266,8 @@ snapshots:
   '@rolldown/pluginutils@1.0.0-rc.18': {}
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@tsconfig/node22@22.0.5': {}
 
   '@tybys/wasm-util@0.10.2':
     dependencies:
