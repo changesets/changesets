@@ -18,7 +18,7 @@ export const mockedLogger: PartialMockMethods<
 vi.mock(import("@changesets/logger"), async (importOriginal) => {
   const mod = await importOriginal();
   return {
-    prefix: mod.prefix as "🦋 ",
+    prefix: mod.prefix,
     error: (...args) => (mockedLogger.error ?? mod.error)(...args),
     info: (...args) => (mockedLogger.info ?? mod.info)(...args),
     log: (...args) => (mockedLogger.log ?? mod.log)(...args),

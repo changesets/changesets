@@ -1,7 +1,7 @@
 import pc from "picocolors";
 import util from "util";
 
-export const prefix = "🦋 ";
+export const prefix: string = "🦋 ";
 
 function format(args: Array<any>, customPrefix?: string) {
   const fullPrefix =

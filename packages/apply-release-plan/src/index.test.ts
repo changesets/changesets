@@ -2888,7 +2888,7 @@ describe("apply release plan", () => {
   describe("should error and not write if", () => {
     // This is skipped as *for now* we are assuming we have been passed
     // valid releasePlans - this may get work done on it in the future
-    it.skip("a package appears twice", async () => {
+    it.todo("a package appears twice", async () => {
       let changedFiles;
       try {
         const testResults = await testSetup(
