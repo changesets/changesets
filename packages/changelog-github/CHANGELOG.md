@@ -1,5 +1,11 @@
 # @changesets/changelog-github
 
+## 0.7.0
+
+### Minor Changes
+
+- [#1255](https://github.com/changesets/changesets/pull/1255) [`94578cf`](https://github.com/changesets/changesets/commit/94578cf164aa7abcb12b97dd3a55d12a324f4fe8) Thanks [@Kauhsa](https://github.com/Kauhsa)! - Added `disableThanks` option
+
 ## 0.6.0
 
 ### Minor Changes
