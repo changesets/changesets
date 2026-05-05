@@ -23,7 +23,7 @@ runs:
 
     - name: Set up dev environment
       shell: bash
-      run: pnpm preconstruct dev
+      run: node --run build
 
     - name: Check with manypkg
       shell: bash
