@@ -1,7 +1,7 @@
 # @changesets/get-release-plan
 
-[![npm package](https://img.shields.io/npm/v/@changesets/get-release-plan)](https://npmjs.com/package/@changesets/get-release-plan)
-[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/get-release-plan?name=true)](https://npmx.dev/package/@changesets/get-release-plan)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 A function that reads information about the current repository
 

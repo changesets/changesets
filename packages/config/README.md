@@ -2,8 +2,8 @@
 
 > Utilities for reading and parsing Changeset's config
 
-[![npm package](https://img.shields.io/npm/v/@changesets/config)](https://npmjs.com/package/@changesets/config)
-[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/config?name=true)](https://npmx.dev/package/@changesets/config)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 ```tsx
 import { parse, read, ValidationError } from "@changesets/config";
