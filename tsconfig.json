@@ -6,8 +6,10 @@
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
     "libReplacement": false,
+    "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "types": ["node"]
-  }
+  },
+  "include": ["./", "./packages/*"],
 }
