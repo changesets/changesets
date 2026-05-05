@@ -9,6 +9,7 @@ export const baseConfig = defineConfig({
   format: "esm",
   minify: "dce-only",
 
+  checks: { pluginTimings: false },
   publint: true,
 });
 
