@@ -3,7 +3,6 @@
 "@changesets/get-dependents-graph": major
 "@changesets/apply-release-plan": major
 "@changesets/get-release-plan": major
-"@changesets/release-utils": major
 "@changesets/config": major
 "@changesets/cli": major
 "@changesets/git": major

@@ -18,7 +18,6 @@
     "@changesets/parse": "0.4.0",
     "@changesets/pre": "2.0.1",
     "@changesets/read": "0.6.1",
-    "@changesets/release-utils": "0.2.1",
     "@changesets/should-skip-package": "0.1.1",
     "@changesets/types": "6.0.0",
     "@changesets/write": "0.3.2",
@@ -28,9 +27,7 @@
     "afraid-radios-fetch",
     "bright-points-think",
     "busy-points-guess",
-    "chatty-kings-bake",
     "chilly-insects-attack",
-    "clever-frogs-kick",
     "deep-coins-attend",
     "fix-version-no-changesets-exit-code",
     "free-results-love-2",
@@ -38,10 +35,8 @@
     "gentle-windows-enter",
     "green-bottles-leave",
     "green-pianos-sneeze",
-    "happy-news-wave",
     "late-animals-drive",
     "legal-islands-heal",
-    "long-badgers-relax",
     "old-paths-bake",
     "petite-buttons-shake",
     "plain-planes-arrive",
@@ -58,7 +53,6 @@
     "thick-emus-refuse",
     "thin-chicken-smell",
     "tricky-spies-hunt",
-    "two-hoops-fix",
     "whole-aliens-notice"
   ]
 }

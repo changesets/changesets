@@ -6,7 +6,6 @@
 "@changesets/changelog-github": minor
 "@changesets/get-release-plan": minor
 "@changesets/changelog-git": minor
-"@changesets/release-utils": minor
 "@changesets/parse": minor
 "@changesets/write": minor
 "@changesets/read": minor

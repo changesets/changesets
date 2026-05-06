@@ -8,7 +8,6 @@
 "@changesets/get-release-plan": major
 "@changesets/get-github-info": minor
 "@changesets/changelog-git": minor
-"@changesets/release-utils": minor
 "@changesets/config": major
 "@changesets/errors": minor
 "@changesets/logger": minor
