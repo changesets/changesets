@@ -9,6 +9,3 @@ dedupePeers: true
 dedupePeerDependents: true
 
 shellEmulator: true
-
-overrides:
-  'vitest>vite': ^8.0.0
