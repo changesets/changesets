@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { silenceLogsInBlock } from "./index.ts"; // this has to be imported before `@changesets/logger`
+import { silenceLogsInBlock } from "./index.ts";
+// [keep-order] logger has to be after `./index.ts`
 import { log } from "@changesets/logger";
 
 describe("temporarilySilenceLogs", () => {

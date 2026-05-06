@@ -1,10 +1,9 @@
-import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import { defaultWrittenConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-
+import { describe, expect, it } from "vitest";
 import { init as initializeCommand } from "../index.ts";
 
 const getPaths = (cwd: string) => ({

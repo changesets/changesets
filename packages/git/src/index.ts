@@ -1,10 +1,10 @@
-import { exec } from "tinyexec";
 import fs from "node:fs/promises";
-import path from "path";
-import { getPackages } from "@manypkg/get-packages";
+import path from "node:path";
 import { GitError } from "@changesets/errors";
-import picomatch from "picomatch";
 import type { Package } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
+import picomatch from "picomatch";
+import { exec } from "tinyexec";
 
 export async function add(pathToFile: string, cwd: string) {
   const gitCmd = await exec("git", ["add", pathToFile], {

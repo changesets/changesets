@@ -1,12 +1,12 @@
-import { publishPackages } from "./publishPackages.ts";
 import { ExitError } from "@changesets/errors";
-import { error, log, success, warn } from "@changesets/logger";
 import * as git from "@changesets/git";
+import { error, log, success, warn } from "@changesets/logger";
 import { readPreState } from "@changesets/pre";
 import type { Config, PreState } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import pc from "picocolors";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { publishPackages } from "./publishPackages.ts";
 
 function logReleases(pkgs: Array<{ name: string; newVersion: string }>) {
   const mappedPkgs = pkgs.map((p) => `${p.name}@${p.newVersion}`).join("\n");

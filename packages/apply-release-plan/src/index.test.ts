@@ -1,4 +1,14 @@
-import { describe, expect, it, test } from "vitest";
+import { existsSync } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { defaultConfig } from "@changesets/config";
+import * as git from "@changesets/git";
+import {
+  type Fixture,
+  outputFile,
+  temporarilySilenceLogs,
+  testdir,
+} from "@changesets/test-utils";
 import type {
   ComprehensiveRelease,
   Config,
@@ -6,22 +16,11 @@ import type {
   ReleasePlan,
   PreState,
 } from "@changesets/types";
-import * as git from "@changesets/git";
-import { existsSync } from "node:fs";
-import fs from "node:fs/promises";
-import path from "path";
+import { getPackages } from "@manypkg/get-packages";
 import { outdent } from "outdent";
 import { exec } from "tinyexec";
-import { defaultConfig } from "@changesets/config";
-
+import { describe, expect, it, test } from "vitest";
 import applyReleasePlan from "./index.ts";
-import { getPackages } from "@manypkg/get-packages";
-import {
-  type Fixture,
-  outputFile,
-  temporarilySilenceLogs,
-  testdir,
-} from "@changesets/test-utils";
 
 const changesetsCliChangelogPath = path.resolve(
   import.meta.dirname,

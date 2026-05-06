@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, type Mock, onTestFinished, vi } from "vitest";
-import { createFixture, type FileTree } from "fs-fixture";
-import { exec } from "tinyexec";
 import type fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
+import { createFixture, type FileTree } from "fs-fixture";
+import { exec } from "tinyexec";
+import { afterEach, beforeEach, type Mock, onTestFinished, vi } from "vitest";
 
 type PartialMockMethods<T> = Partial<{
   [K in keyof T as T[K] extends (...args: never) => unknown

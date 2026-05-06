@@ -1,8 +1,7 @@
-// This is a modified version of the graph-getting in bolt
-import Range from "semver/classes/range.js";
-import pc from "picocolors";
-import type { Package, Packages, PackageJSON } from "@changesets/types";
 import path from "node:path";
+import type { Package, Packages, PackageJSON } from "@changesets/types";
+import pc from "picocolors";
+import Range from "semver/classes/range.js";
 
 const DEPENDENCY_TYPES = [
   "dependencies",

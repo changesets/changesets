@@ -1,10 +1,9 @@
-import path from "path";
-import { exec } from "tinyexec";
+import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { describe, expect, it } from "vitest";
 import { gitdir, outputFile, testdir } from "@changesets/test-utils";
 import { writeChangeset } from "@changesets/write";
-
+import { exec } from "tinyexec";
+import { describe, expect, it } from "vitest";
 import {
   add,
   commit,

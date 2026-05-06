@@ -1,11 +1,12 @@
-import { describe, expect, it, test, vi, beforeEach, afterEach } from "vitest";
-import { parse, read } from "./index.ts";
+import path from "node:path";
 import * as logger from "@changesets/logger";
 import type { Config, WrittenConfig, Packages } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import { outdent } from "outdent";
-import path from "path";
+import { describe, expect, it, test, vi, beforeEach, afterEach } from "vitest";
+import { parse, read } from "./index.ts";
+// [keep-order] test-utils has to be after `./index.ts`
+import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 
 vi.mock("@changesets/logger");
 

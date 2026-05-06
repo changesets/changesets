@@ -1,6 +1,6 @@
-import pc from "picocolors";
 import { log } from "@changesets/logger";
 import type { Release, VersionType } from "@changesets/types";
+import pc from "picocolors";
 
 export function printConfirmationMessage(
   changeset: {

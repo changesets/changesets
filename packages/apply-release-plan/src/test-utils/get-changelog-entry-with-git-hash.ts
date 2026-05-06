@@ -1,6 +1,5 @@
 import { getCommitsThatAddFiles } from "@changesets/git";
 import type { ComprehensiveRelease, NewChangeset } from "@changesets/types";
-
 import type { RelevantChangesets } from "../types.ts";
 import { capitalize } from "../utils.ts";
 

@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
-import path from "path";
-import type { PreState } from "@changesets/types";
-import { getPackages } from "@manypkg/get-packages";
+import path from "node:path";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError,
 } from "@changesets/errors";
+import type { PreState } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 
 async function outputFile(filePath: string, content: string) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });

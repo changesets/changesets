@@ -1,13 +1,13 @@
-import path from "path";
-import { describe, expect, it, vi } from "vitest";
+import path from "node:path";
 import {
   mockedLogger,
   silenceLogsInBlock,
   testdir,
 } from "@changesets/test-utils";
+import { writeChangeset } from "@changesets/write";
+import { describe, expect, it, vi } from "vitest";
 import { add } from "./commands/add/index.ts";
 import { run } from "./run.ts";
-import { writeChangeset } from "@changesets/write";
 
 vi.mock("./commands/add");
 vi.mock("./commands/version");

@@ -1,3 +1,5 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -5,8 +7,6 @@ import { error } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { add } from "./commands/add/index.ts";
 import { init } from "./commands/init/index.ts";
 import { pre } from "./commands/pre/index.ts";

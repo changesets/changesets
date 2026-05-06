@@ -1,3 +1,6 @@
+import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { defaultConfig } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
@@ -11,9 +14,6 @@ import type { Changeset, Config } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
 import { getPackages } from "@manypkg/get-packages";
 import { humanId } from "human-id";
-import assert from "node:assert/strict";
-import fs from "node:fs/promises";
-import path from "node:path";
 import {
   afterEach,
   beforeEach,
