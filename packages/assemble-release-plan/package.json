@@ -20,6 +20,6 @@
     "@changesets/config": "workspace:*"
   },
   "engines": {
-    "node": "^22 || ^24 || >=26"
+    "node": "^22.11 || ^24 || >=26"
   }
 }
