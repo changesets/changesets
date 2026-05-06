@@ -5,7 +5,7 @@ export const baseConfig = defineConfig({
   outDir: "dist",
   exports: true,
 
-  dts: true,
+  dts: { parallel: !process.env.CI },
   format: "esm",
   minify: "dce-only",
   platform: "node",
