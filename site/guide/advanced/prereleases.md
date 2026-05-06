@@ -12,14 +12,36 @@ When you want to do a prerelease, you need to enter prerelease mode. You can do 
 
 A prerelease workflow might look something like this:
 
-```bash
-yarn changeset pre enter next
-yarn changeset version
-git add .
-git commit -m "Enter prerelease mode and version packages"
-yarn changeset publish
-git push --follow-tags
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli pre enter next
+$ npx @changesets/cli version
+$ git add .
+$ git commit -m "Enter prerelease mode and version packages"
+$ npx @changesets/cli publish
+$ git push --follow-tags
 ```
+
+```bash [pnpm]
+$ pnpm changeset pre enter next
+$ pnpm changeset version
+$ git add .
+$ git commit -m "Enter prerelease mode and version packages"
+$ pnpm changeset publish
+$ git push --follow-tags
+```
+
+```bash [yarn]
+$ yarn changeset pre enter next
+$ yarn changeset version
+$ git add .
+$ git commit -m "Enter prerelease mode and version packages"
+$ yarn changeset publish
+$ git push --follow-tags
+```
+
+:::
 
 Let's go through what's happening here. For this example, let's say you have a repo that looks like this:
 
@@ -32,15 +54,39 @@ packages/
   pkg-b@minor
 ```
 
-```bash
-yarn changeset pre enter next
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli pre enter next
 ```
+
+```bash [pnpm]
+$ pnpm changeset pre enter next
+```
+
+```bash [yarn]
+$ yarn changeset pre enter next
+```
+
+:::
 
 This command changes Changesets into prerelease mode which creates a `pre.json` file in the `.changeset` directory which stores information about the state the prerelease is in. For the specific data stored in the `pre.json` file, see the type definition of `PreState` in [`@changesets/types`](https://github.com/changesets/changesets/tree/main/packages/types).
 
-```bash
-yarn changeset version
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli version
 ```
+
+```bash [pnpm]
+$ pnpm changeset version
+```
+
+```bash [yarn]
+$ yarn changeset version
+```
+
+:::
 
 This command will version packages as you would normally expect but append `-next.0`. An important note is that this will bump dependent packages that wouldn't be bumped in normal releases because prerelease versions are not satisfied by most semver ranges.(e.g. `^5.0.0` is not satisfied by `5.1.0-next.0`)
 
@@ -54,21 +100,53 @@ packages/
 .changeset/
 ```
 
-```bash
-yarn changeset publish
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli publish
 ```
+
+```bash [pnpm]
+$ pnpm changeset publish
+```
+
+```bash [yarn]
+$ yarn changeset publish
+```
+
+:::
 
 This command will publish to npm as the publish command normally does though it will set the dist tag to the tag you specified when running the prerelease command.
 
 When you want to do another prerelease, your workflow would look something like this:
 
-```bash
-yarn changeset version
-git add .
-git commit -m "Version packages"
-yarn changeset publish
-git push --follow-tags
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli version
+$ git add .
+$ git commit -m "Version packages"
+$ npx @changesets/cli publish
+$ git push --follow-tags
 ```
+
+```bash [pnpm]
+$ pnpm changeset version
+$ git add .
+$ git commit -m "Version packages"
+$ pnpm changeset publish
+$ git push --follow-tags
+```
+
+```bash [yarn]
+$ yarn changeset version
+$ git add .
+$ git commit -m "Version packages"
+$ yarn changeset publish
+$ git push --follow-tags
+```
+
+:::
 
 Let's say we add some changesets and a new package so our repo looks like this
 
@@ -85,9 +163,21 @@ packages/
   pkg-d@major
 ```
 
-```bash
-yarn changeset version
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli version
 ```
+
+```bash [pnpm]
+$ pnpm changeset version
+```
+
+```bash [yarn]
+$ yarn changeset version
+```
+
+:::
 
 The version command will behave just like it does for the first versioning of a prerelease except the number at the end will be updated. The repo would now look like this:
 
@@ -99,32 +189,90 @@ packages/
   pkg-d@1.0.0-next.0 has no deps
 ```
 
-```bash
-yarn changeset publish
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli publish
 ```
+
+```bash [pnpm]
+$ pnpm changeset publish
+```
+
+```bash [yarn]
+$ yarn changeset publish
+```
+
+:::
 
 This command will publish to npm just like it does for the first prerelease except because we're adding a new package(we need to define this, is it new to the repo or new to npm? I'm thinking new to npm), the new package will be published with the `latest` dist tag rather than the `next` tag because it's the first time it's being published which means it will be on `latest` anyway. For future publishes until pkg-d is out of prerelease, it will also be published to `latest`.
 
 When you're ready to do the final release, your workflow would look something like this:
 
-```bash
-yarn changeset pre exit
-yarn changeset version
-git add .
-git commit -m "Exit prerelease mode and version packages"
-yarn changeset publish
-git push --follow-tags
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli pre exit
+$ npx @changesets/cli version
+$ git add .
+$ git commit -m "Exit prerelease mode and version packages"
+$ npx @changesets/cli publish
+$ git push --follow-tags
 ```
 
-```bash
-yarn changeset pre exit
+```bash [pnpm]
+$ pnpm changeset pre exit
+$ pnpm changeset version
+$ git add .
+$ git commit -m "Exit prerelease mode and version packages"
+$ pnpm changeset publish
+$ git push --follow-tags
 ```
+
+```bash [yarn]
+$ yarn changeset pre exit
+$ yarn changeset version
+$ git add .
+$ git commit -m "Exit prerelease mode and version packages"
+$ yarn changeset publish
+$ git push --follow-tags
+```
+
+:::
+
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli pre exit
+```
+
+```bash [pnpm]
+$ pnpm changeset pre exit
+```
+
+```bash [yarn]
+$ yarn changeset pre exit
+```
+
+:::
 
 This command will set an intent to exit prerelease mode in the `pre.json` file though it won't do any actual versioning.
 
-```bash
-yarn changeset version
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli version
 ```
+
+```bash [pnpm]
+$ pnpm changeset version
+```
+
+```bash [yarn]
+$ yarn changeset version
+```
+
+:::
 
 The version command will apply any changesets currently in the repo and then remove the prerelease tag from the versions. The repo would now look like this:
 
@@ -136,8 +284,20 @@ packages/
   pkg-d@1.0.0 has no deps
 ```
 
-```bash
-yarn changeset publish
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli publish
 ```
+
+```bash [pnpm]
+$ pnpm changeset publish
+```
+
+```bash [yarn]
+$ yarn changeset publish
+```
+
+:::
 
 The publish command will publish everything to the `latest` dist tag as normal.

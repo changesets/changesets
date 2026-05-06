@@ -16,27 +16,39 @@ The second two steps can be made part of a CI process.
 
 ## Add the changeset tool
 
-```shell
-yarn add -D @changesets/cli && yarn changeset init
+::: code-group
+
+```bash [npm]
+$ npm install --save-dev @changesets/cli && npx @changesets/cli init
 ```
 
-or
-
-```shell
-npx @changesets/cli init
+```bash [pnpm]
+$ pnpm add -D @changesets/cli && pnpm changeset init
 ```
+
+```bash [yarn]
+$ yarn add -D @changesets/cli && yarn changeset init
+```
+
+:::
 
 ## Adding changesets
 
-```shell
-yarn changeset
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli
 ```
 
-or
-
-```shell
-npx @changesets/cli
+```bash [pnpm]
+$ pnpm changeset
 ```
+
+```bash [yarn]
+$ yarn changeset
+```
+
+:::
 
 > Note: You can run `changeset add` to add a changeset if you want to, but running Changesets without any command works as well.
 
@@ -44,29 +56,41 @@ npx @changesets/cli
 
 Once you decide you want to do a release, you can run
 
-```shell
-yarn changeset version
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli version
 ```
 
-or
-
-```shell
-npx @changesets/cli version
+```bash [pnpm]
+$ pnpm changeset version
 ```
+
+```bash [yarn]
+$ yarn changeset version
+```
+
+:::
 
 This consumes all changesets, and updates to the most appropriate semver version based on those changesets. It also writes changelog entries for each consumed changeset.
 
 We recommend at this step reviewing both the changelog entries and the version changes for packages. Once you are confident that these are correct, and have made any necessary tweaks to changelogs, you can publish your packages:
 
-```shell
-yarn changeset publish
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli publish
 ```
 
-or
-
-```shell
-npx @changesets/cli publish
+```bash [pnpm]
+$ pnpm changeset publish
 ```
+
+```bash [yarn]
+$ yarn changeset publish
+```
+
+:::
 
 This will run npm publish in each package that is of a later version than the one currently listed on npm.
 

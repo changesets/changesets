@@ -28,9 +28,21 @@ Sometimes, you may want to make CI fail if no changeset is present to ensure no 
 
 In your CI process, add a step that runs:
 
-```bash
-changeset status --since=main
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli status --since=main
 ```
+
+```bash [pnpm]
+$ pnpm changeset status --since=main
+```
+
+```bash [yarn]
+$ yarn changeset status --since=main
+```
+
+:::
 
 This will exit with exit code 1 if there have been no new changesets since main.
 

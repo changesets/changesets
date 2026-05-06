@@ -8,9 +8,21 @@ To change how the changelog is generated, you use the `changelog` setting in the
 
 For example, `changesets` has a package, `@changesets/changelog-git`. To use it, you would first need to install the package.
 
-```bash
-yarn add @changesets/changelog-git
+::: code-group
+
+```bash [npm]
+$ npm install @changesets/changelog-git
 ```
+
+```bash [pnpm]
+$ pnpm add @changesets/changelog-git
+```
+
+```bash [yarn]
+$ yarn add @changesets/changelog-git
+```
+
+:::
 
 Next, change your `.changeset/config.json` to point to the new package:
 

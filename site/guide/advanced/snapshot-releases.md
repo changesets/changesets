@@ -8,17 +8,41 @@ Create changesets as normal, as described in [adding a changeset](../basic/addin
 
 ## Versioning your packages
 
-```bash
-yarn changeset version --snapshot
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli version --snapshot
 ```
+
+```bash [pnpm]
+$ pnpm changeset version --snapshot
+```
+
+```bash [yarn]
+$ yarn changeset version --snapshot
+```
+
+:::
 
 This will apply the changesets, but instead of using the next version, all versions will be set to `0.0.0-THE_TIME_YOU_DID_THIS`.
 
 If you want to add a personalised part to this version number, such as `bulbasaur`, you can run
 
-```bash
-yarn changeset version --snapshot bulbasaur
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli version --snapshot bulbasaur
 ```
+
+```bash [pnpm]
+$ pnpm changeset version --snapshot bulbasaur
+```
+
+```bash [yarn]
+$ yarn changeset version --snapshot bulbasaur
+```
+
+:::
 
 This will instead update versions to `0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS`
 
@@ -38,15 +62,39 @@ When you want to get people to test your snapshots, they can either update their
 
 For our above example, you could run
 
-```bash
-yarn add your-package-name@0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS
+::: code-group
+
+```bash [npm]
+$ npm install your-package-name@0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS
 ```
+
+```bash [pnpm]
+$ pnpm add your-package-name@0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS
+```
+
+```bash [yarn]
+$ yarn add your-package-name@0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS
+```
+
+:::
 
 or the tag:
 
-```bash
-yarn add your-package-name@bulbasaur
+::: code-group
+
+```bash [npm]
+$ npm install your-package-name@bulbasaur
 ```
+
+```bash [pnpm]
+$ pnpm add your-package-name@bulbasaur
+```
+
+```bash [yarn]
+$ yarn add your-package-name@bulbasaur
+```
+
+:::
 
 ## What to do with the snapshot branch
 
