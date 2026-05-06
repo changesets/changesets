@@ -46,7 +46,7 @@ export function getCurrentHighestVersion(
     );
 
     if (
-      highestVersion === undefined ||
+      highestVersion == null ||
       semverGt(pkg.packageJson.version, highestVersion)
     ) {
       highestVersion = pkg.packageJson.version;
@@ -62,7 +62,7 @@ export function mapGetOrThrow<V>(
   errorMessage: string,
 ): V {
   const value = map.get(key);
-  if (value === undefined) {
+  if (value == null) {
     throw new Error(errorMessage);
   }
   return value;
@@ -74,7 +74,7 @@ export function mapGetOrThrowInternal<V>(
   errorMessage: string,
 ): V {
   const value = map.get(key);
-  if (value === undefined) {
+  if (value == null) {
     throw new InternalError(errorMessage);
   }
   return value;

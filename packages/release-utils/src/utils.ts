@@ -38,7 +38,7 @@ export function getChangelogEntry(changelog: string, version: string) {
   // Iterate through each headings and code blocks (for skipping its contents)
   const regex = /^(#{1,6})\s(.*)$|^(`{3,})/gm;
   let match: RegExpExecArray | null;
-  while ((match = regex.exec(changelog)) !== null) {
+  while ((match = regex.exec(changelog)) != null) {
     // Skip over code blocks so we don't match any headings inside of them
     if (match[3]) {
       const endOfCodeBlockRegex = new RegExp(`^${match[3]}`, "gm");
@@ -59,7 +59,7 @@ export function getChangelogEntry(changelog: string, version: string) {
 
     // Search for the highest bump level in the entire changelog
     const levelMatch = /(major|minor|patch)/.exec(headingText.toLowerCase());
-    if (levelMatch !== null) {
+    if (levelMatch != null) {
       const level = BumpLevels[levelMatch[0] as "major" | "minor" | "patch"];
       highestLevel = Math.max(level, highestLevel);
     }

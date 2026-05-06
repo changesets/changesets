@@ -115,7 +115,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   );
 
   if (
-    json.changelog !== undefined &&
+    json.changelog != null &&
     json.changelog !== false &&
     typeof json.changelog !== "string" &&
     !(
@@ -141,7 +141,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     );
   }
   if (
-    normalizedAccess !== undefined &&
+    normalizedAccess != null &&
     normalizedAccess !== "restricted" &&
     normalizedAccess !== "public"
   ) {
@@ -155,7 +155,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   if (
-    json.commit !== undefined &&
+    json.commit != null &&
     typeof json.commit !== "boolean" &&
     typeof json.commit !== "string" &&
     !(
@@ -172,7 +172,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       )} when the only valid values are undefined or a boolean or a module path (e.g. "@changesets/cli/commit" or "./some-module") or a tuple with a module path and config for the commit message generator (e.g. ["@changesets/cli/commit", { "skipCI": "version" }])`,
     );
   }
-  if (json.baseBranch !== undefined && typeof json.baseBranch !== "string") {
+  if (json.baseBranch != null && typeof json.baseBranch !== "string") {
     messages.push(
       `The \`baseBranch\` option is set as ${JSON.stringify(
         json.baseBranch,
@@ -183,7 +183,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   if (
-    json.changedFilePatterns !== undefined &&
+    json.changedFilePatterns != null &&
     (!isArray(json.changedFilePatterns) ||
       !json.changedFilePatterns.every((pattern) => typeof pattern === "string"))
   ) {
@@ -197,7 +197,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   const fixed: string[][] = [];
-  if (json.fixed !== undefined) {
+  if (json.fixed != null) {
     if (!havePackageGroupsCorrectShape(json.fixed)) {
       messages.push(
         `The \`fixed\` option is set as ${JSON.stringify(
@@ -240,7 +240,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   const linked: string[][] = [];
-  if (json.linked !== undefined) {
+  if (json.linked != null) {
     if (!havePackageGroupsCorrectShape(json.linked)) {
       messages.push(
         `The \`linked\` option is set as ${JSON.stringify(
@@ -294,7 +294,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   });
 
   if (
-    json.updateInternalDependencies !== undefined &&
+    json.updateInternalDependencies != null &&
     !["patch", "minor"].includes(json.updateInternalDependencies)
   ) {
     messages.push(
@@ -305,7 +305,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       )} but can only be 'patch' or 'minor'`,
     );
   }
-  if (json.privatePackages !== undefined && json.privatePackages !== false) {
+  if (json.privatePackages != null && json.privatePackages !== false) {
     if (typeof json.privatePackages !== "object") {
       messages.push(
         `The \`privatePackages\` option is set as ${JSON.stringify(
@@ -316,7 +316,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       );
     } else {
       if (
-        json.privatePackages.version !== undefined &&
+        json.privatePackages.version != null &&
         typeof json.privatePackages.version !== "boolean"
       ) {
         messages.push(
@@ -328,7 +328,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
         );
       }
       if (
-        json.privatePackages.tag !== undefined &&
+        json.privatePackages.tag != null &&
         typeof json.privatePackages.tag !== "boolean"
       ) {
         messages.push(
@@ -432,7 +432,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
-  if (json.prettier !== undefined && typeof json.prettier !== "boolean") {
+  if (json.prettier != null && typeof json.prettier !== "boolean") {
     messages.push(
       `The \`prettier\` option is set as ${JSON.stringify(
         json.prettier,
@@ -444,9 +444,9 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
 
   const { snapshot } = json;
 
-  if (snapshot !== undefined) {
+  if (snapshot != null) {
     if (
-      snapshot.useCalculatedVersion !== undefined &&
+      snapshot.useCalculatedVersion != null &&
       typeof snapshot.useCalculatedVersion !== "boolean"
     ) {
       messages.push(
@@ -458,7 +458,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
       );
     }
     if (
-      snapshot.prereleaseTemplate !== undefined &&
+      snapshot.prereleaseTemplate != null &&
       typeof snapshot.prereleaseTemplate !== "string"
     ) {
       messages.push(
@@ -471,12 +471,12 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
-  if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH !== undefined) {
+  if (json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH != null) {
     const { onlyUpdatePeerDependentsWhenOutOfRange, updateInternalDependents } =
       json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH;
 
     if (
-      onlyUpdatePeerDependentsWhenOutOfRange !== undefined &&
+      onlyUpdatePeerDependentsWhenOutOfRange != null &&
       typeof onlyUpdatePeerDependentsWhenOutOfRange !== "boolean"
     ) {
       messages.push(
@@ -489,7 +489,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     }
 
     if (
-      updateInternalDependents !== undefined &&
+      updateInternalDependents != null &&
       !["always", "out-of-range"].includes(updateInternalDependents)
     ) {
       messages.push(
@@ -511,33 +511,29 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
 
   const config: Config = {
     changelog: getNormalizedChangelogOption(
-      json.changelog === undefined
-        ? defaultWrittenConfig.changelog
-        : json.changelog,
+      json.changelog == null ? defaultWrittenConfig.changelog : json.changelog,
     ),
     access:
-      normalizedAccess === undefined
-        ? defaultWrittenConfig.access
-        : normalizedAccess,
+      normalizedAccess == null ? defaultWrittenConfig.access : normalizedAccess,
     commit: getNormalizedCommitOption(
-      json.commit === undefined ? defaultWrittenConfig.commit : json.commit,
+      json.commit == null ? defaultWrittenConfig.commit : json.commit,
     ),
     fixed,
     linked,
     baseBranch:
-      json.baseBranch === undefined
+      json.baseBranch == null
         ? defaultWrittenConfig.baseBranch
         : json.baseBranch,
 
     changedFilePatterns: json.changedFilePatterns ?? ["**"],
 
     updateInternalDependencies:
-      json.updateInternalDependencies === undefined
+      json.updateInternalDependencies == null
         ? defaultWrittenConfig.updateInternalDependencies
         : json.updateInternalDependencies,
 
     ignore:
-      json.ignore === undefined
+      json.ignore == null
         ? defaultWrittenConfig.ignore
         : globMatch(pkgNames, json.ignore),
 
@@ -547,16 +543,16 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     snapshot: {
       prereleaseTemplate: json.snapshot?.prereleaseTemplate ?? null,
       useCalculatedVersion:
-        json.snapshot?.useCalculatedVersion !== undefined
+        json.snapshot?.useCalculatedVersion != null
           ? json.snapshot.useCalculatedVersion
           : false,
     },
 
     ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
       onlyUpdatePeerDependentsWhenOutOfRange:
-        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH === undefined ||
+        json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH == null ||
         json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange === undefined
+          .onlyUpdatePeerDependentsWhenOutOfRange == null
           ? false
           : json.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange,

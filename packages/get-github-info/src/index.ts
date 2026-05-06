@@ -123,7 +123,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
   }
   const repos: ReposWithCommitsAndPRsToFetch = {};
   requests.forEach(({ repo, ...data }) => {
-    if (repos[repo] === undefined) {
+    if (repos[repo] == null) {
       repos[repo] = [];
     }
     repos[repo].push(data);
@@ -238,13 +238,13 @@ export async function getInfo(request: {
     data.associatedPullRequests.nodes &&
     data.associatedPullRequests.nodes.length
       ? (data.associatedPullRequests.nodes as any[]).sort((a, b) => {
-          if (a.mergedAt === null && b.mergedAt === null) {
+          if (a.mergedAt == null && b.mergedAt == null) {
             return 0;
           }
-          if (a.mergedAt === null) {
+          if (a.mergedAt == null) {
             return 1;
           }
-          if (b.mergedAt === null) {
+          if (b.mergedAt == null) {
             return -1;
           }
           a = new Date(a.mergedAt);
@@ -280,7 +280,7 @@ export async function getInfoFromPullRequest(request: {
     user: string | null;
   };
 }> {
-  if (request.pull === undefined) {
+  if (request.pull == null) {
     throw new Error("Please pass a pull request number");
   }
 

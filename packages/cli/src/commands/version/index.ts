@@ -40,7 +40,7 @@ export async function version(
 
   if (preState?.mode === "pre") {
     warn(importantSeparator);
-    if (options.snapshot !== undefined) {
+    if (options.snapshot != null) {
       error("Snapshot release is not allowed in pre mode");
       log("To resolve this exit the pre mode by running `changeset pre exit`");
       throw new ExitError(1);
@@ -56,7 +56,7 @@ export async function version(
 
   if (
     changesets.length === 0 &&
-    (preState === undefined || preState.mode !== "exit")
+    (preState == null || preState.mode !== "exit")
   ) {
     warn("No unreleased changesets found, exiting.");
     throw new ExitError(1);

@@ -52,12 +52,12 @@ export async function runPublish({
 
     for (const line of changesetPublishOutput.split("\n")) {
       const match = line.match(newTagRegex);
-      if (match === null) {
+      if (match == null) {
         continue;
       }
       const pkgName = match[1];
       const pkg = packagesByName.get(pkgName);
-      if (pkg === undefined) {
+      if (pkg == null) {
         throw new Error(
           `Package "${pkgName}" not found.` +
             "This is probably a bug in the action, please open an issue",
