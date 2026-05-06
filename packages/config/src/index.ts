@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 // this requires that the package is built _after_ bumping versions before publishing
-import manifest from "@changesets/cli/package.json" with { type: "json" };
+import manifest from "@changesets/config/package.json" with { type: "json" };
 import { ValidationError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { warn } from "@changesets/logger";
