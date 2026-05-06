@@ -90,6 +90,7 @@ export default defineConfig(
   {
     files: [
       "**/index.ts", // to be removed in next release (v4) when we are dropping default export
+      "**/.vitepress/config.ts",
       "**/vitest.config.mts",
       "**/eslint.config.mjs",
     ],
