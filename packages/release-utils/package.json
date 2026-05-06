@@ -12,9 +12,6 @@
     "@changesets/read": "workspace:^",
     "@changesets/types": "workspace:^",
     "@manypkg/get-packages": "^3.0.0",
-    "mdast-util-from-markdown": "^2.0.2",
-    "mdast-util-to-markdown": "^2.1.2",
-    "mdast-util-to-string": "^4.0.0",
     "semver": "^7.5.3",
     "tinyexec": "^1.0.2"
   },

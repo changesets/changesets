@@ -1,8 +1,5 @@
 import type { Package } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import { fromMarkdown as stringToMdast } from "mdast-util-from-markdown";
-import { toMarkdown as mdastToString } from "mdast-util-to-markdown";
-import { toString as mdastNodeToString } from "mdast-util-to-string";
 
 export const BumpLevels = {
   dep: 0,
@@ -34,53 +31,54 @@ export async function getChangedPackages(
 }
 
 export function getChangelogEntry(changelog: string, version: string) {
-  const ast = stringToMdast(changelog);
-
   let highestLevel: number = BumpLevels.dep;
-
-  const nodes = ast.children;
-  let headingStartInfo:
-    | {
-        index: number;
-        depth: number;
-      }
-    | undefined;
+  let headingStartInfo: { index: number; depth: number } | undefined;
   let endIndex: number | undefined;
 
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
-    if (node.type === "heading") {
-      const stringified: string = mdastNodeToString(node);
-      const match = stringified.toLowerCase().match(/(major|minor|patch)/);
-      if (match != null) {
-        const level = BumpLevels[match[0] as "major" | "minor" | "patch"];
-        highestLevel = Math.max(level, highestLevel);
-      }
-      if (headingStartInfo == null && stringified === version) {
-        headingStartInfo = {
-          index: i,
-          depth: node.depth,
-        };
+  // Iterate through each headings and code blocks (for skipping its contents)
+  const regex = /^(#{1,6})\s(.*)$|^(`{3,})/gm;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(changelog)) != null) {
+    // Skip over code blocks so we don't match any headings inside of them
+    if (match[3]) {
+      const endOfCodeBlockRegex = new RegExp(`^${match[3]}`, "gm");
+      endOfCodeBlockRegex.lastIndex = regex.lastIndex;
+      const endMatch = endOfCodeBlockRegex.exec(changelog);
+      if (endMatch) {
+        // Start next search for headings after the end of the code block
+        regex.lastIndex = endOfCodeBlockRegex.lastIndex;
         continue;
-      }
-      if (
-        endIndex == null &&
-        headingStartInfo != null &&
-        headingStartInfo.depth === node.depth
-      ) {
-        endIndex = i;
+      } else {
+        // Can't find end of code block, probably malformed
         break;
       }
     }
+
+    const headingDepth = match[1].length;
+    const headingText = match[2].trim();
+
+    // Search for the highest bump level in the entire changelog
+    const levelMatch = /(major|minor|patch)/.exec(headingText.toLowerCase());
+    if (levelMatch != null) {
+      const level = BumpLevels[levelMatch[0] as "major" | "minor" | "patch"];
+      highestLevel = Math.max(level, highestLevel);
+    }
+
+    // Search for heading of the entry
+    if (headingText === version) {
+      headingStartInfo = { index: regex.lastIndex, depth: headingDepth };
+      continue;
+    }
+
+    // If we've found the entry heading, search for the closing heading with the same depth
+    if (headingStartInfo && headingDepth === headingStartInfo.depth) {
+      endIndex = match.index;
+      break;
+    }
   }
-  if (headingStartInfo) {
-    ast.children = (ast.children as any).slice(
-      headingStartInfo.index + 1,
-      endIndex,
-    );
-  }
+
   return {
-    content: mdastToString(ast),
+    content: changelog.slice(headingStartInfo?.index, endIndex).trim(),
     highestLevel,
   };
 }
