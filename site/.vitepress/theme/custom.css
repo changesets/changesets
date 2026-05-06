@@ -46,3 +46,8 @@
 .VPLocalNav {
   backdrop-filter: saturate(180%) blur(20px);
 }
+
+.VPFeature .details > a {
+  color: var(--vp-c-text-1);
+  text-decoration: underline;
+}

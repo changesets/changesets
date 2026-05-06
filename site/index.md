@@ -23,7 +23,7 @@ features:
     details: Automatically updates versions based on change types.
   - icon: 📦
     title: Monorepo Support
-    details: Simplifies managing multiple packages within one repository.
+    details: Supports <a href="https://pnpm.io/workspaces">pnpm</a>, <a href="https://yarnpkg.com/features/workspaces">yarn</a>, and <a href="https://docs.npmjs.com/cli/v11/using-npm/workspaces">npm</a> workspaces.
   - icon: 📖
     title: Changelog Generation
     details: Automatically creates package changelogs.
