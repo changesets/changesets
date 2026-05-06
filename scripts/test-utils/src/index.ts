@@ -1,29 +1,24 @@
 import type fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
+import * as logger from "@changesets/logger";
 import { createFixture, type FileTree } from "fs-fixture";
 import { exec } from "tinyexec";
-import { afterEach, beforeEach, type Mock, onTestFinished, vi } from "vitest";
+import { afterEach, beforeEach, onTestFinished, vi } from "vitest";
 
-type PartialMockMethods<T> = Partial<{
-  [K in keyof T as T[K] extends (...args: never) => unknown
-    ? K
-    : never]: T[K] extends (...args: never) => unknown ? Mock<T[K]> : never;
-}>;
+// these mocks will be removed in the clack migration, so we can be wild with the types
 
-export const mockedLogger: PartialMockMethods<
-  typeof import("@changesets/logger")
-> = {};
+export const mockedLogger = vi.mocked(logger);
 
-vi.mock("@changesets/logger", async (importOriginal) => {
-  const mod = await importOriginal();
+vi.mock("@changesets/logger" as never, async (importOriginal) => {
+  const mod = await importOriginal<typeof logger>();
   return {
     prefix: mod.prefix,
-    error: (...args) => (mockedLogger.error ?? mod.error)(...args),
-    info: (...args) => (mockedLogger.info ?? mod.info)(...args),
-    log: (...args) => (mockedLogger.log ?? mod.log)(...args),
-    warn: (...args) => (mockedLogger.warn ?? mod.warn)(...args),
-    success: (...args) => (mockedLogger.success ?? mod.success)(...args),
+    error: (...args: any[]) => (mockedLogger.error ?? mod.error)(...args),
+    info: (...args: any[]) => (mockedLogger.info ?? mod.info)(...args),
+    log: (...args: any[]) => (mockedLogger.log ?? mod.log)(...args),
+    warn: (...args: any[]) => (mockedLogger.warn ?? mod.warn)(...args),
+    success: (...args: any[]) => (mockedLogger.success ?? mod.success)(...args),
   };
 });
 
@@ -53,11 +48,11 @@ const createLogSilencer = () => {
       process.stderr.write = vi.fn();
 
       return () => {
-        mockedLogger.error = undefined;
-        mockedLogger.info = undefined;
-        mockedLogger.log = undefined;
-        mockedLogger.warn = undefined;
-        mockedLogger.success = undefined;
+        mockedLogger.error = undefined!;
+        mockedLogger.info = undefined!;
+        mockedLogger.log = undefined!;
+        mockedLogger.warn = undefined!;
+        mockedLogger.success = undefined!;
 
         console.error = originalConsoleError;
         console.info = originalConsoleInfo;

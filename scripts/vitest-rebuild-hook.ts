@@ -6,7 +6,7 @@ export default function setup(project: TestProject) {
   if (!process.env.VITEST_SKIP_REBUILD) {
     project.onTestsRerun(async () => {
       console.log("rebuilding...");
-      await build({ logLevel: "silent" });
+      await build({ logLevel: "silent", publint: false });
     });
   }
 }
