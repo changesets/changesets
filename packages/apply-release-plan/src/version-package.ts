@@ -3,7 +3,7 @@ import type {
   PackageJSON,
   VersionType,
 } from "@changesets/types";
-import getVersionRangeType from "@changesets/get-version-range-type";
+import { getVersionRangeType } from "@changesets/get-version-range-type";
 import Range from "semver/classes/range.js";
 import semverPrerelease from "semver/functions/prerelease.js";
 import validRange from "semver/ranges/valid.js";
@@ -16,7 +16,7 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
-export default function versionPackage(
+export function versionPackage(
   release: ComprehensiveRelease & {
     changelog: string | null;
     packageJson: PackageJSON;
@@ -76,7 +76,7 @@ export default function versionPackage(
         if (
           !usesWorkspaceRange &&
           (bumpVersionsWithWorkspaceProtocolOnly ||
-            validRange(depCurrentVersion) === null)
+            validRange(depCurrentVersion) == null)
         ) {
           continue;
         }
@@ -90,7 +90,7 @@ export default function versionPackage(
             workspaceDepVersion === "*" ||
             workspaceDepVersion === "^" ||
             workspaceDepVersion === "~" ||
-            validRange(workspaceDepVersion) === null
+            validRange(workspaceDepVersion) == null
           ) {
             continue;
           }
@@ -104,7 +104,7 @@ export default function versionPackage(
           new Range(depCurrentVersion).range !== "" ||
           // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-          semverPrerelease(version) !== null
+          semverPrerelease(version) != null
         ) {
           let newNewRange = snapshot
             ? version

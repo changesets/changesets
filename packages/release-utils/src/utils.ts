@@ -52,11 +52,11 @@ export function getChangelogEntry(changelog: string, version: string) {
     if (node.type === "heading") {
       const stringified: string = mdastNodeToString(node);
       const match = stringified.toLowerCase().match(/(major|minor|patch)/);
-      if (match !== null) {
+      if (match != null) {
         const level = BumpLevels[match[0] as "major" | "minor" | "patch"];
         highestLevel = Math.max(level, highestLevel);
       }
-      if (headingStartInfo === undefined && stringified === version) {
+      if (headingStartInfo == null && stringified === version) {
         headingStartInfo = {
           index: i,
           depth: node.depth,
@@ -64,8 +64,8 @@ export function getChangelogEntry(changelog: string, version: string) {
         continue;
       }
       if (
-        endIndex === undefined &&
-        headingStartInfo !== undefined &&
+        endIndex == null &&
+        headingStartInfo != null &&
         headingStartInfo.depth === node.depth
       ) {
         endIndex = i;

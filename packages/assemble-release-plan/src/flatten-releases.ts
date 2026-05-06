@@ -6,7 +6,7 @@ import type { Config, NewChangeset, Package } from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import { mapGetOrThrowInternal } from "./utils.ts";
 
-export default function flattenReleases(
+export function flattenReleases(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
   config: Config,

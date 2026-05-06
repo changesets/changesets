@@ -5,9 +5,9 @@ import {
   silenceLogsInBlock,
   testdir,
 } from "@changesets/test-utils";
-import add from "./commands/add/index.ts";
+import { add } from "./commands/add/index.ts";
 import { run } from "./run.ts";
-import writeChangeset from "@changesets/write";
+import { writeChangeset } from "@changesets/write";
 
 vi.mock("./commands/add");
 vi.mock("./commands/version");

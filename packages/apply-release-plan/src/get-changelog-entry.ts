@@ -24,7 +24,7 @@ async function generateChangesForVersionTypeMarkdown(
 }
 
 // release is the package and version we are releasing
-export default async function getChangelogEntry(
+export async function getChangelogEntry(
   cwd: string,
   release: ModCompWithPackage,
   releases: ModCompWithPackage[],
@@ -70,7 +70,7 @@ export default async function getChangelogEntry(
     const usesWorkspaceRange = versionRange?.startsWith("workspace:");
     return (
       versionRange &&
-      (usesWorkspaceRange || validRange(versionRange) !== null) &&
+      (usesWorkspaceRange || validRange(versionRange) != null) &&
       shouldUpdateDependencyBasedOnConfig(
         cwd,
         {

@@ -105,7 +105,7 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
   return `${bold(pkgName)}@${bold(version)}`;
 }
 
-export default async function createChangeset(
+export async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Array<Package>,
   messageFromCli?: string,
@@ -238,7 +238,7 @@ export default async function createChangeset(
     releases.push({ name: pkg.packageJson.name, type });
   }
 
-  if (messageFromCli !== undefined) {
+  if (messageFromCli != null) {
     return {
       confirmed: false,
       summary: messageFromCli,

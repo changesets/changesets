@@ -31,7 +31,7 @@ export type PublishedResult = {
 function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
   if (tag) return tag;
 
-  if (preState !== undefined && pkgInfo.publishedState !== "only-pre") {
+  if (preState != null && pkgInfo.publishedState !== "only-pre") {
     return preState.tag;
   }
 
@@ -80,7 +80,7 @@ export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
   );
 };
 
-export default async function publishPackages({
+export async function publishPackages({
   packages,
   access,
   otp,
@@ -165,7 +165,7 @@ async function getUnpublishedPackages(
       let publishedState: PublishedState = "never";
       if (response.published) {
         publishedState = "published";
-        if (preState !== undefined) {
+        if (preState != null) {
           if (
             response.pkgInfo.versions &&
             response.pkgInfo.versions.every(
@@ -196,7 +196,7 @@ async function getUnpublishedPackages(
       info(
         `${name} is being published because our local version (${localVersion}) has not been published on npm`,
       );
-      if (preState !== undefined && publishedState === "only-pre") {
+      if (preState != null && publishedState === "only-pre") {
         info(
           `${name} is being published to ${pc.cyan(
             "latest",

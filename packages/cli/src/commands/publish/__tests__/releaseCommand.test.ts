@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import publishPackages from "../publishPackages.ts";
+import { publishPackages } from "../publishPackages.ts";
 import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import runRelease from "../index.ts";
+import { publish as runRelease } from "../index.ts";
 
 vi.mock("../../../utils/cli-utilities");
 vi.mock("@changesets/git");

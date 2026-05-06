@@ -6,8 +6,8 @@ import { getCurrentCommitId } from "@changesets/git";
 import { error, log, warn } from "@changesets/logger";
 import type { Config } from "@changesets/types";
 import applyReleasePlan from "@changesets/apply-release-plan";
-import readChangesets from "@changesets/read";
-import assembleReleasePlan from "@changesets/assemble-release-plan";
+import { readChangesets } from "@changesets/read";
+import { assembleReleasePlan } from "@changesets/assemble-release-plan";
 import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 import { ExitError } from "@changesets/errors";
@@ -21,7 +21,7 @@ const importantEnd = pc.red(
   "----------------------------------------------------------------------",
 );
 
-export default async function version(
+export async function version(
   cwd: string,
   options: {
     snapshot?: string | boolean;
@@ -40,7 +40,7 @@ export default async function version(
 
   if (preState?.mode === "pre") {
     warn(importantSeparator);
-    if (options.snapshot !== undefined) {
+    if (options.snapshot != null) {
       error("Snapshot release is not allowed in pre mode");
       log("To resolve this exit the pre mode by running `changeset pre exit`");
       throw new ExitError(1);
@@ -56,7 +56,7 @@ export default async function version(
 
   if (
     changesets.length === 0 &&
-    (preState === undefined || preState.mode !== "exit")
+    (preState == null || preState.mode !== "exit")
   ) {
     warn("No unreleased changesets found, exiting.");
     throw new ExitError(1);

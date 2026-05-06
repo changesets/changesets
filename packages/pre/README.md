@@ -1,7 +1,7 @@
 # @changesets/pre
 
-[![npm package](https://img.shields.io/npm/v/@changesets/pre)](https://npmjs.com/package/@changesets/pre)
-[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/pre?name=true)](https://npmx.dev/package/@changesets/pre)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 Enter and exit pre mode in a Changesets repo.
 

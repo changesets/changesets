@@ -110,7 +110,7 @@ const changelogFunctions: ChangelogFunctions = {
       .map((l) => l.trimEnd());
 
     const links = await (async () => {
-      if (prFromSummary !== undefined) {
+      if (prFromSummary != null) {
         let { links } = await getInfoFromPullRequest({
           repo: options.repo,
           pull: prFromSummary,
@@ -149,9 +149,9 @@ const changelogFunctions: ChangelogFunctions = {
       : links.user;
 
     const prefix = [
-      links.pull === null ? "" : ` ${links.pull}`,
-      links.commit === null ? "" : ` ${links.commit}`,
-      users === null ? "" : ` Thanks ${users}!`,
+      links.pull == null ? "" : ` ${links.pull}`,
+      links.commit == null ? "" : ` ${links.commit}`,
+      users == null ? "" : ` Thanks ${users}!`,
     ].join("");
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {
@@ -169,4 +169,5 @@ const changelogFunctions: ChangelogFunctions = {
   },
 };
 
+// ChangelogFunctions require a default export
 export default changelogFunctions;

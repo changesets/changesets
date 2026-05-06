@@ -1,7 +1,7 @@
 # @changesets/get-github-info
 
-[![npm package](https://img.shields.io/npm/v/@changesets/get-github-info)](https://npmjs.com/package/@changesets/get-github-info)
-[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/get-github-info?name=true)](https://npmx.dev/package/@changesets/get-github-info)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 > Get the GitHub username and PR number from a commit. Intended for use with changesets.
 
@@ -28,8 +28,8 @@ const getReleaseLine = async (changeset, type) => {
     commit: changeset.commit,
   });
   let returnVal = `- ${links.commit}${
-    links.pull === null ? "" : ` ${links.pull}`
-  }${links.user === null ? "" : ` Thanks ${links.user}!`}: ${firstLine}`;
+    links.pull == null ? "" : ` ${links.pull}`
+  }${links.user == null ? "" : ` Thanks ${links.user}!`}: ${firstLine}`;
   if (futureLines.length > 0) {
     returnVal += `\n${futureLines.map((l) => `  ${l}`).join("\n")}`;
   }

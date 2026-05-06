@@ -14,8 +14,8 @@ import fs from "node:fs/promises";
 import path from "path";
 import prettier from "prettier";
 import { resolve } from "import-meta-resolve";
-import getChangelogEntry from "./get-changelog-entry.ts";
-import versionPackage from "./version-package.ts";
+import { getChangelogEntry } from "./get-changelog-entry.ts";
+import { versionPackage } from "./version-package.ts";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 
@@ -72,7 +72,7 @@ async function getCommitsThatAddChangesets(
   return commits;
 }
 
-export default async function applyReleasePlan(
+export async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
   config: Config = defaultConfig,
@@ -110,7 +110,7 @@ export default async function applyReleasePlan(
     contextDir,
   );
 
-  if (releasePlan.preState !== undefined && snapshot === undefined) {
+  if (releasePlan.preState != null && snapshot == null) {
     if (releasePlan.preState.mode === "exit") {
       await fs.rm(path.join(cwd, ".changeset", "pre.json"), {
         recursive: true,
@@ -166,10 +166,7 @@ export default async function applyReleasePlan(
     }
   }
 
-  if (
-    releasePlan.preState === undefined ||
-    releasePlan.preState.mode === "exit"
-  ) {
+  if (releasePlan.preState == null || releasePlan.preState.mode === "exit") {
     const changesetFolder = path.resolve(cwd, ".changeset");
     await Promise.all(
       changesets.map(async (changeset) => {
@@ -377,6 +374,10 @@ async function updatePackageJson(
 
   return fs.writeFile(pkgJsonPath, stringified);
 }
+
+/** @deprecated Use named export `applyReleasePlan` instead */
+const applyReleasePlanDefault = applyReleasePlan;
+export default applyReleasePlanDefault;
 
 async function writeFormattedMarkdownFile(
   filePath: string,

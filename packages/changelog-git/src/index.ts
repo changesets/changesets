@@ -50,4 +50,5 @@ const defaultChangelogFunctions = {
   getDependencyReleaseLine,
 } satisfies ChangelogFunctions;
 
+// ChangelogFunctions require a default export
 export default defaultChangelogFunctions;

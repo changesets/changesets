@@ -11,11 +11,11 @@ import type {
   Packages,
 } from "@changesets/types";
 import semverParse from "semver/functions/parse.js";
-import applyLinks from "./apply-links.ts";
-import determineDependents from "./determine-dependents.ts";
-import flattenReleases from "./flatten-releases.ts";
+import { applyLinks } from "./apply-links.ts";
+import { determineDependents } from "./determine-dependents.ts";
+import { flattenReleases } from "./flatten-releases.ts";
 import { incrementVersion } from "./increment.ts";
-import matchFixedConstraint from "./match-fixed-constraint.ts";
+import { matchFixedConstraint } from "./match-fixed-constraint.ts";
 import type { InternalRelease, PreInfo } from "./types.ts";
 import { mapGetOrThrow, mapGetOrThrowInternal } from "./utils.ts";
 
@@ -26,8 +26,7 @@ type SnapshotReleaseParameters = {
 
 function getPreVersion(version: string) {
   const parsed = semverParse(version)!;
-  let preVersion =
-    parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
+  let preVersion = parsed.prerelease[1] == null ? -1 : parsed.prerelease[1];
   if (typeof preVersion !== "number") {
     throw new InternalError("preVersion is not a number");
   }
@@ -63,7 +62,7 @@ function getSnapshotSuffix(
     keyof typeof placeholderValues
   >;
 
-  if (!template.includes(`{tag}`) && placeholderValues.tag !== undefined) {
+  if (!template.includes(`{tag}`) && placeholderValues.tag != null) {
     throw new Error(
       `Failed to compose snapshot version: "{tag}" placeholder is missing, but the snapshot parameter is defined (value: '${placeholderValues.tag}')`,
     );
@@ -72,7 +71,7 @@ function getSnapshotSuffix(
   return placeholders.reduce((prev, key) => {
     return prev.replace(new RegExp(`\\{${key}\\}`, "g"), () => {
       const value = placeholderValues[key];
-      if (value === undefined) {
+      if (value == null) {
         throw new Error(
           `Failed to compose snapshot version: "{${key}}" placeholder is used without having a value defined!`,
         );
@@ -120,7 +119,7 @@ function getNewVersion(
   return incrementVersion(release, preInfo);
 }
 
-function assembleReleasePlan(
+export function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
   config: Config,
@@ -311,7 +310,7 @@ function getPreInfo(
   config: Config,
   preState: PreState | undefined,
 ): PreInfo | undefined {
-  if (preState === undefined) {
+  if (preState == null) {
     return;
   }
 
@@ -324,7 +323,7 @@ function getPreInfo(
   };
 
   for (const [, pkg] of packagesByName) {
-    if (updatedPreState.initialVersions[pkg.packageJson.name] === undefined) {
+    if (updatedPreState.initialVersions[pkg.packageJson.name] == null) {
       updatedPreState.initialVersions[pkg.packageJson.name] =
         pkg.packageJson.version;
     }
@@ -373,4 +372,6 @@ function getPreInfo(
   };
 }
 
-export default assembleReleasePlan;
+/** @deprecated Use named export `assembleReleasePlan` instead */
+const assembleReleasePlanDefault = assembleReleasePlan;
+export default assembleReleasePlanDefault;

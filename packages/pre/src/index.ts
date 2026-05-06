@@ -41,7 +41,7 @@ export async function exitPre(rootDir: string) {
   // TODO: verify that the pre state isn't broken
   const preState = await readPreState(rootDir);
 
-  if (preState === undefined) {
+  if (preState == null) {
     throw new PreExitButNotInPreModeError();
   }
 

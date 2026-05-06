@@ -25,7 +25,7 @@ import { mapGetOrThrowInternal } from "./utils.ts";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-export default function determineDependents({
+export function determineDependents({
   releases,
   packagesByName,
   rootDir,
