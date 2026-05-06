@@ -138,7 +138,8 @@ The status command provides information about the changesets that currently exis
 
 - `--since` - to only display information about changesets since a specific branch or git tag (such as `main`, or the git hash of latest). While this can be used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot) to detect pull requests missing changesets, as not all pull requests need one if you are on GitHub.
 
-> NOTE: `status` will fail if you are in the middle of running `version` or `publish`. If you want to get changeset status at the time of a version increase and publish, you need to run it immediately before running `version`.
+> [!NOTE]
+> `status` will fail if you are in the middle of running `version` or `publish`. If you want to get changeset status at the time of a version increase and publish, you need to run it immediately before running `version`.
 
 ## pre
 
@@ -148,7 +149,8 @@ changeset pre [exit|enter {tag}]
 
 The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a pre-release, you should run changeset pre enter next(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with changeset version and changeset publish. For more information about the pre command, see the prereleases [the prereleases documentation](https://github.com/changesets/changesets/blob/master/docs/prereleases.md).
 
-> NOTE: pre-releases are a very complicated feature. Many of the safety rails that changesets helps you with will be taken off. We recommend that you read both [problems publishing in monorepos](../advanced/publishing-in-monorepos.md) and be clear on both exiting and entering pre-releases before using it. You may also prefer using [snapshot releases](../advanced/snapshot-releases.md) for a slightly less involved process.
+> [!NOTE]
+> Pre-releases are a very complicated feature. Many of the safety rails that changesets helps you with will be taken off. We recommend that you read both [problems publishing in monorepos](../advanced/publishing-in-monorepos.md) and be clear on both exiting and entering pre-releases before using it. You may also prefer using [snapshot releases](../advanced/snapshot-releases.md) for a slightly less involved process.
 
 ## tag
 

@@ -1,4 +1,8 @@
 import { defineConfig } from "vitepress";
+import {
+  groupIconMdPlugin,
+  groupIconVitePlugin,
+} from "vitepress-plugin-group-icons";
 import packageJson from "../../packages/cli/package.json" with { type: "json" };
 
 const changesetsVersion = packageJson.version;
@@ -6,10 +10,16 @@ const changesetsVersion = packageJson.version;
 export default defineConfig({
   title: "Changesets",
   head: [["link", { rel: "icon", href: "logo.svg" }]],
-
   lastUpdated: true,
   cleanUrls: true,
-
+  markdown: {
+    config(md) {
+      md.use(groupIconMdPlugin);
+    },
+  },
+  vite: {
+    plugins: [groupIconVitePlugin()],
+  },
   themeConfig: {
     logo: {
       light: "/logo-light.svg",

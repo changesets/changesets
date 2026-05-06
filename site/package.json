@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "oxc-minify": "^0.128.0",
-    "vitepress": "^2.0.0-alpha.17"
+    "vitepress": "^2.0.0-alpha.17",
+    "vitepress-plugin-group-icons": "^1.7.5"
   }
 }

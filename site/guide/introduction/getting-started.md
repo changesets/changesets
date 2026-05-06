@@ -50,7 +50,8 @@ $ yarn changeset
 
 :::
 
-> Note: You can run `changeset add` to add a changeset if you want to, but running Changesets without any command works as well.
+> [!NOTE]
+> You can run `changeset add` to add a changeset if you want to, but running Changesets without any command works as well.
 
 ## Versioning and publishing
 

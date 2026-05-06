@@ -12,7 +12,8 @@ This allows changesets to be added and accumulated safely, with the knowledge th
 
 ## How dependencies are bumped
 
-> NOTE: This refers specifically to a feature of changesets used in mono-repos
+> [!NOTE]
+> This refers specifically to a feature of changesets used in mono-repos
 
 When changesets are generated, we check to see if the selected packages will leave semver for any other packages within the mono-repo.
 
