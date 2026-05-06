@@ -6,10 +6,26 @@ import {
 import packageJson from "../../packages/cli/package.json" with { type: "json" };
 
 const changesetsVersion = packageJson.version;
+const ogTitle = "Changesets";
+const ogDescription =
+  "A tool to manage versioning and changelogs with a focus on multi-package repositories";
+const ogUrl = "https://changesets.dev";
+const ogImage = "https://changesets.dev/og-image.png";
 
 export default defineConfig({
-  title: "Changesets",
-  head: [["link", { rel: "icon", href: "logo.svg" }]],
+  title: ogTitle,
+  description: ogDescription,
+  head: [
+    ["link", { rel: "icon", href: "logo-light.svg" }],
+    ["meta", { property: "og:type", content: "website" }],
+    ["meta", { property: "og:title", content: ogTitle }],
+    ["meta", { property: "og:image", content: ogImage }],
+    ["meta", { property: "og:url", content: ogUrl }],
+    ["meta", { property: "og:description", content: ogDescription }],
+    ["meta", { property: "og:site_name", content: ogTitle }],
+    ["meta", { name: "twitter:card", content: "summary_large_image" }],
+    ["meta", { name: "theme-color", content: "#006dcc" }],
+  ],
   lastUpdated: true,
   cleanUrls: true,
   markdown: {
@@ -43,7 +59,7 @@ export default defineConfig({
     nav: [
       {
         text: "Guide",
-        link: "/introduction/getting-started",
+        link: "/guide/introduction/getting-started",
       },
       {
         text: `v${changesetsVersion}`,

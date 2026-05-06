@@ -42,7 +42,7 @@
 }
 
 /* Blur effect for navigation bars */
-.VPNavBar,
+.VPNavBar:not(.home.top),
 .VPLocalNav {
   backdrop-filter: saturate(180%) blur(20px);
 }
