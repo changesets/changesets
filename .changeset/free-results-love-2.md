@@ -21,4 +21,4 @@
 "@changesets/pre": major
 ---
 
-Bumped supported Node versions to `^22 || >=24`
+Bumped supported Node versions to `^22 || ^24 || >=26`
