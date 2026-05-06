@@ -15,8 +15,34 @@ permissions:
   contents: read
 
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/ci-setup
+        with:
+          download-dist: false
+
+      - name: Build artifacts
+        run: node --run build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          compression-level: 4
+          name: dist
+          path: |
+            packages/*/dist
+            scripts/*/dist
+
   test:
     name: "Test using Node ${{ matrix.node_version }}"
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -56,6 +82,7 @@ jobs:
 
   typecheck:
     name: Typecheck
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -71,6 +98,7 @@ jobs:
 
   lint:
     name: Lint
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -91,7 +119,7 @@ jobs:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [test, typecheck, lint]
+    needs: [build, test, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1
