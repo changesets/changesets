@@ -12,9 +12,9 @@
     "lint": "eslint",
     "test": "vitest",
     "types:check": "tsc",
-    "check-all": "node --run build && node --run test -- run && node --run types:check && node --run lint && node --run format",
-    "version-packages": "node --run changeset version && node --run format:fix",
-    "release": "node --run build && node --run changeset publish",
+    "check-all": "pnpm build && pnpm test run && pnpm types:check && pnpm lint && pnpm format",
+    "version-packages": "pnpm changeset version && pnpm format:fix",
+    "release": "pnpm build && pnpm changeset publish",
     "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js"
   },
   "repository": {
