@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node_version: [22, 24, 25]
+        node_version: [22, 24, 26]
       fail-fast: false
     steps:
       - name: Check out repo
