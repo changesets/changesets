@@ -5,7 +5,7 @@ export const baseConfig = defineConfig({
   outDir: "dist",
   exports: true,
 
-  dts: { parallel: true },
+  dts: true,
   format: "esm",
   minify: "dce-only",
   platform: "node",
