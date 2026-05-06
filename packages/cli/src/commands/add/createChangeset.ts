@@ -238,7 +238,7 @@ export async function createChangeset(
     releases.push({ name: pkg.packageJson.name, type });
   }
 
-  if (messageFromCli !== undefined) {
+  if (messageFromCli != null) {
     return {
       confirmed: false,
       summary: messageFromCli,

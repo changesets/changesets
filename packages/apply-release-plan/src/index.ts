@@ -110,7 +110,7 @@ export async function applyReleasePlan(
     contextDir,
   );
 
-  if (releasePlan.preState !== undefined && snapshot === undefined) {
+  if (releasePlan.preState != null && snapshot == null) {
     if (releasePlan.preState.mode === "exit") {
       await fs.rm(path.join(cwd, ".changeset", "pre.json"), {
         recursive: true,
@@ -166,10 +166,7 @@ export async function applyReleasePlan(
     }
   }
 
-  if (
-    releasePlan.preState === undefined ||
-    releasePlan.preState.mode === "exit"
-  ) {
+  if (releasePlan.preState == null || releasePlan.preState.mode === "exit") {
     const changesetFolder = path.resolve(cwd, ".changeset");
     await Promise.all(
       changesets.map(async (changeset) => {

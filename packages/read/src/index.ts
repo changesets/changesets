@@ -35,7 +35,7 @@ export async function readChangesets(
     throw err;
   }
 
-  if (sinceRef !== undefined) {
+  if (sinceRef != null) {
     contents = await filterChangesetsSinceRef(
       contents,
       changesetBase,

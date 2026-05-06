@@ -11,11 +11,11 @@ export async function readChangesetState(
   cwd: string = process.cwd(),
 ): Promise<ChangesetState> {
   const preState = await readPreState(cwd);
-  const isInPreMode = preState !== undefined && preState.mode === "pre";
+  const isInPreMode = preState != null && preState.mode === "pre";
 
   let changesets = await readChangesets(cwd);
 
-  if (isInPreMode && preState !== undefined) {
+  if (isInPreMode && preState != null) {
     const changesetsToFilter = new Set(preState.changesets);
     changesets = changesets.filter((x) => !changesetsToFilter.has(x.id));
   }
