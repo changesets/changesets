@@ -11,8 +11,7 @@
   "repository": "https://github.com/changesets/changesets/tree/main/packages/changelog-github",
   "dependencies": {
     "@changesets/get-github-info": "workspace:^",
-    "@changesets/types": "workspace:^",
-    "dotenv": "^16.4.7"
+    "@changesets/types": "workspace:^"
   },
   "devDependencies": {
     "@changesets/parse": "workspace:*",

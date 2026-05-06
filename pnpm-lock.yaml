@@ -146,9 +146,6 @@ importers:
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
-      dotenv:
-        specifier: ^16.4.7
-        version: 16.6.1
     devDependencies:
       '@changesets/parse':
         specifier: workspace:*
@@ -1824,10 +1821,6 @@ packages:
   detect-indent@7.0.2:
     resolution: {integrity: sha512-y+8xyqdGLL+6sh0tVeHcfP/QDd8gUgbasolJJpY7NgeQGSZ739bDtSiaiDgtoicy+mtYB81dKLxO9xRhCyIB3A==}
     engines: {node: '>=12.20'}
-
-  dotenv@16.6.1:
-    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
-    engines: {node: '>=12'}
 
   electron-to-chromium@1.5.267:
     resolution: {integrity: sha512-0Drusm6MVRXSOJpGbaSVgcQsuB4hEkMpHXaVstcPmhu5LIedxs1xNK/nIxmQIU/RPC0+1/o0AVZfBTkTNJOdUw==}
@@ -4164,8 +4157,6 @@ snapshots:
   detect-indent@6.1.0: {}
 
   detect-indent@7.0.2: {}
-
-  dotenv@16.6.1: {}
 
   electron-to-chromium@1.5.267: {}
 
