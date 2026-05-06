@@ -16,12 +16,13 @@ permissions:
 
 jobs:
   test:
-    name: "Test using Node ${{ matrix.node_version }}"
-    runs-on: ubuntu-latest
+    name: "Tests (node v${{ matrix.node_version }}, ${{ matrix.platform }})"
+    runs-on: ${{ matrix.platform }}
     timeout-minutes: 20
     strategy:
       matrix:
         node_version: [22, 24, 26]
+        platform: [ubuntu-24.04, windows-2025, macos-26]
       fail-fast: false
     steps:
       - name: Check out repo
