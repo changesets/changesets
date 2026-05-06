@@ -4,5 +4,6 @@ export default defineConfig({
   test: {
     experimental: { preParse: true },
     clearMocks: true,
+    globalSetup: ["./scripts/vitest-rebuild-hook.ts"],
   },
 });
