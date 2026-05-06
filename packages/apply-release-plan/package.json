@@ -8,7 +8,11 @@
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/apply-release-plan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/apply-release-plan"
+  },
   "dependencies": {
     "@changesets/config": "workspace:^",
     "@changesets/get-version-range-type": "workspace:^",

@@ -9,7 +9,11 @@
     "./schema.json": "./schema.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/config",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/config"
+  },
   "files": [
     "dist",
     "schema.json"
