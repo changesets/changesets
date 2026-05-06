@@ -1,4 +1,7 @@
 import { defineConfig } from "vitepress";
+import packageJson from "../../packages/cli/package.json" with { type: "json" };
+
+const changesetsVersion = packageJson.version;
 
 export default defineConfig({
   title: "Changesets",
@@ -8,13 +11,19 @@ export default defineConfig({
   cleanUrls: true,
 
   themeConfig: {
-    logo: "/logo.svg",
+    logo: {
+      light: "/logo-light.svg",
+      dark: "/logo-dark.svg",
+      alt: "Changesets logo",
+    },
     editLink: {
       pattern: "https://github.com/changesets/changesets/edit/main/site/:path",
     },
 
     socialLinks: [
+      { icon: "discord", link: "https://chat.changesets.dev" },
       { icon: "github", link: "https://github.com/changesets/changesets" },
+      { icon: "npm", link: "https://npmx.dev/package/@changesets/cli" },
     ],
 
     search: {
@@ -33,6 +42,19 @@ export default defineConfig({
       {
         text: "FAQ",
         link: "/faq/publishing-in-monorepos",
+      },
+      {
+        text: `v${changesetsVersion}`,
+        items: [
+          {
+            text: `v${changesetsVersion}`,
+            link: `https://github.com/changesets/changesets/releases/tag/%40changesets%2Fcli%40${changesetsVersion}`,
+          },
+          {
+            text: "Changelog",
+            link: "https://github.com/changesets/changesets/blob/main/packages/cli/CHANGELOG.md",
+          },
+        ],
       },
     ],
 

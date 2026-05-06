@@ -13,9 +13,9 @@
     "test": "vitest",
     "types:check": "tsc",
     "check-all": "node --run build && node --run test -- run && node --run types:check && node --run lint && node --run format",
-    "docs:dev": "pnpm --filter=./site dev",
-    "docs:build": "pnpm --filter=./site build",
-    "docs:preview": "pnpm --filter=./site preview",
+    "site:dev": "pnpm --filter=./site dev",
+    "site:build": "pnpm --filter=./site build",
+    "site:preview": "pnpm --filter=./site preview",
     "version-packages": "node --run changeset version && node --run format:fix",
     "release": "node --run build && node --run changeset publish",
     "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js"
