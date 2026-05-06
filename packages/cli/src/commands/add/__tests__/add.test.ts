@@ -4,16 +4,17 @@ import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import * as logger from "@changesets/logger";
 import getChangesets from "@changesets/read";
+import { exec } from "tinyexec";
+import { describe, expect, it, vi } from "vitest";
+import * as utils from "../../../utils/cli-utilities.ts";
+import { add as addChangeset } from "../index.ts";
+// [keep-order] test-utils has to be after `../index.ts`
 import {
   silenceLogsInBlock,
   testdir,
   gitdir,
   outputFile,
 } from "@changesets/test-utils";
-import { exec } from "tinyexec";
-import { describe, expect, it, vi } from "vitest";
-import * as utils from "../../../utils/cli-utilities.ts";
-import { add as addChangeset } from "../index.ts";
 
 vi.mock("../../../utils/cli-utilities");
 const mockedUtils = vi.mocked(utils);

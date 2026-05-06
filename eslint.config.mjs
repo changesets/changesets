@@ -98,6 +98,7 @@ export default defineConfig(
         {
           internalPattern: ["^[@~#]+/"],
           newlinesBetween: 0,
+          partitionByComment: "^\\[keep-order\\]",
           groups: [
             "builtin",
             "external",
