@@ -15,7 +15,7 @@ export const mockedLogger: PartialMockMethods<
   typeof import("@changesets/logger")
 > = {};
 
-vi.mock(import("@changesets/logger"), async (importOriginal) => {
+vi.mock("@changesets/logger", async (importOriginal) => {
   const mod = await importOriginal();
   return {
     prefix: mod.prefix,
