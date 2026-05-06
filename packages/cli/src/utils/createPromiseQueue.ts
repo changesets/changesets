@@ -1,18 +1,4 @@
-interface PromiseWithResolvers<T> {
-  promise: Promise<T>;
-  resolve: (value: T | PromiseLike<T>) => void;
-  reject: (reason?: any) => void;
-}
-
-function withResolvers<T>(): PromiseWithResolvers<T> {
-  const rv = {} as PromiseWithResolvers<T>;
-  rv.promise = new Promise<T>((resolve, reject) => {
-    rv.resolve = resolve;
-    rv.reject = reject;
-  });
-  return rv;
-}
-
+// TODO [engine:node@>=23]: remove when supported by minimum node version
 function promiseTry<T>(fn: () => Promise<T>): Promise<T> {
   return new Promise<T>((resolve) => resolve(fn()));
 }
@@ -55,7 +41,7 @@ export function createPromiseQueue(concurrency: number) {
 
   return {
     add: <T>(fn: () => Promise<T>): Promise<T> => {
-      const { promise, resolve, reject } = withResolvers();
+      const { promise, resolve, reject } = Promise.withResolvers<unknown>();
       jobs.push({
         fn,
         resolve,
