@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /guide/intro/what-are-changesets
+      link: ./guide/introduction/getting-started.md
     - theme: alt
       text: View on GitHub
       link: https://github.com/changesets/changesets

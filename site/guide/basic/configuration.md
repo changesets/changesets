@@ -77,7 +77,7 @@ There are two caveats to this.
 1. If the package is mentioned in a changeset that also includes a package that is not ignored, publishing will fail.
 2. If the package requires one of its dependencies to be updated as part of a publish.
 
-These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](../../faq/publishing-in-monorepos.md).
+These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](../advanced/publishing-in-monorepos.md).
 
 > [!TIP]
 > You can also provide glob expressions to match the packages, according to the [micromatch](https://www.npmjs.com/package/micromatch) format.
@@ -92,7 +92,7 @@ This option can be used to declare that packages should be version-bumped and pu
 }
 ```
 
-If you want to use this option, you should read the documentation on [fixed packages](../advance/fixed-packages.md) to fully understand the implementation and implications.
+If you want to use this option, you should read the documentation on [fixed packages](../advanced/fixed-packages.md) to fully understand the implementation and implications.
 
 ## `linked` (array of arrays of package names)
 
@@ -104,7 +104,7 @@ This option can be used to declare that packages should 'share' a version, inste
 }
 ```
 
-If you want to use this option, you should read the documentation on [linked packages](../advance/linked-packages.md) to fully understand the implementation and implications.
+If you want to use this option, you should read the documentation on [linked packages](../advanced/linked-packages.md) to fully understand the implementation and implications.
 
 > [!WARNING]
 > This does not do what some other tools do, which is make sure when any package is published, all other packages are also published with the same version.
@@ -169,7 +169,7 @@ You would specify our github changelog generator with:
 
 If you want to disable thank you messages, add `"disableThanks": true` to the options.
 
-For more details on these functions and information on how to write your own see [changelog-functions](../advance/modifying-changelog-format.md)
+For more details on these functions and information on how to write your own see [changelog-functions](../advanced/modifying-changelog-format.md)
 
 ## `bumpVersionsWithWorkspaceProtocolOnly` (optional boolean)
 

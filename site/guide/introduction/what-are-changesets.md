@@ -7,7 +7,7 @@ The changesets workflow is designed to help when people are making changes, all 
 Changesets has a focus on solving these problems for multi-package repositories, and keeps packages that rely on each other within the multi-package repository up-to-date, as well as making it easy to make changes to groups of packages.
 
 > [!NOTE]
-> Just want to try it out? Skip to the [Getting Started](/guide/intro/getting-started) page.
+> Just want to try it out? Skip to the [Getting Started](./getting-started.md) page.
 
 ## How do we do that?
 

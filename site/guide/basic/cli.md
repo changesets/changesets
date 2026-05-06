@@ -1,6 +1,6 @@
 # Command line options
 
-The command line for changesets is the main way of interacting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](../intro/getting-started.md)
+The command line for changesets is the main way of interacting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](../introduction/getting-started.md)
 
 - `init`
 - `add [--empty] [--open] [--since <ref>] [--message <text>]`
@@ -94,13 +94,13 @@ This command is used to allow you to skip packages from being published. This al
 1. If the package is mentioned in a changeset that also includes a package that is not ignored, publishing will fail.
 2. If the package requires one of its dependencies to be updated as part of a publish.
 
-These restrictions exist to ensure your repository or published code does not end up in a broken state. For additional information on the intricacies of publishing, check out our guide on [problems publishing in monorepos](../../faq/publishing-in-monorepos.md).
+These restrictions exist to ensure your repository or published code does not end up in a broken state. For additional information on the intricacies of publishing, check out our guide on [problems publishing in monorepos](../advanced/publishing-in-monorepos.md).
 
 ```
 changeset version --snapshot
 ```
 
-Snapshot is used for a special kind of publishing for testing - it creates temporary versions with a tag, instead of updating versions from the current semver ranges. You should not use this without [reading the documentation on snapshot releases](../advance/snapshot-releases.md)
+Snapshot is used for a special kind of publishing for testing - it creates temporary versions with a tag, instead of updating versions from the current semver ranges. You should not use this without [reading the documentation on snapshot releases](../advanced/snapshot-releases.md)
 
 ## publish
 
@@ -114,7 +114,7 @@ Because this command assumes that the last commit is the release commit, you sho
 
 `--otp={token}` - allows you to provide an npm one-time password if you have auth and writes enabled on npm. The CLI also prompts for the OTP if it's not provided with the --otp option.
 
-`--tag TAGNAME` - for packages that are published, the chosen tag will be used instead of `latest`, allowing you to publish changes intended for testing and validation, not main consumption. This will most likely be used with [snapshot releases](../advance/snapshot-releases.md).
+`--tag TAGNAME` - for packages that are published, the chosen tag will be used instead of `latest`, allowing you to publish changes intended for testing and validation, not main consumption. This will most likely be used with [snapshot releases](../advanced/snapshot-releases.md).
 
 ### Git Tags
 
@@ -148,7 +148,7 @@ changeset pre [exit|enter {tag}]
 
 The pre command enters and exits pre mode. The command does not do any actual versioning, when doing a pre-release, you should run changeset pre enter next(or a different tag, the tag is what is in versions and is the npm dist tag) and then do the normal release process with changeset version and changeset publish. For more information about the pre command, see the prereleases [the prereleases documentation](https://github.com/changesets/changesets/blob/master/docs/prereleases.md).
 
-> NOTE: pre-releases are a very complicated feature. Many of the safety rails that changesets helps you with will be taken off. We recommend that you read both [problems publishing in monorepos](../../faq/publishing-in-monorepos.md) and be clear on both exiting and entering pre-releases before using it. You may also prefer using [snapshot releases](../advance/snapshot-releases.md) for a slightly less involved process.
+> NOTE: pre-releases are a very complicated feature. Many of the safety rails that changesets helps you with will be taken off. We recommend that you read both [problems publishing in monorepos](../advanced/publishing-in-monorepos.md) and be clear on both exiting and entering pre-releases before using it. You may also prefer using [snapshot releases](../advanced/snapshot-releases.md) for a slightly less involved process.
 
 ## tag
 
