@@ -1,14 +1,14 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import { createRequire } from "node:module";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defaultWrittenConfig } from "@changesets/config";
-import { info, log, warn, error } from "@changesets/logger";
+import { error, info, log, warn } from "@changesets/logger";
 import pc from "picocolors";
 
-const require = createRequire(import.meta.url);
-
-const pkgPath = path.dirname(require.resolve("@changesets/cli/package.json"));
+const pkgPath = path.dirname(
+  fileURLToPath(import.meta.resolve("@changesets/cli/package.json")),
+);
 
 const defaultConfig = `${JSON.stringify(defaultWrittenConfig, null, 2)}\n`;
 
