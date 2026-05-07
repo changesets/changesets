@@ -2,4 +2,4 @@
 const promiseTryPolyfill = <T>(fn: () => Promise<T> | T): Promise<T> =>
   new Promise((resolve) => resolve(fn()));
 
-export const promiseTry = Promise.try ?? promiseTryPolyfill;
+export const promiseTry = Promise.try.bind(Promise) ?? promiseTryPolyfill;
