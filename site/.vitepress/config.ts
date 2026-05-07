@@ -62,6 +62,15 @@ export default defineConfig({
         link: "/guide/introduction/getting-started",
       },
       {
+        text: "Resources",
+        items: [
+          {
+            text: "Acknowledgements",
+            link: "/acknowledgements",
+          },
+        ],
+      },
+      {
         text: `v${changesetsVersion}`,
         items: [
           {
