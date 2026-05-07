@@ -68,6 +68,7 @@
     "tinyexec": "^1.0.2"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "workspace:*",
     "@changesets/parse": "workspace:*",
     "@changesets/test-utils": "workspace:*",
     "@types/semver": "^7.7.1",

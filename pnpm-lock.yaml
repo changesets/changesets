@@ -229,6 +229,9 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2
     devDependencies:
+      '@changesets/changelog-github':
+        specifier: workspace:*
+        version: link:../changelog-github
       '@changesets/parse':
         specifier: workspace:*
         version: link:../parse
