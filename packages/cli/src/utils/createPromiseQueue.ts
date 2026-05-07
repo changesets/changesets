@@ -1,4 +1,4 @@
-import { promiseTry } from "../polyfills/promise-try.ts";
+import { promiseTry } from "../ponyfills/promise-try.ts";
 
 export function createPromiseQueue(concurrency: number) {
   const jobs: Array<{
