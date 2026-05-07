@@ -1,6 +1,6 @@
 {
   "name": "@changesets/pre",
-  "version": "3.0.0-next.2",
+  "version": "3.0.0-next.3",
   "description": "Utils to make a Changesets repo enter and exit pre mode",
   "type": "module",
   "exports": {

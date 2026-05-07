@@ -1,5 +1,25 @@
 # @changesets/changelog-github
 
+## 1.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+### Minor Changes
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- [#1947](https://github.com/changesets/changesets/pull/1947) [`492b0ca`](https://github.com/changesets/changesets/commit/492b0caa1a076551cf4bdca13d83dee4c485c9c8) Thanks [@bluwy](https://github.com/bluwy)! - Use `parseEnv` instead of `dotenv` to load the `.env` file and avoid loading them to `process.env`
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7), [`492b0ca`](https://github.com/changesets/changesets/commit/492b0caa1a076551cf4bdca13d83dee4c485c9c8)]:
+  - @changesets/get-github-info@1.0.0-next.2
+  - @changesets/types@7.0.0-next.3
+
 ## 0.7.0
 
 ### Minor Changes

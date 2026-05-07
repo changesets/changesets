@@ -1,6 +1,6 @@
 {
   "name": "@changesets/test-utils",
-  "version": "0.0.9-next.2",
+  "version": "0.0.9-next.3",
   "private": true,
   "type": "module",
   "description": "Utils for testing changesets packages",

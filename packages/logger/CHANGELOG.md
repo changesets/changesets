@@ -1,5 +1,11 @@
 # @changesets/logger
 
+## 1.0.0-next.2
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
 ## 1.0.0-next.1
 
 ### Minor Changes

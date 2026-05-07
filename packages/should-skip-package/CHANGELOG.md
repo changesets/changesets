@@ -1,5 +1,16 @@
 # @changesets/should-skip-package
 
+## 1.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+### Patch Changes
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7)]:
+  - @changesets/types@7.0.0-next.3
+
 ## 1.0.0-next.2
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@changesets/errors",
-  "version": "1.0.0-next.1",
+  "version": "1.0.0-next.2",
   "description": "Error classes for @changesets",
   "type": "module",
   "exports": {
