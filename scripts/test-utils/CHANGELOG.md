@@ -1,5 +1,12 @@
 # @changesets/test-utils
 
+## 0.0.9-next.3
+
+### Patch Changes
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069)]:
+  - @changesets/logger@1.0.0-next.2
+
 ## 0.0.9-next.2
 
 ### Patch Changes

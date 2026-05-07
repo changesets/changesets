@@ -1,6 +1,6 @@
 {
   "name": "@changesets/config",
-  "version": "4.0.0-next.2",
+  "version": "4.0.0-next.3",
   "description": "Utilities for reading and parsing Changeset's config",
   "type": "module",
   "exports": {

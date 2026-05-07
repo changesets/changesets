@@ -1,6 +1,6 @@
 {
   "name": "@changesets/assemble-release-plan",
-  "version": "7.0.0-next.2",
+  "version": "7.0.0-next.3",
   "description": "Reads changesets and adds information on dependents that need bumping",
   "type": "module",
   "exports": {
