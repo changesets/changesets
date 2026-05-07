@@ -245,13 +245,13 @@ it("with multiple authors", async () => {
 it("disables thanks if disableThanks is enabled", async () => {
   const [changeset, releaseType, options] = getChangeset(
     "author: @Andarist",
-    data.commit
+    data.commit,
   );
   expect(
     await getReleaseLine(changeset, releaseType, {
       ...options,
       disableThanks: true,
-    })
+    }),
   ).toMatchInlineSnapshot(`
     "
 

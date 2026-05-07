@@ -142,13 +142,13 @@ const changelogFunctions: ChangelogFunctions = {
     const users = options.disableThanks
       ? null
       : usersFromSummary.length
-      ? usersFromSummary
-          .map(
-            (userFromSummary) =>
-              `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`,
-          )
-          .join(", ")
-      : links.user;
+        ? usersFromSummary
+            .map(
+              (userFromSummary) =>
+                `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`,
+            )
+            .join(", ")
+        : links.user;
 
     const prefix = [
       links.pull == null ? "" : ` ${links.pull}`,

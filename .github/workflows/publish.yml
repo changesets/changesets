@@ -30,7 +30,7 @@ jobs:
         # https://github.com/changesets/action
         uses: changesets/action@6a0a831ff30acef54f2c6aa1cbbc1096b066edaf # v1
         with:
-          version: yarn version-packages
+          version: pnpm version-packages
 
   publish:
     name: Publish
@@ -58,4 +58,3 @@ jobs:
         with:
           # this expects you to have a script called release which does a build for your packages and calls changeset publish
           publish: pnpm release
-          version: pnpm version-packages
