@@ -3451,12 +3451,24 @@ describe("apply release plan", () => {
 });
 
 describe("updateVersionField", () => {
-  it("should update the version with a new value", () => {
-    const data = JSON.stringify({ version: "1.2.4" });
-    const value = "2.0.0";
+  const cases: Array<[from: string, to: string]> = [
+    ["1.0.0", "1.0.1"],
+    ["1.0.0", "1.1.0"],
+    ["1.0.0", "2.0.0"],
+    ["1.0.0", "2.0.0-beta.0"],
+    ["2.0.0-beta.0", "1.0.0"],
+    ["workspace:^", "1.0.0"],
+    ["1.0.0", "workspace:^"],
+    ["link:../foo", "1.0.0"],
+    ["1.0.0", "link:../foo"],
+    ["1.0.0", "npm:@foo/bar@1.2.3"],
+    ["npm:@foo/bar@1.2.3", "1.0.0"],
+  ];
+  it.each(cases)("should change the version from %s to %s", (from, to) => {
+    const data = JSON.stringify({ version: from });
 
-    expect(updateVersionField(data, value)).toEqual(
-      JSON.stringify({ version: value }),
+    expect(updateVersionField(data, to)).toEqual(
+      JSON.stringify({ version: to }),
     );
   });
 
