@@ -1,7 +1,4 @@
-// TODO [engine:node@>=23]: remove when supported by minimum node version
-if (!("try" in Promise)) {
-  await import("../polyfills/promise-try.ts");
-}
+import { promiseTry } from "../polyfills/promise-try.ts";
 
 export function createPromiseQueue(concurrency: number) {
   const jobs: Array<{
@@ -25,7 +22,7 @@ export function createPromiseQueue(concurrency: number) {
 
     active++;
 
-    Promise.try(job.fn).then(
+    promiseTry(job.fn).then(
       (result) => {
         active--;
         job.resolve(result);
