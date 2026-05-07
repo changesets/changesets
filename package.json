@@ -12,7 +12,7 @@
     "format:fix": "prettier --experimental-cli --write \"**/*.{js,ts,tsx,md}\"",
     "lint": "eslint",
     "test": "vitest",
-    "test:no-rebuild": "VITEST_SKIP_REBUILD=1 vitest",
+    "test:with-rebuild": "VITEST_AUTO_REBUILD=1 vitest",
     "types:check": "tsc",
     "check-all": "pnpm build && pnpm test run && pnpm types:check && pnpm lint && pnpm format",
     "version-packages": "pnpm changeset version && pnpm format:fix",

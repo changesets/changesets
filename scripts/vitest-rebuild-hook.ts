@@ -3,7 +3,7 @@ import type { TestProject } from "vitest/node";
 
 // eslint-disable-next-line import-lite/no-default-export
 export default function setup(project: TestProject) {
-  if (!process.env.VITEST_SKIP_REBUILD) {
+  if (process.env.VITEST_AUTO_REBUILD != null) {
     project.onTestsRerun(async () => {
       console.log("rebuilding...");
       await build({ logLevel: "silent", publint: false });
