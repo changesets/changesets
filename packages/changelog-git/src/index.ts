@@ -45,7 +45,7 @@ const getDependencyReleaseLine = (
   return [...changesetLinks, ...updatedDependenciesList].join("\n");
 };
 
-const defaultChangelogFunctions: ChangelogFunctions = {
+const defaultChangelogFunctions: Required<ChangelogFunctions> = {
   getReleaseLine,
   getDependencyReleaseLine,
 };
