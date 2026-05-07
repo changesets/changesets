@@ -5,7 +5,16 @@ import {
 } from "vitepress-plugin-group-icons";
 import packageJson from "../../packages/cli/package.json" with { type: "json" };
 
+// Netlify envs
+const commitRef = process.env.COMMIT_REF;
+
 const changesetsVersion = packageJson.version;
+const currentYear = new Date().getFullYear();
+const netlifyLink = `<a href="https://www.netlify.com" target="_blank">Netlify</a>`;
+const commitLink = commitRef
+  ? `<a href="https://github.com/changesets/changesets/commit/${commitRef}" target="_blank">${commitRef.slice(0, 7)}</a>`
+  : "dev";
+
 const ogTitle = "Changesets";
 const ogDescription =
   "A tool to manage versioning and changelogs with a focus on multi-package repositories";
@@ -45,15 +54,18 @@ export default defineConfig({
     editLink: {
       pattern: "https://github.com/changesets/changesets/edit/main/site/:path",
     },
-
     socialLinks: [
       { icon: "discord", link: "https://chat.changesets.dev" },
       { icon: "github", link: "https://github.com/changesets/changesets" },
       { icon: "npm", link: "https://npmx.dev/package/@changesets/cli" },
     ],
-
     search: {
       provider: "local",
+    },
+
+    footer: {
+      message: `This site is powered by ${netlifyLink}`,
+      copyright: `© ${currentYear} Changesets (${commitLink})`,
     },
 
     nav: [
@@ -67,6 +79,10 @@ export default defineConfig({
           {
             text: "Acknowledgements",
             link: "/acknowledgements",
+          },
+          {
+            text: "Code of Conduct",
+            link: "https://github.com/changesets/.github/blob/main/CODE_OF_CONDUCT.md",
           },
         ],
       },

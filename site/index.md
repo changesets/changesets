@@ -38,6 +38,6 @@ import { VPHomeSponsors } from 'vitepress/theme'
 
 <VPHomeSponsors
   actionLink="https://github.com/sponsors/changesets"
-  message="Changesets is free and open source, made possible by your support."
+  message="Changesets is free and open source, made possible with your support."
   :data="[]"
 />
