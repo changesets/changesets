@@ -6,6 +6,7 @@
     "verbatimModuleSyntax": true,
     "strict": true,
     "noEmit": true,
+    "lib": ["es2025", "ESNext.Array", "ESNext.Collection", "ESNext.Iterator"],
     "types": ["node"]
   },
   "include": ["./", "./packages/*"]
