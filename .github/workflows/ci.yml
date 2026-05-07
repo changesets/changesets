@@ -34,7 +34,10 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          compression-level: 4
+          # the size of the dist artifacts is not very large, so we can use better compression without a slowdown
+          compression-level: 8
+          # store it for as short as possible, since we only need it for the same workflow run
+          retention-days: 1
           name: dist
           path: |
             packages/*/dist
