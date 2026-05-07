@@ -18,6 +18,6 @@
     "@changesets/test-utils": "workspace:*"
   },
   "engines": {
-    "node": "^22 || >=24"
+    "node": "^22 || ^24 || >=26"
   }
 }

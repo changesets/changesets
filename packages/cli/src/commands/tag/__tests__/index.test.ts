@@ -1,8 +1,8 @@
-import { describe, expect, it, type Mock, vi } from "vitest";
 import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { getPackages } from "@manypkg/get-packages";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { tag } from "../index.ts";
 
 vi.mock("@changesets/git");

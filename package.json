@@ -12,12 +12,12 @@
     "lint": "eslint",
     "test": "vitest",
     "types:check": "tsc",
-    "check-all": "node --run build && node --run test -- run && node --run types:check && node --run lint && node --run format",
+    "check-all": "pnpm build && pnpm test run && pnpm types:check && pnpm lint && pnpm format",
     "site:dev": "pnpm --filter=./site dev",
     "site:build": "pnpm --filter=./site build",
     "site:preview": "pnpm --filter=./site preview",
-    "version-packages": "node --run changeset version && node --run format:fix",
-    "release": "node --run build && node --run changeset publish",
+    "version-packages": "pnpm changeset version && pnpm format:fix",
+    "release": "pnpm build && pnpm changeset publish",
     "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js"
   },
   "repository": {
@@ -52,6 +52,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-lite": "~0.6.0",
     "eslint-plugin-n": "^17.24.0",
+    "eslint-plugin-perfectionist": "^5.9.0",
     "prettier": "^3.7.4",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.1",
@@ -72,6 +73,6 @@
     }
   },
   "engines": {
-    "node": "^22 || >=24"
+    "node": "^22 || ^24 || >=26"
   }
 }

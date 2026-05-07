@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import * as git from "@changesets/git";
 import { parseChangesetFile } from "@changesets/parse";
 import type { NewChangeset } from "@changesets/types";
-import * as git from "@changesets/git";
 
 async function filterChangesetsSinceRef(
   changesets: Array<string>,

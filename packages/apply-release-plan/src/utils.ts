@@ -1,10 +1,10 @@
+import path from "node:path";
+import type { VersionType } from "@changesets/types";
 /**
  * Shared utility functions and business logic
  */
 import semverSatisfies from "semver/functions/satisfies.js";
 import validRange from "semver/ranges/valid.js";
-import type { VersionType } from "@changesets/types";
-import path from "node:path";
 
 const bumpTypes = ["none", "patch", "minor", "major"];
 

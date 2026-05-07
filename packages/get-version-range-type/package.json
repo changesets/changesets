@@ -10,6 +10,6 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/get-version-range-type",
   "engines": {
-    "node": "^22 || >=24"
+    "node": "^22 || ^24 || >=26"
   }
 }

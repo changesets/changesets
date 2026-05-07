@@ -1,16 +1,16 @@
-import pc from "picocolors";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import applyReleasePlan from "@changesets/apply-release-plan";
+import { assembleReleasePlan } from "@changesets/assemble-release-plan";
+import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { getCurrentCommitId } from "@changesets/git";
 import { error, log, warn } from "@changesets/logger";
-import type { Config } from "@changesets/types";
-import applyReleasePlan from "@changesets/apply-release-plan";
-import { readChangesets } from "@changesets/read";
-import { assembleReleasePlan } from "@changesets/assemble-release-plan";
-import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
-import { ExitError } from "@changesets/errors";
+import { readChangesets } from "@changesets/read";
+import type { Config } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
+import pc from "picocolors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 
 const importantSeparator = pc.red(

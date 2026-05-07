@@ -1,12 +1,12 @@
-import { getPackages } from "@manypkg/get-packages";
+import { createRequire } from "node:module";
+import path from "node:path";
 import type { Package } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 import semverLt from "semver/functions/lt.js";
-import { getChangedPackages, getVersionsByDirectory } from "./utils.ts";
+import { exec } from "tinyexec";
 import * as gitUtils from "./gitUtils.ts";
 import { readChangesetState } from "./readChangesetState.ts";
-import { createRequire } from "node:module";
-import { exec } from "tinyexec";
-import path from "node:path";
+import { getChangedPackages, getVersionsByDirectory } from "./utils.ts";
 
 const require = createRequire(import.meta.url);
 

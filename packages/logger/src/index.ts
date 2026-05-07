@@ -1,5 +1,5 @@
+import util from "node:util";
 import pc from "picocolors";
-import util from "util";
 
 export const prefix: string = "🦋 ";
 

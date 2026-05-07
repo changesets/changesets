@@ -1,11 +1,11 @@
-import * as logger from "@changesets/logger";
-import pc from "picocolors";
-import { exitPre, enterPre } from "@changesets/pre";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError,
   ExitError,
 } from "@changesets/errors";
+import * as logger from "@changesets/logger";
+import { exitPre, enterPre } from "@changesets/pre";
+import pc from "picocolors";
 
 export async function pre(
   rootDir: string,

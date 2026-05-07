@@ -1,9 +1,9 @@
-import type { Changeset } from "@changesets/types";
 import fs from "node:fs/promises";
-import { humanId } from "human-id";
-import path from "path";
-import prettier from "prettier";
 import { createRequire } from "node:module";
+import path from "node:path";
+import type { Changeset } from "@changesets/types";
+import { humanId } from "human-id";
+import prettier from "prettier";
 
 const require = createRequire(import.meta.url);
 

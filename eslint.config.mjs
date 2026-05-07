@@ -1,10 +1,11 @@
-import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
-import node from "eslint-plugin-n";
-import tseslint from "typescript-eslint";
 import vitest from "@vitest/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 import importLite from "eslint-plugin-import-lite";
+import node from "eslint-plugin-n";
+import perfectionist from "eslint-plugin-perfectionist";
+import { defineConfig } from "eslint/config";
+import tseslint from "typescript-eslint";
 
 export default defineConfig(
   {
@@ -21,6 +22,7 @@ export default defineConfig(
     plugins: {
       js,
       node,
+      perfectionist,
       tseslint,
       vitest,
     },
@@ -38,6 +40,11 @@ export default defineConfig(
     },
     languageOptions: {
       parserOptions: { projectService: true },
+    },
+    settings: {
+      perfectionist: {
+        type: "natural",
+      },
     },
     rules: {
       // enforce using `x == null` for nullish checks (no triple equals, no undefined)
@@ -77,7 +84,7 @@ export default defineConfig(
       "n/no-process-exit": "off",
       "n/no-unpublished-import": "off",
 
-      "n/prefer-node-protocol": "off", // TODO enable and fix errors
+      "n/prefer-node-protocol": "error",
       "n/no-unsupported-features/node-builtins": [
         "error",
         { ignores: ["fs/promises.cp", "import.meta.dirname"] },
@@ -85,6 +92,24 @@ export default defineConfig(
 
       "import-lite/no-default-export": "error",
       "import-lite/no-mutable-exports": "error",
+
+      "perfectionist/sort-imports": [
+        "error",
+        {
+          internalPattern: ["^[@~#]+/"],
+          newlinesBetween: 0,
+          partitionByComment: "^\\[keep-order\\]",
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            "parent",
+            "sibling",
+            "index",
+            "unknown",
+          ],
+        },
+      ],
     },
   },
   {

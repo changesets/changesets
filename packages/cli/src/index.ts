@@ -1,10 +1,10 @@
-import mri from "mri";
+import { createRequire } from "node:module";
+import { format } from "node:util";
 import { ExitError, InternalError } from "@changesets/errors";
 import { error } from "@changesets/logger";
-import { format } from "util";
+import mri from "mri";
 import { COMMAND_HELP } from "./help.ts";
 import { run } from "./run.ts";
-import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 

@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node_version: [22, 24, 25]
+        node_version: [22, 24, 26]
       fail-fast: false
     steps:
       - name: Check out repo
@@ -41,15 +41,15 @@ jobs:
 
       - name: Vitest tests
         if: matrix.node_version != 24
-        run: node --run test
+        run: pnpm test
 
       # Run coverage only once on node 24 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
         if: matrix.node_version == 24
-        run: node --run test -- --coverage
+        run: pnpm test --coverage
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
         if: matrix.node_version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -67,7 +67,7 @@ jobs:
       - uses: ./.github/actions/ci-setup
 
       - name: Typecheck
-        run: node --run types:check
+        run: pnpm types:check
 
   lint:
     name: Lint
@@ -82,10 +82,10 @@ jobs:
       - uses: ./.github/actions/ci-setup
 
       - name: Lint
-        run: node --run lint
+        run: pnpm lint
 
       - name: Format
-        run: node --run format
+        run: pnpm format
 
   ci-ok:
     name: CI OK

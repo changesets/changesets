@@ -1,6 +1,6 @@
+import parse from "@changesets/parse";
 import { describe, expect, it, test, vi } from "vitest";
 import changelogFunctions from "./index.ts";
-import parse from "@changesets/parse";
 
 const getReleaseLine = changelogFunctions.getReleaseLine;
 
@@ -238,6 +238,24 @@ it("with multiple authors", async () => {
     "
 
     - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist), [@mitchellhamilton](https://github.com/mitchellhamilton)! - something
+    "
+  `);
+});
+
+it("disables thanks if disableThanks is enabled", async () => {
+  const [changeset, releaseType, options] = getChangeset(
+    "author: @Andarist",
+    data.commit,
+  );
+  expect(
+    await getReleaseLine(changeset, releaseType, {
+      ...options,
+      disableThanks: true,
+    }),
+  ).toMatchInlineSnapshot(`
+    "
+
+    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) - something
     "
   `);
 });

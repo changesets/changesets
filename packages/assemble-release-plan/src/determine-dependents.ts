@@ -1,3 +1,4 @@
+import path from "node:path";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   Config,
@@ -6,7 +7,6 @@ import type {
   VersionType,
   Package,
 } from "@changesets/types";
-import path from "node:path";
 import semverSatisfies from "semver/functions/satisfies.js";
 import validRange from "semver/ranges/valid.js";
 import { incrementVersion } from "./increment.ts";

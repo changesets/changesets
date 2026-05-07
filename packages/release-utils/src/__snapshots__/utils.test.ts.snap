@@ -1,6 +1,55 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getChangelogEntry > it sorts the things right 1`] = `
+exports[`getChangelogEntry > it works 1`] = `
+"### Major Changes
+
+- [2164a779](https://github.com/keystonejs/keystone-5/commit/2164a779):
+
+  - Replace jade with pug because Jade was renamed to Pug, and \`jade\` package is outdated
+
+### Patch Changes
+
+- [81dc0be5](https://github.com/keystonejs/keystone-5/commit/81dc0be5):
+
+  - Update dependencies"
+`;
+
+exports[`getChangelogEntry > it works again! 1`] = `
+"### Patch Changes
+
+- [19fe6c1b](https://github.com/keystonejs/keystone-5/commit/19fe6c1b):
+
+  Move frontmatter in docs into comments"
+`;
+
+exports[`getChangelogEntry > it works with code blocks 1`] = `
+"### Major Changes
+
+\`\`\`
+# not a heading
+## not a heading
+### not a heading
+\`\`\`"
+`;
+
+exports[`getChangelogEntry > it works with nested code blocks 1`] = `
+"### Major Changes
+
+\`\`\`\`
+# not a heading
+## not a heading
+### not a heading
+
+\`\`\`
+# not a heading
+## not a heading
+### not a heading
+\`\`\`
+
+\`\`\`\`"
+`;
+
+exports[`sortChangelogEntries > it sorts the things right 1`] = `
 [
   {
     "highestLevel": 3,
@@ -18,28 +67,4 @@ exports[`getChangelogEntry > it sorts the things right 1`] = `
     "private": true,
   },
 ]
-`;
-
-exports[`getChangelogEntry > it works 1`] = `
-"### Major Changes
-
-* [2164a779](https://github.com/keystonejs/keystone-5/commit/2164a779):
-
-  * Replace jade with pug because Jade was renamed to Pug, and \`jade\` package is outdated
-
-### Patch Changes
-
-* [81dc0be5](https://github.com/keystonejs/keystone-5/commit/81dc0be5):
-
-  * Update dependencies
-"
-`;
-
-exports[`getChangelogEntry > it works again! 1`] = `
-"### Patch Changes
-
-* [19fe6c1b](https://github.com/keystonejs/keystone-5/commit/19fe6c1b):
-
-  Move frontmatter in docs into comments
-"
 `;

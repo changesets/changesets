@@ -1,11 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import parse from "@changesets/parse";
-import writeChangeset from "./index.ts";
-
-import { humanId } from "human-id";
 import { testdir } from "@changesets/test-utils";
+import { humanId } from "human-id";
+import { describe, expect, it, vi } from "vitest";
+import writeChangeset from "./index.ts";
 
 vi.mock("human-id");
 const mockedHumanId = vi.mocked(humanId);

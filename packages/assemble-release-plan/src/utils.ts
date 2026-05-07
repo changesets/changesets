@@ -1,7 +1,7 @@
+import { InternalError } from "@changesets/errors";
 import type { PackageGroup, VersionType, Package } from "@changesets/types";
 import semverGt from "semver/functions/gt.js";
 import type { InternalRelease } from "./types.ts";
-import { InternalError } from "@changesets/errors";
 
 export function getHighestReleaseType(
   releases: InternalRelease[],

@@ -1,11 +1,10 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
-import pc from "picocolors";
-
 import { defaultWrittenConfig } from "@changesets/config";
 import { info, log, warn, error } from "@changesets/logger";
-import { createRequire } from "node:module";
+import pc from "picocolors";
 
 const require = createRequire(import.meta.url);
 

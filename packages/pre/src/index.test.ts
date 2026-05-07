@@ -1,12 +1,12 @@
-import { enterPre, exitPre, readPreState } from "./index.ts";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import {
   PreEnterButInPreModeError,
   PreExitButNotInPreModeError,
 } from "@changesets/errors";
 import { testdir } from "@changesets/test-utils";
 import { describe, expect, it, test } from "vitest";
+import { enterPre, exitPre, readPreState } from "./index.ts";
 
 describe("enterPre", () => {
   it("should enter", async () => {

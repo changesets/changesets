@@ -1,8 +1,8 @@
-import { parseEnv } from "node:util";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { ChangelogFunctions } from "@changesets/types";
+import { parseEnv } from "node:util";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
+import type { ChangelogFunctions } from "@changesets/types";
 
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
@@ -139,14 +139,16 @@ const changelogFunctions: ChangelogFunctions = {
       };
     })();
 
-    const users = usersFromSummary.length
-      ? usersFromSummary
-          .map(
-            (userFromSummary) =>
-              `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`,
-          )
-          .join(", ")
-      : links.user;
+    const users = options.disableThanks
+      ? null
+      : usersFromSummary.length
+        ? usersFromSummary
+            .map(
+              (userFromSummary) =>
+                `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`,
+            )
+            .join(", ")
+        : links.user;
 
     const prefix = [
       links.pull == null ? "" : ` ${links.pull}`,
