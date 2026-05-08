@@ -36,38 +36,12 @@ function getPrettierInstance(cwd: string): typeof prettier {
   }
 }
 
-function stringDefined(s: string | undefined): s is string {
-  return !!s;
-}
 async function getCommitsThatAddChangesets(
   changesetIds: string[],
   cwd: string,
 ) {
   const paths = changesetIds.map((id) => `.changeset/${id}.md`);
   const commits = await git.getCommitsThatAddFiles(paths, { cwd });
-
-  if (commits.every(stringDefined)) {
-    // We have commits for all files
-    return commits;
-  }
-
-  // Some files didn't exist. Try legacy filenames instead
-  const missingIds = changesetIds
-    .map((id, i) => (commits[i] ? undefined : id))
-    .filter(stringDefined);
-
-  const legacyPaths = missingIds.map((id) => `.changeset/${id}/changes.json`);
-  const commitsForLegacyPaths = await git.getCommitsThatAddFiles(legacyPaths, {
-    cwd,
-  });
-
-  // Fill in the blanks in the array of commits
-  changesetIds.forEach((id, i) => {
-    if (!commits[i]) {
-      const missingIndex = missingIds.indexOf(id);
-      commits[i] = commitsForLegacyPaths[missingIndex];
-    }
-  });
 
   return commits;
 }
