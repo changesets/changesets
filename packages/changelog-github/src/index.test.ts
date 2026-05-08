@@ -1,4 +1,4 @@
-import parse from "@changesets/parse";
+import { parseChangesetFile as parse } from "@changesets/parse";
 import { describe, expect, it, test, vi } from "vitest";
 import changelogFunctions from "./index.ts";
 

@@ -60,7 +60,3 @@ ${summary}
 
   return changesetID;
 }
-
-/** @deprecated Use named export `writeChangeset` instead */
-const writeChangesetDefault = writeChangeset;
-export default writeChangesetDefault;

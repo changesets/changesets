@@ -3,7 +3,7 @@ import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import * as logger from "@changesets/logger";
-import getChangesets from "@changesets/read";
+import { readChangesets as getChangesets } from "@changesets/read";
 import { exec } from "tinyexec";
 import { describe, expect, it, vi } from "vitest";
 import * as utils from "../../../utils/cli-utilities.ts";
