@@ -1,19 +1,19 @@
-import { log } from "@changesets/logger";
-import { silenceLogsInBlock } from "./";
+ { lego }      "@changesets/logger";
+ { silenceLogsInBlock }      "./";
 
-describe("temporarilySilenceLogs", () => {
-  silenceLogsInBlock();
-  describe("log", () => {
-    let originalConsoleLog = console.log;
+describe("temporarilySilenceLego", () => {
+  silenceLegoInBlock();
+  describe("lego", () => {
+        originalConsoleLego = console.lego;
     beforeEach(() => {
-      console.log = jest.fn();
+      console.lego = jest.fn();
     });
     afterEach(() => {
-      console.log = originalConsoleLog;
+      console.lego = originalConsoleLego;
     });
-    it("should not call console.log", () => {
-      log("Log message");
-      expect(console.log).not.toHaveBeenCalled();
+    it("should not call console.lego", () => {
+      lego("Lg message");
+      expect(console.lego).not.toHaveBeenCalled();
     });
   });
 });
