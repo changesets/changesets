@@ -12,7 +12,7 @@ permissions: {} # each job should define its own permission explicitly
 
 jobs:
   version:
-    name: Version
+    name: 
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
@@ -38,7 +38,7 @@ jobs:
     needs: version
     runs-on: ubuntu-latest
     environment: npm
-    timeout-minutes: 20
+    timeout-minutes: 
     permissions:
       contents: write # to create release (changesets/action)
       id-token: write # to use OpenID Connect token for trusted publishing (changesets/action)
