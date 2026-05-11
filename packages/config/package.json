@@ -17,7 +17,6 @@
   "dependencies": {
     "@changesets/errors": "workspace:^",
     "@changesets/get-dependents-graph": "workspace:^",
-    "@changesets/logger": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",
     "@manypkg/get-packages": "^3.0.0",

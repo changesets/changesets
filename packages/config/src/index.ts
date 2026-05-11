@@ -3,7 +3,6 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { ValidationError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   Config,
@@ -136,7 +135,8 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   let normalizedAccess: WrittenConfig["access"] = json.access;
   if ((json.access as string) === "private") {
     normalizedAccess = "restricted";
-    warn(
+    // TODO: replace with returning errors/warnings
+    console.error(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',
     );
   }
