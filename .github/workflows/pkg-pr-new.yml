@@ -1,0 +1,29 @@
+on:
+  # publish each pull request to next
+  pull_request:
+    branches: ["next"]
+  # publish each commit to main/next
+  #push:
+    #branches: ["main", "next"]
+    #tags: ["!**"]
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/ci-setup
+        with:
+          node-version: ${{ matrix.node_version }}
+
+      - name: Build
+        run: pnpm build
+
+      - run: pnpm exec pkg-pr-new publish --pnpm --packageManager=pnpm --commentWithDev --commentWithSha './packages/*'
