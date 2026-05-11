@@ -256,9 +256,6 @@ importers:
       '@changesets/get-dependents-graph':
         specifier: workspace:^
         version: link:../get-dependents-graph
-      '@changesets/logger':
-        specifier: workspace:^
-        version: link:../logger
       '@changesets/should-skip-package':
         specifier: workspace:^
         version: link:../should-skip-package

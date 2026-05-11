@@ -13,15 +13,7 @@ import { writeChangeset } from "@changesets/write";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { humanId } from "human-id";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type Mock,
-  vi,
-} from "vitest";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { pre } from "../pre/index.ts";
 import { version } from "./index.ts";
 
