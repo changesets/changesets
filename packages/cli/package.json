@@ -5,7 +5,11 @@
   "bin": {
     "changeset": "bin.js"
   },
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/cli"
+  },
   "files": [
     "default-files",
     "dist",
@@ -15,9 +19,9 @@
   ],
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-cli.js",
-    "./changelog": "./dist/changesets-cli-changelog.js",
-    "./commit": "./dist/changesets-cli-commit.js",
+    ".": "./dist/index.mjs",
+    "./changelog": "./dist/changelog.mjs",
+    "./commit": "./dist/commit/index.mjs",
     "./package.json": "./package.json",
     "./bin.js": "./bin.js"
   },
@@ -27,19 +31,6 @@
     "Mitchell Hamilton",
     "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
   ],
-  "preconstruct": {
-    "entrypoints": [
-      "./index.ts",
-      "./changelog.ts",
-      "./commit/index.ts"
-    ],
-    "type": "module",
-    "exports": {
-      "extra": {
-        "./bin.js": "./bin.js"
-      }
-    }
-  },
   "license": "MIT",
   "dependencies": {
     "@changesets/apply-release-plan": "workspace:^",

@@ -112,7 +112,7 @@ describe("running version in a simple project", () => {
       await expect(
         version(cwd, defaultOptions, modifiedDefaultConfig),
       ).rejects.toThrow(ExitError);
-      const loggerWarnCalls = mockedLogger.warn!.mock.calls;
+      const loggerWarnCalls = mockedLogger.warn.mock.calls;
       expect(loggerWarnCalls.length).toEqual(1);
       expect(loggerWarnCalls[0][0]).toEqual(
         "No unreleased changesets found, exiting.",

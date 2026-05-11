@@ -2,9 +2,13 @@
   "name": "@changesets/release-utils",
   "version": "1.0.0-next.3",
   "type": "module",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/release-utils",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/release-utils"
+  },
   "exports": {
-    ".": "./dist/changesets-release-utils.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "dependencies": {

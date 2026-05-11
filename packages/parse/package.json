@@ -4,11 +4,15 @@
   "description": "Parse a changeset file's contents into a usable json object",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-parse.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/parse",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/parse"
+  },
   "dependencies": {
     "@changesets/types": "workspace:^",
     "js-yaml": "^4.1.1"

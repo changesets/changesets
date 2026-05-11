@@ -133,5 +133,12 @@ export default defineConfig(
       "@typescript-eslint/require-await": "off",
     },
   },
+  {
+    files: ["**/*.config.*"],
+    rules: {
+      // config files often return default exports
+      "import-lite/no-default-export": "off",
+    },
+  },
   eslintConfigPrettier,
 );
