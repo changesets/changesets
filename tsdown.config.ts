@@ -15,5 +15,5 @@ export const baseConfig = defineConfig({
 });
 
 export default defineConfig({
-  workspace: ["packages/*", "scripts/*"],
+  workspace: ["packages/*"],
 });
