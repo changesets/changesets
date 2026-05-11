@@ -1,24 +1,20 @@
 import type fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import * as logger from "@changesets/logger";
 import { createFixture, type FileTree } from "fs-fixture";
 import { exec } from "tinyexec";
 import { afterEach, beforeEach, onTestFinished, vi } from "vitest";
 
-// these mocks will be removed in the clack migration, so we can be wild with the types
-
-export const mockedLogger = vi.mocked(logger);
-
-vi.mock("@changesets/logger" as never, async (importOriginal) => {
-  const mod = await importOriginal<typeof logger>();
+vi.mock("@clack/prompts", async (importOriginal) => {
   return {
-    prefix: mod.prefix,
-    error: (...args: any[]) => (mockedLogger.error ?? mod.error)(...args),
-    info: (...args: any[]) => (mockedLogger.info ?? mod.info)(...args),
-    log: (...args: any[]) => (mockedLogger.log ?? mod.log)(...args),
-    warn: (...args: any[]) => (mockedLogger.warn ?? mod.warn)(...args),
-    success: (...args: any[]) => (mockedLogger.success ?? mod.success)(...args),
+    ...(await importOriginal()),
+    note: vi.fn(),
+    log: {
+      info: vi.fn(),
+      success: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    },
   };
 });
 
@@ -33,12 +29,6 @@ const createLogSilencer = () => {
 
   return {
     setup() {
-      mockedLogger.error = vi.fn();
-      mockedLogger.info = vi.fn();
-      mockedLogger.log = vi.fn();
-      mockedLogger.warn = vi.fn();
-      mockedLogger.success = vi.fn();
-
       console.error = vi.fn();
       console.info = vi.fn();
       console.log = vi.fn();
@@ -48,12 +38,6 @@ const createLogSilencer = () => {
       process.stderr.write = vi.fn();
 
       return () => {
-        mockedLogger.error = undefined!;
-        mockedLogger.info = undefined!;
-        mockedLogger.log = undefined!;
-        mockedLogger.warn = undefined!;
-        mockedLogger.success = undefined!;
-
         console.error = originalConsoleError;
         console.info = originalConsoleInfo;
         console.log = originalConsoleLog;

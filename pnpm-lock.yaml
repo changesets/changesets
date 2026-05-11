@@ -507,9 +507,9 @@ importers:
 
   scripts/test-utils:
     dependencies:
-      '@changesets/logger':
-        specifier: workspace:^
-        version: link:../../packages/logger
+      '@clack/prompts':
+        specifier: ^1.3.0
+        version: 1.3.0
       fs-fixture:
         specifier: ^2.13.0
         version: 2.13.0
