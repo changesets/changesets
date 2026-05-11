@@ -21,7 +21,7 @@ jobs:
 
       - uses: ./.github/actions/ci-setup
         with:
-          node-version: ${{ matrix.node_version }}
+          node-version: 26
 
       - name: Build
         run: pnpm build
