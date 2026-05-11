@@ -8,12 +8,10 @@ import {
 import type { Changeset, Config } from "@changesets/types";
 import { humanId } from "human-id";
 
-type Formatter = (filePath: string) => Promise<void>;
-
 async function getFormatter(
   config: Config["format"],
   cwd: string,
-): Promise<Formatter> {
+): Promise<(patterns: string[]) => Promise<void>> {
   if (config === false) return async () => {};
 
   const formatter =
@@ -26,8 +24,8 @@ async function getFormatter(
       : config;
   if (!formatter) return async () => {};
 
-  return async (filePath: string) => {
-    await format([filePath], { cwd, formatter });
+  return async (patterns: string[]) => {
+    await format(patterns, { cwd, formatter });
   };
 }
 
@@ -60,7 +58,7 @@ ${summary}
 
   await fs.mkdir(path.dirname(newChangesetPath), { recursive: true });
   await fs.writeFile(newChangesetPath, changesetContents);
-  await formatter(newChangesetPath);
+  await formatter([newChangesetPath]);
 
   return changesetID;
 }

@@ -62,12 +62,10 @@ async function getCommitsThatAddChangesets(
   return commits;
 }
 
-type Formatter = (filePath: string) => Promise<void>;
-
 async function getFormatter(
   config: Config["format"],
   cwd: string,
-): Promise<Formatter> {
+): Promise<(patterns: string[]) => Promise<void>> {
   if (config === false) return async () => {};
 
   const formatter =
@@ -80,8 +78,8 @@ async function getFormatter(
       : config;
   if (!formatter) return async () => {};
 
-  return async (filePath: string) => {
-    await format([filePath], { cwd, formatter });
+  return async (patterns: string[]) => {
+    await format(patterns, { cwd, formatter });
   };
 }
 
@@ -94,7 +92,7 @@ export async function applyReleasePlan(
 ) {
   const cwd = packages.rootDir;
 
-  const touchedFiles = [];
+  const touchedFiles: string[] = [];
 
   const packagesByName = new Map(
     packages.packages.map((x) => [x.packageJson.name, x]),
@@ -162,8 +160,7 @@ export async function applyReleasePlan(
     });
   });
 
-  const formatter = await getFormatter(config.format, cwd);
-
+  const filesToFormat: string[] = [];
   for (const release of finalisedRelease) {
     const { changelog, packageJson, dir, name } = release;
 
@@ -174,9 +171,14 @@ export async function applyReleasePlan(
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
       await updateChangelog(changelogPath, changelog, name);
-      await formatter(changelogPath);
       touchedFiles.push(changelogPath);
+      filesToFormat.push(changelogPath);
     }
+  }
+
+  if (filesToFormat.length > 0) {
+    const formatter = await getFormatter(config.format, cwd);
+    await formatter(filesToFormat);
   }
 
   if (releasePlan.preState == null || releasePlan.preState.mode === "exit") {
