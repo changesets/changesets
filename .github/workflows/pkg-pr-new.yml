@@ -1,3 +1,5 @@
+name: pkg-pr-new
+
 on:
   # publish each pull request to next
   pull_request:
@@ -10,7 +12,7 @@ on:
 permissions: {}
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
