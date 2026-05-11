@@ -434,7 +434,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   }
 
   if (
-    json.format !== undefined &&
+    json.format != null &&
     !["auto", "prettier", "oxfmt", "dprint", "deno", false].includes(
       json.format,
     )
@@ -568,8 +568,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
           ?.updateInternalDependents ?? "out-of-range",
     },
 
-    format:
-      json.format === undefined ? defaultWrittenConfig.format : json.format,
+    format: json.format == null ? defaultWrittenConfig.format : json.format,
 
     // TODO consider enabling this by default in the next major version
     privatePackages,
