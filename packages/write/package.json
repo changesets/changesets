@@ -10,9 +10,9 @@
   "license": "MIT",
   "repository": "https://github.com/changesets/changesets/tree/main/packages/write",
   "dependencies": {
+    "@changesets/format": "link:../../../changesets-format",
     "@changesets/types": "workspace:^",
-    "human-id": "^4.1.1",
-    "prettier": "^3.7.4"
+    "human-id": "^4.1.1"
   },
   "devDependencies": {
     "@changesets/parse": "workspace:*",

@@ -72,6 +72,9 @@ importers:
       '@changesets/config':
         specifier: workspace:^
         version: link:../config
+      '@changesets/format':
+        specifier: link:../../../changesets-format
+        version: link:../../../changesets-format
       '@changesets/get-version-range-type':
         specifier: workspace:^
         version: link:../get-version-range-type
@@ -90,9 +93,6 @@ importers:
       import-meta-resolve:
         specifier: ^4.2.0
         version: 4.2.0
-      prettier:
-        specifier: ^3.7.4
-        version: 3.8.3
       semver:
         specifier: ^7.5.3
         version: 7.7.3
@@ -488,15 +488,15 @@ importers:
 
   packages/write:
     dependencies:
+      '@changesets/format':
+        specifier: link:../../../changesets-format
+        version: link:../../../changesets-format
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
       human-id:
         specifier: ^4.1.1
         version: 4.1.3
-      prettier:
-        specifier: ^3.7.4
-        version: 3.8.3
     devDependencies:
       '@changesets/parse':
         specifier: workspace:*
