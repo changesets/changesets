@@ -9,6 +9,7 @@ export const baseConfig = defineConfig({
   // useful for running `build --watch` and `test` concurrently
   clean: !process.argv.includes("--watch"),
 
+  sourcemap: !isCi,
   dts: { enabled: true, parallel: !isCi, sourcemap: !isCi },
   format: "esm",
   minify: "dce-only",
