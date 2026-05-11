@@ -97,7 +97,7 @@ describe("simple project", () => {
         private: true,
         name: "root-pkg",
         workspaces: ["packages/*"],
-        prettier: {}
+        prettier: {},
       }),
       "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({

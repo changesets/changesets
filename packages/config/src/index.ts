@@ -435,7 +435,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
 
   if (
     json.format !== undefined &&
-    !["auto", "prettier", "biome", "oxfmt", "dprint", "deno", false].includes(
+    !["auto", "prettier", "oxfmt", "dprint", "deno", false].includes(
       json.format,
     )
   ) {
@@ -444,7 +444,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
         json.format,
         null,
         2,
-      )} when the only valid values are "auto", "prettier", "biome", "oxfmt", "dprint", "deno" or false`,
+      )} when the only valid values are "auto", "prettier", "oxfmt", "dprint", "deno" or false`,
     );
   }
 

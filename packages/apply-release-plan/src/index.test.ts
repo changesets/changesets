@@ -2220,7 +2220,7 @@ describe("apply release plan", () => {
         ### Patch Changes
 
           - pkg-b@2.0.0"
-      `)
+      `);
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
@@ -2359,7 +2359,7 @@ describe("apply release plan", () => {
         - New feature, much wow
           
           look at this shiny stuff!"
-      `)
+      `);
     });
 
     it("should add an updated dependencies line when dependencies have been updated", async () => {

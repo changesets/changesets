@@ -2,7 +2,11 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { defaultConfig } from "@changesets/config";
-import { detect as detectFormatter, format } from "@changesets/format";
+import {
+  defaultDetectOrder,
+  detect as detectFormatter,
+  format,
+} from "@changesets/format";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
@@ -66,7 +70,14 @@ async function getFormatter(
 ): Promise<Formatter> {
   if (config === false) return async () => {};
 
-  const formatter = config === "auto" ? await detectFormatter({ cwd }) : config;
+  const formatter =
+    config === "auto"
+      ? await detectFormatter({
+          cwd,
+          // Biome doesn't support formatting markdown files
+          order: defaultDetectOrder.filter((f) => f !== "biome"),
+        })
+      : config;
   if (!formatter) return async () => {};
 
   return async (filePath: string) => {

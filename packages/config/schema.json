@@ -79,7 +79,7 @@
       "anyOf": [
         {
           "type": "string",
-          "enum": ["auto", "prettier", "biome", "oxfmt", "deno", "dprint"]
+          "enum": ["auto", "prettier", "oxfmt", "deno", "dprint"]
         },
         {
           "const": false
