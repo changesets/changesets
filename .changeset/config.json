@@ -6,6 +6,7 @@
   "baseBranch": "next",
   "commit": false,
   "access": "public",
+  "ignore": ["@changesets/test-utils"],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "updateInternalDependents": "always"
   }

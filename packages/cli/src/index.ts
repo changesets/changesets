@@ -1,12 +1,11 @@
-import { createRequire } from "node:module";
 import { format } from "node:util";
+// this requires that the package is built _after_ bumping versions before publishing
+import manifest from "@changesets/cli/package.json" with { type: "json" };
 import { ExitError, InternalError } from "@changesets/errors";
 import { error } from "@changesets/logger";
 import mri from "mri";
 import { COMMAND_HELP } from "./help.ts";
 import { run } from "./run.ts";
-
-const require = createRequire(import.meta.url);
 
 const args = process.argv.slice(2);
 const aliases = {
@@ -70,7 +69,7 @@ ${Object.values(COMMAND_HELP)
 
 // Version should only be shown if it's the only argument passed
 if (parsed.version && args.length === 1) {
-  console.log(require("@changesets/cli/package.json").version);
+  console.log(manifest.version);
   process.exit(0);
 }
 
@@ -97,7 +96,7 @@ ${format("", err).replace(process.cwd(), "<cwd>")}
 
 ## Versions
 
-- @changesets/cli@${require("@changesets/cli/package.json").version}
+- @changesets/cli@${manifest.version}
 - node@${process.version}
 
 ## Extra details

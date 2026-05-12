@@ -4,11 +4,15 @@
   "description": "A changelog entry generator for git that writes hashes",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-changelog-git.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/changelog-git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/changelog-git"
+  },
   "dependencies": {
     "@changesets/types": "workspace:^"
   },

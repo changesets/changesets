@@ -4,11 +4,15 @@
   "description": "Console log alias",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-logger.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/logger",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/logger"
+  },
   "dependencies": {
     "picocolors": "^1.1.0"
   },

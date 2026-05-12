@@ -24,11 +24,11 @@ import applyReleasePlan from "./index.ts";
 
 const changesetsCliChangelogPath = path.resolve(
   import.meta.dirname,
-  "../../cli/dist/changesets-cli-changelog.js",
+  "../../cli/dist/changelog.mjs",
 );
 const changesetsCliCommitPath = path.resolve(
   import.meta.dirname,
-  "../../cli/dist/changesets-cli-commit.js",
+  "../../cli/dist/commit.mjs",
 );
 
 class FakeReleasePlan {

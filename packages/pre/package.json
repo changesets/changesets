@@ -4,11 +4,15 @@
   "description": "Utils to make a Changesets repo enter and exit pre mode",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-pre.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/pre",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/pre"
+  },
   "dependencies": {
     "@changesets/errors": "workspace:^",
     "@changesets/types": "workspace:^",

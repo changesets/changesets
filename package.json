@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "description": "A tool to help manage the versioning and changelogs for open source packages",
+  "type": "module",
   "scripts": {
-    "postinstall": "preconstruct dev && manypkg check",
-    "build": "preconstruct build",
-    "watch": "preconstruct watch",
+    "postinstall": "manypkg check",
+    "build": "tsdown",
+    "watch": "tsdown --watch",
     "format": "prettier --experimental-cli --list-different \"**/*.{js,ts,tsx,md}\"",
     "format:fix": "prettier --experimental-cli --write \"**/*.{js,ts,tsx,md}\"",
     "lint": "eslint",
@@ -34,12 +35,9 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.28.5",
-    "@babel/preset-env": "^7.28.5",
-    "@babel/preset-typescript": "^7.27.0",
     "@eslint/js": "10.0.1",
     "@manypkg/cli": "^0.25.1",
-    "@preconstruct/cli": "^2.8.12",
+    "@tsconfig/node22": "^22.0.5",
     "@types/node": "^24.12.2",
     "@types/semver": "^7.7.1",
     "@vitest/coverage-v8": "^4.1.5",
@@ -50,23 +48,11 @@
     "eslint-plugin-n": "^17.24.0",
     "eslint-plugin-perfectionist": "^5.9.0",
     "prettier": "^3.7.4",
+    "publint": "^0.3.18",
+    "tsdown": "^0.22.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.1",
     "vitest": "^4.1.5"
-  },
-  "preconstruct": {
-    "packages": [
-      "packages/*",
-      "scripts/*"
-    ],
-    "exports": {
-      "importConditionDefaultExport": "default"
-    },
-    "___experimentalFlags_WILL_CHANGE_IN_PATCH": {
-      "distInRoot": true,
-      "importsConditions": true,
-      "typeModule": true
-    }
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
