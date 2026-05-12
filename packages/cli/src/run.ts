@@ -7,13 +7,6 @@ import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import pc from "picocolors";
-import { add } from "./commands/add/index.ts";
-import { init } from "./commands/init/index.ts";
-import { pre } from "./commands/pre/index.ts";
-import { publish } from "./commands/publish/index.ts";
-import { status } from "./commands/status/index.ts";
-import { tag as tagCommand } from "./commands/tag/index.ts";
-import { version } from "./commands/version/index.ts";
 import { COMMAND_HELP } from "./help.ts";
 import type { CliOptions } from "./types.ts";
 
@@ -43,7 +36,7 @@ export async function run(
 
   if (input[0] === "init") {
     validateCommandFlags("init", flags);
-    await init(packages.rootDir);
+    await (await import("./commands/init/index.ts")).init(packages.rootDir);
     return;
   }
 
@@ -65,7 +58,9 @@ If you expected there to be changesets, you should check git history for when th
   if (input.length < 1) {
     const { empty, open, since, message, ...rest }: CliOptions = flags;
     validateCommandFlags("add", rest);
-    await add(packages.rootDir, { empty, open, since, message }, config);
+    await (
+      await import("./commands/add/index.ts")
+    ).add(packages.rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     log.error(
       "Too many arguments passed to changesets - we only accept the command name as an argument",
@@ -80,7 +75,9 @@ If you expected there to be changesets, you should check git history for when th
       case "add": {
         const { empty, open, since, message, ...rest }: CliOptions = flags;
         validateCommandFlags("add", rest);
-        await add(packages.rootDir, { empty, open, since, message }, config);
+        await (
+          await import("./commands/add/index.ts")
+        ).add(packages.rootDir, { empty, open, since, message }, config);
         return;
       }
       case "version": {
@@ -179,24 +176,32 @@ If you expected there to be changesets, you should check git history for when th
           config.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
         }
 
-        await version(packages.rootDir, { snapshot }, config);
+        await (
+          await import("./commands/version/index.ts")
+        ).version(packages.rootDir, { snapshot }, config);
         return;
       }
       case "publish": {
         const { otp, tag, gitTag, ...rest }: CliOptions = flags;
         validateCommandFlags("publish", rest);
-        await publish(packages.rootDir, { otp, tag, gitTag }, config);
+        await (
+          await import("./commands/publish/index.ts")
+        ).publish(packages.rootDir, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
         const { since, verbose, output, ...rest }: CliOptions = flags;
         validateCommandFlags("status", rest);
-        await status(packages.rootDir, { since, verbose, output }, config);
+        await (
+          await import("./commands/status/index.ts")
+        ).status(packages.rootDir, { since, verbose, output }, config);
         return;
       }
       case "tag": {
         validateCommandFlags("tag", flags);
-        await tagCommand(packages.rootDir, config);
+        await (
+          await import("./commands/tag/index.ts")
+        ).tag(packages.rootDir, config);
         return;
       }
       case "pre": {
@@ -213,7 +218,9 @@ If you expected there to be changesets, you should check git history for when th
           log.error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);
         }
-        await pre(packages.rootDir, { command, tag });
+        await (
+          await import("./commands/pre/index.ts")
+        ).pre(packages.rootDir, { command, tag });
         return;
       }
       case "bump": {
