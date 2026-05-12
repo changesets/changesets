@@ -1,7 +1,6 @@
 ---
 "@changesets/apply-release-plan": patch
 "@changesets/release-utils": patch
-"@changesets/test-utils": patch
 "@changesets/config": patch
 "@changesets/write": patch
 "@changesets/read": patch
