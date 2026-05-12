@@ -29,8 +29,6 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
-        with:
-          download-dist: false
 
       - name: Build artifacts
         run: pnpm build
@@ -65,6 +63,7 @@ jobs:
       - uses: ./.github/actions/ci-setup
         with:
           node-version: ${{ matrix.node_version }}
+          download-dist: true
 
       - name: Check Git version
         run: git --version
@@ -99,6 +98,8 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
+        with:
+          download-dist: true
 
       - name: Typecheck
         run: pnpm types:check
@@ -115,6 +116,8 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
+        with:
+          download-dist: true
 
       - name: Lint
         run: pnpm lint

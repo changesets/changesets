@@ -12,7 +12,7 @@ inputs:
   download-dist:
     description: "Whether to download a dist folder artifact from the current run"
     required: false
-    default: "true"
+    default: "false"
 
 runs:
   using: composite
