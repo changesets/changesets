@@ -7,8 +7,7 @@ on:
   pull_request:
     paths: [.github/workflows/*]
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.sha }}
