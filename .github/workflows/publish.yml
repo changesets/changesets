@@ -6,7 +6,9 @@ on:
       - main
       - next
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions: {} # each job should define its own permission explicitly
 
@@ -48,7 +50,10 @@ jobs:
       contents: write # to create release (changesets/action)
       id-token: write # to use OpenID Connect token for trusted publishing (changesets/action)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
         with:
           node-version: 24
