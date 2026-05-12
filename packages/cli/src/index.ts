@@ -1,12 +1,12 @@
-import { createRequire } from "node:module";
 import { format } from "node:util";
+// this requires that the package is built _after_ bumping versions before publishing
+import manifest from "@changesets/cli/package.json" with { type: "json" };
 import { ExitError, InternalError } from "@changesets/errors";
-import { error } from "@changesets/logger";
+import { intro, log, outro } from "@clack/prompts";
 import mri from "mri";
+import pc from "picocolors";
 import { COMMAND_HELP } from "./help.ts";
 import { run } from "./run.ts";
-
-const require = createRequire(import.meta.url);
 
 const args = process.argv.slice(2);
 const aliases = {
@@ -70,7 +70,7 @@ ${Object.values(COMMAND_HELP)
 
 // Version should only be shown if it's the only argument passed
 if (parsed.version && args.length === 1) {
-  console.log(require("@changesets/cli/package.json").version);
+  console.log(manifest.version);
   process.exit(0);
 }
 
@@ -80,35 +80,39 @@ for (const flag of ["_", ...Object.keys(aliases)]) {
   delete flags[flag];
 }
 
+intro("🦋");
+
 run(parsed._, flags, cwd).catch((err) => {
   if (err instanceof InternalError) {
-    error(
-      "The following error is an internal unexpected error, these should never happen.",
-    );
-    error("Please open an issue with the following link");
-    error(
-      `https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(
-        `Unexpected error during ${parsed._[0] || "add"} command`,
-      )}&body=${encodeURIComponent(`## Error
+    log.error(
+      `
+The following error is an internal unexpected error, these should never happen.
+Please open an issue with the following link:
+https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(`Unexpected error during ${parsed._[0] || "add"} command`)}&body=${encodeURIComponent(`## Error
 
 \`\`\`
-${format("", err).replace(process.cwd(), "<cwd>")}
+${format(err).replace(process.cwd().replace(/\\/g, "/"), "<cwd>")}
 \`\`\`
 
 ## Versions
 
-- @changesets/cli@${require("@changesets/cli/package.json").version}
+- @changesets/cli@${manifest.version}
 - node@${process.version}
 
 ## Extra details
 
 <!-- Add any extra details of what you were doing, ideas you have about what might have caused the error and reproduction steps if possible. If you have a repository we can look at that would be great. 😁 -->
-`)}`,
+`)}
+      `.trim(),
     );
   }
+
   if (err instanceof ExitError) {
+    outro(pc.red(`🦋 Exited with code ${err.code}`));
     return process.exit(err.code);
   }
-  error(err);
+
+  log.error(err.stack);
+  outro(pc.red("🦋 Exited with code 1"));
   process.exit(1);
 });

@@ -5,13 +5,12 @@
   "type": "module",
   "description": "Utils for testing changesets packages",
   "exports": {
-    ".": "./dist/changesets-test-utils.js",
+    ".": "./src/index.ts",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/test-utils",
   "dependencies": {
-    "@changesets/logger": "workspace:^",
+    "@clack/prompts": "^1.4.0",
     "fs-fixture": "^2.13.0",
     "tinyexec": "^1.0.2",
     "vitest": "^4.1.5"

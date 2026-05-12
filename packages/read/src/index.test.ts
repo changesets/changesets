@@ -4,7 +4,7 @@ import { add } from "@changesets/git";
 import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { writeChangeset } from "@changesets/write";
 import { describe, expect, it } from "vitest";
-import read from "./index.ts";
+import { readChangesets as read } from "./index.ts";
 
 silenceLogsInBlock();
 

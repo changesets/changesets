@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
-import { createRequire } from "node:module";
 import path from "node:path";
+// this requires that the package is built _after_ bumping versions before publishing
+import manifest from "@changesets/config/package.json" with { type: "json" };
 import { ValidationError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   Config,
@@ -17,11 +17,8 @@ import type {
 import { getPackages } from "@manypkg/get-packages";
 import picomatch from "picomatch";
 
-const require = createRequire(import.meta.url);
-const packageJson = require("../package.json");
-
 export const defaultWrittenConfig = {
-  $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
+  $schema: `https://unpkg.com/@changesets/config@${manifest.version}/schema.json`,
   changelog: "@changesets/cli/changelog",
   commit: false,
   fixed: [] as Fixed,
@@ -137,7 +134,8 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   let normalizedAccess: WrittenConfig["access"] = json.access;
   if ((json.access as string) === "private") {
     normalizedAccess = "restricted";
-    warn(
+    // TODO: replace with returning errors/warnings
+    console.error(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',
     );
   }

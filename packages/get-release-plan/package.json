@@ -4,11 +4,15 @@
   "description": "Reads changesets and adds information on dependents that need bumping",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-get-release-plan.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/get-release-plan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/get-release-plan"
+  },
   "dependencies": {
     "@changesets/assemble-release-plan": "workspace:^",
     "@changesets/config": "workspace:^",
