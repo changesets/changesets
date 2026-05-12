@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
+import color from "@changesets/color";
 import type { AccessType, Package, PreState } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
-import pc from "picocolors";
 import semverParse from "semver/functions/parse.js";
 import type { TwoFactorState } from "../../utils/types.ts";
 import {
@@ -139,7 +139,7 @@ export async function publishPackages({
       publishPromises.map(async (publishPromise) => {
         const result = await publishPromise;
         log.success(
-          `Published ${pc.blue(result.name)}@${pc.green(result.newVersion)}!`,
+          `Published ${color.blue(result.name)}@${color.green(result.newVersion)}!`,
         );
         return result;
       }),
@@ -215,10 +215,10 @@ async function getUnpublishedPackages(
     const { name, publishedState, localVersion, publishedVersions } = pkgInfo;
     if (!publishedVersions.includes(localVersion)) {
       packagesToPublish.push(pkgInfo);
-      previewLines.push(`${pc.blue(name)}@${pc.green(localVersion)}`);
+      previewLines.push(`${color.blue(name)}@${color.green(localVersion)}`);
       if (preState != null && publishedState === "only-pre") {
         previewLines.push(
-          `${pc.gray("└")} will be published to ${pc.cyan("latest")} rather than ${pc.cyan(preState.tag)} as it will be its first published version.`,
+          `${color.gray("└")} will be published to ${color.cyan("latest")} rather than ${color.cyan(preState.tag)} as it will be its first published version.`,
         );
       }
     } else {
@@ -231,7 +231,7 @@ async function getUnpublishedPackages(
       `
 These packages will be published as they were not found on npm:
 ${previewLines.join("\n")}
-${pc.gray(`${alreadyPublishedCount} packages are already published.`)}
+${color.gray(`${alreadyPublishedCount} packages are already published.`)}
       `.trim(),
     );
   }

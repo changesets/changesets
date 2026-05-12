@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import color from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { getReleasePlan } from "@changesets/get-release-plan";
 import type { ComprehensiveRelease, Config } from "@changesets/types";
 import { log } from "@clack/prompts";
-import pc from "picocolors";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
 
 export async function status(
@@ -29,8 +29,8 @@ export async function status(
   if (changedPackages.length > 0 && releasePlan.changesets.length === 0) {
     log.error(
       `
-Some packages have been changed but no changesets were found. Run ${pc.cyan("changeset add")} to resolve this error.
-If this change doesn't need a release, run ${pc.cyan("changeset add --empty")}.
+Some packages have been changed but no changesets were found. Run ${color.cyan("changeset add")} to resolve this error.
+If this change doesn't need a release, run ${color.cyan("changeset add --empty")}.
       `.trim(),
     );
     throw new ExitError(1);
@@ -62,9 +62,9 @@ ${printPackageList(releases, verbose)}
 }
 
 const typeColors = {
-  major: pc.red,
-  minor: pc.green,
-  patch: pc.blue,
+  major: color.red,
+  minor: color.green,
+  patch: color.blue,
 } as const;
 
 function printPackageList(releases: ComprehensiveRelease[], verbose?: boolean) {
@@ -85,12 +85,14 @@ function printPackageList(releases: ComprehensiveRelease[], verbose?: boolean) {
       const lines = [`- ${typeColors[type](type)}`];
 
       releases.forEach(({ name, newVersion, changesets }) => {
-        const addedLineIndex = lines.push(`  - ${pc.cyan(name)}`) - 1;
+        const addedLineIndex = lines.push(`  - ${color.cyan(name)}`) - 1;
 
         if (verbose) {
-          lines[addedLineIndex] += ` -> ${pc.green(newVersion)}`;
+          lines[addedLineIndex] += ` -> ${color.green(newVersion)}`;
           lines.push(
-            ...changesets.map((c) => `    - ${pc.blue(`.changeset/${c}.md`)}`),
+            ...changesets.map(
+              (c) => `    - ${color.blue(`.changeset/${c}.md`)}`,
+            ),
           );
         }
       });

@@ -13,10 +13,8 @@
     "url": "git+https://github.com/changesets/changesets.git",
     "directory": "packages/logger"
   },
-  "dependencies": {
-    "picocolors": "^1.1.0"
-  },
   "devDependencies": {
+    "@changesets/color": "workspace:^",
     "vitest": "^4.1.5"
   },
   "engines": {

@@ -213,9 +213,6 @@ importers:
       package-manager-detector:
         specifier: ^1.1.0
         version: 1.6.0
-      picocolors:
-        specifier: ^1.1.0
-        version: 1.1.1
       semver:
         specifier: ^7.5.3
         version: 7.7.4
@@ -226,6 +223,9 @@ importers:
       '@changesets/changelog-github':
         specifier: workspace:*
         version: link:../changelog-github
+      '@changesets/color':
+        specifier: workspace:^
+        version: link:../color
       '@changesets/parse':
         specifier: workspace:*
         version: link:../parse
@@ -244,6 +244,8 @@ importers:
       vitest:
         specifier: ^4.1.5
         version: 4.1.5(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.10)
+
+  packages/color: {}
 
   packages/config:
     dependencies:
@@ -286,13 +288,13 @@ importers:
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
-      picocolors:
-        specifier: ^1.1.0
-        version: 1.1.1
       semver:
         specifier: ^7.5.3
         version: 7.7.4
     devDependencies:
+      '@changesets/color':
+        specifier: workspace:^
+        version: link:../color
       '@changesets/test-utils':
         specifier: workspace:*
         version: link:../../scripts/test-utils
@@ -365,11 +367,10 @@ importers:
         version: 4.0.3
 
   packages/logger:
-    dependencies:
-      picocolors:
-        specifier: ^1.1.0
-        version: 1.1.1
     devDependencies:
+      '@changesets/color':
+        specifier: workspace:^
+        version: link:../color
       vitest:
         specifier: ^4.1.5
         version: 4.1.5(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.10)
@@ -417,9 +418,6 @@ importers:
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
-      picocolors:
-        specifier: ^1.1.0
-        version: 1.1.1
     devDependencies:
       '@changesets/test-utils':
         specifier: workspace:*

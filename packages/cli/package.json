@@ -52,12 +52,12 @@
     "launch-editor": "^2.13.2",
     "mri": "^1.2.0",
     "package-manager-detector": "^1.1.0",
-    "picocolors": "^1.1.0",
     "semver": "^7.5.3",
     "tinyexec": "^1.0.2"
   },
   "devDependencies": {
     "@changesets/changelog-github": "workspace:*",
+    "@changesets/color": "workspace:^",
     "@changesets/parse": "workspace:*",
     "@changesets/test-utils": "workspace:*",
     "@types/semver": "^7.7.1",

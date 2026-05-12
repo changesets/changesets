@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { applyReleasePlan } from "@changesets/apply-release-plan";
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
+import color from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
@@ -9,7 +10,6 @@ import { readChangesets } from "@changesets/read";
 import type { Config } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import pc from "picocolors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 
@@ -33,7 +33,7 @@ export async function version(
       log.error(
         `
 Snapshot release is not allowed in pre mode.
-To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
+To resolve this exit the pre mode by running ${color.cyan("changeset pre exit")}.
         `.trim(),
       );
       throw new ExitError(1);
@@ -41,8 +41,8 @@ To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
       importantWarning(
         `
 You are in prerelease mode!
-If you meant to do a normal release you should revert these changes and run ${pc.cyan("changeset pre exit")}.
-You can then run ${pc.cyan("changeset version")} again to do a normal release.
+If you meant to do a normal release you should revert these changes and run ${color.cyan("changeset pre exit")}.
+You can then run ${color.cyan("changeset version")} again to do a normal release.
         `,
       );
     }

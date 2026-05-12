@@ -1,9 +1,9 @@
+import color from "@changesets/color";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
 import { getPackages, type Tool } from "@manypkg/get-packages";
-import pc from "picocolors";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 
 function buildTag(tool: Tool, pkg: { name: string; newVersion: string }) {
@@ -17,8 +17,8 @@ function buildTagMessage(
   pkg: { name: string; newVersion: string },
 ) {
   return tool.type !== "root"
-    ? `${pc.blue(pkg.name)}@${pc.green(pkg.newVersion)}`
-    : pc.cyan(`v${pkg.newVersion}`);
+    ? `${color.blue(pkg.name)}@${color.green(pkg.newVersion)}`
+    : color.cyan(`v${pkg.newVersion}`);
 }
 
 export async function tag(cwd: string, config: Config) {

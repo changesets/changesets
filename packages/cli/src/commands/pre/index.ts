@@ -1,3 +1,4 @@
+import color from "@changesets/color";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError,
@@ -5,7 +6,6 @@ import {
 } from "@changesets/errors";
 import { exitPre, enterPre } from "@changesets/pre";
 import { log } from "@clack/prompts";
-import pc from "picocolors";
 
 export async function pre(
   rootDir: string,
@@ -18,16 +18,16 @@ export async function pre(
       await enterPre(rootDir, options.tag);
       log.success(
         `
-Entered pre mode with tag ${pc.green(options.tag)}!
-Run ${pc.cyan("changeset version")} to version packages with prerelease versions.
+Entered pre mode with tag ${color.green(options.tag)}!
+Run ${color.cyan("changeset version")} to version packages with prerelease versions.
         `.trim(),
       );
     } catch (err) {
       if (err instanceof PreEnterButInPreModeError) {
         log.error(
           `
-${pc.cyan("changeset pre enter")} cannot be run when in pre mode.
-If you're trying to exit pre mode, run ${pc.cyan("changeset pre exit")}.
+${color.cyan("changeset pre enter")} cannot be run when in pre mode.
+If you're trying to exit pre mode, run ${color.cyan("changeset pre exit")}.
           `.trim(),
         );
         throw new ExitError(1);
@@ -40,15 +40,15 @@ If you're trying to exit pre mode, run ${pc.cyan("changeset pre exit")}.
       log.success(
         `
 Exited pre mode!
-Run ${pc.cyan("changeset version")} to version packages with normal versions.
+Run ${color.cyan("changeset version")} to version packages with normal versions.
         `.trim(),
       );
     } catch (err) {
       if (err instanceof PreExitButNotInPreModeError) {
         log.error(
           `
-${pc.cyan("changeset pre exit")} can only be run when in pre mode!
-If you're trying to enter pre mode, run ${pc.cyan("changeset pre enter")}.
+${color.cyan("changeset pre exit")} can only be run when in pre mode!
+If you're trying to enter pre mode, run ${color.cyan("changeset pre enter")}.
           `.trim(),
         );
         throw new ExitError(1);

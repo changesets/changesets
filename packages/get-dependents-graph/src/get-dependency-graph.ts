@@ -1,6 +1,6 @@
 import path from "node:path";
+import color from "@changesets/color";
 import type { Package, Packages, PackageJSON } from "@changesets/types";
-import pc from "picocolors";
 import Range from "semver/classes/range.js";
 
 const DEPENDENCY_TYPES = [
@@ -123,7 +123,7 @@ export function getDependencyGraph(
           valid = false;
           // TODO: replace with returning errors/warnings
           console.error(
-            `Package ${pc.blue(name)} must depend on the current version of ${pc.blue(depName)}: ${pc.green(expected)} vs ${pc.red(rawDepRange)}`,
+            `Package ${color.blue(name)} must depend on the current version of ${color.blue(depName)}: ${color.green(expected)} vs ${color.red(rawDepRange)}`,
           );
           continue;
         }
@@ -137,7 +137,7 @@ export function getDependencyGraph(
         valid = false;
         // TODO: replace with returning errors/warnings
         console.error(
-          `Package ${pc.blue(name)} must depend on the current version of ${pc.blue(depName)}: ${pc.green(expected)} vs ${pc.red(rawDepRange)}`,
+          `Package ${color.blue(name)} must depend on the current version of ${color.blue(depName)}: ${color.green(expected)} vs ${color.red(rawDepRange)}`,
         );
         continue;
       }
