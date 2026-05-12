@@ -1,14 +1,18 @@
 {
   "name": "@changesets/get-github-info",
-  "version": "1.0.0-next.1",
+  "version": "1.0.0-next.2",
   "description": "Get the GitHub username and PR number from a commit. Intended for use with changesets.",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-get-github-info.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/get-github-info",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/get-github-info"
+  },
   "dependencies": {
     "dataloader": "^1.4.0"
   },
@@ -17,6 +21,6 @@
     "prettier": "^3.7.4"
   },
   "engines": {
-    "node": "^22 || ^24 || >=26"
+    "node": "^22.11 || ^24 || >=26"
   }
 }

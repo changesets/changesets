@@ -1,5 +1,45 @@
 # @changesets/cli
 
+## 3.0.0-next.3
+
+### Major Changes
+
+- [#1860](https://github.com/changesets/changesets/pull/1860) [`92b1c1b`](https://github.com/changesets/changesets/commit/92b1c1b6b1733b1f1799a73828d378646b068798) Thanks [@mixelburg](https://github.com/mixelburg)! - `changeset version` now exits with code 1 when there are no unreleased changesets, instead of silently exiting with code 0.
+
+  This makes it easier to detect when a version step is a no-op — for example, to prevent accidentally publishing packages with incorrect version tags when using `--snapshot` mode.
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1961](https://github.com/changesets/changesets/pull/1961) [`07278a7`](https://github.com/changesets/changesets/commit/07278a726343388eb6dfc56e7a8213872d4c8857) Thanks [@beeequeue](https://github.com/beeequeue)! - `CommitFunctions` can now be both sync and async, and the `defaultCommitFunctions` are now sync.
+
+- [#1652](https://github.com/changesets/changesets/pull/1652) [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7) Thanks [@bluwy](https://github.com/bluwy)! - Remove support for the deprecated `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.useCalculatedVersionForSnapshots` config. The `snapshot.useCalculatedVersion` config should be used instead.
+
+### Minor Changes
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- [#1667](https://github.com/changesets/changesets/pull/1667) [`81832f8`](https://github.com/changesets/changesets/commit/81832f855029f4093b2142ba22b747ba0de92425) Thanks [@Andarist](https://github.com/Andarist)! - Fixed resolution of changelog and commit generator modules so built-in modules can still be loaded when they are not installed in the target project.
+
+- Updated dependencies [[`81832f8`](https://github.com/changesets/changesets/commit/81832f855029f4093b2142ba22b747ba0de92425), [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`03d4479`](https://github.com/changesets/changesets/commit/03d44794fedd24ae9eb053b28624c1fd8fe6fe6f), [`b9407b3`](https://github.com/changesets/changesets/commit/b9407b39a458bab106d0e23a3afab01d07d8482f), [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625), [`07278a7`](https://github.com/changesets/changesets/commit/07278a726343388eb6dfc56e7a8213872d4c8857), [`ad3edbd`](https://github.com/changesets/changesets/commit/ad3edbdc78c7b2ba451577969b6137df275ec430), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7)]:
+  - @changesets/apply-release-plan@8.0.0-next.3
+  - @changesets/assemble-release-plan@7.0.0-next.3
+  - @changesets/get-dependents-graph@3.0.0-next.3
+  - @changesets/should-skip-package@1.0.0-next.3
+  - @changesets/get-release-plan@5.0.0-next.3
+  - @changesets/changelog-git@1.0.0-next.3
+  - @changesets/config@4.0.0-next.3
+  - @changesets/errors@1.0.0-next.2
+  - @changesets/logger@1.0.0-next.2
+  - @changesets/types@7.0.0-next.3
+  - @changesets/write@1.0.0-next.3
+  - @changesets/read@1.0.0-next.3
+  - @changesets/git@4.0.0-next.3
+  - @changesets/pre@3.0.0-next.3
+
 ## 3.0.0-next.2
 
 ### Major Changes

@@ -1,14 +1,18 @@
 {
   "name": "@changesets/read",
-  "version": "1.0.0-next.2",
+  "version": "1.0.0-next.3",
   "description": "Read changesets from disc, and return the information as JSON",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-read.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/read",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/read"
+  },
   "dependencies": {
     "@changesets/git": "workspace:^",
     "@changesets/parse": "workspace:^",
@@ -21,6 +25,6 @@
     "outdent": "^0.8.0"
   },
   "engines": {
-    "node": "^22 || ^24 || >=26"
+    "node": "^22.11 || ^24 || >=26"
   }
 }

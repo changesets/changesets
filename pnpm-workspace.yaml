@@ -9,9 +9,10 @@ allowBuilds:
 dedupePeers: true
 dedupePeerDependents: true
 
-shellEmulator: true
-
 overrides:
+  rolldown: 1.0.0
   'vitepress>@docsearch/js': '-'
   'vitepress>@docsearch/sidepanel-js': '-'
   'vitepress>vite': ^8.0.0
+
+shellEmulator: true

@@ -1,5 +1,24 @@
 # @changesets/config
 
+## 4.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1652](https://github.com/changesets/changesets/pull/1652) [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7) Thanks [@bluwy](https://github.com/bluwy)! - Remove support for the deprecated `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.useCalculatedVersionForSnapshots` config. The `snapshot.useCalculatedVersion` config should be used instead.
+
+### Patch Changes
+
+- [#1953](https://github.com/changesets/changesets/pull/1953) [`b9407b3`](https://github.com/changesets/changesets/commit/b9407b39a458bab106d0e23a3afab01d07d8482f) Thanks [@beeequeue](https://github.com/beeequeue)! - Refactored from `micromatch` to `picomatch` for globbing patterns
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7)]:
+  - @changesets/get-dependents-graph@3.0.0-next.3
+  - @changesets/should-skip-package@1.0.0-next.3
+  - @changesets/errors@1.0.0-next.2
+  - @changesets/logger@1.0.0-next.2
+  - @changesets/types@7.0.0-next.3
+
 ## 4.0.0-next.2
 
 ### Major Changes

@@ -145,9 +145,12 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     );
   }
 
-  let data;
+  let data: { errors?: unknown; data?: Record<string, unknown> };
   try {
-    data = await fetchResponse.json();
+    data = (await fetchResponse.json()) as {
+      errors?: unknown;
+      data?: Record<string, unknown>;
+    };
   } catch (e) {
     throw new Error(
       `Failed to parse data from GitHub\n${(e as Error).message}`,
@@ -180,7 +183,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
       pull: {},
     };
     cleanedData[repo] = output;
-    Object.entries(data.data[`a${index}`]).forEach(([field, value]) => {
+    Object.entries(data.data![`a${index}`]!).forEach(([field, value]) => {
       // this is "a" because that's how it was when it was first written, "a" means it's a commit not a pr
       // we could change it to commit__ but then we have to get new GraphQL results from the GH API to put in the tests
       if (field[0] === "a") {

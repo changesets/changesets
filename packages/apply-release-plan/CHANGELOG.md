@@ -1,5 +1,30 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+### Minor Changes
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- [#1667](https://github.com/changesets/changesets/pull/1667) [`81832f8`](https://github.com/changesets/changesets/commit/81832f855029f4093b2142ba22b747ba0de92425) Thanks [@Andarist](https://github.com/Andarist)! - Fixed resolution of changelog and commit generator modules so built-in modules can still be loaded when they are not installed in the target project.
+
+- [#1985](https://github.com/changesets/changesets/pull/1985) [`ad3edbd`](https://github.com/changesets/changesets/commit/ad3edbdc78c7b2ba451577969b6137df275ec430) Thanks [@bluwy](https://github.com/bluwy)! - Update `detect-indent` package to v7
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`b9407b3`](https://github.com/changesets/changesets/commit/b9407b39a458bab106d0e23a3afab01d07d8482f), [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7)]:
+  - @changesets/get-version-range-type@1.0.0-next.2
+  - @changesets/should-skip-package@1.0.0-next.3
+  - @changesets/config@4.0.0-next.3
+  - @changesets/types@7.0.0-next.3
+  - @changesets/git@4.0.0-next.3
+
 ## 8.0.0-next.2
 
 ### Major Changes

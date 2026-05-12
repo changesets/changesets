@@ -1,5 +1,26 @@
 # @changesets/release-utils
 
+## 1.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+### Minor Changes
+
+- [#1962](https://github.com/changesets/changesets/pull/1962) [`cda03f7`](https://github.com/changesets/changesets/commit/cda03f70aa6ed2129cdd2ea32c9c204bbf78aa60) Thanks [@bluwy](https://github.com/bluwy)! - Replace markdown parsing with regex
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7)]:
+  - @changesets/types@7.0.0-next.3
+  - @changesets/read@1.0.0-next.3
+  - @changesets/pre@3.0.0-next.3
+
 ## 1.0.0-next.2
 
 ### Major Changes

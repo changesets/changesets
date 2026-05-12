@@ -1,5 +1,15 @@
 # @changesets/get-github-info
 
+## 1.0.0-next.2
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+### Patch Changes
+
+- [#1947](https://github.com/changesets/changesets/pull/1947) [`492b0ca`](https://github.com/changesets/changesets/commit/492b0caa1a076551cf4bdca13d83dee4c485c9c8) Thanks [@bluwy](https://github.com/bluwy)! - Automatically load `GITHUB_` environment variables from `.env` file
+
 ## 0.8.0
 
 ### Minor Changes

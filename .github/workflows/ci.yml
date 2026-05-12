@@ -14,9 +14,40 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: true
+
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/ci-setup
+
+      - name: Build artifacts
+        run: pnpm build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          # the size of the dist artifacts is not very large, so we can use better compression without a slowdown
+          compression-level: 8
+          # store it for as short as possible, since we only need it for the same workflow run
+          retention-days: 1
+          name: dist
+          path: |
+            packages/*/dist
+            scripts/*/dist
+
   test:
     name: "Test using Node ${{ matrix.node_version }}"
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -32,6 +63,7 @@ jobs:
       - uses: ./.github/actions/ci-setup
         with:
           node-version: ${{ matrix.node_version }}
+          download-dist: true
 
       - name: Check Git version
         run: git --version
@@ -49,13 +81,14 @@ jobs:
         run: pnpm test --coverage
 
       - name: Upload coverage
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         if: matrix.node_version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   typecheck:
     name: Typecheck
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -65,12 +98,15 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
+        with:
+          download-dist: true
 
       - name: Typecheck
         run: pnpm types:check
 
   lint:
     name: Lint
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -80,6 +116,8 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
+        with:
+          download-dist: true
 
       - name: Lint
         run: pnpm lint
@@ -91,7 +129,7 @@ jobs:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [test, typecheck, lint]
+    needs: [build, test, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1

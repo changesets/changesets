@@ -1,21 +1,4 @@
-interface PromiseWithResolvers<T> {
-  promise: Promise<T>;
-  resolve: (value: T | PromiseLike<T>) => void;
-  reject: (reason?: any) => void;
-}
-
-function withResolvers<T>(): PromiseWithResolvers<T> {
-  const rv = {} as PromiseWithResolvers<T>;
-  rv.promise = new Promise<T>((resolve, reject) => {
-    rv.resolve = resolve;
-    rv.reject = reject;
-  });
-  return rv;
-}
-
-function promiseTry<T>(fn: () => Promise<T>): Promise<T> {
-  return new Promise<T>((resolve) => resolve(fn()));
-}
+import { promiseTry } from "../ponyfills/promise-try.ts";
 
 export function createPromiseQueue(concurrency: number) {
   const jobs: Array<{
@@ -55,7 +38,7 @@ export function createPromiseQueue(concurrency: number) {
 
   return {
     add: <T>(fn: () => Promise<T>): Promise<T> => {
-      const { promise, resolve, reject } = withResolvers();
+      const { promise, resolve, reject } = Promise.withResolvers<unknown>();
       jobs.push({
         fn,
         resolve,

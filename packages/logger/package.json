@@ -1,14 +1,18 @@
 {
   "name": "@changesets/logger",
-  "version": "1.0.0-next.1",
+  "version": "1.0.0-next.2",
   "description": "Console log alias",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-logger.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/logger",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/logger"
+  },
   "dependencies": {
     "picocolors": "^1.1.0"
   },
@@ -16,6 +20,6 @@
     "vitest": "^4.1.5"
   },
   "engines": {
-    "node": "^22 || ^24 || >=26"
+    "node": "^22.11 || ^24 || >=26"
   }
 }

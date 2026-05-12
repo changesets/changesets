@@ -1,15 +1,19 @@
 {
   "name": "@changesets/errors",
-  "version": "1.0.0-next.1",
+  "version": "1.0.0-next.2",
   "description": "Error classes for @changesets",
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-errors.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/errors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/errors"
+  },
   "engines": {
-    "node": "^22 || ^24 || >=26"
+    "node": "^22.11 || ^24 || >=26"
   }
 }
