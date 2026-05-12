@@ -4,7 +4,11 @@ inputs:
   node-version:
     description: "Node.js version"
     required: false
-    default: 20
+    default: "20"
+  skip-cache:
+    description: "Whether to skip the cache"
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -13,7 +17,7 @@ runs:
       uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
       with:
         node-version: ${{ inputs.node-version }}
-        cache: yarn
+        cache: ${{ inputs.skip-cache != 'true' && 'yarn' }}
 
     - name: Install dependencies
       shell: bash
