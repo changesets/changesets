@@ -114,7 +114,7 @@ export async function getChangelogEntry(
   );
 
   return [
-    `## ${release.newVersion}\n`,
+    `## ${release.newVersion}`,
     await generateChangesForVersionTypeMarkdown(changelogLines, "major"),
     await generateChangesForVersionTypeMarkdown(changelogLines, "minor"),
     await generateChangesForVersionTypeMarkdown(changelogLines, "patch"),

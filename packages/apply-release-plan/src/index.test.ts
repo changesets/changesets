@@ -2105,7 +2105,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - Hey, let's have fun with testing!`);
@@ -2143,7 +2142,6 @@ describe("apply release plan", () => {
 
       expect(readme).toMatchInlineSnapshot(`
         "## 1.1.0
-
         ### Minor Changes
 
         - Hey, let's have fun with testing!
@@ -2208,19 +2206,16 @@ describe("apply release plan", () => {
       const readme = await fs.readFile(readmePath, "utf-8");
       const readmeB = await fs.readFile(readmePathB, "utf-8");
 
-      expect(readme.trim()).toMatchInlineSnapshot(`
-        "# pkg-a
+       expect(readme.trim()).toEqual(outdent`# pkg-a
 
-        ## 1.1.0
+      ## 1.1.0
+      ### Minor Changes
 
-        ### Minor Changes
+      - Hey, let's have fun with testing!
 
-        - Hey, let's have fun with testing!
+      ### Patch Changes
 
-        ### Patch Changes
-
-          - pkg-b@2.0.0"
-      `);
+        - pkg-b@2.0.0`);
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
@@ -2345,21 +2340,20 @@ describe("apply release plan", () => {
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       const readme = await fs.readFile(readmePath, "utf-8");
-      expect(readme.trim()).toMatchInlineSnapshot(`
-        "# pkg-a
-
-        ## 1.1.0
-
-        ### Minor Changes
-
-        - Hey, let's have fun with testing!
-        - Random stuff
-          
-          get it while it's hot!
-        - New feature, much wow
-          
-          look at this shiny stuff!"
-      `);
+       expect(readme.trim()).toEqual(
+        [
+          "# pkg-a\n",
+          "## 1.1.0",
+          "### Minor Changes\n",
+          "- Hey, let's have fun with testing!",
+          "- Random stuff",
+          "  ",
+          "  get it while it's hot!",
+          "- New feature, much wow",
+          "  ",
+          "  look at this shiny stuff!",
+        ].join("\n"),
+      );
     });
 
     it("should add an updated dependencies line when dependencies have been updated", async () => {
@@ -2452,7 +2446,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -2462,7 +2455,6 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -2560,7 +2552,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -2568,7 +2559,6 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -2684,7 +2674,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -2692,7 +2681,6 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -2702,7 +2690,6 @@ describe("apply release plan", () => {
       expect(readmeC.trim()).toEqual(outdent`# pkg-c
 
       ## 2.1.0
-
       ### Minor Changes
 
       - Hey, let's have fun with testing!`);
@@ -2818,7 +2805,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -2826,7 +2812,6 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -2836,7 +2821,6 @@ describe("apply release plan", () => {
       expect(readmeC.trim()).toEqual(outdent`# pkg-c
 
       ## 2.0.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -3277,7 +3261,6 @@ describe("apply release plan", () => {
     ).toBe(`# pkg-a
 
 ## 1.1.0
-
 ### Minor Changes
 
 - ${lastCommit}: Hey, let's have fun with testing!

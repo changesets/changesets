@@ -331,7 +331,7 @@ describe("cli", () => {
       await expect(run(["version"], {}, cwd)).rejects
         .toThrowErrorMatchingInlineSnapshot(`
         [Error: Some errors occurred when validating the changesets config:
-        The \`format\` option is set as "no thanks" when the only valid values are "auto", "prettier", "biome", "oxfmt", "dprint", "deno" or false]
+        The \`format\` option is set as "no thanks" when the only valid values are "auto", "prettier", "oxfmt", "dprint", "deno" or false]
       `);
     });
   });

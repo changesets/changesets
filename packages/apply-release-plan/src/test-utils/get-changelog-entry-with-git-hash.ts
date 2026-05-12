@@ -59,7 +59,7 @@ export default async function defaultChangelogGetter(
   );
 
   return [
-    `## ${release.newVersion}\n`,
+    `## ${release.newVersion}`,
     majorReleaseLines,
     minorReleaseLines,
     patchReleaseLines,
