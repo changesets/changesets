@@ -2206,7 +2206,7 @@ describe("apply release plan", () => {
       const readme = await fs.readFile(readmePath, "utf-8");
       const readmeB = await fs.readFile(readmePathB, "utf-8");
 
-       expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.1.0
       ### Minor Changes
@@ -2340,7 +2340,7 @@ describe("apply release plan", () => {
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       const readme = await fs.readFile(readmePath, "utf-8");
-       expect(readme.trim()).toEqual(
+      expect(readme.trim()).toEqual(
         [
           "# pkg-a\n",
           "## 1.1.0",
