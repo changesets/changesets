@@ -2,7 +2,7 @@ import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import getChangesets from "@changesets/read";
+import { readChangesets as getChangesets } from "@changesets/read";
 import * as clack from "@clack/prompts";
 import { exec } from "tinyexec";
 import { beforeEach, describe, expect, it, vi } from "vitest";
