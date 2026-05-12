@@ -1,4 +1,3 @@
-import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { defaultConfig } from "@changesets/config";
@@ -6,25 +5,20 @@ import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import {
   linkNodeModules,
-  mockedLogger,
   silenceLogsInBlock,
   testdir,
 } from "@changesets/test-utils";
 import type { Changeset, Config } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
+import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { humanId } from "human-id";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type Mock,
-  vi,
-} from "vitest";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { pre } from "../pre/index.ts";
 import { version } from "./index.ts";
+
+vi.mock("@clack/prompts");
+const mockedLogger = vi.mocked(log);
 
 const modifiedDefaultConfig: Config = {
   ...defaultConfig,
@@ -35,12 +29,7 @@ const defaultOptions = {
   snapshot: undefined,
 };
 
-// avoid polluting test logs with error message in console
-// This is from bolt's error log
-const consoleError = console.error;
-
 vi.mock("human-id");
-vi.mock("@changesets/logger");
 
 vi.mock("@changesets/git");
 const mockedGit = vi.mocked(git);
@@ -61,8 +50,8 @@ const writeChangesets = (changesets: Changeset[], cwd: string) => {
 const getFilePath = async (pkgName: string, fileName: string, cwd: string) => {
   const packages = await getPackages(cwd);
   const pkg = packages.packages.find((pkg) => pkg.packageJson.name === pkgName);
-  assert(pkg, `could not find package: ${pkgName}`);
-  return path.join(pkg.dir, fileName);
+  expect(pkg).toBeDefined();
+  return path.join(pkg!.dir, fileName);
 };
 
 const getFile = async (pkgName: string, fileName: string, cwd: string) => {
@@ -88,10 +77,6 @@ beforeEach(() => {
   vi.setSystemTime(vi.getRealSystemTime());
 });
 
-afterEach(() => {
-  console.error = consoleError;
-});
-
 silenceLogsInBlock();
 
 describe("running version in a simple project", () => {
@@ -112,10 +97,8 @@ describe("running version in a simple project", () => {
       await expect(
         version(cwd, defaultOptions, modifiedDefaultConfig),
       ).rejects.toThrow(ExitError);
-      const loggerWarnCalls = mockedLogger.warn.mock.calls;
-      expect(loggerWarnCalls.length).toEqual(1);
-      expect(loggerWarnCalls[0][0]).toEqual(
-        "No unreleased changesets found, exiting.",
+      expect(mockedLogger.warn).toHaveBeenCalledExactlyOnceWith(
+        "No unreleased changesets found.",
       );
     });
   });
@@ -1360,7 +1343,7 @@ describe("workspace range", () => {
     `);
 
     // `pkg-b` should not be touched
-    await expect(() => getChangelog("pkg-b", cwd)).rejects.toThrowError();
+    await expect(() => getChangelog("pkg-b", cwd)).rejects.toThrow();
   });
 });
 
