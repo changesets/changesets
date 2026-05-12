@@ -41,7 +41,6 @@
     "@changesets/get-dependents-graph": "workspace:^",
     "@changesets/get-release-plan": "workspace:^",
     "@changesets/git": "workspace:^",
-    "@changesets/logger": "workspace:^",
     "@changesets/pre": "workspace:^",
     "@changesets/read": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",

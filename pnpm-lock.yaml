@@ -180,9 +180,6 @@ importers:
       '@changesets/git':
         specifier: workspace:^
         version: link:../git
-      '@changesets/logger':
-        specifier: workspace:^
-        version: link:../logger
       '@changesets/pre':
         specifier: workspace:^
         version: link:../pre
