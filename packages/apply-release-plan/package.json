@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@changesets/config": "workspace:^",
-    "@changesets/format": "link:../../../changesets-format",
+    "@changesets/format": "^0.1.0",
     "@changesets/get-version-range-type": "workspace:^",
     "@changesets/git": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",

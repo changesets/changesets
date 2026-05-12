@@ -14,7 +14,7 @@
     "directory": "packages/write"
   },
   "dependencies": {
-    "@changesets/format": "link:../../../changesets-format",
+    "@changesets/format": "^0.1.0",
     "@changesets/types": "workspace:^",
     "human-id": "^4.1.1"
   },

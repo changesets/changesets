@@ -73,8 +73,8 @@ importers:
         specifier: workspace:^
         version: link:../config
       '@changesets/format':
-        specifier: link:../../../changesets-format
-        version: link:../../../changesets-format
+        specifier: ^0.1.0
+        version: 0.1.0
       '@changesets/get-version-range-type':
         specifier: workspace:^
         version: link:../get-version-range-type
@@ -480,8 +480,8 @@ importers:
   packages/write:
     dependencies:
       '@changesets/format':
-        specifier: link:../../../changesets-format
-        version: link:../../../changesets-format
+        specifier: ^0.1.0
+        version: 0.1.0
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
@@ -557,6 +557,10 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
+
+  '@changesets/format@0.1.0':
+    resolution: {integrity: sha512-m3ScsTpVqQJu6WOV36vpGozJPBu5JWaFXAhG1/yRnzbOnyqomuPrIfm+LeE0PmX4HWPs9Fh4MDH4aDISEsjZaA==}
+    engines: {node: ^22.11 || ^24 || >=26}
 
   '@clack/core@1.3.1':
     resolution: {integrity: sha512-fT1qHVGAag4IEkrupZ6lRRbNCs1vS9P01KB/sG8zKgvUztbYtFBtQpjSITNwooDZ83tpsPzP0mRNs1/KVszCRA==}
@@ -1875,6 +1879,10 @@ snapshots:
       '@babel/helper-validator-identifier': 8.0.0-rc.4
 
   '@bcoe/v8-coverage@1.0.2': {}
+
+  '@changesets/format@0.1.0':
+    dependencies:
+      package-manager-detector: 1.6.0
 
   '@clack/core@1.3.1':
     dependencies:
