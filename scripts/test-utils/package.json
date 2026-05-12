@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@changesets/logger": "workspace:^",
+    "@clack/prompts": "^1.4.0",
     "fs-fixture": "^2.13.0",
     "tinyexec": "^1.0.2",
     "vitest": "^4.1.5"

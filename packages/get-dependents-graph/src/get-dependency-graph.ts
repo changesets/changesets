@@ -121,12 +121,9 @@ export function getDependencyGraph(
 
         if (!getValidRange(depRange)) {
           valid = false;
+          // TODO: replace with returning errors/warnings
           console.error(
-            `Package ${pc.cyan(
-              `"${name}"`,
-            )} must depend on the current version of ${pc.cyan(
-              `"${depName}"`,
-            )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${rawDepRange}"`)}`,
+            `Package ${pc.blue(name)} must depend on the current version of ${pc.blue(depName)}: ${pc.green(expected)} vs ${pc.red(rawDepRange)}`,
           );
           continue;
         }
@@ -138,12 +135,9 @@ export function getDependencyGraph(
 
       if ((range && !range.test(expected)) || isProtocolRange(depRange)) {
         valid = false;
+        // TODO: replace with returning errors/warnings
         console.error(
-          `Package ${pc.cyan(
-            `"${name}"`,
-          )} must depend on the current version of ${pc.cyan(
-            `"${depName}"`,
-          )}: ${pc.green(`"${expected}"`)} vs ${pc.red(`"${rawDepRange}"`)}`,
+          `Package ${pc.blue(name)} must depend on the current version of ${pc.blue(depName)}: ${pc.green(expected)} vs ${pc.red(rawDepRange)}`,
         );
         continue;
       }
