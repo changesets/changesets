@@ -18,3 +18,7 @@ export async function getReleasePlan(
 
   return assembleReleasePlan(changesets, packages, config, preState);
 }
+
+/** @deprecated Use named export `getReleasePlan` instead */
+const getReleasePlanDefault = getReleasePlan;
+export default getReleasePlanDefault;

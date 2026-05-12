@@ -8,3 +8,7 @@ export function getVersionRangeType(
   if (versionRange.charAt(0) === ">") return ">";
   return "";
 }
+
+/** @deprecated Use named export `getVersionRangeType` instead */
+const getVersionRangeTypeDefault = getVersionRangeType;
+export default getVersionRangeTypeDefault;

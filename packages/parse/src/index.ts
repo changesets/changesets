@@ -109,3 +109,7 @@ export function parseChangesetFile(contents: string): {
 
   return { releases, summary };
 }
+
+/** @deprecated Use named export `parseChangesetFile` instead */
+const parseChangesetFileDefault = parseChangesetFile;
+export default parseChangesetFileDefault;

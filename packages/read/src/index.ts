@@ -57,3 +57,7 @@ export async function readChangesets(
   });
   return await Promise.all(changesetContents);
 }
+
+/** @deprecated Use named export `readChangesets` instead */
+const readChangesetsDefault = readChangesets;
+export default readChangesetsDefault;

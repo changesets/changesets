@@ -371,3 +371,7 @@ function getPreInfo(
     preVersions,
   };
 }
+
+/** @deprecated Use named export `assembleReleasePlan` instead */
+const assembleReleasePlanDefault = assembleReleasePlan;
+export default assembleReleasePlanDefault;
