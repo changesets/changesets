@@ -8,10 +8,16 @@ on:
   #branches: ["main", "next"]
   #tags: ["!**"]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+  queue: max
+
 permissions: {}
 
 jobs:
   publish:
+    name: Publish
     if: ${{ contains(github.event.pull_request.labels.*.name, 'pkg.pr.new') }}
     runs-on: ubuntu-latest
 
@@ -28,4 +34,6 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run: pnpm exec pkg-pr-new publish --pnpm --packageManager=pnpm --commentWithDev --commentWithSha './packages/*'
+      - run:
+          | # zizmor: ignore[use-trusted-publishing] we're not publishing to npm here
+          pnpm exec pkg-pr-new publish --pnpm --packageManager=pnpm --commentWithDev --commentWithSha './packages/*'
