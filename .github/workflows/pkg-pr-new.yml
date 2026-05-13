@@ -3,10 +3,6 @@ name: pkg-pr-new
 on:
   pull_request:
     types: [labeled]
-  # publish each commit to main/next
-  #push:
-  #branches: ["main", "next"]
-  #tags: ["!**"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

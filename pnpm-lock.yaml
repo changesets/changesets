@@ -49,7 +49,7 @@ importers:
         specifier: ^0.49.0
         version: 0.49.0
       pkg-pr-new:
-        specifier: 0.0.71
+        specifier: ^0.0.71
         version: 0.0.71
       publint:
         specifier: ^0.3.18
