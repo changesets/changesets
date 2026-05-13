@@ -118,7 +118,11 @@ describe("running version in a simple project", () => {
     });
 
     await expect(
-      version(cwd, { ...defaultOptions, ignore: ["pkg-c"] }, modifiedDefaultConfig),
+      version(
+        cwd,
+        { ...defaultOptions, ignore: ["pkg-c"] },
+        modifiedDefaultConfig,
+      ),
     ).rejects.toThrow(ExitError);
 
     expect(mockedLogger.error).toHaveBeenCalledOnce();
@@ -149,7 +153,11 @@ describe("running version in a simple project", () => {
     });
 
     await expect(
-      version(cwd, { ...defaultOptions, ignore: ["pkg-b"] }, modifiedDefaultConfig),
+      version(
+        cwd,
+        { ...defaultOptions, ignore: ["pkg-b"] },
+        modifiedDefaultConfig,
+      ),
     ).rejects.toThrow(ExitError);
 
     expect(mockedLogger.error).toHaveBeenCalledOnce();
