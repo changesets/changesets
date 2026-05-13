@@ -3,6 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "description": "A tool to help manage the versioning and changelogs for open source packages",
+  "license": "MIT",
+  "author": "Changesets Contributors",
+  "contributors": [
+    "Ben Conolly",
+    "Mitchell Hamilton",
+    "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/changesets/changesets.git"
+  },
+  "workspaces": [
+    "packages/*",
+    "scripts/*"
+  ],
   "type": "module",
   "scripts": {
     "postinstall": "manypkg check",
@@ -18,22 +33,6 @@
     "release": "pnpm build && pnpm changeset publish",
     "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/changesets/changesets.git"
-  },
-  "packageManager": "pnpm@11.0.4",
-  "workspaces": [
-    "packages/*",
-    "scripts/*"
-  ],
-  "author": "Changesets Contributors",
-  "contributors": [
-    "Ben Conolly",
-    "Mitchell Hamilton",
-    "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
-  ],
-  "license": "MIT",
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@manypkg/cli": "^0.25.1",
@@ -55,5 +54,6 @@
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
-  }
+  },
+  "packageManager": "pnpm@11.0.4"
 }
