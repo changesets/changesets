@@ -1,11 +1,10 @@
 import path from "node:path";
+import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 import type { Config, Packages, WrittenConfig } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { outdent } from "outdent";
 import { describe, expect, it, test, vi, beforeEach } from "vitest";
 import { parse, read } from "./index.ts";
-// [keep-order] test-utils has to be after `./index.ts`
-import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
 
 beforeEach(() => {
   vi.spyOn(console, "error");

@@ -3,13 +3,28 @@
   "version": "1.0.0",
   "private": true,
   "description": "A tool to help manage the versioning and changelogs for open source packages",
+  "license": "MIT",
+  "author": "Changesets Contributors",
+  "contributors": [
+    "Ben Conolly",
+    "Mitchell Hamilton",
+    "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git"
+  },
+  "workspaces": [
+    "packages/*",
+    "scripts/*"
+  ],
   "type": "module",
   "scripts": {
     "postinstall": "manypkg check",
     "build": "tsdown",
     "watch": "tsdown --watch",
-    "format": "prettier --experimental-cli --list-different \"**/*.{js,ts,tsx,md}\"",
-    "format:fix": "prettier --experimental-cli --write \"**/*.{js,ts,tsx,md}\"",
+    "format": "oxfmt --check",
+    "format:fix": "oxfmt",
     "lint": "eslint",
     "test": "vitest",
     "types:check": "tsc",
@@ -18,22 +33,6 @@
     "release": "pnpm build && pnpm changeset publish",
     "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/changesets/changesets.git"
-  },
-  "packageManager": "pnpm@11.0.4",
-  "workspaces": [
-    "packages/*",
-    "scripts/*"
-  ],
-  "author": "Changesets Contributors",
-  "contributors": [
-    "Ben Conolly",
-    "Mitchell Hamilton",
-    "Mateusz Burzyński <mateuszburzynski@gmail.com> (https://github.com/Andarist)"
-  ],
-  "license": "MIT",
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@manypkg/cli": "^0.25.1",
@@ -46,8 +45,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-lite": "~0.6.0",
     "eslint-plugin-n": "^17.24.0",
-    "eslint-plugin-perfectionist": "^5.9.0",
-    "prettier": "^3.7.4",
+    "oxfmt": "^0.49.0",
     "publint": "^0.3.18",
     "tsdown": "^0.22.0",
     "typescript": "^6.0.3",
@@ -56,5 +54,6 @@
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
-  }
+  },
+  "packageManager": "pnpm@11.0.4"
 }
