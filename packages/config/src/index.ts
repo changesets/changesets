@@ -656,4 +656,4 @@ export const defaultConfig = parse(defaultWrittenConfig, {
   rootDir: fakePackage.dir,
   rootPackage: fakePackage,
   packages: [fakePackage],
-});
+}).config;

@@ -41,7 +41,7 @@ test("read reads the config", async () => {
       commit: true,
     }),
   });
-  const config = await read(cwd, {
+  const { config } = await read(cwd, {
     ...defaultPackages,
     rootDir: cwd,
     rootPackage: { ...defaultPackages.rootPackage!, dir: cwd },
@@ -84,7 +84,7 @@ test("read can read config based on the passed in `cwd`", async () => {
       version: "0.0.0",
     }),
   });
-  const config = await read(cwd);
+  const { config } = await read(cwd);
 
   expect(config).toEqual({
     fixed: [],
@@ -464,13 +464,13 @@ describe("parse", () => {
       ...correctCases[title],
     })),
   )("$title", ({ input, output, packages }) => {
-    expect(parse(input, withPackages(packages || ["pkg-a", "pkg-b"]))).toEqual(
+    expect(parse(input, withPackages(packages || ["pkg-a", "pkg-b"])).config).toEqual(
       output,
     );
   });
 });
 
-const unsafeParse = parse as any;
+const unsafeParse = (conf: unknown, packages: Packages) => parse(conf, packages).config;
 
 describe("parser errors", () => {
   test("changelog invalid value", () => {
@@ -661,7 +661,7 @@ describe("parser errors", () => {
     });
   });
   test("access private warns and sets to restricted", () => {
-    const config = unsafeParse({ access: "private" }, defaultPackages);
+    const { config } = unsafeParse({ access: "private" }, defaultPackages);
     expect(config).toEqual(defaults);
     expect(console.error).toBeCalledWith(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',

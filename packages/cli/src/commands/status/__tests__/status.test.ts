@@ -11,8 +11,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { status } from "../index.ts";
 
 async function readConfig(cwd: string) {
-  const packages = await getPackages(cwd);
-  return read(cwd, packages);
+  return (await read(cwd, await getPackages(cwd))).config;
 }
 
 function replaceHumanIds(releaseObj: ReleasePlan | undefined) {

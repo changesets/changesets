@@ -119,9 +119,7 @@ export function getDependencyGraph(
         }
 
         if (!getValidRange(depRange)) {
-          valid = false;
-          // TODO: replace with returning errors/warnings
-          console.error(
+          warnings.push(
             `Package ${pc.blue(name)} must depend on the current version of ${pc.blue(depName)}: ${pc.green(expected)} vs ${pc.red(rawDepRange)}`,
           );
           continue;

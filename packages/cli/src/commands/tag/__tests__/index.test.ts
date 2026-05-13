@@ -8,7 +8,7 @@ import { tag } from "../index.ts";
 vi.mock("@changesets/git");
 
 async function readConfig(cwd: string) {
-  return read(cwd, await getPackages(cwd));
+  return (await read(cwd, await getPackages(cwd))).config;
 }
 
 describe("tag command", () => {

@@ -21,7 +21,7 @@ describe("getting the dependency graph", function () {
       dir: path.resolve(),
       packageJson: { name: "root", version: "1.0.0" },
     };
-    const { graph, valid } = getDependencyGraph(
+    const { graph, warnings } = getDependencyGraph(
       {
         tool: { type: "yarn" },
         rootDir: rootPackage.dir,
@@ -49,8 +49,8 @@ describe("getting the dependency graph", function () {
       rootPackage,
     );
     expect(graph.get("foo")!.dependencies).toStrictEqual([]);
-    expect(valid).toBeTruthy();
-    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+    expect(warnings).toHaveLength(0);
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   it("should skip dependencies specified using a tag", function () {
@@ -58,7 +58,7 @@ describe("getting the dependency graph", function () {
       dir: path.resolve(),
       packageJson: { name: "root", version: "1.0.0" },
     };
-    const { graph, valid } = getDependencyGraph(
+    const { graph, warnings } = getDependencyGraph(
       {
         tool: { type: "yarn" },
         rootDir: rootPackage.dir,
@@ -86,18 +86,18 @@ describe("getting the dependency graph", function () {
       rootPackage,
     );
     expect(graph.get("foo-example")!.dependencies).toStrictEqual([]);
-    expect(valid).toBeTruthy();
-    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+    expect(warnings).toHaveLength(0);
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   it(
-    "should set valid to false if the link protocol is used in a non-dev dep",
+    "should add warning if the link protocol is used in a non-dev dep",
     temporarilySilenceLogs(() => {
       const rootPackage: Package = {
         dir: path.resolve(),
         packageJson: { name: "root", version: "1.0.0" },
       };
-      const { valid } = getDependencyGraph(
+      const { warnings } = getDependencyGraph(
         {
           tool: { type: "yarn" },
           rootDir: rootPackage.dir,
@@ -124,12 +124,8 @@ describe("getting the dependency graph", function () {
         },
         rootPackage,
       );
-      expect(valid).toBeFalsy();
-      expect((console.error as any).mock.calls).toHaveLength(1);
-      expect(
-        stripVTControlCharacters((console.error as any).mock.calls[0][0]),
-      ).toBe(
-        `Package foo must depend on the current version of bar: 1.0.0 vs link:../bar`,
+      expect(stripVTControlCharacters(warnings[0])).toEqual(
+        "Package foo must depend on the current version of bar: 1.0.0 vs link:../bar",
       );
     }),
   );
@@ -141,7 +137,7 @@ describe("getting the dependency graph", function () {
         dir: path.resolve(),
         packageJson: { name: "root", version: "1.0.0" },
       };
-      const { valid } = getDependencyGraph(
+      const { warnings } = getDependencyGraph(
         {
           tool: { type: "yarn" },
           rootDir: rootPackage.dir,
@@ -168,11 +164,9 @@ describe("getting the dependency graph", function () {
         },
         rootPackage,
       );
-      expect(valid).toBe(false);
-      expect(
-        stripVTControlCharacters((console.error as any).mock.calls[0][0]),
-      ).toMatchInlineSnapshot(
-        `"Package foo must depend on the current version of bar: 1.0.0 vs 0.9.0"`,
+
+      expect(stripVTControlCharacters(warnings[0])).toEqual(
+        "Package foo must depend on the current version of bar: 1.0.0 vs 0.9.0",
       );
     }),
   );
@@ -184,7 +178,7 @@ describe("getting the dependency graph", function () {
         dir: path.resolve(),
         packageJson: { name: "root", version: "1.0.0" },
       };
-      const { valid } = getDependencyGraph(
+      const { warnings } = getDependencyGraph(
         {
           tool: { type: "yarn" },
           rootDir: rootPackage.dir,
@@ -214,8 +208,8 @@ describe("getting the dependency graph", function () {
           bumpVersionsWithWorkspaceProtocolOnly: true,
         },
       );
-      expect(valid).toBe(true);
-      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+      expect(warnings).toHaveLength(0);
+      expect(console.error).not.toHaveBeenCalled();
     }),
   );
 
@@ -224,7 +218,7 @@ describe("getting the dependency graph", function () {
       dir: path.resolve(),
       packageJson: { name: "root", version: "1.0.0" },
     };
-    const { graph, valid } = getDependencyGraph(
+    const { graph, warnings } = getDependencyGraph(
       {
         tool: { type: "pnpm" },
         rootDir: rootPackage.dir,
@@ -253,8 +247,8 @@ describe("getting the dependency graph", function () {
     );
 
     expect(graph.get("foo")!.dependencies).toStrictEqual(["bar"]);
-    expect(valid).toBeTruthy();
-    expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+    expect(warnings).toHaveLength(0);
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   it(
@@ -264,7 +258,7 @@ describe("getting the dependency graph", function () {
         dir: path.resolve(),
         packageJson: { name: "root", version: "1.0.0" },
       };
-      const { graph, valid } = getDependencyGraph(
+      const { graph, warnings } = getDependencyGraph(
         {
           tool: { type: "pnpm" },
           rootDir: rootPackage.dir,
@@ -293,11 +287,9 @@ describe("getting the dependency graph", function () {
       );
 
       expect(graph.get("foo")!.dependencies).toStrictEqual([]);
-      expect(valid).toBe(false);
-      expect(
-        stripVTControlCharacters((console.error as any).mock.calls[0][0]),
-      ).toMatchInlineSnapshot(
-        `"Package foo must depend on the current version of bar: 1.0.0 vs workspace:packages/not-bar"`,
+
+      expect(stripVTControlCharacters(warnings[0])).toEqual(
+        "Package foo must depend on the current version of bar: 1.0.0 vs workspace:packages/not-bar",
       );
     }),
   );
