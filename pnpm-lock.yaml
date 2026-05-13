@@ -75,9 +75,6 @@ importers:
       '@changesets/format':
         specifier: ^0.1.0
         version: 0.1.0
-      '@changesets/get-version-range-type':
-        specifier: workspace:^
-        version: link:../get-version-range-type
       '@changesets/git':
         specifier: workspace:^
         version: link:../git
