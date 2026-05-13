@@ -163,7 +163,6 @@ export async function applyReleasePlan(
           changesetFolder,
           `${changeset.id}.md`,
         );
-        const changesetFolderPath = path.resolve(changesetFolder, changeset.id);
         if (
           await fs.access(changesetPath).then(
             () => true,
@@ -186,15 +185,6 @@ export async function applyReleasePlan(
             touchedFiles.push(changesetPath);
             await fs.rm(changesetPath, { recursive: true, force: true });
           }
-          // TO REMOVE LOGIC - this works to remove v1 changesets. We should be removed in the future
-        } else if (
-          await fs.access(changesetFolderPath).then(
-            () => true,
-            () => false,
-          )
-        ) {
-          touchedFiles.push(changesetFolderPath);
-          await fs.rm(changesetFolderPath, { recursive: true, force: true });
         }
       }),
     );
