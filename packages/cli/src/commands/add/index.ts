@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import color from "@changesets/color";
+import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
@@ -46,8 +46,8 @@ export async function add(
     log.error(
       `
 No versionable packages found
-  ${color.italic("Ensure the packages to version are not ignored by the config")}
-  ${color.italic("Ensure that relevant package.json files have a `version` field")}
+  ${c.italic("Ensure the packages to version are not ignored by the config")}
+  ${c.italic("Ensure that relevant package.json files have a `version` field")}
 `.trim(),
     );
     throw new ExitError(1);
@@ -111,11 +111,11 @@ ${(error as Error).toString()}
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
       await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
       finalLogMessageLines.push(
-        color.green(`${empty ? "Empty " : ""}Changeset added and committed!`),
+        c.green(`${empty ? "Empty " : ""}Changeset added and committed!`),
       );
     } else {
       finalLogMessageLines.push(
-        color.green(
+        c.green(
           `${empty ? "Empty " : ""}Changeset added - you can now commit it!`,
         ),
       );
@@ -136,7 +136,7 @@ This Changeset includes a major change and we STRONGLY recommend adding more inf
       );
     } else {
       finalLogMessageLines.push(
-        color.green(
+        c.green(
           "If you want to modify or expand on the changeset summary, you can find it here:",
         ),
       );
@@ -146,7 +146,7 @@ This Changeset includes a major change and we STRONGLY recommend adding more inf
       process.cwd(),
       path.join(changesetBase, `${changesetID}.md`),
     );
-    finalLogMessageLines.push(color.blue(changesetPath));
+    finalLogMessageLines.push(c.blue(changesetPath));
 
     log.success(finalLogMessageLines.join("\n"));
 

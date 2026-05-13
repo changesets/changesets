@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import color from "@changesets/color";
+import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { getReleasePlan } from "@changesets/get-release-plan";
 import type { ComprehensiveRelease, Config } from "@changesets/types";
@@ -29,8 +29,8 @@ export async function status(
   if (changedPackages.length > 0 && releasePlan.changesets.length === 0) {
     log.error(
       `
-Some packages have been changed but no changesets were found. Run ${color.cyan("changeset add")} to resolve this error.
-If this change doesn't need a release, run ${color.cyan("changeset add --empty")}.
+Some packages have been changed but no changesets were found. Run ${c.cyan("changeset add")} to resolve this error.
+If this change doesn't need a release, run ${c.cyan("changeset add --empty")}.
       `.trim(),
     );
     throw new ExitError(1);
@@ -62,9 +62,9 @@ ${printPackageList(releases, verbose)}
 }
 
 const typeColors = {
-  major: color.red,
-  minor: color.green,
-  patch: color.blue,
+  major: c.red,
+  minor: c.green,
+  patch: c.blue,
 } as const;
 
 function printPackageList(releases: ComprehensiveRelease[], verbose?: boolean) {
@@ -85,14 +85,12 @@ function printPackageList(releases: ComprehensiveRelease[], verbose?: boolean) {
       const lines = [`- ${typeColors[type](type)}`];
 
       releases.forEach(({ name, newVersion, changesets }) => {
-        const addedLineIndex = lines.push(`  - ${color.cyan(name)}`) - 1;
+        const addedLineIndex = lines.push(`  - ${c.cyan(name)}`) - 1;
 
         if (verbose) {
-          lines[addedLineIndex] += ` -> ${color.green(newVersion)}`;
+          lines[addedLineIndex] += ` -> ${c.green(newVersion)}`;
           lines.push(
-            ...changesets.map(
-              (c) => `    - ${color.blue(`.changeset/${c}.md`)}`,
-            ),
+            ...changesets.map((c) => `    - ${c.blue(`.changeset/${c}.md`)}`),
           );
         }
       });

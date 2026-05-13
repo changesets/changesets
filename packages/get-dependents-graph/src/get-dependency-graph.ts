@@ -1,5 +1,5 @@
 import path from "node:path";
-import color from "@changesets/color";
+import c from "@changesets/color";
 import type { Package, Packages, PackageJSON } from "@changesets/types";
 import Range from "semver/classes/range.js";
 
@@ -123,7 +123,7 @@ export function getDependencyGraph(
           valid = false;
           // TODO: replace with returning errors/warnings
           console.error(
-            `Package ${color.blue(name)} must depend on the current version of ${color.blue(depName)}: ${color.green(expected)} vs ${color.red(rawDepRange)}`,
+            `Package ${c.blue(name)} must depend on the current version of ${c.blue(depName)}: ${c.green(expected)} vs ${c.red(rawDepRange)}`,
           );
           continue;
         }
@@ -137,7 +137,7 @@ export function getDependencyGraph(
         valid = false;
         // TODO: replace with returning errors/warnings
         console.error(
-          `Package ${color.blue(name)} must depend on the current version of ${color.blue(depName)}: ${color.green(expected)} vs ${color.red(rawDepRange)}`,
+          `Package ${c.blue(name)} must depend on the current version of ${c.blue(depName)}: ${c.green(expected)} vs ${c.red(rawDepRange)}`,
         );
         continue;
       }

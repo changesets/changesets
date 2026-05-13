@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import color from "@changesets/color";
+import c from "@changesets/color";
 import type { AccessType, Package, PreState } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
 import semverParse from "semver/functions/parse.js";
@@ -139,7 +139,7 @@ export async function publishPackages({
       publishPromises.map(async (publishPromise) => {
         const result = await publishPromise;
         log.success(
-          `Published ${color.blue(result.name)}@${color.green(result.newVersion)}!`,
+          `Published ${c.blue(result.name)}@${c.green(result.newVersion)}!`,
         );
         return result;
       }),
@@ -215,10 +215,10 @@ async function getUnpublishedPackages(
     const { name, publishedState, localVersion, publishedVersions } = pkgInfo;
     if (!publishedVersions.includes(localVersion)) {
       packagesToPublish.push(pkgInfo);
-      previewLines.push(`${color.blue(name)}@${color.green(localVersion)}`);
+      previewLines.push(`${c.blue(name)}@${c.green(localVersion)}`);
       if (preState != null && publishedState === "only-pre") {
         previewLines.push(
-          `${color.gray("└")} will be published to ${color.cyan("latest")} rather than ${color.cyan(preState.tag)} as it will be its first published version.`,
+          `${c.gray("└")} will be published to ${c.cyan("latest")} rather than ${c.cyan(preState.tag)} as it will be its first published version.`,
         );
       }
     } else {
@@ -231,7 +231,7 @@ async function getUnpublishedPackages(
       `
 These packages will be published as they were not found on npm:
 ${previewLines.join("\n")}
-${color.gray(`${alreadyPublishedCount} packages are already published.`)}
+${c.gray(`${alreadyPublishedCount} packages are already published.`)}
       `.trim(),
     );
   }

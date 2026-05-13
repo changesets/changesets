@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import color from "@changesets/color";
+import c from "@changesets/color";
 import { defaultWrittenConfig } from "@changesets/config";
 import { log } from "@clack/prompts";
 
@@ -20,7 +20,7 @@ export async function init(cwd: string) {
       log.success(
         `
 It looks like you don't have a config file
-The default config file will be written to ${color.blue(".changeset/config.json")}
+The default config file will be written to ${c.blue(".changeset/config.json")}
         `.trim(),
       );
 
@@ -30,7 +30,7 @@ The default config file will be written to ${color.blue(".changeset/config.json"
       );
     } else {
       log.success(
-        `It looks like you already have ${color.green("Changesets")} initialized.\nYou should be able to run changeset commands no problems.`,
+        `It looks like you already have ${c.green("Changesets")} initialized.\nYou should be able to run changeset commands no problems.`,
       );
     }
   } else {
@@ -44,11 +44,11 @@ The default config file will be written to ${color.blue(".changeset/config.json"
 
     log.success(
       `
-Thanks for choosing ${color.green("Changesets")} to help manage your versioning and publishing.
+Thanks for choosing ${c.green("Changesets")} to help manage your versioning and publishing.
 You should be set up to start using changesets now!
 We have created a \`.changeset\` folder, and a couple of files to help you out:
-- ${color.blue(".changeset/config.json")} with the default config options
-- ${color.blue(".changeset/README.md")} with information about using changesets
+- ${c.blue(".changeset/config.json")} with the default config options
+- ${c.blue(".changeset/README.md")} with information about using changesets
       `.trim(),
     );
   }

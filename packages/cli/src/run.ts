@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import color from "@changesets/color";
+import c from "@changesets/color";
 import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -26,7 +26,7 @@ function validateCommandFlags(
   if (unknownFlags.length > 0) {
     log.error(
       `
-Unknown flag${unknownFlags.length > 1 ? "s" : ""} for ${color.cyan(command)}: ${unknownFlags.map((flag) => `--${flag}`).join(", ")}
+Unknown flag${unknownFlags.length > 1 ? "s" : ""} for ${c.cyan(command)}: ${unknownFlags.map((flag) => `--${flag}`).join(", ")}
 Usage: changeset ${COMMAND_HELP[command]}
       `.trim(),
     );
@@ -53,7 +53,7 @@ export async function run(
     log.error(
       `
 There is no .changeset folder.
-If this is the first time ${color.green("Changesets")} have been used in this project, run ${color.cyan("changeset init")} to get set up.
+If this is the first time ${c.green("Changesets")} have been used in this project, run ${c.cyan("changeset init")} to get set up.
 If you expected there to be changesets, you should check git history for when the folder was removed to ensure you do not lose any configuration.
       `.trim(),
     );
@@ -108,7 +108,7 @@ If you expected there to be changesets, you should check git history for when th
         for (const pkgName of ignoreArrayFromCmd || []) {
           if (!pkgNames.has(pkgName)) {
             messages.push(
-              `The package ${color.blue(pkgName)} is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
+              `The package ${c.blue(pkgName)} is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
             );
           }
         }
@@ -163,7 +163,7 @@ If you expected there to be changesets, you should check git history for when th
               })
             ) {
               messages.push(
-                `The package ${color.blue(dependent)} depends on the skipped package ${color.blue(skippedPackage)} (either by \`ignore\` option or by \`privatePackages.version\`), but ${color.blue(dependent)} is not being skipped. Please pass ${color.blue(dependent)} to the ${color.cyan("--ignore")} flag.`,
+                `The package ${c.blue(dependent)} depends on the skipped package ${c.blue(skippedPackage)} (either by \`ignore\` option or by \`privatePackages.version\`), but ${c.blue(dependent)} is not being skipped. Please pass ${c.blue(dependent)} to the ${c.cyan("--ignore")} flag.`,
               );
             }
           }
@@ -204,7 +204,7 @@ If you expected there to be changesets, you should check git history for when th
         const command = input[1];
         if (command !== "enter" && command !== "exit") {
           log.error(
-            `${color.cyan("enter")}, ${color.cyan("exit")} or ${color.cyan("snapshot")} must be passed after prerelease`,
+            `${c.cyan("enter")}, ${c.cyan("exit")} or ${c.cyan("snapshot")} must be passed after prerelease`,
           );
           throw new ExitError(1);
         }
@@ -219,8 +219,8 @@ If you expected there to be changesets, you should check git history for when th
       case "bump": {
         log.error(
           `
-In version 2 of changesets, ${color.red("bump")} has been renamed to ${color.cyan("version")} - see our changelog for an explanation
-To fix this, use ${color.cyan("changeset version")} instead, and update any scripts that use changesets
+In version 2 of changesets, ${c.red("bump")} has been renamed to ${c.cyan("version")} - see our changelog for an explanation
+To fix this, use ${c.cyan("changeset version")} instead, and update any scripts that use changesets
           `.trim(),
         );
         throw new ExitError(1);
@@ -228,14 +228,14 @@ To fix this, use ${color.cyan("changeset version")} instead, and update any scri
       case "release": {
         log.error(
           `
-In version 2 of changesets, ${color.red("release")} has been renamed to ${color.cyan("publish")} - see our changelog for an explanation
-To fix this, use ${color.cyan("changeset publish")} instead, and update any scripts that use changesets
+In version 2 of changesets, ${c.red("release")} has been renamed to ${c.cyan("publish")} - see our changelog for an explanation
+To fix this, use ${c.cyan("changeset publish")} instead, and update any scripts that use changesets
           `.trim(),
         );
         throw new ExitError(1);
       }
       default: {
-        log.error(`Unknown command: ${color.red(input[0])}`);
+        log.error(`Unknown command: ${c.red(input[0])}`);
         throw new ExitError(1);
       }
     }

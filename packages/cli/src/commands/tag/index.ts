@@ -1,4 +1,4 @@
-import color from "@changesets/color";
+import c from "@changesets/color";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config } from "@changesets/types";
@@ -17,8 +17,8 @@ function buildTagMessage(
   pkg: { name: string; newVersion: string },
 ) {
   return tool.type !== "root"
-    ? `${color.blue(pkg.name)}@${color.green(pkg.newVersion)}`
-    : color.cyan(`v${pkg.newVersion}`);
+    ? `${c.blue(pkg.name)}@${c.green(pkg.newVersion)}`
+    : c.cyan(`v${pkg.newVersion}`);
 }
 
 export async function tag(cwd: string, config: Config) {

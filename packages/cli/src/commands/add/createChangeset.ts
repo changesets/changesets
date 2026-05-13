@@ -1,4 +1,4 @@
-import color from "@changesets/color";
+import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import type { Package, PackageJSON, Release } from "@changesets/types";
 import { log } from "@clack/prompts";
@@ -11,13 +11,13 @@ async function confirmMajorRelease({ name, version }: PackageJSON) {
   if (semverLt(version, "1.0.0")) {
     importantWarning(
       `
-The ${color.red("major")} version of ${color.blue(name)} will be its ${color.red("first major release")} (1.0.0).
-If you are unsure if this is correct, contact the package's maintainers ${color.red("before committing this changeset")}.   
+The ${c.red("major")} version of ${c.blue(name)} will be its ${c.red("first major release")} (1.0.0).
+If you are unsure if this is correct, contact the package's maintainers ${c.red("before committing this changeset")}.
       `,
     );
 
     return cli.askConfirm(
-      `Are you sure you want to release the ${color.red("first major version")} of ${name}?`,
+      `Are you sure you want to release the ${c.red("first major version")} of ${name}?`,
     );
   }
   return true;
@@ -73,7 +73,7 @@ function getPkgJsonsByName(packages: Array<Package>) {
 }
 
 function formatPkgNameAndVersion(pkgName: string, version: string) {
-  return `${color.bold(pkgName)}@${color.bold(version)}`;
+  return `${c.bold(pkgName)}@${c.bold(version)}`;
 }
 
 export async function createChangeset(
@@ -95,8 +95,8 @@ export async function createChangeset(
     const pkgsLeftToGetBumpTypeFor = new Set(packagesToRelease);
 
     const pkgsThatShouldBeMajorBumped = await cli.askMultiselect<string>(
-      color.bold(
-        `Which packages should have a ${color.red("major")} ${color.gray(`(${color.red("X")}.X.X)`)} bump?`,
+      c.bold(
+        `Which packages should have a ${c.red("major")} ${c.gray(`(${c.red("X")}.X.X)`)} bump?`,
       ),
       {
         "all packages": packagesToRelease.map((pkgName) => ({
@@ -125,8 +125,8 @@ export async function createChangeset(
 
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
       const pkgsThatShouldBeMinorBumped = await cli.askMultiselect(
-        color.bold(
-          `Which packages should have a ${color.green("minor")} ${color.gray(`(X.${color.green("X")}.X)`)} bump?`,
+        c.bold(
+          `Which packages should have a ${c.green("minor")} ${c.gray(`(X.${c.green("X")}.X)`)} bump?`,
         ),
         {
           "all packages": [...pkgsLeftToGetBumpTypeFor].map((pkgName) => ({
@@ -152,8 +152,8 @@ export async function createChangeset(
       );
       log.info(
         `
-The following packages will be ${color.blue("patch")} ${color.gray(`(X.X.${color.blue("X")})`)} bumped:
-${color.gray(patchBumpedPackages.join(", "))}
+The following packages will be ${c.blue("patch")} ${c.gray(`(X.X.${c.blue("X")})`)} bumped:
+${c.gray(patchBumpedPackages.join(", "))}
         `.trim(),
       );
 
@@ -164,7 +164,7 @@ ${color.gray(patchBumpedPackages.join(", "))}
   } else {
     const pkg = allPackages[0];
     const type = await cli.askList(
-      `What kind of change is this for ${color.blue(pkg.packageJson.name)}? ${color.gray(`(current version is ${pkg.packageJson.version})`)}`,
+      `What kind of change is this for ${c.blue(pkg.packageJson.name)}? ${c.gray(`(current version is ${pkg.packageJson.version})`)}`,
       ["patch", "minor", "major"],
     );
     if (type === "major") {
@@ -203,7 +203,7 @@ ${color.gray(patchBumpedPackages.join(", "))}
       }
     } catch {
       summary = await cli.askQuestion(
-        `${color.red(
+        `${c.red(
           "An error happened using external editor. Please type your summary here:",
         )}`,
         { notEmpty: true },

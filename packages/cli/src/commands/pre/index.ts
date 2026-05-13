@@ -1,4 +1,4 @@
-import color from "@changesets/color";
+import c from "@changesets/color";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError,
@@ -18,16 +18,16 @@ export async function pre(
       await enterPre(rootDir, options.tag);
       log.success(
         `
-Entered pre mode with tag ${color.green(options.tag)}!
-Run ${color.cyan("changeset version")} to version packages with prerelease versions.
+Entered pre mode with tag ${c.green(options.tag)}!
+Run ${c.cyan("changeset version")} to version packages with prerelease versions.
         `.trim(),
       );
     } catch (err) {
       if (err instanceof PreEnterButInPreModeError) {
         log.error(
           `
-${color.cyan("changeset pre enter")} cannot be run when in pre mode.
-If you're trying to exit pre mode, run ${color.cyan("changeset pre exit")}.
+${c.cyan("changeset pre enter")} cannot be run when in pre mode.
+If you're trying to exit pre mode, run ${c.cyan("changeset pre exit")}.
           `.trim(),
         );
         throw new ExitError(1);
@@ -40,15 +40,15 @@ If you're trying to exit pre mode, run ${color.cyan("changeset pre exit")}.
       log.success(
         `
 Exited pre mode!
-Run ${color.cyan("changeset version")} to version packages with normal versions.
+Run ${c.cyan("changeset version")} to version packages with normal versions.
         `.trim(),
       );
     } catch (err) {
       if (err instanceof PreExitButNotInPreModeError) {
         log.error(
           `
-${color.cyan("changeset pre exit")} can only be run when in pre mode!
-If you're trying to enter pre mode, run ${color.cyan("changeset pre enter")}.
+${c.cyan("changeset pre exit")} can only be run when in pre mode!
+If you're trying to enter pre mode, run ${c.cyan("changeset pre enter")}.
           `.trim(),
         );
         throw new ExitError(1);
