@@ -30,7 +30,8 @@ export async function version(
     snapshot: {
       ...config.snapshot,
       prereleaseTemplate:
-        options.snapshotPrereleaseTemplate ?? config.snapshot.prereleaseTemplate,
+        options.snapshotPrereleaseTemplate ??
+        config.snapshot.prereleaseTemplate,
     },
     // Disable committing when in snapshot mode
     commit: options.snapshot ? false : config.commit,
@@ -40,9 +41,9 @@ export async function version(
 
   const messages: string[] = [];
 
-  validateIgnoredPackageNames(packages, options.ignore, messages)
-  validateIgnoreSourceConflict(config, options.ignore, messages)
-  validateSkippedDependents(packages, releaseConfig, messages)
+  validateIgnoredPackageNames(packages, options.ignore, messages);
+  validateIgnoreSourceConflict(config, options.ignore, messages);
+  validateSkippedDependents(packages, releaseConfig, messages);
 
   if (messages.length > 0) {
     log.error(messages.join("\n"));
@@ -176,7 +177,11 @@ function validateIgnoreSourceConflict(
   }
 }
 
-function validateSkippedDependents(packages: Packages, config: Config, messages: string[]) {
+function validateSkippedDependents(
+  packages: Packages,
+  config: Config,
+  messages: string[],
+) {
   const packagesByName = new Map(
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
