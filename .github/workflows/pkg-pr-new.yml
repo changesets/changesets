@@ -5,8 +5,8 @@ on:
     types: [labeled]
   # publish each commit to main/next
   #push:
-    #branches: ["main", "next"]
-    #tags: ["!**"]
+  #branches: ["main", "next"]
+  #tags: ["!**"]
 
 permissions: {}
 
