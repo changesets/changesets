@@ -1,0 +1,35 @@
+name: pkg-pr-new
+
+on:
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+  queue: max
+
+permissions: {}
+
+jobs:
+  publish:
+    name: Publish
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'pkg.pr.new') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/ci-setup
+        with:
+          node-version: 26
+
+      - name: Build
+        run: pnpm build
+
+      - run:
+          | # zizmor: ignore[use-trusted-publishing] we're not publishing to npm here
+          pnpm exec pkg-pr-new publish --pnpm --packageManager=pnpm --commentWithDev --commentWithSha './packages/*'
