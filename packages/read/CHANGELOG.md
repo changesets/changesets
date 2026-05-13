@@ -1,5 +1,16 @@
 # @changesets/read
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- [#2004](https://github.com/changesets/changesets/pull/2004) [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156) Thanks [@ghostdevv](https://github.com/ghostdevv)! - Replace `picocolors` with `node:util`'s `styleText`
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8)]:
+  - @changesets/types@7.0.0-next.4
+  - @changesets/git@4.0.0-next.4
+  - @changesets/parse@1.0.0-next.4
+
 ## 1.0.0-next.3
 
 ### Major Changes
