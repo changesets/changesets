@@ -279,7 +279,7 @@ describe("cli", () => {
       );
     });
 
-    it("should not throw if `prettier: false` is configured", async () => {
+    it("should not throw if `format: false` is configured", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
@@ -291,7 +291,7 @@ describe("cli", () => {
           version: "1.0.0",
         }),
         ".changeset/config.json": JSON.stringify({
-          prettier: false,
+          format: false,
         }),
       });
       await writeChangeset(
@@ -305,7 +305,7 @@ describe("cli", () => {
       await expect(run(["version"], {}, cwd)).resolves.not.toThrow();
     });
 
-    it('should throw if `prettier: "string"` is configured', async () => {
+    it('should throw if `format: "invalid"` is configured', async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
@@ -317,7 +317,7 @@ describe("cli", () => {
           version: "1.0.0",
         }),
         ".changeset/config.json": JSON.stringify({
-          prettier: "no thanks",
+          format: "no thanks",
         }),
       });
       await writeChangeset(
@@ -331,7 +331,7 @@ describe("cli", () => {
       await expect(run(["version"], {}, cwd)).rejects
         .toThrowErrorMatchingInlineSnapshot(`
         [Error: Some errors occurred when validating the changesets config:
-        The \`prettier\` option is set as "no thanks" when the only valid values are undefined or a boolean]
+        The \`format\` option is set as "no thanks" when the only valid values are "auto", "prettier", "oxfmt", "dprint", "deno" or false]
       `);
     });
   });

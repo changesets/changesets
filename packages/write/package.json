@@ -14,9 +14,9 @@
     "directory": "packages/write"
   },
   "dependencies": {
+    "@changesets/format": "^0.1.0",
     "@changesets/types": "workspace:^",
-    "human-id": "^4.1.1",
-    "prettier": "^3.7.4"
+    "human-id": "^4.1.1"
   },
   "devDependencies": {
     "@changesets/parse": "workspace:*",

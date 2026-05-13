@@ -542,7 +542,6 @@ Awesome feature, hidden behind a feature flag
       "# pkg-a
 
       ## 2.0.0
-
       ### Major Changes
 
       - g1th4sh: a summary with special replacement patterns \`react$\` $'
@@ -552,7 +551,7 @@ Awesome feature, hidden behind a feature flag
             ### Major Changes
 
             - a very useful summary for the change
-      "
+            "
     `);
   });
 
@@ -842,14 +841,13 @@ describe("fixed", () => {
       "# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - g1th4sh: This is a summary
 
       ### Patch Changes
 
-      - pkg-b@1.1.0
+        - pkg-b@1.1.0
       "
     `);
     expect(await getChangelog("pkg-b", cwd)).toMatchInlineSnapshot(`
@@ -878,24 +876,22 @@ describe("fixed", () => {
       "# pkg-a
 
       ## 1.2.0
-
       ### Minor Changes
 
       - g1th4sh: This is a summary
 
       ### Patch Changes
 
-      - pkg-b@1.2.0
+        - pkg-b@1.2.0
 
       ## 1.1.0
-
       ### Minor Changes
 
       - g1th4sh: This is a summary
 
       ### Patch Changes
 
-      - pkg-b@1.1.0
+        - pkg-b@1.1.0
       "
     `);
     expect(await getChangelog("pkg-b", cwd)).toMatchInlineSnapshot(`
@@ -1225,7 +1221,6 @@ describe("workspace range", () => {
       "# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -1236,7 +1231,6 @@ describe("workspace range", () => {
       "# pkg-b
 
       ## 1.0.1
-
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
@@ -1277,7 +1271,6 @@ describe("workspace range", () => {
       "# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -1288,7 +1281,6 @@ describe("workspace range", () => {
       "# pkg-b
 
       ## 2.0.0
-
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
@@ -1335,7 +1327,6 @@ describe("workspace range", () => {
       "# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -2022,7 +2013,6 @@ describe("updateInternalDependents: always", () => {
       "# pkg-a
 
       ## 1.0.1
-
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
@@ -2033,7 +2023,6 @@ describe("updateInternalDependents: always", () => {
       "# pkg-b
 
       ## 1.0.1
-
       ### Patch Changes
 
       - g1th4sh: This is not a summary
@@ -2108,7 +2097,6 @@ describe("updateInternalDependents: always", () => {
       "# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -2184,7 +2172,6 @@ describe("updateInternalDependents: always", () => {
       "# pkg-b
 
       ## 1.0.1
-
       ### Patch Changes
 
       - g1th4sh: This is some fix
@@ -2251,7 +2238,6 @@ describe("updateInternalDependents: always", () => {
       "# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -2262,7 +2248,6 @@ describe("updateInternalDependents: always", () => {
       "# pkg-b
 
       ## 1.0.1
-
       ### Patch Changes
 
       - g1th4sh: This is some fix
@@ -2409,7 +2394,6 @@ describe("pre", () => {
       "# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - g1th4sh: a very useful summary for the third change
@@ -2422,25 +2406,21 @@ describe("pre", () => {
         - pkg-b@1.0.1
 
       ## 1.1.0-next.3
-
       ### Minor Changes
 
       - g1th4sh: a very useful summary for the third change
 
       ## 1.0.1-next.2
-
       ### Patch Changes
 
       - g1th4sh: a very useful summary for the second change
 
       ## 1.0.1-next.1
-
       ### Patch Changes
 
       - g1th4sh: a very useful summary
 
       ## 1.0.1-next.0
-
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
@@ -2456,13 +2436,11 @@ describe("pre", () => {
       "# pkg-b
 
       ## 1.0.1
-
       ### Patch Changes
 
       - g1th4sh: a very useful summary for the first change
 
       ## 1.0.1-next.0
-
       ### Patch Changes
 
       - g1th4sh: a very useful summary for the first change

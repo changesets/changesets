@@ -58,7 +58,7 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
-    prettier: true,
+    format: "auto",
     privatePackages: {
       tag: false,
       version: true,
@@ -98,7 +98,7 @@ test("read can read config based on the passed in `cwd`", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
-    prettier: true,
+    format: "auto",
     privatePackages: {
       tag: false,
       version: true,
@@ -198,7 +198,7 @@ const defaults: Config = {
   changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
   ignore: [],
-  prettier: true,
+  format: "auto",
   privatePackages: { version: true, tag: false },
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
