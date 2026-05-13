@@ -24,9 +24,21 @@ export async function version(
   },
   config: Config,
 ) {
+  const messages: string[] = [];
+  let ignore: readonly string[] | undefined;
+
+  if (options.ignore != null) {
+    if (config.ignore.length > 0) {
+      messages.push(
+        "It looks like you are trying to use the `--ignore` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.",
+      );
+    } else {
+      ignore = options.ignore;
+    }
+  }
   const releaseConfig = {
     ...config,
-    ignore: options.ignore ?? config.ignore,
+    ignore: ignore ?? config.ignore,
     snapshot: {
       ...config.snapshot,
       prereleaseTemplate:
@@ -39,10 +51,7 @@ export async function version(
 
   const packages = await getPackages(cwd);
 
-  const messages: string[] = [];
-
   validateIgnoredPackageNames(packages, options.ignore, messages);
-  validateIgnoreSourceConflict(config, options.ignore, messages);
   validateSkippedDependents(packages, releaseConfig, messages);
 
   if (messages.length > 0) {
@@ -160,19 +169,7 @@ function validateIgnoredPackageNames(
     }
 
     messages.push(
-      `The package ${pc.blue(pkgName)} is passed to the ${pc.cyan("--ignore")} option but it is not found in the project. You may have misspelled the package name.`,
-    );
-  }
-}
-
-function validateIgnoreSourceConflict(
-  config: Config,
-  ignoreFromCli: string[] | undefined,
-  messages: string[],
-) {
-  if (config.ignore.length > 0 && ignoreFromCli) {
-    messages.push(
-      "It looks like you are trying to use the `--ignore` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.",
+      `The package ${pc.blue(pkgName)} is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
     );
   }
 }
