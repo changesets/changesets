@@ -3,10 +3,12 @@ import { fileURLToPath } from "node:url";
 import { applyReleasePlan } from "@changesets/apply-release-plan";
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
 import { ExitError } from "@changesets/errors";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import { readChangesets } from "@changesets/read";
-import type { Config } from "@changesets/types";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
+import type { Config, Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import pc from "picocolors";
@@ -15,14 +17,38 @@ import { importantWarning } from "../../utils/cli-utilities.ts";
 
 export async function version(
   cwd: string,
-  options: { snapshot?: string | boolean },
+  options: {
+    ignore?: string[];
+    snapshot?: string | boolean;
+    snapshotPrereleaseTemplate?: string;
+  },
   config: Config,
 ) {
   const releaseConfig = {
     ...config,
+    ignore: options.ignore ?? config.ignore,
+    snapshot: {
+      ...config.snapshot,
+      prereleaseTemplate:
+        options.snapshotPrereleaseTemplate ?? config.snapshot.prereleaseTemplate,
+    },
     // Disable committing when in snapshot mode
     commit: options.snapshot ? false : config.commit,
   };
+
+  const packages = await getPackages(cwd);
+
+  const messages: string[] = [];
+
+  validateIgnoredPackageNames(packages, options.ignore, messages)
+  validateIgnoreSourceConflict(config, options.ignore, messages)
+  validateSkippedDependents(packages, releaseConfig, messages)
+
+  if (messages.length > 0) {
+    log.error(messages.join("\n"));
+    throw new ExitError(1);
+  }
+
   const [changesets, preState] = await Promise.all([
     readChangesets(cwd),
     readPreState(cwd),
@@ -56,8 +82,6 @@ You can then run ${pc.cyan("changeset version")} again to do a normal release.
     throw new ExitError(1);
   }
 
-  const packages = await getPackages(cwd);
-
   const releasePlan = assembleReleasePlan(
     changesets,
     packages,
@@ -66,7 +90,9 @@ You can then run ${pc.cyan("changeset version")} again to do a normal release.
     options.snapshot
       ? {
           tag: options.snapshot === true ? undefined : options.snapshot,
-          commit: config.snapshot.prereleaseTemplate?.includes("{commit}")
+          commit: releaseConfig.snapshot.prereleaseTemplate?.includes(
+            "{commit}",
+          )
             ? await git.getCurrentCommitId({ cwd })
             : undefined,
         }
@@ -112,5 +138,91 @@ You can then run ${pc.cyan("changeset version")} again to do a normal release.
     log.success(
       "All files have been updated. Review them and commit at your leisure",
     );
+  }
+}
+
+function validateIgnoredPackageNames(
+  packages: Packages,
+  ignoreFromCli: string[] | undefined,
+  messages: string[],
+) {
+  if (!ignoreFromCli) {
+    return;
+  }
+  const pkgNames = new Set(
+    packages.packages.map(({ packageJson }) => packageJson.name),
+  );
+
+  for (const pkgName of ignoreFromCli) {
+    if (pkgNames.has(pkgName)) {
+      continue;
+    }
+
+    messages.push(
+      `The package ${pc.blue(pkgName)} is passed to the ${pc.cyan("--ignore")} option but it is not found in the project. You may have misspelled the package name.`,
+    );
+  }
+}
+
+function validateIgnoreSourceConflict(
+  config: Config,
+  ignoreFromCli: string[] | undefined,
+  messages: string[],
+) {
+  if (config.ignore.length > 0 && ignoreFromCli) {
+    messages.push(
+      "It looks like you are trying to use the `--ignore` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.",
+    );
+  }
+}
+
+function validateSkippedDependents(packages: Packages, config: Config, messages: string[]) {
+  const packagesByName = new Map(
+    packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
+  );
+
+  // devDependencies are excluded because they don't affect published consumers —
+  // a stale devDep range on a skipped package is harmless.
+  // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
+  // update devDep ranges in package.json even though they don't cause version bumps.
+  const dependentsGraph = getDependentsGraph(packages, {
+    ignoreDevDependencies: true,
+    bumpVersionsWithWorkspaceProtocolOnly:
+      config.bumpVersionsWithWorkspaceProtocolOnly,
+  });
+
+  for (const pkg of packages.packages) {
+    if (
+      !shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.version,
+      })
+    ) {
+      continue;
+    }
+
+    const skippedPackage = pkg.packageJson.name;
+    const dependents = dependentsGraph.get(skippedPackage) || [];
+    for (const dependent of dependents) {
+      const dependentPkg = packagesByName.get(dependent)!;
+      if (dependentPkg.packageJson.private) {
+        // Private packages don't publish to npm,
+        // so they can safely depend on skipped packages.
+        // This also holds for private packages with other publish targets (like a VS Code extension)
+        // as those typically have to prebundle dependencies.
+        continue;
+      }
+
+      if (
+        !shouldSkipPackage(dependentPkg, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        })
+      ) {
+        messages.push(
+          `The package ${pc.blue(dependent)} depends on the skipped package ${pc.blue(skippedPackage)} (either by \`ignore\` option or by \`privatePackages.version\`), but ${pc.blue(dependent)} is not being skipped. Please pass ${pc.blue(dependent)} to the ${pc.cyan("--ignore")} flag.`,
+        );
+      }
+    }
   }
 }
