@@ -5,4 +5,4 @@
 "@changesets/read": patch
 ---
 
-perf: replace picocolors with node:util styletext
+Replace `picocolors` with `node:util`'s `styleText`
