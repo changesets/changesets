@@ -2,18 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
-import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import pc from "picocolors";
-import { add } from "./commands/add/index.ts";
-import { init } from "./commands/init/index.ts";
-import { pre } from "./commands/pre/index.ts";
-import { publish } from "./commands/publish/index.ts";
-import { status } from "./commands/status/index.ts";
-import { tag as tagCommand } from "./commands/tag/index.ts";
-import { version } from "./commands/version/index.ts";
 import { COMMAND_HELP } from "./help.ts";
 import type { CliOptions } from "./types.ts";
 
@@ -43,6 +34,7 @@ export async function run(
 
   if (input[0] === "init") {
     validateCommandFlags("init", flags);
+    const { init } = await import("./commands/init/index.ts");
     await init(packages.rootDir);
     return;
   }
@@ -65,6 +57,7 @@ If you expected there to be changesets, you should check git history for when th
   if (input.length < 1) {
     const { empty, open, since, message, ...rest }: CliOptions = flags;
     validateCommandFlags("add", rest);
+    const { add } = await import("./commands/add/index.ts");
     await add(packages.rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     log.error(
@@ -80,6 +73,7 @@ If you expected there to be changesets, you should check git history for when th
       case "add": {
         const { empty, open, since, message, ...rest }: CliOptions = flags;
         validateCommandFlags("add", rest);
+        const { add } = await import("./commands/add/index.ts");
         await add(packages.rootDir, { empty, open, since, message }, config);
         return;
       }
@@ -98,105 +92,36 @@ If you expected there to be changesets, you should check git history for when th
           // undefined or an array
           ignoreArrayFromCmd = ignore;
         }
-
-        // Validate that items in ignoreArrayFromCmd are valid project names
-        const pkgNames = new Set(
-          packages.packages.map(({ packageJson }) => packageJson.name),
+        const { version } = await import("./commands/version/index.ts");
+        await version(
+          packages.rootDir,
+          {
+            ignore: ignoreArrayFromCmd,
+            snapshot,
+            snapshotPrereleaseTemplate,
+          },
+          config,
         );
-
-        const messages = [];
-        for (const pkgName of ignoreArrayFromCmd || []) {
-          if (!pkgNames.has(pkgName)) {
-            messages.push(
-              `The package ${pc.blue(pkgName)} is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
-            );
-          }
-        }
-
-        if (config.ignore.length > 0 && ignoreArrayFromCmd) {
-          messages.push(
-            `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`,
-          );
-        } else if (ignoreArrayFromCmd) {
-          // use the ignore flags from cli
-          config.ignore = ignoreArrayFromCmd;
-        }
-
-        const packagesByName = new Map(
-          packages.packages.map((x) => [x.packageJson.name, x]),
-        );
-
-        // Validate that all dependents of skipped packages are also skipped.
-        // devDependencies are excluded because they don't affect published consumers —
-        // a stale devDep range on a skipped package is harmless.
-        // Note: assemble-release-plan uses a graph WITH devDeps because it needs to
-        // update devDep ranges in package.json even though they don't cause version bumps.
-        const dependentsGraph = getDependentsGraph(packages, {
-          ignoreDevDependencies: true,
-          bumpVersionsWithWorkspaceProtocolOnly:
-            config.bumpVersionsWithWorkspaceProtocolOnly,
-        });
-        for (const pkg of packages.packages) {
-          if (
-            !shouldSkipPackage(pkg, {
-              ignore: config.ignore,
-              allowPrivatePackages: config.privatePackages.version,
-            })
-          ) {
-            continue;
-          }
-          const skippedPackage = pkg.packageJson.name;
-          const dependents = dependentsGraph.get(skippedPackage) || [];
-          for (const dependent of dependents) {
-            const dependentPkg = packagesByName.get(dependent)!;
-            if (dependentPkg.packageJson.private) {
-              // Private packages don't publish to npm,
-              // so they can safely depend on skipped packages.
-              // This also holds for private packages with other publish targets (like a VS Code extension)
-              // as those typically have to prebundle dependencies.
-              continue;
-            }
-            if (
-              !shouldSkipPackage(dependentPkg, {
-                ignore: config.ignore,
-                allowPrivatePackages: config.privatePackages.version,
-              })
-            ) {
-              messages.push(
-                `The package ${pc.blue(dependent)} depends on the skipped package ${pc.blue(skippedPackage)} (either by \`ignore\` option or by \`privatePackages.version\`), but ${pc.blue(dependent)} is not being skipped. Please pass ${pc.blue(dependent)} to the ${pc.cyan("--ignore")} flag.`,
-              );
-            }
-          }
-        }
-
-        if (messages.length > 0) {
-          log.error(messages.join("\n"));
-
-          throw new ExitError(1);
-        }
-
-        if (snapshotPrereleaseTemplate) {
-          config.snapshot.prereleaseTemplate = snapshotPrereleaseTemplate;
-        }
-
-        await version(packages.rootDir, { snapshot }, config);
         return;
       }
       case "publish": {
         const { otp, tag, gitTag, ...rest }: CliOptions = flags;
         validateCommandFlags("publish", rest);
+        const { publish } = await import("./commands/publish/index.ts");
         await publish(packages.rootDir, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
         const { since, verbose, output, ...rest }: CliOptions = flags;
         validateCommandFlags("status", rest);
+        const { status } = await import("./commands/status/index.ts");
         await status(packages.rootDir, { since, verbose, output }, config);
         return;
       }
       case "tag": {
         validateCommandFlags("tag", flags);
-        await tagCommand(packages.rootDir, config);
+        const { tag } = await import("./commands/tag/index.ts");
+        await tag(packages.rootDir, config);
         return;
       }
       case "pre": {
@@ -213,6 +138,7 @@ If you expected there to be changesets, you should check git history for when th
           log.error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);
         }
+        const { pre } = await import("./commands/pre/index.ts");
         await pre(packages.rootDir, { command, tag });
         return;
       }
