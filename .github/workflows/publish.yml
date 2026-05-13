@@ -32,7 +32,9 @@ jobs:
       - uses: ./.github/actions/ci-setup
         with:
           skip-cache: true # avoid cache poisoning attacks
-          download-dist: true
+
+      - name: Build artifacts
+        run: pnpm build
 
       - name: Create or update release pull request
         id: changesets
