@@ -1,9 +1,8 @@
 name: pkg-pr-new
 
 on:
-  # publish each pull request to next
   pull_request:
-    branches: ["next"]
+    types: [labeled]
   # publish each commit to main/next
   #push:
     #branches: ["main", "next"]
@@ -13,6 +12,7 @@ permissions: {}
 
 jobs:
   publish:
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'pkg.pr.new') }}
     runs-on: ubuntu-latest
 
     steps:
