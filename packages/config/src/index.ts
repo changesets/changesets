@@ -24,6 +24,7 @@ export const defaultWrittenConfig = {
   fixed: [] as Fixed,
   linked: [] as Linked,
   access: "restricted",
+  format: "auto",
   baseBranch: "main",
   updateInternalDependencies: "patch",
   ignore: [] as ReadonlyArray<string>,
@@ -430,13 +431,18 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
-  if (json.prettier != null && typeof json.prettier !== "boolean") {
+  if (
+    json.format != null &&
+    !["auto", "prettier", "oxfmt", "dprint", "deno", false].includes(
+      json.format,
+    )
+  ) {
     messages.push(
-      `The \`prettier\` option is set as ${JSON.stringify(
-        json.prettier,
+      `The \`format\` option is set as ${JSON.stringify(
+        json.format,
         null,
         2,
-      )} when the only valid values are undefined or a boolean`,
+      )} when the only valid values are "auto", "prettier", "oxfmt", "dprint", "deno" or false`,
     );
   }
 
@@ -560,7 +566,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
           ?.updateInternalDependents ?? "out-of-range",
     },
 
-    prettier: typeof json.prettier === "boolean" ? json.prettier : true,
+    format: json.format == null ? defaultWrittenConfig.format : json.format,
 
     // TODO consider enabling this by default in the next major version
     privatePackages,

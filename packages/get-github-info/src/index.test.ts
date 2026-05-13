@@ -1,11 +1,13 @@
 import nock from "nock";
-import prettier from "prettier";
+import { format } from "oxfmt";
 import { expect, test, beforeEach, afterEach } from "vitest";
 import { getInfo, getInfoFromPullRequest } from "./index.ts";
 
 process.env.GITHUB_TOKEN = "token";
 
 const apiPath = `/graphql`;
+const formatGraphql = async (query: string) =>
+  (await format("file.graphql", query)).code;
 
 beforeEach(() => {
   nock.disableNetConnect();
@@ -103,8 +105,7 @@ test("associated with multiple PRs with only one merged", async () => {
   });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
 
-  expect(await prettier.format(githubQuery, { parser: "graphql" }))
-    .toMatchInlineSnapshot(`
+  expect(await formatGraphql(githubQuery)).toMatchInlineSnapshot(`
     "query {
       a0: repository(owner: "emotion-js", name: "emotion") {
         aa085003: object(expression: "a085003") {
@@ -222,8 +223,7 @@ test("associated with multiple PRs with multiple merged gets the one that was me
   });
   expect(result).toMatchObject({ pull: 1613, user: "Andarist" });
 
-  expect(await prettier.format(githubQuery, { parser: "graphql" }))
-    .toMatchInlineSnapshot(`
+  expect(await formatGraphql(githubQuery)).toMatchInlineSnapshot(`
     "query {
       a0: repository(owner: "emotion-js", name: "emotion") {
         aa085003: object(expression: "a085003") {
@@ -305,8 +305,7 @@ test("gets the author of the associated pull request if it exists rather than th
   });
   expect(result).toMatchObject({ pull: 3682, user: "lmvco" });
 
-  expect(await prettier.format(githubQuery, { parser: "graphql" }))
-    .toMatchInlineSnapshot(`
+  expect(await formatGraphql(githubQuery)).toMatchInlineSnapshot(`
     "query {
       a0: repository(owner: "JedWatson", name: "react-select") {
         ac7e9c69: object(expression: "c7e9c69") {
@@ -413,8 +412,7 @@ test("associated with multiple PRs with only one merged 2", async () => {
     }
   `);
 
-  expect(await prettier.format(githubQuery, { parser: "graphql" }))
-    .toMatchInlineSnapshot(`
+  expect(await formatGraphql(githubQuery)).toMatchInlineSnapshot(`
     "query {
       a0: repository(owner: "emotion-js", name: "emotion") {
         pr__1613: pullRequest(number: 1613) {
@@ -497,8 +495,7 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
         "user": "Andarist",
       }
     `);
-    expect(await prettier.format(githubQuery, { parser: "graphql" }))
-      .toMatchInlineSnapshot(`
+    expect(await formatGraphql(githubQuery)).toMatchInlineSnapshot(`
         "query {
           a0: repository(owner: "emotion-js", name: "emotion") {
             aa085003: object(expression: "a085003") {

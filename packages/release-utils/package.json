@@ -1,12 +1,13 @@
 {
   "name": "@changesets/release-utils",
   "version": "1.0.0-next.3",
-  "type": "module",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/changesets/changesets.git",
     "directory": "packages/release-utils"
   },
+  "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"

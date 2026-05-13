@@ -3,19 +3,18 @@ import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { readChangesets as getChangesets } from "@changesets/read";
-import * as clack from "@clack/prompts";
-import { exec } from "tinyexec";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { askWithEditor } from "../../../utils/askWithEditor.ts";
-import * as utils from "../../../utils/cli-utilities.ts";
-import { add as addChangeset } from "../index.ts";
-// [keep-order] test-utils has to be after `../index.ts`
 import {
   silenceLogsInBlock,
   testdir,
   gitdir,
   outputFile,
 } from "@changesets/test-utils";
+import * as clack from "@clack/prompts";
+import { exec } from "tinyexec";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { askWithEditor } from "../../../utils/askWithEditor.ts";
+import * as utils from "../../../utils/cli-utilities.ts";
+import { add as addChangeset } from "../index.ts";
 
 vi.mock("../../../utils/askWithEditor");
 const mockedAskWithEditor = vi.mocked(askWithEditor);

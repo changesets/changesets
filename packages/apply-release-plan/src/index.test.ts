@@ -63,7 +63,7 @@ class FakeReleasePlan {
       baseBranch: "main",
       updateInternalDependencies: "patch",
       ignore: [],
-      prettier: true,
+      format: "auto",
       privatePackages: { version: true, tag: false },
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -107,7 +107,7 @@ async function testSetup(
       baseBranch: "main",
       updateInternalDependencies: "patch",
       ignore: [],
-      prettier: true,
+      format: "auto",
       privatePackages: { version: true, tag: false },
       snapshot: {
         useCalculatedVersion: false,
@@ -698,7 +698,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -776,7 +776,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           changedFilePatterns: ["**"],
           updateInternalDependencies: "patch",
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ignore: [],
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1043,7 +1043,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1161,7 +1161,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1264,7 +1264,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1366,7 +1366,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1468,7 +1468,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1573,7 +1573,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1691,7 +1691,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1802,7 +1802,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -1904,7 +1904,7 @@ describe("apply release plan", () => {
               baseBranch: "main",
               updateInternalDependencies,
               ignore: [],
-              prettier: true,
+              format: "auto",
               privatePackages: { version: true, tag: false },
               ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
                 onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2007,7 +2007,7 @@ describe("apply release plan", () => {
             baseBranch: "main",
             updateInternalDependencies: "patch",
             ignore: [],
-            prettier: true,
+            format: "auto",
             privatePackages: { version: true, tag: false },
             ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
               onlyUpdatePeerDependentsWhenOutOfRange: true,
@@ -2105,7 +2105,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - Hey, let's have fun with testing!`);
@@ -2143,11 +2142,9 @@ describe("apply release plan", () => {
 
       expect(readme).toMatchInlineSnapshot(`
         "## 1.1.0
-
         ### Minor Changes
 
         - Hey, let's have fun with testing!
-
         ## 1.0.0
 
         ### Minor Changes
@@ -2212,14 +2209,13 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.1.0
-
       ### Minor Changes
 
       - Hey, let's have fun with testing!
 
       ### Patch Changes
 
-      - pkg-b@2.0.0`);
+        - pkg-b@2.0.0`);
 
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
@@ -2285,7 +2281,7 @@ describe("apply release plan", () => {
           changelog: [changesetsCliChangelogPath, null],
           updateInternalDependencies: "patch",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2347,12 +2343,14 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(
         [
           "# pkg-a\n",
-          "## 1.1.0\n",
+          "## 1.1.0",
           "### Minor Changes\n",
           "- Hey, let's have fun with testing!",
-          "- Random stuff\n",
-          "  get it while it's hot!\n",
-          "- New feature, much wow\n",
+          "- Random stuff",
+          "  ",
+          "  get it while it's hot!",
+          "- New feature, much wow",
+          "  ",
           "  look at this shiny stuff!",
         ].join("\n"),
       );
@@ -2420,7 +2418,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "patch",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2448,7 +2446,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -2458,7 +2455,6 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -2528,7 +2524,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2556,7 +2552,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -2564,7 +2559,6 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -2648,7 +2642,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2680,7 +2674,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -2688,7 +2681,6 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -2698,7 +2690,6 @@ describe("apply release plan", () => {
       expect(readmeC.trim()).toEqual(outdent`# pkg-c
 
       ## 2.1.0
-
       ### Minor Changes
 
       - Hey, let's have fun with testing!`);
@@ -2782,7 +2773,7 @@ describe("apply release plan", () => {
           baseBranch: "main",
           updateInternalDependencies: "minor",
           ignore: [],
-          prettier: true,
+          format: "auto",
           privatePackages: { version: true, tag: false },
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -2814,7 +2805,6 @@ describe("apply release plan", () => {
       expect(readme.trim()).toEqual(outdent`# pkg-a
 
       ## 1.0.4
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -2822,7 +2812,6 @@ describe("apply release plan", () => {
       expect(readmeB.trim()).toEqual(outdent`# pkg-b
 
       ## 1.2.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!
@@ -2832,7 +2821,6 @@ describe("apply release plan", () => {
       expect(readmeC.trim()).toEqual(outdent`# pkg-c
 
       ## 2.0.1
-
       ### Patch Changes
 
       - Hey, let's have fun with testing!`);
@@ -3273,7 +3261,6 @@ describe("apply release plan", () => {
     ).toBe(`# pkg-a
 
 ## 1.1.0
-
 ### Minor Changes
 
 - ${lastCommit}: Hey, let's have fun with testing!
