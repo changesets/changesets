@@ -3,7 +3,7 @@
 // eslint-disable-next-line n/no-unsupported-features/node-builtins
 import { styleText } from "node:util";
 
-type Color = Exclude<Parameters<typeof styleText>[0], Array<unknown>>;
+type Color = Extract<Parameters<typeof styleText>[0], string>;
 type ColorProxy = Record<Color, (text: string) => string>;
 
 export default new Proxy({} as ColorProxy, {
