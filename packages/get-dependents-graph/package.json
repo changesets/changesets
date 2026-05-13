@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "@changesets/types": "workspace:^",
-    "picocolors": "^1.1.0",
     "semver": "^7.5.3"
   },
   "devDependencies": {
+    "@changesets/color": "workspace:^",
     "@changesets/test-utils": "workspace:*",
     "vitest": "^4.1.5"
   },

@@ -1,10 +1,10 @@
 import { format } from "node:util";
 // this requires that the package is built _after_ bumping versions before publishing
 import manifest from "@changesets/cli/package.json" with { type: "json" };
+import c from "@changesets/color";
 import { ExitError, InternalError } from "@changesets/errors";
 import { intro, log, outro } from "@clack/prompts";
 import mri from "mri";
-import pc from "picocolors";
 import { COMMAND_HELP } from "./help.ts";
 import { run } from "./run.ts";
 
@@ -108,11 +108,11 @@ ${format(err).replace(process.cwd().replace(/\\/g, "/"), "<cwd>")}
   }
 
   if (err instanceof ExitError) {
-    outro(pc.red(`🦋 Exited with code ${err.code}`));
+    outro(c.red(`🦋 Exited with code ${err.code}`));
     return process.exit(err.code);
   }
 
   log.error(err.stack);
-  outro(pc.red("🦋 Exited with code 1"));
+  outro(c.red("🦋 Exited with code 1"));
   process.exit(1);
 });

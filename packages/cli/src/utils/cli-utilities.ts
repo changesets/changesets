@@ -1,3 +1,4 @@
+import c from "@changesets/color";
 import {
   cancel,
   confirm,
@@ -9,7 +10,6 @@ import {
   select,
   text,
 } from "@clack/prompts";
-import pc from "picocolors";
 
 async function cancelable<T>(task: () => Promise<T | symbol>) {
   const result = await task();
@@ -21,7 +21,7 @@ async function cancelable<T>(task: () => Promise<T | symbol>) {
 }
 
 function importantWarning(message: string): void {
-  note(message.trim(), pc.yellow("IMPORTANT"), { format: pc.white });
+  note(message.trim(), c.yellow("IMPORTANT"), { format: c.white });
 }
 
 export type MultiselectOptions<Value> = Record<string, Option<Value>[]>;

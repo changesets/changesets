@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { applyReleasePlan } from "@changesets/apply-release-plan";
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
+import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import * as git from "@changesets/git";
@@ -11,7 +12,6 @@ import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config, Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import pc from "picocolors";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 
@@ -69,7 +69,7 @@ export async function version(
       log.error(
         `
 Snapshot release is not allowed in pre mode.
-To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
+To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
         `.trim(),
       );
       throw new ExitError(1);
@@ -77,8 +77,8 @@ To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
       importantWarning(
         `
 You are in prerelease mode!
-If you meant to do a normal release you should revert these changes and run ${pc.cyan("changeset pre exit")}.
-You can then run ${pc.cyan("changeset version")} again to do a normal release.
+If you meant to do a normal release you should revert these changes and run ${c.cyan("changeset pre exit")}.
+You can then run ${c.cyan("changeset version")} again to do a normal release.
         `,
       );
     }
@@ -169,7 +169,7 @@ function validateIgnoredPackageNames(
     }
 
     messages.push(
-      `The package ${pc.blue(pkgName)} is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
+      `The package ${c.blue(pkgName)} is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
     );
   }
 }
@@ -222,7 +222,7 @@ function validateSkippedDependents(
         })
       ) {
         messages.push(
-          `The package ${pc.blue(dependent)} depends on the skipped package ${pc.blue(skippedPackage)} (either by \`ignore\` option or by \`privatePackages.version\`), but ${pc.blue(dependent)} is not being skipped. Please pass ${pc.blue(dependent)} to the ${pc.cyan("--ignore")} flag.`,
+          `The package ${c.blue(dependent)} depends on the skipped package ${c.blue(skippedPackage)} (either by \`ignore\` option or by \`privatePackages.version\`), but ${c.blue(dependent)} is not being skipped. Please pass ${c.blue(dependent)} to the ${c.cyan("--ignore")} flag.`,
         );
       }
     }

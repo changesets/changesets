@@ -16,8 +16,7 @@
   "dependencies": {
     "@changesets/git": "workspace:^",
     "@changesets/parse": "workspace:^",
-    "@changesets/types": "workspace:^",
-    "picocolors": "^1.1.0"
+    "@changesets/types": "workspace:^"
   },
   "devDependencies": {
     "@changesets/test-utils": "workspace:*",

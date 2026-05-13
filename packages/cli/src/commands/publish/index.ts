@@ -1,21 +1,21 @@
+import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import type { Config, PreState } from "@changesets/types";
 import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import pc from "picocolors";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 import { publishPackages } from "./publishPackages.ts";
 
 function formatPackageList(
   pkgs: Array<{ name: string; newVersion: string }>,
-  versionColor = pc.green,
+  versionColor = c.green,
 ) {
   return pkgs
     .toSorted((a, b) => a.name.localeCompare(b.name))
-    .map((p) => `${pc.blueBright(p.name)}@${versionColor(p.newVersion)}`)
+    .map((p) => `${c.blueBright(p.name)}@${versionColor(p.newVersion)}`)
     .join("\n");
 }
 
@@ -23,8 +23,8 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   if (preState) {
     importantWarning(
       `
-You are in prerelease mode, so packages will be published to the ${pc.cyan(preState.tag)} npm tag,
-${pc.red("except")} for packages that have not had normal releases, which will be published to ${pc.cyan("latest")}.
+You are in prerelease mode, so packages will be published to the ${c.cyan(preState.tag)} npm tag,
+${c.red("except")} for packages that have not had normal releases, which will be published to ${c.cyan("latest")}.
       `,
     );
   } else if (tag !== "latest") {
@@ -44,7 +44,7 @@ export async function publish(
     log.error(
       `
 Releasing under custom tag is not allowed in pre mode!
-To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
+To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
       `.trim(),
     );
     throw new ExitError(1);
@@ -113,7 +113,7 @@ ${formatPackageList(successfulNpmPublishes)}
     log.success(
       `
 Found untagged packages:
-${formatPackageList(untaggedPrivatePackageReleases, pc.yellowBright)}
+${formatPackageList(untaggedPrivatePackageReleases, c.yellowBright)}
       `.trim(),
     );
 
@@ -131,7 +131,7 @@ ${formatPackageList(untaggedPrivatePackageReleases, pc.yellowBright)}
     log.error(
       `
 Some packages failed to publish:
-${formatPackageList(unsuccessfulNpmPublishes, pc.red)}
+${formatPackageList(unsuccessfulNpmPublishes, c.red)}
       `.trim(),
     );
     throw new ExitError(1);
