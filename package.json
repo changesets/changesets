@@ -30,7 +30,7 @@
     "types:check": "tsc",
     "check-all": "pnpm build && pnpm test run && pnpm types:check && pnpm lint && pnpm format",
     "version-packages": "pnpm changeset version && pnpm format:fix",
-    "release": "pnpm build && pnpm changeset publish",
+    "release": "pnpm changeset publish",
     "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js"
   },
   "devDependencies": {
