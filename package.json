@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/changesets/changesets.git"
+    "url": "git+https://github.com/changesets/changesets.git"
   },
   "workspaces": [
     "packages/*",
