@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
-import { createRequire } from "node:module";
 import path from "node:path";
+// this requires that the package is built _after_ bumping versions before publishing
+import manifest from "@changesets/config/package.json" with { type: "json" };
 import { ValidationError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
-import { warn } from "@changesets/logger";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   Config,
@@ -17,16 +17,14 @@ import type {
 import { getPackages } from "@manypkg/get-packages";
 import picomatch from "picomatch";
 
-const require = createRequire(import.meta.url);
-const packageJson = require("../package.json");
-
 export const defaultWrittenConfig = {
-  $schema: `https://unpkg.com/@changesets/config@${packageJson.version}/schema.json`,
+  $schema: `https://unpkg.com/@changesets/config@${manifest.version}/schema.json`,
   changelog: "@changesets/cli/changelog",
   commit: false,
   fixed: [] as Fixed,
   linked: [] as Linked,
   access: "restricted",
+  format: "auto",
   baseBranch: "main",
   updateInternalDependencies: "patch",
   ignore: [] as ReadonlyArray<string>,
@@ -136,7 +134,8 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
   let normalizedAccess: WrittenConfig["access"] = json.access;
   if ((json.access as string) === "private") {
     normalizedAccess = "restricted";
-    warn(
+    // TODO: replace with returning errors/warnings
+    console.error(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',
     );
   }
@@ -432,13 +431,18 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
     }
   }
 
-  if (json.prettier != null && typeof json.prettier !== "boolean") {
+  if (
+    json.format != null &&
+    !["auto", "prettier", "oxfmt", "dprint", "deno", false].includes(
+      json.format,
+    )
+  ) {
     messages.push(
-      `The \`prettier\` option is set as ${JSON.stringify(
-        json.prettier,
+      `The \`format\` option is set as ${JSON.stringify(
+        json.format,
         null,
         2,
-      )} when the only valid values are undefined or a boolean`,
+      )} when the only valid values are "auto", "prettier", "oxfmt", "dprint", "deno" or false`,
     );
   }
 
@@ -562,7 +566,7 @@ export const parse = (json: WrittenConfig, packages: Packages): Config => {
           ?.updateInternalDependents ?? "out-of-range",
     },
 
-    prettier: typeof json.prettier === "boolean" ? json.prettier : true,
+    format: json.format == null ? defaultWrittenConfig.format : json.format,
 
     // TODO consider enabling this by default in the next major version
     privatePackages,

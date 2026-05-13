@@ -14,7 +14,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "ignore": [],
   "bumpVersionsWithWorkspaceProtocolOnly": false,
   "changedFilePatterns": ["**"],
-  "prettier": true,
+  "format": "auto",
   "privatePackages": { "version": true, "tag": false }
 }
 ```
@@ -263,3 +263,11 @@ Example:
   "changedFilePatterns": ["src/**", "lib/**"]
 }
 ```
+
+### `format` (optional string or boolean)
+
+Default value: `"auto"`
+
+The formatter to use to format changesets and changelogs. Set `false` to disable formatting. The default value of `"auto"` will auto-detect the formatter based on the project's configuration files. See the [`@changesets/format` documentation](https://github.com/changesets/format) for more details.
+
+Supported formatters include `"prettier"`, `"oxfmt"`, `"deno"`, and `"dprint"`.

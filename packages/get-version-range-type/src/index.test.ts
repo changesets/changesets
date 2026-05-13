@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import getVersionRangeType from "./index.ts";
+import { getVersionRangeType } from "./index.ts";
 
 test.each([
   ["^1.0.0", "^"],

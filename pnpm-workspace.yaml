@@ -8,4 +8,7 @@ allowBuilds:
 dedupePeers: true
 dedupePeerDependents: true
 
+overrides:
+  rolldown: 1.0.0
+
 shellEmulator: true

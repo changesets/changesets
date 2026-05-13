@@ -2,13 +2,17 @@
   "name": "@changesets/git",
   "version": "4.0.0-next.3",
   "description": "Some git helpers that changesets use to get information",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/git"
+  },
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-git.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/git",
   "dependencies": {
     "@changesets/errors": "workspace:^",
     "@changesets/types": "workspace:^",

@@ -1,13 +1,19 @@
 {
+  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "Node16",
-    "moduleResolution": "Node16",
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
-    "libReplacement": false,
+    "verbatimModuleSyntax": true,
     "strict": true,
     "noEmit": true,
+    "lib": [
+      "ES2024",
+      "ES2025.Promise",
+      "ESNext.Array",
+      "ESNext.Collection",
+      "ESNext.Iterator"
+    ],
     "types": ["node"]
-  }
+  },
+  "include": ["./"]
 }

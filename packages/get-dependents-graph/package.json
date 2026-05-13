@@ -2,13 +2,17 @@
   "name": "@changesets/get-dependents-graph",
   "version": "3.0.0-next.3",
   "description": "Get the graph of dependents in a monorepo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/get-dependents-graph"
+  },
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-get-dependents-graph.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/get-dependents-graph",
   "dependencies": {
     "@changesets/types": "workspace:^",
     "picocolors": "^1.1.0",

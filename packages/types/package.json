@@ -2,13 +2,17 @@
   "name": "@changesets/types",
   "version": "7.0.0-next.3",
   "description": "Common types shared between changeset packages",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/types"
+  },
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-types.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/types",
   "engines": {
     "node": "^22.11 || ^24 || >=26"
   }

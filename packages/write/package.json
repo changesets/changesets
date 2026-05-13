@@ -2,17 +2,21 @@
   "name": "@changesets/write",
   "version": "1.0.0-next.3",
   "description": "Writes a changeset to a file",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/write"
+  },
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-write.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/write",
   "dependencies": {
+    "@changesets/format": "^0.1.0",
     "@changesets/types": "workspace:^",
-    "human-id": "^4.1.1",
-    "prettier": "^3.7.4"
+    "human-id": "^4.1.1"
   },
   "devDependencies": {
     "@changesets/parse": "workspace:*",

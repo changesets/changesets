@@ -2,22 +2,25 @@
   "name": "@changesets/config",
   "version": "4.0.0-next.3",
   "description": "Utilities for reading and parsing Changeset's config",
-  "type": "module",
-  "exports": {
-    ".": "./dist/changesets-config.js",
-    "./package.json": "./package.json",
-    "./schema.json": "./schema.json"
-  },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/config",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/config"
+  },
   "files": [
     "dist",
     "schema.json"
   ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json",
+    "./schema.json": "./schema.json"
+  },
   "dependencies": {
     "@changesets/errors": "workspace:^",
     "@changesets/get-dependents-graph": "workspace:^",
-    "@changesets/logger": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",
     "@manypkg/get-packages": "^3.0.0",
@@ -31,12 +34,5 @@
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
-  },
-  "preconstruct": {
-    "exports": {
-      "extra": {
-        "./schema.json": "./schema.json"
-      }
-    }
   }
 }

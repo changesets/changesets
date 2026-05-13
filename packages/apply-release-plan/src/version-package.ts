@@ -1,4 +1,3 @@
-import { getVersionRangeType } from "@changesets/get-version-range-type";
 import type {
   ComprehensiveRelease,
   PackageJSON,
@@ -117,4 +116,15 @@ export function versionPackage(
   }
 
   return { ...release, packageJson };
+}
+
+function getVersionRangeType(
+  versionRange: string,
+): "^" | "~" | ">=" | "<=" | ">" | "" {
+  if (versionRange.charAt(0) === "^") return "^";
+  if (versionRange.charAt(0) === "~") return "~";
+  if (versionRange.startsWith(">=")) return ">=";
+  if (versionRange.startsWith("<=")) return "<=";
+  if (versionRange.charAt(0) === ">") return ">";
+  return "";
 }

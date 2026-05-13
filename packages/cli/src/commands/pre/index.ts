@@ -3,8 +3,8 @@ import {
   PreEnterButInPreModeError,
   ExitError,
 } from "@changesets/errors";
-import * as logger from "@changesets/logger";
 import { exitPre, enterPre } from "@changesets/pre";
+import { log } from "@clack/prompts";
 import pc from "picocolors";
 
 export async function pre(
@@ -16,15 +16,19 @@ export async function pre(
   if (options.command === "enter") {
     try {
       await enterPre(rootDir, options.tag);
-      logger.success(`Entered pre mode with tag ${pc.cyan(options.tag)}`);
-      logger.info(
-        "Run `changeset version` to version packages with prerelease versions",
+      log.success(
+        `
+Entered pre mode with tag ${pc.green(options.tag)}!
+Run ${pc.cyan("changeset version")} to version packages with prerelease versions.
+        `.trim(),
       );
     } catch (err) {
       if (err instanceof PreEnterButInPreModeError) {
-        logger.error("`changeset pre enter` cannot be run when in pre mode");
-        logger.info(
-          "If you're trying to exit pre mode, run `changeset pre exit`",
+        log.error(
+          `
+${pc.cyan("changeset pre enter")} cannot be run when in pre mode.
+If you're trying to exit pre mode, run ${pc.cyan("changeset pre exit")}.
+          `.trim(),
         );
         throw new ExitError(1);
       }
@@ -33,15 +37,19 @@ export async function pre(
   } else {
     try {
       await exitPre(rootDir);
-      logger.success(`Exited pre mode`);
-      logger.info(
-        "Run `changeset version` to version packages with normal versions",
+      log.success(
+        `
+Exited pre mode!
+Run ${pc.cyan("changeset version")} to version packages with normal versions.
+        `.trim(),
       );
     } catch (err) {
       if (err instanceof PreExitButNotInPreModeError) {
-        logger.error("`changeset pre exit` can only be run when in pre mode");
-        logger.info(
-          "If you're trying to enter pre mode, run `changeset pre enter`",
+        log.error(
+          `
+${pc.cyan("changeset pre exit")} can only be run when in pre mode!
+If you're trying to enter pre mode, run ${pc.cyan("changeset pre enter")}.
+          `.trim(),
         );
         throw new ExitError(1);
       }

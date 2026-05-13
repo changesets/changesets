@@ -2,13 +2,17 @@
   "name": "@changesets/get-version-range-type",
   "version": "1.0.0-next.2",
   "description": "Common get-version-range-type shared between changeset packages",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/get-version-range-type"
+  },
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-get-version-range-type.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/get-version-range-type",
   "engines": {
     "node": "^22.11 || ^24 || >=26"
   }

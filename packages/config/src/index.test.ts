@@ -1,23 +1,13 @@
 import path from "node:path";
-import * as logger from "@changesets/logger";
-import type { Config, WrittenConfig, Packages } from "@changesets/types";
+import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
+import type { Config, Packages, WrittenConfig } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { outdent } from "outdent";
-import { describe, expect, it, test, vi, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, test, vi, beforeEach } from "vitest";
 import { parse, read } from "./index.ts";
-// [keep-order] test-utils has to be after `./index.ts`
-import { temporarilySilenceLogs, testdir } from "@changesets/test-utils";
-
-vi.mock("@changesets/logger");
-
-const consoleError = console.error;
 
 beforeEach(() => {
-  console.error = vi.fn();
-});
-
-afterEach(() => {
-  console.error = consoleError;
+  vi.spyOn(console, "error");
 });
 
 type CorrectCase = {
@@ -67,7 +57,7 @@ test("read reads the config", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
-    prettier: true,
+    format: "auto",
     privatePackages: {
       tag: false,
       version: true,
@@ -107,7 +97,7 @@ test("read can read config based on the passed in `cwd`", async () => {
     updateInternalDependencies: "patch",
     ignore: [],
     bumpVersionsWithWorkspaceProtocolOnly: false,
-    prettier: true,
+    format: "auto",
     privatePackages: {
       tag: false,
       version: true,
@@ -207,7 +197,7 @@ const defaults: Config = {
   changedFilePatterns: ["**"],
   updateInternalDependencies: "patch",
   ignore: [],
-  prettier: true,
+  format: "auto",
   privatePackages: { version: true, tag: false },
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
     onlyUpdatePeerDependentsWhenOutOfRange: false,
@@ -673,7 +663,7 @@ describe("parser errors", () => {
   test("access private warns and sets to restricted", () => {
     const config = unsafeParse({ access: "private" }, defaultPackages);
     expect(config).toEqual(defaults);
-    expect(logger.warn).toBeCalledWith(
+    expect(console.error).toBeCalledWith(
       'The `access` option is set as "private", but this is actually not a valid value - the correct form is "restricted".',
     );
   });

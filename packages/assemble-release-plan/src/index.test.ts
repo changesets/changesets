@@ -1,7 +1,7 @@
 import { defaultConfig } from "@changesets/config";
 import { beforeEach, describe, expect, it } from "vitest";
-import { FakeFullState } from "./test-utils.ts";
 import { assembleReleasePlan } from "./index.ts";
+import { FakeFullState } from "./test-utils.ts";
 
 describe("assemble-release-plan", () => {
   let setup: FakeFullState;

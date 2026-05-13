@@ -1,6 +1,6 @@
 import { outdent } from "outdent";
 import { describe, expect, it } from "vitest";
-import parse from "./index.ts";
+import { parseChangesetFile as parse } from "./index.ts";
 
 describe("parsing a changeset", () => {
   it("should parse a changeset", () => {

@@ -2,22 +2,25 @@
   "name": "@changesets/apply-release-plan",
   "version": "8.0.0-next.3",
   "description": "Takes a release plan and applies it to packages",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/apply-release-plan"
+  },
   "type": "module",
   "exports": {
-    ".": "./dist/changesets-apply-release-plan.js",
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/apply-release-plan",
   "dependencies": {
     "@changesets/config": "workspace:^",
-    "@changesets/get-version-range-type": "workspace:^",
+    "@changesets/format": "^0.1.0",
     "@changesets/git": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",
     "detect-indent": "^7.0.2",
     "import-meta-resolve": "^4.2.0",
-    "prettier": "^3.7.4",
     "semver": "^7.5.3"
   },
   "devDependencies": {
