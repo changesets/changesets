@@ -34,7 +34,8 @@ export async function run(
 
   if (input[0] === "init") {
     validateCommandFlags("init", flags);
-    await (await import("./commands/init/index.ts")).init(packages.rootDir);
+    const { init } = await import("./commands/init/index.ts");
+    await init(packages.rootDir);
     return;
   }
 
@@ -56,9 +57,8 @@ If you expected there to be changesets, you should check git history for when th
   if (input.length < 1) {
     const { empty, open, since, message, ...rest }: CliOptions = flags;
     validateCommandFlags("add", rest);
-    await (
-      await import("./commands/add/index.ts")
-    ).add(packages.rootDir, { empty, open, since, message }, config);
+    const { add } = await import("./commands/add/index.ts");
+    await add(packages.rootDir, { empty, open, since, message }, config);
   } else if (input[0] !== "pre" && input.length > 1) {
     log.error(
       "Too many arguments passed to changesets - we only accept the command name as an argument",
@@ -73,9 +73,8 @@ If you expected there to be changesets, you should check git history for when th
       case "add": {
         const { empty, open, since, message, ...rest }: CliOptions = flags;
         validateCommandFlags("add", rest);
-        await (
-          await import("./commands/add/index.ts")
-        ).add(packages.rootDir, { empty, open, since, message }, config);
+        const { add } = await import("./commands/add/index.ts");
+        await add(packages.rootDir, { empty, open, since, message }, config);
         return;
       }
       case "version": {
@@ -93,9 +92,8 @@ If you expected there to be changesets, you should check git history for when th
           // undefined or an array
           ignoreArrayFromCmd = ignore;
         }
-        await (
-          await import("./commands/version/index.ts")
-        ).version(
+        const { version } = await import("./commands/version/index.ts");
+        await version(
           packages.rootDir,
           {
             ignore: ignoreArrayFromCmd,
@@ -109,24 +107,21 @@ If you expected there to be changesets, you should check git history for when th
       case "publish": {
         const { otp, tag, gitTag, ...rest }: CliOptions = flags;
         validateCommandFlags("publish", rest);
-        await (
-          await import("./commands/publish/index.ts")
-        ).publish(packages.rootDir, { otp, tag, gitTag }, config);
+        const { publish } = await import("./commands/publish/index.ts");
+        await publish(packages.rootDir, { otp, tag, gitTag }, config);
         return;
       }
       case "status": {
         const { since, verbose, output, ...rest }: CliOptions = flags;
         validateCommandFlags("status", rest);
-        await (
-          await import("./commands/status/index.ts")
-        ).status(packages.rootDir, { since, verbose, output }, config);
+        const { status } = await import("./commands/status/index.ts");
+        await status(packages.rootDir, { since, verbose, output }, config);
         return;
       }
       case "tag": {
         validateCommandFlags("tag", flags);
-        await (
-          await import("./commands/tag/index.ts")
-        ).tag(packages.rootDir, config);
+        const { tag } = await import("./commands/tag/index.ts");
+        await tag(packages.rootDir, config);
         return;
       }
       case "pre": {
@@ -143,9 +138,8 @@ If you expected there to be changesets, you should check git history for when th
           log.error(`A tag must be passed when using prerelease enter`);
           throw new ExitError(1);
         }
-        await (
-          await import("./commands/pre/index.ts")
-        ).pre(packages.rootDir, { command, tag });
+        const { pre } = await import("./commands/pre/index.ts");
+        await pre(packages.rootDir, { command, tag });
         return;
       }
       case "bump": {
