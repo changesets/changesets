@@ -33,6 +33,9 @@ jobs:
         with:
           skip-cache: true # avoid cache poisoning attacks
 
+      - name: Build artifacts
+        run: pnpm build
+
       - name: Create or update release pull request
         id: changesets
         # https://github.com/changesets/action
@@ -60,6 +63,9 @@ jobs:
         with:
           node-version: 24
           skip-cache: true # avoid cache poisoning attacks
+
+      - name: Build artifacts
+        run: pnpm build
 
       - name: Publish to npm
         # https://github.com/changesets/action

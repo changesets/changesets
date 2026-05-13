@@ -90,7 +90,9 @@ function printPackageList(releases: ComprehensiveRelease[], verbose?: boolean) {
         if (verbose) {
           lines[addedLineIndex] += ` -> ${c.green(newVersion)}`;
           lines.push(
-            ...changesets.map((c) => `    - ${c.blue(`.changeset/${c}.md`)}`),
+            ...changesets.map(
+              (changeset) => `    - ${c.blue(`.changeset/${changeset}.md`)}`,
+            ),
           );
         }
       });
