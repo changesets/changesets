@@ -1,5 +1,25 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.4
+
+### Major Changes
+
+- [#1994](https://github.com/changesets/changesets/pull/1994) [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8) Thanks [@bluwy](https://github.com/bluwy)! - Generated changelog entries and rewritten `package.json` files are now formatted with [@changesets/format](https://github.com/changesets/format) instead of depending on Prettier directly. Formatter selection can be auto-detected from the project configuration or controlled via the `format` config option.
+
+### Minor Changes
+
+- [#1989](https://github.com/changesets/changesets/pull/1989) [`ee10723`](https://github.com/changesets/changesets/commit/ee10723dde491ba6632da74d10876dfa2e67d0d2) Thanks [@43081j](https://github.com/43081j)! - Remove support for the legacy Changeset v1 format.
+
+### Patch Changes
+
+- [#2006](https://github.com/changesets/changesets/pull/2006) [`fc42514`](https://github.com/changesets/changesets/commit/fc425143294e63ba254ddbe8c2ea026b55a05991) Thanks [@bluwy](https://github.com/bluwy)! - Remove `@changesets/get-version-range-type` dependency
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc)]:
+  - @changesets/config@4.0.0-next.4
+  - @changesets/types@7.0.0-next.4
+  - @changesets/git@4.0.0-next.4
+  - @changesets/should-skip-package@1.0.0-next.4
+
 ## 8.0.0-next.3
 
 ### Major Changes

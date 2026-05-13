@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "3.0.0-next.3",
+  "version": "3.0.0-next.4",
   "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
   "license": "MIT",
   "author": "Changesets Contributors",

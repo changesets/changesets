@@ -1,5 +1,14 @@
 # @changesets/release-utils
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156)]:
+  - @changesets/types@7.0.0-next.4
+  - @changesets/read@1.0.0-next.4
+  - @changesets/pre@3.0.0-next.4
+
 ## 1.0.0-next.3
 
 ### Major Changes
