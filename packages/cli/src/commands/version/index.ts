@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { applyReleasePlan } from "@changesets/apply-release-plan";
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
 import c from "@changesets/color";
+import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import * as git from "@changesets/git";
@@ -14,16 +15,22 @@ import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
+import { ensureChangesetFolder } from "../shared.ts";
 
-export async function version(
-  cwd: string,
-  options: {
-    ignore?: string[];
-    snapshot?: string | boolean;
-    snapshotPrereleaseTemplate?: string;
-  },
-  config: Config,
-) {
+export interface VersionOptions {
+  cwd?: string;
+  ignore?: string[];
+  snapshot?: string | boolean;
+  snapshotPrereleaseTemplate?: string;
+}
+
+export async function version(options: VersionOptions) {
+  const cwd = options.cwd ?? process.cwd();
+
+  const packages = await getPackages(cwd);
+  await ensureChangesetFolder(packages.rootDir);
+  const config = await read(packages.rootDir, packages);
+
   const messages: string[] = [];
   let ignore: readonly string[] | undefined;
 
@@ -48,8 +55,6 @@ export async function version(
     // Disable committing when in snapshot mode
     commit: options.snapshot ? false : config.commit,
   };
-
-  const packages = await getPackages(cwd);
 
   validateIgnoredPackageNames(packages, options.ignore, messages);
   validateSkippedDependents(packages, releaseConfig, messages);

@@ -1,10 +1,11 @@
 import c from "@changesets/color";
+import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
 import { getPackages, type Tool } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { ensureChangesetFolder } from "../shared.ts";
 
 function buildTag(tool: Tool, pkg: { name: string; newVersion: string }) {
   return tool.type !== "root"
@@ -21,12 +22,19 @@ function buildTagMessage(
     : c.cyan(`v${pkg.newVersion}`);
 }
 
-export async function tag(cwd: string, config: Config) {
-  const { packages, tool } = await getPackages(cwd);
+export interface TagOptions {
+  cwd?: string;
+}
 
-  const allExistingTags = await git.getAllTags(cwd);
+export async function tag(options?: TagOptions) {
+  const cwd = options?.cwd ?? process.cwd();
+  const packages = await getPackages(cwd);
+  await ensureChangesetFolder(packages.rootDir);
+  const config = await read(packages.rootDir, packages);
 
-  const taggablePackages = packages.filter(
+  const allExistingTags = await git.getAllTags(packages.rootDir);
+
+  const taggablePackages = packages.packages.filter(
     (pkg) =>
       !shouldSkipPackage(pkg, {
         ignore: config.ignore,
@@ -36,11 +44,11 @@ export async function tag(cwd: string, config: Config) {
 
   const untaggedPackages = await getUntaggedPackages(
     taggablePackages,
-    cwd,
-    tool,
+    packages.rootDir,
+    packages.tool,
   );
   const skippedTags = untaggedPackages.filter((pkg) =>
-    allExistingTags.has(buildTag(tool, pkg)),
+    allExistingTags.has(buildTag(packages.tool, pkg)),
   );
   if (untaggedPackages.length === 0) {
     log.info("Did not find any packages that need to be tagged.");
@@ -51,24 +59,24 @@ export async function tag(cwd: string, config: Config) {
   p.start("Creating tags...");
 
   for (const pkg of untaggedPackages) {
-    const tag = buildTag(tool, pkg);
+    const tag = buildTag(packages.tool, pkg);
     if (allExistingTags.has(tag)) continue;
 
-    await git.tag(tag, cwd);
+    await git.tag(tag, packages.rootDir);
 
-    p.advance(1, buildTagMessage(tool, pkg));
+    p.advance(1, buildTagMessage(packages.tool, pkg));
   }
 
   const lines = [
     "Created tags:",
     untaggedPackages
-      .map((pkg) => `   - ${buildTagMessage(tool, pkg)}`)
+      .map((pkg) => `   - ${buildTagMessage(packages.tool, pkg)}`)
       .join(`\n`),
   ];
   if (skippedTags.length !== 0) {
     lines.push(
       "Skipped tags (already exist):",
-      ...skippedTags.map((pkg) => buildTagMessage(tool, pkg)),
+      ...skippedTags.map((pkg) => buildTagMessage(packages.tool, pkg)),
     );
   }
 

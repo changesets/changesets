@@ -198,15 +198,15 @@ importers:
       '@manypkg/get-packages':
         specifier: ^3.0.0
         version: 3.1.0
+      cac:
+        specifier: ^7.0.0
+        version: 7.0.0
       import-meta-resolve:
         specifier: ^4.2.0
         version: 4.2.0
       launch-editor:
         specifier: ^2.13.2
         version: 2.13.2
-      mri:
-        specifier: ^1.2.0
-        version: 1.2.0
       package-manager-detector:
         specifier: ^1.1.0
         version: 1.6.0

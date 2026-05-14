@@ -26,10 +26,6 @@ const modifiedDefaultConfig: Config = {
   changelog: ["@changesets/cli/changelog", null],
 };
 
-const defaultOptions = {
-  snapshot: undefined,
-};
-
 vi.mock("human-id");
 
 vi.mock("@changesets/git");
@@ -93,11 +89,9 @@ describe("running version in a simple project", () => {
           name: "pkg-a",
           version: "1.0.0",
         }),
-        ".changeset/config.json": JSON.stringify({}),
+        ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
       });
-      await expect(
-        version(cwd, defaultOptions, modifiedDefaultConfig),
-      ).rejects.toThrow(ExitError);
+      await expect(version({ cwd })).rejects.toThrow(ExitError);
       expect(mockedLogger.warn).toHaveBeenCalledExactlyOnceWith(
         "No unreleased changesets found.",
       );
@@ -115,15 +109,12 @@ describe("running version in a simple project", () => {
         name: "pkg-a",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
-    await expect(
-      version(
-        cwd,
-        { ...defaultOptions, ignore: ["pkg-c"] },
-        modifiedDefaultConfig,
-      ),
-    ).rejects.toThrow(ExitError);
+    await expect(version({ cwd, ignore: ["pkg-c"] })).rejects.toThrow(
+      ExitError,
+    );
 
     expect(mockedLogger.error).toHaveBeenCalledOnce();
     const arg = mockedLogger.error.mock.calls[0][0];
@@ -150,15 +141,12 @@ describe("running version in a simple project", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
-    await expect(
-      version(
-        cwd,
-        { ...defaultOptions, ignore: ["pkg-b"] },
-        modifiedDefaultConfig,
-      ),
-    ).rejects.toThrow(ExitError);
+    await expect(version({ cwd, ignore: ["pkg-b"] })).rejects.toThrow(
+      ExitError,
+    );
 
     expect(mockedLogger.error).toHaveBeenCalledOnce();
     const arg = mockedLogger.error.mock.calls[0][0];
@@ -185,15 +173,15 @@ describe("running version in a simple project", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      }),
     });
 
-    await expect(
-      version(
-        cwd,
-        { ...defaultOptions, ignore: ["pkg-b"] },
-        { ...modifiedDefaultConfig, ignore: ["pkg-a"] },
-      ),
-    ).rejects.toThrow(ExitError);
+    await expect(version({ cwd, ignore: ["pkg-b"] })).rejects.toThrow(
+      ExitError,
+    );
 
     expect(mockedLogger.error).toHaveBeenCalledOnce();
     const arg = mockedLogger.error.mock.calls[0][0];
@@ -221,6 +209,7 @@ describe("running version in a simple project", () => {
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
       });
       await writeChangesets(
         [
@@ -235,7 +224,7 @@ describe("running version in a simple project", () => {
         cwd,
       );
 
-      await version(cwd, defaultOptions, modifiedDefaultConfig);
+      await version({ cwd });
 
       expect(await getPkgJSON("pkg-a", cwd)).toEqual(
         expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
@@ -265,6 +254,10 @@ describe("running version in a simple project", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      }),
     });
     await writeChangesets(
       [
@@ -276,10 +269,7 @@ describe("running version in a simple project", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      ignore: ["pkg-a"],
-    });
+    await version({ cwd });
 
     // no change
     expect(await getPkgJSON("pkg-a", cwd)).toEqual({
@@ -310,6 +300,10 @@ describe("running version in a simple project", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      }),
     });
     await writeChangesets(
       [
@@ -325,10 +319,7 @@ describe("running version in a simple project", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      ignore: ["pkg-a"],
-    });
+    await version({ cwd });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -360,6 +351,7 @@ describe("running version in a simple project", () => {
         name: "pkg-a",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
     await writeChangesets(
       [
@@ -372,7 +364,7 @@ describe("running version in a simple project", () => {
     );
     const spy = vi.spyOn(git, "commit");
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect(spy).not.toHaveBeenCalled();
   });
@@ -396,6 +388,10 @@ describe("running version in a simple project", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        commit: ["@changesets/cli/commit", null],
+      }),
     });
 
     await linkNodeModules(cwd);
@@ -416,10 +412,7 @@ describe("running version in a simple project", () => {
 
     expect(spy).not.toHaveBeenCalled();
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      commit: ["@changesets/cli/commit", null],
-    });
+    await version({ cwd });
 
     expect(spy).toHaveBeenCalled();
 
@@ -466,6 +459,10 @@ describe("running version in a simple project", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        commit: ["@changesets/cli/commit", null],
+      }),
     });
 
     await linkNodeModules(cwd);
@@ -486,10 +483,7 @@ describe("running version in a simple project", () => {
 
     expect(spy).not.toHaveBeenCalled();
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      commit: ["@changesets/cli/commit", null],
-    });
+    await version({ cwd });
 
     expect(spy).toHaveBeenCalled();
     expect(spy.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -521,6 +515,7 @@ describe("running version in a simple project", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
       ".changeset/changesets-are-beautiful.md": `---
 "pkg-a": minor
 ---
@@ -535,7 +530,7 @@ Awesome feature, hidden behind a feature flag
 `,
     });
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -575,6 +570,7 @@ Awesome feature, hidden behind a feature flag
           "pkg-a": "latest",
         },
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
     await writeChangeset(
@@ -585,7 +581,7 @@ Awesome feature, hidden behind a feature flag
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -617,6 +613,7 @@ Awesome feature, hidden behind a feature flag
         name: "pkg-a",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
       "packages/pkg-a/CHANGELOG.md": `# pkg-a
 
       ## 1.0.0
@@ -635,7 +632,7 @@ Awesome feature, hidden behind a feature flag
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
       "# pkg-a
@@ -673,6 +670,7 @@ Awesome feature, hidden behind a feature flag
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
       });
       await writeChangesets(
         [
@@ -691,7 +689,7 @@ Awesome feature, hidden behind a feature flag
         cwd,
       );
 
-      await version(cwd, defaultOptions, modifiedDefaultConfig);
+      await version({ cwd });
 
       expect(await getPkgJSON("pkg-a", cwd)).toEqual(
         expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
@@ -719,6 +717,7 @@ Awesome feature, hidden behind a feature flag
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
       });
       await writeChangesets(
         [
@@ -736,7 +735,7 @@ Awesome feature, hidden behind a feature flag
         ],
         cwd,
       );
-      await version(cwd, defaultOptions, modifiedDefaultConfig);
+      await version({ cwd });
 
       // first call should be minor bump
       expect(await getPkgJSON("pkg-a", cwd)).toEqual(
@@ -771,7 +770,7 @@ Awesome feature, hidden behind a feature flag
           name: "pkg-b",
           version: "1.0.0",
         }),
-        ".changeset/config.json": JSON.stringify({}),
+        ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
       });
 
       await writeChangesets(
@@ -794,7 +793,7 @@ Awesome feature, hidden behind a feature flag
         3,
       );
 
-      await version(cwd, defaultOptions, modifiedDefaultConfig);
+      await version({ cwd });
       expect((await fs.readdir(path.resolve(cwd, ".changeset"))).length).toBe(
         1,
       );
@@ -822,6 +821,10 @@ describe("fixed", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        fixed: [["pkg-a", "pkg-b"]],
+      }),
     });
     await writeChangesets(
       [
@@ -833,10 +836,7 @@ describe("fixed", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      fixed: [["pkg-a", "pkg-b"]],
-    });
+    await version({ cwd });
 
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
       expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
@@ -865,6 +865,11 @@ describe("fixed", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        fixed: [["pkg-a", "pkg-b"]],
+        ignore: ["pkg-a"],
+      }),
     });
     await writeChangesets(
       [
@@ -876,11 +881,7 @@ describe("fixed", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      fixed: [["pkg-a", "pkg-b"]],
-      ignore: ["pkg-a"],
-    });
+    await version({ cwd });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -919,6 +920,10 @@ describe("fixed", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        fixed: [["pkg-a", "pkg-b"]],
+      }),
     });
 
     await writeChangesets(
@@ -931,10 +936,7 @@ describe("fixed", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      fixed: [["pkg-a", "pkg-b"]],
-    });
+    await version({ cwd });
 
     expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
       "# pkg-a
@@ -966,10 +968,7 @@ describe("fixed", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      fixed: [["pkg-a", "pkg-b"]],
-    });
+    await version({ cwd });
 
     expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
       "# pkg-a
@@ -1024,6 +1023,10 @@ describe("linked", () => {
         name: "pkg-b",
         version: "0.1.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        linked: [["pkg-a", "pkg-b"]],
+      }),
     });
     await writeChangesets(
       [
@@ -1038,10 +1041,7 @@ describe("linked", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      linked: [["pkg-a", "pkg-b"]],
-    });
+    await version({ cwd });
 
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
       expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
@@ -1070,6 +1070,10 @@ describe("linked", () => {
         name: "pkg-b",
         version: "0.1.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        linked: [["pkg-a", "pkg-b"]],
+      }),
     });
     await writeChangesets(
       [
@@ -1081,10 +1085,7 @@ describe("linked", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      linked: [["pkg-1", "pkg-2"]],
-    });
+    await version({ cwd });
 
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
       expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
@@ -1112,6 +1113,10 @@ describe("workspace range", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        commit: false,
+      }),
     });
 
     await writeChangesets(
@@ -1126,7 +1131,7 @@ describe("workspace range", () => {
       ],
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -1163,6 +1168,7 @@ describe("workspace range", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
     await writeChangeset(
@@ -1172,7 +1178,7 @@ describe("workspace range", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -1209,6 +1215,7 @@ describe("workspace range", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
     await writeChangeset(
@@ -1218,7 +1225,7 @@ describe("workspace range", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -1255,6 +1262,7 @@ describe("workspace range", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
     await writeChangeset(
@@ -1264,7 +1272,7 @@ describe("workspace range", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -1299,6 +1307,13 @@ describe("workspace range", () => {
         version: "1.0.0",
         dependencies: { "pkg-a": "workspace:*" },
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          updateInternalDependents: "always",
+        },
+      }),
     });
 
     await writeChangeset(
@@ -1308,13 +1323,7 @@ describe("workspace range", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-        updateInternalDependents: "always",
-      },
-    });
+    await version({ cwd });
 
     expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
       "# pkg-a
@@ -1355,6 +1364,7 @@ describe("workspace range", () => {
         version: "1.0.0",
         peerDependencies: { "pkg-a": "workspace:^" },
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
     await writeChangeset(
@@ -1364,7 +1374,7 @@ describe("workspace range", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
       "# pkg-a
@@ -1405,6 +1415,13 @@ describe("workspace range", () => {
         version: "1.0.0",
         peerDependencies: { "pkg-a": "workspace:^" },
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          onlyUpdatePeerDependentsWhenOutOfRange: true,
+        },
+      }),
     });
 
     await writeChangeset(
@@ -1414,13 +1431,7 @@ describe("workspace range", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-        onlyUpdatePeerDependentsWhenOutOfRange: true,
-      },
-    });
+    await version({ cwd });
 
     expect(await getChangelog("pkg-a", cwd)).toMatchInlineSnapshot(`
       "# pkg-a
@@ -1460,6 +1471,7 @@ describe("same package in different dependency types", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
     await writeChangeset(
       {
@@ -1474,7 +1486,7 @@ describe("same package in different dependency types", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -1516,6 +1528,10 @@ describe("snapshot release", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        commit: false,
+      }),
     });
     await writeChangesets(
       [
@@ -1529,16 +1545,7 @@ describe("snapshot release", () => {
       ],
       cwd,
     );
-    await version(
-      cwd,
-      {
-        snapshot: "experimental",
-      },
-      {
-        ...modifiedDefaultConfig,
-        commit: false,
-      },
-    );
+    await version({ cwd, snapshot: "experimental" });
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
       expect.objectContaining({
         name: "pkg-a",
@@ -1573,6 +1580,10 @@ describe("snapshot release", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        commit: ["@changesets/cli/commit", null],
+      }),
     });
     await writeChangesets(
       [
@@ -1590,16 +1601,7 @@ describe("snapshot release", () => {
 
     expect(spy).not.toHaveBeenCalled();
 
-    await version(
-      cwd,
-      {
-        snapshot: "experimental",
-      },
-      {
-        ...modifiedDefaultConfig,
-        commit: ["@changesets/cli/commit", null],
-      },
-    );
+    await version({ cwd, snapshot: "experimental" });
 
     expect(spy).not.toHaveBeenCalled();
   });
@@ -1616,6 +1618,7 @@ describe("snapshot release", () => {
         name: "pkg-a",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
     await writeChangeset(
       {
@@ -1625,13 +1628,7 @@ describe("snapshot release", () => {
       cwd,
     );
 
-    await version(
-      cwd,
-      {
-        snapshot: true,
-      },
-      modifiedDefaultConfig,
-    );
+    await version({ cwd, snapshot: true });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -1665,6 +1662,10 @@ describe("snapshot release", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      }),
     });
     await writeChangeset(
       {
@@ -1674,16 +1675,7 @@ describe("snapshot release", () => {
       cwd,
     );
 
-    await version(
-      cwd,
-      {
-        snapshot: true,
-      },
-      {
-        ...modifiedDefaultConfig,
-        ignore: ["pkg-a"],
-      },
-    );
+    await version({ cwd, snapshot: true });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -1722,6 +1714,14 @@ describe("snapshot release", () => {
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify({
+          ...modifiedDefaultConfig,
+          commit: false,
+          snapshot: {
+            ...modifiedDefaultConfig.snapshot,
+            prereleaseTemplate: `{tag}.{commit}`,
+          },
+        }),
       });
       await writeChangesets(
         [
@@ -1736,20 +1736,7 @@ describe("snapshot release", () => {
         cwd,
       );
 
-      await expect(
-        version(
-          cwd,
-          { snapshot: true },
-          {
-            ...modifiedDefaultConfig,
-            commit: false,
-            snapshot: {
-              ...modifiedDefaultConfig.snapshot,
-              prereleaseTemplate: `{tag}.{commit}`,
-            },
-          },
-        ),
-      ).rejects.toThrow(
+      await expect(version({ cwd, snapshot: true })).rejects.toThrow(
         'Failed to compose snapshot version: "{tag}" placeholder is used without having a value defined!',
       );
     });
@@ -1772,6 +1759,14 @@ describe("snapshot release", () => {
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify({
+          ...modifiedDefaultConfig,
+          commit: false,
+          snapshot: {
+            ...modifiedDefaultConfig.snapshot,
+            prereleaseTemplate: `{commit}`,
+          },
+        }),
       });
       await writeChangesets(
         [
@@ -1786,20 +1781,7 @@ describe("snapshot release", () => {
         cwd,
       );
 
-      await expect(
-        version(
-          cwd,
-          { snapshot: "test" },
-          {
-            ...modifiedDefaultConfig,
-            commit: false,
-            snapshot: {
-              ...modifiedDefaultConfig.snapshot,
-              prereleaseTemplate: `{commit}`,
-            },
-          },
-        ),
-      ).rejects.toThrow(
+      await expect(version({ cwd, snapshot: "test" })).rejects.toThrow(
         "Failed to compose snapshot version: \"{tag}\" placeholder is missing, but the snapshot parameter is defined (value: 'test')",
       );
     });
@@ -1844,6 +1826,14 @@ describe("snapshot release", () => {
             name: "pkg-b",
             version: "1.0.0",
           }),
+          ".changeset/config.json": JSON.stringify({
+            ...modifiedDefaultConfig,
+            commit: false,
+            snapshot: {
+              ...modifiedDefaultConfig.snapshot,
+              prereleaseTemplate: snapshotTemplate as string,
+            },
+          }),
         });
         await writeChangesets(
           [
@@ -1857,18 +1847,7 @@ describe("snapshot release", () => {
           ],
           cwd,
         );
-        await version(
-          cwd,
-          { snapshot: snapshotValue },
-          {
-            ...modifiedDefaultConfig,
-            commit: false,
-            snapshot: {
-              ...modifiedDefaultConfig.snapshot,
-              prereleaseTemplate: snapshotTemplate as string,
-            },
-          },
-        );
+        await version({ cwd, snapshot: snapshotValue });
 
         expect(await getPkgJSON("pkg-a", cwd)).toEqual(
           expect.objectContaining({
@@ -1906,6 +1885,14 @@ describe("snapshot release", () => {
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify({
+          ...modifiedDefaultConfig,
+          commit: false,
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null,
+          },
+        }),
       });
       await writeChangesets(
         [
@@ -1919,20 +1906,7 @@ describe("snapshot release", () => {
         ],
         cwd,
       );
-      await version(
-        cwd,
-        {
-          snapshot: "experimental",
-        },
-        {
-          ...modifiedDefaultConfig,
-          commit: false,
-          snapshot: {
-            useCalculatedVersion: true,
-            prereleaseTemplate: null,
-          },
-        },
-      );
+      await version({ cwd, snapshot: "experimental" });
       expect(await getPkgJSON("pkg-a", cwd)).toEqual(
         expect.objectContaining({
           name: "pkg-a",
@@ -1959,6 +1933,13 @@ describe("snapshot release", () => {
           name: "pkg-a",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify({
+          ...modifiedDefaultConfig,
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null,
+          },
+        }),
       });
       await writeChangeset(
         {
@@ -1968,19 +1949,7 @@ describe("snapshot release", () => {
         cwd,
       );
 
-      await version(
-        cwd,
-        {
-          snapshot: true,
-        },
-        {
-          ...modifiedDefaultConfig,
-          snapshot: {
-            useCalculatedVersion: true,
-            prereleaseTemplate: null,
-          },
-        },
-      );
+      await version({ cwd, snapshot: true });
 
       expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
         .toMatchInlineSnapshot(`
@@ -2013,6 +1982,14 @@ describe("snapshot release", () => {
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify({
+          ...modifiedDefaultConfig,
+          ignore: ["pkg-a"],
+          snapshot: {
+            useCalculatedVersion: true,
+            prereleaseTemplate: null,
+          },
+        }),
       });
       await writeChangeset(
         {
@@ -2022,20 +1999,7 @@ describe("snapshot release", () => {
         cwd,
       );
 
-      await version(
-        cwd,
-        {
-          snapshot: true,
-        },
-        {
-          ...modifiedDefaultConfig,
-          ignore: ["pkg-a"],
-          snapshot: {
-            useCalculatedVersion: true,
-            prereleaseTemplate: null,
-          },
-        },
-      );
+      await version({ cwd, snapshot: true });
 
       expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
         .toMatchInlineSnapshot(`
@@ -2077,6 +2041,13 @@ describe("updateInternalDependents: always", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          updateInternalDependents: "always",
+        },
+      }),
     });
     await writeChangeset(
       {
@@ -2085,13 +2056,7 @@ describe("updateInternalDependents: always", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-        updateInternalDependents: "always",
-      },
-    });
+    await version({ cwd });
 
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
       expect.objectContaining({
@@ -2151,6 +2116,13 @@ describe("updateInternalDependents: always", () => {
         version: "1.0.0",
         dependencies: { "pkg-b": "1.0.0" },
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          updateInternalDependents: "always",
+        },
+      }),
     });
 
     await writeChangeset(
@@ -2160,13 +2132,7 @@ describe("updateInternalDependents: always", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-        updateInternalDependents: "always",
-      },
-    });
+    await version({ cwd });
 
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
       expect.objectContaining({
@@ -2229,6 +2195,13 @@ describe("updateInternalDependents: always", () => {
         version: "1.0.0",
         dependencies: { "pkg-a": "bulbasaur" }, // using tag version from npm
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          updateInternalDependents: "always",
+        },
+      }),
     });
 
     await writeChangeset(
@@ -2238,13 +2211,7 @@ describe("updateInternalDependents: always", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-        updateInternalDependents: "always",
-      },
-    });
+    await version({ cwd });
 
     // `pkg-a` should not be touched
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
@@ -2295,6 +2262,13 @@ describe("updateInternalDependents: always", () => {
         version: "1.0.0",
         dependencies: { "pkg-a": "bulbasaur" }, // using tag version from npm
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+          updateInternalDependents: "always",
+        },
+      }),
     });
 
     await writeChangeset(
@@ -2311,13 +2285,7 @@ describe("updateInternalDependents: always", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        ...defaultConfig.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
-        updateInternalDependents: "always",
-      },
-    });
+    await version({ cwd });
 
     expect(await getPkgJSON("pkg-a", cwd)).toEqual(
       expect.objectContaining({
@@ -2375,8 +2343,9 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
-    await pre(cwd, { command: "enter", tag: "next" });
+    await pre({ cwd, command: "enter", tag: "next" });
     await writeChangeset(
       {
         releases: [{ name: "pkg-b", type: "patch" }],
@@ -2384,7 +2353,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     let packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
@@ -2407,7 +2376,7 @@ describe("pre", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     packages = (await getPackages(cwd))!;
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
@@ -2429,7 +2398,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     packages = (await getPackages(cwd))!;
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
@@ -2451,7 +2420,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     packages = (await getPackages(cwd))!;
     expect(packages.packages.map((x) => x.packageJson)).toMatchInlineSnapshot(`
       [
@@ -2468,8 +2437,8 @@ describe("pre", () => {
         },
       ]
     `);
-    await pre(cwd, { command: "exit" });
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await pre({ cwd, command: "exit" });
+    await version({ cwd });
     packages = (await getPackages(cwd))!;
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
@@ -2565,8 +2534,9 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
-    await pre(cwd, { command: "enter", tag: "next" });
+    await pre({ cwd, command: "enter", tag: "next" });
     await writeChangeset(
       {
         releases: [{ name: "pkg-b", type: "patch" }],
@@ -2575,7 +2545,7 @@ describe("pre", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     let packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
@@ -2612,7 +2582,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     packages = (await getPackages(cwd))!;
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2652,6 +2622,7 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
     await writeChangeset(
       {
@@ -2660,7 +2631,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     let packages = await getPackages(cwd);
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2675,7 +2646,7 @@ describe("pre", () => {
       },
     ]);
 
-    await pre(cwd, { command: "enter", tag: "next" });
+    await pre({ cwd, command: "enter", tag: "next" });
     await writeChangeset(
       {
         releases: [{ name: "pkg-a", type: "patch" }],
@@ -2683,7 +2654,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     packages = (await getPackages(cwd))!;
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2718,8 +2689,9 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
-    await pre(cwd, { command: "enter", tag: "next" });
+    await pre({ cwd, command: "enter", tag: "next" });
     await writeChangeset(
       {
         releases: [{ name: "pkg-b", type: "patch" }],
@@ -2727,7 +2699,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     let packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2744,8 +2716,8 @@ describe("pre", () => {
       },
     ]);
 
-    await pre(cwd, { command: "exit" });
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await pre({ cwd, command: "exit" });
+    await version({ cwd });
 
     packages = (await getPackages(cwd))!;
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2782,6 +2754,7 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
     await writeChangeset(
       {
@@ -2791,8 +2764,8 @@ describe("pre", () => {
       cwd,
     );
 
-    await pre(cwd, { command: "enter", tag: "next" });
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await pre({ cwd, command: "enter", tag: "next" });
+    await version({ cwd });
     let packages = await getPackages(cwd);
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2814,7 +2787,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     packages = (await getPackages(cwd))!;
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2848,8 +2821,9 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
-    await pre(cwd, { command: "enter", tag: "next" });
+    await pre({ cwd, command: "enter", tag: "next" });
 
     await writeChangeset(
       {
@@ -2859,7 +2833,7 @@ describe("pre", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     let packages = await getPackages(cwd);
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2881,7 +2855,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     packages = (await getPackages(cwd))!;
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2916,6 +2890,7 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
     await writeChangeset(
       {
@@ -2925,8 +2900,8 @@ describe("pre", () => {
       cwd,
     );
 
-    await pre(cwd, { command: "enter", tag: "next" });
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await pre({ cwd, command: "enter", tag: "next" });
+    await version({ cwd });
     const packages = await getPackages(cwd);
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -2960,6 +2935,10 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      }),
     });
     await writeChangeset(
       {
@@ -2977,11 +2956,8 @@ describe("pre", () => {
       cwd,
     );
 
-    await pre(cwd, { command: "enter", tag: "next" });
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      ignore: ["pkg-a"],
-    });
+    await pre({ cwd, command: "enter", tag: "next" });
+    await version({ cwd });
     const packages = await getPackages(cwd);
 
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -3015,8 +2991,9 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
-    await pre(cwd, { command: "enter", tag: "alpha" });
+    await pre({ cwd, command: "enter", tag: "alpha" });
 
     await writeChangeset(
       {
@@ -3025,7 +3002,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -3062,9 +3039,10 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
-    await pre(cwd, { command: "enter", tag: "alpha" });
+    await pre({ cwd, command: "enter", tag: "alpha" });
 
     await writeChangeset(
       {
@@ -3074,7 +3052,7 @@ describe("pre", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -3101,7 +3079,7 @@ describe("pre", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -3140,9 +3118,10 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
-    await pre(cwd, { command: "enter", tag: "alpha" });
+    await pre({ cwd, command: "enter", tag: "alpha" });
 
     await writeChangeset(
       {
@@ -3152,7 +3131,7 @@ describe("pre", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -3191,9 +3170,10 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
-    await pre(cwd, { command: "enter", tag: "alpha" });
+    await pre({ cwd, command: "enter", tag: "alpha" });
 
     await writeChangeset(
       {
@@ -3203,7 +3183,7 @@ describe("pre", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -3242,9 +3222,10 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
-    await pre(cwd, { command: "enter", tag: "alpha" });
+    await pre({ cwd, command: "enter", tag: "alpha" });
 
     await writeChangeset(
       {
@@ -3254,7 +3235,7 @@ describe("pre", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -3293,9 +3274,10 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
 
-    await pre(cwd, { command: "enter", tag: "alpha" });
+    await pre({ cwd, command: "enter", tag: "alpha" });
 
     await writeChangeset(
       {
@@ -3305,7 +3287,7 @@ describe("pre", () => {
       cwd,
     );
 
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
 
     expect((await getPackages(cwd)).packages.map((x) => x.packageJson))
       .toMatchInlineSnapshot(`
@@ -3342,8 +3324,9 @@ describe("pre", () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
-    await pre(cwd, { command: "enter", tag: "next" });
+    await pre({ cwd, command: "enter", tag: "next" });
     await writeChangeset(
       {
         releases: [{ name: "pkg-b", type: "patch" }],
@@ -3351,7 +3334,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, modifiedDefaultConfig);
+    await version({ cwd });
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
@@ -3378,8 +3361,15 @@ describe("pre", () => {
         private: true,
         version: "1.0.0",
       }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        privatePackages: {
+          tag: false,
+          version: true,
+        },
+      }),
     });
-    await pre(cwd, { command: "enter", tag: "next" });
+    await pre({ cwd, command: "enter", tag: "next" });
     await writeChangeset(
       {
         releases: [{ name: "pkg-a", type: "patch" }],
@@ -3387,13 +3377,7 @@ describe("pre", () => {
       },
       cwd,
     );
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      privatePackages: {
-        tag: false,
-        version: true,
-      },
-    });
+    await version({ cwd });
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
       {
@@ -3427,6 +3411,7 @@ describe("pre", () => {
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify(linkedConfig),
       });
       await writeChangeset(
         {
@@ -3435,7 +3420,7 @@ describe("pre", () => {
         },
         cwd,
       );
-      await version(cwd, defaultOptions, linkedConfig);
+      await version({ cwd });
       let packages = await getPackages(cwd);
 
       expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -3450,7 +3435,7 @@ describe("pre", () => {
         },
       ]);
 
-      await pre(cwd, { command: "enter", tag: "next" });
+      await pre({ cwd, command: "enter", tag: "next" });
       await writeChangeset(
         {
           releases: [{ name: "pkg-b", type: "patch" }],
@@ -3458,7 +3443,7 @@ describe("pre", () => {
         },
         cwd,
       );
-      await version(cwd, defaultOptions, linkedConfig);
+      await version({ cwd });
       packages = (await getPackages(cwd))!;
 
       expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -3479,7 +3464,7 @@ describe("pre", () => {
         },
         cwd,
       );
-      await version(cwd, defaultOptions, linkedConfig);
+      await version({ cwd });
       packages = (await getPackages(cwd))!;
       expect(packages.packages.map((x) => x.packageJson)).toEqual([
         {
@@ -3499,7 +3484,7 @@ describe("pre", () => {
         },
         cwd,
       );
-      await version(cwd, defaultOptions, linkedConfig);
+      await version({ cwd });
       packages = (await getPackages(cwd))!;
       expect(packages.packages.map((x) => x.packageJson)).toEqual([
         {
@@ -3540,8 +3525,9 @@ describe("pre", () => {
           name: "pkg-c",
           version: "0.1.0",
         }),
+        ".changeset/config.json": JSON.stringify(linkedConfig),
       });
-      await pre(cwd, { command: "enter", tag: "next" });
+      await pre({ cwd, command: "enter", tag: "next" });
       await writeChangeset(
         {
           releases: [{ name: "pkg-a", type: "minor" }],
@@ -3549,7 +3535,7 @@ describe("pre", () => {
         },
         cwd,
       );
-      await version(cwd, defaultOptions, linkedConfig);
+      await version({ cwd });
       let packages = await getPackages(cwd);
 
       expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -3575,7 +3561,7 @@ describe("pre", () => {
         },
         cwd,
       );
-      await version(cwd, defaultOptions, linkedConfig);
+      await version({ cwd });
       packages = (await getPackages(cwd))!;
 
       expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -3616,6 +3602,7 @@ describe("pre", () => {
           name: "pkg-b",
           version: "1.0.0",
         }),
+        ".changeset/config.json": JSON.stringify(linkedConfig),
       });
       await writeChangeset(
         {
@@ -3624,7 +3611,7 @@ describe("pre", () => {
         },
         cwd,
       );
-      await version(cwd, defaultOptions, linkedConfig);
+      await version({ cwd });
       const packages = await getPackages(cwd);
 
       expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -3669,15 +3656,16 @@ describe("with privatePackages", () => {
 
 Nice simple summary, much wow
 `,
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        privatePackages: {
+          version: false,
+          tag: false,
+        },
+      }),
     });
 
-    await version(cwd, defaultOptions, {
-      ...modifiedDefaultConfig,
-      privatePackages: {
-        version: false,
-        tag: false,
-      },
-    });
+    await version({ cwd });
 
     const packages = await getPackages(cwd);
     expect(packages.packages.map((x) => x.packageJson)).toEqual([
@@ -3694,5 +3682,129 @@ Nice simple summary, much wow
         version: "1.1.0",
       },
     ]);
+  });
+
+  it("should not throw if dependents of unversioned private packages are not explicitly listed by the ignore flag", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        privatePackages: {
+          tag: false,
+          version: false,
+        },
+      }),
+    });
+    try {
+      await version({ cwd, ignore: ["pkg-b"] });
+    } catch {
+      // ignore the error. We just want to validate the error message
+    }
+
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+  });
+
+  it("should not throw on a dev dependent on an unversioned private package", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        devDependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        private: true,
+      }),
+      ".changeset/config.json": JSON.stringify({
+        privatePackages: {
+          tag: false,
+          version: false,
+        },
+      }),
+    });
+    try {
+      await version({ cwd });
+    } catch {
+      // ignore the error. We just want to validate the error message
+    }
+
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+  });
+
+  it("should not throw if a versioned private package depends on an ignored package", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        private: true,
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    await version({ cwd, ignore: ["pkg-b"] });
+
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+  });
+
+  it("should not throw if a package only has a devDependency on an ignored package", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        devDependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    await version({ cwd, ignore: ["pkg-b"] });
+
+    expect(mockedLogger.error).not.toHaveBeenCalled();
   });
 });

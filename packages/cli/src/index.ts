@@ -4,91 +4,108 @@ import manifest from "@changesets/cli/package.json" with { type: "json" };
 import c from "@changesets/color";
 import { ExitError, InternalError } from "@changesets/errors";
 import { intro, log, outro } from "@clack/prompts";
-import mri from "mri";
-import { COMMAND_HELP } from "./help.ts";
-import { run } from "./run.ts";
+import { cac } from "cac";
+import type { AddOptions } from "./commands/add/index.ts";
+import type { InitOptions } from "./commands/init/index.ts";
+import type { PreOptions } from "./commands/pre/index.ts";
+import type { PublishOptions } from "./commands/publish/index.ts";
+import type { StatusOptions } from "./commands/status/index.ts";
+import type { TagOptions } from "./commands/tag/index.ts";
+import type { VersionOptions } from "./commands/version/index.ts";
 
-const args = process.argv.slice(2);
-const aliases = {
-  // Short flags
-  v: "verbose",
-  o: "output",
-  m: "message",
-  // Support kebab-case flags
-  "git-tag": "gitTag",
-  "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
-};
+const cli = cac("changeset");
 
-const parsed = mri(args, {
-  boolean: ["verbose", "empty", "open", "gitTag", "snapshot"],
-  string: [
-    "output",
-    "otp",
-    "since",
-    "ignore",
-    "message",
-    "tag",
-    "snapshot",
-    "snapshotPrereleaseTemplate",
-  ],
-  // mri mutates the alias object passed to it, so we need to copy it here to maintain the original object
-  alias: { ...aliases },
+cli.help();
+cli.version(manifest.version);
+
+cli.command("init").action(async (options: InitOptions) => {
+  const { init } = await import("./commands/init/index.ts");
+  await init(options);
 });
 
-// `mri` doesn't handle mixed boolean and strings well. It'll always try to coerce it as
-// a string even if only `--snapshot` is passed. We check here if this was the case and
-// try to coerce it as a boolean
-if (parsed.snapshot === "" && args[args.indexOf("--snapshot") + 1] !== "") {
-  parsed.snapshot = true;
-}
+cli
+  .command("", "Add a new changeset")
+  .alias("add")
+  .option("--empty", "Add an empty changeset")
+  .option("--open", "Open the changeset in the editor after creating it")
+  .option(
+    "--since <branch>",
+    "Detect changed packages since the provided git ref",
+  )
+  .option("-m, --message <text>", "Directly provide a message to the changeset")
+  .action(async (options: AddOptions) => {
+    const { add } = await import("./commands/add/index.ts");
+    await add(options);
+  });
 
-if (parsed.help) {
-  const command = parsed._[0];
-  if (command && COMMAND_HELP[command]) {
-    console.log(`
-  Usage
-    $ changeset ${COMMAND_HELP[command]}
+cli
+  .command("version", "Version packages and create changelogs")
+  .option("--ignore", "Packages to ignore")
+  .option("--snapshot [name]", "Create a snapshot prerelease")
+  .option(
+    "--snapshot-prerelease-template <template>",
+    "Template for snapshot prerelease",
+  )
+  .action(async (options: VersionOptions) => {
+    const { version } = await import("./commands/version/index.ts");
+    await version(options);
+  });
 
-    `);
-  } else {
-    console.log(
-      `
-  Organise your package versioning and publishing to make both contributors and maintainers happy
+cli
+  .command("publish", "Publish packages to npm")
+  .option("--otp <code>", "One time password for npm publish")
+  .option("--tag <name>", "Publish with the given npm dist-tag")
+  .option("--git-tag", "Create a git tag for the release")
+  .action(async (options: PublishOptions) => {
+    const { publish } = await import("./commands/publish/index.ts");
+    await publish(options);
+  });
 
-  Usage
-    $ changeset [command]
-  Commands
-${Object.values(COMMAND_HELP)
-  .map((cmd) => `    ${cmd}`)
-  .join("\n")}
+cli
+  .command("status", "Show the status of changesets")
+  .option("--since <branch>", "Show changesets since the provided git ref")
+  .option("-v, --verbose", "Show more information about the changesets")
+  .option("-o, --output <file>", "Output the status as JSON to a file")
+  .action(async (options: StatusOptions) => {
+    const { status } = await import("./commands/status/index.ts");
+    await status(options);
+  });
 
-    `,
-    );
-  }
-  process.exit(0);
-}
+cli.command("tag", "Tag release").action(async (options: TagOptions) => {
+  const { tag } = await import("./commands/tag/index.ts");
+  await tag(options);
+});
 
-// Version should only be shown if it's the only argument passed
-if (parsed.version && args.length === 1) {
-  console.log(manifest.version);
-  process.exit(0);
-}
+cli
+  .command("pre <enter|exit> <tag>")
+  .action(
+    async (
+      command: "enter" | "exit",
+      tag: string | undefined,
+      options: PreOptions,
+    ) => {
+      if (command === "enter" && typeof tag !== "string") {
+        log.error(`A tag must be passed when using prerelease enter`);
+        throw new ExitError(1);
+      }
 
-const cwd = process.cwd();
-const flags = { ...parsed };
-for (const flag of ["_", ...Object.keys(aliases)]) {
-  delete flags[flag];
-}
+      const { pre } = await import("./commands/pre/index.ts");
+      await pre(options);
+    },
+  );
 
 intro("🦋");
 
-run(parsed._, flags, cwd).catch((err) => {
+try {
+  cli.parse(process.argv, { run: false });
+  await cli.runMatchedCommand();
+} catch (err: any) {
   if (err instanceof InternalError) {
     log.error(
       `
 The following error is an internal unexpected error, these should never happen.
 Please open an issue with the following link:
-https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(`Unexpected error during ${parsed._[0] || "add"} command`)}&body=${encodeURIComponent(`## Error
+https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(`Unexpected error during ${cli.matchedCommandName || "add"} command`)}&body=${encodeURIComponent(`## Error
 
 \`\`\`
 ${format(err).replace(process.cwd().replace(/\\/g, "/"), "<cwd>")}
@@ -109,10 +126,10 @@ ${format(err).replace(process.cwd().replace(/\\/g, "/"), "<cwd>")}
 
   if (err instanceof ExitError) {
     outro(c.red(`🦋 Exited with code ${err.code}`));
-    return process.exit(err.code);
+    process.exit(err.code);
   }
 
   log.error(err.stack);
   outro(c.red("🦋 Exited with code 1"));
   process.exit(1);
-});
+}

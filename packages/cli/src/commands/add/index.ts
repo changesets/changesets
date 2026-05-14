@@ -1,10 +1,10 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import c from "@changesets/color";
+import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
@@ -13,26 +13,31 @@ import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 import * as cli from "../../utils/cli-utilities.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
+import { ensureChangesetFolder } from "../shared.ts";
 import { createChangeset } from "./createChangeset.ts";
 import { printConfirmationMessage } from "./messages.ts";
 
-export async function add(
-  cwd: string,
-  {
-    empty,
-    open,
-    since,
-    message,
-  }: { empty?: boolean; open?: boolean; since?: string; message?: string },
-  config: Config,
-): Promise<void> {
+export interface AddOptions {
+  cwd?: string;
+  empty?: boolean;
+  open?: boolean;
+  since?: string;
+  message?: string;
+}
+
+export async function add(options?: AddOptions): Promise<void> {
+  const cwd = options?.cwd ?? process.cwd();
+
   const packages = await getPackages(cwd);
+  await ensureChangesetFolder(packages.rootDir);
   if (packages.packages.length === 0) {
     log.error(
       `No packages found. You might have ${packages.tool.type} workspaces configured but no packages yet?`,
     );
     throw new ExitError(1);
   }
+
+  const config = await read(packages.rootDir, packages);
 
   const versionablePackages = packages.packages.filter(
     (pkg) =>
@@ -56,11 +61,11 @@ No versionable packages found
   const changesetBase = path.resolve(cwd, ".changeset");
 
   let newChangeset: Awaited<ReturnType<typeof createChangeset>>;
-  if (empty) {
+  if (options?.empty) {
     newChangeset = {
       confirmed: true,
       releases: [],
-      summary: message ?? "",
+      summary: options?.message ?? "",
     };
   } else {
     let changedPackagesNames: string[] = [];
@@ -68,7 +73,7 @@ No versionable packages found
       changedPackagesNames = (
         await getVersionableChangedPackages(config, {
           cwd,
-          ref: since,
+          ref: options?.since,
         })
       ).map((pkg) => pkg.packageJson.name);
     } catch (error) {
@@ -76,7 +81,7 @@ No versionable packages found
       // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
       log.warn(
         `
-Failed to identify which packages have changed since the ${since ? "ref" : "base branch"} due to an error:
+Failed to identify which packages have changed since the ${options?.since ? "ref" : "base branch"} due to an error:
 ${(error as Error).toString()}
 `.trim(),
       );
@@ -85,7 +90,7 @@ ${(error as Error).toString()}
     newChangeset = await createChangeset(
       changedPackagesNames,
       versionablePackages,
-      message,
+      options?.message,
     );
     printConfirmationMessage(newChangeset, versionablePackages.length > 1);
 
@@ -111,12 +116,14 @@ ${(error as Error).toString()}
       await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
       await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
       finalLogMessageLines.push(
-        c.green(`${empty ? "Empty " : ""}Changeset added and committed!`),
+        c.green(
+          `${options?.empty ? "Empty " : ""}Changeset added and committed!`,
+        ),
       );
     } else {
       finalLogMessageLines.push(
         c.green(
-          `${empty ? "Empty " : ""}Changeset added - you can now commit it!`,
+          `${options?.empty ? "Empty " : ""}Changeset added - you can now commit it!`,
         ),
       );
     }
@@ -150,7 +157,7 @@ This Changeset includes a major change and we STRONGLY recommend adding more inf
 
     log.success(finalLogMessageLines.join("\n"));
 
-    if (open) {
+    if (options?.open) {
       launchEditor(changesetPath);
     }
   }

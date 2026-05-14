@@ -1,19 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
 import type { ReleasePlan } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
-import { getPackages } from "@manypkg/get-packages";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { status } from "../index.ts";
-
-async function readConfig(cwd: string) {
-  const packages = await getPackages(cwd);
-  return read(cwd, packages);
-}
 
 function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
   if (!releaseObj) {
@@ -82,11 +75,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    const releaseObj = await status(
-      cwd,
-      { since: "main" },
-      await readConfig(cwd),
-    );
+    const releaseObj = await status({ cwd, since: "main" });
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
         "changesets": [
@@ -152,11 +141,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    const releaseObj = await status(
-      cwd,
-      { since: undefined },
-      await readConfig(cwd),
-    );
+    const releaseObj = await status({ cwd });
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
         "changesets": [
@@ -214,7 +199,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    const promise = status(cwd, { since: "main" }, await readConfig(cwd));
+    const promise = status({ cwd, since: "main" });
     await expect(promise).rejects.toThrow();
   });
 
@@ -239,11 +224,7 @@ describe("status", () => {
       nodeOptions: { cwd },
     });
 
-    const releaseObj = await status(
-      cwd,
-      { since: "main" },
-      await readConfig(cwd),
-    );
+    const releaseObj = await status({ cwd, since: "main" });
 
     expect(process.exit).not.toHaveBeenCalled();
     expect(releaseObj).toEqual({
@@ -289,7 +270,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    await status(cwd, { since: "main" }, await readConfig(cwd));
+    await status({ cwd, since: "main" });
 
     expect(process.exit).not.toHaveBeenCalled();
   });
@@ -333,11 +314,7 @@ describe("status", () => {
 
     const output = "nonsense.json";
 
-    const probsUndefined = await status(
-      cwd,
-      { since: "main", output },
-      await readConfig(cwd),
-    );
+    const probsUndefined = await status({ cwd, since: "main", output });
 
     const releaseObj = await fs.readFile(path.join(cwd, output), "utf8");
 
@@ -402,11 +379,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("add unrelated thing", cwd);
 
-    const releaseObj = await status(
-      cwd,
-      { since: "main" },
-      await readConfig(cwd),
-    );
+    const releaseObj = await status({ cwd, since: "main" });
 
     expect(process.exit).not.toHaveBeenCalled();
     expect(releaseObj).toEqual({
@@ -446,7 +419,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    const promise = status(cwd, { since: "main" }, await readConfig(cwd));
+    const promise = status({ cwd, since: "main" });
     await expect(promise).rejects.toThrow();
   });
 
@@ -486,11 +459,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated a", cwd);
 
-    const releaseObj = await status(
-      cwd,
-      { since: "main" },
-      await readConfig(cwd),
-    );
+    const releaseObj = await status({ cwd, since: "main" });
     expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
       {
         "changesets": [
@@ -557,11 +526,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated b", cwd);
 
-    const releaseObj = await status(
-      cwd,
-      { since: "main" },
-      await readConfig(cwd),
-    );
+    const releaseObj = await status({ cwd, since: "main" });
 
     expect(process.exit).not.toHaveBeenCalled();
     expect(releaseObj).toEqual({
@@ -610,11 +575,7 @@ describe("status", () => {
     await git.add(".", cwd);
     await git.commit("updated b", cwd);
 
-    const releaseObj = await status(
-      cwd,
-      { since: "main" },
-      await readConfig(cwd),
-    );
+    const releaseObj = await status({ cwd, since: "main" });
 
     expect(process.exit).not.toHaveBeenCalled();
     expect(releaseObj).toEqual({

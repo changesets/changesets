@@ -14,12 +14,17 @@ const getPaths = (cwd: string) => ({
 describe("init", () => {
   silenceLogsInBlock();
   it("should initialize in a project without a .changeset folder", async () => {
-    const cwd = await testdir({});
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+      }),
+    });
     const { readmePath, configPath } = getPaths(cwd);
 
     expect(existsSync(readmePath)).toBe(false);
     expect(existsSync(configPath)).toBe(false);
-    await initializeCommand(cwd);
+    await initializeCommand({ cwd });
     expect(existsSync(readmePath)).toBe(true);
     expect(existsSync(configPath)).toBe(true);
   });
@@ -33,7 +38,7 @@ describe("init", () => {
       "package-lock.json": "",
     });
 
-    await initializeCommand(cwd);
+    await initializeCommand({ cwd });
     expect(
       JSON.parse(
         await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8"),
@@ -50,7 +55,7 @@ describe("init", () => {
       "package-lock.json": "",
     });
 
-    await initializeCommand(cwd);
+    await initializeCommand({ cwd });
 
     const configPath = path.join(cwd, ".changeset/config.json");
     const config = (await fs.readFile(configPath)).toString();
@@ -71,7 +76,7 @@ describe("init", () => {
       }),
     });
 
-    await initializeCommand(cwd);
+    await initializeCommand({ cwd });
     expect(
       JSON.parse(
         await fs.readFile(path.join(cwd, ".changeset/config.json"), "utf8"),
