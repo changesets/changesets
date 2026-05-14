@@ -11,8 +11,6 @@ export default defineConfig(
     ignores: [
       "**/node_modules/**",
       "**/dist/**",
-      "**/__fixtures__/**",
-      "**/scratchings.js",
       "packages/cli/bin.js",
       "**/*.snap",
     ],
