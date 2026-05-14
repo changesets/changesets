@@ -5,27 +5,28 @@ import c from "@changesets/color";
 import { ExitError, InternalError } from "@changesets/errors";
 import { intro, log, outro } from "@clack/prompts";
 import { cac } from "cac";
-import type { AddOptions } from "./commands/add/index.ts";
-import type { InitOptions } from "./commands/init/index.ts";
-import type { PreOptions } from "./commands/pre/index.ts";
-import type { PublishOptions } from "./commands/publish/index.ts";
-import type { StatusOptions } from "./commands/status/index.ts";
-import type { TagOptions } from "./commands/tag/index.ts";
-import type { VersionOptions } from "./commands/version/index.ts";
 
 const cli = cac("changeset");
 
-cli.help();
 cli.version(manifest.version);
-
-cli.command("init").action(async (options: InitOptions) => {
-  const { init } = await import("./commands/init/index.ts");
-  await init(options);
+cli.help((sections) => {
+  // Show nicer help message title
+  sections[0] = { body: `🦋 changeset v${manifest.version}` };
 });
 
+// Simplify the version output compared to the default
+cli.globalCommand.outputVersion = () => console.info(manifest.version);
+
 cli
-  .command("", "Add a new changeset")
-  .alias("add")
+  .command("init", "Initialize a new changesets setup")
+  .action(async (options) => {
+    const { init } = await import("./commands/init/index.ts");
+    await init(options);
+  });
+
+cli
+  .command("add", "Add a new changeset")
+  .alias("!") // special alias for default command
   .option("--empty", "Add an empty changeset")
   .option("--open", "Open the changeset in the editor after creating it")
   .option(
@@ -33,71 +34,71 @@ cli
     "Detect changed packages since the provided git ref",
   )
   .option("-m, --message <text>", "Directly provide a message to the changeset")
-  .action(async (options: AddOptions) => {
+  .action(async (options) => {
     const { add } = await import("./commands/add/index.ts");
     await add(options);
   });
 
 cli
   .command("version", "Version packages and create changelogs")
-  .option("--ignore", "Packages to ignore")
+  .option("--ignore <pkg>", "Packages to ignore", { type: [String] })
   .option("--snapshot [name]", "Create a snapshot prerelease")
   .option(
     "--snapshot-prerelease-template <template>",
     "Template for snapshot prerelease",
   )
-  .action(async (options: VersionOptions) => {
+  .action(async (options) => {
     const { version } = await import("./commands/version/index.ts");
     await version(options);
   });
 
 cli
-  .command("publish", "Publish packages to npm")
+  .command("publish", "Publish packages to npm and create git tags")
   .option("--otp <code>", "One time password for npm publish")
   .option("--tag <name>", "Publish with the given npm dist-tag")
   .option("--git-tag", "Create a git tag for the release")
-  .action(async (options: PublishOptions) => {
+  .action(async (options) => {
     const { publish } = await import("./commands/publish/index.ts");
     await publish(options);
   });
 
 cli
-  .command("status", "Show the status of changesets")
+  .command("status", "Show the changesets that currently exist")
   .option("--since <branch>", "Show changesets since the provided git ref")
   .option("-v, --verbose", "Show more information about the changesets")
   .option("-o, --output <file>", "Output the status as JSON to a file")
-  .action(async (options: StatusOptions) => {
+  .action(async (options) => {
     const { status } = await import("./commands/status/index.ts");
     await status(options);
   });
 
-cli.command("tag", "Tag release").action(async (options: TagOptions) => {
-  const { tag } = await import("./commands/tag/index.ts");
-  await tag(options);
-});
+cli
+  .command("tag", "Create git tags for the current version of all packages")
+  .action(async (options) => {
+    const { tag } = await import("./commands/tag/index.ts");
+    await tag(options);
+  });
 
 cli
-  .command("pre <enter|exit> <tag>")
-  .action(
-    async (
-      command: "enter" | "exit",
-      tag: string | undefined,
-      options: PreOptions,
-    ) => {
-      if (command === "enter" && typeof tag !== "string") {
-        log.error(`A tag must be passed when using prerelease enter`);
-        throw new ExitError(1);
-      }
+  .command("pre enter <tag>", "Enter prerelease mode with the given tag")
+  .action(async (tag: string, options) => {
+    const { pre } = await import("./commands/pre/index.ts");
+    await pre({ ...options, command: "enter", tag });
+  });
 
-      const { pre } = await import("./commands/pre/index.ts");
-      await pre(options);
-    },
-  );
-
-intro("🦋");
+cli.command("pre exit", "Exit prerelease mode").action(async (options) => {
+  const { pre } = await import("./commands/pre/index.ts");
+  await pre({ ...options, command: "exit" });
+});
 
 try {
   cli.parse(process.argv, { run: false });
+
+  // Do not show intro for --help and --version, which have no command name
+  if (cli.matchedCommandName != null) {
+    intro("🦋");
+  }
+
   await cli.runMatchedCommand();
 } catch (err: any) {
   if (err instanceof InternalError) {
