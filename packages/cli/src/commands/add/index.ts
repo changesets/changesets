@@ -58,7 +58,7 @@ No versionable packages found
     throw new ExitError(1);
   }
 
-  const changesetBase = path.resolve(cwd, ".changeset");
+  const changesetBase = path.resolve(packages.rootDir, ".changeset");
 
   let newChangeset: Awaited<ReturnType<typeof createChangeset>>;
   if (options?.empty) {
@@ -72,7 +72,7 @@ No versionable packages found
     try {
       changedPackagesNames = (
         await getVersionableChangedPackages(config, {
-          cwd,
+          cwd: packages.rootDir,
           ref: options?.since,
         })
       ).map((pkg) => pkg.packageJson.name);
@@ -103,18 +103,28 @@ ${(error as Error).toString()}
   }
 
   if (newChangeset.confirmed) {
-    const changesetID = await writeChangeset(newChangeset, cwd, config);
+    const changesetID = await writeChangeset(
+      newChangeset,
+      packages.rootDir,
+      config,
+    );
     const [{ getAddMessage }, commitOpts] = await getCommitFunctions(
       config.commit,
-      cwd,
+      packages.rootDir,
       path.dirname(fileURLToPath(import.meta.url)),
     );
 
     const finalLogMessageLines: string[] = [];
 
     if (getAddMessage) {
-      await git.add(path.resolve(changesetBase, `${changesetID}.md`), cwd);
-      await git.commit(await getAddMessage(newChangeset, commitOpts), cwd);
+      await git.add(
+        path.resolve(changesetBase, `${changesetID}.md`),
+        packages.rootDir,
+      );
+      await git.commit(
+        await getAddMessage(newChangeset, commitOpts),
+        packages.rootDir,
+      );
       finalLogMessageLines.push(
         c.green(
           `${options?.empty ? "Empty " : ""}Changeset added and committed!`,

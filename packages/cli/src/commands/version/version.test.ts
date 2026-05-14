@@ -3774,6 +3774,12 @@ Nice simple summary, much wow
         version: "1.0.0",
         private: true,
       }),
+      ".changeset/changesets-are-beautiful.md": `---
+"pkg-a": minor
+---
+
+Nice simple summary, much wow
+`,
       ".changeset/config.json": JSON.stringify({}),
     });
 
@@ -3800,6 +3806,12 @@ Nice simple summary, much wow
         name: "pkg-b",
         version: "1.0.0",
       }),
+      ".changeset/changesets-are-beautiful.md": `---
+"pkg-a": minor
+---
+
+Nice simple summary, much wow
+`,
       ".changeset/config.json": JSON.stringify({}),
     });
 

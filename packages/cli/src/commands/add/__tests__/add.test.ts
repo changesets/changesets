@@ -628,18 +628,23 @@ describe("Add command", () => {
         name: "pkg-a",
         version: "1.0.0",
       }),
-      ".changeset/config.json": JSON.stringify({}),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
     });
 
     const cwd = path.resolve(rootDir, "packages", "pkg-a");
 
-    await addChangeset({ cwd, message: "test" });
+    mockUserResponses({ releases: { "pkg-a": "patch" } });
+    await addChangeset({ cwd });
 
     const changesets = await getChangesets(rootDir);
     expect(changesets.length).toBe(1);
     expect(changesets[0]).toEqual(
       expect.objectContaining({
-        summary: "test",
+        summary: "summary message mock",
         releases: [{ name: "pkg-a", type: "patch" }],
       }),
     );
