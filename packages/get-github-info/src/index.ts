@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { parseEnv } from "node:util";
+import util from "node:util";
 import DataLoader from "dataloader";
 
 async function readEnvFile() {
@@ -11,7 +11,10 @@ async function readEnvFile() {
   } catch {
     return {};
   }
-  return parseEnv(content);
+  // API may be experimental in supported node versions, but practically nothing
+  // changed until stable, so this is safe
+  // eslint-disable-next-line n/no-unsupported-features/node-builtins
+  return util.parseEnv(content);
 }
 
 let cachedEnv: ReturnType<typeof readEnvFile> | undefined;
@@ -108,7 +111,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
 // 2. batching
 // getReleaseLine will be called a large number of times but it'll be called at the same time
 // so instead of doing a bunch of network requests, we can do a single one.
-const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
+const GHDataLoader = new DataLoader(async (requests: readonly RequestData[]) => {
   const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } =
     await readEnv();
   if (!GITHUB_TOKEN) {
