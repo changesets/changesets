@@ -45,6 +45,75 @@ jobs:
             packages/*/dist
             scripts/*/dist
 
+  github-dir-changes:
+    name: Detect GitHub directory changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read # required to read changed files in pull requests
+    outputs:
+      github-dir: ${{ steps.filter.outputs.github-dir }}
+    steps:
+      - name: Checkout repository
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # Push only needs the previous commit on the current branch.
+          # Merge queue groups are capped at 5 PRs here and use squash merging,
+          # so a depth of 10 leaves room for the queue commit plus a small buffer.
+          fetch-depth: ${{ github.event_name == 'push' && 2 || 10 }}
+          sparse-checkout: .github
+          persist-credentials: false
+
+      - name: Deepen checkout for merge_group if needed
+        if: github.event_name == 'merge_group'
+        env:
+          MERGE_GROUP_BASE_REF: ${{ github.event.merge_group.base_ref }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+        run: |
+          for deepen_by in 10 20 40; do
+            if git cat-file -e "${MERGE_GROUP_BASE_SHA}^{commit}" 2>/dev/null; then
+              exit 0
+            fi
+
+            git fetch --deepen="$deepen_by" origin "${MERGE_GROUP_BASE_REF}"
+          done
+
+          git cat-file -e "${MERGE_GROUP_BASE_SHA}^{commit}"
+
+      - name: Detect GitHub directory changes
+        id: filter
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        with:
+          # On push, compare against the previous commit on the current branch.
+          # On pull_request, paths-filter uses the PR base via the GitHub API.
+          # On merge_group, leaving base unset lets it use the event's base/head SHAs.
+          base: ${{ github.event_name == 'push' && github.ref || '' }}
+          filters: |
+            github-dir:
+              - '.github/**'
+
+  lint-workflows:
+    name: Lint workflows
+    needs: [github-dir-changes]
+    if: needs.github-dir-changes.outputs.github-dir == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # only required in private repos
+      actions: read # only required in private repos
+      security-events: write # allow writing security events
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e # v0.5.3
+        with:
+          persona: pedantic
+          annotations: true
+          advanced-security: false
+
   test:
     name: "Test using Node ${{ matrix.node_version }}"
     needs: [build]
@@ -129,8 +198,8 @@ jobs:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [build, test, typecheck, lint]
+    needs: [github-dir-changes, lint-workflows, build, test, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1
-        if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'skipped') || contains(needs.*.result, 'cancelled')) }}
+        if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
