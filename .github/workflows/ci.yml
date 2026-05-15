@@ -49,7 +49,6 @@ jobs:
     name: Lint workflows
     runs-on: ubuntu-latest
     permissions:
-      contents: read # only required in private repos
       actions: read # only required in private repos
       security-events: write # allow writing security events
     steps:
