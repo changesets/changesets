@@ -111,7 +111,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
 // 2. batching
 // getReleaseLine will be called a large number of times but it'll be called at the same time
 // so instead of doing a bunch of network requests, we can do a single one.
-const GHDataLoader = new DataLoader(async (requests: readonly RequestData[]) => {
+const GHDataLoader = new DataLoader<RequestData, any>(async (requests) => {
   const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } =
     await readEnv();
   if (!GITHUB_TOKEN) {
