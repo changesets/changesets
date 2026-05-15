@@ -2,7 +2,7 @@ import type { CommitFunctions } from "@changesets/types";
 
 type SkipCI = boolean | "add" | "version";
 
-const commitFunctions: CommitFunctions = {
+const commitFunctions: Required<CommitFunctions> = {
   getAddMessage: (changeset, options: { skipCI?: SkipCI } | null) => {
     const skipCI = options?.skipCI === "add" || options?.skipCI === true;
     const skipMsg = skipCI ? `\n\n[skip ci]\n` : "";
