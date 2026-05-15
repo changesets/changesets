@@ -7,7 +7,13 @@
 
 <p align="center">
   A tool to manage versioning and changelogs <br/>
-  with a focus on multi-package repositories
+  with a focus on monorepos
+</p>
+
+<p align="center">
+  <a href="https://changesets.dev">
+    Read the docs to learn more
+  </a>
 </p>
 <br/>
 

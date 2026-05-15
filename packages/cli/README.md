@@ -3,12 +3,9 @@
 [![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/cli?name=true)](https://npmx.dev/package/@changesets/cli)
 [![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
-The primary implementation of [changesets](https://github.com/changesets/changesets). Helps you manage the versioning
-and changelog entries for your packages, with a focus on versioning within a mono-repository (though we support
-single-package repositories too).
+A tool to manage versioning and changelogs with a focus on monorepos.
 
-This package is intended as a successor to `@atlaskit/build-releases` with a more general focus.
-It supports single-package repositories as well as [pnpm](https://pnpm.io/workspaces), [yarn](https://yarnpkg.com/features/workspaces), and [npm](https://docs.npmjs.com/cli/v11/using-npm/workspaces) workspaces.
+[Read the docs to learn more](https://changesets.dev).
 
 ## Getting Started
 
