@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_call:
   pull_request:
   # merge queue is required so all commits on target branches trigger this workflow
   # despite lack of the push event trigger here

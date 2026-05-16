@@ -43,10 +43,14 @@ jobs:
         with:
           version: pnpm version-packages
 
-  publish:
-    name: Publish
+  ci:
     if: needs.version.outputs.hasChangesets == 'false'
     needs: version
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Publish
+    needs: ci
     runs-on: ubuntu-latest
     environment: npm
     timeout-minutes: 20
