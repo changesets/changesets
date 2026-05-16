@@ -25,7 +25,10 @@ cli
   });
 
 cli
-  .command("add", "Add a new changeset")
+  .command("add", "Add a new changeset (default)")
+  .usage("[command] [options]")
+  .example("changeset -m 'Added a new feature'")
+  .example("changeset add --open --since main")
   .alias("!") // special alias for default command
   .option("--empty", "Add an empty changeset")
   .option("--open", "Open the changeset in the editor after creating it")
@@ -41,6 +44,8 @@ cli
 
 cli
   .command("version", "Version packages and create changelogs")
+  .example("changeset version")
+  .example("changeset version --snapshot 'pr#123'")
   .option("--ignore <pkg>", "Packages to ignore", { type: [String] })
   .option("--snapshot [name]", "Create a snapshot prerelease")
   .option(
@@ -54,6 +59,8 @@ cli
 
 cli
   .command("publish", "Publish packages to npm and create git tags")
+  .example("changeset status --otp 123456")
+  .example("changeset status --tag beta")
   .option("--otp <code>", "One time password for npm publish")
   .option("--tag <name>", "Publish with the given npm dist-tag")
   .option("--git-tag", "Create a git tag for the release")
@@ -64,6 +71,7 @@ cli
 
 cli
   .command("status", "Show the changesets that currently exist")
+  .example("changeset status --verbose")
   .option("--since <branch>", "Show changesets since the provided git ref")
   .option("-v, --verbose", "Show more information about the changesets")
   .option("-o, --output <file>", "Output the status as JSON to a file")
