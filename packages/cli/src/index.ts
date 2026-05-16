@@ -46,13 +46,19 @@ cli
   .command("version", "Version packages and create changelogs")
   .example("changeset version")
   .example("changeset version --snapshot 'pr#123'")
-  .option("--ignore <pkg>", "Packages to ignore", { type: [String] })
+  .option("--ignore <pkg>", "Packages to ignore")
   .option("--snapshot [name]", "Create a snapshot prerelease")
   .option(
     "--snapshot-prerelease-template <template>",
     "Template for snapshot prerelease",
   )
   .action(async (options) => {
+    if (options.ignore) {
+      options.ignore = Array.isArray(options.ignore)
+        ? options.ignore
+        : [options.ignore];
+    }
+
     const { version } = await import("./commands/version/index.ts");
     await version(options);
   });
