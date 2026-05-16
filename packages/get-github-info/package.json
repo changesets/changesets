@@ -14,10 +14,10 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "dataloader": "^1.4.0"
+    "dataloader": "^2.2.3"
   },
   "devDependencies": {
-    "nock": "^14.0.1",
+    "nock": "^14.0.15",
     "oxfmt": "^0.49.0"
   },
   "engines": {

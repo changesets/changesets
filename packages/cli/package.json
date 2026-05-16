@@ -1,7 +1,8 @@
 {
   "name": "@changesets/cli",
   "version": "3.0.0-next.4",
-  "description": "Organise your package versioning and publishing to make both contributors and maintainers happy",
+  "description": "A tool to manage versioning and changelogs with a focus on monorepos",
+  "homepage": "https://changesets.dev",
   "license": "MIT",
   "author": "Changesets Contributors",
   "contributors": [
@@ -52,7 +53,7 @@
     "launch-editor": "^2.13.2",
     "mri": "^1.2.0",
     "package-manager-detector": "^1.1.0",
-    "semver": "^7.5.3",
+    "semver": "^7.8.0",
     "tinyexec": "^1.0.2"
   },
   "devDependencies": {
@@ -63,7 +64,7 @@
     "@types/semver": "^7.7.1",
     "human-id": "^4.1.1",
     "outdent": "^0.8.0",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.6"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
