@@ -47,9 +47,6 @@ jobs:
   lint-workflows:
     name: Lint workflows
     runs-on: ubuntu-latest
-    permissions:
-      actions: read # only required in private repos
-      security-events: write # allow writing security events
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -100,7 +97,7 @@ jobs:
 
       - name: Upload coverage
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
-        if: matrix.node_version == 24
+        if: matrix.node_version == 24 && github.event_name != 'workflow_call'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 

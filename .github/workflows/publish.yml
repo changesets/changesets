@@ -46,6 +46,8 @@ jobs:
   ci:
     if: needs.version.outputs.hasChangesets == 'false'
     needs: version
+    permissions:
+      contents: read
     uses: ./.github/workflows/ci.yml
 
   publish:
