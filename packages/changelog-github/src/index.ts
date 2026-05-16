@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { parseEnv } from "node:util";
+import util from "node:util";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 import type { ChangelogFunctions } from "@changesets/types";
 
@@ -25,7 +25,10 @@ async function readEnvFile() {
   } catch {
     return {};
   }
-  return parseEnv(content);
+  // API may be experimental in supported node versions, but practically nothing
+  // changed until stable, so this is safe
+  // eslint-disable-next-line n/no-unsupported-features/node-builtins
+  return util.parseEnv(content);
 }
 
 let cachedEnv: ReturnType<typeof readEnvFile> | undefined;

@@ -21,7 +21,7 @@
   "devDependencies": {
     "@changesets/parse": "workspace:*",
     "@changesets/test-utils": "workspace:*",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.6"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
