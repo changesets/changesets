@@ -30,7 +30,7 @@ export async function status(options?: StatusOptions) {
     config,
   );
   const changedPackages = await getVersionableChangedPackages(config, {
-    cwd,
+    cwd: packages.rootDir,
     ref: options?.since,
   });
 

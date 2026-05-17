@@ -17,9 +17,34 @@ cli.help((sections) => {
 // Simplify the version output compared to the default
 cli.globalCommand.outputVersion = () => console.info(manifest.version);
 
+function normalizeOptions(
+  options: Record<string, any>,
+  { array }: { array?: string[] } = {},
+) {
+  // Do not allow positional arguments in options
+  options["--"] = undefined;
+
+  for (const key in options) {
+    if (options[key] == null) continue;
+
+    // If the flag is expected to be an array, ensure it's an array.
+    if (array?.includes(key)) {
+      const v = options[key];
+      options[key] = Array.isArray(v) ? v : [v];
+      continue;
+    }
+
+    // If a flag is passed multiple times (becoming an array), only take the last value.
+    if (Array.isArray(options[key])) {
+      options[key] = options[key].at(-1);
+    }
+  }
+}
+
 cli
   .command("init", "Initialize a new changesets setup")
   .action(async (options) => {
+    normalizeOptions(options);
     const { init } = await import("./commands/init/index.ts");
     await init(options);
   });
@@ -38,6 +63,7 @@ cli
   )
   .option("-m, --message <text>", "Directly provide a message to the changeset")
   .action(async (options) => {
+    normalizeOptions(options);
     const { add } = await import("./commands/add/index.ts");
     await add(options);
   });
@@ -53,12 +79,7 @@ cli
     "Template for snapshot prerelease",
   )
   .action(async (options) => {
-    if (options.ignore) {
-      options.ignore = Array.isArray(options.ignore)
-        ? options.ignore
-        : [options.ignore];
-    }
-
+    normalizeOptions(options, { array: ["ignore"] });
     const { version } = await import("./commands/version/index.ts");
     await version(options);
   });
@@ -71,6 +92,7 @@ cli
   .option("--tag <name>", "Publish with the given npm dist-tag")
   .option("--git-tag", "Create a git tag for the release")
   .action(async (options) => {
+    normalizeOptions(options);
     const { publish } = await import("./commands/publish/index.ts");
     await publish(options);
   });
@@ -82,6 +104,7 @@ cli
   .option("-v, --verbose", "Show more information about the changesets")
   .option("-o, --output <file>", "Output the status as JSON to a file")
   .action(async (options) => {
+    normalizeOptions(options);
     const { status } = await import("./commands/status/index.ts");
     await status(options);
   });
@@ -89,6 +112,7 @@ cli
 cli
   .command("tag", "Create git tags for the current version of all packages")
   .action(async (options) => {
+    normalizeOptions(options);
     const { tag } = await import("./commands/tag/index.ts");
     await tag(options);
   });
@@ -96,11 +120,13 @@ cli
 cli
   .command("pre enter <tag>", "Enter prerelease mode with the given tag")
   .action(async (tag: string, options) => {
+    normalizeOptions(options);
     const { pre } = await import("./commands/pre/index.ts");
     await pre({ ...options, command: "enter", tag });
   });
 
 cli.command("pre exit", "Exit prerelease mode").action(async (options) => {
+  normalizeOptions(options);
   const { pre } = await import("./commands/pre/index.ts");
   await pre({ ...options, command: "exit" });
 });
