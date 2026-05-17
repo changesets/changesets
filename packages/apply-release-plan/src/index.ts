@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { defaultConfig } from "@changesets/config";
+import { getDefaultConfig } from "@changesets/config";
 import {
   defaultDetectOrder,
   detect as detectFormatter,
@@ -60,7 +60,7 @@ async function getFormatter(
 export async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
-  config: Config = defaultConfig,
+  config: Config = getDefaultConfig(),
   snapshot?: string | boolean,
   contextDir = import.meta.dirname,
 ) {

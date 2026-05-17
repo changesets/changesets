@@ -1,0 +1,33 @@
+import c from "@changesets/color";
+import { readAndValidateConfig } from "@changesets/config";
+import { ExitError } from "@changesets/errors";
+import type { Config } from "@changesets/types";
+import { log } from "@clack/prompts";
+import type { Packages } from "@manypkg/get-packages";
+
+export async function readConfig(packages: Packages): Promise<Config> {
+  const { config, warnings, errors } = await readAndValidateConfig(
+    packages.rootDir,
+    packages,
+  );
+
+  const messages: string[] = [];
+
+  for (const warning of warnings) {
+    messages.push(c.yellow(`- ${warning}`));
+  }
+  for (const error of errors) {
+    messages.push(c.red(`- ${error}`));
+  }
+
+  const logFn = errors.length === 0 ? log.error : log.warn;
+  if (messages.length !== 0) {
+    logFn(messages.join("\n"));
+  }
+
+  if (errors.length !== 0) {
+    throw new ExitError(1);
+  }
+
+  return config!;
+}

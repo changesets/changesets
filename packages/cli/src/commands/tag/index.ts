@@ -1,10 +1,10 @@
 import c from "@changesets/color";
-import { read } from "@changesets/config";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { log, progress } from "@clack/prompts";
 import { getPackages, type Tool } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { readConfig } from "../../utils/read-config.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 
 function buildTag(tool: Tool, pkg: { name: string; newVersion: string }) {
@@ -30,7 +30,7 @@ export async function tag(options?: TagOptions) {
   const cwd = options?.cwd ?? process.cwd();
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
-  const config = await read(packages.rootDir, packages);
+  const config = await readConfig(packages);
 
   const allExistingTags = await git.getAllTags(packages.rootDir);
 

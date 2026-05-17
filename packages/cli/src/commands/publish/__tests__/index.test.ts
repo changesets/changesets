@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { defaultConfig } from "@changesets/config";
+import { getDefaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import type { Config } from "@changesets/types";
 import { describe, expect, it } from "vitest";
@@ -7,7 +7,7 @@ import { publish as publishCommand } from "../index.ts";
 
 const changelogPath = path.resolve(import.meta.dirname, "../../changelog");
 const modifiedDefaultConfig: Config = {
-  ...defaultConfig,
+  ...getDefaultConfig(),
   changelog: [changelogPath, null],
 };
 
@@ -33,7 +33,7 @@ describe("Publish command", () => {
       });
       await expect(
         publishCommand({ cwd, tag: "experimental" }),
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
     });
   });
 });

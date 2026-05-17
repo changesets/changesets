@@ -1,7 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import c from "@changesets/color";
-import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
@@ -12,6 +11,7 @@ import launchEditor from "launch-editor";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 import * as cli from "../../utils/cli-utilities.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
+import { readConfig } from "../../utils/read-config.ts";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { createChangeset } from "./createChangeset.ts";
@@ -37,7 +37,7 @@ export async function add(options?: AddOptions): Promise<void> {
     throw new ExitError(1);
   }
 
-  const config = await read(packages.rootDir, packages);
+  const config = await readConfig(packages);
 
   const versionablePackages = packages.packages.filter(
     (pkg) =>

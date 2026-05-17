@@ -2,16 +2,15 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
 import c from "@changesets/color";
-import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import { readPreState } from "@changesets/pre";
 import { readChangesets } from "@changesets/read";
 import type { ComprehensiveRelease } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
+import { readConfig } from "../../utils/read-config.ts";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
 import { ensureChangesetFolder } from "../shared.ts";
-import { readConfig } from "../../utils/read-config.ts";
 
 export interface StatusOptions {
   cwd?: string;
@@ -25,8 +24,8 @@ export async function status(options?: StatusOptions) {
 
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
-  const config = await read(packages.rootDir, packages);
 
+  const config = await readConfig(packages);
   const preState = await readPreState(packages.rootDir);
   const changesets = await readChangesets(packages.rootDir, options?.since);
 

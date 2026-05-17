@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { defaultConfig } from "@changesets/config";
+import { getDefaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import {
   type Fixture,
@@ -20,7 +20,9 @@ import { getPackages } from "@manypkg/get-packages";
 import { outdent } from "outdent";
 import { exec } from "tinyexec";
 import { describe, expect, it, test } from "vitest";
-import applyReleasePlan from "./index.ts";
+import { applyReleasePlan } from "./index.ts";
+
+const defaultConfig = getDefaultConfig();
 
 const changesetsCliChangelogPath = path.resolve(
   import.meta.dirname,

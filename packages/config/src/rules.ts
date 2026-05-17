@@ -202,10 +202,11 @@ const internalButNotGitHubRegistry: Rule = ({ packages, config, warnings }) => {
       ? !packages.rootPackage!.packageJson.publishConfig?.access?.includes(
           "npm.pkg.github.com",
         )
-      : packages.packages.some((pkg) =>
-          !pkg.packageJson.publishConfig?.registry?.includes(
-            "npm.pkg.github.com",
-          ),
+      : packages.packages.some(
+          (pkg) =>
+            !pkg.packageJson.publishConfig?.registry?.includes(
+              "npm.pkg.github.com",
+            ),
         );
 
   if (missingRegistry) {
@@ -217,10 +218,10 @@ const internalButNotGitHubRegistry: Rule = ({ packages, config, warnings }) => {
 
 // TODO: remove this alias
 const noAccessPrivate: Rule = ({ writtenConfig, warnings }) => {
-  if ((writtenConfig.access as unknown) !== "private") return
+  if ((writtenConfig.access as unknown) !== "private") return;
 
-  warnings.push('Deprecated: Use "restricted" instead of "private"')
-}
+  warnings.push('Deprecated: Use "restricted" instead of "private"');
+};
 
 const rules: Rule[] = [
   fixedGroupsExist,

@@ -1,5 +1,4 @@
 import c from "@changesets/color";
-import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
@@ -8,6 +7,7 @@ import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { readConfig } from "../../utils/read-config.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { publishPackages } from "./publishPackages.ts";
 
@@ -65,7 +65,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     showNonLatestTagWarning(options?.tag, preState);
   }
 
-  const config = await read(packages.rootDir, packages);
+  const config = await readConfig(packages);
   const tagPrivatePackages =
     config.privatePackages && config.privatePackages.tag;
 
