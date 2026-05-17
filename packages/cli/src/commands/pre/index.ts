@@ -6,16 +6,32 @@ import {
 } from "@changesets/errors";
 import { exitPre, enterPre } from "@changesets/pre";
 import { log } from "@clack/prompts";
+import { getPackages } from "@manypkg/get-packages";
+import { ensureChangesetFolder } from "../shared.ts";
 
-export async function pre(
-  rootDir: string,
-  options:
-    | { command: "enter"; tag: string }
-    | { command: "exit"; tag?: string },
-) {
+export type PreOptions = PreOptionsEnter | PreOptionsExit;
+
+interface PreOptionsEnter extends PreOptionsBase {
+  command: "enter";
+  tag: string;
+}
+
+interface PreOptionsExit extends PreOptionsBase {
+  command: "exit";
+}
+
+interface PreOptionsBase {
+  cwd?: string;
+}
+
+export async function pre(options: PreOptions) {
+  const cwd = options.cwd ?? process.cwd();
+  const packages = await getPackages(cwd);
+  await ensureChangesetFolder(packages.rootDir);
+
   if (options.command === "enter") {
     try {
-      await enterPre(rootDir, options.tag);
+      await enterPre(packages.rootDir, options.tag);
       log.success(
         `
 Entered pre mode with tag ${c.green(options.tag)}!
@@ -36,7 +52,7 @@ If you're trying to exit pre mode, run ${c.cyan("changeset pre exit")}.
     }
   } else {
     try {
-      await exitPre(rootDir);
+      await exitPre(packages.rootDir);
       log.success(
         `
 Exited pre mode!

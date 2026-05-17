@@ -27,11 +27,12 @@ describe("Publish command", () => {
           version: "1.0.0",
         }),
         ".changeset/pre.json": JSON.stringify({
+          ...modifiedDefaultConfig,
           mode: "pre",
         }),
       });
       await expect(
-        publishCommand(cwd, { tag: "experimental" }, modifiedDefaultConfig),
+        publishCommand({ cwd, tag: "experimental" }),
       ).rejects.toThrowError();
     });
   });

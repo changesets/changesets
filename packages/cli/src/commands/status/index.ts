@@ -1,29 +1,37 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import c from "@changesets/color";
+import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import { getReleasePlan } from "@changesets/get-release-plan";
-import type { ComprehensiveRelease, Config } from "@changesets/types";
+import type { ComprehensiveRelease } from "@changesets/types";
 import { log } from "@clack/prompts";
+import { getPackages } from "@manypkg/get-packages";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
+import { ensureChangesetFolder } from "../shared.ts";
 
-export async function status(
-  cwd: string,
-  {
-    since,
-    verbose,
-    output,
-  }: {
-    since?: string;
-    verbose?: boolean;
-    output?: string;
-  },
-  config: Config,
-) {
-  const releasePlan = await getReleasePlan(cwd, since, config);
+export interface StatusOptions {
+  cwd?: string;
+  since?: string;
+  verbose?: boolean;
+  output?: string;
+}
+
+export async function status(options?: StatusOptions) {
+  const cwd = options?.cwd ?? process.cwd();
+
+  const packages = await getPackages(cwd);
+  await ensureChangesetFolder(packages.rootDir);
+  const config = await read(packages.rootDir, packages);
+
+  const releasePlan = await getReleasePlan(
+    packages.rootDir,
+    options?.since,
+    config,
+  );
   const changedPackages = await getVersionableChangedPackages(config, {
-    cwd,
-    ref: since,
+    cwd: packages.rootDir,
+    ref: options?.since,
   });
 
   if (changedPackages.length > 0 && releasePlan.changesets.length === 0) {
@@ -36,9 +44,9 @@ If this change doesn't need a release, run ${c.cyan("changeset add --empty")}.
     throw new ExitError(1);
   }
 
-  if (output) {
+  if (options?.output) {
     await fs.writeFile(
-      path.resolve(cwd, output),
+      path.resolve(cwd, options.output),
       JSON.stringify(releasePlan, undefined, 2),
     );
     return;
@@ -46,7 +54,7 @@ If this change doesn't need a release, run ${c.cyan("changeset add --empty")}.
 
   printStatus(
     releasePlan.releases.toSorted((a, b) => a.name.localeCompare(b.name)),
-    verbose,
+    options?.verbose,
   );
 
   return releasePlan;

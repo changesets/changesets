@@ -20,8 +20,9 @@ describe("enterPre", () => {
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({}),
     });
-    await pre(cwd, { command: "enter", tag: "next" });
+    await pre({ cwd, command: "enter", tag: "next" });
 
     expect(
       JSON.parse(
@@ -57,7 +58,7 @@ describe("enterPre", () => {
     });
 
     await expect(
-      pre(cwd, { command: "enter", tag: "next" }),
+      pre({ cwd, command: "enter", tag: "next" }),
     ).rejects.toBeInstanceOf(ExitError);
     expect(mockedLogger.error).toHaveBeenCalledWith(
       expect.stringContaining("changeset pre enter"),
@@ -88,7 +89,7 @@ describe("enterPre", () => {
       }),
     });
 
-    await pre(cwd, { command: "enter", tag: "next" });
+    await pre({ cwd, command: "enter", tag: "next" });
     expect(
       JSON.parse(
         await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
@@ -124,7 +125,7 @@ describe("exitPre", () => {
         tag: "next",
       }),
     });
-    await pre(cwd, { command: "exit" });
+    await pre({ cwd, command: "exit" });
 
     expect(
       JSON.parse(
@@ -145,8 +146,9 @@ describe("exitPre", () => {
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({}),
     });
-    await expect(pre(cwd, { command: "exit" })).rejects.toBeInstanceOf(
+    await expect(pre({ cwd, command: "exit" })).rejects.toBeInstanceOf(
       ExitError,
     );
     expect(mockedLogger.error).toHaveBeenCalledWith(

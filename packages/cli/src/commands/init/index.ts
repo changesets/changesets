@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import c from "@changesets/color";
 import { defaultWrittenConfig } from "@changesets/config";
 import { log } from "@clack/prompts";
+import { getPackages } from "@manypkg/get-packages";
 
 const pkgPath = path.dirname(
   fileURLToPath(import.meta.resolve("@changesets/cli/package.json")),
@@ -12,8 +13,15 @@ const pkgPath = path.dirname(
 
 const defaultConfig = `${JSON.stringify(defaultWrittenConfig, null, 2)}\n`;
 
-export async function init(cwd: string) {
-  const changesetBase = path.resolve(cwd, ".changeset");
+export interface InitOptions {
+  cwd?: string;
+}
+
+export async function init(options?: InitOptions) {
+  const cwd = options?.cwd ?? process.cwd();
+
+  const packages = await getPackages(cwd);
+  const changesetBase = path.resolve(packages.rootDir, ".changeset");
 
   if (existsSync(changesetBase)) {
     if (!existsSync(path.join(changesetBase, "config.json"))) {
