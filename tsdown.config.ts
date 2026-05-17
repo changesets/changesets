@@ -5,6 +5,7 @@ const isCi = process.env.CI != null;
 export const baseConfig = defineConfig({
   entry: "src/index.ts",
   outDir: "dist",
+  hash: false,
   exports: true,
   // useful for running `build --watch` and `test` concurrently
   clean: !process.argv.includes("--watch"),
