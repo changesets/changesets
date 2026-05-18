@@ -1801,10 +1801,6 @@ describe("snapshot release", () => {
         "0.0.0-alpha.1639354050879.abcdef",
       ],
       ["{datetime}-{tag}", "alpha", "0.0.0-20211213000730-alpha"],
-      // Legacy support
-      ["", "test", "0.0.0-test-20211213000730"],
-      [undefined, "canary", "0.0.0-canary-20211213000730"],
-      [null, "alpha", "0.0.0-alpha-20211213000730"],
     ])(
       "should customize release correctly based on snapshotPrereleaseTemplate template: %s (tag: '%s')",
       async (snapshotTemplate, snapshotValue, expectedResult) => {
@@ -1891,7 +1887,7 @@ describe("snapshot release", () => {
           commit: false,
           snapshot: {
             useCalculatedVersion: true,
-            prereleaseTemplate: null,
+            prereleaseTemplate: undefined,
           },
         }),
       });
@@ -1938,7 +1934,7 @@ describe("snapshot release", () => {
           ...modifiedDefaultConfig,
           snapshot: {
             useCalculatedVersion: true,
-            prereleaseTemplate: null,
+            prereleaseTemplate: undefined,
           },
         }),
       });
@@ -1988,7 +1984,7 @@ describe("snapshot release", () => {
           ignore: ["pkg-a"],
           snapshot: {
             useCalculatedVersion: true,
-            prereleaseTemplate: null,
+            prereleaseTemplate: undefined,
           },
         }),
       });
