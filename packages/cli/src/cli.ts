@@ -1,4 +1,4 @@
-// this requires that the package is built _after_ bumping versions before publishing
+// this json import requires that the package is built _after_ bumping versions before publishing
 import manifest from "@changesets/cli/package.json" with { type: "json" };
 import c from "@changesets/color";
 import { log } from "@clack/prompts";

@@ -80,6 +80,14 @@ const tests: CommandTest[] = [
       {
         args: [
           "--snapshot",
+        ],
+        options: {
+          snapshot: true,
+        },
+      },
+      {
+        args: [
+          "--snapshot",
           "pr-123",
           "--snapshot-prerelease-template",
           "{tag}-{commit}",
