@@ -12,6 +12,7 @@ export default defineConfig(
       "**/node_modules/**",
       "**/dist/**",
       "packages/cli/bin.js",
+      "site/.vitepress/cache/**",
       "**/*.snap",
     ],
   },

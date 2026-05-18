@@ -1,7 +1,7 @@
 {
   "name": "@changesets/docs",
-  "private": true,
   "version": "0.0.1",
+  "private": true,
   "description": "The official documentation for Changesets",
   "type": "module",
   "scripts": {
