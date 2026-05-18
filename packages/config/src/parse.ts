@@ -28,7 +28,6 @@ export async function readConfigFile(cwd: string): Promise<ParseResult> {
   );
 }
 
-// uses a three-stage structure; parse, normalize, validate
 export function validateConfig(json: unknown, packages: Packages): ParseResult {
   // parse (...and validate)
   const writtenConfigResult = safeParse(WrittenConfigSchema, json);
@@ -70,9 +69,9 @@ export async function readAndValidateConfig(
   cwd ??= process.cwd();
   packages ??= await getPackages(cwd);
 
-  // parse
+  // read
   const json = await readConfigFile(packages.rootDir);
 
-  // normalize+validate
+  // prase+normalize+validate
   return validateConfig(json, packages);
 }

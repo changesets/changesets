@@ -106,7 +106,7 @@ const noFixedAndLinkedPackages: Rule = ({ config, errors }) => {
   for (const fixedName of allFixedPackages) {
     if (allLinkedPackages.has(fixedName)) {
       errors.push(
-        `The package "${fixedName}" can be found in both fixed and linked groups. A package can only be either fixed or linked.`,
+        `Invalid group: The package "${fixedName}" can be found in both fixed and linked groups. A package can only be either fixed or linked.`,
       );
     }
   }
@@ -194,6 +194,8 @@ const noPrivateTagWithoutPrivateVersion: Rule = ({ config, errors }) => {
   }
 };
 
+// TODO: add more details about this to docs, along with a link in the error message
+// TODO: maybe add setting for GH Packages registry domain?
 const internalButNotGitHubRegistry: Rule = ({ packages, config, warnings }) => {
   if (config.access !== "internal") return;
 
