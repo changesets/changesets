@@ -72,6 +72,6 @@ export async function readAndValidateConfig(
   // read
   const json = await readConfigFile(packages.rootDir);
 
-  // prase+normalize+validate
+  // parse+normalize+validate
   return validateConfig(json, packages);
 }
