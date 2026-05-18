@@ -18,6 +18,9 @@ A changeset declares which packages are affected by a change, the semver bump ty
 **Do nothing when:**
 - The change is `ci:`, `chore:`, `test:`, or an internal refactor with no API/behavior change
 - The only changed files are in `examples/`, `docs/`, or non-published packages (check `private: true` and `"ignore"` in `.changeset/config.json`)
+- The only changed files are tests or Storybook stories
+- The change is build-process, CI/CD, or development tooling only
+- The only dependency changes are `devDependencies`
 
 Tell the user no changeset is needed and why.
 
@@ -86,21 +89,23 @@ Use the commit message body / subject as a starting point for the changeset summ
 | Adds new exported function, class, option, or command | `minor` |
 | Bug fix, internal refactor, dependency update | `patch` |
 
+> **Pre-1.0 rule:** For packages on `0.x`, use `minor` for breaking changes — this is standard semver for pre-release packages. Only assign `major` to packages at `1.0.0` or higher.
+
 When unsure between minor and patch, ask the user.
 
 ### 4. Write the changeset file
 
-Generate a random two-word slug (adjective + animal, e.g. `fuzzy-wolves`) for the filename. Do not use `changeset` CLI — write the file directly.
+Choose a descriptive kebab-case filename that reflects the change (e.g. `fix-button-accessibility.md`, `add-retry-option.md`). Fall back to a random two-word slug (adjective + animal, e.g. `fuzzy-wolves`) when no obvious name fits or to avoid a conflict. Do not use the `changeset` CLI — write the file directly.
 
 ```markdown
 ---
 "package-name": patch
 ---
 
-Add retry option to fetch client
+Add `retry` option to fetch client.
 ```
 
-- Filename: `.changeset/<slug>.md`
+- Filename: `.changeset/<name>.md`
 - Each affected package gets one line in the frontmatter: `"<name>": <major|minor|patch>`
 - For packages in a `fixed` group, list every package in the group with the same bump type
 - The body is the user-facing summary (see summary rules below)
@@ -108,18 +113,37 @@ Add retry option to fetch client
 **Summary rules** — the body appears verbatim in `CHANGELOG.md`:
 - Imperative mood: "Add support for X" not "Added support for X"
 - User-facing: describe the effect, not the implementation
+- End with a period (`.`)
+- Wrap code identifiers (component names, prop names, function names) in backticks
 - One line is enough; add bullet points only for breaking changes that need migration steps
 - No references to internal file names or commit SHAs
 
-Good: `Add retry option to fetch client`
+Good: `Add \`retry\` option to fetch client.`
 Bad: `Updated fetchClient.ts to handle retries in the error handler`
 
+**Breaking change example** — include migration steps in the body:
+
+```markdown
+---
+"package-name": major
+---
+
+Remove deprecated `oldOption` config key. Use `newOption` instead.
+
+Migration:
+- Replace `oldOption: true` with `newOption: true`
+```
+
 ### 5. Commit the changeset
+
+Only commit the changeset automatically when there were **no local changes** at the start (scope case 3 — branch diff). In that case:
 
 ```bash
 git add .changeset/
 git commit -m "docs: add changeset"
 ```
+
+If staged or unstaged changes existed (scope cases 1 or 2), tell the user the changeset file has been created and let them include it in their own commit.
 
 ## What Happens Next (don't intervene)
 
@@ -131,7 +155,10 @@ Once the changeset is merged to the base branch, the CI release workflow (`chang
 
 ## Verification
 
-```bash
-# List changeset files pending release
-ls .changeset/*.md | grep -v config.json
-```
+- [ ] File exists in `.changeset/` with a descriptive or slug filename
+- [ ] Frontmatter lists all affected packages with the correct bump type
+- [ ] All packages in any `fixed` group are included together
+- [ ] Summary is consumer-focused — no internal file names or commit SHAs
+- [ ] Code identifiers are wrapped in backticks
+- [ ] Summary ends with a period
+- [ ] Breaking changes include migration steps
