@@ -3,8 +3,10 @@ import { format } from "node:util";
 import manifest from "@changesets/cli/package.json" with { type: "json" };
 import c from "@changesets/color";
 import { ExitError, InternalError } from "@changesets/errors";
-import { intro, log, outro } from "@clack/prompts";
+import { intro, log, outro, updateSettings } from "@clack/prompts";
 import { cac } from "cac";
+
+updateSettings({ withGuide: false });
 
 const cli = cac("changeset");
 
@@ -135,8 +137,8 @@ try {
   cli.parse(process.argv, { run: false });
 
   // Do not show intro for --help and --version, which have no command name
-  if (cli.matchedCommandName != null) {
-    intro("🦋");
+  if (cli.matchedCommand?.name != null) {
+    intro(`🦋 changeset v${manifest.version}\n`);
   }
 
   await cli.runMatchedCommand();
@@ -146,7 +148,7 @@ try {
       `
 The following error is an internal unexpected error, these should never happen.
 Please open an issue with the following link:
-https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(`Unexpected error during ${cli.matchedCommandName || "add"} command`)}&body=${encodeURIComponent(`## Error
+https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(`Unexpected error during ${cli.matchedCommand?.name || "add"} command`)}&body=${encodeURIComponent(`## Error
 
 \`\`\`
 ${format(err).replace(process.cwd().replace(/\\/g, "/"), "<cwd>")}
