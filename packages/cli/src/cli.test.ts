@@ -78,9 +78,7 @@ const tests: CommandTest[] = [
         },
       },
       {
-        args: [
-          "--snapshot",
-        ],
+        args: ["--snapshot"],
         options: {
           snapshot: true,
         },
