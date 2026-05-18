@@ -57,6 +57,18 @@ While not every changeset is going to need a huge amount of detail, a good idea 
 
 4. Once you are happy with the changeset, commit the file to your branch.
 
+## Using an AI agent
+
+If your workflow includes an AI coding agent, you can ask it to add a changeset for you. The agent will analyse your staged or unstaged changes (or the full branch diff if your working tree is clean), determine which packages are affected, infer the bump type, and write the `.changeset/<slug>.md` file directly.
+
+For agents that support skills or slash commands, look for an `add-changeset` skill. For example in Claude Code:
+
+```
+/add-changeset
+```
+
+The agent will also read conventional commit messages (`feat:`, `fix:`, `BREAKING CHANGE`, etc.) to help determine the bump type and draft a user-facing summary.
+
 ## Tips on adding changesets
 
 ### You can add more than one changeset to a pull request
