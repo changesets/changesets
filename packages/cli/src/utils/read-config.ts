@@ -14,19 +14,19 @@ export async function readConfig(packages: Packages): Promise<Config> {
   const messages: string[] = [];
 
   for (const warning of warnings) {
-    messages.push(c.yellow(`- ${warning}`));
+    messages.push(c.yellow(warning));
   }
   for (const error of errors) {
-    messages.push(c.red(`- ${error}`));
+    messages.push(c.red(error));
   }
 
   const logFn = errors.length === 0 ? log.error : log.warn;
   if (messages.length !== 0) {
-    logFn(messages.join("\n"));
+    logFn(`- ${messages.join("\n- ")}`);
   }
 
   if (errors.length !== 0) {
-    throw new ExitError(1);
+    throw new ExitError(1, { cause: new Error(messages.join("\n")) });
   }
 
   return config!;

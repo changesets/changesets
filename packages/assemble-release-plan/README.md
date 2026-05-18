@@ -10,16 +10,21 @@ Usage
 ```ts
 import assembleReleasePlan from "@changesets/assemble-release-plan";
 import { readChangesets } from "@changesets/read";
-import { read } from "@changesets/config";
+import { readAndValidateConfig } from "@changesets/config";
 import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 
 const packages = await getPackages(cwd);
 const preState = await readPreState(cwd);
-const config = await read(cwd, packages);
+const { config } = await readAndValidateConfig(cwd, packages);
 const changesets = await readChangesets(cwd, sinceRef);
 
-const releasePlan = assembleReleasePlan(changesets, packages, config, preState);
+const releasePlan = assembleReleasePlan(
+  changesets,
+  packages,
+  config!,
+  preState,
+);
 ```
 
 Signature

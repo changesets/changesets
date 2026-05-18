@@ -24,3 +24,6 @@ describe("WrittenConfig", () => {
     await expect(schemaString).toMatchFileSnapshot("../schema.json");
   });
 });
+
+// tests for the config schema and rules are in `parse.test.ts` as we want to make sure
+// they are working correctly inside of `readAndValidateConfig`

@@ -19,7 +19,6 @@
     "./schema.json": "./schema.json"
   },
   "dependencies": {
-    "@changesets/errors": "workspace:^",
     "@changesets/get-dependents-graph": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",

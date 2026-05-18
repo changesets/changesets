@@ -243,9 +243,6 @@ importers:
 
   packages/config:
     dependencies:
-      '@changesets/errors':
-        specifier: workspace:^
-        version: link:../errors
       '@changesets/get-dependents-graph':
         specifier: workspace:^
         version: link:../get-dependents-graph
