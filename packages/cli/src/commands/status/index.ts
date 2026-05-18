@@ -1,44 +1,52 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import c from "@changesets/color";
+import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import { getReleasePlan } from "@changesets/get-release-plan";
-import type { ComprehensiveRelease, Config } from "@changesets/types";
+import type { ComprehensiveRelease } from "@changesets/types";
 import { log } from "@clack/prompts";
-import pc from "picocolors";
+import { getPackages } from "@manypkg/get-packages";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
+import { ensureChangesetFolder } from "../shared.ts";
 
-export async function status(
-  cwd: string,
-  {
-    since,
-    verbose,
-    output,
-  }: {
-    since?: string;
-    verbose?: boolean;
-    output?: string;
-  },
-  config: Config,
-) {
-  const releasePlan = await getReleasePlan(cwd, since, config);
+export interface StatusOptions {
+  cwd?: string;
+  since?: string;
+  verbose?: boolean;
+  output?: string;
+}
+
+export async function status(options?: StatusOptions) {
+  const cwd = options?.cwd ?? process.cwd();
+
+  const packages = await getPackages(cwd);
+  await ensureChangesetFolder(packages.rootDir);
+  const config = await read(packages.rootDir, packages);
+
+  const releasePlan = await getReleasePlan(
+    packages.rootDir,
+    options?.since,
+    config,
+  );
   const changedPackages = await getVersionableChangedPackages(config, {
-    cwd,
-    ref: since,
+    cwd: packages.rootDir,
+    ref: options?.since,
   });
 
   if (changedPackages.length > 0 && releasePlan.changesets.length === 0) {
     log.error(
       `
-Some packages have been changed but no changesets were found. Run ${pc.cyan("changeset add")} to resolve this error.
-If this change doesn't need a release, run ${pc.cyan("changeset add --empty")}.
+Some packages have been changed but no changesets were found. Run ${c.cyan("changeset add")} to resolve this error.
+If this change doesn't need a release, run ${c.cyan("changeset add --empty")}.
       `.trim(),
     );
     throw new ExitError(1);
   }
 
-  if (output) {
+  if (options?.output) {
     await fs.writeFile(
-      path.resolve(cwd, output),
+      path.resolve(cwd, options.output),
       JSON.stringify(releasePlan, undefined, 2),
     );
     return;
@@ -46,7 +54,7 @@ If this change doesn't need a release, run ${pc.cyan("changeset add --empty")}.
 
   printStatus(
     releasePlan.releases.toSorted((a, b) => a.name.localeCompare(b.name)),
-    verbose,
+    options?.verbose,
   );
 
   return releasePlan;
@@ -62,9 +70,9 @@ ${printPackageList(releases, verbose)}
 }
 
 const typeColors = {
-  major: pc.red,
-  minor: pc.green,
-  patch: pc.blue,
+  major: c.red,
+  minor: c.green,
+  patch: c.blue,
 } as const;
 
 function printPackageList(releases: ComprehensiveRelease[], verbose?: boolean) {
@@ -85,12 +93,14 @@ function printPackageList(releases: ComprehensiveRelease[], verbose?: boolean) {
       const lines = [`- ${typeColors[type](type)}`];
 
       releases.forEach(({ name, newVersion, changesets }) => {
-        const addedLineIndex = lines.push(`  - ${pc.cyan(name)}`) - 1;
+        const addedLineIndex = lines.push(`  - ${c.cyan(name)}`) - 1;
 
         if (verbose) {
-          lines[addedLineIndex] += ` -> ${pc.green(newVersion)}`;
+          lines[addedLineIndex] += ` -> ${c.green(newVersion)}`;
           lines.push(
-            ...changesets.map((c) => `    - ${pc.blue(`.changeset/${c}.md`)}`),
+            ...changesets.map(
+              (changeset) => `    - ${c.blue(`.changeset/${changeset}.md`)}`,
+            ),
           );
         }
       });

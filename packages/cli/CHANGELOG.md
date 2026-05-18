@@ -1,5 +1,47 @@
 # @changesets/cli
 
+## 3.0.0-next.4
+
+### Major Changes
+
+- [#1994](https://github.com/changesets/changesets/pull/1994) [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8) Thanks [@bluwy](https://github.com/bluwy)! - The `prettier` option in `.changeset/config.json` has been removed in favor of `format`. `format` supports `"auto"`, `"prettier"`, `"oxfmt"`, `"deno"`, and `"dprint"`, and `false` disables formatting. If you previously used `prettier: false`, migrate to `format: false` or remove the option to use automatic formatter detection.
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed warning messages about using v1 configs. They will now be silently ignored.
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Migrated from `enquirer` + `@inquirer/launch-editor` to `@clack/prompts` + `launch-editor`.
+
+  This means the CLI flows will have minor changes, but they are largely the same.
+
+  This change also fixes various issues related to `enquirer` like cancelling prompts crashing the CLI.
+
+### Minor Changes
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Packages are now listed in alphabetical order when possible.
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Choosing a change type now shows a preview of which part of the version it affects.
+
+  > Which packages should have a major (**X**.X.X) bump?
+
+### Patch Changes
+
+- [#2002](https://github.com/changesets/changesets/pull/2002) [`6db2c21`](https://github.com/changesets/changesets/commit/6db2c2160ee8f7a2401faeeb1477a98ff47fab12) Thanks [@Andarist](https://github.com/Andarist)! - Lazy-load CLI commands so `changeset` only loads the code needed for the command being run.
+
+- [#2004](https://github.com/changesets/changesets/pull/2004) [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156) Thanks [@ghostdevv](https://github.com/ghostdevv)! - Replace `picocolors` with `node:util`'s `styleText`
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`ee10723`](https://github.com/changesets/changesets/commit/ee10723dde491ba6632da74d10876dfa2e67d0d2), [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc), [`fc42514`](https://github.com/changesets/changesets/commit/fc425143294e63ba254ddbe8c2ea026b55a05991), [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156), [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8)]:
+  - @changesets/config@4.0.0-next.4
+  - @changesets/types@7.0.0-next.4
+  - @changesets/apply-release-plan@8.0.0-next.4
+  - @changesets/write@1.0.0-next.4
+  - @changesets/get-dependents-graph@3.0.0-next.4
+  - @changesets/read@1.0.0-next.4
+  - @changesets/assemble-release-plan@7.0.0-next.4
+  - @changesets/get-release-plan@5.0.0-next.4
+  - @changesets/changelog-git@1.0.0-next.4
+  - @changesets/git@4.0.0-next.4
+  - @changesets/pre@3.0.0-next.4
+  - @changesets/should-skip-package@1.0.0-next.4
+
 ## 3.0.0-next.3
 
 ### Major Changes

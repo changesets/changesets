@@ -1,8 +1,8 @@
+import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import type { AccessType, PackageJSON } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { detect } from "package-manager-detector";
-import pc from "picocolors";
 import semverParse from "semver/functions/parse.js";
 import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
@@ -195,13 +195,13 @@ export function getPackageInfo(packageJson: PackageJSON) {
 export async function infoAllow404(packageJson: PackageJSON) {
   const pkgInfo = await getPackageInfo(packageJson);
   if (pkgInfo.error?.code === "E404") {
-    log.warn(`Received 404 for ${pc.cyan(`npm info ${packageJson.name}`)}`);
+    log.warn(`Received 404 for ${c.cyan(`npm info ${packageJson.name}`)}`);
     return { published: false, pkgInfo: {} };
   }
   if (pkgInfo.error) {
     log.error(
       `
-Received an unknown error code: ${pkgInfo.error.code} for ${pc.cyan(`npm info ${packageJson.name}`)}
+Received an unknown error code: ${pkgInfo.error.code} for ${c.cyan(`npm info ${packageJson.name}`)}
 ${pkgInfo.error.summary}${pkgInfo.error.detail ? `\n${pkgInfo.error.detail}` : ""}
       `.trim(),
     );

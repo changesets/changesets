@@ -1,5 +1,16 @@
 # @changesets/write
 
+## 1.0.0-next.4
+
+### Minor Changes
+
+- [#1994](https://github.com/changesets/changesets/pull/1994) [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8) Thanks [@bluwy](https://github.com/bluwy)! - Changeset files are now formatted with [@changesets/format](https://github.com/changesets/format) instead of depending on Prettier directly. Formatter selection can be auto-detected from the project configuration or controlled via the `format` config option.
+
+### Patch Changes
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8)]:
+  - @changesets/types@7.0.0-next.4
+
 ## 1.0.0-next.3
 
 ### Major Changes

@@ -1,0 +1,14 @@
+// supported and working as expected in Node 22.08+
+// https://nodejs.org/docs/latest-v22.x/api/util.html#utilstyletextformat-text-options
+// eslint-disable-next-line n/no-unsupported-features/node-builtins
+import { styleText } from "node:util";
+
+type Color = Extract<Parameters<typeof styleText>[0], string>;
+type ColorProxy = Record<Color, (text: string) => string>;
+
+export default new Proxy({} as ColorProxy, {
+  get(target, color: Color) {
+    target[color] ??= (text) => styleText(color, text);
+    return target[color];
+  },
+});

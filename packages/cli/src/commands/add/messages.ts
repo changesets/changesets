@@ -1,6 +1,6 @@
+import c from "@changesets/color";
 import type { Release, VersionType } from "@changesets/types";
 import { log } from "@clack/prompts";
-import pc from "picocolors";
 
 export function printConfirmationMessage(
   changeset: {
@@ -19,23 +19,23 @@ export function printConfirmationMessage(
   const minorReleases = getReleasesOfType("minor");
   const patchReleases = getReleasesOfType("patch");
 
-  let msg = pc.bold("Summary of changesets:");
+  let msg = c.bold("Summary of changesets:");
   if (majorReleases.length > 0) {
-    msg += `\n${pc.bold(pc.red("major"))}:  ${majorReleases.join(", ")}`;
+    msg += `\n${c.bold(c.red("major"))}:  ${majorReleases.join(", ")}`;
   }
   if (minorReleases.length > 0) {
-    msg += `\n${pc.bold(pc.green("minor"))}:  ${minorReleases.join(", ")}`;
+    msg += `\n${c.bold(c.green("minor"))}:  ${minorReleases.join(", ")}`;
   }
   if (patchReleases.length > 0) {
-    msg += `\n${pc.bold(pc.blue("patch"))}:  ${patchReleases.join(", ")}`;
+    msg += `\n${c.bold(c.blue("patch"))}:  ${patchReleases.join(", ")}`;
   }
   log.success(msg);
 
   if (repoHasMultiplePackages) {
     log.info(
       `
-Note: All packages that depend on these whose required versions 
-will be incompatible will also be ${pc.blue("patch")} bumped
+Note: All packages that depend on these whose required versions
+will be incompatible will also be ${c.blue("patch")} bumped
 when this changeset is applied.
       `.trim(),
     );

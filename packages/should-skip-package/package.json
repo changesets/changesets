@@ -1,17 +1,17 @@
 {
   "name": "@changesets/should-skip-package",
-  "version": "1.0.0-next.3",
+  "version": "1.0.0-next.4",
   "description": "Checks if a package should be skipped for versioning or tagging purposes",
-  "type": "module",
-  "exports": {
-    ".": "./dist/index.mjs",
-    "./package.json": "./package.json"
-  },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/changesets/changesets.git",
     "directory": "packages/should-skip-package"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
   },
   "dependencies": {
     "@changesets/types": "workspace:^"

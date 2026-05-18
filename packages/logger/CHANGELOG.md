@@ -1,5 +1,11 @@
 # @changesets/logger
 
+## 1.0.0-next.3
+
+### Patch Changes
+
+- [#2004](https://github.com/changesets/changesets/pull/2004) [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156) Thanks [@ghostdevv](https://github.com/ghostdevv)! - Replace `picocolors` with `node:util`'s `styleText`
+
 ## 1.0.0-next.2
 
 ### Major Changes

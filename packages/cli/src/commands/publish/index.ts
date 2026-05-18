@@ -1,21 +1,23 @@
+import c from "@changesets/color";
+import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
-import type { Config, PreState } from "@changesets/types";
+import type { PreState } from "@changesets/types";
 import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import pc from "picocolors";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { ensureChangesetFolder } from "../shared.ts";
 import { publishPackages } from "./publishPackages.ts";
 
 function formatPackageList(
   pkgs: Array<{ name: string; newVersion: string }>,
-  versionColor = pc.green,
+  versionColor = c.green,
 ) {
   return pkgs
     .toSorted((a, b) => a.name.localeCompare(b.name))
-    .map((p) => `${pc.blueBright(p.name)}@${versionColor(p.newVersion)}`)
+    .map((p) => `${c.blueBright(p.name)}@${versionColor(p.newVersion)}`)
     .join("\n");
 }
 
@@ -23,8 +25,8 @@ function showNonLatestTagWarning(tag?: string, preState?: PreState) {
   if (preState) {
     importantWarning(
       `
-You are in prerelease mode, so packages will be published to the ${pc.cyan(preState.tag)} npm tag,
-${pc.red("except")} for packages that have not had normal releases, which will be published to ${pc.cyan("latest")}.
+You are in prerelease mode, so packages will be published to the ${c.cyan(preState.tag)} npm tag,
+${c.red("except")} for packages that have not had normal releases, which will be published to ${c.cyan("latest")}.
       `,
     );
   } else if (tag !== "latest") {
@@ -32,46 +34,59 @@ ${pc.red("except")} for packages that have not had normal releases, which will b
   }
 }
 
-export async function publish(
-  cwd: string,
-  { otp, tag, gitTag = true }: { otp?: string; tag?: string; gitTag?: boolean },
-  config: Config,
-) {
-  const releaseTag = tag && tag.length > 0 ? tag : undefined;
-  const preState = await readPreState(cwd);
+export interface PublishOptions {
+  cwd?: string;
+  otp?: string;
+  tag?: string;
+  gitTag?: boolean;
+}
+
+export async function publish(options?: PublishOptions) {
+  const cwd = options?.cwd ?? process.cwd();
+
+  const packages = await getPackages(cwd);
+  await ensureChangesetFolder(packages.rootDir);
+
+  const releaseTag =
+    options?.tag && options.tag.length > 0 ? options.tag : undefined;
+  const preState = await readPreState(packages.rootDir);
 
   if (releaseTag && preState && preState.mode === "pre") {
     log.error(
       `
 Releasing under custom tag is not allowed in pre mode!
-To resolve this exit the pre mode by running ${pc.cyan("changeset pre exit")}.
+To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
       `.trim(),
     );
     throw new ExitError(1);
   }
 
   if (releaseTag || preState) {
-    showNonLatestTagWarning(tag, preState);
+    showNonLatestTagWarning(options?.tag, preState);
   }
 
-  const { packages, tool } = await getPackages(cwd);
+  const config = await read(packages.rootDir, packages);
   const tagPrivatePackages =
     config.privatePackages && config.privatePackages.tag;
 
   const publishedPackages = await publishPackages({
-    packages,
+    packages: packages.packages,
     // if not public, we won't pass the access, and it works as normal
     access: config.access,
-    otp,
+    otp: options?.otp,
     preState,
     tag: releaseTag,
   });
 
-  const privatePackages = packages.filter(
+  const privatePackages = packages.packages.filter(
     (pkg) => pkg.packageJson.private && pkg.packageJson.version,
   );
   const untaggedPrivatePackageReleases = tagPrivatePackages
-    ? await getUntaggedPackages(privatePackages, cwd, tool)
+    ? await getUntaggedPackages(
+        privatePackages,
+        packages.rootDir,
+        packages.tool,
+      )
     : [];
 
   if (
@@ -99,12 +114,16 @@ ${formatPackageList(successfulNpmPublishes)}
     // We create the tags after the push above so that we know that HEAD won't change and that pushing
     // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
     // fail if we are behind the base branch).
-    if (gitTag) {
+    if (options?.gitTag) {
       const p = spinner();
       p.start(
         `Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`,
       );
-      await tagPublish(tool.type, successfulNpmPublishes, cwd);
+      await tagPublish(
+        packages.tool.type,
+        successfulNpmPublishes,
+        packages.rootDir,
+      );
       p.stop(`Created git tag${successfulNpmPublishes.length > 1 ? "s" : ""}.`);
     }
   }
@@ -113,7 +132,7 @@ ${formatPackageList(successfulNpmPublishes)}
     log.success(
       `
 Found untagged packages:
-${formatPackageList(untaggedPrivatePackageReleases, pc.yellowBright)}
+${formatPackageList(untaggedPrivatePackageReleases, c.yellowBright)}
       `.trim(),
     );
 
@@ -121,7 +140,11 @@ ${formatPackageList(untaggedPrivatePackageReleases, pc.yellowBright)}
     p.start(
       `Creating git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}...`,
     );
-    await tagPublish(tool.type, untaggedPrivatePackageReleases, cwd);
+    await tagPublish(
+      packages.tool.type,
+      untaggedPrivatePackageReleases,
+      packages.rootDir,
+    );
     p.stop(
       `Created git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}.`,
     );
@@ -131,7 +154,7 @@ ${formatPackageList(untaggedPrivatePackageReleases, pc.yellowBright)}
     log.error(
       `
 Some packages failed to publish:
-${formatPackageList(unsuccessfulNpmPublishes, pc.red)}
+${formatPackageList(unsuccessfulNpmPublishes, c.red)}
       `.trim(),
     );
     throw new ExitError(1);

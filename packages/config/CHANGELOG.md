@@ -1,5 +1,20 @@
 # @changesets/config
 
+## 4.0.0-next.4
+
+### Major Changes
+
+- [#1994](https://github.com/changesets/changesets/pull/1994) [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8) Thanks [@bluwy](https://github.com/bluwy)! - Replaced the `prettier` config option with `format`. `format` supports `"auto"`, `"prettier"`, `"oxfmt"`, `"deno"`, `"dprint"`, and `false`. If you previously used `prettier: false`, migrate to `format: false`.
+
+### Patch Changes
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed `@changesets/logger`.
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156)]:
+  - @changesets/types@7.0.0-next.4
+  - @changesets/get-dependents-graph@3.0.0-next.4
+  - @changesets/should-skip-package@1.0.0-next.4
+
 ## 4.0.0-next.3
 
 ### Major Changes

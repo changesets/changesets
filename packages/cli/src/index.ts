@@ -1,94 +1,152 @@
 import { format } from "node:util";
 // this requires that the package is built _after_ bumping versions before publishing
 import manifest from "@changesets/cli/package.json" with { type: "json" };
+import c from "@changesets/color";
 import { ExitError, InternalError } from "@changesets/errors";
 import { intro, log, outro } from "@clack/prompts";
-import mri from "mri";
-import pc from "picocolors";
-import { COMMAND_HELP } from "./help.ts";
-import { run } from "./run.ts";
+import { cac } from "cac";
 
-const args = process.argv.slice(2);
-const aliases = {
-  // Short flags
-  v: "verbose",
-  o: "output",
-  m: "message",
-  // Support kebab-case flags
-  "git-tag": "gitTag",
-  "snapshot-prerelease-template": "snapshotPrereleaseTemplate",
-};
+const cli = cac("changeset");
 
-const parsed = mri(args, {
-  boolean: ["verbose", "empty", "open", "gitTag", "snapshot"],
-  string: [
-    "output",
-    "otp",
-    "since",
-    "ignore",
-    "message",
-    "tag",
-    "snapshot",
-    "snapshotPrereleaseTemplate",
-  ],
-  // mri mutates the alias object passed to it, so we need to copy it here to maintain the original object
-  alias: { ...aliases },
+cli.version(manifest.version);
+cli.help((sections) => {
+  // Show nicer help message title
+  sections[0] = { body: `🦋 changeset v${manifest.version}` };
 });
 
-// `mri` doesn't handle mixed boolean and strings well. It'll always try to coerce it as
-// a string even if only `--snapshot` is passed. We check here if this was the case and
-// try to coerce it as a boolean
-if (parsed.snapshot === "" && args[args.indexOf("--snapshot") + 1] !== "") {
-  parsed.snapshot = true;
-}
+// Simplify the version output compared to the default
+cli.globalCommand.outputVersion = () => console.info(manifest.version);
 
-if (parsed.help) {
-  const command = parsed._[0];
-  if (command && COMMAND_HELP[command]) {
-    console.log(`
-  Usage
-    $ changeset ${COMMAND_HELP[command]}
+function normalizeOptions(
+  options: Record<string, any>,
+  { array }: { array?: string[] } = {},
+) {
+  // Do not allow positional arguments in options
+  options["--"] = undefined;
 
-    `);
-  } else {
-    console.log(
-      `
-  Organise your package versioning and publishing to make both contributors and maintainers happy
+  for (const key in options) {
+    if (options[key] == null) continue;
 
-  Usage
-    $ changeset [command]
-  Commands
-${Object.values(COMMAND_HELP)
-  .map((cmd) => `    ${cmd}`)
-  .join("\n")}
+    // If the flag is expected to be an array, ensure it's an array.
+    if (array?.includes(key)) {
+      const v = options[key];
+      options[key] = Array.isArray(v) ? v : [v];
+      continue;
+    }
 
-    `,
-    );
+    // If a flag is passed multiple times (becoming an array), only take the last value.
+    if (Array.isArray(options[key])) {
+      options[key] = options[key].at(-1);
+    }
   }
-  process.exit(0);
 }
 
-// Version should only be shown if it's the only argument passed
-if (parsed.version && args.length === 1) {
-  console.log(manifest.version);
-  process.exit(0);
-}
+cli
+  .command("init", "Initialize a new changesets setup")
+  .action(async (options) => {
+    normalizeOptions(options);
+    const { init } = await import("./commands/init/index.ts");
+    await init(options);
+  });
 
-const cwd = process.cwd();
-const flags = { ...parsed };
-for (const flag of ["_", ...Object.keys(aliases)]) {
-  delete flags[flag];
-}
+cli
+  .command("add", "Add a new changeset (default)")
+  .usage("[command] [options]")
+  .example("changeset -m 'Added a new feature'")
+  .example("changeset add --open --since main")
+  .alias("!") // special alias for default command
+  .option("--empty", "Add an empty changeset")
+  .option("--open", "Open the changeset in the editor after creating it")
+  .option(
+    "--since <branch>",
+    "Detect changed packages since the provided git ref",
+  )
+  .option("-m, --message <text>", "Directly provide a message to the changeset")
+  .action(async (options) => {
+    normalizeOptions(options);
+    const { add } = await import("./commands/add/index.ts");
+    await add(options);
+  });
 
-intro("🦋");
+cli
+  .command("version", "Version packages and create changelogs")
+  .example("changeset version")
+  .example("changeset version --snapshot 'pr#123'")
+  .option("--ignore <pkg>", "Packages to ignore")
+  .option("--snapshot [name]", "Create a snapshot prerelease")
+  .option(
+    "--snapshot-prerelease-template <template>",
+    "Template for snapshot prerelease",
+  )
+  .action(async (options) => {
+    normalizeOptions(options, { array: ["ignore"] });
+    const { version } = await import("./commands/version/index.ts");
+    await version(options);
+  });
 
-run(parsed._, flags, cwd).catch((err) => {
+cli
+  .command("publish", "Publish packages to npm and create git tags")
+  .example("changeset status --otp 123456")
+  .example("changeset status --tag beta")
+  .option("--otp <code>", "One time password for npm publish")
+  .option("--tag <name>", "Publish with the given npm dist-tag")
+  .option("--git-tag", "Create a git tag for the release")
+  .action(async (options) => {
+    normalizeOptions(options);
+    const { publish } = await import("./commands/publish/index.ts");
+    await publish(options);
+  });
+
+cli
+  .command("status", "Show the changesets that currently exist")
+  .example("changeset status --verbose")
+  .option("--since <branch>", "Show changesets since the provided git ref")
+  .option("-v, --verbose", "Show more information about the changesets")
+  .option("-o, --output <file>", "Output the status as JSON to a file")
+  .action(async (options) => {
+    normalizeOptions(options);
+    const { status } = await import("./commands/status/index.ts");
+    await status(options);
+  });
+
+cli
+  .command("tag", "Create git tags for the current version of all packages")
+  .action(async (options) => {
+    normalizeOptions(options);
+    const { tag } = await import("./commands/tag/index.ts");
+    await tag(options);
+  });
+
+cli
+  .command("pre enter <tag>", "Enter prerelease mode with the given tag")
+  .action(async (tag: string, options) => {
+    normalizeOptions(options);
+    const { pre } = await import("./commands/pre/index.ts");
+    await pre({ ...options, command: "enter", tag });
+  });
+
+cli.command("pre exit", "Exit prerelease mode").action(async (options) => {
+  normalizeOptions(options);
+  const { pre } = await import("./commands/pre/index.ts");
+  await pre({ ...options, command: "exit" });
+});
+
+try {
+  cli.parse(process.argv, { run: false });
+
+  // Do not show intro for --help and --version, which have no command name
+  if (cli.matchedCommandName != null) {
+    intro("🦋");
+  }
+
+  await cli.runMatchedCommand();
+} catch (err: any) {
   if (err instanceof InternalError) {
     log.error(
       `
 The following error is an internal unexpected error, these should never happen.
 Please open an issue with the following link:
-https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(`Unexpected error during ${parsed._[0] || "add"} command`)}&body=${encodeURIComponent(`## Error
+https://github.com/changesets/changesets/issues/new?title=${encodeURIComponent(`Unexpected error during ${cli.matchedCommandName || "add"} command`)}&body=${encodeURIComponent(`## Error
 
 \`\`\`
 ${format(err).replace(process.cwd().replace(/\\/g, "/"), "<cwd>")}
@@ -108,11 +166,11 @@ ${format(err).replace(process.cwd().replace(/\\/g, "/"), "<cwd>")}
   }
 
   if (err instanceof ExitError) {
-    outro(pc.red(`🦋 Exited with code ${err.code}`));
-    return process.exit(err.code);
+    outro(c.red(`🦋 Exited with code ${err.code}`));
+    process.exit(err.code);
   }
 
   log.error(err.stack);
-  outro(pc.red("🦋 Exited with code 1"));
+  outro(c.red("🦋 Exited with code 1"));
   process.exit(1);
-});
+}
