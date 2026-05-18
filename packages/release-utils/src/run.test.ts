@@ -352,7 +352,6 @@ describe("publish", () => {
     const result = await runPublish({
       command: "node",
       args: [
-        "--experimental-strip-types",
         "-e",
         `const git = await import(${JSON.stringify(gitModulePath)}); console.log('🦋 New tag: v1.0.0'); git.tag('v1.0.0', process.cwd());`,
       ],
@@ -399,7 +398,6 @@ describe("publish", () => {
     const result = await runPublish({
       command: "node",
       args: [
-        "--experimental-strip-types",
         "-e",
         `const git = await import(${JSON.stringify(gitModulePath)}); console.log('🦋 New tag: pkg-a@1.0.0'); console.log('🦋 New tag: pkg-b@1.0.0'); git.tag('pkg-a@1.0.0', process.cwd()); git.tag('pkg-b@1.0.0', process.cwd());`,
       ],

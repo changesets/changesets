@@ -128,11 +128,6 @@ export async function runVersion({
       },
     );
     const args = [];
-    // this is done just so our tests can run with the types stripped since they are run with source files
-    // this won't be used by published package since this file will be compiled there
-    if (import.meta.url.endsWith(".ts")) {
-      args.push("--experimental-strip-types");
-    }
     args.push(path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"));
     args.push(
       semverLt(require(changesetsCliPkgJsonPath).version, "2.0.0")
