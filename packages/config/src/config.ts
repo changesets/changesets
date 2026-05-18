@@ -161,7 +161,7 @@ export const WrittenConfigSchema = v.object({
   changelog: rootKey(
     ChangelogSchema,
     "The configuration for changelog generators.",
-    false,
+    "@changesets/cli/changelog",
   ),
   commit: rootKey(
     CommitSchema,

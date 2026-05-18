@@ -209,7 +209,7 @@
         }
       ],
       "description": "The configuration for changelog generators.",
-      "default": false
+      "default": "@changesets/cli/changelog"
     },
     "commit": {
       "anyOf": [

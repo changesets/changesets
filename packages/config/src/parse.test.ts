@@ -141,6 +141,27 @@ describe("readAndValidateConfig", () => {
     expect(result.errors).toStrictEqual([]);
     expect(result.warnings).toStrictEqual([]);
   });
+
+  it("returns the correct default config if passed an empty object", async () => {
+    const cwd = await testdir({
+      ".changeset/config.json": JSON.stringify({}),
+      "package.json": JSON.stringify({
+        name: "test-pkg",
+        version: "1.0.0",
+      }),
+      "packages/foo/package.json": JSON.stringify({
+        name: "foo",
+        version: "1.0.0",
+      }),
+      "pnpm-lockfile.yaml": "",
+      "pnpm-workspace.yaml": "packages: ['packages/*']",
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { ["$schema" as never]: _, ...defaultConfig } = getDefaultConfig();
+    const result = await readAndValidateConfig(cwd);
+    expect(result.config).toStrictEqual(defaultConfig);
+  });
 });
 
 describe("defaultConfig", () => {
@@ -158,7 +179,10 @@ describe("defaultConfig", () => {
         "changedFilePatterns": [
           "**",
         ],
-        "changelog": false,
+        "changelog": [
+          "@changesets/cli/changelog",
+          null,
+        ],
         "commit": false,
         "fixed": [],
         "format": "auto",
