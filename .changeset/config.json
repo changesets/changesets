@@ -1,4 +1,5 @@
 {
+  "$schema": "../packages/config/schema.json",
   "changelog": [
     "@changesets/changelog-github",
     { "repo": "changesets/changesets" }
