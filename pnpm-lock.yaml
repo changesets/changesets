@@ -171,9 +171,6 @@ importers:
       '@changesets/get-dependents-graph':
         specifier: workspace:^
         version: link:../get-dependents-graph
-      '@changesets/get-release-plan':
-        specifier: workspace:^
-        version: link:../get-release-plan
       '@changesets/git':
         specifier: workspace:^
         version: link:../git
