@@ -1,38 +1,62 @@
-# Using Changesets
+# Getting Started
 
-Changesets are designed to make your workflows easier, by allowing the person making contributions to make key decisions when they are making their contribution. Changesets hold two key bits of information: a version type (following [semver](https://semver.org/)), and change information to be added to a changelog.
+## What is Changesets?
 
-In addition, changesets were originally designed for implementation in [bolt monorepos](https://github.com/boltpkg/bolt). As such, in a monorepo context, changesets will handle bumping dependencies of changed packages, if that is required.
+Changesets has several meanings that are sometimes used interchangeably:
 
-This guide is aimed at package maintainers adding changesets as a tool. For the information relevant to contributors, see [adding a changeset](../basic/adding-a-changeset.md).
+1. It is a tool to manage package versions and changelog generation in a project. It is designed to work in [monorepos](https://monorepo.tools) as well as single package repos.
 
-The overall tool after initialization should lead to a loop that looks like:
+2. It is also a workflow that allows contributors to describe what their changes are and how they should be released.
 
-1. Changesets added along with each change
-2. The version command is run when a release is ready, and the changes are verified
-3. The publish command is run afterwards.
+3. A change description is also known as a "changeset". Typically represented as markdown file, it records the affected packages, the type of change following [semver](https://semver.org), and the change summary to be added to the changelog.
 
-The second two steps can be made part of a CI process.
+<br>
 
-## Add the changeset tool
+The Changesets development loop looks like this:
+
+1. When making a change, e.g. via a git commit or a PR, a changeset is added alongside.
+2. When a release is ready, the version command is run which consumes all the changesets and updates the package versions and changelogs.
+3. Then, the publish command is run to publish the new versions of packages.
+
+The last two steps can be automated in CI.
+
+## Setting Up
 
 ::: code-group
 
 ```bash [npm]
-$ npm install --save-dev @changesets/cli && npx @changesets/cli init
+$ npm install --save-dev @changesets/cli
 ```
 
 ```bash [pnpm]
-$ pnpm add -D @changesets/cli && pnpm changeset init
+$ pnpm add -D @changesets/cli
 ```
 
 ```bash [yarn]
-$ yarn add -D @changesets/cli && yarn changeset init
+$ yarn add -D @changesets/cli
 ```
 
 :::
 
-## Adding changesets
+Next, run `init` to set up the `.changeset` folder in your project:
+
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli init
+```
+
+```bash [pnpm]
+$ pnpm changeset init
+```
+
+```bash [yarn]
+$ yarn changeset init
+```
+
+:::
+
+Now, whenever you make a change, you can create a changeset through the CLI:
 
 ::: code-group
 
@@ -50,53 +74,8 @@ $ yarn changeset
 
 :::
 
-> [!NOTE]
-> You can run `changeset add` to add a changeset if you want to, but running Changesets without any command works as well.
+::: tip Not every change requires a changeset
 
-## Versioning and publishing
-
-Once you decide you want to do a release, you can run
-
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli version
-```
-
-```bash [pnpm]
-$ pnpm changeset version
-```
-
-```bash [yarn]
-$ yarn changeset version
-```
+Since a changeset describes how a change should be released, changes that don't require a release do not need a changeset. As such, it is **not recommended** to block contributions in the absence of a changeset.
 
 :::
-
-This consumes all changesets, and updates to the most appropriate semver version based on those changesets. It also writes changelog entries for each consumed changeset.
-
-We recommend at this step reviewing both the changelog entries and the version changes for packages. Once you are confident that these are correct, and have made any necessary tweaks to changelogs, you can publish your packages:
-
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli publish
-```
-
-```bash [pnpm]
-$ pnpm changeset publish
-```
-
-```bash [yarn]
-$ yarn changeset publish
-```
-
-:::
-
-This will run npm publish in each package that is of a later version than the one currently listed on npm.
-
-## Some handy advice
-
-### Not every change requires a changeset
-
-Since changesets are focused on releases and changelogs, changes to your repository that don't require these won't need a changeset. As such, we recommend not adding a blocking element to contributions in the absence of a changeset.

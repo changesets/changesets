@@ -74,6 +74,10 @@ export default defineConfig({
         link: "/guide/introduction/getting-started",
       },
       {
+        text: "FAQ",
+        link: "/faq",
+      },
+      {
         text: "Resources",
         items: [
           {
@@ -108,11 +112,8 @@ export default defineConfig({
             text: "Introduction",
             base: "/guide/introduction/",
             items: [
-              { text: "What are Changesets?", link: "what-are-changesets" },
               { text: "Getting Started", link: "getting-started" },
-              { text: "Common Questions", link: "common-questions" },
-              { text: "Concepts", link: "concepts" },
-              { text: "Dictionary", link: "dictionary" },
+              { text: "Origins", link: "origins" },
             ],
           },
           {
