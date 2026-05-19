@@ -11,12 +11,12 @@ import { readConfig } from "@changesets/config";
 const { config, warnings, errors } = await readConfig(process.cwd());
 
 if (warnings.length !== 0) {
-  console.warn(warnings)
+  console.warn(warnings);
 }
 if (config == null) {
-  console.error(errors)
-  return
+  console.error(errors);
+  return;
 }
 
-console.log(config)
+console.log(config);
 ```

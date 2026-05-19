@@ -19,7 +19,9 @@ export async function getReleasePlan(
     );
   }
 
-  const config = passedConfig ? { ...configResult.config, ...passedConfig } : configResult.config;
+  const config = passedConfig
+    ? { ...configResult.config, ...passedConfig }
+    : configResult.config;
 
   const changesets = await readChangesets(packages.rootDir, sinceRef);
   const preState = await readPreState(packages.rootDir);
