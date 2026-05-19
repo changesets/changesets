@@ -1,5 +1,5 @@
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
-import { read } from "@changesets/config";
+import { readAndValidateConfig } from "@changesets/config";
 import { readPreState } from "@changesets/pre";
 import { readChangesets } from "@changesets/read";
 import type { Config, ReleasePlan } from "@changesets/types";
@@ -11,10 +11,18 @@ export async function getReleasePlan(
   passedConfig?: Config,
 ): Promise<ReleasePlan> {
   const packages = await getPackages(cwd);
-  const preState = await readPreState(packages.rootDir);
-  const readConfig = await read(packages.rootDir, packages);
-  const config = passedConfig ? { ...readConfig, ...passedConfig } : readConfig;
+
+  const configResult = await readAndValidateConfig(packages.rootDir, packages);
+  if (configResult.config == null) {
+    throw new Error(
+      `Invalid configuration:\n  ${configResult.errors.join("  \n")}`,
+    );
+  }
+
+  const config = passedConfig ? { ...configResult.config, ...passedConfig } : configResult.config;
+
   const changesets = await readChangesets(packages.rootDir, sinceRef);
+  const preState = await readPreState(packages.rootDir);
 
   return assembleReleasePlan(changesets, packages, config, preState);
 }
