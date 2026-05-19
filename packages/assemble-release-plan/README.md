@@ -10,13 +10,13 @@ Usage
 ```ts
 import assembleReleasePlan from "@changesets/assemble-release-plan";
 import { readChangesets } from "@changesets/read";
-import { readAndValidateConfig } from "@changesets/config";
+import { readConfig } from "@changesets/config";
 import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 
 const packages = await getPackages(cwd);
 const preState = await readPreState(cwd);
-const { config } = await readAndValidateConfig(cwd, packages);
+const { config } = await readConfig(cwd, packages);
 const changesets = await readChangesets(cwd, sinceRef);
 
 const releasePlan = assembleReleasePlan(

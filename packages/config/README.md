@@ -6,9 +6,9 @@
 [![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 ```tsx
-import { readAndValidateConfig } from "@changesets/config";
+import { readConfig } from "@changesets/config";
 
-const { config, warnings, errors } = await readAndValidateConfig(process.cwd());
+const { config, warnings, errors } = await readConfig(process.cwd());
 
 if (warnings.length !== 0) {
   console.warn(warnings)
