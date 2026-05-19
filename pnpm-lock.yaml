@@ -266,7 +266,7 @@ importers:
         specifier: 4.0.3
         version: 4.0.3
       '@valibot/to-json-schema':
-        specifier: 1.7.0
+        specifier: ^1.7.0
         version: 1.7.0(valibot@1.4.0)
       outdent:
         specifier: ^0.8.0

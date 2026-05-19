@@ -28,7 +28,7 @@
   "devDependencies": {
     "@changesets/test-utils": "workspace:*",
     "@types/picomatch": "4.0.3",
-    "@valibot/to-json-schema": "1.7.0",
+    "@valibot/to-json-schema": "^1.7.0",
     "outdent": "^0.8.0",
     "valibot": "^1.4.0",
     "vitest": "^4.1.6"
