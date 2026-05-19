@@ -19,10 +19,6 @@
           "const": "restricted"
         },
         {
-          "const": "internal",
-          "description": "Exclusive to GitHub Packages npm registry"
-        },
-        {
           "const": "private",
           "description": "Deprecated, just an alias for \"restricted\""
         }

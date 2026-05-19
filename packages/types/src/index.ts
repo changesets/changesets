@@ -10,8 +10,7 @@ export type DependencyType =
   | "peerDependencies"
   | "optionalDependencies";
 
-/** `internal` is GitHub Package Registry-specific */
-export type AccessType = "public" | "restricted" | "internal";
+export type AccessType = "public" | "restricted";
 
 export type Release = { name: string; type: VersionType };
 

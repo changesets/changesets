@@ -194,30 +194,6 @@ const noPrivateTagWithoutPrivateVersion: Rule = ({ config, errors }) => {
   }
 };
 
-// TODO: add more details about this to docs, along with a link in the error message
-// TODO: maybe add setting for GH Packages registry domain?
-const internalButNotGitHubRegistry: Rule = ({ packages, config, warnings }) => {
-  if (config.access !== "internal") return;
-
-  const missingRegistry =
-    packages.tool.type === "root"
-      ? !packages.rootPackage!.packageJson.publishConfig?.access?.includes(
-          "npm.pkg.github.com",
-        )
-      : packages.packages.some(
-          (pkg) =>
-            !pkg.packageJson.publishConfig?.registry?.includes(
-              "npm.pkg.github.com",
-            ),
-        );
-
-  if (missingRegistry) {
-    warnings.push(
-      `Potential issue: Setting "access" to "internal" is exclusive to GitHub Packages Registry but "publishConfig.registry" is not configured to use it.`,
-    );
-  }
-};
-
 // TODO: remove this alias
 const noAccessPrivate: Rule = ({ writtenConfig, warnings }) => {
   if ((writtenConfig.access as unknown) !== "private") return;
@@ -234,7 +210,6 @@ const rules: Rule[] = [
   ignoredPatternsExist,
   alsoSkipDependentsOfSkipped,
   noPrivateTagWithoutPrivateVersion,
-  internalButNotGitHubRegistry,
   noAccessPrivate,
 ];
 

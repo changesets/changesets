@@ -53,10 +53,6 @@ const CommitSchema = v.union(
 const AccessSchema = v.union([
   v.literal("public"),
   v.literal("restricted"),
-  v.pipe(
-    v.literal("internal"),
-    v.description("Exclusive to GitHub Packages npm registry"),
-  ),
   // TODO: remove this alias
   v.pipe(
     v.literal("private"),
