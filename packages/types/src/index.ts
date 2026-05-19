@@ -10,7 +10,8 @@ export type DependencyType =
   | "peerDependencies"
   | "optionalDependencies";
 
-export type AccessType = "public" | "restricted";
+/** `internal` is GitHub Package Registry-specific */
+export type AccessType = "public" | "restricted" | "internal";
 
 export type Release = { name: string; type: VersionType };
 
@@ -98,7 +99,7 @@ export type WrittenConfig = {
   commit?: boolean | readonly [string, any] | string;
   fixed?: Fixed;
   linked?: Linked;
-  access?: AccessType;
+  access?: AccessType | "private";
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
   format?: "auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false;

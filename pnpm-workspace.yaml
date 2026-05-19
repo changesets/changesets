@@ -8,7 +8,8 @@ allowBuilds:
 blockExoticSubdeps: true
 dedupePeers: true
 dedupePeerDependents: true
-minimumReleaseAge: 10080
+
+minimumReleaseAge: 2440
 
 overrides:
   rolldown: 1.0.0
