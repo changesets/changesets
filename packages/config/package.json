@@ -18,6 +18,9 @@
     "./package.json": "./package.json",
     "./schema.json": "./schema.json"
   },
+  "scripts": {
+    "generate-json-schema": "node scripts/generate-json-schema.ts"
+  },
   "dependencies": {
     "@changesets/get-dependents-graph": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",

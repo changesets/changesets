@@ -32,9 +32,7 @@
         "type": "string"
       },
       "description": "A list of file patterns that Changesets should consider when determining what packages have changed.",
-      "default": [
-        "**"
-      ]
+      "default": ["**"]
     },
     "format": {
       "anyOf": [
@@ -78,14 +76,8 @@
       },
       "examples": [
         [
-          [
-            "@pkg/a",
-            "@pkg/b"
-          ],
-          [
-            "@pkg/d",
-            "@pkg/e"
-          ]
+          ["@pkg/a", "@pkg/b"],
+          ["@pkg/d", "@pkg/e"]
         ]
       ],
       "description": "Packages that should always be released together with the same version.",
@@ -101,14 +93,8 @@
       },
       "examples": [
         [
-          [
-            "@pkg/a",
-            "@pkg/b"
-          ],
-          [
-            "@pkg/d",
-            "@pkg/e"
-          ]
+          ["@pkg/a", "@pkg/b"],
+          ["@pkg/d", "@pkg/e"]
         ]
       ],
       "description": "Packages that should be linked together so when they are being released, they will be released at the same version.",
