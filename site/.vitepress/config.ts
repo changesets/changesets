@@ -62,6 +62,9 @@ export default defineConfig({
     search: {
       provider: "local",
     },
+    outline: {
+      level: [2, 3],
+    },
 
     footer: {
       message: `This site is powered by ${netlifyLink}`,

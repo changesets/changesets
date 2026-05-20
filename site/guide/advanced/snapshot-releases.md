@@ -4,7 +4,7 @@ Snapshot releases are a way to release your changes for testing without updating
 
 ## Starting Off
 
-Create changesets as normal, as described in [adding a changeset](../basic/adding-a-changeset.md). When you are ready to release a snapshot, you should make a dedicated branch for doing so.
+Create changesets as normal. When you are ready to release a snapshot, you should make a dedicated branch for doing so.
 
 ## Versioning your packages
 

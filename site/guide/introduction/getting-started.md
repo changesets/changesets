@@ -18,7 +18,7 @@ The Changesets development loop looks like this:
 2. When a release is ready, the version command is run which consumes all the changesets and updates the package versions and changelogs.
 3. Then, the publish command is run to publish the new versions of packages.
 
-The last two steps can be automated in CI.
+The last two steps can be [automated in CI](../basic/automating-changesets.md).
 
 ## Setting Up
 
@@ -76,6 +76,6 @@ $ yarn changeset
 
 ::: tip Not every change requires a changeset
 
-Since a changeset describes how a change should be released, changes that don't require a release do not need a changeset. As such, it is **not recommended** to block contributions in the absence of a changeset.
+Since a changeset describes how a change should be released, changes that don't require a release do not need a changeset. As such, we **do not recommend** blocking contributions in the absence of a changeset.
 
 :::
