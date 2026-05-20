@@ -120,7 +120,6 @@ export default defineConfig({
             text: "Basic",
             base: "/guide/basic/",
             items: [
-              { text: "Adding a Changeset", link: "adding-a-changeset" },
               {
                 text: "Checking for Changesets",
                 link: "checking-for-changesets",

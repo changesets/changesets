@@ -4,9 +4,24 @@ Check the [guide](./guide/introduction/getting-started.md) for more detailed exp
 
 ## What is a changeset?
 
-A changeset is a Markdown file that describes a change, and includes YAML frontmatter that describes the packages affected with the respective [semver](https://semver.org) bump types.
+A changeset is a Markdown file that describes a change, and includes YAML frontmatter that describes the affected packages with the respective [semver](https://semver.org) bump types. They typically look like this:
 
-Changesets are automatically generated via the CLI:
+```md
+---
+"pkg-a": minor
+"pkg-b": patch
+---
+
+Summary of the change
+```
+
+## Do I need a changeset for every change?
+
+No! Since a changeset describes how a change should be released, changes that don't require a release do not need a changeset.
+
+## How do I add a changeset?
+
+Run the CLI to generate a changeset:
 
 ::: code-group
 
@@ -24,20 +39,28 @@ $ yarn changeset
 
 :::
 
-They typically look like this:
+And follow the prompts:
 
-```md
----
-"pkg-a": minor
-"pkg-b": patch
----
+1. If the project has multiple packages, select the packages you want to include.
+   - Use <kbd>↑</kbd> and <kbd>↓</kbd> to navigate to packages
+   - Press <kbd>space</kbd> to select a package.
+   - Press <kbd>enter</kbd> when all desired packages are selected.
+2. Select the appropriate [semver](https://semver.org) bump type for each selected package.
+3. Provide a message to go alongside the changeset. This will be written into the changelog when the next release occurs.
 
-Summary of the change
-```
+   While not every changeset is going to need a huge amount of detail, a good idea of what should be in a changeset is:
+   - WHAT the change is
+   - WHY the change was made
+   - HOW a consumer should update their code
 
-## Do I need a changeset for every change?
+A new changeset file will be created in the `.changeset` folder. Once you are happy with the changeset, commit the file to your branch.
 
-No! Since a changeset describes how a change should be released, changes that don't require a release do not need a changeset.
+## Can I add more than one changeset in a PR?
+
+Yes! Changesets are designed to stack, so there's no problem with adding multiple. You might want to add more than one changeset when:
+
+- You want to release multiple packages with different changelog entries
+- You have made multiple changes to a package that should each be called out separately
 
 ## Can I manually edit a changeset?
 
@@ -47,4 +70,4 @@ You can also delete them if you feel the changeset is not needed for a previous 
 
 ## Are changesets removed?
 
-When `changeset version` is run, all changeset files are moved. This is so we only ever use a changeset once. This makes the `.changeset` folder a very bad place to store any other information.
+When `changeset version` is run, all changeset files are removed. This is so we only ever use a changeset once. This makes the `.changeset` folder a very bad place to store any other information.

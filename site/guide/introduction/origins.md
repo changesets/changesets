@@ -2,7 +2,7 @@
 
 ## The Problem
 
-When organising the release of packages, you may end up wanting to group several changes together written by different people and/or over a relatively large period of time. The best time to capture this information is when submitting a PR (when it is fresh in your mind), not when you eventually go to batch and release these changes.
+When organizing the release of packages, you may end up wanting to group several changes together written by different people and/or over a relatively large period of time. The best time to capture this information is when submitting a PR (when it is fresh in your mind), not when you eventually go to batch and release these changes.
 
 Git is a bad place to store this information, as it discourages writing detailed change descriptions. You want to allow people to provide as much documentation for the change as they want.
 
@@ -33,11 +33,11 @@ A changeset is a Markdown file with YAML frontmatter. The contents of the Markdo
 
 ```md
 ---
-"@myproject/cli": major
-"@myproject/core": minor
+"pkg-a": minor
+"pkg-b": patch
 ---
 
-Change all the things
+Summary of the change
 ```
 
 This is useful because it breaks versioning into two steps:
