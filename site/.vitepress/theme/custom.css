@@ -37,14 +37,27 @@
 }
 
 /* Ensure tagline stays single line */
-.VPHero .container .main > .heading > .text {
+.VPHero .heading > .text {
   font-size: 48px;
+}
+
+/* Loosen heading in mobile view */
+@media (max-width: 768px) {
+  .VPHero .heading > .name,
+  .VPHero .heading > .text {
+    letter-spacing: 0px;
+  }
 }
 
 /* Blur effect for navigation bars */
 .VPNavBar:not(.home.top),
 .VPLocalNav {
   backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* We do not need sponsor images for now */
+.VPHomeSponsors .sponsors {
+  display: none;
 }
 
 .VPFeature .details > a {
