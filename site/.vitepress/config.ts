@@ -123,13 +123,9 @@ export default defineConfig({
             text: "Basic",
             base: "/guide/basic/",
             items: [
-              {
-                text: "Checking for Changesets",
-                link: "checking-for-changesets",
-              },
-              { text: "Automating Changesets", link: "automating-changesets" },
-              { text: "Configuration", link: "configuration" },
+              { text: "Configuration File", link: "configuration-file" },
               { text: "CLI Reference", link: "cli" },
+              { text: "Automating Changesets", link: "automating-changesets" },
             ],
           },
           {
@@ -145,10 +141,6 @@ export default defineConfig({
                 link: "modifying-changelog-formats",
               },
               { text: "Prereleases", link: "prereleases" },
-              {
-                text: "Publishing in Monorepos",
-                link: "publishing-in-monorepos",
-              },
               { text: "Snapshot Releases", link: "snapshot-releases" },
               { text: "Versioning apps", link: "versioning-apps" },
             ],
