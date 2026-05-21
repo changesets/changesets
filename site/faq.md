@@ -4,7 +4,9 @@ Check the [guide](./guide/introduction/getting-started.md) for more detailed exp
 
 ## What is a changeset?
 
-A changeset is a Markdown file that describes a change, and includes YAML frontmatter that describes the affected packages with the respective [semver](https://semver.org) bump types. They typically look like this:
+A changeset is a Markdown file with YAML frontmatter. The contents of the Markdown is the change summary which will be written to the changelog and the YAML frontmatter describes the packages that have changed and their respective [semver](https://semver.org) bump types.
+
+They typically look like this:
 
 ```md
 ---

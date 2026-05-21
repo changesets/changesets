@@ -4,28 +4,39 @@
 
 Changesets has several meanings that are sometimes used interchangeably:
 
-1. It is a tool to manage package versions and changelog generation in a project. It is designed to work in [monorepos](https://monorepo.tools) as well as single package repos.
+1. It is a tool to manage package versions and changelog generation in a project, designed to work in [monorepos](https://monorepo.tools) as well as single package repos.
 
-2. It is also a workflow that allows contributors to describe what their changes are and how they should be released.
+2. It is also [a workflow](#usage) that allows contributors to describe what their changes are and how they should be released.
 
-3. A change description is also known as a "changeset". Typically represented as markdown file, it records the affected packages, the type of change following [semver](https://semver.org), and the change summary to be added to the changelog.
+3. It also represents a group of [changeset files](#what-is-a-changeset), which are Markdown files that each describe a change.
 
-<br>
+::: tip New to Changesets?
+If you are contributing to a project that uses Changesets, check out the [frequently asked questions](../../faq.md) for a quick introduction to working with changesets.
+:::
 
-The Changesets development loop looks like this:
+## What is a changeset?
 
-1. When making a change, e.g. via a git commit or a PR, a changeset is added alongside.
-2. When a release is ready, the version command is run which consumes all the changesets and updates the package versions and changelogs.
-3. Then, the publish command is run to publish the new versions of packages.
+A changeset is a Markdown file with YAML frontmatter. The contents of the Markdown is the change summary which will be written to the changelog and the YAML frontmatter describes the packages that have changed and their respective [semver](https://semver.org) bump types.
 
-The last two steps can be [automated in CI](../basic/automating-changesets.md).
+They typically look like this:
+
+```md
+---
+"pkg-a": minor
+"pkg-b": patch
+---
+
+Summary of the change
+```
 
 ## Setting Up
+
+Install the Changesets CLI:
 
 ::: code-group
 
 ```bash [npm]
-$ npm install --save-dev @changesets/cli
+$ npm install -D @changesets/cli
 ```
 
 ```bash [pnpm]
@@ -38,7 +49,7 @@ $ yarn add -D @changesets/cli
 
 :::
 
-Next, run `init` to set up the `.changeset` folder in your project:
+And run `init` to set up the `.changeset` folder in your project:
 
 ::: code-group
 
@@ -56,7 +67,11 @@ $ yarn changeset init
 
 :::
 
-Now, whenever you make a change, you can create a changeset through the CLI:
+Your project is now using Changesets!
+
+## Usage
+
+Whenever you make a change, e.g. via a git commit or a PR, create a changeset alongside with the CLI:
 
 ::: code-group
 
@@ -79,3 +94,43 @@ $ yarn changeset
 Since a changeset describes how a change should be released, changes that don't require a release do not need a changeset. As such, we **do not recommend** blocking contributions in the absence of a changeset.
 
 :::
+
+Once you have accumulated some changesets and are ready to release, you can run the `version` command to update the package versions and changelogs:
+
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli version
+```
+
+```bash [pnpm]
+$ pnpm changeset version
+```
+
+```bash [yarn]
+$ yarn changeset version
+```
+
+:::
+
+Then, run the `publish` command to publish the new versions of the packages:
+
+::: code-group
+
+```bash [npm]
+$ npx @changesets/cli publish
+```
+
+```bash [pnpm]
+$ pnpm changeset publish
+```
+
+```bash [yarn]
+$ yarn changeset publish
+```
+
+:::
+
+And you have released your changes! When you make more changes again, repeat the process to continue releasing new versions of your packages.
+
+You can also [automate the `version` and `publish` steps](../basic/automating-changesets.md) in CI so that releasing is as simple as merging a PR.

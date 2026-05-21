@@ -29,7 +29,7 @@ As storing this information directly in git is problematic, we store it in the f
 
 ## The Result
 
-A changeset is a Markdown file with YAML frontmatter. The contents of the Markdown is the change summary which will be written to the changelog and the YAML frontmatter describes the packages have changed and their respective semver bump types:
+A changeset is a Markdown file with YAML frontmatter. The contents of the Markdown is the change summary which will be written to the changelog and the YAML frontmatter describes the packages that have changed and their respective semver bump types:
 
 ```md
 ---
