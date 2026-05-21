@@ -133,4 +133,4 @@ $ yarn changeset publish
 
 And you have released your changes! When you make more changes again, repeat the process to continue releasing new versions of your packages.
 
-You can also [automate the `version` and `publish` steps](../basic/automating-changesets.md) in CI so that releasing is as simple as merging a PR.
+You can also [automate the version and publish steps](../basic/automating-changesets.md) in CI so that releasing is as simple as merging a PR. Check out the [CLI reference](../basic/cli.md) to learn more about the available CLI commands.

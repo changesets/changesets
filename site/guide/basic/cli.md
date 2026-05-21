@@ -1,3 +1,7 @@
+---
+outline: 2
+---
+
 # Command Line Interface
 
 The Changesets CLI is the main way of interacting with changesets. It provides a set of commands that allow you to manage your changesets, version your packages, and publish them.
@@ -51,18 +55,17 @@ It will ask you a series of questions, first about what packages you want to rel
 
 Once confirmed, the changeset will be written in the `.changeset` folder. If the [`commit`](./configuration-file.md#commit) option is enabled, the changeset will be automatically committed to git.
 
-::: info Empty changesets
-If you have [CI that blocks merges](../basic/automating-changesets.md#blocking) without a changeset, pass `--empty` to create an empty changeset.
-:::
+### Empty changesets
 
-::: info Changing base branch
-When prompting for packages to release, Changesets will detect and suggest the changed packages since the last commit on [`baseBranch`](./configuration-file.md#basebranch). If you want to use a different base branch, tag, or git ref, you can change it with the `--since` option.
+If you have [CI that blocks merges](../basic/automating-changesets.md#blocking) without a changeset, pass `--empty` to create an empty changeset.
+
+### Changing the base branch
+
+When prompting for packages to release, Changesets will detect and suggest the changed packages since the last commit on [`baseBranch`](./configuration-file.md#basebranch). If you want to use a different base branch, tag, or git ref, you can change it with the `--since [branch]` option.
 
 ```bash
 $ changeset --since next
 ```
-
-:::
 
 ## version
 
@@ -86,13 +89,23 @@ This is one of two commands responsible for releasing packages. The `version` co
 We recommend making sure changes made from this command are merged back into the base branch before you run publish.
 :::
 
-::: info Ignoring packages
-The `--ignore` flag allows you to skip packages from being published. This allows you to run partial publishes of the repository. This extends the [`ignore`](./configuration-file.md#ignore) option with the same documented caveats.
-:::
+### Ignoring packages
 
-::: info Snapshot releases
-You can use the `--snapshot` flag to create a [snapshot release](../advanced/snapshot-releases.md), meant for testing purposes only. It is highly recommended to read the [Snapshot Release](../advanced/snapshot-releases.md) documentation before using this flag.
-:::
+The `--ignore` flag allows you to skip packages from being published. This allows you to run partial publishes of the repository. This extends the [`ignore`](./configuration-file.md#ignore) option with the same documented caveats.
+
+```bash
+$ changeset version --ignore pkg-a --ignore pkg-b
+```
+
+### Snapshot releases
+
+You can use the `--snapshot` flag to create a [snapshot release](../advanced/snapshot-releases.md), meant for testing purposes only. The suffix for snapshot releases can be customized with `--snapshot-prerelease-template <template>`, which works the same way as the [`snapshot.prereleaseTemplate`](./configuration-file.md#snapshotprereleasetemplate) option.
+
+It is highly recommended to read the [Snapshot Releases](../advanced/snapshot-releases.md) guide before using this flag.
+
+```bash
+$ changeset version --snapshot 'pr#123'
+```
 
 ## publish
 
@@ -114,24 +127,35 @@ This command publishes changes to npm and creates git tags. It works by going in
 
 Because this command assumes that the last commit is the version commit, you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if the release changes are accurate.
 
-::: info OTP
-When publishing locally, you may be prompted for a one-time password (OTP) if your have two-factor authentication enabled on npm. You can provide this OTP directly with the `--otp` flag to avoid the prompt.
-:::
+### OTP
 
-::: info NPM dist-tags
-Published versions are tagged on npm with `latest` by default. You may want to change the tag when publishing [snapshot releases](../advanced/snapshot-releases.md) to prevent them from being installed by default.
-:::
+When publishing locally, you may be prompted for a one-time password (OTP) if your have two-factor authentication enabled on npm. You can provide this OTP directly with the `--otp <code>` flag to avoid the prompt.
 
-::: info Git tags
+```bash
+$ changeset publish --otp 123456
+```
+
+### NPM dist-tags
+
+Published versions are tagged on npm with `latest` by default. You may want to change the tag when publishing [snapshot releases](../advanced/snapshot-releases.md) to prevent them from being installed by default. Pass `--tag <name>` to publish with a different tag.
+
+```bash
+$ changeset publish --tag beta
+```
+
+### Git tags
+
 Pass `--git-tag` to create git tags for each package published. This allows users to easily find the code for a specific release. The tags created are in the format `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`.
+
+```bash
+$ changeset publish --git-tag
+```
 
 After the git tags are created, you will need to push them back up to your git remote:
 
 ```bash
 $ git push --follow-tags
 ```
-
-:::
 
 ## status
 
@@ -150,13 +174,21 @@ Examples:
 
 The status command provides information about the changesets that currently exist. If there are no changesets present, it exits with exit code 1.
 
-::: info JSON output
-Pass `--output` and the file path to write the status output as JSON, so it can be consumed by other tools.
-:::
+### JSON output
 
-::: info Status since a specific branch
-You can use `--since` with a different branch, tag, or git ref to only display the information about changesets since that point.
-:::
+Pass `--output <file>` write the status output as a JSON file so it can be consumed by other tools.
+
+```bash
+$ changeset status --output status.json
+```
+
+### Status since a specific branch
+
+You can use `--since <branch>` with a different branch, tag, or git ref to only display the information about changesets since that point.
+
+```bash
+$ changeset status --since next
+```
 
 ::: warning
 `status` will fail if you are in the middle of running `version` or `publish`. If you want to get changeset status at the time of a version increase and publish, you need to run it immediately before running `version`.
@@ -171,7 +203,7 @@ Usage:
 
 The `tag` command creates git tags for the current version of all packages. The tags created are equivalent to those created by [`publish --git-tag`](#publish), but the `tag` command does not publish anything to npm.
 
-This is helpful in situations where a different tool is used to publish packages instead of Changesets. The tags created are in the format `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`. It is expected to run the `version` command first so the created tags are up to date with the versions in the `package.json` files.
+This is helpful in situations where a different tool is used to publish packages instead of Changesets. The tags created are in the format `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`. It is expected to run the `version` command first so the created tags are up to date.
 
 ## pre
 
@@ -185,5 +217,5 @@ The `pre` command is used to enter or exit [prerelease mode](../advanced/prerele
 When you want to do a prerelease, run `pre enter <tag>` to enter prerelease mode with the given tag, then do the normal release process as usual. When you're ready for a stable release, run `pre exit` and do the normal release process again.
 
 ::: warning Prereleases are complicated
-Many of the safety rails that Changesets helps you with will be taken off in prerelease mode. You may also prefer using [snapshot releases](../advanced/snapshot-releases.md) for a slightly less involved process. It is highly recommended to read through the [prereleases](../advanced/prereleases.md) documentation before using this command.
+Many of the safety rails that Changesets helps you with are taken off in prerelease mode. You may also prefer using [snapshot releases](../advanced/snapshot-releases.md) for a slightly less involved process. It is highly recommended to read through the [prereleases](../advanced/prereleases.md) documentation before using this command.
 :::

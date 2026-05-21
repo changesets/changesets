@@ -75,6 +75,7 @@ export default defineConfig({
       {
         text: "Guide",
         link: "/guide/introduction/getting-started",
+        activeMatch: "^/guide/",
       },
       {
         text: "FAQ",
@@ -124,7 +125,7 @@ export default defineConfig({
             base: "/guide/basic/",
             items: [
               { text: "Configuration File", link: "configuration-file" },
-              { text: "CLI Reference", link: "cli" },
+              { text: "Command Line Interface", link: "cli" },
               { text: "Automating Changesets", link: "automating-changesets" },
             ],
           },
