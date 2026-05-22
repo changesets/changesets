@@ -21,7 +21,7 @@ export async function readConfig(packages: Packages): Promise<Config> {
 
   const logFn = errors.length === 0 ? log.error : log.warn;
   if (messages.length !== 0) {
-    logFn(`- ${messages.join("\n- ")}`);
+    logFn(`Found issues in your config:\n- ${messages.join("\n- ")}`);
   }
 
   if (errors.length !== 0) {

@@ -30,7 +30,7 @@ const fixedGroupsExist: Rule = ({
   for (const fixedGroup of writtenConfig.fixed ?? []) {
     warnings.push(
       ...getUnmatchedPatterns(fixedGroup, packageNames).map(
-        invalidPathOrGlobMessage,
+        (pkgOrGlob) => `fixed: ${invalidPathOrGlobMessage(pkgOrGlob)}`,
       ),
     );
   }
@@ -52,7 +52,7 @@ const noDuplicateFixedPackages: Rule = ({ config, errors }) => {
     errors.push(
       ...Array.from(duplicatedNames).map(
         (pkgOrGlob) =>
-          `Invalid group: The package or glob "${pkgOrGlob}" is defined in multiple groups of fixed packages. Packages can only be belong to a single group. ${picomatchNote}`,
+          `fixed: Invalid group: The package or glob "${pkgOrGlob}" is defined in multiple groups of fixed packages. Packages can only be belong to a single group. ${picomatchNote}`,
       ),
     );
   }
@@ -69,7 +69,7 @@ const linkedGroupsExist: Rule = ({
   for (const linkedGroup of writtenConfig.linked ?? []) {
     warnings.push(
       ...getUnmatchedPatterns(linkedGroup, packageNames).map(
-        invalidPathOrGlobMessage,
+        (pkgOrGlob) => `linked: ${invalidPathOrGlobMessage(pkgOrGlob)}`,
       ),
     );
   }
@@ -91,7 +91,7 @@ const noDuplicateLinkedPackages: Rule = ({ config, errors }) => {
     errors.push(
       ...Array.from(duplicatedNames).map(
         (pkgOrGlob) =>
-          `Invalid group: The package or glob "${pkgOrGlob}" is defined in multiple groups of linked packages. Packages can only be belong to a single group. ${picomatchNote}`,
+          `linked: Invalid group: The package or glob "${pkgOrGlob}" is defined in multiple groups of linked packages. Packages can only be belong to a single group. ${picomatchNote}`,
       ),
     );
   }
@@ -121,7 +121,7 @@ const ignoredPatternsExist: Rule = ({
 
   errors.push(
     ...getUnmatchedPatterns(writtenConfig.ignore, packageNames).map(
-      invalidPathOrGlobMessage,
+      (pkgOrGlob) => `ignore: ${invalidPathOrGlobMessage(pkgOrGlob)}`,
     ),
   );
 };
@@ -184,12 +184,11 @@ const alsoSkipDependentsOfSkipped: Rule = ({ packages, config, errors }) => {
 };
 
 const noPrivateTagWithoutPrivateVersion: Rule = ({ config, errors }) => {
-  if (
-    config.privatePackages.version === false &&
-    config.privatePackages.tag === true
-  ) {
+  const { version, tag } = config.privatePackages;
+
+  if (version === false && tag === true) {
     errors.push(
-      `Invalid combination: The "tag" is set to "true" but "version" is set to "false". This is not allowed.`,
+      `privatePackages: Invalid combination: "tag" is set to "true" but "version" is set to "false".`,
     );
   }
 };
