@@ -147,8 +147,12 @@ export default defineConfig({
               { text: "Fixed Packages", link: "fixed-packages" },
               { text: "Linked Packages", link: "linked-packages" },
               {
-                text: "Modifying Changelog Format",
-                link: "modifying-changelog-format",
+                text: "Customize Changelog Format",
+                link: "customize-changelog-format",
+              },
+              {
+                text: "Customize Commit Format",
+                link: "customize-commit-format",
               },
               { text: "Prereleases", link: "prereleases" },
               { text: "Snapshot Releases", link: "snapshot-releases" },

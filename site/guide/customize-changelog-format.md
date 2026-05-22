@@ -1,10 +1,14 @@
-# Modifying Changelog Format
+# Customize Changelog Format
 
-Changesets comes with a default formatter for the changelogs at `@changesets/cli/changelog`. It displays relatively basic information, however, this can be customized with the [`changelog`](./config.md#changelog) option.
+Changesets uses a default changelog formatter (`@changesets/cli/changelog`) that displays relatively basic information, however, this can be customized with the [`changelog`](./config.md#changelog) option.
+
+::: info
+Many of the APIs below may look similar to a [custom commit formatter](./customize-commit-format.md).
+:::
 
 ## Writing a Custom Changelog Formatter
 
-The changelog formatting can be customized with two functions: `getReleaseLine` and `getDependencyReleaseLine`. These must be default exported as an object containing the functions. For example:
+The changelog formatting can be customized with two functions: `getReleaseLine` and `getDependencyReleaseLine`. They must be default exported as an object containing the functions. For example:
 
 ::: code-group
 
@@ -54,7 +58,7 @@ type GetReleaseLine = (
   type: VersionType,
   // Options passed to the second item of the tuple
   changelogOpts?: Record<string, any>,
-) => MaybePromise<string>;
+) => string | Promise<string>;
 
 type GetDependencyReleaseLine = (
   // The changesets that causes a dependency update
@@ -63,7 +67,7 @@ type GetDependencyReleaseLine = (
   dependenciesUpdated: ModCompWithPackage[],
   // Options passed to the second item of the tuple
   changelogOpts?: Record<string, any>,
-) => MaybePromise<string>;
+) => string | Promise<string>;
 
 type ChangelogFunctions = {
   getReleaseLine: GetReleaseLine;
@@ -73,7 +77,7 @@ type ChangelogFunctions = {
 
 ## Using a Custom Changelog Formatter
 
-To use a custom changelog formatter, you can specify the path to the file (relative to the config file) or the module if it's packaged as a dependency in the [`changelog`](./config.md#changelog) option:
+To use a custom changelog formatter, you can specify the path to the file (relative to the config file) or the module if it's packaged as a dependency, using the [`changelog`](./config.md#changelog) option:
 
 ```json [.changeset/config.json]
 {
@@ -87,7 +91,7 @@ To use a custom changelog formatter, you can specify the path to the file (relat
 }
 ```
 
-You can also specify options to be passed to the changelog functions' `changelogOpts` option:
+You can also specify options to be passed to the changelog functions' `changelogOpts` parameter:
 
 ```json [.changeset/config.json]
 {
