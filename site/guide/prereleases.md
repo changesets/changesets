@@ -8,9 +8,7 @@ Prereleases allow you to release alpha/beta versions of your packages before you
 
 Changesets can be configured to enter prerelease mode which will publish all packages as prerelease versions. When you're ready to do a stable release, you can exit prerelease mode and publish everything as stable versions. Note that you cannot enter prerelease mode for only a subset of packages.
 
-It is also recommended to **run prereleases on a different branch** than the default branch, so that you can continue making changes to your stable version for important bug and security fixes. Alternatively, make a copy of the default branch, e.g. `v1`, before entering prerelease for `v2`. See the Backport Changes guide for more information for making changes to older versions.
-
-<!-- TODO: Backport Changes guide -->
+It is also recommended to **run prereleases on a different branch** than the default branch, so that you can continue making changes to your stable version for important bug and security fixes. Alternatively, make a copy of the default branch, e.g. `v1`, before entering prerelease for `v2`. See the [Backporting Changes](./backporting-changes.md) guide for more information for making changes to older versions.
 
 ## Enter Prerelease Mode
 

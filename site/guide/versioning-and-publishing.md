@@ -61,7 +61,7 @@ $ git push --follow-tags
 
 And you have released your changes! When you add more changesets again, repeat the process to continue releasing new versions of your packages.
 
-Check out the [CI automation](./automating.md) guide to simplify versioning and publishing so that releasing is as simple as merging a PR.
+Check out the [CI automation](./automating.md) guide to simplify versioning and publishing so that releasing is as simple as merging a PR. And the [Backporting Changes](./backporting-changes.md) guide if you need to release changes in previous versions.
 
 ## Publishing for the First Time
 
