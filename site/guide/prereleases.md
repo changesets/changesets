@@ -1,244 +1,96 @@
 # Prereleases
 
-> [!WARNING]
-> Prereleases are very complicated! Using them requires a thorough understanding of all parts of npm publishes. Mistakes can lead to repository and publish states that are very hard to fix.
+::: warning Please read through the guide before using prereleases
+Prereleases are very complicated! Using them requires a thorough understanding of all parts of npm publishes. Mistakes can lead to repository and publish states that are very hard to fix.
+:::
 
-> [!WARNING]
-> If you decide to do prereleases from the default branch of your repository, without having a branch for your last stable release without the prerelease changes, you will block other changes until you are ready to exit prerelease mode. We thoroughly recommend only running prereleases from a branch other than the default branch.
+Prereleases allow you to release alpha/beta versions of your packages before you do a stable release, e.g. publishing versions like `1.0.0-beta.0` before you publish `1.0.0`. This allows you to make frequent breaking changes and get feedback before you do a stable release.
 
-You might want to release a version of your packages before you do an actual release, Changesets lets you do this but there are some caveats because of the complexity that monorepos add that are important to understand.
+Changesets can be configured to enter prerelease mode which will publish all packages as prerelease versions. When you're ready to do a stable release, you can exit prerelease mode and publish everything as stable versions. Note that you cannot enter prerelease mode for only a subset of packages.
 
-When you want to do a prerelease, you need to enter prerelease mode. You can do that with the `pre enter <tag>`. The tag that you need to pass is used in versions(e.g. `1.0.0-beta.0`) and for the npm dist tag.
+It is also recommended to **run prereleases on a different branch** than the default branch, so that you can continue making changes to your stable version for important bug and security fixes. Alternatively, make a copy of the default branch, e.g. `v1`, before entering prerelease for `v2`. See the Backport Changes guide for more information for making changes to older versions.
 
-A prerelease workflow might look something like this:
+<!-- TODO: Backport Changes guide -->
+
+## Enter Prerelease Mode
+
+::: tip Make one last stable release
+Before entering prerelease mode, consider making another stable release to clear the existing changesets. Otherwise, they will be included in the first prerelease.
+:::
+
+Run [`pre enter <tag>`](./cli.md#pre) to enter prerelease mode with the given tag. The tag will be used in the versions, e.g. if the tag is `beta`, the versions will look like `1.0.0-beta.0`, and for the npm [dist-tag](https://docs.npmjs.com/adding-dist-tags-to-packages) when you publish.
 
 ::: code-group
 
 ```bash [npm]
-$ npx @changesets/cli pre enter next
-$ npx @changesets/cli version
-$ git add .
-$ git commit -m "Enter prerelease mode and version packages"
-$ npx @changesets/cli publish
-$ git push --follow-tags
+$ npx @changesets/cli pre enter beta
 ```
 
 ```bash [pnpm]
-$ pnpm changeset pre enter next
-$ pnpm changeset version
-$ git add .
-$ git commit -m "Enter prerelease mode and version packages"
-$ pnpm changeset publish
-$ git push --follow-tags
+$ pnpm changeset pre enter beta
 ```
 
 ```bash [yarn]
-$ yarn changeset pre enter next
-$ yarn changeset version
-$ git add .
-$ git commit -m "Enter prerelease mode and version packages"
-$ yarn changeset publish
-$ git push --follow-tags
+$ yarn changeset pre enter beta
 ```
 
 :::
 
-Let's go through what's happening here. For this example, let's say you have a repo that looks like this:
+This will generate a `pre.json` file in the `.changeset` folder that stores the current prerelease state. See the type definition of `PreState` in [`@changesets/types`](https://github.com/changesets/changesets/tree/main/packages/types) for more information of the state.
+
+If you entered prerelease mode on a different branch:
+
+- Update the [`baseBranch`](./config.md#baseBranch) option with the branch name. This allows the [`add`](./cli.md#add) command to properly detect the changed packages.
+
+- If you have set up CI to [automatically run version and publish](./automating-changesets.md#how-do-i-run-the-version-and-publish-commands), make sure to allow running the workflow for this branch too.
+
+Commit the changes and Changesets will now be in prerelease mode.
+
+## Releasing Prerelease Versions
+
+When you want to release a prerelease version, you can run the [`version`](./cli.md#version) and [`publish`](./cli.md#publish) commands as usual. See the [Getting Started](./getting-started.md#usage) guide for the usual flow.
+
+The only difference is that the versions will have the prerelease tag postfixed and the dist-tag will be the tag you specified when you entered prerelease mode.
+
+If you have set up CI to [automatically run version and publish](./automating-changesets.md#how-do-i-run-the-version-and-publish-commands), you should see a `version` PR with the `(<tag>)` postfixed in the title.
+
+### Example
+
+Say we have three packages, `pkg-a`, `pkg-b`, and `pkg-c`:
 
 ```
-packages/
-  pkg-a@1.0.0 has dep on pkg-b@^2.0.0
-  pkg-b@2.0.0 has no deps
-  pkg-c@3.0.0 has no deps
-.changeset/
-  pkg-b@minor
+pkg-a @ version 1.0.0
+  depends on pkg-b at range ^2.0.0
+pkg-b @ version 2.0.0
+pkg-c @ version 3.0.0
 ```
 
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli pre enter next
+```md [.changeset/i-love-changesets.md]
+---
+"pkg-b": minor
+---
 ```
 
-```bash [pnpm]
-$ pnpm changeset pre enter next
+When running the `version` command, `pkg-b` will be released as `2.1.0-beta.0`. An important note is that this will bump dependent packages that wouldn't be bumped in normal releases because prerelease versions are not satisfied by most semver ranges, e.g. `2.1.0-beta.0` does not satisfy `^2.0.0`.
+
+The packages should now look like this:
+
+```
+pkg-a @ version 1.0.1-beta.0
+  depends on pkg-b at range ^2.1.0-beta.0
+pkg-b @ version 2.1.0-beta.0
+pkg-c @ version 3.0.0
 ```
 
-```bash [yarn]
-$ yarn changeset pre enter next
-```
+Then, run the `publish` command as usual and it will publish the prerelease versions to npm with the `beta` dist-tag.
 
+::: info New package dist-tag
+If you add a new package while in prerelease mode, it will be published with the `latest` dist-tag as it's the first time it's being published with no stable version.
 :::
 
-This command changes Changesets into prerelease mode which creates a `pre.json` file in the `.changeset` directory which stores information about the state the prerelease is in. For the specific data stored in the `pre.json` file, see the type definition of `PreState` in [`@changesets/types`](https://github.com/changesets/changesets/tree/main/packages/types).
+## Exit Prerelease Mode
 
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli version
-```
-
-```bash [pnpm]
-$ pnpm changeset version
-```
-
-```bash [yarn]
-$ yarn changeset version
-```
-
-:::
-
-This command will version packages as you would normally expect but append `-next.0`. An important note is that this will bump dependent packages that wouldn't be bumped in normal releases because prerelease versions are not satisfied by most semver ranges.(e.g. `^5.0.0` is not satisfied by `5.1.0-next.0`)
-
-The repo would now look like this:
-
-```
-packages/
-  pkg-a@1.0.1-next.0 has dep on pkg-b@^2.1.0-next.0
-  pkg-b@2.1.0-next.0 has no deps
-  pkg-c@3.0.0 has no deps
-.changeset/
-```
-
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli publish
-```
-
-```bash [pnpm]
-$ pnpm changeset publish
-```
-
-```bash [yarn]
-$ yarn changeset publish
-```
-
-:::
-
-This command will publish to npm as the publish command normally does though it will set the dist tag to the tag you specified when running the prerelease command.
-
-When you want to do another prerelease, your workflow would look something like this:
-
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli version
-$ git add .
-$ git commit -m "Version packages"
-$ npx @changesets/cli publish
-$ git push --follow-tags
-```
-
-```bash [pnpm]
-$ pnpm changeset version
-$ git add .
-$ git commit -m "Version packages"
-$ pnpm changeset publish
-$ git push --follow-tags
-```
-
-```bash [yarn]
-$ yarn changeset version
-$ git add .
-$ git commit -m "Version packages"
-$ yarn changeset publish
-$ git push --follow-tags
-```
-
-:::
-
-Let's say we add some changesets and a new package so our repo looks like this
-
-```
-packages/
-  pkg-a@1.0.1-next.0 has dep on pkg-b@^2.1.0-next.0
-  pkg-b@2.1.0-next.0 has no deps
-  pkg-c@3.0.0 has no deps
-  pkg-d@0.0.0 has no deps
-
-.changeset/
-  pkg-a@minor
-  pkg-c@patch
-  pkg-d@major
-```
-
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli version
-```
-
-```bash [pnpm]
-$ pnpm changeset version
-```
-
-```bash [yarn]
-$ yarn changeset version
-```
-
-:::
-
-The version command will behave just like it does for the first versioning of a prerelease except the number at the end will be updated. The repo would now look like this:
-
-```
-packages/
-  pkg-a@1.1.0-next.1 has dep on pkg-b@^2.1.0-next.0
-  pkg-b@2.1.0-next.0 has no deps
-  pkg-c@3.0.1-next.0 has no deps
-  pkg-d@1.0.0-next.0 has no deps
-```
-
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli publish
-```
-
-```bash [pnpm]
-$ pnpm changeset publish
-```
-
-```bash [yarn]
-$ yarn changeset publish
-```
-
-:::
-
-This command will publish to npm just like it does for the first prerelease except because we're adding a new package(we need to define this, is it new to the repo or new to npm? I'm thinking new to npm), the new package will be published with the `latest` dist tag rather than the `next` tag because it's the first time it's being published which means it will be on `latest` anyway. For future publishes until pkg-d is out of prerelease, it will also be published to `latest`.
-
-When you're ready to do the final release, your workflow would look something like this:
-
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli pre exit
-$ npx @changesets/cli version
-$ git add .
-$ git commit -m "Exit prerelease mode and version packages"
-$ npx @changesets/cli publish
-$ git push --follow-tags
-```
-
-```bash [pnpm]
-$ pnpm changeset pre exit
-$ pnpm changeset version
-$ git add .
-$ git commit -m "Exit prerelease mode and version packages"
-$ pnpm changeset publish
-$ git push --follow-tags
-```
-
-```bash [yarn]
-$ yarn changeset pre exit
-$ yarn changeset version
-$ git add .
-$ git commit -m "Exit prerelease mode and version packages"
-$ yarn changeset publish
-$ git push --follow-tags
-```
-
-:::
+When you're ready to do a stable release, you can exit prerelease mode with the [`pre exit`](./cli.md#pre) command. This will set an intent to exit prerelease mode in the `pre.json` file but it won't do any actual versioning.
 
 ::: code-group
 
@@ -256,48 +108,36 @@ $ yarn changeset pre exit
 
 :::
 
-This command will set an intent to exit prerelease mode in the `pre.json` file though it won't do any actual versioning.
+If you exited prerelease mode on a different branch (the same branch as you entered prerelease mode on), you may want to merge this back to the default branch. Make sure to revert the changes you made before:
 
-::: code-group
+- Update the [`baseBranch`](./config.md#baseBranch) option back to the default branch.
 
-```bash [npm]
-$ npx @changesets/cli version
-```
+- If you have set up CI to [automatically run version and publish](./automating-changesets.md#how-do-i-run-the-version-and-publish-commands), remove allowing to run the workflow for this branch.
 
-```bash [pnpm]
-$ pnpm changeset version
-```
+Commit the changes.
 
-```bash [yarn]
-$ yarn changeset version
-```
+After merging the branch, run the [`version`](./cli.md#version) and [`publish`](./cli.md#publish) commands as usual. The versions will now be released as stable versions without the prerelease tag and published to the `latest` dist-tag.
 
-:::
+### Example
 
-The version command will apply any changesets currently in the repo and then remove the prerelease tag from the versions. The repo would now look like this:
+Taking the example before, after releasing the stable versions, the packages should now look like this:
 
 ```
-packages/
-  pkg-a@1.1.0 has dep on pkg-b@^2.1.0
-  pkg-b@2.1.0 has no deps
-  pkg-c@3.0.1 has no deps
-  pkg-d@1.0.0 has no deps
+pkg-a @ version 1.0.1
+  depends on pkg-b at range ^2.1.0
+pkg-b @ version 2.1.0
+pkg-c @ version 3.0.0
 ```
 
-::: code-group
+## Changing the Prerelease Tag
 
-```bash [npm]
-$ npx @changesets/cli publish
+During prerelease mode, you may want to change the tag for different stages of the prerelease, e.g. `alpha` -> `beta` -> `rc`. You can do this by directly changing the `"tag"` value in `.changeset/pre.json`:
+
+```json [.changeset/pre.json]
+{
+  "tag": "alpha", // [!code --]
+  "tag": "beta" // [!code ++]
+}
 ```
 
-```bash [pnpm]
-$ pnpm changeset publish
-```
-
-```bash [yarn]
-$ yarn changeset publish
-```
-
-:::
-
-The publish command will publish everything to the `latest` dist tag as normal.
+If you're using a different branch for prereleases, you do not need to rename the branch for the new tag. Prereleases only uses the specified tag for versions and dist-tags.

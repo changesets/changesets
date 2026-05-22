@@ -13,7 +13,7 @@ With linked packages, there is no guarantee that all packages in the group will 
 
 ### General Example
 
-We have three packages, `pkg-a`, `pkg-b`, and `pkg-c`. `pkg-a` and `pkg-b` are linked, but `pkg-c` is not so the config looks like this.
+We have three packages, `pkg-a`, `pkg-b`, and `pkg-c`. `pkg-a` and `pkg-b` are linked, but `pkg-c` is not so the config looks like this:
 
 ```json [.changeset/config.json]
 {

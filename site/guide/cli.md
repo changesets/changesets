@@ -86,7 +86,7 @@ $ changeset publish --otp 123456
 
 ### NPM dist-tags
 
-Published versions are tagged on npm with `latest` by default. You may want to change the tag when publishing [snapshot releases](./snapshot-releases.md) to prevent them from being installed by default. Pass `--tag <name>` to publish with a different tag.
+Published versions are tagged on npm with `latest` by default. You may want to change the [dist-tag](https://docs.npmjs.com/adding-dist-tags-to-packages) when publishing [snapshot releases](./snapshot-releases.md) to prevent them from being installed by default. Pass `--tag <name>` to publish with a different dist-tag.
 
 ```bash
 $ changeset publish --tag beta

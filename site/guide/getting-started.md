@@ -123,7 +123,7 @@ $ yarn changeset version
 
 :::
 
-Then, run the `publish` command to publish the new versions of the packages:
+Review the changes and commit them to your repository. Then, run the `publish` command to publish the new versions of the packages:
 
 ::: code-group
 

@@ -10,7 +10,7 @@ With fixed packages, all packages in the group will be version-bumped and publis
 
 ### General Example
 
-Let's say we have three packages, `pkg-a`, `pkg-b` and, `pkg-c`. `pkg-a` and `pkg-b` are fixed but `pkg-c` is not so the config looks like this.
+Let's say we have three packages, `pkg-a`, `pkg-b`, and `pkg-c`. `pkg-a` and `pkg-b` are fixed but `pkg-c` is not so the config looks like this:
 
 ```json [.changeset/config.json]
 {
