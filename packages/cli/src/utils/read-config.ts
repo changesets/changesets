@@ -25,7 +25,7 @@ export async function readConfig(packages: Packages): Promise<Config> {
   }
 
   if (errors.length !== 0) {
-    throw new ExitError(1, { cause: new Error(messages.join("\n")) });
+    throw new ExitError(1, { cause: new Error(errors.join("\n")) });
   }
 
   return config!;
