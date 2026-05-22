@@ -1,7 +1,3 @@
----
-outline: 2
----
-
 <script setup lang="ts">
 import { data } from "./cli.data.ts";
 </script>

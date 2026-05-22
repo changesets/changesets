@@ -1,12 +1,12 @@
 # Snapshot Releases
 
-Snapshot releases are a way to release your changes for testing without updating the versions. Both a modified `version` and a modified `publish` command are used to do accomplish a snapshot release. After both processes run, you will have a published version of packages in changesets with a version of `0.0.0-{tag}-DATETIMESTAMP`.
+Snapshot releases are a way to release your changes for testing without updating the versions. Both a modified [`version`](./cli.md#version) and a modified [`publish`](./cli.md#publish) commands are used to do a snapshot release. After both commands run, you will have a published version of packages in changesets with a version like `0.0.0-{tag}-{datetime}`.
 
 ## Starting Off
 
-Create changesets as normal. When you are ready to release a snapshot, you should make a dedicated branch for doing so.
+Create changesets as normal. When you are ready to release a snapshot, create a dedicated branch for doing so.
 
-## Versioning your packages
+## Versioning
 
 ::: code-group
 
@@ -24,9 +24,9 @@ $ yarn changeset version --snapshot
 
 :::
 
-This will apply the changesets, but instead of using the next version, all versions will be set to `0.0.0-THE_TIME_YOU_DID_THIS`.
+This will apply the changesets, but instead of using the next version, all versions will be set to `0.0.0-{datetime}`.
 
-If you want to add a personalised part to this version number, such as `bulbasaur`, you can run
+If you want to add a personalized part to this version number, such as `bulbasaur`, you can run:
 
 ::: code-group
 
@@ -44,41 +44,43 @@ $ yarn changeset version --snapshot bulbasaur
 
 :::
 
-This will instead update versions to `0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS`
+This will instead update versions to `0.0.0-bulbasaur-{datetime}`.
 
-## Publishing your packages
+## Publishing
 
-After running the `yarn changeset version` command, you can use the `changeset publish --tag bulbasaur` command to release the packages. By using the `--tag` flag, you will not add it to the `latest` flag on npm. This is REALLY IMPORTANT because if you do not include a tag, people installing your package using `yarn add your-package-name` will install the snapshot version.
+Run `publish --tag bulbasaur` to publish the packages. By using the `--tag` flag, you will not add it to the `latest` [dist-tag](https://docs.npmjs.com/adding-dist-tags-to-packages) on npm.
 
-## Using the `--no-git-tag` flag
+If you did not set a name when running `version --snapshot`, you should still use `--tag` to not publish it to the `latest` dist-tag. Use a random name like `publish --tag snapshot`.
 
-You can use the `--no-git-tag` CLI flag when running `changeset publish` if you plan to publish snapshot releases locally or you are pushing [git tags](http://npm.github.io/publishing-pkgs-docs/updating/using-tags.html) to a remote from your CI environment.
+::: danger Always use a tag for snapshots
+This is **REALLY IMPORTANT** because if you do not include a tag, installing your package will default to the snapshot version, which is not what you want.
+:::
 
-When you run `changeset publish --no-git-tag`, changesets will skip creating git tags for published snapshot packages. That means that git tags can still be created whenever pushing stable versions (with a regular `changeset publish`), and you can safely publish snapshot releases locally, without creating unnecessary tags.
+## Disabling git tags
+
+When publishing snapshot releases, you may not want to create git tags as they may be temporary only. Use `publish --no-git-tag` to skip creating git tags for snapshot releases.
 
 ## Using a snapshot version
 
-When you want to get people to test your snapshots, they can either update their package.json to your newly published version and run an install, or use `yarn add your-package-name@YOUR_TAG_OR_VERSIONS`
-
-For our above example, you could run
+When you want to get people to test your snapshots, they can either update their package.json to your newly published version and run an install, or use the install command directly:
 
 ::: code-group
 
 ```bash [npm]
-$ npm install your-package-name@0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS
+$ npm install your-package-name@0.0.0-bulbasaur-{datetime}
 ```
 
 ```bash [pnpm]
-$ pnpm add your-package-name@0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS
+$ pnpm add your-package-name@0.0.0-bulbasaur-{datetime}
 ```
 
 ```bash [yarn]
-$ yarn add your-package-name@0.0.0-bulbasaur-THE_TIME_YOU_DID_THIS
+$ yarn add your-package-name@0.0.0-bulbasaur-{datetime}
 ```
 
 :::
 
-or the tag:
+Or you can install with the dist-tag:
 
 ::: code-group
 
