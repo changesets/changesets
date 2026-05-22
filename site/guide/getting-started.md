@@ -105,42 +105,7 @@ Since a changeset describes how a change should be released, changes that don't 
 
 :::
 
-Once you have accumulated some changesets and are ready to release, you can run the `version` command to update the package versions and changelogs:
+Once you have accumulated some changesets,
+check out the [Versioning and Publishing](./versioning-and-publishing.md) guide to learn how to release your changes.
 
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli version
-```
-
-```bash [pnpm]
-$ pnpm changeset version
-```
-
-```bash [yarn]
-$ yarn changeset version
-```
-
-:::
-
-Review the changes and commit them to your repository. Then, run the `publish` command to publish the new versions of the packages:
-
-::: code-group
-
-```bash [npm]
-$ npx @changesets/cli publish
-```
-
-```bash [pnpm]
-$ pnpm changeset publish
-```
-
-```bash [yarn]
-$ yarn changeset publish
-```
-
-:::
-
-And you have released your changes! When you make more changes again, repeat the process to continue releasing new versions of your packages.
-
-You can also [automate the version and publish steps](./automating-changesets.md) in CI so that releasing is as simple as merging a PR. Check out the [CLI reference](./cli.md) to learn more about the available CLI commands.
+See also the [CLI reference](./cli.md) to learn more about the available CLI commands.

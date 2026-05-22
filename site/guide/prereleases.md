@@ -42,17 +42,17 @@ If you entered prerelease mode on a different branch:
 
 - Update the [`baseBranch`](./config.md#baseBranch) option with the branch name. This allows the [`add`](./cli.md#add) command to properly detect the changed packages.
 
-- If you have set up CI to [automatically run version and publish](./automating-changesets.md#how-do-i-run-the-version-and-publish-commands), make sure to allow running the workflow for this branch too.
+- If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), make sure to allow running the workflow for this branch too.
 
 Commit the changes and Changesets will now be in prerelease mode.
 
 ## Releasing Prerelease Versions
 
-When you want to release a prerelease version, you can run the [`version`](./cli.md#version) and [`publish`](./cli.md#publish) commands as usual. See the [Getting Started](./getting-started.md#usage) guide for the usual flow.
+When you want to release a prerelease version, you can run the [`version`](./cli.md#version) and [`publish`](./cli.md#publish) commands as usual. See the [Versioning and Publishing](./versioning-and-publishing.md) guide for the usual flow.
 
 The only difference is that the versions will have the prerelease tag postfixed and the dist-tag will be the tag you specified when you entered prerelease mode.
 
-If you have set up CI to [automatically run version and publish](./automating-changesets.md#how-do-i-run-the-version-and-publish-commands), you should see a `version` PR with the `(<tag>)` postfixed in the title.
+If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), you should see a `version` PR with the `(<tag>)` postfixed in the title.
 
 ### Example
 
@@ -112,7 +112,7 @@ If you exited prerelease mode on a different branch (the same branch as you ente
 
 - Update the [`baseBranch`](./config.md#baseBranch) option back to the default branch.
 
-- If you have set up CI to [automatically run version and publish](./automating-changesets.md#how-do-i-run-the-version-and-publish-commands), remove allowing to run the workflow for this branch.
+- If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), remove allowing to run the workflow for this branch.
 
 Commit the changes.
 

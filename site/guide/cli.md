@@ -30,7 +30,7 @@ Once confirmed, the changeset will be written in the `.changeset` folder. If the
 
 ### Empty changesets
 
-If you have [CI that blocks merges](./automating-changesets.md#blocking) without a changeset, pass `--empty` to create an empty changeset.
+If you have [CI that blocks merges](./automating.md#blocking) without a changeset, pass `--empty` to create an empty changeset.
 
 ### Changing the base branch
 
@@ -46,8 +46,8 @@ $ changeset --since next
 
 This is one of two commands responsible for releasing packages. The `version` command takes changesets that have been made and updates versions and dependencies of packages, as well as writing changelogs. It is responsible for all file changes before publishing to npm.
 
-::: tip Merge the version changes
-We recommend making sure changes made from this command are merged back into the base branch before you run publish.
+::: tip Commit the version changes
+We recommend making sure changes made from this command are committed before you run publish.
 :::
 
 ### Ignoring packages
