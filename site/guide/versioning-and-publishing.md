@@ -24,7 +24,12 @@ $ yarn changeset version
 
 :::
 
-Review the changes, ensure the versions and changelogs are updated as expected, and commit them to your repository.
+Review the changes, ensure the versions and changelogs are updated as expected, and commit them to your repository:
+
+```bash
+$ git add .
+$ git commit -m "Version packages"
+```
 
 ## Publishing
 
@@ -46,9 +51,9 @@ $ yarn changeset publish
 
 :::
 
-You can also create git tags for the published versions by passing the `--git-tag` flag. If you have published without git tags, you can still run the [`tag`](./cli.md#tag) command to create tags for the current published versions.
+The `publish` command creates git tags for each package by default. This allows users to easily find the code for a specific release. The tags created are in the format of `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`.
 
-Make sure to push the tags to your git remote after creating them.
+Make sure to push the tags to your git remote after creating them:
 
 ```bash
 $ git push --follow-tags

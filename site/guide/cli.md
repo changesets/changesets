@@ -40,10 +40,18 @@ $ changeset --since next
 
 <div v-html="data.versionHelpMessage" />
 
+- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#versioning)
+
 This is one of two commands responsible for releasing packages. The `version` command takes changesets that have been made and updates versions and dependencies of packages, as well as writing changelogs. It is responsible for all file changes before publishing to npm.
 
 ::: tip Commit the version changes
-We recommend making sure changes made from this command are committed before you run publish.
+We recommend making sure changes made from this command are committed before you run publish:
+
+```bash
+$ git add .
+$ git commit -m "Version packages"
+```
+
 :::
 
 ### Ignoring packages
@@ -68,9 +76,19 @@ $ changeset version --snapshot 'pr#123'
 
 <div v-html="data.publishHelpMessage" />
 
+- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing)
+
 This command publishes changes to npm and creates git tags. It works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it's not, run `npm publish` (or `pnpm publish` etc if detected to be using a different package manager).
 
 Because this command assumes that the last commit is the version commit, you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if the release changes are accurate.
+
+Git tags for each package are also created by default. This allows users to easily find the code for a specific release. The tags created are in the format of `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`. Pass `--no-git-tag` to disable this.
+
+Make sure to push the tags to your git remote after creating them:
+
+```bash
+$ git push --follow-tags
+```
 
 ### OTP
 
@@ -86,20 +104,6 @@ Published versions are tagged on npm with `latest` by default. You may want to c
 
 ```bash
 $ changeset publish --tag beta
-```
-
-### Git tags
-
-Pass `--git-tag` to create git tags for each package published. This allows users to easily find the code for a specific release. The tags created are in the format `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`.
-
-```bash
-$ changeset publish --git-tag
-```
-
-After the git tags are created, you will need to push them back up to your git remote:
-
-```bash
-$ git push --follow-tags
 ```
 
 ## status
@@ -132,7 +136,7 @@ $ changeset status --since next
 
 <div v-html="data.tagHelpMessage" />
 
-The `tag` command creates git tags for the current version of all packages. The tags created are equivalent to those created by [`publish --git-tag`](#git-tags), but the `tag` command does not publish anything to npm.
+The `tag` command creates git tags for the current version of all packages. The tags created are equivalent to those created by the [`publish`](#publish) command, but the `tag` command does not publish anything to npm.
 
 This is helpful in situations where a different tool is used to publish packages instead of Changesets. The tags created are in the format `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`. It is expected to run the `version` command first so the created tags are up to date.
 
