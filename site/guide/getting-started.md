@@ -11,7 +11,7 @@ Changesets has several meanings that are sometimes used interchangeably:
 3. It also represents a group of [changeset files](#what-is-a-changeset), which are Markdown files that each describe a change.
 
 ::: tip New to Changesets?
-If you are contributing to a project that uses Changesets, check out the [frequently asked questions](../../faq.md) for a quick introduction to working with changesets.
+If you are contributing to a project that uses Changesets, check out the [frequently asked questions](../faq.md) for a quick introduction to working with changesets.
 :::
 
 ## What is a changeset?
@@ -133,4 +133,4 @@ $ yarn changeset publish
 
 And you have released your changes! When you make more changes again, repeat the process to continue releasing new versions of your packages.
 
-You can also [automate the version and publish steps](../basic/automating-changesets.md) in CI so that releasing is as simple as merging a PR. Check out the [CLI reference](../basic/cli.md) to learn more about the available CLI commands.
+You can also [automate the version and publish steps](./automating-changesets.md) in CI so that releasing is as simple as merging a PR. Check out the [CLI reference](./cli.md) to learn more about the available CLI commands.

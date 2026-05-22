@@ -1,6 +1,6 @@
 # Linked Packages
 
-Linked packages allow you to specify a group or groups of packages that should be versioned together. They can be configured with the [`linked`](../basic/configuration-file.md#linked) option. There are some complex cases, so some examples are shown below to demonstrate various cases.
+Linked packages allow you to specify a group or groups of packages that should be versioned together. They can be configured with the [`linked`](./config.md#linked) option. There are some complex cases, so some examples are shown below to demonstrate various cases.
 
 - Linked packages will only be bumped when there is a changeset for them. This can mean because you explicitly choose to add a changeset for it or because it's a dependent of something being released.
 - Packages that have changesets and are in a set of linked packages will **always** be versioned based on the highest current version in the set of linked packages and the highest bump type from changesets in the set of linked packages.

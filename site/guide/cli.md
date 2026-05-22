@@ -26,15 +26,15 @@ This is the main command to interact with the changesets.
 
 It will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the changes. The final step will show the changeset it will generate and confirm that you want to add it.
 
-Once confirmed, the changeset will be written in the `.changeset` folder. If the [`commit`](./configuration-file.md#commit) option is enabled, the changeset will be automatically committed to git.
+Once confirmed, the changeset will be written in the `.changeset` folder. If the [`commit`](./config.md#commit) option is enabled, the changeset will be automatically committed to git.
 
 ### Empty changesets
 
-If you have [CI that blocks merges](../basic/automating-changesets.md#blocking) without a changeset, pass `--empty` to create an empty changeset.
+If you have [CI that blocks merges](./automating-changesets.md#blocking) without a changeset, pass `--empty` to create an empty changeset.
 
 ### Changing the base branch
 
-When prompting for packages to release, Changesets will detect and suggest the changed packages since the last commit on [`baseBranch`](./configuration-file.md#basebranch). If you want to use a different base branch, tag, or git ref, you can change it with the `--since [branch]` option.
+When prompting for packages to release, Changesets will detect and suggest the changed packages since the last commit on [`baseBranch`](./config.md#basebranch). If you want to use a different base branch, tag, or git ref, you can change it with the `--since [branch]` option.
 
 ```bash
 $ changeset --since next
@@ -52,7 +52,7 @@ We recommend making sure changes made from this command are merged back into the
 
 ### Ignoring packages
 
-The `--ignore` flag allows you to skip packages from being published. This allows you to run partial publishes of the repository. This extends the [`ignore`](./configuration-file.md#ignore) option with the same documented caveats.
+The `--ignore` flag allows you to skip packages from being published. This allows you to run partial publishes of the repository. This extends the [`ignore`](./config.md#ignore) option with the same documented caveats.
 
 ```bash
 $ changeset version --ignore pkg-a --ignore pkg-b
@@ -60,9 +60,9 @@ $ changeset version --ignore pkg-a --ignore pkg-b
 
 ### Snapshot releases
 
-You can use the `--snapshot` flag to create a [snapshot release](../advanced/snapshot-releases.md), meant for testing purposes only. The suffix for snapshot releases can be customized with `--snapshot-prerelease-template <template>`, which works the same way as the [`snapshot.prereleaseTemplate`](./configuration-file.md#snapshotprereleasetemplate) option.
+You can use the `--snapshot` flag to create a [snapshot release](./snapshot-releases.md), meant for testing purposes only. The suffix for snapshot releases can be customized with `--snapshot-prerelease-template <template>`, which works the same way as the [`snapshot.prereleaseTemplate`](./config.md#snapshotprereleasetemplate) option.
 
-It is highly recommended to read the [Snapshot Releases](../advanced/snapshot-releases.md) guide before using this flag.
+It is highly recommended to read the [Snapshot Releases](./snapshot-releases.md) guide before using this flag.
 
 ```bash
 $ changeset version --snapshot 'pr#123'
@@ -86,7 +86,7 @@ $ changeset publish --otp 123456
 
 ### NPM dist-tags
 
-Published versions are tagged on npm with `latest` by default. You may want to change the tag when publishing [snapshot releases](../advanced/snapshot-releases.md) to prevent them from being installed by default. Pass `--tag <name>` to publish with a different tag.
+Published versions are tagged on npm with `latest` by default. You may want to change the tag when publishing [snapshot releases](./snapshot-releases.md) to prevent them from being installed by default. Pass `--tag <name>` to publish with a different tag.
 
 ```bash
 $ changeset publish --tag beta
@@ -144,10 +144,10 @@ This is helpful in situations where a different tool is used to publish packages
 
 <div v-html="data.preHelpMessage" />
 
-The `pre` command is used to enter or exit [prerelease mode](../advanced/prereleases.md). It does not do any versioning but prepares Changesets in a state for prereleases.
+The `pre` command is used to enter or exit [prerelease mode](./prereleases.md). It does not do any versioning but prepares Changesets in a state for prereleases.
 
 When you want to do a prerelease, run `pre enter <tag>` to enter prerelease mode with the given tag, then do the normal release process as usual. When you're ready for a stable release, run `pre exit` and do the normal release process again.
 
 ::: warning Prereleases are complicated
-Many of the safety rails that Changesets helps you with are taken off in prerelease mode. You may also prefer using [snapshot releases](../advanced/snapshot-releases.md) for a slightly less involved process. It is highly recommended to read through the [prereleases](../advanced/prereleases.md) documentation before using this command.
+Many of the safety rails that Changesets helps you with are taken off in prerelease mode. You may also prefer using [snapshot releases](./snapshot-releases.md) for a slightly less involved process. It is highly recommended to read through the [prereleases](./prereleases.md) documentation before using this command.
 :::

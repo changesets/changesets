@@ -4,7 +4,7 @@ import {
   type MarkdownRenderer,
   type SiteConfig,
 } from "vitepress";
-import { cli } from "../../../packages/cli/src/cli.ts";
+import { cli } from "../../packages/cli/src/cli.ts";
 
 export interface Data {
   mainHelpMessage: string;

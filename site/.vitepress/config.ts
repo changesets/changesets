@@ -84,7 +84,7 @@ export default defineConfig({
     nav: [
       {
         text: "Guide",
-        link: "/guide/introduction/getting-started",
+        link: "/guide/getting-started",
         activeMatch: "^/guide/",
       },
       {
@@ -121,10 +121,10 @@ export default defineConfig({
 
     sidebar: {
       "/guide/": {
+        base: "/guide/",
         items: [
           {
             text: "Introduction",
-            base: "/guide/introduction/",
             items: [
               { text: "Getting Started", link: "getting-started" },
               { text: "Why Changesets?", link: "why" },
@@ -132,16 +132,14 @@ export default defineConfig({
           },
           {
             text: "Basic",
-            base: "/guide/basic/",
             items: [
-              { text: "Configuration File", link: "configuration-file" },
+              { text: "Configuration File", link: "config" },
               { text: "Command Line Interface", link: "cli" },
               { text: "Automating Changesets", link: "automating-changesets" },
             ],
           },
           {
             text: "Advanced",
-            base: "/guide/advanced/",
             items: [
               { text: "Fixed Packages", link: "fixed-packages" },
               { text: "Linked Packages", link: "linked-packages" },

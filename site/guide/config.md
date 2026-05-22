@@ -26,7 +26,7 @@ Changesets keeps its configuration in `.changeset/config.json`. The default conf
 
 Set how the changelog for packages should be generated. The default changelog generator is `@changesets/cli/changelog` (an alias to `@changesets/changelog-git`) which adds related commit links to each changeset entry in the changelog. If it is set to `false`, no changelogs will be generated.
 
-You can also specify a custom changelog generator by providing a string or a tuple with the module path and options. The module can be an npm package or a relative file path. Check out the [changelog generators](../advanced/modifying-changelog-format.md) guide to learn how to write your own changelog generator.
+You can also specify a custom changelog generator by providing a string or a tuple with the module path and options. The module can be an npm package or a relative file path. Check out the [changelog generators](./modifying-changelog-format.md) guide to learn how to write your own changelog generator.
 
 If a tuple (`[string, Record<string, any>]`) is set, you can pass options in the second item of the tuple to configure the changelog generator. For example, if you are using `@changesets/changelog-github`, you can pass the `repo` and `disableThanks` options like this:
 
@@ -48,7 +48,7 @@ Consult the documentation for the changelog generator you're using for more info
 
 Enable this option to automatically commit the changes when running the `changeset add` and `changeset version` commands. If set to `true`, the default commit message generator (`["@changesets/cli/commit", { "skipCI": "version" }]`) will be used.
 
-This option works similarly to the [`changelog`](#changelog) option. Check out the [commit generators](../advanced/modifying-changelog-format.md) guide to learn how to write your own commit message generator.
+This option works similarly to the [`changelog`](#changelog) option. Check out the [commit generators](./modifying-changelog-format.md) guide to learn how to write your own commit message generator.
 
 <!-- TODO: Docs for `getAddMessage` and `getVersionMessage` -->
 
@@ -56,7 +56,7 @@ This option works similarly to the [`changelog`](#changelog) option. Check out t
 
 - **Type:** `string[][]`
 - **Default:** `[]`
-- **Related:** [Fixed Packages](../advanced/fixed-packages.md)
+- **Related:** [Fixed Packages](./fixed-packages.md)
 - **Note:** Only applicable in monorepos.
 
 Declare that packages should be version-bumped and published together. Supports [picomatch patterns](https://github.com/micromatch/picomatch) to match packages.
@@ -69,13 +69,13 @@ For example, if you have `pkg-a@1.0.0` and `pkg-b@1.0.0`, when one gets bumped t
 }
 ```
 
-Learn more about the implementation and implications in the [Fixed Packages](../advanced/fixed-packages.md) guide.
+Learn more about the implementation and implications in the [Fixed Packages](./fixed-packages.md) guide.
 
 ## linked
 
 - **Type:** `string[][]`
 - **Default:** `[]`
-- **Related:** [Linked Packages](../advanced/linked-packages.md)
+- **Related:** [Linked Packages](./linked-packages.md)
 - **Note:** Only applicable in monorepos.
 
 Declare that packages should "share" a version together. Supports [picomatch patterns](https://github.com/micromatch/picomatch) to match packages.
@@ -88,7 +88,7 @@ For example, if you have `pkg-a@1.0.0` and `pkg-b@1.1.0`, if `pkg-a` is minor-bu
 }
 ```
 
-Learn more about the implementation and implications in the [Linked Packages](../advanced/linked-packages.md) guide.
+Learn more about the implementation and implications in the [Linked Packages](./linked-packages.md) guide.
 
 ::: warning This does not do what some other tools do
 

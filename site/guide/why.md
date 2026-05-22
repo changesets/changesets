@@ -47,9 +47,9 @@ This is useful because it breaks versioning into two steps:
 
 ## The Tooling that Makes this Worthwhile
 
-1. The [Changesets CLI](../basic/cli.md) helps with generating new changesets, versioning, and publishing packages.
-2. The [Changesets GitHub Bot](../basic/automating-changesets.md#how-do-i-ensure-pull-requests-have-changesets) ensure PRs have changesets and prompts for creating them.
-3. The [Changesets GitHub Action](../basic/automating-changesets.md#how-do-i-run-the-version-and-publish-commands) automates versioning and publishing in CI so releasing is as simple as merging a PR.
+1. The [Changesets CLI](./cli.md) helps with generating new changesets, versioning, and publishing packages.
+2. The [Changesets GitHub Bot](./automating-changesets.md#how-do-i-ensure-pull-requests-have-changesets) ensure PRs have changesets and prompts for creating them.
+3. The [Changesets GitHub Action](./automating-changesets.md#how-do-i-run-the-version-and-publish-commands) automates versioning and publishing in CI so releasing is as simple as merging a PR.
 
 ## Benefits for Single Package Repos
 

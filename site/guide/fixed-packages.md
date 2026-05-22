@@ -1,6 +1,6 @@
 # Fixed Packages
 
-Fixed packages allow you to specify a group or groups of packages that should be versioned and published together. They can be configured with the [`fixed`](../basic/configuration-file.md#fixed) option.
+Fixed packages allow you to specify a group or groups of packages that should be versioned and published together. They can be configured with the [`fixed`](./config.md#fixed) option.
 
 ::: info Compared to [linked packages](./linked-packages.md)
 With fixed packages, all packages in the group will be version-bumped and published together even when there are no changes done to some of the the member packages, which means all packages will always have the same version.
