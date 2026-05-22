@@ -2,6 +2,7 @@ import { defineConfig } from "vitepress";
 import {
   groupIconMdPlugin,
   groupIconVitePlugin,
+  localIconLoader,
 } from "vitepress-plugin-group-icons";
 import packageJson from "../../packages/cli/package.json" with { type: "json" };
 
@@ -43,7 +44,16 @@ export default defineConfig({
     },
   },
   vite: {
-    plugins: [groupIconVitePlugin()],
+    plugins: [
+      groupIconVitePlugin({
+        customIcon: {
+          ".changeset/config.json": {
+            light: localIconLoader(import.meta.url, "../public/logo-light.svg"),
+            dark: localIconLoader(import.meta.url, "../public/logo-dark.svg"),
+          },
+        },
+      }),
+    ],
   },
   themeConfig: {
     logo: {

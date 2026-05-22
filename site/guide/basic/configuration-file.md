@@ -2,7 +2,7 @@
 
 Changesets keeps its configuration in `.changeset/config.json`. The default config is:
 
-```json
+```json [.changeset/config.json]
 {
   "changelog": "@changesets/cli/changelog",
   "commit": false,
@@ -30,7 +30,7 @@ You can also specify a custom changelog generator by providing a string or a tup
 
 If a tuple (`[string, Record<string, any>]`) is set, you can pass options in the second item of the tuple to configure the changelog generator. For example, if you are using `@changesets/changelog-github`, you can pass the `repo` and `disableThanks` options like this:
 
-```json
+```json [.changeset/config.json]
 {
   "changelog": [
     "@changesets/changelog-github",
@@ -63,7 +63,7 @@ Declare that packages should be version-bumped and published together. Supports 
 
 For example, if you have `pkg-a@1.0.0` and `pkg-b@1.0.0`, when one gets bumped to `1.1.0`, the other is also bumped to `1.1.0` regardless if it has any change or not. To achieve this, you can configure like so:
 
-```json
+```json [.changeset/config.json]
 {
   "fixed": [["pkg-a", "pkg-b"]]
 }
@@ -82,7 +82,7 @@ Declare that packages should "share" a version together. Supports [picomatch pat
 
 For example, if you have `pkg-a@1.0.0` and `pkg-b@1.1.0`, if `pkg-a` is minor-bumped, it uses the shared highest version in the group which is `1.1.0` and bumps to `1.2.0`. `pkg-b` will not be explicitly bumped. To achieve this, you can configure like so:
 
-```json
+```json [.changeset/config.json]
 {
   "linked": [["pkg-a", "pkg-b"]]
 }
@@ -129,7 +129,7 @@ The [picomatch patterns](https://github.com/micromatch/picomatch) for changed fi
 
 Example:
 
-```json
+```json [.changeset/config.json]
 {
   "changedFilePatterns": ["src/**", "lib/**"]
 }
