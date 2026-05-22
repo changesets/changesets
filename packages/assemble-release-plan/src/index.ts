@@ -10,6 +10,7 @@ import {
 } from "@changesets/types";
 import { Package, Packages } from "@manypkg/get-packages";
 import semverParse from "semver/functions/parse";
+import semverValid from "semver/functions/valid";
 import applyLinks from "./apply-links";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
@@ -80,6 +81,14 @@ function getSnapshotSuffix(
       return value;
     });
   }, template);
+}
+
+function validateSnapshotSuffix(snapshotSuffix: string): void {
+  if (!semverValid(`0.0.0-${snapshotSuffix}`)) {
+    throw new Error(
+      `Failed to compose snapshot version: "${snapshotSuffix}" is not a valid semver prerelease. Check the --snapshot tag and snapshot.prereleaseTemplate values.`
+    );
+  }
 }
 
 function getSnapshotVersion(
@@ -250,6 +259,9 @@ function assembleReleasePlan(
       refinedConfig.snapshot.prereleaseTemplate,
       refinedSnapshot
     );
+  if (snapshotSuffix) {
+    validateSnapshotSuffix(snapshotSuffix);
+  }
 
   return {
     changesets: relevantChangesets,
