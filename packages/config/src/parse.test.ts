@@ -477,11 +477,6 @@ describe("validateConfig", () => {
         config: { access: "something" },
         errors: ['Expected ("public"'],
       },
-      {
-        name: "access: warns about private",
-        config: { access: "private" },
-        warnings: ['Deprecated: Use "restricted" instead of "private"'],
-      },
       // fixed
       {
         name: "fixed: non-array",

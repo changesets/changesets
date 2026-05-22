@@ -194,13 +194,6 @@ const noPrivateTagWithoutPrivateVersion: Rule = ({ config, errors }) => {
   }
 };
 
-// TODO: remove this alias
-const noAccessPrivate: Rule = ({ writtenConfig, warnings }) => {
-  if ((writtenConfig.access as unknown) !== "private") return;
-
-  warnings.push('Deprecated: Use "restricted" instead of "private"');
-};
-
 const rules: Rule[] = [
   fixedGroupsExist,
   noDuplicateFixedPackages,
@@ -210,7 +203,6 @@ const rules: Rule[] = [
   ignoredPatternsExist,
   alsoSkipDependentsOfSkipped,
   noPrivateTagWithoutPrivateVersion,
-  noAccessPrivate,
 ];
 
 export function validateConfigByRules(

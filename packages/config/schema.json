@@ -17,10 +17,6 @@
         },
         {
           "const": "restricted"
-        },
-        {
-          "const": "private",
-          "description": "Deprecated, just an alias for \"restricted\""
         }
       ],
       "description": "Determines whether Changesets should publish packages to the registry publicly or to a restricted scope.",

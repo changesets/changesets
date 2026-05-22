@@ -50,15 +50,7 @@ const CommitSchema = v.union(
   'Invalid type: Expected a boolean, a module path (e.g. "@changesets/cli/commit" or "./some-module"), or a tuple with a module path and options (e.g. ["@changesets/cli/commit", { "skipCI": "version" }])]',
 );
 
-const AccessSchema = v.union([
-  v.literal("public"),
-  v.literal("restricted"),
-  // TODO: remove this alias
-  v.pipe(
-    v.literal("private"),
-    v.description('Deprecated, just an alias for "restricted"'),
-  ),
-]);
+const AccessSchema = v.union([v.literal("public"), v.literal("restricted")]);
 
 export const WrittenConfigSchema = v.object({
   $schema: v.optional(v.string()),
@@ -183,11 +175,6 @@ export function normalizeWrittenConfig({
   writtenConfig,
 }: Pick<FullContext, "packageNames" | "writtenConfig">): Config {
   const config = structuredClone(writtenConfig) as Config;
-
-  // TODO: remove this alias
-  if ((writtenConfig.access as unknown) === "private") {
-    config.access = "restricted";
-  }
 
   if (typeof writtenConfig.changelog === "string") {
     config.changelog = [writtenConfig.changelog, null];
