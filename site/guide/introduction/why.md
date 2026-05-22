@@ -1,4 +1,4 @@
-# Origins
+# Why Changesets?
 
 ## The Problem
 
@@ -47,11 +47,9 @@ This is useful because it breaks versioning into two steps:
 
 ## The Tooling that Makes this Worthwhile
 
-1. CLI generation of new changesets.
-2. Automated consumption of changesets to do versioning.
-3. Detection + surfacing of changesets in PRs.
-
-A tool to publish multiple packages from a monorepo is also important, however does not need to be linked to this.
+1. The [Changesets CLI](../basic/cli.md) helps with generating new changesets, versioning, and publishing packages.
+2. The [Changesets GitHub Bot](../basic/automating-changesets.md#how-do-i-ensure-pull-requests-have-changesets) ensure PRs have changesets and prompts for creating them.
+3. The [Changesets GitHub Action](../basic/automating-changesets.md#how-do-i-run-the-version-and-publish-commands) automates versioning and publishing in CI so releasing is as simple as merging a PR.
 
 ## Benefits for Single Package Repos
 

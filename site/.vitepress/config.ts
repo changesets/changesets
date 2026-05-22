@@ -117,7 +117,7 @@ export default defineConfig({
             base: "/guide/introduction/",
             items: [
               { text: "Getting Started", link: "getting-started" },
-              { text: "Origins", link: "origins" },
+              { text: "Why Changesets?", link: "why" },
             ],
           },
           {
