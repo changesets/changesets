@@ -47,6 +47,8 @@ export default defineConfig({
     plugins: [
       groupIconVitePlugin({
         customIcon: {
+          typescript: "vscode-icons:file-type-typescript-official",
+          javascript: "vscode-icons:file-type-js-official",
           ".changeset/config.json": {
             light: localIconLoader(import.meta.url, "../public/logo-light.svg"),
             dark: localIconLoader(import.meta.url, "../public/logo-dark.svg"),
@@ -145,8 +147,8 @@ export default defineConfig({
               { text: "Fixed Packages", link: "fixed-packages" },
               { text: "Linked Packages", link: "linked-packages" },
               {
-                text: "Modifying Changelog Formats",
-                link: "modifying-changelog-formats",
+                text: "Modifying Changelog Format",
+                link: "modifying-changelog-format",
               },
               { text: "Prereleases", link: "prereleases" },
               { text: "Snapshot Releases", link: "snapshot-releases" },

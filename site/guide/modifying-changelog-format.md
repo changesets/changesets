@@ -1,94 +1,96 @@
-# Modifying The Changelog Formats
+# Modifying Changelog Format
 
-Changesets comes with a default format for the changelogs for packages which is relatively basic in what information it displays, however this is customisable. Here we will talk about how to modify the changelog, so that it contains extra meta-information.
+Changesets comes with a default formatter for the changelogs at `@changesets/cli/changelog`. It displays relatively basic information, however, this can be customized with the [`changelog`](./config.md#changelog) option.
 
-## Setting What Formatting Functions to Use
+## Writing a Custom Changelog Formatter
 
-To change how the changelog is generated, you use the `changelog` setting in the `./changeset/config.json`. This setting accepts a string, which points to a module. You can reference an npm package that you have installed, or a local file where you have written your own functions.
-
-For example, `changesets` has a package, `@changesets/changelog-git`. To use it, you would first need to install the package.
+The changelog formatting can be customized with two functions: `getReleaseLine` and `getDependencyReleaseLine`. These must be default exported as an object containing the functions. For example:
 
 ::: code-group
 
-```bash [npm]
-$ npm install @changesets/changelog-git
+```ts [TypeScript]
+// Install `@changesets/types` to get the `ChangelogFunctions` type
+import type { ChangelogFunctions } from "@changesets/types";
+
+const functions: ChangelogFunctions = {
+  getReleaseLine() {}
+  getDependencyReleaseLine(){}
+};
+
+export default functions;
 ```
 
-```bash [pnpm]
-$ pnpm add @changesets/changelog-git
-```
+```js [JavaScript]
+const functions = {
+  getReleaseLine() {},
+  getDependencyReleaseLine() {},
+};
 
-```bash [yarn]
-$ yarn add @changesets/changelog-git
+export default functions;
 ```
 
 :::
 
-Next, change your `.changeset/config.json` to point to the new package:
+These functions are run during the [`version`](./cli.md#version) command and are expected to return a string (or a promise with a string).
 
-```
-"changelog": "@changesets/changelog-git"
-```
+```ts
+type VersionType = "major" | "minor" | "patch";
 
-If you want to write your own, you can reference a file path. For example, you can create a new file `.changeset/my-changelog-config.js`, then you can reference it in the `.changeset/config.json` file as:
+type NewChangesetWithCommit = {
+  // The file name of the changeset, e.g. "cool-places-hug"
+  id: string;
+  // The Markdown summary of the changeset
+  summary: string;
+  // The package names to be released and their respective semver bump types
+  releases: Array<{ name: string; type: VersionType }>;
+  // The commit hash that introduced the changeset
+  commit?: string;
+};
 
-```
-"changelog": "./my-changelog-config.js"
-```
+type GetReleaseLine = (
+  // The changeset for this release
+  changeset: NewChangesetWithCommit,
+  // The type of change for this release: "major", "minor", or "patch"
+  type: VersionType,
+  // Options passed to the second item of the tuple
+  changelogOpts?: Record<string, any>,
+) => MaybePromise<string>;
 
-## Writing Changelog Formatting Functions
+type GetDependencyReleaseLine = (
+  // The changesets that causes a dependency update
+  changesets: NewChangesetWithCommit[],
+  // The dependencies that are being updated
+  dependenciesUpdated: ModCompWithPackage[],
+  // Options passed to the second item of the tuple
+  changelogOpts?: Record<string, any>,
+) => MaybePromise<string>;
 
-The changelog formatting is done by two different functions. `getReleaseLine` and `getDependencyReleaseLine`. These must be provided in an object as the export of your generation file. A basic file setup for the changelog generation functions would be:
-
-```js
-async function getReleaseLine() {}
-
-async function getDependencyReleaseLine() {}
-
-module.exports = {
-  getReleaseLine,
-  getDependencyReleaseLine,
+type ChangelogFunctions = {
+  getReleaseLine: GetReleaseLine;
+  getDependencyReleaseLine: GetDependencyReleaseLine;
 };
 ```
 
-These functions are run during the `changeset version` and are expected to return a string (or a promise with a string).
+## Using a Custom Changelog Formatter
 
-If you are using typescript to write your changelog functions, you can use the type. First install `@changesets/types`, and then:
+To use a custom changelog formatter, you can specify the path to the file (relative to the config file) or the module if it's packaged as a dependency in the [`changelog`](./config.md#changelog) option:
 
-```ts
-import { ChangelogFunctions } from "@changesets/types";
-
-async function getReleaseLine() {}
-
-async function getDependencyReleaseLine() {}
-
-const defaultChangelogFunctions: ChangelogFunctions = {
-  getReleaseLine,
-  getDependencyReleaseLine,
-};
-
-export default defaultChangelogFunctions;
+```json [.changeset/config.json]
+{
+  "changelog": "./changelog-formatter.ts"
+}
 ```
 
-```ts
-type getReleaseLine(
-    changeset: {
-        // This is the string of the summary from the changeset markdown file
-        summary: string
-        // This is an array of information about what is going to be released. each is an object with name: the name of the package, and type, which is "major", "minor", or "patch"
-        releases
-        // the hash for the commit that introduced the changeset
-        commit
-    },
-    // the type of the change this changeset refers to, as "major", "minor", or "patch"
-    type
-    // This needs to be explained - see @changesets/changelog-github's code for how this works
-    changelogOpts
-) => string
+```json [.changeset/config.json]
+{
+  "changelog": "changelog-formatter-pkg"
+}
 ```
 
-> TODO - this guide is incomplete. Until it is completed, you may need to dig into the code for some of our existing
+You can also specify options to be passed to the changelog functions' `changelogOpts` option:
 
-## Adding Options to Changelog Functions
-
-> TODO
+```json [.changeset/config.json]
+{
+  "changelog": ["./changelog-formatter.ts", { "showCommit": false }]
+}
+```
