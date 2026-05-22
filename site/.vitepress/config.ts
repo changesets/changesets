@@ -127,7 +127,7 @@ export default defineConfig({
             text: "Introduction",
             items: [
               { text: "Getting Started", link: "getting-started" },
-              { text: "Why Changesets?", link: "why" },
+              { text: "Why Changesets", link: "why" },
               { text: "Technical Decisions", link: "technical-decisions" },
             ],
           },

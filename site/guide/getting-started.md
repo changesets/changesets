@@ -14,6 +14,14 @@ Changesets has several meanings that are sometimes used interchangeably:
 If you are contributing to a project that uses Changesets, check out the [frequently asked questions](../faq.md) for a quick introduction to working with changesets.
 :::
 
+## Why Changesets?
+
+Changesets is designed to help manage and describe changes, all the way through to publishing. It lets contributors declare how their changes should be released, and it'll handle updating package versions, changelogs, and publishing based on the provided changesets.
+
+Changesets has a focus on solving these problems for monorepos, keeping packages that rely on each other up to date, as well as making it easy to make changes to groups of packages. Conceptually, the workflow is also beneficial for single package repos.
+
+Read more about the motivation in the [Why Changesets](./why.md) page.
+
 ## What is a changeset?
 
 A changeset is a Markdown file with YAML frontmatter. The contents of the Markdown is the change summary which will be written to the changelog and the YAML frontmatter describes the packages that have changed and their respective [semver](https://semver.org) bump types.
@@ -28,6 +36,8 @@ They typically look like this:
 
 Summary of the change
 ```
+
+The core idea of Changesets revolves around these files.
 
 ## Setting Up
 

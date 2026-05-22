@@ -1,4 +1,4 @@
-# Why Changesets?
+# Why Changesets
 
 ## The Problem
 
