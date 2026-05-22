@@ -1,7 +1,7 @@
 import path from "node:path";
 import { testdir } from "@changesets/test-utils";
-import type { Config, WrittenConfig } from "@changesets/types";
-import { getPackages, type Packages } from "@manypkg/get-packages";
+import type { Config, Packages, WrittenConfig } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 import { describe, expect, it } from "vitest";
 import { getDefaultConfig } from "./defaults.ts";
 import {
@@ -9,14 +9,6 @@ import {
   readConfigFile,
   validateConfig,
 } from "./parse.ts";
-
-const omit = <Obj extends Record<string, unknown>>(
-  obj: Obj,
-  keys: (keyof Obj)[] | string[],
-): typeof keys extends keyof Obj ? Omit<Obj, typeof keys> : Obj =>
-  Object.fromEntries(
-    Object.entries(obj).filter(([k]) => !keys.includes(k)),
-  ) as never;
 
 describe("readConfigFile", () => {
   it("can read a config file", async () => {
@@ -167,7 +159,7 @@ describe("readAndValidateConfig", () => {
 describe("defaultConfig", () => {
   it("creates the default config", () => {
     const result = getDefaultConfig();
-    expect(omit(result, ["$schema"])).toMatchInlineSnapshot(`
+    expect(result).toMatchInlineSnapshot(`
       {
         "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
           "onlyUpdatePeerDependentsWhenOutOfRange": false,
@@ -203,18 +195,17 @@ describe("defaultConfig", () => {
 
 const rootManifest = { name: "root", private: true, version: "0.0.0" };
 
-const defaults = omit(getDefaultConfig(), ["$schema"]);
+const defaults = getDefaultConfig();
 
 const getDefaultPackages = (cwd: string) =>
   ({
     rootPackage: {
       packageJson: rootManifest,
       dir: cwd,
-      relativeDir: "./",
     },
     rootDir: cwd,
     packages: [],
-    tool: { type: "pnpm" } as never,
+    tool: { type: "pnpm" },
   }) as Packages;
 
 const withPackages = (cwd: string, pkgNames: string[]): Packages => ({

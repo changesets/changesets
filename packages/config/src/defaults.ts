@@ -11,14 +11,12 @@ export const defaultWrittenConfig: WrittenConfig = {
 
 let defaultConfig: Config | undefined;
 export const getDefaultConfig = (): Config => {
-  if (defaultConfig == null) {
-    defaultConfig = {
-      ...normalizeWrittenConfig({
-        packageNames: [],
-        writtenConfig: parse(WrittenConfigSchema, defaultWrittenConfig),
-      }),
-    };
-  }
+  defaultConfig ??= defaultConfig = {
+    ...normalizeWrittenConfig({
+      packageNames: [],
+      writtenConfig: parse(WrittenConfigSchema, defaultWrittenConfig),
+    }),
+  };
 
   return defaultConfig;
 };

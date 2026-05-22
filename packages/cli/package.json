@@ -31,8 +31,7 @@
     "./changelog": "./dist/changelog.mjs",
     "./commit": "./dist/commit/index.mjs",
     "./package.json": "./package.json",
-    "./bin.js": "./bin.js",
-    "./config-schema.json": "./node_modules/@changesets/config/schema.json"
+    "./bin.js": "./bin.js"
   },
   "dependencies": {
     "@changesets/apply-release-plan": "workspace:^",

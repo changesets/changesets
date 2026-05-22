@@ -1,8 +1,7 @@
-import type { Config, WrittenConfig } from "@changesets/types";
-import type { Packages } from "@manypkg/get-packages";
+import type { Config, Packages, WrittenConfig } from "@changesets/types";
 import picomatch from "picomatch";
 
-export type FullContext = {
+export type ValidationContext = {
   packages: Packages;
   config: Config;
   writtenConfig: WrittenConfig;

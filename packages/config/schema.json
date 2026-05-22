@@ -2,9 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
-    "$schema": {
-      "type": "string"
-    },
     "baseBranch": {
       "type": "string",
       "description": "Determines the branch that Changesets uses when finding what packages have changed.",

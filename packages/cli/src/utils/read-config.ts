@@ -1,9 +1,8 @@
 import c from "@changesets/color";
 import { readConfig as originalReadConfig } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
-import type { Config } from "@changesets/types";
+import type { Config, Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
-import type { Packages } from "@manypkg/get-packages";
 
 export async function readConfig(packages: Packages): Promise<Config> {
   const { config, warnings, errors } = await originalReadConfig(

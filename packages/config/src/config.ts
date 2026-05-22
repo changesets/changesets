@@ -1,6 +1,6 @@
 import type { Config } from "@changesets/types";
 import * as v from "valibot";
-import { type FullContext, globMatch } from "./utils.ts";
+import { type ValidationContext, globMatch } from "./utils.ts";
 
 const rootKey = <Schema extends v.BaseSchema<any, any, any>>(
   schema: Schema,
@@ -26,12 +26,7 @@ const ChangelogSchema = v.union(
   [
     v.literal(false),
     v.string(),
-    v.tuple([
-      v.string(),
-      // record or any?
-      // v.any(),
-      v.nullable(v.record(v.string(), v.unknown())),
-    ]),
+    v.tuple([v.string(), v.nullable(v.record(v.string(), v.unknown()))]),
   ],
   'Invalid type: Expected false, a module path ("@changesets/cli/changelog" or "./some-module"), or a tuple of module path and options (["@changesets/cli/changelog", { "someOption": true }]).',
 );
@@ -40,12 +35,7 @@ const CommitSchema = v.union(
   [
     v.boolean(),
     v.string(),
-    v.tuple([
-      v.string(),
-      // record or any?
-      // v.any(),
-      v.nullable(v.record(v.string(), v.unknown())),
-    ]),
+    v.tuple([v.string(), v.nullable(v.record(v.string(), v.unknown()))]),
   ],
   'Invalid type: Expected a boolean, a module path (e.g. "@changesets/cli/commit" or "./some-module"), or a tuple with a module path and options (e.g. ["@changesets/cli/commit", { "skipCI": "version" }])]',
 );
@@ -53,8 +43,6 @@ const CommitSchema = v.union(
 const AccessSchema = v.union([v.literal("public"), v.literal("restricted")]);
 
 export const WrittenConfigSchema = v.object({
-  $schema: v.optional(v.string()),
-
   baseBranch: rootKey(
     v.string(),
     "Determines the branch that Changesets uses when finding what packages have changed.",
@@ -170,10 +158,14 @@ export const WrittenConfigSchema = v.object({
   ),
 });
 
+/**
+ * "Normalizes" a `WrittenConfig` into a `Config`, by filling in defaults and
+ * rewriting properties with multiple forms into a single one.
+ */
 export function normalizeWrittenConfig({
   packageNames,
   writtenConfig,
-}: Pick<FullContext, "packageNames" | "writtenConfig">): Config {
+}: Pick<ValidationContext, "packageNames" | "writtenConfig">): Config {
   const config = structuredClone(writtenConfig) as Config;
 
   if (typeof writtenConfig.changelog === "string") {

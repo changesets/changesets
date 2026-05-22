@@ -1,7 +1,7 @@
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import picomatch from "picomatch";
-import type { FullContext } from "./utils.ts";
+import type { ValidationContext } from "./utils.ts";
 
 function getUnmatchedPatterns(
   listOfPackageNamesOrGlob: readonly string[],
@@ -17,7 +17,7 @@ const picomatchNote = `Note that glob expressions must be defined according to h
 const invalidPathOrGlobMessage = (pkgOrGlob: string) =>
   `Invalid path: The package or glob "${pkgOrGlob}" does not match any package in the project. ${picomatchNote}`;
 
-type Rule = (ctx: FullContext) => void;
+type Rule = (ctx: ValidationContext) => void;
 
 const fixedGroupsExist: Rule = ({
   config,
@@ -206,18 +206,13 @@ const rules: Rule[] = [
 ];
 
 export function validateConfigByRules(
-  ctx: Omit<FullContext, "warnings" | "errors">,
-): Pick<FullContext, "warnings" | "errors"> {
-  const errors: string[] = [];
-  const warnings: string[] = [];
+  ctx: Omit<ValidationContext, "warnings" | "errors">,
+): Pick<ValidationContext, "warnings" | "errors"> {
+  const fullCtx: ValidationContext = { ...ctx, errors: [], warnings: [] };
 
   for (const rule of rules) {
-    rule({
-      ...ctx,
-      errors,
-      warnings,
-    });
+    rule(fullCtx);
   }
 
-  return { errors, warnings };
+  return { errors: fullCtx.errors, warnings: fullCtx.warnings };
 }

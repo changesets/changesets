@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { Config } from "@changesets/types";
-import { getPackages, type Packages } from "@manypkg/get-packages";
+import type { Config, Packages } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 import { type BaseIssue, getDotPath, safeParse } from "valibot";
 import { normalizeWrittenConfig, WrittenConfigSchema } from "./config.ts";
 import { validateConfigByRules } from "./rules.ts";
