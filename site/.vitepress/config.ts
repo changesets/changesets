@@ -160,7 +160,6 @@ export default defineConfig({
               },
               { text: "Snapshot Releases", link: "snapshot-releases" },
               { text: "Prereleases", link: "prereleases" },
-              { text: "Versioning apps", link: "versioning-apps" },
             ],
           },
         ],
