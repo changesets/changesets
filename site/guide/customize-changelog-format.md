@@ -1,12 +1,12 @@
 # Customize Changelog Format
 
-Changesets uses a default changelog formatter (`@changesets/cli/changelog`) that displays relatively basic information, however, this can be customized with the [`changelog`](./config.md#changelog) option.
+Changesets uses a default changelog generator (`@changesets/cli/changelog`) that displays relatively basic information, however, this can be customized with the [`changelog`](./config.md#changelog) option.
 
 ::: info
-Many of the APIs below may look similar to a [custom commit formatter](./customize-commit-format.md).
+Many of the APIs below may look similar to a [custom commit generator](./customize-commit-format.md).
 :::
 
-## Writing a Custom Changelog Formatter
+## Writing a Custom Changelog Generator
 
 The changelog formatting can be customized with two functions: `getReleaseLine` and `getDependencyReleaseLine`. They must be default exported as an object containing the functions. For example:
 
@@ -75,19 +75,19 @@ type ChangelogFunctions = {
 };
 ```
 
-## Using a Custom Changelog Formatter
+## Using a Custom Changelog Generator
 
-To use a custom changelog formatter, you can specify the path to the file (relative to the config file) or the module if it's packaged as a dependency, using the [`changelog`](./config.md#changelog) option:
+To use a custom changelog generator, you can specify the path to the file (relative to the config file) or the module if it's packaged as a dependency, using the [`changelog`](./config.md#changelog) option:
 
 ```json [.changeset/config.json]
 {
-  "changelog": "./changelog-formatter.ts"
+  "changelog": "./changelog-generator.ts"
 }
 ```
 
 ```json [.changeset/config.json]
 {
-  "changelog": "changelog-formatter-pkg"
+  "changelog": "changelog-generator-pkg"
 }
 ```
 
@@ -95,6 +95,6 @@ You can also specify options to be passed to the changelog functions' `changelog
 
 ```json [.changeset/config.json]
 {
-  "changelog": ["./changelog-formatter.ts", { "showCommit": false }]
+  "changelog": ["./changelog-generator.ts", { "showCommit": false }]
 }
 ```

@@ -2,7 +2,7 @@
 
 If the [`commit`](./config.md#commit) option is enabled, Changesets will automatically commit changes made during the [`add`](./cli.md#add) and [`version`](./cli.md#version) commands.
 
-The default commit message formatter (`@changesets/cli/commit`) uses the following format:
+The default commit message generator (`@changesets/cli/commit`) uses the following format:
 
 - For `add` command:
 
@@ -19,15 +19,15 @@ The default commit message formatter (`@changesets/cli/commit`) uses the followi
   {releasesLines}
   ```
 
-These can be customized with a custom commit formatter.
+These can be customized with a custom commit generator.
 
 ::: info
-Many of the APIs below may look similar to a [custom changelog formatter](./customize-changelog-format.md).
+Many of the APIs below may look similar to a [custom changelog generator](./customize-changelog-format.md).
 :::
 
-## Writing a Custom Commit Formatter
+## Writing a Custom Commit Generator
 
-The commit message formatting can be customized with two optional functions: `getAddMessage` and `getVersionMessage`. If one function is not provided, the default formatter will be used for that command.
+The commit message formatting can be customized with two optional functions: `getAddMessage` and `getVersionMessage`. If one function is not provided, the default generator will be used for that command.
 
 The functions must be default exported as an object containing them. For example:
 
@@ -86,19 +86,19 @@ type CommitFunctions = {
 };
 ```
 
-## Using a Custom Commit Formatter
+## Using a Custom Commit Generator
 
-To use a custom commit formatter, you can specify the path to the file (relative to the config file) or the module if it's packaged as a dependency, using the [`commit`](./config.md#commit) option:
+To use a custom commit generator, you can specify the path to the file (relative to the config file) or the module if it's packaged as a dependency, using the [`commit`](./config.md#commit) option:
 
 ```json [.changeset/config.json]
 {
-  "commit": "./commit-formatter.ts"
+  "commit": "./commit-generator.ts"
 }
 ```
 
 ```json [.changeset/config.json]
 {
-  "commit": "commit-formatter-pkg"
+  "commit": "commit-generator-pkg"
 }
 ```
 
@@ -106,6 +106,6 @@ You can also specify options to be passed to the commit functions' `commitOpts` 
 
 ```json [.changeset/config.json]
 {
-  "commit": ["./commit-formatter.ts", { "showCommit": false }]
+  "commit": ["./commit-generator.ts", { "showCommit": false }]
 }
 ```

@@ -24,11 +24,11 @@ Changesets keeps its configuration in `.changeset/config.json`. The default conf
 - **Type:** `false | string | [string, Record<string, any>]`
 - **Default:** `"@changesets/cli/changelog"`
 
-Set how the changelog for packages should be generated. The default changelog formatter is `@changesets/cli/changelog` (an alias to `@changesets/changelog-git`) which adds related commit links to each changeset entry in the changelog. If it is set to `false`, no changelogs will be generated.
+Set how the changelog for packages should be generated. The default changelog generator is `@changesets/cli/changelog` (an alias to `@changesets/changelog-git`) which adds related commit links to each changeset entry in the changelog. If it is set to `false`, no changelogs will be generated.
 
-You can also specify a custom changelog formatter by providing a string or a tuple with the module path and options. The module can be an npm package or a relative file path. Check out the [Customize Changelog Format](./customize-changelog-format.md) guide to learn how to write your own changelog formatter.
+You can also specify a custom changelog generator by providing a string or a tuple with the module path and options. The module can be an npm package or a relative file path. Check out the [Customize Changelog Format](./customize-changelog-format.md) guide to learn how to write your own changelog generator.
 
-If a tuple (`[string, Record<string, any>]`) is set, you can pass options in the second item of the tuple to configure the changelog formatter. For example, if you are using `@changesets/changelog-github`, you can pass the `repo` and `disableThanks` options like this:
+If a tuple (`[string, Record<string, any>]`) is set, you can pass options in the second item of the tuple to configure the changelog generator. For example, if you are using `@changesets/changelog-github`, you can pass the `repo` and `disableThanks` options like this:
 
 ```json [.changeset/config.json]
 {
@@ -46,9 +46,9 @@ Consult the documentation for the changelog generator you're using for more info
 - **Type:** `boolean | string | [string, Record<string, any>]`
 - **Default:** `false`
 
-Enable this option to automatically commit the changes when running the `changeset add` and `changeset version` commands. If set to `true`, the default commit message formatter (`["@changesets/cli/commit", { "skipCI": "version" }]`) will be used.
+Enable this option to automatically commit the changes when running the `changeset add` and `changeset version` commands. If set to `true`, the default commit message generator (`["@changesets/cli/commit", { "skipCI": "version" }]`) will be used.
 
-This option works similarly to the [`changelog`](#changelog) option. Check out the [Customize Commit Format](./customize-commit-format.md) guide to learn how to write your own commit message formatter.
+This option works similarly to the [`changelog`](#changelog) option. Check out the [Customize Commit Format](./customize-commit-format.md) guide to learn how to write your own commit message generator.
 
 ## fixed
 
