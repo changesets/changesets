@@ -65,7 +65,7 @@ For example, if you have `pkg-a@1.0.0` and `pkg-b@1.0.0`, when one gets bumped t
 
 ```json [.changeset/config.json]
 {
-  "fixed": [["pkg-a", "pkg-b"]]
+  "fixed": [["pkg-a", "pkg-b"], ["@scope/*"]]
 }
 ```
 
@@ -84,7 +84,7 @@ For example, if you have `pkg-a@1.0.0` and `pkg-b@1.1.0`, if `pkg-a` is minor-bu
 
 ```json [.changeset/config.json]
 {
-  "linked": [["pkg-a", "pkg-b"]]
+  "linked": [["pkg-a", "pkg-b"], ["@scope/*"]]
 }
 ```
 

@@ -143,7 +143,6 @@ export default defineConfig({
             text: "Advanced",
             base: "/guide/advanced/",
             items: [
-              { text: "Technical Decisions", link: "technical-decisions" },
               { text: "Fixed Packages", link: "fixed-packages" },
               { text: "Linked Packages", link: "linked-packages" },
               {
@@ -153,6 +152,7 @@ export default defineConfig({
               { text: "Prereleases", link: "prereleases" },
               { text: "Snapshot Releases", link: "snapshot-releases" },
               { text: "Versioning apps", link: "versioning-apps" },
+              { text: "Technical Decisions", link: "technical-decisions" },
             ],
           },
         ],

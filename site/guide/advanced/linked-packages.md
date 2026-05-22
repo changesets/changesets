@@ -1,20 +1,21 @@
 # Linked Packages
 
-Linked packages allow you to specify a group or groups of packages that should be versioned together. There are some complex cases, so some examples are shown below to demonstrate various cases.
+Linked packages allow you to specify a group or groups of packages that should be versioned together. They can be configured with the [`linked`](../basic/configuration-file.md#linked) option. There are some complex cases, so some examples are shown below to demonstrate various cases.
 
-- Linked packages will still only be bumped when there is a changeset for them (this can mean because you explicitly choose to add a changeset for it or because it's a dependent of something being released)
-- Packages that have changesets and are in a set of linked packages will **always** be versioned to the highest current version in the set of linked packages + the highest bump type from changesets in the set of linked packages
+- Linked packages will only be bumped when there is a changeset for them. This can mean because you explicitly choose to add a changeset for it or because it's a dependent of something being released.
+- Packages that have changesets and are in a set of linked packages will **always** be versioned based on the highest current version in the set of linked packages and the highest bump type from changesets in the set of linked packages.
 
-> [!NOTE]
-> Unlike `fixed packages`, there is no guarantee that all packages in the group of linked packages will be version-bumped and published, only those with changeset(s) will be.
+::: info Compared to [fixed packages](./fixed-packages.md)
+With linked packages, there is no guarantee that all packages in the group will be version-bumped and published, only those with changesets will be.
+:::
 
 ## Examples
 
-### General example
+### General Example
 
-I have three packages, `pkg-a`, `pkg-b` and `pkg-c`. `pkg-a` and `pkg-b` are linked but `pkg-c` is not so the config looks like this.
+We have three packages, `pkg-a`, `pkg-b`, and `pkg-c`. `pkg-a` and `pkg-b` are linked, but `pkg-c` is not so the config looks like this.
 
-```json
+```json [.changeset/config.json]
 {
   "linked": [["pkg-a", "pkg-b"]]
 }
@@ -24,35 +25,35 @@ I have three packages, `pkg-a`, `pkg-b` and `pkg-c`. `pkg-a` and `pkg-b` are lin
 - `pkg-b` is at `1.0.0`
 - `pkg-c` is at `1.0.0`
 
-I have a changeset with a patch for `pkg-a`, minor for `pkg-b` and major for `pkg-c` and I do a release, the resulting versions will be:
+We have a changeset with a patch for `pkg-a`, minor for `pkg-b` and major for `pkg-c`, and we do a release, the resulting versions will be:
 
 - `pkg-a` is at `1.1.0`
 - `pkg-b` is at `1.1.0`
 - `pkg-c` is at `2.0.0`
 
-I now have another changeset with a minor for `pkg-a` and I do a release, the resulting versions will be:
+We now have another changeset with a minor for `pkg-a`, and we do a release, the resulting versions will be:
 
 - `pkg-a` is at `1.2.0`
 - `pkg-b` is at `1.1.0`
 - `pkg-c` is at `2.0.0`
 
-I now have another changeset with a minor for `pkg-b` and I do a release, the resulting versions will be:
+We now have another changeset with a minor for `pkg-b`, and we do a release, the resulting versions will be:
 
 - `pkg-a` is at `1.2.0`
 - `pkg-b` is at `1.3.0`
 - `pkg-c` is at `2.0.0`
 
-I now have another changeset with patches for all three packages and I do a release, the resulting versions will be:
+We now have another changeset with patches for all three packages, and we do a release, the resulting versions will be:
 
 - `pkg-a` is at `1.3.1`
 - `pkg-b` is at `1.3.1`
 - `pkg-c` is at `2.0.1`
 
-### Example with dependants
+### With dependencies
 
-I have two packages, `pkg-a`, `pkg-b` which are linked. `pkg-a` has a dependency on `pkg-b`.
+We have two packages, `pkg-a` and `pkg-b` which are linked. `pkg-a` has a dependency on `pkg-b`.
 
-```json
+```json [.changeset/config.json]
 {
   "linked": [["pkg-a", "pkg-b"]]
 }
@@ -61,30 +62,12 @@ I have two packages, `pkg-a`, `pkg-b` which are linked. `pkg-a` has a dependency
 - `pkg-a` is at `1.0.0`
 - `pkg-b` is at `1.0.0`
 
-I have a changeset with a major for `pkg-b` and I do a release, the resulting versions will be:
+We have a changeset with a major for `pkg-b`, and we do a release, the resulting versions will be:
 
 - `pkg-a` is at `2.0.0`
 - `pkg-b` is at `2.0.0`
 
-I now have another changeset with a major for `pkg-a` and I do a release, the resulting versions will be:
+We now have another changeset with a major for `pkg-a`, and we do a release, the resulting versions will be:
 
 - `pkg-a` is at `3.0.0`
 - `pkg-b` is at `2.0.0`
-
-## Using glob expressions
-
-Sometimes you want to link many or all packages within your project (for example in a monorepo setup), in which case you would need to keep the list of linked packages up-to-date.
-
-To make it simpler to maintain that list, you can provide glob expressions in the linked list that would match and resolve all the packages you wish to include.
-
-For example:
-
-```json
-{
-  "linked": [["pkg-*"]]
-}
-```
-
-It will match all packages starting with `pkg-`.
-
-**The glob expressions must be defined according to the [picomatch](https://npmx.dev/picomatch) format.**
