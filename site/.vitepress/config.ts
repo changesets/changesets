@@ -128,19 +128,20 @@ export default defineConfig({
             items: [
               { text: "Getting Started", link: "getting-started" },
               { text: "Why Changesets?", link: "why" },
+              { text: "Technical Decisions", link: "technical-decisions" },
             ],
           },
           {
-            text: "Basic",
+            text: "API Reference",
             items: [
               { text: "Configuration File", link: "config" },
               { text: "Command Line Interface", link: "cli" },
-              { text: "Automating Changesets", link: "automating-changesets" },
             ],
           },
           {
-            text: "Advanced",
+            text: "Guides",
             items: [
+              { text: "Automating Changesets", link: "automating-changesets" },
               { text: "Fixed Packages", link: "fixed-packages" },
               { text: "Linked Packages", link: "linked-packages" },
               {
@@ -150,7 +151,6 @@ export default defineConfig({
               { text: "Prereleases", link: "prereleases" },
               { text: "Snapshot Releases", link: "snapshot-releases" },
               { text: "Versioning apps", link: "versioning-apps" },
-              { text: "Technical Decisions", link: "technical-decisions" },
             ],
           },
         ],
