@@ -2,52 +2,25 @@
 outline: 2
 ---
 
+<script setup lang="ts">
+import { data } from "./cli.data.ts";
+</script>
+
 # Command Line Interface
 
 The Changesets CLI is the main way of interacting with changesets. It provides a set of commands that allow you to manage your changesets, version your packages, and publish them.
 
-<!-- Manually synced from `pnpm changeset --help` -->
-
-```bash
-Usage:
-  $ changeset [command] [options]
-
-Commands:
-  init                    Initialize a new changesets setup
-  add                     Add a new changeset (default)
-  version                 Version packages and create changelogs
-  publish                 Publish packages to npm and create git tags
-  status                  Show the changesets that currently exist
-  tag                     Create git tags for the current version of all packages
-  pre <enter|exit> [tag]  Enter or exit prerelease mode (tag required for enter)
-```
+<div v-html="data.mainHelpMessage" />
 
 ## init
 
-```bash
-Usage:
-  $ changeset init
-```
+<div v-html="data.initHelpMessage" />
 
 This command sets up the `.changeset` folder. It generates a readme and a config file with the default options. You should run this command once when setting up Changesets.
 
 ## add
 
-```bash
-Usage:
-  $ changeset add
-  $ changeset
-
-Options:
-  --empty               Add an empty changeset
-  --open                Open the changeset in the editor after creating it
-  --since <branch>      Detect changed packages since the provided git ref
-  -m, --message <text>  Directly provide a message to the changeset
-
-Examples:
-  $ changeset -m 'Description'
-  $ changeset --open --since main
-```
+<div v-html="data.addHelpMessage" />
 
 This is the main command to interact with the changesets.
 
@@ -69,19 +42,7 @@ $ changeset --since next
 
 ## version
 
-```bash
-Usage:
-  $ changeset version
-
-Options:
-  --ignore <pkg>                             Packages to ignore
-  --snapshot [name]                          Create a snapshot prerelease
-  --snapshot-prerelease-template <template>  Template for snapshot prerelease
-
-Examples:
-  $ changeset version
-  $ changeset version --snapshot 'pr#123'
-```
+<div v-html="data.versionHelpMessage" />
 
 This is one of two commands responsible for releasing packages. The `version` command takes changesets that have been made and updates versions and dependencies of packages, as well as writing changelogs. It is responsible for all file changes before publishing to npm.
 
@@ -109,19 +70,7 @@ $ changeset version --snapshot 'pr#123'
 
 ## publish
 
-```bash
-Usage:
-  $ changeset publish
-
-Options:
-  --otp <code>  One time password for npm publish
-  --tag <name>  Publish with the given npm dist-tag
-  --git-tag     Create a git tag for the release
-
-Examples:
-  $ changeset publish --otp 123456
-  $ changeset publish --tag beta
-```
+<div v-html="data.publishHelpMessage" />
 
 This command publishes changes to npm and creates git tags. It works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it's not, run `npm publish` (or `pnpm publish` etc if detected to be using a different package manager).
 
@@ -159,18 +108,7 @@ $ git push --follow-tags
 
 ## status
 
-```bash
-Usage:
-  $ changeset status
-
-Options:
-  --since <branch>     Show changesets since the provided git ref
-  -v, --verbose        Show more information about the changesets
-  -o, --output <file>  Output the status as JSON to a file
-
-Examples:
-  $ changeset status --verbose
-```
+<div v-html="data.statusHelpMessage" />
 
 The status command provides information about the changesets that currently exist. If there are no changesets present, it exits with exit code 1.
 
@@ -196,21 +134,15 @@ $ changeset status --since next
 
 ## tag
 
-```bash
-Usage:
-  $ changeset tag
-```
+<div v-html="data.tagHelpMessage" />
 
-The `tag` command creates git tags for the current version of all packages. The tags created are equivalent to those created by [`publish --git-tag`](#publish), but the `tag` command does not publish anything to npm.
+The `tag` command creates git tags for the current version of all packages. The tags created are equivalent to those created by [`publish --git-tag`](#git-tags), but the `tag` command does not publish anything to npm.
 
 This is helpful in situations where a different tool is used to publish packages instead of Changesets. The tags created are in the format `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`. It is expected to run the `version` command first so the created tags are up to date.
 
 ## pre
 
-```bash
-Usage:
-  $ changeset pre <enter|exit> [tag]
-```
+<div v-html="data.preHelpMessage" />
 
 The `pre` command is used to enter or exit [prerelease mode](../advanced/prereleases.md). It does not do any versioning but prepares Changesets in a state for prereleases.
 
