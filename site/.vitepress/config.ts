@@ -134,7 +134,6 @@ export default defineConfig({
             base: "/guide/advanced/",
             items: [
               { text: "Technical Decisions", link: "technical-decisions" },
-              { text: "Experimental Options", link: "experimental-options" },
               { text: "Fixed Packages", link: "fixed-packages" },
               { text: "Linked Packages", link: "linked-packages" },
               {

@@ -267,3 +267,21 @@ Configures the suffix for the snapshot release using a template with placeholder
 If you are using `--snapshot` with empty tag name, you cannot use `{tag}` as a placeholder. This will result in an error.
 
 :::
+
+## \_\_\_experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+
+Experimental options that may change in patch versions. Use these with caution and pay attention to the release notes for any changes.
+
+### \_\_\_experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.updateInternalDependents
+
+- **Type:** `"out-of-range" | "always"`
+- **Default:** `"out-of-range"`
+
+Add dependent packages to the release (if they are not already a part of it) with patch bumps.
+
+### \_\_\_experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.onlyUpdatePeerDependentsWhenOutOfRange
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+When set to `true`, Changesets will only bump peer dependents when `peerDependencies` are leaving the range.
