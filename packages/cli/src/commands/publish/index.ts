@@ -38,6 +38,7 @@ export interface PublishOptions {
   cwd?: string;
   otp?: string;
   tag?: string;
+  /** @default true */
   gitTag?: boolean;
 }
 
@@ -114,7 +115,7 @@ ${formatPackageList(successfulNpmPublishes)}
     // We create the tags after the push above so that we know that HEAD won't change and that pushing
     // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
     // fail if we are behind the base branch).
-    if (options?.gitTag) {
+    if (options?.gitTag ?? true) {
       const p = spinner();
       p.start(
         `Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`,
