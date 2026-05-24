@@ -103,7 +103,11 @@ const tests: CommandTest[] = [
     cases: [
       {
         args: [],
-        options: {},
+        options: { gitTag: true },
+      },
+      {
+        args: ["--no-git-tag"],
+        options: { gitTag: false },
       },
       {
         args: ["--otp", "123456", "--tag", "beta", "--git-tag"],
