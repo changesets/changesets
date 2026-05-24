@@ -79,9 +79,7 @@ describe("readConfig", () => {
       "pnpm-workspace.yaml": "packages: ['packages/*']",
     });
 
-    const result = await readConfig(
-      path.join(cwd, "packages", "foo"),
-    );
+    const result = await readConfig(path.join(cwd, "packages", "foo"));
     expect(result.errors).toStrictEqual([]);
     expect(result.warnings).toStrictEqual([]);
   });
