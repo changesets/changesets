@@ -22,12 +22,6 @@ function flattenIssues(issues: BaseIssue<any>[]): string[] {
   return issues.map((issue) => `${getDotPath(issue)}: ${issue.message}`);
 }
 
-export async function readConfigFile(cwd: string): Promise<ParseResult> {
-  return JSON.parse(
-    await fs.readFile(path.join(cwd, ".changeset", "config.json"), "utf8"),
-  );
-}
-
 export function validateConfig(json: unknown, packages: Packages): ParseResult {
   // parse (...and validate)
   const writtenConfigResult = safeParse(WrittenConfigSchema, json);
@@ -62,7 +56,7 @@ export function validateConfig(json: unknown, packages: Packages): ParseResult {
   return { config, warnings, errors: [] };
 }
 
-export async function readAndValidateConfig(
+export async function readConfig(
   cwd?: string,
   packages?: Packages,
 ): Promise<ParseResult> {
@@ -70,7 +64,12 @@ export async function readAndValidateConfig(
   packages ??= await getPackages(cwd);
 
   // read
-  const json = await readConfigFile(packages.rootDir);
+  const json = JSON.parse(
+    await fs.readFile(
+      path.join(packages.rootDir, ".changeset", "config.json"),
+      "utf8",
+    ),
+  );
 
   // parse+normalize+validate
   return validateConfig(json, packages);

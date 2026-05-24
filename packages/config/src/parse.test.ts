@@ -4,13 +4,9 @@ import type { Config, Packages, WrittenConfig } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { describe, expect, it } from "vitest";
 import { getDefaultConfig } from "./defaults.ts";
-import {
-  readAndValidateConfig,
-  readConfigFile,
-  validateConfig,
-} from "./parse.ts";
+import { readConfig, validateConfig } from "./parse.ts";
 
-describe("readConfigFile", () => {
+describe("readConfig", () => {
   it("can read a config file", async () => {
     const writtenConfig = {
       changelog: false,
@@ -25,51 +21,7 @@ describe("readConfigFile", () => {
       }),
     });
 
-    const result = await readConfigFile(cwd);
-    expect(result).toStrictEqual(writtenConfig);
-  });
-
-  // it should be passed the monorepo root directory, not search for it by itself
-  it("does not check the monorepo root for config files, only the cwd", async () => {
-    const writtenConfig = {
-      changelog: false,
-      commit: true,
-    };
-
-    const cwd = await testdir({
-      ".changeset/config.json": JSON.stringify(writtenConfig),
-      "package.json": JSON.stringify({
-        name: "root",
-        private: true,
-      }),
-      "packages/foo/package.json": JSON.stringify({
-        name: "foo",
-        version: "1.0.0",
-      }),
-    });
-
-    await expect(
-      readConfigFile(path.join(cwd, "packages", "foo")),
-    ).rejects.toThrow("no such file or directory");
-  });
-});
-
-describe("readAndValidateConfig", () => {
-  it("can read a config file", async () => {
-    const writtenConfig = {
-      changelog: false,
-      commit: true,
-    };
-
-    const cwd = await testdir({
-      ".changeset/config.json": JSON.stringify(writtenConfig),
-      "package.json": JSON.stringify({
-        name: "test-pkg",
-        version: "1.0.0",
-      }),
-    });
-
-    const result = await readAndValidateConfig(cwd);
+    const result = await readConfig(cwd);
     expect(result.errors).toStrictEqual([]);
     expect(result.warnings).toStrictEqual([]);
     expect(result.config).toMatchInlineSnapshot(`
@@ -127,7 +79,7 @@ describe("readAndValidateConfig", () => {
       "pnpm-workspace.yaml": "packages: ['packages/*']",
     });
 
-    const result = await readAndValidateConfig(
+    const result = await readConfig(
       path.join(cwd, "packages", "foo"),
     );
     expect(result.errors).toStrictEqual([]);
@@ -151,7 +103,7 @@ describe("readAndValidateConfig", () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ["$schema" as never]: _, ...defaultConfig } = getDefaultConfig();
-    const result = await readAndValidateConfig(cwd);
+    const result = await readConfig(cwd);
     expect(result.config).toStrictEqual(defaultConfig);
   });
 });
