@@ -6,7 +6,15 @@ import { normalizeWrittenConfig, WrittenConfigSchema } from "./config.ts";
 
 export const defaultWrittenConfig: WrittenConfig = {
   ["$schema" as never]: `https://unpkg.com/@changesets/config@${manifest.version}/schema.json`,
+  baseBranch: "main",
   access: "restricted",
+  ignore: [],
+  fixed: [],
+  linked: [],
+  format: "auto",
+  updateInternalDependencies: "patch",
+  commit: false,
+  changelog: "@changesets/cli/changelog",
 };
 
 export const defaultConfig: Config = normalizeWrittenConfig({
