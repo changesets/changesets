@@ -26,7 +26,10 @@ import { readConfig } from "@changesets/config";
 import { getPackages } from "@manypkg/get-packages";
 
 // both arguments are optional
-const { config, warnings, errors } = readConfig(process.cwd(), await getPackages());
+const { config, warnings, errors } = readConfig(
+  process.cwd(),
+  await getPackages(),
+);
 
 if (warnings.length !== 0) {
   console.warn(warnings.join("\n"));
