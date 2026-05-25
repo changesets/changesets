@@ -98,7 +98,7 @@ export type WrittenConfig = {
   commit?: boolean | readonly [string, any] | string;
   fixed?: Fixed;
   linked?: Linked;
-  access?: AccessType;
+  access?: AccessType | "private";
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
   format?: "auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false;

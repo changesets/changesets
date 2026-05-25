@@ -40,7 +40,6 @@
     "@changesets/config": "workspace:^",
     "@changesets/errors": "workspace:^",
     "@changesets/get-dependents-graph": "workspace:^",
-    "@changesets/get-release-plan": "workspace:^",
     "@changesets/git": "workspace:^",
     "@changesets/pre": "workspace:^",
     "@changesets/read": "workspace:^",

@@ -26,13 +26,14 @@
     "watch": "tsdown --watch",
     "format": "oxfmt --check",
     "format:fix": "oxfmt",
+    "generate-json-schema": "node packages/config/scripts/generate-json-schema.ts",
     "lint": "eslint",
     "test": "vitest",
     "types:check": "tsc",
     "check-all": "pnpm build && pnpm test run && pnpm types:check && pnpm lint && pnpm format",
     "version-packages": "pnpm changeset version && pnpm format:fix",
     "release": "pnpm changeset publish",
-    "changeset": "NODE_OPTIONS=--experimental-strip-types packages/cli/bin.js"
+    "changeset": "node packages/cli/bin.js"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
