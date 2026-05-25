@@ -15,18 +15,20 @@ export async function readConfig(packages: Packages): Promise<Config> {
   for (const warning of warnings) {
     messages.push(c.yellow(warning));
   }
-  for (const error of errors) {
-    messages.push(c.red(error));
+  if (errors != null) {
+    for (const error of errors) {
+      messages.push(c.red(error));
+    }
   }
 
-  const logFn = errors.length === 0 ? log.error : log.warn;
+  const logFn = errors != null ? log.error : log.warn;
   if (messages.length !== 0) {
     logFn(`Found issues in your config:\n- ${messages.join("\n- ")}`);
   }
 
-  if (errors.length !== 0) {
+  if (errors != null) {
     throw new ExitError(1, { cause: new Error(errors.join("\n")) });
   }
 
-  return config!;
+  return config;
 }

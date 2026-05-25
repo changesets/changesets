@@ -10,10 +10,10 @@ type ParseResult =
   | {
       config: Config;
       warnings: string[];
-      errors: [];
+      errors: undefined;
     }
   | {
-      config: null;
+      config: undefined;
       warnings: string[];
       errors: string[];
     };
@@ -27,7 +27,7 @@ export function validateConfig(json: unknown, packages: Packages): ParseResult {
   const writtenConfigResult = safeParse(WrittenConfigSchema, json);
   if (!writtenConfigResult.success) {
     return {
-      config: null,
+      config: undefined,
       warnings: [],
       errors: flattenIssues(writtenConfigResult.issues),
     };
@@ -50,10 +50,10 @@ export function validateConfig(json: unknown, packages: Packages): ParseResult {
     writtenConfig,
   });
   if (errors.length !== 0) {
-    return { config: null, warnings, errors };
+    return { config: undefined, warnings, errors };
   }
 
-  return { config, warnings, errors: [] };
+  return { config, warnings, errors: undefined };
 }
 
 export async function readConfig(

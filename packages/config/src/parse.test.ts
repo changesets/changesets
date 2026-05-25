@@ -22,7 +22,7 @@ describe("readConfig", () => {
     });
 
     const result = await readConfig(cwd);
-    expect(result.errors).toStrictEqual([]);
+    expect(result.errors).toBeUndefined();
     expect(result.warnings).toStrictEqual([]);
     expect(result.config).toMatchInlineSnapshot(`
       {
@@ -80,7 +80,7 @@ describe("readConfig", () => {
     });
 
     const result = await readConfig(path.join(cwd, "packages", "foo"));
-    expect(result.errors).toStrictEqual([]);
+    expect(result.errors).toBeUndefined();
     expect(result.warnings).toStrictEqual([]);
   });
 
@@ -370,7 +370,7 @@ describe("validateConfig", () => {
         const packages = withPackages(cwd, packageNames);
 
         const result = validateConfig(config, packages);
-        expect(result.errors).toStrictEqual([]);
+        expect(result.errors).toBeUndefined();
         expect(result.warnings).toStrictEqual([]);
         expect(result.config).toStrictEqual(expected);
       },
@@ -584,10 +584,10 @@ describe("validateConfig", () => {
         if (errors != null) {
           expect(result.errors).not.toStrictEqual([]);
           for (let i = 0; i < errors.length; i++) {
-            expect(result.errors[i]).toContain(errors[i]);
+            expect(result.errors![i]).toContain(errors[i]);
           }
         } else {
-          expect(result.errors).toStrictEqual([]);
+          expect(result.errors).toBeUndefined();
         }
 
         if (warnings != null) {
@@ -627,7 +627,7 @@ describe("validateConfig", () => {
         const result = validateConfig(config, await getPackages(cwd));
 
         expect(result.errors).not.toStrictEqual([]);
-        expect(result.errors[0]).toContain(
+        expect(result.errors![0]).toContain(
           'Invalid tree: "pkg-a" depends on the skipped package "pkg-b", but "pkg-a" is not skipped.',
         );
       });
@@ -652,7 +652,7 @@ describe("validateConfig", () => {
         });
 
         const result = validateConfig(config, await getPackages(cwd));
-        expect(result.errors).toStrictEqual([]);
+        expect(result.errors).toBeUndefined();
       });
     });
   });
