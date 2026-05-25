@@ -18,7 +18,7 @@ const commitLink = commitRef
 
 const ogTitle = "Changesets";
 const ogDescription =
-  "A tool to manage versioning and changelogs with a focus on multi-package repositories";
+  "A tool to manage versioning and changelogs with a focus on monorepos";
 const ogUrl = "https://changesets.dev";
 const ogImage = "https://changesets.dev/og-image.png";
 
