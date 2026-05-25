@@ -1,6 +1,6 @@
 import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
-import { getDefaultConfig } from "@changesets/config";
+import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { readChangesets as getChangesets } from "@changesets/read";
 import {
@@ -20,8 +20,6 @@ vi.mock("../../../utils/askWithEditor");
 const mockedAskWithEditor = vi.mocked(askWithEditor);
 vi.mock("../../../utils/cli-utilities");
 const mockedUtils = vi.mocked(utils);
-
-const defaultConfig = getDefaultConfig();
 
 const mockUserResponses = (mockResponses: {
   releases: Record<string, "patch" | "minor" | "major">;

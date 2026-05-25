@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { getDefaultConfig } from "@changesets/config";
+import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import type { Config } from "@changesets/types";
 import { describe, expect, it } from "vitest";
@@ -7,7 +7,7 @@ import { publish as publishCommand } from "../index.ts";
 
 const changelogPath = path.resolve(import.meta.dirname, "../../changelog");
 const modifiedDefaultConfig: Config = {
-  ...getDefaultConfig(),
+  ...defaultConfig,
   changelog: [changelogPath, null],
 };
 

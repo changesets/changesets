@@ -3,7 +3,7 @@ import { testdir } from "@changesets/test-utils";
 import type { Config, Packages, WrittenConfig } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { describe, expect, it } from "vitest";
-import { getDefaultConfig } from "./defaults.ts";
+import { defaultConfig } from "./defaults.ts";
 import { readConfig, validateConfig } from "./parse.ts";
 
 describe("readConfig", () => {
@@ -100,16 +100,15 @@ describe("readConfig", () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { ["$schema" as never]: _, ...defaultConfig } = getDefaultConfig();
+    const { ["$schema" as never]: _, ...rest } = defaultConfig;
     const result = await readConfig(cwd);
-    expect(result.config).toStrictEqual(defaultConfig);
+    expect(result.config).toStrictEqual(rest);
   });
 });
 
 describe("defaultConfig", () => {
   it("creates the default config", () => {
-    const result = getDefaultConfig();
-    expect(result).toMatchInlineSnapshot(`
+    expect(defaultConfig).toMatchInlineSnapshot(`
       {
         "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
           "onlyUpdatePeerDependentsWhenOutOfRange": false,
@@ -145,8 +144,6 @@ describe("defaultConfig", () => {
 
 const rootManifest = { name: "root", private: true, version: "0.0.0" };
 
-const defaults = getDefaultConfig();
-
 const getDefaultPackages = (cwd: string) =>
   ({
     rootPackage: {
@@ -177,35 +174,35 @@ describe("validateConfig", () => {
 
   describe("valid", () => {
     const validCases: Array<ValidCase> = [
-      { name: "defaults", config: {}, expected: defaults },
+      { name: "defaults", config: {}, expected: defaultConfig },
       {
         name: "changelog: string",
         config: { changelog: "some-module" },
-        expected: { ...defaults, changelog: ["some-module", null] },
+        expected: { ...defaultConfig, changelog: ["some-module", null] },
       },
       {
         name: "changelog: false",
         config: { changelog: false },
-        expected: { ...defaults, changelog: false },
+        expected: { ...defaultConfig, changelog: false },
       },
       {
         name: "changelog: tuple",
         config: { changelog: ["some-module", { something: true }] },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           changelog: ["some-module", { something: true }],
         },
       },
       {
         name: "commit: false",
         config: { commit: false },
-        expected: { ...defaults, commit: false },
+        expected: { ...defaultConfig, commit: false },
       },
       {
         name: "commit: true",
         config: { commit: true },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           commit: ["@changesets/cli/commit", { skipCI: "version" }],
         },
       },
@@ -213,29 +210,29 @@ describe("validateConfig", () => {
         name: "commit: custom",
         config: { commit: ["./some-module", { customOption: true }] },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           commit: ["./some-module", { customOption: true }],
         },
       },
       {
         name: "access: restricted",
         config: { access: "restricted" },
-        expected: { ...defaults, access: "restricted" },
+        expected: { ...defaultConfig, access: "restricted" },
       },
       {
         name: "access: public",
         config: { access: "public" },
-        expected: { ...defaults, access: "public" },
+        expected: { ...defaultConfig, access: "public" },
       },
       {
         name: "changedFilePatterns",
         config: { changedFilePatterns: ["src/**"] },
-        expected: { ...defaults, changedFilePatterns: ["src/**"] },
+        expected: { ...defaultConfig, changedFilePatterns: ["src/**"] },
       },
       {
         name: "fixed",
         config: { fixed: [["pkg-a", "pkg-b"]] },
-        expected: { ...defaults, fixed: [["pkg-a", "pkg-b"]] },
+        expected: { ...defaultConfig, fixed: [["pkg-a", "pkg-b"]] },
       },
       {
         name: "fixed: globs",
@@ -249,7 +246,7 @@ describe("validateConfig", () => {
         ],
         config: { fixed: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           fixed: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]],
         },
       },
@@ -265,14 +262,14 @@ describe("validateConfig", () => {
         ],
         config: { fixed: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           fixed: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]],
         },
       },
       {
         name: "linked",
         config: { linked: [["pkg-a", "pkg-b"]] },
-        expected: { ...defaults, linked: [["pkg-a", "pkg-b"]] },
+        expected: { ...defaultConfig, linked: [["pkg-a", "pkg-b"]] },
       },
       {
         name: "linked: globs",
@@ -286,7 +283,7 @@ describe("validateConfig", () => {
         ],
         config: { linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]],
         },
       },
@@ -302,21 +299,21 @@ describe("validateConfig", () => {
         ],
         config: { linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]],
         },
       },
       {
         name: "ignore",
         config: { ignore: ["pkg-a", "pkg-b"] },
-        expected: { ...defaults, ignore: ["pkg-a", "pkg-b"] },
+        expected: { ...defaultConfig, ignore: ["pkg-a", "pkg-b"] },
       },
       {
         name: "ignore: Globs",
         pkgs: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"],
         config: { ignore: ["pkg-*", "@pkg/*"] },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           ignore: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"],
         },
       },
@@ -324,25 +321,25 @@ describe("validateConfig", () => {
         name: "ignore: globs with exclusions",
         pkgs: ["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"],
         config: { ignore: ["pkg-*", "!pkg-b", "@pkg/*"] },
-        expected: { ...defaults, ignore: ["pkg-a", "@pkg/a", "@pkg/b"] },
+        expected: { ...defaultConfig, ignore: ["pkg-a", "@pkg/a", "@pkg/b"] },
       },
       {
         name: "privatePackages: false",
         config: { privatePackages: false },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           privatePackages: { version: false, tag: false },
         },
       },
       {
         name: "updateInternalDependencies: minor",
         config: { updateInternalDependencies: "minor" },
-        expected: { ...defaults, updateInternalDependencies: "minor" },
+        expected: { ...defaultConfig, updateInternalDependencies: "minor" },
       },
       {
         name: "updateInternalDependencies: patch",
         config: { updateInternalDependencies: "patch" },
-        expected: { ...defaults, updateInternalDependencies: "patch" },
+        expected: { ...defaultConfig, updateInternalDependencies: "patch" },
       },
       {
         name: "updateInternalDependents",
@@ -352,7 +349,7 @@ describe("validateConfig", () => {
           },
         },
         expected: {
-          ...defaults,
+          ...defaultConfig,
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
             onlyUpdatePeerDependentsWhenOutOfRange: false,
             updateInternalDependents: "always",

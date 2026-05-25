@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
-import { getDefaultConfig } from "@changesets/config";
+import { defaultConfig } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import {
@@ -21,7 +21,6 @@ import { version } from "./index.ts";
 vi.mock("@clack/prompts");
 const mockedLogger = vi.mocked(log);
 
-const defaultConfig = getDefaultConfig();
 const modifiedDefaultConfig: Config = {
   ...defaultConfig,
   changelog: ["@changesets/cli/changelog", null],

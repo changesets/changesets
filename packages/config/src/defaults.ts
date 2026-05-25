@@ -9,14 +9,7 @@ export const defaultWrittenConfig: WrittenConfig = {
   access: "restricted",
 };
 
-let defaultConfig: Config | undefined;
-export const getDefaultConfig = (): Config => {
-  defaultConfig ??= defaultConfig = {
-    ...normalizeWrittenConfig({
-      packageNames: [],
-      writtenConfig: parse(WrittenConfigSchema, defaultWrittenConfig),
-    }),
-  };
-
-  return defaultConfig;
-};
+export const defaultConfig: Config = normalizeWrittenConfig({
+  packageNames: [],
+  writtenConfig: parse(WrittenConfigSchema, defaultWrittenConfig),
+});
