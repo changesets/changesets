@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { generateJsonSchema } from "./json-schema.ts";
+import { generateJsonSchema } from "./generate-json-schema.ts";
 
 it("can generate a json schema", async () => {
   await expect(generateJsonSchema(false)).resolves.not.toThrow();
