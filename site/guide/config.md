@@ -135,7 +135,7 @@ Example:
 
 ## format
 
-- **Type:** `"auto" | "prettier" | "prettier" | "oxfmt" | "deno" | "dprint" | false`
+- **Type:** `"auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false`
 - **Default:** `"auto"`
 
 The code formatter to use for generated changeset files and changelogs. If set to `false`, no formatting will be applied.
@@ -239,8 +239,6 @@ Whether to only bump dependency ranges that use the `workspace:` protocol of pac
 
 Configure snapshot releases when using `changesets version --snapshot`.
 
-- `prereleaseTemplate`: Configure the suffix for the snapshot releases, using a template with placeholders. If not specified, it will default to `{tag}-{datetime}` (or `{datetime}` if the tag is empty). Available placeholders are `{tag}`, `{commit}`, `{timestamp}`, and `{datetime}`. Note that if you are using `--snapshot` with an empty tag name, you cannot use `{tag}` as a placeholder - this will result in an error.
-
 ### snapshot.useCalculatedVersion
 
 - **Type:** `boolean`
@@ -261,9 +259,7 @@ Configures the suffix for the snapshot release using a template with placeholder
 - `{datetime}` - the date and time of the release, e.g. `20211213000730` (YYYYMMDDHHMMSS, 14 characters)
 
 ::: warning
-
 If you are using `--snapshot` with empty tag name, you cannot use `{tag}` as a placeholder. This will result in an error.
-
 :::
 
 ## \_\_\_experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH

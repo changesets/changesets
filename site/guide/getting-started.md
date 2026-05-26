@@ -6,7 +6,7 @@ Changesets has several meanings that are sometimes used interchangeably:
 
 1. It is a tool to manage package versions and changelog generation in a project, designed to work in [monorepos](https://monorepo.tools) as well as single package repos.
 
-2. It is also [a workflow](#usage) that allows contributors to describe what their changes are and how they should be released.
+2. It is [a workflow](#usage) that allows contributors to describe what their changes are and how they should be released.
 
 3. It also represents a group of [changeset files](#what-is-a-changeset), which are Markdown files that each describe a change.
 
@@ -100,12 +100,9 @@ $ yarn changeset
 :::
 
 ::: tip Not every change requires a changeset
-
 Since a changeset describes how a change should be released, changes that don't require a release do not need a changeset. As such, we **do not recommend** blocking contributions in the absence of a changeset.
-
 :::
 
-Once you have accumulated some changesets,
-check out the [Versioning and Publishing](./versioning-and-publishing.md) guide to learn how to release your changes.
+Once you have accumulated some changesets, check out the [Versioning and Publishing](./versioning-and-publishing.md) guide to learn how to release your changes.
 
 See also the [CLI reference](./cli.md) to learn more about the available CLI commands.

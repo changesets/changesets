@@ -13,9 +13,9 @@ This allows changesets to be added and accumulated safely, with the knowledge th
 ## How dependencies are bumped
 
 > [!NOTE]
-> This refers specifically to a feature of changesets used in mono-repos
+> This refers specifically to a feature of changesets used in monorepos
 
-When changesets are generated, we check to see if the selected packages will leave semver for any other packages within the mono-repo.
+When changesets are generated, we check to see if the selected packages will leave semver for any other packages within the monorepo.
 
 For example, if I have two packages:
 
@@ -23,7 +23,7 @@ For example, if I have two packages:
 
 and `packageB` at `1.1.0` that depends on `packageA` at `^1.1.0`.
 
-If I add `packageA` to a changeset with a `major` change, the version of `packageB` within the mono-repo should also be updated. If it is not, either `packageB` in the mono-repo will not use `packageA` in development, or `packageB` in development will not match an installation of `packageB` in production.
+If I add `packageA` to a changeset with a `major` change, the version of `packageB` within the monorepo should also be updated. If it is not, either `packageB` in the monorepo will not use `packageA` in development, or `packageB` in development will not match an installation of `packageB` in production.
 
 As such we end up with a changeset that includes `packageA` as `major` and `packageB` as `patch`.
 
@@ -35,9 +35,9 @@ There are two reasons we chose to do this. The first is so the changeset descrip
 
 ## What distinguishes this from Semantic Release
 
-If you have been looking at automating versioning previously, you may have come across [semantic release](https://github.com/semantic-release/semantic-release), or its mono-repo equivalent [lerna semantic release](https://github.com/atlassian/lerna-semantic-release). It's good to understand how changesets operate differently.
+If you have been looking at automating versioning previously, you may have come across [semantic release](https://github.com/semantic-release/semantic-release), or its monorepo equivalent [lerna semantic release](https://github.com/atlassian/lerna-semantic-release). It's good to understand how changesets operate differently.
 
-1. Changesets are designed for mono-repos first.
+1. Changesets are designed for monorepos first.
 
 This means we manage dependencies within the repository, which other tools do not do.
 
