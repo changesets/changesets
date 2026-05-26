@@ -14,6 +14,7 @@ export async function generateJsonSchema(write = true): Promise<string> {
 
   const schema = toJsonSchema(WrittenConfigSchema, {
     target: "draft-2020-12",
+    typeMode: "input",
     errorMode: "throw",
   });
   const schemaString = JSON.stringify(sortKeysInSchema(schema), null, 2);
