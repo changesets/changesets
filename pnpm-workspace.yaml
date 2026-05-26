@@ -2,17 +2,11 @@ packages:
   - packages/*
   - scripts/*
 
-allowBuilds:
-  esbuild: false
-
 blockExoticSubdeps: true
 dedupePeers: true
 dedupePeerDependents: true
 
 minimumReleaseAge: 10080
-
-overrides:
-  rolldown: 1.0.0
 
 shellEmulator: true
 trustPolicy: no-downgrade
