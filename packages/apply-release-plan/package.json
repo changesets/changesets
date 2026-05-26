@@ -25,9 +25,9 @@
   },
   "devDependencies": {
     "@changesets/test-utils": "workspace:*",
-    "@manypkg/get-packages": "^3.0.0",
+    "@manypkg/get-packages": "^3.1.0",
     "outdent": "^0.8.0",
-    "tinyexec": "^1.0.2"
+    "tinyexec": "^1.1.2"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"

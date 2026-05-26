@@ -25,7 +25,7 @@
     "@changesets/get-dependents-graph": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",
-    "@manypkg/get-packages": "^3.0.0",
+    "@manypkg/get-packages": "^3.1.0",
     "picomatch": "^4.0.4"
   },
   "devDependencies": {
