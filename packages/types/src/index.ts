@@ -135,13 +135,13 @@ export type ModCompWithPackage = ComprehensiveRelease & {
 export type GetReleaseLine = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
-  changelogOpts: null | Record<string, any>,
+  changelogOpts: null | Record<string, unknown>,
 ) => MaybePromise<string>;
 
 export type GetDependencyReleaseLine = (
   changesets: NewChangesetWithCommit[],
   dependenciesUpdated: ModCompWithPackage[],
-  changelogOpts: any,
+  changelogOpts: null | Record<string, unknown>,
 ) => MaybePromise<string>;
 
 export type ChangelogFunctions = {
@@ -151,12 +151,12 @@ export type ChangelogFunctions = {
 
 export type GetAddMessage = (
   changeset: Changeset,
-  commitOptions: any,
+  commitOpts: null | Record<string, unknown>,
 ) => MaybePromise<string>;
 
 export type GetVersionMessage = (
   releasePlan: ReleasePlan,
-  commitOptions: any,
+  commitOpts: null | Record<string, unknown>,
 ) => MaybePromise<string>;
 
 export type CommitFunctions = {
