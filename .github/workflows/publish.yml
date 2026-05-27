@@ -17,6 +17,7 @@ jobs:
   version:
     name: Version
     runs-on: ubuntu-latest
+    environment: version
     timeout-minutes: 20
     outputs:
       hasChangesets: ${{ steps.changesets.outputs.hasChangesets }}
@@ -33,11 +34,19 @@ jobs:
         with:
           skip-cache: true # avoid cache poisoning attacks
 
+      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        id: app-token
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Create or update release pull request
         id: changesets
         # https://github.com/changesets/action
         uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
+          token: ${{ steps.app-token.outputs.token }}
+          commitMode: github-api
           version: yarn version-packages
 
   publish:
