@@ -102,6 +102,8 @@ Make sure to revert the changes you made before merging back into the default br
 
 - If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), remove any configuration to run the workflow for the prerelease branch.
 
+- You can now run the `exit` command, commit, and merge the changes back into the default branch.
+
 :::
 
 ::: code-group
