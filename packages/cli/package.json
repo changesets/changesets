@@ -56,9 +56,7 @@
     "tinyexec": "^1.1.2"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "workspace:*",
     "@changesets/color": "workspace:^",
-    "@changesets/parse": "workspace:*",
     "@changesets/test-utils": "workspace:*",
     "@types/semver": "^7.7.1",
     "human-id": "^4.1.3",
