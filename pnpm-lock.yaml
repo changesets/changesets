@@ -30,6 +30,9 @@ importers:
       '@vitest/eslint-plugin':
         specifier: ^1.6.17
         version: 1.6.17(@typescript-eslint/eslint-plugin@8.59.4)(eslint@10.4.0)(typescript@6.0.3)(vitest@4.1.6)
+      comptime:
+        specifier: ^0.1.0
+        version: 0.1.0(rolldown@1.0.1)(vite@8.0.13)
       eslint:
         specifier: ^10.4.0
         version: 10.4.0
@@ -1114,6 +1117,15 @@ packages:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}
     engines: {node: '>=18'}
 
+  comptime@0.1.0:
+    resolution: {integrity: sha512-MfJWCKUr3D1lPjxt/IBeXLGLI0G9dx9OYgo1zoHoBLhteSXpCpa9gI4+ibre04QHBaKrGgc+bz9N0pCMbYA2GQ==}
+    peerDependencies:
+      rolldown: ^1.0.0
+      vite: ^6 || ^7 || ^8
+    peerDependenciesMeta:
+      vite:
+        optional: true
+
   config-chain@1.1.13:
     resolution: {integrity: sha512-qj+f8APARXHrM0hraqXYb2/bOVSV4PvJQlNZ/DVj0QrmNM2q2euizkeuVckQ57J+W0mRH6Hvi+k50M4Jul2VRQ==}
 
@@ -1153,6 +1165,9 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  devalue@5.8.1:
+    resolution: {integrity: sha512-4CXDYRBGqN+57wVJkuXBYmpAVUSg3L6JAQa/DFqm238G73E1wuyc/JhGQJzN7vUf/CMphYau2zXbfWzDR5aTEw==}
 
   dts-resolver@3.0.0:
     resolution: {integrity: sha512-1T1f+z+4tl9XD+m+0HBgWoL/nm0bOIffyWaUuUSBlFg/86IWvfx+wjNaO/ybU0AJzG9/Mi5hBUgGV6zCmWEN7Q==}
@@ -2519,6 +2534,14 @@ snapshots:
 
   chai@6.2.2: {}
 
+  comptime@0.1.0(rolldown@1.0.1)(vite@8.0.13):
+    dependencies:
+      devalue: 5.8.1
+      magic-string: 0.30.21
+      rolldown: 1.0.1
+    optionalDependencies:
+      vite: 8.0.13(@types/node@25.9.0)
+
   config-chain@1.1.13:
     dependencies:
       ini: 1.3.8
@@ -2547,6 +2570,8 @@ snapshots:
   detect-indent@7.0.2: {}
 
   detect-libc@2.1.2: {}
+
+  devalue@5.8.1: {}
 
   dts-resolver@3.0.0: {}
 
