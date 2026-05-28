@@ -68,7 +68,7 @@ jobs:
     steps:
       # ...
       - name: Create Release PR
-        uses: changesets/action@v1
+        uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
 ```
 
 2. In your GitHub repository's settings, go to `Code and automation > Actions > General` and enable the option `Allow GitHub Actions to create and approve pull requests` at the end.
