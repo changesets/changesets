@@ -1,6 +1,6 @@
 {
   "name": "@changesets/errors",
-  "version": "1.0.0-next.2",
+  "version": "1.0.0-next.3",
   "description": "Error classes for @changesets",
   "license": "MIT",
   "repository": {
