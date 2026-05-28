@@ -36,11 +36,13 @@ $ yarn changeset pre enter beta
 
 This will generate a `pre.json` file in the `.changeset` folder that stores the current prerelease state. See the type definition of `PreState` in [`@changesets/types`](https://github.com/changesets/changesets/tree/main/packages/types) for more information of the state.
 
-If you entered prerelease mode on a different branch:
+::: info Prerelease mode on a separate branch
 
 - Update the [`baseBranch`](./config.md#baseBranch) option with the branch name. This allows the [`add`](./cli.md#add) command to properly detect the changed packages.
 
 - If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), make sure to allow running the workflow for this branch too.
+
+:::
 
 Commit the changes and Changesets will now be in prerelease mode.
 
@@ -92,6 +94,16 @@ This is because npm enforces that all packages have a `latest` tagged version.
 
 When you're ready to do a stable release, you can exit prerelease mode with the [`pre exit`](./cli.md#pre) command. This will set an intent to exit prerelease mode in the `pre.json` file but it won't do any actual versioning.
 
+::: info Prerelease mode on a separate branch
+
+Make sure to revert the changes you made before merging back into the default branch:
+
+- Update the [`baseBranch`](./config.md#baseBranch) option back to the default branch.
+
+- If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), remove any configuration to run the workflow for the prerelease branch.
+
+:::
+
 ::: code-group
 
 ```bash [pnpm]
@@ -108,15 +120,9 @@ $ yarn changeset pre exit
 
 :::
 
-If you exited prerelease mode on a different branch (the same branch as you entered prerelease mode on), you may want to merge this back to the default branch. Make sure to revert the changes you made before:
+Make sure to commit the changes.
 
-- Update the [`baseBranch`](./config.md#baseBranch) option back to the default branch.
-
-- If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), remove allowing to run the workflow for this branch.
-
-Commit the changes.
-
-After merging the branch, run the [`version`](./cli.md#version) and [`publish`](./cli.md#publish) commands as usual. The versions will now be released as stable versions without the prerelease tag and published to the `latest` dist-tag.
+You can now run the [`version`](./cli.md#version) and [`publish`](./cli.md#publish) commands as usual. The versions will now be released as stable versions without the prerelease tag and published to the `latest` dist-tag.
 
 ### Example
 
