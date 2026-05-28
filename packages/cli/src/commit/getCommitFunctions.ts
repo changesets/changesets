@@ -1,6 +1,6 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import type { CommitFunctions } from "@changesets/types";
+import type { CommitFunctions, Config } from "@changesets/types";
 import { resolve } from "import-meta-resolve";
 
 function importResolveFromDir(specifier: string, dir: string) {
@@ -8,15 +8,15 @@ function importResolveFromDir(specifier: string, dir: string) {
 }
 
 export async function getCommitFunctions(
-  commit: false | readonly [string, any],
+  commit: Config["commit"],
   cwd: string,
   contextDir: string,
-): Promise<[CommitFunctions, any]> {
+): Promise<[CommitFunctions, null | Record<string, unknown>]> {
   let commitFunctions: CommitFunctions = {};
   if (!commit) {
     return [commitFunctions, null];
   }
-  const commitOpts: any = commit[1];
+  const commitOpts = commit[1];
   const changesetPath = path.join(cwd, ".changeset");
   let commitPath;
 
