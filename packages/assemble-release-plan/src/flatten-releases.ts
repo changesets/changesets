@@ -55,9 +55,6 @@ export function flattenReleases(
         release.type = type;
       }
 
-      // Check whether the bumpType will change
-      // If the bumpType has changed recalc newVersion
-      // push new changeset to releases
       release.changesets.push(changeset.id);
 
       releases.set(name, release);
