@@ -41,6 +41,13 @@ The core idea of Changesets revolves around these files.
 
 ## Setting Up
 
+::: tip Selecting a package manager
+
+We recommend using pnpm as it has safer security defaults and better monorepo support.
+However, we also support other package managers if you prefer them.
+
+:::
+
 Install the Changesets CLI:
 
 ::: code-group
