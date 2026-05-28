@@ -9,6 +9,12 @@ importers:
 
   .:
     devDependencies:
+      '@changesets/changelog-github':
+        specifier: workspace:*
+        version: link:packages/changelog-github
+      '@changesets/cli':
+        specifier: workspace:*
+        version: link:packages/cli
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.4.0)
