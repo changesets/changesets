@@ -56,8 +56,6 @@ export function flattenReleases(
       }
 
       release.changesets.push(changeset.id);
-
-      releases.set(name, release);
     }
   }
 
