@@ -1,5 +1,15 @@
 # @changesets/errors
 
+## 1.0.0-next.3
+
+### Major Changes
+
+- [#2015](https://github.com/changesets/changesets/pull/2015) [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed `ValidationError`.
+
+### Minor Changes
+
+- [#2015](https://github.com/changesets/changesets/pull/2015) [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf) Thanks [@beeequeue](https://github.com/beeequeue)! - Added `cause` option to `ExitError` to help surface the cause behind exiting.
+
 ## 1.0.0-next.2
 
 ### Major Changes

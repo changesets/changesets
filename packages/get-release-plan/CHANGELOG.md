@@ -1,5 +1,16 @@
 # @changesets/get-release-plan
 
+## 5.0.0-next.5
+
+### Patch Changes
+
+- Updated dependencies [[`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf)]:
+  - @changesets/config@4.0.0-next.5
+  - @changesets/types@7.0.0-next.5
+  - @changesets/assemble-release-plan@7.0.0-next.5
+  - @changesets/pre@3.0.0-next.5
+  - @changesets/read@1.0.0-next.5
+
 ## 5.0.0-next.4
 
 ### Patch Changes
