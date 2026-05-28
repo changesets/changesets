@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - scripts/*
+  - site
 
 blockExoticSubdeps: true
 dedupePeers: true
