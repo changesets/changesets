@@ -1,7 +1,0 @@
-import type { NewChangeset } from "@changesets/types";
-
-export type RelevantChangesets = {
-  major: NewChangeset[];
-  minor: NewChangeset[];
-  patch: NewChangeset[];
-};

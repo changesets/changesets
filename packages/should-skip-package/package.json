@@ -16,9 +16,6 @@
   "dependencies": {
     "@changesets/types": "workspace:^"
   },
-  "devDependencies": {
-    "@changesets/test-utils": "workspace:*"
-  },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
   }
