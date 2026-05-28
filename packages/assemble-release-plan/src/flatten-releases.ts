@@ -1,10 +1,5 @@
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type {
-  Config,
-  NewChangeset,
-  Package,
-  VersionType,
-} from "@changesets/types";
+import type { Config, NewChangeset, Package } from "@changesets/types";
 import type { InternalRelease } from "./types.ts";
 import { mapGetOrThrowInternal } from "./utils.ts";
 
@@ -14,11 +9,6 @@ const changeTypes = {
   patch: 1,
   none: 0,
 } as const;
-
-const changeTypeIsBiggerThanPrevious = (
-  type: VersionType,
-  previous: VersionType,
-) => changeTypes[type] > changeTypes[previous];
 
 /**
  * Flattens a list of changesets into a package->release-type map
@@ -41,11 +31,11 @@ export function flattenReleases(
 
       // Filter out skipped packages because they should not trigger a release
       // If their dependencies need updates, they will be added to releases by `determineDependents()` with release type `none`
-      const packageIsSkipped = shouldSkipPackage(pkg, {
+      const isSkipped = shouldSkipPackage(pkg, {
         ignore: config.ignore,
         allowPrivatePackages: config.privatePackages.version,
       });
-      if (packageIsSkipped) continue;
+      if (isSkipped) continue;
 
       const release = releases.get(name);
 
@@ -60,7 +50,8 @@ export function flattenReleases(
         continue;
       }
 
-      if (changeTypeIsBiggerThanPrevious(type, release.type)) {
+      // if this changeset's type overrides the previous one
+      if (changeTypes[type] > changeTypes[release.type]) {
         release.type = type;
       }
 
