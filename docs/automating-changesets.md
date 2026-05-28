@@ -38,10 +38,37 @@ In some cases, you may _want_ to merge a change without doing any releases (such
 
 ## How do I run the version and publish commands?
 
+### Automatic setup
+
 We have a [github action](https://github.com/changesets/action) that
 
 - creates a `version` PR, then keeps it up to date, recreating it when merged. This PR always has an up-to-date run of `changeset version`
 - Optionally allows you to do releases when changes are merged to the base branch.
+
+#### GitHub permissions issues
+
+You may encounter issues of changesets/action jobs failing for no reason and if that's the case, you can try the following steps :
+
+1. Add writing permissions for the GitHub access token used by the job that triggers changesets/action :
+
+```yml
+# In .github/workflows/release.yml or similar
+
+jobs:
+  release:
+    # ...
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # ...
+      - name: Create Release PR
+        uses: changesets/action@v1
+```
+
+2. In your GitHub repository's settings, go to `Code and automation > Actions > General` and enable the option `Allow GitHub Actions to create and approve pull requests` at the end.
+
+### Manual setup
 
 If you don't want to use this action, the manual workflow we recommend for running the `version` and `publish` commands is:
 
