@@ -26,6 +26,7 @@ jobs:
       - uses: ./.github/actions/ci-setup
         with:
           node-version: 26
+          skip-cache: true # avoid cache poisoning attacks
 
       - name: Build
         run: pnpm build

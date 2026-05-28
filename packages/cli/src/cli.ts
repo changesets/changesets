@@ -97,7 +97,7 @@ cli
   .example("  $ changeset publish --tag beta")
   .option("--otp <code>", "One time password for npm publish")
   .option("--tag <name>", "Publish with the given npm dist-tag")
-  .option("--git-tag", "Create a git tag for the release")
+  .option("--git-tag", "Create a git tag for the release", { default: true })
   .action(async (options) => {
     normalizeOptions(options);
     const { publish } = await import("./commands/publish/index.ts");

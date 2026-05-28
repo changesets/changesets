@@ -1,10 +1,6 @@
 packages:
   - packages/*
   - scripts/*
-  - site
-
-allowBuilds:
-  esbuild: false
 
 blockExoticSubdeps: true
 dedupePeers: true
@@ -12,7 +8,6 @@ dedupePeerDependents: true
 minimumReleaseAge: 10080
 
 overrides:
-  rolldown: 1.0.0
   "vitepress>@docsearch/js": "-"
   "vitepress>@docsearch/sidepanel-js": "-"
   "vitepress>vite": ^8.0.0

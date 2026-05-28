@@ -6,12 +6,10 @@ export class GitError extends Error {
   }
 }
 
-export class ValidationError extends Error {}
-
 export class ExitError extends Error {
   code: number;
-  constructor(code: number) {
-    super(`The process exited with code: ${code}`);
+  constructor(code: number, options?: { cause?: Error }) {
+    super(`The process exited with code: ${code}`, options);
     this.code = code;
   }
 }

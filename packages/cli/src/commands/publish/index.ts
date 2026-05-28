@@ -1,5 +1,4 @@
 import c from "@changesets/color";
-import { read } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
@@ -8,6 +7,7 @@ import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { readConfig } from "../../utils/read-config.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { publishPackages } from "./publishPackages.ts";
 
@@ -38,6 +38,7 @@ export interface PublishOptions {
   cwd?: string;
   otp?: string;
   tag?: string;
+  /** @default true */
   gitTag?: boolean;
 }
 
@@ -65,7 +66,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     showNonLatestTagWarning(options?.tag, preState);
   }
 
-  const config = await read(packages.rootDir, packages);
+  const config = await readConfig(packages);
   const tagPrivatePackages =
     config.privatePackages && config.privatePackages.tag;
 
@@ -114,7 +115,7 @@ ${formatPackageList(successfulNpmPublishes)}
     // We create the tags after the push above so that we know that HEAD won't change and that pushing
     // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
     // fail if we are behind the base branch).
-    if (options?.gitTag) {
+    if (options?.gitTag ?? true) {
       const p = spinner();
       p.start(
         `Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`,

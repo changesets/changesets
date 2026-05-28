@@ -20,7 +20,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { outdent } from "outdent";
 import { exec } from "tinyexec";
 import { describe, expect, it, test } from "vitest";
-import applyReleasePlan from "./index.ts";
+import { applyReleasePlan } from "./index.ts";
 
 const changesetsCliChangelogPath = path.resolve(
   import.meta.dirname,
