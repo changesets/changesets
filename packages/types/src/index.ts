@@ -67,8 +67,8 @@ export interface PrivatePackages {
 }
 
 export type Config = {
-  changelog: false | readonly [string, Record<string, unknown>];
-  commit: false | readonly [string, Record<string, unknown>];
+  changelog: false | readonly [string, null | Record<string, unknown>];
+  commit: false | readonly [string, null | Record<string, unknown>];
   fixed: Fixed;
   linked: Linked;
   access: AccessType;
@@ -94,8 +94,11 @@ export type Config = {
 };
 
 export type WrittenConfig = {
-  changelog?: false | readonly [string, Record<string, unknown>] | string;
-  commit?: boolean | readonly [string, Record<string, unknown>] | string;
+  changelog?:
+    | false
+    | readonly [string, null | Record<string, unknown>]
+    | string;
+  commit?: boolean | readonly [string, null | Record<string, unknown>] | string;
   fixed?: Fixed;
   linked?: Linked;
   access?: AccessType | "private";
