@@ -1,6 +1,6 @@
 import c from "@changesets/color";
 import type { Release, VersionType } from "@changesets/types";
-import { log } from "@clack/prompts";
+import { log, note } from "@clack/prompts";
 
 export function printConfirmationMessage(
   changeset: {
@@ -32,12 +32,10 @@ export function printConfirmationMessage(
   log.success(msg);
 
   if (repoHasMultiplePackages) {
-    log.info(
-      `
-Note: All packages that depend on these whose required versions
-will be incompatible will also be ${c.blue("patch")} bumped
-when this changeset is applied.
-      `.trim(),
+    note(
+      `All packages that depend on these whose required versions will be incompatible ` +
+        `will also be ${c.blue("patch")} bumped when this changeset is applied.`,
+      "NOTE",
     );
   }
 }
