@@ -10,12 +10,12 @@ Create changesets as normal. When you are ready to release a snapshot, create a 
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli version --snapshot
-```
-
 ```bash [pnpm]
 $ pnpm changeset version --snapshot
+```
+
+```bash [npm]
+$ npx @changesets/cli version --snapshot
 ```
 
 ```bash [yarn]
@@ -30,12 +30,12 @@ If you want to add a personalized part to this version number, such as `bulbasau
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli version --snapshot bulbasaur
-```
-
 ```bash [pnpm]
 $ pnpm changeset version --snapshot bulbasaur
+```
+
+```bash [npm]
+$ npx @changesets/cli version --snapshot bulbasaur
 ```
 
 ```bash [yarn]
@@ -66,12 +66,12 @@ When you want to get people to test your snapshots, they can either update their
 
 ::: code-group
 
-```bash [npm]
-$ npm install your-package-name@0.0.0-bulbasaur-{datetime}
-```
-
 ```bash [pnpm]
 $ pnpm add your-package-name@0.0.0-bulbasaur-{datetime}
+```
+
+```bash [npm]
+$ npm install your-package-name@0.0.0-bulbasaur-{datetime}
 ```
 
 ```bash [yarn]
@@ -84,12 +84,12 @@ Or you can install with the dist-tag:
 
 ::: code-group
 
-```bash [npm]
-$ npm install your-package-name@bulbasaur
-```
-
 ```bash [pnpm]
 $ pnpm add your-package-name@bulbasaur
+```
+
+```bash [npm]
+$ npm install your-package-name@bulbasaur
 ```
 
 ```bash [yarn]

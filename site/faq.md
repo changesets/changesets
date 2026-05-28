@@ -27,12 +27,12 @@ Run the CLI to generate a changeset:
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli
-```
-
 ```bash [pnpm]
 $ pnpm changeset
+```
+
+```bash [npm]
+$ npx @changesets/cli
 ```
 
 ```bash [yarn]

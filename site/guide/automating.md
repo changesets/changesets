@@ -32,12 +32,12 @@ As not every change requires a release, we **do not recommend** blocking contrib
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli status --since main
-```
-
 ```bash [pnpm]
 $ pnpm changeset status --since main
+```
+
+```bash [npm]
+$ npx @changesets/cli status --since main
 ```
 
 ```bash [yarn]

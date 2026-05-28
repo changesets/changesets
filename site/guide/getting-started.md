@@ -45,12 +45,12 @@ Install the Changesets CLI:
 
 ::: code-group
 
-```bash [npm]
-$ npm install -D @changesets/cli
-```
-
 ```bash [pnpm]
 $ pnpm add -D @changesets/cli
+```
+
+```bash [npm]
+$ npm install -D @changesets/cli
 ```
 
 ```bash [yarn]
@@ -63,12 +63,12 @@ And run `init` to set up the `.changeset` folder in your project:
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli init
-```
-
 ```bash [pnpm]
 $ pnpm changeset init
+```
+
+```bash [npm]
+$ npx @changesets/cli init
 ```
 
 ```bash [yarn]
@@ -85,12 +85,12 @@ Whenever you make a change, e.g. via a git commit or a PR, create a changeset al
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli
-```
-
 ```bash [pnpm]
 $ pnpm changeset
+```
+
+```bash [npm]
+$ npx @changesets/cli
 ```
 
 ```bash [yarn]

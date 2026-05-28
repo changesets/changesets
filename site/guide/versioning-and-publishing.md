@@ -10,12 +10,12 @@ Run the [`version`](./cli.md#version) command to update the package versions and
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli version
-```
-
 ```bash [pnpm]
 $ pnpm changeset version
+```
+
+```bash [npm]
+$ npx @changesets/cli version
 ```
 
 ```bash [yarn]
@@ -37,12 +37,12 @@ Run the [`publish`](./cli.md#publish) command to publish the new versions of the
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli publish
-```
-
 ```bash [pnpm]
 $ pnpm changeset publish
+```
+
+```bash [npm]
+$ npx @changesets/cli publish
 ```
 
 ```bash [yarn]

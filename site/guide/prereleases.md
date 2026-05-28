@@ -20,12 +20,12 @@ Run [`pre enter <tag>`](./cli.md#pre) to enter prerelease mode with the given ta
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli pre enter beta
-```
-
 ```bash [pnpm]
 $ pnpm changeset pre enter beta
+```
+
+```bash [npm]
+$ npx @changesets/cli pre enter beta
 ```
 
 ```bash [yarn]
@@ -94,12 +94,12 @@ When you're ready to do a stable release, you can exit prerelease mode with the 
 
 ::: code-group
 
-```bash [npm]
-$ npx @changesets/cli pre exit
-```
-
 ```bash [pnpm]
 $ pnpm changeset pre exit
+```
+
+```bash [npm]
+$ npx @changesets/cli pre exit
 ```
 
 ```bash [yarn]
