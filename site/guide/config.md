@@ -244,7 +244,9 @@ Configure snapshot releases when using `changesets version --snapshot`.
 - **Type:** `boolean`
 - **Default:** `false`
 
-Snapshot version uses `0.0.0` as the base version, e.g. `0.0.0-tag-20211213000730`. Setting this to `true` will use the calculated version based on the changeset files.
+Snapshot version uses `0.0.0` as the base version, e.g. `0.0.0-tag-20211213000730`, so it does not hinder with other version releases. For example, if you have a prerelease at `1.0.0-beta.0`, and then you had a snapshot prerelease at `1.0.0-tag-20211213000730`, and a consumer is using the range `^1.0.0-beta.0` would resolve to the snapshot version which is likely not expected. Using `0.0.0` solves this problem.
+
+If this problem doesn't affect you, set this to `true` to use the calculated version based on the changeset files.
 
 ### snapshot.prereleaseTemplate
 
