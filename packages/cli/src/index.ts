@@ -6,18 +6,19 @@ import { ExitError, InternalError } from "@changesets/errors";
 import { intro, log, outro, updateSettings } from "@clack/prompts";
 import { cli } from "./cli.ts";
 
+updateSettings({ withGuide: false });
+
 try {
   cli.parse(process.argv, { run: false });
 
   const commandName = cli.matchedCommand?.name;
 
-  // Disable clack guide for non-interactive commands
-  if (commandName !== "add") {
-    updateSettings({ withGuide: false });
+  // Enable clack guide for interactive commands
+  if (commandName === "add") {
+    updateSettings({ withGuide: true });
   }
-
-  // Do not show intro for --help and --version, which have no command name
-  if (cli.matchedCommand?.name != null) {
+  // Show intro when running a command, except for --help and --version (has no command name)
+  if (commandName != null) {
     intro(`🦋 changeset v${manifest.version}`);
   }
 
