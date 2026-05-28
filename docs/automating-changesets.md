@@ -47,7 +47,12 @@ We have a [github action](https://github.com/changesets/action) that
 
 #### GitHub permissions issues
 
-You may encounter issues of changesets/action jobs failing for no reason and if that's the case, you can try the following steps :
+You may encounter issues of changesets/action jobs failing with some of these errors :
+
+- `remote: Permission to xxx.git denied to github-actions[bot]`
+- `GitHub Actions is not permitted to create or approve pull requests`
+
+If that's the case, you can try the following steps :
 
 1. Add writing permissions for the GitHub access token used by the job that triggers changesets/action :
 
@@ -58,8 +63,8 @@ jobs:
   release:
     # ...
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # For changesets to create/update PRs
+      pull-requests: write # For changesets to push tags
     steps:
       # ...
       - name: Create Release PR
