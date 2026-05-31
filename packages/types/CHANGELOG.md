@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 7.0.0-next.5
+
+### Major Changes
+
+- [#2040](https://github.com/changesets/changesets/pull/2040) [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f) Thanks [@bluwy](https://github.com/bluwy)! - Use stricter types for the options parameter for `CommitFunctions`, `ChangelogFunctions`, `Config` & `WrittenConfig`'s `commit` and `changelog` properties, to `null | Record<string, unknown>` instead of `any` or `Record<string, any>`
+
 ## 7.0.0-next.4
 
 ### Major Changes

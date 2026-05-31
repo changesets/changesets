@@ -1,5 +1,15 @@
 # @changesets/assemble-release-plan
 
+## 7.0.0-next.5
+
+### Patch Changes
+
+- Updated dependencies [[`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf)]:
+  - @changesets/types@7.0.0-next.5
+  - @changesets/errors@1.0.0-next.3
+  - @changesets/get-dependents-graph@3.0.0-next.5
+  - @changesets/should-skip-package@1.0.0-next.5
+
 ## 7.0.0-next.4
 
 ### Patch Changes

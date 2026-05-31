@@ -14,6 +14,12 @@ importers:
 
   .:
     devDependencies:
+      '@changesets/changelog-github':
+        specifier: workspace:*
+        version: link:packages/changelog-github
+      '@changesets/cli':
+        specifier: workspace:*
+        version: link:packages/cli
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.4.0)
@@ -216,15 +222,9 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
     devDependencies:
-      '@changesets/changelog-github':
-        specifier: workspace:*
-        version: link:../changelog-github
       '@changesets/color':
         specifier: workspace:^
         version: link:../color
-      '@changesets/parse':
-        specifier: workspace:*
-        version: link:../parse
       '@changesets/test-utils':
         specifier: workspace:*
         version: link:../../scripts/test-utils
@@ -270,9 +270,6 @@ importers:
       '@valibot/to-json-schema':
         specifier: ^1.7.0
         version: 1.7.0(valibot@1.4.0)
-      outdent:
-        specifier: ^0.8.0
-        version: 0.8.0
       valibot:
         specifier: ^1.4.0
         version: 1.4.0(typescript@6.0.3)
@@ -424,9 +421,6 @@ importers:
       '@changesets/write':
         specifier: workspace:*
         version: link:../write
-      outdent:
-        specifier: ^0.8.0
-        version: 0.8.0
 
   packages/release-utils:
     dependencies:
@@ -467,10 +461,6 @@ importers:
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
-    devDependencies:
-      '@changesets/test-utils':
-        specifier: workspace:*
-        version: link:../../scripts/test-utils
 
   packages/types: {}
 
@@ -498,9 +488,6 @@ importers:
 
   scripts/test-utils:
     dependencies:
-      '@clack/prompts':
-        specifier: ^1.4.0
-        version: 1.4.0
       fs-fixture:
         specifier: ^2.14.0
         version: 2.14.0

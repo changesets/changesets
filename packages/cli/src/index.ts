@@ -11,9 +11,15 @@ updateSettings({ withGuide: false });
 try {
   cli.parse(process.argv, { run: false });
 
-  // Do not show intro for --help and --version, which have no command name
-  if (cli.matchedCommand?.name != null) {
-    intro(`🦋 changeset v${manifest.version}\n`);
+  const commandName = cli.matchedCommand?.name;
+
+  // Enable clack guide for interactive commands
+  if (commandName === "add") {
+    updateSettings({ withGuide: true });
+  }
+  // Show intro when running a command, except for --help and --version (has no command name)
+  if (commandName != null) {
+    intro(`🦋 changeset v${manifest.version}`);
   }
 
   await cli.runMatchedCommand();

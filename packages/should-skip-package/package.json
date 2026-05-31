@@ -1,6 +1,6 @@
 {
   "name": "@changesets/should-skip-package",
-  "version": "1.0.0-next.4",
+  "version": "1.0.0-next.5",
   "description": "Checks if a package should be skipped for versioning or tagging purposes",
   "license": "MIT",
   "repository": {
@@ -15,9 +15,6 @@
   },
   "dependencies": {
     "@changesets/types": "workspace:^"
-  },
-  "devDependencies": {
-    "@changesets/test-utils": "workspace:*"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"

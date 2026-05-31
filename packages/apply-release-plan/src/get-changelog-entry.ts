@@ -30,7 +30,7 @@ export async function getChangelogEntry(
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
   changelogFuncs: ChangelogFunctions,
-  changelogOpts: any,
+  changelogOpts: null | Record<string, unknown>,
   {
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,

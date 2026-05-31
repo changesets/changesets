@@ -67,8 +67,8 @@ export interface PrivatePackages {
 }
 
 export type Config = {
-  changelog: false | readonly [string, any];
-  commit: false | readonly [string, any];
+  changelog: false | readonly [string, null | Record<string, unknown>];
+  commit: false | readonly [string, null | Record<string, unknown>];
   fixed: Fixed;
   linked: Linked;
   access: AccessType;
@@ -94,8 +94,11 @@ export type Config = {
 };
 
 export type WrittenConfig = {
-  changelog?: false | readonly [string, any] | string;
-  commit?: boolean | readonly [string, any] | string;
+  changelog?:
+    | false
+    | readonly [string, null | Record<string, unknown>]
+    | string;
+  commit?: boolean | readonly [string, null | Record<string, unknown>] | string;
   fixed?: Fixed;
   linked?: Linked;
   access?: AccessType | "private";
@@ -135,13 +138,13 @@ export type ModCompWithPackage = ComprehensiveRelease & {
 export type GetReleaseLine = (
   changeset: NewChangesetWithCommit,
   type: VersionType,
-  changelogOpts: null | Record<string, any>,
+  changelogOpts: null | Record<string, unknown>,
 ) => MaybePromise<string>;
 
 export type GetDependencyReleaseLine = (
   changesets: NewChangesetWithCommit[],
   dependenciesUpdated: ModCompWithPackage[],
-  changelogOpts: any,
+  changelogOpts: null | Record<string, unknown>,
 ) => MaybePromise<string>;
 
 export type ChangelogFunctions = {
@@ -151,12 +154,12 @@ export type ChangelogFunctions = {
 
 export type GetAddMessage = (
   changeset: Changeset,
-  commitOptions: any,
+  commitOpts: null | Record<string, unknown>,
 ) => MaybePromise<string>;
 
 export type GetVersionMessage = (
   releasePlan: ReleasePlan,
-  commitOptions: any,
+  commitOpts: null | Record<string, unknown>,
 ) => MaybePromise<string>;
 
 export type CommitFunctions = {

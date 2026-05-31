@@ -1,5 +1,27 @@
 # @changesets/cli
 
+## 3.0.0-next.5
+
+### Patch Changes
+
+- [#2041](https://github.com/changesets/changesets/pull/2041) [`ce39c72`](https://github.com/changesets/changesets/commit/ce39c725afba19588c261cc521ef4fd55f72ef19) Thanks [@bluwy](https://github.com/bluwy)! - Enable guide line for `add` command and use box design for dependent patch bump note
+
+- [#2009](https://github.com/changesets/changesets/pull/2009) [`44df27d`](https://github.com/changesets/changesets/commit/44df27d25745609bcf0c66ae244de2b0464a1b2d) Thanks [@bluwy](https://github.com/bluwy)! - Use `cac` for CLI arg parsing and handling
+
+- Updated dependencies [[`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf)]:
+  - @changesets/config@4.0.0-next.5
+  - @changesets/types@7.0.0-next.5
+  - @changesets/errors@1.0.0-next.3
+  - @changesets/apply-release-plan@8.0.0-next.5
+  - @changesets/assemble-release-plan@7.0.0-next.5
+  - @changesets/changelog-git@1.0.0-next.5
+  - @changesets/get-dependents-graph@3.0.0-next.5
+  - @changesets/git@4.0.0-next.5
+  - @changesets/pre@3.0.0-next.5
+  - @changesets/read@1.0.0-next.5
+  - @changesets/should-skip-package@1.0.0-next.5
+  - @changesets/write@1.0.0-next.5
+
 ## 3.0.0-next.4
 
 ### Major Changes

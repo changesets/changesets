@@ -1,5 +1,57 @@
 # @changesets/config
 
+## 4.0.0-next.5
+
+### Major Changes
+
+- [#2015](https://github.com/changesets/changesets/pull/2015) [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed `read` and `parse` functions in favor of `readConfig`, which returns `{ config, warnings, errors }` instead of throwing on issues.
+
+  ```ts
+  // before.ts
+  import { parse } from "@changesets/config";
+  import { getPackages } from "@manypkg/get-packages";
+
+  const config = parse({ commit: true }, await getPackages());
+
+  try {
+    return parse({ commit: true }, packages);
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      console.error(`Invalid config: ${err.message}`);
+    } else {
+      throw err;
+    }
+  }
+
+  // after.ts
+  import { readConfig } from "@changesets/config";
+  import { getPackages } from "@manypkg/get-packages";
+
+  // both arguments are optional
+  const { config, warnings, errors } = readConfig(
+    process.cwd(),
+    await getPackages(),
+  );
+
+  if (warnings.length !== 0) {
+    console.warn(warnings.join("\n"));
+  }
+  if (config == null) {
+    console.error(errors.join("\n"));
+  }
+  ```
+
+### Minor Changes
+
+- [#2015](https://github.com/changesets/changesets/pull/2015) [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf) Thanks [@beeequeue](https://github.com/beeequeue)! - Refactored config parsing to use Valibot and validation rules.
+
+### Patch Changes
+
+- Updated dependencies [[`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f)]:
+  - @changesets/types@7.0.0-next.5
+  - @changesets/get-dependents-graph@3.0.0-next.5
+  - @changesets/should-skip-package@1.0.0-next.5
+
 ## 4.0.0-next.4
 
 ### Major Changes

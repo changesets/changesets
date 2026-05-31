@@ -35,11 +35,12 @@
     "site:dev": "pnpm --filter=./site dev",
     "site:build": "pnpm --filter=./site build",
     "site:preview": "pnpm --filter=./site preview",
-    "version-packages": "pnpm changeset version && pnpm format:fix",
-    "release": "pnpm changeset publish",
-    "changeset": "node packages/cli/bin.js"
+    "version-packages": "changeset version && pnpm format:fix",
+    "release": "changeset publish"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "workspace:*",
+    "@changesets/cli": "workspace:*",
     "@eslint/js": "10.0.1",
     "@manypkg/cli": "^0.25.1",
     "@tsconfig/node22": "^22.0.5",

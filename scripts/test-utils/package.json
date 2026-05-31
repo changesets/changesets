@@ -10,7 +10,6 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@clack/prompts": "^1.4.0",
     "fs-fixture": "^2.14.0",
     "tinyexec": "^1.1.2",
     "vitest": "^4.1.6"

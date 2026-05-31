@@ -51,7 +51,8 @@ const changelogFunctions: ChangelogFunctions = {
     dependenciesUpdated,
     options,
   ) => {
-    if (!options.repo) {
+    const repo = options?.repo;
+    if (!repo || typeof repo !== "string") {
       throw new Error(
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]',
       );
@@ -63,7 +64,7 @@ const changelogFunctions: ChangelogFunctions = {
         changesets.map(async (cs) => {
           if (cs.commit) {
             const { links } = await getInfo({
-              repo: options.repo,
+              repo,
               commit: cs.commit,
             });
             return links.commit;
@@ -81,12 +82,14 @@ const changelogFunctions: ChangelogFunctions = {
     return [changesetLink, ...updatedDepenenciesList].join("\n");
   },
   getReleaseLine: async (changeset, type, options) => {
-    const { GITHUB_SERVER_URL } = await readEnv();
-    if (!options || !options.repo) {
+    const repo = options?.repo;
+    if (!repo || typeof repo !== "string") {
       throw new Error(
         'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]',
       );
     }
+
+    const { GITHUB_SERVER_URL } = await readEnv();
 
     let prFromSummary: number | undefined;
     let commitFromSummary: string | undefined;
@@ -115,14 +118,14 @@ const changelogFunctions: ChangelogFunctions = {
     const links = await (async () => {
       if (prFromSummary != null) {
         let { links } = await getInfoFromPullRequest({
-          repo: options.repo,
+          repo,
           pull: prFromSummary,
         });
         if (commitFromSummary) {
           const shortCommitId = commitFromSummary.slice(0, 7);
           links = {
             ...links,
-            commit: `[\`${shortCommitId}\`](${GITHUB_SERVER_URL}/${options.repo}/commit/${commitFromSummary})`,
+            commit: `[\`${shortCommitId}\`](${GITHUB_SERVER_URL}/${repo}/commit/${commitFromSummary})`,
           };
         }
         return links;
@@ -130,7 +133,7 @@ const changelogFunctions: ChangelogFunctions = {
       const commitToFetchFrom = commitFromSummary || changeset.commit;
       if (commitToFetchFrom) {
         const { links } = await getInfo({
-          repo: options.repo,
+          repo,
           commit: commitToFetchFrom,
         });
         return links;
@@ -161,13 +164,13 @@ const changelogFunctions: ChangelogFunctions = {
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {
       serverUrl: GITHUB_SERVER_URL,
-      repo: options.repo,
+      repo,
     })}\n${futureLines
       .map(
         (l) =>
           `  ${linkifyIssueRefs(l, {
             serverUrl: GITHUB_SERVER_URL,
-            repo: options.repo,
+            repo,
           })}`,
       )
       .join("\n")}`;
