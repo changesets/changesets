@@ -1,4 +1,18 @@
-import { getCorrectRegistry, isCustomRegistry } from "../npm-utils";
+import { getCorrectRegistry, isCustomRegistry, getPackageInfo } from "../npm-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import spawn from "spawndamnit";
+
+jest.mock("spawndamnit");
+
+const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
+
+function spawnResult(stdout: string, code = 0) {
+  return {
+    code,
+    stdout: Buffer.from(stdout),
+    stderr: Buffer.from(""),
+  };
+}
 
 const originalEnv = process.env;
 
@@ -124,5 +138,97 @@ describe("isCustomRegistry", () => {
 
   it("returns true for a path-based custom registry", () => {
     expect(isCustomRegistry("https://registry.example.com/npm")).toBe(true);
+  });
+});
+
+describe("getPackageInfo", () => {
+  silenceLogsInBlock();
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("uses pnpm info when packageManager field specifies pnpm", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        packageManager: "pnpm@9.0.0",
+      }),
+    });
+
+    mockSpawn.mockImplementation(((cmd: string, args: string[]) =>
+      Promise.resolve(
+        cmd === "pnpm" && args?.[0] === "info"
+          ? spawnResult(
+              JSON.stringify({ name: "pkg-a", version: "1.0.0", versions: ["1.0.0"] })
+            )
+          : spawnResult("", 1)
+      )) as any);
+
+    const result = await getPackageInfo({ name: "pkg-a", version: "1.0.0" }, cwd);
+
+    expect(result).toMatchObject({ name: "pkg-a" });
+    expect(
+      mockSpawn.mock.calls.some(([cmd, args]) => cmd === "npm" && args?.[0] === "info")
+    ).toBe(false);
+    expect(
+      mockSpawn.mock.calls.some(([cmd, args]) => cmd === "pnpm" && args?.[0] === "info")
+    ).toBe(true);
+  });
+
+  it("treats yarn classic error JSON as not found and returns E404 when both queries fail", async () => {
+    // yarn v1 returns {"type":"error","data":"..."} (non-empty) instead of empty stdout
+    // when a package or version isn't found. Without the fix, the empty-stdout guard never
+    // fires, the error object bypasses E404 normalization, and the package appears published.
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        packageManager: "yarn@1.22.0",
+      }),
+    });
+
+    mockSpawn.mockImplementation(((cmd: string, args: string[]) =>
+      Promise.resolve(
+        cmd === "yarn" && args?.[0] === "info"
+          ? spawnResult(
+              JSON.stringify({
+                type: "error",
+                data: 'error Couldn\'t find package "pkg-a" on the "npm" registry.',
+              })
+            )
+          : spawnResult("", 1)
+      )) as any);
+
+    const result = await getPackageInfo({ name: "pkg-a", version: "1.0.0" }, cwd);
+
+    expect(result).toEqual({ error: { code: "E404" } });
+    expect(
+      mockSpawn.mock.calls.some(([cmd, args]) => cmd === "npm" && args?.[0] === "info")
+    ).toBe(false);
+    expect(
+      mockSpawn.mock.calls.some(([cmd, args]) => cmd === "yarn" && args?.[0] === "info")
+    ).toBe(true);
+  });
+
+  it("strips the yarn classic inspect wrapper from a successful response", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        packageManager: "yarn@1.22.0",
+      }),
+    });
+
+    const packageData = { name: "pkg-a", version: "1.0.0", versions: ["1.0.0"] };
+
+    mockSpawn.mockImplementation(((cmd: string, args: string[]) =>
+      Promise.resolve(
+        cmd === "yarn" && args?.[0] === "info"
+          ? spawnResult(JSON.stringify({ type: "inspect", data: packageData }))
+          : spawnResult("", 1)
+      )) as any);
+
+    const result = await getPackageInfo({ name: "pkg-a", version: "1.0.0" }, cwd);
+
+    expect(result).toEqual(packageData);
   });
 });

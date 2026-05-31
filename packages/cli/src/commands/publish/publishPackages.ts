@@ -88,18 +88,21 @@ export default async function publishPackages({
   otp,
   preState,
   tag,
+  cwd = process.cwd(),
 }: {
   packages: Package[];
   access: AccessType;
   otp?: string;
   preState: PreState | undefined;
   tag?: string;
+  cwd?: string;
 }) {
   const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
   const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
-    preState
+    preState,
+    cwd
   );
 
   if (unpublishedPackagesInfo.length === 0) {
@@ -159,11 +162,12 @@ async function publishAPackage(
 
 async function getUnpublishedPackages(
   packages: Array<Package>,
-  preState: PreState | undefined
+  preState: PreState | undefined,
+  cwd: string
 ) {
   const results: Array<PkgInfo> = await Promise.all(
     packages.map(async ({ packageJson }) => {
-      const response = await infoAllow404(packageJson);
+      const response = await infoAllow404(packageJson, cwd);
       let publishedState: PublishedState = "never";
       if (response.published) {
         publishedState = "published";

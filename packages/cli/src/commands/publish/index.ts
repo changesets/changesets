@@ -67,6 +67,7 @@ export default async function publish(
     otp,
     preState,
     tag: releaseTag,
+    cwd,
   });
   const privatePackages = packages.filter(
     (pkg) => pkg.packageJson.private && pkg.packageJson.version

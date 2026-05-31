@@ -55,6 +55,7 @@ describe("publishPackages", () => {
       packages: (await getPackages(cwd)).packages,
       access: "public",
       preState: undefined,
+      cwd,
     });
 
     const spawnCalls = mockSpawn.mock.calls;
@@ -99,6 +100,7 @@ describe("publishPackages", () => {
       packages: (await getPackages(cwd)).packages,
       access: "public",
       preState: undefined,
+      cwd,
     });
 
     expect(result).toEqual([]);
@@ -135,6 +137,7 @@ describe("publishPackages", () => {
       packages: (await getPackages(cwd)).packages,
       access: "public",
       preState: undefined,
+      cwd,
     });
 
     expect(result).toEqual([
@@ -182,6 +185,7 @@ describe("publishPackages", () => {
         initialVersions: {},
         changesets: [],
       },
+      cwd,
     });
 
     expect(result).toEqual([
@@ -231,6 +235,7 @@ describe("publishPackages", () => {
         initialVersions: {},
         changesets: [],
       },
+      cwd,
     });
 
     expect(result).toEqual([
@@ -243,4 +248,5 @@ describe("publishPackages", () => {
     expect(publishCall?.[1]).toEqual(expect.arrayContaining(["--tag", "beta"]));
     expect(publishCall?.[1]).not.toContain("latest");
   });
+
 });

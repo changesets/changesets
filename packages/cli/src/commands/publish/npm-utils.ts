@@ -127,8 +127,37 @@ export async function getTokenIsRequired() {
   return json.tfa.mode === "auth-and-writes";
 }
 
-// `npm info <pkg> --json` (aka `npm view`) behavior:
+type InfoTool =
+  | { name: "npm" }
+  | { name: "pnpm" }
+  | { name: "yarn-classic" }
+  | { name: "yarn-berry" };
+
+async function getInfoTool(cwd: string): Promise<InfoTool> {
+  const pm = await detect({ cwd });
+  if (pm?.name === "pnpm") return { name: "pnpm" };
+  if (pm?.name === "yarn") {
+    return pm.agent === "yarn@berry"
+      ? { name: "yarn-berry" }
+      : { name: "yarn-classic" };
+  }
+  return { name: "npm" };
+}
+
+// yarn v1 returns {"type":"error","data":"..."} (non-empty stdout) when a package or
+// version isn't found, unlike npm/pnpm which return empty stdout.
+function isYarnClassicError(output: string): boolean {
+  try {
+    return JSON.parse(output)?.type === "error";
+  } catch {
+    return false;
+  }
+}
+
+// Queries the registry for package info using the detected package manager.
+// Tool-specific behaviour:
 //
+// npm / pnpm:
 // - Bare package name starts with version string `'latest'`. If
 //   `dist-tags['latest']` exists, it's replaced with that value (e.g.
 //   `'1.0.0'`). Then ALL versions are filtered through
@@ -141,60 +170,99 @@ export async function getTokenIsRequired() {
 // - When at least one version matches, the JSON output includes a `versions`
 //   array with ALL published versions including prereleases (bleeds through
 //   from the packument, unfiltered).
-// - npmjs.org auto-assigns `latest` on first publish in addition to the
-//   provided --tag, so bare queries always work there. GitHub Packages does
-//   NOT auto-assign `latest`, so the empty-stdout case above applies.
-// - `npm info <pkg>@<exact-prerelease> --json` works as long as that
-//   version exists on the registry: exact strings pass `semver.satisfies`,
-//   and the output still includes the full `versions` history (same
-//   packument merge). Returns empty when the version doesn't exist yet.
-// - Consequence: the exact-version fallback only provides data when
-//   localVersion is already published. For a new unpublished version both
-//   queries return empty → no versions list → only-pre detection is not
-//   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
-//   published with preState.tag rather than "latest".
-export function getPackageInfo(packageJson: PackageJSON) {
+// - Registry is passed via `--registry` (or `--<scope>:registry`) CLI flag.
+//
+// yarn berry:
+// - Uses `yarn npm info`, which reads the registry from `.yarnrc.yml` rather
+//   than accepting a CLI `--registry` flag.
+// - Returns npm-compatible JSON directly (no envelope wrapping).
+//
+// yarn classic (v1):
+// - Uses `yarn info`, which wraps the result in `{ type: "inspect", data: {...} }`.
+//   The wrapper is stripped before returning so callers get the raw packument shape.
+// - Registry is passed via `--registry` (not the scoped `--@scope:registry` form,
+//   which yarn v1 silently ignores).
+// - Returns `{ type: "error", data: "..." }` (non-empty) instead of empty stdout
+//   when a package or version isn't found.
+//
+// Two-query strategy (applies to all tools):
+// - npmjs.org auto-assigns `latest` on first publish, so bare queries always
+//   work there. GitHub Packages does NOT auto-assign `latest`, so the bare
+//   query returns empty stdout (or a yarn-classic error) and we fall back to
+//   an exact-version query.
+// - The exact-version fallback only provides data when localVersion is already
+//   published. For a new unpublished version both queries return empty →
+//   no versions list → only-pre detection is not possible. Such packages
+//   (e.g. GitHub Packages with no auto-latest) are published with
+//   preState.tag rather than "latest".
+export function getPackageInfo(
+  packageJson: PackageJSON,
+  cwd = process.cwd()
+) {
   return npmRequestQueue.add(async () => {
     info(`npm info ${packageJson.name}`);
 
     const { scope, registry } = getCorrectRegistry(packageJson);
+    const infoTool = await getInfoTool(cwd);
+
+    // yarn classic only understands --registry=<url>, not --@scope:registry=<url>
+    const registryFlag =
+      infoTool.name === "yarn-classic"
+        ? `--registry=${registry}`
+        : `--${scope ? `${scope}:` : ""}registry=${registry}`;
+
+    const runInfoCommand = (pkgSpecifier: string) => {
+      if (infoTool.name === "yarn-berry") {
+        // yarn berry's `npm` subcommand returns npm-compatible JSON;
+        // registry is read from .yarnrc.yml rather than a CLI flag
+        return spawn("yarn", ["npm", "info", pkgSpecifier, "--json"], { cwd });
+      }
+      const cmd = infoTool.name === "yarn-classic" ? "yarn" : infoTool.name;
+      return spawn(cmd, ["info", pkgSpecifier, registryFlag, "--json"], { cwd });
+    };
+
+    // "no useful result" means empty stdout for npm/pnpm/yarn-berry, or a
+    // {"type":"error"} response for yarn classic (which never returns empty stdout).
+    const isEmptyResult = (output: string) =>
+      output === "" ||
+      (infoTool.name === "yarn-classic" && isYarnClassicError(output));
 
     // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
     // bleed-through, enabling only-pre detection downstream. Returns empty when no `latest` exists.
-    let result = await spawn("npm", [
-      "info",
-      packageJson.name,
-      `--${scope ? `${scope}:` : ""}registry=${registry}`,
-      "--json",
-    ]);
+    let result = await runInfoCommand(packageJson.name);
 
     // Bare query returned nothing — retry with exact version specifier
     // to handle prerelease-only packages on registries without auto-`latest`.
-    if (result.stdout.toString() === "") {
-      result = await spawn("npm", [
-        "info",
-        `${packageJson.name}@${packageJson.version}`,
-        `--${scope ? `${scope}:` : ""}registry=${registry}`,
-        "--json",
-      ]);
+    if (isEmptyResult(result.stdout.toString())) {
+      result = await runInfoCommand(
+        `${packageJson.name}@${packageJson.version}`
+      );
     }
 
     // Normalize, just in case. The above prerelease-only package query should already have returned:
     // - either a result (when the package+version exists)
     // - or an error with: "code": "E404", "summary": "No match found for version $VERSION",
-    if (result.stdout.toString() === "") {
+    if (isEmptyResult(result.stdout.toString())) {
       return {
         error: {
           code: "E404",
         },
       };
     }
-    return jsonParse(result.stdout.toString());
+
+    const parsed = jsonParse(result.stdout.toString());
+
+    // yarn classic wraps packument data in { type: "inspect", data: {...} }
+    if (infoTool.name === "yarn-classic" && parsed?.type === "inspect") {
+      return parsed.data;
+    }
+
+    return parsed;
   });
 }
 
-export async function infoAllow404(packageJson: PackageJSON) {
-  let pkgInfo = await getPackageInfo(packageJson);
+export async function infoAllow404(packageJson: PackageJSON, cwd?: string) {
+  let pkgInfo = await getPackageInfo(packageJson, cwd);
   if (pkgInfo.error?.code === "E404") {
     warn(`Received 404 for npm info ${pc.cyan(`"${packageJson.name}"`)}`);
     return { published: false, pkgInfo: {} };
