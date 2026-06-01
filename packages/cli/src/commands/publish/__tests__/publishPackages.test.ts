@@ -200,6 +200,48 @@ describe("publishPackages", () => {
     );
   });
 
+  it("passes the otp token to npm publish when provided", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    mockSpawnImplementation((cmd, args) => {
+      if (cmd === "npm" && args?.[0] === "info") {
+        return spawnResult("");
+      }
+      if (cmd === "npm" && args?.[0] === "publish") {
+        return spawnResult(JSON.stringify({ id: "pkg-a@1.0.0" }));
+      }
+      return spawnResult("", 1);
+    });
+
+    const result = await publishPackages({
+      packages: (await getPackages(cwd)).packages,
+      access: "public",
+      preState: undefined,
+      otp: "123456",
+      cwd,
+    });
+
+    expect(result).toEqual([
+      { name: "pkg-a", newVersion: "1.0.0", result: "published" },
+    ]);
+
+    const publishCall = mockSpawn.mock.calls.find(
+      ([cmd, args]) => cmd === "npm" && args?.[0] === "publish"
+    );
+    expect(publishCall?.[1]).toEqual(
+      expect.arrayContaining(["--otp", "123456"])
+    );
+  });
+
   it("publishes with specified tag on GitHub Packages when new version not yet published", async () => {
     // GitHub Packages does not auto-assign latest on first publish. When both
     // the bare query and the exact-version fallback return empty, there is no

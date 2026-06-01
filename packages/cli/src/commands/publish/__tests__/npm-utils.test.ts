@@ -260,4 +260,67 @@ describe("getPackageInfo", () => {
 
     expect(result).toEqual(packageData);
   });
+
+  it("uses yarn npm info when packageManager field specifies yarn berry", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        packageManager: "yarn@4.0.0",
+      }),
+    });
+
+    mockSpawn.mockImplementation(((cmd: string, args: string[]) =>
+      Promise.resolve(
+        cmd === "yarn" && args?.[0] === "npm" && args?.[1] === "info"
+          ? spawnResult(
+              JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.0",
+                versions: ["1.0.0"],
+              })
+            )
+          : spawnResult("", 1)
+      )) as any);
+
+    const result = await getPackageInfo(
+      { name: "pkg-a", version: "1.0.0" },
+      cwd
+    );
+
+    expect(result).toMatchObject({ name: "pkg-a" });
+    expect(
+      mockSpawn.mock.calls.some(
+        ([cmd, args]) =>
+          cmd === "yarn" && args?.[0] === "npm" && args?.[1] === "info"
+      )
+    ).toBe(true);
+    expect(
+      mockSpawn.mock.calls.some(
+        ([cmd, args]) => cmd === "npm" && args?.[0] === "info"
+      )
+    ).toBe(false);
+  });
+
+  it("throws when yarn classic returns unparseable non-JSON output", async () => {
+    // isYarnClassicError's JSON.parse throws on non-JSON output, returning false
+    // from the catch block. The output is treated as non-empty, so jsonParse
+    // is called next and propagates the SyntaxError.
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        packageManager: "yarn@1.22.0",
+      }),
+    });
+
+    mockSpawn.mockImplementation(((cmd: string, args: string[]) =>
+      Promise.resolve(
+        cmd === "yarn" && args?.[0] === "info"
+          ? spawnResult("error: network timeout")
+          : spawnResult("", 1)
+      )) as any);
+
+    await expect(
+      getPackageInfo({ name: "pkg-a", version: "1.0.0" }, cwd)
+    ).rejects.toThrow(SyntaxError);
+  });
 });
