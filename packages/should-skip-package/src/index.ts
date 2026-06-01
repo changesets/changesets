@@ -1,5 +1,6 @@
 import { Package } from "@manypkg/get-packages";
 import { PackageGroup } from "@changesets/types";
+import micromatch from "micromatch";
 
 export function shouldSkipPackage(
   { packageJson }: Package,
@@ -11,7 +12,7 @@ export function shouldSkipPackage(
     allowPrivatePackages: boolean;
   }
 ) {
-  if (ignore.includes(packageJson.name)) {
+  if (micromatch([packageJson.name], ignore).length > 0) {
     return true;
   }
 
