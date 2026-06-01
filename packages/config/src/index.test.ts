@@ -752,6 +752,34 @@ describe("parser errors", () => {
     `);
   });
 
+  test("ignore globs require dependent packages to also be ignored", async () => {
+    expect(() =>
+      unsafeParse(
+        { ignore: ["pkg-*", "!pkg-a"] },
+        {
+          ...defaultPackages,
+          packages: [
+            {
+              packageJson: {
+                name: "pkg-a",
+                version: "1.0.0",
+                dependencies: { "pkg-b": "1.0.0" },
+              },
+              dir: "dir",
+            },
+            {
+              packageJson: { name: "pkg-b", version: "1.0.0" },
+              dir: "dir",
+            },
+          ],
+        }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The package "pkg-a" depends on the skipped package "pkg-b", but "pkg-a" is not being skipped. Please add "pkg-a" to the \`ignore\` option."
+    `);
+  });
+
   test("ignore should not require private versioned dependents to also be ignored", () => {
     expect(() =>
       unsafeParse(
