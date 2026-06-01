@@ -248,5 +248,4 @@ describe("publishPackages", () => {
     expect(publishCall?.[1]).toEqual(expect.arrayContaining(["--tag", "beta"]));
     expect(publishCall?.[1]).not.toContain("latest");
   });
-
 });

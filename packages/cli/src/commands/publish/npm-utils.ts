@@ -195,10 +195,7 @@ function isYarnClassicError(output: string): boolean {
 //   no versions list → only-pre detection is not possible. Such packages
 //   (e.g. GitHub Packages with no auto-latest) are published with
 //   preState.tag rather than "latest".
-export function getPackageInfo(
-  packageJson: PackageJSON,
-  cwd = process.cwd()
-) {
+export function getPackageInfo(packageJson: PackageJSON, cwd = process.cwd()) {
   return npmRequestQueue.add(async () => {
     info(`npm info ${packageJson.name}`);
 
@@ -218,7 +215,9 @@ export function getPackageInfo(
         return spawn("yarn", ["npm", "info", pkgSpecifier, "--json"], { cwd });
       }
       const cmd = infoTool.name === "yarn-classic" ? "yarn" : infoTool.name;
-      return spawn(cmd, ["info", pkgSpecifier, registryFlag, "--json"], { cwd });
+      return spawn(cmd, ["info", pkgSpecifier, registryFlag, "--json"], {
+        cwd,
+      });
     };
 
     // "no useful result" means empty stdout for npm/pnpm/yarn-berry, or a

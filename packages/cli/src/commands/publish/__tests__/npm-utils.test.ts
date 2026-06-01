@@ -1,4 +1,8 @@
-import { getCorrectRegistry, isCustomRegistry, getPackageInfo } from "../npm-utils";
+import {
+  getCorrectRegistry,
+  isCustomRegistry,
+  getPackageInfo,
+} from "../npm-utils";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import spawn from "spawndamnit";
 
@@ -160,19 +164,30 @@ describe("getPackageInfo", () => {
       Promise.resolve(
         cmd === "pnpm" && args?.[0] === "info"
           ? spawnResult(
-              JSON.stringify({ name: "pkg-a", version: "1.0.0", versions: ["1.0.0"] })
+              JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.0",
+                versions: ["1.0.0"],
+              })
             )
           : spawnResult("", 1)
       )) as any);
 
-    const result = await getPackageInfo({ name: "pkg-a", version: "1.0.0" }, cwd);
+    const result = await getPackageInfo(
+      { name: "pkg-a", version: "1.0.0" },
+      cwd
+    );
 
     expect(result).toMatchObject({ name: "pkg-a" });
     expect(
-      mockSpawn.mock.calls.some(([cmd, args]) => cmd === "npm" && args?.[0] === "info")
+      mockSpawn.mock.calls.some(
+        ([cmd, args]) => cmd === "npm" && args?.[0] === "info"
+      )
     ).toBe(false);
     expect(
-      mockSpawn.mock.calls.some(([cmd, args]) => cmd === "pnpm" && args?.[0] === "info")
+      mockSpawn.mock.calls.some(
+        ([cmd, args]) => cmd === "pnpm" && args?.[0] === "info"
+      )
     ).toBe(true);
   });
 
@@ -199,14 +214,21 @@ describe("getPackageInfo", () => {
           : spawnResult("", 1)
       )) as any);
 
-    const result = await getPackageInfo({ name: "pkg-a", version: "1.0.0" }, cwd);
+    const result = await getPackageInfo(
+      { name: "pkg-a", version: "1.0.0" },
+      cwd
+    );
 
     expect(result).toEqual({ error: { code: "E404" } });
     expect(
-      mockSpawn.mock.calls.some(([cmd, args]) => cmd === "npm" && args?.[0] === "info")
+      mockSpawn.mock.calls.some(
+        ([cmd, args]) => cmd === "npm" && args?.[0] === "info"
+      )
     ).toBe(false);
     expect(
-      mockSpawn.mock.calls.some(([cmd, args]) => cmd === "yarn" && args?.[0] === "info")
+      mockSpawn.mock.calls.some(
+        ([cmd, args]) => cmd === "yarn" && args?.[0] === "info"
+      )
     ).toBe(true);
   });
 
@@ -218,7 +240,11 @@ describe("getPackageInfo", () => {
       }),
     });
 
-    const packageData = { name: "pkg-a", version: "1.0.0", versions: ["1.0.0"] };
+    const packageData = {
+      name: "pkg-a",
+      version: "1.0.0",
+      versions: ["1.0.0"],
+    };
 
     mockSpawn.mockImplementation(((cmd: string, args: string[]) =>
       Promise.resolve(
@@ -227,7 +253,10 @@ describe("getPackageInfo", () => {
           : spawnResult("", 1)
       )) as any);
 
-    const result = await getPackageInfo({ name: "pkg-a", version: "1.0.0" }, cwd);
+    const result = await getPackageInfo(
+      { name: "pkg-a", version: "1.0.0" },
+      cwd
+    );
 
     expect(result).toEqual(packageData);
   });
