@@ -129,7 +129,7 @@ export async function createChangeset(
           `Which packages should have a ${c.green("minor")} ${c.gray(`(X.${c.green("X")}.X)`)} bump?`,
         ),
         {
-          "all packages": [...pkgsLeftToGetBumpTypeFor].map((pkgName) => ({
+          "all packages": Array.from(pkgsLeftToGetBumpTypeFor, (pkgName) => ({
             label: formatPkgNameAndVersion(
               pkgName,
               pkgJsonsByName.get(pkgName)!.version,
@@ -147,8 +147,13 @@ export async function createChangeset(
     }
 
     if (pkgsLeftToGetBumpTypeFor.size !== 0) {
-      const patchBumpedPackages = [...pkgsLeftToGetBumpTypeFor].map((pkgName) =>
-        formatPkgNameAndVersion(pkgName, pkgJsonsByName.get(pkgName)!.version),
+      const patchBumpedPackages = Array.from(
+        pkgsLeftToGetBumpTypeFor,
+        (pkgName) =>
+          formatPkgNameAndVersion(
+            pkgName,
+            pkgJsonsByName.get(pkgName)!.version,
+          ),
       );
       log.info(
         `

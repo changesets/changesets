@@ -175,7 +175,7 @@ export async function applyReleasePlan(
           // so we just check if any skipped package exists in this changeset, and only remove it if none exists
           // options to skip packages were added in v2, so we don't need to do it for v1 changesets
           if (
-            !changeset.releases.find((release) =>
+            !changeset.releases.some((release) =>
               shouldSkipPackage(packagesByName.get(release.name)!, {
                 ignore: config.ignore,
                 allowPrivatePackages: config.privatePackages.version,

@@ -85,7 +85,7 @@ export class FakeFullState {
     } = {},
   ) {
     const changeset = getChangeset(data);
-    if (this.changesets.find((c) => c.id === changeset.id)) {
+    if (this.changesets.some((c) => c.id === changeset.id)) {
       throw new Error(
         `tried to add a second changeset with same id: ${changeset.id}`,
       );
@@ -121,7 +121,7 @@ export class FakeFullState {
   addPackage(name: string, version: string) {
     const pkg = getPackage({ name, version });
     if (
-      this.packages.packages.find(
+      this.packages.packages.some(
         (c) => c.packageJson.name === pkg.packageJson.name,
       )
     ) {

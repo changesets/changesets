@@ -28,7 +28,7 @@ export default defineConfig(
     extends: [
       // "e18e/modernization", // TODO: enable
       "e18e/moduleReplacements",
-      // "e18e/performanceImprovements", // TODO: enable
+      "e18e/performanceImprovements",
       "js/recommended",
       "node/flat/recommended",
       "tseslint/recommended",

@@ -214,7 +214,7 @@ export function assembleReleasePlan(
 
   return {
     changesets: relevantChangesets,
-    releases: [...releases.values()].map((incompleteRelease) => {
+    releases: Array.from(releases.values(), (incompleteRelease) => {
       return {
         ...incompleteRelease,
         newVersion: snapshotSuffix
