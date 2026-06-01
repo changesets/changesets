@@ -26,7 +26,7 @@ type SnapshotReleaseParameters = {
 
 function getPreVersion(version: string) {
   const parsed = semverParse(version)!;
-  let preVersion = parsed.prerelease[1] == null ? -1 : parsed.prerelease[1];
+  let preVersion = parsed.prerelease[1] ?? -1;
   if (typeof preVersion !== "number") {
     throw new InternalError("preVersion is not a number");
   }
@@ -323,10 +323,8 @@ function getPreInfo(
   };
 
   for (const [, pkg] of packagesByName) {
-    if (updatedPreState.initialVersions[pkg.packageJson.name] == null) {
-      updatedPreState.initialVersions[pkg.packageJson.name] =
-        pkg.packageJson.version;
-    }
+    updatedPreState.initialVersions[pkg.packageJson.name] ??=
+      pkg.packageJson.version;
   }
   // Populate preVersion
   // preVersion is the map between package name and its next pre version number.

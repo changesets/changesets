@@ -38,7 +38,7 @@ const getAllDependencies = (
   return allDependencies;
 };
 
-const isProtocolRange = (range: string) => range.indexOf(":") !== -1;
+const isProtocolRange = (range: string) => range.includes(":");
 
 const getValidRange = (potentialRange: string) => {
   if (isProtocolRange(potentialRange)) {

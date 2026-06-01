@@ -26,7 +26,7 @@ export default defineConfig(
       vitest,
     },
     extends: [
-      // "e18e/modernization", // TODO: enable
+      "e18e/modernization",
       "e18e/moduleReplacements",
       "e18e/performanceImprovements",
       "js/recommended",
