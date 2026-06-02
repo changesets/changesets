@@ -1,3 +1,5 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import { readPreState } from "@changesets/pre";
 import type { Config } from "@changesets/types";
 import { log } from "@clack/prompts";
@@ -17,6 +19,7 @@ export type PublishPlan = ReadonlyArray<
 
 export interface PublishPlanOptions {
   cwd?: string;
+  output?: string;
 }
 
 export async function publishPlan(
@@ -51,6 +54,16 @@ export async function publishPlan(
       )
     : [];
 
+  const plan: PublishPlan = [[...releases, ...tagReleases]];
+
+  if (options?.output) {
+    await fs.writeFile(
+      path.resolve(cwd, options.output),
+      JSON.stringify(plan, undefined, 2),
+    );
+    return plan;
+  }
+
   if (releases.length === 0 && tagReleases.length === 0) {
     log.info("No projects to publish or tag.");
     return [];
@@ -74,5 +87,5 @@ ${tagReleases.map((release) => `- ${release.name}@${release.version}`).join("\n"
     );
   }
 
-  return [[...releases, ...tagReleases]];
+  return plan;
 }
