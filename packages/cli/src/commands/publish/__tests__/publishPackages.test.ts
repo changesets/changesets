@@ -1,6 +1,7 @@
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { getPackages } from "@manypkg/get-packages";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { getUnpublishedPackages } from "../getReleaseEntries.ts";
 import * as npmUtils from "../npm-utils.ts";
 import { publishPackages } from "../publishPackages.ts";
 
@@ -42,10 +43,14 @@ describe("publishPackages", () => {
         result: "published",
       }));
 
+      const releases = await getUnpublishedPackages(
+        (await getPackages(cwd)).packages,
+        undefined,
+      );
+
       await publishPackages({
-        packages: (await getPackages(cwd)).packages,
+        releases,
         access: "public",
-        preState: undefined,
       });
       expect(mockedNpmUtils.getTokenIsRequired).not.toHaveBeenCalled();
     });
