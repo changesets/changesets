@@ -15,7 +15,6 @@ import { getCorrectRegistry, infoAllow404 } from "./npm-utils.ts";
 type PublishedState = "never" | "published" | "only-pre";
 
 type BaseReleaseEntry = {
-  pkg: Package;
   name: string;
   version: string;
 };
@@ -92,7 +91,6 @@ export async function getUnpublishedPackages(
     if (!publishedVersions.includes(localVersion)) {
       const release = {
         kind: "publish" as const,
-        pkg,
         name: pkg.packageJson.name,
         version: localVersion,
         access: pkg.packageJson.publishConfig?.access || access,
@@ -133,14 +131,10 @@ export async function getUntaggedPrivatePackages(
   const taggablePackages = packages.filter(
     (pkg) => pkg.packageJson.private && !shouldSkipPackage(pkg, options),
   );
-  const packagesByName = new Map(
-    taggablePackages.map((pkg) => [pkg.packageJson.name, pkg]),
-  );
 
   return (await getUntaggedPackages(taggablePackages, cwd, tool)).map(
     ({ name, newVersion }) => ({
       kind: "tag-only",
-      pkg: packagesByName.get(name)!,
       name,
       version: newVersion,
     }),

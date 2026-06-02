@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import c from "@changesets/color";
+import type { Package } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
 import type { TwoFactorState } from "../../utils/types.ts";
 import {
@@ -58,9 +59,11 @@ export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
 
 export async function publishPackages({
   releases,
+  packages,
   otp,
 }: {
   releases: Array<PublishReleaseEntry>;
+  packages: Array<Package>;
   otp?: string;
 }): Promise<PublishedResult[]> {
   if (releases.length === 0) {
@@ -73,8 +76,11 @@ export async function publishPackages({
     npmPublishQueue.setConcurrency(1);
   }
 
+  const packagesByName = new Map(
+    packages.map((pkg) => [pkg.packageJson.name, pkg]),
+  );
   const publishPromises = releases.map((release) =>
-    publishAPackage(release, twoFactorState),
+    publishAPackage(packagesByName.get(release.name)!, release, twoFactorState),
   );
 
   if (!hasToDelegate && releases.length > 1) {
@@ -105,10 +111,10 @@ export async function publishPackages({
 }
 
 async function publishAPackage(
+  pkg: Package,
   release: PublishReleaseEntry,
   twoFactorState: TwoFactorState,
 ): Promise<PublishedResult> {
-  const pkg = release.pkg;
   const { name, version, publishConfig } = pkg.packageJson;
 
   const publishConfirmation = await publish(

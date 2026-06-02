@@ -99,6 +99,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
 
   const publishedPackages = await publishPackages({
     releases: unpublishedPackages,
+    packages: packages.packages,
     otp: options?.otp,
   });
 
