@@ -1,7 +1,9 @@
 import c from "@changesets/color";
+import { readPreState } from "@changesets/pre";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   AccessType,
+  Config,
   Package,
   PackageGroup,
   Packages,
@@ -9,8 +11,9 @@ import type {
 } from "@changesets/types";
 import { log } from "@clack/prompts";
 import semverParse from "semver/functions/parse.js";
+import { getPackages } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
-import { getCorrectRegistry, infoAllow404 } from "./npm-utils.ts";
+import { getCorrectRegistry, infoAllow404 } from "../publish/npm-utils.ts";
 
 type PublishedState = "never" | "published" | "only-pre";
 
@@ -24,11 +27,16 @@ export type PublishReleaseEntry = BaseReleaseEntry & {
   access: AccessType;
   registry: string;
   tag: string;
+  tarballFilename?: string;
 };
 
 export type TagReleaseEntry = BaseReleaseEntry & {
   kind: "tag-only";
 };
+
+export type PublishPlan = ReadonlyArray<
+  ReadonlyArray<PublishReleaseEntry | TagReleaseEntry>
+>;
 
 function getReleaseTag(
   publishedState: PublishedState,
@@ -58,41 +66,39 @@ export async function getUnpublishedPackages(
       .map(async (pkg) => {
         const response = await infoAllow404(pkg.packageJson);
         let publishedState: PublishedState = "never";
+
         if (response.published) {
           publishedState = "published";
-          if (
-            preState != null &&
-            response.pkgInfo.versions &&
-            response.pkgInfo.versions.every(
-              (version: string) =>
-                semverParse(version)!.prerelease[0] === preState.tag,
-            )
-          ) {
-            publishedState = "only-pre";
+
+          if (preState !== undefined) {
+            if (
+              response.pkgInfo.versions &&
+              !response.pkgInfo.versions[
+                `${semverParse(pkg.packageJson.version)!.major}.${semverParse(pkg.packageJson.version)!.minor}.${semverParse(pkg.packageJson.version)!.patch}`
+              ]
+            ) {
+              publishedState = "only-pre";
+            }
           }
         }
 
         return {
           pkg,
           publishedState,
-          publishedVersions: response.pkgInfo.versions || [],
         };
       }),
   );
 
-  const packagesToPublish: Array<PublishReleaseEntry> = [];
-  const previewLines: string[] = [];
+  let packagesToPublish: Array<PublishReleaseEntry> = [];
+  const previewLines: Array<string> = [];
   let alreadyPublishedCount = 0;
 
-  for (const result of results) {
-    const { pkg, publishedState, publishedVersions } = result;
-    const localVersion = pkg.packageJson.version;
-
-    if (!publishedVersions.includes(localVersion)) {
-      const release = {
-        kind: "publish" as const,
+  for (const { pkg, publishedState } of results) {
+    if (publishedState !== "published") {
+      const release: PublishReleaseEntry = {
+        kind: "publish",
         name: pkg.packageJson.name,
-        version: localVersion,
+        version: pkg.packageJson.version,
         access: pkg.packageJson.publishConfig?.access || access,
         registry: getCorrectRegistry(pkg.packageJson).registry,
         tag: getReleaseTag(publishedState, preState, options.tag),
@@ -139,4 +145,41 @@ export async function getUntaggedPrivatePackages(
       version: newVersion,
     }),
   );
+}
+
+export async function getPublishPlan(
+  rootDir: string,
+  config: Config,
+  options?: { tag?: string },
+): Promise<PublishPlan> {
+  const packages = await getPackages(rootDir);
+  const preState = await readPreState(rootDir);
+  const releases = await getUnpublishedPackages(
+    packages.packages,
+    preState,
+    config.access,
+    {
+      tag: options?.tag,
+      ignore: config.ignore,
+      allowPrivatePackages: config.privatePackages.tag,
+    },
+  );
+  const tagReleases = config.privatePackages.tag
+    ? await getUntaggedPrivatePackages(
+        packages.rootDir,
+        packages.packages,
+        packages.tool,
+        {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.tag,
+        },
+      )
+    : [];
+
+  if (releases.length === 0 && tagReleases.length === 0) {
+    return [];
+  }
+
+  // add one nesting level in preparation for topological sorting in the future
+  return [[...releases, ...tagReleases]];
 }

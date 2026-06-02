@@ -9,7 +9,7 @@ import {
   npmPublishQueue,
   publish,
 } from "./npm-utils.ts";
-import type { PublishReleaseEntry } from "./getReleaseEntries.ts";
+import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 export type PublishedResult = {
   name: string;

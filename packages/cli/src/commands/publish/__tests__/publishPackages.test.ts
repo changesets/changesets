@@ -1,7 +1,7 @@
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { getPackages } from "@manypkg/get-packages";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getUnpublishedPackages } from "../getReleaseEntries.ts";
+import { getUnpublishedPackages } from "../../publish-plan/getPublishPlan.ts";
 import * as npmUtils from "../npm-utils.ts";
 import { publishPackages } from "../publishPackages.ts";
 
@@ -38,6 +38,9 @@ describe("publishPackages", () => {
           version: "1.0.0",
         },
       }));
+      mockedNpmUtils.getCorrectRegistry.mockReturnValue({
+        registry: "https://registry.npmjs.org",
+      } as never);
 
       mockedNpmUtils.publish.mockImplementation(async () => ({
         result: "published",

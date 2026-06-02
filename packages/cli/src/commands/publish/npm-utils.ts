@@ -81,7 +81,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   };
 }
 
-async function getPublishTool(
+export async function getPublishTool(
   cwd: string,
 ): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
   const pm = await detect({ cwd });

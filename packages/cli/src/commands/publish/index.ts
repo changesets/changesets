@@ -7,12 +7,8 @@ import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { readConfig } from "../../utils/read-config.ts";
+import { getPublishPlan, type TagReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 import { ensureChangesetFolder } from "../shared.ts";
-import {
-  type TagReleaseEntry,
-  getUnpublishedPackages,
-  getUntaggedPrivatePackages,
-} from "./getReleaseEntries.ts";
 import { publishPackages } from "./publishPackages.ts";
 
 function formatPackageList(
@@ -71,31 +67,16 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   }
 
   const config = await readConfig(packages);
-  const unpublishedPackages = await getUnpublishedPackages(
-    packages.packages,
-    preState,
-    config.access,
-    {
-      tag: releaseTag,
-      ignore: config.ignore,
-      allowPrivatePackages: config.privatePackages.tag,
-    },
+  const plan = await getPublishPlan(packages.rootDir, config, {
+    tag: releaseTag,
+  });
+  const entries = plan.flat();
+  const unpublishedPackages = entries.filter(
+    (release) => release.kind === "publish",
   );
-  const tagPrivatePackages = config.privatePackages && config.privatePackages.tag;
-
-  const untaggedPrivatePackageReleases = tagPrivatePackages
-    ? await getUntaggedPrivatePackages(
-        packages.rootDir,
-        packages.packages.filter(
-          (pkg) => pkg.packageJson.private && pkg.packageJson.version,
-        ),
-        packages.tool,
-        {
-          ignore: config.ignore,
-          allowPrivatePackages: config.privatePackages.tag,
-        },
-      )
-    : [];
+  const untaggedPrivatePackageReleases = entries.filter(
+    (release): release is TagReleaseEntry => release.kind === "tag-only",
+  );
 
   const publishedPackages = await publishPackages({
     releases: unpublishedPackages,

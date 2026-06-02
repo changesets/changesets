@@ -3,10 +3,15 @@ import path from "node:path";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as npmUtils from "../../publish/npm-utils.ts";
+import * as getUntaggedPackagesModule from "../../../utils/getUntaggedPackages.ts";
 import { publishPlan } from "../index.ts";
 
 vi.mock("../../publish/npm-utils.ts");
+vi.mock("../../../utils/getUntaggedPackages.ts");
 const mockedNpmUtils = vi.mocked(npmUtils);
+const mockedGetUntaggedPackages = vi.mocked(
+  getUntaggedPackagesModule.getUntaggedPackages,
+);
 
 describe("publish-plan", () => {
   silenceLogsInBlock();
@@ -18,10 +23,14 @@ describe("publish-plan", () => {
   it("returns publish and tag-only entries", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
+        name: "repo",
         private: true,
         workspaces: ["packages/*"],
       }),
-      ".changeset/config.json": JSON.stringify({ privatePackages: { tag: true } }),
+      "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({
+        privatePackages: { version: true, tag: true },
+      }),
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -39,6 +48,12 @@ describe("publish-plan", () => {
         version: "1.0.0",
       },
     }));
+    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
+      registry: "https://registry.npmjs.org",
+    } as never);
+    mockedGetUntaggedPackages.mockResolvedValue([
+      { name: "pkg-b", newVersion: "1.0.0" },
+    ] as never);
 
     const result = await publishPlan({ cwd });
 
@@ -64,9 +79,11 @@ describe("publish-plan", () => {
   it("returns empty arrays when there is nothing to publish or tag", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
+        name: "repo",
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/config.json": JSON.stringify({}),
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
@@ -81,6 +98,10 @@ describe("publish-plan", () => {
         versions: ["1.0.0"],
       },
     }));
+    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
+      registry: "https://registry.npmjs.org",
+    } as never);
+    mockedGetUntaggedPackages.mockResolvedValue([] as never);
 
     const result = await publishPlan({ cwd });
 
@@ -90,9 +111,11 @@ describe("publish-plan", () => {
   it("writes the plan to the output file", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
+        name: "repo",
         private: true,
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       ".changeset/config.json": JSON.stringify({}),
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
@@ -106,6 +129,10 @@ describe("publish-plan", () => {
         version: "1.0.0",
       },
     }));
+    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
+      registry: "https://registry.npmjs.org",
+    } as never);
+    mockedGetUntaggedPackages.mockResolvedValue([] as never);
 
     const output = "publish-plan.json";
     const result = await publishPlan({ cwd, output });

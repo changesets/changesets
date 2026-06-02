@@ -2,13 +2,13 @@ import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import * as getReleaseEntries from "../getReleaseEntries.ts";
+import * as getPublishPlanModule from "../../publish-plan/getPublishPlan.ts";
 import { publish as runRelease } from "../index.ts";
 import * as publishPackagesModule from "../publishPackages.ts";
 
 vi.mock("@changesets/git");
 vi.mock("../publishPackages.ts");
-vi.mock("../getReleaseEntries.ts");
+vi.mock("../../publish-plan/getPublishPlan.ts");
 
 describe("running release", () => {
   silenceLogsInBlock();
@@ -44,10 +44,7 @@ describe("running release", () => {
         { name: "pkg-a", version: "1.1.0", result: "published" },
         { name: "pkg-b", version: "1.0.1", result: "published" },
       ]);
-      vi.mocked(getReleaseEntries.getUnpublishedPackages).mockResolvedValue([]);
-      vi.mocked(getReleaseEntries.getUntaggedPrivatePackages).mockResolvedValue(
-        [],
-      );
+      vi.mocked(getPublishPlanModule.getPublishPlan).mockResolvedValue([[]]);
 
       await runRelease({ cwd });
 

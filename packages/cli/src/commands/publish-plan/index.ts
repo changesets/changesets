@@ -1,21 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { readPreState } from "@changesets/pre";
-import type { Config } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import {
-  type PublishReleaseEntry,
-  type TagReleaseEntry,
-  getUnpublishedPackages,
-  getUntaggedPrivatePackages,
-} from "../publish/getReleaseEntries.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { readConfig } from "../../utils/read-config.ts";
-
-export type PublishPlan = ReadonlyArray<
-  ReadonlyArray<PublishReleaseEntry | TagReleaseEntry>
->;
+import { getPublishPlan, type PublishPlan } from "./getPublishPlan.ts";
 
 export interface PublishPlanOptions {
   cwd?: string;
@@ -30,31 +19,10 @@ export async function publishPlan(
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
   const config = await readConfig(packages);
-  const preState = await readPreState(packages.rootDir);
-
-  const releases = await getUnpublishedPackages(
-    packages.packages,
-    preState,
-    config.access,
-    {
-      ignore: config.ignore,
-      allowPrivatePackages: config.privatePackages.tag,
-    },
-  );
-
-  const tagReleases = config.privatePackages?.tag
-    ? await getUntaggedPrivatePackages(
-        packages.rootDir,
-        packages.packages,
-        packages.tool,
-        {
-          ignore: config.ignore,
-          allowPrivatePackages: config.privatePackages.tag,
-        },
-      )
-    : [];
-
-  const plan: PublishPlan = [[...releases, ...tagReleases]];
+  const plan = await getPublishPlan(packages.rootDir, config);
+  const entries = plan.flat();
+  const releases = entries.filter((release) => release.kind === "publish");
+  const tagReleases = entries.filter((release) => release.kind === "tag-only");
 
   if (options?.output) {
     await fs.writeFile(

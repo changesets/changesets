@@ -114,6 +114,15 @@ cli
   });
 
 cli
+  .command("pack", "Pack publishable packages into tarballs")
+  .option("--from <file>", "Read the publish plan from a JSON file")
+  .action(async (options) => {
+    normalizeOptions(options);
+    const { pack } = await import("./commands/pack/index.ts");
+    await pack(options);
+  });
+
+cli
   .command("status", "Show the changesets that currently exist")
   .example("  $ changeset status --verbose")
   .option("--since <branch>", "Show changesets since the provided git ref")
