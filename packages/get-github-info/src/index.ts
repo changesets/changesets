@@ -126,9 +126,7 @@ const GHDataLoader = new DataLoader<RequestData, any>(async (requests) => {
   }
   const repos: ReposWithCommitsAndPRsToFetch = {};
   requests.forEach(({ repo, ...data }) => {
-    if (repos[repo] == null) {
-      repos[repo] = [];
-    }
+    repos[repo] ??= [];
     repos[repo].push(data);
   });
 

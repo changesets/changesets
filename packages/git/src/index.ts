@@ -271,29 +271,26 @@ export async function getChangedPackagesSinceRef({
 }): Promise<Package[]> {
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
 
-  return (
-    [...(await getPackages(cwd)).packages]
-      // sort packages by length of dir, so that we can check for subdirs first
-      .sort((pkgA, pkgB) => pkgB.dir.length - pkgA.dir.length)
-      .filter((pkg) => {
-        const changedPackageFiles: string[] = [];
+  return (await getPackages(cwd)).packages
+    .toSorted((pkgA, pkgB) => pkgB.dir.length - pkgA.dir.length)
+    .filter((pkg) => {
+      const changedPackageFiles: string[] = [];
 
-        for (let i = changedFiles.length - 1; i >= 0; i--) {
-          const file = changedFiles[i];
-          const isFileInPkg = !path.relative(pkg.dir, file).startsWith("..");
-          if (isFileInPkg) {
-            changedFiles.splice(i, 1);
-            const relativeFile = file.slice(pkg.dir.length + 1);
-            changedPackageFiles.push(relativeFile);
-          }
+      for (let i = changedFiles.length - 1; i >= 0; i--) {
+        const file = changedFiles[i];
+        const isFileInPkg = !path.relative(pkg.dir, file).startsWith("..");
+        if (isFileInPkg) {
+          changedFiles.splice(i, 1);
+          const relativeFile = file.slice(pkg.dir.length + 1);
+          changedPackageFiles.push(relativeFile);
         }
+      }
 
-        return (
-          changedPackageFiles.length > 0 &&
-          globMatchSome(changedPackageFiles, changedFilePatterns)
-        );
-      })
-  );
+      return (
+        changedPackageFiles.length > 0 &&
+        globMatchSome(changedPackageFiles, changedFilePatterns)
+      );
+    });
 }
 
 export async function tagExists(tagStr: string, cwd: string) {

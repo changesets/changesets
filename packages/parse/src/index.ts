@@ -1,4 +1,5 @@
 import type { Release, VersionType } from "@changesets/types";
+// eslint-disable-next-line e18e/ban-dependencies
 import yaml from "js-yaml";
 
 const mdRegex = /\s*---([^]*?)\n\s*---(\s*(?:\n|$)[^]*)/;
