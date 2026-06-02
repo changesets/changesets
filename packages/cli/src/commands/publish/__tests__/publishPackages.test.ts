@@ -46,11 +46,12 @@ describe("publishPackages", () => {
       const releases = await getUnpublishedPackages(
         (await getPackages(cwd)).packages,
         undefined,
+        "public",
+        { ignore: [], allowPrivatePackages: false },
       );
 
       await publishPackages({
         releases,
-        access: "public",
       });
       expect(mockedNpmUtils.getTokenIsRequired).not.toHaveBeenCalled();
     });

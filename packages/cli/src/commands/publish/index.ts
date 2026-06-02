@@ -9,18 +9,19 @@ import { importantWarning } from "../../utils/cli-utilities.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import {
+  type TagReleaseEntry,
   getUnpublishedPackages,
   getUntaggedPrivatePackages,
 } from "./getReleaseEntries.ts";
 import { publishPackages } from "./publishPackages.ts";
 
 function formatPackageList(
-  pkgs: Array<{ name: string; newVersion: string }>,
+  pkgs: Array<{ name: string; version: string }>,
   versionColor = c.green,
 ) {
   return pkgs
     .toSorted((a, b) => a.name.localeCompare(b.name))
-    .map((p) => `${c.blueBright(p.name)}@${versionColor(p.newVersion)}`)
+    .map((p) => `${c.blueBright(p.name)}@${versionColor(p.version)}`)
     .join("\n");
 }
 
@@ -73,7 +74,12 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   const unpublishedPackages = await getUnpublishedPackages(
     packages.packages,
     preState,
-    releaseTag,
+    config.access,
+    {
+      tag: releaseTag,
+      ignore: config.ignore,
+      allowPrivatePackages: config.privatePackages.tag,
+    },
   );
   const tagPrivatePackages = config.privatePackages && config.privatePackages.tag;
 
@@ -93,8 +99,6 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
 
   const publishedPackages = await publishPackages({
     releases: unpublishedPackages,
-    // if not public, we won't pass the access, and it works as normal
-    access: config.access,
     otp: options?.otp,
   });
 
@@ -172,16 +176,16 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
 
 async function tagPublish(
   tool: string,
-  packageReleases: Array<{ name: string; newVersion: string }>,
+  packageReleases: Array<{ name: string; version: string }>,
   cwd: string,
 ) {
   if (tool !== "root") {
     for (const pkg of packageReleases) {
-      const tag = `${pkg.name}@${pkg.newVersion}`;
+      const tag = `${pkg.name}@${pkg.version}`;
       await git.tag(tag, cwd);
     }
   } else {
-    const tag = `v${packageReleases[0].newVersion}`;
+    const tag = `v${packageReleases[0].version}`;
     await git.tag(tag, cwd);
   }
 }

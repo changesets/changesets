@@ -1,6 +1,7 @@
 import c from "@changesets/color";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
+  AccessType,
   Package,
   PackageGroup,
   Packages,
@@ -9,15 +10,25 @@ import type {
 import { log } from "@clack/prompts";
 import semverParse from "semver/functions/parse.js";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
-import { infoAllow404 } from "./npm-utils.ts";
+import { getCorrectRegistry, infoAllow404 } from "./npm-utils.ts";
 
 type PublishedState = "never" | "published" | "only-pre";
 
-export type PackageReleaseEntry = {
+type BaseReleaseEntry = {
   pkg: Package;
-  publishedState: PublishedState;
-  publishedVersions: string[];
+  name: string;
+  version: string;
+};
+
+export type PublishReleaseEntry = BaseReleaseEntry & {
+  kind: "publish";
+  access: AccessType;
+  registry: string;
   tag: string;
+};
+
+export type TagReleaseEntry = BaseReleaseEntry & {
+  kind: "tag-only";
 };
 
 function getReleaseTag(
@@ -37,11 +48,14 @@ function getReleaseTag(
 export async function getUnpublishedPackages(
   packages: Array<Package>,
   preState: PreState | undefined,
-  tag?: string,
-): Promise<Array<PackageReleaseEntry>> {
-  const results: Array<Omit<PackageReleaseEntry, "tag">> = await Promise.all(
+  access: AccessType,
+  options: { tag?: string; ignore: PackageGroup; allowPrivatePackages: boolean },
+): Promise<Array<PublishReleaseEntry>> {
+  const results = await Promise.all(
     packages
-      .filter((pkg) => !pkg.packageJson.private)
+      .filter(
+        (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
+      )
       .map(async (pkg) => {
         const response = await infoAllow404(pkg.packageJson);
         let publishedState: PublishedState = "never";
@@ -67,7 +81,7 @@ export async function getUnpublishedPackages(
       }),
   );
 
-  const packagesToPublish: Array<PackageReleaseEntry> = [];
+  const packagesToPublish: Array<PublishReleaseEntry> = [];
   const previewLines: string[] = [];
   let alreadyPublishedCount = 0;
 
@@ -77,13 +91,16 @@ export async function getUnpublishedPackages(
 
     if (!publishedVersions.includes(localVersion)) {
       const release = {
-        ...result,
-        tag: getReleaseTag(publishedState, preState, tag),
+        kind: "publish" as const,
+        pkg,
+        name: pkg.packageJson.name,
+        version: localVersion,
+        access: pkg.packageJson.publishConfig?.access || access,
+        registry: getCorrectRegistry(pkg.packageJson).registry,
+        tag: getReleaseTag(publishedState, preState, options.tag),
       };
       packagesToPublish.push(release);
-      previewLines.push(
-        `${c.blue(pkg.packageJson.name)}@${c.green(localVersion)}`,
-      );
+      previewLines.push(`${c.blue(release.name)}@${c.green(release.version)}`);
       if (preState != null && publishedState === "only-pre") {
         previewLines.push(
           `${c.gray("└")} will be published to ${c.cyan("latest")} rather than ${c.cyan(preState.tag)} as it will be its first published version.`,
@@ -112,10 +129,20 @@ export async function getUntaggedPrivatePackages(
   packages: Array<Package>,
   tool: Packages["tool"],
   options: { ignore: PackageGroup; allowPrivatePackages: boolean },
-) {
-  return getUntaggedPackages(
-    packages.filter((pkg) => !shouldSkipPackage(pkg, options)),
-    cwd,
-    tool,
+): Promise<Array<TagReleaseEntry>> {
+  const taggablePackages = packages.filter(
+    (pkg) => pkg.packageJson.private && !shouldSkipPackage(pkg, options),
+  );
+  const packagesByName = new Map(
+    taggablePackages.map((pkg) => [pkg.packageJson.name, pkg]),
+  );
+
+  return (await getUntaggedPackages(taggablePackages, cwd, tool)).map(
+    ({ name, newVersion }) => ({
+      kind: "tag-only",
+      pkg: packagesByName.get(name)!,
+      name,
+      version: newVersion,
+    }),
   );
 }

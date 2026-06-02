@@ -1,20 +1,18 @@
 import { resolve } from "node:path";
 import c from "@changesets/color";
-import type { AccessType } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
 import type { TwoFactorState } from "../../utils/types.ts";
 import {
-  getCorrectRegistry,
   getTokenIsRequired,
   isCustomRegistry,
   npmPublishQueue,
   publish,
 } from "./npm-utils.ts";
-import type { PackageReleaseEntry } from "./getReleaseEntries.ts";
+import type { PublishReleaseEntry } from "./getReleaseEntries.ts";
 
 export type PublishedResult = {
   name: string;
-  newVersion: string;
+  version: string;
   result: "published" | "skipped" | "failed";
 };
 
@@ -23,7 +21,7 @@ const getTwoFactorState = async ({
   releases,
 }: {
   otp?: string;
-  releases: Array<PackageReleaseEntry>;
+  releases: Array<PublishReleaseEntry>;
 }): Promise<TwoFactorState> => {
   if (otp) {
     return {
@@ -34,9 +32,7 @@ const getTwoFactorState = async ({
 
   if (
     !process.stdin.isTTY ||
-    releases.some((release) =>
-      isCustomRegistry(getCorrectRegistry(release.pkg.packageJson).registry),
-    ) ||
+    releases.some((release) => isCustomRegistry(release.registry)) ||
     isCustomRegistry(process.env.npm_config_registry)
   ) {
     return {
@@ -62,11 +58,9 @@ export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
 
 export async function publishPackages({
   releases,
-  access,
   otp,
 }: {
-  releases: Array<PackageReleaseEntry>;
-  access: AccessType;
+  releases: Array<PublishReleaseEntry>;
   otp?: string;
 }): Promise<PublishedResult[]> {
   if (releases.length === 0) {
@@ -80,7 +74,7 @@ export async function publishPackages({
   }
 
   const publishPromises = releases.map((release) =>
-    publishAPackage(release, access, twoFactorState),
+    publishAPackage(release, twoFactorState),
   );
 
   if (!hasToDelegate && releases.length > 1) {
@@ -102,7 +96,7 @@ export async function publishPackages({
       publishPromises.map(async (publishPromise) => {
         const result = await publishPromise;
         log.success(
-          `Published ${c.blue(result.name)}@${c.green(result.newVersion)}!`,
+          `Published ${c.blue(result.name)}@${c.green(result.version)}!`,
         );
         return result;
       }),
@@ -111,8 +105,7 @@ export async function publishPackages({
 }
 
 async function publishAPackage(
-  release: PackageReleaseEntry,
-  access: AccessType,
+  release: PublishReleaseEntry,
   twoFactorState: TwoFactorState,
 ): Promise<PublishedResult> {
   const pkg = release.pkg;
@@ -125,7 +118,7 @@ async function publishAPackage(
       publishDir: publishConfig?.directory
         ? resolve(pkg.dir, publishConfig.directory)
         : pkg.dir,
-      access: publishConfig?.access || access,
+      access: release.access,
       tag: release.tag,
     },
     twoFactorState,
@@ -133,7 +126,7 @@ async function publishAPackage(
 
   return {
     name,
-    newVersion: version,
+    version,
     result: publishConfirmation.result,
   };
 }

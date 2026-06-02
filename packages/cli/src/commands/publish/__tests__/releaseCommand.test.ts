@@ -41,8 +41,8 @@ describe("running release", () => {
 
       vi.mocked(git.tag).mockResolvedValue(undefined as never);
       vi.mocked(publishPackagesModule.publishPackages).mockResolvedValue([
-        { name: "pkg-a", newVersion: "1.1.0", result: "published" },
-        { name: "pkg-b", newVersion: "1.0.1", result: "published" },
+        { name: "pkg-a", version: "1.1.0", result: "published" },
+        { name: "pkg-b", version: "1.0.1", result: "published" },
       ]);
       vi.mocked(getReleaseEntries.getUnpublishedPackages).mockResolvedValue([]);
       vi.mocked(getReleaseEntries.getUntaggedPrivatePackages).mockResolvedValue(
