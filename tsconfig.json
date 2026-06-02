@@ -10,8 +10,8 @@
       "ES2024",
       "ES2025.Promise",
       "ESNext.Array",
-      "ESNext.Collection",
-      "ESNext.Iterator"
+      "ES2025.Collection",
+      "ES2025.Iterator"
     ],
     "types": ["node"]
   },
