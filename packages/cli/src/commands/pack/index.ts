@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -21,11 +22,17 @@ export interface PackedRelease {
   name: string;
   version: string;
   tarballFilename: string;
+  checksum: string;
 }
 
 function getTarballFilename(stdout: string) {
   const json = getLastJsonObjectFromString(stdout);
   return Array.isArray(json) ? json[0]?.filename : json?.filename;
+}
+
+async function getChecksum(filePath: string) {
+  const contents = await fs.readFile(filePath);
+  return createHash("sha256").update(contents).digest("hex");
 }
 
 export async function pack(
@@ -99,11 +106,15 @@ export async function pack(
         if (!tarballFilename) {
           throw new Error(`Failed to determine tarball filename for ${release.name}`);
         }
+        const checksum = await getChecksum(
+          path.join(outputDir, tarballFilename),
+        );
 
         return {
           name: release.name,
           version: release.version,
           tarballFilename,
+          checksum,
         };
       }),
     ),
@@ -112,7 +123,7 @@ export async function pack(
   const tarballFilenamesByRelease = new Map(
     packedReleases.map((release) => [
       `${release.name}@${release.version}`,
-      release.tarballFilename,
+      release,
     ]),
   );
   const packedPlan = plan.map((group) =>
@@ -121,11 +132,14 @@ export async function pack(
         return release;
       }
 
+      const packedRelease = tarballFilenamesByRelease.get(
+        `${release.name}@${release.version}`,
+      )!;
+
       return {
         ...release,
-        tarballFilename: tarballFilenamesByRelease.get(
-          `${release.name}@${release.version}`,
-        ),
+        tarballFilename: packedRelease.tarballFilename,
+        checksum: packedRelease.checksum,
       };
     }),
   );

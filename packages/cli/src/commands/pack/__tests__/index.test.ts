@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
@@ -29,6 +30,11 @@ function execResult(stdout: string, exitCode = 0) {
     killed: false,
   };
 }
+
+const tarballContents = "tarball";
+const tarballChecksum = createHash("sha256")
+  .update(tarballContents)
+  .digest("hex");
 
 describe("pack", () => {
   silenceLogsInBlock();
@@ -77,7 +83,7 @@ describe("pack", () => {
       const dest = args[args.indexOf("--pack-destination") + 1];
       const tarballFilename = "pkg-a-1.0.0.tgz";
       await fs.mkdir(dest, { recursive: true });
-      await fs.writeFile(path.join(dest, tarballFilename), "tarball");
+      await fs.writeFile(path.join(dest, tarballFilename), tarballContents);
       return execResult(JSON.stringify([{ filename: tarballFilename }]));
     });
 
@@ -88,6 +94,7 @@ describe("pack", () => {
         name: "pkg-a",
         version: "1.0.0",
         tarballFilename: "pkg-a-1.0.0.tgz",
+        checksum: tarballChecksum,
       },
     ]);
 
@@ -103,7 +110,8 @@ describe("pack", () => {
             "access": "restricted",
             "registry": "https://registry.npmjs.org",
             "tag": "latest",
-            "tarballFilename": "pkg-a-1.0.0.tgz"
+            "tarballFilename": "pkg-a-1.0.0.tgz",
+            "checksum": "${tarballChecksum}"
           },
           {
             "kind": "tag-only",
@@ -158,7 +166,7 @@ describe("pack", () => {
       const dest = args[args.indexOf("--pack-destination") + 1];
       const tarballFilename = "pkg-a-1.0.0.tgz";
       await fs.mkdir(dest, { recursive: true });
-      await fs.writeFile(path.join(dest, tarballFilename), "tarball");
+      await fs.writeFile(path.join(dest, tarballFilename), tarballContents);
       return execResult(JSON.stringify([{ filename: tarballFilename }]));
     });
 
@@ -169,11 +177,12 @@ describe("pack", () => {
         name: "pkg-a",
         version: "1.0.0",
         tarballFilename: "pkg-a-1.0.0.tgz",
+        checksum: tarballChecksum,
       },
     ]);
 
     await expect(
       fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"),
-    ).resolves.toContain(`"tarballFilename": "pkg-a-1.0.0.tgz"`);
+    ).resolves.toContain(`"checksum": "${tarballChecksum}"`);
   });
 });

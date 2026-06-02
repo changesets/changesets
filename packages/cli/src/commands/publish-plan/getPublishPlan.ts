@@ -28,6 +28,7 @@ export type PublishReleaseEntry = BaseReleaseEntry & {
   registry: string;
   tag: string;
   tarballFilename?: string;
+  checksum?: string;
 };
 
 export type TagReleaseEntry = BaseReleaseEntry & {
