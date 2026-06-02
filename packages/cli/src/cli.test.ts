@@ -4,6 +4,7 @@ import { add } from "./commands/add/index.ts";
 import { init } from "./commands/init/index.ts";
 import { pre } from "./commands/pre/index.ts";
 import { publish } from "./commands/publish/index.ts";
+import { publishPlan } from "./commands/publish-plan/index.ts";
 import { status } from "./commands/status/index.ts";
 import { tag } from "./commands/tag/index.ts";
 import { version } from "./commands/version/index.ts";
@@ -12,6 +13,7 @@ vi.mock("./commands/init/index.ts");
 vi.mock("./commands/add/index.ts");
 vi.mock("./commands/version/index.ts");
 vi.mock("./commands/publish/index.ts");
+vi.mock("./commands/publish-plan/index.ts");
 vi.mock("./commands/status/index.ts");
 vi.mock("./commands/tag/index.ts");
 vi.mock("./commands/pre/index.ts");
@@ -116,6 +118,16 @@ const tests: CommandTest[] = [
           tag: "beta",
           gitTag: true,
         },
+      },
+    ],
+  },
+  {
+    command: "publish-plan",
+    fn: publishPlan,
+    cases: [
+      {
+        args: [],
+        options: {},
       },
     ],
   },
