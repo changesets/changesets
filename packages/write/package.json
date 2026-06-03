@@ -16,12 +16,11 @@
   "dependencies": {
     "@changesets/format": "^0.1.0",
     "@changesets/types": "workspace:^",
-    "human-id": "^4.1.3"
+    "human-id": "^4.2.0"
   },
   "devDependencies": {
     "@changesets/parse": "workspace:*",
-    "@changesets/test-utils": "workspace:*",
-    "vitest": "^4.1.6"
+    "@changesets/test-utils": "workspace:*"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"

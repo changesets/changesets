@@ -15,12 +15,11 @@
   },
   "dependencies": {
     "@changesets/types": "workspace:^",
-    "semver": "^7.8.0"
+    "semver": "^7.8.1"
   },
   "devDependencies": {
     "@changesets/color": "workspace:^",
-    "@changesets/test-utils": "workspace:*",
-    "vitest": "^4.1.6"
+    "@changesets/test-utils": "workspace:*"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
