@@ -7,6 +7,7 @@ import { Config } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import fs from "fs-extra";
 import path from "path";
+import semverValid from "semver/functions/valid";
 import add from "./commands/add";
 import init from "./commands/init";
 import pre from "./commands/pre";
@@ -32,6 +33,10 @@ function validateCommandFlags(
     error(`Usage: changeset ${COMMAND_HELP[command]}`);
     throw new ExitError(1);
   }
+}
+
+function isValidPrereleasePart(value: string): boolean {
+  return semverValid(`0.0.0-${value}`) !== null;
 }
 
 export async function run(
@@ -144,6 +149,12 @@ export async function run(
         );
 
         const messages = [];
+        if (typeof snapshot === "string" && !isValidPrereleasePart(snapshot)) {
+          messages.push(
+            `The snapshot tag "${snapshot}" passed to the \`--snapshot\` option is not a valid semver prerelease.`
+          );
+        }
+
         for (const pkgName of ignoreArrayFromCmd || []) {
           if (!pkgNames.has(pkgName)) {
             messages.push(

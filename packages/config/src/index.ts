@@ -1,6 +1,7 @@
 import * as fs from "fs-extra";
 import path from "path";
 import micromatch from "micromatch";
+import semverValid from "semver/functions/valid";
 import { ValidationError } from "@changesets/errors";
 import { warn } from "@changesets/logger";
 import { Packages, getPackages } from "@manypkg/get-packages";
@@ -90,6 +91,31 @@ function isArray<T>(
     : readonly any[]
   : any[] {
   return Array.isArray(arg);
+}
+
+const snapshotPrereleaseTemplatePlaceholders = {
+  commit: "abcdef",
+  tag: "tag",
+  timestamp: "1639354050879",
+  datetime: "20211213000730",
+};
+
+function isValidSnapshotPrereleaseTemplate(template: string): boolean {
+  if (template === "") {
+    return true;
+  }
+
+  const placeholders = Object.keys(
+    snapshotPrereleaseTemplatePlaceholders
+  ) as Array<keyof typeof snapshotPrereleaseTemplatePlaceholders>;
+  const snapshotSuffix = placeholders.reduce((prev, key) => {
+    return prev.replace(
+      new RegExp(`\\{${key}\\}`, "g"),
+      snapshotPrereleaseTemplatePlaceholders[key]
+    );
+  }, template);
+
+  return semverValid(`0.0.0-${snapshotSuffix}`) !== null;
 }
 
 export let read = async (cwd: string, packages?: Packages) => {
@@ -459,6 +485,17 @@ export let parse = (json: WrittenConfig, packages: Packages): Config => {
           null,
           2
         )} when the only valid values are undefined, or a template string.`
+      );
+    } else if (
+      snapshot.prereleaseTemplate !== undefined &&
+      !isValidSnapshotPrereleaseTemplate(snapshot.prereleaseTemplate)
+    ) {
+      messages.push(
+        `The \`snapshot.prereleaseTemplate\` option is set as ${JSON.stringify(
+          snapshot.prereleaseTemplate,
+          null,
+          2
+        )} but it is not a valid semver prerelease template.`
       );
     }
   }
