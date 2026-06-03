@@ -1,17 +1,29 @@
+import { createReadStream, createWriteStream } from "node:fs";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { pipeline } from "node:stream/promises";
+import { createGzip } from "node:zlib";
 import { ExitError } from "@changesets/errors";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
+import tar from "tar-stream";
 import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
 import { readConfig } from "../../utils/read-config.ts";
-import { getPublishPlan, type PublishPlan } from "../publish-plan/getPublishPlan.ts";
+import {
+  getPublishPlan,
+  type PublishPlan,
+  type TarballMetadata,
+} from "../publish-plan/getPublishPlan.ts";
 import { getPublishTool } from "../publish/npm-utils.ts";
 import { ensureChangesetFolder } from "../shared.ts";
+import { getDefaultWorkspaceConcurrency } from "../../utils/workspaceConcurrency.ts";
+
+const FILE_MODE = 0o644;
+const STABLE_MTIME = new Date("1985-10-26T08:15:00.000Z");
 
 export interface PackOptions {
   cwd?: string;
@@ -21,8 +33,11 @@ export interface PackOptions {
 export interface PackedRelease {
   name: string;
   version: string;
-  tarballFilename: string;
-  checksum: string;
+  tarball: TarballMetadata;
+}
+
+export interface PackResult {
+  tarballPath: string | undefined;
 }
 
 function getTarballFilename(stdout: string) {
@@ -31,13 +46,82 @@ function getTarballFilename(stdout: string) {
 }
 
 async function getChecksum(filePath: string) {
-  const contents = await fs.readFile(filePath);
-  return createHash("sha256").update(contents).digest("hex");
+  const hash = createHash("sha256");
+  await pipeline(createReadStream(filePath), hash);
+  return hash.digest("hex");
+}
+
+async function addFileEntry(
+  pack: tar.Pack,
+  name: string,
+  source: string,
+) {
+  const stat = await fs.stat(source);
+
+  await new Promise<void>((resolve, reject) => {
+    const entry = pack.entry(
+      { name, mode: FILE_MODE, mtime: STABLE_MTIME, size: stat.size },
+      (error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      },
+    );
+
+    pipeline(createReadStream(source), entry).catch(reject);
+  });
+}
+
+async function collectFilesRecursively(
+  dir: string,
+  files: Array<string> = []
+): Promise<Array<string>> {
+  const entries = (await fs.readdir(dir, { withFileTypes: true })).sort(
+    (a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0
+  );
+
+  for (const entry of entries) {
+    const entryPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      await collectFilesRecursively(entryPath, files)
+      continue;
+    }
+
+    if (entry.isFile()) {
+      files.push(entryPath);
+    }
+  }
+
+  return files;
+}
+
+async function createTarball(dir: string, target: string) {
+  const pack = tar.pack();
+  const tarball = createWriteStream(target);
+  // for reproducible tarballs, we need to ensure that the entries are always in the same order
+  // so we have to collect sorted files first
+  const files = await collectFilesRecursively(dir);
+
+  const tarballPromise = pipeline(pack, createGzip(), tarball);
+
+  for (const file of files) {
+    await addFileEntry(
+      pack,
+      path.relative(dir, file).split(path.sep).join(path.posix.sep),
+      file,
+    );
+  }
+
+  pack.finalize();
+  await tarballPromise;
 }
 
 export async function pack(
   options?: PackOptions,
-): Promise<Array<PackedRelease>> {
+): Promise<PackResult> {
   const cwd = options?.cwd ?? process.cwd();
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
@@ -53,11 +137,16 @@ export async function pack(
 
   if (releases.length === 0) {
     log.info("No packages to pack.");
-    return [];
+    return {
+      tarballPath: undefined,
+    };
   }
 
   const outputDir = await fs.mkdtemp(path.join(os.tmpdir(), "changesets-pack-"));
-  const queue = createPromiseQueue(5);
+  const packagesDir = path.join(outputDir, "packages");
+  await fs.mkdir(packagesDir, { recursive: true });
+
+  const queue = createPromiseQueue(getDefaultWorkspaceConcurrency());
   const packagesByName = new Map(packages.packages.map((pkg) => [pkg.packageJson.name, pkg]));
 
   const packedReleases = await Promise.all(
@@ -75,8 +164,8 @@ export async function pack(
           : pkg.dir;
         const args =
           publishTool.name === "pnpm"
-            ? ["pack", "--json", "--pack-destination", outputDir]
-            : ["pack", publishDir, "--json", "--pack-destination", outputDir];
+            ? ["pack", "--json", "--pack-destination", packagesDir]
+            : ["pack", publishDir, "--json", "--pack-destination", packagesDir];
         const execCwd = publishTool.name === "pnpm" ? publishDir : pkg.dir;
         const { exitCode, stdout, stderr } = await exec(
           publishTool.name,
@@ -107,14 +196,16 @@ export async function pack(
           throw new Error(`Failed to determine tarball filename for ${release.name}`);
         }
         const checksum = await getChecksum(
-          path.join(outputDir, tarballFilename),
+          path.join(packagesDir, tarballFilename),
         );
 
         return {
           name: release.name,
           version: release.version,
-          tarballFilename,
-          checksum,
+          tarball: {
+            filename: tarballFilename,
+            checksum,
+          },
         };
       }),
     ),
@@ -138,8 +229,7 @@ export async function pack(
 
       return {
         ...release,
-        tarballFilename: packedRelease.tarballFilename,
-        checksum: packedRelease.checksum,
+        tarball: packedRelease.tarball,
       };
     }),
   );
@@ -148,6 +238,8 @@ export async function pack(
     path.join(outputDir, "publish-plan.json"),
     JSON.stringify(packedPlan, undefined, 2),
   );
+  const tarballPath = path.join(packages.rootDir, "changesets-pack.tgz");
+  await createTarball(outputDir, tarballPath);
 
   log.info(
     `
@@ -155,6 +247,9 @@ Packed packages:
 ${packedReleases.map((release) => `- ${release.name}@${release.version}`).join("\n")}
     `.trim(),
   );
+  log.info(`Pack artifact: ${tarballPath}`);
 
-  return packedReleases;
+  return {
+    tarballPath,
+  };
 }

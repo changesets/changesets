@@ -22,13 +22,17 @@ type BaseReleaseEntry = {
   version: string;
 };
 
+export type TarballMetadata = {
+  filename: string;
+  checksum: string;
+};
+
 export type PublishReleaseEntry = BaseReleaseEntry & {
   kind: "publish";
   access: AccessType;
   registry: string;
   tag: string;
-  tarballFilename?: string;
-  checksum?: string;
+  tarball?: TarballMetadata;
 };
 
 export type TagReleaseEntry = BaseReleaseEntry & {

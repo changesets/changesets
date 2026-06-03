@@ -1,12 +1,16 @@
 import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { pipeline } from "node:stream/promises";
+import { createGunzip } from "node:zlib";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as npmUtils from "../../publish/npm-utils.ts";
 import * as getUntaggedPackagesModule from "../../../utils/getUntaggedPackages.ts";
 import { pack } from "../index.ts";
 import { exec } from "tinyexec";
+import tar from "tar-stream";
 
 vi.mock("tinyexec");
 vi.mock("../../publish/npm-utils.ts");
@@ -31,10 +35,42 @@ function execResult(stdout: string, exitCode = 0) {
   };
 }
 
+function mockExecImplementation(
+  fn: (
+    cmd: string,
+    args: readonly string[],
+  ) => Promise<ReturnType<typeof execResult>>,
+) {
+  mockedExec.mockImplementation(((cmd: string, args?: readonly string[]) =>
+    Promise.resolve(fn(cmd, args ?? []))) as any);
+}
+
 const tarballContents = "tarball";
 const tarballChecksum = createHash("sha256")
   .update(tarballContents)
   .digest("hex");
+
+async function readOuterTarball(tarballPath: string) {
+  const extract = tar.extract();
+  const entries = new Map<string, string>();
+
+  extract.on("entry", (header, stream, next) => {
+    const chunks: Array<Buffer> = [];
+    stream.on("data", (chunk) => {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    });
+    stream.on("end", () => {
+      entries.set(header.name, Buffer.concat(chunks).toString("utf8"));
+      next();
+    });
+    stream.on("error", next);
+    stream.resume();
+  });
+
+  await pipeline(createReadStream(tarballPath), createGunzip(), extract);
+
+  return entries;
+}
 
 describe("pack", () => {
   silenceLogsInBlock();
@@ -79,7 +115,7 @@ describe("pack", () => {
     mockedGetUntaggedPackages.mockResolvedValue([
       { name: "pkg-b", newVersion: "1.0.0" },
     ] as never);
-    mockedExec.mockImplementation(async (cmd, args) => {
+    mockExecImplementation(async (cmd, args) => {
       const dest = args[args.indexOf("--pack-destination") + 1];
       const tarballFilename = "pkg-a-1.0.0.tgz";
       await fs.mkdir(dest, { recursive: true });
@@ -89,14 +125,19 @@ describe("pack", () => {
 
     const result = await pack({ cwd });
 
-    expect(result).toEqual([
-      {
-        name: "pkg-a",
-        version: "1.0.0",
-        tarballFilename: "pkg-a-1.0.0.tgz",
-        checksum: tarballChecksum,
-      },
-    ]);
+    expect(result).toEqual({
+      packedReleases: [
+        {
+          name: "pkg-a",
+          version: "1.0.0",
+          tarball: {
+            filename: "pkg-a-1.0.0.tgz",
+            checksum: tarballChecksum,
+          },
+        },
+      ],
+      tarballPath: path.join(cwd, "changesets-pack.tgz"),
+    });
 
     await expect(
       fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"),
@@ -110,8 +151,10 @@ describe("pack", () => {
             "access": "restricted",
             "registry": "https://registry.npmjs.org",
             "tag": "latest",
-            "tarballFilename": "pkg-a-1.0.0.tgz",
-            "checksum": "${tarballChecksum}"
+            "tarball": {
+              "filename": "pkg-a-1.0.0.tgz",
+              "checksum": "${tarballChecksum}"
+            }
           },
           {
             "kind": "tag-only",
@@ -121,6 +164,19 @@ describe("pack", () => {
         ]
       ]"
     `);
+    await expect(fs.stat(result.tarballPath!)).resolves.toMatchObject({
+      isFile: expect.any(Function),
+    });
+
+    const entries = await readOuterTarball(result.tarballPath!);
+    expect([...entries.keys()].toSorted()).toEqual([
+      "packages/pkg-a-1.0.0.tgz",
+      "publish-plan.json",
+    ]);
+    expect(entries.get("publish-plan.json")).toContain(
+      `"checksum": "${tarballChecksum}"`,
+    );
+    expect(entries.get("packages/pkg-a-1.0.0.tgz")).toBe(tarballContents);
   });
 
   it("packs from an existing plan file", async () => {
@@ -162,7 +218,7 @@ describe("pack", () => {
       path.join(cwd, "publish-plan.json"),
       JSON.stringify(plan, undefined, 2),
     );
-    mockedExec.mockImplementation(async (cmd, args) => {
+    mockExecImplementation(async (cmd, args) => {
       const dest = args[args.indexOf("--pack-destination") + 1];
       const tarballFilename = "pkg-a-1.0.0.tgz";
       await fs.mkdir(dest, { recursive: true });
@@ -172,17 +228,25 @@ describe("pack", () => {
 
     const result = await pack({ cwd, from: "publish-plan.json" });
 
-    expect(result).toEqual([
-      {
-        name: "pkg-a",
-        version: "1.0.0",
-        tarballFilename: "pkg-a-1.0.0.tgz",
-        checksum: tarballChecksum,
-      },
-    ]);
+    expect(result).toEqual({
+      packedReleases: [
+        {
+          name: "pkg-a",
+          version: "1.0.0",
+          tarball: {
+            filename: "pkg-a-1.0.0.tgz",
+            checksum: tarballChecksum,
+          },
+        },
+      ],
+      tarballPath: path.join(cwd, "changesets-pack.tgz"),
+    });
 
     await expect(
       fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"),
     ).resolves.toContain(`"checksum": "${tarballChecksum}"`);
+    await expect(fs.stat(result.tarballPath!)).resolves.toMatchObject({
+      isFile: expect.any(Function),
+    });
   });
 });
