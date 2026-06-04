@@ -1,4 +1,8 @@
+import { randomUUID } from "node:crypto";
 import { defaultConfig } from "@changesets/config";
+import type { Config, VersionType } from "@changesets/types";
+import { defu } from "defu";
+import { inc } from "semver";
 import { beforeEach, describe, expect, it } from "vitest";
 import { assembleReleasePlan } from "./index.ts";
 import { FakeFullState } from "./test-utils.ts";
@@ -1544,10 +1548,249 @@ describe("bumping peerDeps", () => {
   });
 });
 
-/*
-    Bumping peerDeps is a tricky issue, so we are testing every single combination here so that
-    we can have absolute certainty when changing anything to do with them.
-    In general the rule for bumping peerDeps is that:
-      * All MINOR or MAJOR peerDep bumps must MAJOR bump all dependents - regardless of ranges
-      * Otherwise - normal patching rules apply
- */
+describe("dependent bumping", () => {
+  type DeepPartial<T> = T extends object
+    ? { [P in keyof T]?: DeepPartial<T[P]> }
+    : T;
+
+  /** Semver range prefix written on the dependency. */
+  type Range = "^" | "~" | "=";
+  /** Which field the dependency lives in. */
+  type DepKind = "dep" | "dev" | "peer";
+
+  const RANGES = ["^", "~", "="] as const satisfies readonly Range[];
+  const DEP_KINDS = [
+    "dep",
+    "dev",
+    "peer",
+  ] as const satisfies readonly DepKind[];
+  const BUMPS = [
+    "none",
+    "patch",
+    "minor",
+    "major",
+  ] as const satisfies readonly VersionType[];
+  const BASE_VERSION = "1.0.0";
+
+  // ---- Expectation tables ----
+  //
+  // The whole matrix lives in one readable table, indexed `expected[dep][bump][range]`.
+  // The value is the resulting version of the *dependent* (`pkg-a`);
+
+  type ExpectationTable = Record<
+    DepKind,
+    Record<VersionType, Record<Range, string>>
+  >;
+
+  // oxfmt-ignore
+  const baseExpectations: ExpectationTable = {
+    dep: {
+      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
+      minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
+      major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
+    },
+    dev: {
+      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      minor: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      major: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+    },
+    peer: {
+      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
+      minor: { "^": "2.0.0", "~": "2.0.0", "=": "2.0.0" },
+      major: { "^": "2.0.0", "~": "2.0.0", "=": "2.0.0" },
+    },
+  };
+
+  // ---- Test cases ----
+
+  type Case = {
+    range: Range;
+    dep: DepKind;
+    bump: VersionType;
+    /** Expected resulting version of the dependent (`pkg-a`). */
+    expected: string;
+    /** Set when an override changed the baseline expectation (for the title). */
+    overriddenFrom?: string;
+  };
+
+  /** Flattens the expectation table into one `Case` per cell. */
+  function casesFromTable(table: ExpectationTable): Case[] {
+    return DEP_KINDS.flatMap((dep) =>
+      BUMPS.flatMap((bump) =>
+        RANGES.map((range) => ({
+          dep,
+          bump,
+          range,
+          expected: table[dep][bump][range],
+        })),
+      ),
+    );
+  }
+
+  /**
+   * Applies a partial expectation table on top of the baseline cases.
+   * Only the cells you list change; everything else stays at the baseline.
+   * Invalid keys are caught by the type checker, so there's no runtime
+   * "no matching case" guard to maintain.
+   */
+  function applyOverrides(
+    cases: Case[],
+    overrides: DeepPartial<ExpectationTable>,
+  ): Case[] {
+    return cases.map((c) => {
+      const expected = overrides[c.dep]?.[c.bump]?.[c.range];
+      if (expected == null || expected === c.expected) return c;
+      return { ...c, expected, overriddenFrom: c.expected };
+    });
+  }
+
+  // ---- Execution ----
+
+  /** Turns a canonical range into the string written to package.json. */
+  type RangeRenderer = (range: Range) => string;
+
+  const defaultRange: RangeRenderer = (range) =>
+    range === "=" ? BASE_VERSION : `${range}${BASE_VERSION}`;
+
+  // oxfmt-ignore
+  const writeDependency: Record<DepKind, (setup: FakeFullState, range: string) => void> = {
+    dep: (setup, range) =>
+      setup.updateDependency("pkg-a", "pkg-a-b", range),
+    dev: (setup, range) =>
+      setup.updateDevDependency("pkg-a", "pkg-a-b", range),
+    peer: (setup, range) =>
+      setup.updatePeerDependency("pkg-a", "pkg-a-b", range),
+  };
+
+  function runCase(c: Case, config: Config, renderRange: RangeRenderer) {
+    /*
+     * Set up the test "workspace":
+     *   - `pkg-a` depends on `pkg-a-b` via dependency kind `dep`
+     *     using the range produced by `renderRange(range)`
+     *   - `pkg-a-b` is bumped by `bump`
+     */
+    const setup = new FakeFullState({ changesets: [] });
+    setup.addPackage("pkg-a-b", BASE_VERSION);
+    setup.addChangeset({
+      id: randomUUID(),
+      releases: [{ name: "pkg-a-b", type: c.bump }],
+    });
+    writeDependency[c.dep](setup, renderRange(c.range));
+
+    const { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      config,
+      undefined,
+    );
+
+    // Sanity check: the dependency itself bumped as requested.
+    const dependency = releases.find((r) => r.name === "pkg-a-b");
+    expect(dependency).toBeDefined();
+    expect(dependency!.newVersion).toEqual(
+      c.bump !== "none" ? inc(BASE_VERSION, c.bump) : BASE_VERSION,
+    );
+
+    // The dependent bumped (or didn't) as expected.
+    // Some cases don't bump the dependent so we assert it stayed put with the fallback value.
+    const dependent = releases.find((r) => r.name === "pkg-a");
+    expect(dependent?.newVersion ?? BASE_VERSION).toEqual(c.expected);
+  }
+
+  // ---- Suite builder ----
+
+  function fieldWidths(cases: Case[]) {
+    return {
+      range: Math.max(...cases.map((c) => c.range.length)),
+      dep: Math.max(...cases.map((c) => c.dep.length)),
+      bump: Math.max(...cases.map((c) => c.bump.length)),
+    };
+  }
+
+  function caseTitle(c: Case, widths: ReturnType<typeof fieldWidths>): string {
+    const range = c.range.padEnd(widths.range);
+    const dep = c.dep.padStart(widths.dep);
+    const bump = c.bump.padEnd(widths.bump);
+
+    let title = `(${range} ${dep} ${bump}) => ${c.expected}`;
+    if (c.overriddenFrom != null) {
+      title += ` (overridden from ${c.overriddenFrom})`;
+    }
+    return title;
+  }
+
+  type SuiteOptions = {
+    config?: DeepPartial<Config>;
+    overrides?: DeepPartial<ExpectationTable>;
+    /** Override how the range is written (e.g. the `workspace:` protocol). */
+    renderRange?: RangeRenderer;
+  };
+
+  function describeDependentBumping(
+    name: string,
+    {
+      config = {},
+      overrides = {},
+      renderRange = defaultRange,
+    }: SuiteOptions = {},
+  ) {
+    const mergedConfig = defu(config, defaultConfig) as Config;
+    const cases = applyOverrides(casesFromTable(baseExpectations), overrides);
+    const widths = fieldWidths(cases);
+
+    // eslint-disable-next-line vitest/valid-title
+    describe(name, () => {
+      for (const testCase of cases) {
+        // eslint-disable-next-line vitest/valid-title, vitest/expect-expect
+        it(caseTitle(testCase, widths), () => {
+          runCase(testCase, mergedConfig, renderRange);
+        });
+      }
+    });
+  }
+
+  // ---- Suites ----
+
+  describeDependentBumping("default config");
+
+  describeDependentBumping("updateInternalDependents: always", {
+    config: {
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        updateInternalDependents: "always",
+      },
+    },
+    overrides: {
+      dep: {
+        patch: { "^": "1.0.1", "~": "1.0.1" },
+        minor: { "^": "1.0.1" },
+      },
+      peer: {
+        patch: { "^": "1.0.1", "~": "1.0.1" },
+      },
+    },
+  });
+
+  describeDependentBumping("onlyUpdatePeerDependentsWhenOutOfRange: true", {
+    config: {
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        onlyUpdatePeerDependentsWhenOutOfRange: true,
+      },
+    },
+    overrides: {
+      peer: { minor: { "^": "1.0.0" } },
+    },
+  });
+
+  describe("workspace: protocol works the same as without it", () => {
+    describeDependentBumping("range only", {
+      renderRange: (range) => `workspace:${range !== "=" ? range : "*"}`,
+    });
+
+    describeDependentBumping("range+version", {
+      renderRange: (range) => `workspace:${range !== "=" ? range : ""}1.0.0`,
+    });
+  });
+});

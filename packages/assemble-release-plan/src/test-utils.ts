@@ -93,29 +93,47 @@ export class FakeFullState {
     this.changesets.push(changeset);
   }
 
-  updateDependency(pkgA: string, pkgB: string, versionRange: string) {
-    const pkg = this.packages.packages.find((a) => a.packageJson.name === pkgA);
-    if (!pkg) throw new Error(`No "${pkgA}" package`);
+  updateDependency(
+    dependent: string,
+    dependency: string,
+    versionRange: string,
+  ) {
+    const pkg = this.packages.packages.find(
+      (a) => a.packageJson.name === dependent,
+    );
+    if (!pkg) throw new Error(`No "${dependent}" package`);
     if (!pkg.packageJson.dependencies) {
       pkg.packageJson.dependencies = {};
     }
-    pkg.packageJson.dependencies[pkgB] = versionRange;
+    pkg.packageJson.dependencies[dependency] = versionRange;
   }
-  updateDevDependency(pkgA: string, pkgB: string, versionRange: string) {
-    const pkg = this.packages.packages.find((a) => a.packageJson.name === pkgA);
-    if (!pkg) throw new Error(`No "${pkgA}" package`);
+  updateDevDependency(
+    dependent: string,
+    dependency: string,
+    versionRange: string,
+  ) {
+    const pkg = this.packages.packages.find(
+      (a) => a.packageJson.name === dependent,
+    );
+    if (!pkg) throw new Error(`No "${dependent}" package`);
     if (!pkg.packageJson.devDependencies) {
       pkg.packageJson.devDependencies = {};
     }
-    pkg.packageJson.devDependencies[pkgB] = versionRange;
+    pkg.packageJson.devDependencies[dependency] = versionRange;
   }
-  updatePeerDependency(pkgA: string, pkgB: string, versionRange: string) {
-    const pkg = this.packages.packages.find((a) => a.packageJson.name === pkgA);
-    if (!pkg) throw new Error(`No "${pkgA}" package`);
+  updatePeerDependency(
+    dependent: string,
+    dependency: string,
+    versionRange: string,
+  ) {
+    const pkg = this.packages.packages.find(
+      (a) => a.packageJson.name === dependent,
+    );
+    if (!pkg) throw new Error(`No "${dependent}" package`);
     if (!pkg.packageJson.peerDependencies) {
       pkg.packageJson.peerDependencies = {};
     }
-    pkg.packageJson.peerDependencies[pkgB] = versionRange;
+    pkg.packageJson.peerDependencies[dependency] = versionRange;
   }
 
   addPackage(name: string, version: string) {

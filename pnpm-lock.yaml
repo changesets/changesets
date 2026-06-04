@@ -134,6 +134,9 @@ importers:
       '@changesets/config':
         specifier: workspace:*
         version: link:../config
+      defu:
+        specifier: ^6.1.7
+        version: 6.1.7
 
   packages/changelog-git:
     dependencies:
