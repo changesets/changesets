@@ -1,50 +1,28 @@
 import { resolve } from "node:path";
 import c from "@changesets/color";
-import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { AccessType, Package, PreState } from "@changesets/types";
+import type { AccessType, Package } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
-import semverParse from "semver/functions/parse.js";
 import type { TwoFactorState } from "../../utils/types.ts";
 import {
-  getCorrectRegistry,
   getTokenIsRequired,
-  infoAllow404,
   isCustomRegistry,
   npmPublishQueue,
   publish,
 } from "./npm-utils.ts";
-
-type PublishedState = "never" | "published" | "only-pre";
-
-type PkgInfo = {
-  name: string;
-  localVersion: string;
-  publishedState: PublishedState;
-  publishedVersions: string[];
-};
+import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 export type PublishedResult = {
   name: string;
-  newVersion: string;
+  version: string;
   result: "published" | "skipped" | "failed";
 };
 
-function getReleaseTag(pkgInfo: PkgInfo, preState?: PreState, tag?: string) {
-  if (tag) return tag;
-
-  if (preState != null && pkgInfo.publishedState !== "only-pre") {
-    return preState.tag;
-  }
-
-  return "latest";
-}
-
 const getTwoFactorState = async ({
   otp,
-  publicPackages,
+  releases,
 }: {
   otp?: string;
-  publicPackages: Package[];
+  releases: Array<PublishReleaseEntry>;
 }): Promise<TwoFactorState> => {
   if (otp) {
     return {
@@ -55,9 +33,7 @@ const getTwoFactorState = async ({
 
   if (
     !process.stdin.isTTY ||
-    publicPackages.some((pkg) =>
-      isCustomRegistry(getCorrectRegistry(pkg.packageJson).registry),
-    ) ||
+    releases.some((release) => isCustomRegistry(release.registry)) ||
     isCustomRegistry(process.env.npm_config_registry)
   ) {
     return {
@@ -82,55 +58,40 @@ export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
 };
 
 export async function publishPackages({
+  releases,
   packages,
   access,
-  ignore,
-  allowPrivatePackages,
   otp,
-  preState,
-  tag,
 }: {
-  packages: Package[];
+  releases: Array<PublishReleaseEntry>;
+  packages: Array<Package>;
   access: AccessType;
-  ignore: readonly string[];
-  allowPrivatePackages: boolean;
   otp?: string;
-  preState: PreState | undefined;
-  tag?: string;
 }): Promise<PublishedResult[]> {
-  const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
-  const publicPackages = packages.filter(
-    (pkg) =>
-      !pkg.packageJson.private &&
-      !shouldSkipPackage(pkg, { ignore, allowPrivatePackages }),
-  );
-  const unpublishedPackagesInfo = await getUnpublishedPackages(
-    publicPackages,
-    preState,
-  );
-
-  if (unpublishedPackagesInfo.length === 0) {
+  if (releases.length === 0) {
     return [];
   }
 
-  const twoFactorState = await getTwoFactorState({ otp, publicPackages });
+  const packagesByName = new Map(
+    packages.map((pkg) => [pkg.packageJson.name, pkg]),
+  );
+  const twoFactorState = await getTwoFactorState({ otp, releases });
   const hasToDelegate = requiresDelegatedAuth(twoFactorState);
   if (hasToDelegate) {
     npmPublishQueue.setConcurrency(1);
   }
 
-  const publishPromises = unpublishedPackagesInfo.map((pkgInfo) => {
-    const pkg = packagesByName.get(pkgInfo.name)!;
-    return publishAPackage(
-      pkg,
+  const publishPromises = releases.map((release) =>
+    publishAPackage(
+      release,
+      packagesByName.get(release.name)!,
       access,
       twoFactorState,
-      getReleaseTag(pkgInfo, preState, tag),
-    );
-  });
+    ),
+  );
 
-  if (!hasToDelegate && unpublishedPackagesInfo.length > 1) {
-    const p = progress({ max: unpublishedPackagesInfo.length });
+  if (!hasToDelegate && releases.length > 1) {
+    const p = progress({ max: releases.length });
     p.start("Publishing packages...");
 
     const results = await Promise.all(
@@ -148,7 +109,7 @@ export async function publishPackages({
       publishPromises.map(async (publishPromise) => {
         const result = await publishPromise;
         log.success(
-          `Published ${c.blue(result.name)}@${c.green(result.newVersion)}!`,
+          `Published ${c.blue(result.name)}@${c.green(result.version)}!`,
         );
         return result;
       }),
@@ -157,10 +118,10 @@ export async function publishPackages({
 }
 
 async function publishAPackage(
+  release: PublishReleaseEntry,
   pkg: Package,
   access: AccessType,
   twoFactorState: TwoFactorState,
-  tag: string,
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
 
@@ -172,78 +133,14 @@ async function publishAPackage(
         ? resolve(pkg.dir, publishConfig.directory)
         : pkg.dir,
       access: publishConfig?.access || access,
-      tag,
+      tag: release.tag,
     },
     twoFactorState,
   );
 
   return {
     name,
-    newVersion: version,
+    version,
     result: publishConfirmation.result,
   };
-}
-
-async function getUnpublishedPackages(
-  packages: Array<Package>,
-  preState: PreState | undefined,
-) {
-  const results: Array<PkgInfo> = await Promise.all(
-    packages.map(async ({ packageJson }) => {
-      const response = await infoAllow404(packageJson);
-      let publishedState: PublishedState = "never";
-      if (response.published) {
-        publishedState = "published";
-        if (preState != null) {
-          if (
-            response.pkgInfo.versions &&
-            response.pkgInfo.versions.every(
-              (version: string) =>
-                semverParse(version)!.prerelease[0] === preState.tag,
-            )
-          ) {
-            publishedState = "only-pre";
-          }
-        }
-      }
-
-      return {
-        name: packageJson.name,
-        localVersion: packageJson.version,
-        publishedState,
-        publishedVersions: response.pkgInfo.versions || [],
-      };
-    }),
-  );
-
-  const packagesToPublish: Array<PkgInfo> = [];
-  const previewLines: string[] = [];
-  let alreadyPublishedCount = 0;
-
-  for (const pkgInfo of results) {
-    const { name, publishedState, localVersion, publishedVersions } = pkgInfo;
-    if (!publishedVersions.includes(localVersion)) {
-      packagesToPublish.push(pkgInfo);
-      previewLines.push(`${c.blue(name)}@${c.green(localVersion)}`);
-      if (preState != null && publishedState === "only-pre") {
-        previewLines.push(
-          `${c.gray("└")} will be published to ${c.cyan("latest")} rather than ${c.cyan(preState.tag)} as it will be its first published version.`,
-        );
-      }
-    } else {
-      alreadyPublishedCount++;
-    }
-  }
-
-  if (packagesToPublish.length !== 0) {
-    log.info(
-      `
-These packages will be published as they were not found on npm:
-${previewLines.join("\n")}
-${c.gray(`${alreadyPublishedCount} packages are already published.`)}
-      `.trim(),
-    );
-  }
-
-  return packagesToPublish;
 }
