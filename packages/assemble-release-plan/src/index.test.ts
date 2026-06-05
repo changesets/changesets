@@ -1645,7 +1645,14 @@ describe("dependent bumping", () => {
   ): Case[] {
     return cases.map((c) => {
       const expected = overrides[c.dep]?.[c.bump]?.[c.range];
-      if (expected == null || expected === c.expected) return c;
+      if (expected == null) return c;
+
+      if (expected === c.expected) {
+        throw new Error(
+          `Override for ${c.range}${c.dep}:${c.bump} is invalid. ${expected} is same as original value.`,
+        );
+      }
+
       return { ...c, expected, overriddenFrom: c.expected };
     });
   }
