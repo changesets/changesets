@@ -1804,6 +1804,29 @@ describe("dependent bumping", () => {
     },
   });
 
+  // weird case, should probably not be allowed
+  describeDependentBumping(
+    "onlyUpdatePeerDependentsWhenOutOfRange + updateInternalDependents combined",
+    {
+      config: {
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          onlyUpdatePeerDependentsWhenOutOfRange: true,
+          updateInternalDependents: "always",
+        },
+      },
+      overrides: {
+        dep: {
+          patch: { "^": "1.0.1", "~": "1.0.1" },
+          minor: { "^": "1.0.1" },
+        },
+        peer: {
+          patch: { "^": "1.0.1", "~": "1.0.1" },
+          minor: { "^": "1.0.1" },
+        },
+      },
+    },
+  );
+
   describe("workspace: protocol works the same as without it", () => {
     describeDependentBumping("modifier only", {
       // render workspace:*, workspace:^, workspace:~
