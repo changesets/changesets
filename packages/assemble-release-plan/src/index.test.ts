@@ -1584,12 +1584,15 @@ describe("dependent bumping", () => {
 
   // oxfmt-ignore
   const baseExpectations: ExpectationTable = {
+    // direct dependent has to be bumped only when dependency falls out of allowed range
+    // otherwise, installing the latest versions of dependent and dependency would result in duplicate dependency package in the tree
     dep: {
       none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
       patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
       minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
       major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
     },
+    // devDependent should stay untouched, given the dev dependency doesn't affect production installations
     dev: {
       none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
       patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
@@ -1756,6 +1759,7 @@ describe("dependent bumping", () => {
 
   describeDependentBumping("default config");
 
+  // makes all non-none bumps result in a patch bump of a dependent
   describeDependentBumping("updateInternalDependents: always", {
     config: {
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -1786,10 +1790,12 @@ describe("dependent bumping", () => {
 
   describe("workspace: protocol works the same as without it", () => {
     describeDependentBumping("range only", {
+      // render workspace:*, workspace:^, workspace:~
       renderRange: (range) => `workspace:${range !== "=" ? range : "*"}`,
     });
 
     describeDependentBumping("range+version", {
+      // render workspace:1.0.0, workspace:^1.0.0, workspace:~1.0.0
       renderRange: (range) => `workspace:${range !== "=" ? range : ""}1.0.0`,
     });
   });
