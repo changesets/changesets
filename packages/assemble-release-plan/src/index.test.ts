@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { defaultConfig } from "@changesets/config";
 import type { Config, VersionType } from "@changesets/types";
-import { defu } from "defu";
 import { inc } from "semver";
 import { beforeEach, describe, expect, it } from "vitest";
 import { assembleReleasePlan } from "./index.ts";
@@ -1750,7 +1749,14 @@ describe("dependent bumping", () => {
       renderRange = defaultRange,
     }: SuiteOptions = {},
   ) {
-    const mergedConfig = defu(config, defaultConfig) as Config;
+    const mergedConfig = {
+      ...defaultConfig,
+      ...config,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig?.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        ...config?.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+      },
+    } as Config;
     const cases = applyOverrides(casesFromTable(baseExpectations), overrides);
     const widths = fieldWidths(cases);
 
