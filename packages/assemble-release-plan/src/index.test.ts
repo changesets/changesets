@@ -1796,12 +1796,12 @@ describe("dependent bumping", () => {
   });
 
   describe("workspace: protocol works the same as without it", () => {
-    describeDependentBumping("range only", {
+    describeDependentBumping("modifier only", {
       // render workspace:*, workspace:^, workspace:~
       renderRange: (range) => `workspace:${range !== "=" ? range : "*"}`,
     });
 
-    describeDependentBumping("range+version", {
+    describeDependentBumping("modifier+version", {
       // render workspace:1.0.0, workspace:^1.0.0, workspace:~1.0.0
       renderRange: (range) => `workspace:${range !== "=" ? range : ""}1.0.0`,
     });
