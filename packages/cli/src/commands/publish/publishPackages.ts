@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import c from "@changesets/color";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { AccessType, Package, PreState } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
 import semverParse from "semver/functions/parse.js";
@@ -83,18 +84,26 @@ export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
 export async function publishPackages({
   packages,
   access,
+  ignore,
+  allowPrivatePackages,
   otp,
   preState,
   tag,
 }: {
   packages: Package[];
   access: AccessType;
+  ignore: readonly string[];
+  allowPrivatePackages: boolean;
   otp?: string;
   preState: PreState | undefined;
   tag?: string;
 }): Promise<PublishedResult[]> {
   const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]));
-  const publicPackages = packages.filter((pkg) => !pkg.packageJson.private);
+  const publicPackages = packages.filter(
+    (pkg) =>
+      !pkg.packageJson.private &&
+      !shouldSkipPackage(pkg, { ignore, allowPrivatePackages }),
+  );
   const unpublishedPackagesInfo = await getUnpublishedPackages(
     publicPackages,
     preState,

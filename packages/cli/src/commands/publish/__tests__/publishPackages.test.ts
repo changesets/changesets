@@ -45,6 +45,8 @@ describe("publishPackages", () => {
       await publishPackages({
         packages: (await getPackages(cwd)).packages,
         access: "public",
+        ignore: [],
+        allowPrivatePackages: false,
         preState: undefined,
       });
       expect(mockedNpmUtils.getTokenIsRequired).not.toHaveBeenCalled();

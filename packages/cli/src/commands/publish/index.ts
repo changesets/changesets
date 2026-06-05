@@ -2,6 +2,7 @@ import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { PreState } from "@changesets/types";
 import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
@@ -74,13 +75,21 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     packages: packages.packages,
     // if not public, we won't pass the access, and it works as normal
     access: config.access,
+    ignore: config.ignore,
+    allowPrivatePackages: config.privatePackages.tag,
     otp: options?.otp,
     preState,
     tag: releaseTag,
   });
 
   const privatePackages = packages.packages.filter(
-    (pkg) => pkg.packageJson.private && pkg.packageJson.version,
+    (pkg) =>
+      pkg.packageJson.private &&
+      pkg.packageJson.version &&
+      !shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.tag,
+      }),
   );
   const untaggedPrivatePackageReleases = tagPrivatePackages
     ? await getUntaggedPackages(
