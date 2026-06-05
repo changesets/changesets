@@ -1704,10 +1704,13 @@ describe("dependent bumping", () => {
       c.bump !== "none" ? inc(BASE_VERSION, c.bump) : BASE_VERSION,
     );
 
-    // The dependent bumped (or didn't) as expected.
-    // Some cases don't bump the dependent so we assert it stayed put with the fallback value.
+    // The dependent got bumped (or not) as expected.
     const dependent = releases.find((r) => r.name === "pkg-a");
-    expect(dependent?.newVersion ?? BASE_VERSION).toEqual(c.expected);
+    if (c.expected === BASE_VERSION) {
+      expect(dependent?.newVersion).toBeOneOf(["1.0.0", undefined]);
+    } else {
+      expect(dependent?.newVersion).toEqual(c.expected);
+    }
   }
 
   // ---- Suite builder ----
