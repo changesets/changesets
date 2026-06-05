@@ -1,16 +1,16 @@
 import { resolve } from "node:path";
 import c from "@changesets/color";
 import type { Packages } from "@changesets/types";
-import { log, progress } from "@clack/prompts";
-import type { TwoFactorState } from "../../utils/types.ts";
+import { log } from "@clack/prompts";
+import type { AuthState } from "../../utils/types.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 import {
-  getTokenIsRequired,
   npmPublishQueue,
   publish,
   type PublishTool,
   getPublishTool,
   sanitizeEnv,
+  NPM_PUBLISH_CONCURRENCY_LIMIT,
 } from "./npm-utils.ts";
 
 export type PublishedResult = {
@@ -19,54 +19,33 @@ export type PublishedResult = {
   result: "published" | "skipped" | "failed";
 };
 
-const getTwoFactorState = async (
+function getInitialAuthState(
   publishTool: PublishTool,
-  {
-    otp,
-  }: {
-    otp?: string;
-  },
-): Promise<TwoFactorState> => {
+  otp?: string,
+): AuthState {
   if (otp) {
     return {
       token: otp,
-      isRequired: true,
+      shouldDelegate: false,
     };
   }
-
   if (publishTool.name === "pnpm" && process.env.PNPM_CONFIG_OTP) {
     return {
       token: process.env.PNPM_CONFIG_OTP,
-      isRequired: true,
+      shouldDelegate: false,
     };
-  } else if (process.env.NPM_CONFIG_OTP) {
+  }
+  if (process.env.NPM_CONFIG_OTP) {
     return {
       token: process.env.NPM_CONFIG_OTP,
-      isRequired: true,
+      shouldDelegate: false,
     };
   }
-
-  if (!process.stdin.isTTY) {
-    return {
-      token: undefined,
-      isRequired: false,
-    };
-  }
-
   return {
     token: undefined,
-    isRequired: await getTokenIsRequired(),
+    shouldDelegate: false,
   };
-};
-
-export const requiresDelegatedAuth = (twoFactorState: TwoFactorState) => {
-  return (
-    process.stdin.isTTY &&
-    !twoFactorState.token &&
-    !twoFactorState.allowConcurrency &&
-    twoFactorState.isRequired
-  );
-};
+}
 
 export async function publishPackages({
   releases,
@@ -83,18 +62,22 @@ export async function publishPackages({
     return [];
   }
   const publishTool = getPublishTool(packages.tool);
-  const twoFactorState = await getTwoFactorState(publishTool, { otp });
+  const authState = getInitialAuthState(publishTool, otp);
   const env = sanitizeEnv({
     ...process.env,
-    // we take over OTP handling in our TwoFactorState, so we unset those env variables so they don't become stale once we start updating expired OTPs
+    // we take over initial OTP handling in our AuthState
+    // so we unset those env variables so they don't become stale once we start delegating to the package manager CLIs for OTP prompting
     ...(publishTool.name === "pnpm"
       ? { PNPM_CONFIG_OTP: undefined }
       : { NPM_CONFIG_OTP: undefined }),
   });
-  const hasToDelegate = requiresDelegatedAuth(twoFactorState);
-  if (hasToDelegate) {
-    npmPublishQueue.setConcurrency(1);
-  }
+  // in TTY mode let's allow the first publish to "check" if the publish process requires delegated auth or not
+  // on CI everything has to be configured in a way that allows automation so we can safely allow concurrency up to the defined limit
+  // but in TTY the user might rely on Changesets prompting (through the used package manager CLI) for OTP/web auth
+  // this is just an appromixation of the best behavior that assumes a single publish target/registry with a consistent/shared auth setup
+  npmPublishQueue.setConcurrency(
+    process.stdin.isTTY && !authState.token ? 1 : NPM_PUBLISH_CONCURRENCY_LIMIT,
+  );
 
   const packagesByName = new Map(
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
@@ -144,7 +127,7 @@ export async function publishPackages({
         cwd: packages.rootDir,
         env,
       },
-      twoFactorState,
+      authState,
     );
     return {
       name: release.name,
@@ -153,29 +136,13 @@ export async function publishPackages({
     };
   });
 
-  if (!hasToDelegate && releases.length > 1) {
-    const p = progress({ max: releases.length });
-    p.start("Publishing packages...");
-
-    const results = await Promise.all(
-      publishPromises.map(async (publishPromise) => {
-        const result = await publishPromise;
-        p.advance();
-        return result;
-      }),
-    );
-
-    p.stop(`Published ${publishPromises.length} packages!`);
-    return results;
-  } else {
-    return Promise.all(
-      publishPromises.map(async (publishPromise) => {
-        const result = await publishPromise;
-        log.success(
-          `Published ${c.blue(result.name)}@${c.green(result.version)}!`,
-        );
-        return result;
-      }),
-    );
-  }
+  return Promise.all(
+    publishPromises.map(async (publishPromise) => {
+      const result = await publishPromise;
+      log.success(
+        `Published ${c.blue(result.name)}@${c.green(result.version)}!`,
+      );
+      return result;
+    }),
+  );
 }

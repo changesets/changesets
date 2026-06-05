@@ -5,9 +5,8 @@ import { log } from "@clack/prompts";
 import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
-import type { TwoFactorState } from "../../utils/types.ts";
+import type { AuthState } from "../../utils/types.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
-import { requiresDelegatedAuth } from "./publishPackages.ts";
 
 interface PublishOptions {
   /** The publish command argument, the path to the package or tarball */
@@ -19,7 +18,7 @@ interface PublishOptions {
 }
 
 const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
-const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
+export const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
 
 export const npmRequestQueue = createPromiseQueue(
   NPM_REQUEST_CONCURRENCY_LIMIT,
@@ -54,32 +53,10 @@ export function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return env;
 }
 
-export function getPublishTool({
-  type,
-}: Packages["tool"]): { name: "npm" } | { name: "pnpm" } {
+export type PublishTool = { name: "npm" } | { name: "pnpm" };
+
+export function getPublishTool({ type }: Packages["tool"]): PublishTool {
   return { name: type === "pnpm" ? "pnpm" : "npm" };
-}
-
-export type PublishTool = ReturnType<typeof getPublishTool>;
-
-export async function getTokenIsRequired() {
-  const result = await exec("npm", ["profile", "get", "--json"], {
-    nodeOptions: { env: sanitizeEnv(process.env) },
-  });
-  if (result.exitCode !== 0) {
-    log.error(
-      `
-error while checking if token is required
-${result.stderr.toString().trim() || result.stdout.toString().trim()}
-      `.trim(),
-    );
-    return false;
-  }
-  const json = jsonParse(result.stdout.toString());
-  if (json.error || !json.tfa || !json.tfa.mode) {
-    return false;
-  }
-  return json.tfa.mode === "auth-and-writes";
 }
 
 // `npm info <pkg> --json` (aka `npm view`) behavior:
@@ -226,14 +203,14 @@ async function internalPublish(
   publishTool: PublishTool,
   release: PublishReleaseEntry,
   opts: PublishOptions,
-  twoFactorState: TwoFactorState,
+  authState: AuthState,
 ): Promise<InternalPublishResult> {
   const publishFlags = ["--access", release.access, "--tag", release.tag];
   if (publishTool.name === "pnpm") {
     publishFlags.push("--no-git-checks");
   }
 
-  if (requiresDelegatedAuth(twoFactorState)) {
+  if (process.stdin.isTTY && authState.shouldDelegate) {
     // it's not easily controllable but ideally no other work should happen until this is done
     // we specifically don't want any other output to interfere with the delegated auth flow
     const child = exec(
@@ -251,7 +228,7 @@ async function internalPublish(
     const result = await child;
 
     if (child.exitCode === 0) {
-      twoFactorState.allowConcurrency = true;
+      authState.shouldDelegate = false;
       // bump for remaining packages
       npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
       return { result: "published" };
@@ -264,7 +241,7 @@ async function internalPublish(
       log.warn(
         `${release.name} is already published (likely a stale registry data led to a duplicate publish attempt)`,
       );
-      twoFactorState.allowConcurrency = true;
+      authState.shouldDelegate = false;
       npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
       return { result: "skipped" };
     }
@@ -275,8 +252,8 @@ async function internalPublish(
   // in the delegated mode we don't need the json output
   // as we won't be handling the auth errors
   publishFlags.push("--json");
-  if (twoFactorState.token) {
-    publishFlags.push("--otp", twoFactorState.token);
+  if (authState.token) {
+    publishFlags.push("--otp", authState.token);
   }
 
   const { exitCode, stdout, stderr } = await exec(
@@ -316,10 +293,8 @@ async function internalPublish(
         process.stdin.isTTY
       ) {
         // the current otp code must be invalid since it errored
-        twoFactorState.token = undefined;
-        // just in case this isn't already true
-        twoFactorState.isRequired = true;
-        twoFactorState.allowConcurrency = false;
+        authState.token = undefined;
+        authState.shouldDelegate = true;
         npmPublishQueue.setConcurrency(1);
         return {
           result: "failed",
@@ -340,6 +315,8 @@ ${json.error.summary}${json.error.detail ? `\n${json.error.detail}` : ""}
     log.error(stderr.toString() || stdout.toString());
     return { result: "failed" };
   }
+  // bump the limit up in case we have started with the limit of 1 in the TTY mode
+  npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
   return { result: "published" };
 }
 
@@ -347,13 +324,13 @@ export function publish(
   publishTool: PublishTool,
   release: PublishReleaseEntry,
   opts: PublishOptions,
-  twoFactorState: TwoFactorState,
+  authState: AuthState,
 ): Promise<{ result: "published" | "skipped" | "failed" }> {
   return npmRequestQueue.add(async () => {
     let result: InternalPublishResult;
     do {
       result = await npmPublishQueue.add(() =>
-        internalPublish(publishTool, release, opts, twoFactorState),
+        internalPublish(publishTool, release, opts, authState),
       );
     } while (result.result === "failed" && result.allowRetry);
 
