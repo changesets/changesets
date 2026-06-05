@@ -61,11 +61,13 @@ export async function publishPackages({
   releases,
   packages,
   access,
+  artifactDir,
   otp,
 }: {
   releases: Array<PublishReleaseEntry>;
   packages: Array<Package>;
   access: AccessType;
+  artifactDir?: string;
   otp?: string;
 }): Promise<PublishedResult[]> {
   if (releases.length === 0) {
@@ -86,6 +88,7 @@ export async function publishPackages({
       release,
       packagesByName.get(release.name)!,
       access,
+      artifactDir,
       twoFactorState,
     ),
   );
@@ -121,17 +124,21 @@ async function publishAPackage(
   release: PublishReleaseEntry,
   pkg: Package,
   access: AccessType,
+  artifactDir: string | undefined,
   twoFactorState: TwoFactorState,
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
+  const publishDir = artifactDir
+    ? resolve(artifactDir, release.tarball!.path)
+    : publishConfig?.directory
+      ? resolve(pkg.dir, publishConfig.directory)
+      : pkg.dir;
 
   const publishConfirmation = await publish(
     pkg.packageJson,
     {
       cwd: pkg.dir,
-      publishDir: publishConfig?.directory
-        ? resolve(pkg.dir, publishConfig.directory)
-        : pkg.dir,
+      publishDir,
       access: publishConfig?.access || access,
       tag: release.tag,
     },
