@@ -105,6 +105,15 @@ cli
   });
 
 cli
+  .command("publish-plan", "Show packages that are ready to publish or tag")
+  .option("-o, --output <file>", "Output the publish plan as JSON to a file")
+  .action(async (options) => {
+    normalizeOptions(options);
+    const { publishPlan } = await import("./commands/publish-plan/index.ts");
+    await publishPlan(options);
+  });
+
+cli
   .command("status", "Show the changesets that currently exist")
   .example("  $ changeset status --verbose")
   .option("--since <branch>", "Show changesets since the provided git ref")
