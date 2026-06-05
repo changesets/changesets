@@ -23,7 +23,7 @@ type BaseReleaseEntry = {
 };
 
 export type TarballMetadata = {
-  filename: string;
+  path: string;
   checksum: string;
 };
 

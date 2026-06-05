@@ -99,7 +99,7 @@ export async function publishPackages({
     {
       let target: string
       if (artifactDir) {
-        target = resolve(artifactDir, release.tarball!.filename)
+        target = resolve(artifactDir, release.tarball!.path)
       } else if (publishTool.name === 'pnpm') {
         // pnpm supports `publishConfig.directory` natively. We have to let it resolve it on its own.
         // Otherwise we'd risk it re-resolving from within the `publishConfig.directory` itself

@@ -219,15 +219,13 @@ async function internalPublish(
     publishFlags.push("--no-git-checks");
   }
 
-  const env = sanitizeEnv(process.env);
-
   if (requiresDelegatedAuth(twoFactorState)) {
     // it's not easily controllable but ideally no other work should happen until this is done
     // we specifically don't want any other output to interfere with the delegated auth flow
     const child =
       exec(publishTool.name, ["publish", opts.target, ...publishFlags], {
         nodeOptions: {
-          env,
+          env: opts.env,
           cwd: opts.cwd,
           stdio: ["inherit", "inherit", "pipe"],
         },
@@ -267,7 +265,7 @@ async function internalPublish(
   const { exitCode, stdout, stderr } =
     await exec(publishTool.name, ["publish", opts.target, ...publishFlags], {
       nodeOptions: {
-        env,
+        env: opts.env,
         cwd: opts.cwd,
       },
     });

@@ -84,7 +84,7 @@ describe("running release", () => {
                   registry: "https://registry.npmjs.org",
                   tag: "latest",
                   tarball: {
-                    filename: "pkg-a-1.0.0.tgz",
+                    path: "packages/pkg-a-1.0.0.tgz",
                     checksum: "abc",
                   },
                 },
@@ -109,19 +109,21 @@ describe("running release", () => {
             registry: "https://registry.npmjs.org",
             tag: "latest",
             tarball: {
-              filename: "pkg-a-1.0.0.tgz",
+              path: "packages/pkg-a-1.0.0.tgz",
               checksum: "abc",
             },
           },
         ],
-        packages: [
-          expect.objectContaining({
-            packageJson: expect.objectContaining({
-              name: "pkg-a",
-              version: "1.0.0",
+        packages: expect.objectContaining({
+          packages: [
+            expect.objectContaining({
+              packageJson: expect.objectContaining({
+                name: "pkg-a",
+                version: "1.0.0",
+              }),
             }),
-          }),
-        ],
+          ],
+        }),
         artifactDir: expect.stringContaining("changesets-publish-"),
         otp: undefined,
       });

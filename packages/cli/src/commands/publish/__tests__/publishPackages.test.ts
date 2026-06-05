@@ -38,12 +38,13 @@ describe("publishPackages", () => {
           version: "1.0.0",
         },
       }));
+      mockedNpmUtils.getPublishTool.mockReturnValue({ name: "npm" } as never);
 
       mockedNpmUtils.publish.mockImplementation(async () => ({
         result: "published",
       }));
 
-      const packages = (await getPackages(cwd)).packages;
+      const packages = await getPackages(cwd);
       const releases = await getUnpublishedPackages(packages, undefined, "public", {
         ignore: [],
         allowPrivatePackages: false,

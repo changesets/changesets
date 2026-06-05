@@ -61,7 +61,6 @@ describe("publish-plan", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         }),
         {

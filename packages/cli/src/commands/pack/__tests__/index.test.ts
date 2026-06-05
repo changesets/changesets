@@ -130,10 +130,9 @@ describe("pack", () => {
             "name": "pkg-a",
             "version": "1.0.0",
             "access": "restricted",
-            "registry": "https://registry.npmjs.org",
             "tag": "latest",
             "tarball": {
-              "filename": "pkg-a-1.0.0.tgz",
+              "path": "packages/pkg-a-1.0.0.tgz",
               "checksum": "${tarballChecksum}"
             }
           },

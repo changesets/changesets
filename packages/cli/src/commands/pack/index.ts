@@ -131,7 +131,7 @@ export async function pack(
           name: release.name,
           version: release.version,
           tarball: {
-            filename: tarballFilename,
+            path: path.posix.join("packages", tarballFilename),
             checksum,
           },
         };
