@@ -2,12 +2,12 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import * as npmUtils from "../../publish/npm-utils.ts";
 import * as getUntaggedPackagesModule from "../../../utils/getUntaggedPackages.ts";
 import { extractTarball } from "../../../utils/tarball.ts";
+import * as npmUtils from "../../publish/npm-utils.ts";
 import { pack } from "../index.ts";
-import { exec } from "tinyexec";
 
 vi.mock("tinyexec");
 vi.mock("../../publish/npm-utils.ts");
@@ -101,7 +101,7 @@ describe("pack", () => {
     mockedNpmUtils.infoAllow404.mockResolvedValue({
       published: false,
       pkgInfo: { version: "1.0.0" },
-    } as never);
+    });
     mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" } as never);
     mockedGetUntaggedPackages.mockResolvedValue([
       { name: "pkg-b", newVersion: "1.0.0" },
@@ -120,9 +120,8 @@ describe("pack", () => {
       tarballPath: path.join(cwd, "changesets-pack.tgz"),
     });
 
-    await expect(
-      fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"),
-    ).resolves.toMatchInlineSnapshot(`
+    await expect(fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"))
+      .resolves.toMatchInlineSnapshot(`
       "[
         [
           {
@@ -133,7 +132,7 @@ describe("pack", () => {
             "tag": "latest",
             "tarball": {
               "path": "packages/pkg-a-1.0.0.tgz",
-              "checksum": "${tarballChecksum}"
+              "checksum": "db4b4d0d1cb480bf9aeea253771c00febe627f236765fa37d6a5614f079a3aa0"
             }
           },
           {

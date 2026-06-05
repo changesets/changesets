@@ -1,5 +1,5 @@
-import { createReadStream } from "node:fs";
 import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -12,6 +12,7 @@ import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { packTarball } from "../../utils/tarball.ts";
+import { getDefaultWorkspaceConcurrency } from "../../utils/workspaceConcurrency.ts";
 import {
   getPublishPlan,
   type PublishPlan,
@@ -19,7 +20,6 @@ import {
 } from "../publish-plan/getPublishPlan.ts";
 import { getPublishTool } from "../publish/npm-utils.ts";
 import { ensureChangesetFolder } from "../shared.ts";
-import { getDefaultWorkspaceConcurrency } from "../../utils/workspaceConcurrency.ts";
 
 export interface PackOptions {
   cwd?: string;
@@ -47,9 +47,7 @@ async function getChecksum(filePath: string) {
   return hash.digest("hex");
 }
 
-export async function pack(
-  options?: PackOptions,
-): Promise<PackResult> {
+export async function pack(options?: PackOptions): Promise<PackResult> {
   const cwd = options?.cwd ?? process.cwd();
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
@@ -70,12 +68,16 @@ export async function pack(
     };
   }
 
-  const outputDir = await fs.mkdtemp(path.join(os.tmpdir(), "changesets-pack-"));
+  const outputDir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "changesets-pack-"),
+  );
   const packagesDir = path.join(outputDir, "packages");
   await fs.mkdir(packagesDir, { recursive: true });
 
   const queue = createPromiseQueue(getDefaultWorkspaceConcurrency());
-  const packagesByName = new Map(packages.packages.map((pkg) => [pkg.packageJson.name, pkg]));
+  const packagesByName = new Map(
+    packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
+  );
 
   const packedReleases = await Promise.all(
     releases.map((release) =>
@@ -86,7 +88,7 @@ export async function pack(
           throw new Error(`Package not found: ${release.name}`);
         }
 
-        const publishTool = await getPublishTool(packages.tool);
+        const publishTool = getPublishTool(packages.tool);
         const publishDir = pkg.packageJson.publishConfig?.directory
           ? path.resolve(pkg.dir, pkg.packageJson.publishConfig.directory)
           : pkg.dir;
@@ -121,7 +123,9 @@ export async function pack(
         const tarballFilename = getTarballFilename(stdout.toString());
 
         if (!tarballFilename) {
-          throw new Error(`Failed to determine tarball filename for ${release.name}`);
+          throw new Error(
+            `Failed to determine tarball filename for ${release.name}`,
+          );
         }
         const checksum = await getChecksum(
           path.join(packagesDir, tarballFilename),

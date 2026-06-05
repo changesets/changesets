@@ -6,14 +6,14 @@ import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
 import type { TwoFactorState } from "../../utils/types.ts";
-import { requiresDelegatedAuth } from "./publishPackages.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
+import { requiresDelegatedAuth } from "./publishPackages.ts";
 
 interface PublishOptions {
   /** The publish command argument, the path to the package or tarball */
   target: string;
   /** The current working directory for the publish operation */
-  cwd: string
+  cwd: string;
   /** The environment variables for the publish operation */
   env: NodeJS.ProcessEnv;
 }
@@ -49,15 +49,15 @@ export function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
     return {
       ...env,
       npm_config_registry: undefined,
-    }
+    };
   }
-  return env
+  return env;
 }
 
-export  function getPublishTool(
-  { type }: Packages["tool"],
-): { name: "npm" } | { name: "pnpm"; } {
-  return { name: type === 'pnpm' ? "pnpm" : "npm" };
+export function getPublishTool({
+  type,
+}: Packages["tool"]): { name: "npm" } | { name: "pnpm" } {
+  return { name: type === "pnpm" ? "pnpm" : "npm" };
 }
 
 export type PublishTool = ReturnType<typeof getPublishTool>;
@@ -108,9 +108,12 @@ ${result.stderr.toString().trim() || result.stdout.toString().trim()}
 //   queries return empty → no versions list → only-pre detection is not
 //   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
 //   published with preState.tag rather than "latest".
-export function getPackageInfo(publishTool: PublishTool, packageJson: PackageJSON) {
+export function getPackageInfo(
+  publishTool: PublishTool,
+  packageJson: PackageJSON,
+) {
   return npmRequestQueue.add(async () => {
-    let registryOverrides: string[] = []
+    const registryOverrides: string[] = [];
 
     // for a scoped package the priority of registry resolution in `info` is:
     // --@scope:registry
@@ -121,23 +124,31 @@ export function getPackageInfo(publishTool: PublishTool, packageJson: PackageJSO
     // so we can't rely on a simple --registry override here
     if (packageJson.name.startsWith("@")) {
       const scope = packageJson.name.split("/")[0];
-      if (publishTool.name !== 'pnpm') {
+      if (publishTool.name !== "pnpm") {
         // in npm publishConfig values are only flattened into the config-level values
         // so we just have to pick the existing ones and override them 1 to 1 as CLI flags
         if (packageJson.publishConfig?.[`${scope}:registry`]) {
-          registryOverrides.push(`--${scope}:registry=${packageJson.publishConfig[`${scope}:registry`]}`)
+          registryOverrides.push(
+            `--${scope}:registry=${packageJson.publishConfig[`${scope}:registry`]}`,
+          );
         }
         if (packageJson.publishConfig?.registry) {
-          registryOverrides.push(`--registry=${packageJson.publishConfig.registry}`)
+          registryOverrides.push(
+            `--registry=${packageJson.publishConfig.registry}`,
+          );
         }
       } else if (packageJson.publishConfig?.registry) {
         // in pnpm `publishConfig.registry` is the only supported registry value and it's a strong publish-time override
         // to emulate pnpm publish-time precedence when querying via pnpm info, we force it as a scoped override
-        registryOverrides.push(`--${scope}:registry=${packageJson.publishConfig.registry}`)
+        registryOverrides.push(
+          `--${scope}:registry=${packageJson.publishConfig.registry}`,
+        );
       }
     } else if (packageJson.publishConfig?.registry) {
       // for non-scoped packages, it's a simple override
-      registryOverrides.push(`--registry=${packageJson.publishConfig.registry}`)
+      registryOverrides.push(
+        `--registry=${packageJson.publishConfig.registry}`,
+      );
     }
 
     // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
@@ -174,7 +185,10 @@ export function getPackageInfo(publishTool: PublishTool, packageJson: PackageJSO
   });
 }
 
-export async function infoAllow404(publishTool: PublishTool, packageJson: PackageJSON) {
+export async function infoAllow404(
+  publishTool: PublishTool,
+  packageJson: PackageJSON,
+) {
   const pkgInfo = await getPackageInfo(publishTool, packageJson);
   if (pkgInfo.error?.code === "E404") {
     log.warn(`Received 404 for ${c.cyan(`npm info ${packageJson.name}`)}`);
@@ -222,14 +236,17 @@ async function internalPublish(
   if (requiresDelegatedAuth(twoFactorState)) {
     // it's not easily controllable but ideally no other work should happen until this is done
     // we specifically don't want any other output to interfere with the delegated auth flow
-    const child =
-      exec(publishTool.name, ["publish", opts.target, ...publishFlags], {
+    const child = exec(
+      publishTool.name,
+      ["publish", opts.target, ...publishFlags],
+      {
         nodeOptions: {
           env: opts.env,
           cwd: opts.cwd,
           stdio: ["inherit", "inherit", "pipe"],
         },
-      });
+      },
+    );
 
     const result = await child;
 
@@ -262,13 +279,16 @@ async function internalPublish(
     publishFlags.push("--otp", twoFactorState.token);
   }
 
-  const { exitCode, stdout, stderr } =
-    await exec(publishTool.name, ["publish", opts.target, ...publishFlags], {
+  const { exitCode, stdout, stderr } = await exec(
+    publishTool.name,
+    ["publish", opts.target, ...publishFlags],
+    {
       nodeOptions: {
         env: opts.env,
         cwd: opts.cwd,
       },
-    });
+    },
+  );
 
   if (exitCode !== 0) {
     // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal

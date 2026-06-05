@@ -8,11 +8,7 @@ import tar from "tar-stream";
 const FILE_MODE = 0o644;
 const STABLE_MTIME = new Date("1985-10-26T08:15:00.000Z");
 
-async function addFileEntry(
-  pack: tar.Pack,
-  name: string,
-  source: string,
-) {
+async function addFileEntry(pack: tar.Pack, name: string, source: string) {
   const stat = await fs.stat(source);
 
   await new Promise<void>((resolve, reject) => {
@@ -35,8 +31,8 @@ async function collectFilesRecursively(
   dir: string,
   files: Array<string> = [],
 ): Promise<Array<string>> {
-  const entries = (await fs.readdir(dir, { withFileTypes: true })).sort((a, b) =>
-    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+  const entries = (await fs.readdir(dir, { withFileTypes: true })).sort(
+    (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
   );
 
   for (const entry of entries) {

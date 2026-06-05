@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
-import * as git from "@changesets/git";
 import { defaultConfig } from "@changesets/config";
+import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import * as getPublishPlanModule from "../../publish-plan/getPublishPlan.ts";
 import * as tarball from "../../../utils/tarball.ts";
+import * as getPublishPlanModule from "../../publish-plan/getPublishPlan.ts";
 import { publish as runRelease } from "../index.ts";
 import * as publishPackagesModule from "../publishPackages.ts";
 

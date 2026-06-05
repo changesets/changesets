@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import * as npmUtils from "../../publish/npm-utils.ts";
 import * as getUntaggedPackagesModule from "../../../utils/getUntaggedPackages.ts";
+import * as npmUtils from "../../publish/npm-utils.ts";
 import { publishPlan } from "../index.ts";
 
 vi.mock("../../publish/npm-utils.ts");

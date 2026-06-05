@@ -45,10 +45,15 @@ describe("publishPackages", () => {
       }));
 
       const packages = await getPackages(cwd);
-      const releases = await getUnpublishedPackages(packages, undefined, "public", {
-        ignore: [],
-        allowPrivatePackages: false,
-      });
+      const releases = await getUnpublishedPackages(
+        packages,
+        undefined,
+        "public",
+        {
+          ignore: [],
+          allowPrivatePackages: false,
+        },
+      );
 
       await publishPackages({
         releases,

@@ -10,8 +10,8 @@ import type {
   PreState,
 } from "@changesets/types";
 import { log } from "@clack/prompts";
-import semverParse from "semver/functions/parse.js";
 import { getPackages } from "@manypkg/get-packages";
+import semverParse from "semver/functions/parse.js";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 import { getPublishTool, infoAllow404 } from "../publish/npm-utils.ts";
 
@@ -65,22 +65,26 @@ export async function getUnpublishedPackages(
   packages: Packages,
   preState: PreState | undefined,
   access: AccessType,
-  options: { tag?: string; ignore: PackageGroup; allowPrivatePackages: boolean },
+  options: {
+    tag?: string;
+    ignore: PackageGroup;
+    allowPrivatePackages: boolean;
+  },
 ): Promise<Array<PublishReleaseEntry>> {
-  const publishTool =  getPublishTool(packages.tool);
+  const publishTool = getPublishTool(packages.tool);
   const results = await Promise.all(
     packages.packages
       .filter(
         (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
       )
       .map(async (pkg) => {
-        const response = await infoAllow404(publishTool,  pkg.packageJson);
+        const response = await infoAllow404(publishTool, pkg.packageJson);
         let publishedState: PublishedState = "never";
 
         if (response.published) {
           publishedState = "published";
 
-          if (preState !== undefined) {
+          if (preState != null) {
             if (
               response.pkgInfo.versions &&
               !response.pkgInfo.versions[
@@ -99,7 +103,7 @@ export async function getUnpublishedPackages(
       }),
   );
 
-  let packagesToPublish: Array<PublishReleaseEntry> = [];
+  const packagesToPublish: Array<PublishReleaseEntry> = [];
   const previewLines: Array<string> = [];
   let alreadyPublishedCount = 0;
 

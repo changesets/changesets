@@ -1,6 +1,6 @@
-import path from "node:path";
 import fs from "node:fs/promises";
 import os from "node:os";
+import path from "node:path";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
@@ -10,11 +10,13 @@ import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { readConfig } from "../../utils/read-config.ts";
-import { getPublishPlan, type PublishPlan } from "../publish-plan/getPublishPlan.ts";
 import { extractTarball } from "../../utils/tarball.ts";
+import {
+  getPublishPlan,
+  type PublishPlan,
+} from "../publish-plan/getPublishPlan.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { publishPackages } from "./publishPackages.ts";
-import { getPublishTool } from "./npm-utils.ts";
 
 function formatPackageList(
   pkgs: Array<{ name: string; version: string }>,
@@ -60,14 +62,18 @@ export interface PublishOptions {
 
 export async function publish(options?: PublishOptions) {
   const cwd = options?.cwd ?? process.cwd();
-  const artifactPath = options?.from ? path.resolve(cwd, options.from) : undefined;
+  const artifactPath = options?.from
+    ? path.resolve(cwd, options.from)
+    : undefined;
 
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
 
   const releaseTag =
     options?.tag && options.tag.length > 0 ? options.tag : undefined;
-  const preState = !artifactPath ? await readPreState(packages.rootDir) : undefined;
+  const preState = !artifactPath
+    ? await readPreState(packages.rootDir)
+    : undefined;
 
   if (artifactPath && releaseTag) {
     log.error("Releasing under custom tag is not allowed in artifact mode.");

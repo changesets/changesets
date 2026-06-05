@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import { ensureChangesetFolder } from "../shared.ts";
 import { readConfig } from "../../utils/read-config.ts";
+import { ensureChangesetFolder } from "../shared.ts";
 import { getPublishPlan, type PublishPlan } from "./getPublishPlan.ts";
 
 export interface PublishPlanOptions {
@@ -20,7 +20,9 @@ export async function publishPlan(
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
   const config = await readConfig(packages);
-  const plan = await getPublishPlan(packages.rootDir, config, { tag: options?.tag });
+  const plan = await getPublishPlan(packages.rootDir, config, {
+    tag: options?.tag,
+  });
   const entries = plan.flat();
   const releases = entries.filter((release) => release.kind === "publish");
   const tagReleases = entries.filter((release) => release.kind === "tag-only");
