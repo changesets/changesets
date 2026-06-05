@@ -32,6 +32,9 @@ export type TarballMetadata = {
 // However, we don't quite know what exactly got queried at the end as that gets largely delegated to the package manager CLIs and their internal logic.
 // Given we don't want to reimplement everything carefully for each package manager, we can't include the registry in the publish plan's release entries.
 // So, to some extent, the overall flow relies on matching configuration values between publish-plan and publish invocations.
+//
+// This also assumes "core" fields (like name and version) match between ./packages/pkg-a/package.json and ./packages/pkg-a/dist/package.json when using `publishConfig.directory`.
+// It's hard to imagine a legitimate/non-contrived examples for this not being the case.
 export type PublishReleaseEntry = BaseReleaseEntry & {
   kind: "publish";
   access: AccessType;
