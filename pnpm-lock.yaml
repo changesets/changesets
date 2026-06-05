@@ -210,9 +210,6 @@ importers:
       launch-editor:
         specifier: ^2.13.2
         version: 2.13.2
-      package-manager-detector:
-        specifier: ^1.6.0
-        version: 1.6.0
       semver:
         specifier: ^7.8.0
         version: 7.8.0

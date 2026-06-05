@@ -121,6 +121,13 @@ const tests: CommandTest[] = [
           gitTag: true,
         },
       },
+      {
+        args: ["--from", "changesets-pack.tgz"],
+        options: {
+          from: "changesets-pack.tgz",
+          gitTag: true,
+        },
+      },
     ],
   },
   {

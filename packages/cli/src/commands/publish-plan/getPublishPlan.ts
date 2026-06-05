@@ -13,7 +13,7 @@ import { log } from "@clack/prompts";
 import semverParse from "semver/functions/parse.js";
 import { getPackages } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
-import { getCorrectRegistry, infoAllow404 } from "../publish/npm-utils.ts";
+import { getPublishTool, infoAllow404 } from "../publish/npm-utils.ts";
 
 type PublishedState = "never" | "published" | "only-pre";
 
@@ -27,10 +27,14 @@ export type TarballMetadata = {
   checksum: string;
 };
 
+// NOTE: publish plan gets computed based on the registry configuration coming from publishConfig, config and env values.
+// To compute what gets included in the publish plan, we need to query the registry.
+// However, we don't quite know what exactly got queried at the end as that gets largely delegated to the package manager CLIs and their internal logic.
+// Given we don't want to reimplement everything carefully for each package manager, we can't include the registry in the publish plan's release entries.
+// So, to some extent, the overall flow relies on matching configuration values between publish-plan and publish invocations.
 export type PublishReleaseEntry = BaseReleaseEntry & {
   kind: "publish";
   access: AccessType;
-  registry: string;
   tag: string;
   tarball?: TarballMetadata;
 };
@@ -58,18 +62,19 @@ function getReleaseTag(
 }
 
 export async function getUnpublishedPackages(
-  packages: Array<Package>,
+  packages: Packages,
   preState: PreState | undefined,
   access: AccessType,
   options: { tag?: string; ignore: PackageGroup; allowPrivatePackages: boolean },
 ): Promise<Array<PublishReleaseEntry>> {
+  const publishTool =  getPublishTool(packages.tool);
   const results = await Promise.all(
-    packages
+    packages.packages
       .filter(
         (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
       )
       .map(async (pkg) => {
-        const response = await infoAllow404(pkg.packageJson);
+        const response = await infoAllow404(publishTool,  pkg.packageJson);
         let publishedState: PublishedState = "never";
 
         if (response.published) {
@@ -105,7 +110,6 @@ export async function getUnpublishedPackages(
         name: pkg.packageJson.name,
         version: pkg.packageJson.version,
         access: pkg.packageJson.publishConfig?.access || access,
-        registry: getCorrectRegistry(pkg.packageJson).registry,
         tag: getReleaseTag(publishedState, preState, options.tag),
       };
       packagesToPublish.push(release);
@@ -160,7 +164,7 @@ export async function getPublishPlan(
   const packages = await getPackages(rootDir);
   const preState = await readPreState(rootDir);
   const releases = await getUnpublishedPackages(
-    packages.packages,
+    packages,
     preState,
     config.access,
     {

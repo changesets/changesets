@@ -1,16 +1,13 @@
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { pipeline } from "node:stream/promises";
-import { createGunzip } from "node:zlib";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as npmUtils from "../../publish/npm-utils.ts";
 import * as getUntaggedPackagesModule from "../../../utils/getUntaggedPackages.ts";
+import { extractTarball } from "../../../utils/tarball.ts";
 import { pack } from "../index.ts";
 import { exec } from "tinyexec";
-import tar from "tar-stream";
 
 vi.mock("tinyexec");
 vi.mock("../../publish/npm-utils.ts");
@@ -51,25 +48,22 @@ const tarballChecksum = createHash("sha256")
   .digest("hex");
 
 async function readOuterTarball(tarballPath: string) {
-  const extract = tar.extract();
-  const entries = new Map<string, string>();
+  const extractDir = `${tarballPath}.extract`;
+  await extractTarball(tarballPath, extractDir);
 
-  extract.on("entry", (header, stream, next) => {
-    const chunks: Array<Buffer> = [];
-    stream.on("data", (chunk) => {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-    });
-    stream.on("end", () => {
-      entries.set(header.name, Buffer.concat(chunks).toString("utf8"));
-      next();
-    });
-    stream.on("error", next);
-    stream.resume();
-  });
-
-  await pipeline(createReadStream(tarballPath), createGunzip(), extract);
-
-  return entries;
+  return new Map<string, string>([
+    [
+      "publish-plan.json",
+      await fs.readFile(path.join(extractDir, "publish-plan.json"), "utf8"),
+    ],
+    [
+      "packages/pkg-a-1.0.0.tgz",
+      await fs.readFile(
+        path.join(extractDir, "packages", "pkg-a-1.0.0.tgz"),
+        "utf8",
+      ),
+    ],
+  ]);
 }
 
 describe("pack", () => {
@@ -108,9 +102,6 @@ describe("pack", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     } as never);
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    } as never);
     mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" } as never);
     mockedGetUntaggedPackages.mockResolvedValue([
       { name: "pkg-b", newVersion: "1.0.0" },
@@ -126,16 +117,6 @@ describe("pack", () => {
     const result = await pack({ cwd });
 
     expect(result).toEqual({
-      packedReleases: [
-        {
-          name: "pkg-a",
-          version: "1.0.0",
-          tarball: {
-            filename: "pkg-a-1.0.0.tgz",
-            checksum: tarballChecksum,
-          },
-        },
-      ],
       tarballPath: path.join(cwd, "changesets-pack.tgz"),
     });
 
@@ -229,16 +210,6 @@ describe("pack", () => {
     const result = await pack({ cwd, from: "publish-plan.json" });
 
     expect(result).toEqual({
-      packedReleases: [
-        {
-          name: "pkg-a",
-          version: "1.0.0",
-          tarball: {
-            filename: "pkg-a-1.0.0.tgz",
-            checksum: tarballChecksum,
-          },
-        },
-      ],
       tarballPath: path.join(cwd, "changesets-pack.tgz"),
     });
 

@@ -1,3 +1,6 @@
+import path from "node:path";
+import fs from "node:fs/promises";
+import os from "node:os";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
@@ -7,9 +10,11 @@ import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { readConfig } from "../../utils/read-config.ts";
-import { getPublishPlan, type TagReleaseEntry } from "../publish-plan/getPublishPlan.ts";
+import { getPublishPlan, type PublishPlan } from "../publish-plan/getPublishPlan.ts";
+import { extractTarball } from "../../utils/tarball.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { publishPackages } from "./publishPackages.ts";
+import { getPublishTool } from "./npm-utils.ts";
 
 function formatPackageList(
   pkgs: Array<{ name: string; version: string }>,
@@ -34,23 +39,40 @@ ${c.red("except")} for packages that have not had normal releases, which will be
   }
 }
 
+async function readPublishArtifact(artifactPath: string) {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "changesets-publish-"));
+  await extractTarball(artifactPath, dir);
+  const plan = JSON.parse(
+    await fs.readFile(path.join(dir, "publish-plan.json"), "utf8"),
+  ) as PublishPlan;
+
+  return { dir, plan };
+}
+
 export interface PublishOptions {
   cwd?: string;
   otp?: string;
   tag?: string;
+  from?: string;
   /** @default true */
   gitTag?: boolean;
 }
 
 export async function publish(options?: PublishOptions) {
   const cwd = options?.cwd ?? process.cwd();
+  const artifactPath = options?.from ? path.resolve(cwd, options.from) : undefined;
 
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
 
   const releaseTag =
     options?.tag && options.tag.length > 0 ? options.tag : undefined;
-  const preState = await readPreState(packages.rootDir);
+  const preState = !artifactPath ? await readPreState(packages.rootDir) : undefined;
+
+  if (artifactPath && releaseTag) {
+    log.error("Releasing under custom tag is not allowed in artifact mode.");
+    throw new ExitError(1);
+  }
 
   if (releaseTag && preState && preState.mode === "pre") {
     log.error(
@@ -67,20 +89,26 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   }
 
   const config = await readConfig(packages);
-  const plan = await getPublishPlan(packages.rootDir, config, {
-    tag: releaseTag,
-  });
+  const artifact = artifactPath
+    ? await readPublishArtifact(artifactPath)
+    : null;
+  const plan = artifact
+    ? artifact.plan
+    : await getPublishPlan(packages.rootDir, config, {
+        tag: releaseTag,
+      });
   const entries = plan.flat();
   const unpublishedPackages = entries.filter(
     (release) => release.kind === "publish",
   );
   const untaggedPrivatePackageReleases = entries.filter(
-    (release): release is TagReleaseEntry => release.kind === "tag-only",
+    (release) => release.kind === "tag-only",
   );
 
   const publishedPackages = await publishPackages({
     releases: unpublishedPackages,
-    packages: packages.packages,
+    packages,
+    artifactDir: artifact?.dir,
     otp: options?.otp,
   });
 

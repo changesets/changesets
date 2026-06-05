@@ -38,9 +38,6 @@ describe("publishPackages", () => {
           version: "1.0.0",
         },
       }));
-      mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-        registry: "https://registry.npmjs.org",
-      } as never);
 
       mockedNpmUtils.publish.mockImplementation(async () => ({
         result: "published",

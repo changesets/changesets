@@ -1,26 +1,25 @@
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
-import type { AccessType, PackageJSON } from "@changesets/types";
+import type { PackageJSON, Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
-import { detect } from "package-manager-detector";
-import semverParse from "semver/functions/parse.js";
 import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
 import type { TwoFactorState } from "../../utils/types.ts";
 import { requiresDelegatedAuth } from "./publishPackages.ts";
+import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 interface PublishOptions {
-  cwd: string;
-  publishDir: string;
-  access: AccessType;
-  tag: string;
+  /** The publish command argument, the path to the package or tarball */
+  target: string;
+  /** The current working directory for the publish operation */
+  cwd: string
+  /** The environment variables for the publish operation */
+  env: NodeJS.ProcessEnv;
 }
 
 const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
 const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
-const NPM_REGISTRY = "https://registry.npmjs.org";
-const YARN_REGISTRY = "https://registry.yarnpkg.com";
 
 export const npmRequestQueue = createPromiseQueue(
   NPM_REQUEST_CONCURRENCY_LIMIT,
@@ -40,77 +39,32 @@ function jsonParse(input: string) {
   }
 }
 
-export const isCustomRegistry = (registry?: string): boolean => {
-  return (
-    !!registry &&
-    registry !== NPM_REGISTRY &&
-    registry !== `${NPM_REGISTRY}/` &&
-    registry !== YARN_REGISTRY &&
-    registry !== `${YARN_REGISTRY}/`
-  );
-};
-
-interface RegistryInfo {
-  scope?: string;
-  registry: string;
-}
-
-export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
-  const packageName = packageJson?.name;
-
-  if (packageName?.startsWith("@")) {
-    const scope = packageName.split("/")[0];
-    const scopedRegistry =
-      packageJson!.publishConfig?.[`${scope}:registry`] ||
-      process.env[`npm_config_${scope}:registry`];
-    if (scopedRegistry) {
-      return {
-        scope,
-        registry: scopedRegistry,
-      };
+export function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  if (env.npm_config_registry === "https://registry.yarnpkg.com") {
+    // Due to a super annoying issue in classic yarn, we have to manually strip this env variable.
+    // The issue is that `yarn run` overrides the `npm_config_registry` env variable with its read-only mirror.
+    // Then the publish command runs from within it and inherits that env variable. Env variable trumps config values
+    // and even trumps the `yarn publish`'s default publish registry (npm one) so the whole thing ends up failing.
+    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
+    return {
+      ...env,
+      npm_config_registry: undefined,
     }
   }
-
-  const registry =
-    packageJson?.publishConfig?.registry || process.env.npm_config_registry;
-
-  return {
-    scope: undefined,
-    registry:
-      !registry || !isCustomRegistry(registry) ? NPM_REGISTRY : registry,
-  };
+  return env
 }
 
-export async function getPublishTool(
-  cwd: string,
-): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
-  const pm = await detect({ cwd });
-  if (!pm || pm.name !== "pnpm") return { name: "npm" };
-  try {
-    const result = await exec("pnpm", ["--version"], { nodeOptions: { cwd } });
-    const version = result.stdout.toString().trim();
-    const parsed = semverParse(version);
-    return {
-      name: "pnpm",
-      shouldAddNoGitChecks: parsed?.major == null ? false : parsed.major >= 5,
-    };
-  } catch {
-    return {
-      name: "pnpm",
-      shouldAddNoGitChecks: false,
-    };
-  }
+export  function getPublishTool(
+  { type }: Packages["tool"],
+): { name: "npm" } | { name: "pnpm"; } {
+  return { name: type === 'pnpm' ? "pnpm" : "npm" };
 }
+
+export type PublishTool = ReturnType<typeof getPublishTool>;
 
 export async function getTokenIsRequired() {
-  const { scope, registry } = getCorrectRegistry();
-  // Due to a super annoying issue in yarn, we have to manually override this env variable
-  // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-  const envOverride = {
-    [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
-  };
   const result = await exec("npm", ["profile", "get", "--json"], {
-    nodeOptions: { env: { ...process.env, ...envOverride } },
+    nodeOptions: { env: sanitizeEnv(process.env) },
   });
   if (result.exitCode !== 0) {
     log.error(
@@ -154,26 +108,54 @@ ${result.stderr.toString().trim() || result.stdout.toString().trim()}
 //   queries return empty → no versions list → only-pre detection is not
 //   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
 //   published with preState.tag rather than "latest".
-export function getPackageInfo(packageJson: PackageJSON) {
+export function getPackageInfo(publishTool: PublishTool, packageJson: PackageJSON) {
   return npmRequestQueue.add(async () => {
-    const { scope, registry } = getCorrectRegistry(packageJson);
+    let registryOverrides: string[] = []
+
+    // for a scoped package the priority of registry resolution in `info` is:
+    // --@scope:registry
+    // .npmrc @scope:registry=
+    // --registry
+    // .npmrc registry=
+    //
+    // so we can't rely on a simple --registry override here
+    if (packageJson.name.startsWith("@")) {
+      const scope = packageJson.name.split("/")[0];
+      if (publishTool.name !== 'pnpm') {
+        // in npm publishConfig values are only flattened into the config-level values
+        // so we just have to pick the existing ones and override them 1 to 1 as CLI flags
+        if (packageJson.publishConfig?.[`${scope}:registry`]) {
+          registryOverrides.push(`--${scope}:registry=${packageJson.publishConfig[`${scope}:registry`]}`)
+        }
+        if (packageJson.publishConfig?.registry) {
+          registryOverrides.push(`--registry=${packageJson.publishConfig.registry}`)
+        }
+      } else if (packageJson.publishConfig?.registry) {
+        // in pnpm `publishConfig.registry` is the only supported registry value and it's a strong publish-time override
+        // to emulate pnpm publish-time precedence when querying via pnpm info, we force it as a scoped override
+        registryOverrides.push(`--${scope}:registry=${packageJson.publishConfig.registry}`)
+      }
+    } else if (packageJson.publishConfig?.registry) {
+      // for non-scoped packages, it's a simple override
+      registryOverrides.push(`--registry=${packageJson.publishConfig.registry}`)
+    }
 
     // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
     // bleed-through, enabling only-pre detection downstream. Returns empty when no `latest` exists.
-    let result = await exec("npm", [
+    let result = await exec(publishTool.name, [
       "info",
       packageJson.name,
-      `--${scope ? `${scope}:` : ""}registry=${registry}`,
+      ...registryOverrides,
       "--json",
     ]);
 
     // Bare query returned nothing — retry with exact version specifier
     // to handle prerelease-only packages on registries without auto-`latest`.
     if (result.stdout.toString() === "") {
-      result = await exec("npm", [
+      result = await exec(publishTool.name, [
         "info",
         `${packageJson.name}@${packageJson.version}`,
-        `--${scope ? `${scope}:` : ""}registry=${registry}`,
+        ...registryOverrides,
         "--json",
       ]);
     }
@@ -192,8 +174,8 @@ export function getPackageInfo(packageJson: PackageJSON) {
   });
 }
 
-export async function infoAllow404(packageJson: PackageJSON) {
-  const pkgInfo = await getPackageInfo(packageJson);
+export async function infoAllow404(publishTool: PublishTool, packageJson: PackageJSON) {
+  const pkgInfo = await getPackageInfo(publishTool, packageJson);
   if (pkgInfo.error?.code === "E404") {
     log.warn(`Received 404 for ${c.cyan(`npm info ${packageJson.name}`)}`);
     return { published: false, pkgInfo: {} };
@@ -227,48 +209,29 @@ type InternalPublishResult =
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
-  packageJson: PackageJSON,
+  publishTool: PublishTool,
+  release: PublishReleaseEntry,
   opts: PublishOptions,
   twoFactorState: TwoFactorState,
 ): Promise<InternalPublishResult> {
-  const publishTool = await getPublishTool(opts.cwd);
-
-  const publishFlags = opts.access ? ["--access", opts.access] : [];
-  publishFlags.push("--tag", opts.tag);
-  if (publishTool.name === "pnpm" && publishTool.shouldAddNoGitChecks) {
+  const publishFlags = ["--access", release.access, "--tag", release.tag];
+  if (publishTool.name === "pnpm") {
     publishFlags.push("--no-git-checks");
   }
 
-  const { scope, registry } = getCorrectRegistry(packageJson);
-
-  // Due to a super annoying issue in yarn, we have to manually override this env variable
-  // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-  const envOverride = {
-    [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
-  };
+  const env = sanitizeEnv(process.env);
 
   if (requiresDelegatedAuth(twoFactorState)) {
     // it's not easily controllable but ideally no other work should happen until this is done
     // we specifically don't want any other output to interfere with the delegated auth flow
     const child =
-      publishTool.name === "pnpm"
-        ? exec("pnpm", ["publish", ...publishFlags], {
-            nodeOptions: {
-              env: { ...process.env, ...envOverride },
-              cwd: opts.cwd,
-              stdio: ["inherit", "inherit", "pipe"],
-            },
-          })
-        : exec(
-            publishTool.name,
-            ["publish", opts.publishDir, ...publishFlags],
-            {
-              nodeOptions: {
-                env: { ...process.env, ...envOverride },
-                stdio: ["inherit", "inherit", "pipe"],
-              },
-            },
-          );
+      exec(publishTool.name, ["publish", opts.target, ...publishFlags], {
+        nodeOptions: {
+          env,
+          cwd: opts.cwd,
+          stdio: ["inherit", "inherit", "pipe"],
+        },
+      });
 
     const result = await child;
 
@@ -284,7 +247,7 @@ async function internalPublish(
       // given this error happened in the delegated mode, the user was prompted to log in
       // for that reason, it's nice to show this warning to the user so they are not confused by the printed error
       log.warn(
-        `${packageJson.name} is already published (likely a stale registry data led to a duplicate publish attempt)`,
+        `${release.name} is already published (likely a stale registry data led to a duplicate publish attempt)`,
       );
       twoFactorState.allowConcurrency = true;
       npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
@@ -302,18 +265,12 @@ async function internalPublish(
   }
 
   const { exitCode, stdout, stderr } =
-    publishTool.name === "pnpm"
-      ? await exec("pnpm", ["publish", ...publishFlags], {
-          nodeOptions: {
-            env: { ...process.env, ...envOverride },
-            cwd: opts.cwd,
-          },
-        })
-      : await exec(
-          publishTool.name,
-          ["publish", opts.publishDir, ...publishFlags],
-          { nodeOptions: { env: { ...process.env, ...envOverride } } },
-        );
+    await exec(publishTool.name, ["publish", opts.target, ...publishFlags], {
+      nodeOptions: {
+        env,
+        cwd: opts.cwd,
+      },
+    });
 
   if (exitCode !== 0) {
     // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
@@ -356,7 +313,7 @@ async function internalPublish(
       }
       log.error(
         `
-An error occurred while publishing ${packageJson.name}: ${json.error.code}
+An error occurred while publishing ${release.name}: ${json.error.code}
 ${json.error.summary}${json.error.detail ? `\n${json.error.detail}` : ""}
         `.trim(),
       );
@@ -369,7 +326,8 @@ ${json.error.summary}${json.error.detail ? `\n${json.error.detail}` : ""}
 }
 
 export function publish(
-  packageJson: PackageJSON,
+  publishTool: PublishTool,
+  release: PublishReleaseEntry,
   opts: PublishOptions,
   twoFactorState: TwoFactorState,
 ): Promise<{ result: "published" | "skipped" | "failed" }> {
@@ -377,7 +335,7 @@ export function publish(
     let result: InternalPublishResult;
     do {
       result = await npmPublishQueue.add(() =>
-        internalPublish(packageJson, opts, twoFactorState),
+        internalPublish(publishTool, release, opts, twoFactorState),
       );
     } while (result.result === "failed" && result.allowRetry);
 

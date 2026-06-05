@@ -48,9 +48,6 @@ describe("publish-plan", () => {
         version: "1.0.0",
       },
     }));
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    } as never);
     mockedGetUntaggedPackages.mockResolvedValue([
       { name: "pkg-b", newVersion: "1.0.0" },
     ] as never);
@@ -98,9 +95,6 @@ describe("publish-plan", () => {
         versions: ["1.0.0"],
       },
     }));
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    } as never);
     mockedGetUntaggedPackages.mockResolvedValue([] as never);
 
     const result = await publishPlan({ cwd });
@@ -129,9 +123,6 @@ describe("publish-plan", () => {
         version: "1.0.0",
       },
     }));
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    } as never);
     mockedGetUntaggedPackages.mockResolvedValue([] as never);
 
     const output = "publish-plan.json";

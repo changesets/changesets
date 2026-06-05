@@ -9,6 +9,7 @@ import { getPublishPlan, type PublishPlan } from "./getPublishPlan.ts";
 export interface PublishPlanOptions {
   cwd?: string;
   output?: string;
+  tag?: string;
 }
 
 export async function publishPlan(
@@ -19,7 +20,7 @@ export async function publishPlan(
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
   const config = await readConfig(packages);
-  const plan = await getPublishPlan(packages.rootDir, config);
+  const plan = await getPublishPlan(packages.rootDir, config, { tag: options?.tag });
   const entries = plan.flat();
   const releases = entries.filter((release) => release.kind === "publish");
   const tagReleases = entries.filter((release) => release.kind === "tag-only");
