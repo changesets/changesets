@@ -81,7 +81,6 @@ describe("running release", () => {
                   name: "pkg-a",
                   version: "1.0.0",
                   access: "public",
-                  registry: "https://registry.npmjs.org",
                   tag: "latest",
                   tarball: {
                     path: "packages/pkg-a-1.0.0.tgz",
@@ -106,7 +105,6 @@ describe("running release", () => {
             name: "pkg-a",
             version: "1.0.0",
             access: "public",
-            registry: "https://registry.npmjs.org",
             tag: "latest",
             tarball: {
               path: "packages/pkg-a-1.0.0.tgz",
