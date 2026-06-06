@@ -113,7 +113,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
 
   const publishedPackages = await publishPackages({
     releases: unpublishedPackages,
-    packages: packages.packages,
+    packages,
     // if not public, we won't pass the access, and it works as normal
     access: config.access,
     artifactDir: artifact?.dir,

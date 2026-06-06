@@ -56,7 +56,7 @@ describe("publishPackages", () => {
 
       await publishPackages({
         releases,
-        packages: packages.packages,
+        packages,
         access: "public",
       });
       expect(mockedNpmUtils.getTokenIsRequired).not.toHaveBeenCalled();
