@@ -7,8 +7,8 @@ import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { readConfig } from "../../utils/read-config.ts";
-import { ensureChangesetFolder } from "../shared.ts";
 import { getPublishPlan } from "../publish-plan/getPublishPlan.ts";
+import { ensureChangesetFolder } from "../shared.ts";
 import { publishPackages } from "./publishPackages.ts";
 
 function formatPackageList(

@@ -3,13 +3,13 @@ import c from "@changesets/color";
 import type { AccessType, Package } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
 import type { TwoFactorState } from "../../utils/types.ts";
+import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 import {
   getTokenIsRequired,
   isCustomRegistry,
   npmPublishQueue,
   publish,
 } from "./npm-utils.ts";
-import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 export type PublishedResult = {
   name: string;

@@ -1,10 +1,9 @@
-import fs from "node:fs/promises";
-import path from "node:path";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { getPackages } from "@manypkg/get-packages";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as npmUtils from "../../publish/npm-utils.ts";
-import { publishPlan } from "../index.ts";
+import { getPublishPlan, getUnpublishedPackages } from "../getPublishPlan.ts";
 
 vi.mock("@changesets/git");
 vi.mock("../../publish/npm-utils.ts");
@@ -12,7 +11,7 @@ vi.mock("../../publish/npm-utils.ts");
 const mockedNpmUtils = vi.mocked(npmUtils);
 const mockedGit = vi.mocked(git);
 
-describe("publish-plan", () => {
+describe("getPublishPlan", () => {
   silenceLogsInBlock();
 
   afterEach(() => {
@@ -51,7 +50,11 @@ describe("publish-plan", () => {
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
-    const result = await publishPlan({ cwd });
+    const result = await getPublishPlan(cwd, {
+      access: "restricted",
+      ignore: [],
+      privatePackages: { version: true, tag: true },
+    } as any);
 
     expect(result).toEqual([
       [
@@ -72,7 +75,7 @@ describe("publish-plan", () => {
     ]);
   });
 
-  it("returns empty arrays when there is nothing to publish or tag", async () => {
+  it("skips ignored public packages", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         name: "repo",
@@ -80,69 +83,25 @@ describe("publish-plan", () => {
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
-      ".changeset/config.json": JSON.stringify({}),
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
       }),
     });
 
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
-      published: true,
-      pkgInfo: {
-        version: "1.0.0",
-        versions: ["1.0.0"],
-      },
-    });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
+    const packages = await getPackages(cwd);
 
-    const result = await publishPlan({ cwd });
+    const result = await getUnpublishedPackages(
+      packages,
+      undefined,
+      "restricted",
+      {
+        ignore: ["pkg-a"],
+        allowPrivatePackages: false,
+      },
+    );
 
     expect(result).toEqual([]);
-  });
-
-  it("writes the plan to the output file", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        name: "repo",
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      ".changeset/config.json": JSON.stringify({}),
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-    });
-
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
-      published: false,
-      pkgInfo: { version: "1.0.0" },
-    });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
-
-    const output = "publish-plan.json";
-    const result = await publishPlan({ cwd, output });
-
-    expect(result).toEqual([
-      [
-        {
-          kind: "publish",
-          name: "pkg-a",
-          version: "1.0.0",
-          access: "restricted",
-          registry: "https://registry.npmjs.org",
-          tag: "latest",
-        },
-      ],
-    ]);
-    await expect(fs.readFile(path.join(cwd, output), "utf8")).resolves.toEqual(
-      `${JSON.stringify(result, undefined, 2)}`,
-    );
+    expect(mockedNpmUtils.infoAllow404).not.toHaveBeenCalled();
   });
 });
