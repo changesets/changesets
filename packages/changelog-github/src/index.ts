@@ -17,6 +17,18 @@ function linkifyIssueRefs(
   );
 }
 
+// narrow autolinking used by `autolinkIssues: "hints"`: only links a ref that
+// sits inside `(fix #123)`, `(fixes #123)`, or `(see #123)`
+function linkifyIssueHints(
+  line: string,
+  { serverUrl, repo }: { serverUrl: string; repo: string },
+): string {
+  return line.replace(
+    /(?<=\( ?(?:fix|fixes|see) )#(\d+)(?= ?\))/g,
+    (_match, issue) => `[#${issue}](${serverUrl}/${repo}/issues/${issue})`,
+  );
+}
+
 async function readEnvFile() {
   const envFile = path.resolve(process.cwd(), ".env");
   let content: string | undefined;
@@ -40,6 +52,53 @@ async function readEnv() {
     (await readEnvFileCached()).GITHUB_SERVER_URL ||
     "https://github.com";
   return { GITHUB_SERVER_URL };
+}
+
+export const RELEASE_LINE_TOKENS = [
+  "summary",
+  "ref",
+  "pr",
+  "commit",
+  "authors",
+] as const;
+
+export function renderTemplate(
+  template: string,
+  tokens: Record<string, string>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (_match, name: string) => {
+    if (!Object.hasOwn(tokens, name)) {
+      throw new Error(
+        `Unknown changelog template token "{${name}}". Valid tokens are: ${RELEASE_LINE_TOKENS.map(
+          (t) => `{${t}}`,
+        ).join(", ")}.`,
+      );
+    }
+    return tokens[name];
+  });
+}
+
+export function buildReleaseLineTokens(args: {
+  summary: string;
+  links: { pull: string | null; commit: string | null; user: string | null };
+  users: string | null;
+}): Record<string, string> {
+  const { summary, links, users } = args;
+  // Tokens render bare (no built-in spacing); the template author writes the
+  // spaces. `{ref}` is the one self-contained convenience: a parenthesized
+  // PR-or-commit reference (PR wins), empty when there is neither.
+  const ref = links.pull
+    ? `(${links.pull})`
+    : links.commit
+      ? `(${links.commit})`
+      : "";
+  return {
+    summary,
+    ref,
+    pr: links.pull ?? "",
+    commit: links.commit ?? "",
+    authors: users ?? "",
+  };
 }
 
 const changelogFunctions: ChangelogFunctions = {
@@ -153,24 +212,34 @@ const changelogFunctions: ChangelogFunctions = {
             .join(", ")
         : links.user;
 
+    const autolink = (line: string): string => {
+      const linkOpts = { serverUrl: GITHUB_SERVER_URL, repo };
+      return options.autolinkIssues === "hints"
+        ? linkifyIssueHints(line, linkOpts)
+        : linkifyIssueRefs(line, linkOpts);
+    };
+
+    const continuation = futureLines.map((l) => `  ${autolink(l)}`).join("\n");
+
+    if (typeof options.template === "string" && options.template.length > 0) {
+      const tokens = buildReleaseLineTokens({
+        summary: autolink(firstLine),
+        links,
+        users,
+      });
+      // trimEnd so an empty trailing token (e.g. `{ref}` with no PR/commit)
+      // leaves no dangling space - a trailing space in markdown is unsafe.
+      const rendered = renderTemplate(options.template, tokens).trimEnd();
+      return `${rendered}\n${continuation}`;
+    }
+
     const prefix = [
       links.pull == null ? "" : ` ${links.pull}`,
       links.commit == null ? "" : ` ${links.commit}`,
       users == null ? "" : ` Thanks ${users}!`,
     ].join("");
 
-    return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {
-      serverUrl: GITHUB_SERVER_URL,
-      repo,
-    })}\n${futureLines
-      .map(
-        (l) =>
-          `  ${linkifyIssueRefs(l, {
-            serverUrl: GITHUB_SERVER_URL,
-            repo,
-          })}`,
-      )
-      .join("\n")}`;
+    return `\n\n-${prefix ? `${prefix} -` : ""} ${autolink(firstLine)}\n${continuation}`;
   },
 };
 
