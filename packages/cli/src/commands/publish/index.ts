@@ -11,7 +11,10 @@ import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { extractTarball } from "../../utils/tarball.ts";
-import { type PublishPlan, getPublishPlan } from "../publish-plan/getPublishPlan.ts";
+import {
+  type PublishPlan,
+  getPublishPlan,
+} from "../publish-plan/getPublishPlan.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { publishPackages } from "./publishPackages.ts";
 
