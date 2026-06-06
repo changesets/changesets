@@ -114,7 +114,16 @@ describe("running release", () => {
             },
           },
         ],
-        packages: expect.any(Array),
+        packages: expect.objectContaining({
+          packages: [
+            expect.objectContaining({
+              packageJson: expect.objectContaining({
+                name: "pkg-a",
+                version: "1.0.0",
+              }),
+            }),
+          ],
+        }),
         access: "restricted",
         artifactDir: expect.stringContaining("changesets-publish-"),
         otp: undefined,

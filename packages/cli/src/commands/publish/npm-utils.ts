@@ -12,7 +12,7 @@ import { requiresDelegatedAuth } from "./publishPackages.ts";
 
 interface PublishOptions {
   cwd: string;
-  publishDir: string;
+  target: string;
   access: AccessType;
   tag: string;
 }
@@ -252,7 +252,7 @@ async function internalPublish(
     // we specifically don't want any other output to interfere with the delegated auth flow
     const child =
       publishTool.name === "pnpm"
-        ? exec("pnpm", ["publish", ...publishFlags], {
+        ? exec("pnpm", ["publish", opts.target, ...publishFlags], {
             nodeOptions: {
               env: { ...process.env, ...envOverride },
               cwd: opts.cwd,
@@ -261,10 +261,11 @@ async function internalPublish(
           })
         : exec(
             publishTool.name,
-            ["publish", opts.publishDir, ...publishFlags],
+            ["publish", opts.target, ...publishFlags],
             {
               nodeOptions: {
                 env: { ...process.env, ...envOverride },
+                cwd: opts.cwd,
                 stdio: ["inherit", "inherit", "pipe"],
               },
             },
@@ -303,7 +304,7 @@ async function internalPublish(
 
   const { exitCode, stdout, stderr } =
     publishTool.name === "pnpm"
-      ? await exec("pnpm", ["publish", ...publishFlags], {
+      ? await exec("pnpm", ["publish", opts.target, ...publishFlags], {
           nodeOptions: {
             env: { ...process.env, ...envOverride },
             cwd: opts.cwd,
@@ -311,8 +312,13 @@ async function internalPublish(
         })
       : await exec(
           publishTool.name,
-          ["publish", opts.publishDir, ...publishFlags],
-          { nodeOptions: { env: { ...process.env, ...envOverride } } },
+          ["publish", opts.target, ...publishFlags],
+          {
+            nodeOptions: {
+              env: { ...process.env, ...envOverride },
+              cwd: opts.cwd,
+            },
+          },
         );
 
   if (exitCode !== 0) {
