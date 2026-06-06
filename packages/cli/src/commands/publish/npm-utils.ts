@@ -259,17 +259,13 @@ async function internalPublish(
               stdio: ["inherit", "inherit", "pipe"],
             },
           })
-        : exec(
-            publishTool.name,
-            ["publish", opts.target, ...publishFlags],
-            {
-              nodeOptions: {
-                env: { ...process.env, ...envOverride },
-                cwd: opts.cwd,
-                stdio: ["inherit", "inherit", "pipe"],
-              },
+        : exec(publishTool.name, ["publish", opts.target, ...publishFlags], {
+            nodeOptions: {
+              env: { ...process.env, ...envOverride },
+              cwd: opts.cwd,
+              stdio: ["inherit", "inherit", "pipe"],
             },
-          );
+          });
 
     const result = await child;
 

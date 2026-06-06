@@ -38,6 +38,9 @@ describe("publishPackages", () => {
       mockedNpmUtils.getCorrectRegistry.mockReturnValue({
         registry: "https://registry.npmjs.org",
       });
+      mockedNpmUtils.getPublishTool.mockResolvedValue({
+        name: "npm",
+      });
 
       mockedNpmUtils.publish.mockImplementation(async () => ({
         result: "published",

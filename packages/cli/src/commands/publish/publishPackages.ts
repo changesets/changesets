@@ -136,9 +136,9 @@ async function publishAPackage(
     ? resolve(artifactDir, release.tarball!.path)
     : publishTool.name === "pnpm"
       ? pkg.dir
-    : publishConfig?.directory
-      ? resolve(pkg.dir, publishConfig.directory)
-      : pkg.dir;
+      : publishConfig?.directory
+        ? resolve(pkg.dir, publishConfig.directory)
+        : pkg.dir;
 
   const publishConfirmation = await publish(
     pkg.packageJson,
