@@ -1,23 +1,21 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import * as getUntaggedPackagesModule from "../../../utils/getUntaggedPackages.ts";
 import { extractTarball } from "../../../utils/tarball.ts";
 import * as npmUtils from "../../publish/npm-utils.ts";
 import { pack } from "../index.ts";
 
+vi.mock("@changesets/git");
 vi.mock("tinyexec");
 vi.mock("../../publish/npm-utils.ts");
-vi.mock("../../../utils/getUntaggedPackages.ts");
 
 const mockedExec = vi.mocked(exec);
+const mockedGit = vi.mocked(git);
 const mockedNpmUtils = vi.mocked(npmUtils);
-const mockedGetUntaggedPackages = vi.mocked(
-  getUntaggedPackagesModule.getUntaggedPackages,
-);
 
 function execResult(stdout: string, exitCode = 0) {
   return {
@@ -106,9 +104,8 @@ describe("pack", () => {
       registry: "https://registry.npmjs.org",
     });
     mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" } as never);
-    mockedGetUntaggedPackages.mockResolvedValue([
-      { name: "pkg-b", newVersion: "1.0.0" },
-    ] as never);
+    mockedGit.tagExists.mockResolvedValue(false);
+    mockedGit.remoteTagExists.mockResolvedValue(false);
     mockExecImplementation(async (cmd, args) => {
       const dest = args[args.indexOf("--pack-destination") + 1];
       const tarballFilename = "pkg-a-1.0.0.tgz";
