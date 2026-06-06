@@ -94,13 +94,14 @@ export async function getUnpublishedPackages(
     allowPrivatePackages: boolean;
   },
 ): Promise<Array<PublishReleaseEntry>> {
+  const publishTool = packages.tool.type === "pnpm" ? "pnpm" : "npm";
   const results = await Promise.all(
     packages.packages
       .filter(
         (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
       )
       .map(async (pkg) => {
-        const response = await infoAllow404(pkg.packageJson);
+        const response = await infoAllow404(pkg.packageJson, publishTool);
         let publishedState: PublishedState = "never";
         if (response.published) {
           publishedState = "published";

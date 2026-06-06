@@ -56,6 +56,8 @@ interface RegistryInfo {
   registry: string;
 }
 
+type InfoPublishTool = "npm" | "pnpm";
+
 export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   const packageName = packageJson?.name;
 
@@ -155,26 +157,53 @@ ${result.stderr.toString().trim() || result.stdout.toString().trim()}
 //   queries return empty → no versions list → only-pre detection is not
 //   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
 //   published with preState.tag rather than "latest".
-export function getPackageInfo(packageJson: PackageJSON) {
+export function getPackageInfo(
+  packageJson: PackageJSON,
+  publishTool: InfoPublishTool = "npm",
+) {
   return npmRequestQueue.add(async () => {
-    const { scope, registry } = getCorrectRegistry(packageJson);
+    const registryOverrides: string[] = [];
+
+    if (packageJson.name.startsWith("@")) {
+      const scope = packageJson.name.split("/")[0];
+      if (publishTool !== "pnpm") {
+        if (packageJson.publishConfig?.[`${scope}:registry`]) {
+          registryOverrides.push(
+            `--${scope}:registry=${packageJson.publishConfig[`${scope}:registry`]}`,
+          );
+        }
+        if (packageJson.publishConfig?.registry) {
+          registryOverrides.push(
+            `--registry=${packageJson.publishConfig.registry}`,
+          );
+        }
+      } else if (packageJson.publishConfig?.registry) {
+        registryOverrides.push(
+          `--${scope}:registry=${packageJson.publishConfig.registry}`,
+        );
+      }
+    } else if (packageJson.publishConfig?.registry) {
+      registryOverrides.push(
+        `--registry=${packageJson.publishConfig.registry}`,
+      );
+    }
 
     // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
     // bleed-through, enabling only-pre detection downstream. Returns empty when no `latest` exists.
-    let result = await exec("npm", [
+    let result = await exec(publishTool, [
       "info",
       packageJson.name,
-      `--${scope ? `${scope}:` : ""}registry=${registry}`,
+      ...registryOverrides,
       "--json",
     ]);
 
     // Bare query returned nothing — retry with exact version specifier
     // to handle prerelease-only packages on registries without auto-`latest`.
     if (result.stdout.toString() === "") {
-      result = await exec("npm", [
+      result = await exec(publishTool, [
         "info",
         `${packageJson.name}@${packageJson.version}`,
-        `--${scope ? `${scope}:` : ""}registry=${registry}`,
+        ...registryOverrides,
         "--json",
       ]);
     }
@@ -193,8 +222,11 @@ export function getPackageInfo(packageJson: PackageJSON) {
   });
 }
 
-export async function infoAllow404(packageJson: PackageJSON) {
-  const pkgInfo = await getPackageInfo(packageJson);
+export async function infoAllow404(
+  packageJson: PackageJSON,
+  publishTool: InfoPublishTool = "npm",
+) {
+  const pkgInfo = await getPackageInfo(packageJson, publishTool);
   if (pkgInfo.error?.code === "E404") {
     log.warn(`Received 404 for ${c.cyan(`npm info ${packageJson.name}`)}`);
     return { published: false, pkgInfo: {} };
