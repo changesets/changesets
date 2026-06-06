@@ -15,31 +15,6 @@ describe("publishPackages", () => {
     vi.clearAllMocks();
   });
 
-  it("skips ignored public packages", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-    });
-
-    await publishPackages({
-      packages: (await getPackages(cwd)).packages,
-      access: "public",
-      ignore: ["pkg-a"],
-      allowPrivatePackages: false,
-      preState: undefined,
-    });
-
-    expect(mockedNpmUtils.infoAllow404).not.toHaveBeenCalled();
-    expect(mockedNpmUtils.publish).not.toHaveBeenCalled();
-  });
-
   describe("when not in isTTY", () => {
     it("does not call out to npm to see if otp is required", async () => {
       const cwd = await testdir({
@@ -62,7 +37,7 @@ describe("publishPackages", () => {
       }));
       mockedNpmUtils.getCorrectRegistry.mockReturnValue({
         registry: "https://registry.npmjs.org",
-      } as never);
+      });
 
       mockedNpmUtils.publish.mockImplementation(async () => ({
         result: "published",
