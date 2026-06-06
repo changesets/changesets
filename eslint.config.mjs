@@ -86,7 +86,7 @@ export default defineConfig(
       "n/prefer-node-protocol": "error",
       "n/no-unsupported-features/node-builtins": [
         "error",
-        { ignores: ["fs/promises.cp", "import.meta.dirname"] },
+        { allowExperimental: true },
       ],
 
       "import-lite/no-default-export": "error",

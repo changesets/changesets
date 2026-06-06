@@ -34,6 +34,7 @@ export async function generateJsonSchema(write = true): Promise<string> {
   return result.code;
 }
 
+// This will only be executed in our scripts and tests, so not limited to engines
 // eslint-disable-next-line n/no-unsupported-features/node-builtins
 if (import.meta.main) {
   await generateJsonSchema();

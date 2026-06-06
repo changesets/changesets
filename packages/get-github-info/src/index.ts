@@ -11,9 +11,6 @@ async function readEnvFile() {
   } catch {
     return {};
   }
-  // API may be experimental in supported node versions, but practically nothing
-  // changed until stable, so this is safe
-  // eslint-disable-next-line n/no-unsupported-features/node-builtins
   return util.parseEnv(content);
 }
 
