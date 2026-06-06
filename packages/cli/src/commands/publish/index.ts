@@ -85,7 +85,6 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   const privatePackages = packages.packages.filter(
     (pkg) =>
       pkg.packageJson.private &&
-      pkg.packageJson.version &&
       !shouldSkipPackage(pkg, {
         ignore: config.ignore,
         allowPrivatePackages: config.privatePackages.tag,
