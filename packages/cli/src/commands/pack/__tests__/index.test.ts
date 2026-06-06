@@ -104,7 +104,7 @@ describe("pack", () => {
     });
     mockedNpmUtils.getCorrectRegistry.mockReturnValue({
       registry: "https://registry.npmjs.org",
-    } as never);
+    });
     mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" } as never);
     mockedGetUntaggedPackages.mockResolvedValue([
       { name: "pkg-b", newVersion: "1.0.0" },
@@ -132,6 +132,7 @@ describe("pack", () => {
             "name": "pkg-a",
             "version": "1.0.0",
             "access": "restricted",
+            "registry": "https://registry.npmjs.org",
             "tag": "latest",
             "tarball": {
               "path": "packages/pkg-a-1.0.0.tgz",
@@ -197,7 +198,7 @@ describe("pack", () => {
     vi.spyOn(fs, "mkdtemp").mockResolvedValue(outputDir);
     mockedNpmUtils.getCorrectRegistry.mockReturnValue({
       registry: "https://registry.npmjs.org",
-    } as never);
+    });
     mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" } as never);
     await fs.writeFile(
       path.join(cwd, "publish-plan.json"),
