@@ -226,6 +226,10 @@ describe("git", () => {
       expect(firstTagRef).toEqual(initialHead);
       expect(secondTagRef).toEqual(newHead);
     });
+
+    it("should throw an error on git tag failure", async () => {
+      await expect(tag("new invalid tag", __dirname)).rejects.toThrow();
+    });
   });
 
   describe("tagExists", () => {
