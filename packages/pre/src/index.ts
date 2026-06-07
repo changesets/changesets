@@ -5,6 +5,7 @@ import { getPackages } from "@manypkg/get-packages";
 import {
   PreExitButNotInPreModeError,
   PreEnterButInPreModeError,
+  PreEnterButInRequestedPreModeError,
 } from "@changesets/errors";
 
 export async function readPreState(
@@ -50,10 +51,16 @@ export async function enterPre(rootDir: string, tag: string) {
   let packages = await getPackages(rootDir);
   let preStatePath = path.resolve(packages.root.dir, ".changeset", "pre.json");
   let preState: PreState | undefined = await readPreState(packages.root.dir);
+
+  if (preState?.mode === "pre" && preState?.tag === tag) {
+    throw new PreEnterButInRequestedPreModeError();
+  }
+
   // can't reenter if pre mode still exists, but we should allow exited pre mode to be reentered
-  if (preState?.mode === "pre") {
+  if (preState?.mode === "pre" && preState?.tag !== tag) {
     throw new PreEnterButInPreModeError();
   }
+
   let newPreState: PreState = {
     mode: "pre",
     tag,
