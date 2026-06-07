@@ -6,7 +6,7 @@ import type { NewChangeset } from "@changesets/types";
 
 // Files in `.changeset` that should not be considered as changesets. We may
 // revisit this if it becomes difficult to maintain the common list of files.
-const ignoredMdFiles = ["README.md", "AGENTS.md", "CLAUDE.md", "GEMINI.md"];
+const ignoredMdFiles = [/^README\.md$/i, "AGENTS.md", "CLAUDE.md", "GEMINI.md"];
 
 async function filterChangesetsSinceRef(
   changesets: Array<string>,
@@ -51,7 +51,9 @@ export async function readChangesets(
     (file) =>
       !file.startsWith(".") &&
       file.endsWith(".md") &&
-      !ignoredMdFiles.includes(file),
+      !ignoredMdFiles.some((pattern) =>
+        typeof pattern === "string" ? pattern === file : pattern.test(file),
+      ),
   );
 
   const changesetContents = changesets.map(async (file) => {
