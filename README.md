@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> This is development branch for Changesets v3. For the v2 code, check out the [v2](https://github.com/changesets/changesets/tree/v2) branch.
+> This is development branch for Changesets v3. For the v2 code, check out the [maintenance/v2](https://github.com/changesets/changesets/tree/maintenance/v2) branch.
 
 <p align="center">
   <picture>
