@@ -24,6 +24,6 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "outdent": "^0.5.0"
+    "outdent": "^0.8.0"
   }
 }

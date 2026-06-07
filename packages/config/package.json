@@ -29,15 +29,15 @@
     "@changesets/logger": "^0.1.1",
     "@changesets/should-skip-package": "^0.1.2",
     "@changesets/types": "^6.1.0",
-    "@manypkg/get-packages": "^1.1.3",
-    "fs-extra": "^7.0.1",
+    "@manypkg/get-packages": "^3.1.0",
+    "fs-extra": "^11.3.5",
     "micromatch": "^4.0.8"
   },
   "devDependencies": {
     "@changesets/test-utils": "*",
     "@types/micromatch": "^4.0.1",
     "jest-in-case": "^1.0.2",
-    "outdent": "^0.5.0"
+    "outdent": "^0.8.0"
   },
   "preconstruct": {
     "exports": {
