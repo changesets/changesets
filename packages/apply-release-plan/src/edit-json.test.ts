@@ -88,3 +88,20 @@ it("throws when a key path does not exist", () => {
     ]);
   }).toThrow('Key path "version" not found in JSON');
 });
+
+it("throws on malformed JSON", () => {
+  const jsons = [`{{{`, ``, `{//comment\n"version":"1.0.0"}`];
+
+  expect.assertions(jsons.length);
+
+  for (const json of jsons) {
+    expect(() => {
+      editJson(json, [
+        {
+          keys: ["version"],
+          value: "2.0.0",
+        },
+      ]);
+    }).toThrow(/Failed to parse JSON/);
+  }
+});
