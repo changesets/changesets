@@ -15,13 +15,21 @@ export function editJson(
 ): string {
   const parsed = parse(json);
 
+  const nodesToUpdate: { node: CstValueNode; value: unknown }[] = [];
   for (const op of operations) {
     const valueNode = getValueNode(parsed.root, op.keys);
     if (!valueNode) {
       throw new Error(`Key path "${op.keys.join(".")}" not found in JSON`);
     }
-    const { start, end } = valueNode.range;
-    json = json.slice(0, start) + JSON.stringify(op.value) + json.slice(end);
+    nodesToUpdate.push({ node: valueNode, value: op.value });
+  }
+
+  // Update nodes in reverse order to avoid altering offsets of subsequent runs
+  nodesToUpdate.sort((a, b) => b.node.range.start - a.node.range.start);
+  for (const update of nodesToUpdate) {
+    const { start, end } = update.node.range;
+    json =
+      json.slice(0, start) + JSON.stringify(update.value) + json.slice(end);
   }
 
   return json;
