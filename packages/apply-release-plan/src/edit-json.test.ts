@@ -63,6 +63,19 @@ it("preserves formatting", () => {
   );
 });
 
+it("preserves bizarre formatting", () => {
+  const json = `{\n\t\n\n\n"a"\n:\t\t\n{"b":{"c":"^1.0.0"}}\n\n\n,  \t  \n\t"name":"pkg-a"\n\n\n\n\n}\t\t\t\t`;
+
+  const result = editJson(json, [
+    {
+      keys: ["a", "b", "c"],
+      value: "^2.0.0",
+    },
+  ]);
+
+  expect(result).toEqual(json.replace(`"^1.0.0"`, `"^2.0.0"`));
+});
+
 it("throws when a key path does not exist", () => {
   const json = `{"name":"pkg-a"}`;
 
