@@ -1,11 +1,9 @@
-import type {
-  ComprehensiveRelease,
-  PackageJSON,
-  VersionType,
-} from "@changesets/types";
+import type { VersionType } from "@changesets/types";
 import Range from "semver/classes/range.js";
 import semverPrerelease from "semver/functions/prerelease.js";
 import validRange from "semver/ranges/valid.js";
+import type { EditJsonOperation } from "./edit-json.ts";
+import type { ModCompWithPackageAndChangelog } from "./types.ts";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
 const DEPENDENCY_TYPES = [
@@ -15,12 +13,12 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
+type ModCompWithPackageAndChangelogAndEdits = ModCompWithPackageAndChangelog & {
+  pkgJsonEdits: EditJsonOperation[];
+};
+
 export function versionPackage(
-  release: ComprehensiveRelease & {
-    changelog: string | null;
-    packageJson: PackageJSON;
-    dir: string;
-  },
+  release: ModCompWithPackageAndChangelog,
   versionsToUpdate: Array<{
     name: string;
     version: string;
@@ -41,10 +39,11 @@ export function versionPackage(
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
     snapshot?: string | boolean | undefined;
   },
-) {
+): ModCompWithPackageAndChangelogAndEdits {
+  const pkgJsonEdits: EditJsonOperation[] = [];
   const { newVersion, packageJson } = release;
 
-  packageJson.version = newVersion;
+  pkgJsonEdits.push({ keys: ["version"], value: newVersion });
 
   for (const depType of DEPENDENCY_TYPES) {
     const deps = packageJson[depType];
@@ -109,13 +108,13 @@ export function versionPackage(
             ? version
             : `${getVersionRangeType(depCurrentVersion)}${version}`;
           if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`;
-          deps[name] = newNewRange;
+          pkgJsonEdits.push({ keys: [depType, name], value: newNewRange });
         }
       }
     }
   }
 
-  return { ...release, packageJson };
+  return { ...release, pkgJsonEdits };
 }
 
 function getVersionRangeType(
