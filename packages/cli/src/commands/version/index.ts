@@ -105,8 +105,8 @@ You can then run ${c.cyan("changeset version")} again to do a normal release.
     options.snapshot
       ? {
           tag: options.snapshot === true ? undefined : options.snapshot,
-          commit: releaseConfig.snapshot.prereleaseTemplate?.includes(
-            "{commit}",
+          commit: ["{commit}", "{commit-short}"].some((placeholder) =>
+            releaseConfig.snapshot.prereleaseTemplate?.includes(placeholder),
           )
             ? await git.getCurrentCommitId({ cwd })
             : undefined,

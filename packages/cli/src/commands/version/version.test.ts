@@ -35,7 +35,9 @@ mockedGit.commit.mockImplementation(async () => true);
 mockedGit.getCommitsThatAddFiles.mockImplementation(async (changesetIds) =>
   changesetIds.map(() => "g1th4sh"),
 );
-mockedGit.getCurrentCommitId.mockImplementation(async () => "abcdef");
+mockedGit.getCurrentCommitId.mockImplementation(
+  async () => "abcdefghijklmnopqrstuvwxyz",
+);
 mockedGit.tag.mockImplementation(async () => true);
 
 const writeChangesets = (changesets: Changeset[], cwd: string) => {
@@ -1790,15 +1792,17 @@ describe("snapshot release", () => {
       // Template-based
       ["{tag}", "test", "0.0.0-test"],
       ["{tag}-{tag}", "test", "0.0.0-test-test"],
-      ["{commit}", true, "0.0.0-abcdef"],
+      ["{commit}", true, "0.0.0-abcdefghijklmnopqrstuvwxyz"],
+      ["{commit-short}", true, "0.0.0-abcdefg"],
       ["{timestamp}", true, "0.0.0-1639354050879"],
       ["{datetime}", true, "0.0.0-20211213000730"],
       // Mixing template and static string
       [
         "{tag}.{timestamp}.{commit}",
         "alpha",
-        "0.0.0-alpha.1639354050879.abcdef",
+        "0.0.0-alpha.1639354050879.abcdefghijklmnopqrstuvwxyz",
       ],
+      ["{tag}.{commit-short}", "alpha", "0.0.0-alpha.abcdefg"],
       ["{datetime}-{tag}", "alpha", "0.0.0-20211213000730-alpha"],
     ])(
       "should customize release correctly based on snapshotPrereleaseTemplate template: %s (tag: '%s')",
