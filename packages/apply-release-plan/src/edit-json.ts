@@ -27,7 +27,10 @@ export function editJson(
     disallowComments: true,
   });
 
-  if (errors.length > 0 || !parsed) {
+  if (!parsed) {
+    throw new Error("Failed to parse JSON");
+  }
+  if (errors.length > 0) {
     // Since the first error could cause subsequent errors, we only report the first one
     const error = errors[0];
     throw new Error(
