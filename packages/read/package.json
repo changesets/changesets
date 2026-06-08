@@ -30,6 +30,6 @@
   "devDependencies": {
     "@changesets/test-utils": "*",
     "@changesets/write": "*",
-    "outdent": "^0.5.0"
+    "outdent": "^0.8.0"
   }
 }
