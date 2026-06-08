@@ -1,4 +1,11 @@
-import { parse, type CstValueNode } from "json-cst";
+import {
+  applyEdits,
+  parseTree,
+  printParseErrorCode,
+  type EditResult,
+  type Node,
+  type ParseError,
+} from "jsonc-parser";
 
 export interface EditJsonOperation {
   keys: string[];
@@ -13,35 +20,49 @@ export function editJson(
   json: string,
   operations: EditJsonOperation[],
 ): string {
-  const parsed = parse(json);
+  const errors: ParseError[] = [];
+  const parsed = parseTree(json, errors, {
+    allowEmptyContent: false,
+    allowTrailingComma: false,
+    disallowComments: true,
+  });
 
-  const nodesToUpdate = operations.map((op) => {
-    const valueNode = getValueNode(parsed.root, op.keys);
+  if (errors.length > 0 || !parsed) {
+    // Since the first error could cause subsequent errors, we only report the first one
+    const error = errors[0];
+    throw new Error(
+      `Failed to parse JSON at offset ${error.offset}: ${printParseErrorCode(error.error)}`,
+    );
+  }
+
+  const edits: EditResult = operations.map((op) => {
+    const valueNode = getValueNode(parsed, op.keys);
     if (!valueNode) {
       throw new Error(`Key path "${op.keys.join(".")}" not found in JSON`);
     }
-    return { node: valueNode, value: op.value };
+    return {
+      content: JSON.stringify(op.value),
+      offset: valueNode.offset,
+      length: valueNode.length,
+    };
   });
 
-  // Update nodes in reverse order to avoid altering offsets of subsequent runs
-  nodesToUpdate.sort((a, b) => b.node.range.start - a.node.range.start);
-
-  for (const update of nodesToUpdate) {
-    const { start, end } = update.node.range;
-    json =
-      json.slice(0, start) + JSON.stringify(update.value) + json.slice(end);
-  }
-
-  return json;
+  return applyEdits(json, edits);
 }
 
-function getValueNode(root: CstValueNode, keys: string[]): CstValueNode | null {
+function getValueNode(root: Node, keys: string[]): Node | null {
   let node = root;
   for (const key of keys) {
-    if (node.kind !== "object") return null;
-    const property = node.children.find((child) => child.key === key);
+    if (node.type !== "object") return null;
+    const property = node.children?.find(
+      (child) =>
+        child.type === "property" &&
+        child.children?.length === 2 &&
+        child.children[0].value === key,
+    );
     if (!property) return null;
-    node = property.valueNode;
+    // We've checked above that `children[1]` exists
+    node = property.children![1];
   }
   return node;
 }
