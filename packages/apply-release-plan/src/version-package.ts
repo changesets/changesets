@@ -1,9 +1,8 @@
-import type { VersionType } from "@changesets/types";
+import type { ModCompWithPackage, VersionType } from "@changesets/types";
 import Range from "semver/classes/range.js";
 import semverPrerelease from "semver/functions/prerelease.js";
 import validRange from "semver/ranges/valid.js";
 import type { EditJsonOperation } from "./edit-json.ts";
-import type { ModCompWithPackageAndChangelog } from "./types.ts";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
 const DEPENDENCY_TYPES = [
@@ -12,6 +11,10 @@ const DEPENDENCY_TYPES = [
   "peerDependencies",
   "optionalDependencies",
 ] as const;
+
+export type ModCompWithPackageAndChangelog = ModCompWithPackage & {
+  changelog: string | null;
+};
 
 type ModCompWithPackageAndChangelogAndEdits = ModCompWithPackageAndChangelog & {
   pkgJsonEdits: EditJsonOperation[];

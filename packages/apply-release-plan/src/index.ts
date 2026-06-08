@@ -20,8 +20,10 @@ import type {
 import { resolve } from "import-meta-resolve";
 import { editJson } from "./edit-json.ts";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
-import type { ModCompWithPackageAndChangelog } from "./types.ts";
-import { versionPackage } from "./version-package.ts";
+import {
+  versionPackage,
+  type ModCompWithPackageAndChangelog,
+} from "./version-package.ts";
 
 function importResolveFromDir(specifier: string, dir: string) {
   return resolve(specifier, pathToFileURL(path.join(dir, "x.mjs")).toString());
