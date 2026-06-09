@@ -595,7 +595,7 @@ describe("assembleReleasePlan", () => {
         },
         {
           name: "pkg-b",
-          newVersion: "2.0.0",
+          newVersion: "1.0.1",
         },
       ]);
     });
@@ -734,7 +734,7 @@ describe("assembleReleasePlan", () => {
         },
         {
           name: "pkg-b",
-          newVersion: "2.0.0",
+          newVersion: "1.0.1",
         },
       ]);
     });
@@ -1044,8 +1044,8 @@ describe("dependent bumping", () => {
     peer: {
       none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
       patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
-      minor: { "^": "2.0.0", "~": "2.0.0", "=": "2.0.0" },
-      major: { "^": "2.0.0", "~": "2.0.0", "=": "2.0.0" },
+      minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
+      major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
     },
   };
 
@@ -1232,6 +1232,7 @@ describe("dependent bumping", () => {
       },
       peer: {
         patch: { "^": "1.0.1", "~": "1.0.1" },
+        minor: { "^": "1.0.1", },
       },
     },
   });
