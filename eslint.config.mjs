@@ -1,3 +1,4 @@
+import e18e from "@e18e/eslint-plugin";
 import js from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
@@ -11,6 +12,7 @@ export default defineConfig(
     ignores: [
       "**/node_modules/**",
       "**/dist/**",
+      "site/.vitepress",
       "packages/cli/bin.js",
       "site/.vitepress/cache/**",
       "**/*.snap",
@@ -18,12 +20,16 @@ export default defineConfig(
   },
   {
     plugins: {
+      e18e,
       js,
       node,
       tseslint,
       vitest,
     },
     extends: [
+      "e18e/modernization",
+      "e18e/moduleReplacements",
+      "e18e/performanceImprovements",
       "js/recommended",
       "node/flat/recommended",
       "tseslint/recommended",
@@ -48,6 +54,8 @@ export default defineConfig(
           message: "Use `== null` instead of comparing with `undefined`.",
         },
       ],
+
+      "e18e/prefer-static-regex": "off",
 
       "@typescript-eslint/consistent-type-exports": [
         "error",
@@ -79,7 +87,7 @@ export default defineConfig(
       "n/prefer-node-protocol": "error",
       "n/no-unsupported-features/node-builtins": [
         "error",
-        { ignores: ["fs/promises.cp", "import.meta.dirname"] },
+        { allowExperimental: true },
       ],
 
       "import-lite/no-default-export": "error",

@@ -11,9 +11,6 @@ async function readEnvFile() {
   } catch {
     return {};
   }
-  // API may be experimental in supported node versions, but practically nothing
-  // changed until stable, so this is safe
-  // eslint-disable-next-line n/no-unsupported-features/node-builtins
   return util.parseEnv(content);
 }
 
@@ -126,9 +123,7 @@ const GHDataLoader = new DataLoader<RequestData, any>(async (requests) => {
   }
   const repos: ReposWithCommitsAndPRsToFetch = {};
   requests.forEach(({ repo, ...data }) => {
-    if (repos[repo] == null) {
-      repos[repo] = [];
-    }
+    repos[repo] ??= [];
     repos[repo].push(data);
   });
 

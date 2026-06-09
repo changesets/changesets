@@ -110,7 +110,7 @@ export async function getTokenIsRequired() {
     [scope ? `npm_config_${scope}:registry` : "npm_config_registry"]: registry,
   };
   const result = await exec("npm", ["profile", "get", "--json"], {
-    nodeOptions: { env: Object.assign({}, process.env, envOverride) },
+    nodeOptions: { env: { ...process.env, ...envOverride } },
   });
   if (result.exitCode !== 0) {
     log.error(
@@ -254,7 +254,7 @@ async function internalPublish(
       publishTool.name === "pnpm"
         ? exec("pnpm", ["publish", ...publishFlags], {
             nodeOptions: {
-              env: Object.assign({}, process.env, envOverride),
+              env: { ...process.env, ...envOverride },
               cwd: opts.cwd,
               stdio: ["inherit", "inherit", "pipe"],
             },
@@ -264,7 +264,7 @@ async function internalPublish(
             ["publish", opts.publishDir, ...publishFlags],
             {
               nodeOptions: {
-                env: Object.assign({}, process.env, envOverride),
+                env: { ...process.env, ...envOverride },
                 stdio: ["inherit", "inherit", "pipe"],
               },
             },
@@ -305,14 +305,14 @@ async function internalPublish(
     publishTool.name === "pnpm"
       ? await exec("pnpm", ["publish", ...publishFlags], {
           nodeOptions: {
-            env: Object.assign({}, process.env, envOverride),
+            env: { ...process.env, ...envOverride },
             cwd: opts.cwd,
           },
         })
       : await exec(
           publishTool.name,
           ["publish", opts.publishDir, ...publishFlags],
-          { nodeOptions: { env: Object.assign({}, process.env, envOverride) } },
+          { nodeOptions: { env: { ...process.env, ...envOverride } } },
         );
 
   if (exitCode !== 0) {

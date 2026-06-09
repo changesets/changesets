@@ -1,5 +1,5 @@
-// supported and working as expected in Node 22.08+
-// https://nodejs.org/docs/latest-v22.x/api/util.html#utilstyletextformat-text-options
+// Lint has invalid data, styleText is supported experimentally since node 22.0.
+// https://github.com/nodejs/node/blob/v22.0.0/lib/util.js#L214
 // eslint-disable-next-line n/no-unsupported-features/node-builtins
 import { styleText } from "node:util";
 
