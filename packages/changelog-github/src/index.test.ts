@@ -299,7 +299,8 @@ describe("renderTemplate", () => {
 describe("buildReleaseLineTokens", () => {
   it("ref prefers PR over commit", () => {
     const t = buildReleaseLineTokens({
-      summary: "msg",
+      summaryLinked: "linked",
+      summaryHints: "hints",
       links: { pull: "[#1](u)", commit: "[`abc`](u)", user: "[@x](u)" },
       users: "[@x](u)",
     });
@@ -307,12 +308,14 @@ describe("buildReleaseLineTokens", () => {
     expect(t.pr).toBe("[#1](u)");
     expect(t.commit).toBe("[`abc`](u)");
     expect(t.authors).toBe("[@x](u)");
-    expect(t.summary).toBe("msg");
+    expect(t.summary).toBe("linked");
+    expect(t.summaryHints).toBe("hints");
   });
 
   it("ref falls back to commit when there is no PR", () => {
     const t = buildReleaseLineTokens({
-      summary: "msg",
+      summaryLinked: "msg",
+      summaryHints: "msg",
       links: { pull: null, commit: "[`abc`](u)", user: null },
       users: null,
     });
@@ -323,7 +326,8 @@ describe("buildReleaseLineTokens", () => {
 
   it("ref is empty when there is neither PR nor commit", () => {
     const t = buildReleaseLineTokens({
-      summary: "msg",
+      summaryLinked: "msg",
+      summaryHints: "msg",
       links: { pull: null, commit: null, user: null },
       users: null,
     });
@@ -334,7 +338,8 @@ describe("buildReleaseLineTokens", () => {
   it("returns exactly the documented RELEASE_LINE_TOKENS keys", () => {
     const keys = Object.keys(
       buildReleaseLineTokens({
-        summary: "m",
+        summaryLinked: "m",
+        summaryHints: "m",
         links: { pull: null, commit: null, user: null },
         users: null,
       }),
@@ -346,8 +351,7 @@ describe("buildReleaseLineTokens", () => {
 describe("template option (compact reproduction)", () => {
   const compactOpts = {
     repo: data.repo,
-    template: "\n- {summary} {ref}",
-    autolinkIssues: "hints",
+    template: "\n- {summaryHints} {ref}",
   };
 
   it("renders the compact single-line form with PR ref", async () => {
@@ -433,24 +437,19 @@ describe("template option (compact reproduction)", () => {
   });
 });
 
-describe("autolinkIssues option", () => {
-  const optionsWith = (extra: Record<string, any>) => ({
-    repo: data.repo,
-    ...extra,
-  });
+describe("{summary} vs {summaryHints} tokens", () => {
+  const changeset = {
+    id: "x",
+    summary: "did a thing (fixes #99) and also #1234",
+    releases: [{ name: "pkg", type: "minor" as const }],
+    commit: data.commit,
+  };
 
-  it('"hints" only links refs inside (fix|fixes|see #n)', async () => {
-    const changeset = {
-      id: "x",
-      summary: "did a thing (fixes #99) and also #1234",
-      releases: [{ name: "pkg", type: "minor" as const }],
-      commit: data.commit,
-    };
-    const line = await getReleaseLine(
-      changeset,
-      "minor",
-      optionsWith({ autolinkIssues: "hints" }),
-    );
+  it("{summaryHints} only links refs inside (fix|fixes|see #n)", async () => {
+    const line = await getReleaseLine(changeset, "minor", {
+      repo: data.repo,
+      template: "\n- {summaryHints}",
+    });
     expect(line).toContain(
       "(fixes [#99](https://github.com/emotion-js/emotion/issues/99))",
     );
@@ -458,14 +457,11 @@ describe("autolinkIssues option", () => {
     expect(line).not.toContain("issues/1234");
   });
 
-  it('"all" (default) still links every bare #n', async () => {
-    const changeset = {
-      id: "x",
-      summary: "did a thing (fixes #99) and also #1234",
-      releases: [{ name: "pkg", type: "minor" as const }],
-      commit: data.commit,
-    };
-    const line = await getReleaseLine(changeset, "minor", optionsWith({}));
+  it("{summary} links every bare #n", async () => {
+    const line = await getReleaseLine(changeset, "minor", {
+      repo: data.repo,
+      template: "\n- {summary}",
+    });
     expect(line).toContain(
       "[#1234](https://github.com/emotion-js/emotion/issues/1234)",
     );
@@ -488,7 +484,7 @@ describe("documented template examples", () => {
       "\n- {pr} {commit} Thanks {authors}! - {summary}",
       `\n- ${pr} ${commit} Thanks ${author}! - fix the thing\n`,
     ],
-    ["\n- {summary} {ref}", `\n- fix the thing (${pr})\n`],
+    ["\n- {summaryHints} {ref}", `\n- fix the thing (${pr})\n`],
     [
       "\n- {summary} (thanks {authors}!)",
       `\n- fix the thing (thanks ${author}!)\n`,

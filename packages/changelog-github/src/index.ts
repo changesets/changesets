@@ -17,7 +17,7 @@ function linkifyIssueRefs(
   );
 }
 
-// narrow autolinking used by `autolinkIssues: "hints"`: only links a ref that
+// narrow autolinking behind the `{summaryHints}` token: only links a ref that
 // sits inside `(fix #123)`, `(fixes #123)`, or `(see #123)`
 function linkifyIssueHints(
   line: string,
@@ -56,6 +56,7 @@ async function readEnv() {
 
 export const RELEASE_LINE_TOKENS = [
   "summary",
+  "summaryHints",
   "ref",
   "pr",
   "commit",
@@ -79,11 +80,12 @@ export function renderTemplate(
 }
 
 export function buildReleaseLineTokens(args: {
-  summary: string;
+  summaryLinked: string;
+  summaryHints: string;
   links: { pull: string | null; commit: string | null; user: string | null };
   users: string | null;
 }): Record<string, string> {
-  const { summary, links, users } = args;
+  const { summaryLinked, summaryHints, links, users } = args;
   // Tokens render bare (no built-in spacing); the template author writes the
   // spaces. `{ref}` is the one self-contained convenience: a parenthesized
   // PR-or-commit reference (PR wins), empty when there is neither.
@@ -93,7 +95,9 @@ export function buildReleaseLineTokens(args: {
       ? `(${links.commit})`
       : "";
   return {
-    summary,
+    // `{summary}` links every `#n`; `{summaryHints}` links only `(fix #n)` hints
+    summary: summaryLinked,
+    summaryHints,
     ref,
     pr: links.pull ?? "",
     commit: links.commit ?? "",
@@ -212,18 +216,20 @@ const changelogFunctions: ChangelogFunctions = {
             .join(", ")
         : links.user;
 
-    const autolink = (line: string): string => {
-      const linkOpts = { serverUrl: GITHUB_SERVER_URL, repo };
-      return options.autolinkIssues === "hints"
-        ? linkifyIssueHints(line, linkOpts)
-        : linkifyIssueRefs(line, linkOpts);
-    };
+    const linkOpts = { serverUrl: GITHUB_SERVER_URL, repo };
+    const summaryLinked = linkifyIssueRefs(firstLine, linkOpts);
+    const summaryHints = linkifyIssueHints(firstLine, linkOpts);
 
-    const continuation = futureLines.map((l) => `  ${autolink(l)}`).join("\n");
+    // continuation lines always link every `#n` (the `{summaryHints}` narrowing
+    // is a first-line concern; a bare ref in a wrapped body line is rare)
+    const continuation = futureLines
+      .map((l) => `  ${linkifyIssueRefs(l, linkOpts)}`)
+      .join("\n");
 
     if (typeof options.template === "string" && options.template.length > 0) {
       const tokens = buildReleaseLineTokens({
-        summary: autolink(firstLine),
+        summaryLinked,
+        summaryHints,
         links,
         users,
       });
@@ -239,7 +245,7 @@ const changelogFunctions: ChangelogFunctions = {
       users == null ? "" : ` Thanks ${users}!`,
     ].join("");
 
-    return `\n\n-${prefix ? `${prefix} -` : ""} ${autolink(firstLine)}\n${continuation}`;
+    return `\n\n-${prefix ? `${prefix} -` : ""} ${summaryLinked}\n${continuation}`;
   },
 };
 
