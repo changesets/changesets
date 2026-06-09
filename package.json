@@ -15,7 +15,7 @@
     "changeset": "packages/cli/bin.js",
     "check-all": "yarn test && yarn types:check && yarn lint && yarn format",
     "version-packages": "changeset version && yarn format:fix",
-    "release": "yarn build && changeset publish"
+    "release": "yarn build && changeset publish --tag v2"
   },
   "repository": {
     "type": "git",

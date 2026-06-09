@@ -1,9 +1,11 @@
 {
   "changelog": [
     "@changesets/changelog-github",
-    { "repo": "changesets/changesets" }
+    {
+      "repo": "changesets/changesets"
+    }
   ],
-  "baseBranch": "main",
+  "baseBranch": "maintenance/v2",
   "commit": false,
   "access": "public",
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
