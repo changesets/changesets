@@ -1,5 +1,19 @@
 # @changesets/cli
 
+## 3.0.0-next.6
+
+### Minor Changes
+
+- [#2068](https://github.com/changesets/changesets/pull/2068) [`d03ffc1`](https://github.com/changesets/changesets/commit/d03ffc1d11fb486328734e52767379646062f5c1) Thanks [@bluwy](https://github.com/bluwy)! - Support `{commit-short}` placeholder for the `snapshot.prereleaseTemplate` config, which is a 7 character variant of `{commit}`
+
+### Patch Changes
+
+- [#2060](https://github.com/changesets/changesets/pull/2060) [`11bded4`](https://github.com/changesets/changesets/commit/11bded4bd38e4ced3dfa4c428c50e2284c458ae3) Thanks [@Andarist](https://github.com/Andarist)! - Fixed `changeset publish` to respect ignored packages for both publishing and private package tagging.
+
+- Updated dependencies [[`d03ffc1`](https://github.com/changesets/changesets/commit/d03ffc1d11fb486328734e52767379646062f5c1), [`c2348fc`](https://github.com/changesets/changesets/commit/c2348fcb9eba443fde1460b595651ce040f40a08)]:
+  - @changesets/assemble-release-plan@7.0.0-next.6
+  - @changesets/read@1.0.0-next.6
+
 ## 3.0.0-next.5
 
 ### Patch Changes
