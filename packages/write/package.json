@@ -1,31 +1,29 @@
 {
   "name": "@changesets/write",
-  "version": "0.4.0",
+  "version": "1.0.0-next.5",
   "description": "Writes a changeset to a file",
-  "main": "dist/changesets-write.cjs.js",
-  "module": "dist/changesets-write.esm.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/write"
+  },
+  "type": "module",
   "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/changesets-write.cjs.mjs",
-        "default": "./dist/changesets-write.cjs.js"
-      },
-      "module": "./dist/changesets-write.esm.js",
-      "import": "./dist/changesets-write.cjs.mjs",
-      "default": "./dist/changesets-write.cjs.js"
-    },
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/write",
   "dependencies": {
-    "@changesets/types": "^6.1.0",
-    "fs-extra": "^7.0.1",
-    "human-id": "^4.1.1",
-    "prettier": "^2.7.1"
+    "@changesets/format": "^0.1.0",
+    "@changesets/types": "workspace:^",
+    "human-id": "^4.1.3"
   },
   "devDependencies": {
-    "@changesets/parse": "*",
-    "@changesets/test-utils": "*"
+    "@changesets/parse": "workspace:*",
+    "@changesets/test-utils": "workspace:*",
+    "vitest": "^4.1.6"
+  },
+  "engines": {
+    "node": "^22.11 || ^24 || >=26"
   }
 }

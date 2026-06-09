@@ -1,32 +1,29 @@
 {
   "name": "@changesets/assemble-release-plan",
-  "version": "6.0.10",
+  "version": "7.0.0-next.5",
   "description": "Reads changesets and adds information on dependents that need bumping",
-  "main": "dist/changesets-assemble-release-plan.cjs.js",
-  "module": "dist/changesets-assemble-release-plan.esm.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/assemble-release-plan"
+  },
+  "type": "module",
   "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/changesets-assemble-release-plan.cjs.mjs",
-        "default": "./dist/changesets-assemble-release-plan.cjs.js"
-      },
-      "module": "./dist/changesets-assemble-release-plan.esm.js",
-      "import": "./dist/changesets-assemble-release-plan.cjs.mjs",
-      "default": "./dist/changesets-assemble-release-plan.cjs.js"
-    },
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/assemble-release-plan",
   "dependencies": {
-    "@changesets/errors": "^0.2.0",
-    "@changesets/get-dependents-graph": "^2.1.4",
-    "@changesets/should-skip-package": "^0.1.2",
-    "@changesets/types": "^6.1.0",
-    "@manypkg/get-packages": "^1.1.3",
-    "semver": "^7.5.3"
+    "@changesets/errors": "workspace:^",
+    "@changesets/get-dependents-graph": "workspace:^",
+    "@changesets/should-skip-package": "workspace:^",
+    "@changesets/types": "workspace:^",
+    "semver": "^7.8.0"
   },
   "devDependencies": {
-    "@changesets/config": "*"
+    "@changesets/config": "workspace:*"
+  },
+  "engines": {
+    "node": "^22.11 || ^24 || >=26"
   }
 }

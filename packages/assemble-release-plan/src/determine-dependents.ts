@@ -1,17 +1,17 @@
+import path from "node:path";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import {
+import type {
   Config,
   DependencyType,
   PackageJSON,
   VersionType,
+  Package,
 } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
-import path from "node:path";
-import semverSatisfies from "semver/functions/satisfies";
-import validRange from "semver/ranges/valid";
-import { incrementVersion } from "./increment";
-import { InternalRelease, PreInfo } from "./types";
-import { mapGetOrThrowInternal } from "./utils";
+import semverSatisfies from "semver/functions/satisfies.js";
+import validRange from "semver/ranges/valid.js";
+import { incrementVersion } from "./increment.ts";
+import type { InternalRelease, PreInfo } from "./types.ts";
+import { mapGetOrThrowInternal } from "./utils.ts";
 
 /*
   WARNING:
@@ -25,7 +25,7 @@ import { mapGetOrThrowInternal } from "./utils";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-export default function determineDependents({
+export function determineDependents({
   releases,
   packagesByName,
   rootDir,
@@ -42,7 +42,7 @@ export default function determineDependents({
 }): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
-  let pkgsToSearch = [...releases.values()];
+  const pkgsToSearch = [...releases.values()];
 
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
@@ -52,7 +52,7 @@ export default function determineDependents({
     const pkgDependents = mapGetOrThrowInternal(
       dependencyGraph,
       nextRelease.name,
-      `Error in determining dependents - could not find package in repository: ${nextRelease.name}`
+      `Error in determining dependents - could not find package in repository: ${nextRelease.name}`,
     );
     pkgDependents
       .map((dependent) => {
@@ -61,7 +61,7 @@ export default function determineDependents({
         const dependentPackage = mapGetOrThrowInternal(
           packagesByName,
           dependent,
-          "Dependency map is incorrect"
+          "Dependency map is incorrect",
         );
 
         if (
@@ -75,13 +75,13 @@ export default function determineDependents({
           const dependencyPackage = mapGetOrThrowInternal(
             packagesByName,
             nextRelease.name,
-            "Dependency map is incorrect"
+            "Dependency map is incorrect",
           );
           const dependencyVersionRanges = getDependencyVersionRanges(
             rootDir,
             dependentPackage.packageJson,
             nextRelease,
-            dependencyPackage
+            dependencyPackage,
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
@@ -108,7 +108,7 @@ export default function determineDependents({
                 .updateInternalDependents === "always" ||
                 !semverSatisfies(
                   incrementVersion(nextRelease, preInfo),
-                  versionRange
+                  versionRange,
                 ))
             ) {
               switch (depType) {
@@ -144,9 +144,9 @@ export default function determineDependents({
       })
       .filter(
         (
-          dependentItem
+          dependentItem,
         ): dependentItem is typeof dependentItem & { type: VersionType } =>
-          !!dependentItem.type
+          !!dependentItem.type,
       )
       .forEach(({ name, type, pkgJSON }) => {
         // At this point, we know if we are making a change
@@ -163,7 +163,7 @@ export default function determineDependents({
 
           pkgsToSearch.push(existing);
         } else {
-          let newDependent: InternalRelease = {
+          const newDependent: InternalRelease = {
             name,
             type,
             oldVersion: pkgJSON.version,
@@ -188,7 +188,7 @@ function getDependencyVersionRanges(
   rootDir: string,
   dependentPkgJSON: PackageJSON,
   dependencyRelease: InternalRelease,
-  dependencyPackage: Package
+  dependencyPackage: Package,
 ): {
   depType: DependencyType;
   versionRange: string;

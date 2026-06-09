@@ -1,13 +1,12 @@
-import {
+import type {
   ComprehensiveRelease,
   PackageJSON,
   VersionType,
 } from "@changesets/types";
-import getVersionRangeType from "@changesets/get-version-range-type";
-import Range from "semver/classes/range";
-import semverPrerelease from "semver/functions/prerelease";
-import validRange from "semver/ranges/valid";
-import { shouldUpdateDependencyBasedOnConfig } from "./utils";
+import Range from "semver/classes/range.js";
+import semverPrerelease from "semver/functions/prerelease.js";
+import validRange from "semver/ranges/valid.js";
+import { shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -16,7 +15,7 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
-export default function versionPackage(
+export function versionPackage(
   release: ComprehensiveRelease & {
     changelog: string | null;
     packageJson: PackageJSON;
@@ -41,16 +40,16 @@ export default function versionPackage(
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
     snapshot?: string | boolean | undefined;
-  }
+  },
 ) {
-  let { newVersion, packageJson } = release;
+  const { newVersion, packageJson } = release;
 
   packageJson.version = newVersion;
 
-  for (let depType of DEPENDENCY_TYPES) {
-    let deps = packageJson[depType];
+  for (const depType of DEPENDENCY_TYPES) {
+    const deps = packageJson[depType];
     if (deps) {
-      for (let { name, version, oldVersion, type, dir } of versionsToUpdate) {
+      for (const { name, version, oldVersion, type, dir } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
         if (
           !depCurrentVersion ||
@@ -66,7 +65,7 @@ export default function versionPackage(
             {
               minReleaseType: updateInternalDependencies,
               onlyUpdatePeerDependentsWhenOutOfRange,
-            }
+            },
           )
         ) {
           continue;
@@ -76,7 +75,7 @@ export default function versionPackage(
         if (
           !usesWorkspaceRange &&
           (bumpVersionsWithWorkspaceProtocolOnly ||
-            validRange(depCurrentVersion) === null)
+            validRange(depCurrentVersion) == null)
         ) {
           continue;
         }
@@ -84,13 +83,13 @@ export default function versionPackage(
         if (usesWorkspaceRange) {
           const workspaceDepVersion = depCurrentVersion.replace(
             /^workspace:/,
-            ""
+            "",
           );
           if (
             workspaceDepVersion === "*" ||
             workspaceDepVersion === "^" ||
             workspaceDepVersion === "~" ||
-            validRange(workspaceDepVersion) === null
+            validRange(workspaceDepVersion) == null
           ) {
             continue;
           }
@@ -104,7 +103,7 @@ export default function versionPackage(
           new Range(depCurrentVersion).range !== "" ||
           // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-          semverPrerelease(version) !== null
+          semverPrerelease(version) != null
         ) {
           let newNewRange = snapshot
             ? version
@@ -117,4 +116,15 @@ export default function versionPackage(
   }
 
   return { ...release, packageJson };
+}
+
+function getVersionRangeType(
+  versionRange: string,
+): "^" | "~" | ">=" | "<=" | ">" | "" {
+  if (versionRange.charAt(0) === "^") return "^";
+  if (versionRange.charAt(0) === "~") return "~";
+  if (versionRange.startsWith(">=")) return ">=";
+  if (versionRange.startsWith("<=")) return "<=";
+  if (versionRange.charAt(0) === ">") return ">";
+  return "";
 }

@@ -1,12 +1,36 @@
-import fetch from "node-fetch";
+import fs from "node:fs/promises";
+import path from "node:path";
+import util from "node:util";
 import DataLoader from "dataloader";
 
-function readEnv() {
+async function readEnvFile() {
+  const envFile = path.resolve(process.cwd(), ".env");
+  let content: string | undefined;
+  try {
+    content = await fs.readFile(envFile, "utf-8");
+  } catch {
+    return {};
+  }
+  return util.parseEnv(content);
+}
+
+let cachedEnv: ReturnType<typeof readEnvFile> | undefined;
+function readEnvFileCached() {
+  cachedEnv ??= readEnvFile();
+  return cachedEnv;
+}
+
+async function readEnv() {
   const GITHUB_GRAPHQL_URL =
-    process.env.GITHUB_GRAPHQL_URL || "https://api.github.com/graphql";
+    process.env.GITHUB_GRAPHQL_URL ||
+    (await readEnvFileCached()).GITHUB_GRAPHQL_URL ||
+    "https://api.github.com/graphql";
   const GITHUB_SERVER_URL =
-    process.env.GITHUB_SERVER_URL || "https://github.com";
-  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    process.env.GITHUB_SERVER_URL ||
+    (await readEnvFileCached()).GITHUB_SERVER_URL ||
+    "https://github.com";
+  const GITHUB_TOKEN =
+    process.env.GITHUB_TOKEN || (await readEnvFileCached()).GITHUB_TOKEN;
   return { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN };
 }
 
@@ -34,9 +58,7 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
             ${repos[repo]
               .map((data) =>
                 data.kind === "commit"
-                  ? `a${data.commit}: object(expression: ${JSON.stringify(
-                      data.commit
-                    )}) {
+                  ? `a${data.commit}: object(expression: ${JSON.stringify(data.commit)}) {
             ... on Commit {
             commitUrl
             associatedPullRequests(first: 50) {
@@ -67,10 +89,10 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
                       commitUrl
                       abbreviatedOid
                     }
-                  }`
+                  }`,
               )
               .join("\n")}
-          }`
+          }`,
           )
           .join("\n")}
         }
@@ -86,23 +108,22 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
 // 2. batching
 // getReleaseLine will be called a large number of times but it'll be called at the same time
 // so instead of doing a bunch of network requests, we can do a single one.
-const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
-  const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } = readEnv();
+const GHDataLoader = new DataLoader<RequestData, any>(async (requests) => {
+  const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } =
+    await readEnv();
   if (!GITHUB_TOKEN) {
     throw new Error(
       `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new?scopes=read:user,repo:status&description=changesets-${new Date()
         .toISOString()
         .substring(
           0,
-          10
-        )} with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`
+          10,
+        )} with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`,
     );
   }
-  let repos: ReposWithCommitsAndPRsToFetch = {};
+  const repos: ReposWithCommitsAndPRsToFetch = {};
   requests.forEach(({ repo, ...data }) => {
-    if (repos[repo] === undefined) {
-      repos[repo] = [];
-    }
+    repos[repo] ??= [];
     repos[repo].push(data);
   });
 
@@ -115,47 +136,52 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
       },
       body: JSON.stringify({ query: makeQuery(repos) }),
     });
-  } catch (e: any) {
+  } catch (e) {
     throw new Error(
-      `An error occurred when fetching data from GitHub\n${e.message}`
+      `An error occurred when fetching data from GitHub\n${(e as Error).message}`,
+      { cause: e },
     );
   }
 
-  let data;
+  let data: { errors?: unknown; data?: Record<string, unknown> };
   try {
-    data = await fetchResponse.json();
-  } catch (e: any) {
-    throw new Error(`Failed to parse data from GitHub\n${e.message}`);
+    data = (await fetchResponse.json()) as {
+      errors?: unknown;
+      data?: Record<string, unknown>;
+    };
+  } catch (e) {
+    throw new Error(
+      `Failed to parse data from GitHub\n${(e as Error).message}`,
+      {
+        cause: e,
+      },
+    );
   }
 
   if (data.errors) {
     throw new Error(
-      `Fetched data from GitHub returned errors\n${JSON.stringify(
-        data.errors,
-        null,
-        2
-      )}`
+      `Fetched data from GitHub returned errors\n${JSON.stringify(data.errors, null, 2)}`,
     );
   }
 
   // this is mainly for the case where there's an authentication problem
   if (!data.data) {
     throw new Error(
-      `Fetched data from GitHub has missing data\n${JSON.stringify(data)}`
+      `Fetched data from GitHub has missing data\n${JSON.stringify(data)}`,
     );
   }
 
-  let cleanedData: Record<
+  const cleanedData: Record<
     string,
     { commit: Record<string, any>; pull: Record<string, any> }
   > = {};
   Object.keys(repos).forEach((repo, index) => {
-    let output: { commit: Record<string, any>; pull: Record<string, any> } = {
+    const output: { commit: Record<string, any>; pull: Record<string, any> } = {
       commit: {},
       pull: {},
     };
     cleanedData[repo] = output;
-    Object.entries(data.data[`a${index}`]).forEach(([field, value]) => {
+    Object.entries(data.data![`a${index}`]!).forEach(([field, value]) => {
       // this is "a" because that's how it was when it was first written, "a" means it's a commit not a pr
       // we could change it to commit__ but then we have to get new GraphQL results from the GH API to put in the tests
       if (field[0] === "a") {
@@ -170,7 +196,7 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
     ({ repo, ...data }) =>
       cleanedData[repo][data.kind][
         data.kind === "pull" ? data.pull : data.commit
-      ]
+      ],
   );
 });
 
@@ -192,13 +218,13 @@ export async function getInfo(request: {
 
   if (!request.repo) {
     throw new Error(
-      "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"
+      "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo",
     );
   }
 
   if (!validRepoNameRegex.test(request.repo)) {
     throw new Error(
-      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`
+      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`,
     );
   }
 
@@ -208,18 +234,18 @@ export async function getInfo(request: {
     user = data.author.user;
   }
 
-  let associatedPullRequest =
+  const associatedPullRequest =
     data.associatedPullRequests &&
     data.associatedPullRequests.nodes &&
     data.associatedPullRequests.nodes.length
       ? (data.associatedPullRequests.nodes as any[]).sort((a, b) => {
-          if (a.mergedAt === null && b.mergedAt === null) {
+          if (a.mergedAt == null && b.mergedAt == null) {
             return 0;
           }
-          if (a.mergedAt === null) {
+          if (a.mergedAt == null) {
             return 1;
           }
-          if (b.mergedAt === null) {
+          if (b.mergedAt == null) {
             return -1;
           }
           a = new Date(a.mergedAt);
@@ -255,26 +281,26 @@ export async function getInfoFromPullRequest(request: {
     user: string | null;
   };
 }> {
-  if (request.pull === undefined) {
+  if (request.pull == null) {
     throw new Error("Please pass a pull request number");
   }
 
   if (!request.repo) {
     throw new Error(
-      "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo"
+      "Please pass a GitHub repository in the form of userOrOrg/repoName to getInfo",
     );
   }
 
   if (!validRepoNameRegex.test(request.repo)) {
     throw new Error(
-      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`
+      `Please pass a valid GitHub repository in the form of userOrOrg/repoName to getInfo (it has to match the "${validRepoNameRegex.source}" pattern)`,
     );
   }
 
   const data = await GHDataLoader.load({ kind: "pull", ...request });
-  let user = data?.author;
+  const user = data?.author;
 
-  let commit = data?.mergeCommit;
+  const commit = data?.mergeCommit;
 
   return {
     user: user ? user.login : null,

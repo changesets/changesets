@@ -1,7 +1,7 @@
 # @changesets/get-github-info
 
-[![npm package](https://img.shields.io/npm/v/@changesets/get-github-info)](https://npmjs.com/package/@changesets/get-github-info)
-[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/get-github-info?name=true)](https://npmx.dev/package/@changesets/get-github-info)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 > Get the GitHub username and PR number from a commit. Intended for use with changesets.
 
@@ -9,23 +9,10 @@
 
 > Note: This assumes you already have changesets setup.
 
-To use `@changesets/get-github-info`, you'll need to install it and you'll probably also want `dotenv` to provide a GitHub personal access token via a `.env` file.
+You can use `@changesets/get-github-info` like this if you have a [custom changelog formatter](https://github.com/changesets/changesets/blob/main/docs/modifying-changelog-format.md).
 
-```bash
-yarn add --dev @changesets/get-github-info dotenv
-```
-
-or
-
-```bash
-npm install --save-dev @changesets/get-github-info dotenv
-```
-
-Then you can use it in your `.changeset/config.js` like this.
-
-```jsx
-require("dotenv").config();
-const { getInfo } = require("@changesets/get-github-info");
+```js
+import { getInfo } from "@changesets/get-github-info";
 
 // ...
 
@@ -41,8 +28,8 @@ const getReleaseLine = async (changeset, type) => {
     commit: changeset.commit,
   });
   let returnVal = `- ${links.commit}${
-    links.pull === null ? "" : ` ${links.pull}`
-  }${links.user === null ? "" : ` Thanks ${links.user}!`}: ${firstLine}`;
+    links.pull == null ? "" : ` ${links.pull}`
+  }${links.user == null ? "" : ` Thanks ${links.user}!`}: ${firstLine}`;
   if (futureLines.length > 0) {
     returnVal += `\n${futureLines.map((l) => `  ${l}`).join("\n")}`;
   }
@@ -52,7 +39,7 @@ const getReleaseLine = async (changeset, type) => {
 // ...
 ```
 
-You'll need to [get a GitHub personal access token](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions, and add it to a `.env` file.
+You'll need to [get a GitHub personal access token](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions, and add it to a `.env` file (it'll be loaded automatically).
 
 ```bash
 GITHUB_TOKEN=token_here

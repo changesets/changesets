@@ -19,6 +19,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/ci-setup
+
+      - name: Build artifacts
+        run: pnpm build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          # the size of the dist artifacts is not very large, so we can use better compression without a slowdown
+          compression-level: 8
+          # store it for as short as possible, since we only need it for the same workflow run
+          retention-days: 1
+          name: dist
+          path: |
+            packages/*/dist
+            scripts/*/dist
+
   lint-workflows:
     name: Lint workflows
     runs-on: ubuntu-latest
@@ -39,15 +65,24 @@ jobs:
           advanced-security: false
 
   test:
-    name: Test
+    name: "Test using Node ${{ matrix.node_version }}"
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      matrix:
+        node_version: [22, 24, 26]
+      fail-fast: false
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
+        with:
+          node-version: ${{ matrix.node_version }}
+          download-dist: true
 
       - name: Check Git version
         run: git --version
@@ -55,50 +90,65 @@ jobs:
       - name: Setup mock Git user
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
-      - name: Jest tests
-        run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
+      - name: Vitest tests
+        if: matrix.node_version != 24
+        run: pnpm test
+
+      # Run coverage only once on node 24 to avoid duplicate codecov uploads
+      - name: Vitest tests with coverage
+        if: matrix.node_version == 24
+        run: pnpm test --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        if: matrix.node_version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   typecheck:
     name: Typecheck
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
+        with:
+          download-dist: true
 
       - name: Typecheck
-        run: yarn types:check
+        run: pnpm types:check
 
   lint:
     name: Lint
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - uses: ./.github/actions/ci-setup
+        with:
+          download-dist: true
 
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Format
-        run: yarn format
+        run: pnpm format
 
   ci-ok:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [lint-workflows, test, typecheck, lint]
+    needs: [lint-workflows, build, test, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1

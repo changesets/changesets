@@ -1,10 +1,10 @@
+import path from "node:path";
+import type { VersionType } from "@changesets/types";
 /**
  * Shared utility functions and business logic
  */
-import semverSatisfies from "semver/functions/satisfies";
-import validRange from "semver/ranges/valid";
-import { VersionType } from "@changesets/types";
-import path from "node:path";
+import semverSatisfies from "semver/functions/satisfies.js";
+import validRange from "semver/ranges/valid.js";
 
 const bumpTypes = ["none", "patch", "minor", "major"];
 
@@ -42,7 +42,7 @@ export function shouldUpdateDependencyBasedOnConfig(
   }: {
     minReleaseType: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-  }
+  },
 ): boolean {
   const usesWorkspaceRange = depVersionRange.startsWith("workspace:");
   if (usesWorkspaceRange) {
@@ -78,4 +78,8 @@ export function shouldUpdateDependencyBasedOnConfig(
     shouldUpdate = !onlyUpdatePeerDependentsWhenOutOfRange;
   }
   return shouldUpdate;
+}
+
+export function capitalize(str: string) {
+  return str[0].toUpperCase() + str.slice(1);
 }

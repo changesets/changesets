@@ -1,21 +1,20 @@
-import { PackageGroup, VersionType } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
-import semverGt from "semver/functions/gt";
-import { InternalRelease } from "./types";
 import { InternalError } from "@changesets/errors";
+import type { PackageGroup, VersionType, Package } from "@changesets/types";
+import semverGt from "semver/functions/gt.js";
+import type { InternalRelease } from "./types.ts";
 
 export function getHighestReleaseType(
-  releases: InternalRelease[]
+  releases: InternalRelease[],
 ): VersionType {
   if (releases.length === 0) {
     throw new Error(
-      `Large internal Changesets error when calculating highest release type in the set of releases. Please contact the maintainers`
+      `Large internal Changesets error when calculating highest release type in the set of releases. Please contact the maintainers`,
     );
   }
 
   let highestReleaseType: VersionType = "none";
 
-  for (let release of releases) {
+  for (const release of releases) {
     switch (release.type) {
       case "major":
         return "major";
@@ -35,19 +34,19 @@ export function getHighestReleaseType(
 
 export function getCurrentHighestVersion(
   packageGroup: PackageGroup,
-  packagesByName: Map<string, Package>
+  packagesByName: Map<string, Package>,
 ): string {
   let highestVersion: string | undefined;
 
-  for (let pkgName of packageGroup) {
-    let pkg = mapGetOrThrowInternal(
+  for (const pkgName of packageGroup) {
+    const pkg = mapGetOrThrowInternal(
       packagesByName,
       pkgName,
-      `We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`
+      `We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`,
     );
 
     if (
-      highestVersion === undefined ||
+      highestVersion == null ||
       semverGt(pkg.packageJson.version, highestVersion)
     ) {
       highestVersion = pkg.packageJson.version;
@@ -57,25 +56,25 @@ export function getCurrentHighestVersion(
   return highestVersion!;
 }
 
-export function mapGetOrThrow<V extends {}>(
+export function mapGetOrThrow<V>(
   map: Map<string, V>,
   key: string,
-  errorMessage: string
+  errorMessage: string,
 ): V {
   const value = map.get(key);
-  if (value === undefined) {
+  if (value == null) {
     throw new Error(errorMessage);
   }
   return value;
 }
 
-export function mapGetOrThrowInternal<V extends {}>(
+export function mapGetOrThrowInternal<V>(
   map: Map<string, V>,
   key: string,
-  errorMessage: string
+  errorMessage: string,
 ): V {
   const value = map.get(key);
-  if (value === undefined) {
+  if (value == null) {
     throw new InternalError(errorMessage);
   }
   return value;

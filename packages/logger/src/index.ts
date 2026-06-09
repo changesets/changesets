@@ -1,11 +1,10 @@
-import pc from "picocolors";
-import util from "util";
+import util from "node:util";
+import c from "@changesets/color";
 
-export let prefix = "🦋 ";
+export const prefix: string = "🦋 ";
 
 function format(args: Array<any>, customPrefix?: string) {
-  let fullPrefix =
-    prefix + (customPrefix === undefined ? "" : " " + customPrefix);
+  const fullPrefix = prefix + (customPrefix == null ? "" : " " + customPrefix);
   return (
     fullPrefix +
     util
@@ -16,11 +15,11 @@ function format(args: Array<any>, customPrefix?: string) {
 }
 
 export function error(...args: Array<any>) {
-  console.error(format(args, pc.red("error")));
+  console.error(format(args, c.red("error")));
 }
 
 export function info(...args: Array<any>) {
-  console.info(format(args, pc.cyan("info")));
+  console.info(format(args, c.cyan("info")));
 }
 
 export function log(...args: Array<any>) {
@@ -28,9 +27,9 @@ export function log(...args: Array<any>) {
 }
 
 export function success(...args: Array<any>) {
-  console.log(format(args, pc.green("success")));
+  console.log(format(args, c.green("success")));
 }
 
 export function warn(...args: Array<any>) {
-  console.warn(format(args, pc.yellow("warn")));
+  console.warn(format(args, c.yellow("warn")));
 }

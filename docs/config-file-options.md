@@ -14,7 +14,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "ignore": [],
   "bumpVersionsWithWorkspaceProtocolOnly": false,
   "changedFilePatterns": ["**"],
-  "prettier": true,
+  "format": "auto",
   "privatePackages": { "version": true, "tag": false }
 }
 ```
@@ -77,7 +77,7 @@ There are two caveats to this.
 
 These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos.md).
 
-> NOTE: you can also provide glob expressions to match the packages, according to the [micromatch](https://www.npmjs.com/package/micromatch) format.
+> NOTE: you can also provide glob expressions to match the packages, according to the [picomatch](https://npmx.dev/picomatch) format.
 
 ## `fixed` (array of arrays of package names)
 
@@ -263,3 +263,11 @@ Example:
   "changedFilePatterns": ["src/**", "lib/**"]
 }
 ```
+
+### `format` (optional string or boolean)
+
+Default value: `"auto"`
+
+The formatter to use to format changesets and changelogs. Set `false` to disable formatting. The default value of `"auto"` will auto-detect the formatter based on the project's configuration files. See the [`@changesets/format` documentation](https://github.com/changesets/format) for more details.
+
+Supported formatters include `"prettier"`, `"oxfmt"`, `"deno"`, and `"dprint"`.

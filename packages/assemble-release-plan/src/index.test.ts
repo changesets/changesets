@@ -1,6 +1,10 @@
+import { randomUUID } from "node:crypto";
 import { defaultConfig } from "@changesets/config";
-import assembleReleasePlan from "./";
-import FakeFullState from "./test-utils";
+import type { Config, VersionType } from "@changesets/types";
+import { inc } from "semver";
+import { beforeEach, describe, expect, it } from "vitest";
+import { assembleReleasePlan } from "./index.ts";
+import { FakeFullState } from "./test-utils.ts";
 
 describe("assemble-release-plan", () => {
   let setup: FakeFullState;
@@ -14,11 +18,11 @@ describe("assemble-release-plan", () => {
   });
 
   it("should assemble release plan for basic setup", () => {
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -32,14 +36,14 @@ describe("assemble-release-plan", () => {
   });
 
   it("should assemble release plan for basic setup with snapshot", () => {
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
       undefined,
       {
         tag: undefined,
-      }
+      },
     );
 
     expect(releases.length).toBe(1);
@@ -47,14 +51,14 @@ describe("assemble-release-plan", () => {
   });
 
   it("should assemble release plan for basic setup with snapshot and tag", () => {
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
       undefined,
       {
         tag: "foo",
-      }
+      },
     );
 
     expect(releases.length).toBe(1);
@@ -71,11 +75,11 @@ describe("assemble-release-plan", () => {
       ],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(4);
@@ -94,11 +98,11 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -132,11 +136,11 @@ describe("assemble-release-plan", () => {
       ],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -160,11 +164,11 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -178,11 +182,11 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-a", "1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -197,11 +201,11 @@ describe("assemble-release-plan", () => {
     setup.updateDependency("pkg-b", "pkg-a", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -219,11 +223,11 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -239,14 +243,14 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
         ...defaultConfig,
         bumpVersionsWithWorkspaceProtocolOnly: true,
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -264,14 +268,14 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       {
         ...defaultConfig,
         bumpVersionsWithWorkspaceProtocolOnly: true,
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -294,11 +298,11 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -318,11 +322,11 @@ describe("assemble-release-plan", () => {
       ],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -341,11 +345,11 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-b", type: "none" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -361,11 +365,11 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -379,11 +383,11 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -397,11 +401,11 @@ describe("assemble-release-plan", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -426,7 +430,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         ignore: ["pkg-b"],
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(1);
@@ -450,7 +454,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         ignore: ["pkg-b"],
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -477,7 +481,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         ignore: ["pkg-b"],
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -504,7 +508,7 @@ describe("assemble-release-plan", () => {
         ...defaultConfig,
         ignore: ["pkg-b"],
       },
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(2);
@@ -532,25 +536,25 @@ describe("assemble-release-plan", () => {
           ...defaultConfig,
           ignore: ["pkg-b"],
         },
-        undefined
-      )
+        undefined,
+      ),
     ).toThrowErrorMatchingInlineSnapshot(`
-"Found mixed changeset big-cats-delight
-Found ignored packages: pkg-b
-Found not ignored packages: pkg-a
-Mixed changesets that contain both ignored and not ignored packages are not allowed"
-`);
+      [Error: Found mixed changeset big-cats-delight
+      Found ignored packages: pkg-b
+      Found not ignored packages: pkg-a
+      Mixed changesets that contain both ignored and not ignored packages are not allowed]
+    `);
   });
 
   it("should not bump a dev dependent nor its dependent when a package gets bumped", () => {
     setup.updateDevDependency("pkg-b", "pkg-a", "1.0.0");
     setup.updateDependency("pkg-c", "pkg-b", "1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -575,10 +579,10 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
-      )
+        undefined,
+      ),
     ).toThrow(
-      "Found changeset small-dogs-sad for package pkg-z which is not in the workspace"
+      "Found changeset small-dogs-sad for package pkg-z which is not in the workspace",
     );
   });
 
@@ -589,14 +593,14 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [{ name: "pkg-a", type: "minor" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
           ...defaultConfig,
           fixed: [["pkg-a", "pkg-b"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -614,14 +618,14 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 
       setup.updatePackage("pkg-c", "2.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
           ...defaultConfig,
           fixed: [["pkg-a", "pkg-b", "pkg-c"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(3);
@@ -647,7 +651,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 
       setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -657,7 +661,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(4);
@@ -682,7 +686,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 
       setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -692,7 +696,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(4);
@@ -706,7 +710,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[3].newVersion).toEqual("1.1.0");
     });
     it("should return an empty release array when no changes will occur", () => {
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         [],
         setup.packages,
         {
@@ -716,7 +720,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases).toEqual([]);
@@ -730,14 +734,14 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [{ type: "minor", name: "pkg-a" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
           ...defaultConfig,
           fixed: [["pkg-a", "pkg-c"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases).toMatchObject([
@@ -764,14 +768,14 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [{ name: "pkg-b", type: "major" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
           ...defaultConfig,
           linked: [["pkg-a", "pkg-b"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -789,14 +793,14 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 
       setup.updatePackage("pkg-c", "2.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
           ...defaultConfig,
           linked: [["pkg-a", "pkg-b", "pkg-c"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -822,7 +826,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
 
       setup.updateDependency("pkg-c", "pkg-a", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -832,7 +836,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(4);
@@ -842,7 +846,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       expect(releases[3].newVersion).toEqual("1.1.0");
     });
     it("should return an empty release array when no changes will occur", () => {
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         [],
         setup.packages,
         {
@@ -852,7 +856,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             ["pkg-c", "pkg-d"],
           ],
         },
-        undefined
+        undefined,
       );
 
       expect(releases).toEqual([]);
@@ -865,14 +869,14 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [{ type: "minor", name: "pkg-c" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
           ...defaultConfig,
           linked: [["pkg-a", "pkg-c"]],
         },
-        undefined
+        undefined,
       );
 
       expect(releases).toMatchObject([
@@ -905,7 +909,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
           tag: "next",
           initialVersions: {},
           mode: "exit",
-        }
+        },
       );
 
       expect(releases.length).toEqual(1);
@@ -932,7 +936,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             "pkg-b": "1.0.0",
           },
           mode: "exit",
-        }
+        },
       );
 
       expect(releases.length).toEqual(2);
@@ -962,7 +966,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             "pkg-b": "1.0.0",
           },
           mode: "exit",
-        }
+        },
       );
 
       expect(releases.length).toEqual(2);
@@ -1010,7 +1014,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             "pkg-c": "1.0.0",
           },
           mode: "pre",
-        }
+        },
       );
 
       expect(releases.length).toEqual(1);
@@ -1028,11 +1032,11 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [{ name: "pkg-b", type: "none" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -1048,11 +1052,11 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [{ name: "pkg-b", type: "none" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -1064,11 +1068,11 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     it("should assemble release plan with workspace:* dependencies", () => {
       setup.updateDependency("pkg-b", "pkg-a", "workspace:*");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -1084,11 +1088,11 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [{ name: "pkg-b", type: "none" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -1100,11 +1104,11 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     it("should assemble release plan with workspace path dependencies", () => {
       setup.updateDependency("pkg-b", "pkg-a", "workspace:packages/pkg-a");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         defaultConfig,
-        undefined
+        undefined,
       );
 
       expect(releases.length).toEqual(2);
@@ -1119,7 +1123,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
     it("should bump a direct dependent when a dependency package gets bumped", () => {
       setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1129,7 +1133,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             updateInternalDependents: "always",
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(2);
@@ -1143,7 +1147,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       setup.updateDependency("pkg-b", "pkg-a", "^1.0.0");
       setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1153,7 +1157,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             updateInternalDependents: "always",
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(3);
@@ -1172,7 +1176,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
         releases: [{ name: "pkg-c", type: "none" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1182,7 +1186,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             updateInternalDependents: "always",
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(2);
@@ -1196,7 +1200,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
       setup.updateDevDependency("pkg-b", "pkg-a", "^1.0.0");
       setup.updateDependency("pkg-c", "pkg-b", "^1.0.0");
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1206,7 +1210,7 @@ Mixed changesets that contain both ignored and not ignored packages are not allo
             updateInternalDependents: "always",
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(2);
@@ -1232,11 +1236,11 @@ describe("version update thoroughness", () => {
   });
 
   it("should patch a single pinned dependent", () => {
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
     expect(releases.length).toEqual(2);
     expect(releases[0].name).toEqual("pkg-a");
@@ -1250,11 +1254,11 @@ describe("version update thoroughness", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(3);
@@ -1271,11 +1275,11 @@ describe("version update thoroughness", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toEqual(4);
@@ -1300,11 +1304,11 @@ describe("bumping peerDeps", () => {
   it("should patch a pinned peerDep", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1321,11 +1325,11 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "none" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -1335,11 +1339,11 @@ describe("bumping peerDeps", () => {
   it("should not bump the dependent when bumping a tilde peerDep by a patch", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "~1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -1353,11 +1357,11 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1373,11 +1377,11 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1394,11 +1398,11 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "none" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -1408,11 +1412,11 @@ describe("bumping peerDeps", () => {
   it("should not bump dependent when bumping caret peerDep by patch", () => {
     setup.updatePeerDependency("pkg-b", "pkg-a", "^1.0.0");
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(1);
@@ -1426,11 +1430,11 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1446,11 +1450,11 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "major" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(2);
@@ -1468,11 +1472,11 @@ describe("bumping peerDeps", () => {
       releases: [{ name: "pkg-a", type: "minor" }],
     });
 
-    let { releases } = assembleReleasePlan(
+    const { releases } = assembleReleasePlan(
       setup.changesets,
       setup.packages,
       defaultConfig,
-      undefined
+      undefined,
     );
 
     expect(releases.length).toBe(3);
@@ -1497,7 +1501,7 @@ describe("bumping peerDeps", () => {
         id: "anyway-the-windblows",
         releases: [{ name: "pkg-a", type: "minor" }],
       });
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1507,7 +1511,7 @@ describe("bumping peerDeps", () => {
             onlyUpdatePeerDependentsWhenOutOfRange: true,
           },
         },
-        undefined
+        undefined,
       );
       expect(releases.length).toBe(1);
       expect(releases[0].name).toEqual("pkg-a");
@@ -1521,7 +1525,7 @@ describe("bumping peerDeps", () => {
         releases: [{ name: "pkg-a", type: "minor" }],
       });
 
-      let { releases } = assembleReleasePlan(
+      const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
         {
@@ -1531,7 +1535,7 @@ describe("bumping peerDeps", () => {
             onlyUpdatePeerDependentsWhenOutOfRange: true,
           },
         },
-        undefined
+        undefined,
       );
 
       expect(releases.length).toBe(2);
@@ -1543,10 +1547,295 @@ describe("bumping peerDeps", () => {
   });
 });
 
-/*
-    Bumping peerDeps is a tricky issue, so we are testing every single combination here so that
-    we can have absolute certainty when changing anything to do with them.
-    In general the rule for bumping peerDeps is that:
-      * All MINOR or MAJOR peerDep bumps must MAJOR bump all dependents - regardless of ranges
-      * Otherwise - normal patching rules apply
- */
+describe("dependent bumping", () => {
+  type DeepPartial<T> = T extends object
+    ? { [P in keyof T]?: DeepPartial<T[P]> }
+    : T;
+
+  /** Semver range prefix written on the dependency. */
+  type Range = "^" | "~" | "=";
+  /** Which field the dependency lives in. */
+  type DepKind = "dep" | "dev" | "peer";
+
+  const RANGES = ["^", "~", "="] as const satisfies readonly Range[];
+  const DEP_KINDS = [
+    "dep",
+    "dev",
+    "peer",
+  ] as const satisfies readonly DepKind[];
+  const BUMPS = [
+    "none",
+    "patch",
+    "minor",
+    "major",
+  ] as const satisfies readonly VersionType[];
+  const BASE_VERSION = "1.0.0";
+
+  // ---- Expectation tables ----
+  //
+  // The whole matrix lives in one readable table, indexed `expected[dep][bump][range]`.
+  // The value is the resulting version of the *dependent* (`pkg-a`);
+
+  type ExpectationTable = Record<
+    DepKind,
+    Record<VersionType, Record<Range, string>>
+  >;
+
+  // oxfmt-ignore
+  const baseExpectations: ExpectationTable = {
+    // direct dependent has to be bumped only when dependency falls out of allowed range
+    // otherwise, installing the latest versions of dependent and dependency would result in duplicate dependency package in the tree
+    dep: {
+      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
+      minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
+      major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
+    },
+    // devDependent should stay untouched, given the dev dependency doesn't affect production installations
+    dev: {
+      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      minor: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      major: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+    },
+    peer: {
+      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
+      minor: { "^": "2.0.0", "~": "2.0.0", "=": "2.0.0" },
+      major: { "^": "2.0.0", "~": "2.0.0", "=": "2.0.0" },
+    },
+  };
+
+  // ---- Test cases ----
+
+  type Case = {
+    range: Range;
+    dep: DepKind;
+    bump: VersionType;
+    /** Expected resulting version of the dependent (`pkg-a`). */
+    expected: string;
+    /** Set when an override changed the baseline expectation (for the title). */
+    overriddenFrom?: string;
+  };
+
+  /** Flattens the expectation table into one `Case` per cell. */
+  function casesFromTable(table: ExpectationTable): Case[] {
+    return DEP_KINDS.flatMap((dep) =>
+      BUMPS.flatMap((bump) =>
+        RANGES.map((range) => ({
+          dep,
+          bump,
+          range,
+          expected: table[dep][bump][range],
+        })),
+      ),
+    );
+  }
+
+  /**
+   * Applies a partial expectation table on top of the baseline cases.
+   * Only the cells you list change; everything else stays at the baseline.
+   * Invalid keys are caught by the type checker, so there's no runtime
+   * "no matching case" guard to maintain.
+   */
+  function applyOverrides(
+    cases: Case[],
+    overrides: DeepPartial<ExpectationTable>,
+  ): Case[] {
+    return cases.map((c) => {
+      const expected = overrides[c.dep]?.[c.bump]?.[c.range];
+      if (expected == null) return c;
+
+      if (expected === c.expected) {
+        throw new Error(
+          `Override for ${c.range}${c.dep}:${c.bump} is invalid. ${expected} is same as original value.`,
+        );
+      }
+
+      return { ...c, expected, overriddenFrom: c.expected };
+    });
+  }
+
+  // ---- Execution ----
+
+  /** Turns a canonical range into the string written to package.json. */
+  type RangeRenderer = (range: Range) => string;
+
+  const defaultRange: RangeRenderer = (range) =>
+    range === "=" ? BASE_VERSION : `${range}${BASE_VERSION}`;
+
+  // oxfmt-ignore
+  const writeDependency: Record<DepKind, (setup: FakeFullState, range: string) => void> = {
+    dep: (setup, range) =>
+      setup.updateDependency("pkg-a", "pkg-a-b", range),
+    dev: (setup, range) =>
+      setup.updateDevDependency("pkg-a", "pkg-a-b", range),
+    peer: (setup, range) =>
+      setup.updatePeerDependency("pkg-a", "pkg-a-b", range),
+  };
+
+  function runCase(c: Case, config: Config, renderRange: RangeRenderer) {
+    /*
+     * Set up the test "workspace":
+     *   - `pkg-a` depends on `pkg-a-b` via dependency kind `dep`
+     *     using the range produced by `renderRange(range)`
+     *   - `pkg-a-b` is bumped by `bump`
+     */
+    const setup = new FakeFullState({ changesets: [] });
+    setup.addPackage("pkg-a-b", BASE_VERSION);
+    setup.addChangeset({
+      id: randomUUID(),
+      releases: [{ name: "pkg-a-b", type: c.bump }],
+    });
+    writeDependency[c.dep](setup, renderRange(c.range));
+
+    const { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      config,
+      undefined,
+    );
+
+    // Sanity check: the dependency itself bumped as requested.
+    const dependency = releases.find((r) => r.name === "pkg-a-b");
+    expect(dependency).toBeDefined();
+    expect(dependency!.newVersion).toEqual(
+      c.bump !== "none" ? inc(BASE_VERSION, c.bump) : BASE_VERSION,
+    );
+
+    // The dependent got bumped (or not) as expected.
+    const dependent = releases.find((r) => r.name === "pkg-a");
+    if (c.expected === BASE_VERSION) {
+      expect(dependent?.newVersion).toBeOneOf(["1.0.0", undefined]);
+    } else {
+      expect(dependent?.newVersion).toEqual(c.expected);
+    }
+  }
+
+  // ---- Suite builder ----
+
+  function fieldWidths(cases: Case[]) {
+    return {
+      range: Math.max(...cases.map((c) => c.range.length)),
+      dep: Math.max(...cases.map((c) => c.dep.length)),
+      bump: Math.max(...cases.map((c) => c.bump.length)),
+    };
+  }
+
+  function caseTitle(c: Case, widths: ReturnType<typeof fieldWidths>): string {
+    const range = c.range.padEnd(widths.range);
+    const dep = c.dep.padStart(widths.dep);
+    const bump = c.bump.padEnd(widths.bump);
+
+    let title = `(${range} ${dep} ${bump}) => ${c.expected}`;
+    if (c.overriddenFrom != null) {
+      title += ` (overridden from ${c.overriddenFrom})`;
+    }
+    return title;
+  }
+
+  type SuiteOptions = {
+    config?: DeepPartial<Config>;
+    overrides?: DeepPartial<ExpectationTable>;
+    /** Override how the range is written (e.g. the `workspace:` protocol). */
+    renderRange?: RangeRenderer;
+  };
+
+  function describeDependentBumping(
+    name: string,
+    {
+      config = {},
+      overrides = {},
+      renderRange = defaultRange,
+    }: SuiteOptions = {},
+  ) {
+    const mergedConfig = {
+      ...defaultConfig,
+      ...config,
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        ...defaultConfig?.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+        ...config?.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH,
+      },
+    } as Config;
+    const cases = applyOverrides(casesFromTable(baseExpectations), overrides);
+    const widths = fieldWidths(cases);
+
+    // eslint-disable-next-line vitest/valid-title
+    describe(name, () => {
+      for (const testCase of cases) {
+        // eslint-disable-next-line vitest/valid-title, vitest/expect-expect
+        it(caseTitle(testCase, widths), () => {
+          runCase(testCase, mergedConfig, renderRange);
+        });
+      }
+    });
+  }
+
+  // ---- Suites ----
+
+  describeDependentBumping("default config");
+
+  // makes all non-none bumps result in a patch bump of a dependent
+  describeDependentBumping("updateInternalDependents: always", {
+    config: {
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        updateInternalDependents: "always",
+      },
+    },
+    overrides: {
+      dep: {
+        patch: { "^": "1.0.1", "~": "1.0.1" },
+        minor: { "^": "1.0.1" },
+      },
+      peer: {
+        patch: { "^": "1.0.1", "~": "1.0.1" },
+      },
+    },
+  });
+
+  describeDependentBumping("onlyUpdatePeerDependentsWhenOutOfRange: true", {
+    config: {
+      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+        onlyUpdatePeerDependentsWhenOutOfRange: true,
+      },
+    },
+    overrides: {
+      peer: { minor: { "^": "1.0.0" } },
+    },
+  });
+
+  // weird case, should probably not be allowed
+  describeDependentBumping(
+    "onlyUpdatePeerDependentsWhenOutOfRange + updateInternalDependents combined",
+    {
+      config: {
+        ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
+          onlyUpdatePeerDependentsWhenOutOfRange: true,
+          updateInternalDependents: "always",
+        },
+      },
+      overrides: {
+        dep: {
+          patch: { "^": "1.0.1", "~": "1.0.1" },
+          minor: { "^": "1.0.1" },
+        },
+        peer: {
+          patch: { "^": "1.0.1", "~": "1.0.1" },
+          minor: { "^": "1.0.1" },
+        },
+      },
+    },
+  );
+
+  describe("workspace: protocol works the same as without it", () => {
+    describeDependentBumping("modifier only", {
+      // render workspace:*, workspace:^, workspace:~
+      renderRange: (range) => `workspace:${range !== "=" ? range : "*"}`,
+    });
+
+    describeDependentBumping("modifier+version", {
+      // render workspace:1.0.0, workspace:^1.0.0, workspace:~1.0.0
+      renderRange: (range) => `workspace:${range !== "=" ? range : ""}1.0.0`,
+    });
+  });
+});

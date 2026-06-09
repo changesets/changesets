@@ -1,27 +1,39 @@
-import { Changeset } from "@changesets/types";
-import fs from "fs-extra";
-import humanId from "human-id";
-import path from "path";
-import prettier from "prettier";
+import fs from "node:fs/promises";
+import path from "node:path";
+import {
+  defaultDetectOrder,
+  detect as detectFormatter,
+  format,
+} from "@changesets/format";
+import type { Changeset, Config } from "@changesets/types";
+import { humanId } from "human-id";
 
-function getPrettierInstance(cwd: string): typeof prettier {
-  try {
-    return require(require.resolve("prettier", { paths: [cwd] }));
-  } catch (err) {
-    if (!err || (err as any).code !== "MODULE_NOT_FOUND") {
-      throw err;
-    }
-    return prettier;
-  }
+async function getFormatter(
+  config: Config["format"],
+  cwd: string,
+): Promise<(patterns: string[]) => Promise<void>> {
+  if (config === false) return async () => {};
+
+  const formatter =
+    config === "auto"
+      ? await detectFormatter({
+          cwd,
+          // Biome doesn't support formatting markdown files
+          order: defaultDetectOrder.filter((f) => f !== "biome"),
+        })
+      : config;
+  if (!formatter) return async () => {};
+
+  return async (patterns: string[]) => {
+    await format(patterns, { cwd, formatter });
+  };
 }
 
-async function writeChangeset(
-  changeset: Changeset,
+export async function writeChangeset(
+  { summary, releases }: Changeset,
   rootDir: string,
-  options?: { prettier?: boolean }
+  options?: { format?: Config["format"] },
 ): Promise<string> {
-  const { summary, releases } = changeset;
-
   const changesetBase = path.resolve(rootDir, ".changeset");
 
   // Worth understanding that the ID merely needs to be a unique hash to avoid git conflicts
@@ -31,8 +43,7 @@ async function writeChangeset(
     capitalize: false,
   });
 
-  const prettierInstance =
-    options?.prettier !== false ? getPrettierInstance(rootDir) : undefined;
+  const formatter = await getFormatter(options?.format ?? "auto", rootDir);
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
   // NOTE: The quotation marks in here are really important even though they are
@@ -45,18 +56,13 @@ ${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
 ${summary}
   `;
 
-  await fs.outputFile(
-    newChangesetPath,
-    prettierInstance
-      ? // Prettier v3 returns a promise
-        await prettierInstance.format(changesetContents, {
-          ...(await prettierInstance.resolveConfig(newChangesetPath)),
-          parser: "markdown",
-        })
-      : changesetContents
-  );
+  await fs.mkdir(path.dirname(newChangesetPath), { recursive: true });
+  await fs.writeFile(newChangesetPath, changesetContents);
+  await formatter([newChangesetPath]);
 
   return changesetID;
 }
 
-export default writeChangeset;
+/** @deprecated Use named export `writeChangeset` instead */
+const writeChangesetDefault = writeChangeset;
+export default writeChangesetDefault;

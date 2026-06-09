@@ -33,6 +33,9 @@ jobs:
         with:
           skip-cache: true # avoid cache poisoning attacks
 
+      - name: Build artifacts
+        run: pnpm build
+
       - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
         with:
@@ -47,7 +50,7 @@ jobs:
         uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
           github-token: ${{ steps.app-token.outputs.token }}
-          version: yarn version-packages
+          version: pnpm version-packages
 
   publish:
     name: Publish
@@ -60,7 +63,8 @@ jobs:
       contents: write # to create release (changesets/action)
       id-token: write # to use OpenID Connect token for trusted publishing (changesets/action)
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Check out repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -69,9 +73,12 @@ jobs:
           node-version: 24
           skip-cache: true # avoid cache poisoning attacks
 
+      - name: Build artifacts
+        run: pnpm build
+
       - name: Publish to npm
         # https://github.com/changesets/action
         uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
           # this expects you to have a script called release which does a build for your packages and calls changeset publish
-          publish: yarn release
+          publish: pnpm release

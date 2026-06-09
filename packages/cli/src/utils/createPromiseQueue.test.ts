@@ -1,40 +1,41 @@
-import { createPromiseQueue } from "./createPromiseQueue";
+import { describe, expect, it, vi } from "vitest";
+import { createPromiseQueue } from "./createPromiseQueue.ts";
 
 function asyncSpy(implementation: () => unknown = () => {}) {
-  return jest.fn().mockImplementation(async () => implementation());
+  return vi.fn().mockImplementation(async () => implementation());
 }
 
 function syncSpy(implementation: () => unknown = () => {}) {
-  return jest.fn().mockImplementation(() => implementation());
+  return vi.fn().mockImplementation(() => implementation());
 }
 
-describe("createPromiseQueue", () => {
-  it("should start jobs immediately before hitting the concurrency limit", () => {
+describe("createPromiseQueue", async () => {
+  it("should start jobs immediately before hitting the concurrency limit", async () => {
     const queue = createPromiseQueue(3);
 
     const job1 = asyncSpy();
     const job2 = asyncSpy();
     const job3 = asyncSpy();
 
-    queue.add(job1);
-    queue.add(job2);
-    queue.add(job3);
+    void queue.add(job1);
+    void queue.add(job2);
+    void queue.add(job3);
 
     expect(job1).toHaveBeenCalled();
     expect(job2).toHaveBeenCalled();
     expect(job3).toHaveBeenCalled();
   });
 
-  it("should not start a job immediately after hitting the concurrency limit", () => {
+  it("should not start a job immediately after hitting the concurrency limit", async () => {
     const queue = createPromiseQueue(2);
 
     const job1 = asyncSpy();
     const job2 = asyncSpy();
     const job3 = asyncSpy();
 
-    queue.add(job1);
-    queue.add(job2);
-    queue.add(job3);
+    void queue.add(job1);
+    void queue.add(job2);
+    void queue.add(job3);
 
     expect(job3).not.toHaveBeenCalled();
   });
@@ -46,9 +47,9 @@ describe("createPromiseQueue", () => {
     const job2 = asyncSpy();
     const job3 = asyncSpy();
 
-    queue.add(job1);
+    void queue.add(job1);
     const queuedJob2 = queue.add(job2);
-    queue.add(job3);
+    void queue.add(job3);
 
     expect(job3).not.toHaveBeenCalled();
 
@@ -126,8 +127,8 @@ describe("createPromiseQueue", () => {
     const job1 = asyncSpy();
     const job2 = asyncSpy();
 
-    queue.add(job1);
-    queue.add(job2);
+    void queue.add(job1);
+    void queue.add(job2);
 
     expect(job2).not.toHaveBeenCalled();
 

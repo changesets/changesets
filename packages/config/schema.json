@@ -1,32 +1,63 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
-    "changelog": {
+    "baseBranch": {
+      "type": "string",
+      "description": "Determines the branch that Changesets uses when finding what packages have changed.",
+      "default": "main"
+    },
+    "access": {
       "anyOf": [
         {
-          "type": "array",
-          "items": [
-            {
-              "type": "string",
-              "title": "Changelog Generator Path"
-            },
-            { "title": "Changelog Generator Options" }
-          ],
-          "minItems": 1,
-          "maxItems": 2
+          "const": "public"
         },
         {
-          "enum": [false],
-          "type": "boolean"
-        },
-        {
-          "type": "string",
-          "title": "Changelog Generator Path"
+          "const": "restricted"
         }
       ],
-      "description": "The configuration for changelog generators.",
-      "default": ["@changesets/cli", null]
+      "description": "Determines whether Changesets should publish packages to the registry publicly or to a restricted scope.",
+      "default": "restricted"
+    },
+    "changedFilePatterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A list of file patterns that Changesets should consider when determining what packages have changed.",
+      "default": ["**"]
+    },
+    "format": {
+      "anyOf": [
+        {
+          "const": "auto"
+        },
+        {
+          "const": "prettier"
+        },
+        {
+          "const": "oxfmt"
+        },
+        {
+          "const": "deno"
+        },
+        {
+          "const": "dprint"
+        },
+        {
+          "const": false
+        }
+      ],
+      "description": "The formatter to use to format changesets and changelogs. Set `false` to disable formatting. The default value of `auto` will auto-detect the formatter based on the project's configuration files.",
+      "default": "auto"
+    },
+    "ignore": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Packages that should not be released.",
+      "default": []
     },
     "fixed": {
       "type": "array",
@@ -36,6 +67,12 @@
           "type": "string"
         }
       },
+      "examples": [
+        [
+          ["@pkg/a", "@pkg/b"],
+          ["@pkg/d", "@pkg/e"]
+        ]
+      ],
       "description": "Packages that should always be released together with the same version.",
       "default": []
     },
@@ -47,104 +84,166 @@
           "type": "string"
         }
       },
+      "examples": [
+        [
+          ["@pkg/a", "@pkg/b"],
+          ["@pkg/d", "@pkg/e"]
+        ]
+      ],
       "description": "Packages that should be linked together so when they are being released, they will be released at the same version.",
       "default": []
     },
-    "commit": {
+    "updateInternalDependencies": {
       "anyOf": [
         {
-          "type": "array",
-          "items": [
-            {
-              "type": "string",
-              "title": "Commit Generator Path"
-            },
-            { "title": "Commit Generator Options" }
-          ],
-          "minItems": 1,
-          "maxItems": 2
+          "const": "minor"
         },
         {
-          "type": "boolean"
-        },
-        {
-          "type": "string",
-          "title": "Commit Generator Path"
+          "const": "patch"
         }
       ],
-      "description": "Determines whether Changesets should commit the results of the add and version command.",
-      "default": false
-    },
-    "prettier": {
-      "type": "boolean",
-      "description": "When false, Changesets won't format with Prettier",
-      "default": true
+      "description": "The minimum bump type to trigger automatic update of internal dependencies that are part of the same release.",
+      "default": "patch"
     },
     "privatePackages": {
       "anyOf": [
         {
           "type": "object",
           "properties": {
-            "tag": { "type": "boolean" },
-            "version": { "type": "boolean" }
-          }
+            "version": {
+              "type": "boolean",
+              "default": true
+            },
+            "tag": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": []
         },
         {
           "const": false
         }
-      ]
-    },
-    "access": {
-      "enum": ["restricted", "public"],
-      "type": "string",
-      "description": "Determines whether Changesets should publish packages to the registry publicly or to a restricted scope.",
-      "default": "restricted"
-    },
-    "baseBranch": {
-      "type": "string",
-      "default": "master",
-      "description": "Determines the branch that Changesets uses when finding what packages have changed."
-    },
-    "changedFilePatterns": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": ["**"],
-      "description": "Glob patterns for changed files that should determining the package as changed."
-    },
-    "ignore": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Packages that should not be released.",
-      "default": []
-    },
-    "updateInternalDependencies": {
-      "enum": ["patch", "minor"],
-      "type": "string",
-      "description": "The minimum bump type to trigger automatic update of internal dependencies that are part of the same release.",
-      "default": "patch"
+      ],
+      "description": "Opt in to tracking non-npm / private packages",
+      "default": {}
     },
     "bumpVersionsWithWorkspaceProtocolOnly": {
       "type": "boolean",
-      "default": false,
-      "description": "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace."
+      "description": "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.",
+      "default": false
     },
     "snapshot": {
       "type": "object",
       "properties": {
         "useCalculatedVersion": {
           "type": "boolean",
-          "description": "It can be used to make generated snapshot versions use the calculated version (based on the changeset files) as a base version, instead of 0.0.0"
+          "description": "Makes generated snapshot versions use the calculated version (based on the changeset files) as a base version, instead of 0.0.0",
+          "default": false
         },
         "prereleaseTemplate": {
           "type": "string",
-          "description": "A template for the prerelease (suffix) part of the generated snapshot version. The template can use the following variable patterns: {commit}, {tag}, {datetime}, {timestamp}.",
-          "minLength": 1
+          "minLength": 1,
+          "description": "A template for the prerelease (suffix) part of the generated snapshot version. The template can use the following variable patterns: {commit}, {tag}, {datetime}, {timestamp}."
         }
-      }
+      },
+      "required": [],
+      "description": "Snapshot-specific options.",
+      "default": {}
+    },
+    "changelog": {
+      "anyOf": [
+        {
+          "const": false
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string"
+            },
+            {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ],
+          "minItems": 2
+        }
+      ],
+      "description": "The configuration for changelog generators.",
+      "default": "@changesets/cli/changelog"
+    },
+    "commit": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string"
+            },
+            {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ],
+          "minItems": 2
+        }
+      ],
+      "description": "Determines whether Changesets should commit the results of the add and version command.",
+      "default": false
+    },
+    "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+      "type": "object",
+      "properties": {
+        "onlyUpdatePeerDependentsWhenOutOfRange": {
+          "type": "boolean",
+          "default": false
+        },
+        "updateInternalDependents": {
+          "anyOf": [
+            {
+              "const": "always"
+            },
+            {
+              "const": "out-of-range"
+            }
+          ],
+          "default": "out-of-range"
+        }
+      },
+      "required": [],
+      "description": "Unsafe options",
+      "default": {}
     }
-  }
+  },
+  "required": []
 }

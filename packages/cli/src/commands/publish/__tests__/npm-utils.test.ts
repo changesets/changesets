@@ -1,4 +1,5 @@
-import { getCorrectRegistry, isCustomRegistry } from "../npm-utils";
+import { beforeEach, afterAll, describe, expect, it } from "vitest";
+import { getCorrectRegistry, isCustomRegistry } from "../npm-utils.ts";
 
 const originalEnv = process.env;
 
@@ -37,7 +38,7 @@ describe("getCorrectRegistry", () => {
     process.env["npm_config_@acme:registry"] = "https://nexus.example.com/npm";
 
     expect(
-      getCorrectRegistry({ name: "@acme/pkg", version: "1.0.0" }).registry
+      getCorrectRegistry({ name: "@acme/pkg", version: "1.0.0" }).registry,
     ).toBe("https://nexus.example.com/npm");
   });
 
@@ -50,7 +51,7 @@ describe("getCorrectRegistry", () => {
       {
         scope: "@acme",
         registry: "https://registry.example.com/acme",
-      }
+      },
     );
   });
 
@@ -60,7 +61,7 @@ describe("getCorrectRegistry", () => {
         name: "pkg",
         version: "1.0.0",
         publishConfig: { registry: "https://registry.example.com/npm" },
-      }).registry
+      }).registry,
     ).toBe("https://registry.example.com/npm");
   });
 
@@ -72,7 +73,7 @@ describe("getCorrectRegistry", () => {
         publishConfig: {
           "@acme:registry": "https://registry.example.com/acme",
         },
-      })
+      }),
     ).toEqual({
       scope: "@acme",
       registry: "https://registry.example.com/acme",
@@ -83,7 +84,7 @@ describe("getCorrectRegistry", () => {
     process.env.npm_config_registry = "https://nexus.example.com/npm/";
 
     expect(getCorrectRegistry().registry).toBe(
-      "https://nexus.example.com/npm/"
+      "https://nexus.example.com/npm/",
     );
   });
 
@@ -92,7 +93,7 @@ describe("getCorrectRegistry", () => {
       "https://nexus.example.com/npm?token=abc#fragment";
 
     expect(getCorrectRegistry().registry).toBe(
-      "https://nexus.example.com/npm?token=abc#fragment"
+      "https://nexus.example.com/npm?token=abc#fragment",
     );
   });
 

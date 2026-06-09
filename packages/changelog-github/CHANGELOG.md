@@ -1,10 +1,53 @@
 # @changesets/changelog-github
 
+## 1.0.0-next.5
+
+### Patch Changes
+
+- [#2040](https://github.com/changesets/changesets/pull/2040) [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f) Thanks [@bluwy](https://github.com/bluwy)! - Improve type-check for options object
+
+- Updated dependencies [[`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f)]:
+  - @changesets/types@7.0.0-next.5
+
+## 1.0.0-next.4
+
+### Patch Changes
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8)]:
+  - @changesets/types@7.0.0-next.4
+
+## 1.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+### Minor Changes
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- [#1947](https://github.com/changesets/changesets/pull/1947) [`492b0ca`](https://github.com/changesets/changesets/commit/492b0caa1a076551cf4bdca13d83dee4c485c9c8) Thanks [@bluwy](https://github.com/bluwy)! - Use `parseEnv` instead of `dotenv` to load the `.env` file and avoid loading them to `process.env`
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7), [`492b0ca`](https://github.com/changesets/changesets/commit/492b0caa1a076551cf4bdca13d83dee4c485c9c8)]:
+  - @changesets/get-github-info@1.0.0-next.2
+  - @changesets/types@7.0.0-next.3
+
 ## 0.7.0
 
 ### Minor Changes
 
 - [#1255](https://github.com/changesets/changesets/pull/1255) [`94578cf`](https://github.com/changesets/changesets/commit/94578cf164aa7abcb12b97dd3a55d12a324f4fe8) Thanks [@Kauhsa](https://github.com/Kauhsa)! - Added `disableThanks` option
+
+## 1.0.0-next.2
+
+### Patch Changes
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c)]:
+  - @changesets/types@7.0.0-next.2
 
 ## 0.6.0
 
@@ -27,6 +70,36 @@
 
 - Updated dependencies [[`398b3fe`](https://github.com/changesets/changesets/commit/398b3fe1cbce3c8a02f4d6a568f6cb724acffa5a)]:
   - @changesets/get-github-info@0.7.0
+
+## 1.0.0-next.1
+
+### Minor Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d)]:
+  - @changesets/get-github-info@1.0.0-next.1
+  - @changesets/types@7.0.0-next.1
+
+## 1.0.0-next.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Minor Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1615](https://github.com/changesets/changesets/pull/1615) [`4b962cc`](https://github.com/changesets/changesets/commit/4b962cc6e5c56ca519c3d5c00bdec59c754a43cc) Thanks [@bluwy](https://github.com/bluwy)! - Bump `dotenv` dependency to v16
+
+### Patch Changes
+
+- Updated dependencies [[`5b02e2f`](https://github.com/changesets/changesets/commit/5b02e2f61d2a1335293016f81efb0386a0ed7967), [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/get-github-info@1.0.0-next.0
+  - @changesets/types@7.0.0-next.0
 
 ## 0.5.1
 
