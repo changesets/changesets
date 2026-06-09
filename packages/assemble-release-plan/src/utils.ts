@@ -1,4 +1,5 @@
-import { PackageGroup, VersionType } from "@changesets/types";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
+import { Config, PackageGroup, VersionType } from "@changesets/types";
 import { Package } from "@manypkg/get-packages";
 import semverGt from "semver/functions/gt";
 import { InternalRelease } from "./types";
@@ -35,7 +36,8 @@ export function getHighestReleaseType(
 
 export function getCurrentHighestVersion(
   packageGroup: PackageGroup,
-  packagesByName: Map<string, Package>
+  packagesByName: Map<string, Package>,
+  config: Config
 ): string {
   let highestVersion: string | undefined;
 
@@ -45,6 +47,15 @@ export function getCurrentHighestVersion(
       pkgName,
       `We were unable to version for package group: ${pkgName} in package group: ${packageGroup.toString()}`
     );
+
+    if (
+      shouldSkipPackage(pkg, {
+        ignore: config.ignore,
+        allowPrivatePackages: config.privatePackages.version,
+      })
+    ) {
+      continue;
+    }
 
     if (
       highestVersion === undefined ||
