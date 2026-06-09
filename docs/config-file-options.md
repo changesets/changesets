@@ -162,7 +162,75 @@ You would specify our github changelog generator with:
 }
 ```
 
-If you want to disable thank you messages, add `"disableThanks": true` to the options.
+#### Custom line format with `composeReleaseLine`
+
+For full control over each changelog line, point `changelog` at a small local module and compose the line in JavaScript with `composeReleaseLine`:
+
+```js
+// .changeset/changelog.js
+import { composeReleaseLine } from "@changesets/changelog-github";
+
+export const getReleaseLine = composeReleaseLine(
+  ({ summary, pr, commit, authors, linkRefs, linkHints }) => {
+    // return a string, or { separator, line } to override the entry separator
+  },
+);
+
+export { getDependencyReleaseLine } from "@changesets/changelog-github";
+```
+
+```json
+{
+  "changelog": ["./changelog.js", { "repo": "<org>/<repo>" }]
+}
+```
+
+The callback receives:
+
+| Field       | Value                                                             |
+| ----------- | ----------------------------------------------------------------- |
+| `summary`   | the changeset summary's first line, raw (not linkified)           |
+| `pr`        | `[#123](url)`, or `""` when there is none                         |
+| `commit`    | ``[`abc1234`](url)``, or `""` when there is none                  |
+| `authors`   | array of `[@user](url)` links; empty when there is no attribution |
+| `linkRefs`  | links every bare `#123` (the default issue autolinking)           |
+| `linkHints` | links only refs inside `(fix #123)`, `(fixes #123)`, `(see #123)` |
+
+Return a string to use the default `\n\n` entry separator, or `{ separator, line }` to override it. Continuation lines of a multi-line summary are always appended below, indented by two spaces and linkified with `linkRefs`.
+
+**Default output** (what you get with no custom module):
+
+```js
+({ summary, pr, commit, authors, linkRefs }) => {
+  const prefix = [
+    pr ? ` ${pr}` : "",
+    commit ? ` ${commit}` : "",
+    authors.length ? ` Thanks ${authors.join(", ")}!` : "",
+  ].join("");
+  return `-${prefix ? `${prefix} -` : ""} ${linkRefs(summary)}`;
+};
+```
+
+**Compact** (reproduces `@svitejs/changesets-changelog-github-compact`, which is unmaintained):
+
+```js
+({ summary, pr, commit, linkHints }) => {
+  const ref = pr || commit;
+  return {
+    separator: "\n",
+    line: `- ${linkHints(summary)}${ref ? ` (${ref})` : ""}`,
+  };
+};
+```
+
+**Without thank-you messages** (replaces the old `disableThanks: true`):
+
+```js
+({ summary, pr, commit, linkRefs }) => {
+  const refs = [pr, commit].filter(Boolean).join(" ");
+  return `-${refs ? ` ${refs} -` : ""} ${linkRefs(summary)}`;
+};
+```
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 
