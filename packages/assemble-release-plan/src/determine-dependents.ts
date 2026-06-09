@@ -5,6 +5,7 @@ import {
   PackageJSON,
   VersionType,
 } from "@changesets/types";
+import { readPnpmCatalog } from "@changesets/get-dependents-graph";
 import { Package } from "@manypkg/get-packages";
 import path from "node:path";
 import semverSatisfies from "semver/functions/satisfies";
@@ -41,6 +42,7 @@ export default function determineDependents({
   config: Config;
 }): boolean {
   let updated = false;
+  const catalog = readPnpmCatalog(rootDir);
   // NOTE this is intended to be called recursively
   let pkgsToSearch = [...releases.values()];
 
@@ -81,7 +83,8 @@ export default function determineDependents({
             rootDir,
             dependentPackage.packageJson,
             nextRelease,
-            dependencyPackage
+            dependencyPackage,
+            catalog
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
@@ -188,7 +191,8 @@ function getDependencyVersionRanges(
   rootDir: string,
   dependentPkgJSON: PackageJSON,
   dependencyRelease: InternalRelease,
-  dependencyPackage: Package
+  dependencyPackage: Package,
+  catalog: Record<string, string>
 ): {
   depType: DependencyType;
   versionRange: string;
@@ -206,6 +210,12 @@ function getDependencyVersionRanges(
   for (const type of DEPENDENCY_TYPES) {
     let versionRange = dependentPkgJSON[type]?.[dependencyRelease.name];
     if (!versionRange) continue;
+
+    if (versionRange === "catalog:") {
+      const catalogVersion = catalog[dependencyRelease.name];
+      if (!catalogVersion) continue;
+      versionRange = catalogVersion;
+    }
 
     if (versionRange.startsWith("workspace:")) {
       versionRange = versionRange.replace(/^workspace:/, "");

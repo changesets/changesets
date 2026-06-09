@@ -1,5 +1,6 @@
 import { Packages, Package } from "@manypkg/get-packages";
 import getDependencyGraph from "./get-dependency-graph";
+export { readPnpmCatalog } from "./read-pnpm-catalog";
 
 export function getDependentsGraph(
   packages: Packages,
