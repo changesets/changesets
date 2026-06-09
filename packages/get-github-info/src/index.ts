@@ -77,27 +77,44 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
     `;
 }
 
-// why are we using dataloader?
-// it provides use with two things
-// 1. caching
-// since getInfo will be called inside of changeset's getReleaseLine
-// and there could be a lot of release lines for a single commit
-// caching is important so we don't do a bunch of requests for the same commit
-// 2. batching
-// getReleaseLine will be called a large number of times but it'll be called at the same time
-// so instead of doing a bunch of network requests, we can do a single one.
-const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
-  const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } = readEnv();
-  if (!GITHUB_TOKEN) {
-    throw new Error(
-      `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new?scopes=read:user,repo:status&description=changesets-${new Date()
-        .toISOString()
-        .substring(
-          0,
-          10
-        )} with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`
-    );
+const DEFAULT_BATCH_SIZE = 100;
+
+let configuredBatchSize: number | undefined;
+
+function isValidBatchSize(value: number): boolean {
+  return Number.isFinite(value) && Number.isInteger(value) && value > 0;
+}
+
+/**
+ * Set the batch size for GitHub GraphQL API requests.
+ * This controls how many commits/PRs are looked up in a single query.
+ * Can also be set via the CHANGESET_GITHUB_BATCH_SIZE environment variable.
+ */
+export function setBatchSize(size: number) {
+  if (!isValidBatchSize(size)) {
+    throw new RangeError("Batch size must be a finite integer greater than 0");
   }
+  configuredBatchSize = size;
+}
+
+function getBatchSize(): number {
+  if (configuredBatchSize !== undefined) {
+    return configuredBatchSize;
+  }
+  const envVal = process.env.CHANGESET_GITHUB_BATCH_SIZE;
+  if (envVal) {
+    const parsed = parseInt(envVal, 10);
+    if (isValidBatchSize(parsed)) {
+      return parsed;
+    }
+  }
+  return DEFAULT_BATCH_SIZE;
+}
+
+async function fetchBatch(
+  requests: readonly RequestData[],
+  env: { GITHUB_GRAPHQL_URL: string; GITHUB_TOKEN: string }
+): Promise<any[]> {
   let repos: ReposWithCommitsAndPRsToFetch = {};
   requests.forEach(({ repo, ...data }) => {
     if (repos[repo] === undefined) {
@@ -108,10 +125,10 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
 
   let fetchResponse;
   try {
-    fetchResponse = await fetch(GITHUB_GRAPHQL_URL, {
+    fetchResponse = await fetch(env.GITHUB_GRAPHQL_URL, {
       method: "POST",
       headers: {
-        Authorization: `Token ${GITHUB_TOKEN}`,
+        Authorization: `Token ${env.GITHUB_TOKEN}`,
       },
       body: JSON.stringify({ query: makeQuery(repos) }),
     });
@@ -172,7 +189,72 @@ const GHDataLoader = new DataLoader(async (requests: RequestData[]) => {
         data.kind === "pull" ? data.pull : data.commit
       ]
   );
-});
+}
+
+// why are we using dataloader?
+// it provides us with two things
+// 1. caching
+// since getInfo will be called inside of changeset's getReleaseLine
+// and there could be a lot of release lines for a single commit
+// caching is important so we don't do a bunch of requests for the same commit
+// 2. batching
+// getReleaseLine will be called a large number of times but it'll be called at the same time
+// so instead of doing a bunch of network requests, we can do a single one.
+const GHDataLoader = new DataLoader<RequestData, any>(
+  async (requests: readonly RequestData[]) => {
+    const { GITHUB_GRAPHQL_URL, GITHUB_SERVER_URL, GITHUB_TOKEN } = readEnv();
+    if (!GITHUB_TOKEN) {
+      throw new Error(
+        `Please create a GitHub personal access token at ${GITHUB_SERVER_URL}/settings/tokens/new?scopes=read:user,repo:status&description=changesets-${new Date()
+          .toISOString()
+          .substring(
+            0,
+            10
+          )} with \`read:user\` and \`repo:status\` permissions and add it as the GITHUB_TOKEN environment variable`
+      );
+    }
+
+    const batchSize = getBatchSize();
+    const totalBatches = Math.ceil(requests.length / batchSize);
+    const results: any[] = new Array(requests.length);
+
+    if (totalBatches > 1) {
+      console.error(
+        `Fetching GitHub info for ${requests.length} items in ${totalBatches} batches (batch size: ${batchSize})`
+      );
+    }
+
+    // Process requests in batches to avoid GitHub GraphQL API timeouts
+    // on query validation when there are many commits to look up
+    for (let offset = 0; offset < requests.length; offset += batchSize) {
+      const batchNum = Math.floor(offset / batchSize) + 1;
+      if (totalBatches > 1) {
+        console.error(`Fetching batch ${batchNum}/${totalBatches}...`);
+      }
+      const batch = requests.slice(offset, offset + batchSize);
+      const batchResults = await fetchBatch(batch, {
+        GITHUB_GRAPHQL_URL,
+        GITHUB_TOKEN,
+      });
+      for (let i = 0; i < batchResults.length; i++) {
+        results[offset + i] = batchResults[i];
+      }
+    }
+
+    return results;
+  },
+  {
+    cacheKeyFn: (request: RequestData) =>
+      request.kind === "commit"
+        ? `commit:${request.repo}:${request.commit}`
+        : `pull:${request.repo}:${request.pull}`,
+  }
+);
+
+// exported for testing – lets callers reset the DataLoader's result cache
+export function clearCache() {
+  GHDataLoader.clearAll();
+}
 
 export async function getInfo(request: {
   commit: string;
