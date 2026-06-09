@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "fs-fixture": "^2.14.0",
-    "tinyexec": "^1.1.2",
-    "vitest": "^4.1.6"
+    "tinyexec": "^1.2.4",
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"

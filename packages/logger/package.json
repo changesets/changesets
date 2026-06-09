@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@changesets/color": "workspace:^",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"

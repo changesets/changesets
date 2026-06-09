@@ -55,7 +55,7 @@
     "tsdown": "^0.22.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.4",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"

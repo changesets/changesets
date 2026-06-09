@@ -33,7 +33,7 @@
     "@types/picomatch": "4.0.3",
     "@valibot/to-json-schema": "^1.7.0",
     "valibot": "^1.4.0",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
