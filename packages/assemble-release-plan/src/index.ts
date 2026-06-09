@@ -10,6 +10,7 @@ import {
 } from "@changesets/types";
 import { Package, Packages } from "@manypkg/get-packages";
 import semverParse from "semver/functions/parse";
+import semverValid from "semver/functions/valid";
 import applyLinks from "./apply-links";
 import determineDependents from "./determine-dependents";
 import flattenReleases from "./flatten-releases";
@@ -50,12 +51,25 @@ function getSnapshotSuffix(
       .replace(/[^\d]/g, ""),
   };
 
+  if (
+    placeholderValues.tag !== undefined &&
+    !isValidPrereleasePart(placeholderValues.tag)
+  ) {
+    throw new Error(
+      `Failed to compose snapshot version: snapshot tag "${placeholderValues.tag}" is not a valid semver prerelease.`
+    );
+  }
+
   // We need a special handling because we need to handle a case where `--snapshot` is used without any template,
   // and the resulting version needs to be composed without a tag.
   if (!template) {
-    return [placeholderValues.tag, placeholderValues.datetime]
+    const snapshotSuffix = [placeholderValues.tag, placeholderValues.datetime]
       .filter(Boolean)
       .join("-");
+
+    validateSnapshotSuffixFromTemplate(snapshotSuffix);
+
+    return snapshotSuffix;
   }
 
   const placeholders = Object.keys(placeholderValues) as Array<
@@ -68,7 +82,7 @@ function getSnapshotSuffix(
     );
   }
 
-  return placeholders.reduce((prev, key) => {
+  const snapshotSuffix = placeholders.reduce((prev, key) => {
     return prev.replace(new RegExp(`\\{${key}\\}`, "g"), () => {
       const value = placeholderValues[key];
       if (value === undefined) {
@@ -80,6 +94,22 @@ function getSnapshotSuffix(
       return value;
     });
   }, template);
+
+  validateSnapshotSuffixFromTemplate(snapshotSuffix);
+
+  return snapshotSuffix;
+}
+
+function isValidPrereleasePart(value: string): boolean {
+  return semverValid(`0.0.0-${value}`) !== null;
+}
+
+function validateSnapshotSuffixFromTemplate(snapshotSuffix: string): void {
+  if (!isValidPrereleasePart(snapshotSuffix)) {
+    throw new Error(
+      `Failed to compose snapshot version: snapshot.prereleaseTemplate produced "${snapshotSuffix}", which is not a valid semver prerelease.`
+    );
+  }
 }
 
 function getSnapshotVersion(

@@ -61,6 +61,44 @@ describe("assemble-release-plan", () => {
     expect(/0\.0\.0-foo-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
   });
 
+  it("should throw when a snapshot tag is not a valid prerelease identifier", () => {
+    expect(() =>
+      assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        defaultConfig,
+        undefined,
+        {
+          tag: "foo_bar",
+        }
+      )
+    ).toThrow(
+      /Failed to compose snapshot version: snapshot tag "foo_bar" is not a valid semver prerelease/
+    );
+  });
+
+  it("should throw when a snapshot prerelease template creates an invalid prerelease version", () => {
+    expect(() =>
+      assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          snapshot: {
+            ...defaultConfig.snapshot,
+            prereleaseTemplate: "foo_{datetime}",
+          },
+        },
+        undefined,
+        {
+          tag: undefined,
+        }
+      )
+    ).toThrow(
+      /Failed to compose snapshot version: snapshot\.prereleaseTemplate produced "foo_\d{14}", which is not a valid semver prerelease/
+    );
+  });
+
   it("should assemble release plan with multiple packages", () => {
     setup.addChangeset({
       id: "big-cats-delight",

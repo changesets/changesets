@@ -31,7 +31,8 @@
     "@changesets/types": "^6.1.0",
     "@manypkg/get-packages": "^1.1.3",
     "fs-extra": "^7.0.1",
-    "micromatch": "^4.0.8"
+    "micromatch": "^4.0.8",
+    "semver": "^7.5.3"
   },
   "devDependencies": {
     "@changesets/test-utils": "*",

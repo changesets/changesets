@@ -921,6 +921,22 @@ describe("parser errors", () => {
     `);
   });
 
+  test("snapshot.prereleaseTemplate invalid semver prerelease template", () => {
+    expect(() => {
+      unsafeParse(
+        {
+          snapshot: {
+            prereleaseTemplate: "foo_{datetime}",
+          },
+        },
+        defaultPackages
+      );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "Some errors occurred when validating the changesets config:
+      The \`snapshot.prereleaseTemplate\` option is set as "foo_{datetime}" but it is not a valid semver prerelease template."
+    `);
+  });
+
   test("Experimental useCalculatedVersionForSnapshots non-boolean", () => {
     expect(() => {
       unsafeParse(

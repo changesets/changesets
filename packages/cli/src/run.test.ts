@@ -2,6 +2,7 @@ import path from "path";
 import { error } from "@changesets/logger";
 import { testdir } from "@changesets/test-utils";
 import add from "./commands/add";
+import version from "./commands/version";
 import { run } from "./run";
 import writeChangeset from "@changesets/write";
 
@@ -57,6 +58,33 @@ describe("cli", () => {
   });
 
   describe("version", () => {
+    it("should validate snapshot tags before running version", async () => {
+      (error as any).mockClear();
+      (version as any).mockClear();
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await expect(
+        run(["version"], { snapshot: "foo_bar" }, cwd)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"The process exited with code: 1"`
+      );
+
+      expect(error).toHaveBeenCalledWith(
+        `The snapshot tag "foo_bar" passed to the \`--snapshot\` option is not a valid semver prerelease.`
+      );
+      expect(version).not.toHaveBeenCalled();
+    });
+
     it("should validate package name passed in from --ignore flag", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
