@@ -8,7 +8,8 @@ on:
     branches:
       - main
       - next
-      - "maintenance/v[0-9]+"
+      # merge group rulesets don't allow wildcards so in settings each maintenance branch needs to be added separately
+      - "maintenance/v*" # branch rulesets don't support v[0-9]+
 
 permissions:
   contents: read

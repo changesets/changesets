@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - next
-      - "maintenance/v[0-9]+"
+      - "maintenance/v*" # branch rulesets don't support v[0-9]+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
