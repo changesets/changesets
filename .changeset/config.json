@@ -4,7 +4,7 @@
     "@changesets/changelog-github",
     { "repo": "changesets/changesets" }
   ],
-  "baseBranch": "next",
+  "baseBranch": "main",
   "commit": false,
   "access": "public",
   "ignore": ["@changesets/test-utils", "@changesets/color"],
