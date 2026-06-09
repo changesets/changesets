@@ -23,9 +23,7 @@ jobs:
     outputs:
       hasChangesets: ${{ steps.changesets.outputs.hasChangesets }}
     permissions:
-      contents: write # to create release (changesets/action)
-      issues: write # to post issue comments (changesets/action)
-      pull-requests: write # to create pull request (changesets/action)
+      contents: read # to check out repo (actions/checkout)
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -35,11 +33,13 @@ jobs:
         with:
           skip-cache: true # avoid cache poisoning attacks
 
-      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
         with:
           client-id: ${{ vars.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write # to create version commits (changesets/action)
+          permission-pull-requests: write # to create pull request (changesets/action)
 
       - name: Create or update release pull request
         id: changesets
