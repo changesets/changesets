@@ -22,10 +22,6 @@ jobs:
     timeout-minutes: 20
     outputs:
       hasChangesets: ${{ steps.changesets.outputs.hasChangesets }}
-    permissions:
-      contents: write # to create release (changesets/action)
-      issues: write # to post issue comments (changesets/action)
-      pull-requests: write # to create pull request (changesets/action)
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -40,6 +36,8 @@ jobs:
         with:
           client-id: ${{ vars.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write # to create version commits (changesets/action)
+          permission-pull-requests: write # to create pull request (changesets/action)
 
       - name: Create or update release pull request
         id: changesets
