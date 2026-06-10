@@ -76,7 +76,7 @@ export function parseChangesetFile(contents: string): {
 
   let yamlStuff: unknown;
   try {
-    yamlStuff = yaml.parse(roughReleases);
+    yamlStuff = yaml.parse(roughReleases.trim());
   } catch (e) {
     throw new Error(
       `could not parse changeset - invalid YAML in frontmatter.\n` +
