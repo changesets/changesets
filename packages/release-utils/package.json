@@ -17,14 +17,14 @@
     "@changesets/read": "workspace:^",
     "@changesets/types": "workspace:^",
     "@manypkg/get-packages": "^3.1.0",
-    "semver": "^7.8.0",
-    "tinyexec": "^1.1.2"
+    "semver": "^7.8.1",
+    "tinyexec": "^1.2.4"
   },
   "devDependencies": {
     "@changesets/git": "workspace:*",
     "@changesets/test-utils": "workspace:*",
     "@changesets/write": "workspace:*",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
