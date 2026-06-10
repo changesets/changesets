@@ -42,9 +42,6 @@ importers:
       eslint:
         specifier: ^10.4.0
         version: 10.4.0
-      eslint-config-prettier:
-        specifier: ^10.1.8
-        version: 10.1.8(eslint@10.4.0)
       eslint-plugin-import-lite:
         specifier: ~0.6.0
         version: 0.6.0(eslint@10.4.0)
@@ -1203,12 +1200,6 @@ packages:
     engines: {node: '>=12'}
     peerDependencies:
       eslint: '>=6.0.0'
-
-  eslint-config-prettier@10.1.8:
-    resolution: {integrity: sha512-82GZUjRS0p/jganf6q1rEO25VSoHH0hKPCTrgillPjdI/3bgBhAE1QzHrHTizjpRvy6pGAvKjDJtk2pF9NDq8w==}
-    hasBin: true
-    peerDependencies:
-      eslint: '>=7.0.0'
 
   eslint-plugin-es-x@7.8.0:
     resolution: {integrity: sha512-7Ds8+wAAoV3T+LAKeu39Y5BzXCrGKrcISfgKEqTS4BDN8SFEDQd0S43jiQ8vIa3wUKD07qitZdfzlenSi8/0qQ==}
@@ -2599,10 +2590,6 @@ snapshots:
     dependencies:
       eslint: 10.4.0
       semver: 7.8.0
-
-  eslint-config-prettier@10.1.8(eslint@10.4.0):
-    dependencies:
-      eslint: 10.4.0
 
   eslint-plugin-es-x@7.8.0(eslint@10.4.0):
     dependencies:

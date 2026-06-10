@@ -1,7 +1,6 @@
 import e18e from "@e18e/eslint-plugin";
 import js from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
-import eslintConfigPrettier from "eslint-config-prettier/flat";
 import importLite from "eslint-plugin-import-lite";
 import node from "eslint-plugin-n";
 import { defineConfig } from "eslint/config";
@@ -121,5 +120,4 @@ export default defineConfig(
       "import-lite/no-default-export": "off",
     },
   },
-  eslintConfigPrettier,
 );
