@@ -6,5 +6,9 @@ blockExoticSubdeps: true
 dedupePeers: true
 dedupePeerDependents: true
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - "@manypkg/tools@2.1.2"
+overrides:
+  rolldown: 1.0.3
 shellEmulator: true
 trustPolicy: no-downgrade
