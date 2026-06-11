@@ -18,7 +18,14 @@ The most important commands are `add`, which is used by contributors to add info
 changeset init
 ```
 
-This command sets up the `.changeset` folder. It generates a readme and a config file. The config file includes the default options and comments on what these options represent. You should run this command once when you are setting up changesets.
+This command sets up the `.changeset` folder. It generates a readme and creates a config file through an interactive prompt. You will be asked to configure:
+
+1. Your preferred `changelog` generator (and GitHub repo, if applicable)
+2. Automatic `commit` preferences
+3. Public or private package publishing `access`
+4. Your `baseBranch` (defaults to "main")
+
+You should run this command once when you are setting up changesets.
 
 ## `add`
 
