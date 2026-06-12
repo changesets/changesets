@@ -15,10 +15,9 @@
   },
   "dependencies": {
     "@changesets/types": "workspace:^",
-    "js-yaml": "^4.1.1"
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.9",
     "outdent": "^0.8.0"
   },
   "engines": {

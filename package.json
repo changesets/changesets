@@ -45,24 +45,24 @@
     "@eslint/js": "10.0.1",
     "@manypkg/cli": "^0.25.1",
     "@tsconfig/node22": "^22.0.5",
-    "@types/node": "^25.9.0",
+    "@types/node": "^25.9.1",
     "@types/semver": "^7.7.1",
-    "@vitest/coverage-v8": "^4.1.6",
-    "@vitest/eslint-plugin": "^1.6.17",
-    "eslint": "^10.4.0",
+    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/eslint-plugin": "^1.6.19",
+    "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-lite": "~0.6.0",
     "eslint-plugin-n": "^18.0.1",
-    "oxfmt": "^0.50.0",
-    "pkg-pr-new": "^0.0.74",
+    "oxfmt": "^0.53.0",
+    "pkg-pr-new": "^0.0.75",
     "publint": "^0.3.21",
-    "tsdown": "^0.22.0",
+    "tsdown": "^0.22.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.4",
-    "vitest": "^4.1.6"
+    "typescript-eslint": "^8.60.1",
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
   },
-  "packageManager": "pnpm@11.1.1+sha512.d1fdf5f73c617b64fa1a56a81c3c8dfe0e966e33a6010aa256b517ae77be21d93e05affc0de1a83b0e4f29d569f68b446ae8f068cd7247c0bb3df0fb4d7bdf9a"
+  "packageManager": "pnpm@11.5.2+sha512.71c631e382066efc25625d5cf029075de07b61b37f6e27350fbd84b1bda5864c8c1967adc280776b45c30a715c0359a3be08fef42d5bb09e2b99029979692916"
 }

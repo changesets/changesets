@@ -108,27 +108,16 @@ describe("version", () => {
         path.join(cwd, "packages", "pkg-a", "package.json"),
         "utf8",
       ),
-    ).toMatchInlineSnapshot(`
-      "{
-        "name": "pkg-a",
-        "version": "1.1.0",
-        "dependencies": {
-          "pkg-b": "1.1.0"
-        }
-      }"
-    `);
+    ).toMatchInlineSnapshot(
+      `"{"name":"pkg-a","version":"1.1.0","dependencies":{"pkg-b":"1.1.0"}}"`,
+    );
 
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-b", "package.json"),
         "utf8",
       ),
-    ).toMatchInlineSnapshot(`
-      "{
-        "name": "pkg-b",
-        "version": "1.1.0"
-      }"
-    `);
+    ).toMatchInlineSnapshot(`"{"name":"pkg-b","version":"1.1.0"}"`);
     expect(
       await fs.readFile(
         path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
@@ -231,15 +220,9 @@ describe("version", () => {
         path.join(cwd, "packages", "pkg-a", "package.json"),
         "utf8",
       ),
-    ).toMatchInlineSnapshot(`
-      "{
-        "name": "pkg-a",
-        "version": "1.1.0",
-        "dependencies": {
-          "pkg-b": "1.0.0"
-        }
-      }"
-    `);
+    ).toMatchInlineSnapshot(
+      `"{"name":"pkg-a","version":"1.1.0","dependencies":{"pkg-b":"1.0.0"}}"`,
+    );
 
     expect(
       await fs.readFile(

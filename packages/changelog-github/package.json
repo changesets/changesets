@@ -18,8 +18,7 @@
     "@changesets/types": "workspace:^"
   },
   "devDependencies": {
-    "@changesets/parse": "workspace:*",
-    "vitest": "^4.1.6"
+    "@changesets/parse": "workspace:*"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
