@@ -118,7 +118,7 @@ export default defineLoader({
 function getMessageSections(message: string, sections: string[]) {
   const newLines: string[] = [];
   let inSection: string | false = false;
-  for (const line of message.split("\n").concat("")) {
+  for (const line of [...message.split("\n"), ""]) {
     if (!inSection) {
       // Start section when a line matches one of the section headers
       if (sections.some((section) => line.startsWith(section + ":"))) {
