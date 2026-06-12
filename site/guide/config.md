@@ -257,6 +257,7 @@ Configures the suffix for the snapshot release using a template with placeholder
 
 - `{tag}` - the name of the snapshot tag, as specified in `--snapshot something`
 - `{commit}` - the git commit SHA (40 characters)
+- `{commit-short}` - like `{commit}` but only the first 7 characters
 - `{timestamp}` - the Unix timestamp of the time of the release, i.e. the value of `Date.now()`
 - `{datetime}` - the date and time of the release, e.g. `20211213000730` (YYYYMMDDHHMMSS, 14 characters)
 
