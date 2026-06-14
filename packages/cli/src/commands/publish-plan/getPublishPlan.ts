@@ -123,7 +123,7 @@ export async function getUnpublishedPackages(
   if (packagesToPublish.length !== 0) {
     log.info(
       `
-These packages will be published as they were not found on npm:
+These packages will be published as they were not found in the registry:
 ${previewLines.join("\n")}
 ${c.gray(`${alreadyPublishedCount} packages are already published.`)}
       `.trim(),
