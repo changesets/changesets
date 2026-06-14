@@ -30,7 +30,14 @@ export async function publishPlan(
   if (options?.output) {
     await fs.writeFile(
       path.resolve(cwd, options.output),
-      JSON.stringify(plan, undefined, 2),
+      JSON.stringify(
+        {
+          version: 1,
+          ...plan,
+        },
+        undefined,
+        2,
+      ),
     );
     return plan;
   }
