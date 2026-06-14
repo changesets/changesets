@@ -39,6 +39,14 @@ function jsonParse(input: string) {
   }
 }
 
+function safeJsonParse(input: string): unknown {
+  try {
+    return JSON.parse(input);
+  } catch {
+    return undefined;
+  }
+}
+
 export function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   if (env.npm_config_registry === "https://registry.yarnpkg.com") {
     // Due to a super annoying issue in classic yarn, we have to manually strip this env variable.
@@ -54,10 +62,73 @@ export function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return env;
 }
 
-export type PublishTool = { name: "npm" } | { name: "pnpm" };
+type YarnPublishTool = {
+  name: "yarn";
+  version: "classic" | "berry";
+};
 
-export function getPublishTool({ type }: Packages["tool"]): PublishTool {
-  return { name: type === "pnpm" ? "pnpm" : "npm" };
+export type PublishTool = { name: "npm" } | { name: "pnpm" } | YarnPublishTool;
+
+async function getYarnVersion(
+  packages: Packages,
+): Promise<YarnPublishTool["version"]> {
+  const { stdout } = await exec("yarn", ["--version"], {
+    nodeOptions: {
+      cwd: packages.rootDir,
+    },
+  });
+  const major = Number(stdout.toString().trim().split(".")[0]);
+  return Number.isNaN(major) || major >= 2 ? "berry" : "classic";
+}
+
+export async function getPublishTool(packages: Packages): Promise<PublishTool> {
+  const { type } = packages.tool;
+  if (type === "pnpm") {
+    return { name: "pnpm" };
+  }
+  if (type === "yarn") {
+    return { name: "yarn", version: await getYarnVersion(packages) };
+  }
+  return { name: "npm" };
+}
+
+function parseInfoOutput(publishTool: PublishTool, output: string) {
+  if (publishTool.name === "yarn") {
+    let cursor = output.length;
+
+    while (cursor >= 0) {
+      const lineStart = output.lastIndexOf("\n", cursor - 1) + 1;
+      const line = output.slice(lineStart, cursor).trim();
+      cursor = lineStart - 1;
+
+      if (line.length === 0) {
+        continue;
+      }
+
+      const entry = safeJsonParse(line);
+      if (!entry) {
+        continue;
+      }
+      if (publishTool.version === "berry") {
+        // `yarn npm info --json` writes the payload we care about as a direct NDJSON object,
+        // not wrapped in a reporter event like classic's `inspect`.
+        return entry;
+      }
+      if (
+        typeof entry === "object" &&
+        entry != null &&
+        "type" in entry &&
+        entry.type === "inspect" &&
+        "data" in entry
+      ) {
+        return entry.data;
+      }
+    }
+
+    return undefined;
+  }
+
+  return jsonParse(output);
 }
 
 // `npm info <pkg> --json` (aka `npm view`) behavior:
@@ -87,35 +158,37 @@ export function getPublishTool({ type }: Packages["tool"]): PublishTool {
 //   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
 //   published with preState.tag rather than "latest".
 export function getPackageInfo(
+  cwd: string,
   publishTool: PublishTool,
   packageJson: PackageJSON,
 ) {
   return npmRequestQueue.add(async () => {
     const registryOverrides: string[] = [];
 
+    // Yarn Berry doesn't support `yarn npm info --registry` even though it does support `publishConfig.registry` as a publish-time override.
+    // But it also supports separate `npmRegistryServer` and `npmPublishRegistry` for the same scope.
+    // So it seems that in their model we should be using the *fetch* registry for info queries *anyway*.
+    //
     // In pnpm `publishConfig.registry` is the only supported registry value and it's a strong publish-time override.
     // However, pnpm's recursive publish doesn't use that to query which packages are already published:
     // https://github.com/pnpm/pnpm/blob/b4fdfe9b3381bde2b09c1aa8af9f31446b177c83/pnpm11/releasing/commands/src/publish/recursivePublish.ts#L85-L94
     //
-    // We match that behavior and in pnpm we treat `publishConfig.registry` as a publish-time override only, and we don't use it to query the registry for existing versions.
-    // It's a poorly documented manifest option anyway (docs don't mention it at all).
-    if (publishTool.name !== "pnpm") {
+    // We match that behavior and in pnpm we treat `publishConfig.registry` as a publish-time override only.
+    if (
+      publishTool.name !== "pnpm" &&
+      !(publishTool.name === "yarn" && publishTool.version === "berry")
+    ) {
       // npm actually uses the `publishConfig.registry` value when querying package info during publish:
       // https://github.com/npm/cli/blob/ed729620b1297f44ccf2517fd19fbaffdc225ed9/lib/commands/publish.js#L150
       //
-      // Note that at this point the `opts` can actually be already mutates by the `#getManifest` call.
+      // for a scoped package the priority of registry resolution in `npm info` is:
+      // --@scope:registry
+      // .npmrc @scope:registry=
+      // --registry
+      // .npmrc registry=
       //
-      // It doesn't actually implement `isAlreadyPublished`-like early out for already published workspaces
-      // but it still performs the `npm info`-like query to validate certain things about the package.
-      // We treat this as a strong signal that `publishConfig.registry` in npm is also meant to be a read-time registry target.
+      // so we can't rely on a simple --registry override here
       if (packageJson.name.startsWith("@")) {
-        // For a scoped package the priority of registry resolution in `npm info` is:
-        // --@scope:registry
-        // .npmrc @scope:registry=
-        // --registry
-        // .npmrc registry=
-        //
-        // so we can't rely on a simple --registry override here
         const scope = packageJson.name.split("/")[0];
         if (packageJson.publishConfig?.[`${scope}:registry`]) {
           registryOverrides.push(
@@ -135,24 +208,34 @@ export function getPackageInfo(
       }
     }
 
+    const infoArgs =
+      publishTool.name === "yarn" && publishTool.version === "berry"
+        ? ["npm", "info"]
+        : ["info"];
+    const infoFlags = [...registryOverrides, "--json"];
+
     // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
     // bleed-through, enabling only-pre detection downstream. Returns empty when no `latest` exists.
-    let result = await exec(publishTool.name, [
-      "info",
-      packageJson.name,
-      ...registryOverrides,
-      "--json",
-    ]);
+    let result = await exec(
+      publishTool.name,
+      [...infoArgs, packageJson.name, ...infoFlags],
+      {
+        nodeOptions: { cwd },
+      },
+    );
 
     // Bare query returned nothing — retry with exact version specifier
     // to handle prerelease-only packages on registries without auto-`latest`.
     if (result.stdout.toString() === "") {
-      result = await exec(publishTool.name, [
-        "info",
-        `${packageJson.name}@${packageJson.version}`,
-        ...registryOverrides,
-        "--json",
-      ]);
+      result = await exec(
+        publishTool.name,
+        [
+          ...infoArgs,
+          `${packageJson.name}@${packageJson.version}`,
+          ...infoFlags,
+        ],
+        { nodeOptions: { cwd } },
+      );
     }
 
     // Normalize, just in case. The above prerelease-only package query should already have returned:
@@ -165,15 +248,16 @@ export function getPackageInfo(
         },
       };
     }
-    return jsonParse(result.stdout.toString());
+    return parseInfoOutput(publishTool, result.stdout.toString());
   });
 }
 
 export async function infoAllow404(
+  cwd: string,
   publishTool: PublishTool,
   packageJson: PackageJSON,
 ) {
-  const pkgInfo = await getPackageInfo(publishTool, packageJson);
+  const pkgInfo = await getPackageInfo(cwd, publishTool, packageJson);
   if (pkgInfo.error?.code === "E404") {
     log.warn(`Received 404 for ${c.cyan(`npm info ${packageJson.name}`)}`);
     return { published: false, pkgInfo: {} };
@@ -205,7 +289,7 @@ type InternalPublishResult =
   | { result: "failed"; allowRetry?: boolean };
 
 function formatPublishError(
-  publishTool: "npm" | "pnpm",
+  publishTool: PublishTool["name"],
   error: {
     summary?: string;
     message?: string;
@@ -227,13 +311,21 @@ async function internalPublish(
   opts: PublishOptions,
   authState: AuthState,
 ): Promise<InternalPublishResult> {
-  const publishArgs = ["publish"];
+  const publishArgs =
+    publishTool.name === "yarn" && publishTool.version === "berry"
+      ? ["npm", "publish"]
+      : ["publish"];
   if (opts.target) {
     publishArgs.push(path.relative(opts.cwd, opts.target));
   }
   const publishFlags = ["--access", release.access, "--tag", release.tag];
   if (publishTool.name === "pnpm") {
     publishFlags.push("--no-git-checks");
+  } else if (publishTool.name === "yarn" && publishTool.version === "classic") {
+    publishFlags.push("--new-version", release.version, "--no-git-tag-version");
+    if (!process.stdin.isTTY) {
+      publishFlags.push("--non-interactive");
+    }
   }
 
   if (process.stdin.isTTY && authState.requiresInteractive) {

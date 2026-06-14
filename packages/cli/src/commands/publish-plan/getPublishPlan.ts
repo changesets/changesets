@@ -101,14 +101,18 @@ export async function getUnpublishedPackages(
     allowPrivatePackages: boolean;
   },
 ): Promise<Array<PublishReleaseEntry>> {
-  const publishTool = getPublishTool(packages.tool);
+  const publishTool = await getPublishTool(packages);
   const results = await Promise.all(
     packages.packages
       .filter(
         (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
       )
       .map(async (pkg) => {
-        const response = await infoAllow404(publishTool, pkg.packageJson);
+        const response = await infoAllow404(
+          packages.rootDir,
+          publishTool,
+          pkg.packageJson,
+        );
         let publishedState: PublishedState = "never";
 
         if (response.published) {

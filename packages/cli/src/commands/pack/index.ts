@@ -4,6 +4,7 @@ import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
+import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
@@ -33,14 +34,18 @@ export interface PackedRelease {
   tarball: TarballMetadata;
 }
 
-function getTarballFilename(stdout: string) {
+function getTarballFilenameFromStdout(stdout: string) {
   const json = getLastJsonObjectFromString(stdout);
   // npm emits an array even when packing a single package
   // pnpm emits an object when packing a single package, and an array when packing multiple packages
   const filename = Array.isArray(json) ? json[0]?.filename : json?.filename;
   assert(typeof filename === "string", "Failed to determine tarball filename");
-  // normalize to just basenaname, npm emits just the basename, pnpm emits absolute paths
+  // normalize to just basename, npm emits just the basename, pnpm emits absolute paths
   return path.basename(filename);
+}
+
+function getNormalizedTarballFilename(name: string, version: string) {
+  return `${name.replace(/^@/, "").replace("/", "-")}-${version}.tgz`;
 }
 
 async function getIntegrity(filePath: string) {
@@ -70,6 +75,7 @@ export async function pack(options: PackOptions) {
   const packagesByName = new Map(
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
+  const publishTool = await getPublishTool(packages);
 
   const packedReleases = await Promise.all(
     releases.map((release) =>
@@ -80,18 +86,55 @@ export async function pack(options: PackOptions) {
           throw new Error(`Package not found: ${release.name}`);
         }
 
-        const publishTool = getPublishTool(packages.tool);
-        const publishDir = pkg.packageJson.publishConfig?.directory
-          ? path.resolve(pkg.dir, pkg.packageJson.publishConfig.directory)
+        const publishDirOverride = pkg.packageJson.publishConfig?.directory;
+        if (
+          publishDirOverride &&
+          publishTool.name === "yarn" &&
+          publishTool.version === "berry"
+        ) {
+          // Yarn Berry doesn't allow publishing non-workspace directories
+          log.error(
+            `Package ${c.blue(pkg.packageJson.name)} has publishConfig.directory set to ${c.blue(publishDirOverride)}, which is not supported when using Yarn Berry. Please remove publishConfig.directory from your package.json.`,
+          );
+          throw new ExitError(1);
+        }
+        const packDir = publishDirOverride
+          ? path.resolve(pkg.dir, publishDirOverride)
           : pkg.dir;
-        const args =
-          publishTool.name === "pnpm"
-            ? ["pack", "--json", "--pack-destination", packagesDir]
-            : ["pack", publishDir, "--json", "--pack-destination", packagesDir];
+        const tarballFilename = getNormalizedTarballFilename(
+          release.name,
+          release.version,
+        );
+        const tarballPath = path.join(packagesDir, tarballFilename);
+        let args: string[];
+        let cwd: string;
+
+        if (publishTool.name === "pnpm") {
+          args = ["pack", "--out", tarballPath, "--json"];
+          // pnpm supports `publishConfig.directory` natively. We have to let it resolve it on its own.
+          cwd = pkg.dir;
+        } else if (
+          publishTool.name === "yarn" &&
+          publishTool.version === "berry"
+        ) {
+          args = ["pack", "--out", tarballPath, "--json"];
+          cwd = packDir;
+        } else if (
+          publishTool.name === "yarn" &&
+          publishTool.version === "classic"
+        ) {
+          args = ["pack", "--filename", tarballPath, "--json"];
+          cwd = packDir;
+        } else {
+          args = ["pack", packDir, "--pack-destination", packagesDir, "--json"];
+          cwd = pkg.dir;
+        }
         const { exitCode, stdout, stderr } = await exec(
           publishTool.name,
           args,
-          { nodeOptions: { cwd: pkg.dir } },
+          {
+            nodeOptions: { cwd },
+          },
         );
 
         if (exitCode !== 0) {
@@ -111,24 +154,25 @@ export async function pack(options: PackOptions) {
           throw new ExitError(1);
         }
 
-        const tarballFilename = getTarballFilename(stdout.toString());
+        const resolvedTarballFilename =
+          publishTool.name === "npm"
+            ? getTarballFilenameFromStdout(stdout.toString())
+            : tarballFilename;
 
-        if (!tarballFilename) {
+        if (!resolvedTarballFilename) {
           throw new Error(
             `Failed to determine tarball filename for ${release.name}`,
           );
         }
-        // npm returns integrity in its --json output
-        // but pnpm doesn't, so we need to calculate it ourselves
         const integrity = await getIntegrity(
-          path.join(packagesDir, tarballFilename),
+          path.join(packagesDir, resolvedTarballFilename),
         );
 
         return {
           name: release.name,
           version: release.version,
           tarball: {
-            path: path.posix.join("packages", tarballFilename),
+            path: path.posix.join("packages", resolvedTarballFilename),
             integrity,
           },
         };

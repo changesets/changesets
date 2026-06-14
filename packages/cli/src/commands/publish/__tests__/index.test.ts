@@ -245,6 +245,98 @@ describe("Publish command", () => {
     );
   });
 
+  it("uses yarn npm publish from the package directory for yarn berry", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+        packageManager: "yarn@4.10.0",
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(false);
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("4.10.0");
+      }
+      if (args[0] === "npm" && args[1] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "npm" && args[1] === "publish") {
+        return execResult("");
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(mockedExec).toHaveBeenCalledWith(
+      "yarn",
+      expect.arrayContaining(["npm", "publish", "--json"]),
+      expect.objectContaining({
+        nodeOptions: expect.objectContaining({
+          cwd: path.join(cwd, "packages", "pkg-a"),
+        }),
+      }),
+    );
+  });
+
+  it("uses yarn publish with the target path for yarn classic", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(false);
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("1.22.22");
+      }
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult("");
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(mockedExec).toHaveBeenCalledWith(
+      "yarn",
+      expect.arrayContaining([
+        "publish",
+        "--new-version",
+        "1.0.0",
+        "--no-git-tag-version",
+        "--non-interactive",
+        "--json",
+      ]),
+      expect.objectContaining({
+        nodeOptions: expect.objectContaining({
+          cwd: path.join(cwd, "packages", "pkg-a"),
+        }),
+      }),
+    );
+  });
+
   describe("in pre state", () => {
     it("should report error if the tag option is used in pre release", async () => {
       const cwd = await testdir({
