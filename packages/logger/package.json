@@ -14,8 +14,7 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "@changesets/color": "workspace:^",
-    "vitest": "^4.1.6"
+    "@changesets/color": "workspace:^"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"

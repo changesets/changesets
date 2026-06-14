@@ -1,8 +1,7 @@
 import type { Release, VersionType } from "@changesets/types";
-// eslint-disable-next-line e18e/ban-dependencies
-import yaml from "js-yaml";
+import * as yaml from "yaml";
 
-const mdRegex = /\s*---([^]*?)\n\s*---(\s*(?:\n|$)[^]*)/;
+const mdRegex = /\s*---([^]*?)\r?\n\s*---(\s*(?:\n|$)[^]*)/;
 
 const EXAMPLE_FORMAT = `---\n"package-name": patch\n---`;
 
@@ -75,10 +74,9 @@ export function parseChangesetFile(contents: string): {
   const [, roughReleases, roughSummary] = execResult;
   const summary = roughSummary.trim();
 
-  let releases: Release[];
-  let yamlStuff: Record<string, VersionType> | undefined;
+  let yamlStuff: unknown;
   try {
-    yamlStuff = yaml.load(roughReleases) as typeof yamlStuff;
+    yamlStuff = yaml.parse(roughReleases);
   } catch (e) {
     throw new Error(
       `could not parse changeset - invalid YAML in frontmatter.\n` +
@@ -89,6 +87,7 @@ export function parseChangesetFile(contents: string): {
     );
   }
 
+  let releases: Release[] = [];
   if (yamlStuff) {
     if (typeof yamlStuff !== "object" || Array.isArray(yamlStuff)) {
       throw new Error(
@@ -102,8 +101,6 @@ export function parseChangesetFile(contents: string): {
       name,
       type,
     }));
-  } else {
-    releases = [];
   }
 
   validateReleases(releases, contents);

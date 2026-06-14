@@ -1,7 +1,7 @@
 import c from "@changesets/color";
-import { ExitError } from "@changesets/errors";
+import { ExitError, InternalError } from "@changesets/errors";
 import type { Package, PackageJSON, Release } from "@changesets/types";
-import { log } from "@clack/prompts";
+import { log, type Option } from "@clack/prompts";
 import semverLt from "semver/functions/lt.js";
 import { askWithEditor } from "../../utils/askWithEditor.ts";
 import * as cli from "../../utils/cli-utilities.ts";
@@ -27,43 +27,43 @@ async function getPackagesToRelease(
   changedPackages: Array<string>,
   allPackages: Array<Package>,
 ): Promise<string[]> {
-  if (allPackages.length > 1) {
-    const unchangedPackagesNames = allPackages
-      .map(({ packageJson }) => packageJson.name)
-      .filter((name) => !changedPackages.includes(name));
-
-    const defaultChoiceList = Object.fromEntries(
-      (
-        [
-          [
-            "changed packages",
-            changedPackages
-              .toSorted((a, b) => a.localeCompare(b))
-              .map((value) => ({ value })),
-          ],
-          [
-            "unchanged packages",
-            unchangedPackagesNames
-              .toSorted((a, b) => a.localeCompare(b))
-              .map((value) => ({ value })),
-          ],
-        ] as const
-      ).filter(([, choices]) => choices.length !== 0),
-    );
-
-    const packagesToRelease = await cli.askMultiselect(
-      // TODO: Make this wording better
-      "Which packages were affected by the changes you made?",
-      defaultChoiceList,
-      { required: true },
-    );
-
-    return packagesToRelease.filter(
-      (pkgName) =>
-        pkgName !== "changed packages" && pkgName !== "unchanged packages",
+  if (allPackages.length <= 1) {
+    throw new InternalError(
+      "getPackagesToRelease should not be called if there is only one package",
     );
   }
-  return [allPackages[0].packageJson.name];
+
+  const allSortedPackages = allPackages.toSorted((a, b) =>
+    a.packageJson.name.localeCompare(b.packageJson.name),
+  );
+  const changedPackagesList: Option<string>[] = [];
+  const unchangedPackagesList: Option<string>[] = [];
+
+  for (const { packageJson } of allSortedPackages) {
+    const pkgName = packageJson.name;
+    const list = changedPackages.includes(pkgName)
+      ? changedPackagesList
+      : unchangedPackagesList;
+    list.push({
+      label: pkgName + (packageJson.private ? " (private)" : ""),
+      value: pkgName,
+    });
+  }
+
+  const multiselectValues: cli.MultiselectOptions<string> = {};
+  if (changedPackagesList.length > 0) {
+    multiselectValues["changed packages"] = changedPackagesList;
+  }
+  if (unchangedPackagesList.length > 0) {
+    multiselectValues["unchanged packages"] = unchangedPackagesList;
+  }
+
+  return await cli.askMultiselect(
+    // TODO: Make this wording better
+    "Which packages were affected by the changes you made?",
+    multiselectValues,
+    { required: true },
+  );
 }
 
 function getPkgJsonsByName(packages: Array<Package>) {

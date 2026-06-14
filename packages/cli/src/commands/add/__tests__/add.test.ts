@@ -447,8 +447,8 @@ describe("Add command", () => {
     expect(mockedUtils.askMultiselect).toHaveBeenCalledWith(
       expect.stringContaining("Which packages"),
       {
-        "changed packages": [{ value: "pkg-b" }],
-        "unchanged packages": [{ value: "pkg-a" }],
+        "changed packages": [{ label: "pkg-b", value: "pkg-b" }],
+        "unchanged packages": [{ label: "pkg-a", value: "pkg-a" }],
       },
       { required: true },
     );
@@ -493,7 +493,10 @@ describe("Add command", () => {
     await addChangeset({ cwd });
     const choices =
       mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
-    expect(choices).toMatchObject([{ value: "pkg-a" }, { value: "pkg-c" }]);
+    expect(choices).toMatchObject([
+      { label: "pkg-a", value: "pkg-a" },
+      { label: "pkg-c", value: "pkg-c" },
+    ]);
   });
 
   it("should not include private packages without a version in the prompt", async () => {
@@ -523,7 +526,10 @@ describe("Add command", () => {
     await addChangeset({ cwd });
     const choices =
       mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
-    expect(choices).toStrictEqual([{ value: "pkg-a" }, { value: "pkg-c" }]);
+    expect(choices).toStrictEqual([
+      { label: "pkg-a", value: "pkg-a" },
+      { label: "pkg-c", value: "pkg-c" },
+    ]);
   });
 
   it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
@@ -560,7 +566,10 @@ describe("Add command", () => {
     await addChangeset({ cwd });
     const choices =
       mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
-    expect(choices).toStrictEqual([{ value: "pkg-a" }, { value: "pkg-c" }]);
+    expect(choices).toStrictEqual([
+      { label: "pkg-a", value: "pkg-a" },
+      { label: "pkg-c", value: "pkg-c" },
+    ]);
   });
 
   it("should exit with an error when there are no versionable packages in a single-package repo", async () => {

@@ -209,10 +209,14 @@ describe("apply release plan", () => {
         const releasePlan = new FakeReleasePlan();
         const { changedFiles } = await testSetup(
           {
-            "package.json": JSON.stringify({
-              name: "pkg-a",
-              version: "1.0.0",
-            }),
+            "package.json": JSON.stringify(
+              {
+                name: "pkg-a",
+                version: "1.0.0",
+              },
+              null,
+              2,
+            ),
           },
           releasePlan.getReleasePlan(),
           releasePlan.config,
@@ -232,10 +236,14 @@ describe("apply release plan", () => {
         const { changedFiles } = await testSetup(
           {
             "package.json":
-              JSON.stringify({
-                name: "pkg-a",
-                version: "1.0.0",
-              }) + "\n",
+              JSON.stringify(
+                {
+                  name: "pkg-a",
+                  version: "1.0.0",
+                },
+                null,
+                2,
+              ) + "\n",
           },
           releasePlan.getReleasePlan(),
           releasePlan.config,

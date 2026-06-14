@@ -166,10 +166,12 @@ async function tagPublish(
   if (tool !== "root") {
     for (const pkg of packageReleases) {
       const tag = `${pkg.name}@${pkg.version}`;
+      log.info(`New tag: ${tag}`);
       await git.tag(tag, cwd);
     }
   } else {
     const tag = `v${packageReleases[0].version}`;
+    log.info(`New tag: ${tag}`);
     await git.tag(tag, cwd);
   }
 }

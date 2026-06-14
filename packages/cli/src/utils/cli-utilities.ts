@@ -24,7 +24,7 @@ function importantWarning(message: string): void {
   note(message.trim(), c.yellow("IMPORTANT"), { format: c.white });
 }
 
-type MultiselectOptions<Value> = Record<string, Option<Value>[]>;
+export type MultiselectOptions<Value> = Record<string, Option<Value>[]>;
 
 async function askMultiselect<Value>(
   message: string,

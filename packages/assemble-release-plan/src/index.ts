@@ -42,6 +42,7 @@ function getSnapshotSuffix(
 
   const placeholderValues = {
     commit: snapshotParameters.commit,
+    "commit-short": snapshotParameters.commit?.slice(0, 7),
     tag: snapshotParameters.tag,
     timestamp: snapshotRefDate.getTime().toString(),
     datetime: snapshotRefDate

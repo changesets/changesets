@@ -17,10 +17,13 @@ import type {
   NewChangeset,
   ReleasePlan,
 } from "@changesets/types";
-import detectIndent from "detect-indent";
 import { resolve } from "import-meta-resolve";
+import { editJson } from "./edit-json.ts";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
-import { versionPackage } from "./version-package.ts";
+import {
+  versionPackage,
+  type ModCompWithPackageAndChangelog,
+} from "./version-package.ts";
 
 function importResolveFromDir(specifier: string, dir: string) {
   return resolve(specifier, pathToFileURL(path.join(dir, "x.mjs")).toString());
@@ -136,11 +139,13 @@ export async function applyReleasePlan(
 
   const filesToFormat: string[] = [];
   for (const release of finalisedRelease) {
-    const { changelog, packageJson, dir, name } = release;
+    const { changelog, pkgJsonEdits, dir, name } = release;
 
-    const pkgJSONPath = path.resolve(dir, "package.json");
-    await updatePackageJson(pkgJSONPath, packageJson);
-    touchedFiles.push(pkgJSONPath);
+    const pkgJsonPath = path.resolve(dir, "package.json");
+    const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
+    const pkgUpdated = editJson(pkgRaw, pkgJsonEdits);
+    await fs.writeFile(pkgJsonPath, pkgUpdated);
+    touchedFiles.push(pkgJsonPath);
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
@@ -200,7 +205,7 @@ async function getNewChangelogEntry(
   config: Config,
   cwd: string,
   contextDir: string,
-) {
+): Promise<ModCompWithPackageAndChangelog[]> {
   if (!config.changelog) {
     return Promise.resolve(
       releasesWithPackage.map((release) => ({
@@ -327,18 +332,6 @@ async function updateChangelog(
   }
 
   await fs.writeFile(changelogPath, newChangelog);
-}
-
-async function updatePackageJson(
-  pkgJsonPath: string,
-  pkgJson: any,
-): Promise<void> {
-  const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
-  const indent = detectIndent(pkgRaw).indent || "  ";
-  const stringified =
-    JSON.stringify(pkgJson, null, indent) + (pkgRaw.endsWith("\n") ? "\n" : "");
-
-  return fs.writeFile(pkgJsonPath, stringified);
 }
 
 /** @deprecated Use named export `applyReleasePlan` instead */

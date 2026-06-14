@@ -262,16 +262,14 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - invalid YAML in frontmatter.
-      The frontmatter between the "---" delimiters must be valid YAML.
-      YAML error: incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line (2:1)
+      [Error: could not parse changeset - invalid package name in frontmatter.
+      Expected a non-empty string for package name, but got: ""
+      Changeset contents:
+      ---
+      : minor
+      ---
 
-       1 | 
-       2 | : minor
-      -----^
-      Frontmatter content:
-
-      : minor]
+      Nice simple summary]
     `);
   });
 
