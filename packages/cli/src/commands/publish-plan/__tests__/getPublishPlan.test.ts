@@ -1,3 +1,4 @@
+import { readConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { getPackages } from "@manypkg/get-packages";
@@ -50,11 +51,8 @@ describe("getPublishPlan", () => {
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
-    const result = await getPublishPlan(cwd, {
-      access: "restricted",
-      ignore: [],
-      privatePackages: { version: true, tag: true },
-    } as any);
+    const config = await readConfig(cwd);
+    const result = await getPublishPlan(cwd, config.config!);
 
     expect(result).toEqual([
       [
