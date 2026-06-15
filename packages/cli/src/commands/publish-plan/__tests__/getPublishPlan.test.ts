@@ -54,23 +54,26 @@ describe("getPublishPlan", () => {
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
 
-    expect(result).toEqual([
-      [
-        {
-          kind: "publish",
-          name: "pkg-a",
-          version: "1.0.0",
-          access: "restricted",
-          registry: "https://registry.npmjs.org",
-          tag: "latest",
-        },
-        {
-          kind: "tag-only",
-          name: "pkg-b",
-          version: "1.0.0",
-        },
+    expect(result).toEqual({
+      version: 1,
+      plan: [
+        [
+          {
+            kind: "publish",
+            name: "pkg-a",
+            version: "1.0.0",
+            access: "restricted",
+            registry: "https://registry.npmjs.org",
+            tag: "latest",
+          },
+          {
+            kind: "tag-only",
+            name: "pkg-b",
+            version: "1.0.0",
+          },
+        ],
       ],
-    ]);
+    });
   });
 
   it("skips ignored public packages", async () => {

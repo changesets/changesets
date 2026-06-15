@@ -33,7 +33,7 @@ export async function publishPlan(
       JSON.stringify(
         {
           version: 1,
-          ...plan,
+          plan,
         },
         undefined,
         2,
