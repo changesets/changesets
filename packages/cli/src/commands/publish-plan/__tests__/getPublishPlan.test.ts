@@ -1,10 +1,9 @@
 import { readConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import { getPackages } from "@manypkg/get-packages";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as npmUtils from "../../publish/npm-utils.ts";
-import { getPublishPlan, getUnpublishedPackages } from "../getPublishPlan.ts";
+import { getPublishPlan } from "../getPublishPlan.ts";
 
 vi.mock("@changesets/git");
 vi.mock("../../publish/npm-utils.ts");
@@ -54,26 +53,23 @@ describe("getPublishPlan", () => {
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
 
-    expect(result).toEqual({
-      version: 1,
-      plan: [
-        [
-          {
-            kind: "publish",
-            name: "pkg-a",
-            version: "1.0.0",
-            access: "restricted",
-            registry: "https://registry.npmjs.org",
-            tag: "latest",
-          },
-          {
-            kind: "tag-only",
-            name: "pkg-b",
-            version: "1.0.0",
-          },
-        ],
+    expect(result).toEqual([
+      [
+        {
+          kind: "publish",
+          name: "pkg-a",
+          version: "1.0.0",
+          access: "restricted",
+          registry: "https://registry.npmjs.org",
+          tag: "latest",
+        },
+        {
+          kind: "tag-only",
+          name: "pkg-b",
+          version: "1.0.0",
+        },
       ],
-    });
+    ]);
   });
 
   it("skips ignored public packages", async () => {
@@ -84,23 +80,17 @@ describe("getPublishPlan", () => {
         workspaces: ["packages/*"],
       }),
       "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({
+        ignore: ["pkg-a"],
+      }),
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
       }),
     });
 
-    const packages = await getPackages(cwd);
-
-    const result = await getUnpublishedPackages(
-      packages,
-      undefined,
-      "restricted",
-      {
-        ignore: ["pkg-a"],
-        allowPrivatePackages: false,
-      },
-    );
+    const config = await readConfig(cwd);
+    const result = await getPublishPlan(cwd, config.config!);
 
     expect(result).toEqual([]);
     expect(mockedNpmUtils.infoAllow404).not.toHaveBeenCalled();
