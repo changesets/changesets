@@ -129,23 +129,20 @@ describe("publish-plan", () => {
     const output = "publish-plan.json";
     const result = await publishPlan({ cwd, output });
 
-    expect(result).toEqual({
-      version: 1,
-      plan: [
-        [
-          {
-            kind: "publish",
-            name: "pkg-a",
-            version: "1.0.0",
-            access: "restricted",
-            registry: "https://registry.npmjs.org",
-            tag: "latest",
-          },
-        ],
+    expect(result).toEqual([
+      [
+        {
+          kind: "publish",
+          name: "pkg-a",
+          version: "1.0.0",
+          access: "restricted",
+          registry: "https://registry.npmjs.org",
+          tag: "latest",
+        },
       ],
-    });
+    ]);
     await expect(fs.readFile(path.join(cwd, output), "utf8")).resolves.toEqual(
-      `${JSON.stringify(result, undefined, 2)}`,
+      `${JSON.stringify({ version: 1, plan: result }, undefined, 2)}`,
     );
   });
 });
