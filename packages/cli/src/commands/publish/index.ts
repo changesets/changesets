@@ -2,23 +2,22 @@ import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
-import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { PreState } from "@changesets/types";
 import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
-import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 import { readConfig } from "../../utils/read-config.ts";
+import { getPublishPlan } from "../publish-plan/getPublishPlan.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { publishPackages } from "./publishPackages.ts";
 
 function formatPackageList(
-  pkgs: Array<{ name: string; newVersion: string }>,
+  pkgs: Array<{ name: string; version: string }>,
   versionColor = c.green,
 ) {
   return pkgs
     .toSorted((a, b) => a.name.localeCompare(b.name))
-    .map((p) => `${c.blueBright(p.name)}@${versionColor(p.newVersion)}`)
+    .map((p) => `${c.blueBright(p.name)}@${versionColor(p.version)}`)
     .join("\n");
 }
 
@@ -68,35 +67,24 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   }
 
   const config = await readConfig(packages);
-  const tagPrivatePackages =
-    config.privatePackages && config.privatePackages.tag;
+  const plan = await getPublishPlan(packages.rootDir, config, {
+    tag: releaseTag,
+  });
+  const entries = plan.flat();
+  const unpublishedPackages = entries.filter(
+    (release) => release.kind === "publish",
+  );
+  const untaggedPrivatePackageReleases = entries.filter(
+    (release) => release.kind === "tag-only",
+  );
 
   const publishedPackages = await publishPackages({
+    releases: unpublishedPackages,
     packages: packages.packages,
     // if not public, we won't pass the access, and it works as normal
     access: config.access,
-    ignore: config.ignore,
-    allowPrivatePackages: config.privatePackages.tag,
     otp: options?.otp,
-    preState,
-    tag: releaseTag,
   });
-
-  const privatePackages = packages.packages.filter(
-    (pkg) =>
-      pkg.packageJson.private &&
-      !shouldSkipPackage(pkg, {
-        ignore: config.ignore,
-        allowPrivatePackages: config.privatePackages.tag,
-      }),
-  );
-  const untaggedPrivatePackageReleases = tagPrivatePackages
-    ? await getUntaggedPackages(
-        privatePackages,
-        packages.rootDir,
-        packages.tool,
-      )
-    : [];
 
   if (
     publishedPackages.length === 0 &&
@@ -172,17 +160,17 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
 
 async function tagPublish(
   tool: string,
-  packageReleases: Array<{ name: string; newVersion: string }>,
+  packageReleases: Array<{ name: string; version: string }>,
   cwd: string,
 ) {
   if (tool !== "root") {
     for (const pkg of packageReleases) {
-      const tag = `${pkg.name}@${pkg.newVersion}`;
+      const tag = `${pkg.name}@${pkg.version}`;
       log.info(`New tag: ${tag}`);
       await git.tag(tag, cwd);
     }
   } else {
-    const tag = `v${packageReleases[0].newVersion}`;
+    const tag = `v${packageReleases[0].version}`;
     log.info(`New tag: ${tag}`);
     await git.tag(tag, cwd);
   }
