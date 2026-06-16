@@ -106,7 +106,7 @@ cli
 
 cli
   .command("publish-plan", "Show packages that are ready to publish or tag")
-  .option("-o, --output <file>", "Output the publish plan as JSON to a file")
+  .option("-o, --output <file>", "Output the publish plan as JSON to a file [experimental]")
   .action(async (options) => {
     normalizeOptions(options);
     const { publishPlan } = await import("./commands/publish-plan/index.ts");
