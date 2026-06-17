@@ -5,7 +5,6 @@ import { defaultConfig } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import {
-  linkNodeModules,
   silenceLogsInBlock,
   testdir,
 } from "@changesets/test-utils";
@@ -396,8 +395,6 @@ describe("running version in a simple project", () => {
       }),
     });
 
-    await linkNodeModules(cwd);
-
     const ids = await writeChangesets(
       [
         {
@@ -466,8 +463,6 @@ describe("running version in a simple project", () => {
         commit: ["@changesets/cli/commit", null],
       }),
     });
-
-    await linkNodeModules(cwd);
 
     await writeChangesets(
       [
