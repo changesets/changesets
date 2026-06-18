@@ -1,4 +1,5 @@
 import c from "@changesets/color";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { readPreState } from "@changesets/pre";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
@@ -6,7 +7,6 @@ import type {
   Config,
   Package,
   PackageGroup,
-  PackageJSON,
   Packages,
   PreState,
 } from "@changesets/types";
@@ -159,45 +159,40 @@ export async function getUntaggedPrivatePackages(
 function sortReleases(
   packages: Packages,
   releases: Array<ReleaseEntry>,
+  opts: {
+    bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  },
 ): PublishPlan {
-  const packagesByName = new Map(
-    packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
-  );
-  const released = new Map(
+  const dependentsGraph = getDependentsGraph(packages, {
+    bumpVersionsWithWorkspaceProtocolOnly:
+      opts.bumpVersionsWithWorkspaceProtocolOnly,
+    ignoreDevDependencies: true,
+  });
+  const releasesByName = new Map(
     releases.map((release) => {
-      const pkg = packagesByName.get(release.name);
-      if (!pkg) {
-        throw new Error(`Package referenced by release entry not found: ${release.name}`);
+      // validate externally-provided releases
+      if (!dependentsGraph.has(release.name)) {
+        throw new Error(
+          `Package referenced by release entry not found: ${release.name}`,
+        );
       }
-      return [release.name, { pkg, release }];
+      return [release.name, release];
     }),
   );
-  const graph = new Map(
-    Array.from(released.values(), ({ pkg, release }) => {
-      const dependencies = new Set<string>();
-
-      for (const dependencyType of ["dependencies", "peerDependencies"] as const) {
-        const dependencyGroup = pkg.packageJson[dependencyType];
-        if (!dependencyGroup) continue;
-
-        for (const dependencyName of Object.keys(dependencyGroup)) {
-          if (
-            dependencyName !== pkg.packageJson.name &&
-            released.has(dependencyName)
-          ) {
-            dependencies.add(dependencyName);
-          }
-        }
-      }
-      return [
-        release,
-        Array.from(
-          dependencies,
-          (dependencyName) => released.get(dependencyName)!.release,
-        ),
-      ];
-    }),
+  const graph = new Map<ReleaseEntry, ReleaseEntry[]>(
+    releases.map((release) => [release, []]),
   );
+
+  for (const [dependencyName, dependents] of dependentsGraph) {
+    const release = releasesByName.get(dependencyName);
+    if (!release) continue;
+
+    for (const dependentName of dependents) {
+      const dependentRelease = releasesByName.get(dependentName);
+      if (!dependentRelease) continue;
+      graph.get(dependentRelease)!.push(release);
+    }
+  }
   const result = graphSequencer(graph);
 
   if (result.cycles.length > 0) {
@@ -244,5 +239,5 @@ export async function getPublishPlan(
     return [];
   }
 
-  return sortReleases(packages, [...releases, ...tagReleases]);
+  return sortReleases(packages, [...releases, ...tagReleases], config);
 }
