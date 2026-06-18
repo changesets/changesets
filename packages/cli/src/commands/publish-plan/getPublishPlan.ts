@@ -6,11 +6,13 @@ import type {
   Config,
   Package,
   PackageGroup,
+  PackageJSON,
   Packages,
   PreState,
 } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
+import { graphSequencer } from "@pnpm/deps.graph-sequencer";
 import semverParse from "semver/functions/parse.js";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 import { getCorrectRegistry, infoAllow404 } from "../publish/npm-utils.ts";
@@ -36,6 +38,8 @@ export type TagReleaseEntry = BaseReleaseEntry & {
 export type PublishPlan = ReadonlyArray<
   ReadonlyArray<PublishReleaseEntry | TagReleaseEntry>
 >;
+
+type ReleaseEntry = PublishReleaseEntry | TagReleaseEntry;
 
 function getReleaseTag(
   publishedState: PublishedState,
@@ -152,6 +156,61 @@ export async function getUntaggedPrivatePackages(
   );
 }
 
+function sortReleases(
+  packages: Packages,
+  releases: Array<ReleaseEntry>,
+): PublishPlan {
+  const packagesByName = new Map(
+    packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
+  );
+  const released = new Map(
+    releases.map((release) => {
+      const pkg = packagesByName.get(release.name);
+      if (!pkg) {
+        throw new Error(`Package referenced by release entry not found: ${release.name}`);
+      }
+      return [release.name, { pkg, release }];
+    }),
+  );
+  const graph = new Map(
+    Array.from(released.values(), ({ pkg, release }) => {
+      const dependencies = new Set<string>();
+
+      for (const dependencyType of ["dependencies", "peerDependencies"] as const) {
+        const dependencyGroup = pkg.packageJson[dependencyType];
+        if (!dependencyGroup) continue;
+
+        for (const dependencyName of Object.keys(dependencyGroup)) {
+          if (
+            dependencyName !== pkg.packageJson.name &&
+            released.has(dependencyName)
+          ) {
+            dependencies.add(dependencyName);
+          }
+        }
+      }
+      return [
+        release,
+        Array.from(
+          dependencies,
+          (dependencyName) => released.get(dependencyName)!.release,
+        ),
+      ];
+    }),
+  );
+  const result = graphSequencer(graph);
+
+  if (result.cycles.length > 0) {
+    throw new Error(
+      `Cannot compute publish plan due to cyclic dependencies: ${result.cycles
+        .map((cycle) => cycle.map((release) => release.name).join(" -> "))
+        .join("; ")}`,
+    );
+  }
+
+  return result.chunks;
+}
+
 export async function getPublishPlan(
   rootDir: string,
   config: Config,
@@ -185,5 +244,5 @@ export async function getPublishPlan(
     return [];
   }
 
-  return [[...releases, ...tagReleases]];
+  return sortReleases(packages, [...releases, ...tagReleases]);
 }
