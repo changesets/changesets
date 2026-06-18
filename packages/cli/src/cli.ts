@@ -118,9 +118,14 @@ cli
 
 cli
   .command("pack", "Pack publishable packages into tarballs")
-  .option("--from <file>", "Read the publish plan from a JSON file")
+  .option("--from-plan <file>", "Read the publish plan from a JSON file")
+  .option("--out-dir <dir>", "Write pack output into this directory")
   .action(async (options) => {
     normalizeOptions(options);
+    if (!options.outDir) {
+      log.error("The --out-dir option is required.");
+      throw new ExitError(1);
+    }
     const { pack } = await import("./commands/pack/index.ts");
     await pack(options);
   });

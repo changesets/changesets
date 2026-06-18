@@ -15,6 +15,8 @@ import semverParse from "semver/functions/parse.js";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 import { getCorrectRegistry, infoAllow404 } from "../publish/npm-utils.ts";
 
+export const CURRENT_PUBLISH_PLAN_VERSION = 1;
+
 type PublishedState = "never" | "published" | "only-pre";
 
 type BaseReleaseEntry = {

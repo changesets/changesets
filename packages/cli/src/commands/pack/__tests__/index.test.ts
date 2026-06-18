@@ -5,7 +5,6 @@ import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { extractTarball } from "../../../utils/tarball.ts";
 import * as npmUtils from "../../publish/npm-utils.ts";
 import { pack } from "../index.ts";
 
@@ -45,25 +44,6 @@ const tarballChecksum = createHash("sha256")
   .update(tarballContents)
   .digest("hex");
 
-async function readOuterTarball(tarballPath: string) {
-  const extractDir = `${tarballPath}.extract`;
-  await extractTarball(tarballPath, extractDir);
-
-  return new Map<string, string>([
-    [
-      "publish-plan.json",
-      await fs.readFile(path.join(extractDir, "publish-plan.json"), "utf8"),
-    ],
-    [
-      "packages/pkg-a-1.0.0.tgz",
-      await fs.readFile(
-        path.join(extractDir, "packages", "pkg-a-1.0.0.tgz"),
-        "utf8",
-      ),
-    ],
-  ]);
-}
-
 describe("pack", () => {
   silenceLogsInBlock();
 
@@ -94,8 +74,6 @@ describe("pack", () => {
       }),
     });
     const outputDir = path.join(cwd, ".packed");
-
-    vi.spyOn(fs, "mkdtemp").mockResolvedValue(outputDir);
     mockedNpmUtils.infoAllow404.mockResolvedValue({
       published: false,
       pkgInfo: { version: "1.0.0" },
@@ -114,49 +92,38 @@ describe("pack", () => {
       return execResult(JSON.stringify([{ filename: tarballFilename }]));
     });
 
-    const result = await pack({ cwd });
-
-    expect(result).toEqual({
-      tarballPath: path.join(cwd, "changesets-pack.tgz"),
-    });
+    await pack({ cwd, outDir: ".packed" });
 
     await expect(fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"))
       .resolves.toMatchInlineSnapshot(`
-      "[
-        [
-          {
-            "kind": "publish",
-            "name": "pkg-a",
-            "version": "1.0.0",
-            "access": "restricted",
-            "registry": "https://registry.npmjs.org",
-            "tag": "latest",
-            "tarball": {
-              "path": "packages/pkg-a-1.0.0.tgz",
-              "checksum": "db4b4d0d1cb480bf9aeea253771c00febe627f236765fa37d6a5614f079a3aa0"
+      "{
+        "version": 1,
+        "plan": [
+          [
+            {
+              "kind": "publish",
+              "name": "pkg-a",
+              "version": "1.0.0",
+              "access": "restricted",
+              "registry": "https://registry.npmjs.org",
+              "tag": "latest",
+              "tarball": {
+                "path": "packages/pkg-a-1.0.0.tgz",
+                "checksum": "db4b4d0d1cb480bf9aeea253771c00febe627f236765fa37d6a5614f079a3aa0"
+              }
+            },
+            {
+              "kind": "tag-only",
+              "name": "pkg-b",
+              "version": "1.0.0"
             }
-          },
-          {
-            "kind": "tag-only",
-            "name": "pkg-b",
-            "version": "1.0.0"
-          }
+          ]
         ]
-      ]"
+      }"
     `);
-    await expect(fs.stat(result.tarballPath!)).resolves.toMatchObject({
-      isFile: expect.any(Function),
-    });
-
-    const entries = await readOuterTarball(result.tarballPath!);
-    expect([...entries.keys()].toSorted()).toEqual([
-      "packages/pkg-a-1.0.0.tgz",
-      "publish-plan.json",
-    ]);
-    expect(entries.get("publish-plan.json")).toContain(
-      `"checksum": "${tarballChecksum}"`,
-    );
-    expect(entries.get("packages/pkg-a-1.0.0.tgz")).toBe(tarballContents);
+    await expect(
+      fs.readFile(path.join(outputDir, "packages", "pkg-a-1.0.0.tgz"), "utf8"),
+    ).resolves.toBe(tarballContents);
   });
 
   it("packs from an existing plan file", async () => {
@@ -192,14 +159,13 @@ describe("pack", () => {
       ],
     ];
 
-    vi.spyOn(fs, "mkdtemp").mockResolvedValue(outputDir);
     mockedNpmUtils.getCorrectRegistry.mockReturnValue({
       registry: "https://registry.npmjs.org",
     });
     mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" } as never);
     await fs.writeFile(
       path.join(cwd, "publish-plan.json"),
-      JSON.stringify(plan, undefined, 2),
+      JSON.stringify({ version: 1, plan }, undefined, 2),
     );
     mockExecImplementation(async (cmd, args) => {
       const dest = args[args.indexOf("--pack-destination") + 1];
@@ -209,17 +175,46 @@ describe("pack", () => {
       return execResult(JSON.stringify([{ filename: tarballFilename }]));
     });
 
-    const result = await pack({ cwd, from: "publish-plan.json" });
-
-    expect(result).toEqual({
-      tarballPath: path.join(cwd, "changesets-pack.tgz"),
+    await pack({
+      cwd,
+      fromPlan: "publish-plan.json",
+      outDir: ".packed",
     });
 
     await expect(
       fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"),
     ).resolves.toContain(`"checksum": "${tarballChecksum}"`);
-    await expect(fs.stat(result.tarballPath!)).resolves.toMatchObject({
-      isFile: expect.any(Function),
+    await expect(
+      fs.readFile(path.join(outputDir, "packages", "pkg-a-1.0.0.tgz"), "utf8"),
+    ).resolves.toBe(tarballContents);
+  });
+
+  it("throws on an unsupported plan file version", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({}),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
     });
+
+    await fs.writeFile(
+      path.join(cwd, "publish-plan.json"),
+      JSON.stringify({ version: 2, plan: [] }, undefined, 2),
+    );
+
+    await expect(
+      pack({
+        cwd,
+        fromPlan: "publish-plan.json",
+        outDir: ".packed",
+      }),
+    ).rejects.toThrow(/Invalid publish plan file version/);
   });
 });

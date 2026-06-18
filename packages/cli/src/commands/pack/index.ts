@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { ExitError } from "@changesets/errors";
@@ -11,9 +10,9 @@ import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
 import { readConfig } from "../../utils/read-config.ts";
-import { packTarball } from "../../utils/tarball.ts";
 import { getDefaultWorkspaceConcurrency } from "../../utils/workspaceConcurrency.ts";
 import {
+  CURRENT_PUBLISH_PLAN_VERSION,
   getPublishPlan,
   type PublishPlan,
   type TarballMetadata,
@@ -23,17 +22,14 @@ import { ensureChangesetFolder } from "../shared.ts";
 
 export interface PackOptions {
   cwd?: string;
-  from?: string;
+  fromPlan?: string;
+  outDir: string;
 }
 
 export interface PackedRelease {
   name: string;
   version: string;
   tarball: TarballMetadata;
-}
-
-export interface PackResult {
-  tarballPath: string | undefined;
 }
 
 function getTarballFilename(stdout: string) {
@@ -47,32 +43,44 @@ async function getChecksum(filePath: string) {
   return hash.digest("hex");
 }
 
-export async function pack(options?: PackOptions): Promise<PackResult> {
-  const cwd = options?.cwd ?? process.cwd();
+function readPlanFile(contents: string): PublishPlan {
+  const json = JSON.parse(contents);
+
+  if (!json || typeof json !== "object") {
+    throw new Error("Invalid publish plan file");
+  }
+
+  if (!Array.isArray(json.plan)) {
+    throw new Error("Invalid publish plan file");
+  }
+
+  if (json.version !== CURRENT_PUBLISH_PLAN_VERSION) {
+    throw new Error(
+      `Invalid publish plan file version: expected ${CURRENT_PUBLISH_PLAN_VERSION}, received ${String(json.version)}`,
+    );
+  }
+
+  return json.plan as PublishPlan;
+}
+
+export async function pack(options: PackOptions) {
+  const cwd = options.cwd ?? process.cwd();
+
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
   const config = await readConfig(packages);
 
-  const plan = options?.from
-    ? (JSON.parse(
-        await fs.readFile(path.resolve(cwd, options.from), "utf8"),
-      ) as PublishPlan)
+  const plan = options.fromPlan
+    ? readPlanFile(
+        await fs.readFile(path.resolve(cwd, options.fromPlan), "utf8"),
+      )
     : await getPublishPlan(packages.rootDir, config);
 
-  const releases = plan.flat().filter((release) => release.kind === "publish");
-
-  if (releases.length === 0) {
-    log.info("No packages to pack.");
-    return {
-      tarballPath: undefined,
-    };
-  }
-
-  const outputDir = await fs.mkdtemp(
-    path.join(os.tmpdir(), "changesets-pack-"),
-  );
+  const outputDir = path.resolve(cwd, options.outDir);
   const packagesDir = path.join(outputDir, "packages");
   await fs.mkdir(packagesDir, { recursive: true });
+
+  const releases = plan.flat().filter((release) => release.kind === "publish");
 
   const queue = createPromiseQueue(getDefaultWorkspaceConcurrency());
   const packagesByName = new Map(
@@ -168,10 +176,20 @@ export async function pack(options?: PackOptions): Promise<PackResult> {
 
   await fs.writeFile(
     path.join(outputDir, "publish-plan.json"),
-    JSON.stringify(packedPlan, undefined, 2),
+    JSON.stringify(
+      {
+        version: CURRENT_PUBLISH_PLAN_VERSION,
+        plan: packedPlan,
+      },
+      undefined,
+      2,
+    ),
   );
-  const tarballPath = path.join(packages.rootDir, "changesets-pack.tgz");
-  await packTarball(outputDir, tarballPath);
+
+  if (releases.length === 0) {
+    log.info("No packages to pack.");
+    return;
+  }
 
   log.info(
     `
@@ -179,9 +197,4 @@ Packed packages:
 ${packedReleases.map((release) => `- ${release.name}@${release.version}`).join("\n")}
     `.trim(),
   );
-  log.info(`Pack artifact: ${tarballPath}`);
-
-  return {
-    tarballPath,
-  };
 }

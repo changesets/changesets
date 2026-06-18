@@ -144,13 +144,16 @@ const tests: CommandTest[] = [
     fn: pack,
     cases: [
       {
-        args: [],
-        options: {},
+        args: ["--out-dir", ".packed"],
+        options: {
+          outDir: ".packed",
+        },
       },
       {
-        args: ["--from", "publish-plan.json"],
+        args: ["--from-plan", "publish-plan.json", "--out-dir", ".packed"],
         options: {
-          from: "publish-plan.json",
+          fromPlan: "publish-plan.json",
+          outDir: ".packed",
         },
       },
     ],
