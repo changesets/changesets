@@ -40,9 +40,9 @@ function mockExecImplementation(
 }
 
 const tarballContents = "tarball";
-const tarballChecksum = createHash("sha256")
+const tarballIntegrity = `sha256-${createHash("sha256")
   .update(tarballContents)
-  .digest("hex");
+  .digest("base64")}`;
 
 describe("pack", () => {
   silenceLogsInBlock();
@@ -81,7 +81,7 @@ describe("pack", () => {
     mockedNpmUtils.getCorrectRegistry.mockReturnValue({
       registry: "https://registry.npmjs.org",
     });
-    mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" } as never);
+    mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" });
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
     mockExecImplementation(async (cmd, args) => {
@@ -109,7 +109,7 @@ describe("pack", () => {
               "tag": "latest",
               "tarball": {
                 "path": "packages/pkg-a-1.0.0.tgz",
-                "checksum": "db4b4d0d1cb480bf9aeea253771c00febe627f236765fa37d6a5614f079a3aa0"
+                "integrity": "sha256-20tNDRy0gL+a7qJTdxwA/r5ifyNnZfo31qVhTweaOqA="
               }
             },
             {
@@ -162,7 +162,7 @@ describe("pack", () => {
     mockedNpmUtils.getCorrectRegistry.mockReturnValue({
       registry: "https://registry.npmjs.org",
     });
-    mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" } as never);
+    mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" });
     await fs.writeFile(
       path.join(cwd, "publish-plan.json"),
       JSON.stringify({ version: 1, plan }, undefined, 2),
@@ -183,7 +183,7 @@ describe("pack", () => {
 
     await expect(
       fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"),
-    ).resolves.toContain(`"checksum": "${tarballChecksum}"`);
+    ).resolves.toContain(`"integrity": "${tarballIntegrity}"`);
     await expect(
       fs.readFile(path.join(outputDir, "packages", "pkg-a-1.0.0.tgz"), "utf8"),
     ).resolves.toBe(tarballContents);

@@ -37,10 +37,10 @@ function getTarballFilename(stdout: string) {
   return Array.isArray(json) ? json[0]?.filename : json?.filename;
 }
 
-async function getChecksum(filePath: string) {
+async function getIntegrity(filePath: string) {
   const hash = createHash("sha256");
   await pipeline(createReadStream(filePath), hash);
-  return hash.digest("hex");
+  return `sha256-${hash.digest("base64")}`;
 }
 
 function readPlanFile(contents: string): PublishPlan {
@@ -135,7 +135,7 @@ export async function pack(options: PackOptions) {
             `Failed to determine tarball filename for ${release.name}`,
           );
         }
-        const checksum = await getChecksum(
+        const integrity = await getIntegrity(
           path.join(packagesDir, tarballFilename),
         );
 
@@ -144,7 +144,7 @@ export async function pack(options: PackOptions) {
           version: release.version,
           tarball: {
             path: path.posix.join("packages", tarballFilename),
-            checksum,
+            integrity,
           },
         };
       }),

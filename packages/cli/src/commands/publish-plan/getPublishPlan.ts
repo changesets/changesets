@@ -26,7 +26,7 @@ type BaseReleaseEntry = {
 
 export type TarballMetadata = {
   path: string;
-  checksum: string;
+  integrity: string;
 };
 
 export type PublishReleaseEntry = BaseReleaseEntry & {
