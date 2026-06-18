@@ -53,14 +53,12 @@
     "launch-editor": "^2.14.1",
     "package-manager-detector": "^1.6.0",
     "semver": "^7.8.1",
-    "tar-stream": "^3.2.0",
     "tinyexec": "^1.2.4"
   },
   "devDependencies": {
     "@changesets/color": "workspace:^",
     "@changesets/test-utils": "workspace:*",
     "@types/semver": "^7.7.1",
-    "@types/tar-stream": "^3.1.4",
     "human-id": "^4.2.0",
     "outdent": "^0.8.0"
   },
