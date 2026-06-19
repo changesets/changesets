@@ -1,4 +1,5 @@
 import c from "@changesets/color";
+import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { readPreState } from "@changesets/pre";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
@@ -11,6 +12,7 @@ import type {
 } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
+import { graphSequencer } from "@pnpm/deps.graph-sequencer";
 import semverParse from "semver/functions/parse.js";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 import { getCorrectRegistry, infoAllow404 } from "../publish/npm-utils.ts";
@@ -44,6 +46,8 @@ export type TagReleaseEntry = BaseReleaseEntry & {
 export type PublishPlan = ReadonlyArray<
   ReadonlyArray<PublishReleaseEntry | TagReleaseEntry>
 >;
+
+type ReleaseEntry = PublishReleaseEntry | TagReleaseEntry;
 
 function getReleaseTag(
   publishedState: PublishedState,
@@ -160,6 +164,56 @@ export async function getUntaggedPrivatePackages(
   );
 }
 
+function sortReleases(
+  packages: Packages,
+  releases: Array<ReleaseEntry>,
+  opts: {
+    bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  },
+): PublishPlan {
+  const dependentsGraph = getDependentsGraph(packages, {
+    bumpVersionsWithWorkspaceProtocolOnly:
+      opts.bumpVersionsWithWorkspaceProtocolOnly,
+    ignoreDevDependencies: true,
+  });
+  const releasesByName = new Map(
+    releases.map((release) => {
+      // validate externally-provided releases
+      if (!dependentsGraph.has(release.name)) {
+        throw new Error(
+          `Package referenced by release entry not found: ${release.name}`,
+        );
+      }
+      return [release.name, release];
+    }),
+  );
+  const graph = new Map<ReleaseEntry, ReleaseEntry[]>(
+    releases.map((release) => [release, []]),
+  );
+
+  for (const [dependencyName, dependents] of dependentsGraph) {
+    const release = releasesByName.get(dependencyName);
+    if (!release) continue;
+
+    for (const dependentName of dependents) {
+      const dependentRelease = releasesByName.get(dependentName);
+      if (!dependentRelease) continue;
+      graph.get(dependentRelease)!.push(release);
+    }
+  }
+  const result = graphSequencer(graph);
+
+  if (result.cycles.length > 0) {
+    log.warn(
+      `Publish plan contains cyclic dependencies: ${result.cycles
+        .map((cycle) => cycle.map((release) => release.name).join(" -> "))
+        .join("; ")}`,
+    );
+  }
+
+  return result.chunks;
+}
+
 export async function getPublishPlan(
   rootDir: string,
   config: Config,
@@ -193,5 +247,5 @@ export async function getPublishPlan(
     return [];
   }
 
-  return [[...releases, ...tagReleases]];
+  return sortReleases(packages, [...releases, ...tagReleases], config);
 }
