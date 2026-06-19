@@ -172,7 +172,7 @@ describe("getPublishPlan", () => {
     ]);
   });
 
-  it("throws on cyclic dependencies in the release set", async () => {
+  it("keeps cyclic dependencies in one chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         name: "repo",
@@ -206,9 +206,27 @@ describe("getPublishPlan", () => {
     });
 
     const config = await readConfig(cwd);
+    const result = await getPublishPlan(cwd, config.config!);
 
-    await expect(getPublishPlan(cwd, config.config!)).rejects.toThrow(
-      /cyclic dependencies/,
-    );
+    expect(result).toEqual([
+      [
+        {
+          kind: "publish",
+          name: "pkg-a",
+          version: "1.0.0",
+          access: "restricted",
+          registry: "https://registry.npmjs.org",
+          tag: "latest",
+        },
+        {
+          kind: "publish",
+          name: "pkg-b",
+          version: "1.0.0",
+          access: "restricted",
+          registry: "https://registry.npmjs.org",
+          tag: "latest",
+        },
+      ],
+    ]);
   });
 });

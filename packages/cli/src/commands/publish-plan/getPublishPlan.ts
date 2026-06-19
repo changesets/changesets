@@ -196,8 +196,8 @@ function sortReleases(
   const result = graphSequencer(graph);
 
   if (result.cycles.length > 0) {
-    throw new Error(
-      `Cannot compute publish plan due to cyclic dependencies: ${result.cycles
+    log.warn(
+      `Publish plan contains cyclic dependencies: ${result.cycles
         .map((cycle) => cycle.map((release) => release.name).join(" -> "))
         .join("; ")}`,
     );
