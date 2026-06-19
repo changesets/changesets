@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
@@ -36,7 +37,10 @@ function getTarballFilename(stdout: string) {
   const json = getLastJsonObjectFromString(stdout);
   // npm emits an array even when packing a single package
   // pnpm emits an object when packing a single package, and an array when packing multiple packages
-  return Array.isArray(json) ? json[0]?.filename : json?.filename;
+  const filename = Array.isArray(json) ? json[0]?.filename : json?.filename;
+  assert(typeof filename === "string", "Failed to determine tarball filename");
+  // normalize to just basenaname, npm emits just the basename, pnpm emits absolute paths
+  return path.basename(filename);
 }
 
 async function getIntegrity(filePath: string) {
