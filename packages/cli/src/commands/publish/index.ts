@@ -87,92 +87,98 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     : await getPublishPlan(packages.rootDir, config, {
         tag: releaseTag,
       });
-  const entries = plan.flat();
-  const unpublishedPackages = entries.filter(
-    (release) => release.kind === "publish",
-  );
-  const untaggedPrivatePackageReleases = entries.filter(
-    (release) => release.kind === "tag-only",
-  );
-
-  const publishedPackages = await publishPackages({
-    releases: unpublishedPackages,
-    packages,
-    // if not public, we won't pass the access, and it works as normal
-    access: config.access,
-    artifactDir,
-    otp: options?.otp,
-  });
-
-  if (
-    publishedPackages.length === 0 &&
-    untaggedPrivatePackageReleases.length === 0
-  ) {
+  if (plan.length === 0) {
     log.warn("No unpublished projects to publish.");
+    return;
   }
 
-  const successfulNpmPublishes = publishedPackages.filter(
-    (p) => p.result === "published",
-  );
-  const unsuccessfulNpmPublishes = publishedPackages.filter(
-    (p) => p.result === "failed",
-  );
+  for (const [index, chunk] of plan.entries()) {
+    if (plan.length > 1) {
+      log.info(`Publishing group ${index + 1} of ${plan.length}...`);
+    }
 
-  if (successfulNpmPublishes.length > 0) {
-    log.success(
-      `
-Successfully published:
-${formatPackageList(successfulNpmPublishes)}
-      `.trim(),
+    const unpublishedPackages = chunk.filter(
+      (release) => release.kind === "publish",
+    );
+    const untaggedPrivatePackageReleases = chunk.filter(
+      (release) => release.kind === "tag-only",
+    );
+    const publishedPackages =
+      unpublishedPackages.length > 0
+        ? await publishPackages({
+            releases: unpublishedPackages,
+            packages,
+            // if not public, we won't pass the access, and it works as normal
+            access: config.access,
+            artifactDir,
+            otp: options?.otp,
+          })
+        : [];
+    const successfulNpmPublishes = publishedPackages.filter(
+      (p) => p.result === "published",
+    );
+    const unsuccessfulNpmPublishes = publishedPackages.filter(
+      (p) => p.result === "failed",
     );
 
-    // We create the tags after the push above so that we know that HEAD won't change and that pushing
-    // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
-    // fail if we are behind the base branch).
-    if (options?.gitTag ?? true) {
+    if (successfulNpmPublishes.length > 0) {
+      log.success(
+        `
+Successfully published:
+${formatPackageList(successfulNpmPublishes)}
+        `.trim(),
+      );
+
+      // We create the tags after the push above so that we know that HEAD won't change and that pushing
+      // won't suffer from a race condition if another merge happens in the mean time (pushing tags won't
+      // fail if we are behind the base branch).
+      if (options?.gitTag ?? true) {
+        const p = spinner();
+        p.start(
+          `Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`,
+        );
+        await tagPublish(
+          packages.tool.type,
+          successfulNpmPublishes,
+          packages.rootDir,
+        );
+        p.stop(
+          `Created git tag${successfulNpmPublishes.length > 1 ? "s" : ""}.`,
+        );
+      }
+    }
+
+    if (untaggedPrivatePackageReleases.length > 0) {
+      log.success(
+        `
+Found untagged packages:
+${formatPackageList(untaggedPrivatePackageReleases, c.yellowBright)}
+        `.trim(),
+      );
+
       const p = spinner();
       p.start(
-        `Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`,
+        `Creating git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}...`,
       );
       await tagPublish(
         packages.tool.type,
-        successfulNpmPublishes,
+        untaggedPrivatePackageReleases,
         packages.rootDir,
       );
-      p.stop(`Created git tag${successfulNpmPublishes.length > 1 ? "s" : ""}.`);
+      p.stop(
+        `Created git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}.`,
+      );
     }
-  }
 
-  if (untaggedPrivatePackageReleases.length > 0) {
-    log.success(
-      `
-Found untagged packages:
-${formatPackageList(untaggedPrivatePackageReleases, c.yellowBright)}
-      `.trim(),
-    );
-
-    const p = spinner();
-    p.start(
-      `Creating git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}...`,
-    );
-    await tagPublish(
-      packages.tool.type,
-      untaggedPrivatePackageReleases,
-      packages.rootDir,
-    );
-    p.stop(
-      `Created git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}.`,
-    );
-  }
-
-  if (unsuccessfulNpmPublishes.length > 0) {
-    log.error(
-      `
+    if (unsuccessfulNpmPublishes.length > 0) {
+      log.error(
+        `
 Some packages failed to publish:
 ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
-      `.trim(),
-    );
-    throw new ExitError(1);
+        `.trim(),
+      );
+      throw new ExitError(1);
+    }
   }
 }
 

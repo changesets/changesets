@@ -7,7 +7,7 @@ export function getDependentsGraph(
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   },
-) {
+): Map<string, Array<string>> {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
   const rootPackage = packages.rootPackage;
