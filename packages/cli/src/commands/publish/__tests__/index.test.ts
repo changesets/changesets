@@ -121,9 +121,9 @@ describe("Publish command", () => {
 
     await publishCommand({ cwd });
 
-    expect(mockedNpmUtils.publish.mock.calls.map((call) => call[0].name)).toEqual(
-      ["pkg-b", "pkg-a"],
-    );
+    expect(
+      mockedNpmUtils.publish.mock.calls.map((call) => call[0].name),
+    ).toEqual(["pkg-b", "pkg-a"]);
     expect(vi.mocked(git.tag).mock.calls.map((call) => call[0])).toEqual([
       "pkg-b@1.0.0",
       "pkg-a@1.0.0",
