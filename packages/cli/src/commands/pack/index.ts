@@ -34,6 +34,8 @@ export interface PackedRelease {
 
 function getTarballFilename(stdout: string) {
   const json = getLastJsonObjectFromString(stdout);
+  // npm emits an array even when packing a single package
+  // pnpm emits an object when packing a single package, and an array when packing multiple packages
   return Array.isArray(json) ? json[0]?.filename : json?.filename;
 }
 
