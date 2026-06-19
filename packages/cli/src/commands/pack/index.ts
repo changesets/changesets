@@ -136,6 +136,8 @@ export async function pack(options: PackOptions) {
             `Failed to determine tarball filename for ${release.name}`,
           );
         }
+        // npm returns integrity in its --json output
+        // but pnpm doesn't, so we need to calculate it ourselves
         const integrity = await getIntegrity(
           path.join(packagesDir, tarballFilename),
         );
