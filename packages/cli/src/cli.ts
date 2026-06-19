@@ -97,7 +97,7 @@ cli
   .example("  $ changeset publish --tag beta")
   .option("--otp <code>", "One time password for npm publish")
   .option("--tag <name>", "Publish with the given npm dist-tag")
-  .option("--from <file>", "Publish from a packed artifact tarball")
+  .option("--from-pack-dir <dir>", "Publish from a packed output directory")
   .option("--git-tag", "Create a git tag for the release", { default: true })
   .action(async (options) => {
     normalizeOptions(options);

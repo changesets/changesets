@@ -15,7 +15,7 @@ import { getDefaultWorkspaceConcurrency } from "../../utils/workspaceConcurrency
 import {
   CURRENT_PUBLISH_PLAN_VERSION,
   getPublishPlan,
-  type PublishPlan,
+  readPlanFile,
   type TarballMetadata,
 } from "../publish-plan/getPublishPlan.ts";
 import { getPublishTool } from "../publish/npm-utils.ts";
@@ -49,26 +49,6 @@ async function getIntegrity(filePath: string) {
   return `sha256-${hash.digest("base64")}`;
 }
 
-function readPlanFile(contents: string): PublishPlan {
-  const json = JSON.parse(contents);
-
-  if (!json || typeof json !== "object") {
-    throw new Error("Invalid publish plan file");
-  }
-
-  if (!Array.isArray(json.plan)) {
-    throw new Error("Invalid publish plan file");
-  }
-
-  if (json.version !== CURRENT_PUBLISH_PLAN_VERSION) {
-    throw new Error(
-      `Invalid publish plan file version: expected ${CURRENT_PUBLISH_PLAN_VERSION}, received ${String(json.version)}`,
-    );
-  }
-
-  return json.plan as PublishPlan;
-}
-
 export async function pack(options: PackOptions) {
   const cwd = options.cwd ?? process.cwd();
 
@@ -77,9 +57,7 @@ export async function pack(options: PackOptions) {
   const config = await readConfig(packages);
 
   const plan = options.fromPlan
-    ? readPlanFile(
-        await fs.readFile(path.resolve(cwd, options.fromPlan), "utf8"),
-      )
+    ? await readPlanFile(path.resolve(cwd, options.fromPlan))
     : await getPublishPlan(packages.rootDir, config);
 
   const outputDir = path.resolve(cwd, options.outDir);

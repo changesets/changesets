@@ -1,3 +1,4 @@
+import fs from "node:fs/promises";
 import c from "@changesets/color";
 import { readPreState } from "@changesets/pre";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
@@ -44,6 +45,26 @@ export type TagReleaseEntry = BaseReleaseEntry & {
 export type PublishPlan = ReadonlyArray<
   ReadonlyArray<PublishReleaseEntry | TagReleaseEntry>
 >;
+
+export async function readPlanFile(filePath: string): Promise<PublishPlan> {
+  const json = JSON.parse(await fs.readFile(filePath, "utf8"));
+
+  if (!json || typeof json !== "object") {
+    throw new Error("Invalid publish plan file");
+  }
+
+  if (!Array.isArray(json.plan)) {
+    throw new Error("Invalid publish plan file");
+  }
+
+  if (json.version !== CURRENT_PUBLISH_PLAN_VERSION) {
+    throw new Error(
+      `Invalid publish plan file version: expected ${CURRENT_PUBLISH_PLAN_VERSION}, received ${String(json.version)}`,
+    );
+  }
+
+  return json.plan;
+}
 
 function getReleaseTag(
   publishedState: PublishedState,

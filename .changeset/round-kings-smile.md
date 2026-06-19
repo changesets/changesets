@@ -2,4 +2,4 @@
 "@changesets/cli": minor
 ---
 
-Added `changeset publish --from <artifact.tgz>` to publish packages from a previously created pack artifact.
+Added `changeset publish --from-pack-dir <dir>` to publish packages from a previously created pack output directory.

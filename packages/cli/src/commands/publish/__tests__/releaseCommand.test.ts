@@ -1,17 +1,16 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import * as tarball from "../../../utils/tarball.ts";
-import * as getPublishPlanModule from "../../publish-plan/getPublishPlan.ts";
+import * as npmUtils from "../npm-utils.ts";
 import { publish as runRelease } from "../index.ts";
 import * as publishPackagesModule from "../publishPackages.ts";
 
 vi.mock("@changesets/git");
 vi.mock("../publishPackages.ts");
-vi.mock("../../publish-plan/getPublishPlan.ts");
-vi.mock("../../../utils/tarball.ts");
+vi.mock("../npm-utils.ts");
 
 describe("running release", () => {
   silenceLogsInBlock();
@@ -43,11 +42,17 @@ describe("running release", () => {
       });
 
       vi.mocked(git.tag).mockResolvedValue(undefined as never);
+      vi.mocked(npmUtils.infoAllow404).mockResolvedValue({
+        published: false,
+        pkgInfo: { version: "1.0.0" },
+      });
+      vi.mocked(npmUtils.getCorrectRegistry).mockReturnValue({
+        registry: "https://registry.npmjs.org",
+      });
       vi.mocked(publishPackagesModule.publishPackages).mockResolvedValue([
         { name: "pkg-a", version: "1.1.0", result: "published" },
         { name: "pkg-b", version: "1.0.1", result: "published" },
       ]);
-      vi.mocked(getPublishPlanModule.getPublishPlan).mockResolvedValue([[]]);
 
       await runRelease({ cwd });
 
@@ -55,7 +60,7 @@ describe("running release", () => {
     });
   });
 
-  describe("When publishing from an artifact", () => {
+  describe("When publishing from a pack directory", () => {
     it("should run publishPackages in artifact mode", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
@@ -69,12 +74,14 @@ describe("running release", () => {
         }),
         ".changeset/config.json": JSON.stringify(defaultConfig),
       });
-
-      vi.mocked(tarball.extractTarball).mockImplementation(
-        async (_tarballPath, targetDir) => {
-          await fs.writeFile(
-            `${targetDir}/publish-plan.json`,
-            JSON.stringify([
+      const packDir = path.join(cwd, ".packed");
+      await fs.mkdir(path.join(packDir, "packages"), { recursive: true });
+      await fs.writeFile(
+        path.join(packDir, "publish-plan.json"),
+        JSON.stringify(
+          {
+            version: 1,
+            plan: [
               [
                 {
                   kind: "publish",
@@ -85,19 +92,21 @@ describe("running release", () => {
                   tag: "latest",
                   tarball: {
                     path: "packages/pkg-a-1.0.0.tgz",
-                    checksum: "abc",
+                    integrity: "sha256-abc",
                   },
                 },
               ],
-            ]),
-          );
-        },
+            ],
+          },
+          undefined,
+          2,
+        ),
       );
       vi.mocked(publishPackagesModule.publishPackages).mockResolvedValue([
         { name: "pkg-a", version: "1.0.0", result: "published" },
       ]);
 
-      await runRelease({ cwd, from: "changesets-pack.tgz" });
+      await runRelease({ cwd, fromPackDir: ".packed" });
 
       expect(publishPackagesModule.publishPackages).toHaveBeenCalledWith({
         releases: [
@@ -110,7 +119,7 @@ describe("running release", () => {
             tag: "latest",
             tarball: {
               path: "packages/pkg-a-1.0.0.tgz",
-              checksum: "abc",
+              integrity: "sha256-abc",
             },
           },
         ],
@@ -125,7 +134,7 @@ describe("running release", () => {
           ],
         }),
         access: "restricted",
-        artifactDir: expect.stringContaining("changesets-publish-"),
+        artifactDir: packDir,
         otp: undefined,
       });
     });
@@ -141,7 +150,7 @@ describe("running release", () => {
       });
 
       await expect(
-        runRelease({ cwd, from: "changesets-pack.tgz", tag: "beta" }),
+        runRelease({ cwd, fromPackDir: ".packed", tag: "beta" }),
       ).rejects.toThrow();
     });
   });

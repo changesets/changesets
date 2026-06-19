@@ -122,9 +122,9 @@ const tests: CommandTest[] = [
         },
       },
       {
-        args: ["--from", "changesets-pack.tgz"],
+        args: ["--from-pack-dir", ".packed"],
         options: {
-          from: "changesets-pack.tgz",
+          fromPackDir: ".packed",
           gitTag: true,
         },
       },
