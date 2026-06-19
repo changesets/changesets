@@ -4,7 +4,11 @@ import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { readConfig } from "../../utils/read-config.ts";
 import { ensureChangesetFolder } from "../shared.ts";
-import { getPublishPlan, type PublishPlan } from "./getPublishPlan.ts";
+import {
+  CURRENT_PUBLISH_PLAN_VERSION,
+  getPublishPlan,
+  type PublishPlan,
+} from "./getPublishPlan.ts";
 
 export interface PublishPlanOptions {
   cwd?: string;
@@ -32,7 +36,7 @@ export async function publishPlan(
       path.resolve(cwd, options.output),
       JSON.stringify(
         {
-          version: 1,
+          version: CURRENT_PUBLISH_PLAN_VERSION,
           plan,
         },
         undefined,

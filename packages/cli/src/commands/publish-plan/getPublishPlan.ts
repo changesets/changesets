@@ -17,6 +17,8 @@ import semverParse from "semver/functions/parse.js";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
 import { getCorrectRegistry, infoAllow404 } from "../publish/npm-utils.ts";
 
+export const CURRENT_PUBLISH_PLAN_VERSION = 1;
+
 type PublishedState = "never" | "published" | "only-pre";
 
 type BaseReleaseEntry = {
@@ -24,11 +26,17 @@ type BaseReleaseEntry = {
   version: string;
 };
 
+export type TarballMetadata = {
+  path: string;
+  integrity: string;
+};
+
 export type PublishReleaseEntry = BaseReleaseEntry & {
   kind: "publish";
   access: AccessType;
   registry: string;
   tag: string;
+  tarball?: TarballMetadata;
 };
 
 export type TagReleaseEntry = BaseReleaseEntry & {
