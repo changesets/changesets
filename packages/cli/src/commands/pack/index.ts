@@ -104,11 +104,10 @@ export async function pack(options: PackOptions) {
           publishTool.name === "pnpm"
             ? ["pack", "--json", "--pack-destination", packagesDir]
             : ["pack", publishDir, "--json", "--pack-destination", packagesDir];
-        const execCwd = publishTool.name === "pnpm" ? publishDir : pkg.dir;
         const { exitCode, stdout, stderr } = await exec(
           publishTool.name,
           args,
-          { nodeOptions: { cwd: execCwd } },
+          { nodeOptions: { cwd: pkg.dir } },
         );
 
         if (exitCode !== 0) {
