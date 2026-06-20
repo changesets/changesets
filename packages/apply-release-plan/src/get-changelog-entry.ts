@@ -113,6 +113,20 @@ export async function getChangelogEntry(
     ),
   );
 
+  if (
+    !(
+      await Promise.all([
+        ...changelogLines.patch,
+        ...changelogLines.minor,
+        ...changelogLines.major,
+      ])
+    ).some(Boolean)
+  ) {
+    return [`## ${release.newVersion}`, "No changes in this release."]
+      .filter((line) => line)
+      .join("\n");
+  }
+
   return [
     `## ${release.newVersion}`,
     await generateChangesForVersionTypeMarkdown(changelogLines, "major"),
