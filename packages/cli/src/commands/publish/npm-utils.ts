@@ -1,3 +1,4 @@
+import path from "node:path";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import type { AccessType, PackageJSON } from "@changesets/types";
@@ -232,6 +233,7 @@ async function internalPublish(
   twoFactorState: TwoFactorState,
 ): Promise<InternalPublishResult> {
   const publishTool = await getPublishTool(opts.cwd);
+  const relativeTarget = path.relative(opts.cwd, opts.target) || ".";
 
   const publishFlags = opts.access ? ["--access", opts.access] : [];
   publishFlags.push("--tag", opts.tag);
@@ -252,14 +254,14 @@ async function internalPublish(
     // we specifically don't want any other output to interfere with the delegated auth flow
     const child =
       publishTool.name === "pnpm"
-        ? exec("pnpm", ["publish", opts.target, ...publishFlags], {
+        ? exec("pnpm", ["publish", relativeTarget, ...publishFlags], {
             nodeOptions: {
               env: { ...process.env, ...envOverride },
               cwd: opts.cwd,
               stdio: ["inherit", "inherit", "pipe"],
             },
           })
-        : exec(publishTool.name, ["publish", opts.target, ...publishFlags], {
+        : exec(publishTool.name, ["publish", relativeTarget, ...publishFlags], {
             nodeOptions: {
               env: { ...process.env, ...envOverride },
               cwd: opts.cwd,
@@ -300,7 +302,7 @@ async function internalPublish(
 
   const { exitCode, stdout, stderr } =
     publishTool.name === "pnpm"
-      ? await exec("pnpm", ["publish", opts.target, ...publishFlags], {
+      ? await exec("pnpm", ["publish", relativeTarget, ...publishFlags], {
           nodeOptions: {
             env: { ...process.env, ...envOverride },
             cwd: opts.cwd,
@@ -308,7 +310,7 @@ async function internalPublish(
         })
       : await exec(
           publishTool.name,
-          ["publish", opts.target, ...publishFlags],
+          ["publish", relativeTarget, ...publishFlags],
           {
             nodeOptions: {
               env: { ...process.env, ...envOverride },

@@ -92,7 +92,9 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     return;
   }
 
-  for (const [index, chunk] of plan.entries()) {
+  for (let index = 0; index < plan.length; index++) {
+    const chunk = plan[index];
+
     if (plan.length > 1) {
       log.info(`Publishing group ${index + 1} of ${plan.length}...`);
     }
