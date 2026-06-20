@@ -20,16 +20,21 @@ beforeEach(() => {
   vi.restoreAllMocks();
 
   mockedUtils.askList.mockImplementation(async (message) => {
-    if (message.includes("changelog")) {
-      return "@changesets/cli/changelog";
-    }
     if (message.includes("published")) {
       return "restricted";
     }
     return "";
   });
 
-  mockedUtils.askConfirm.mockResolvedValue(false);
+  mockedUtils.askConfirm.mockImplementation(async (message) => {
+    if (message.includes("GitHub integration")) {
+      return false;
+    }
+    if (message.includes("automatically committed")) {
+      return false;
+    }
+    return false;
+  });
 
   mockedUtils.askQuestion.mockImplementation(async (message) => {
     if (message.includes("GitHub repository")) {
@@ -184,14 +189,11 @@ describe("init", () => {
   });
 
   it("should be written with GitHub changelog config and prompt for repo when chosen", async () => {
-    mockedUtils.askList.mockImplementation(async (message) => {
-      if (message.includes("changelog")) {
-        return "@changesets/changelog-github";
+    mockedUtils.askConfirm.mockImplementation(async (message) => {
+      if (message.includes("GitHub integration")) {
+        return true;
       }
-      if (message.includes("published")) {
-        return "restricted";
-      }
-      return "";
+      return false;
     });
 
     mockedUtils.askQuestion.mockImplementation(async (message) => {
@@ -220,39 +222,9 @@ describe("init", () => {
     ]);
   });
 
-  it("should be written with Git changelog config when chosen", async () => {
-    mockedUtils.askList.mockImplementation(async (message) => {
-      if (message.includes("changelog")) {
-        return "@changesets/changelog-git";
-      }
-      if (message.includes("published")) {
-        return "restricted";
-      }
-      return "";
-    });
-
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        name: "root-pkg",
-      }),
-    });
-
-    await initializeCommand({ cwd });
-
-    const { readmePath, configPath } = getPaths(cwd);
-    const config = JSON.parse(await fs.readFile(configPath, "utf8"));
-
-    expect(existsSync(readmePath)).toBe(true);
-    expect(config.changelog).toEqual("@changesets/changelog-git");
-  });
-
   it("should be written with public access, commit enabled, and custom branch when chosen", async () => {
     mockedUtils.askConfirm.mockResolvedValue(true);
     mockedUtils.askList.mockImplementation(async (message) => {
-      if (message.includes("changelog")) {
-        return "@changesets/cli/changelog";
-      }
       if (message.includes("published")) {
         return "public";
       }
