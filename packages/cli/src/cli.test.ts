@@ -121,6 +121,13 @@ const tests: CommandTest[] = [
           gitTag: true,
         },
       },
+      {
+        args: ["--from-pack-dir", ".packed"],
+        options: {
+          fromPackDir: ".packed",
+          gitTag: true,
+        },
+      },
     ],
   },
   {

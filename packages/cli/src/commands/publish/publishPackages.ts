@@ -1,10 +1,11 @@
 import { resolve } from "node:path";
 import c from "@changesets/color";
-import type { AccessType, Package } from "@changesets/types";
+import type { AccessType, Packages } from "@changesets/types";
 import { log, progress } from "@clack/prompts";
 import type { TwoFactorState } from "../../utils/types.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 import {
+  getPublishTool,
   getTokenIsRequired,
   isCustomRegistry,
   npmPublishQueue,
@@ -61,11 +62,13 @@ export async function publishPackages({
   releases,
   packages,
   access,
+  artifactDir,
   otp,
 }: {
   releases: Array<PublishReleaseEntry>;
-  packages: Array<Package>;
+  packages: Packages;
   access: AccessType;
+  artifactDir?: string;
   otp?: string;
 }): Promise<PublishedResult[]> {
   if (releases.length === 0) {
@@ -73,7 +76,7 @@ export async function publishPackages({
   }
 
   const packagesByName = new Map(
-    packages.map((pkg) => [pkg.packageJson.name, pkg]),
+    packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
   const twoFactorState = await getTwoFactorState({ otp, releases });
   const hasToDelegate = requiresDelegatedAuth(twoFactorState);
@@ -85,7 +88,9 @@ export async function publishPackages({
     publishAPackage(
       release,
       packagesByName.get(release.name)!,
+      packages,
       access,
+      artifactDir,
       twoFactorState,
     ),
   );
@@ -119,19 +124,27 @@ export async function publishPackages({
 
 async function publishAPackage(
   release: PublishReleaseEntry,
-  pkg: Package,
+  pkg: Packages["packages"][number],
+  packages: Packages,
   access: AccessType,
+  artifactDir: string | undefined,
   twoFactorState: TwoFactorState,
 ): Promise<PublishedResult> {
   const { name, version, publishConfig } = pkg.packageJson;
+  const publishTool = await getPublishTool(packages.rootDir);
+  const target = artifactDir
+    ? resolve(artifactDir, release.tarball!.path)
+    : publishTool.name === "pnpm"
+      ? pkg.dir
+      : publishConfig?.directory
+        ? resolve(pkg.dir, publishConfig.directory)
+        : pkg.dir;
 
   const publishConfirmation = await publish(
     pkg.packageJson,
     {
-      cwd: pkg.dir,
-      publishDir: publishConfig?.directory
-        ? resolve(pkg.dir, publishConfig.directory)
-        : pkg.dir,
+      cwd: packages.rootDir,
+      target,
       access: publishConfig?.access || access,
       tag: release.tag,
     },

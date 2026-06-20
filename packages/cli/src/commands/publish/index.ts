@@ -1,3 +1,4 @@
+import path from "node:path";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
@@ -7,7 +8,10 @@ import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { readConfig } from "../../utils/read-config.ts";
-import { getPublishPlan } from "../publish-plan/getPublishPlan.ts";
+import {
+  getPublishPlan,
+  readPlanFile,
+} from "../publish-plan/getPublishPlan.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { publishPackages } from "./publishPackages.ts";
 
@@ -38,19 +42,30 @@ export interface PublishOptions {
   cwd?: string;
   otp?: string;
   tag?: string;
+  fromPackDir?: string;
   /** @default true */
   gitTag?: boolean;
 }
 
 export async function publish(options?: PublishOptions) {
   const cwd = options?.cwd ?? process.cwd();
+  const artifactDir = options?.fromPackDir
+    ? path.resolve(cwd, options.fromPackDir)
+    : undefined;
 
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
 
   const releaseTag =
     options?.tag && options.tag.length > 0 ? options.tag : undefined;
-  const preState = await readPreState(packages.rootDir);
+  const preState = !artifactDir
+    ? await readPreState(packages.rootDir)
+    : undefined;
+
+  if (artifactDir && releaseTag) {
+    log.error("Releasing under custom tag is not allowed in artifact mode.");
+    throw new ExitError(1);
+  }
 
   if (releaseTag && preState && preState.mode === "pre") {
     log.error(
@@ -67,15 +82,19 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   }
 
   const config = await readConfig(packages);
-  const plan = await getPublishPlan(packages.rootDir, config, {
-    tag: releaseTag,
-  });
+  const plan = artifactDir
+    ? await readPlanFile(path.join(artifactDir, "publish-plan.json"))
+    : await getPublishPlan(packages.rootDir, config, {
+        tag: releaseTag,
+      });
   if (plan.length === 0) {
     log.warn("No unpublished projects to publish.");
     return;
   }
 
-  for (const [index, chunk] of plan.entries()) {
+  for (let index = 0; index < plan.length; index++) {
+    const chunk = plan[index];
+
     if (plan.length > 1) {
       log.info(`Publishing group ${index + 1} of ${plan.length}...`);
     }
@@ -90,9 +109,10 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
       unpublishedPackages.length > 0
         ? await publishPackages({
             releases: unpublishedPackages,
-            packages: packages.packages,
+            packages,
             // if not public, we won't pass the access, and it works as normal
             access: config.access,
+            artifactDir,
             otp: options?.otp,
           })
         : [];

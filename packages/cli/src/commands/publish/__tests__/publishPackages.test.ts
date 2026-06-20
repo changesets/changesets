@@ -38,6 +38,9 @@ describe("publishPackages", () => {
       mockedNpmUtils.getCorrectRegistry.mockReturnValue({
         registry: "https://registry.npmjs.org",
       });
+      mockedNpmUtils.getPublishTool.mockResolvedValue({
+        name: "npm",
+      });
 
       mockedNpmUtils.publish.mockImplementation(async () => ({
         result: "published",
@@ -56,7 +59,7 @@ describe("publishPackages", () => {
 
       await publishPackages({
         releases,
-        packages: packages.packages,
+        packages,
         access: "public",
       });
       expect(mockedNpmUtils.getTokenIsRequired).not.toHaveBeenCalled();
