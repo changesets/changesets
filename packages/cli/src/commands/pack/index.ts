@@ -80,7 +80,7 @@ export async function pack(options: PackOptions) {
           throw new Error(`Package not found: ${release.name}`);
         }
 
-        const publishTool = await getPublishTool(pkg.dir);
+        const publishTool = getPublishTool(packages.tool);
         const publishDir = pkg.packageJson.publishConfig?.directory
           ? path.resolve(pkg.dir, pkg.packageJson.publishConfig.directory)
           : pkg.dir;

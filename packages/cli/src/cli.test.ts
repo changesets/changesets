@@ -138,12 +138,6 @@ const tests: CommandTest[] = [
         args: [],
         options: {},
       },
-      {
-        args: ["--output", "publish-plan.json"],
-        options: {
-          output: "publish-plan.json",
-        },
-      },
     ],
   },
   {

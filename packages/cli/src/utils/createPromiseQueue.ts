@@ -1,6 +1,11 @@
 import { promiseTry } from "../ponyfills/promise-try.ts";
 
-export function createPromiseQueue(concurrency: number) {
+interface PromiseQueue {
+  add: <T>(fn: () => Promise<T>) => Promise<T>;
+  setConcurrency: (newConcurrency: number) => void;
+}
+
+export function createPromiseQueue(concurrency: number): PromiseQueue {
   const jobs: Array<{
     fn: () => Promise<unknown>;
     resolve: PromiseWithResolvers<unknown>["resolve"];

@@ -140,7 +140,10 @@ describe("Publish command", () => {
       mockedExec.mock.calls
         .filter((call) => call[1]?.[0] === "publish")
         .map((call) => call[1]?.[1]),
-    ).toEqual(["packages/pkg-b", "packages/pkg-a"]);
+    ).toEqual([
+      path.join(cwd, "packages/pkg-b"),
+      path.join(cwd, "packages/pkg-a"),
+    ]);
     expect(vi.mocked(git.tag).mock.calls.map((call) => call[0])).toEqual([
       "pkg-b@1.0.0",
       "pkg-a@1.0.0",
@@ -265,7 +268,6 @@ describe("Publish command", () => {
               name: "pkg-a",
               version: "1.0.0",
               access: "public",
-              registry: "https://registry.npmjs.org",
               tag: "latest",
               tarball: {
                 path: "packages/pkg-a-1.0.0.tgz",
@@ -294,9 +296,9 @@ describe("Publish command", () => {
         "npm",
         [
           "publish",
-          ".packed/packages/pkg-a-1.0.0.tgz",
+          path.join(cwd, ".packed/packages/pkg-a-1.0.0.tgz"),
           "--access",
-          "restricted",
+          "public",
           "--tag",
           "latest",
           "--json",
