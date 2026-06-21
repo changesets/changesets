@@ -78,10 +78,7 @@ describe("pack", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
-    mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" });
+    mockedNpmUtils.getPublishTool.mockReturnValue({ name: "npm" } as never);
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
     mockExecImplementation(async (cmd, args) => {
@@ -105,7 +102,6 @@ describe("pack", () => {
               "name": "pkg-a",
               "version": "1.0.0",
               "access": "restricted",
-              "registry": "https://registry.npmjs.org",
               "tag": "latest",
               "tarball": {
                 "path": "packages/pkg-a-1.0.0.tgz",
@@ -148,7 +144,6 @@ describe("pack", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "public",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
         {
@@ -159,10 +154,7 @@ describe("pack", () => {
       ],
     ];
 
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
-    mockedNpmUtils.getPublishTool.mockResolvedValue({ name: "npm" });
+    mockedNpmUtils.getPublishTool.mockReturnValue({ name: "npm" } as never);
     await fs.writeFile(
       path.join(cwd, "publish-plan.json"),
       JSON.stringify({ version: 1, plan }, undefined, 2),

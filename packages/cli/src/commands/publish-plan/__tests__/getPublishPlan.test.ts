@@ -44,9 +44,6 @@ describe("getPublishPlan", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
@@ -60,7 +57,6 @@ describe("getPublishPlan", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
         {
@@ -132,9 +128,6 @@ describe("getPublishPlan", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
@@ -148,7 +141,6 @@ describe("getPublishPlan", () => {
           name: "pkg-b",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
       ],
@@ -158,7 +150,6 @@ describe("getPublishPlan", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
       ],
@@ -201,10 +192,6 @@ describe("getPublishPlan", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
-
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
 
@@ -215,7 +202,6 @@ describe("getPublishPlan", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
         {
@@ -223,7 +209,6 @@ describe("getPublishPlan", () => {
           name: "pkg-b",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
       ],

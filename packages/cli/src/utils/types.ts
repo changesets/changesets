@@ -1,5 +1,4 @@
-export type TwoFactorState = {
+export type AuthState = {
   token: string | undefined;
-  isRequired: boolean;
-  allowConcurrency?: boolean;
+  shouldDelegate: boolean;
 };
