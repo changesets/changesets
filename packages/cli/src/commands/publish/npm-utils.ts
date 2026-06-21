@@ -164,18 +164,30 @@ export function getPackageInfo(
   return npmRequestQueue.add(async () => {
     const registryOverrides: string[] = [];
 
-    // for a scoped package the priority of registry resolution in `info` is:
-    // --@scope:registry
-    // .npmrc @scope:registry=
-    // --registry
-    // .npmrc registry=
+    // In pnpm `publishConfig.registry` is the only supported registry value and it's a strong publish-time override.
+    // However, pnpm's recursive publish doesn't use that to query which packages are already published:
+    // https://github.com/pnpm/pnpm/blob/b4fdfe9b3381bde2b09c1aa8af9f31446b177c83/pnpm11/releasing/commands/src/publish/recursivePublish.ts#L85-L94
     //
-    // so we can't rely on a simple --registry override here
-    if (packageJson.name.startsWith("@")) {
-      const scope = packageJson.name.split("/")[0];
-      if (publishTool !== "pnpm") {
-        // in npm publishConfig values are only flattened into the config-level values
-        // so we just have to pick the existing ones and override them 1 to 1 as CLI flags
+    // We match that behavior and in pnpm we treat `publishConfig.registry` as a publish-time override only, and we don't use it to query the registry for existing versions.
+    // It's a poorly documented manifest option anyway (docs don't mention it at all).
+    if (publishTool === "npm") {
+      // npm actually uses the `publishConfig.registry` value when querying package info during publish:
+      // https://github.com/npm/cli/blob/ed729620b1297f44ccf2517fd19fbaffdc225ed9/lib/commands/publish.js#L150
+      //
+      // Note that at this point the `opts` can actually be already mutates by the `#getManifest` call.
+      //
+      // It doesn't actually implement `isAlreadyPublished`-like early out for already published workspaces
+      // but it still performs the `npm info`-like query to validate certain things about the package.
+      // We treat this as a strong signal that `publishConfig.registry` in npm is also meant to be a read-time registry target.
+      if (packageJson.name.startsWith("@")) {
+        // For a scoped package the priority of registry resolution in `npm info` is:
+        // --@scope:registry
+        // .npmrc @scope:registry=
+        // --registry
+        // .npmrc registry=
+        //
+        // so we can't rely on a simple --registry override here
+        const scope = packageJson.name.split("/")[0];
         if (packageJson.publishConfig?.[`${scope}:registry`]) {
           registryOverrides.push(
             `--${scope}:registry=${packageJson.publishConfig[`${scope}:registry`]}`,
@@ -187,17 +199,11 @@ export function getPackageInfo(
           );
         }
       } else if (packageJson.publishConfig?.registry) {
-        // in pnpm `publishConfig.registry` is the only supported registry value and it's a strong publish-time override
-        // to emulate pnpm publish-time precedence when querying via pnpm info, we force it as a scoped override
+        // for non-scoped packages, it's a simple override
         registryOverrides.push(
-          `--${scope}:registry=${packageJson.publishConfig.registry}`,
+          `--registry=${packageJson.publishConfig.registry}`,
         );
       }
-    } else if (packageJson.publishConfig?.registry) {
-      // for non-scoped packages, it's a simple override
-      registryOverrides.push(
-        `--registry=${packageJson.publishConfig.registry}`,
-      );
     }
 
     // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
