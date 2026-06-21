@@ -187,7 +187,7 @@ export function getPackageInfo(
           );
         }
       } else if (packageJson.publishConfig?.registry) {
-               // in pnpm `publishConfig.registry` is the only supported registry value and it's a strong publish-time override
+        // in pnpm `publishConfig.registry` is the only supported registry value and it's a strong publish-time override
         // to emulate pnpm publish-time precedence when querying via pnpm info, we force it as a scoped override
         registryOverrides.push(
           `--${scope}:registry=${packageJson.publishConfig.registry}`,
