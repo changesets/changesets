@@ -1024,28 +1024,25 @@ describe("dependent bumping", () => {
     Record<VersionType, Record<Range, string>>
   >;
 
+  const defaultBumps: ExpectationTable[DepKind] = {
+    none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+    patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
+    minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
+    major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
+  }
+
   // oxfmt-ignore
   const baseExpectations: ExpectationTable = {
-    // direct dependent has to be bumped only when dependency falls out of allowed range
+    // direct and peer dependents have to be bumped only when dependency falls out of allowed range
     // otherwise, installing the latest versions of dependent and dependency would result in duplicate dependency package in the tree
-    dep: {
-      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
-      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
-      minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
-      major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
-    },
+    dep: defaultBumps,
+    peer: defaultBumps,
     // devDependent should stay untouched, given the dev dependency doesn't affect production installations
     dev: {
       none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
       patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
       minor: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
       major: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
-    },
-    peer: {
-      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
-      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
-      minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
-      major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
     },
   };
 
@@ -1232,19 +1229,17 @@ describe("dependent bumping", () => {
       },
       peer: {
         patch: { "^": "1.0.1", "~": "1.0.1" },
-        minor: { "^": "1.0.1", },
+        minor: { "^": "1.0.1" },
       },
     },
   });
 
+  // should not affect dependent bumps
   describeDependentBumping("onlyUpdatePeerDependentsWhenOutOfRange: true", {
     config: {
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: true,
       },
-    },
-    overrides: {
-      peer: { minor: { "^": "1.0.0" } },
     },
   });
 
