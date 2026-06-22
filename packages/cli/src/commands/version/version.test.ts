@@ -4,10 +4,7 @@ import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
-import {
-  silenceLogsInBlock,
-  testdir,
-} from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import type { Changeset, Config } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
 import { log } from "@clack/prompts";
