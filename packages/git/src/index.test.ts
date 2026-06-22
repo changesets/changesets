@@ -25,7 +25,7 @@ async function getCommitCount(cwd: string) {
   return parseInt(cmd.stdout.toString(), 10);
 }
 
-describe("git", () => {
+describe("git", { tags: ["slow"] }, () => {
   describe("getDivergedCommit", () => {
     it("should return same commit when branches have not diverged", async () => {
       const cwd = await gitdir({

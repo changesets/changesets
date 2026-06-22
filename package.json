@@ -29,6 +29,7 @@
     "generate-json-schema": "node packages/config/scripts/generate-json-schema.ts",
     "lint": "eslint",
     "test": "vitest",
+    "test:fast": "vitest --tags-filter=!slow",
     "types:check": "tsc",
     "check-all": "pnpm build && pnpm test run && pnpm types:check && pnpm lint && pnpm format",
     "version-packages": "changeset version && pnpm format:fix",
