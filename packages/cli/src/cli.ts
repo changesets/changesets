@@ -119,7 +119,10 @@ cli
 
 cli
   .command("pack", "Pack publishable packages into tarballs")
-  .option("--from-plan <file>", "Read the publish plan from a JSON file")
+  .option(
+    "--from-publish-plan <file>",
+    "Read the publish plan from a JSON file",
+  )
   .option("--out-dir <dir>", "Write pack output into this directory")
   .action(async (options) => {
     normalizeOptions(options);
