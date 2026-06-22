@@ -130,7 +130,7 @@ export async function runVersion({
       path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"),
       "version",
     ];
-    await exec("node", args, { nodeOptions: { cwd } });
+    await exec("node", args, { throwOnError: true, nodeOptions: { cwd } });
   }
 
   const changedPackages = await getChangedPackages(cwd, versionsByDirectory);
