@@ -56,7 +56,34 @@ async function getInteractiveConfig() {
 
   config.baseBranch = baseBranchInput || "main";
 
-  return `${JSON.stringify(config, null, 2)}\n`;
+  const priorityOrder = [
+    "$schema",
+    "changelog",
+    "baseBranch",
+    "commit",
+    "access",
+    "ignore",
+    "fixed",
+    "linked",
+    "format",
+    "updateInternalDependencies",
+  ];
+
+  const sortedConfig: Record<string, any> = {};
+
+  for (const key of priorityOrder) {
+    if (key in config) {
+      sortedConfig[key] = (config as Record<string, any>)[key];
+    }
+  }
+
+  for (const key of Object.keys(config)) {
+    if (!(key in sortedConfig)) {
+      sortedConfig[key] = (config as Record<string, any>)[key];
+    }
+  }
+
+  return `${JSON.stringify(sortedConfig, null, 2)}\n`;
 }
 
 export async function init(options?: InitOptions): Promise<void> {
