@@ -49,7 +49,7 @@ async function setupRepoAndClone(cwd: string) {
   return { clone, mainBranch };
 }
 
-describe("version", () => {
+describe("version", { tags: ["slow"] }, () => {
   it("returns the right changed packages and pushes to the remote", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
