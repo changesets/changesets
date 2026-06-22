@@ -100,8 +100,8 @@ importers:
         specifier: ^3.3.1
         version: 3.3.1
       semver:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.4
+        version: 7.8.4
     devDependencies:
       '@changesets/test-utils':
         specifier: workspace:*
@@ -131,8 +131,8 @@ importers:
         specifier: workspace:^
         version: link:../types
       semver:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.4
+        version: 7.8.4
     devDependencies:
       '@changesets/config':
         specifier: workspace:*
@@ -217,8 +217,8 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0
       semver:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.4
+        version: 7.8.4
       tinyexec:
         specifier: ^1.2.4
         version: 1.2.4
@@ -280,8 +280,8 @@ importers:
         specifier: workspace:^
         version: link:../types
       semver:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.4
+        version: 7.8.4
     devDependencies:
       '@changesets/color':
         specifier: workspace:^
@@ -1701,6 +1701,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.4:
+    resolution: {integrity: sha512-rUCObTnP32Q08R2uuIrt7r9PlEonuTmtuXYcW6s5kjdlj3xbnwe+21yXptAUYcMAABLkYYTtnmzb3w3EDZfueA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   shebang-command@2.0.0:
     resolution: {integrity: sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==}
     engines: {node: '>=8'}
@@ -2385,7 +2390,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.60.1
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.8.1
+      semver: 7.8.4
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -2565,7 +2570,7 @@ snapshots:
   eslint-compat-utils@0.5.1(eslint@10.4.1):
     dependencies:
       eslint: 10.4.1
-      semver: 7.8.1
+      semver: 7.8.4
 
   eslint-config-prettier@10.1.8(eslint@10.4.1):
     dependencies:
@@ -2867,7 +2872,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.8.1
+      semver: 7.8.4
 
   minimatch@10.2.5:
     dependencies:
@@ -2949,7 +2954,7 @@ snapshots:
       ky: 1.14.3
       registry-auth-token: 5.1.1
       registry-url: 6.0.1
-      semver: 7.8.1
+      semver: 7.8.4
 
   package-manager-detector@1.6.0: {}
 
@@ -3050,9 +3055,11 @@ snapshots:
 
   sembear@0.7.0:
     dependencies:
-      semver: 7.8.1
+      semver: 7.8.4
 
   semver@7.8.1: {}
+
+  semver@7.8.4: {}
 
   shebang-command@2.0.0:
     dependencies:

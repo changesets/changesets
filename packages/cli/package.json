@@ -53,7 +53,7 @@
     "import-meta-resolve": "^4.2.0",
     "launch-editor": "^2.14.1",
     "package-manager-detector": "^1.6.0",
-    "semver": "^7.8.1",
+    "semver": "^7.8.4",
     "tinyexec": "^1.2.4"
   },
   "devDependencies": {
