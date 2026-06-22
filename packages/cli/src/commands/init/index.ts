@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import c from "@changesets/color";
 import { defaultWrittenConfig } from "@changesets/config";
+import type { AccessType } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import * as cli from "../../utils/cli-utilities.ts";
@@ -15,8 +16,6 @@ const pkgPath = path.dirname(
 export interface InitOptions {
   cwd?: string;
 }
-
-export type AccessType = "public" | "restricted";
 
 async function getInteractiveConfig() {
   const config = { ...defaultWrittenConfig };
@@ -48,7 +47,7 @@ async function getInteractiveConfig() {
       { label: "Private", value: "restricted" },
       { label: "Public", value: "public" },
     ],
-  )) as AccessType | "private";
+  )) as AccessType;
 
   const baseBranchInput = await cli.askQuestion(
     "Which base branch should be used?",
