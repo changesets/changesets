@@ -422,9 +422,6 @@ importers:
       '@manypkg/get-packages':
         specifier: ^3.1.0
         version: 3.1.0
-      semver:
-        specifier: ^7.8.1
-        version: 7.8.1
       tinyexec:
         specifier: ^1.2.4
         version: 1.2.4

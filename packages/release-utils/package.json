@@ -17,7 +17,6 @@
     "@changesets/read": "workspace:^",
     "@changesets/types": "workspace:^",
     "@manypkg/get-packages": "^3.1.0",
-    "semver": "^7.8.1",
     "tinyexec": "^1.2.4"
   },
   "devDependencies": {
