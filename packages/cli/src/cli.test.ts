@@ -2,7 +2,9 @@ import { describe, expect, test, vi } from "vitest";
 import { cli } from "./cli.ts";
 import { add } from "./commands/add/index.ts";
 import { init } from "./commands/init/index.ts";
+import { pack } from "./commands/pack/index.ts";
 import { pre } from "./commands/pre/index.ts";
+import { publishPlan } from "./commands/publish-plan/index.ts";
 import { publish } from "./commands/publish/index.ts";
 import { status } from "./commands/status/index.ts";
 import { tag } from "./commands/tag/index.ts";
@@ -12,6 +14,8 @@ vi.mock("./commands/init/index.ts");
 vi.mock("./commands/add/index.ts");
 vi.mock("./commands/version/index.ts");
 vi.mock("./commands/publish/index.ts");
+vi.mock("./commands/publish-plan/index.ts");
+vi.mock("./commands/pack/index.ts");
 vi.mock("./commands/status/index.ts");
 vi.mock("./commands/tag/index.ts");
 vi.mock("./commands/pre/index.ts");
@@ -115,6 +119,48 @@ const tests: CommandTest[] = [
           otp: "123456",
           tag: "beta",
           gitTag: true,
+        },
+      },
+      {
+        args: ["--from-pack-dir", ".packed"],
+        options: {
+          fromPackDir: ".packed",
+          gitTag: true,
+        },
+      },
+    ],
+  },
+  {
+    command: "publish-plan",
+    fn: publishPlan,
+    cases: [
+      {
+        args: [],
+        options: {},
+      },
+      {
+        args: ["--output", "publish-plan.json"],
+        options: {
+          output: "publish-plan.json",
+        },
+      },
+    ],
+  },
+  {
+    command: "pack",
+    fn: pack,
+    cases: [
+      {
+        args: ["--out-dir", ".packed"],
+        options: {
+          outDir: ".packed",
+        },
+      },
+      {
+        args: ["--from-plan", "publish-plan.json", "--out-dir", ".packed"],
+        options: {
+          fromPlan: "publish-plan.json",
+          outDir: ".packed",
         },
       },
     ],

@@ -97,11 +97,38 @@ cli
   .example("  $ changeset publish --tag beta")
   .option("--otp <code>", "One time password for npm publish")
   .option("--tag <name>", "Publish with the given npm dist-tag")
+  .option("--from-pack-dir <dir>", "Publish from a packed output directory")
   .option("--git-tag", "Create a git tag for the release", { default: true })
   .action(async (options) => {
     normalizeOptions(options);
     const { publish } = await import("./commands/publish/index.ts");
     await publish(options);
+  });
+
+cli
+  .command("publish-plan", "Show packages that are ready to publish or tag")
+  .option(
+    "-o, --output <file>",
+    "Output the publish plan as JSON to a file [experimental]",
+  )
+  .action(async (options) => {
+    normalizeOptions(options);
+    const { publishPlan } = await import("./commands/publish-plan/index.ts");
+    await publishPlan(options);
+  });
+
+cli
+  .command("pack", "Pack publishable packages into tarballs")
+  .option("--from-plan <file>", "Read the publish plan from a JSON file")
+  .option("--out-dir <dir>", "Write pack output into this directory")
+  .action(async (options) => {
+    normalizeOptions(options);
+    if (!options.outDir) {
+      log.error("The --out-dir option is required.");
+      throw new ExitError(1);
+    }
+    const { pack } = await import("./commands/pack/index.ts");
+    await pack(options);
   });
 
 cli

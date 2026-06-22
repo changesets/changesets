@@ -1,3 +1,4 @@
+import path from "node:path";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import type { AccessType, PackageJSON } from "@changesets/types";
@@ -12,7 +13,7 @@ import { requiresDelegatedAuth } from "./publishPackages.ts";
 
 interface PublishOptions {
   cwd: string;
-  publishDir: string;
+  target: string;
   access: AccessType;
   tag: string;
 }
@@ -55,6 +56,8 @@ interface RegistryInfo {
   registry: string;
 }
 
+type InfoPublishTool = "npm" | "pnpm";
+
 export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   const packageName = packageJson?.name;
 
@@ -81,7 +84,7 @@ export function getCorrectRegistry(packageJson?: PackageJSON): RegistryInfo {
   };
 }
 
-async function getPublishTool(
+export async function getPublishTool(
   cwd: string,
 ): Promise<{ name: "npm" } | { name: "pnpm"; shouldAddNoGitChecks: boolean }> {
   const pm = await detect({ cwd });
@@ -154,26 +157,71 @@ ${result.stderr.toString().trim() || result.stdout.toString().trim()}
 //   queries return empty → no versions list → only-pre detection is not
 //   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
 //   published with preState.tag rather than "latest".
-export function getPackageInfo(packageJson: PackageJSON) {
+export function getPackageInfo(
+  packageJson: PackageJSON,
+  publishTool: InfoPublishTool = "npm",
+) {
   return npmRequestQueue.add(async () => {
-    const { scope, registry } = getCorrectRegistry(packageJson);
+    const registryOverrides: string[] = [];
+
+    // In pnpm `publishConfig.registry` is the only supported registry value and it's a strong publish-time override.
+    // However, pnpm's recursive publish doesn't use that to query which packages are already published:
+    // https://github.com/pnpm/pnpm/blob/b4fdfe9b3381bde2b09c1aa8af9f31446b177c83/pnpm11/releasing/commands/src/publish/recursivePublish.ts#L85-L94
+    //
+    // We match that behavior and in pnpm we treat `publishConfig.registry` as a publish-time override only, and we don't use it to query the registry for existing versions.
+    // It's a poorly documented manifest option anyway (docs don't mention it at all).
+    if (publishTool === "npm") {
+      // npm actually uses the `publishConfig.registry` value when querying package info during publish:
+      // https://github.com/npm/cli/blob/ed729620b1297f44ccf2517fd19fbaffdc225ed9/lib/commands/publish.js#L150
+      //
+      // Note that at this point the `opts` can actually be already mutates by the `#getManifest` call.
+      //
+      // It doesn't actually implement `isAlreadyPublished`-like early out for already published workspaces
+      // but it still performs the `npm info`-like query to validate certain things about the package.
+      // We treat this as a strong signal that `publishConfig.registry` in npm is also meant to be a read-time registry target.
+      if (packageJson.name.startsWith("@")) {
+        // For a scoped package the priority of registry resolution in `npm info` is:
+        // --@scope:registry
+        // .npmrc @scope:registry=
+        // --registry
+        // .npmrc registry=
+        //
+        // so we can't rely on a simple --registry override here
+        const scope = packageJson.name.split("/")[0];
+        if (packageJson.publishConfig?.[`${scope}:registry`]) {
+          registryOverrides.push(
+            `--${scope}:registry=${packageJson.publishConfig[`${scope}:registry`]}`,
+          );
+        }
+        if (packageJson.publishConfig?.registry) {
+          registryOverrides.push(
+            `--registry=${packageJson.publishConfig.registry}`,
+          );
+        }
+      } else if (packageJson.publishConfig?.registry) {
+        // for non-scoped packages, it's a simple override
+        registryOverrides.push(
+          `--registry=${packageJson.publishConfig.registry}`,
+        );
+      }
+    }
 
     // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
     // bleed-through, enabling only-pre detection downstream. Returns empty when no `latest` exists.
-    let result = await exec("npm", [
+    let result = await exec(publishTool, [
       "info",
       packageJson.name,
-      `--${scope ? `${scope}:` : ""}registry=${registry}`,
+      ...registryOverrides,
       "--json",
     ]);
 
     // Bare query returned nothing — retry with exact version specifier
     // to handle prerelease-only packages on registries without auto-`latest`.
     if (result.stdout.toString() === "") {
-      result = await exec("npm", [
+      result = await exec(publishTool, [
         "info",
         `${packageJson.name}@${packageJson.version}`,
-        `--${scope ? `${scope}:` : ""}registry=${registry}`,
+        ...registryOverrides,
         "--json",
       ]);
     }
@@ -192,8 +240,11 @@ export function getPackageInfo(packageJson: PackageJSON) {
   });
 }
 
-export async function infoAllow404(packageJson: PackageJSON) {
-  const pkgInfo = await getPackageInfo(packageJson);
+export async function infoAllow404(
+  packageJson: PackageJSON,
+  publishTool: InfoPublishTool = "npm",
+) {
+  const pkgInfo = await getPackageInfo(packageJson, publishTool);
   if (pkgInfo.error?.code === "E404") {
     log.warn(`Received 404 for ${c.cyan(`npm info ${packageJson.name}`)}`);
     return { published: false, pkgInfo: {} };
@@ -232,6 +283,7 @@ async function internalPublish(
   twoFactorState: TwoFactorState,
 ): Promise<InternalPublishResult> {
   const publishTool = await getPublishTool(opts.cwd);
+  const relativeTarget = path.relative(opts.cwd, opts.target) || ".";
 
   const publishFlags = opts.access ? ["--access", opts.access] : [];
   publishFlags.push("--tag", opts.tag);
@@ -252,23 +304,20 @@ async function internalPublish(
     // we specifically don't want any other output to interfere with the delegated auth flow
     const child =
       publishTool.name === "pnpm"
-        ? exec("pnpm", ["publish", ...publishFlags], {
+        ? exec("pnpm", ["publish", relativeTarget, ...publishFlags], {
             nodeOptions: {
               env: { ...process.env, ...envOverride },
               cwd: opts.cwd,
               stdio: ["inherit", "inherit", "pipe"],
             },
           })
-        : exec(
-            publishTool.name,
-            ["publish", opts.publishDir, ...publishFlags],
-            {
-              nodeOptions: {
-                env: { ...process.env, ...envOverride },
-                stdio: ["inherit", "inherit", "pipe"],
-              },
+        : exec(publishTool.name, ["publish", relativeTarget, ...publishFlags], {
+            nodeOptions: {
+              env: { ...process.env, ...envOverride },
+              cwd: opts.cwd,
+              stdio: ["inherit", "inherit", "pipe"],
             },
-          );
+          });
 
     const result = await child;
 
@@ -303,7 +352,7 @@ async function internalPublish(
 
   const { exitCode, stdout, stderr } =
     publishTool.name === "pnpm"
-      ? await exec("pnpm", ["publish", ...publishFlags], {
+      ? await exec("pnpm", ["publish", relativeTarget, ...publishFlags], {
           nodeOptions: {
             env: { ...process.env, ...envOverride },
             cwd: opts.cwd,
@@ -311,8 +360,13 @@ async function internalPublish(
         })
       : await exec(
           publishTool.name,
-          ["publish", opts.publishDir, ...publishFlags],
-          { nodeOptions: { env: { ...process.env, ...envOverride } } },
+          ["publish", relativeTarget, ...publishFlags],
+          {
+            nodeOptions: {
+              env: { ...process.env, ...envOverride },
+              cwd: opts.cwd,
+            },
+          },
         );
 
   if (exitCode !== 0) {
