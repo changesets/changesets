@@ -276,4 +276,33 @@ describe("init", () => {
 
     expect(config.baseBranch).toBe("main");
   });
+
+  it("should be written with consistently ordered properties", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+      }),
+    });
+
+    await initializeCommand({ cwd });
+
+    const { configPath } = getPaths(cwd);
+    const configContent = await fs.readFile(configPath, "utf8");
+    const parsedConfig = JSON.parse(configContent);
+    const keys = Object.keys(parsedConfig);
+
+    expect(keys).toEqual([
+      "$schema",
+      "changelog",
+      "baseBranch",
+      "commit",
+      "access",
+      "ignore",
+      "fixed",
+      "linked",
+      "format",
+      "updateInternalDependencies",
+    ]);
+  });
 });
