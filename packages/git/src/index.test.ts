@@ -1,6 +1,11 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { gitdir, outputFile, testdir } from "@changesets/test-utils";
+import {
+  disableGitBackgroundMaintenance,
+  gitdir,
+  outputFile,
+  testdir,
+} from "@changesets/test-utils";
 import { writeChangeset } from "@changesets/write";
 import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
@@ -312,6 +317,7 @@ describe("git", { tags: ["slow"] }, () => {
             nodeOptions: { cwd: cloneDir },
           },
         );
+        await disableGitBackgroundMaintenance(cloneDir);
         return cloneDir;
       }
 
