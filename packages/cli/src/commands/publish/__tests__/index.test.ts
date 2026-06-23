@@ -4,15 +4,26 @@ import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import type { Config } from "@changesets/types";
-import { log } from "@clack/prompts";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { publish as publishCommand } from "../index.ts";
 
-vi.mock("@clack/prompts");
+const mockedLogger = vi.hoisted(() => ({
+  success: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
+}));
+
+vi.mock("@clack/prompts", async (importOriginal) => {
+  return {
+    ...(await importOriginal()),
+    log: mockedLogger,
+  };
+});
+
 vi.mock("@changesets/git");
 vi.mock("tinyexec");
-const mockedLogger = vi.mocked(log);
 
 const changelogPath = path.resolve(import.meta.dirname, "../../changelog");
 const modifiedDefaultConfig: Config = {
