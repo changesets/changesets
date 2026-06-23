@@ -64,10 +64,8 @@ export async function version(options: VersionOptions) {
     throw new ExitError(1);
   }
 
-  const [changesets, preState] = await Promise.all([
-    readChangesets(cwd),
-    readPreState(cwd),
-  ]);
+  const preState = await readPreState(cwd);
+  const changesets = await readChangesets(cwd);
 
   if (preState?.mode === "pre") {
     if (options.snapshot != null) {

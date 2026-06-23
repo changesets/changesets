@@ -23,8 +23,8 @@ export async function getReleasePlan(
     ? { ...configResult.config, ...passedConfig }
     : configResult.config;
 
-  const changesets = await readChangesets(packages.rootDir, sinceRef);
   const preState = await readPreState(packages.rootDir);
+  const changesets = await readChangesets(packages.rootDir, sinceRef);
 
   return assembleReleasePlan(changesets, packages, config, preState);
 }
