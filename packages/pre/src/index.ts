@@ -85,12 +85,18 @@ async function migratePreState(
 
   for (const changesetId of preState.changesets) {
     await fs
-      .rm(path.resolve(rootDir, ".changeset", changesetId + ".json"))
+      .rm(path.resolve(rootDir, ".changeset", changesetId + ".md"))
       .catch(() => {
         // It's possible to specify an unknown id before without errors, so we
         // don't throw an error here if the file doesn't exist.
       });
   }
+
+  delete preState.changesets;
+  await outputFile(
+    path.resolve(rootDir, ".changeset", "pre.json"),
+    JSON.stringify(preState, null, 2) + "\n",
+  );
 
   return preState;
 }
