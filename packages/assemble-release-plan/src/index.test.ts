@@ -1025,11 +1025,11 @@ describe("dependent bumping", () => {
   >;
 
   const defaultBumps: ExpectationTable[DepKind] = {
-    none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+    none: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
     patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
     minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
     major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
-  }
+  };
 
   // oxfmt-ignore
   const baseExpectations: ExpectationTable = {
