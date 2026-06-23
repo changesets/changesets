@@ -34,7 +34,7 @@ export async function readPreState(
     }
   }
 
-  // The "changesets" property is not needed for v3, even if migrated from v2
+  // Migrate from v2 to v3 pre.json file
   preState = preState ? await migratePreState(rootDir, preState) : undefined;
 
   return preState;
@@ -70,25 +70,35 @@ export async function enterPre(rootDir: string, tag: string) {
   await outputFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
 }
 
-// "changesets" property is no longer needed in v3, but may exist for those migrating from v2
 async function migratePreState(
   rootDir: string,
-  preState: PreState & { changesets?: string[] },
+  preState: PreState & {
+    initialVersions?: { [pkgName: string]: string };
+    changesets?: string[];
+  },
 ): Promise<PreState> {
-  if (preState.changesets == null) {
+  if (preState.changesets == null && preState.initialVersions == null) {
     return preState;
   }
 
-  for (const changesetId of preState.changesets) {
-    await fs
-      .rm(path.resolve(rootDir, ".changeset", changesetId + ".md"))
-      .catch(() => {
-        // It's possible to specify an unknown id before without errors, so we
-        // don't throw an error here if the file doesn't exist.
-      });
+  // "changesets" is not used by v3 anymore, delete and remove the stale changeset files
+  if (preState.changesets != null) {
+    for (const changesetId of preState.changesets) {
+      await fs
+        .rm(path.resolve(rootDir, ".changeset", changesetId + ".md"))
+        .catch(() => {
+          // It's possible to specify an unknown id before without errors, so we
+          // don't throw an error here if the file doesn't exist.
+        });
+    }
+    delete preState.changesets;
   }
 
-  delete preState.changesets;
+  // "initialVersions" is not used for a long time, so can directly delete
+  if (preState.initialVersions != null) {
+    delete preState.initialVersions;
+  }
+
   await outputFile(
     path.resolve(rootDir, ".changeset", "pre.json"),
     JSON.stringify(preState, null, 2) + "\n",
