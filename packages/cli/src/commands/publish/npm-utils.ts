@@ -212,6 +212,8 @@ async function internalPublish(
   opts: PublishOptions,
   authState: AuthState,
 ): Promise<InternalPublishResult> {
+  const relativeTarget = path.relative(opts.cwd, opts.target);
+
   const publishFlags = ["--access", release.access, "--tag", release.tag];
   if (publishTool.name === "pnpm") {
     publishFlags.push("--no-git-checks");
@@ -222,7 +224,7 @@ async function internalPublish(
     // we specifically don't want any other output to interfere with the delegated auth flow
     const child = exec(
       publishTool.name,
-      ["publish", opts.target, ...publishFlags],
+      ["publish", relativeTarget, ...publishFlags],
       {
         nodeOptions: {
           env: opts.env,
@@ -265,7 +267,7 @@ async function internalPublish(
 
   const { exitCode, stdout, stderr } = await exec(
     publishTool.name,
-    ["publish", opts.target, ...publishFlags],
+    ["publish", relativeTarget, ...publishFlags],
     {
       nodeOptions: {
         env: opts.env,
