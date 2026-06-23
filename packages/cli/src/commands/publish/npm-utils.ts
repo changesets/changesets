@@ -275,12 +275,18 @@ type InternalPublishResult =
   | { result: "skipped" }
   | { result: "failed"; allowRetry?: boolean };
 
-function formatNpmError(error: {
-  summary?: string;
-  message?: string;
-  detail?: string;
-}) {
-  const summary = error.summary ?? error.message ?? "Unknown npm publish error";
+function formatPublishError(
+  publishTool: "npm" | "pnpm",
+  error: {
+    summary?: string;
+    message?: string;
+    detail?: string;
+  },
+) {
+  // pnpm 11 uses .message but pnpm 10 delegates to npm and that uses .summary
+  const summary =
+    publishTool === "pnpm" ? (error.message ?? error.summary) : error.summary;
+  // .detail is npm-specific but for simplicity we handle it at all times
   return `${summary}${error.detail ? `\n${error.detail}` : ""}`;
 }
 
@@ -420,7 +426,7 @@ async function internalPublish(
       log.error(
         `
 An error occurred while publishing ${packageJson.name}: ${json.error.code}
-${formatNpmError(json.error)}
+${formatPublishError(publishTool.name, json.error)}
         `.trim(),
       );
     }

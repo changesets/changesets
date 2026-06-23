@@ -244,13 +244,13 @@ describe("Publish command", () => {
     ).toBe(false);
   });
 
-  it("logs npm error message when summary is missing", async () => {
+  it("logs pnpm error messages from the message field", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
         workspaces: ["packages/*"],
       }),
-      "package-lock.json": "",
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -259,6 +259,9 @@ describe("Publish command", () => {
     });
 
     mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("11.0.0");
+      }
       if (args[0] === "info") {
         return execResult("");
       }
@@ -287,7 +290,65 @@ describe("Publish command", () => {
       errorMessages.some(
         (message) =>
           message.includes("An error occurred while publishing pkg-a: E404") &&
-          message.includes("404 Not Found - PUT https://registry.npmjs.org/pkg-a"),
+          message.includes(
+            "404 Not Found - PUT https://registry.npmjs.org/pkg-a",
+          ),
+      ),
+    ).toBe(true);
+    expect(errorMessages.some((message) => message.includes("undefined"))).toBe(
+      false,
+    );
+  });
+
+  it("logs pnpm 10 error summaries from the summary field", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("10.0.0");
+      }
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult(
+          "",
+          1,
+          JSON.stringify({
+            error: {
+              code: "E404",
+              summary: "404 Not Found - PUT https://registry.npmjs.org/pkg-a",
+            },
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await expect(publishCommand({ cwd })).rejects.toThrow();
+
+    expect(mockedLogger.error).toHaveBeenCalled();
+    const errorMessages = mockedLogger.error.mock.calls.map((call) =>
+      stripVTControlCharacters(String(call[0])),
+    );
+    expect(
+      errorMessages.some(
+        (message) =>
+          message.includes("An error occurred while publishing pkg-a: E404") &&
+          message.includes(
+            "404 Not Found - PUT https://registry.npmjs.org/pkg-a",
+          ),
       ),
     ).toBe(true);
     expect(errorMessages.some((message) => message.includes("undefined"))).toBe(
