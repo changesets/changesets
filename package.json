@@ -33,7 +33,10 @@
     "types:check": "tsc",
     "check-all": "pnpm build && pnpm test run && pnpm types:check && pnpm lint && pnpm format",
     "version-packages": "changeset version && pnpm format:fix",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "lint-staged:setup": "pnpm run --sequential /lint-staged:setup:\\d/",
+    "lint-staged:setup:1": "git config set hook.\"lint-staged\".event pre-commit",
+    "lint-staged:setup:2": "git config set hook.\"lint-staged\".command \"node node_modules/lint-staged/bin/lint-staged.js\""
   },
   "devDependencies": {
     "@changesets/changelog-github": "workspace:*",
@@ -50,6 +53,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-lite": "~0.6.0",
     "eslint-plugin-n": "^18.1.0",
+    "lint-staged": "^17.0.7",
     "oxfmt": "^0.54.0",
     "pkg-pr-new": "^0.0.75",
     "publint": "^0.3.21",
@@ -57,6 +61,11 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0",
     "vitest": "^4.1.9"
+  },
+  "lint-staged": {
+    "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,json5,yaml,yml,css,scss,md}": [
+      "oxfmt --write --no-error-on-unmatched-pattern"
+    ]
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
