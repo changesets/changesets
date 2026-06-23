@@ -3273,7 +3273,6 @@ describe("apply release plan", () => {
           "pkg-a": "1.0.0",
           "pkg-b": "1.0.0",
         },
-        changesets: [],
       };
 
       const { tempDir } = await testSetup(

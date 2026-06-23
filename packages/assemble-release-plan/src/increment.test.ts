@@ -18,7 +18,6 @@ describe("incrementVersion", () => {
           mode: "pre",
           tag: "next",
           initialVersions: {},
-          changesets: [],
         },
       };
 

@@ -749,7 +749,6 @@ describe("assembleReleasePlan", () => {
           ...defaultConfig,
         },
         {
-          changesets: [],
           tag: "next",
           initialVersions: {},
           mode: "exit",
@@ -773,7 +772,6 @@ describe("assembleReleasePlan", () => {
           ...defaultConfig,
         },
         {
-          changesets: ["strange-words-combine"],
           tag: "next",
           initialVersions: {
             "pkg-a": "1.0.0",
@@ -803,7 +801,6 @@ describe("assembleReleasePlan", () => {
           ignore: ["pkg-b"],
         },
         {
-          changesets: ["strange-words-combine"],
           tag: "next",
           initialVersions: {
             "pkg-a": "1.0.0",
@@ -821,16 +818,6 @@ describe("assembleReleasePlan", () => {
     });
 
     it("should return a release with the highest bump type within the current release despite of having a higher release among previous prereleases", () => {
-      // previous release
-      setup.addChangeset({
-        id: "major-bumping-one",
-        releases: [
-          {
-            name: "pkg-a",
-            type: "major",
-          },
-        ],
-      });
       setup.updatePackage("pkg-a", "2.0.0-next.0");
 
       // current release
@@ -850,7 +837,6 @@ describe("assembleReleasePlan", () => {
           ...defaultConfig,
         },
         {
-          changesets: ["major-bumping-one"],
           tag: "next",
           initialVersions: {
             "pkg-a": "1.0.0",

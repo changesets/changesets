@@ -139,10 +139,9 @@ export function assembleReleasePlan(
     changesets,
     packagesByName,
     config,
-    preState,
   );
 
-  const preInfo = getPreInfo(changesets, packagesByName, config, preState);
+  const preInfo = getPreInfo(packagesByName, config, preState);
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
@@ -236,7 +235,6 @@ function getRelevantChangesets(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
   config: Config,
-  preState: PreState | undefined,
 ): NewChangeset[] {
   for (const changeset of changesets) {
     // Using the following 2 arrays to decide whether a changeset
@@ -273,13 +271,6 @@ function getRelevantChangesets(
     }
   }
 
-  if (preState && preState.mode !== "exit") {
-    const usedChangesetIds = new Set(preState.changesets);
-    return changesets.filter(
-      (changeset) => !usedChangesetIds.has(changeset.id),
-    );
-  }
-
   return changesets;
 }
 
@@ -306,7 +297,6 @@ function getHighestPreVersion(
 }
 
 function getPreInfo(
-  changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
   config: Config,
   preState: PreState | undefined,
@@ -317,7 +307,6 @@ function getPreInfo(
 
   const updatedPreState = {
     ...preState,
-    changesets: changesets.map((changeset) => changeset.id),
     initialVersions: {
       ...preState.initialVersions,
     },

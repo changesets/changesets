@@ -33,6 +33,10 @@ export async function readPreState(
       throw err;
     }
   }
+
+  // The "changesets" property is not needed for v3, even if migrated from v2
+  preState = preState ? await migratePreState(rootDir, preState) : undefined;
+
   return preState;
 }
 
@@ -63,10 +67,30 @@ export async function enterPre(rootDir: string, tag: string) {
     mode: "pre",
     tag,
     initialVersions: {},
-    changesets: preState?.changesets ?? [],
   };
   for (const pkg of packages.packages) {
     newPreState.initialVersions[pkg.packageJson.name] = pkg.packageJson.version;
   }
   await outputFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
+}
+
+// "changesets" property is no longer needed in v3, but may exist for those migrating from v2
+async function migratePreState(
+  rootDir: string,
+  preState: PreState & { changesets?: string[] },
+): Promise<PreState> {
+  if (preState.changesets == null) {
+    return preState;
+  }
+
+  for (const changesetId of preState.changesets) {
+    await fs
+      .rm(path.resolve(rootDir, ".changeset", changesetId + ".json"))
+      .catch(() => {
+        // It's possible to specify an unknown id before without errors, so we
+        // don't throw an error here if the file doesn't exist.
+      });
+  }
+
+  return preState;
 }

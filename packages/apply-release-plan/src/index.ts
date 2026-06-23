@@ -160,40 +160,38 @@ export async function applyReleasePlan(
     await formatter(filesToFormat);
   }
 
-  if (releasePlan.preState == null || releasePlan.preState.mode === "exit") {
-    const changesetFolder = path.resolve(cwd, ".changeset");
-    await Promise.all(
-      changesets.map(async (changeset) => {
-        const changesetPath = path.resolve(
-          changesetFolder,
-          `${changeset.id}.md`,
-        );
+  await Promise.all(
+    changesets.map(async (changeset) => {
+      const changesetPath = path.resolve(
+        cwd,
+        ".changeset",
+        `${changeset.id}.md`,
+      );
+      if (
+        await fs.access(changesetPath).then(
+          () => true,
+          () => false,
+        )
+      ) {
+        // DO NOT remove changeset for skipped packages
+        // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
+        // At this point, we know there is no such changeset, because otherwise the program would've already failed,
+        // so we just check if any skipped package exists in this changeset, and only remove it if none exists
+        // options to skip packages were added in v2, so we don't need to do it for v1 changesets
         if (
-          await fs.access(changesetPath).then(
-            () => true,
-            () => false,
+          !changeset.releases.some((release) =>
+            shouldSkipPackage(packagesByName.get(release.name)!, {
+              ignore: config.ignore,
+              allowPrivatePackages: config.privatePackages.version,
+            }),
           )
         ) {
-          // DO NOT remove changeset for skipped packages
-          // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
-          // At this point, we know there is no such changeset, because otherwise the program would've already failed,
-          // so we just check if any skipped package exists in this changeset, and only remove it if none exists
-          // options to skip packages were added in v2, so we don't need to do it for v1 changesets
-          if (
-            !changeset.releases.some((release) =>
-              shouldSkipPackage(packagesByName.get(release.name)!, {
-                ignore: config.ignore,
-                allowPrivatePackages: config.privatePackages.version,
-              }),
-            )
-          ) {
-            touchedFiles.push(changesetPath);
-            await fs.rm(changesetPath, { recursive: true, force: true });
-          }
+          touchedFiles.push(changesetPath);
+          await fs.rm(changesetPath, { recursive: true, force: true });
         }
-      }),
-    );
-  }
+      }
+    }),
+  );
 
   // We return the touched files to be committed in the cli
   return touchedFiles;

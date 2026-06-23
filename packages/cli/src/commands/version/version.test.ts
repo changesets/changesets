@@ -2454,15 +2454,8 @@ describe("pre", () => {
       "# pkg-a
 
       ## 1.1.0
-      ### Minor Changes
-
-      - g1th4sh: a very useful summary for the third change
-
       ### Patch Changes
 
-      - g1th4sh: a very useful summary
-      - g1th4sh: a very useful summary for the second change
-      - Updated dependencies [g1th4sh]
         - pkg-b@1.0.1
 
       ## 1.1.0-next.3
@@ -2496,9 +2489,6 @@ describe("pre", () => {
       "# pkg-b
 
       ## 1.0.1
-      ### Patch Changes
-
-      - g1th4sh: a very useful summary for the first change
 
       ## 1.0.1-next.0
       ### Patch Changes

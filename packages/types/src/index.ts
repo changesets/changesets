@@ -173,7 +173,6 @@ export type PreState = {
   initialVersions: {
     [pkgName: string]: string;
   };
-  changesets: string[];
 };
 
 export interface Package {
