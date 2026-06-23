@@ -1,14 +1,18 @@
 import * as path from "node:path";
+import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import type { Config } from "@changesets/types";
+import { log } from "@clack/prompts";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { publish as publishCommand } from "../index.ts";
 
+vi.mock("@clack/prompts");
 vi.mock("@changesets/git");
 vi.mock("tinyexec");
+const mockedLogger = vi.mocked(log);
 
 const changelogPath = path.resolve(import.meta.dirname, "../../changelog");
 const modifiedDefaultConfig: Config = {
@@ -193,6 +197,102 @@ describe("Publish command", () => {
       mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
     ).toHaveLength(1);
     expect(git.tag).not.toHaveBeenCalled();
+  });
+
+  it("does not log a success message for a failed publish", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult(
+          "",
+          1,
+          JSON.stringify({
+            error: {
+              code: "E403",
+              summary: "failed",
+            },
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await expect(publishCommand({ cwd })).rejects.toThrow();
+
+    const successMessages = mockedLogger.success.mock.calls.map((call) =>
+      stripVTControlCharacters(String(call[0])),
+    );
+    expect(
+      successMessages.some((message) =>
+        message.includes("Published pkg-a@1.0.0!"),
+      ),
+    ).toBe(false);
+  });
+
+  it("logs npm error message when summary is missing", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult(
+          "",
+          1,
+          JSON.stringify({
+            error: {
+              code: "E404",
+              message: "404 Not Found - PUT https://registry.npmjs.org/pkg-a",
+            },
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await expect(publishCommand({ cwd })).rejects.toThrow();
+
+    expect(mockedLogger.error).toHaveBeenCalled();
+    const errorMessages = mockedLogger.error.mock.calls.map((call) =>
+      stripVTControlCharacters(String(call[0])),
+    );
+    expect(
+      errorMessages.some(
+        (message) =>
+          message.includes("An error occurred while publishing pkg-a: E404") &&
+          message.includes("404 Not Found - PUT https://registry.npmjs.org/pkg-a"),
+      ),
+    ).toBe(true);
+    expect(errorMessages.some((message) => message.includes("undefined"))).toBe(
+      false,
+    );
   });
 
   it("tags tag-only releases within their chunk", async () => {

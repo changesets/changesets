@@ -275,6 +275,15 @@ type InternalPublishResult =
   | { result: "skipped" }
   | { result: "failed"; allowRetry?: boolean };
 
+function formatNpmError(error: {
+  summary?: string;
+  message?: string;
+  detail?: string;
+}) {
+  const summary = error.summary ?? error.message ?? "Unknown npm publish error";
+  return `${summary}${error.detail ? `\n${error.detail}` : ""}`;
+}
+
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
@@ -411,7 +420,7 @@ async function internalPublish(
       log.error(
         `
 An error occurred while publishing ${packageJson.name}: ${json.error.code}
-${json.error.summary}${json.error.detail ? `\n${json.error.detail}` : ""}
+${formatNpmError(json.error)}
         `.trim(),
       );
     }
