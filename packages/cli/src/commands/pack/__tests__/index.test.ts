@@ -169,7 +169,7 @@ describe("pack", () => {
 
     await pack({
       cwd,
-      fromPlan: "publish-plan.json",
+      fromPublishPlan: "publish-plan.json",
       outDir: ".packed",
     });
 
@@ -204,7 +204,7 @@ describe("pack", () => {
     await expect(
       pack({
         cwd,
-        fromPlan: "publish-plan.json",
+        fromPublishPlan: "publish-plan.json",
         outDir: ".packed",
       }),
     ).rejects.toThrow(/Invalid publish plan file version/);

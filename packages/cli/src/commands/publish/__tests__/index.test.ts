@@ -140,10 +140,7 @@ describe("Publish command", () => {
       mockedExec.mock.calls
         .filter((call) => call[1]?.[0] === "publish")
         .map((call) => call[1]?.[1]),
-    ).toEqual([
-      path.join(cwd, "packages/pkg-b"),
-      path.join(cwd, "packages/pkg-a"),
-    ]);
+    ).toEqual([path.join("packages", "pkg-b"), path.join("packages", "pkg-a")]);
     expect(vi.mocked(git.tag).mock.calls.map((call) => call[0])).toEqual([
       "pkg-b@1.0.0",
       "pkg-a@1.0.0",
@@ -296,7 +293,7 @@ describe("Publish command", () => {
         "npm",
         [
           "publish",
-          path.join(cwd, ".packed/packages/pkg-a-1.0.0.tgz"),
+          path.join(".packed", "packages", "pkg-a-1.0.0.tgz"),
           "--access",
           "public",
           "--tag",

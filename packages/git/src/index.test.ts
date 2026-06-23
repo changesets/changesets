@@ -1,6 +1,11 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { gitdir, outputFile, testdir } from "@changesets/test-utils";
+import {
+  disableGitBackgroundMaintenance,
+  gitdir,
+  outputFile,
+  testdir,
+} from "@changesets/test-utils";
 import { writeChangeset } from "@changesets/write";
 import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
@@ -25,7 +30,7 @@ async function getCommitCount(cwd: string) {
   return parseInt(cmd.stdout.toString(), 10);
 }
 
-describe("git", () => {
+describe("git", { tags: ["slow"] }, () => {
   describe("getDivergedCommit", () => {
     it("should return same commit when branches have not diverged", async () => {
       const cwd = await gitdir({
@@ -312,6 +317,7 @@ describe("git", () => {
             nodeOptions: { cwd: cloneDir },
           },
         );
+        await disableGitBackgroundMaintenance(cloneDir);
         return cloneDir;
       }
 
