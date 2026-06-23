@@ -23,7 +23,7 @@ import { ensureChangesetFolder } from "../shared.ts";
 
 export interface PackOptions {
   cwd?: string;
-  fromPlan?: string;
+  fromPublishPlan?: string;
   outDir: string;
 }
 
@@ -56,8 +56,8 @@ export async function pack(options: PackOptions) {
   await ensureChangesetFolder(packages.rootDir);
   const config = await readConfig(packages);
 
-  const plan = options.fromPlan
-    ? await readPlanFile(path.resolve(cwd, options.fromPlan))
+  const plan = options.fromPublishPlan
+    ? await readPlanFile(path.resolve(cwd, options.fromPublishPlan))
     : await getPublishPlan(packages.rootDir, config);
 
   const outputDir = path.resolve(cwd, options.outDir);

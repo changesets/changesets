@@ -157,9 +157,14 @@ const tests: CommandTest[] = [
         },
       },
       {
-        args: ["--from-plan", "publish-plan.json", "--out-dir", ".packed"],
+        args: [
+          "--from-publish-plan",
+          "publish-plan.json",
+          "--out-dir",
+          ".packed",
+        ],
         options: {
-          fromPlan: "publish-plan.json",
+          fromPublishPlan: "publish-plan.json",
           outDir: ".packed",
         },
       },
