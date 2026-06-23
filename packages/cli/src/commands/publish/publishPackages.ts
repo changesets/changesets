@@ -35,9 +35,9 @@ function getInitialAuthState(
       shouldDelegate: false,
     };
   }
-  if (process.env.NPM_CONFIG_OTP) {
+  if (process.env.NPM_CONFIG_OTP || process.env.npm_config_otp) {
     return {
-      otpToken: process.env.NPM_CONFIG_OTP,
+      otpToken: process.env.NPM_CONFIG_OTP || process.env.npm_config_otp,
       shouldDelegate: false,
     };
   }
@@ -69,7 +69,7 @@ export async function publishPackages({
     // so we unset those env variables so they don't become stale once we start delegating to the package manager CLIs for OTP prompting
     ...(publishTool.name === "pnpm"
       ? { PNPM_CONFIG_OTP: undefined }
-      : { NPM_CONFIG_OTP: undefined }),
+      : { NPM_CONFIG_OTP: undefined, npm_config_otp: undefined }),
   });
   // in TTY mode let's allow the first publish to "check" if the publish process requires delegated auth or not
   // on CI everything has to be configured in a way that allows automation so we can safely allow concurrency up to the defined limit
