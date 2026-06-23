@@ -29,7 +29,6 @@ describe("enterPre", () => {
         await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
       ),
     ).toMatchObject({
-      initialVersions: {},
       mode: "pre",
       tag: "next",
     });
@@ -49,7 +48,6 @@ describe("enterPre", () => {
       }),
       "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
-        initialVersions: {},
         mode: "pre",
         tag: "next",
       }),
@@ -80,7 +78,6 @@ describe("enterPre", () => {
       }),
       "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
-        initialVersions: {},
         mode: "exit",
         tag: "beta",
       }),
@@ -92,7 +89,6 @@ describe("enterPre", () => {
         await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
       ),
     ).toEqual({
-      initialVersions: {},
       mode: "pre",
       tag: "next",
     });
@@ -115,7 +111,6 @@ describe("exitPre", () => {
       }),
       "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
-        initialVersions: {},
         mode: "pre",
         tag: "next",
       }),
@@ -127,7 +122,6 @@ describe("exitPre", () => {
         await fs.readFile(path.join(cwd, ".changeset", "pre.json"), "utf8"),
       ),
     ).toEqual({
-      initialVersions: {},
       mode: "exit",
       tag: "next",
     });

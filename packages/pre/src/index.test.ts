@@ -37,10 +37,6 @@ describe("enterPre", () => {
       ),
     ).toMatchInlineSnapshot(`
       {
-        "initialVersions": {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         "mode": "pre",
         "tag": "next",
       }
@@ -66,10 +62,6 @@ describe("enterPre", () => {
         version: "1.0.0",
       }),
       ".changeset/pre.json": JSON.stringify({
-        initialVersions: {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         mode: "pre",
         tag: "next",
       }),
@@ -98,10 +90,6 @@ describe("enterPre", () => {
         version: "1.0.0",
       }),
       ".changeset/pre.json": JSON.stringify({
-        initialVersions: {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         mode: "exit",
         tag: "beta",
       }),
@@ -113,10 +101,6 @@ describe("enterPre", () => {
       ),
     ).toMatchInlineSnapshot(`
       {
-        "initialVersions": {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         "mode": "pre",
         "tag": "next",
       }
@@ -145,10 +129,6 @@ describe("exitPre", () => {
         version: "1.0.0",
       }),
       ".changeset/pre.json": JSON.stringify({
-        initialVersions: {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         mode: "pre",
         tag: "next",
       }),
@@ -161,10 +141,6 @@ describe("exitPre", () => {
       ),
     ).toMatchInlineSnapshot(`
       {
-        "initialVersions": {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         "mode": "exit",
         "tag": "next",
       }
@@ -215,20 +191,12 @@ test("readPreState reads the pre state", async () => {
       version: "1.0.0",
     }),
     ".changeset/pre.json": JSON.stringify({
-      initialVersions: {
-        "pkg-a": "1.0.0",
-        "pkg-b": "1.0.0",
-      },
       mode: "pre",
       tag: "next",
     }),
   });
   expect(await readPreState(cwd)).toMatchInlineSnapshot(`
     {
-      "initialVersions": {
-        "pkg-a": "1.0.0",
-        "pkg-b": "1.0.0",
-      },
       "mode": "pre",
       "tag": "next",
     }

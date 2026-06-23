@@ -750,7 +750,6 @@ describe("assembleReleasePlan", () => {
         },
         {
           tag: "next",
-          initialVersions: {},
           mode: "exit",
         },
       );
@@ -773,10 +772,6 @@ describe("assembleReleasePlan", () => {
         },
         {
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-          },
           mode: "exit",
         },
       );
@@ -802,10 +797,6 @@ describe("assembleReleasePlan", () => {
         },
         {
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-          },
           mode: "exit",
         },
       );
@@ -838,11 +829,6 @@ describe("assembleReleasePlan", () => {
         },
         {
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-            "pkg-c": "1.0.0",
-          },
           mode: "pre",
         },
       );

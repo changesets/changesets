@@ -3269,10 +3269,6 @@ describe("apply release plan", () => {
       const preState: PreState = {
         mode: "pre",
         tag: "beta",
-        initialVersions: {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
       };
 
       const { tempDir } = await testSetup(

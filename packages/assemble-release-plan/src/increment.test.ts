@@ -17,7 +17,6 @@ describe("incrementVersion", () => {
         state: {
           mode: "pre",
           tag: "next",
-          initialVersions: {},
         },
       };
 
