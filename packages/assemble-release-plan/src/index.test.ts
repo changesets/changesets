@@ -738,6 +738,54 @@ describe("assembleReleasePlan", () => {
         },
       ]);
     });
+
+    // https://github.com/changesets/changesets/issues/963
+    // https://github.com/changesets/changesets/issues/1759
+    it("should not bump fixed packages due to peer dependents", () => {
+      const setup = new FakeFullState({ changesets: [] });
+
+      setup.addPackage("@ex/core", "0.1.0");
+      setup.addPackage("@ex/errors", "0.1.0");
+      setup.addPackage("@ex/api", "0.1.0");
+      setup.addPackage("some-peer", "0.1.0"); // optional peer
+      setup.addPackage("@ex/components", "0.1.0");
+
+      setup.updateDependencies("@ex/api", [
+        { name: "@ex/core", range: "0.1.0" },
+        { name: "@ex/errors", range: "0.1.0" },
+        { name: "some-peer", range: "0.1.0", type: "peer" },
+      ]);
+      setup.updateDependencies("@ex/components", [
+        { name: "@ex/api", range: "0.1.0" },
+        { name: "some-peer", range: "0.1.0" },
+      ]);
+
+      setup.addChangeset({ releases: [{ name: "@ex/core", type: "minor" }] });
+
+      const result = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          fixed: [
+            [
+              "@ex/core",
+              "@ex/errors",
+              "@ex/api",
+              "some-peer",
+              "@ex/components",
+            ],
+          ],
+        },
+        undefined,
+      );
+
+      expect(result.releases).toHaveLength(5);
+      expect(
+        result.releases.every((release) => release.newVersion === "0.2.0"),
+        "every bump should be to 0.2.0",
+      ).toBe(true);
+    });
   });
 
   describe("pre mode", () => {
