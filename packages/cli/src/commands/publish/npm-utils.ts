@@ -259,8 +259,8 @@ async function internalPublish(
   // in the delegated mode we don't need the json output
   // as we won't be handling the auth errors
   publishFlags.push("--json");
-  if (authState.token) {
-    publishFlags.push("--otp", authState.token);
+  if (authState.otpToken) {
+    publishFlags.push("--otp", authState.otpToken);
   }
 
   const { exitCode, stdout, stderr } = await exec(
@@ -300,7 +300,7 @@ async function internalPublish(
         process.stdin.isTTY
       ) {
         // the current otp code must be invalid since it errored
-        authState.token = undefined;
+        authState.otpToken = undefined;
         authState.shouldDelegate = true;
         npmPublishQueue.setConcurrency(1);
         return {

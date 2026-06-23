@@ -25,24 +25,24 @@ function getInitialAuthState(
 ): AuthState {
   if (otp) {
     return {
-      token: otp,
+      otpToken: otp,
       shouldDelegate: false,
     };
   }
   if (publishTool.name === "pnpm" && process.env.PNPM_CONFIG_OTP) {
     return {
-      token: process.env.PNPM_CONFIG_OTP,
+      otpToken: process.env.PNPM_CONFIG_OTP,
       shouldDelegate: false,
     };
   }
   if (process.env.NPM_CONFIG_OTP) {
     return {
-      token: process.env.NPM_CONFIG_OTP,
+      otpToken: process.env.NPM_CONFIG_OTP,
       shouldDelegate: false,
     };
   }
   return {
-    token: undefined,
+    otpToken: undefined,
     shouldDelegate: false,
   };
 }
@@ -76,7 +76,9 @@ export async function publishPackages({
   // but in TTY the user might rely on Changesets prompting (through the used package manager CLI) for OTP/web auth
   // this is just an appromixation of the best behavior that assumes a single publish target/registry with a consistent/shared auth setup
   npmPublishQueue.setConcurrency(
-    process.stdin.isTTY && !authState.token ? 1 : NPM_PUBLISH_CONCURRENCY_LIMIT,
+    process.stdin.isTTY && !authState.otpToken
+      ? 1
+      : NPM_PUBLISH_CONCURRENCY_LIMIT,
   );
 
   const packagesByName = new Map(

@@ -1,4 +1,4 @@
 export type AuthState = {
-  token: string | undefined;
+  otpToken: string | undefined;
   shouldDelegate: boolean;
 };
