@@ -114,21 +114,22 @@ export async function getUnpublishedPackages(
         if (response.published) {
           publishedState = "published";
 
-          if (preState != null) {
-            if (
-              response.pkgInfo.versions &&
-              !response.pkgInfo.versions[
-                `${semverParse(pkg.packageJson.version)!.major}.${semverParse(pkg.packageJson.version)!.minor}.${semverParse(pkg.packageJson.version)!.patch}`
-              ]
-            ) {
-              publishedState = "only-pre";
-            }
+          if (
+            preState != null &&
+            response.pkgInfo.versions &&
+            response.pkgInfo.versions.every(
+              (version: string) =>
+                semverParse(version)!.prerelease[0] === preState.tag,
+            )
+          ) {
+            publishedState = "only-pre";
           }
         }
 
         return {
           pkg,
           publishedState,
+          publishedVersions: response.pkgInfo.versions || [],
         };
       }),
   );
@@ -137,12 +138,15 @@ export async function getUnpublishedPackages(
   const previewLines: Array<string> = [];
   let alreadyPublishedCount = 0;
 
-  for (const { pkg, publishedState } of results) {
-    if (publishedState !== "published") {
+  for (const result of results) {
+    const { pkg, publishedState, publishedVersions } = result;
+    const localVersion = pkg.packageJson.version;
+
+    if (!publishedVersions.includes(localVersion)) {
       const release: PublishReleaseEntry = {
         kind: "publish",
         name: pkg.packageJson.name,
-        version: pkg.packageJson.version,
+        version: localVersion,
         access: pkg.packageJson.publishConfig?.access || access,
         tag: getReleaseTag(publishedState, preState, options.tag),
       };
