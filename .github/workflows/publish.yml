@@ -137,6 +137,4 @@ jobs:
         # https://github.com/changesets/action
         uses: changesets/action/publish@ee7a001fa469e27dedbd16d54231a45eeee08a09 # v2.0.0-next.1
         with:
-          # # this expects you to have a script called release which does a build for your packages and calls changeset publish
-          # publish: pnpm release
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
