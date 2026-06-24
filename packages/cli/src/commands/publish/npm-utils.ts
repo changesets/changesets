@@ -204,6 +204,21 @@ type InternalPublishResult =
   | { result: "skipped" }
   | { result: "failed"; allowRetry?: boolean };
 
+function formatPublishError(
+  publishTool: "npm" | "pnpm",
+  error: {
+    summary?: string;
+    message?: string;
+    detail?: string;
+  },
+) {
+  // pnpm 11 uses .message but pnpm 10 delegates to npm and that uses .summary
+  const summary =
+    publishTool === "pnpm" ? (error.message ?? error.summary) : error.summary;
+  // .detail is npm-specific but for simplicity we handle it at all times
+  return `${summary}${error.detail ? `\n${error.detail}` : ""}`;
+}
+
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
 async function internalPublish(
@@ -316,7 +331,7 @@ async function internalPublish(
       log.error(
         `
 An error occurred while publishing ${release.name}: ${json.error.code}
-${json.error.summary}${json.error.detail ? `\n${json.error.detail}` : ""}
+${formatPublishError(publishTool.name, json.error)}
         `.trim(),
       );
     }
