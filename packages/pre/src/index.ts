@@ -33,6 +33,10 @@ export async function readPreState(
       throw err;
     }
   }
+
+  // Migrate from v2 to v3 pre.json file
+  preState = preState ? await migratePreState(rootDir, preState) : undefined;
+
   return preState;
 }
 
@@ -65,4 +69,25 @@ export async function enterPre(rootDir: string, tag: string) {
     changesets: preState?.changesets ?? [],
   };
   await outputFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
+}
+
+async function migratePreState(
+  rootDir: string,
+  preState: PreState & {
+    initialVersions?: { [pkgName: string]: string };
+  },
+): Promise<PreState> {
+  if (preState.initialVersions == null) {
+    return preState;
+  }
+
+  // "initialVersions" is not used for a long time, so can directly delete
+  delete preState.initialVersions;
+
+  await outputFile(
+    path.resolve(rootDir, ".changeset", "pre.json"),
+    JSON.stringify(preState, null, 2) + "\n",
+  );
+
+  return preState;
 }
