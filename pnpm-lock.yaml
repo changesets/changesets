@@ -112,9 +112,6 @@ importers:
       '@manypkg/get-packages':
         specifier: ^3.1.0
         version: 3.1.0
-      outdent:
-        specifier: ^0.8.0
-        version: 0.8.0
       tinyexec:
         specifier: ^1.2.4
         version: 1.2.4

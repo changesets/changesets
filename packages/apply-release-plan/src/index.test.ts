@@ -17,7 +17,6 @@ import type {
   PreState,
 } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import { outdent } from "outdent";
 import { exec } from "tinyexec";
 import { describe, expect, it, test } from "vitest";
 import { applyReleasePlan } from "./index.ts";
@@ -2110,13 +2109,15 @@ describe("apply release plan", () => {
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       const readme = await fs.readFile(readmePath, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.1.0
+        ## 1.1.0
 
-      ### Minor Changes
+        ### Minor Changes
 
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
     });
 
     it("should insert new entry before existing version heading when no package title is present", async () => {
@@ -2216,21 +2217,25 @@ describe("apply release plan", () => {
       const readme = await fs.readFile(readmePath, "utf-8");
       const readmeB = await fs.readFile(readmePathB, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.1.0
+        ## 1.1.0
 
-      ### Minor Changes
+        ### Minor Changes
 
-      - Hey, let's have fun with testing!
+        - Hey, let's have fun with testing!
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - pkg-b@2.0.0`);
+        - pkg-b@2.0.0"
+      `);
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      ## 2.0.0`);
+        ## 2.0.0"
+      `);
     });
 
     it("should not update the changelog if only devDeps changed", async () => {
@@ -2351,20 +2356,21 @@ describe("apply release plan", () => {
 
       if (!readmePath) throw new Error(`could not find an updated changelog`);
       const readme = await fs.readFile(readmePath, "utf-8");
-      expect(readme.trim()).toEqual(
-        [
-          "# pkg-a\n",
-          "## 1.1.0\n",
-          "### Minor Changes\n",
-          "- Hey, let's have fun with testing!",
-          "- Random stuff",
-          "  ",
-          "  get it while it's hot!",
-          "- New feature, much wow",
-          "  ",
-          "  look at this shiny stuff!",
-        ].join("\n"),
-      );
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
+
+        ## 1.1.0
+
+        ### Minor Changes
+
+        - Hey, let's have fun with testing!
+        - Random stuff
+          
+          get it while it's hot!
+        - New feature, much wow
+          
+          look at this shiny stuff!"
+      `);
     });
 
     it("should add an updated dependencies line when dependencies have been updated", async () => {
@@ -2454,25 +2460,29 @@ describe("apply release plan", () => {
       const readme = await fs.readFile(readmePath, "utf-8");
       const readmeB = await fs.readFile(readmePathB, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.0.4
+        ## 1.0.4
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - Hey, let's have fun with testing!
-      - Updated dependencies
-        - pkg-b@1.2.1`);
+        - Hey, let's have fun with testing!
+        - Updated dependencies
+          - pkg-b@1.2.1"
+      `);
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      ## 1.2.1
+        ## 1.2.1
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - Hey, let's have fun with testing!
-      - Updated dependencies
-        - pkg-a@1.0.4`);
+        - Hey, let's have fun with testing!
+        - Updated dependencies
+          - pkg-a@1.0.4"
+      `);
     });
 
     it("should NOT add updated dependencies line if dependencies have NOT been updated", async () => {
@@ -2562,21 +2572,25 @@ describe("apply release plan", () => {
       const readme = await fs.readFile(readmePath, "utf-8");
       const readmeB = await fs.readFile(readmePathB, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.0.4
+        ## 1.0.4
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      ## 1.2.1
+        ## 1.2.1
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
     });
 
     it("should only add updated dependencies line for dependencies that have been updated", async () => {
@@ -2686,31 +2700,37 @@ describe("apply release plan", () => {
       const readmeB = await fs.readFile(readmePathB, "utf-8");
       const readmeC = await fs.readFile(readmePathC, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.0.4
+        ## 1.0.4
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      ## 1.2.1
+        ## 1.2.1
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - Hey, let's have fun with testing!
-      - Updated dependencies
-        - pkg-c@2.1.0`);
+        - Hey, let's have fun with testing!
+        - Updated dependencies
+          - pkg-c@2.1.0"
+      `);
 
-      expect(readmeC.trim()).toEqual(outdent`# pkg-c
+      expect(readmeC.trim()).toMatchInlineSnapshot(`
+        "# pkg-c
 
-      ## 2.1.0
+        ## 2.1.0
 
-      ### Minor Changes
+        ### Minor Changes
 
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
     });
 
     it("should still add updated dependencies line for dependencies that have a bump type less than the minimum internal bump range but leave semver range", async () => {
@@ -2820,31 +2840,37 @@ describe("apply release plan", () => {
       const readmeB = await fs.readFile(readmePathB, "utf-8");
       const readmeC = await fs.readFile(readmePathC, "utf-8");
 
-      expect(readme.trim()).toEqual(outdent`# pkg-a
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
 
-      ## 1.0.4
+        ## 1.0.4
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
 
-      expect(readmeB.trim()).toEqual(outdent`# pkg-b
+      expect(readmeB.trim()).toMatchInlineSnapshot(`
+        "# pkg-b
 
-      ## 1.2.1
+        ## 1.2.1
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - Hey, let's have fun with testing!
-      - Updated dependencies
-        - pkg-c@2.0.1`);
+        - Hey, let's have fun with testing!
+        - Updated dependencies
+          - pkg-c@2.0.1"
+      `);
 
-      expect(readmeC.trim()).toEqual(outdent`# pkg-c
+      expect(readmeC.trim()).toMatchInlineSnapshot(`
+        "# pkg-c
 
-      ## 2.0.1
+        ## 2.0.1
 
-      ### Patch Changes
+        ### Patch Changes
 
-      - Hey, let's have fun with testing!`);
+        - Hey, let's have fun with testing!"
+      `);
     });
   });
 
