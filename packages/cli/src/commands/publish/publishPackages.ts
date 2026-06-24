@@ -113,9 +113,11 @@ export async function publishPackages({
     return Promise.all(
       publishPromises.map(async (publishPromise) => {
         const result = await publishPromise;
-        log.success(
-          `Published ${c.blue(result.name)}@${c.green(result.version)}!`,
-        );
+        if (result.result === "published") {
+          log.success(
+            `Published ${c.blue(result.name)}@${c.green(result.version)}!`,
+          );
+        }
         return result;
       }),
     );
