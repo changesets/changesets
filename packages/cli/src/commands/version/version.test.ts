@@ -1347,7 +1347,7 @@ describe("workspace range", () => {
     `);
   });
 
-  it("should bump major bump peer-dependent when workspace:~ dependency gets a minor bump (without onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
+  it("should patch bump peer-dependent when workspace:~ dependency gets a minor bump (without onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -1362,7 +1362,7 @@ describe("workspace range", () => {
       "packages/pkg-b/package.json": JSON.stringify({
         name: "pkg-b",
         version: "1.0.0",
-        peerDependencies: { "pkg-a": "workspace:^" },
+        peerDependencies: { "pkg-a": "workspace:~" },
       }),
       ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
@@ -1390,7 +1390,7 @@ describe("workspace range", () => {
     expect(await getChangelog("pkg-b", cwd)).toMatchInlineSnapshot(`
       "# pkg-b
 
-      ## 2.0.0
+      ## 1.0.1
 
       ### Patch Changes
 
