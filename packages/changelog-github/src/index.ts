@@ -146,6 +146,9 @@ const changelogFunctions: ChangelogFunctions = {
       if (info?.pull) {
         links.pull = `[#${info.pull.number}](${info.pull.url})`;
       }
+      if (info?.author) {
+        links.user = `[@${info.author.login}](${info.author.url})`;
+      }
     }
 
     const users = options.disableThanks

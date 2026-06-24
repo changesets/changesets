@@ -9,33 +9,51 @@ vi.mock(
   (): typeof import("@changesets/get-github-info") => {
     const data = {
       commit: "a085003",
-      user: "Andarist",
+      author: "Andarist",
       pull: 1613,
       repo: "emotion-js/emotion",
     };
-    const links = {
-      user: `[@${data.user}](https://github.com/${data.user})`,
-      pull: `[#${data.pull}](https://github.com/${data.repo}/pull/${data.pull})`,
-      commit: `[\`${data.commit}\`](https://github.com/${data.repo}/commit/${data.commit})`,
+    const urls = {
+      commit: `https://github.com/${data.repo}/commit/${data.commit}`,
+      pull: `https://github.com/${data.repo}/pull/${data.pull}`,
+      author: `https://github.com/${data.author}`,
     };
     return {
       /* eslint-disable vitest/no-standalone-expect */
-      async getInfo({ commit, repo }) {
+      async getCommitInfo({ commit, repo }) {
         expect(commit).toBe(data.commit);
         expect(repo).toBe(data.repo);
         return {
-          pull: data.pull,
-          user: data.user,
-          links,
+          commit: {
+            sha: data.commit,
+            url: urls.commit,
+          },
+          author: {
+            login: data.author,
+            url: urls.author,
+          },
+          pull: {
+            number: data.pull,
+            url: urls.pull,
+          },
         };
       },
-      async getInfoFromPullRequest({ pull, repo }) {
+      async getPullRequestInfo({ pull, repo }) {
         expect(pull).toBe(data.pull);
         expect(repo).toBe(data.repo);
         return {
-          commit: data.commit,
-          user: data.user,
-          links,
+          commit: {
+            sha: data.commit,
+            url: urls.commit,
+          },
+          author: {
+            login: data.author,
+            url: urls.author,
+          },
+          pull: {
+            number: data.pull,
+            url: urls.pull,
+          },
         };
       },
       /* eslint-enable vitest/no-standalone-expect */
