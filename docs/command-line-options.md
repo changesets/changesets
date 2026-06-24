@@ -79,7 +79,7 @@ changeset add --since=develop
 changeset version
 ```
 
-This is one of two commands responsible for releasing packages. The version command takes changesets that have been made and updates versions and dependencies of packages, as well as writing changelogs. It is responsible for all file changes to versions before publishing to npm.
+This is one of two commands responsible for releasing packages. The version command takes changesets that have been made and updates versions and dependencies of packages, as well as writing changelogs. By default it updates `package.json` files, and the [`versionProvider`](./config-file-options.md#versionprovider-node--ruby--object) config can keep other ecosystem-specific version files in sync before publishing.
 
 > We recommend making sure changes made from this command are merged back into the base branch before you run publish.
 

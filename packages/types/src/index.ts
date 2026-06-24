@@ -66,6 +66,30 @@ export interface PrivatePackages {
   tag: boolean;
 }
 
+export type VersionProviderName = "auto" | "node" | "ruby";
+
+export type NodeVersionProviderOptions = {
+  type: "node";
+};
+
+export type RubyVersionProviderOptions = {
+  type: "ruby";
+  gemName?: string;
+  versionFile?: string | false;
+  gemspec?: string | false;
+  gemfileLock?: string | false;
+};
+
+export type PackageVersionProvider =
+  | VersionProviderName
+  | NodeVersionProviderOptions
+  | RubyVersionProviderOptions;
+
+export type VersionProviderConfig = {
+  default: PackageVersionProvider;
+  packages: Record<string, PackageVersionProvider>;
+};
+
 export type Config = {
   changelog: false | readonly [string, null | Record<string, unknown>];
   commit: false | readonly [string, null | Record<string, unknown>];
@@ -81,6 +105,8 @@ export type Config = {
   format: "auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false;
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
+  /** Controls which files are updated when versions are applied */
+  versionProvider: VersionProviderConfig;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
@@ -111,6 +137,12 @@ export type WrittenConfig = {
     | {
         version?: boolean;
         tag?: boolean;
+      };
+  versionProvider?:
+    | PackageVersionProvider
+    | {
+        default?: PackageVersionProvider;
+        packages?: Record<string, PackageVersionProvider>;
       };
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";

@@ -244,6 +244,60 @@ When `tag` is set to `true`, Changesets will create a tag for private packages. 
 }
 ```
 
+## `versionProvider` (`"node"` | `"ruby"` | object)
+
+This option controls which provider reads and updates version files when `changeset version` applies a release plan. When unset, Changesets uses automatic provider selection.
+
+The `node` provider updates the package's `package.json` version and npm dependency ranges. This is the historical Changesets behavior.
+
+The `ruby` provider reads the current version from Ruby version files and updates them when they exist:
+
+- `lib/<gem-name>/version.rb` or a single discovered `lib/**/version.rb`
+- `<gem-name>.gemspec` or a single discovered root `*.gemspec`
+- `Gemfile.lock`
+
+When `versionProvider` is unset, Changesets selects the Ruby provider if it finds Ruby version files in the package directory. Otherwise it uses the Node provider. Package-specific entries in `packages` take precedence over the default provider.
+
+You can configure a single provider for every package:
+
+```json
+{
+  "versionProvider": "ruby"
+}
+```
+
+For mixed repositories, configure a default and package-specific overrides:
+
+```json
+{
+  "versionProvider": {
+    "packages": {
+      "my-gem": {
+        "type": "ruby",
+        "gemName": "my-gem",
+        "versionFile": "lib/my_gem/version.rb",
+        "gemspec": "my-gem.gemspec",
+        "gemfileLock": "Gemfile.lock"
+      }
+    }
+  }
+}
+```
+
+Set `versionFile`, `gemspec`, or `gemfileLock` to `false` to skip that Ruby file.
+
+### Ruby provider options
+
+- `type`: must be `"ruby"`.
+- `gemName`: the Ruby gem name used to find `<gem-name>.gemspec`, `lib/<gem-name>/version.rb`, and the `Gemfile.lock` entry. If omitted, Changesets derives it from the package name.
+- `versionFile`: path to a Ruby version file, relative to the package directory. If omitted, Changesets checks `lib/<gem-name>/version.rb`, `lib/<gem-name-with-underscores>/version.rb`, or a single discovered `lib/**/version.rb`.
+- `gemspec`: path to a `.gemspec` file, relative to the package directory. If omitted, Changesets checks `<gem-name>.gemspec`, `<gem-name-with-underscores>.gemspec`, or a single discovered root `.gemspec`.
+- `gemfileLock`: path to `Gemfile.lock`, relative to the package directory. If omitted, Changesets updates `Gemfile.lock` when it exists.
+
+Configured paths must exist. Auto-discovered files are optional; if multiple ambiguous `version.rb` or `.gemspec` files exist, Changesets leaves those files unchanged unless you configure the exact path.
+
+When updating `Gemfile.lock`, prerelease versions are converted to Bundler's lockfile format. For example, `2.0.0-beta.1` is written as `2.0.0.pre.beta.1`.
+
 ## `changedFilePatterns` (array of strings)
 
 Glob patterns for changed files that should mark a package as changed. Useful to fine-tune what counts as a change (e.g. only source files, ignoring test files, etc).

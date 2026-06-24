@@ -30,6 +30,18 @@ const changesetsCliCommitPath = path.resolve(
   "../../cli/dist/commit.mjs",
 );
 
+function getTestConfig(config: Partial<Config> = {}): Config {
+  return {
+    ...defaultConfig,
+    changelog: false,
+    snapshot: {
+      ...defaultConfig.snapshot,
+      prereleaseTemplate: null,
+    },
+    ...config,
+  };
+}
+
 class FakeReleasePlan {
   changesets: NewChangeset[];
   releases: ComprehensiveRelease[];
@@ -52,28 +64,7 @@ class FakeReleasePlan {
       newVersion: "1.1.0",
       changesets: ["quick-lions-devour"],
     };
-    this.config = {
-      changelog: false,
-      commit: false,
-      fixed: [],
-      linked: [],
-      access: "restricted",
-      changedFilePatterns: ["**"],
-      baseBranch: "main",
-      updateInternalDependencies: "patch",
-      ignore: [],
-      format: "auto",
-      privatePackages: { version: true, tag: false },
-      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        onlyUpdatePeerDependentsWhenOutOfRange: false,
-        updateInternalDependents: "out-of-range",
-      },
-      snapshot: {
-        useCalculatedVersion: false,
-        prereleaseTemplate: null,
-      },
-      ...config,
-    };
+    this.config = getTestConfig(config);
 
     this.changesets = [baseChangeset, ...changesets];
     this.releases = [baseRelease, ...releases];
@@ -91,40 +82,18 @@ class FakeReleasePlan {
 async function testSetup(
   fixture: Fixture,
   releasePlan: ReleasePlan,
-  config?: Config,
+  config?: Partial<Config>,
   snapshot?: string,
   setupFunc?: (tempDir: string) => Promise<unknown>,
 ) {
-  if (!config) {
-    config = {
-      changelog: false,
-      commit: false,
-      fixed: [],
-      linked: [],
-      access: "restricted",
-      changedFilePatterns: ["**"],
-      baseBranch: "main",
-      updateInternalDependencies: "patch",
-      ignore: [],
-      format: "auto",
-      privatePackages: { version: true, tag: false },
-      snapshot: {
-        useCalculatedVersion: false,
-        prereleaseTemplate: null,
-      },
-      ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
-        onlyUpdatePeerDependentsWhenOutOfRange: false,
-        updateInternalDependents: "out-of-range",
-      },
-    };
-  }
+  const testConfig = getTestConfig(config);
   const tempDir = await testdir(fixture);
 
   if (setupFunc) {
     await setupFunc(tempDir);
   }
 
-  if (config.commit) {
+  if (testConfig.commit) {
     await exec("git", ["init"], { nodeOptions: { cwd: tempDir } });
     await git.add(".", tempDir);
     await git.commit("first commit", tempDir);
@@ -136,7 +105,7 @@ async function testSetup(
     changedFiles: await applyReleasePlan(
       releasePlan,
       packages,
-      config,
+      testConfig,
       snapshot,
     ),
     tempDir,
@@ -149,6 +118,454 @@ async function readJson(path: string) {
 
 describe("apply release plan", () => {
   describe("versioning", () => {
+    describe("version providers", () => {
+      it("updates Ruby version files with the Ruby provider", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: { default: "ruby", packages: {} },
+        });
+        const { changedFiles, tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "lib/pkg_a/version.rb": `module PkgA
+  VERSION = "1.0.0"
+end
+`,
+            "pkg-a.gemspec": `Gem::Specification.new do |spec|
+  spec.name = "pkg-a"
+  spec.version = "1.0.0"
+end
+`,
+            "Gemfile.lock": `PATH
+  remote: .
+  specs:
+    pkg-a (1.0.0)
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(
+          await readJson(path.join(tempDir, "package.json")),
+        ).toMatchObject({
+          version: "1.0.0",
+        });
+        await expect(
+          fs.readFile(path.join(tempDir, "lib/pkg_a/version.rb"), "utf8"),
+        ).resolves.toContain(`VERSION = "1.1.0"`);
+        await expect(
+          fs.readFile(path.join(tempDir, "pkg-a.gemspec"), "utf8"),
+        ).resolves.toContain(`spec.version = "1.1.0"`);
+        await expect(
+          fs.readFile(path.join(tempDir, "Gemfile.lock"), "utf8"),
+        ).resolves.toContain(`pkg-a (1.1.0)`);
+        expect(
+          changedFiles.map((file) => path.relative(tempDir, file)),
+        ).toEqual([
+          path.join("lib", "pkg_a", "version.rb"),
+          "pkg-a.gemspec",
+          "Gemfile.lock",
+        ]);
+      });
+
+      it("uses Bundler prerelease formatting in Gemfile.lock", async () => {
+        const releasePlan = new FakeReleasePlan(
+          [],
+          [
+            {
+              name: "pkg-a",
+              type: "major",
+              oldVersion: "1.0.0",
+              newVersion: "2.0.0-beta.1",
+              changesets: ["quick-lions-devour"],
+            },
+          ],
+          {
+            versionProvider: {
+              default: {
+                type: "ruby",
+                versionFile: false,
+                gemspec: false,
+              },
+              packages: {},
+            },
+          },
+        );
+        releasePlan.releases.shift();
+
+        const { tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "Gemfile.lock": `PATH
+  remote: .
+  specs:
+    pkg-a (1.0.0)
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        await expect(
+          fs.readFile(path.join(tempDir, "Gemfile.lock"), "utf8"),
+        ).resolves.toContain(`pkg-a (2.0.0.pre.beta.1)`);
+      });
+
+      it("auto-detects the Ruby provider when Ruby version files exist", async () => {
+        const releasePlan = new FakeReleasePlan();
+        const { tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "pkg-a.gemspec": `Gem::Specification.new do |spec|
+  spec.version = "1.0.0"
+end
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        await expect(
+          fs.readFile(path.join(tempDir, "pkg-a.gemspec"), "utf8"),
+        ).resolves.toContain(`spec.version = "1.1.0"`);
+      });
+
+      it("uses the Node provider when auto detection finds no Ruby files", async () => {
+        const releasePlan = new FakeReleasePlan();
+        const { changedFiles, tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              version: "1.0.0",
+            }),
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(
+          changedFiles.map((file) => path.relative(tempDir, file)),
+        ).toEqual(["package.json"]);
+        expect(
+          await readJson(path.join(tempDir, "package.json")),
+        ).toMatchObject({
+          version: "1.1.0",
+        });
+      });
+
+      it("lets an explicit Node provider ignore Ruby files", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: { default: "node", packages: {} },
+        });
+        const { changedFiles, tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "pkg-a.gemspec": `Gem::Specification.new do |spec|
+  spec.version = "1.0.0"
+end
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(
+          changedFiles.map((file) => path.relative(tempDir, file)),
+        ).toEqual(["package.json"]);
+        await expect(
+          fs.readFile(path.join(tempDir, "pkg-a.gemspec"), "utf8"),
+        ).resolves.toContain(`spec.version = "1.0.0"`);
+      });
+
+      it("uses package-specific providers before the default provider", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: {
+            default: "node",
+            packages: {
+              "pkg-a": "ruby",
+            },
+          },
+        });
+        const { changedFiles, tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "pkg-a.gemspec": `Gem::Specification.new do |spec|
+  spec.version = "1.0.0"
+end
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(
+          changedFiles.map((file) => path.relative(tempDir, file)),
+        ).toEqual(["pkg-a.gemspec"]);
+        await expect(
+          fs.readFile(path.join(tempDir, "pkg-a.gemspec"), "utf8"),
+        ).resolves.toContain(`spec.version = "1.1.0"`);
+      });
+
+      it("updates configured Ruby file paths and skips disabled Ruby files", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: {
+            default: {
+              type: "ruby",
+              gemName: "custom-gem",
+              versionFile: "src/custom/version.rb",
+              gemspec: "custom.gemspec",
+              gemfileLock: false,
+            },
+            packages: {},
+          },
+        });
+        const { changedFiles, tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "src/custom/version.rb": `module Custom
+  VERSION = "1.0.0"
+end
+`,
+            "custom.gemspec": `Gem::Specification.new do |spec|
+  spec.name = "custom-gem"
+  spec.version = "1.0.0"
+end
+`,
+            "Gemfile.lock": `PATH
+  remote: .
+  specs:
+    custom-gem (1.0.0)
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(
+          changedFiles.map((file) => path.relative(tempDir, file)),
+        ).toEqual([path.join("src", "custom", "version.rb"), "custom.gemspec"]);
+        await expect(
+          fs.readFile(path.join(tempDir, "src/custom/version.rb"), "utf8"),
+        ).resolves.toContain(`VERSION = "1.1.0"`);
+        await expect(
+          fs.readFile(path.join(tempDir, "custom.gemspec"), "utf8"),
+        ).resolves.toContain(`spec.version = "1.1.0"`);
+        await expect(
+          fs.readFile(path.join(tempDir, "Gemfile.lock"), "utf8"),
+        ).resolves.toContain(`custom-gem (1.0.0)`);
+      });
+
+      it("updates a single discovered nested Ruby version file", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: { default: "ruby", packages: {} },
+        });
+        const { changedFiles, tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "lib/anything/version.rb": `module Anything
+  VERSION = "1.0.0"
+end
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(
+          changedFiles.map((file) => path.relative(tempDir, file)),
+        ).toEqual([path.join("lib", "anything", "version.rb")]);
+        await expect(
+          fs.readFile(path.join(tempDir, "lib/anything/version.rb"), "utf8"),
+        ).resolves.toContain(`VERSION = "1.1.0"`);
+      });
+
+      it("does not guess between multiple discovered Ruby version files", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: { default: "ruby", packages: {} },
+        });
+        const { changedFiles, tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "lib/one/version.rb": `VERSION = "1.0.0"\n`,
+            "lib/two/version.rb": `VERSION = "1.0.0"\n`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(
+          changedFiles.map((file) => path.relative(tempDir, file)),
+        ).toEqual([]);
+        await expect(
+          fs.readFile(path.join(tempDir, "lib/one/version.rb"), "utf8"),
+        ).resolves.toContain(`VERSION = "1.0.0"`);
+        await expect(
+          fs.readFile(path.join(tempDir, "lib/two/version.rb"), "utf8"),
+        ).resolves.toContain(`VERSION = "1.0.0"`);
+      });
+
+      it("updates quoted versions in Ruby version files without a VERSION constant", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: { default: "ruby", packages: {} },
+        });
+        const { tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "lib/pkg_a/version.rb": `Gem::Version.new("1.0.0")\n`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        await expect(
+          fs.readFile(path.join(tempDir, "lib/pkg_a/version.rb"), "utf8"),
+        ).resolves.toContain(`Gem::Version.new("1.1.0")`);
+      });
+
+      it("throws when a configured Ruby file path is missing", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: {
+            default: {
+              type: "ruby",
+              versionFile: "lib/missing/version.rb",
+              gemspec: false,
+              gemfileLock: false,
+            },
+            packages: {},
+          },
+        });
+
+        await expect(
+          testSetup(
+            {
+              "package.json": JSON.stringify({
+                name: "pkg-a",
+                private: true,
+                version: "1.0.0",
+              }),
+            },
+            releasePlan.getReleasePlan(),
+            releasePlan.config,
+          ),
+        ).rejects.toThrow("Ruby version file not found");
+      });
+
+      it("does not update package.json dependency ranges when using the Ruby provider", async () => {
+        const releasePlan = new FakeReleasePlan(
+          [
+            {
+              id: "slow-widgets-rest",
+              summary: "Update pkg-b",
+              releases: [{ name: "pkg-b", type: "patch" }],
+            },
+          ],
+          [
+            {
+              name: "pkg-b",
+              type: "patch",
+              oldVersion: "1.0.0",
+              newVersion: "1.0.1",
+              changesets: ["slow-widgets-rest"],
+            },
+          ],
+          {
+            versionProvider: { default: "ruby", packages: {} },
+          },
+        );
+        const { tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "root",
+              private: true,
+              version: "0.0.0",
+            }),
+            "pnpm-workspace.yaml": "packages: ['packages/*']",
+            "pnpm-lock.yaml": "",
+            "packages/pkg-a/package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+              dependencies: {
+                "pkg-b": "^1.0.0",
+              },
+            }),
+            "packages/pkg-a/pkg-a.gemspec": `Gem::Specification.new do |spec|
+  spec.version = "1.0.0"
+end
+`,
+            "packages/pkg-b/package.json": JSON.stringify({
+              name: "pkg-b",
+              private: true,
+              version: "1.0.0",
+            }),
+            "packages/pkg-b/pkg-b.gemspec": `Gem::Specification.new do |spec|
+  spec.version = "1.0.0"
+end
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(
+          await readJson(path.join(tempDir, "packages/pkg-a/package.json")),
+        ).toMatchObject({
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "^1.0.0",
+          },
+        });
+        await expect(
+          fs.readFile(
+            path.join(tempDir, "packages/pkg-a/pkg-a.gemspec"),
+            "utf8",
+          ),
+        ).resolves.toContain(`spec.version = "1.1.0"`);
+        await expect(
+          fs.readFile(
+            path.join(tempDir, "packages/pkg-b/pkg-b.gemspec"),
+            "utf8",
+          ),
+        ).resolves.toContain(`spec.version = "1.0.1"`);
+      });
+    });
+
     describe("formatting", () => {
       it("should not reformat a small array in a package.json", async () => {
         const releasePlan = new FakeReleasePlan();

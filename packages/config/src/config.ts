@@ -42,6 +42,26 @@ const CommitSchema = v.union(
 
 const AccessSchema = v.union([v.literal("public"), v.literal("restricted")]);
 
+const VersionProviderNameSchema = v.union([
+  v.literal("auto"),
+  v.literal("node"),
+  v.literal("ruby"),
+]);
+
+const PackageVersionProviderSchema = v.union([
+  VersionProviderNameSchema,
+  v.strictObject({
+    type: v.literal("node"),
+  }),
+  v.strictObject({
+    type: v.literal("ruby"),
+    gemName: v.optional(v.string()),
+    versionFile: v.optional(v.union([v.string(), v.literal(false)])),
+    gemspec: v.optional(v.union([v.string(), v.literal(false)])),
+    gemfileLock: v.optional(v.union([v.string(), v.literal(false)])),
+  }),
+]);
+
 export const WrittenConfigSchema = v.object({
   baseBranch: rootKey(
     v.string(),
@@ -102,6 +122,20 @@ export const WrittenConfigSchema = v.object({
     ]),
     "Opt in to tracking non-npm / private packages",
     {},
+  ),
+  versionProvider: rootKey(
+    v.union([
+      PackageVersionProviderSchema,
+      v.strictObject({
+        default: v.optional(PackageVersionProviderSchema, "auto"),
+        packages: v.optional(
+          v.record(v.string(), PackageVersionProviderSchema),
+          {},
+        ),
+      }),
+    ]),
+    "Determines which provider updates version files for each package.",
+    "auto",
   ),
   bumpVersionsWithWorkspaceProtocolOnly: rootKey(
     v.boolean(),
@@ -193,6 +227,20 @@ export function normalizeWrittenConfig({
     config.privatePackages = {
       version: writtenConfig.privatePackages.version ?? true,
       tag: writtenConfig.privatePackages.tag ?? false,
+    };
+  }
+
+  const versionProvider = writtenConfig.versionProvider ?? "auto";
+
+  if (typeof versionProvider === "string" || "type" in versionProvider) {
+    config.versionProvider = {
+      default: versionProvider,
+      packages: {},
+    };
+  } else {
+    config.versionProvider = {
+      default: versionProvider.default ?? "auto",
+      packages: versionProvider.packages ?? {},
     };
   }
 
