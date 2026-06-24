@@ -82,10 +82,19 @@ export async function testdir(dir?: Fixture) {
   return fixture.path;
 }
 
+// Git's background maintenance can race in the background with fixture cleanup by touching pack files so we disable it.
+export async function disableGitBackgroundMaintenance(cwd: string) {
+  await exec("git", ["config", "gc.auto", "0"], { nodeOptions: { cwd } });
+  await exec("git", ["config", "maintenance.auto", "false"], {
+    nodeOptions: { cwd },
+  });
+}
+
 export async function gitdir(dir: Fixture) {
   const cwd = await testdir(dir);
 
   await exec("git", ["init"], { nodeOptions: { cwd } });
+  await disableGitBackgroundMaintenance(cwd);
   // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
   {
     const { stdout } = await exec(
