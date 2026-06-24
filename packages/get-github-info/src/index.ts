@@ -230,7 +230,7 @@ export async function getInfo(request: {
 
   const data = await GHDataLoader.load({ kind: "commit", ...request });
   let user = null;
-  if (data.author && data.author.user) {
+  if (data?.author?.user) {
     user = data.author.user;
   }
 
