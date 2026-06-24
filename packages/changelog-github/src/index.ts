@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import util from "node:util";
-import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
+import { getCommitInfo, getPullRequestInfo } from "@changesets/get-github-info";
 import type { ChangelogFunctions } from "@changesets/types";
 
 // "match what you skip, capture what you want": the left alternative
@@ -60,11 +60,12 @@ const changelogFunctions: ChangelogFunctions = {
       await Promise.all(
         changesets.map(async (cs) => {
           if (cs.commit) {
-            const { links } = await getInfo({
-              repo,
-              commit: cs.commit,
-            });
-            return links.commit;
+            const info = await getCommitInfo({ commit: cs.commit, repo });
+            if (info != null) {
+              return `[\`${info.commit.sha.slice(0, 7)}\`](${info.commit.url})`;
+            } else {
+              return `\`${cs.commit.slice(0, 7)}\``;
+            }
           }
         }),
       )
@@ -112,35 +113,40 @@ const changelogFunctions: ChangelogFunctions = {
       .split("\n")
       .map((l) => l.trimEnd());
 
-    const links = await (async () => {
-      if (prFromSummary != null) {
-        let { links } = await getInfoFromPullRequest({
-          repo,
-          pull: prFromSummary,
-        });
-        if (commitFromSummary) {
-          const shortCommitId = commitFromSummary.slice(0, 7);
-          links = {
-            ...links,
-            commit: `[\`${shortCommitId}\`](${GITHUB_SERVER_URL}/${repo}/commit/${commitFromSummary})`,
-          };
-        }
-        return links;
+    const links: { commit?: string; pull?: string; user?: string } = {
+      commit: undefined,
+      pull: undefined,
+      user: undefined,
+    };
+
+    if (prFromSummary != null) {
+      const info = await getPullRequestInfo({
+        pull: prFromSummary,
+        repo,
+      });
+      if (commitFromSummary) {
+        links.commit = `[\`${commitFromSummary.slice(0, 7)}\`](${GITHUB_SERVER_URL}/${repo}/commit/${commitFromSummary})`;
+      } else if (info?.commit) {
+        links.commit = `[\`${info.commit.sha.slice(0, 7)}\`](${info.commit.url})`;
       }
-      const commitToFetchFrom = commitFromSummary || changeset.commit;
-      if (commitToFetchFrom) {
-        const { links } = await getInfo({
-          repo,
-          commit: commitToFetchFrom,
-        });
-        return links;
+      if (info?.pull) {
+        links.pull = `[#${info.pull.number}](${info.pull.url})`;
       }
-      return {
-        commit: null,
-        pull: null,
-        user: null,
-      };
-    })();
+      if (info?.author) {
+        links.user = `[@${info.author.login}](${info.author.url})`;
+      }
+    } else if (commitFromSummary || changeset.commit) {
+      const info = await getCommitInfo({
+        commit: commitFromSummary || changeset.commit!,
+        repo,
+      });
+      if (info?.commit) {
+        links.commit = `[\`${info.commit.sha.slice(0, 7)}\`](${info.commit.url})`;
+      }
+      if (info?.pull) {
+        links.pull = `[#${info.pull.number}](${info.pull.url})`;
+      }
+    }
 
     const users = options.disableThanks
       ? null
