@@ -1,5 +1,43 @@
 # @changesets/cli
 
+## 3.0.0-next.6
+
+### Major Changes
+
+- [#2074](https://github.com/changesets/changesets/pull/2074) [`3599e47`](https://github.com/changesets/changesets/commit/3599e47217d2ed2dd60da628fe4d1d3fc4b849c7) Thanks [@bluwy](https://github.com/bluwy)! - Set supported package manager versions in `"engines"` field, including npm >=10.9.0, pnpm >=10.0.0, and yarn >=4.5.2.
+
+### Minor Changes
+
+- [#2068](https://github.com/changesets/changesets/pull/2068) [`d03ffc1`](https://github.com/changesets/changesets/commit/d03ffc1d11fb486328734e52767379646062f5c1) Thanks [@bluwy](https://github.com/bluwy)! - Support `{commit-short}` placeholder for the `snapshot.prereleaseTemplate` config, which is a 7 character variant of `{commit}`
+
+- [#2061](https://github.com/changesets/changesets/pull/2061) [`c2db1dd`](https://github.com/changesets/changesets/commit/c2db1dd5d2da6c6eb514d86bbe05cbb7227b067f) Thanks [@Andarist](https://github.com/Andarist)! - Added a `changeset publish-plan` command to inspect which packages would be published or tagged, with optional JSON output.
+
+- [#2100](https://github.com/changesets/changesets/pull/2100) [`90b4ad0`](https://github.com/changesets/changesets/commit/90b4ad0d1e0c41fab982f065f9f9ab522838499b) Thanks [@Andarist](https://github.com/Andarist)! - Order releases into dependency-aware chunks so packages are grouped in publish order.
+
+- [#2063](https://github.com/changesets/changesets/pull/2063) [`ed77176`](https://github.com/changesets/changesets/commit/ed771766183df240ff1dbedc6eaf6c0064b0c850) Thanks [@Andarist](https://github.com/Andarist)! - Added `changeset publish --from-pack-dir <dir>` to publish packages from a previously created pack output directory.
+
+- [#2062](https://github.com/changesets/changesets/pull/2062) [`830443c`](https://github.com/changesets/changesets/commit/830443c757d2a685cc76f36ebebb081cb531b3c2) Thanks [@Andarist](https://github.com/Andarist)! - Added a `changeset pack` command that requires `--out-dir` and writes publishable package tarballs plus an enriched `publish-plan.json` into that directory, either from the current workspace or from a saved publish plan via `--from-plan`.
+
+- [#2073](https://github.com/changesets/changesets/pull/2073) [`b9cbd80`](https://github.com/changesets/changesets/commit/b9cbd804d68ac43af3b3ada32bed6217da0af81c) Thanks [@bluwy](https://github.com/bluwy)! - Show if a package is private when selecting packages in `changeset add`
+
+### Patch Changes
+
+- [#2060](https://github.com/changesets/changesets/pull/2060) [`11bded4`](https://github.com/changesets/changesets/commit/11bded4bd38e4ced3dfa4c428c50e2284c458ae3) Thanks [@Andarist](https://github.com/Andarist)! - Fixed `changeset publish` to respect ignored packages for both publishing and private package tagging.
+
+- [#2064](https://github.com/changesets/changesets/pull/2064) [`ffd65fc`](https://github.com/changesets/changesets/commit/ffd65fc6110a5ac6dfb27eac7a28a8b26751acc7) Thanks [@Andarist](https://github.com/Andarist)! - For pnpm projects, Changesets now match pnpm's native registry behavior more closely during unpublished package checks. Both scope-based `publishConfig` registry overrides and `publishConfig.registry` are now ignored.
+
+- [#2113](https://github.com/changesets/changesets/pull/2113) [`b8222e6`](https://github.com/changesets/changesets/commit/b8222e688b11e53c2e6b3fab811ccfb50038007b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed publish error printing for pnpm 11.
+
+- [#2111](https://github.com/changesets/changesets/pull/2111) [`124ad07`](https://github.com/changesets/changesets/commit/124ad077c1361b00efa838c0400dc8a835645036) Thanks [@Andarist](https://github.com/Andarist)! - Auto-create the directory for the target publish plan file when executing `changeset publish-plan --output <file>`
+
+- [#2113](https://github.com/changesets/changesets/pull/2113) [`b8222e6`](https://github.com/changesets/changesets/commit/b8222e688b11e53c2e6b3fab811ccfb50038007b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed accidental success logs on failed npm publishes
+
+- [#2091](https://github.com/changesets/changesets/pull/2091) [`3918fe5`](https://github.com/changesets/changesets/commit/3918fe56a32b13c00d76e21e96f6280527a1871c) Thanks [@bluwy](https://github.com/bluwy)! - Log "New tag: ..." messages when running `changeset publish` to fix compatibility with the Changesets release GitHub action to create GitHub releases and push the new tags
+- Updated dependencies [[`694396c`](https://github.com/changesets/changesets/commit/694396ce49f0d7e2200c119b360e60e6bd11265f), [`d03ffc1`](https://github.com/changesets/changesets/commit/d03ffc1d11fb486328734e52767379646062f5c1), [`01f4da4`](https://github.com/changesets/changesets/commit/01f4da4e30aa90391def46b84b986fa223a055f5), [`c2348fc`](https://github.com/changesets/changesets/commit/c2348fcb9eba443fde1460b595651ce040f40a08)]:
+  - @changesets/apply-release-plan@8.0.0-next.6
+  - @changesets/assemble-release-plan@7.0.0-next.6
+  - @changesets/read@1.0.0-next.6
+
 ## 3.0.0-next.5
 
 ### Patch Changes

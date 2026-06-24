@@ -1,5 +1,11 @@
 # @changesets/parse
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- [#2083](https://github.com/changesets/changesets/pull/2083) [`1c1ded3`](https://github.com/changesets/changesets/commit/1c1ded38fe0a0e332baa124c4b89e0688a255ff2) Thanks [@bluwy](https://github.com/bluwy)! - Refactor yaml parsing to use the `yaml` package
+
 ## 1.0.0-next.5
 
 ### Patch Changes
