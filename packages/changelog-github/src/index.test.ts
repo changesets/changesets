@@ -1,8 +1,14 @@
 import { parseChangesetFile as parse } from "@changesets/parse";
-import { describe, expect, it, test, vi } from "vitest";
+import type { ModCompWithPackage } from "@changesets/types";
+import { afterEach, describe, expect, it, test, vi } from "vitest";
 import changelogFunctions from "./index.ts";
 
 const getReleaseLine = changelogFunctions.getReleaseLine;
+const getDependencyReleaseLine = changelogFunctions.getDependencyReleaseLine;
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 vi.mock(
   "@changesets/get-github-info",
@@ -69,6 +75,59 @@ const data = {
   pull: 1613,
   repo: "emotion-js/emotion",
 };
+
+it("uses GITHUB_REPOSITORY when repo option is absent", async () => {
+  vi.stubEnv("GITHUB_REPOSITORY", data.repo);
+  const [changeset, releaseType] = getChangeset("", data.commit);
+
+  expect(await getReleaseLine(changeset, releaseType, null)).toEqual(
+    `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
+  );
+});
+
+it("uses explicit repo option before GITHUB_REPOSITORY", async () => {
+  vi.stubEnv("GITHUB_REPOSITORY", "other/repo");
+
+  expect(await getReleaseLine(...getChangeset("", data.commit))).toEqual(
+    `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
+  );
+});
+
+it("uses GITHUB_REPOSITORY for dependency release lines", async () => {
+  vi.stubEnv("GITHUB_REPOSITORY", data.repo);
+
+  const changeset = {
+    ...parse(
+      `---
+  pkg: "minor"
+  ---
+
+  something
+  `,
+    ),
+    id: "some-id",
+    commit: data.commit,
+  };
+
+  const dependency: ModCompWithPackage = {
+    name: "pkg",
+    type: "patch",
+    oldVersion: "0.0.1",
+    newVersion: "1.0.0",
+    changesets: [],
+    dir: "/repo/pkg",
+    packageJson: {
+      name: "pkg",
+      version: "0.0.1",
+    },
+  };
+
+  expect(await getDependencyReleaseLine([changeset], [dependency], null))
+    .toMatchInlineSnapshot(`
+    "- Updated dependencies [[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003)]:
+      - pkg@1.0.0"
+  `);
+});
 
 describe.each([data.commit, "wrongcommit", undefined])(
   "with commit from changeset of %s",
