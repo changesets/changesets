@@ -1391,6 +1391,7 @@ describe("workspace range", () => {
       "# pkg-b
 
       ## 1.0.1
+
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
