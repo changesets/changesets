@@ -62,11 +62,7 @@ export async function enterPre(rootDir: string, tag: string) {
   const newPreState: PreState = {
     mode: "pre",
     tag,
-    initialVersions: {},
     changesets: preState?.changesets ?? [],
   };
-  for (const pkg of packages.packages) {
-    newPreState.initialVersions[pkg.packageJson.name] = pkg.packageJson.version;
-  }
   await outputFile(preStatePath, JSON.stringify(newPreState, null, 2) + "\n");
 }

@@ -170,9 +170,6 @@ export type CommitFunctions = {
 export type PreState = {
   mode: "pre" | "exit";
   tag: string;
-  initialVersions: {
-    [pkgName: string]: string;
-  };
   changesets: string[];
 };
 

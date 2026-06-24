@@ -751,7 +751,6 @@ describe("assembleReleasePlan", () => {
         {
           changesets: [],
           tag: "next",
-          initialVersions: {},
           mode: "exit",
         },
       );
@@ -775,10 +774,6 @@ describe("assembleReleasePlan", () => {
         {
           changesets: ["strange-words-combine"],
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-          },
           mode: "exit",
         },
       );
@@ -805,10 +800,6 @@ describe("assembleReleasePlan", () => {
         {
           changesets: ["strange-words-combine"],
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-          },
           mode: "exit",
         },
       );
@@ -852,11 +843,6 @@ describe("assembleReleasePlan", () => {
         {
           changesets: ["major-bumping-one"],
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-            "pkg-c": "1.0.0",
-          },
           mode: "pre",
         },
       );
