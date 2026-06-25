@@ -269,7 +269,7 @@ describe("renderTemplate", () => {
   const tokens = {
     summary: "msg",
     ref: "(REF)",
-    pr: "(PR)",
+    pull: "(PULL)",
     commit: "(COMMIT)",
     authors: "AUTHORS",
   };
@@ -306,7 +306,7 @@ describe("buildReleaseLineTokens", () => {
       users: "[@x](u)",
     });
     expect(t.ref).toBe("([#1](u))");
-    expect(t.pr).toBe("[#1](u)");
+    expect(t.pull).toBe("[#1](u)");
     expect(t.commit).toBe("[`abc`](u)");
     expect(t.authors).toBe("[@x](u)");
     expect(t.summary).toBe("linked");
@@ -321,7 +321,7 @@ describe("buildReleaseLineTokens", () => {
       users: null,
     });
     expect(t.ref).toBe("([`abc`](u))");
-    expect(t.pr).toBe("");
+    expect(t.pull).toBe("");
     expect(t.authors).toBe("");
   });
 
@@ -482,7 +482,7 @@ describe("documented template examples", () => {
 
   it.each([
     [
-      "\n- {pr} {commit} Thanks {authors}! - {summary}",
+      "\n- {pull} {commit} Thanks {authors}! - {summary}",
       `\n- ${pr} ${commit} Thanks ${author}! - fix the thing\n`,
     ],
     ["\n- {summaryHints} {ref}", `\n- fix the thing (${pr})\n`],
@@ -490,7 +490,7 @@ describe("documented template examples", () => {
       "\n- {summary} (thanks {authors}!)",
       `\n- fix the thing (thanks ${author}!)\n`,
     ],
-    ["\n- {summary} {pr}", `\n- fix the thing ${pr}\n`],
+    ["\n- {summary} {pull}", `\n- fix the thing ${pr}\n`],
   ])("template %p renders %p", async (template, expected) => {
     const changeset = {
       id: "x",

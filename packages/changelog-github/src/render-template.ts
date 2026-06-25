@@ -6,7 +6,7 @@ export const RELEASE_LINE_TOKENS = [
   "summary",
   "summaryHints",
   "ref",
-  "pr",
+  "pull",
   "commit",
   "authors",
 ] as const;
@@ -47,7 +47,7 @@ export function buildReleaseLineTokens(args: {
     summary: summaryLinked,
     summaryHints,
     ref,
-    pr: links.pull ?? "",
+    pull: links.pull ?? "",
     commit: links.commit ?? "",
     authors: users ?? "",
   };
