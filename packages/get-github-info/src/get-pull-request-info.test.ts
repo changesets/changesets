@@ -1,16 +1,16 @@
 import nock from "nock";
-import { expect, test, beforeEach, afterEach } from "vitest";
+import { expect, test, beforeEach, afterEach, vi } from "vitest";
 import { getPullRequestInfo } from "./get-pull-request-info.ts";
-
-process.env.GITHUB_TOKEN = "token";
 
 const apiPath = `/graphql`;
 
 beforeEach(() => {
+  vi.stubEnv("GITHUB_TOKEN", "token");
   nock.disableNetConnect();
 });
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   nock.cleanAll();
   nock.enableNetConnect();
 });

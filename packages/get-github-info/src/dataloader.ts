@@ -102,10 +102,7 @@ async function batchLoad(
       body: JSON.stringify({ query: makeQuery(repos) }),
     });
   } catch (e) {
-    throw new Error(
-      `An error occurred when fetching data from GitHub\n${(e as Error).message}`,
-      { cause: e },
-    );
+    throw new Error("Failed to fetch data from GitHub", { cause: e });
   }
 
   let data: { errors?: unknown; data?: Record<string, unknown> };
@@ -115,12 +112,7 @@ async function batchLoad(
       data?: Record<string, unknown>;
     };
   } catch (e) {
-    throw new Error(
-      `Failed to parse data from GitHub\n${(e as Error).message}`,
-      {
-        cause: e,
-      },
-    );
+    throw new Error("Failed to parse data from GitHub", { cause: e });
   }
 
   if (data.errors) {

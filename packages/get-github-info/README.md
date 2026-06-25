@@ -27,6 +27,8 @@ const getReleaseLine = async (changeset, type) => {
     commit: changeset.commit,
   });
   if (info == null) {
+    // may be null if referenced the wrong repo, or the commit has not been pushed
+    // to the repo yet
     throw new Error(`Could not get GitHub info for commit ${changeset.commit}`);
   }
 
