@@ -299,9 +299,6 @@ importers:
       nock:
         specifier: ^14.0.15
         version: 14.0.15
-      oxfmt:
-        specifier: ^0.54.0
-        version: 0.54.0
 
   packages/get-release-plan:
     dependencies:
