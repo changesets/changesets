@@ -5,7 +5,7 @@ import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 import type { ChangelogFunctions } from "@changesets/types";
 import { buildReleaseLineTokens, renderTemplate } from "./render-template.ts";
 
-const RX_ISSUE_REF = /\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g;
+const ISSUE_REF_REGEX = /\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g;
 
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
@@ -13,7 +13,7 @@ function linkifyIssueRefs(
   line: string,
   { serverUrl, repo }: { serverUrl: string; repo: string },
 ): string {
-  return line.replace(RX_ISSUE_REF, (match, issue) =>
+  return line.replace(ISSUE_REF_REGEX, (match, issue) =>
     // PRs and issues are the same thing on GitHub (to some extent, of course)
     // this relies on GitHub redirecting from /issues/1234 to /pull/1234 when necessary
     issue ? `[#${issue}](${serverUrl}/${repo}/issues/${issue})` : match,

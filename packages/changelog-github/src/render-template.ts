@@ -1,7 +1,7 @@
 // NOTE: the `template` option is experimental and these helpers are intentionally
 // not exported from `index.ts`. The token syntax may change in a patch release.
 
-const RX_TOKEN = /\{(\w+)\}/g;
+const TOKEN_REGEX = /\{(\w+)\}/g;
 
 export const RELEASE_LINE_TOKENS = [
   "summary",
@@ -15,7 +15,7 @@ export function renderTemplate(
   template: string,
   tokens: Record<string, string>,
 ): string {
-  return template.replace(RX_TOKEN, (_match, name: string) => {
+  return template.replace(TOKEN_REGEX, (_match, name: string) => {
     if (!Object.hasOwn(tokens, name)) {
       throw new Error(
         `Unknown changelog template token "{${name}}". Valid tokens are: ${RELEASE_LINE_TOKENS.map(
