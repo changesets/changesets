@@ -407,6 +407,100 @@ end
         ).resolves.toContain(`VERSION = "1.1.0"`);
       });
 
+      it("updates a single discovered root gemspec", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: {
+            default: {
+              type: "ruby",
+              versionFile: false,
+              gemfileLock: false,
+            },
+            packages: {},
+          },
+        });
+        const { changedFiles, tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "pkg-a",
+              private: true,
+              version: "1.0.0",
+            }),
+            "custom.gemspec": `Gem::Specification.new do |spec|
+  spec.version = "1.0.0"
+end
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(
+          changedFiles.map((file) => path.relative(tempDir, file)),
+        ).toEqual(["custom.gemspec"]);
+        await expect(
+          fs.readFile(path.join(tempDir, "custom.gemspec"), "utf8"),
+        ).resolves.toContain(`spec.version = "1.1.0"`);
+      });
+
+      it("uses scoped package names to discover Ruby version files", async () => {
+        const releasePlan: ReleasePlan = {
+          changesets: [
+            {
+              id: "tame-rubies-serve",
+              summary: "Update scoped Ruby gem",
+              releases: [{ name: "@scope/my-gem", type: "minor" }],
+            },
+          ],
+          releases: [
+            {
+              name: "@scope/my-gem",
+              type: "minor",
+              oldVersion: "1.0.0",
+              newVersion: "1.1.0",
+              changesets: ["tame-rubies-serve"],
+            },
+          ],
+          preState: undefined,
+        };
+        const { changedFiles, tempDir } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              name: "@scope/my-gem",
+              private: true,
+              version: "1.0.0",
+            }),
+            "lib/my/gem/version.rb": `module My
+  module Gem
+    VERSION = "1.0.0"
+  end
+end
+`,
+            "my-gem.gemspec": `Gem::Specification.new do |spec|
+  spec.name = "my-gem"
+  spec.version = "1.0.0"
+end
+`,
+          },
+          releasePlan,
+          {
+            versionProvider: { default: "ruby", packages: {} },
+          },
+        );
+
+        expect(
+          changedFiles.map((file) => path.relative(tempDir, file)),
+        ).toEqual([
+          path.join("lib", "my", "gem", "version.rb"),
+          "my-gem.gemspec",
+        ]);
+        await expect(
+          fs.readFile(path.join(tempDir, "lib/my/gem/version.rb"), "utf8"),
+        ).resolves.toContain(`VERSION = "1.1.0"`);
+        await expect(
+          fs.readFile(path.join(tempDir, "my-gem.gemspec"), "utf8"),
+        ).resolves.toContain(`spec.version = "1.1.0"`);
+      });
+
       it("does not guess between multiple discovered Ruby version files", async () => {
         const releasePlan = new FakeReleasePlan([], [], {
           versionProvider: { default: "ruby", packages: {} },
@@ -458,6 +552,62 @@ end
         ).resolves.toContain(`Gem::Version.new("1.1.0")`);
       });
 
+      it("throws when a configured Ruby gemspec path is missing", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: {
+            default: {
+              type: "ruby",
+              versionFile: false,
+              gemspec: "missing.gemspec",
+              gemfileLock: false,
+            },
+            packages: {},
+          },
+        });
+
+        await expect(
+          testSetup(
+            {
+              "package.json": JSON.stringify({
+                name: "pkg-a",
+                private: true,
+                version: "1.0.0",
+              }),
+            },
+            releasePlan.getReleasePlan(),
+            releasePlan.config,
+          ),
+        ).rejects.toThrow("gemspec not found");
+      });
+
+      it("throws when a configured Gemfile.lock path is missing", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: {
+            default: {
+              type: "ruby",
+              versionFile: false,
+              gemspec: false,
+              gemfileLock: "bundler/Gemfile.lock",
+            },
+            packages: {},
+          },
+        });
+
+        await expect(
+          testSetup(
+            {
+              "package.json": JSON.stringify({
+                name: "pkg-a",
+                private: true,
+                version: "1.0.0",
+              }),
+            },
+            releasePlan.getReleasePlan(),
+            releasePlan.config,
+          ),
+        ).rejects.toThrow("Gemfile.lock not found");
+      });
+
       it("throws when a configured Ruby file path is missing", async () => {
         const releasePlan = new FakeReleasePlan([], [], {
           versionProvider: {
@@ -484,6 +634,28 @@ end
             releasePlan.config,
           ),
         ).rejects.toThrow("Ruby version file not found");
+      });
+
+      it("throws for an unknown configured version provider", async () => {
+        const releasePlan = new FakeReleasePlan([], [], {
+          versionProvider: {
+            default: "python" as "node",
+            packages: {},
+          },
+        });
+
+        await expect(
+          testSetup(
+            {
+              "package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.0",
+              }),
+            },
+            releasePlan.getReleasePlan(),
+            releasePlan.config,
+          ),
+        ).rejects.toThrow("Unknown version provider: python");
       });
 
       it("does not update package.json dependency ranges when using the Ruby provider", async () => {
