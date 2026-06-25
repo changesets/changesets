@@ -3,6 +3,7 @@ import path from "node:path";
 import util from "node:util";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 import type { ChangelogFunctions } from "@changesets/types";
+import { buildReleaseLineTokens, renderTemplate } from "./render-template.ts";
 
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
@@ -52,57 +53,6 @@ async function readEnv() {
     (await readEnvFileCached()).GITHUB_SERVER_URL ||
     "https://github.com";
   return { GITHUB_SERVER_URL };
-}
-
-export const RELEASE_LINE_TOKENS = [
-  "summary",
-  "summaryHints",
-  "ref",
-  "pr",
-  "commit",
-  "authors",
-] as const;
-
-export function renderTemplate(
-  template: string,
-  tokens: Record<string, string>,
-): string {
-  return template.replace(/\{(\w+)\}/g, (_match, name: string) => {
-    if (!Object.hasOwn(tokens, name)) {
-      throw new Error(
-        `Unknown changelog template token "{${name}}". Valid tokens are: ${RELEASE_LINE_TOKENS.map(
-          (t) => `{${t}}`,
-        ).join(", ")}.`,
-      );
-    }
-    return tokens[name];
-  });
-}
-
-export function buildReleaseLineTokens(args: {
-  summaryLinked: string;
-  summaryHints: string;
-  links: { pull: string | null; commit: string | null; user: string | null };
-  users: string | null;
-}): Record<string, string> {
-  const { summaryLinked, summaryHints, links, users } = args;
-  // Tokens render bare (no built-in spacing); the template author writes the
-  // spaces. `{ref}` is the one self-contained convenience: a parenthesized
-  // PR-or-commit reference (PR wins), empty when there is neither.
-  const ref = links.pull
-    ? `(${links.pull})`
-    : links.commit
-      ? `(${links.commit})`
-      : "";
-  return {
-    // `{summary}` links every `#n`; `{summaryHints}` links only `(fix #n)` hints
-    summary: summaryLinked,
-    summaryHints,
-    ref,
-    pr: links.pull ?? "",
-    commit: links.commit ?? "",
-    authors: users ?? "",
-  };
 }
 
 const changelogFunctions: ChangelogFunctions = {

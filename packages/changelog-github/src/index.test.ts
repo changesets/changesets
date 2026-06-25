@@ -1,10 +1,11 @@
 import { parseChangesetFile as parse } from "@changesets/parse";
 import { describe, expect, it, test, vi } from "vitest";
-import changelogFunctions, {
+import changelogFunctions from "./index.ts";
+import {
   renderTemplate,
   buildReleaseLineTokens,
   RELEASE_LINE_TOKENS,
-} from "./index.ts";
+} from "./render-template.ts";
 
 const getReleaseLine = changelogFunctions.getReleaseLine;
 
