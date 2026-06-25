@@ -102,10 +102,31 @@ export class FakeFullState {
       (a) => a.packageJson.name === dependent,
     );
     if (!pkg) throw new Error(`No "${dependent}" package`);
-    if (!pkg.packageJson.dependencies) {
-      pkg.packageJson.dependencies = {};
-    }
+    pkg.packageJson.dependencies ??= {};
     pkg.packageJson.dependencies[dependency] = versionRange;
+  }
+  updateDependencies(
+    dependent: string,
+    deps: Array<{
+      name: string;
+      range: string;
+      type?: "direct" | "peer" | "dev";
+    }>,
+  ) {
+    const pkg = this.packages.packages.find(
+      (p) => p.packageJson.name === dependent,
+    );
+    if (!pkg) throw new Error(`No "${dependent}" package`);
+    for (const { name, range, type } of deps) {
+      const property =
+        type === "dev"
+          ? "devDependencies"
+          : type === "peer"
+            ? "peerDependencies"
+            : "dependencies";
+      pkg.packageJson[property] ??= {};
+      pkg.packageJson[property][name] = range;
+    }
   }
   updateDevDependency(
     dependent: string,
@@ -116,9 +137,7 @@ export class FakeFullState {
       (a) => a.packageJson.name === dependent,
     );
     if (!pkg) throw new Error(`No "${dependent}" package`);
-    if (!pkg.packageJson.devDependencies) {
-      pkg.packageJson.devDependencies = {};
-    }
+    pkg.packageJson.devDependencies ??= {};
     pkg.packageJson.devDependencies[dependency] = versionRange;
   }
   updatePeerDependency(
@@ -130,9 +149,7 @@ export class FakeFullState {
       (a) => a.packageJson.name === dependent,
     );
     if (!pkg) throw new Error(`No "${dependent}" package`);
-    if (!pkg.packageJson.peerDependencies) {
-      pkg.packageJson.peerDependencies = {};
-    }
+    pkg.packageJson.peerDependencies ??= {};
     pkg.packageJson.peerDependencies[dependency] = versionRange;
   }
 

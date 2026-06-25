@@ -88,20 +88,6 @@ export function determineDependents({
             if (nextRelease.type === "none") {
               continue;
             } else if (
-              shouldBumpMajor({
-                dependent,
-                depType,
-                versionRange,
-                releases,
-                nextRelease,
-                preInfo,
-                onlyUpdatePeerDependentsWhenOutOfRange:
-                  config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                    .onlyUpdatePeerDependentsWhenOutOfRange,
-              })
-            ) {
-              type = "major";
-            } else if (
               (!releases.has(dependent) ||
                 releases.get(dependent)!.type === "none") &&
               (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
@@ -239,36 +225,4 @@ function getDependencyVersionRanges(
     });
   }
   return dependencyVersionRanges;
-}
-
-function shouldBumpMajor({
-  dependent,
-  depType,
-  versionRange,
-  releases,
-  nextRelease,
-  preInfo,
-  onlyUpdatePeerDependentsWhenOutOfRange,
-}: {
-  dependent: string;
-  depType: DependencyType;
-  versionRange: string;
-  releases: Map<string, InternalRelease>;
-  nextRelease: InternalRelease;
-  preInfo: PreInfo | undefined;
-  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-}) {
-  // we check if it is a peerDependency because if it is, our dependent bump type might need to be major.
-  return (
-    depType === "peerDependencies" &&
-    nextRelease.type !== "none" &&
-    nextRelease.type !== "patch" &&
-    // 1. If onlyUpdatePeerDependentsWhenOutOfRange set to true, bump major if the version is leaving the range.
-    // 2. If onlyUpdatePeerDependentsWhenOutOfRange set to false, bump major regardless whether or not the version is leaving the range.
-    (!onlyUpdatePeerDependentsWhenOutOfRange ||
-      !semverSatisfies(incrementVersion(nextRelease, preInfo), versionRange)) &&
-    // bump major only if the dependent doesn't already has a major release.
-    (!releases.has(dependent) ||
-      (releases.has(dependent) && releases.get(dependent)!.type !== "major"))
-  );
 }
