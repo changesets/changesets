@@ -51,7 +51,7 @@ export async function getCommitInfo(
     }
     const aDate = new Date(a.mergedAt);
     const bDate = new Date(b.mergedAt);
-    return aDate > bDate ? 1 : aDate < bDate ? -1 : 0;
+    return aDate.getTime() - bDate.getTime();
   })[0];
 
   const author = pr?.author ?? data.author?.user;

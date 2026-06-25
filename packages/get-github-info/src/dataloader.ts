@@ -71,6 +71,11 @@ export async function loadPullData(options: Omit<PullInput, "kind">) {
   return result as PullOutput | null;
 }
 
+interface GraphqlFetchData {
+  errors?: unknown;
+  data?: Record<string, unknown>;
+}
+
 async function batchLoad(
   requests: ReadonlyArray<CommitInput | PullInput>,
 ): Promise<Array<CommitOutput | PullOutput | Error>> {
@@ -87,12 +92,12 @@ async function batchLoad(
     );
   }
   const repos: ReposWithCommitsAndPRsToFetch = {};
-  requests.forEach(({ repo, ...data }) => {
+  for (const { repo, ...data } of requests) {
     repos[repo] ??= [];
     repos[repo].push(data);
-  });
+  }
 
-  let fetchResponse;
+  let fetchResponse: Response;
   try {
     fetchResponse = await fetch(GITHUB_GRAPHQL_URL, {
       method: "POST",
@@ -105,12 +110,9 @@ async function batchLoad(
     throw new Error("Failed to fetch data from GitHub", { cause: e });
   }
 
-  let data: { errors?: unknown; data?: Record<string, unknown> };
+  let data: GraphqlFetchData;
   try {
-    data = (await fetchResponse.json()) as {
-      errors?: unknown;
-      data?: Record<string, unknown>;
-    };
+    data = (await fetchResponse.json()) as GraphqlFetchData;
   } catch (e) {
     throw new Error("Failed to parse data from GitHub", { cause: e });
   }

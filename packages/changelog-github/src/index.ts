@@ -122,7 +122,8 @@ const changelogFunctions: ChangelogFunctions = {
       links.user = info?.author?.markdownLink;
 
       if (commitFromSummary) {
-        links.commit = `[\`${commitFromSummary.slice(0, 7)}\`](${GITHUB_SERVER_URL}/${repo}/commit/${commitFromSummary})`;
+        const url = `${GITHUB_SERVER_URL}/${repo}/commit/${commitFromSummary}`;
+        links.commit = `[\`${commitFromSummary.slice(0, 7)}\`](${url})`;
       }
     } else if (commitFromSummary || changeset.commit) {
       const commitToFetchFrom = commitFromSummary || changeset.commit!;
