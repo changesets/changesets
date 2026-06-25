@@ -134,13 +134,16 @@ test("associated with multiple PRs with only one merged", async () => {
     {
       "author": {
         "login": "Andarist",
+        "markdownLink": "[@Andarist](https://github.com/Andarist)",
         "url": "https://github.com/Andarist",
       },
       "commit": {
+        "markdownLink": "[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
         "sha": "a085003",
         "url": "https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
       },
       "pull": {
+        "markdownLink": "[#1613](https://github.com/emotion-js/emotion/pull/1613)",
         "number": 1613,
         "url": "https://github.com/emotion-js/emotion/pull/1613",
       },
@@ -273,13 +276,16 @@ test("associated with multiple PRs with multiple merged gets the one that was me
     {
       "author": {
         "login": "Andarist",
+        "markdownLink": "[@Andarist](https://github.com/Andarist)",
         "url": "https://github.com/Andarist",
       },
       "commit": {
+        "markdownLink": "[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
         "sha": "a085003",
         "url": "https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
       },
       "pull": {
+        "markdownLink": "[#1613](https://github.com/emotion-js/emotion/pull/1613)",
         "number": 1613,
         "url": "https://github.com/emotion-js/emotion/pull/1613",
       },
@@ -376,13 +382,16 @@ test("gets the author of the associated pull request if it exists rather than th
     {
       "author": {
         "login": "lmvco",
+        "markdownLink": "[@lmvco](https://github.com/lmvco)",
         "url": "https://github.com/lmvco",
       },
       "commit": {
+        "markdownLink": "[\`c7e9c69\`](https://github.com/JedWatson/react-select/commit/c7e9c697dada15ce3ff9a767bf914ad890080433)",
         "sha": "c7e9c69",
         "url": "https://github.com/JedWatson/react-select/commit/c7e9c697dada15ce3ff9a767bf914ad890080433",
       },
       "pull": {
+        "markdownLink": "[#3682](https://github.com/JedWatson/react-select/pull/3682)",
         "number": 3682,
         "url": "https://github.com/JedWatson/react-select/pull/3682",
       },
@@ -482,13 +491,16 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
       {
         "author": {
           "login": "Andarist",
+          "markdownLink": "[@Andarist](https://custom.github.com/Andarist)",
           "url": "https://custom.github.com/Andarist",
         },
         "commit": {
+          "markdownLink": "[\`a085003\`](https://custom.github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
           "sha": "a085003",
           "url": "https://custom.github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
         },
         "pull": {
+          "markdownLink": "[#1613](https://custom.github.com/emotion-js/emotion/pull/1613)",
           "number": 1613,
           "url": "https://custom.github.com/emotion-js/emotion/pull/1613",
         },

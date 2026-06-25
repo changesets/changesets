@@ -18,6 +18,11 @@ vi.mock(
       pull: `https://github.com/${data.repo}/pull/${data.pull}`,
       author: `https://github.com/${data.author}`,
     };
+    const markdownLinks = {
+      commit: `[\`${data.commit.slice(0, 7)}\`](${urls.commit})`,
+      pull: `[#${data.pull}](${urls.pull})`,
+      author: `[@${data.author}](${urls.author})`,
+    };
     return {
       /* eslint-disable vitest/no-standalone-expect */
       async getCommitInfo({ commit, repo }) {
@@ -27,14 +32,17 @@ vi.mock(
           commit: {
             sha: data.commit,
             url: urls.commit,
+            markdownLink: markdownLinks.commit,
           },
           author: {
             login: data.author,
             url: urls.author,
+            markdownLink: markdownLinks.author,
           },
           pull: {
             number: data.pull,
             url: urls.pull,
+            markdownLink: markdownLinks.pull,
           },
         };
       },
@@ -45,14 +53,17 @@ vi.mock(
           commit: {
             sha: data.commit,
             url: urls.commit,
+            markdownLink: markdownLinks.commit,
           },
           author: {
             login: data.author,
             url: urls.author,
+            markdownLink: markdownLinks.author,
           },
           pull: {
             number: data.pull,
             url: urls.pull,
+            markdownLink: markdownLinks.pull,
           },
         };
       },

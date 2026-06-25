@@ -61,11 +61,7 @@ const changelogFunctions: ChangelogFunctions = {
         changesets.map(async (cs) => {
           if (cs.commit) {
             const info = await getCommitInfo({ commit: cs.commit, repo });
-            if (info != null) {
-              return `[\`${info.commit.sha.slice(0, 7)}\`](${info.commit.url})`;
-            } else {
-              return `\`${cs.commit.slice(0, 7)}\``;
-            }
+            return info?.commit.markdownLink ?? `\`${cs.commit.slice(0, 7)}\``;
           }
         }),
       )
@@ -120,35 +116,20 @@ const changelogFunctions: ChangelogFunctions = {
     };
 
     if (prFromSummary != null) {
-      const info = await getPullRequestInfo({
-        pull: prFromSummary,
-        repo,
-      });
+      const info = await getPullRequestInfo({ pull: prFromSummary, repo });
+      links.commit = info?.commit?.markdownLink;
+      links.pull = info?.pull.markdownLink;
+      links.user = info?.author?.markdownLink;
+
       if (commitFromSummary) {
         links.commit = `[\`${commitFromSummary.slice(0, 7)}\`](${GITHUB_SERVER_URL}/${repo}/commit/${commitFromSummary})`;
-      } else if (info?.commit) {
-        links.commit = `[\`${info.commit.sha.slice(0, 7)}\`](${info.commit.url})`;
-      }
-      if (info?.pull) {
-        links.pull = `[#${info.pull.number}](${info.pull.url})`;
-      }
-      if (info?.author) {
-        links.user = `[@${info.author.login}](${info.author.url})`;
       }
     } else if (commitFromSummary || changeset.commit) {
-      const info = await getCommitInfo({
-        commit: commitFromSummary || changeset.commit!,
-        repo,
-      });
-      if (info?.commit) {
-        links.commit = `[\`${info.commit.sha.slice(0, 7)}\`](${info.commit.url})`;
-      }
-      if (info?.pull) {
-        links.pull = `[#${info.pull.number}](${info.pull.url})`;
-      }
-      if (info?.author) {
-        links.user = `[@${info.author.login}](${info.author.url})`;
-      }
+      const commitToFetchFrom = commitFromSummary || changeset.commit!;
+      const info = await getCommitInfo({ commit: commitToFetchFrom, repo });
+      links.commit = info?.commit.markdownLink;
+      links.pull = info?.pull?.markdownLink;
+      links.user = info?.author?.markdownLink;
     }
 
     const users = options.disableThanks

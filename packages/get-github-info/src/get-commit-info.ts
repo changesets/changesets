@@ -10,14 +10,17 @@ export interface CommitInfo {
   commit: {
     sha: string;
     url: string;
+    markdownLink: string;
   };
   author?: {
     login: string;
     url: string;
+    markdownLink: string;
   };
   pull?: {
     number: number;
     url: string;
+    markdownLink: string;
   };
 }
 
@@ -57,17 +60,20 @@ export async function getCommitInfo(
     commit: {
       sha: options.commit,
       url: data.commitUrl,
+      markdownLink: `[\`${options.commit.slice(0, 7)}\`](${data.commitUrl})`,
     },
     author: author
       ? {
           login: author.login,
           url: author.url,
+          markdownLink: `[@${author.login}](${author.url})`,
         }
       : undefined,
     pull: pr
       ? {
           number: pr.number,
           url: pr.url,
+          markdownLink: `[#${pr.number}](${pr.url})`,
         }
       : undefined,
   };

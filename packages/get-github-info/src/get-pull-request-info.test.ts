@@ -84,13 +84,16 @@ test("returns pull request info", async () => {
     {
       "author": {
         "login": "Andarist",
+        "markdownLink": "[@Andarist](https://github.com/Andarist)",
         "url": "https://github.com/Andarist",
       },
       "commit": {
+        "markdownLink": "[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
         "sha": "a085003",
         "url": "https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
       },
       "pull": {
+        "markdownLink": "[#1613](https://github.com/emotion-js/emotion/pull/1613)",
         "number": 1613,
         "url": "https://github.com/emotion-js/emotion/pull/1613",
       },

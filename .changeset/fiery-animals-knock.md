@@ -4,21 +4,29 @@
 
 Rename `getInfo` to `getCommitInfo`, and `getInfoFromPullRequest` to `getPullRequestInfo`. They may now return `undefined` if the commit or pull request is not found in the GitHub repository.
 
-Their return types are also updated to return the direct string and URLs instead of pre-formatted Markdown links. This allows for more flexibility when using the info.
-
-To migrate, you should construct the Markdown links yourself. For example:
+The return types are also slightly changed but should contain the same information as before. To migrate:
 
 ```ts
 const info = await getCommitInfo({ commit, repo });
 if (info == null) return;
 
-const commitLink = `[${info.commit.sha.slice(0, 7)}](${info.commit.url})`;
+// Before:
+const authorLogin = info.user;
+const authorLink = info.links.author;
 
-if (info.author != null) {
-  const authorLink = `[@${info.author.login}](${info.author.url})`;
-}
+const pullNumber = info.pull;
+const pullLink = info.links.pull;
 
-if (info.pull != null) {
-  const pullLink = `([#${info.pull.number}](${info.pull.url})`;
-}
+const commitLink = info.links.commit;
+
+// After:
+const authorLogin = info.author.login;
+const authorLink = info.author.markdownLink;
+
+const pullNumber = info.pull.number;
+const pullLink = info.pull.markdownLink;
+
+const commitLink = info.commit.markdownLink;
 ```
+
+`getPullRequestInfo` also has a similar migration path.

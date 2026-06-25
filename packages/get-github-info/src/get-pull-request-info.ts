@@ -10,14 +10,17 @@ export interface PullRequestInfo {
   pull: {
     number: number;
     url: string;
+    markdownLink: string;
   };
   author?: {
     login: string;
     url: string;
+    markdownLink: string;
   };
   commit?: {
     sha: string;
     url: string;
+    markdownLink: string;
   };
 }
 
@@ -37,17 +40,20 @@ export async function getPullRequestInfo(
     pull: {
       number: options.pull,
       url: data.url,
+      markdownLink: `[#${options.pull}](${data.url})`,
     },
     author: data.author
       ? {
           login: data.author.login,
           url: data.author.url,
+          markdownLink: `[@${data.author.login}](${data.author.url})`,
         }
       : undefined,
     commit: data.mergeCommit
       ? {
           sha: data.mergeCommit.abbreviatedOid,
           url: data.mergeCommit.commitUrl,
+          markdownLink: `[\`${data.mergeCommit.abbreviatedOid.slice(0, 7)}\`](${data.mergeCommit.commitUrl})`,
         }
       : undefined,
   };
