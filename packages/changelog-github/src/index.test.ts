@@ -301,7 +301,6 @@ describe("buildReleaseLineTokens", () => {
   it("ref prefers PR over commit", () => {
     const t = buildReleaseLineTokens({
       summaryLinked: "linked",
-      summaryHints: "hints",
       links: { pull: "[#1](u)", commit: "[`abc`](u)", user: "[@x](u)" },
       users: "[@x](u)",
     });
@@ -310,13 +309,11 @@ describe("buildReleaseLineTokens", () => {
     expect(t.commit).toBe("[`abc`](u)");
     expect(t.authors).toBe("[@x](u)");
     expect(t.summary).toBe("linked");
-    expect(t.summaryHints).toBe("hints");
   });
 
   it("ref falls back to commit when there is no PR", () => {
     const t = buildReleaseLineTokens({
       summaryLinked: "msg",
-      summaryHints: "msg",
       links: { pull: null, commit: "[`abc`](u)", user: null },
       users: null,
     });
@@ -328,7 +325,6 @@ describe("buildReleaseLineTokens", () => {
   it("ref is empty when there is neither PR nor commit", () => {
     const t = buildReleaseLineTokens({
       summaryLinked: "msg",
-      summaryHints: "msg",
       links: { pull: null, commit: null, user: null },
       users: null,
     });
@@ -340,7 +336,6 @@ describe("buildReleaseLineTokens", () => {
     const keys = Object.keys(
       buildReleaseLineTokens({
         summaryLinked: "m",
-        summaryHints: "m",
         links: { pull: null, commit: null, user: null },
         users: null,
       }),
@@ -352,7 +347,7 @@ describe("buildReleaseLineTokens", () => {
 describe("template option (compact reproduction)", () => {
   const compactOpts = {
     repo: data.repo,
-    template: "\n- {summaryHints} {ref}",
+    template: "\n- {summary} {ref}",
   };
 
   it("renders the compact single-line form with PR ref", async () => {
@@ -438,25 +433,13 @@ describe("template option (compact reproduction)", () => {
   });
 });
 
-describe("{summary} vs {summaryHints} tokens", () => {
+describe("{summary} token", () => {
   const changeset = {
     id: "x",
     summary: "did a thing (fixes #99) and also #1234",
     releases: [{ name: "pkg", type: "minor" as const }],
     commit: data.commit,
   };
-
-  it("{summaryHints} only links refs inside (fix|fixes|see #n)", async () => {
-    const line = await getReleaseLine(changeset, "minor", {
-      repo: data.repo,
-      template: "\n- {summaryHints}",
-    });
-    expect(line).toContain(
-      "(fixes [#99](https://github.com/emotion-js/emotion/issues/99))",
-    );
-    expect(line).toContain("and also #1234");
-    expect(line).not.toContain("issues/1234");
-  });
 
   it("{summary} links every bare #n", async () => {
     const line = await getReleaseLine(changeset, "minor", {
@@ -485,7 +468,7 @@ describe("documented template examples", () => {
       "\n- {pull} {commit} Thanks {authors}! - {summary}",
       `\n- ${pr} ${commit} Thanks ${author}! - fix the thing\n`,
     ],
-    ["\n- {summaryHints} {ref}", `\n- fix the thing (${pr})\n`],
+    ["\n- {summary} {ref}", `\n- fix the thing (${pr})\n`],
     [
       "\n- {summary} (thanks {authors}!)",
       `\n- fix the thing (thanks ${author}!)\n`,

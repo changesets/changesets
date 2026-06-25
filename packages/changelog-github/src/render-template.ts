@@ -4,7 +4,6 @@ const RX_TOKEN = /\{(\w+)\}/g;
 
 export const RELEASE_LINE_TOKENS = [
   "summary",
-  "summaryHints",
   "ref",
   "pull",
   "commit",
@@ -29,11 +28,10 @@ export function renderTemplate(
 
 export function buildReleaseLineTokens(args: {
   summaryLinked: string;
-  summaryHints: string;
   links: { pull: string | null; commit: string | null; user: string | null };
   users: string | null;
 }): Record<string, string> {
-  const { summaryLinked, summaryHints, links, users } = args;
+  const { summaryLinked, links, users } = args;
   // Tokens render bare (no built-in spacing); the template author writes the
   // spaces. `{ref}` is the one self-contained convenience: a parenthesized
   // PR-or-commit reference (PR wins), empty when there is neither.
@@ -43,9 +41,7 @@ export function buildReleaseLineTokens(args: {
       ? `(${links.commit})`
       : "";
   return {
-    // `{summary}` links every `#n`; `{summaryHints}` links only `(fix #n)` hints
     summary: summaryLinked,
-    summaryHints,
     ref,
     pull: links.pull ?? "",
     commit: links.commit ?? "",

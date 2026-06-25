@@ -5,28 +5,18 @@ import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 import type { ChangelogFunctions } from "@changesets/types";
 import { buildReleaseLineTokens, renderTemplate } from "./render-template.ts";
 
+const RX_ISSUE_REF = /\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g;
+
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
 function linkifyIssueRefs(
   line: string,
   { serverUrl, repo }: { serverUrl: string; repo: string },
 ): string {
-  return line.replace(/\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g, (match, issue) =>
+  return line.replace(RX_ISSUE_REF, (match, issue) =>
     // PRs and issues are the same thing on GitHub (to some extent, of course)
     // this relies on GitHub redirecting from /issues/1234 to /pull/1234 when necessary
     issue ? `[#${issue}](${serverUrl}/${repo}/issues/${issue})` : match,
-  );
-}
-
-// narrow autolinking behind the `{summaryHints}` token: only links a ref that
-// sits inside `(fix #123)`, `(fixes #123)`, or `(see #123)`
-function linkifyIssueHints(
-  line: string,
-  { serverUrl, repo }: { serverUrl: string; repo: string },
-): string {
-  return line.replace(
-    /(?<=\( ?(?:fix|fixes|see) )#(\d+)(?= ?\))/g,
-    (_match, issue) => `[#${issue}](${serverUrl}/${repo}/issues/${issue})`,
   );
 }
 
@@ -168,10 +158,7 @@ const changelogFunctions: ChangelogFunctions = {
 
     const linkOpts = { serverUrl: GITHUB_SERVER_URL, repo };
     const summaryLinked = linkifyIssueRefs(firstLine, linkOpts);
-    const summaryHints = linkifyIssueHints(firstLine, linkOpts);
 
-    // continuation lines always link every `#n` (the `{summaryHints}` narrowing
-    // is a first-line concern; a bare ref in a wrapped body line is rare)
     const continuation = futureLines
       .map((l) => `  ${linkifyIssueRefs(l, linkOpts)}`)
       .join("\n");
@@ -179,7 +166,6 @@ const changelogFunctions: ChangelogFunctions = {
     if (typeof options.template === "string" && options.template.length > 0) {
       const tokens = buildReleaseLineTokens({
         summaryLinked,
-        summaryHints,
         links,
         users,
       });
