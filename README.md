@@ -1,6 +1,8 @@
 > [!IMPORTANT]
 > This is development branch for Changesets v3. For the v2 code, check out the [maintenance/v2](https://github.com/changesets/changesets/tree/maintenance/v2) branch.
 
+Some changes
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/images/changesets-banner-dark.png">
