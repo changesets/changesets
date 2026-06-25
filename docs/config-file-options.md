@@ -164,47 +164,30 @@ You would specify our github changelog generator with:
 
 If you want to disable thank you messages, add `"disableThanks": true` to the options.
 
-#### `template` (optional string)
+#### `template` (optional string, experimental)
+
+> ⚠ **Experimental.** The `template` option and its token syntax may change in any release, including a patch. If you rely on it, pin the exact `@changesets/changelog-github` version.
 
 By default each changelog line looks like `- [#123](url) [abc1234](url) Thanks [@user](url)! - summary`. Set `template` to render the line yourself from these tokens. Each token renders bare (you write the surrounding spaces) and renders to nothing when its data is absent:
 
-| Token            | Renders                                                                                                                             |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `{summary}`      | the changeset summary's first line, linking every issue reference (`#123`)                                                          |
-| `{summaryHints}` | the same first line, but linking only references inside `(fix #123)`, `(fixes #123)`, or `(see #123)`                               |
-| `{ref}`          | a single parenthesized reference: `([#123](url))` if there is a PR, else ``([`abc1234`](url))`` for a commit, else nothing          |
-| `{pr}`           | `[#123](url)`                                                                                                                       |
-| `{commit}`       | ``[`abc1234`](url)``                                                                                                                |
-| `{authors}`      | `[@user](url)` (the contributors, respects `disableThanks`). For the "Thanks" prefix, write it in the template: `Thanks {authors}!` |
+| Token       | Renders                                                                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `{summary}` | the changeset summary's first line, linking every issue reference (`#123`)                                                          |
+| `{ref}`     | a single parenthesized reference: `([#123](url))` if there is a PR, else ``([`abc1234`](url))`` for a commit, else nothing          |
+| `{pull}`    | `[#123](url)`                                                                                                                       |
+| `{commit}`  | ``[`abc1234`](url)``                                                                                                                |
+| `{authors}` | `[@user](url)` (the contributors, respects `disableThanks`). For the "Thanks" prefix, write it in the template: `Thanks {authors}!` |
 
-`{summary}` and `{summaryHints}` differ only in how aggressively they autolink issue references; pick whichever matches the style you want. Trailing whitespace on the rendered line is trimmed, so a trailing token that renders empty (e.g. `{ref}` with no PR or commit) leaves no dangling space. When `template` is unset the default output is unchanged. Continuation lines of a multi-line summary are always appended below, indented by two spaces. An unknown token (for example a typo, or the removed `{thanks}`) throws an error during `changeset version`.
+Trailing whitespace on the rendered line is trimmed, so a trailing token that renders empty (e.g. `{ref}` with no PR or commit) leaves no dangling space. When `template` is unset the default output is unchanged. Continuation lines of a multi-line summary are always appended below, indented by two spaces. An unknown token (for example a typo, or the removed `{thanks}`) throws an error during `changeset version`. A token with no value renders as empty text, so a fixed prefix like `Thanks {authors}!` can leave an awkward `Thanks !` when there is no author - write the surrounding text with that in mind.
 
 Examples (for a change with PR `#123`, commit `abc1234`, author `@alice`, summary `fix the thing`):
 
-| `template`                                          | rendered line                                                                      |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `"\n- {pr} {commit} Thanks {authors}! - {summary}"` | `- [#123](url) [abc1234](url) Thanks [@alice](url)! - fix the thing` (the default) |
-| `"\n- {summaryHints} {ref}"`                        | `- fix the thing ([#123](url))` (the compact form)                                 |
-| `"\n- {summary} (thanks {authors}!)"`               | `- fix the thing (thanks [@alice](url)!)`                                          |
-| `"\n- {summary} {pr}"`                              | `- fix the thing [#123](url)`                                                      |
-
-#### Replacing `@svitejs/changesets-changelog-github-compact`
-
-That package is unmaintained. `template` reproduces its compact output - one tight line per change, with issue links only on `(fix #123)`-style hints:
-
-```json
-{
-  "changelog": [
-    "@changesets/changelog-github",
-    {
-      "repo": "<org>/<repo>",
-      "template": "\n- {summaryHints} {ref}"
-    }
-  ]
-}
-```
-
-This produces lines like `- fix the thing ([#123](url))`.
+| `template`                                            | rendered line                                                                      |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `"\n- {pull} {commit} Thanks {authors}! - {summary}"` | `- [#123](url) [abc1234](url) Thanks [@alice](url)! - fix the thing` (the default) |
+| `"\n- {summary} {ref}"`                               | `- fix the thing ([#123](url))` (the compact form)                                 |
+| `"\n- {summary} (thanks {authors}!)"`                 | `- fix the thing (thanks [@alice](url)!)`                                          |
+| `"\n- {summary} {pull}"`                              | `- fix the thing [#123](url)`                                                      |
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 

@@ -1,4 +1,5 @@
-// Template rendering helpers, kept internal (not re-exported from index.ts).
+// NOTE: the `template` option is experimental and these helpers are intentionally
+// not exported from `index.ts`. The token syntax may change in a patch release.
 
 const RX_TOKEN = /\{(\w+)\}/g;
 
