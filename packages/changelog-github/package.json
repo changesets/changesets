@@ -1,30 +1,26 @@
 {
   "name": "@changesets/changelog-github",
-  "version": "0.6.0",
+  "version": "1.0.0-next.5",
   "description": "A changelog entry generator for GitHub that links to commits, PRs and users",
-  "main": "dist/changesets-changelog-github.cjs.js",
-  "module": "dist/changesets-changelog-github.esm.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/changelog-github"
+  },
+  "type": "module",
   "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/changesets-changelog-github.cjs.mjs",
-        "default": "./dist/changesets-changelog-github.cjs.js"
-      },
-      "module": "./dist/changesets-changelog-github.esm.js",
-      "import": "./dist/changesets-changelog-github.cjs.mjs",
-      "default": "./dist/changesets-changelog-github.cjs.js"
-    },
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/changelog-github",
   "dependencies": {
-    "@changesets/get-github-info": "^0.8.0",
-    "@changesets/types": "^6.1.0",
-    "dotenv": "^8.1.0"
+    "@changesets/get-github-info": "workspace:^",
+    "@changesets/types": "workspace:^"
   },
   "devDependencies": {
-    "@changesets/parse": "*",
-    "@changesets/test-utils": "*"
+    "@changesets/parse": "workspace:*"
+  },
+  "engines": {
+    "node": "^22.11 || ^24 || >=26"
   }
 }

@@ -1,105 +1,118 @@
-import pc from "picocolors";
-import fs from "fs-extra";
-import path from "path";
-import getReleasePlan from "@changesets/get-release-plan";
-import { error, info, log, warn } from "@changesets/logger";
-import {
-  ComprehensiveRelease,
-  Config,
-  Release,
-  VersionType,
-} from "@changesets/types";
-import { getVersionableChangedPackages } from "../../utils/versionablePackages";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { assembleReleasePlan } from "@changesets/assemble-release-plan";
+import c from "@changesets/color";
+import { ExitError } from "@changesets/errors";
+import { readPreState } from "@changesets/pre";
+import { readChangesets } from "@changesets/read";
+import type { ComprehensiveRelease } from "@changesets/types";
+import { log } from "@clack/prompts";
+import { getPackages } from "@manypkg/get-packages";
+import { readConfig } from "../../utils/read-config.ts";
+import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
+import { ensureChangesetFolder } from "../shared.ts";
 
-export default async function status(
-  cwd: string,
-  {
-    sinceMaster,
-    since,
-    verbose,
-    output,
-  }: {
-    sinceMaster?: boolean;
-    since?: string;
-    verbose?: boolean;
-    output?: string;
-  },
-  config: Config
-) {
-  if (sinceMaster) {
-    warn(
-      "--sinceMaster is deprecated and will be removed in a future major version"
-    );
-    warn("Use --since=master instead");
-  }
-  const sinceBranch =
-    since === undefined ? (sinceMaster ? "master" : undefined) : since;
-  const releasePlan = await getReleasePlan(cwd, sinceBranch, config);
-  const { changesets, releases } = releasePlan;
+export interface StatusOptions {
+  cwd?: string;
+  since?: string;
+  verbose?: boolean;
+  output?: string;
+}
+
+export async function status(options?: StatusOptions) {
+  const cwd = options?.cwd ?? process.cwd();
+
+  const packages = await getPackages(cwd);
+  await ensureChangesetFolder(packages.rootDir);
+
+  const config = await readConfig(packages);
+  const preState = await readPreState(packages.rootDir);
+  const changesets = await readChangesets(packages.rootDir, options?.since);
+
+  const releasePlan = assembleReleasePlan(
+    changesets,
+    packages,
+    config,
+    preState,
+  );
   const changedPackages = await getVersionableChangedPackages(config, {
-    cwd,
-    ref: sinceBranch,
+    cwd: packages.rootDir,
+    ref: options?.since,
   });
 
-  if (changedPackages.length > 0 && changesets.length === 0) {
-    error(
-      "Some packages have been changed but no changesets were found. Run `changeset add` to resolve this error."
+  if (changedPackages.length > 0 && releasePlan.changesets.length === 0) {
+    log.error(
+      `
+Some packages have been changed but no changesets were found. Run ${c.cyan("changeset add")} to resolve this error.
+If this change doesn't need a release, run ${c.cyan("changeset add --empty")}.
+      `.trim(),
     );
-    error(
-      "If this change doesn't need a release, run `changeset add --empty`."
-    );
-    process.exit(1);
+    throw new ExitError(1);
   }
 
-  if (output) {
+  if (options?.output) {
     await fs.writeFile(
-      path.resolve(cwd, output),
-      JSON.stringify(releasePlan, undefined, 2)
+      path.resolve(cwd, options.output),
+      JSON.stringify(releasePlan, undefined, 2),
     );
     return;
   }
 
-  const print = verbose ? verbosePrint : SimplePrint;
-  print("patch", releases);
-  log("---");
-  print("minor", releases);
-  log("---");
-  print("major", releases);
+  printStatus(
+    releasePlan.releases.toSorted((a, b) => a.name.localeCompare(b.name)),
+    options?.verbose,
+  );
 
   return releasePlan;
 }
 
-function SimplePrint(type: VersionType, releases: Array<Release>) {
-  const packages = releases.filter((r) => r.type === type);
-  if (packages.length) {
-    info(`Packages to be bumped at ${pc.green(type)}:\n`);
-
-    const pkgs = packages.map(({ name }) => `- ${name}`).join("\n");
-    log(pc.green(pkgs));
-  } else {
-    info(`${pc.green("NO")} packages to be bumped at ${pc.green(type)}`);
-  }
+function printStatus(releases: ComprehensiveRelease[], verbose?: boolean) {
+  log.info(
+    `
+Packages to be bumped:
+${printPackageList(releases, verbose)}
+    `.trim(),
+  );
 }
 
-function verbosePrint(
-  type: VersionType,
-  releases: Array<ComprehensiveRelease>
-) {
-  const packages = releases.filter((r) => r.type === type);
-  if (packages.length) {
-    info(`Packages to be bumped at ${pc.green(type)}`);
+const typeColors = {
+  major: c.red,
+  minor: c.green,
+  patch: c.blue,
+} as const;
 
-    for (const { name, newVersion: version, changesets } of packages) {
-      log(`- ${pc.green(name)} ${pc.cyan(version)}`);
-      for (const c of changesets) {
-        log(`  - ${pc.blue(`.changeset/${c}.md`)}`);
-      }
-    }
-  } else {
-    info(
-      `Running release would release ${pc.red("NO")} packages as a ${pc.green(
-        type
-      )}`
-    );
-  }
+function printPackageList(releases: ComprehensiveRelease[], verbose?: boolean) {
+  const majors = releases.filter((r) => r.type === "major");
+  const minors = releases.filter((r) => r.type === "minor");
+  const patches = releases.filter((r) => r.type === "patch");
+
+  return (
+    [
+      ["major", majors],
+      ["minor", minors],
+      ["patch", patches],
+    ] as const
+  )
+    .map(([type, releases]) => {
+      if (releases.length === 0) return "";
+
+      const lines = [`- ${typeColors[type](type)}`];
+
+      releases.forEach(({ name, newVersion, changesets }) => {
+        const addedLineIndex = lines.push(`  - ${c.cyan(name)}`) - 1;
+
+        if (verbose) {
+          lines[addedLineIndex] += ` -> ${c.green(newVersion)}`;
+          lines.push(
+            ...changesets.map(
+              (changeset) => `    - ${c.blue(`.changeset/${changeset}.md`)}`,
+            ),
+          );
+        }
+      });
+
+      return lines.flat().join("\n").trim();
+    })
+    .join("\n")
+    .trim();
 }

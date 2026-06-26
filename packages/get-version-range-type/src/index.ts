@@ -1,5 +1,5 @@
-export default function getVersionRangeType(
-  versionRange: string
+export function getVersionRangeType(
+  versionRange: string,
 ): "^" | "~" | ">=" | "<=" | ">" | "" {
   if (versionRange.charAt(0) === "^") return "^";
   if (versionRange.charAt(0) === "~") return "~";
@@ -8,3 +8,7 @@ export default function getVersionRangeType(
   if (versionRange.charAt(0) === ">") return ">";
   return "";
 }
+
+/** @deprecated Use named export `getVersionRangeType` instead */
+const getVersionRangeTypeDefault = getVersionRangeType;
+export default getVersionRangeTypeDefault;

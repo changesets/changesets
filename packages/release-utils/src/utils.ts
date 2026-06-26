@@ -1,11 +1,5 @@
-import { getPackages, Package } from "@manypkg/get-packages";
-// @ts-ignore
-import mdastToString from "mdast-util-to-string";
-import os from "os";
-import remarkParse from "remark-parse";
-import remarkStringify from "remark-stringify";
-import spawn from "spawndamnit";
-import unified from "unified";
+import type { Package } from "@changesets/types";
+import { getPackages } from "@manypkg/get-packages";
 
 export const BumpLevels = {
   dep: 0,
@@ -15,18 +9,18 @@ export const BumpLevels = {
 } as const;
 
 export async function getVersionsByDirectory(cwd: string) {
-  let { packages } = await getPackages(cwd);
+  const { packages } = await getPackages(cwd);
   return new Map(packages.map((x) => [x.dir, x.packageJson.version]));
 }
 
 export async function getChangedPackages(
   cwd: string,
-  previousVersions: Map<string, string>
+  previousVersions: Map<string, string>,
 ) {
-  let { packages } = await getPackages(cwd);
-  let changedPackages = new Set<Package>();
+  const { packages } = await getPackages(cwd);
+  const changedPackages = new Set<Package>();
 
-  for (let pkg of packages) {
+  for (const pkg of packages) {
     const previousVersion = previousVersions.get(pkg.dir);
     if (previousVersion !== pkg.packageJson.version) {
       changedPackages.add(pkg);
@@ -37,86 +31,61 @@ export async function getChangedPackages(
 }
 
 export function getChangelogEntry(changelog: string, version: string) {
-  let ast = unified().use(remarkParse).parse(changelog);
-
   let highestLevel: number = BumpLevels.dep;
-
-  let nodes = ast.children as Array<any>;
-  let headingStartInfo:
-    | {
-        index: number;
-        depth: number;
-      }
-    | undefined;
+  let headingStartInfo: { index: number; depth: number } | undefined;
   let endIndex: number | undefined;
 
-  for (let i = 0; i < nodes.length; i++) {
-    let node = nodes[i];
-    if (node.type === "heading") {
-      let stringified: string = mdastToString(node);
-      let match = stringified.toLowerCase().match(/(major|minor|patch)/);
-      if (match !== null) {
-        let level = BumpLevels[match[0] as "major" | "minor" | "patch"];
-        highestLevel = Math.max(level, highestLevel);
-      }
-      if (headingStartInfo === undefined && stringified === version) {
-        headingStartInfo = {
-          index: i,
-          depth: node.depth,
-        };
+  // Iterate through each headings and code blocks (for skipping its contents)
+  const regex = /^(#{1,6})\s(.*)$|^(`{3,})/gm;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(changelog)) != null) {
+    // Skip over code blocks so we don't match any headings inside of them
+    if (match[3]) {
+      const endOfCodeBlockRegex = new RegExp(`^${match[3]}`, "gm");
+      endOfCodeBlockRegex.lastIndex = regex.lastIndex;
+      const endMatch = endOfCodeBlockRegex.exec(changelog);
+      if (endMatch) {
+        // Start next search for headings after the end of the code block
+        regex.lastIndex = endOfCodeBlockRegex.lastIndex;
         continue;
-      }
-      if (
-        endIndex === undefined &&
-        headingStartInfo !== undefined &&
-        headingStartInfo.depth === node.depth
-      ) {
-        endIndex = i;
+      } else {
+        // Can't find end of code block, probably malformed
         break;
       }
     }
-  }
-  if (headingStartInfo) {
-    ast.children = (ast.children as any).slice(
-      headingStartInfo.index + 1,
-      endIndex
-    );
-  }
-  return {
-    content: unified().use(remarkStringify).stringify(ast),
-    highestLevel,
-  };
-}
 
-export async function execWithOutput(
-  command: string,
-  args: string[],
-  options: { ignoreReturnCode?: boolean; cwd: string }
-) {
-  process.stdout.write(`Running: ${command} ${args.join(" ")}` + os.EOL);
-  let childProcess = spawn(command, args, {
-    cwd: options.cwd,
-  });
-  childProcess.on("stdout", (data) => process.stdout.write(data));
-  childProcess.on("stderr", (data) => process.stderr.write(data));
-  let result = await childProcess;
-  if (!options?.ignoreReturnCode && result.code !== 0) {
-    throw new Error(
-      `The command "${command} ${args.join(" ")}" failed with code ${
-        result.code
-      }\n${result.stdout.toString("utf8")}\n${result.stderr.toString("utf8")}`
-    );
+    const headingDepth = match[1].length;
+    const headingText = match[2].trim();
+
+    // Search for the highest bump level in the entire changelog
+    const levelMatch = /(major|minor|patch)/.exec(headingText.toLowerCase());
+    if (levelMatch != null) {
+      const level = BumpLevels[levelMatch[0] as "major" | "minor" | "patch"];
+      highestLevel = Math.max(level, highestLevel);
+    }
+
+    // Search for heading of the entry
+    if (headingText === version) {
+      headingStartInfo = { index: regex.lastIndex, depth: headingDepth };
+      continue;
+    }
+
+    // If we've found the entry heading, search for the closing heading with the same depth
+    if (headingStartInfo && headingDepth === headingStartInfo.depth) {
+      endIndex = match.index;
+      break;
+    }
   }
+
   return {
-    code: result.code,
-    stdout: result.stdout.toString("utf8"),
-    stderr: result.stderr.toString("utf8"),
+    content: changelog.slice(headingStartInfo?.index, endIndex).trim(),
+    highestLevel,
   };
 }
 
 export function sortChangelogEntries(
   a: { private: boolean; highestLevel: number },
-  b: { private: boolean; highestLevel: number }
+  b: { private: boolean; highestLevel: number },
 ) {
   if (a.private === b.private) {
     return b.highestLevel - a.highestLevel;

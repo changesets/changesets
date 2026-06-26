@@ -1,15 +1,17 @@
+import path from "node:path";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import {
+import type {
   Config,
   DependencyType,
   PackageJSON,
   VersionType,
+  Package,
 } from "@changesets/types";
-import { Package } from "@manypkg/get-packages";
-import semverSatisfies from "semver/functions/satisfies";
-import { incrementVersion } from "./increment";
-import { InternalRelease, PreInfo } from "./types";
-import { mapGetOrThrowInternal } from "./utils";
+import semverSatisfies from "semver/functions/satisfies.js";
+import validRange from "semver/ranges/valid.js";
+import { incrementVersion } from "./increment.ts";
+import type { InternalRelease, PreInfo } from "./types.ts";
+import { mapGetOrThrowInternal } from "./utils.ts";
 
 /*
   WARNING:
@@ -23,22 +25,24 @@ import { mapGetOrThrowInternal } from "./utils";
   We could solve this by inlining this function, or by returning a deep-cloned then
   modified array, but we decided both of those are worse than this solution.
 */
-export default function determineDependents({
+export function determineDependents({
   releases,
   packagesByName,
+  rootDir,
   dependencyGraph,
   preInfo,
   config,
 }: {
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
+  rootDir: string;
   dependencyGraph: Map<string, string[]>;
   preInfo: PreInfo | undefined;
   config: Config;
 }): boolean {
   let updated = false;
   // NOTE this is intended to be called recursively
-  let pkgsToSearch = [...releases.values()];
+  const pkgsToSearch = [...releases.values()];
 
   while (pkgsToSearch.length > 0) {
     // nextRelease is our dependency, think of it as "avatar"
@@ -48,7 +52,7 @@ export default function determineDependents({
     const pkgDependents = mapGetOrThrowInternal(
       dependencyGraph,
       nextRelease.name,
-      `Error in determining dependents - could not find package in repository: ${nextRelease.name}`
+      `Error in determining dependents - could not find package in repository: ${nextRelease.name}`,
     );
     pkgDependents
       .map((dependent) => {
@@ -57,7 +61,7 @@ export default function determineDependents({
         const dependentPackage = mapGetOrThrowInternal(
           packagesByName,
           dependent,
-          "Dependency map is incorrect"
+          "Dependency map is incorrect",
         );
 
         if (
@@ -68,28 +72,21 @@ export default function determineDependents({
         ) {
           type = "none";
         } else {
+          const dependencyPackage = mapGetOrThrowInternal(
+            packagesByName,
+            nextRelease.name,
+            "Dependency map is incorrect",
+          );
           const dependencyVersionRanges = getDependencyVersionRanges(
+            rootDir,
             dependentPackage.packageJson,
-            nextRelease
+            nextRelease,
+            dependencyPackage,
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
             if (nextRelease.type === "none") {
               continue;
-            } else if (
-              shouldBumpMajor({
-                dependent,
-                depType,
-                versionRange,
-                releases,
-                nextRelease,
-                preInfo,
-                onlyUpdatePeerDependentsWhenOutOfRange:
-                  config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-                    .onlyUpdatePeerDependentsWhenOutOfRange,
-              })
-            ) {
-              type = "major";
             } else if (
               (!releases.has(dependent) ||
                 releases.get(dependent)!.type === "none") &&
@@ -97,7 +94,7 @@ export default function determineDependents({
                 .updateInternalDependents === "always" ||
                 !semverSatisfies(
                   incrementVersion(nextRelease, preInfo),
-                  versionRange
+                  versionRange,
                 ))
             ) {
               switch (depType) {
@@ -133,9 +130,9 @@ export default function determineDependents({
       })
       .filter(
         (
-          dependentItem
+          dependentItem,
         ): dependentItem is typeof dependentItem & { type: VersionType } =>
-          !!dependentItem.type
+          !!dependentItem.type,
       )
       .forEach(({ name, type, pkgJSON }) => {
         // At this point, we know if we are making a change
@@ -152,7 +149,7 @@ export default function determineDependents({
 
           pkgsToSearch.push(existing);
         } else {
-          let newDependent: InternalRelease = {
+          const newDependent: InternalRelease = {
             name,
             type,
             oldVersion: pkgJSON.version,
@@ -174,8 +171,10 @@ export default function determineDependents({
   dependency lists. For example, a package that is both a peerDepenency and a devDependency.
 */
 function getDependencyVersionRanges(
+  rootDir: string,
   dependentPkgJSON: PackageJSON,
-  dependencyRelease: InternalRelease
+  dependencyRelease: InternalRelease,
+  dependencyPackage: Package,
 ): {
   depType: DependencyType;
   versionRange: string;
@@ -205,7 +204,19 @@ function getDependencyVersionRanges(
         case "~":
           versionRange = `${versionRange}${dependencyRelease.oldVersion}`;
           break;
-        // default: keep the stripped range as is
+        default: {
+          if (!validRange(versionRange)) {
+            if (
+              path.posix.normalize(versionRange) ===
+              path.relative(rootDir, dependencyPackage.dir).replace(/\\/g, "/")
+            ) {
+              versionRange = dependencyRelease.oldVersion;
+            } else {
+              continue;
+            }
+          }
+          // fallthrough: keep the stripped range as is
+        }
       }
     }
     dependencyVersionRanges.push({
@@ -214,36 +225,4 @@ function getDependencyVersionRanges(
     });
   }
   return dependencyVersionRanges;
-}
-
-function shouldBumpMajor({
-  dependent,
-  depType,
-  versionRange,
-  releases,
-  nextRelease,
-  preInfo,
-  onlyUpdatePeerDependentsWhenOutOfRange,
-}: {
-  dependent: string;
-  depType: DependencyType;
-  versionRange: string;
-  releases: Map<string, InternalRelease>;
-  nextRelease: InternalRelease;
-  preInfo: PreInfo | undefined;
-  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-}) {
-  // we check if it is a peerDependency because if it is, our dependent bump type might need to be major.
-  return (
-    depType === "peerDependencies" &&
-    nextRelease.type !== "none" &&
-    nextRelease.type !== "patch" &&
-    // 1. If onlyUpdatePeerDependentsWhenOutOfRange set to true, bump major if the version is leaving the range.
-    // 2. If onlyUpdatePeerDependentsWhenOutOfRange set to false, bump major regardless whether or not the version is leaving the range.
-    (!onlyUpdatePeerDependentsWhenOutOfRange ||
-      !semverSatisfies(incrementVersion(nextRelease, preInfo), versionRange)) &&
-    // bump major only if the dependent doesn't already has a major release.
-    (!releases.has(dependent) ||
-      (releases.has(dependent) && releases.get(dependent)!.type !== "major"))
-  );
 }

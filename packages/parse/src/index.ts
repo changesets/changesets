@@ -1,7 +1,7 @@
-import yaml from "js-yaml";
-import { Release, VersionType } from "@changesets/types";
+import type { Release, VersionType } from "@changesets/types";
+import * as yaml from "yaml";
 
-const mdRegex = /\s*---([^]*?)\n\s*---(\s*(?:\n|$)[^]*)/;
+const mdRegex = /\s*---([^]*?)\r?\n\s*---(\s*(?:\n|$)[^]*)/;
 
 const EXAMPLE_FORMAT = `---\n"package-name": patch\n---`;
 
@@ -22,9 +22,9 @@ function validateReleases(releases: Release[], contents: string): void {
       throw new Error(
         `could not parse changeset - invalid package name in frontmatter.\n` +
           `Expected a non-empty string for package name, but got: ${JSON.stringify(
-            release.name
+            release.name,
           )}\n` +
-          `Changeset contents:\n${truncate(contents)}`
+          `Changeset contents:\n${truncate(contents)}`,
       );
     }
 
@@ -32,23 +32,23 @@ function validateReleases(releases: Release[], contents: string): void {
       throw new Error(
         `could not parse changeset - invalid release type for package "${release.name}".\n` +
           `Expected a string for release type, but got: ${typeof release.type}\n` +
-          `Changeset contents:\n${truncate(contents)}`
+          `Changeset contents:\n${truncate(contents)}`,
       );
     }
 
     if (!validVersionTypes.includes(release.type)) {
       throw new Error(
         `could not parse changeset - invalid version type ${JSON.stringify(
-          release.type
+          release.type,
         )} for package "${release.name}".\n` +
           `Valid version types are: ${validVersionTypes.join(", ")}\n` +
-          `Changeset contents:\n${truncate(contents)}`
+          `Changeset contents:\n${truncate(contents)}`,
       );
     }
   }
 }
 
-export default function parseChangesetFile(contents: string): {
+export function parseChangesetFile(contents: string): {
   summary: string;
   releases: Release[];
 } {
@@ -58,7 +58,7 @@ export default function parseChangesetFile(contents: string): {
     throw new Error(
       `could not parse changeset - file is empty.\n` +
         `Changesets must have frontmatter with package names and version types.\n` +
-        `Example:\n${EXAMPLE_FORMAT}\n\nYour changeset summary here.`
+        `Example:\n${EXAMPLE_FORMAT}\n\nYour changeset summary here.`,
     );
   }
 
@@ -68,31 +68,32 @@ export default function parseChangesetFile(contents: string): {
       `could not parse changeset - missing or invalid frontmatter.\n` +
         `Changesets must start with frontmatter delimited by "---".\n` +
         `Example:\n${EXAMPLE_FORMAT}\n\nYour changeset summary here.\n` +
-        `Received content:\n${truncate(trimmedContents)}`
+        `Received content:\n${truncate(trimmedContents)}`,
     );
   }
-  let [, roughReleases, roughSummary] = execResult;
-  let summary = roughSummary.trim();
+  const [, roughReleases, roughSummary] = execResult;
+  const summary = roughSummary.trim();
 
-  let releases: Release[];
-  let yamlStuff: Record<string, VersionType> | undefined;
+  let yamlStuff: unknown;
   try {
-    yamlStuff = yaml.load(roughReleases) as typeof yamlStuff;
+    yamlStuff = yaml.parse(roughReleases);
   } catch (e) {
     throw new Error(
       `could not parse changeset - invalid YAML in frontmatter.\n` +
         `The frontmatter between the "---" delimiters must be valid YAML.\n` +
         `YAML error: ${e instanceof Error ? e.message : String(e)}\n` +
-        `Frontmatter content:\n${roughReleases}`
+        `Frontmatter content:\n${roughReleases}`,
+      { cause: e },
     );
   }
 
+  let releases: Release[] = [];
   if (yamlStuff) {
     if (typeof yamlStuff !== "object" || Array.isArray(yamlStuff)) {
       throw new Error(
         `could not parse changeset - frontmatter must be an object mapping package names to version types.\n` +
           `Expected format:\n${EXAMPLE_FORMAT}\n` +
-          `Received:\n${roughReleases}`
+          `Received:\n${roughReleases}`,
       );
     }
 
@@ -100,11 +101,13 @@ export default function parseChangesetFile(contents: string): {
       name,
       type,
     }));
-  } else {
-    releases = [];
   }
 
   validateReleases(releases, contents);
 
   return { releases, summary };
 }
+
+/** @deprecated Use named export `parseChangesetFile` instead */
+const parseChangesetFileDefault = parseChangesetFile;
+export default parseChangesetFileDefault;

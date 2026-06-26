@@ -1,6 +1,7 @@
-import outdent from "outdent";
-import defaultCommitFunctions from ".";
-import { NewChangeset, ReleasePlan } from "@changesets/types";
+import type { NewChangeset, ReleasePlan } from "@changesets/types";
+import { outdent } from "outdent";
+import { describe, expect, it } from "vitest";
+import defaultCommitFunctions from "./index.ts";
 
 const simpleChangeset: NewChangeset = {
   summary: "This is a summary",
@@ -17,7 +18,7 @@ const simpleChangeset2: NewChangeset = {
   id: "abc123fh",
 };
 
-let simpleReleasePlan: ReleasePlan = {
+const simpleReleasePlan: ReleasePlan = {
   changesets: [simpleChangeset],
   releases: [
     {
@@ -31,7 +32,7 @@ let simpleReleasePlan: ReleasePlan = {
   preState: undefined,
 };
 
-let secondReleasePlan: ReleasePlan = {
+const secondReleasePlan: ReleasePlan = {
   changesets: [simpleChangeset, simpleChangeset2],
   releases: [
     {
@@ -66,7 +67,7 @@ describe("defaultCommitFunctions", () => {
           },
         ],
       },
-      { skipCI: "version" }
+      { skipCI: "version" },
     );
     expect(commitStr).toEqual(`docs(changeset): test changeset summary commit`);
   });
@@ -82,7 +83,7 @@ describe("defaultCommitFunctions", () => {
           },
         ],
       },
-      { skipCI: "add" }
+      { skipCI: "add" },
     );
     expect(commitStr).toEqual(outdent`
         docs(changeset): test changeset summary commit
@@ -121,7 +122,7 @@ describe("defaultCommitFunctions", () => {
   });
 
   it("should handle a multiple releases from one changeset", async () => {
-    let releasePlan: ReleasePlan = {
+    const releasePlan: ReleasePlan = {
       changesets: [simpleChangeset, simpleChangeset2],
       releases: [
         {
@@ -204,7 +205,7 @@ describe("defaultCommitFunctions", () => {
         ],
         preState: undefined,
       },
-      { skipCI: "version" }
+      { skipCI: "version" },
     );
 
     expect(commitStr).toMatch("RELEASING: Releasing 1 package(s)");

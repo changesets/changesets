@@ -1,22 +1,23 @@
 import { InternalError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import {
+import type {
   Config,
   NewChangeset,
   PackageGroup,
   PreState,
   ReleasePlan,
+  Package,
+  Packages,
 } from "@changesets/types";
-import { Package, Packages } from "@manypkg/get-packages";
-import semverParse from "semver/functions/parse";
-import applyLinks from "./apply-links";
-import determineDependents from "./determine-dependents";
-import flattenReleases from "./flatten-releases";
-import { incrementVersion } from "./increment";
-import matchFixedConstraint from "./match-fixed-constraint";
-import { InternalRelease, PreInfo } from "./types";
-import { mapGetOrThrow, mapGetOrThrowInternal } from "./utils";
+import semverParse from "semver/functions/parse.js";
+import { applyLinks } from "./apply-links.ts";
+import { determineDependents } from "./determine-dependents.ts";
+import { flattenReleases } from "./flatten-releases.ts";
+import { incrementVersion } from "./increment.ts";
+import { matchFixedConstraint } from "./match-fixed-constraint.ts";
+import type { InternalRelease, PreInfo } from "./types.ts";
+import { mapGetOrThrow, mapGetOrThrowInternal } from "./utils.ts";
 
 type SnapshotReleaseParameters = {
   tag?: string | undefined;
@@ -24,9 +25,8 @@ type SnapshotReleaseParameters = {
 };
 
 function getPreVersion(version: string) {
-  let parsed = semverParse(version)!;
-  let preVersion =
-    parsed.prerelease[1] === undefined ? -1 : parsed.prerelease[1];
+  const parsed = semverParse(version)!;
+  let preVersion = parsed.prerelease[1] ?? -1;
   if (typeof preVersion !== "number") {
     throw new InternalError("preVersion is not a number");
   }
@@ -36,12 +36,13 @@ function getPreVersion(version: string) {
 
 function getSnapshotSuffix(
   template: Config["snapshot"]["prereleaseTemplate"],
-  snapshotParameters: SnapshotReleaseParameters
+  snapshotParameters: SnapshotReleaseParameters,
 ): string {
-  let snapshotRefDate = new Date();
+  const snapshotRefDate = new Date();
 
   const placeholderValues = {
     commit: snapshotParameters.commit,
+    "commit-short": snapshotParameters.commit?.slice(0, 7),
     tag: snapshotParameters.tag,
     timestamp: snapshotRefDate.getTime().toString(),
     datetime: snapshotRefDate
@@ -62,18 +63,18 @@ function getSnapshotSuffix(
     keyof typeof placeholderValues
   >;
 
-  if (!template.includes(`{tag}`) && placeholderValues.tag !== undefined) {
+  if (!template.includes(`{tag}`) && placeholderValues.tag != null) {
     throw new Error(
-      `Failed to compose snapshot version: "{tag}" placeholder is missing, but the snapshot parameter is defined (value: '${placeholderValues.tag}')`
+      `Failed to compose snapshot version: "{tag}" placeholder is missing, but the snapshot parameter is defined (value: '${placeholderValues.tag}')`,
     );
   }
 
   return placeholders.reduce((prev, key) => {
     return prev.replace(new RegExp(`\\{${key}\\}`, "g"), () => {
       const value = placeholderValues[key];
-      if (value === undefined) {
+      if (value == null) {
         throw new Error(
-          `Failed to compose snapshot version: "{${key}}" placeholder is used without having a value defined!`
+          `Failed to compose snapshot version: "{${key}}" placeholder is used without having a value defined!`,
         );
       }
 
@@ -86,7 +87,7 @@ function getSnapshotVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined,
   useCalculatedVersion: boolean,
-  snapshotSuffix: string
+  snapshotSuffix: string,
 ): string {
   if (release.type === "none") {
     return release.oldVersion;
@@ -110,7 +111,7 @@ function getSnapshotVersion(
 
 function getNewVersion(
   release: InternalRelease,
-  preInfo: PreInfo | undefined
+  preInfo: PreInfo | undefined,
 ): string {
   if (release.type === "none") {
     return release.oldVersion;
@@ -119,104 +120,70 @@ function getNewVersion(
   return incrementVersion(release, preInfo);
 }
 
-type OptionalProp<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-function assembleReleasePlan(
+export function assembleReleasePlan(
   changesets: NewChangeset[],
   packages: Packages,
-  config: OptionalProp<Config, "snapshot">,
+  config: Config,
   // intentionally not using an optional parameter here so the result of `readPreState` has to be passed in here
   preState: PreState | undefined,
   // snapshot: undefined            ->  not using snapshot
   // snapshot: { tag: undefined }   ->  --snapshot (empty tag)
   // snapshot: { tag: "canary" }    ->  --snapshot canary
-  snapshot?: SnapshotReleaseParameters | string | boolean
+  snapshot?: SnapshotReleaseParameters,
 ): ReleasePlan {
-  // TODO: remove `refined*` in the next major version of this package
-  // just use `config` and `snapshot` parameters directly, typed as: `config: Config, snapshot?: SnapshotReleaseParameters`
-  const refinedConfig: Config = config.snapshot
-    ? (config as Config)
-    : {
-        ...config,
-        snapshot: {
-          prereleaseTemplate: null,
-          useCalculatedVersion: (
-            config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH as any
-          ).useCalculatedVersionForSnapshots,
-        },
-      };
-  const refinedSnapshot: SnapshotReleaseParameters | undefined =
-    typeof snapshot === "string"
-      ? { tag: snapshot }
-      : typeof snapshot === "boolean"
-      ? { tag: undefined }
-      : snapshot;
-
-  let packagesByName = new Map(
-    packages.packages.map((x) => [x.packageJson.name, x])
+  const packagesByName = new Map(
+    packages.packages.map((x) => [x.packageJson.name, x]),
   );
 
   const relevantChangesets = getRelevantChangesets(
     changesets,
     packagesByName,
-    refinedConfig,
-    preState
+    config,
+    preState,
   );
 
-  const preInfo = getPreInfo(
-    changesets,
-    packagesByName,
-    refinedConfig,
-    preState
-  );
+  const preInfo = getPreInfo(changesets, packagesByName, config, preState);
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
   // changesets, and with a calculated new versions
-  let releases = flattenReleases(
-    relevantChangesets,
-    packagesByName,
-    refinedConfig
-  );
+  const releases = flattenReleases(relevantChangesets, packagesByName, config);
 
   // Unlike the config/CLI validation graphs, this graph intentionally includes
   // devDependencies. While devDeps don't cause version bumps (determineDependents
   // assigns type "none"), they must appear in the release plan so that
   // apply-release-plan can update their version ranges in package.json.
-  let dependencyGraph = getDependentsGraph(packages, {
+  const dependencyGraph = getDependentsGraph(packages, {
     bumpVersionsWithWorkspaceProtocolOnly:
-      refinedConfig.bumpVersionsWithWorkspaceProtocolOnly,
+      config.bumpVersionsWithWorkspaceProtocolOnly,
   });
 
   let releasesValidated = false;
   while (releasesValidated === false) {
     // The map passed in to determineDependents will be mutated
-    let dependentAdded = determineDependents({
+    const dependentAdded = determineDependents({
       releases,
       packagesByName,
+      rootDir: packages.rootDir,
       dependencyGraph,
       preInfo,
-      config: refinedConfig,
+      config,
     });
 
     // `releases` might get mutated here
-    let fixedConstraintUpdated = matchFixedConstraint(
+    const fixedConstraintUpdated = matchFixedConstraint(
       releases,
       packagesByName,
-      refinedConfig
+      config,
     );
-    let linksUpdated = applyLinks(
-      releases,
-      packagesByName,
-      refinedConfig.linked
-    );
+    const linksUpdated = applyLinks(releases, packagesByName, config.linked);
 
     releasesValidated =
       !linksUpdated && !dependentAdded && !fixedConstraintUpdated;
   }
 
   if (preInfo?.state.mode === "exit") {
-    for (let pkg of packages.packages) {
+    for (const pkg of packages.packages) {
       // If a package had a prerelease, but didn't trigger a version bump in the regular release,
       // we want to give it a patch release.
       // Detailed explanation at https://github.com/changesets/changesets/pull/382#discussion_r434434182
@@ -232,8 +199,8 @@ function assembleReleasePlan(
         } else if (
           existingRelease.type === "none" &&
           !shouldSkipPackage(pkg, {
-            ignore: refinedConfig.ignore,
-            allowPrivatePackages: refinedConfig.privatePackages.version,
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
           })
         ) {
           existingRelease.type = "patch";
@@ -244,23 +211,19 @@ function assembleReleasePlan(
 
   // Caching the snapshot version here and use this if it is snapshot release
   const snapshotSuffix =
-    refinedSnapshot &&
-    getSnapshotSuffix(
-      refinedConfig.snapshot.prereleaseTemplate,
-      refinedSnapshot
-    );
+    snapshot && getSnapshotSuffix(config.snapshot.prereleaseTemplate, snapshot);
 
   return {
     changesets: relevantChangesets,
-    releases: [...releases.values()].map((incompleteRelease) => {
+    releases: Array.from(releases.values(), (incompleteRelease) => {
       return {
         ...incompleteRelease,
         newVersion: snapshotSuffix
           ? getSnapshotVersion(
               incompleteRelease,
               preInfo,
-              refinedConfig.snapshot.useCalculatedVersion,
-              snapshotSuffix
+              config.snapshot.useCalculatedVersion,
+              snapshotSuffix,
             )
           : getNewVersion(incompleteRelease, preInfo),
       };
@@ -273,7 +236,7 @@ function getRelevantChangesets(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
   config: Config,
-  preState: PreState | undefined
+  preState: PreState | undefined,
 ): NewChangeset[] {
   for (const changeset of changesets) {
     // Using the following 2 arrays to decide whether a changeset
@@ -285,7 +248,7 @@ function getRelevantChangesets(
       const packageByName = mapGetOrThrow(
         packagesByName,
         release.name,
-        `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`
+        `Found changeset ${changeset.id} for package ${release.name} which is not in the workspace`,
       );
 
       if (
@@ -305,15 +268,15 @@ function getRelevantChangesets(
         `Found mixed changeset ${changeset.id}\n` +
           `Found ignored packages: ${skippedPackages.join(" ")}\n` +
           `Found not ignored packages: ${notSkippedPackages.join(" ")}\n` +
-          "Mixed changesets that contain both ignored and not ignored packages are not allowed"
+          "Mixed changesets that contain both ignored and not ignored packages are not allowed",
       );
     }
   }
 
   if (preState && preState.mode !== "exit") {
-    let usedChangesetIds = new Set(preState.changesets);
+    const usedChangesetIds = new Set(preState.changesets);
     return changesets.filter(
-      (changeset) => !usedChangesetIds.has(changeset.id)
+      (changeset) => !usedChangesetIds.has(changeset.id),
     );
   }
 
@@ -323,20 +286,20 @@ function getRelevantChangesets(
 function getHighestPreVersion(
   groupKind: "linked" | "fixed",
   packageGroup: PackageGroup,
-  packagesByName: Map<string, Package>
+  packagesByName: Map<string, Package>,
 ): number {
   let highestPreVersion = 0;
-  for (let pkgName of packageGroup) {
+  for (const pkgName of packageGroup) {
     const pkg = mapGetOrThrowInternal(
       packagesByName,
       pkgName,
       `Could not find package named "${pkgName}" listed in ${groupKind} group ${JSON.stringify(
-        packageGroup
-      )}`
+        packageGroup,
+      )}`,
     );
     highestPreVersion = Math.max(
       getPreVersion(pkg.packageJson.version),
-      highestPreVersion
+      highestPreVersion,
     );
   }
   return highestPreVersion;
@@ -346,29 +309,20 @@ function getPreInfo(
   changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
   config: Config,
-  preState: PreState | undefined
+  preState: PreState | undefined,
 ): PreInfo | undefined {
-  if (preState === undefined) {
+  if (preState == null) {
     return;
   }
 
-  let updatedPreState = {
+  const updatedPreState = {
     ...preState,
     changesets: changesets.map((changeset) => changeset.id),
-    initialVersions: {
-      ...preState.initialVersions,
-    },
   };
 
-  for (const [, pkg] of packagesByName) {
-    if (updatedPreState.initialVersions[pkg.packageJson.name] === undefined) {
-      updatedPreState.initialVersions[pkg.packageJson.name] =
-        pkg.packageJson.version;
-    }
-  }
   // Populate preVersion
   // preVersion is the map between package name and its next pre version number.
-  let preVersions = new Map<string, number>();
+  const preVersions = new Map<string, number>();
   for (const [, pkg] of packagesByName) {
     if (
       shouldSkipPackage(pkg, {
@@ -380,26 +334,26 @@ function getPreInfo(
     }
     preVersions.set(
       pkg.packageJson.name,
-      getPreVersion(pkg.packageJson.version)
+      getPreVersion(pkg.packageJson.version),
     );
   }
-  for (let fixedGroup of config.fixed) {
-    let highestPreVersion = getHighestPreVersion(
+  for (const fixedGroup of config.fixed) {
+    const highestPreVersion = getHighestPreVersion(
       "fixed",
       fixedGroup,
-      packagesByName
+      packagesByName,
     );
-    for (let fixedPackage of fixedGroup) {
+    for (const fixedPackage of fixedGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
     }
   }
-  for (let linkedGroup of config.linked) {
-    let highestPreVersion = getHighestPreVersion(
+  for (const linkedGroup of config.linked) {
+    const highestPreVersion = getHighestPreVersion(
       "linked",
       linkedGroup,
-      packagesByName
+      packagesByName,
     );
-    for (let linkedPackage of linkedGroup) {
+    for (const linkedPackage of linkedGroup) {
       preVersions.set(linkedPackage, highestPreVersion);
     }
   }
@@ -410,4 +364,6 @@ function getPreInfo(
   };
 }
 
-export default assembleReleasePlan;
+/** @deprecated Use named export `assembleReleasePlan` instead */
+const assembleReleasePlanDefault = assembleReleasePlan;
+export default assembleReleasePlanDefault;

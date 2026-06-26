@@ -1,45 +1,81 @@
-import { setEnvironmentVariable } from "@changesets/test-utils";
-import changelogFunctions from "./index";
-import parse from "@changesets/parse";
+import { parseChangesetFile as parse } from "@changesets/parse";
+import type { ModCompWithPackage } from "@changesets/types";
+import { afterEach, describe, expect, it, test, vi } from "vitest";
+import changelogFunctions from "./index.ts";
 
 const getReleaseLine = changelogFunctions.getReleaseLine;
+const getDependencyReleaseLine = changelogFunctions.getDependencyReleaseLine;
 
-jest.mock(
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
+vi.mock(
   "@changesets/get-github-info",
   (): typeof import("@changesets/get-github-info") => {
-    // this is duplicated because jest.mock reordering things
     const data = {
       commit: "a085003",
-      user: "Andarist",
+      author: "Andarist",
       pull: 1613,
       repo: "emotion-js/emotion",
     };
-    const links = {
-      user: `[@${data.user}](https://github.com/${data.user})`,
-      pull: `[#${data.pull}](https://github.com/${data.repo}/pull/${data.pull})`,
-      commit: `[\`${data.commit}\`](https://github.com/${data.repo}/commit/${data.commit})`,
+    const urls = {
+      commit: `https://github.com/${data.repo}/commit/${data.commit}`,
+      pull: `https://github.com/${data.repo}/pull/${data.pull}`,
+      author: `https://github.com/${data.author}`,
+    };
+    const markdownLinks = {
+      commit: `[\`${data.commit.slice(0, 7)}\`](${urls.commit})`,
+      pull: `[#${data.pull}](${urls.pull})`,
+      author: `[@${data.author}](${urls.author})`,
     };
     return {
-      async getInfo({ commit, repo }) {
+      /* eslint-disable vitest/no-standalone-expect */
+      async getCommitInfo({ commit, repo }) {
         expect(commit).toBe(data.commit);
         expect(repo).toBe(data.repo);
         return {
-          pull: data.pull,
-          user: data.user,
-          links,
+          commit: {
+            sha: data.commit,
+            url: urls.commit,
+            markdownLink: markdownLinks.commit,
+          },
+          author: {
+            login: data.author,
+            url: urls.author,
+            markdownLink: markdownLinks.author,
+          },
+          pull: {
+            number: data.pull,
+            url: urls.pull,
+            markdownLink: markdownLinks.pull,
+          },
         };
       },
-      async getInfoFromPullRequest({ pull, repo }) {
+      async getPullRequestInfo({ pull, repo }) {
         expect(pull).toBe(data.pull);
         expect(repo).toBe(data.repo);
         return {
-          commit: data.commit,
-          user: data.user,
-          links,
+          commit: {
+            sha: data.commit,
+            url: urls.commit,
+            markdownLink: markdownLinks.commit,
+          },
+          author: {
+            login: data.author,
+            url: urls.author,
+            markdownLink: markdownLinks.author,
+          },
+          pull: {
+            number: data.pull,
+            url: urls.pull,
+            markdownLink: markdownLinks.pull,
+          },
         };
       },
+      /* eslint-enable vitest/no-standalone-expect */
     };
-  }
+  },
 );
 
 const getChangeset = (content: string, commit: string | undefined) => {
@@ -52,7 +88,7 @@ const getChangeset = (content: string, commit: string | undefined) => {
 
   something
   ${content}
-  `
+  `,
       ),
       id: "some-id",
       commit,
@@ -69,6 +105,59 @@ const data = {
   repo: "emotion-js/emotion",
 };
 
+it("uses GITHUB_REPOSITORY when repo option is absent", async () => {
+  vi.stubEnv("GITHUB_REPOSITORY", data.repo);
+  const [changeset, releaseType] = getChangeset("", data.commit);
+
+  expect(await getReleaseLine(changeset, releaseType, null)).toEqual(
+    `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
+  );
+});
+
+it("uses explicit repo option before GITHUB_REPOSITORY", async () => {
+  vi.stubEnv("GITHUB_REPOSITORY", "other/repo");
+
+  expect(await getReleaseLine(...getChangeset("", data.commit))).toEqual(
+    `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
+  );
+});
+
+it("uses GITHUB_REPOSITORY for dependency release lines", async () => {
+  vi.stubEnv("GITHUB_REPOSITORY", data.repo);
+
+  const changeset = {
+    ...parse(
+      `---
+  pkg: "minor"
+  ---
+
+  something
+  `,
+    ),
+    id: "some-id",
+    commit: data.commit,
+  };
+
+  const dependency: ModCompWithPackage = {
+    name: "pkg",
+    type: "patch",
+    oldVersion: "0.0.1",
+    newVersion: "1.0.0",
+    changesets: [],
+    dir: "/repo/pkg",
+    packageJson: {
+      name: "pkg",
+      version: "0.0.1",
+    },
+  };
+
+  expect(await getDependencyReleaseLine([changeset], [dependency], null))
+    .toMatchInlineSnapshot(`
+    "- Updated dependencies [[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003)]:
+      - pkg@1.0.0"
+  `);
+});
+
 describe.each([data.commit, "wrongcommit", undefined])(
   "with commit from changeset of %s",
   (commitFromChangeset) => {
@@ -80,25 +169,25 @@ describe.each([data.commit, "wrongcommit", undefined])(
             await getReleaseLine(
               ...getChangeset(
                 `${keyword}: ${kind === "with #" ? "#" : ""}${data.pull}`,
-                commitFromChangeset
-              )
-            )
+                commitFromChangeset,
+              ),
+            ),
           ).toEqual(
-            `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`
+            `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
           );
         });
-      }
+      },
     );
     test("override commit with commit keyword", async () => {
       expect(
         await getReleaseLine(
-          ...getChangeset(`commit: ${data.commit}`, commitFromChangeset)
-        )
+          ...getChangeset(`commit: ${data.commit}`, commitFromChangeset),
+        ),
       ).toEqual(
-        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`
+        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
       );
     });
-  }
+  },
 );
 
 describe.each(["author", "user"])(
@@ -109,19 +198,19 @@ describe.each(["author", "user"])(
         await getReleaseLine(
           ...getChangeset(
             `${keyword}: ${kind === "with @" ? "@" : ""}other`,
-            data.commit
-          )
-        )
+            data.commit,
+          ),
+        ),
       ).toEqual(
-        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@other](https://github.com/other)! - something\n`
+        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@other](https://github.com/other)! - something\n`,
       );
     });
-  }
+  },
 );
 
 it("linkifies bare issue references", async () => {
   expect(
-    await getReleaseLine(...getChangeset("fixes #1234 and #5678", data.commit))
+    await getReleaseLine(...getChangeset("fixes #1234 and #5678", data.commit)),
   ).toMatchInlineSnapshot(`
     "
 
@@ -135,9 +224,9 @@ it("does not double-linkify existing markdown links", async () => {
     await getReleaseLine(
       ...getChangeset(
         "see [#1234](https://github.com/emotion-js/emotion/issues/1234)",
-        data.commit
-      )
-    )
+        data.commit,
+      ),
+    ),
   ).toMatchInlineSnapshot(`
     "
 
@@ -149,8 +238,8 @@ it("does not double-linkify existing markdown links", async () => {
 it("does not linkify issue-like refs inside link text", async () => {
   expect(
     await getReleaseLine(
-      ...getChangeset("see [fix for #99](https://example.com)", data.commit)
-    )
+      ...getChangeset("see [fix for #99](https://example.com)", data.commit),
+    ),
   ).toMatchInlineSnapshot(`
     "
 
@@ -204,9 +293,9 @@ it("handles mixed linked and bare refs", async () => {
     await getReleaseLine(
       ...getChangeset(
         "fixes [#1](https://github.com/emotion-js/emotion/issues/1) and #2",
-        data.commit
-      )
-    )
+        data.commit,
+      ),
+    ),
   ).toMatchInlineSnapshot(`
     "
 
@@ -230,9 +319,9 @@ it("with multiple authors", async () => {
     await getReleaseLine(
       ...getChangeset(
         ["author: @Andarist", "author: @mitchellhamilton"].join("\n"),
-        data.commit
-      )
-    )
+        data.commit,
+      ),
+    ),
   ).toMatchInlineSnapshot(`
     "
 
@@ -241,21 +330,20 @@ it("with multiple authors", async () => {
   `);
 });
 
-it("uses repo name from env var", async () => {
-  const cleanup = setEnvironmentVariable("GITHUB_REPOSITORY", data.repo);
-
-  try {
-    const [changeset, bump] = getChangeset(
-      "fixes #1234 and #5678",
-      data.commit
-    );
-    expect(await getReleaseLine(changeset, bump, null)).toMatchInlineSnapshot(`
+it("disables thanks if disableThanks is enabled", async () => {
+  const [changeset, releaseType, options] = getChangeset(
+    "author: @Andarist",
+    data.commit,
+  );
+  expect(
+    await getReleaseLine(changeset, releaseType, {
+      ...options,
+      disableThanks: true,
+    }),
+  ).toMatchInlineSnapshot(`
     "
 
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
-        fixes [#1234](https://github.com/emotion-js/emotion/issues/1234) and [#5678](https://github.com/emotion-js/emotion/issues/5678)"
+    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) - something
+    "
   `);
-  } finally {
-    cleanup();
-  }
 });

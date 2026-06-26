@@ -1,0 +1,13 @@
+{
+  "name": "@changesets/color",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "engines": {
+    "node": "^22.11 || ^24 || >=26"
+  }
+}
