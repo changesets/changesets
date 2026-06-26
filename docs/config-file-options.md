@@ -158,9 +158,19 @@ You would specify our github changelog generator with:
 
 ```json
 {
+  "changelog": "@changesets/changelog-github"
+}
+```
+
+Alternatively, you can provide the repo name via options:
+
+```json
+{
   "changelog": ["@changesets/changelog-github", { "repo": "<org>/<repo>" }]
 }
 ```
+
+When running in GitHub Actions, `repo` is optional because it defaults to the `GITHUB_REPOSITORY` environment variable.
 
 If you want to disable thank you messages, add `"disableThanks": true` to the options.
 

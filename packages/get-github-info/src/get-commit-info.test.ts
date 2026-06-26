@@ -437,57 +437,55 @@ test("gets the author of the associated pull request if it exists rather than th
 
 test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
   let githubQuery = "";
-  const originalGraphqlUrl = process.env.GITHUB_GRAPHQL_URL;
-  process.env.GITHUB_GRAPHQL_URL = "https://custom.github.com/api/graphql";
+  vi.stubEnv("GITHUB_GRAPHQL_URL", "https://custom.github.com/api/graphql");
 
-  try {
-    nock("https://custom.github.com", {
-      reqheaders: {
-        Authorization: `Token ${process.env.GITHUB_TOKEN}`,
-      },
+  nock("https://custom.github.com", {
+    reqheaders: {
+      Authorization: `Token ${process.env.GITHUB_TOKEN}`,
+    },
+  })
+    .post("/api/graphql", ({ query }) => {
+      githubQuery = query;
+      return true;
     })
-      .post("/api/graphql", ({ query }) => {
-        githubQuery = query;
-        return true;
-      })
-      .reply(
-        200,
-        JSON.stringify({
-          data: {
-            repo__0: {
-              commit__a085003: {
-                commitUrl:
-                  "https://custom.github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
-                associatedPullRequests: {
-                  nodes: [
-                    {
-                      number: 1613,
-                      url: "https://custom.github.com/emotion-js/emotion/pull/1613",
-                      mergedAt: "2019-11-07T06:43:58Z",
-                      author: {
-                        login: "Andarist",
-                        url: "https://custom.github.com/Andarist",
-                      },
+    .reply(
+      200,
+      JSON.stringify({
+        data: {
+          repo__0: {
+            commit__a085003: {
+              commitUrl:
+                "https://custom.github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
+              associatedPullRequests: {
+                nodes: [
+                  {
+                    number: 1613,
+                    url: "https://custom.github.com/emotion-js/emotion/pull/1613",
+                    mergedAt: "2019-11-07T06:43:58Z",
+                    author: {
+                      login: "Andarist",
+                      url: "https://custom.github.com/Andarist",
                     },
-                  ],
-                },
-                author: {
-                  user: {
-                    login: "Andarist",
-                    url: "https://custom.github.com/Andarist",
                   },
+                ],
+              },
+              author: {
+                user: {
+                  login: "Andarist",
+                  url: "https://custom.github.com/Andarist",
                 },
               },
             },
           },
-        }),
-      );
+        },
+      }),
+    );
 
-    const result = await getCommitInfo({
-      commit: "a085003",
-      repo: "emotion-js/emotion",
-    });
-    expect(result).toMatchInlineSnapshot(`
+  const result = await getCommitInfo({
+    commit: "a085003",
+    repo: "emotion-js/emotion",
+  });
+  expect(result).toMatchInlineSnapshot(`
       {
         "author": {
           "login": "Andarist",
@@ -506,7 +504,7 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
         },
       }
     `);
-    expect(githubQuery).toMatchInlineSnapshot(`
+  expect(githubQuery).toMatchInlineSnapshot(`
       "query {
         repo__0: repository(
           owner: "emotion-js",
@@ -541,7 +539,4 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
       }
       "
     `);
-  } finally {
-    process.env.GITHUB_GRAPHQL_URL = originalGraphqlUrl;
-  }
 });

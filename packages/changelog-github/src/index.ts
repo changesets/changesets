@@ -39,7 +39,29 @@ async function readEnv() {
     process.env.GITHUB_SERVER_URL ||
     (await readEnvFileCached()).GITHUB_SERVER_URL ||
     "https://github.com";
-  return { GITHUB_SERVER_URL };
+  const GITHUB_REPOSITORY =
+    process.env.GITHUB_REPOSITORY ||
+    (await readEnvFileCached()).GITHUB_REPOSITORY;
+
+  return { GITHUB_SERVER_URL, GITHUB_REPOSITORY };
+}
+
+async function getRepo(options: null | Record<string, unknown>) {
+  let repo: string | undefined;
+  if (options && "repo" in options) {
+    repo =
+      typeof options.repo === "string" && options.repo
+        ? options.repo
+        : undefined;
+  } else {
+    repo = (await readEnv()).GITHUB_REPOSITORY;
+  }
+  if (!repo) {
+    throw new Error(
+      'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]\nor set the GITHUB_REPOSITORY environment variable.',
+    );
+  }
+  return repo;
 }
 
 const changelogFunctions: ChangelogFunctions = {
@@ -48,12 +70,7 @@ const changelogFunctions: ChangelogFunctions = {
     dependenciesUpdated,
     options,
   ) => {
-    const repo = options?.repo;
-    if (!repo || typeof repo !== "string") {
-      throw new Error(
-        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]',
-      );
-    }
+    const repo = await getRepo(options);
     if (dependenciesUpdated.length === 0) return "";
 
     const changesetLink = `- Updated dependencies [${(
@@ -76,12 +93,7 @@ const changelogFunctions: ChangelogFunctions = {
     return [changesetLink, ...updatedDepenenciesList].join("\n");
   },
   getReleaseLine: async (changeset, type, options) => {
-    const repo = options?.repo;
-    if (!repo || typeof repo !== "string") {
-      throw new Error(
-        'Please provide a repo to this changelog generator like this:\n"changelog": ["@changesets/changelog-github", { "repo": "org/repo" }]',
-      );
-    }
+    const repo = await getRepo(options);
 
     const { GITHUB_SERVER_URL } = await readEnv();
 
@@ -133,7 +145,7 @@ const changelogFunctions: ChangelogFunctions = {
       links.user = info?.author?.markdownLink;
     }
 
-    const users = options.disableThanks
+    const users = options?.disableThanks
       ? null
       : usersFromSummary.length
         ? usersFromSummary
