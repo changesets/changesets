@@ -324,6 +324,12 @@ describe("validateConfig", () => {
         expected: { ...defaultConfig, ignore: ["pkg-a", "@pkg/a", "@pkg/b"] },
       },
       {
+        name: "ignore: allows unmatched globs",
+        pkgs: ["pkg-a", "pkg-b"],
+        config: { ignore: ["not-a-valid-package"] },
+        expected: { ...defaultConfig, ignore: [] },
+      },
+      {
         name: "privatePackages: false",
         config: { privatePackages: false },
         expected: {
@@ -521,18 +527,6 @@ describe("validateConfig", () => {
         name: "ignore: array of non-string",
         config: { ignore: [123, "pkg-a"] },
         errors: ["Expected string"],
-      },
-      {
-        name: "rule: ignoredPatternsExist",
-        pkgs: [],
-        config: { ignore: ["pkg-a"] },
-        errors: ['Invalid path: The package or glob "pkg-a" does not match'],
-      },
-      {
-        name: "rule: ignoredPatternsExist: glob",
-        pkgs: [],
-        config: { ignore: ["pkg-*"] },
-        errors: ['Invalid path: The package or glob "pkg-*" does not match'],
       },
       // privatePackages
       {
