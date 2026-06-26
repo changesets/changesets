@@ -29,8 +29,12 @@ export function renderTemplate(
 
 export function buildReleaseLineTokens(args: {
   summaryLinked: string;
-  links: { pull: string | null; commit: string | null; user: string | null };
-  users: string | null;
+  links: {
+    pull?: string | null;
+    commit?: string | null;
+    user?: string | null;
+  };
+  users: string | null | undefined;
 }): Record<string, string> {
   const { summaryLinked, links, users } = args;
   // Tokens render bare (no built-in spacing); the template author writes the
