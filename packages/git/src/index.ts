@@ -142,28 +142,26 @@ export async function getCommitsThatAddFiles(
 }
 
 export async function isRepoShallow({ cwd }: { cwd: string }) {
-  const gitCmd = await exec("git", ["rev-parse", "--is-shallow-repository"], {
-    nodeOptions: { cwd },
-  });
-
-  if (gitCmd.exitCode !== 0) {
-    throw new Error(gitCmd.stderr.toString());
-  }
-
-  const isShallowRepoOutput = gitCmd.stdout.toString().trim();
+  const isShallowRepoOutput = (
+    await exec("git", ["rev-parse", "--is-shallow-repository"], {
+      nodeOptions: { cwd },
+    })
+  ).stdout
+    .toString()
+    .trim();
 
   if (isShallowRepoOutput === "--is-shallow-repository") {
     // We have an old version of Git (<2.15) which doesn't support `rev-parse --is-shallow-repository`
     // In that case, we'll test for the existence of .git/shallow.
 
     // Firstly, find the .git folder for the repo; note that this will be relative to the repo dir
-    const gitDirCmd = await exec("git", ["rev-parse", "--git-dir"], { nodeOptions: { cwd } });
-
-    if (gitDirCmd.exitCode !== 0) {
-      throw new Error(gitDirCmd.stderr.toString());
-    }
-
-    const gitDir = gitDirCmd.stdout.toString().trim();
+    const gitDir = (
+      await exec("git", ["rev-parse", "--git-dir"], {
+        nodeOptions: { cwd },
+      })
+    ).stdout
+      .toString()
+      .trim();
 
     const fullGitDir = path.resolve(cwd, gitDir);
 
@@ -182,7 +180,9 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
 }
 
 export async function deepenCloneBy({ by, cwd }: { by: number; cwd: string }) {
-  const cmd = await exec("git", ["fetch", `--deepen=${by}`], { nodeOptions: { cwd } });
+  const cmd = await exec("git", ["fetch", `--deepen=${by}`], {
+    nodeOptions: { cwd },
+  });
   if (cmd.exitCode !== 0) {
     throw new Error(cmd.stderr.toString());
   }
