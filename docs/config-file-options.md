@@ -9,9 +9,13 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "fixed": [],
   "linked": [],
   "access": "restricted",
-  "baseBranch": "main",
+  "baseBranch": "master",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [],
+  "bumpVersionsWithWorkspaceProtocolOnly": false,
+  "changedFilePatterns": ["**"],
+  "format": "auto",
+  "privatePackages": { "version": true, "tag": false }
 }
 ```
 
@@ -54,9 +58,11 @@ If you want to prevent a package from being published to npm, set `private: true
 
 ## `baseBranch` (git branch name)
 
-The branch to which changesets will make comparisons. A number of internal changesets features use git to compare present changesets against another branch. This defaults what branch will be used for these comparisons. This should generally set to the major branch you merge changes into. Commands that use this information accept a `--since` option which can be used to override this.
+The branch to which changesets will make comparisons to detect what has changed since the last commit of the base branch. This should generally be set to the default branch you merge changes into, e.g. `main` or `master`.
 
-> To help make coding a more inclusive experience, we recommend changing the name of your `master` branch to `main`.
+Commands that use this information accept a `--since` option which can be used to override this.
+
+Locally, make sure the base branch exists and is up to date so changesets can make accurate comparisons.
 
 ## `ignore` (array of packages)
 
@@ -71,7 +77,7 @@ There are two caveats to this.
 
 These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos.md).
 
-> NOTE: you can also provide glob expressions to match the packages, according to the [micromatch](https://www.npmjs.com/package/micromatch) format.
+> NOTE: you can also provide glob expressions to match the packages, according to the [picomatch](https://npmx.dev/picomatch) format.
 
 ## `fixed` (array of arrays of package names)
 
@@ -156,6 +162,8 @@ You would specify our github changelog generator with:
 }
 ```
 
+If you want to disable thank you messages, add `"disableThanks": true` to the options.
+
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 
 ## `bumpVersionsWithWorkspaceProtocolOnly` (optional boolean)
@@ -197,6 +205,18 @@ You can use the following placeholders for customizing the snapshot release vers
 
 If you are not specifying `prereleaseTemplate`, the default behavior will fall back to using the following template: `{tag}-{datetime}`, and in cases where the tag is empty (`--snapshot` with no tag name), it will use `{datetime}` only.
 
+## `prettier` (optional boolean)
+
+This option configures whether Changesets will format its output using Prettier. When set to `false`, Changesets will skip formatting with Prettier.
+
+Default value: `true`
+
+```json
+{
+  "prettier": false
+}
+```
+
 ## `privatePackages` (object or false)
 
 This option is for setting how private packages should be handled. By default, Changesets will update the changelog for private packages and update their version, but will not create a tag. You can configure this option to change the default behavior.
@@ -223,3 +243,31 @@ When `tag` is set to `true`, Changesets will create a tag for private packages. 
   }
 }
 ```
+
+## `changedFilePatterns` (array of strings)
+
+Glob patterns for changed files that should mark a package as changed. Useful to fine-tune what counts as a change (e.g. only source files, ignoring test files, etc).
+
+Default value:
+
+```json
+{
+  "changedFilePatterns": ["**"]
+}
+```
+
+Example:
+
+```json
+{
+  "changedFilePatterns": ["src/**", "lib/**"]
+}
+```
+
+### `format` (optional string or boolean)
+
+Default value: `"auto"`
+
+The formatter to use to format changesets and changelogs. Set `false` to disable formatting. The default value of `"auto"` will auto-detect the formatter based on the project's configuration files. See the [`@changesets/format` documentation](https://github.com/changesets/format) for more details.
+
+Supported formatters include `"prettier"`, `"oxfmt"`, `"deno"`, and `"dprint"`.

@@ -1,16 +1,14 @@
-import { execWithOutput } from "./utils";
+import { exec } from "tinyexec";
 
 export const getCurrentBranch = async (cwd: string) => {
-  const { stdout } = await execWithOutput(
-    "git",
-    ["rev-parse", "--abbrev-ref", "HEAD"],
-    { cwd }
-  );
+  const { stdout } = await exec("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+    nodeOptions: { cwd },
+  });
   return stdout.trim();
 };
 
 export const pullBranch = async (branch: string, cwd: string) => {
-  await execWithOutput("git", ["pull", "origin", branch], { cwd });
+  await exec("git", ["pull", "origin", branch], { nodeOptions: { cwd } });
 };
 
 export const push = async (
@@ -19,9 +17,9 @@ export const push = async (
     force,
     includeTags,
     cwd,
-  }: { force?: boolean; includeTags?: boolean; cwd: string }
+  }: { force?: boolean; includeTags?: boolean; cwd: string },
 ) => {
-  await execWithOutput(
+  await exec(
     "git",
     [
       "push",
@@ -30,44 +28,42 @@ export const push = async (
       includeTags && "--tags",
       force && "--force",
     ].filter((x): x is string => !!x),
-    { cwd }
+    { nodeOptions: { cwd } },
   );
 };
 
 export const switchToMaybeExistingBranch = async (
   branch: string,
-  cwd: string
+  cwd: string,
 ) => {
-  let { stderr } = await execWithOutput("git", ["checkout", branch], {
-    ignoreReturnCode: true,
-    cwd,
+  const { stderr } = await exec("git", ["checkout", branch], {
+    nodeOptions: { cwd },
+    throwOnError: false,
   });
-  let isCreatingBranch = !stderr
+  const isCreatingBranch = !stderr
     .toString()
     .includes(`Switched to a new branch '${branch}'`);
   if (isCreatingBranch) {
-    await execWithOutput("git", ["checkout", "-b", branch], { cwd });
+    await exec("git", ["checkout", "-b", branch], { nodeOptions: { cwd } });
   }
 };
 
 export const reset = async (
   pathSpec: string,
   mode: "hard" | "soft" | "mixed" = "hard",
-  cwd: string
+  cwd: string,
 ) => {
-  await execWithOutput("git", ["reset", `--${mode}`, pathSpec], { cwd });
+  await exec("git", ["reset", `--${mode}`, pathSpec], { nodeOptions: { cwd } });
 };
 
 export const commitAll = async (message: string, cwd: string) => {
-  await execWithOutput("git", ["add", "."], {
-    cwd,
-  });
-  await execWithOutput("git", ["commit", "-m", message], { cwd });
+  await exec("git", ["add", "."], { nodeOptions: { cwd } });
+  await exec("git", ["commit", "-m", message], { nodeOptions: { cwd } });
 };
 
 export const checkIfClean = async (cwd: string): Promise<boolean> => {
-  const { stdout } = await execWithOutput("git", ["status", "--porcelain"], {
-    cwd,
+  const { stdout } = await exec("git", ["status", "--porcelain"], {
+    nodeOptions: { cwd },
   });
   return !stdout.length;
 };

@@ -1,5 +1,139 @@
 # @changesets/release-utils
 
+## 1.0.0-next.6
+
+### Major Changes
+
+- [#2106](https://github.com/changesets/changesets/pull/2106) [`ea8ca75`](https://github.com/changesets/changesets/commit/ea8ca75118462abcfa5657ff2d7aef1552e3b9b6) Thanks [@beeequeue](https://github.com/beeequeue)! - Dropped support for v1 `changeset bump` command in `runVersion()`
+
+### Patch Changes
+
+- Updated dependencies [[`c2348fc`](https://github.com/changesets/changesets/commit/c2348fcb9eba443fde1460b595651ce040f40a08)]:
+  - @changesets/read@1.0.0-next.6
+
+## 1.0.0-next.5
+
+### Patch Changes
+
+- Updated dependencies [[`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f)]:
+  - @changesets/types@7.0.0-next.5
+  - @changesets/pre@3.0.0-next.5
+  - @changesets/read@1.0.0-next.5
+
+## 1.0.0-next.4
+
+### Patch Changes
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156)]:
+  - @changesets/types@7.0.0-next.4
+  - @changesets/read@1.0.0-next.4
+  - @changesets/pre@3.0.0-next.4
+
+## 1.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+### Minor Changes
+
+- [#1962](https://github.com/changesets/changesets/pull/1962) [`cda03f7`](https://github.com/changesets/changesets/commit/cda03f70aa6ed2129cdd2ea32c9c204bbf78aa60) Thanks [@bluwy](https://github.com/bluwy)! - Replace markdown parsing with regex
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7)]:
+  - @changesets/types@7.0.0-next.3
+  - @changesets/read@1.0.0-next.3
+  - @changesets/pre@3.0.0-next.3
+
+## 1.0.0-next.2
+
+### Major Changes
+
+- [#1875](https://github.com/changesets/changesets/pull/1875) [`12f20ea`](https://github.com/changesets/changesets/commit/12f20ea75fb5a440a378bd2bf6072a6bd749fd57) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed `execWithOutput` and `spawnWithOutput`.
+
+  They were never intended to be used externally, but are now removed either way.
+
+  If you used them, we recommend using `tinyexec` or `node:child_process#exec` directly.
+
+- [#1875](https://github.com/changesets/changesets/pull/1875) [`12f20ea`](https://github.com/changesets/changesets/commit/12f20ea75fb5a440a378bd2bf6072a6bd749fd57) Thanks [@beeequeue](https://github.com/beeequeue)! - Changed `runPublish()` signature.
+
+  Now requires passing separate `command` and `args` parameters:
+
+  ```diff
+  runPublish({
+  -  script: `node -e 'console.log("test")'`
+  +  command: "node",
+  +  args: ["-e", `console.log("test")`]
+    cwd: import.meta.dirname,
+  })
+  ```
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+### Patch Changes
+
+- [#1875](https://github.com/changesets/changesets/pull/1875) [`12f20ea`](https://github.com/changesets/changesets/commit/12f20ea75fb5a440a378bd2bf6072a6bd749fd57) Thanks [@beeequeue](https://github.com/beeequeue)! - Replaced `spawndamnit` with `tinyexec`
+
+- [#1948](https://github.com/changesets/changesets/pull/1948) [`d165b4e`](https://github.com/changesets/changesets/commit/d165b4ed7472c67c7d178d80c474b682b61346f8) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed the unused `signal-exit` dependency
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2)]:
+  - @changesets/types@7.0.0-next.2
+  - @changesets/pre@3.0.0-next.2
+  - @changesets/read@1.0.0-next.2
+
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@0.6.7
+
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@0.6.6
+
+## 1.0.0-next.1
+
+### Minor Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d)]:
+  - @changesets/types@7.0.0-next.1
+  - @changesets/read@1.0.0-next.1
+  - @changesets/pre@3.0.0-next.1
+
+## 1.0.0-next.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Minor Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1618](https://github.com/changesets/changesets/pull/1618) [`e089e60`](https://github.com/changesets/changesets/commit/e089e60c6f9d4cbb2040abb1045dcbebc3a559e6) Thanks [@bluwy](https://github.com/bluwy)! - Update markdown dependencies to latest. The returned markdown from `getChangelogEntry` may be formatted differently, but should semantically represent the same content.
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replace `fs-extra` usage with `node:fs`
+
+- Updated dependencies [[`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e), [`6d1f384`](https://github.com/changesets/changesets/commit/6d1f384c8feab091f58443f6f7ee2ada64e0e7cc), [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/read@1.0.0-next.0
+  - @changesets/pre@3.0.0-next.0
+  - @changesets/types@7.0.0-next.0
+
 ## 0.2.5
 
 ### Patch Changes

@@ -1,11 +1,19 @@
 {
+  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
     "strict": true,
-    "noEmit": true
-  }
+    "noEmit": true,
+    "lib": [
+      "ES2024",
+      "ES2025.Promise",
+      "ESNext.Array",
+      "ES2025.Collection",
+      "ES2025.Iterator"
+    ],
+    "types": ["node"]
+  },
+  "include": ["./"]
 }

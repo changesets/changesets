@@ -1,35 +1,28 @@
 {
   "name": "@changesets/read",
-  "version": "0.6.5",
+  "version": "1.0.0-next.6",
   "description": "Read changesets from disc, and return the information as JSON",
-  "main": "dist/changesets-read.cjs.js",
-  "module": "dist/changesets-read.esm.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/read"
+  },
+  "type": "module",
   "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/changesets-read.cjs.mjs",
-        "default": "./dist/changesets-read.cjs.js"
-      },
-      "module": "./dist/changesets-read.esm.js",
-      "import": "./dist/changesets-read.cjs.mjs",
-      "default": "./dist/changesets-read.cjs.js"
-    },
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/read",
   "dependencies": {
-    "@changesets/git": "^3.0.4",
-    "@changesets/logger": "^0.1.1",
-    "@changesets/parse": "^0.4.1",
-    "@changesets/types": "^6.1.0",
-    "fs-extra": "^7.0.1",
-    "p-filter": "^2.1.0",
-    "picocolors": "^1.1.0"
+    "@changesets/git": "workspace:^",
+    "@changesets/parse": "workspace:^",
+    "@changesets/types": "workspace:^"
   },
   "devDependencies": {
-    "@changesets/test-utils": "*",
-    "@changesets/write": "*",
-    "outdent": "^0.5.0"
+    "@changesets/test-utils": "workspace:*",
+    "@changesets/write": "workspace:*"
+  },
+  "engines": {
+    "node": "^22.11 || ^24 || >=26"
   }
 }

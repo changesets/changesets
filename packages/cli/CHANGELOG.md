@@ -1,11 +1,280 @@
 # @changesets/cli
 
+## 3.0.0-next.6
+
+### Major Changes
+
+- [#2074](https://github.com/changesets/changesets/pull/2074) [`3599e47`](https://github.com/changesets/changesets/commit/3599e47217d2ed2dd60da628fe4d1d3fc4b849c7) Thanks [@bluwy](https://github.com/bluwy)! - Set supported package manager versions in `"engines"` field, including npm >=10.9.0, pnpm >=10.0.0, and yarn >=4.5.2.
+
+### Minor Changes
+
+- [#2068](https://github.com/changesets/changesets/pull/2068) [`d03ffc1`](https://github.com/changesets/changesets/commit/d03ffc1d11fb486328734e52767379646062f5c1) Thanks [@bluwy](https://github.com/bluwy)! - Support `{commit-short}` placeholder for the `snapshot.prereleaseTemplate` config, which is a 7 character variant of `{commit}`
+
+- [#2061](https://github.com/changesets/changesets/pull/2061) [`c2db1dd`](https://github.com/changesets/changesets/commit/c2db1dd5d2da6c6eb514d86bbe05cbb7227b067f) Thanks [@Andarist](https://github.com/Andarist)! - Added a `changeset publish-plan` command to inspect which packages would be published or tagged, with optional JSON output.
+
+- [#2100](https://github.com/changesets/changesets/pull/2100) [`90b4ad0`](https://github.com/changesets/changesets/commit/90b4ad0d1e0c41fab982f065f9f9ab522838499b) Thanks [@Andarist](https://github.com/Andarist)! - Order releases into dependency-aware chunks so packages are grouped in publish order.
+
+- [#2063](https://github.com/changesets/changesets/pull/2063) [`ed77176`](https://github.com/changesets/changesets/commit/ed771766183df240ff1dbedc6eaf6c0064b0c850) Thanks [@Andarist](https://github.com/Andarist)! - Added `changeset publish --from-pack-dir <dir>` to publish packages from a previously created pack output directory.
+
+- [#2062](https://github.com/changesets/changesets/pull/2062) [`830443c`](https://github.com/changesets/changesets/commit/830443c757d2a685cc76f36ebebb081cb531b3c2) Thanks [@Andarist](https://github.com/Andarist)! - Added a `changeset pack` command that requires `--out-dir` and writes publishable package tarballs plus an enriched `publish-plan.json` into that directory, either from the current workspace or from a saved publish plan via `--from-plan`.
+
+- [#2073](https://github.com/changesets/changesets/pull/2073) [`b9cbd80`](https://github.com/changesets/changesets/commit/b9cbd804d68ac43af3b3ada32bed6217da0af81c) Thanks [@bluwy](https://github.com/bluwy)! - Show if a package is private when selecting packages in `changeset add`
+
+### Patch Changes
+
+- [#2060](https://github.com/changesets/changesets/pull/2060) [`11bded4`](https://github.com/changesets/changesets/commit/11bded4bd38e4ced3dfa4c428c50e2284c458ae3) Thanks [@Andarist](https://github.com/Andarist)! - Fixed `changeset publish` to respect ignored packages for both publishing and private package tagging.
+
+- [#2064](https://github.com/changesets/changesets/pull/2064) [`ffd65fc`](https://github.com/changesets/changesets/commit/ffd65fc6110a5ac6dfb27eac7a28a8b26751acc7) Thanks [@Andarist](https://github.com/Andarist)! - For pnpm projects, Changesets now match pnpm's native registry behavior more closely during unpublished package checks. Both scope-based `publishConfig` registry overrides and `publishConfig.registry` are now ignored.
+
+- [#2113](https://github.com/changesets/changesets/pull/2113) [`b8222e6`](https://github.com/changesets/changesets/commit/b8222e688b11e53c2e6b3fab811ccfb50038007b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed publish error printing for pnpm 11.
+
+- [#2111](https://github.com/changesets/changesets/pull/2111) [`124ad07`](https://github.com/changesets/changesets/commit/124ad077c1361b00efa838c0400dc8a835645036) Thanks [@Andarist](https://github.com/Andarist)! - Auto-create the directory for the target publish plan file when executing `changeset publish-plan --output <file>`
+
+- [#2113](https://github.com/changesets/changesets/pull/2113) [`b8222e6`](https://github.com/changesets/changesets/commit/b8222e688b11e53c2e6b3fab811ccfb50038007b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed accidental success logs on failed npm publishes
+
+- [#2091](https://github.com/changesets/changesets/pull/2091) [`3918fe5`](https://github.com/changesets/changesets/commit/3918fe56a32b13c00d76e21e96f6280527a1871c) Thanks [@bluwy](https://github.com/bluwy)! - Log "New tag: ..." messages when running `changeset publish` to fix compatibility with the Changesets release GitHub action to create GitHub releases and push the new tags
+- Updated dependencies [[`694396c`](https://github.com/changesets/changesets/commit/694396ce49f0d7e2200c119b360e60e6bd11265f), [`d03ffc1`](https://github.com/changesets/changesets/commit/d03ffc1d11fb486328734e52767379646062f5c1), [`01f4da4`](https://github.com/changesets/changesets/commit/01f4da4e30aa90391def46b84b986fa223a055f5), [`c2348fc`](https://github.com/changesets/changesets/commit/c2348fcb9eba443fde1460b595651ce040f40a08)]:
+  - @changesets/apply-release-plan@8.0.0-next.6
+  - @changesets/assemble-release-plan@7.0.0-next.6
+  - @changesets/read@1.0.0-next.6
+
+## 3.0.0-next.5
+
+### Patch Changes
+
+- [#2041](https://github.com/changesets/changesets/pull/2041) [`ce39c72`](https://github.com/changesets/changesets/commit/ce39c725afba19588c261cc521ef4fd55f72ef19) Thanks [@bluwy](https://github.com/bluwy)! - Enable guide line for `add` command and use box design for dependent patch bump note
+
+- [#2009](https://github.com/changesets/changesets/pull/2009) [`44df27d`](https://github.com/changesets/changesets/commit/44df27d25745609bcf0c66ae244de2b0464a1b2d) Thanks [@bluwy](https://github.com/bluwy)! - Use `cac` for CLI arg parsing and handling
+
+- Updated dependencies [[`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf)]:
+  - @changesets/config@4.0.0-next.5
+  - @changesets/types@7.0.0-next.5
+  - @changesets/errors@1.0.0-next.3
+  - @changesets/apply-release-plan@8.0.0-next.5
+  - @changesets/assemble-release-plan@7.0.0-next.5
+  - @changesets/changelog-git@1.0.0-next.5
+  - @changesets/get-dependents-graph@3.0.0-next.5
+  - @changesets/git@4.0.0-next.5
+  - @changesets/pre@3.0.0-next.5
+  - @changesets/read@1.0.0-next.5
+  - @changesets/should-skip-package@1.0.0-next.5
+  - @changesets/write@1.0.0-next.5
+
+## 3.0.0-next.4
+
+### Major Changes
+
+- [#1994](https://github.com/changesets/changesets/pull/1994) [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8) Thanks [@bluwy](https://github.com/bluwy)! - The `prettier` option in `.changeset/config.json` has been removed in favor of `format`. `format` supports `"auto"`, `"prettier"`, `"oxfmt"`, `"deno"`, and `"dprint"`, and `false` disables formatting. If you previously used `prettier: false`, migrate to `format: false` or remove the option to use automatic formatter detection.
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed warning messages about using v1 configs. They will now be silently ignored.
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Migrated from `enquirer` + `@inquirer/launch-editor` to `@clack/prompts` + `launch-editor`.
+
+  This means the CLI flows will have minor changes, but they are largely the same.
+
+  This change also fixes various issues related to `enquirer` like cancelling prompts crashing the CLI.
+
+### Minor Changes
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Packages are now listed in alphabetical order when possible.
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Choosing a change type now shows a preview of which part of the version it affects.
+
+  > Which packages should have a major (**X**.X.X) bump?
+
+### Patch Changes
+
+- [#2002](https://github.com/changesets/changesets/pull/2002) [`6db2c21`](https://github.com/changesets/changesets/commit/6db2c2160ee8f7a2401faeeb1477a98ff47fab12) Thanks [@Andarist](https://github.com/Andarist)! - Lazy-load CLI commands so `changeset` only loads the code needed for the command being run.
+
+- [#2004](https://github.com/changesets/changesets/pull/2004) [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156) Thanks [@ghostdevv](https://github.com/ghostdevv)! - Replace `picocolors` with `node:util`'s `styleText`
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`ee10723`](https://github.com/changesets/changesets/commit/ee10723dde491ba6632da74d10876dfa2e67d0d2), [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc), [`fc42514`](https://github.com/changesets/changesets/commit/fc425143294e63ba254ddbe8c2ea026b55a05991), [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156), [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8)]:
+  - @changesets/config@4.0.0-next.4
+  - @changesets/types@7.0.0-next.4
+  - @changesets/apply-release-plan@8.0.0-next.4
+  - @changesets/write@1.0.0-next.4
+  - @changesets/get-dependents-graph@3.0.0-next.4
+  - @changesets/read@1.0.0-next.4
+  - @changesets/assemble-release-plan@7.0.0-next.4
+  - @changesets/get-release-plan@5.0.0-next.4
+  - @changesets/changelog-git@1.0.0-next.4
+  - @changesets/git@4.0.0-next.4
+  - @changesets/pre@3.0.0-next.4
+  - @changesets/should-skip-package@1.0.0-next.4
+
+## 3.0.0-next.3
+
+### Major Changes
+
+- [#1860](https://github.com/changesets/changesets/pull/1860) [`92b1c1b`](https://github.com/changesets/changesets/commit/92b1c1b6b1733b1f1799a73828d378646b068798) Thanks [@mixelburg](https://github.com/mixelburg)! - `changeset version` now exits with code 1 when there are no unreleased changesets, instead of silently exiting with code 0.
+
+  This makes it easier to detect when a version step is a no-op — for example, to prevent accidentally publishing packages with incorrect version tags when using `--snapshot` mode.
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1961](https://github.com/changesets/changesets/pull/1961) [`07278a7`](https://github.com/changesets/changesets/commit/07278a726343388eb6dfc56e7a8213872d4c8857) Thanks [@beeequeue](https://github.com/beeequeue)! - `CommitFunctions` can now be both sync and async, and the `defaultCommitFunctions` are now sync.
+
+- [#1652](https://github.com/changesets/changesets/pull/1652) [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7) Thanks [@bluwy](https://github.com/bluwy)! - Remove support for the deprecated `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.useCalculatedVersionForSnapshots` config. The `snapshot.useCalculatedVersion` config should be used instead.
+
+### Minor Changes
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- [#1667](https://github.com/changesets/changesets/pull/1667) [`81832f8`](https://github.com/changesets/changesets/commit/81832f855029f4093b2142ba22b747ba0de92425) Thanks [@Andarist](https://github.com/Andarist)! - Fixed resolution of changelog and commit generator modules so built-in modules can still be loaded when they are not installed in the target project.
+
+- Updated dependencies [[`81832f8`](https://github.com/changesets/changesets/commit/81832f855029f4093b2142ba22b747ba0de92425), [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`03d4479`](https://github.com/changesets/changesets/commit/03d44794fedd24ae9eb053b28624c1fd8fe6fe6f), [`b9407b3`](https://github.com/changesets/changesets/commit/b9407b39a458bab106d0e23a3afab01d07d8482f), [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625), [`07278a7`](https://github.com/changesets/changesets/commit/07278a726343388eb6dfc56e7a8213872d4c8857), [`ad3edbd`](https://github.com/changesets/changesets/commit/ad3edbdc78c7b2ba451577969b6137df275ec430), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7)]:
+  - @changesets/apply-release-plan@8.0.0-next.3
+  - @changesets/assemble-release-plan@7.0.0-next.3
+  - @changesets/get-dependents-graph@3.0.0-next.3
+  - @changesets/should-skip-package@1.0.0-next.3
+  - @changesets/get-release-plan@5.0.0-next.3
+  - @changesets/changelog-git@1.0.0-next.3
+  - @changesets/config@4.0.0-next.3
+  - @changesets/errors@1.0.0-next.2
+  - @changesets/logger@1.0.0-next.2
+  - @changesets/types@7.0.0-next.3
+  - @changesets/write@1.0.0-next.3
+  - @changesets/read@1.0.0-next.3
+  - @changesets/git@4.0.0-next.3
+  - @changesets/pre@3.0.0-next.3
+
+## 3.0.0-next.2
+
+### Major Changes
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+### Minor Changes
+
+- [#1744](https://github.com/changesets/changesets/pull/1744) [`303cacd`](https://github.com/changesets/changesets/commit/303cacdde85c94f2ef4d1408b401165ff25d263d) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped the default Prettier version used in the absence of the local installation to v3
+
+### Patch Changes
+
+- [#1875](https://github.com/changesets/changesets/pull/1875) [`12f20ea`](https://github.com/changesets/changesets/commit/12f20ea75fb5a440a378bd2bf6072a6bd749fd57) Thanks [@beeequeue](https://github.com/beeequeue)! - Replaced `spawndamnit` with `tinyexec`
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2), [`303cacd`](https://github.com/changesets/changesets/commit/303cacdde85c94f2ef4d1408b401165ff25d263d), [`12f20ea`](https://github.com/changesets/changesets/commit/12f20ea75fb5a440a378bd2bf6072a6bd749fd57)]:
+  - @changesets/types@7.0.0-next.2
+  - @changesets/assemble-release-plan@7.0.0-next.2
+  - @changesets/get-dependents-graph@3.0.0-next.2
+  - @changesets/apply-release-plan@8.0.0-next.2
+  - @changesets/get-release-plan@5.0.0-next.2
+  - @changesets/config@4.0.0-next.2
+  - @changesets/git@4.0.0-next.2
+  - @changesets/pre@3.0.0-next.2
+  - @changesets/changelog-git@1.0.0-next.2
+  - @changesets/read@1.0.0-next.2
+  - @changesets/should-skip-package@1.0.0-next.2
+  - @changesets/write@1.0.0-next.2
+
+## 2.31.0
+
+### Minor Changes
+
+- [#1889](https://github.com/changesets/changesets/pull/1889) [`96ca062`](https://github.com/changesets/changesets/commit/96ca062272605c14f77a64043f50a0a3a278c57f) Thanks [@mixelburg](https://github.com/mixelburg)! - Error on unsupported flags for individual CLI commands and print the matching command usage to make mistakes easier to spot.
+
+- [#1873](https://github.com/changesets/changesets/pull/1873) [`42943b7`](https://github.com/changesets/changesets/commit/42943b74d7a455ed03b93dd85e1c0a15f45db37f) Thanks [@mixelburg](https://github.com/mixelburg)! - Respond to `--help` on all subcommands. Previously, `--help` was only handled when it was the sole argument; passing it alongside a subcommand (e.g. `changeset version --help`) would silently execute the command instead. Now `--help` always exits early and prints per-command usage when a known subcommand is provided, or the general help text otherwise.
+
+### Patch Changes
+
+- [`d2121dc`](https://github.com/changesets/changesets/commit/d2121dc3d86b55f76de6022ccfcde843ed4b884a) Thanks [@Andarist](https://github.com/Andarist)! - Fix npm auth for path-based registries during publish by preserving configured registry URLs instead of normalizing them.
+
+- [#1888](https://github.com/changesets/changesets/pull/1888) [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix several `changeset version` issues with workspace protocol dependencies. Valid explicit `workspace:` ranges and aliases are no longer rewritten unnecessarily, and workspace path references are handled correctly during versioning.
+
+- [#1903](https://github.com/changesets/changesets/pull/1903) [`5c4731f`](https://github.com/changesets/changesets/commit/5c4731fea82ce880500ac5e1c55ff372f7a4efe2) Thanks [@Andarist](https://github.com/Andarist)! - Gracefully handle stale `npm info` data leading to duplicate publish attempts.
+
+- [#1867](https://github.com/changesets/changesets/pull/1867) [`f61e716`](https://github.com/changesets/changesets/commit/f61e7166c349d4934e4acc9b47f3d028c212ecc1) Thanks [@Andarist](https://github.com/Andarist)! - Improved detection for `published` state of prerelease-only packages without `latest` dist-tag on GitHub Packages registry.
+
+- Updated dependencies [[`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464), [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464), [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464)]:
+  - @changesets/assemble-release-plan@6.0.10
+  - @changesets/get-dependents-graph@2.1.4
+  - @changesets/apply-release-plan@7.1.1
+  - @changesets/get-release-plan@4.0.16
+  - @changesets/config@3.1.4
+
+## 2.30.0
+
+### Minor Changes
+
+- [#1840](https://github.com/changesets/changesets/pull/1840) [`057cca2`](https://github.com/changesets/changesets/commit/057cca222321816b6c8c6f6c52130185b364de36) Thanks [@wotan-allfather](https://github.com/wotan-allfather)! - Add `--since` flag to `add` command
+
+  The `add` command now supports a `--since` flag that allows you to specify which branch, tag, or git ref to use when detecting changed packages. This is useful for gitflow workflows where you have multiple target branches and the `baseBranch` config option doesn't cover all use cases.
+
+  Example: `changeset add --since=develop`
+
+  If not provided, the command falls back to the `baseBranch` value in your `.changeset/config.json`.
+
+- [#1845](https://github.com/changesets/changesets/pull/1845) [`2b4a66a`](https://github.com/changesets/changesets/commit/2b4a66a36497fd5504186dcc6ae9e287c8403de6) Thanks [@Andarist](https://github.com/Andarist)! - Delegate OTP prompting to the package manager instead of handling it in-process. This allows Changesets to use the package manager's native web auth support.
+
+- [#1774](https://github.com/changesets/changesets/pull/1774) [`667fe5a`](https://github.com/changesets/changesets/commit/667fe5aacf04dbefcf2532584ff2753b8417855a) Thanks [@bluwy](https://github.com/bluwy)! - Support importing custom `commit` option ES module. Previously, it used `require()` which only worked for CJS modules, however now it uses `import()` which supports both CJS and ES modules.
+
+- [#1839](https://github.com/changesets/changesets/pull/1839) [`73b1809`](https://github.com/changesets/changesets/commit/73b18099517b00a3c7b70c417b7f7f1bfaa24931) Thanks [@leochiu-a](https://github.com/leochiu-a)! - Add a `--message` (`-m`) flag to `changeset add` (and default `changeset`) so the changeset summary can be provided from the command line. When `--message` is present, the summary prompt is skipped while the final confirmation step is kept.
+
+- [#1806](https://github.com/changesets/changesets/pull/1806) [`0e8e01e`](https://github.com/changesets/changesets/commit/0e8e01e93358bdc8c318c608dd3b0e4af8219049) Thanks [@luisadame](https://github.com/luisadame)! - Changeset CLI can now be run from the nested directories in the project, where the `.changeset` directory has to be found in one of the parent directories
+
+### Patch Changes
+
+- [#1849](https://github.com/changesets/changesets/pull/1849) [`9dc3230`](https://github.com/changesets/changesets/commit/9dc32308e4d208964b648a788ba4eee1003c273c) Thanks [@Andarist](https://github.com/Andarist)! - Compute the terminal's size lazily to avoid spurious stderr output in non-interactive mode
+
+- [#1857](https://github.com/changesets/changesets/pull/1857) [`2a73025`](https://github.com/changesets/changesets/commit/2a7302577d2923dc7db5025003d8aa58fb627ff9) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix confusing prompt labels when entering changeset summary after external editor fallback
+
+- [#1842](https://github.com/changesets/changesets/pull/1842) [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6) Thanks [@RodrigoHamuy](https://github.com/RodrigoHamuy)! - Allow private packages to depend on skipped packages without requiring them to also be skipped. Private packages are not published to npm, so it is safe for them to have dependencies on ignored or unversioned packages.
+
+- [#1776](https://github.com/changesets/changesets/pull/1776) [`503fcaa`](https://github.com/changesets/changesets/commit/503fcaae57c397e14a52da7700dc5cb8e7cbd551) Thanks [@bluwy](https://github.com/bluwy)! - Support absolute paths in `changeset status --output <path>`
+
+- Updated dependencies [[`667fe5a`](https://github.com/changesets/changesets/commit/667fe5aacf04dbefcf2532584ff2753b8417855a), [`1772598`](https://github.com/changesets/changesets/commit/1772598270a59ba1fa7b0ef7e675fce6a575f850), [`b6f4c74`](https://github.com/changesets/changesets/commit/b6f4c748c4ba50b5ac608f3ce41229526d1bfe94), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6), [`6df3a5e`](https://github.com/changesets/changesets/commit/6df3a5e95522a0210cb2b5619588a75f32b502c6), [`27fd8f4`](https://github.com/changesets/changesets/commit/27fd8f41dddafcc2e96e7df39dca04d92f916a0a)]:
+  - @changesets/apply-release-plan@7.1.0
+  - @changesets/config@3.1.3
+  - @changesets/get-release-plan@4.0.15
+  - @changesets/read@0.6.7
+
+## 2.29.8
+
+### Patch Changes
+
+- [#1437](https://github.com/changesets/changesets/pull/1437) [`aa68d54`](https://github.com/changesets/changesets/commit/aa68d54faa17f825345ef3732d20e4a74423e5fd) Thanks [@with-heart](https://github.com/with-heart)! - Tweaked a hint text printed when one confirms an empty set of packages to be released
+
+- Updated dependencies [[`cc28222`](https://github.com/changesets/changesets/commit/cc28222ee892b3a078fa02ee26e1cef98c171532), [`e520bf5`](https://github.com/changesets/changesets/commit/e520bf5d4dbfe96f59ca28008e87bffaf3c9dfea), [`13dace8`](https://github.com/changesets/changesets/commit/13dace895017fa351014bc9e13b544d33f8b4bbe)]:
+  - @changesets/config@3.1.2
+  - @changesets/apply-release-plan@7.0.14
+  - @changesets/get-release-plan@4.0.14
+  - @changesets/read@0.6.6
+
 ## 2.29.7
 
 ### Patch Changes
 
 - Updated dependencies [[`957f24e`](https://github.com/changesets/changesets/commit/957f24ed0446494c5709189ae57583f72c716d43)]:
   - @changesets/apply-release-plan@7.0.13
+
+## 3.0.0-next.1
+
+### Major Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+- [#1651](https://github.com/changesets/changesets/pull/1651) [`e1df862`](https://github.com/changesets/changesets/commit/e1df8625800a1b3c4f66474a0e3c01b08214465c) Thanks [@bluwy](https://github.com/bluwy)! - Remove support for the `--sinceMaster` flag for `changeset status`. Use `--since=master` or `--since=main` instead.
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d), [`b83787f`](https://github.com/changesets/changesets/commit/b83787fb090dc03ad566a7d8b7e286dbe93e2301)]:
+  - @changesets/assemble-release-plan@7.0.0-next.1
+  - @changesets/get-dependents-graph@3.0.0-next.1
+  - @changesets/should-skip-package@1.0.0-next.1
+  - @changesets/apply-release-plan@8.0.0-next.1
+  - @changesets/get-release-plan@5.0.0-next.1
+  - @changesets/changelog-git@1.0.0-next.1
+  - @changesets/config@4.0.0-next.1
+  - @changesets/errors@1.0.0-next.1
+  - @changesets/logger@1.0.0-next.1
+  - @changesets/types@7.0.0-next.1
+  - @changesets/write@1.0.0-next.1
+  - @changesets/read@1.0.0-next.1
+  - @changesets/git@4.0.0-next.1
+  - @changesets/pre@3.0.0-next.1
 
 ## 2.29.6
 
@@ -44,6 +313,40 @@
 - Updated dependencies [[`de8bebc`](https://github.com/changesets/changesets/commit/de8bebc93b81cb333c3c7e1ed8a3687926b7fcd8)]:
   - @changesets/assemble-release-plan@6.0.7
   - @changesets/get-release-plan@4.0.11
+
+## 3.0.0-next.0
+
+### Major Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replace `fs-extra` usage with `node:fs`
+
+- [#1570](https://github.com/changesets/changesets/pull/1570) [`d099e43`](https://github.com/changesets/changesets/commit/d099e43300c590c86740a638330bed03511c7c77) Thanks [@pralkarz](https://github.com/pralkarz)! - Removed extra leftover code related to Changesets v1
+
+- [#1616](https://github.com/changesets/changesets/pull/1616) [`609046c`](https://github.com/changesets/changesets/commit/609046c353caa08473b86e7c194e256e1cecacaa) Thanks [@bluwy](https://github.com/bluwy)! - Remove `term-size` dependency
+
+- [#1640](https://github.com/changesets/changesets/pull/1640) [`2ad65e0`](https://github.com/changesets/changesets/commit/2ad65e062ec882dcde461dbcd80a3e1d4ee98c96) Thanks [@bluwy](https://github.com/bluwy)! - Remove deprecated flag warnings, including `--updateChangelog`, `--isPublic`, `--skipCI`, and `--commit`
+
+- Updated dependencies [[`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e), [`6d1f384`](https://github.com/changesets/changesets/commit/6d1f384c8feab091f58443f6f7ee2ada64e0e7cc), [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`3628cab`](https://github.com/changesets/changesets/commit/3628cab6cbfd931b7f2a909b38b66c1aa794d4bf), [`8f7b607`](https://github.com/changesets/changesets/commit/8f7b607b486e299e038bf8e257d28f0193ac4412), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/apply-release-plan@8.0.0-next.0
+  - @changesets/config@4.0.0-next.0
+  - @changesets/write@1.0.0-next.0
+  - @changesets/read@1.0.0-next.0
+  - @changesets/git@4.0.0-next.0
+  - @changesets/pre@3.0.0-next.0
+  - @changesets/assemble-release-plan@7.0.0-next.0
+  - @changesets/get-dependents-graph@3.0.0-next.0
+  - @changesets/should-skip-package@1.0.0-next.0
+  - @changesets/get-release-plan@5.0.0-next.0
+  - @changesets/changelog-git@1.0.0-next.0
+  - @changesets/errors@1.0.0-next.0
+  - @changesets/logger@1.0.0-next.0
+  - @changesets/types@7.0.0-next.0
 
 ## 2.29.2
 
@@ -236,7 +539,6 @@
 ### Patch Changes
 
 - [#1354](https://github.com/changesets/changesets/pull/1354) [`69be7dc`](https://github.com/changesets/changesets/commit/69be7dc7195011ac6dbd00b24ea923f02adcf69c) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an issue with `changeset status` incorrectly returning an error status in two cases:
-
   - for changed ignored packages
   - for changed private packages when `privatePackage.version` was set to `false`
 
@@ -1194,7 +1496,6 @@
 - [`a679b1d`](https://github.com/changesets/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62) [#204](https://github.com/changesets/changesets/pull/204) Thanks [@Andarist](https://github.com/Andarist)! - Correctly handle the 'access' flag for packages
 
   Previously, we had access as "public" or "private", access "private" isn't valid. This was a confusing because there are three states for publishing a package:
-
   - `private: true` - the package will not be published to npm (worked)
   - `access: public` - the package will be publicly published to npm (even if it uses a scope) (worked)
   - `access: restricted` - the package will be published to npm, but only visible/accessible by those who are part of the scope. This technically worked, but we were passing the wrong bit of information in.
@@ -1430,7 +1731,6 @@ meaning within the community, even though these commands do slightly more than t
 
 - [e55fa3f0](https://github.com/changesets/changesets/commit/e55fa3f0) [#92](https://github.com/changesets/changesets/pull/92) Thanks [@highvoltag3](https://github.com/highvoltag3)! - Catch Promise rejection on SIGINT and exit gracefully
 - [94267ff3](https://github.com/changesets/changesets/commit/94267ff3) [#106](https://github.com/changesets/changesets/pull/106) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Improve 2FA support for publishing:
-
   - Prompt for an OTP code when required
   - Add `--otp` option to release command
 
@@ -1473,7 +1773,6 @@ meaning within the community, even though these commands do slightly more than t
 - [7fa42641](https://github.com/changesets/changesets/commit/7fa42641) [#61](https://github.com/changesets/changesets/pull/61) Thanks [@Noviny](https://github.com/Noviny)! - When bumping, run prettier over the changelog file.
 
   If you want this option turned off, add `disabledLanguage: ["markdown"] to your prettier config.
-
   - [6dc510f4](https://github.com/changesets/changesets/commit/6dc510f4) [#62](https://github.com/changesets/changesets/pull/62) Thanks [@mitchellhamilton](https://github.com/mitchellhamilton)! - Add butterfly emoji prefix to CLI output
 
 ## 1.1.4
@@ -1543,14 +1842,12 @@ meaning within the community, even though these commands do slightly more than t
   the binary has been changed to `changeset`.
 
   The new names are:
-
   - `build-releases initialize` => `changeset init` (for ecosystem consistency)
   - `build-releases changeset` => `changeset` (default command). You can also run `changeset add`
   - `build-releases version` => `changeset bump`
   - `build-releases publish` => `changeset release`
 
   The function of these commands remains unchanged.
-
   - 51c8b0d6: Change format of changelog entries
 
   Previously changelog entries were in the form of:
@@ -1611,7 +1908,6 @@ meaning within the community, even though these commands do slightly more than t
 - 51c8b0d6: Support non-bolt repositories
 
   Changesets have been expanded to support:
-
   - bolt repositories
   - yarn workspaces-based repositories
   - single package repositories.
@@ -1627,7 +1923,6 @@ meaning within the community, even though these commands do slightly more than t
   If plans to modularize bolt proceed, we may go back to relying on its functions.
 
   This should have no impact on use.
-
   - 51c8b0d6: Add 'select all' and 'select all changed' options, to make mass-bumping easier.
   - eeb4d5c6: Add new command: `status` - see Readme for more information
 
@@ -1636,19 +1931,16 @@ meaning within the community, even though these commands do slightly more than t
 ## 3.0.3
 
 - [patch][c87337f](https://bitbucket.org/changesets/atlaskit-mk-2/commits/c87337f):
-
   - The version command now removes empty folders before it starts. This should prevent a race condition in CI
 
 ## 3.0.2
 
 - [patch][f7b030a](https://bitbucket.org/changesets/atlaskit-mk-2/commits/f7b030a):
-
   - Fixes potential infinite loop in parseChangesetCommit
 
 ## 3.0.1
 
 - [patch][494c1fe](https://bitbucket.org/changesets/atlaskit-mk-2/commits/494c1fe):
-
   - Update git commit message to match previous tooling.
 
 ## 3.0.0
@@ -1657,7 +1949,6 @@ meaning within the community, even though these commands do slightly more than t
   d):
 
   Changesets now use local file system - this has several effects:
-
   1. Changesets will no longer automatically create a commit. You will need to add and commit the files yourself.
   2. Changesets are easier to modify. You should ONLY modify the changes.md file (_Not changes.json_).
   3. There will be a new directory which is `.changeset`, which will hold all the changesets.

@@ -1,7 +1,7 @@
 ## @changesets/logger
 
-[![npm package](https://img.shields.io/npm/v/@changesets/logger)](https://npmjs.com/package/@changesets/logger)
-[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/logger?name=true)](https://npmx.dev/package/@changesets/logger)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 ### Usage
 

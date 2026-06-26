@@ -1,15 +1,11 @@
 ## @changesets/cli 🦋
 
-[![npm package](https://img.shields.io/npm/v/@changesets/cli)](https://npmjs.com/package/@changesets/cli)
-[![View changelog](https://img.shields.io/badge/Explore%20Changelog-brightgreen)](./CHANGELOG.md)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/cli?name=true)](https://npmx.dev/package/@changesets/cli)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
-The primary implementation of [changesets](https://github.com/changesets/changesets). Helps you manage the versioning
-and changelog entries for your packages, with a focus on versioning within a mono-repository (though we support
-single-package repositories too).
+A tool to manage versioning and changelogs with a focus on monorepos.
 
-This package is intended as a successor to `@atlaskit/build-releases` with a more general focus. It works in
-[bolt](https://www.npmjs.com/package/bolt) multi-package repositories, [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) multi-package repositories, and
-in single-package repositories.
+[Read the docs to learn more](https://changesets.dev).
 
 ## Getting Started
 
@@ -100,13 +96,13 @@ To publish public packages to NPM, you'll need to edit `.changeset/config.json` 
 ### add
 
 ```shell
-changeset [--empty] [--open]
+changeset [--empty] [--open] [--message <text>]
 ```
 
 or
 
 ```shell
-changeset add [--empty] [--open]
+changeset add [--empty] [--open] [--message <text>]
 ```
 
 This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
@@ -137,6 +133,7 @@ A changeset created with the `empty` flag would look like this:
 If you set the `commit` option in the config, the command will add the updated changeset files and then commit them.
 
 - `--open` - opens the created changeset in an external editor
+- `--message` (or `-m`) - provides the changeset summary from the command line instead of prompting for it.
 
 ### version
 

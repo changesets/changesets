@@ -1,14 +1,17 @@
-import fs from "fs-extra";
-import path from "path";
-import parse from "@changesets/parse";
-import { NewChangeset } from "@changesets/types";
+import fs from "node:fs/promises";
+import path from "node:path";
 import * as git from "@changesets/git";
-import getOldChangesetsAndWarn from "./legacy";
+import { parseChangesetFile } from "@changesets/parse";
+import type { NewChangeset } from "@changesets/types";
+
+// Files in `.changeset` that should not be considered as changesets. We may
+// revisit this if it becomes difficult to maintain the common list of files.
+const ignoredMdFiles = [/^README\.md$/i, "AGENTS.md", "CLAUDE.md", "GEMINI.md"];
 
 async function filterChangesetsSinceRef(
   changesets: Array<string>,
   changesetBase: string,
-  sinceRef: string
+  sinceRef: string,
 ) {
   const newChangesets = await git.getChangedChangesetFilesSinceRef({
     cwd: changesetBase,
@@ -19,48 +22,48 @@ async function filterChangesetsSinceRef(
   return changesets.filter((dir) => newHashes.includes(dir));
 }
 
-export default async function getChangesets(
-  cwd: string,
-  sinceRef?: string
+export async function readChangesets(
+  rootDir: string,
+  sinceRef?: string,
 ): Promise<Array<NewChangeset>> {
-  let changesetBase = path.join(cwd, ".changeset");
+  const changesetBase = path.join(rootDir, ".changeset");
   let contents: string[];
   try {
     contents = await fs.readdir(changesetBase);
   } catch (err) {
-    if ((err as any).code === "ENOENT") {
-      throw new Error("There is no .changeset directory in this project");
+    if ((err as { code: string }).code === "ENOENT") {
+      throw new Error("There is no .changeset directory in this project", {
+        cause: err,
+      });
     }
     throw err;
   }
 
-  if (sinceRef !== undefined) {
+  if (sinceRef != null) {
     contents = await filterChangesetsSinceRef(
       contents,
       changesetBase,
-      sinceRef
+      sinceRef,
     );
   }
 
-  let oldChangesetsPromise = getOldChangesetsAndWarn(changesetBase, contents);
-
-  let changesets = contents.filter(
+  const changesets = contents.filter(
     (file) =>
       !file.startsWith(".") &&
       file.endsWith(".md") &&
-      !/^README\.md$/i.test(file)
+      !ignoredMdFiles.some((pattern) =>
+        typeof pattern === "string" ? pattern === file : pattern.test(file),
+      ),
   );
 
   const changesetContents = changesets.map(async (file) => {
-    const changeset = await fs.readFile(
-      path.join(changesetBase, file),
-      "utf-8"
-    );
+    const changeset = await fs.readFile(path.join(changesetBase, file), "utf8");
 
-    return { ...parse(changeset), id: file.replace(".md", "") };
+    return { ...parseChangesetFile(changeset), id: file.replace(".md", "") };
   });
-  return [
-    ...(await oldChangesetsPromise),
-    ...(await Promise.all(changesetContents)),
-  ];
+  return await Promise.all(changesetContents);
 }
+
+/** @deprecated Use named export `readChangesets` instead */
+const readChangesetsDefault = readChangesets;
+export default readChangesetsDefault;

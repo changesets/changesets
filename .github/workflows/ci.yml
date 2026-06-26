@@ -2,20 +2,87 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches: [main]
+  # merge queue is required so all commits on target branches trigger this workflow
+  # despite lack of the push event trigger here
+  merge_group:
+    branches:
+      - main
+      - next
+      # merge group rulesets don't allow wildcards so in settings each maintenance branch needs to be added separately
+      - "maintenance/v*" # branch rulesets don't support v[0-9]+
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: true
+
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/ci-setup
+
+      - name: Build artifacts
+        run: pnpm build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          # the size of the dist artifacts is not very large, so we can use better compression without a slowdown
+          compression-level: 8
+          # store it for as short as possible, since we only need it for the same workflow run
+          retention-days: 1
+          name: dist
+          path: |
+            packages/*/dist
+            scripts/*/dist
+
+  lint-workflows:
+    name: Lint workflows
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read # only required in private repos
+      security-events: write # allow writing security events
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+        with:
+          persona: pedantic
+          annotations: true
+          advanced-security: false
+
   test:
-    name: Test
+    name: "Test using Node ${{ matrix.node_version }}"
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      matrix:
+        node_version: [22, 24, 26]
+      fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
+        with:
+          node-version: ${{ matrix.node_version }}
+          download-dist: true
 
       - name: Check Git version
         run: git --version
@@ -23,45 +90,66 @@ jobs:
       - name: Setup mock Git user
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
-      - name: Jest tests
-        run: yarn jest --ci --color --runInBand --coverage --reporters=default --reporters=jest-junit
+      - name: Vitest tests
+        if: matrix.node_version != 24
+        run: pnpm test
+
+      # Run coverage only once on node 24 to avoid duplicate codecov uploads
+      - name: Vitest tests with coverage
+        if: matrix.node_version == 24
+        run: pnpm test --coverage
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        if: matrix.node_version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   typecheck:
     name: Typecheck
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
+        with:
+          download-dist: true
 
       - name: Typecheck
-        run: yarn types:check
+        run: pnpm types:check
 
   lint:
     name: Lint
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
       - uses: ./.github/actions/ci-setup
+        with:
+          download-dist: true
 
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Format
-        run: yarn format
+        run: pnpm format
 
   ci-ok:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [test, typecheck, lint]
+    needs: [lint-workflows, build, test, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1
-        if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'skipped') || contains(needs.*.result, 'cancelled')) }}
+        if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
