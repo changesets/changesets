@@ -57,6 +57,10 @@ Specify the `<org>/<repo>` slug of your GitHub repository.
 
 Set `"disableThanks": true` to drop the `"Thanks [@user]!"` attribution from each line.
 
+::: info
+It is recommended to not set `"disableThanks": true` when using `template`, as the `{authors}` token returns an empty string then, which could lead to unexpected results.
+:::
+
 ### `template`
 
 - **Type:** `string`
