@@ -34,8 +34,8 @@ If a tuple (`[string, Record<string, any>]`) is set, you can pass options in the
 {
   "changelog": [
     "@changesets/changelog-github",
-    { 
-      "repo": "owner/repo", 
+    {
+      "repo": "owner/repo",
       "disableThanks": true,
       "template": "\n- {summary} {ref}"
     }

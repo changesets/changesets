@@ -32,10 +32,7 @@ Then you can use it in the [`changelog`](./config.md#changelog) option:
 
 ```json [.changeset/config.json]
 {
-  "changelog": [
-    "@changesets/changelog-github",
-    { "repo": "owner/repo" }
-  ]
+  "changelog": ["@changesets/changelog-github", { "repo": "owner/repo" }]
 }
 ```
 
@@ -89,7 +86,7 @@ Note that `\n- ` is included to generate each change as a bullet list item. Howe
 The `template` option supports these tokens.
 
 | Token       | Description                                                                               | Example              |
-|-------------|-------------------------------------------------------------------------------------------|----------------------|
+| ----------- | ----------------------------------------------------------------------------------------- | -------------------- |
 | `{summary}` | The first line of the changeset Markdown content, linking to GitHub issues (e.g. `#123`). | `fix the thing`      |
 | `{ref}`     | Link to either PR, or commit if the changes were pushed directly; wrapped in paranthesis. | `([#123](url))`      |
 | `{pull}`    | Link to the PR if available; not wrapped in paranthesis.                                  | `[#123](url)`        |
@@ -103,7 +100,7 @@ When you use a token and its data is absent, the token will generate an empty st
 Here are some examples for the change `"fix the thing"` made in PR `#123` by `@ghost`, squashed in commit `a1b2c3d` to the [`baseBranch`](./config.md#basebranch):
 
 | `template` config                                     | Generated Markdown                                                                   |
-|-------------------------------------------------------|--------------------------------------------------------------------------------------|
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | `"\n- {pull} {commit} Thanks {authors}! - {summary}"` | ``\n- [#123](url) [`a1b2c3d`](url) Thanks [@ghost](url)! - fix the thing`` (default) |
 | `"\n- {summary} {ref}"`                               | `\n- fix the thing ([#123](url))` or ``- fix the thing ([`a1b2c3d`](url))``          |
 | `"\n- {summary} (thanks {authors}!)"`                 | `\n- fix the thing (thanks [@ghost](url)!)`                                          |

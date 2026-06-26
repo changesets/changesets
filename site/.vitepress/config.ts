@@ -155,7 +155,10 @@ export default defineConfig({
                 text: "Customize Changelog Format",
                 link: "customize-changelog-format",
               },
-              { text: "GitHub Changelog Generator", link: "github-changelog-generator" },
+              {
+                text: "GitHub Changelog Generator",
+                link: "github-changelog-generator",
+              },
               {
                 text: "Customize Commit Format",
                 link: "customize-commit-format",
