@@ -22,7 +22,7 @@ $ yarn add -D @changesets/changelog-github
 
 :::
 
-The GitHub Changelog generator requires a [`GITHUB_TOKEN`](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions. Add it to your repository's [GitHub Action secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) your `.env` file:
+The GitHub Changelog generator requires a [`GITHUB_TOKEN`](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions. Add it to your repository's [GitHub Action secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) and your `.env` file:
 
 ```bash
 GITHUB_TOKEN=token_here
