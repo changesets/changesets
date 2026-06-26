@@ -3,6 +3,9 @@ import path from "node:path";
 import util from "node:util";
 import { getCommitInfo, getPullRequestInfo } from "@changesets/get-github-info";
 import type { ChangelogFunctions } from "@changesets/types";
+import { buildReleaseLineTokens, renderTemplate } from "./render-template.ts";
+
+const ISSUE_REF_REGEX = /\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g;
 
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
@@ -10,7 +13,7 @@ function linkifyIssueRefs(
   line: string,
   { serverUrl, repo }: { serverUrl: string; repo: string },
 ): string {
-  return line.replace(/\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g, (match, issue) =>
+  return line.replace(ISSUE_REF_REGEX, (match, issue) =>
     // PRs and issues are the same thing on GitHub (to some extent, of course)
     // this relies on GitHub redirecting from /issues/1234 to /pull/1234 when necessary
     issue ? `[#${issue}](${serverUrl}/${repo}/issues/${issue})` : match,
@@ -156,24 +159,32 @@ const changelogFunctions: ChangelogFunctions = {
             .join(", ")
         : links.user;
 
+    const linkOpts = { serverUrl: GITHUB_SERVER_URL, repo };
+    const summaryLinked = linkifyIssueRefs(firstLine, linkOpts);
+
+    const continuation = futureLines
+      .map((l) => `  ${linkifyIssueRefs(l, linkOpts)}`)
+      .join("\n");
+
+    if (typeof options?.template === "string" && options.template.length > 0) {
+      const tokens = buildReleaseLineTokens({
+        summaryLinked,
+        links,
+        users,
+      });
+      // trimEnd so an empty trailing token (e.g. `{ref}` with no PR/commit)
+      // leaves no dangling space - a trailing space in markdown is unsafe.
+      const rendered = renderTemplate(options.template, tokens).trimEnd();
+      return `${rendered}\n${continuation}`;
+    }
+
     const prefix = [
       links.pull == null ? "" : ` ${links.pull}`,
       links.commit == null ? "" : ` ${links.commit}`,
       users == null ? "" : ` Thanks ${users}!`,
     ].join("");
 
-    return `\n\n-${prefix ? `${prefix} -` : ""} ${linkifyIssueRefs(firstLine, {
-      serverUrl: GITHUB_SERVER_URL,
-      repo,
-    })}\n${futureLines
-      .map(
-        (l) =>
-          `  ${linkifyIssueRefs(l, {
-            serverUrl: GITHUB_SERVER_URL,
-            repo,
-          })}`,
-      )
-      .join("\n")}`;
+    return `\n\n-${prefix ? `${prefix} -` : ""} ${summaryLinked}\n${continuation}`;
   },
 };
 

@@ -172,7 +172,7 @@ Alternatively, you can provide the repo name via options:
 
 When running in GitHub Actions, `repo` is optional because it defaults to the `GITHUB_REPOSITORY` environment variable.
 
-If you want to disable thank you messages, add `"disableThanks": true` to the options.
+If you want to disable thank you messages, add `"disableThanks": true` to the options. For the full set of `@changesets/changelog-github` options (including the experimental `template` option), see its [README](../packages/changelog-github/README.md).
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 
