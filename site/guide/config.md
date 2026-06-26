@@ -28,18 +28,24 @@ Set how the changelog for packages should be generated. The default changelog ge
 
 You can also specify a custom changelog generator by providing a string or a tuple with the module path and options. The module can be an npm package or a relative file path. Check out the [Customize Changelog Format](./customize-changelog-format.md) guide to learn how to write your own changelog generator.
 
-If a tuple (`[string, Record<string, any>]`) is set, you can pass options in the second item of the tuple to configure the changelog generator. For example, if you are using `@changesets/changelog-github`, you can pass the `repo` and `disableThanks` options like this:
+If a tuple (`[string, Record<string, any>]`) is set, you can pass options in the second item of the tuple to configure the changelog generator. For example, if you are using `@changesets/changelog-github`, you can pass the `repo`, `disableThanks`, and `template` options like this:
 
 ```json [.changeset/config.json]
 {
   "changelog": [
     "@changesets/changelog-github",
-    { "repo": "owner/repo", "disableThanks": true }
+    { 
+      "repo": "owner/repo", 
+      "disableThanks": true,
+      "template": "\n- {summary} {ref}"
+    }
   ]
 }
 ```
 
 Consult the documentation for the changelog generator you're using for more information on the options you can pass to it.
+
+Read more about the [`@changesets/changelog-github` generator](./github-changelog-generator.md).
 
 ## commit
 

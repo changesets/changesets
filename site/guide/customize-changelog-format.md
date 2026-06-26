@@ -98,3 +98,5 @@ You can also specify options to be passed to the changelog functions' `changelog
   "changelog": ["./changelog-generator.ts", { "showCommit": false }]
 }
 ```
+
+You can also use our official [GitHub Changelog generator](./github-changelog-generator.md).
