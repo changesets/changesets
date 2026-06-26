@@ -18,7 +18,7 @@ cli.globalCommand.outputVersion = () => console.info(manifest.version);
 
 function normalizeOptions(
   options: Record<string, any>,
-  { array }: { array?: string[] } = {},
+  { array, outputPath }: { array?: string[]; outputPath?: boolean } = {},
 ) {
   // Do not allow positional arguments in options
   delete options["--"];
@@ -45,6 +45,10 @@ function normalizeOptions(
     if (typeof options[key] === "number") {
       options[key] = String(options[key]);
     }
+  }
+
+  if (outputPath && process.env.CHANGESETS_OUTPUT_PATH) {
+    options.outputPath = process.env.CHANGESETS_OUTPUT_PATH;
   }
 }
 
@@ -100,7 +104,7 @@ cli
   .option("--from-pack-dir <dir>", "Publish from a packed output directory")
   .option("--git-tag", "Create a git tag for the release", { default: true })
   .action(async (options) => {
-    normalizeOptions(options);
+    normalizeOptions(options, { outputPath: true });
     const { publish } = await import("./commands/publish/index.ts");
     await publish(options);
   });
@@ -149,7 +153,7 @@ cli
 cli
   .command("tag", "Create git tags for the current version of all packages")
   .action(async (options) => {
-    normalizeOptions(options);
+    normalizeOptions(options, { outputPath: true });
     const { tag } = await import("./commands/tag/index.ts");
     await tag(options);
   });

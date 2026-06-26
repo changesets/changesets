@@ -4,6 +4,7 @@ import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { log, progress } from "@clack/prompts";
 import { getPackages, type Tool } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { createOutputReport } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 
@@ -24,6 +25,7 @@ function buildTagMessage(
 
 export interface TagOptions {
   cwd?: string;
+  outputPath?: string;
 }
 
 export async function tag(options?: TagOptions) {
@@ -58,11 +60,18 @@ export async function tag(options?: TagOptions) {
   const p = progress({ max: untaggedPackages.length - skippedTags.length });
   p.start("Creating tags...");
 
+  await using reporter = await createOutputReport(options?.outputPath);
+
   for (const pkg of untaggedPackages) {
     const tag = buildTag(packages.tool, pkg);
     if (allExistingTags.has(tag)) continue;
 
     await git.tag(tag, packages.rootDir);
+    reporter?.write({
+      type: "git-tag",
+      tag,
+      packageName: pkg.name,
+    });
 
     p.advance(1, buildTagMessage(packages.tool, pkg));
   }

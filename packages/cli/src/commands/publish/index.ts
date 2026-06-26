@@ -7,6 +7,7 @@ import type { PreState } from "@changesets/types";
 import { log, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { importantWarning } from "../../utils/cli-utilities.ts";
+import { createOutputReport, type OutputReporter } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import {
   getPublishPlan,
@@ -43,6 +44,7 @@ export interface PublishOptions {
   otp?: string;
   tag?: string;
   fromPackDir?: string;
+  outputPath?: string;
   /** @default true */
   gitTag?: boolean;
 }
@@ -92,6 +94,8 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     return;
   }
 
+  await using reporter = await createOutputReport(options?.outputPath);
+
   for (let index = 0; index < plan.length; index++) {
     const chunk = plan[index];
 
@@ -140,9 +144,10 @@ ${formatPackageList(successfulNpmPublishes)}
           `Creating git tag${successfulNpmPublishes.length > 1 ? "s" : ""}...`,
         );
         await tagPublish(
+          packages.rootDir,
+          reporter,
           packages.tool.type,
           successfulNpmPublishes,
-          packages.rootDir,
         );
         p.stop(
           `Created git tag${successfulNpmPublishes.length > 1 ? "s" : ""}.`,
@@ -163,9 +168,10 @@ ${formatPackageList(untaggedPrivatePackageReleases, c.yellowBright)}
         `Creating git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}...`,
       );
       await tagPublish(
+        packages.rootDir,
+        reporter,
         packages.tool.type,
         untaggedPrivatePackageReleases,
-        packages.rootDir,
       );
       p.stop(
         `Created git tag${untaggedPrivatePackageReleases.length > 1 ? "s" : ""}.`,
@@ -185,19 +191,28 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
 }
 
 async function tagPublish(
+  cwd: string,
+  reporter: OutputReporter | undefined,
   tool: string,
   packageReleases: Array<{ name: string; version: string }>,
-  cwd: string,
 ) {
   if (tool !== "root") {
     for (const pkg of packageReleases) {
       const tag = `${pkg.name}@${pkg.version}`;
-      log.info(`New tag: ${tag}`);
       await git.tag(tag, cwd);
+      reporter?.write({
+        type: "git-tag",
+        tag,
+        packageName: pkg.name,
+      });
     }
   } else {
     const tag = `v${packageReleases[0].version}`;
-    log.info(`New tag: ${tag}`);
     await git.tag(tag, cwd);
+    reporter?.write({
+      type: "git-tag",
+      tag,
+      packageName: packageReleases[0].name,
+    });
   }
 }
