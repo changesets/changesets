@@ -147,11 +147,11 @@ cli
   });
 
 cli
-  .command("tag", "Create git tags for the current version of all packages")
+  .command("git-tag", "Create git tags for the current version of all packages")
   .action(async (options) => {
     normalizeOptions(options);
-    const { tag } = await import("./commands/tag/index.ts");
-    await tag(options);
+    const { gitTag } = await import("./commands/git-tag/index.ts");
+    await gitTag(options);
   });
 
 cli
