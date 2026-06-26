@@ -17,8 +17,7 @@
     "dataloader": "^2.2.3"
   },
   "devDependencies": {
-    "nock": "^14.0.15",
-    "oxfmt": "^0.54.0"
+    "nock": "^14.0.15"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"

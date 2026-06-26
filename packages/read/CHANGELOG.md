@@ -1,5 +1,16 @@
 # @changesets/read
 
+## 1.0.0-next.6
+
+### Minor Changes
+
+- [#2066](https://github.com/changesets/changesets/pull/2066) [`c2348fc`](https://github.com/changesets/changesets/commit/c2348fcb9eba443fde1460b595651ce040f40a08) Thanks [@bluwy](https://github.com/bluwy)! - Ignore more markdown files in the `.changeset` directory when reading changesets, including AGENTS.md, CLAUDE.md, and GEMINI.md
+
+### Patch Changes
+
+- Updated dependencies [[`1c1ded3`](https://github.com/changesets/changesets/commit/1c1ded38fe0a0e332baa124c4b89e0688a255ff2)]:
+  - @changesets/parse@1.0.0-next.6
+
 ## 1.0.0-next.5
 
 ### Patch Changes
