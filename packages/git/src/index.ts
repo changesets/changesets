@@ -156,9 +156,7 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
 
     // Firstly, find the .git folder for the repo; note that this will be relative to the repo dir
     const gitDir = (
-      await exec("git", ["rev-parse", "--git-dir"], {
-        nodeOptions: { cwd },
-      })
+      await exec("git", ["rev-parse", "--git-dir"], { nodeOptions: { cwd } })
     ).stdout
       .toString()
       .trim();
