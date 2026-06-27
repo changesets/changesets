@@ -58,14 +58,14 @@ async function getInteractiveConfig() {
 
   const priorityOrder = [
     "$schema",
-    "changelog",
     "baseBranch",
-    "commit",
     "access",
+    "format",
+    "changelog",
+    "commit",
     "ignore",
     "fixed",
     "linked",
-    "format",
     "updateInternalDependencies",
   ];
 
