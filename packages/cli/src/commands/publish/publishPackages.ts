@@ -83,7 +83,7 @@ export async function publishPackages({
           npm_config_otp: undefined,
         }),
   });
-  // in TTY mode let's allow the first publish to "check" if the publish process requires delegated auth or not
+  // in TTY mode let's allow the first publish to "check" if the publish process requires interactive auth or not
   // on CI everything has to be configured in a way that allows automation so we can safely allow concurrency up to the defined limit
   // but in TTY the user might rely on Changesets prompting (through the used package manager CLI) for OTP/web auth
   // this is just an appromixation of the best behavior that assumes a single publish target/registry with a consistent/shared auth setup

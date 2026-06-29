@@ -10,7 +10,7 @@ import type { AuthState } from "../../utils/types.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 interface PublishOptions {
-  /** The publish command argument, the path to the package or tarball */
+  /** The publish command argument, the path to the `publishConfig.directory` or tarball */
   target: string | undefined;
   /** The current working directory for the publish operation */
   cwd: string;

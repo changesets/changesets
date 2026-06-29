@@ -59,14 +59,18 @@ function stubIsTTY(value: boolean) {
   const originalDescriptor = Object.getOwnPropertyDescriptor(
     process.stdin,
     "isTTY",
-  )!;
+  );
   Object.defineProperty(process.stdin, "isTTY", {
     ...originalDescriptor,
     value,
   });
   return {
     [Symbol.dispose]() {
-      Object.defineProperty(process.stdin, "isTTY", originalDescriptor);
+      if (originalDescriptor) {
+        Object.defineProperty(process.stdin, "isTTY", originalDescriptor);
+      } else {
+        Reflect.deleteProperty(process.stdin, "isTTY");
+      }
     },
   };
 }
