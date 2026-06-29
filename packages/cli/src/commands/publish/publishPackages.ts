@@ -136,7 +136,7 @@ export async function publishPackages({
         //
         // However, there are still 2 reasons why we prefer to set it to the root:
         // 1. it's a consistent approach that works across package managers and it's also a good location when publishing packed artifacts
-        // 2. it's important not to call npm from a directory that is an actual workspace (as per the workspaces configuration) and not from, for example, publishConfig.directory
+        // 2. it's important to call npm from a directory that is an actual workspace (as per the workspaces configuration) and not from, for example, publishConfig.directory
         //    because npm only resolves to the root's .npmrc for actual workspaces and not for arbitrary subdirectories of the root.
         cwd: packages.rootDir,
         env,
