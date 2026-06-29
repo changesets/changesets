@@ -13,6 +13,10 @@ export const baseConfig = defineConfig({
     onlyBundle: [], // require explicitly listing inlined dependencies
   },
 
+  env: {
+    CHANGESETS_TEST_INTERACTIVE: "false",
+  },
+
   sourcemap: !isCi,
   dts: { enabled: true, parallel: !isCi, sourcemap: !isCi },
   format: "esm",

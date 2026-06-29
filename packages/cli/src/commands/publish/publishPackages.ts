@@ -2,15 +2,17 @@ import { resolve } from "node:path";
 import c from "@changesets/color";
 import type { Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
-import type { AuthState } from "../../utils/types.ts";
+import {
+  NPM_PUBLISH_CONCURRENCY_LIMIT,
+  npmPublishQueue,
+} from "../../lib/common.ts";
+import type { AuthState } from "../../lib/types.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 import {
-  npmPublishQueue,
   publish,
   type PublishTool,
   getPublishTool,
   sanitizeEnv,
-  NPM_PUBLISH_CONCURRENCY_LIMIT,
 } from "./npm-utils.ts";
 
 export type PublishedResult = {
@@ -98,7 +100,7 @@ export async function publishPackages({
   );
   const publishPromises = releases.map(async (release) => {
     const pkg = packagesByName.get(release.name)!;
-    let target: string | undefined;
+    let target: string | null = null;
     if (artifactDir) {
       target = resolve(artifactDir, release.tarball!.path);
     } else if (

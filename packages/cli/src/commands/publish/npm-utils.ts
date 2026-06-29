@@ -1,32 +1,22 @@
-import path from "node:path";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import type { PackageJSON, Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { exec } from "tinyexec";
-import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
-import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
-import type { AuthState } from "../../utils/types.ts";
+import { npmPublishQueue, npmRequestQueue } from "../../lib/common.ts";
+import * as npm from "../../lib/npm.ts";
+import * as pnpm from "../../lib/pnpm.ts";
+import type { AuthState, InternalPublishResult } from "../../lib/types.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 interface PublishOptions {
   /** The publish command argument, the path to the `publishConfig.directory` or tarball */
-  target: string | undefined;
+  target: string | null;
   /** The current working directory for the publish operation */
   cwd: string;
   /** The environment variables for the publish operation */
   env: NodeJS.ProcessEnv;
 }
-
-const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
-export const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
-
-export const npmRequestQueue = createPromiseQueue(
-  NPM_REQUEST_CONCURRENCY_LIMIT,
-);
-export const npmPublishQueue = createPromiseQueue(
-  NPM_PUBLISH_CONCURRENCY_LIMIT,
-);
 
 function jsonParse(input: string) {
   try {
@@ -191,171 +181,30 @@ ${pkgInfo.error.summary}${pkgInfo.error.detail ? `\n${pkgInfo.error.detail}` : "
   return { published: true, pkgInfo };
 }
 
-// we check `npm info` before publishing but `npm info` can return stale data at times
-// so we need to gracefully handle this situation
-function isAlreadyPublishedError(output: string): boolean {
-  return output.includes(
-    "cannot publish over the previously published version",
-  );
-}
-
-type InternalPublishResult =
-  | { result: "published" }
-  | { result: "skipped" }
-  | { result: "failed"; allowRetry?: boolean };
-
-function formatPublishError(
-  publishTool: "npm" | "pnpm",
-  error: {
-    summary?: string;
-    message?: string;
-    detail?: string;
-  },
-) {
-  // pnpm 11 uses .message but pnpm 10 delegates to npm and that uses .summary
-  const summary =
-    publishTool === "pnpm" ? (error.message ?? error.summary) : error.summary;
-  // .detail is npm-specific but for simplicity we handle it at all times
-  return `${summary}${error.detail ? `\n${error.detail}` : ""}`;
-}
-
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
-async function internalPublish(
-  publishTool: PublishTool,
-  release: PublishReleaseEntry,
-  opts: PublishOptions,
-  authState: AuthState,
-): Promise<InternalPublishResult> {
-  const publishArgs = ["publish"];
-  if (opts.target) {
-    publishArgs.push(path.relative(opts.cwd, opts.target));
-  }
-  const publishFlags = ["--access", release.access, "--tag", release.tag];
-  if (publishTool.name === "pnpm") {
-    publishFlags.push("--no-git-checks");
-  }
-
-  if (process.stdin.isTTY && authState.requiresInteractive) {
-    // it's not easily controllable but ideally no other work should happen until this is done
-    // we specifically don't want any other output to interfere with the delegated auth flow
-    const child = exec(publishTool.name, [...publishArgs, ...publishFlags], {
-      nodeOptions: {
-        env: opts.env,
-        cwd: opts.cwd,
-        stdio: ["inherit", "inherit", "pipe"],
-      },
-    });
-
-    const result = await child;
-
-    if (child.exitCode === 0) {
-      authState.requiresInteractive = false;
-      // bump for remaining packages
-      npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
-      return { result: "published" };
-    }
-
-    // in the delegated mode all tested npm versions (v3-v10) log the error to stderr
-    if (isAlreadyPublishedError(result.stderr.toString())) {
-      // given this error happened in the delegated mode, the user was prompted to log in
-      // for that reason, it's nice to show this warning to the user so they are not confused by the printed error
-      log.warn(
-        `${release.name} is already published (likely a stale registry data led to a duplicate publish attempt)`,
-      );
-      authState.requiresInteractive = false;
-      npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
-      return { result: "skipped" };
-    }
-
-    return { result: "failed" };
-  }
-
-  // in the delegated mode we don't need the json output
-  // as we won't be handling the auth errors
-  publishFlags.push("--json");
-  if (authState.otpToken) {
-    publishFlags.push("--otp", authState.otpToken);
-  }
-
-  const { exitCode, stdout, stderr } = await exec(
-    publishTool.name,
-    [...publishArgs, ...publishFlags],
-    {
-      nodeOptions: {
-        env: opts.env,
-        cwd: opts.cwd,
-      },
-    },
-  );
-
-  if (exitCode !== 0) {
-    // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
-    // We want to handle this as best we can but it has some struggles:
-    // - output of those lifecycle scripts can contain JSON
-    // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
-    // Note that the `--json` output is always printed at the end so this should work
-    const json =
-      getLastJsonObjectFromString(stderr.toString()) ||
-      getLastJsonObjectFromString(stdout.toString());
-
-    if (json?.error) {
-      if (
-        json.error.code === "E403" &&
-        isAlreadyPublishedError(json.error.summary)
-      ) {
-        // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
-        return { result: "skipped" };
-      }
-      // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
-      if (
-        (json.error.code === "EOTP" ||
-          (json.error.code === "E401" &&
-            json.error.detail?.includes("--otp=<code>"))) &&
-        process.stdin.isTTY
-      ) {
-        // the current otp code must be invalid since it errored
-        authState.otpToken = undefined;
-        authState.requiresInteractive = true;
-        npmPublishQueue.setConcurrency(1);
-        return {
-          result: "failed",
-          // given we have just adjusted the concurrency, we need to handle the retries in the layer that requeues the publish
-          // calling internalPublish again would allow concurrent failures to run again concurrently
-          // but only one retried publish should get delegated to the npm cli and other ones should "await" its successful result before being retried
-          allowRetry: true,
-        };
-      }
-      log.error(
-        `
-An error occurred while publishing ${release.name}: ${json.error.code}
-${formatPublishError(publishTool.name, json.error)}
-        `.trim(),
-      );
-    }
-
-    log.error(stderr.toString() || stdout.toString());
-    return { result: "failed" };
-  }
-  // bump the limit up in case we have started with the limit of 1 in the TTY mode
-  npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
-  return { result: "published" };
-}
-
 export function publish(
   publishTool: PublishTool,
   release: PublishReleaseEntry,
   opts: PublishOptions,
   authState: AuthState,
-): Promise<{ result: "published" | "skipped" | "failed" }> {
+): Promise<InternalPublishResult> {
+  const publish = publishTool.name === "npm" ? npm.publish : pnpm.publish;
+
   return npmRequestQueue.add(async () => {
     let result: InternalPublishResult;
     do {
       result = await npmPublishQueue.add(() =>
-        internalPublish(publishTool, release, opts, authState),
+        publish({
+          release,
+          authState,
+          cwd: opts.cwd,
+          env: opts.env,
+          target: opts.target,
+        }),
       );
     } while (result.result === "failed" && result.allowRetry);
 
-    return { result: result.result };
+    return result;
   });
 }
