@@ -1,10 +1,57 @@
-import { beforeEach, afterAll, describe, expect, it } from "vitest";
-import { getCorrectRegistry, isCustomRegistry } from "../npm-utils.ts";
+import { testdir } from "@changesets/test-utils";
+import { detect } from "package-manager-detector";
+import { exec } from "tinyexec";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { getCorrectRegistry, isCustomRegistry, publish } from "../npm-utils.ts";
 
 const originalEnv = process.env;
 
+vi.mock("package-manager-detector");
+vi.mock("tinyexec");
+
+const mockedDetect = vi.mocked(detect);
+const mockedExec = vi.mocked(exec);
+
+function execResult(stdout: string, exitCode = 0, stderr = "") {
+  return {
+    command: "",
+    args: [],
+    stdout,
+    stderr,
+    exitCode,
+    failed: exitCode !== 0,
+    signal: undefined,
+    killed: false,
+  };
+}
+
+function mockPnpmPublishError(stderr: string) {
+  mockedDetect.mockResolvedValue({ name: "pnpm" } as any);
+  mockedExec.mockImplementation(((
+    command: string,
+    args?: readonly string[],
+  ) => {
+    if (command === "pnpm" && args?.[0] === "--version") {
+      return Promise.resolve(execResult("11.5.2"));
+    }
+    if (command === "pnpm" && args?.[0] === "publish") {
+      return Promise.resolve(execResult("", 1, stderr));
+    }
+    throw new Error(`Unexpected exec call: ${command} ${args?.join(" ")}`);
+  }) as any);
+}
+
+async function publishTestPackage(cwd: string) {
+  return publish(
+    { name: "pkg-a", version: "1.0.0" },
+    { cwd, target: cwd, access: "public", tag: "latest" },
+    { token: undefined, isRequired: false },
+  );
+}
+
 beforeEach(() => {
   process.env = { ...originalEnv };
+  vi.clearAllMocks();
 });
 
 afterAll(() => {
@@ -125,5 +172,38 @@ describe("isCustomRegistry", () => {
 
   it("returns true for a path-based custom registry", () => {
     expect(isCustomRegistry("https://registry.example.com/npm")).toBe(true);
+  });
+});
+
+describe("publish", () => {
+  it("skips already-published pnpm JSON errors when summary is missing", async () => {
+    const cwd = await testdir({});
+    mockPnpmPublishError(
+      JSON.stringify({
+        error: {
+          code: "E403",
+          detail:
+            "You cannot publish over the previously published version 1.0.0.",
+        },
+      }),
+    );
+
+    await expect(publishTestPackage(cwd)).resolves.toEqual({
+      result: "skipped",
+    });
+  });
+
+  it("falls back to raw stderr for already-published pnpm JSON errors", async () => {
+    const cwd = await testdir({});
+    mockPnpmPublishError(
+      [
+        "ERR_PNPM_PUBLISH_FAILED cannot publish over the previously published version 1.0.0.",
+        JSON.stringify({ error: { code: "E403" } }),
+      ].join("\n"),
+    );
+
+    await expect(publishTestPackage(cwd)).resolves.toEqual({
+      result: "skipped",
+    });
   });
 });

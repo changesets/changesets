@@ -264,9 +264,11 @@ ${pkgInfo.error.summary}${pkgInfo.error.detail ? `\n${pkgInfo.error.detail}` : "
 
 // we check `npm info` before publishing but `npm info` can return stale data at times
 // so we need to gracefully handle this situation
-function isAlreadyPublishedError(output: string): boolean {
-  return output.includes(
-    "cannot publish over the previously published version",
+function isAlreadyPublishedError(
+  ...outputs: Array<string | undefined>
+): boolean {
+  return outputs.some((output) =>
+    output?.includes("cannot publish over the previously published version"),
   );
 }
 
@@ -397,7 +399,13 @@ async function internalPublish(
     if (json?.error) {
       if (
         json.error.code === "E403" &&
-        isAlreadyPublishedError(json.error.summary)
+        isAlreadyPublishedError(
+          json.error.summary,
+          json.error.detail,
+          json.error.message,
+          stderr.toString(),
+          stdout.toString(),
+        )
       ) {
         // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
         return { result: "skipped" };
