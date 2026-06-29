@@ -304,7 +304,7 @@ describe("Publish command", () => {
     expect(
       mockedExec.mock.calls
         .filter((call) => call[1]?.[0] === "publish")
-        .map((call) => call[2]?.nodeOptions.cwd),
+        .map((call) => call[2]?.nodeOptions?.cwd),
     ).toEqual([
       path.join(cwd, "packages", "pkg-b"),
       path.join(cwd, "packages", "pkg-a"),

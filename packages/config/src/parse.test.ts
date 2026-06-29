@@ -99,7 +99,6 @@ describe("readConfig", () => {
       "pnpm-workspace.yaml": "packages: ['packages/*']",
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ["$schema" as never]: _, ...rest } = defaultConfig;
     const result = await readConfig(cwd);
     expect(result.config).toStrictEqual(rest);
