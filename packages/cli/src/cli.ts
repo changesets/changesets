@@ -17,8 +17,8 @@ cli.help((sections) => {
 cli.globalCommand.outputVersion = () => console.info(manifest.version);
 
 function normalizeOptions(
-  options: Record<string, any>,
-  { array, outputPath }: { array?: string[]; outputPath?: boolean } = {},
+  options: Record<string, unknown>,
+  { array }: { array?: string[] } = {},
 ) {
   // Do not allow positional arguments in options
   delete options["--"];
@@ -33,7 +33,13 @@ function normalizeOptions(
     // If the flag is expected to be an array, ensure it's an array.
     if (array?.includes(key)) {
       const v = options[key];
-      options[key] = Array.isArray(v) ? v.map(String) : [String(v)];
+      options[key] = Array.isArray(v)
+        ? v.map(String)
+        : [
+            // those won't actually be objects and we want to stringify other primitive types
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            String(v),
+          ];
     }
     // If a flag is passed multiple times (becoming an array), only take the last value.
     else if (Array.isArray(options[key])) {
@@ -46,8 +52,10 @@ function normalizeOptions(
       options[key] = String(options[key]);
     }
   }
+}
 
-  if (outputPath && process.env.CHANGESETS_OUTPUT_PATH) {
+function withOutputPath(options: Record<string, unknown>) {
+  if (process.env.CHANGESETS_OUTPUT_PATH) {
     options.outputPath = process.env.CHANGESETS_OUTPUT_PATH;
   }
 }
@@ -104,7 +112,7 @@ cli
   .option("--from-pack-dir <dir>", "Publish from a packed output directory")
   .option("--git-tag", "Create a git tag for the release", { default: true })
   .action(async (options) => {
-    normalizeOptions(options, { outputPath: true });
+    withOutputPath(normalizeOptions(options));
     const { publish } = await import("./commands/publish/index.ts");
     await publish(options);
   });
@@ -153,7 +161,7 @@ cli
 cli
   .command("tag", "Create git tags for the current version of all packages")
   .action(async (options) => {
-    normalizeOptions(options, { outputPath: true });
+    withOutputPath(normalizeOptions(options));
     const { tag } = await import("./commands/tag/index.ts");
     await tag(options);
   });
