@@ -11,7 +11,7 @@ import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 interface PublishOptions {
   /** The publish command argument, the path to the package or tarball */
-  target: string;
+  target: string | undefined;
   /** The current working directory for the publish operation */
   cwd: string;
   /** The environment variables for the publish operation */
@@ -227,8 +227,10 @@ async function internalPublish(
   opts: PublishOptions,
   authState: AuthState,
 ): Promise<InternalPublishResult> {
-  const relativeTarget = path.relative(opts.cwd, opts.target);
-
+  const publishArgs = ["publish"];
+  if (opts.target) {
+    publishArgs.push(path.relative(opts.cwd, opts.target));
+  }
   const publishFlags = ["--access", release.access, "--tag", release.tag];
   if (publishTool.name === "pnpm") {
     publishFlags.push("--no-git-checks");
@@ -237,17 +239,13 @@ async function internalPublish(
   if (process.stdin.isTTY && authState.requiresInteractive) {
     // it's not easily controllable but ideally no other work should happen until this is done
     // we specifically don't want any other output to interfere with the delegated auth flow
-    const child = exec(
-      publishTool.name,
-      ["publish", relativeTarget, ...publishFlags],
-      {
-        nodeOptions: {
-          env: opts.env,
-          cwd: opts.cwd,
-          stdio: ["inherit", "inherit", "pipe"],
-        },
+    const child = exec(publishTool.name, [...publishArgs, ...publishFlags], {
+      nodeOptions: {
+        env: opts.env,
+        cwd: opts.cwd,
+        stdio: ["inherit", "inherit", "pipe"],
       },
-    );
+    });
 
     const result = await child;
 
@@ -282,7 +280,7 @@ async function internalPublish(
 
   const { exitCode, stdout, stderr } = await exec(
     publishTool.name,
-    ["publish", relativeTarget, ...publishFlags],
+    [...publishArgs, ...publishFlags],
     {
       nodeOptions: {
         env: opts.env,

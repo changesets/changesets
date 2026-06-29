@@ -97,16 +97,18 @@ export async function publishPackages({
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
   const publishPromises = releases.map(async (release) => {
-    let target: string;
+    const pkg = packagesByName.get(release.name)!;
+    let target: string | undefined;
     if (artifactDir) {
       target = resolve(artifactDir, release.tarball!.path);
-    } else if (publishTool.name === "pnpm") {
+    } else if (
+      publishTool.name !== "pnpm" &&
+      pkg.packageJson.publishConfig?.directory
+    ) {
       // pnpm supports `publishConfig.directory` natively. We have to let it resolve it on its own.
       // Otherwise we'd risk it re-resolving from within the `publishConfig.directory` itself
       // but original untouched relative paths in `publishConfig.directory` would not even point to correct locations anymore.
-      target = packagesByName.get(release.name)!.dir;
-    } else {
-      const pkg = packagesByName.get(release.name)!;
+      //
       // npm, yarn classic and berry don't support `publishConfig.directory` natively.
       // We inherited support for it from Lerna, so we have to resolve it ourselves.
       // It's worth noting it's still useful for, for example, `ng-packagr` users
@@ -118,9 +120,7 @@ export async function publishPackages({
       // It's not possible to rely on regular lifecycle publish scripts for that. We merely delegate to the package manager for publishing
       // and we don't reimplement the pack+publish logic ourselves. So it's not possible for us to pack,
       // and let appropriate lifecycle scripts run, from the package's original directory and then publish from a different `publishConfig.directory`.
-      target = pkg.packageJson.publishConfig?.directory
-        ? resolve(pkg.dir, pkg.packageJson.publishConfig.directory)
-        : pkg.dir;
+      target = resolve(pkg.dir, pkg.packageJson.publishConfig.directory);
     }
     const publishConfirmation = await publish(
       publishTool,
@@ -128,17 +128,15 @@ export async function publishPackages({
       {
         target,
         // cwd is super important for correct resolution of .npmrc
-        // in the past, we wouldn't be able to call npm in the package directory itself, because despite npm's workspace support introduced in npm 7
-        // it wouldn't actually be particularly workspaces-aware until npm 9 (until https://github.com/npm/cli/pull/4372).
-        // So we'd have to call npm from the root with a nested package target (essentially what we still do now)
-        // because .npmrc would resolve in respect to cwd and not the target package and that's what we wanted.
-        // Nowadays, this isn't as important as .npmrc lookup is workspace-aware and would find the root .npmrc just fine even if invoked from the package directory.
         //
-        // However, there are still 2 reasons why we prefer to set it to the root:
-        // 1. it's a consistent approach that works across package managers and it's also a good location when publishing packed artifacts
-        // 2. it's important to call npm from a directory that is an actual workspace (as per the workspaces configuration) and not from, for example, publishConfig.directory
-        //    because npm only resolves to the root's .npmrc for actual workspaces and not for arbitrary subdirectories of the root.
-        cwd: packages.rootDir,
+        // In the past, we wouldn't be able to call npm in the package directory itself, because despite npm's workspace support introduced in npm 7.
+        // It wouldn't actually be particularly workspaces-aware until npm 9 (until https://github.com/npm/cli/pull/4372).
+        // So we'd have to call npm from the root with a nested package target because .npmrc would resolve in respect to cwd and not the target package and that's what we wanted.
+        // Nowadays, this isn't important as .npmrc lookup is workspace-aware and finds the root .npmrc just fine even if invoked from the package directory.
+        //
+        // So we prefer calling npm from the actual workspace package directory itself. It's important to call npm from a directory that is an actual workspace (as per the workspaces configuration)
+        // and not from, for example, `publishConfig.directory` because npm only resolves to the root's .npmrc for actual workspaces and not for arbitrary subdirectories of the root.
+        cwd: pkg.dir,
         env,
       },
       authState,

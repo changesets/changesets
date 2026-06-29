@@ -72,6 +72,9 @@ describe("publishPackages", () => {
     mockExecImplementation(async () => execResult(""));
 
     const packages = await getPackages(cwd);
+    const pkg = packages.packages.find(
+      (pkg) => pkg.packageJson.name === "pkg-a",
+    )!;
 
     await publishPackages({
       releases: [
@@ -91,7 +94,7 @@ describe("publishPackages", () => {
       expect.not.arrayContaining(["--otp"]),
       expect.objectContaining({
         nodeOptions: expect.objectContaining({
-          cwd,
+          cwd: pkg.dir,
           env: expect.objectContaining({
             NPM_CONFIG_OTP: undefined,
           }),
