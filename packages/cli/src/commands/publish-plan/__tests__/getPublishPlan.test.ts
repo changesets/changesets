@@ -44,9 +44,6 @@ describe("getPublishPlan", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
@@ -60,7 +57,6 @@ describe("getPublishPlan", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
         {
@@ -132,9 +128,6 @@ describe("getPublishPlan", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
@@ -148,7 +141,6 @@ describe("getPublishPlan", () => {
           name: "pkg-b",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
       ],
@@ -158,7 +150,6 @@ describe("getPublishPlan", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
       ],
@@ -201,10 +192,6 @@ describe("getPublishPlan", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
-
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
 
@@ -215,7 +202,6 @@ describe("getPublishPlan", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
         {
@@ -223,7 +209,88 @@ describe("getPublishPlan", () => {
           name: "pkg-b",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
+          tag: "latest",
+        },
+      ],
+    ]);
+  });
+
+  it("uses latest tag when all published versions are prereleases for the current pre tag", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({}),
+      ".changeset/pre.json": JSON.stringify({
+        mode: "pre",
+        tag: "next",
+        initialVersions: {},
+        changesets: [],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0-next.3",
+      }),
+    });
+
+    mockedNpmUtils.infoAllow404.mockResolvedValue({
+      published: true,
+      pkgInfo: {
+        versions: ["1.0.0-next.1", "1.0.0-next.2"],
+      },
+    });
+
+    const config = await readConfig(cwd);
+    const result = await getPublishPlan(cwd, config.config!);
+
+    expect(result).toEqual([
+      [
+        {
+          kind: "publish",
+          name: "pkg-a",
+          version: "1.0.0-next.3",
+          access: "restricted",
+          tag: "latest",
+        },
+      ],
+    ]);
+  });
+
+  it("includes a package when it is published but the local version is not", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({}),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.1.0",
+      }),
+    });
+
+    mockedNpmUtils.infoAllow404.mockResolvedValue({
+      published: true,
+      pkgInfo: {
+        versions: ["1.0.0"],
+      },
+    });
+
+    const config = await readConfig(cwd);
+    const result = await getPublishPlan(cwd, config.config!);
+
+    expect(result).toEqual([
+      [
+        {
+          kind: "publish",
+          name: "pkg-a",
+          version: "1.1.0",
+          access: "restricted",
           tag: "latest",
         },
       ],
