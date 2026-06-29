@@ -26,7 +26,7 @@ function getInitialAuthState(
   if (otp) {
     return {
       otpToken: otp,
-      shouldDelegate: false,
+      requiresInteractive: false,
     };
   }
   if (
@@ -35,18 +35,18 @@ function getInitialAuthState(
   ) {
     return {
       otpToken: process.env.PNPM_CONFIG_OTP || process.env.pnpm_config_otp,
-      shouldDelegate: false,
+      requiresInteractive: false,
     };
   }
   if (process.env.NPM_CONFIG_OTP || process.env.npm_config_otp) {
     return {
       otpToken: process.env.NPM_CONFIG_OTP || process.env.npm_config_otp,
-      shouldDelegate: false,
+      requiresInteractive: false,
     };
   }
   return {
     otpToken: undefined,
-    shouldDelegate: false,
+    requiresInteractive: false,
   };
 }
 

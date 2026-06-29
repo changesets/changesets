@@ -234,7 +234,7 @@ async function internalPublish(
     publishFlags.push("--no-git-checks");
   }
 
-  if (process.stdin.isTTY && authState.shouldDelegate) {
+  if (process.stdin.isTTY && authState.requiresInteractive) {
     // it's not easily controllable but ideally no other work should happen until this is done
     // we specifically don't want any other output to interfere with the delegated auth flow
     const child = exec(
@@ -252,7 +252,7 @@ async function internalPublish(
     const result = await child;
 
     if (child.exitCode === 0) {
-      authState.shouldDelegate = false;
+      authState.requiresInteractive = false;
       // bump for remaining packages
       npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
       return { result: "published" };
@@ -265,7 +265,7 @@ async function internalPublish(
       log.warn(
         `${release.name} is already published (likely a stale registry data led to a duplicate publish attempt)`,
       );
-      authState.shouldDelegate = false;
+      authState.requiresInteractive = false;
       npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
       return { result: "skipped" };
     }
@@ -318,7 +318,7 @@ async function internalPublish(
       ) {
         // the current otp code must be invalid since it errored
         authState.otpToken = undefined;
-        authState.shouldDelegate = true;
+        authState.requiresInteractive = true;
         npmPublishQueue.setConcurrency(1);
         return {
           result: "failed",

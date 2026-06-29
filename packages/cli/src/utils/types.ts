@@ -1,4 +1,5 @@
 export type AuthState = {
   otpToken: string | undefined;
-  shouldDelegate: boolean;
+  /** Indicates if interactive authentication (prompt-based) is required */
+  requiresInteractive: boolean;
 };
