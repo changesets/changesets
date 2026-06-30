@@ -12,14 +12,7 @@ The Changesets CLI is the main way of interacting with changesets. It provides a
 
 <div v-html="data.initHelpMessage" />
 
-This command sets up the `.changeset` folder. It generates a readme and creates a config file through an interactive prompt. You will be asked to configure:
-
-1. Your preferred [`changelog`](./config#changelog) generator (and GitHub repo, if applicable)
-2. Automatic [`commit`](./config#commit) preferences
-3. Public or private package publishing ([`access`](./config#access))
-4. Your [`baseBranch`](./config#basebranch) (defaults to "main")
-
-You should run this command once when you are setting up changesets.
+This command sets up the `.changeset` folder. It generates a readme and creates a config file through an interactive prompt. You should run this command once when you are setting up changesets.
 
 ## add
 
