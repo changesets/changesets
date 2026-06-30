@@ -1,5 +1,13 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.6
+
+### Minor Changes
+
+- [#2070](https://github.com/changesets/changesets/pull/2070) [`694396c`](https://github.com/changesets/changesets/commit/694396ce49f0d7e2200c119b360e60e6bd11265f) Thanks [@bluwy](https://github.com/bluwy)! - Preserve the existing formatting of `package.json` when updating version and dependency ranges
+
+- [#2118](https://github.com/changesets/changesets/pull/2118) [`01f4da4`](https://github.com/changesets/changesets/commit/01f4da4e30aa90391def46b84b986fa223a055f5) Thanks [@bluwy](https://github.com/bluwy)! - Improve the default unformatted changelog new lines handling to ensure consistent spacing after the heading and the spacing between release lines
+
 ## 8.0.0-next.5
 
 ### Patch Changes

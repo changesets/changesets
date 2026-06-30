@@ -318,15 +318,8 @@ function getPreInfo(
   const updatedPreState = {
     ...preState,
     changesets: changesets.map((changeset) => changeset.id),
-    initialVersions: {
-      ...preState.initialVersions,
-    },
   };
 
-  for (const [, pkg] of packagesByName) {
-    updatedPreState.initialVersions[pkg.packageJson.name] ??=
-      pkg.packageJson.version;
-  }
   // Populate preVersion
   // preVersion is the map between package name and its next pre version number.
   const preVersions = new Map<string, number>();

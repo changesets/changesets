@@ -12,17 +12,6 @@ type ChangelogLines = {
   patch: Array<Promise<string>>;
 };
 
-async function generateChangesForVersionTypeMarkdown(
-  obj: ChangelogLines,
-  type: keyof ChangelogLines,
-) {
-  let releaseLines = await Promise.all(obj[type]);
-  releaseLines = releaseLines.filter((x) => x);
-  if (releaseLines.length) {
-    return `### ${capitalize(type)} Changes\n\n${releaseLines.join("\n")}\n`;
-  }
-}
-
 // release is the package and version we are releasing
 export async function getChangelogEntry(
   cwd: string,
@@ -113,12 +102,48 @@ export async function getChangelogEntry(
     ),
   );
 
+  const resolvedChangelogLines = {
+    major: await Promise.all(changelogLines.major),
+    minor: await Promise.all(changelogLines.minor),
+    patch: await Promise.all(changelogLines.patch),
+  };
+
   return [
     `## ${release.newVersion}`,
-    await generateChangesForVersionTypeMarkdown(changelogLines, "major"),
-    await generateChangesForVersionTypeMarkdown(changelogLines, "minor"),
-    await generateChangesForVersionTypeMarkdown(changelogLines, "patch"),
+    generateMarkdownForVersionType("major", resolvedChangelogLines.major),
+    generateMarkdownForVersionType("minor", resolvedChangelogLines.minor),
+    generateMarkdownForVersionType("patch", resolvedChangelogLines.patch),
   ]
     .filter((line) => line)
-    .join("\n");
+    .join("\n\n");
+}
+
+// Exported for test only
+export function generateMarkdownForVersionType(
+  type: keyof ChangelogLines,
+  lines: Array<string>,
+) {
+  const releaseLines = lines.filter((l) => l);
+  if (!releaseLines.length) return;
+
+  let content = `### ${capitalize(type)} Changes`;
+  // Track the new lines to be added between release lines. Start with two as we
+  // want the extra spacing after the heading.
+  let newLines = 2;
+
+  for (const line of releaseLines) {
+    // Factor in the starting new lines preferred by the release line
+    const startNewLinesCount = line.match(/^\n*/)?.[0].length ?? 0;
+    newLines += startNewLinesCount;
+
+    // Ensure a minimum of one new line and maximum of two new lines between release lines
+    const newLinesContent = "\n".repeat(Math.min(Math.max(newLines, 1), 2));
+    content += newLinesContent + line.trim();
+
+    // Count the ending new lines preferred by the release line for the next run
+    const endNewLinesCount = line.match(/\n*$/)?.[0].length ?? 0;
+    newLines = endNewLinesCount;
+  }
+
+  return content;
 }

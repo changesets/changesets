@@ -45,9 +45,6 @@ describe("publish-plan", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
@@ -60,7 +57,6 @@ describe("publish-plan", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
         {
@@ -94,9 +90,6 @@ describe("publish-plan", () => {
         versions: ["1.0.0"],
       },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
 
     const result = await publishPlan({ cwd });
 
@@ -122,9 +115,6 @@ describe("publish-plan", () => {
       published: false,
       pkgInfo: { version: "1.0.0" },
     });
-    mockedNpmUtils.getCorrectRegistry.mockReturnValue({
-      registry: "https://registry.npmjs.org",
-    });
 
     const output = "publish-plan.json";
     const result = await publishPlan({ cwd, output });
@@ -136,7 +126,6 @@ describe("publish-plan", () => {
           name: "pkg-a",
           version: "1.0.0",
           access: "restricted",
-          registry: "https://registry.npmjs.org",
           tag: "latest",
         },
       ],

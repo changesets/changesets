@@ -1,6 +1,6 @@
 {
   "name": "@changesets/apply-release-plan",
-  "version": "8.0.0-next.5",
+  "version": "8.0.0-next.6",
   "description": "Takes a release plan and applies it to packages",
   "license": "MIT",
   "repository": {
@@ -26,7 +26,6 @@
   "devDependencies": {
     "@changesets/test-utils": "workspace:*",
     "@manypkg/get-packages": "^3.1.0",
-    "outdent": "^0.8.0",
     "tinyexec": "^1.2.4"
   },
   "engines": {

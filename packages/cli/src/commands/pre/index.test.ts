@@ -30,7 +30,6 @@ describe("enterPre", () => {
       ),
     ).toMatchObject({
       changesets: [],
-      initialVersions: {},
       mode: "pre",
       tag: "next",
     });
@@ -51,7 +50,6 @@ describe("enterPre", () => {
       "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
-        initialVersions: {},
         mode: "pre",
         tag: "next",
       }),
@@ -83,7 +81,6 @@ describe("enterPre", () => {
       "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
-        initialVersions: {},
         mode: "exit",
         tag: "beta",
       }),
@@ -96,7 +93,6 @@ describe("enterPre", () => {
       ),
     ).toEqual({
       changesets: [],
-      initialVersions: {},
       mode: "pre",
       tag: "next",
     });
@@ -120,7 +116,6 @@ describe("exitPre", () => {
       "package-lock.json": "",
       ".changeset/pre.json": JSON.stringify({
         changesets: [],
-        initialVersions: {},
         mode: "pre",
         tag: "next",
       }),
@@ -133,7 +128,6 @@ describe("exitPre", () => {
       ),
     ).toEqual({
       changesets: [],
-      initialVersions: {},
       mode: "exit",
       tag: "next",
     });
