@@ -1,13 +1,13 @@
 import { describe, expect, test, vi } from "vitest";
 import { cli } from "./cli.ts";
 import { add } from "./commands/add/index.ts";
+import { gitTag } from "./commands/git-tag/index.ts";
 import { init } from "./commands/init/index.ts";
 import { pack } from "./commands/pack/index.ts";
 import { pre } from "./commands/pre/index.ts";
 import { publishPlan } from "./commands/publish-plan/index.ts";
 import { publish } from "./commands/publish/index.ts";
 import { status } from "./commands/status/index.ts";
-import { gitTag } from "./commands/git-tag/index.ts";
 import { version } from "./commands/version/index.ts";
 
 vi.mock("./commands/init/index.ts");
