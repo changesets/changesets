@@ -117,3 +117,7 @@ Then, run `npm publish` and set up trusted publishing in the package settings. T
 
 Initial release
 ```
+
+## Removing a Package
+
+If a package is no longer needed, you can delete the package directory from your repository as usual, and make sure all references to the package name is removed from the existing changesets. Search for lines such as `"my-deleted-package": patch` in the changesets frontmatter and remove them, and Changesets will skip the package for the next version and publish.
