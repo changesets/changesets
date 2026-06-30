@@ -135,27 +135,28 @@ If you set the `commit` option in the config, the command will add the updated c
 - `--open` - opens the created changeset in an external editor
 - `--message` (or `-m`) - provides the changeset summary from the command line instead of prompting for it.
 
-Also, If you want to select a package without interaction, use the flag:
+To select packages without prompting for release types, use one or more release type flags:
 
 - `--major`
 - `--minor`
 - `--patch`
-- `--message`
 
-For example
+Pass `--message` as well to create a changeset without any prompts.
+
+For example:
 
 ```bash
-changeset --message 'This is message' --patch @changesets/cli
+changeset --message 'This is a message' --patch @changesets/cli
 ```
 
-A changeset created with above example would look like this:
+A changeset created with the above example would look like this:
 
 ```md
 ---
 "@changesets/cli": patch
 ---
 
-This is message
+This is a message
 ```
 
 ### version
