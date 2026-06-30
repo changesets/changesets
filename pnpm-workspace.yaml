@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - scripts/*
+  - site
 
 blockExoticSubdeps: true
 dedupePeers: true
@@ -10,5 +11,8 @@ minimumReleaseAgeExclude:
   - "@manypkg/tools@2.1.2"
 overrides:
   rolldown: 1.0.3
+  "vitepress>@docsearch/js": "-"
+  "vitepress>@docsearch/sidepanel-js": "-"
+  "vitepress>vite": ^8.0.0
 shellEmulator: true
 trustPolicy: no-downgrade
