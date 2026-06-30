@@ -76,7 +76,7 @@ $ changeset version --snapshot 'pr#123'
 
 <div v-html="data.publishHelpMessage" />
 
-- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing)
+- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing), [`pack` command](#pack)
 
 This command publishes changes to npm and creates git tags. It works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it's not, run `npm publish` (or `pnpm publish` etc if detected to be using a different package manager).
 
@@ -105,6 +105,26 @@ Published versions are tagged on npm with `latest` by default. You may want to c
 ```bash
 $ changeset publish --tag beta
 ```
+
+## publish-plan
+
+<div v-html="data.publishPlanHelpMessage" />
+
+- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing), [`pack` command](#pack), [`publish` command](#publish)
+
+Show packages that are ready to publish or tag. If `--output` is passed, the JSON will be written to the file which can be used later by the `pack` and `publish` commands. `--output` is marked experimental as the format may change between patches, however the output will always work if passed to the same version of `pack` and `publish` commands.
+
+This is useful for CI pipelines that want to split the version and publish steps to check if there are packages to publish.
+
+## pack
+
+<div v-html="data.packHelpMessage" />
+
+- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing), [`publish` command](#publish)
+
+Pack publishable packages into tarballs. The `--out-dir` flag is required to write the output to the directory, which the same directory can be passed to `publish --from-pack-dir` so the `publish` command picks up the tarballs and publishes them.
+
+This is useful for CI pipelines that want to split the build and publish steps.
 
 ## status
 

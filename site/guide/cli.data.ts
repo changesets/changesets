@@ -12,6 +12,8 @@ export interface Data {
   addHelpMessage: string;
   versionHelpMessage: string;
   publishHelpMessage: string;
+  publishPlanHelpMessage: string;
+  packHelpMessage: string;
   tagHelpMessage: string;
   preHelpMessage: string;
 }
@@ -54,6 +56,14 @@ ${log}`,
     flags: ["publish", "--help"],
     sections: ["Usage", "Options", "Examples"],
   },
+  publishPlanHelpMessage: {
+    flags: ["publish-plan", "--help"],
+    sections: ["Usage", "Options", "Examples"],
+  },
+  packHelpMessage: {
+    flags: ["pack", "--help"],
+    sections: ["Usage", "Options", "Examples"],
+  },
   tagHelpMessage: {
     flags: ["tag", "--help"],
     sections: ["Usage", "Options", "Examples"],
@@ -72,6 +82,8 @@ export default defineLoader({
       addHelpMessage: "",
       versionHelpMessage: "",
       publishHelpMessage: "",
+      publishPlanHelpMessage: "",
+      packHelpMessage: "",
       tagHelpMessage: "",
       preHelpMessage: "",
     };
