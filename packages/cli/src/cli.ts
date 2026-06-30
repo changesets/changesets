@@ -56,9 +56,9 @@ function normalizeOptions(
   return options;
 }
 
-function withOutputPath(options: Record<string, unknown>) {
-  if (process.env.CHANGESETS_OUTPUT_PATH) {
-    options.outputPath = process.env.CHANGESETS_OUTPUT_PATH;
+function withEnvOptions(options: Record<string, unknown>) {
+  if (options.output == null && process.env.CHANGESETS_OUTPUT_FILE) {
+    options.output = process.env.CHANGESETS_OUTPUT_FILE;
   }
 }
 
@@ -114,7 +114,7 @@ cli
   .option("--from-pack-dir <dir>", "Publish from a packed output directory")
   .option("--git-tag", "Create a git tag for the release", { default: true })
   .action(async (options) => {
-    withOutputPath(normalizeOptions(options));
+    withEnvOptions(normalizeOptions(options));
     const { publish } = await import("./commands/publish/index.ts");
     await publish(options);
   });
@@ -126,7 +126,7 @@ cli
     "Output the publish plan as JSON to a file [experimental]",
   )
   .action(async (options) => {
-    normalizeOptions(options);
+    withEnvOptions(normalizeOptions(options));
     const { publishPlan } = await import("./commands/publish-plan/index.ts");
     await publishPlan(options);
   });
@@ -155,7 +155,7 @@ cli
   .option("-v, --verbose", "Show more information about the changesets")
   .option("-o, --output <file>", "Output the status as JSON to a file")
   .action(async (options) => {
-    normalizeOptions(options);
+    withEnvOptions(normalizeOptions(options));
     const { status } = await import("./commands/status/index.ts");
     await status(options);
   });
@@ -163,7 +163,7 @@ cli
 cli
   .command("tag", "Create git tags for the current version of all packages")
   .action(async (options) => {
-    withOutputPath(normalizeOptions(options));
+    withEnvOptions(normalizeOptions(options));
     const { tag } = await import("./commands/tag/index.ts");
     await tag(options);
   });

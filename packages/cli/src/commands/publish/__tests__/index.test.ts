@@ -180,7 +180,7 @@ describe("Publish command", () => {
       }),
       ".changeset/config.json": JSON.stringify(defaultConfig),
     });
-    const outputPath = path.join(cwd, "output.ndjson");
+    const outputFile = path.join(cwd, "output.ndjson");
 
     mockExecImplementation(async (_command, args) => {
       if (args[0] === "info") {
@@ -193,9 +193,9 @@ describe("Publish command", () => {
     });
     vi.mocked(git.tag).mockResolvedValue(true);
 
-    await publishCommand({ cwd, outputPath });
+    await publishCommand({ cwd, output: outputFile });
 
-    await expect(fs.readFile(outputPath, "utf8")).resolves.toBe(
+    await expect(fs.readFile(outputFile, "utf8")).resolves.toBe(
       [
         JSON.stringify({
           type: "git-tag",

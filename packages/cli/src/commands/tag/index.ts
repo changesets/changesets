@@ -25,7 +25,7 @@ function buildTagMessage(
 
 export interface TagOptions {
   cwd?: string;
-  outputPath?: string;
+  output?: string;
 }
 
 export async function tag(options?: TagOptions) {
@@ -60,7 +60,7 @@ export async function tag(options?: TagOptions) {
   const p = progress({ max: untaggedPackages.length - skippedTags.length });
   p.start("Creating tags...");
 
-  await using reporter = await createOutputReport(options?.outputPath);
+  await using reporter = await createOutputReport(options?.output);
 
   for (const pkg of untaggedPackages) {
     const tag = buildTag(packages.tool, pkg);

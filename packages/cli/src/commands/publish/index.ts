@@ -44,7 +44,7 @@ export interface PublishOptions {
   otp?: string;
   tag?: string;
   fromPackDir?: string;
-  outputPath?: string;
+  output?: string;
   /** @default true */
   gitTag?: boolean;
 }
@@ -94,7 +94,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     return;
   }
 
-  await using reporter = await createOutputReport(options?.outputPath);
+  await using reporter = await createOutputReport(options?.output);
 
   for (let index = 0; index < plan.length; index++) {
     const chunk = plan[index];

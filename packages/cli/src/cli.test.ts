@@ -136,11 +136,11 @@ const tests: CommandTest[] = [
       {
         args: [],
         env: {
-          CHANGESETS_OUTPUT_PATH: "output.ndjson",
+          CHANGESETS_OUTPUT_FILE: "output.ndjson",
         },
         options: {
           gitTag: true,
-          outputPath: "output.ndjson",
+          output: "output.ndjson",
         },
       },
     ],
@@ -221,10 +221,10 @@ const tests: CommandTest[] = [
       {
         args: [],
         env: {
-          CHANGESETS_OUTPUT_PATH: "output.ndjson",
+          CHANGESETS_OUTPUT_FILE: "output.ndjson",
         },
         options: {
-          outputPath: "output.ndjson",
+          output: "output.ndjson",
         },
       },
     ],

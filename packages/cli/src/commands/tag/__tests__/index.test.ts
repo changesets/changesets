@@ -58,13 +58,13 @@ describe("tag command", () => {
         }),
         ".changeset/config.json": JSON.stringify({}),
       });
-      const outputPath = path.join(cwd, "output.ndjson");
+      const outputFile = path.join(cwd, "output.ndjson");
 
       (git.getAllTags as Mock).mockReturnValue(new Set());
 
-      await tag({ cwd, outputPath });
+      await tag({ cwd, output: outputFile });
 
-      await expect(fs.readFile(outputPath, "utf8")).resolves.toBe(
+      await expect(fs.readFile(outputFile, "utf8")).resolves.toBe(
         [
           JSON.stringify({
             type: "git-tag",
