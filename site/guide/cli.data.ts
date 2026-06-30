@@ -14,7 +14,7 @@ export interface Data {
   publishHelpMessage: string;
   publishPlanHelpMessage: string;
   packHelpMessage: string;
-  tagHelpMessage: string;
+  gitTagHelpMessage: string;
   preHelpMessage: string;
 }
 
@@ -64,7 +64,7 @@ ${log}`,
     flags: ["pack", "--help"],
     sections: ["Usage", "Options", "Examples"],
   },
-  tagHelpMessage: {
+  gitTagHelpMessage: {
     flags: ["tag", "--help"],
     sections: ["Usage", "Options", "Examples"],
   },
@@ -84,7 +84,7 @@ export default defineLoader({
       publishHelpMessage: "",
       publishPlanHelpMessage: "",
       packHelpMessage: "",
-      tagHelpMessage: "",
+      gitTagHelpMessage: "",
       preHelpMessage: "",
     };
 

@@ -158,11 +158,11 @@ $ changeset status --since next
 `status` will fail if you are in the middle of running `version` or `publish`. If you want to get changeset status at the time of a version increase and publish, you need to run it immediately before running `version`.
 :::
 
-## tag
+## git-tag
 
-<div v-html="data.tagHelpMessage" />
+<div v-html="data.gitTagHelpMessage" />
 
-The `tag` command creates git tags for the current version of all packages. The tags created are equivalent to those created by the [`publish`](#publish) command, but the `tag` command does not publish anything to npm.
+The `git-tag` command creates git tags for the current version of all packages. The tags created are equivalent to those created by the [`publish`](#publish) command, but the `git-tag` command does not publish anything to npm.
 
 This is helpful in situations where a different tool is used to publish packages instead of Changesets. The tags created are in the format `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`. It is expected to run the `version` command first so the created tags are up to date.
 
