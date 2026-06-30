@@ -83,10 +83,6 @@ type OptionsFromCli = {
   patch?: string[];
 };
 
-function getPackagesByOptions(option?: string[]) {
-  return option ?? [];
-}
-
 function validateSelectedPackageNames(
   pkgNames: Set<string>,
   optionsFromCli: OptionsFromCli | undefined,
