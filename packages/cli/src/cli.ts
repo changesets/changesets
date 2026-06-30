@@ -69,8 +69,11 @@ cli
     "Detect changed packages since the provided git ref",
   )
   .option("-m, --message <text>", "Directly provide a message to the changeset")
+  .option("--major <pkg>", "Package to major bump")
+  .option("--minor <pkg>", "Package to minor bump")
+  .option("--patch <pkg>", "Package to patch bump")
   .action(async (options) => {
-    normalizeOptions(options);
+    normalizeOptions(options, { array: ["major", "minor", "patch"] });
     const { add } = await import("./commands/add/index.ts");
     await add(options);
   });

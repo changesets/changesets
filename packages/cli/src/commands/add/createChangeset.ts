@@ -76,14 +76,97 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
   return `${c.bold(pkgName)}@${c.bold(version)}`;
 }
 
+type OptionsFromCli = {
+  message?: string;
+  major?: string[];
+  minor?: string[];
+  patch?: string[];
+};
+
+function validateSelectedPackageNames(
+  pkgNames: Set<string>,
+  optionsFromCli: OptionsFromCli | undefined,
+  messages: string[],
+) {
+  for (const [flag, packageNamesFromCli] of [
+    ["--major", optionsFromCli?.major],
+    ["--minor", optionsFromCli?.minor],
+    ["--patch", optionsFromCli?.patch],
+  ] as const) {
+    for (const pkgName of packageNamesFromCli ?? []) {
+      if (pkgNames.has(pkgName)) {
+        continue;
+      }
+
+      messages.push(
+        `The package ${c.blue(pkgName)} is passed to the \`${flag}\` option but it is not found in the project. You may have misspelled the package name.`,
+      );
+    }
+  }
+}
+
+function validateDuplicatePackageNames(
+  pkgNames: Set<string>,
+  optionsFromCli: OptionsFromCli | undefined,
+  messages: string[],
+) {
+  // Only raise duplicate errors for existing package names. Unknown packages are validated separately.
+  const major = new Set(optionsFromCli?.major).intersection(pkgNames);
+  const minor = new Set(optionsFromCli?.minor).intersection(pkgNames);
+  const patch = new Set(optionsFromCli?.patch).intersection(pkgNames);
+
+  const duplicates = major
+    .intersection(minor)
+    .union(major.intersection(patch))
+    .union(minor.intersection(patch));
+
+  for (const pkgName of duplicates) {
+    const flags = [
+      major.has(pkgName) && "--major",
+      minor.has(pkgName) && "--minor",
+      patch.has(pkgName) && "--patch",
+    ].filter((flag) => flag !== false);
+
+    messages.push(
+      `The package ${c.blue(pkgName)} is passed to multiple release type options: ${flags.map((flag) => `\`${flag}\``).join(", ")}. Please select only one release type for this package.`,
+    );
+  }
+}
+
 export async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Array<Package>,
-  messageFromCli?: string,
+  optionsFromCli?: OptionsFromCli,
 ): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
-  if (allPackages.length > 1) {
+  let confirmed = false;
+
+  if (optionsFromCli?.major || optionsFromCli?.minor || optionsFromCli?.patch) {
+    confirmed = true;
+    const pkgNames = new Set(
+      allPackages.map(({ packageJson }) => packageJson.name),
+    );
+
+    const messages: string[] = [];
+    validateSelectedPackageNames(pkgNames, optionsFromCli, messages);
+    validateDuplicatePackageNames(pkgNames, optionsFromCli, messages);
+
+    if (messages.length > 0) {
+      log.error(messages.join("\n"));
+      throw new ExitError(1);
+    }
+
+    for (const [type, packageNamesFromCli] of [
+      ["major", optionsFromCli?.major],
+      ["minor", optionsFromCli?.minor],
+      ["patch", optionsFromCli?.patch],
+    ] as const) {
+      for (const pkgName of packageNamesFromCli ?? []) {
+        releases.push({ name: pkgName, type });
+      }
+    }
+  } else if (allPackages.length > 1) {
     const packagesToRelease = await getPackagesToRelease(
       changedPackages,
       allPackages,
@@ -181,13 +264,15 @@ ${c.gray(patchBumpedPackages.join(", "))}
     releases.push({ name: pkg.packageJson.name, type });
   }
 
-  if (messageFromCli != null) {
+  if (optionsFromCli?.message != null) {
     return {
-      confirmed: false,
-      summary: messageFromCli,
+      confirmed,
+      summary: optionsFromCli.message,
       releases,
     };
   }
+
+  confirmed = false;
 
   let summary = await cli.askQuestion(
     "Please enter a summary for this change (this will be in the changelogs).",
@@ -222,7 +307,7 @@ ${c.gray(patchBumpedPackages.join(", "))}
   }
 
   return {
-    confirmed: false,
+    confirmed,
     summary,
     releases,
   };

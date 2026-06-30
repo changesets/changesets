@@ -23,6 +23,9 @@ export interface AddOptions {
   open?: boolean;
   since?: string;
   message?: string;
+  major?: string[];
+  minor?: string[];
+  patch?: string[];
 }
 
 export async function add(options?: AddOptions): Promise<void> {
@@ -90,7 +93,12 @@ ${(error as Error).toString()}
     newChangeset = await createChangeset(
       changedPackagesNames,
       versionablePackages,
-      options?.message,
+      {
+        message: options?.message,
+        major: options?.major,
+        minor: options?.minor,
+        patch: options?.patch,
+      },
     );
     printConfirmationMessage(newChangeset, versionablePackages.length > 1);
 

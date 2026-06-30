@@ -65,6 +65,23 @@ const tests: CommandTest[] = [
           since: "next",
         },
       },
+      {
+        args: [
+          "--major",
+          "pkg-a",
+          "--minor",
+          "pkg-b",
+          "--patch",
+          "pkg-c",
+          "--patch",
+          "pkg-d",
+        ],
+        options: {
+          major: ["pkg-a"],
+          minor: ["pkg-b"],
+          patch: ["pkg-c", "pkg-d"],
+        },
+      },
     ],
   },
   {
