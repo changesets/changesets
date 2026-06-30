@@ -52,6 +52,8 @@ function normalizeOptions(
       options[key] = String(options[key]);
     }
   }
+
+  return options;
 }
 
 function withOutputPath(options: Record<string, unknown>) {
