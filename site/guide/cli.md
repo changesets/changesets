@@ -78,7 +78,7 @@ $ changeset version --snapshot 'pr#123'
 
 - **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing), [`pack` command](#pack)
 
-This command publishes changes to npm and creates git tags. It works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it's not, run `npm publish` (or `pnpm publish` etc if detected to be using a different package manager).
+This command publishes changes to npm and creates git tags. It works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it's not, run `npm publish` (or with the detected package-manager-specific publish command).
 
 Because this command assumes that the last commit is the version commit, you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if the release changes are accurate.
 
@@ -89,6 +89,12 @@ Make sure to push the tags to your git remote after creating them:
 ```bash
 $ git push --follow-tags
 ```
+
+::: warning Accidental publishes
+As the `publish` command automatically publishes versions that are not yet published, it's possible to accidentally publish a new package that has not been versioned before.
+
+For example, when [Automating Changesets](./automating.md) (where it calls `publish` if there are no changesets to create a version PR) or automated [Snapshot Releases](./snapshot-releases.md), it may unintentionally publish the new package. To prevent this, make sure to set `"private": true` in the `package.json` of packages that should not be published.
+:::
 
 ### OTP
 
