@@ -148,7 +148,11 @@ cli
 
 cli
   .command("git-tag", "Create git tags for the current version of all packages")
+  .alias("tag")
   .action(async (options) => {
+    if (cli.matchedCommandName === "tag") {
+      log.warn("The 'tag' command is deprecated. Please use 'git-tag' instead.");
+    }
     normalizeOptions(options);
     const { gitTag } = await import("./commands/git-tag/index.ts");
     await gitTag(options);
