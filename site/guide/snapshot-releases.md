@@ -1,6 +1,12 @@
 # Snapshot Releases
 
-Snapshot releases are a way to release your changes for testing without updating the versions. Both a modified [`version`](./cli.md#version) and a modified [`publish`](./cli.md#publish) commands are used to do a snapshot release. After both commands run, you will have a published version of packages in changesets with a version like `0.0.0-{tag}-{datetime}`.
+Snapshot releases are a way to release your changes for testing without updating the versions. This can be useful for releasing preview versions from PRs, nightly releases from the `main` branch, etc. These steps can be run in CI to automate the process of snapshot releases.
+
+Both a modified [`version`](./cli.md#version) and [`publish`](./cli.md#publish) commands are used to do a snapshot release. After both commands run, you will have a published version of packages in changesets with a version like `0.0.0-{tag}-{datetime}`.
+
+::: info Alternatives
+You can also use services such as [pkg.pr.new](https://pkg.pr.new) to easily set up snapshot releases. They publish to their own registry as ephemeral releases to prevent polluting versions and tags on npm.
+:::
 
 ## Starting Off
 
