@@ -1,8 +1,7 @@
-// This is a modified version of the graph-getting in bolt
-import Range from "semver/classes/range";
-import chalk from "chalk";
-import { Packages, Package } from "@manypkg/get-packages";
-import { PackageJSON } from "@changesets/types";
+import path from "node:path";
+import c from "@changesets/color";
+import type { Package, Packages, PackageJSON } from "@changesets/types";
+import Range from "semver/classes/range.js";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -11,7 +10,10 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
-const getAllDependencies = (config: PackageJSON) => {
+const getAllDependencies = (
+  config: PackageJSON,
+  ignoreDevDependencies: boolean,
+) => {
   const allDependencies = new Map<string, string>();
 
   for (const type of DEPENDENCY_TYPES) {
@@ -21,8 +23,10 @@ const getAllDependencies = (config: PackageJSON) => {
     for (const name of Object.keys(deps)) {
       const depRange = deps[name];
       if (
-        (depRange.startsWith("link:") || depRange.startsWith("file:")) &&
-        type === "devDependencies"
+        type === "devDependencies" &&
+        (ignoreDevDependencies ||
+          depRange.startsWith("link:") ||
+          depRange.startsWith("file:"))
       ) {
         continue;
       }
@@ -34,7 +38,7 @@ const getAllDependencies = (config: PackageJSON) => {
   return allDependencies;
 };
 
-const isProtocolRange = (range: string) => range.indexOf(":") !== -1;
+const isProtocolRange = (range: string) => range.includes(":");
 
 const getValidRange = (potentialRange: string) => {
   if (isProtocolRange(potentialRange)) {
@@ -48,11 +52,16 @@ const getValidRange = (potentialRange: string) => {
   }
 };
 
-export default function getDependencyGraph(
+export function getDependencyGraph(
   packages: Packages,
-  opts?: {
+  rootPackage: Package,
+  {
+    ignoreDevDependencies = false,
+    bumpVersionsWithWorkspaceProtocolOnly = false,
+  }: {
+    ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-  }
+  } = {},
 ): {
   graph: Map<string, { pkg: Package; dependencies: Array<string> }>;
   valid: boolean;
@@ -64,26 +73,37 @@ export default function getDependencyGraph(
   let valid = true;
 
   const packagesByName: { [key: string]: Package } = {
-    [packages.root.packageJson.name]: packages.root,
+    [rootPackage.packageJson.name]: rootPackage,
+  };
+  const relativePathsByName: { [key: string]: string } = {
+    [rootPackage.packageJson.name]: ".",
   };
 
-  const queue = [packages.root];
+  const queue = [rootPackage];
 
   for (const pkg of packages.packages) {
     queue.push(pkg);
     packagesByName[pkg.packageJson.name] = pkg;
+    relativePathsByName[pkg.packageJson.name] = path
+      .relative(rootPackage.dir, pkg.dir)
+      .replace(/\\/g, "/");
   }
 
   for (const pkg of queue) {
     const { name } = pkg.packageJson;
     const dependencies = [];
-    const allDependencies = getAllDependencies(pkg.packageJson);
+    const allDependencies = getAllDependencies(
+      pkg.packageJson,
+      ignoreDevDependencies,
+    );
 
+    // eslint-disable-next-line prefer-const
     for (let [depName, depRange] of allDependencies) {
       const match = packagesByName[depName];
       if (!match) continue;
 
       const expected = match.packageJson.version;
+      const rawDepRange = depRange;
       const usesWorkspaceRange = depRange.startsWith("workspace:");
 
       if (usesWorkspaceRange) {
@@ -93,7 +113,21 @@ export default function getDependencyGraph(
           dependencies.push(depName);
           continue;
         }
-      } else if (opts?.bumpVersionsWithWorkspaceProtocolOnly === true) {
+
+        if (path.posix.normalize(depRange) === relativePathsByName[depName]) {
+          dependencies.push(depName);
+          continue;
+        }
+
+        if (!getValidRange(depRange)) {
+          valid = false;
+          // TODO: replace with returning errors/warnings
+          console.error(
+            `Package ${c.blue(name)} must depend on the current version of ${c.blue(depName)}: ${c.green(expected)} vs ${c.red(rawDepRange)}`,
+          );
+          continue;
+        }
+      } else if (bumpVersionsWithWorkspaceProtocolOnly) {
         continue;
       }
 
@@ -101,12 +135,9 @@ export default function getDependencyGraph(
 
       if ((range && !range.test(expected)) || isProtocolRange(depRange)) {
         valid = false;
+        // TODO: replace with returning errors/warnings
         console.error(
-          `Package ${chalk.cyan(
-            `"${name}"`
-          )} must depend on the current version of ${chalk.cyan(
-            `"${depName}"`
-          )}: ${chalk.green(`"${expected}"`)} vs ${chalk.red(`"${depRange}"`)}`
+          `Package ${c.blue(name)} must depend on the current version of ${c.blue(depName)}: ${c.green(expected)} vs ${c.red(rawDepRange)}`,
         );
         continue;
       }

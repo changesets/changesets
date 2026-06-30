@@ -1,5 +1,51 @@
 # @changesets/types
 
+## 7.0.0-next.5
+
+### Major Changes
+
+- [#2040](https://github.com/changesets/changesets/pull/2040) [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f) Thanks [@bluwy](https://github.com/bluwy)! - Use stricter types for the options parameter for `CommitFunctions`, `ChangelogFunctions`, `Config` & `WrittenConfig`'s `commit` and `changelog` properties, to `null | Record<string, unknown>` instead of `any` or `Record<string, any>`
+
+## 7.0.0-next.4
+
+### Major Changes
+
+- [#1994](https://github.com/changesets/changesets/pull/1994) [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8) Thanks [@bluwy](https://github.com/bluwy)! - Replaced the `prettier` config option with `format`. `format` supports `"auto"`, `"prettier"`, `"oxfmt"`, `"deno"`, `"dprint"`, and `false`. If you previously used `prettier: false`, migrate to `format: false`.
+
+## 7.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1652](https://github.com/changesets/changesets/pull/1652) [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7) Thanks [@bluwy](https://github.com/bluwy)! - Remove support for the deprecated `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.useCalculatedVersionForSnapshots` config. The `snapshot.useCalculatedVersion` config should be used instead.
+
+## 7.0.0-next.2
+
+### Minor Changes
+
+- [#1872](https://github.com/changesets/changesets/pull/1872) [`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Export `Package` and `Packages` from `@changesets/types`. They are meant to be used instead of the types from `@manypkg/get-packages`.
+
+## 7.0.0-next.1
+
+### Major Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+## 7.0.0-next.0
+
+### Major Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+## 6.1.0
+
+### Minor Changes
+
+- [#1453](https://github.com/changesets/changesets/pull/1453) [`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf) Thanks [@bennypowers](https://github.com/bennypowers)! - Added a new config option to opt-out from formatting with Prettier using `prettier: false`.
+
 ## 6.0.0
 
 ### Major Changes
@@ -147,7 +193,6 @@
 - [`a679b1d`](https://github.com/changesets/changesets/commit/a679b1dcdcb56652d31536e2d6326ba02a9dfe62) [#204](https://github.com/changesets/changesets/pull/204) Thanks [@Andarist](https://github.com/Andarist)! - Correctly handle the 'access' flag for packages
 
   Previously, we had access as "public" or "private", access "private" isn't valid. This was a confusing because there are three states for publishing a package:
-
   - `private: true` - the package will not be published to npm (worked)
   - `access: public` - the package will be publicly published to npm (even if it uses a scope) (worked)
   - `access: restricted` - the package will be published to npm, but only visible/accessible by those who are part of the scope. This technically worked, but we were passing the wrong bit of information in.

@@ -1,36 +1,31 @@
 {
   "name": "@changesets/git",
-  "version": "3.0.0",
+  "version": "4.0.0-next.5",
   "description": "Some git helpers that changesets use to get information",
-  "main": "dist/changesets-git.cjs.js",
-  "module": "dist/changesets-git.esm.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/git"
+  },
+  "type": "module",
   "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/changesets-git.cjs.mjs",
-        "default": "./dist/changesets-git.cjs.js"
-      },
-      "module": "./dist/changesets-git.esm.js",
-      "import": "./dist/changesets-git.cjs.mjs",
-      "default": "./dist/changesets-git.cjs.js"
-    },
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/git",
   "dependencies": {
-    "@babel/runtime": "^7.20.1",
-    "@changesets/errors": "^0.2.0",
-    "@changesets/types": "^6.0.0",
-    "@manypkg/get-packages": "^1.1.3",
-    "is-subdir": "^1.1.1",
-    "micromatch": "^4.0.2",
-    "spawndamnit": "^2.0.0"
+    "@changesets/errors": "workspace:^",
+    "@changesets/types": "workspace:^",
+    "@manypkg/get-packages": "^3.1.0",
+    "picomatch": "^4.0.4",
+    "tinyexec": "^1.2.4"
   },
   "devDependencies": {
-    "@changesets/test-utils": "*",
-    "@changesets/write": "*",
-    "file-url": "^3.0.0",
-    "fs-extra": "^7.0.1"
+    "@changesets/test-utils": "workspace:*",
+    "@changesets/write": "workspace:*",
+    "@types/picomatch": "4.0.3"
+  },
+  "engines": {
+    "node": "^22.11 || ^24 || >=26"
   }
 }

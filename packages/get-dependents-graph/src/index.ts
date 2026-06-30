@@ -1,20 +1,34 @@
-import { Packages, Package } from "@manypkg/get-packages";
-import getDependencyGraph from "./get-dependency-graph";
+import type { Package, Packages } from "@changesets/types";
+import { getDependencyGraph } from "./get-dependency-graph.ts";
 
 export function getDependentsGraph(
   packages: Packages,
-  opts?: { bumpVersionsWithWorkspaceProtocolOnly?: boolean }
-) {
+  opts?: {
+    ignoreDevDependencies?: boolean;
+    bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  },
+): Map<string, Array<string>> {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
-  const { graph: dependencyGraph } = getDependencyGraph(packages, {
-    bumpVersionsWithWorkspaceProtocolOnly:
-      opts?.bumpVersionsWithWorkspaceProtocolOnly === true,
-  });
+  const rootPackage = packages.rootPackage;
+  if (rootPackage == null) {
+    return new Map();
+  }
+
+  const { graph: dependencyGraph } = getDependencyGraph(
+    packages,
+    rootPackage,
+    opts,
+  );
 
   const dependentsLookup: {
     [key: string]: { pkg: Package; dependents: Array<string> };
-  } = {};
+  } = {
+    [rootPackage.packageJson.name]: {
+      pkg: rootPackage,
+      dependents: [],
+    },
+  };
 
   packages.packages.forEach((pkg) => {
     dependentsLookup[pkg.packageJson.name] = {

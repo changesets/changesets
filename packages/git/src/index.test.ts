@@ -1,30 +1,36 @@
-import path from "path";
-import fs from "fs-extra";
-import spawn from "spawndamnit";
-import fileUrl from "file-url";
-import { gitdir, tempdir } from "@changesets/test-utils";
-import writeChangeset from "@changesets/write";
-
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import {
-  getCommitsThatAddFiles,
-  getChangedFilesSince,
+  disableGitBackgroundMaintenance,
+  gitdir,
+  outputFile,
+  testdir,
+} from "@changesets/test-utils";
+import { writeChangeset } from "@changesets/write";
+import { exec } from "tinyexec";
+import { describe, expect, it } from "vitest";
+import {
   add,
   commit,
-  tag,
-  getDivergedCommit,
-  getChangedPackagesSinceRef,
-  getChangedChangesetFilesSinceRef,
   getAllTags,
-  tagExists,
+  getChangedChangesetFilesSinceRef,
+  getChangedFilesSince,
+  getChangedPackagesSinceRef,
+  getCommitsThatAddFiles,
   getCurrentCommitId,
-} from "./";
+  getDivergedCommit,
+  tag,
+  tagExists,
+} from "./index.ts";
 
 async function getCommitCount(cwd: string) {
-  const cmd = await spawn("git", ["rev-list", "--count", "HEAD"], { cwd });
+  const cmd = await exec("git", ["rev-list", "--count", "HEAD"], {
+    nodeOptions: { cwd },
+  });
   return parseInt(cmd.stdout.toString(), 10);
 }
 
-describe("git", () => {
+describe("git", { tags: ["slow"] }, () => {
   describe("getDivergedCommit", () => {
     it("should return same commit when branches have not diverged", async () => {
       const cwd = await gitdir({
@@ -34,7 +40,7 @@ describe("git", () => {
 
       const firstSha = await getCurrentCommitId({ cwd });
 
-      await fs.outputFile(path.join(cwd, "b.js"), 'export default "updated b"');
+      await outputFile(path.join(cwd, "b.js"), 'export default "updated b"');
       await commit("update b", cwd);
 
       const secondSha = await getCurrentCommitId({ cwd });
@@ -53,9 +59,11 @@ describe("git", () => {
       const mainSha = await getCurrentCommitId({ cwd });
 
       // Create a new branch, and add a commit to it.
-      await spawn("git", ["checkout", "-b", "my-branch"], { cwd });
+      await exec("git", ["checkout", "-b", "my-branch"], {
+        nodeOptions: { cwd },
+      });
 
-      await fs.outputFile(path.join(cwd, "b.js"), 'export default "updated b"');
+      await outputFile(path.join(cwd, "b.js"), 'export default "updated b"');
       await commit("update b", cwd);
 
       // Now, get the latest commit from our new branch.
@@ -75,11 +83,11 @@ describe("git", () => {
         "b.js": 'export default "b"',
       });
 
-      await fs.outputFile(path.join(cwd, "a.js"), 'export default "updated a"');
+      await outputFile(path.join(cwd, "a.js"), 'export default "updated a"');
       await add("a.js", cwd);
 
-      const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
-        cwd,
+      const gitCmd = await exec("git", ["diff", "--name-only", "--cached"], {
+        nodeOptions: { cwd },
       });
       const stagedFiles = gitCmd.stdout
         .toString()
@@ -96,13 +104,13 @@ describe("git", () => {
         "c.js": 'export default "c"',
       });
 
-      await fs.outputFile(path.join(cwd, "a.js"), 'export default "updated a"');
-      await fs.outputFile(path.join(cwd, "c.js"), 'export default "updated c"');
+      await outputFile(path.join(cwd, "a.js"), 'export default "updated a"');
+      await outputFile(path.join(cwd, "c.js"), 'export default "updated c"');
       await add("a.js", cwd);
       await add("c.js", cwd);
 
-      const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
-        cwd,
+      const gitCmd = await exec("git", ["diff", "--name-only", "--cached"], {
+        nodeOptions: { cwd },
       });
       const stagedFiles = gitCmd.stdout
         .toString()
@@ -120,18 +128,18 @@ describe("git", () => {
         "foo/b.js": 'export default "b"',
       });
 
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, "foo/a.js"),
-        'export default "updated a"'
+        'export default "updated a"',
       );
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, "foo/b.js"),
-        'export default "updated b"'
+        'export default "updated b"',
       );
       await add("foo", cwd);
 
-      const gitCmd = await spawn("git", ["diff", "--name-only", "--cached"], {
-        cwd,
+      const gitCmd = await exec("git", ["diff", "--name-only", "--cached"], {
+        nodeOptions: { cwd },
       });
       const stagedFiles = gitCmd.stdout
         .toString()
@@ -148,12 +156,12 @@ describe("git", () => {
         "a.js": 'export default "a"',
       });
 
-      await fs.outputFile(path.join(cwd, "a.js"), 'export default "updated a"');
+      await outputFile(path.join(cwd, "a.js"), 'export default "updated a"');
       await add("a.js", cwd);
       await commit("update a.js", cwd);
 
-      const gitCmd = await spawn("git", ["log", "-1", "--pretty=%B"], {
-        cwd,
+      const gitCmd = await exec("git", ["log", "-1", "--pretty=%B"], {
+        nodeOptions: { cwd },
       });
       const commitMessage = gitCmd.stdout.toString().trim();
 
@@ -181,15 +189,15 @@ describe("git", () => {
         "a.js": 'export default "a"',
       });
 
-      const head = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+      const head = await exec("git", ["rev-parse", "HEAD"], {
+        nodeOptions: { cwd },
+      });
       await tag("tag_message", cwd);
 
       // Gets the hash of the commit the tag is referring to, not the hash of the tag itself
-      const tagRef = await spawn(
-        "git",
-        ["rev-list", "-n", "1", "tag_message"],
-        { cwd }
-      );
+      const tagRef = await exec("git", ["rev-list", "-n", "1", "tag_message"], {
+        nodeOptions: { cwd },
+      });
       expect(tagRef).toEqual(head);
     });
 
@@ -199,28 +207,30 @@ describe("git", () => {
         "b.js": 'export default "b"',
       });
 
-      const initialHead = await spawn("git", ["rev-parse", "HEAD"], {
-        cwd,
+      const initialHead = await exec("git", ["rev-parse", "HEAD"], {
+        nodeOptions: { cwd },
       });
       await tag("tag_message", cwd);
 
-      await fs.outputFile(path.join(cwd, "b.js"), 'export default "updated b"');
+      await outputFile(path.join(cwd, "b.js"), 'export default "updated b"');
       await add("b.js", cwd);
       await commit("update b", cwd);
 
-      const newHead = await spawn("git", ["rev-parse", "HEAD"], { cwd });
+      const newHead = await exec("git", ["rev-parse", "HEAD"], {
+        nodeOptions: { cwd },
+      });
       await tag("new_tag", cwd);
 
       // Gets the hash of the commit the tag is referring to, not the hash of the tag itself
-      const firstTagRef = await spawn(
+      const firstTagRef = await exec(
         "git",
         ["rev-list", "-n", "1", "tag_message"],
-        { cwd }
+        { nodeOptions: { cwd } },
       );
-      const secondTagRef = await spawn(
+      const secondTagRef = await exec(
         "git",
         ["rev-list", "-n", "1", "new_tag"],
-        { cwd }
+        { nodeOptions: { cwd } },
       );
 
       expect(firstTagRef).toEqual(initialHead);
@@ -255,7 +265,9 @@ describe("git", () => {
       });
 
       const headSha = await getCurrentCommitId({ cwd });
-      const commitHash = await getCommitsThatAddFiles(["a.js"], { cwd });
+      const commitHash = await getCommitsThatAddFiles(["a.js"], {
+        cwd,
+      });
 
       expect(commitHash).toEqual([headSha]);
     });
@@ -286,19 +298,26 @@ describe("git", () => {
 
       async function createShallowClone(
         depth: number,
-        cwd: string
+        cwd: string,
       ): Promise<string> {
         // Make a 1-commit-deep shallow clone of this repo
-        const cloneDir = tempdir();
-        await spawn(
+        const cloneDir = await testdir();
+        await exec(
           "git",
           // Note: a file:// URL is needed in order to make a shallow clone of
           // a local repo
-          ["clone", "--depth", depth.toString(), fileUrl(cwd), "."],
+          [
+            "clone",
+            "--depth",
+            depth.toString(),
+            pathToFileURL(cwd).toString(),
+            ".",
+          ],
           {
-            cwd: cloneDir,
-          }
+            nodeOptions: { cwd: cloneDir },
+          },
         );
+        await disableGitBackgroundMaintenance(cloneDir);
         return cloneDir;
       }
 
@@ -311,7 +330,7 @@ describe("git", () => {
         // the commit we're going to scan for is the latest commit,
         // so will be in the shallow clone immediately without deepening
         await createDummyCommits(10, cwd);
-        await fs.outputFile(path.join(cwd, "b.js"), 'export default "b"');
+        await outputFile(path.join(cwd, "b.js"), 'export default "b"');
         const originalCommit = await addFileAndCommit("b.js", cwd);
 
         const clone = await createShallowClone(5, cwd);
@@ -333,7 +352,7 @@ describe("git", () => {
         // We're going to create a repo where the commit we're looking for isn't
         // in the shallow clone, so we'll need to deepen it to locate it.
         await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3, cwd);
-        await fs.outputFile(path.join(cwd, "b.js"), 'export default "b"');
+        await outputFile(path.join(cwd, "b.js"), 'export default "b"');
         const originalCommit = await addFileAndCommit("b.js", cwd);
         await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3, cwd);
 
@@ -349,7 +368,7 @@ describe("git", () => {
         const originalRepoDepth = await getCommitCount(cwd);
         expect(await getCommitCount(clone)).toBeGreaterThan(5);
         expect(await getCommitCount(clone)).toBeLessThan(originalRepoDepth);
-      });
+      }, 10_000);
 
       it("reads the SHA of a file-add even if the first commit of a repo", async () => {
         const cwd = await gitdir({
@@ -371,7 +390,7 @@ describe("git", () => {
         // We should have fully deepened
         const originalRepoDepth = await getCommitCount(cwd);
         expect(await getCommitCount(clone)).toEqual(originalRepoDepth);
-      });
+      }, 10_000);
 
       it("can return SHAs for multiple files including return blanks for missing files", async () => {
         const cwd = await gitdir({
@@ -382,23 +401,23 @@ describe("git", () => {
         // for the files that succeed.
         await createDummyCommits(shallowCloneDeepeningAmount, cwd);
 
-        await fs.outputFile(path.join(cwd, "b.js"), 'export default "b"');
+        await outputFile(path.join(cwd, "b.js"), 'export default "b"');
         const originalCommit1 = await addFileAndCommit("b.js", cwd);
 
         await createDummyCommits(shallowCloneDeepeningAmount, cwd);
 
-        await fs.outputFile(path.join(cwd, "c.js"), 'export default "c"');
+        await outputFile(path.join(cwd, "c.js"), 'export default "c"');
         const originalCommit2 = await addFileAndCommit("c.js", cwd);
 
         const clone = await createShallowClone(5, cwd);
 
         const commits = await getCommitsThatAddFiles(
           ["b.js", "this-file-does-not-exist", "c.js"],
-          { cwd: clone }
+          { cwd: clone },
         );
 
         expect(commits).toEqual([originalCommit1, undefined, originalCommit2]);
-      });
+      }, 10_000);
     });
   });
 
@@ -442,12 +461,12 @@ describe("git", () => {
       });
 
       const firstRef = await getCurrentCommitId({ cwd });
-      await fs.outputFile(path.join(cwd, "b.js"), 'export default "updated b"');
+      await outputFile(path.join(cwd, "b.js"), 'export default "updated b"');
       await add("b.js", cwd);
       await commit("update b.js", cwd);
 
       const secondRef = await getCurrentCommitId({ cwd });
-      await fs.outputFile(path.join(cwd, "d.js"), 'export default "updated d"');
+      await outputFile(path.join(cwd, "d.js"), 'export default "updated d"');
       await add("d.js", cwd);
       await commit("update d.js", cwd);
 
@@ -472,16 +491,16 @@ describe("git", () => {
 
       const ref = await getCurrentCommitId({ cwd });
 
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, "packages/pkg-b/b.js"),
-        'export default "updated b"'
+        'export default "updated b"',
       );
       await add("packages/pkg-b/b.js", cwd);
       await commit("update b.js", cwd);
 
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, "packages/pkg-c/c.js"),
-        'export default "updated c"'
+        'export default "updated c"',
       );
       await add("packages/pkg-c/c.js", cwd);
       await commit("update c.js", cwd);
@@ -515,20 +534,23 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
         "packages/pkg-a/a.js": 'export default "a"',
       });
 
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, "packages/pkg-a/a.js"),
-        'export default "updated a"'
+        'export default "updated a"',
       );
       await add("packages/pkg-a/a.js", cwd);
       await commit("update a.js", cwd);
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
       const changedPackages = await getChangedPackagesSinceRef({
         cwd,
         ref: "main",
@@ -542,6 +564,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -556,23 +579,25 @@ describe("git", () => {
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, "packages/pkg-b/package.json"),
         JSON.stringify({
           name: "pkg-b",
           private: true,
-        })
+        }),
       );
       await commit("update pkg-b", cwd);
 
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, "packages/pkg-d/package.json"),
         JSON.stringify({
           name: "pkg-d",
           private: true,
-        })
+        }),
       );
       await commit("update pkg-d", cwd);
 
@@ -593,6 +618,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*", "packages/*/examples/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -601,13 +627,15 @@ describe("git", () => {
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const newFilePath = "packages/pkg-a/examples/example-a/file.js";
 
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, newFilePath),
-        "console.log('hello world');"
+        "console.log('hello world');",
       );
 
       await add(newFilePath, cwd);
@@ -629,6 +657,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*/examples/*", "packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -637,13 +666,15 @@ describe("git", () => {
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const newFilePath = "packages/pkg-a/examples/example-a/file.js";
 
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, newFilePath),
-        "console.log('hello world');"
+        "console.log('hello world');",
       );
 
       await add(newFilePath, cwd);
@@ -665,19 +696,19 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const newFilePath = "packages/pkg-a/__tests__/file.js";
 
-      await fs.outputFile(
-        path.join(cwd, newFilePath),
-        "expect(answer).toBe(42);"
-      );
+      await outputFile(path.join(cwd, newFilePath), "expect(answer).toBe(42);");
 
       await add(newFilePath, cwd);
       await commit("new test file", cwd);
@@ -697,18 +728,21 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
       });
 
-      await spawn("git", ["checkout", "-b", "new-branch"], { cwd });
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const newFilePath = "packages/pkg-a/src/index.js";
 
-      await fs.outputFile(
+      await outputFile(
         path.join(cwd, newFilePath),
-        "export const answer = 42;"
+        "export const answer = 42;",
       );
 
       await add(newFilePath, cwd);
@@ -733,6 +767,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -752,6 +787,7 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
@@ -768,7 +804,7 @@ describe("git", () => {
           ],
           summary: "Awesome summary",
         },
-        cwd
+        cwd,
       );
       await add(".changeset", cwd);
 
@@ -784,13 +820,16 @@ describe("git", () => {
           private: true,
           workspaces: ["packages/*"],
         }),
+        "package-lock.json": "",
         "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
         }),
         ".changeset/config.json": JSON.stringify({}),
       });
 
-      await spawn("git", ["checkout", "-b", "some-branch"], { cwd });
+      await exec("git", ["checkout", "-b", "some-branch"], {
+        nodeOptions: { cwd },
+      });
 
       const changesetId = await writeChangeset(
         {
@@ -802,13 +841,51 @@ describe("git", () => {
           ],
           summary: "Awesome summary",
         },
-        cwd
+        cwd,
       );
       await add(".changeset", cwd);
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd,
         ref: "some-branch",
+      });
+      expect(files).toEqual([`.changeset/${changesetId}.md`]);
+    });
+
+    it("should still get the relative path to the changeset file if git config relative has been set to true", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await exec("git", ["config", "diff.relative", "true"], {
+        nodeOptions: { cwd },
+      });
+
+      const changesetId = await writeChangeset(
+        {
+          releases: [
+            {
+              name: "pkg-a",
+              type: "minor",
+            },
+          ],
+          summary: "Awesome summary",
+        },
+        cwd,
+      );
+      await add(".changeset", cwd);
+
+      const files = await getChangedChangesetFilesSinceRef({
+        cwd: path.join(cwd, ".changeset"),
+        ref: "main",
       });
       expect(files).toEqual([`.changeset/${changesetId}.md`]);
     });

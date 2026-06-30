@@ -1,5 +1,78 @@
 # @changesets/changelog-git
 
+## 1.0.0-next.5
+
+### Patch Changes
+
+- Updated dependencies [[`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f)]:
+  - @changesets/types@7.0.0-next.5
+
+## 1.0.0-next.4
+
+### Patch Changes
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8)]:
+  - @changesets/types@7.0.0-next.4
+
+## 1.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1961](https://github.com/changesets/changesets/pull/1961) [`07278a7`](https://github.com/changesets/changesets/commit/07278a726343388eb6dfc56e7a8213872d4c8857) Thanks [@beeequeue](https://github.com/beeequeue)! - `ChangelogFunctions` can now be both sync and async, and the `defaultChangelogFunctions` are now sync.
+
+### Minor Changes
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7)]:
+  - @changesets/types@7.0.0-next.3
+
+## 1.0.0-next.2
+
+### Patch Changes
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c)]:
+  - @changesets/types@7.0.0-next.2
+
+## 1.0.0-next.1
+
+### Minor Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d)]:
+  - @changesets/types@7.0.0-next.1
+
+## 1.0.0-next.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Minor Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+### Patch Changes
+
+- Updated dependencies [[`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/types@7.0.0-next.0
+
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+
 ## 0.2.0
 
 ### Minor Changes

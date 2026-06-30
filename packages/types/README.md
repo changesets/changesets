@@ -1,6 +1,7 @@
 # @changesets/types
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/types)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/types?name=true)](https://npmx.dev/package/@changesets/types)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 A package of types for use in changesets, or projects wishing to extend them.
 

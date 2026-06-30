@@ -1,6 +1,7 @@
 # @changesets/pre
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/pre)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/pre?name=true)](https://npmx.dev/package/@changesets/pre)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 Enter and exit pre mode in a Changesets repo.
 
@@ -22,7 +23,7 @@ This package is used by internally by Changesets to enter and exit pre mode alon
 ## Types
 
 ```ts
-import { PreState } from "@changesets/types";
+import type { PreState } from "@changesets/types";
 
 export function enterPre(cwd: string, tag: string): Promise<void>;
 export function exitPre(cwd: string): Promise<void>;

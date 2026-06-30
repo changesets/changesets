@@ -1,4 +1,5 @@
-export type TwoFactorState = {
-  token: string | null;
-  isRequired: Promise<boolean>;
+export type AuthState = {
+  otpToken: string | undefined;
+  /** Indicates if interactive authentication (prompt-based) is required */
+  requiresInteractive: boolean;
 };

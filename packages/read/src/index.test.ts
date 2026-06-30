@@ -1,9 +1,10 @@
-import fs from "fs-extra";
-import path from "path";
-import outdent from "outdent";
-
-import read from "./";
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { add } from "@changesets/git";
+import { gitdir, silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { writeChangeset } from "@changesets/write";
+import { describe, expect, it } from "vitest";
+import { readChangesets as read } from "./index.ts";
 
 silenceLogsInBlock();
 
@@ -96,27 +97,31 @@ I'm amazed we needed to update the best package, because it was already the best
       },
     ]);
   });
+
   it("should return an empty array when no changesets are found", async () => {
     const cwd = await testdir({});
-    await fs.mkdir(path.join(cwd, ".changeset"));
+    await fs.mkdir(path.join(cwd, ".changeset"), { recursive: true });
 
     const changesets = await read(cwd);
     expect(changesets).toEqual([]);
   });
+
   it("should error when there is no changeset folder", async () => {
     const cwd = await testdir({});
 
     try {
       await read(cwd);
     } catch (e) {
+      // eslint-disable-next-line vitest/no-conditional-expect
       expect((e as Error).message).toBe(
-        "There is no .changeset directory in this project"
+        "There is no .changeset directory in this project",
       );
       return;
     }
     expect("never run this because we returned above").toBe(true);
   });
-  it("should error on broken changeset?", async () => {
+
+  it("should error on broken changeset", async () => {
     const cwd = await testdir({
       ".changeset/broken-changeset.md": `---
 
@@ -127,16 +132,26 @@ I'm amazed we needed to update the best package, because it was already the best
 Everything is wrong`,
     });
 
-    expect(read(cwd)).rejects.toThrow(
-      outdent`could not parse changeset - invalid frontmatter: ---
+    await expect(read(cwd)).rejects.toThrowErrorMatchingInlineSnapshot(`
+      [Error: could not parse changeset - missing or invalid frontmatter.
+      Changesets must start with frontmatter delimited by "---".
+      Example:
+      ---
+      "package-name": patch
+      ---
+
+      Your changeset summary here.
+      Received content:
+      ---
 
       "cool-package": minor
 
       --
 
-      Everything is wrong`
-    );
+      Everything is wrong]
+    `);
   });
+
   it("should return no releases and empty summary when the changeset is empty", async () => {
     const cwd = await testdir({
       ".changeset/empty-like-void.md": `---
@@ -152,12 +167,15 @@ Everything is wrong`,
       },
     ]);
   });
+
   it("should filter out ignored changesets", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
+        name: "root-pkg",
         workspaces: ["packages/*"],
       }),
+      "package-lock.json": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -192,27 +210,38 @@ Awesome feature, hidden behind a feature flag
       },
     ]);
   });
+  it("should read a nested changeset relative to git root", async () => {
+    const cwd = await gitdir({
+      "library/package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "library/packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+      }),
+      "library/.changeset/config.json": JSON.stringify({}),
+    });
 
-  it("should read an old changeset", async () => {
-    const cwd = await testdir({
-      ".changeset/basic-changeset/changes.json": JSON.stringify({
+    const changesetId = await writeChangeset(
+      {
         releases: [
           {
-            name: "cool-package",
+            name: "pkg-a",
             type: "minor",
           },
         ],
-        dependents: [],
-      }),
-      ".changeset/basic-changeset/changes.md": `Nice simple summary`,
-    });
+        summary: "Awesome summary",
+      },
+      path.join(cwd, "library"),
+    );
+    await add("library/.changeset", cwd);
 
-    const changesets = await read(cwd);
+    const changesets = await read(path.join(cwd, "library"), "main");
     expect(changesets).toEqual([
       {
-        releases: [{ name: "cool-package", type: "minor" }],
-        summary: "Nice simple summary",
-        id: "basic-changeset",
+        releases: [{ name: "pkg-a", type: "minor" }],
+        summary: "Awesome summary",
+        id: changesetId,
       },
     ]);
   });

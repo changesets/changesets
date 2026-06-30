@@ -1,6 +1,7 @@
 # Assemble Release Plan
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/assemble-release-plan)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/assemble-release-plan?name=true)](https://npmx.dev/package/@changesets/assemble-release-plan)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 Assemble a release plan for changesets from data about a repository.
 
@@ -8,29 +9,38 @@ Usage
 
 ```ts
 import assembleReleasePlan from "@changesets/assemble-release-plan";
-import readChangesets from "@changesets/read";
-import { read } from "@changesets/config";
+import { readChangesets } from "@changesets/read";
+import { readConfig } from "@changesets/config";
 import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
 
 const packages = await getPackages(cwd);
 const preState = await readPreState(cwd);
-const config = await read(cwd, packages);
+const { config } = await readConfig(cwd, packages);
 const changesets = await readChangesets(cwd, sinceRef);
 
-const releasePlan = assembleReleasePlan(changesets, packages, config, preState);
+const releasePlan = assembleReleasePlan(
+  changesets,
+  packages,
+  config!,
+  preState,
+);
 ```
 
 Signature
 
 ```ts
-import { NewChangeset, Config, ReleasePlan } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import type {
+  NewChangeset,
+  Config,
+  Packages,
+  ReleasePlan,
+} from "@changesets/types";
 
 assembleReleasePlan = (
   changesets: NewChangeset[],
   packages: Packages,
-  config: Config
+  config: Config,
 ) => ReleasePlan;
 ```
 

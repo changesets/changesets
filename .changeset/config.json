@@ -1,11 +1,10 @@
 {
-  "changelog": [
-    "@changesets/changelog-github",
-    { "repo": "changesets/changesets" }
-  ],
+  "$schema": "../packages/config/schema.json",
+  "changelog": "@changesets/changelog-github",
   "baseBranch": "main",
   "commit": false,
   "access": "public",
+  "ignore": ["@changesets/test-utils", "@changesets/color"],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "updateInternalDependents": "always"
   }

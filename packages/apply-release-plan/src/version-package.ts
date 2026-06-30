@@ -1,12 +1,9 @@
-import {
-  ComprehensiveRelease,
-  PackageJSON,
-  VersionType,
-} from "@changesets/types";
-import getVersionRangeType from "@changesets/get-version-range-type";
-import Range from "semver/classes/range";
-import semverPrerelease from "semver/functions/prerelease";
-import { shouldUpdateDependencyBasedOnConfig } from "./utils";
+import type { ModCompWithPackage, VersionType } from "@changesets/types";
+import Range from "semver/classes/range.js";
+import semverPrerelease from "semver/functions/prerelease.js";
+import validRange from "semver/ranges/valid.js";
+import type { EditJsonOperation } from "./edit-json.ts";
+import { shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -15,40 +12,54 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
-export default function versionPackage(
-  release: ComprehensiveRelease & {
-    changelog: string | null;
-    packageJson: PackageJSON;
+export type ModCompWithPackageAndChangelog = ModCompWithPackage & {
+  changelog: string | null;
+};
+
+type ModCompWithPackageAndChangelogAndEdits = ModCompWithPackageAndChangelog & {
+  pkgJsonEdits: EditJsonOperation[];
+};
+
+export function versionPackage(
+  release: ModCompWithPackageAndChangelog,
+  versionsToUpdate: Array<{
+    name: string;
+    version: string;
+    oldVersion: string;
+    type: VersionType;
     dir: string;
-  },
-  versionsToUpdate: Array<{ name: string; version: string; type: VersionType }>,
+  }>,
   {
+    cwd,
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
     bumpVersionsWithWorkspaceProtocolOnly,
     snapshot,
   }: {
+    cwd: string;
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
     snapshot?: string | boolean | undefined;
-  }
-) {
-  let { newVersion, packageJson } = release;
+  },
+): ModCompWithPackageAndChangelogAndEdits {
+  const pkgJsonEdits: EditJsonOperation[] = [];
+  const { newVersion, packageJson } = release;
 
-  packageJson.version = newVersion;
+  pkgJsonEdits.push({ keys: ["version"], value: newVersion });
 
-  for (let depType of DEPENDENCY_TYPES) {
-    let deps = packageJson[depType];
+  for (const depType of DEPENDENCY_TYPES) {
+    const deps = packageJson[depType];
     if (deps) {
-      for (let { name, version, type } of versionsToUpdate) {
+      for (const { name, version, oldVersion, type, dir } of versionsToUpdate) {
         let depCurrentVersion = deps[name];
         if (
           !depCurrentVersion ||
           depCurrentVersion.startsWith("file:") ||
           depCurrentVersion.startsWith("link:") ||
           !shouldUpdateDependencyBasedOnConfig(
-            { version, type },
+            cwd,
+            { version, oldVersion, type, dir },
             {
               depVersionRange: depCurrentVersion,
               depType,
@@ -56,7 +67,7 @@ export default function versionPackage(
             {
               minReleaseType: updateInternalDependencies,
               onlyUpdatePeerDependentsWhenOutOfRange,
-            }
+            },
           )
         ) {
           continue;
@@ -65,7 +76,8 @@ export default function versionPackage(
 
         if (
           !usesWorkspaceRange &&
-          bumpVersionsWithWorkspaceProtocolOnly === true
+          (bumpVersionsWithWorkspaceProtocolOnly ||
+            validRange(depCurrentVersion) == null)
         ) {
           continue;
         }
@@ -73,12 +85,13 @@ export default function versionPackage(
         if (usesWorkspaceRange) {
           const workspaceDepVersion = depCurrentVersion.replace(
             /^workspace:/,
-            ""
+            "",
           );
           if (
             workspaceDepVersion === "*" ||
             workspaceDepVersion === "^" ||
-            workspaceDepVersion === "~"
+            workspaceDepVersion === "~" ||
+            validRange(workspaceDepVersion) == null
           ) {
             continue;
           }
@@ -92,17 +105,28 @@ export default function versionPackage(
           new Range(depCurrentVersion).range !== "" ||
           // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-          semverPrerelease(version) !== null
+          semverPrerelease(version) != null
         ) {
           let newNewRange = snapshot
             ? version
             : `${getVersionRangeType(depCurrentVersion)}${version}`;
           if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`;
-          deps[name] = newNewRange;
+          pkgJsonEdits.push({ keys: [depType, name], value: newNewRange });
         }
       }
     }
   }
 
-  return { ...release, packageJson };
+  return { ...release, pkgJsonEdits };
+}
+
+function getVersionRangeType(
+  versionRange: string,
+): "^" | "~" | ">=" | "<=" | ">" | "" {
+  if (versionRange.charAt(0) === "^") return "^";
+  if (versionRange.charAt(0) === "~") return "~";
+  if (versionRange.startsWith(">=")) return ">=";
+  if (versionRange.startsWith("<=")) return "<=";
+  if (versionRange.charAt(0) === ">") return ">";
+  return "";
 }

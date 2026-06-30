@@ -1,5 +1,39 @@
 # @changesets/logger
 
+## 1.0.0-next.3
+
+### Patch Changes
+
+- [#2004](https://github.com/changesets/changesets/pull/2004) [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156) Thanks [@ghostdevv](https://github.com/ghostdevv)! - Replace `picocolors` with `node:util`'s `styleText`
+
+## 1.0.0-next.2
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+## 1.0.0-next.1
+
+### Minor Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+## 1.0.0-next.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Minor Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+## 0.1.1
+
+### Patch Changes
+
+- [#1417](https://github.com/changesets/changesets/pull/1417) [`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55) Thanks [@trivikr](https://github.com/trivikr)! - Replace `chalk` with `picocolors` to reduce install size
+
 ## 0.1.0
 
 ### Minor Changes

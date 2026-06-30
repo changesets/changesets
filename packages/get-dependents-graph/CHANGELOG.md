@@ -1,5 +1,106 @@
 # @changesets/get-dependents-graph
 
+## 3.0.0-next.5
+
+### Patch Changes
+
+- Updated dependencies [[`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f)]:
+  - @changesets/types@7.0.0-next.5
+
+## 3.0.0-next.4
+
+### Patch Changes
+
+- [#2004](https://github.com/changesets/changesets/pull/2004) [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156) Thanks [@ghostdevv](https://github.com/ghostdevv)! - Replace `picocolors` with `node:util`'s `styleText`
+
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8)]:
+  - @changesets/types@7.0.0-next.4
+
+## 3.0.0-next.3
+
+### Major Changes
+
+- [#1954](https://github.com/changesets/changesets/pull/1954) [`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069) Thanks [@beeequeue](https://github.com/beeequeue)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+### Minor Changes
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- Updated dependencies [[`ed6728c`](https://github.com/changesets/changesets/commit/ed6728ce3c089caaee19f71194a0cd7029480069), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7)]:
+  - @changesets/types@7.0.0-next.3
+
+## 3.0.0-next.2
+
+### Major Changes
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+### Patch Changes
+
+- Updated dependencies [[`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c)]:
+  - @changesets/types@7.0.0-next.2
+
+## 2.1.4
+
+### Patch Changes
+
+- [#1888](https://github.com/changesets/changesets/pull/1888) [`036fdd4`](https://github.com/changesets/changesets/commit/036fdd451367226d0f2cd8af1e0a7f37a65e3464) Thanks [@mixelburg](https://github.com/mixelburg)! - Fix dependency graph validation for workspace path references. Valid `workspace:packages/pkg` specifiers are now treated as local dependencies instead of being rejected as invalid ranges.
+
+## 3.0.0-next.1
+
+### Major Changes
+
+- [#1656](https://github.com/changesets/changesets/pull/1656) [`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d) Thanks [@bluwy](https://github.com/bluwy)! - Bumps minimum node version to `>=20.0.0`
+
+### Patch Changes
+
+- Updated dependencies [[`268a29f`](https://github.com/changesets/changesets/commit/268a29fedc948f22c672a3b1e3e51df4427f478d)]:
+  - @changesets/types@7.0.0-next.1
+
+## 3.0.0-next.0
+
+### Major Changes
+
+- [#1479](https://github.com/changesets/changesets/pull/1479) [`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5) Thanks [@bluwy](https://github.com/bluwy)! - Add `"engines"` field for explicit node version support. The supported node versions are `>=18.0.0`.
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Patch Changes
+
+- Updated dependencies [[`7f34a00`](https://github.com/changesets/changesets/commit/7f34a00aab779a941a406b17f5a85895144fc0a5), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7)]:
+  - @changesets/types@7.0.0-next.0
+
+## 2.1.3
+
+### Patch Changes
+
+- Updated dependencies [[`84a4a1b`](https://github.com/changesets/changesets/commit/84a4a1b1d399bfd0a58677b0182b9c053194febf)]:
+  - @changesets/types@6.1.0
+
+## 2.1.2
+
+### Patch Changes
+
+- [#1417](https://github.com/changesets/changesets/pull/1417) [`bc75c1a`](https://github.com/changesets/changesets/commit/bc75c1a74c2d46e08620c7aa0e9f4f5ef40a9b55) Thanks [@trivikr](https://github.com/trivikr)! - Replace `chalk` with `picocolors` to reduce install size
+
+- [#1445](https://github.com/changesets/changesets/pull/1445) [`52c302a`](https://github.com/changesets/changesets/commit/52c302a48a662f71585f18f91dad3cbe49d75890) Thanks [@bluwy](https://github.com/bluwy)! - Remove unused `@babel/runtime` dependency
+
+## 2.1.1
+
+### Patch Changes
+
+- [#1400](https://github.com/changesets/changesets/pull/1400) [`dd6e5bb`](https://github.com/changesets/changesets/commit/dd6e5bbf74e246d7a742aa50424989462679b0ca) Thanks [@Andarist](https://github.com/Andarist)! - Fixed a crash in `getDependentsGraph` in a scenario when a workspace depends on the root workspace
+
+## 2.1.0
+
+### Minor Changes
+
+- [#1370](https://github.com/changesets/changesets/pull/1370) [`5e9d33a`](https://github.com/changesets/changesets/commit/5e9d33a2e659abdcf26f204a76a9465cf4b26d6b) Thanks [@Andarist](https://github.com/Andarist)! - Added a new `ignoreDevDependencies` option
+
 ## 2.0.0
 
 ### Major Changes

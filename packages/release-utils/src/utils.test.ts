@@ -1,6 +1,11 @@
-import { getChangelogEntry, BumpLevels, sortChangelogEntries } from "./utils";
+import { describe, expect, test } from "vitest";
+import {
+  BumpLevels,
+  getChangelogEntry,
+  sortChangelogEntries,
+} from "./utils.ts";
 
-let changelog = `# @keystone-alpha/email
+const changelog = `# @keystone-alpha/email
 
 ## 3.0.1
 
@@ -67,35 +72,88 @@ let changelog = `# @keystone-alpha/email
   - Update mjml-dependency
 `;
 
-test("it works", () => {
-  let entry = getChangelogEntry(changelog, "3.0.0");
-  expect(entry.content).toMatchSnapshot();
-  expect(entry.highestLevel).toBe(BumpLevels.major);
+describe("getChangelogEntry", () => {
+  test("it works", () => {
+    const entry = getChangelogEntry(changelog, "3.0.0");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.major);
+  });
+
+  test("it works again!", () => {
+    const entry = getChangelogEntry(changelog, "3.0.1");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.patch);
+  });
+
+  test("it works with code blocks", () => {
+    const changelogWithCodeBlocks = `# Changelog
+
+## 1.0.0
+
+### Major Changes
+
+\`\`\`
+# not a heading
+## not a heading
+### not a heading
+\`\`\`
+
+## 0.0.1
+
+Initial release`;
+    const entry = getChangelogEntry(changelogWithCodeBlocks, "1.0.0");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.major);
+  });
+
+  test("it works with nested code blocks", () => {
+    const changelogWithCodeBlocks = `# Changelog
+
+## 1.0.0
+
+### Major Changes
+
+\`\`\`\`
+# not a heading
+## not a heading
+### not a heading
+
+\`\`\`
+# not a heading
+## not a heading
+### not a heading
+\`\`\`
+
+\`\`\`\`
+
+## 0.0.1
+
+Initial release`;
+    const entry = getChangelogEntry(changelogWithCodeBlocks, "1.0.0");
+    expect(entry.content).toMatchSnapshot();
+    expect(entry.highestLevel).toBe(BumpLevels.major);
+  });
 });
 
-test("it works", () => {
-  let entry = getChangelogEntry(changelog, "3.0.1");
-  expect(entry.content).toMatchSnapshot();
-  expect(entry.highestLevel).toBe(BumpLevels.patch);
-});
-
-test("it sorts the things right", () => {
-  let things = [
-    {
-      name: "a",
-      highestLevel: BumpLevels.major,
-      private: true,
-    },
-    {
-      name: "b",
-      highestLevel: BumpLevels.patch,
-      private: false,
-    },
-    {
-      name: "c",
-      highestLevel: BumpLevels.major,
-      private: false,
-    },
-  ];
-  expect(things.sort(sortChangelogEntries)).toMatchSnapshot();
+describe("sortChangelogEntries", () => {
+  test("it sorts the things right", () => {
+    const things = [
+      {
+        name: "a",
+        highestLevel: BumpLevels.major,
+        private: true,
+      },
+      {
+        name: "b",
+        highestLevel: BumpLevels.patch,
+        private: false,
+      },
+      {
+        name: "c",
+        highestLevel: BumpLevels.major,
+        private: false,
+      },
+    ];
+    expect(things.sort(sortChangelogEntries)).toMatchSnapshot();
+  });
 });

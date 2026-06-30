@@ -1,4 +1,5 @@
-import { GitError } from "./index";
+import { beforeEach, describe, expect, it } from "vitest";
+import { GitError } from "./index.ts";
 
 describe("Error classes", () => {
   describe("GitError class", () => {

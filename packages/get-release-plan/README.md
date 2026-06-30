@@ -1,11 +1,12 @@
 # @changesets/get-release-plan
 
-[![View changelog](https://img.shields.io/badge/changelogs.xyz-Explore%20Changelog-brightgreen)](https://changelogs.xyz/@changesets/get-release-plan)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/get-release-plan?name=true)](https://npmx.dev/package/@changesets/get-release-plan)
+[![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
 A function that reads information about the current repository
 
 ```js
-import getReleasePlan from "@changesets/get-release-plan";
+import { getReleasePlan } from "@changesets/get-release-plan";
 
 const releasePlan = await getReleasePlan(cwd, since, passedConfig);
 ```

@@ -1,9 +1,4 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "grammarly.selectors": [
-    {
-      "language": "markdown",
-      "scheme": "file"
-    }
-  ]
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "editor.defaultFormatter": "oxc.oxc-vscode"
 }

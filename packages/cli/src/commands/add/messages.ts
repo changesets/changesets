@@ -1,42 +1,41 @@
-import chalk from "chalk";
-import outdent from "outdent";
-import { log } from "@changesets/logger";
-import { Release, VersionType } from "@changesets/types";
+import c from "@changesets/color";
+import type { Release, VersionType } from "@changesets/types";
+import { log, note } from "@clack/prompts";
 
-export default function printConfirmationMessage(
+export function printConfirmationMessage(
   changeset: {
     releases: Array<Release>;
     summary: string;
   },
-  repoHasMultiplePackages: boolean
+  repoHasMultiplePackages: boolean,
 ) {
   function getReleasesOfType(type: VersionType) {
     return changeset.releases
       .filter((release) => release.type === type)
       .map((release) => release.name);
   }
-  log("\n=== Summary of changesets ===");
+
   const majorReleases = getReleasesOfType("major");
   const minorReleases = getReleasesOfType("minor");
   const patchReleases = getReleasesOfType("patch");
 
-  if (majorReleases.length > 0)
-    log(`${chalk.bold.green("major")}:  ${majorReleases.join(", ")}`);
-  if (minorReleases.length > 0)
-    log(`${chalk.bold.green("minor")}:  ${minorReleases.join(", ")}`);
-  if (patchReleases.length > 0)
-    log(`${chalk.bold.green("patch")}:  ${patchReleases.join(", ")}`);
-
-  log("");
+  let msg = c.bold("Summary of changesets:");
+  if (majorReleases.length > 0) {
+    msg += `\n${c.bold(c.red("major"))}:  ${majorReleases.join(", ")}`;
+  }
+  if (minorReleases.length > 0) {
+    msg += `\n${c.bold(c.green("minor"))}:  ${minorReleases.join(", ")}`;
+  }
+  if (patchReleases.length > 0) {
+    msg += `\n${c.bold(c.blue("patch"))}:  ${patchReleases.join(", ")}`;
+  }
+  log.success(msg);
 
   if (repoHasMultiplePackages) {
-    const message = outdent`
-      Note: All dependents of these packages that will be incompatible with
-      the new version will be ${chalk.redBright(
-        "patch bumped"
-      )} when this changeset is applied.
-    `;
-
-    log(message + "\n");
+    note(
+      `All packages that depend on these whose required versions will be incompatible ` +
+        `will also be ${c.blue("patch")} bumped when this changeset is applied.`,
+      "NOTE",
+    );
   }
 }
