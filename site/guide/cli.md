@@ -12,7 +12,7 @@ The Changesets CLI is the main way of interacting with changesets. It provides a
 
 <div v-html="data.initHelpMessage" />
 
-This command sets up the `.changeset` folder. It generates a readme and a config file with the default options. You should run this command once when setting up Changesets.
+This command sets up the `.changeset` folder. It generates a readme and creates a config file through an interactive prompt. You should run this command once when you are setting up Changesets.
 
 ## add
 
