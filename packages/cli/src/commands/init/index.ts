@@ -41,13 +41,13 @@ async function getInteractiveConfig() {
     false,
   );
 
-  config.access = (await cli.askList(
+  config.access = await cli.askList<AccessType>(
     "Should packages be published publicly or privately by default?",
     [
       { label: "Private", value: "restricted" },
       { label: "Public", value: "public" },
     ],
-  )) as AccessType;
+  );
 
   const baseBranchInput = await cli.askQuestion(
     "Which base branch should be used?",

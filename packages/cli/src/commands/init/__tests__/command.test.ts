@@ -294,14 +294,14 @@ describe("init", () => {
 
     expect(keys).toEqual([
       "$schema",
-      "changelog",
       "baseBranch",
-      "commit",
       "access",
+      "format",
+      "changelog",
+      "commit",
       "ignore",
       "fixed",
       "linked",
-      "format",
       "updateInternalDependencies",
     ]);
   });
