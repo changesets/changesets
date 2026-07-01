@@ -365,6 +365,39 @@ describe("Publish command", () => {
     );
   });
 
+  it("creates an empty output file when there is nothing to publish or tag", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+    const outputFile = path.join(cwd, "output.ndjson");
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult(
+          JSON.stringify({
+            version: "1.0.0",
+            versions: ["1.0.0"],
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await publishCommand({ cwd, output: outputFile });
+
+    await expect(fs.readFile(outputFile, "utf8")).resolves.toBe("");
+    expect(git.tag).not.toHaveBeenCalled();
+  });
+
   it("stops publishing after a failed chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
