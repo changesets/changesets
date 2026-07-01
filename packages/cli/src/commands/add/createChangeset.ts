@@ -137,13 +137,10 @@ export async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Array<Package>,
   optionsFromCli?: OptionsFromCli,
-): Promise<{ confirmed: boolean; summary: string; releases: Array<Release> }> {
+): Promise<{ summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
-  let confirmed = false;
-
   if (optionsFromCli?.major || optionsFromCli?.minor || optionsFromCli?.patch) {
-    confirmed = true;
     const pkgNames = new Set(
       allPackages.map(({ packageJson }) => packageJson.name),
     );
@@ -266,13 +263,10 @@ ${c.gray(patchBumpedPackages.join(", "))}
 
   if (optionsFromCli?.message != null) {
     return {
-      confirmed,
       summary: optionsFromCli.message,
       releases,
     };
   }
-
-  confirmed = false;
 
   let summary = await cli.askQuestion(
     "Please enter a summary for this change (this will be in the changelogs).",
@@ -285,11 +279,7 @@ ${c.gray(patchBumpedPackages.join(", "))}
         "\n\n# Please enter a summary for your changes.\n# An empty message aborts the editor.",
       );
       if (summary.length > 0) {
-        return {
-          confirmed: true,
-          summary,
-          releases,
-        };
+        return { summary, releases };
       }
     } catch {
       summary = await cli.askQuestion(
@@ -306,9 +296,5 @@ ${c.gray(patchBumpedPackages.join(", "))}
     );
   }
 
-  return {
-    confirmed,
-    summary,
-    releases,
-  };
+  return { summary, releases };
 }
