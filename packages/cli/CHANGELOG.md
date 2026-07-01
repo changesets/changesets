@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 3.0.0-next.8
+
+### Patch Changes
+
+- [#2138](https://github.com/changesets/changesets/pull/2138) [`3588f18`](https://github.com/changesets/changesets/commit/3588f18f0884ef9f42339b2b9c92402d96009cd3) Thanks [@Andarist](https://github.com/Andarist)! - Ensure `changeset publish` and `changeset tag` create the `CHANGESETS_OUTPUT` file even when there is nothing to publish or tag.
+
 ## 3.0.0-next.7
 
 ### Major Changes
