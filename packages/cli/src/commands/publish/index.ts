@@ -50,6 +50,7 @@ export interface PublishOptions {
 }
 
 export async function publish(options?: PublishOptions) {
+  await using reporter = await createOutputReport(options?.output);
   const cwd = options?.cwd ?? process.cwd();
   const artifactDir = options?.fromPackDir
     ? path.resolve(cwd, options.fromPackDir)
@@ -93,8 +94,6 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     log.warn("No unpublished projects to publish.");
     return;
   }
-
-  await using reporter = await createOutputReport(options?.output);
 
   for (let index = 0; index < plan.length; index++) {
     const chunk = plan[index];
