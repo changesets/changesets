@@ -3,47 +3,90 @@
 [![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/changelog-github?name=true)](https://npmx.dev/package/@changesets/changelog-github)
 [![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
-A changelog entry generator for GitHub that links to commits, PRs and authors.
+The `@changesets/changelog-github` package is an official and maintained generator from changesets that links to commits, PRs and authors. Learn more about generators in [our "Customize Changelog Format" guide](https://changesets.dev/guide/customize-changelog-format#writing-a-custom-changelog-generator).
 
 ## Usage
 
-Enable it in `.changeset/config.json`:
+The `@changesets/changelog-github` package requires a [`GITHUB_TOKEN`](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions. Add it to your repository's [GitHub Action secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) and your `.env` file:
 
-```json
+```bash
+GITHUB_TOKEN=token_here
+```
+
+Then you can use it in the [`changelog`](https://changesets.dev/guide/config#changelog) option:
+
+```json [.changeset/config.json]
 {
-  "changelog": ["@changesets/changelog-github", { "repo": "<org>/<repo>" }]
+  "changelog": ["@changesets/changelog-github", { "repo": "owner/repo" }]
 }
 ```
 
-It requires GitHub authentication: set a `GITHUB_TOKEN` environment variable.
-
 ## Options
 
-### `disableThanks` (optional boolean)
+The `@changesets/changelog-github` package supports the following configuration options:
 
-Set `"disableThanks": true` to drop the "Thanks [@user]!" attribution from each line.
+### `repo`
 
-### `template` (optional string, experimental)
+- **Type:** `string`
 
-> ⚠ **Experimental.** The `template` option and its token syntax may change in any release, including a patch. If you rely on it, pin the exact `@changesets/changelog-github` version.
+Specify the `<org>/<repo>` slug of your GitHub repository.
 
-By default each changelog line looks like `- [#123](url) [abc1234](url) Thanks [@user](url)! - summary`. Set `template` to render the line yourself from these tokens. Each token renders bare (you write the surrounding spaces) and renders to nothing when its data is absent:
+When running in GitHub Actions, `repo` is optional because it defaults to the `GITHUB_REPOSITORY` environment variable.
 
-| Token       | Renders                                                                                                                             |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `{summary}` | the changeset summary's first line, linking every issue reference (`#123`)                                                          |
-| `{ref}`     | a single parenthesized reference: `([#123](url))` if there is a PR, else ``([`abc1234`](url))`` for a commit, else nothing          |
-| `{pull}`    | `[#123](url)`                                                                                                                       |
-| `{commit}`  | ``[`abc1234`](url)``                                                                                                                |
-| `{authors}` | `[@user](url)` (the contributors, respects `disableThanks`). For the "Thanks" prefix, write it in the template: `Thanks {authors}!` |
+### `disableThanks`
 
-Trailing whitespace on the rendered line is trimmed, so a trailing token that renders empty (e.g. `{ref}` with no PR or commit) leaves no dangling space. When `template` is unset the default output is unchanged. Continuation lines of a multi-line summary are always appended below, indented by two spaces. An unknown token (for example a typo, or the removed `{thanks}`) throws an error during `changeset version`. A token with no value renders as empty text, so a fixed prefix like `Thanks {authors}!` can leave an awkward `Thanks !` when there is no author - write the surrounding text with that in mind.
+- **Type:** `boolean`
+- **Default:** `false`
 
-Examples (for a change with PR `#123`, commit `abc1234`, author `@alice`, summary `fix the thing`):
+Set `"disableThanks": true` to drop the `"Thanks [@user]!"` attribution from each line.
 
-| `template`                                            | rendered line                                                                      |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `"\n- {pull} {commit} Thanks {authors}! - {summary}"` | `- [#123](url) [abc1234](url) Thanks [@alice](url)! - fix the thing` (the default) |
-| `"\n- {summary} {ref}"`                               | `- fix the thing ([#123](url))` (the compact form)                                 |
-| `"\n- {summary} (thanks {authors}!)"`                 | `- fix the thing (thanks [@alice](url)!)`                                          |
-| `"\n- {summary} {pull}"`                              | `- fix the thing [#123](url)`                                                      |
+> [!NOTE]
+> It is recommended to not set `"disableThanks": true` when using `template`, as the `{authors}` token returns an empty string then, which could lead to unexpected results.
+
+### `template`
+
+- **Type:** `string`
+- **Default:** `"\n- {pull} {commit} Thanks {authors}! - {summary}"`
+
+> [!WARNING]
+> **Experimental.** The `template` option and its token syntax may change in any release, including a patch. If you rely on it, pin the exact `@changesets/changelog-github` version.
+
+The `template` option allows you to customize the format that should be used for the generation of the first line of individual bullet points in the changelog output. For example, the default template generates this Markdown from one changeset example file:
+
+```
+- [#123](https://github.com/<org>/<repo>/pull/123) [`a1b2c3d`](https://github.com/<org>/<repo>/commit/a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0) Thanks [@ghost](https://github.com/ghost)! - fix the thing
+```
+
+Each piece of information is dynamically represented with a [token](#tokens). The above example uses this `template` syntax:
+
+```
+\n- {pull} {commit} Thanks {authors}! - {summary}
+```
+
+> [!NOTE]
+> Note that `\n- ` is included to generate each change as a bullet list item. However, you can also drop them and write all changes into a paragraph. Trailing spaces will be trimmed to avoid dangling spaces when the last token is empty.
+
+#### Tokens
+
+The `template` option supports these tokens.
+
+| Token       | Description                                                                               | Example              |
+| ----------- | ----------------------------------------------------------------------------------------- | -------------------- |
+| `{summary}` | The first line of the changeset Markdown content, linking to GitHub issues (e.g. `#123`). | `fix the thing`      |
+| `{ref}`     | Link to either PR, or commit if the changes were pushed directly; wrapped in paranthesis. | `([#123](url))`      |
+| `{pull}`    | Link to the PR if available; not wrapped in paranthesis.                                  | `[#123](url)`        |
+| `{commit}`  | Link to the commit; not wrapped in paranthesis.                                           | ``[`abc1234`](url)`` |
+| `{authors}` | Link to the GitHub user profile of the main author of the commit (and PR).                | `[@ghost](url)`      |
+
+::: info
+When you use a token and its data is absent, the token will generate an empty string. Trailing spaces are omitted. Continuation lines of a multi-line summary are always appended below, indented by two spaces.
+:::
+
+Here are some examples for the change `"fix the thing"` made in PR `#123` by `@ghost`, squashed in commit `a1b2c3d` to the [`baseBranch`](https://changesets.dev/guide/config#basebranch):
+
+| `template` config                                     | Generated Markdown                                                                   |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `"\n- {pull} {commit} Thanks {authors}! - {summary}"` | ``\n- [#123](url) [`a1b2c3d`](url) Thanks [@ghost](url)! - fix the thing`` (default) |
+| `"\n- {summary} {ref}"`                               | `\n- fix the thing ([#123](url))` or ``- fix the thing ([`a1b2c3d`](url))``          |
+| `"\n- {summary} (thanks {authors}!)"`                 | `\n- fix the thing (thanks [@ghost](url)!)`                                          |
+| `"\n- {summary} {pull}"`                              | `\n- fix the thing [#123](url)`                                                      |

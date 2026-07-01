@@ -38,6 +38,10 @@ function updateMarkdown(
   const badgeRegex = /\[!\[.*?\]\(.*?\)\]\(.*?\)/g;
   content = content.replace(badgeRegex, "");
 
+  // Relative links to our docs
+  const docsRegex = /https:\/\/changesets\.dev\//g;
+  content = content.replace(docsRegex, "/");
+
   // Add our own badges
   const h1Regex = /^# (.+)$/m;
   if (!h1Regex.test(content)) {
