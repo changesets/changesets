@@ -5,6 +5,8 @@
 
 A changelog entry generator for GitHub that links to commits, PRs and authors.
 
+## Usage
+
 Enable it in `.changeset/config.json`:
 
 ```json

@@ -1,4 +1,4 @@
-import { defineConfig } from "vitepress";
+import { type DefaultTheme, defineConfig } from "vitepress";
 import {
   groupIconMdPlugin,
   groupIconVitePlugin,
@@ -122,49 +122,59 @@ export default defineConfig({
     ],
 
     sidebar: {
-      "/guide/": {
-        base: "/guide/",
-        items: [
-          {
-            text: "Introduction",
-            items: [
-              { text: "Getting Started", link: "getting-started" },
-              { text: "Why Changesets", link: "why" },
-              { text: "Technical Decisions", link: "technical-decisions" },
-            ],
-          },
-          {
-            text: "API Reference",
-            items: [
-              { text: "Configuration File", link: "config" },
-              { text: "Command Line Interface", link: "cli" },
-            ],
-          },
-          {
-            text: "Guides",
-            items: [
-              {
-                text: "Versioning and Publishing",
-                link: "versioning-and-publishing",
-              },
-              { text: "Automating Changesets", link: "automating" },
-              { text: "Backporting Changes", link: "backporting-changes" },
-              { text: "Fixed Packages", link: "fixed-packages" },
-              { text: "Linked Packages", link: "linked-packages" },
-              {
-                text: "Customize Changelog Format",
-                link: "customize-changelog-format",
-              },
-              {
-                text: "Customize Commit Format",
-                link: "customize-commit-format",
-              },
-              { text: "Snapshot Releases", link: "snapshot-releases" },
-              { text: "Prereleases", link: "prereleases" },
-            ],
-          },
-        ],
-      },
+      "/guide/": { items: getMainSidebar() },
+      "/packages/": { items: getMainSidebar() },
     },
   },
 });
+
+function getMainSidebar(): DefaultTheme.SidebarItem[] {
+  return [
+    {
+      text: "Introduction",
+      base: "/guide/",
+      items: [
+        { text: "Getting Started", link: "getting-started" },
+        { text: "Why Changesets", link: "why" },
+        { text: "Technical Decisions", link: "technical-decisions" },
+      ],
+    },
+    {
+      text: "API Reference",
+      base: "/guide/",
+      items: [
+        { text: "Configuration File", link: "config" },
+        { text: "Command Line Interface", link: "cli" },
+      ],
+    },
+    {
+      text: "Guides",
+      base: "/guide/",
+      items: [
+        {
+          text: "Versioning and Publishing",
+          link: "versioning-and-publishing",
+        },
+        { text: "Automating Changesets", link: "automating" },
+        { text: "Backporting Changes", link: "backporting-changes" },
+        { text: "Fixed Packages", link: "fixed-packages" },
+        { text: "Linked Packages", link: "linked-packages" },
+        {
+          text: "Customize Changelog Format",
+          link: "customize-changelog-format",
+        },
+        {
+          text: "Customize Commit Format",
+          link: "customize-commit-format",
+        },
+        { text: "Snapshot Releases", link: "snapshot-releases" },
+        { text: "Prereleases", link: "prereleases" },
+      ],
+    },
+    {
+      text: "Packages",
+      base: "/packages/",
+      items: [{ text: "changelog-github", link: "changelog-github" }],
+    },
+  ];
+}
