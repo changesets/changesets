@@ -1,3 +1,4 @@
+import fs from "node:fs/promises";
 import * as path from "node:path";
 import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
@@ -313,6 +314,55 @@ describe("Publish command", () => {
       "pkg-b@1.0.0",
       "pkg-a@1.0.0",
     ]);
+  });
+
+  it("writes tag events when output path is provided", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+    const outputFile = path.join(cwd, "output.ndjson");
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult("");
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd, output: outputFile });
+
+    await expect(fs.readFile(outputFile, "utf8")).resolves.toBe(
+      [
+        JSON.stringify({
+          type: "git-tag",
+          tag: "pkg-a@1.0.0",
+          packageName: "pkg-a",
+        }),
+        JSON.stringify({
+          type: "git-tag",
+          tag: "pkg-b@1.0.0",
+          packageName: "pkg-b",
+        }),
+        "",
+      ].join("\n"),
+    );
   });
 
   it("stops publishing after a failed chunk", async () => {

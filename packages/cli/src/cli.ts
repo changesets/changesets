@@ -17,7 +17,7 @@ cli.help((sections) => {
 cli.globalCommand.outputVersion = () => console.info(manifest.version);
 
 function normalizeOptions(
-  options: Record<string, any>,
+  options: Record<string, unknown>,
   { array }: { array?: string[] } = {},
 ) {
   // Do not allow positional arguments in options
@@ -33,7 +33,13 @@ function normalizeOptions(
     // If the flag is expected to be an array, ensure it's an array.
     if (array?.includes(key)) {
       const v = options[key];
-      options[key] = Array.isArray(v) ? v.map(String) : [String(v)];
+      options[key] = Array.isArray(v)
+        ? v.map(String)
+        : [
+            // those won't actually be objects and we want to stringify other primitive types
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            String(v),
+          ];
     }
     // If a flag is passed multiple times (becoming an array), only take the last value.
     else if (Array.isArray(options[key])) {
@@ -45,6 +51,14 @@ function normalizeOptions(
     if (typeof options[key] === "number") {
       options[key] = String(options[key]);
     }
+  }
+
+  return options;
+}
+
+function withEnvOptions(options: Record<string, unknown>) {
+  if (options.output == null && process.env.CHANGESETS_OUTPUT) {
+    options.output = process.env.CHANGESETS_OUTPUT;
   }
 }
 
@@ -103,7 +117,7 @@ cli
   .option("--from-pack-dir <dir>", "Publish from a packed output directory")
   .option("--git-tag", "Create a git tag for the release", { default: true })
   .action(async (options) => {
-    normalizeOptions(options);
+    withEnvOptions(normalizeOptions(options));
     const { publish } = await import("./commands/publish/index.ts");
     await publish(options);
   });
@@ -115,7 +129,7 @@ cli
     "Output the publish plan as JSON to a file [experimental]",
   )
   .action(async (options) => {
-    normalizeOptions(options);
+    withEnvOptions(normalizeOptions(options));
     const { publishPlan } = await import("./commands/publish-plan/index.ts");
     await publishPlan(options);
   });
@@ -144,7 +158,7 @@ cli
   .option("-v, --verbose", "Show more information about the changesets")
   .option("-o, --output <file>", "Output the status as JSON to a file")
   .action(async (options) => {
-    normalizeOptions(options);
+    withEnvOptions(normalizeOptions(options));
     const { status } = await import("./commands/status/index.ts");
     await status(options);
   });
@@ -158,7 +172,7 @@ cli
         "The 'tag' command is deprecated. Please use 'git-tag' instead.",
       );
     }
-    normalizeOptions(options);
+    withEnvOptions(normalizeOptions(options));
     const { gitTag } = await import("./commands/git-tag/index.ts");
     await gitTag(options);
   });
