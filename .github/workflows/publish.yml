@@ -17,6 +17,7 @@ permissions: {} # each job should define its own permission explicitly
 jobs:
   select-mode:
     name: Select Mode
+    if: ${{ github.repository_owner == 'changesets' }}
     runs-on: ubuntu-latest
     environment: version
     timeout-minutes: 20
