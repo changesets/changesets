@@ -174,7 +174,7 @@ function getMainSidebar(): DefaultTheme.SidebarItem[] {
     {
       text: "Packages",
       base: "/packages/",
-      items: [{ text: "changelog-github", link: "changelog-github" }],
+      items: [{ text: "Changelog GitHub", link: "changelog-github" }],
     },
   ];
 }
