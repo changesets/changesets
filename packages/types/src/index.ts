@@ -101,7 +101,7 @@ export type WrittenConfig = {
   commit?: boolean | readonly [string, null | Record<string, unknown>] | string;
   fixed?: Fixed;
   linked?: Linked;
-  access?: AccessType | "private";
+  access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
   format?: "auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false;
@@ -170,9 +170,6 @@ export type CommitFunctions = {
 export type PreState = {
   mode: "pre" | "exit";
   tag: string;
-  initialVersions: {
-    [pkgName: string]: string;
-  };
   changesets: string[];
 };
 

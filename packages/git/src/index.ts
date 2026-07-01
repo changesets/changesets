@@ -178,7 +178,12 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
 }
 
 export async function deepenCloneBy({ by, cwd }: { by: number; cwd: string }) {
-  await exec("git", ["fetch", `--deepen=${by}`], { nodeOptions: { cwd } });
+  const cmd = await exec("git", ["fetch", `--deepen=${by}`], {
+    nodeOptions: { cwd },
+  });
+  if (cmd.exitCode !== 0) {
+    throw new Error(cmd.stderr.toString());
+  }
 }
 async function getRepoRoot({ cwd }: { cwd: string }) {
   const { stdout, exitCode, stderr } = await exec(

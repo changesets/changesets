@@ -12,7 +12,7 @@ The Changesets CLI is the main way of interacting with changesets. It provides a
 
 <div v-html="data.initHelpMessage" />
 
-This command sets up the `.changeset` folder. It generates a readme and a config file with the default options. You should run this command once when setting up Changesets.
+This command sets up the `.changeset` folder. It generates a readme and creates a config file through an interactive prompt. You should run this command once when you are setting up Changesets.
 
 ## add
 
@@ -76,9 +76,9 @@ $ changeset version --snapshot 'pr#123'
 
 <div v-html="data.publishHelpMessage" />
 
-- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing)
+- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing), [`pack` command](#pack)
 
-This command publishes changes to npm and creates git tags. It works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it's not, run `npm publish` (or `pnpm publish` etc if detected to be using a different package manager).
+This command publishes changes to npm and creates git tags. It works by going into each package, checking if the version it has in its `package.json` is published on npm, and if it's not, run `npm publish` (or with the detected package-manager-specific publish command).
 
 Because this command assumes that the last commit is the version commit, you should not commit any changes between calling `version` and `publish`. These commands are separate to enable you to check if the release changes are accurate.
 
@@ -89,6 +89,12 @@ Make sure to push the tags to your git remote after creating them:
 ```bash
 $ git push --follow-tags
 ```
+
+::: warning Accidental publishes
+As the `publish` command automatically publishes versions that are not yet published, it's possible to accidentally publish a new package that has not been versioned before.
+
+For example, when [Automating Changesets](./automating.md) (where it calls `publish` if there are no changesets to create a version PR) or automated [Snapshot Releases](./snapshot-releases.md), it may unintentionally publish the new package. To prevent this, make sure to set `"private": true` in the `package.json` of packages that should not be published.
+:::
 
 ### OTP
 
@@ -105,6 +111,26 @@ Published versions are tagged on npm with `latest` by default. You may want to c
 ```bash
 $ changeset publish --tag beta
 ```
+
+## publish-plan
+
+<div v-html="data.publishPlanHelpMessage" />
+
+- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing), [`pack` command](#pack), [`publish` command](#publish)
+
+Show packages that are ready to publish or tag. If `--output` is passed, the JSON will be written to the file which can be used later by the `pack` and `publish` commands. `--output` is marked experimental as the format may change between patches, however the output will always work if passed to the same version of `pack` and `publish` commands.
+
+This is useful for CI pipelines that want to split the version and publish steps to check if there are packages to publish.
+
+## pack
+
+<div v-html="data.packHelpMessage" />
+
+- **Related:** [Versioning and Publishing](./versioning-and-publishing.md#publishing), [`publish` command](#publish)
+
+Pack publishable packages into tarballs. The `--out-dir` flag is required to write the output to the directory, which the same directory can be passed to `publish --from-pack-dir` so the `publish` command picks up the tarballs and publishes them.
+
+This is useful for CI pipelines that want to split the build and publish steps.
 
 ## status
 
@@ -132,11 +158,11 @@ $ changeset status --since next
 `status` will fail if you are in the middle of running `version` or `publish`. If you want to get changeset status at the time of a version increase and publish, you need to run it immediately before running `version`.
 :::
 
-## tag
+## git-tag
 
-<div v-html="data.tagHelpMessage" />
+<div v-html="data.gitTagHelpMessage" />
 
-The `tag` command creates git tags for the current version of all packages. The tags created are equivalent to those created by the [`publish`](#publish) command, but the `tag` command does not publish anything to npm.
+The `git-tag` command creates git tags for the current version of all packages. The tags created are equivalent to those created by the [`publish`](#publish) command, but the `git-tag` command does not publish anything to npm.
 
 This is helpful in situations where a different tool is used to publish packages instead of Changesets. The tags created are in the format `pkg-name@X.X.X`, or in single-package repos, it is `vX.X.X`. It is expected to run the `version` command first so the created tags are up to date.
 

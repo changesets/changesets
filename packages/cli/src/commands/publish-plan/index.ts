@@ -32,6 +32,8 @@ export async function publishPlan(
   const tagReleases = entries.filter((release) => release.kind === "tag-only");
 
   if (options?.output) {
+    const outputPath = path.resolve(cwd, options.output);
+    await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(
       path.resolve(cwd, options.output),
       JSON.stringify(

@@ -76,6 +76,10 @@ export default defineConfig(
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { varsIgnorePattern: "^_" },
+      ],
       "@typescript-eslint/unbound-method": "off",
 
       // these rules are slow, require extensive config, and/or don't provide much
@@ -105,6 +109,7 @@ export default defineConfig(
       "**/index.ts", // to be removed in next release (v4) when we are dropping default export
       "**/.vitepress/config.ts",
       "site/**/*.data.ts",
+      "site/**/*.paths.ts",
       "**/vitest.config.mts",
       "**/eslint.config.mjs",
     ],

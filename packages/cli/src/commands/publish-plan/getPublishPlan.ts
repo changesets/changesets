@@ -16,7 +16,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { graphSequencer } from "@pnpm/deps.graph-sequencer";
 import semverParse from "semver/functions/parse.js";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
-import { getCorrectRegistry, infoAllow404 } from "../publish/npm-utils.ts";
+import { getPublishTool, infoAllow404 } from "../publish/npm-utils.ts";
 
 export const CURRENT_PUBLISH_PLAN_VERSION = 1;
 
@@ -32,10 +32,17 @@ export type TarballMetadata = {
   integrity: string;
 };
 
+// NOTE: publish plan gets computed based on the registry configuration coming from publishConfig, config and env values.
+// To compute what gets included in the publish plan, we need to query the registry.
+// However, we don't quite know what exactly got queried at the end as that gets largely delegated to the package manager CLIs and their internal logic.
+// Given we don't want to reimplement everything carefully for each package manager, we can't include the registry in the publish plan's release entries.
+// So, to some extent, the overall flow relies on matching configuration values between publish-plan and publish invocations.
+//
+// This also assumes "core" fields (like name and version) match between ./packages/pkg-a/package.json and ./packages/pkg-a/dist/package.json when using `publishConfig.directory`.
+// It's hard to imagine a legitimate/non-contrived examples for this not being the case.
 export type PublishReleaseEntry = BaseReleaseEntry & {
   kind: "publish";
   access: AccessType;
-  registry: string;
   tag: string;
   tarball?: TarballMetadata;
 };
@@ -94,17 +101,19 @@ export async function getUnpublishedPackages(
     allowPrivatePackages: boolean;
   },
 ): Promise<Array<PublishReleaseEntry>> {
-  const publishTool = packages.tool.type === "pnpm" ? "pnpm" : "npm";
+  const publishTool = getPublishTool(packages.tool);
   const results = await Promise.all(
     packages.packages
       .filter(
         (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
       )
       .map(async (pkg) => {
-        const response = await infoAllow404(pkg.packageJson, publishTool);
+        const response = await infoAllow404(publishTool, pkg.packageJson);
         let publishedState: PublishedState = "never";
+
         if (response.published) {
           publishedState = "published";
+
           if (
             preState != null &&
             response.pkgInfo.versions &&
@@ -139,7 +148,6 @@ export async function getUnpublishedPackages(
         name: pkg.packageJson.name,
         version: localVersion,
         access: pkg.packageJson.publishConfig?.access || access,
-        registry: getCorrectRegistry(pkg.packageJson).registry,
         tag: getReleaseTag(publishedState, preState, options.tag),
       };
       packagesToPublish.push(release);

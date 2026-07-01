@@ -63,6 +63,10 @@ And you have released your changes! When you add more changesets again, repeat t
 
 Check out the [CI automation](./automating.md) guide to simplify versioning and publishing so that releasing is as simple as merging a PR. And the [Backporting Changes](./backporting-changes.md) guide if you need to release changes in previous versions.
 
+::: tip Publish a different directory
+Changesets supports the `publishConfig.directory` option in the `package.json` to publish a different directory than the package root. This works the same way as [pnpm's support](https://pnpm.io/package_json#publishconfigdirectory), however, Changesets normalizes this to work in all package managers.
+:::
+
 ## Publishing for the First Time
 
 For packages that are being published for the first time, make sure that the [`access`](./config.md#access) option is properly set. If all your packages are public, set it to `public`:
@@ -113,3 +117,7 @@ Then, run `npm publish` and set up trusted publishing in the package settings. T
 
 Initial release
 ```
+
+## Removing a Package
+
+If a package is no longer needed, you can delete the package directory from your repository as usual, and make sure all references to the package name is removed from the existing changesets. Search for lines such as `"my-deleted-package": patch` in the changesets frontmatter and remove them, and Changesets will skip the package for the next version and publish.

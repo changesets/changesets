@@ -1,5 +1,16 @@
 # @changesets/release-utils
 
+## 1.0.0-next.6
+
+### Major Changes
+
+- [#2106](https://github.com/changesets/changesets/pull/2106) [`ea8ca75`](https://github.com/changesets/changesets/commit/ea8ca75118462abcfa5657ff2d7aef1552e3b9b6) Thanks [@beeequeue](https://github.com/beeequeue)! - Dropped support for v1 `changeset bump` command in `runVersion()`
+
+### Patch Changes
+
+- Updated dependencies [[`c2348fc`](https://github.com/changesets/changesets/commit/c2348fcb9eba443fde1460b595651ce040f40a08)]:
+  - @changesets/read@1.0.0-next.6
+
 ## 1.0.0-next.5
 
 ### Patch Changes
