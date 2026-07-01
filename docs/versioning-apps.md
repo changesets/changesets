@@ -34,3 +34,7 @@ For example, if you have an app `A` that depends on a private library `B`, you c
 ```
 
 This works because `A` is private and will never be published to npm with a stale reference to `B`.
+
+## Automated Releases
+
+When using the [Automating Changesets](./automating-changesets.md) you will still need the GitHub Action or similar to invoke `changeset version` and `changeset publish` in order for the release to be created, otherwise just the `CHANGELOG.md` is created, and the release on GitHub is not actually created.
