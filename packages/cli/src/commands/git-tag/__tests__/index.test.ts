@@ -62,7 +62,7 @@ describe("git-tag command", () => {
 
       (git.getAllTags as Mock).mockReturnValue(new Set());
 
-      await tag({ cwd, output: outputFile });
+      await gitTag({ cwd, output: outputFile });
 
       await expect(fs.readFile(outputFile, "utf8")).resolves.toBe(
         [
