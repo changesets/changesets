@@ -1,10 +1,10 @@
-# GitHub Changelog Generator
+# GitHub Changelog
 
-The `@changesets/changelog-github` generator is an official package from changesets that links to commits, PRs and authors. Learn more about generators in [our "Customize Changelog Format" guide](./customize-changelog-format.md#writing-a-custom-changelog-generator).
+The `@changesets/changelog-github` package is an official and maintained generator from changesets that links to commits, PRs and authors. Learn more about generators in [our "Customize Changelog Format" guide](./customize-changelog-format.md#writing-a-custom-changelog-generator).
 
 ## Usage
 
-You can install the GitHub Changelog generator with the following command:
+You can install the `@changesets/changelog-github` package with the following command:
 
 ::: code-group
 
@@ -22,13 +22,13 @@ $ yarn add -D @changesets/changelog-github
 
 :::
 
-The GitHub Changelog generator requires a [`GITHUB_TOKEN`](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions. Add it to your repository's [GitHub Action secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) and your `.env` file:
+The `@changesets/changelog-github` package requires a [`GITHUB_TOKEN`](https://github.com/settings/tokens/new?scopes=read:user,repo:status&description=changesets) with `read:user` and `repo:status` permissions. Add it to your repository's [GitHub Action secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) and your `.env` file:
 
 ```bash
 GITHUB_TOKEN=token_here
 ```
 
-Then you can use it in the [`changelog`](./config.md#changelog) option:
+Then you can use it in the [`changelog`](https://changesets.dev/guide/config#changelog) option:
 
 ```json [.changeset/config.json]
 {
@@ -38,14 +38,15 @@ Then you can use it in the [`changelog`](./config.md#changelog) option:
 
 ## Options
 
-The GitHub Changelog generator supports the following configuration options:
+The `@changesets/changelog-github` package supports the following configuration options:
 
 ### `repo`
 
-- **Required**
 - **Type:** `string`
 
 Specify the `<org>/<repo>` slug of your GitHub repository.
+
+When running in GitHub Actions, `repo` is optional because it defaults to the `GITHUB_REPOSITORY` environment variable.
 
 ### `disableThanks`
 
@@ -97,7 +98,7 @@ The `template` option supports these tokens.
 When you use a token and its data is absent, the token will generate an empty string. Trailing spaces are omitted. Continuation lines of a multi-line summary are always appended below, indented by two spaces.
 :::
 
-Here are some examples for the change `"fix the thing"` made in PR `#123` by `@ghost`, squashed in commit `a1b2c3d` to the [`baseBranch`](./config.md#basebranch):
+Here are some examples for the change `"fix the thing"` made in PR `#123` by `@ghost`, squashed in commit `a1b2c3d` to the [`baseBranch`](https://changesets.dev/guide/config#basebranch):
 
 | `template` config                                     | Generated Markdown                                                                   |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------ |
