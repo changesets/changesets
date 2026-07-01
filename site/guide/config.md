@@ -41,7 +41,7 @@ If a tuple (`[string, Record<string, any>]`) is set, you can pass options in the
 
 Consult the documentation for the changelog generator you're using for more information on the options you can pass to it.
 
-Read more about the [`@changesets/changelog-github` package](./github-changelog.md).
+Read more about the [`@changesets/changelog-github` package](/packages/changelog-github).
 
 ## commit
 
