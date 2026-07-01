@@ -40,16 +40,16 @@ When running in GitHub Actions, `repo` is optional because it defaults to the `G
 
 Set `"disableThanks": true` to drop the `"Thanks [@user]!"` attribution from each line.
 
-::: info
-It is recommended to not set `"disableThanks": true` when using `template`, as the `{authors}` token returns an empty string then, which could lead to unexpected results.
-:::
+> [!NOTE]
+> It is recommended to not set `"disableThanks": true` when using `template`, as the `{authors}` token returns an empty string then, which could lead to unexpected results.
 
 ### `template`
 
 - **Type:** `string`
 - **Default:** `"\n- {pull} {commit} Thanks {authors}! - {summary}"`
 
-> ⚠️ **Experimental.** The `template` option and its token syntax may change in any release, including a patch. If you rely on it, pin the exact `@changesets/changelog-github` version.
+> [!WARNING]
+> **Experimental.** The `template` option and its token syntax may change in any release, including a patch. If you rely on it, pin the exact `@changesets/changelog-github` version.
 
 The `template` option allows you to customize the format that should be used for the generation of the first line of individual bullet points in the changelog output. For example, the default template generates this Markdown from one changeset example file:
 
@@ -63,9 +63,8 @@ Each piece of information is dynamically represented with a [token](#tokens). Th
 \n- {pull} {commit} Thanks {authors}! - {summary}
 ```
 
-::: tip
-Note that `\n- ` is included to generate each change as a bullet list item. However, you can also drop them and write all changes into a paragraph. Trailing spaces will be trimmed to avoid dangling spaces when the last token is empty.
-:::
+> [!NOTE]
+> Note that `\n- ` is included to generate each change as a bullet list item. However, you can also drop them and write all changes into a paragraph. Trailing spaces will be trimmed to avoid dangling spaces when the last token is empty.
 
 #### Tokens
 
