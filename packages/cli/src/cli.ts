@@ -57,8 +57,8 @@ function normalizeOptions(
 }
 
 function withEnvOptions(options: Record<string, unknown>) {
-  if (options.output == null && process.env.CHANGESETS_OUTPUT_FILE) {
-    options.output = process.env.CHANGESETS_OUTPUT_FILE;
+  if (options.output == null && process.env.CHANGESETS_OUTPUT) {
+    options.output = process.env.CHANGESETS_OUTPUT;
   }
 }
 

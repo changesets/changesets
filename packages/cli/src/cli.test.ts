@@ -153,7 +153,7 @@ const tests: CommandTest[] = [
       {
         args: [],
         env: {
-          CHANGESETS_OUTPUT_FILE: "output.ndjson",
+          CHANGESETS_OUTPUT: "output.ndjson",
         },
         options: {
           gitTag: true,
@@ -238,7 +238,7 @@ const tests: CommandTest[] = [
       {
         args: [],
         env: {
-          CHANGESETS_OUTPUT_FILE: "output.ndjson",
+          CHANGESETS_OUTPUT: "output.ndjson",
         },
         options: {
           output: "output.ndjson",
