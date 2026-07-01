@@ -1,6 +1,6 @@
 {
   "name": "@changesets/types",
-  "version": "7.0.0-next.5",
+  "version": "7.0.0-next.6",
   "description": "Common types shared between changeset packages",
   "license": "MIT",
   "repository": {
