@@ -18,6 +18,7 @@ import type {
   ReleasePlan,
 } from "@changesets/types";
 import { resolve } from "import-meta-resolve";
+import { editCargoTomlVersion } from "./edit-cargo-toml.ts";
 import { editJson } from "./edit-json.ts";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
 import {
@@ -139,13 +140,23 @@ export async function applyReleasePlan(
 
   const filesToFormat: string[] = [];
   for (const release of finalisedRelease) {
-    const { changelog, pkgJsonEdits, dir, name } = release;
+    const { changelog, pkgJsonEdits, dir, name, newVersion } = release;
 
     const pkgJsonPath = path.resolve(dir, "package.json");
     const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
     const pkgUpdated = editJson(pkgRaw, pkgJsonEdits);
     await fs.writeFile(pkgJsonPath, pkgUpdated);
     touchedFiles.push(pkgJsonPath);
+
+    const cargoTomlPath = path.resolve(dir, "Cargo.toml");
+    const cargoTomlRaw = await fs
+      .readFile(cargoTomlPath, "utf8")
+      .catch(() => null);
+    if (cargoTomlRaw != null) {
+      const cargoTomlUpdated = editCargoTomlVersion(cargoTomlRaw, newVersion);
+      await fs.writeFile(cargoTomlPath, cargoTomlUpdated);
+      touchedFiles.push(cargoTomlPath);
+    }
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");

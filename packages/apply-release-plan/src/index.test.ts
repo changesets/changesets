@@ -289,6 +289,95 @@ describe("apply release plan", () => {
       });
     });
 
+    describe("Cargo.toml", () => {
+      it("should update the version in a sibling Cargo.toml", async () => {
+        const releasePlan = new FakeReleasePlan();
+        const { changedFiles } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              private: true,
+              workspaces: ["packages/*"],
+            }),
+            "package-lock.json": "",
+            "packages/pkg-a/package.json": JSON.stringify({
+              name: "pkg-a",
+              version: "1.0.0",
+            }),
+            "packages/pkg-a/Cargo.toml": `[package]
+name = "pkg-a"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+serde = "1.0.0"
+`,
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+        const cargoTomlPath = changedFiles.find((a) =>
+          a.endsWith(`pkg-a${path.sep}Cargo.toml`),
+        );
+
+        if (!cargoTomlPath)
+          throw new Error(`could not find an updated Cargo.toml`);
+        const cargoToml = await fs.readFile(cargoTomlPath, "utf8");
+
+        expect(cargoToml).toBe(`[package]
+name = "pkg-a"
+version = "1.1.0"
+edition = "2021"
+
+[dependencies]
+serde = "1.0.0"
+`);
+      });
+
+      it("should not touch packages without a Cargo.toml", async () => {
+        const releasePlan = new FakeReleasePlan();
+        const { changedFiles } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              private: true,
+              workspaces: ["packages/*"],
+            }),
+            "package-lock.json": "",
+            "packages/pkg-a/package.json": JSON.stringify({
+              name: "pkg-a",
+              version: "1.0.0",
+            }),
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+
+        expect(changedFiles.some((a) => a.endsWith("Cargo.toml"))).toBe(false);
+      });
+
+      it("should throw if the Cargo.toml has no [package] section", async () => {
+        const releasePlan = new FakeReleasePlan();
+
+        await expect(
+          testSetup(
+            {
+              "package.json": JSON.stringify({
+                private: true,
+                workspaces: ["packages/*"],
+              }),
+              "package-lock.json": "",
+              "packages/pkg-a/package.json": JSON.stringify({
+                name: "pkg-a",
+                version: "1.0.0",
+              }),
+              "packages/pkg-a/Cargo.toml": `[workspace]\nmembers = ["."]\n`,
+            },
+            releasePlan.getReleasePlan(),
+            releasePlan.config,
+          ),
+        ).rejects.toThrow(/\[package\]/);
+      });
+    });
+
     it("should not update ranges set to *", async () => {
       const releasePlan = new FakeReleasePlan(
         [
