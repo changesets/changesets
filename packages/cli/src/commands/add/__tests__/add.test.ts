@@ -375,6 +375,77 @@ describe("Add command", () => {
     expect(mockedAskWithEditor).not.toHaveBeenCalled();
   });
 
+  it("should skip confirmation when release type flags and message are passed", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await addChangeset({
+      cwd,
+      message: "summary from message",
+      patch: ["pkg-a"],
+    });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "summary from message",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      }),
+    );
+    expect(mockedUtils.askConfirm).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
+    expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
+    expect(mockedAskWithEditor).not.toHaveBeenCalled();
+  });
+
+  it("should keep confirmation flow when only release type flags are passed", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockedUtils.askQuestion.mockResolvedValue("summary from prompt");
+    mockedUtils.askConfirm.mockResolvedValue(true);
+
+    await addChangeset({
+      cwd,
+      patch: ["pkg-a"],
+    });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "summary from prompt",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      }),
+    );
+    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
+      "Is this your desired changeset?",
+    );
+    expect(mockedUtils.askQuestion).toHaveBeenCalledOnce();
+    expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
+  });
+
   it("should allow using message with empty changesets", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -623,6 +694,110 @@ describe("Add command", () => {
           Ensure the packages to version are not ignored by the config
           Ensure that relevant package.json files have a \`version\` field"
     `);
+  });
+
+  it("should validate package names passed in from release type flags", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "test",
+        major: ["pkg-missing-major"],
+        minor: ["pkg-missing-minor"],
+        patch: ["pkg-missing-patch"],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toEqual(
+      [
+        "The package pkg-missing-major is passed to the `--major` option but it is not found in the project. You may have misspelled the package name.",
+        "The package pkg-missing-minor is passed to the `--minor` option but it is not found in the project. You may have misspelled the package name.",
+        "The package pkg-missing-patch is passed to the `--patch` option but it is not found in the project. You may have misspelled the package name.",
+      ].join("\n"),
+    );
+  });
+
+  it("should validate duplicate package names passed in from release type flags", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "test",
+        major: ["pkg-a"],
+        minor: ["pkg-a"],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toEqual(
+      "The package pkg-a is passed to multiple release type options: `--major`, `--minor`. Please select only one release type for this package.",
+    );
+  });
+
+  it("should not validate unknown package names as duplicates", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "test",
+        major: ["pkg-missing"],
+        minor: ["pkg-missing"],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toEqual(
+      [
+        "The package pkg-missing is passed to the `--major` option but it is not found in the project. You may have misspelled the package name.",
+        "The package pkg-missing is passed to the `--minor` option but it is not found in the project. You may have misspelled the package name.",
+      ].join("\n"),
+    );
   });
 
   it("should be able to add a changeset when called from subdirectory", async () => {

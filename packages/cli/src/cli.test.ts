@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { cli } from "./cli.ts";
 import { add } from "./commands/add/index.ts";
+import { gitTag } from "./commands/git-tag/index.ts";
 import { init } from "./commands/init/index.ts";
 import { pack } from "./commands/pack/index.ts";
 import { pre } from "./commands/pre/index.ts";
 import { publishPlan } from "./commands/publish-plan/index.ts";
 import { publish } from "./commands/publish/index.ts";
 import { status } from "./commands/status/index.ts";
-import { tag } from "./commands/tag/index.ts";
 import { version } from "./commands/version/index.ts";
 
 vi.mock("./commands/init/index.ts");
@@ -17,7 +17,7 @@ vi.mock("./commands/publish/index.ts");
 vi.mock("./commands/publish-plan/index.ts");
 vi.mock("./commands/pack/index.ts");
 vi.mock("./commands/status/index.ts");
-vi.mock("./commands/tag/index.ts");
+vi.mock("./commands/git-tag/index.ts");
 vi.mock("./commands/pre/index.ts");
 
 afterEach(() => {
@@ -68,6 +68,23 @@ const tests: CommandTest[] = [
         args: ["--since", "main", "--since", "next"],
         options: {
           since: "next",
+        },
+      },
+      {
+        args: [
+          "--major",
+          "pkg-a",
+          "--minor",
+          "pkg-b",
+          "--patch",
+          "pkg-c",
+          "--patch",
+          "pkg-d",
+        ],
+        options: {
+          major: ["pkg-a"],
+          minor: ["pkg-b"],
+          patch: ["pkg-c", "pkg-d"],
         },
       },
     ],
@@ -211,8 +228,8 @@ const tests: CommandTest[] = [
     ],
   },
   {
-    command: "tag",
-    fn: tag,
+    command: "git-tag",
+    fn: gitTag,
     cases: [
       {
         args: [],

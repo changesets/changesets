@@ -3,11 +3,11 @@ import path from "node:path";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { describe, expect, it, type Mock, vi } from "vitest";
-import { tag } from "../index.ts";
+import { gitTag } from "../index.ts";
 
 vi.mock("@changesets/git");
 
-describe("tag command", () => {
+describe("git-tag command", () => {
   silenceLogsInBlock();
 
   describe("workspace project", () => {
@@ -35,7 +35,7 @@ describe("tag command", () => {
       (git.getAllTags as Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag({ cwd });
+      await gitTag({ cwd });
       expect(git.tag).toHaveBeenCalledTimes(2);
       expect((git.tag as Mock).mock.calls[0][0]).toEqual("pkg-a@1.0.0");
       expect((git.tag as Mock).mock.calls[1][0]).toEqual("pkg-b@1.0.0");
@@ -110,7 +110,7 @@ describe("tag command", () => {
       );
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag({ cwd });
+      await gitTag({ cwd });
       expect(git.tag).toHaveBeenCalledOnce();
       expect((git.tag as Mock).mock.calls[0][0]).toEqual("pkg-b@1.0.0");
     });
@@ -134,7 +134,7 @@ describe("tag command", () => {
       (git.getAllTags as Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag({ cwd });
+      await gitTag({ cwd });
       expect(git.tag).toHaveBeenCalledOnce();
       expect((git.tag as Mock).mock.calls[0][0]).toEqual("v1.0.0");
     });
@@ -151,7 +151,7 @@ describe("tag command", () => {
       (git.getAllTags as Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag({ cwd });
+      await gitTag({ cwd });
       expect(git.tag).toHaveBeenCalledTimes(0);
     });
   });

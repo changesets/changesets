@@ -23,12 +23,12 @@ function buildTagMessage(
     : c.cyan(`v${pkg.newVersion}`);
 }
 
-export interface TagOptions {
+export interface GitTagOptions {
   cwd?: string;
   output?: string;
 }
 
-export async function tag(options?: TagOptions) {
+export async function gitTag(options?: GitTagOptions) {
   const cwd = options?.cwd ?? process.cwd();
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);

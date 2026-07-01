@@ -83,8 +83,11 @@ cli
     "Detect changed packages since the provided git ref",
   )
   .option("-m, --message <text>", "Directly provide a message to the changeset")
+  .option("--major <pkg>", "Package to major bump")
+  .option("--minor <pkg>", "Package to minor bump")
+  .option("--patch <pkg>", "Package to patch bump")
   .action(async (options) => {
-    normalizeOptions(options);
+    normalizeOptions(options, { array: ["major", "minor", "patch"] });
     const { add } = await import("./commands/add/index.ts");
     await add(options);
   });
@@ -161,11 +164,17 @@ cli
   });
 
 cli
-  .command("tag", "Create git tags for the current version of all packages")
+  .command("git-tag", "Create git tags for the current version of all packages")
+  .alias("tag")
   .action(async (options) => {
+    if (cli.matchedCommandName === "tag") {
+      log.warn(
+        "The 'tag' command is deprecated. Please use 'git-tag' instead.",
+      );
+    }
     withEnvOptions(normalizeOptions(options));
-    const { tag } = await import("./commands/tag/index.ts");
-    await tag(options);
+    const { gitTag } = await import("./commands/git-tag/index.ts");
+    await gitTag(options);
   });
 
 cli
