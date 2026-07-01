@@ -31,9 +31,17 @@ function normalizeOptions(
     }
 
     // If the flag is expected to be an array, ensure it's an array.
+    // Also expand comma-separated values so that e.g. `--minor pkg1,pkg2`
+    // is treated the same as `--minor pkg1 --minor pkg2`.
     if (array?.includes(key)) {
       const v = options[key];
-      options[key] = Array.isArray(v) ? v.map(String) : [String(v)];
+      const values = Array.isArray(v) ? v.map(String) : [String(v)];
+      options[key] = values.flatMap((value) =>
+        value
+          .split(",")
+          .map((part) => part.trim())
+          .filter(Boolean),
+      );
     }
     // If a flag is passed multiple times (becoming an array), only take the last value.
     else if (Array.isArray(options[key])) {
@@ -69,9 +77,9 @@ cli
     "Detect changed packages since the provided git ref",
   )
   .option("-m, --message <text>", "Directly provide a message to the changeset")
-  .option("--major <pkg>", "Package to major bump")
-  .option("--minor <pkg>", "Package to minor bump")
-  .option("--patch <pkg>", "Package to patch bump")
+  .option("--major <pkg>", "Package(s) to major bump (comma-separated)")
+  .option("--minor <pkg>", "Package(s) to minor bump (comma-separated)")
+  .option("--patch <pkg>", "Package(s) to patch bump (comma-separated)")
   .action(async (options) => {
     normalizeOptions(options, { array: ["major", "minor", "patch"] });
     const { add } = await import("./commands/add/index.ts");

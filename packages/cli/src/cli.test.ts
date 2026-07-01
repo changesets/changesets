@@ -82,6 +82,20 @@ const tests: CommandTest[] = [
           patch: ["pkg-c", "pkg-d"],
         },
       },
+      {
+        args: [
+          "--minor",
+          "pkg-a, pkg-b",
+          "--patch",
+          "pkg-c,pkg-d",
+          "--patch",
+          "pkg-e",
+        ],
+        options: {
+          minor: ["pkg-a", "pkg-b"],
+          patch: ["pkg-c", "pkg-d", "pkg-e"],
+        },
+      },
     ],
   },
   {
