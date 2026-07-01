@@ -32,10 +32,7 @@ If a tuple (`[string, Record<string, any>]`) is set, you can pass options in the
 
 ```json [.changeset/config.json]
 {
-  "changelog": [
-    "@changesets/changelog-github",
-    { "repo": "owner/repo" }
-  ]
+  "changelog": ["@changesets/changelog-github", { "repo": "owner/repo" }]
 }
 ```
 
