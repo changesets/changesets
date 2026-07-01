@@ -21,7 +21,8 @@
     "@changesets/types": "workspace:^",
     "import-meta-resolve": "^4.2.0",
     "jsonc-parser": "^3.3.1",
-    "semver": "^7.8.1"
+    "semver": "^7.8.1",
+    "toml-eslint-parser": "^1.0.3"
   },
   "devDependencies": {
     "@changesets/test-utils": "workspace:*",

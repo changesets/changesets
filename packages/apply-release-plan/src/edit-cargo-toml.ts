@@ -1,6 +1,4 @@
-const PACKAGE_HEADER_RE = /^\[package\][ \t]*(\r?\n|$)/m;
-const NEXT_HEADER_RE = /^\[/m;
-const VERSION_FIELD_RE = /^([ \t]*version[ \t]*=[ \t]*)(["'])(.*?)\2/m;
+import { parseTOML, type AST } from "toml-eslint-parser";
 
 /**
  * Updates the `version` field in the `[package]` section of a Cargo.toml,
@@ -8,28 +6,47 @@ const VERSION_FIELD_RE = /^([ \t]*version[ \t]*=[ \t]*)(["'])(.*?)\2/m;
  * (`version.workspace = true`) are not supported.
  */
 export function editCargoTomlVersion(toml: string, newVersion: string): string {
-  const packageHeaderMatch = PACKAGE_HEADER_RE.exec(toml);
-  if (!packageHeaderMatch) {
+  const topLevelTable = parseTOML(toml).body[0];
+
+  const packageTable = topLevelTable.body.find(
+    (node): node is AST.TOMLTable =>
+      node.type === "TOMLTable" &&
+      node.kind === "standard" &&
+      node.resolvedKey.length === 1 &&
+      node.resolvedKey[0] === "package",
+  );
+  if (!packageTable) {
     throw new Error("Could not find a `[package]` section in Cargo.toml");
   }
-  const sectionStart = packageHeaderMatch.index + packageHeaderMatch[0].length;
 
-  const nextHeaderMatch = NEXT_HEADER_RE.exec(toml.slice(sectionStart));
-  const sectionEnd = nextHeaderMatch
-    ? sectionStart + nextHeaderMatch.index
-    : toml.length;
-  const section = toml.slice(sectionStart, sectionEnd);
-
-  const versionMatch = VERSION_FIELD_RE.exec(section);
-  if (!versionMatch) {
+  const versionEntry = packageTable.body.find(
+    (kv) => getKeyPath(kv) === "version",
+  );
+  if (!versionEntry) {
+    const isWorkspaceInherited = packageTable.body.some((kv) =>
+      getKeyPath(kv).startsWith("version."),
+    );
     throw new Error(
-      "Could not find a `version` field in the `[package]` section of Cargo.toml (workspace-inherited versions via `version.workspace = true` are not supported)",
+      isWorkspaceInherited
+        ? "Cannot update `version` in Cargo.toml: it is inherited via `version.workspace = true`, which is not supported"
+        : "Could not find a `version` field in the `[package]` section of Cargo.toml",
     );
   }
 
-  const valueStart =
-    sectionStart + versionMatch.index + versionMatch[1].length + 1;
-  const valueEnd = valueStart + versionMatch[3].length;
+  const { value } = versionEntry;
+  if (value.type !== "TOMLValue" || value.kind !== "string") {
+    throw new Error(
+      "Expected the `version` field in the `[package]` section of Cargo.toml to be a string",
+    );
+  }
 
-  return toml.slice(0, valueStart) + newVersion + toml.slice(valueEnd);
+  const [start, end] = value.range;
+  const quote = value.style === "literal" ? "'" : '"';
+  return toml.slice(0, start) + quote + newVersion + quote + toml.slice(end);
+}
+
+function getKeyPath(keyValue: AST.TOMLKeyValue): string {
+  return keyValue.key.keys
+    .map((key) => (key.type === "TOMLBare" ? key.name : key.value))
+    .join(".");
 }

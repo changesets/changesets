@@ -50,7 +50,7 @@ version = "9.9.9"
   it("throws when the version is workspace-inherited", () => {
     const toml = `[package]\nname = "my-crate"\nversion.workspace = true\n`;
     expect(() => editCargoTomlVersion(toml, "0.2.0")).toThrow(
-      /workspace-inherited/,
+      /version\.workspace = true/,
     );
   });
 });
