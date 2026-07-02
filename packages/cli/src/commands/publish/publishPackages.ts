@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import c from "@changesets/color";
+import { ExitError } from "@changesets/errors";
 import type { Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
 import type { AuthState } from "../../utils/types.ts";
@@ -64,7 +65,15 @@ export async function publishPackages({
   if (releases.length === 0) {
     return [];
   }
-  const publishTool = getPublishTool(packages.tool);
+  const publishTool = await getPublishTool(packages);
+  if (
+    artifactDir &&
+    publishTool.name === "yarn" &&
+    publishTool.version === "berry"
+  ) {
+    log.error(`Publishing packed packages is not supported with Yarn Berry.`);
+    throw new ExitError(1);
+  }
   const authState = getInitialAuthState(publishTool, otp);
   const env = sanitizeEnv({
     ...process.env,
@@ -108,7 +117,6 @@ export async function publishPackages({
       // pnpm supports `publishConfig.directory` natively. We have to let it resolve it on its own.
       // Otherwise we'd risk it re-resolving from within the `publishConfig.directory` itself
       // but original untouched relative paths in `publishConfig.directory` would not even point to correct locations anymore.
-      //
       // npm, yarn classic and berry don't support `publishConfig.directory` natively.
       // We inherited support for it from Lerna, so we have to resolve it ourselves.
       // It's worth noting it's still useful for, for example, `ng-packagr` users
@@ -120,7 +128,19 @@ export async function publishPackages({
       // It's not possible to rely on regular lifecycle publish scripts for that. We merely delegate to the package manager for publishing
       // and we don't reimplement the pack+publish logic ourselves. So it's not possible for us to pack,
       // and let appropriate lifecycle scripts run, from the package's original directory and then publish from a different `publishConfig.directory`.
-      target = resolve(pkg.dir, pkg.packageJson.publishConfig.directory);
+      const publishDirOverride = pkg.packageJson.publishConfig?.directory;
+      if (
+        publishDirOverride &&
+        publishTool.name === "yarn" &&
+        publishTool.version === "berry"
+      ) {
+        // Yarn Berry doesn't allow publishing non-workspace directories
+        log.error(
+          `Package ${c.blue(pkg.packageJson.name)} has publishConfig.directory set to ${c.blue(publishDirOverride)}, which is not supported when using Yarn Berry. Please remove publishConfig.directory from your package.json.`,
+        );
+        throw new ExitError(1);
+      }
+      target = resolve(pkg.dir, publishDirOverride!);
     }
     const publishConfirmation = await publish(
       publishTool,
