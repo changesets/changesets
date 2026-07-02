@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/config#experimentalunsafeoptions-will-change-in-patch
+
 # Experimental Options
 
 All experimental options are configured in `config.json` under `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH` flag.
