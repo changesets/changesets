@@ -2,7 +2,7 @@
 
 ## What is Changesets?
 
-Changesets has several meanings that are sometimes used interchangeably:
+Changesets has several meanings that are used interchangeably:
 
 1. It is a tool to manage package versions and changelog generation in a project, designed to work in [monorepos](https://monorepo.tools) as well as single package repos.
 
@@ -37,7 +37,7 @@ They typically look like this:
 Summary of the change
 ```
 
-The core idea of Changesets revolves around these files.
+These files are the foundation of the Changesets workflow.
 
 ## Install Requirements
 
@@ -50,8 +50,7 @@ Changesets requires [Node.js](https://nodejs.org) `^22.11 || ^24 || >=26` and su
 Lower versions may still work but are not guaranteed nor tested.
 
 ::: tip Selecting a package manager
-We recommend using pnpm as it has safer security defaults and better monorepo support.
-However, we also support other package managers if you prefer them.
+We recommend using pnpm as it has safer security defaults and better monorepo support. However, we also support other package managers if you prefer them.
 :::
 
 ## Setting Up

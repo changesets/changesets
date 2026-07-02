@@ -1,6 +1,6 @@
 # Frequently Asked Questions
 
-Check the [guide](./guide/getting-started.md) for more detailed explanations of Changesets.
+Check the [guide](./guide/getting-started.md) to learn more about Changesets.
 
 ## What is a changeset?
 

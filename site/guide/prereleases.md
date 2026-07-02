@@ -85,7 +85,7 @@ pkg-c @ version 3.0.0
 Then, run the `publish` command as usual and it will publish the prerelease versions to npm with the `beta` dist-tag.
 
 ::: danger Publishing new packages while in prerelease mode
-If you publish a **new**, unpublished package for the first time in pre-release mode, it will **still** be published with the `latest` tag alongside the prerelease tag.
+If you publish a **new**, unpublished package for the first time in prerelease mode, it will **still** be published with the `latest` tag alongside the prerelease tag.
 
 This is because npm enforces that all packages have a `latest` tagged version.
 :::
