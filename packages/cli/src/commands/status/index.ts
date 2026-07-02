@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { updatePackageVersionsFromVersionProviders } from "@changesets/apply-release-plan";
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
@@ -26,6 +27,10 @@ export async function status(options?: StatusOptions) {
   await ensureChangesetFolder(packages.rootDir);
 
   const config = await readConfig(packages);
+  await updatePackageVersionsFromVersionProviders(
+    packages,
+    config.versionProvider,
+  );
   const preState = await readPreState(packages.rootDir);
   const changesets = await readChangesets(packages.rootDir, options?.since);
 

@@ -128,6 +128,237 @@
       "description": "Opt in to tracking non-npm / private packages",
       "default": {}
     },
+    "versionProvider": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "const": "auto"
+                },
+                {
+                  "const": "node"
+                },
+                {
+                  "const": "ruby"
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "const": "node"
+                }
+              },
+              "required": ["type"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "const": "ruby"
+                },
+                "gemName": {
+                  "type": "string"
+                },
+                "versionFile": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "const": false
+                    }
+                  ]
+                },
+                "gemspec": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "const": false
+                    }
+                  ]
+                },
+                "gemfileLock": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "const": false
+                    }
+                  ]
+                }
+              },
+              "required": ["type"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "default": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "const": "auto"
+                    },
+                    {
+                      "const": "node"
+                    },
+                    {
+                      "const": "ruby"
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "node"
+                    }
+                  },
+                  "required": ["type"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "ruby"
+                    },
+                    "gemName": {
+                      "type": "string"
+                    },
+                    "versionFile": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "const": false
+                        }
+                      ]
+                    },
+                    "gemspec": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "const": false
+                        }
+                      ]
+                    },
+                    "gemfileLock": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "const": false
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["type"],
+                  "additionalProperties": false
+                }
+              ],
+              "default": "auto"
+            },
+            "packages": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "const": "auto"
+                      },
+                      {
+                        "const": "node"
+                      },
+                      {
+                        "const": "ruby"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "node"
+                      }
+                    },
+                    "required": ["type"],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "ruby"
+                      },
+                      "gemName": {
+                        "type": "string"
+                      },
+                      "versionFile": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "const": false
+                          }
+                        ]
+                      },
+                      "gemspec": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "const": false
+                          }
+                        ]
+                      },
+                      "gemfileLock": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "const": false
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["type"],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "default": {}
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Determines which provider updates version files for each package.",
+      "default": "auto"
+    },
     "bumpVersionsWithWorkspaceProtocolOnly": {
       "type": "boolean",
       "description": "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.",

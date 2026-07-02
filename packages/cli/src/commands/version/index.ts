@@ -1,6 +1,9 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { applyReleasePlan } from "@changesets/apply-release-plan";
+import {
+  applyReleasePlan,
+  updatePackageVersionsFromVersionProviders,
+} from "@changesets/apply-release-plan";
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
@@ -55,6 +58,11 @@ export async function version(options: VersionOptions) {
     // Disable committing when in snapshot mode
     commit: options.snapshot ? false : config.commit,
   };
+
+  await updatePackageVersionsFromVersionProviders(
+    packages,
+    releaseConfig.versionProvider,
+  );
 
   validateIgnoredPackageNames(packages, options.ignore, messages);
   validateSkippedDependents(packages, releaseConfig, messages);
