@@ -33,31 +33,15 @@ All updating of dependencies is done as a patch bump. If you want to indicate a 
 
 There are two reasons we chose to do this. The first is so the changeset descriptions are editable after creation, and a user can go in and change this as they desire. The second is that it means we are unopinionated about your git workflows, with squashing and modifying commits being completely safe, without fear of breaking a release.
 
-## What distinguishes this from other versioning tools
+## How Changesets differs from conventional commit-based tools
 
-If you have been looking at automating versioning previously, you may have come across [Release Please](https://github.com/googleapis/release-please) or [Semantic Release](https://github.com/semantic-release/semantic-release). It's good to understand how changesets operate differently.
+While many versioning tools rely on conventional commits to determine releases, Changesets was built with a different philosophy, prioritizing monorepo management and flexible workflows over strict commit message parsing.
 
-1. Changesets are designed for monorepos first. Changesets allow you to group linked packages, define fixed packages, and explicitly declare whether an internal dependency bump should trigger a patch bump on the consuming package.
+1. Monorepo-first design: Changesets is built to manage complex workspace topologies. It allows you to group linked packages, define fixed packages, and explicitly declare how internal dependency bumps (like `peerDependencies`) cascade through your repository.
 
-2. We store our change intent in dedicated Markdown files alongside your code, rather than relying on strict git commit message parsing. See the above section on why we write files to disc.
+2. Intent-based files: Instead of parsing git commit messages, change intent is stored in dedicated Markdown files committed alongside your code. This ensures that release information is preserved regardless of how your git history is squashed or rewritten.
 
-3. We use semver for specifying the change. When selecting the kind of change your package is, we do not specify any change types beyond `major`, `minor`, or `patch`. In comparison, [conventional commits](https://github.com/conventional-commits/conventionalcommits.org) specify the type of a commit (bug, feat) that gets converted to an appropriate semver type. This is a design decision on our part to push adding this information into the changeset description itself.
-
-### Comparison to Semantic Release
-
-[Semantic Release](https://github.com/semantic-release/semantic-release) focuses on publishing bug fixes and new features as soon as possible without release PRs. With the default CI for Semantic Release, conventional commits landing on the specified branch are published immediately.
-
-While monorepo equivalents (like [Multi Semantic Release](https://github.com/dhoulb/multi-semantic-release) or [Lerna Semantic Release (unmaintained)](https://github.com/atlassian/lerna-semantic-release)) attempt to adapt it for multi-package repositories, standard Semantic Release is designed for single-package repositories.
-
-### Comparison to Release Please
-
-[Release Please](https://github.com/googleapis/release-please) takes a similar approach to semantic release, where conventional commits determine the semver bump. One difference to semantic release - and a similarity to changesets - is the automatic creation of release PRs that need to be merged to trigger a new release.
-
-However, Release Please does not manage publication of packages or complex branch management.
-
-While tools like Release Please support monorepos, Changesets deeply integrates with workspace topologies - giving you fine-grained control over how internal dependency bumps (like `peerDependencies`) cascade through linked packages.
-
-A big advantage of Release Please is its language independence. It supports [15+ strategies](https://github.com/googleapis/release-please#strategy-language-types-supported). There are community-driven ports of changesets for other languages though, like [C#](https://github.com/solarwinds/net-changesets), [Rust](https://github.com/knope-dev/changesets) and [Go](https://github.com/nesymno/changesets).
+3. Direct Semver selection: When creating a changeset, you directly specify a `major`, `minor`, or `patch` bump. Conventional commit-based tools, by comparison, rely on mapping specific commit types (e.g., `feat`, `fix`) to semver increments. We believe this design choice provides more clarity by keeping the documentation and the versioning intent together.
 
 ## The versioning of peer dependencies
 
