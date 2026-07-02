@@ -128,7 +128,17 @@ function parseInfoOutput(publishTool: PublishTool, output: string) {
     return undefined;
   }
 
-  return jsonParse(output);
+  const parsedInfo = jsonParse(output);
+  if (publishTool.name === "npm" && Array.isArray(parsedInfo)) {
+    // npm 12 stopped unwrapping single-version JSON results. Changesets only
+    // queries a bare name or an exact version, so more than one item would mean
+    // npm matched a shape we don't intentionally request.
+    if (parsedInfo.length !== 1) {
+      throw new Error("Unexpected array output from npm info --json");
+    }
+    return parsedInfo[0];
+  }
+  return parsedInfo;
 }
 
 // `npm info <pkg> --json` (aka `npm view`) behavior:
