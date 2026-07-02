@@ -1108,6 +1108,56 @@ describe("Publish command", () => {
     ).toBe(false);
   });
 
+  it("skips already-published pnpm publish failures wrapped in ERR_PNPM_FAILED_TO_PUBLISH", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("11.0.0");
+      }
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult(
+          "",
+          1,
+          JSON.stringify({
+            error: {
+              code: "ERR_PNPM_FAILED_TO_PUBLISH",
+              message:
+                "Failed to publish pkg-a@1.0.0: You cannot publish over the previously published version 1.0.0.",
+            },
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await publishCommand({ cwd });
+
+    expect(git.tag).not.toHaveBeenCalled();
+    const successMessages = mockedLogger.success.mock.calls.map((call) =>
+      stripVTControlCharacters(String(call[0])),
+    );
+    expect(
+      successMessages.some((message) =>
+        message.includes("Published pkg-a@1.0.0!"),
+      ),
+    ).toBe(false);
+  });
+
   it("tags tag-only releases within their chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

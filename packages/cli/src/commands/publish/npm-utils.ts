@@ -425,7 +425,8 @@ async function internalPublish(
     if (json?.error) {
       const publishError = formatPublishError(publishTool.name, json.error);
       if (
-        publishError.code === "E403" &&
+        (publishError.code === "E403" ||
+          publishError.code === "ERR_PNPM_FAILED_TO_PUBLISH") &&
         isAlreadyPublishedError(publishError.message)
       ) {
         // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
