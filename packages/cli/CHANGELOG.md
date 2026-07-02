@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 3.0.0-next.9
+
+### Patch Changes
+
+- [#2132](https://github.com/changesets/changesets/pull/2132) [`d35bb77`](https://github.com/changesets/changesets/commit/d35bb77f031a24e7ca95aecc06e1043d0f9bfb24) Thanks [@cyphercodes](https://github.com/cyphercodes)! - Improve publish error handling for npm and pnpm JSON errors. Changesets now skips npm 11 already-published errors that omit `code`, correctly skips pnpm 11 already-published errors, and retries pnpm 11 `ERR_PNPM_OTP_NON_INTERACTIVE` publish failures in delegated interactive mode.
+
 ## 3.0.0-next.8
 
 ### Patch Changes
