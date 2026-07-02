@@ -602,6 +602,86 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
+  it("treats pnpm info ERR_PNPM_FETCH_404 errors as unpublished", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult(
+          JSON.stringify({
+            error: {
+              code: "ERR_PNPM_FETCH_404",
+              message: "GET https://registry.npmjs.org/pkg-a: Not Found - 404",
+            },
+          }),
+          1,
+        );
+      }
+      if (args[0] === "publish") {
+        return execResult("");
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(
+      mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
+    ).toHaveLength(1);
+  });
+
+  it("treats pnpm info ERR_PNPM_PACKAGE_NOT_FOUND errors as unpublished", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult(
+          JSON.stringify({
+            error: {
+              code: "ERR_PNPM_PACKAGE_NOT_FOUND",
+              message: "No matching version found for pkg-a@1.0.0",
+            },
+          }),
+          1,
+        );
+      }
+      if (args[0] === "publish") {
+        return execResult("");
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(
+      mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
+    ).toHaveLength(1);
+  });
+
   it("stops publishing after a failed chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

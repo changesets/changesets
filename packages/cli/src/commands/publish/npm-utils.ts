@@ -268,7 +268,13 @@ export async function infoAllow404(
   packageJson: PackageJSON,
 ) {
   const pkgInfo = await getPackageInfo(cwd, publishTool, packageJson);
-  if (pkgInfo.error?.code === "E404") {
+  if (
+    pkgInfo.error?.code === "E404" ||
+    // pnpm 11: the queried package does not exist in the registry.
+    pkgInfo.error?.code === "ERR_PNPM_FETCH_404" ||
+    // pnpm 11: the queried exact package version does not exist in the registry.
+    pkgInfo.error?.code === "ERR_PNPM_PACKAGE_NOT_FOUND"
+  ) {
     log.warn(`Received 404 for ${c.cyan(`npm info ${packageJson.name}`)}`);
     return { published: false, pkgInfo: {} };
   }
