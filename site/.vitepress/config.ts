@@ -137,6 +137,7 @@ function getMainSidebar(): DefaultTheme.SidebarItem[] {
         { text: "Getting Started", link: "getting-started" },
         { text: "Why Changesets", link: "why" },
         { text: "Technical Decisions", link: "technical-decisions" },
+        { text: "Migration from v2", link: "migration" },
       ],
     },
     {
