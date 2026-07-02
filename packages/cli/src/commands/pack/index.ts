@@ -34,17 +34,19 @@ export interface PackedRelease {
   tarball: TarballMetadata;
 }
 
-function getTarballFilenameFromStdout(stdout: string) {
+// npm is the only package manager that doesn't support an explicit output path for the tarball
+// it still uses a pretty stable pattern for the output filename:
+// https://github.com/npm/cli/blob/42b12c250ff3e2ecd756fd82666454ebafc9386c/lib/utils/tar.js#L101-L103
+// we prefer to extract it explicitly, just in case
+function getNpmTarballFilenameFromStdout(stdout: string) {
   const json = getLastJsonObjectFromString(stdout);
   // npm<12 emits an array even when packing a single package
-  // pnpm emits an object when packing a single package
-  // note: and an array when packing multiple packages but we don't call it that way
+  // note: pnpm emits an object when packing a single package and an array when packing multiple packages
+  // but with pnpm we don't even have to extract it from stdout as we are relying on explicitly configured --out
   let filename = Array.isArray(json) ? json[0]?.filename : json?.filename;
   if (!filename) {
     // npm>=12 introduced a breaking change: https://github.com/npm/cli/pull/9247
     // since that PR it emits `{ [packageName: string]: { filename: string, ... } }`
-    //
-    // note: it's technically possible that pnpm 10 could call into npm@12's pack
     const pkgOutput = Object.values(json ?? {})[0];
     filename =
       pkgOutput &&
@@ -58,6 +60,7 @@ function getTarballFilenameFromStdout(stdout: string) {
 }
 
 function getNormalizedTarballFilename(name: string, version: string) {
+  // based on https://github.com/pnpm/pnpm/blob/ddbb4899c252efabce5bbf4e519df83c07b891bf/pnpm11/releasing/commands/src/publish/pack.ts#L261
   return `${name.replace(/^@/, "").replace("/", "-")}-${version}.tgz`;
 }
 
@@ -169,7 +172,7 @@ export async function pack(options: PackOptions) {
 
         const resolvedTarballFilename =
           publishTool.name === "npm"
-            ? getTarballFilenameFromStdout(stdout.toString())
+            ? getNpmTarballFilenameFromStdout(stdout.toString())
             : tarballFilename;
 
         if (!resolvedTarballFilename) {
