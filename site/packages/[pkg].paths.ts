@@ -5,6 +5,8 @@ import { defineRoutes, type SiteConfig } from "vitepress";
 const config: SiteConfig = (globalThis as any).VITEPRESS_CONFIG;
 
 export default defineRoutes({
+  watch: ["../../packages/*/README.md", "../../packages/*/package.json"],
+
   async paths() {
     // Get packages to generate based on configured sidebar packages items
     const sidebarItems = config.site.themeConfig.sidebar["/packages/"].items;
