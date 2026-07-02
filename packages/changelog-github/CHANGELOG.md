@@ -1,5 +1,19 @@
 # @changesets/changelog-github
 
+## 1.0.0-next.6
+
+### Minor Changes
+
+- [#2059](https://github.com/changesets/changesets/pull/2059) [`070f531`](https://github.com/changesets/changesets/commit/070f531c6b7ed3ec90fbcda8ce705b9bf476c1ef) Thanks [@jycouet](https://github.com/jycouet)! - Add an opt-in, experimental `template` option to render changelog lines from tokens (`{summary}`, `{ref}`, `{pull}`, `{commit}`, `{authors}`). Default output is unchanged. The token syntax may change in a patch release; pin the version if you rely on it.
+
+- [#1871](https://github.com/changesets/changesets/pull/1871) [`dfefc4e`](https://github.com/changesets/changesets/commit/dfefc4e71fc589df92e8328e9b66e0d7ae9b4699) Thanks [@mihkeleidast](https://github.com/mihkeleidast)! - Use `GITHUB_REPOSITORY` as the default repo when no `repo` option is configured
+
+### Patch Changes
+
+- Updated dependencies [[`dae394c`](https://github.com/changesets/changesets/commit/dae394c29952ce27dc34884c26dcd57a2756325f), [`dae394c`](https://github.com/changesets/changesets/commit/dae394c29952ce27dc34884c26dcd57a2756325f), [`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1)]:
+  - @changesets/get-github-info@1.0.0-next.3
+  - @changesets/types@7.0.0-next.6
+
 ## 1.0.0-next.5
 
 ### Patch Changes

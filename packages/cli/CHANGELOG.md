@@ -1,5 +1,61 @@
 # @changesets/cli
 
+## 3.0.0-next.8
+
+### Patch Changes
+
+- [#2138](https://github.com/changesets/changesets/pull/2138) [`3588f18`](https://github.com/changesets/changesets/commit/3588f18f0884ef9f42339b2b9c92402d96009cd3) Thanks [@Andarist](https://github.com/Andarist)! - Ensure `changeset publish` and `changeset tag` create the `CHANGESETS_OUTPUT` file even when there is nothing to publish or tag.
+
+## 3.0.0-next.7
+
+### Major Changes
+
+- [#2128](https://github.com/changesets/changesets/pull/2128) [`7113c01`](https://github.com/changesets/changesets/commit/7113c014330b3f972e54ece8e67731613193958f) Thanks [@Andarist](https://github.com/Andarist)! - Renamed the `changeset tag` command to `changeset git-tag`.
+
+- [#2117](https://github.com/changesets/changesets/pull/2117) [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1) Thanks [@bluwy](https://github.com/bluwy)! - Remove the `pre.json` `initialVersions` property and handling as it's unused internally
+
+- [#2090](https://github.com/changesets/changesets/pull/2090) [`3aae903`](https://github.com/changesets/changesets/commit/3aae903a668315c495ba09248bad2b9c63424449) Thanks [@beeequeue](https://github.com/beeequeue)! - Peer dependencies now bump packages that depend on them by `patch` instead of `major`.
+
+  This means a peer dependency update is no longer assumed (forced) to be a breaking change.
+
+  If the dependent package is not compatible with the peer's new release you should manually add a `major` changeset describing why and how to migrate.
+
+### Minor Changes
+
+- [#1121](https://github.com/changesets/changesets/pull/1121) [`ce2095d`](https://github.com/changesets/changesets/commit/ce2095d744ba03424641a8b7cf0a7cfee8bcc6f7) Thanks [@Sh031224](https://github.com/Sh031224)! - Added new `--major`, `--minor`, `--patch` flags to the `add` command.
+
+- [#2087](https://github.com/changesets/changesets/pull/2087) [`edc30c8`](https://github.com/changesets/changesets/commit/edc30c8914b1a451a5a7837adb9406957b74126f) Thanks [@trueberryless](https://github.com/trueberryless)! - Made the `init` command interactive. Running `changeset init` will now guide you through a set of intuitive prompts to configure your changelog generator, commit preferences, publish access, and base branch, rather than silently writing the default configuration file.
+
+- [#2129](https://github.com/changesets/changesets/pull/2129) [`369eb0b`](https://github.com/changesets/changesets/commit/369eb0bbf657e12ee4fc53e3ac362dd97802d5d2) Thanks [@Andarist](https://github.com/Andarist)! - Commands supporting `--output` (such as `status` and `publish-plan`) can now be invoked with `CHANGESETS_OUTPUT=path/to/file` environment variable. This has the same effect as calling them with `--output=path/to/file`
+
+- [#2136](https://github.com/changesets/changesets/pull/2136) [`2f9ca42`](https://github.com/changesets/changesets/commit/2f9ca42c11f55fd355fec666265cdfab6d41733b) Thanks [@bluwy](https://github.com/bluwy)! - Remove confirmation prompt when adding a changeset. It will always add a changeset instead, and if the changeset is not desired, the user can edit or delete the file directly.
+
+- [#2129](https://github.com/changesets/changesets/pull/2129) [`369eb0b`](https://github.com/changesets/changesets/commit/369eb0bbf657e12ee4fc53e3ac362dd97802d5d2) Thanks [@Andarist](https://github.com/Andarist)! - `changeset publish` and `changeset tag` can now be invoked with `CHANGESETS_OUTPUT=path/to/file` environment variable. They produce output in the NDJSON format.
+
+- [#2130](https://github.com/changesets/changesets/pull/2130) [`18bc470`](https://github.com/changesets/changesets/commit/18bc470ab550b2def6b52656b7b72f86c04429cb) Thanks [@beeequeue](https://github.com/beeequeue)! - Allow unmatched glob patterns in the `ignore` config option.
+
+### Patch Changes
+
+- [#2065](https://github.com/changesets/changesets/pull/2065) [`0598e83`](https://github.com/changesets/changesets/commit/0598e83327ca49fd3737f9f10371a3e6b711e3bf) Thanks [@Andarist](https://github.com/Andarist)! - Improved `changeset publish` auth handling by removing the preflight OTP requirement check and falling back to interactive auth when the package manager reports that authentication is required.
+
+- [#2065](https://github.com/changesets/changesets/pull/2065) [`0598e83`](https://github.com/changesets/changesets/commit/0598e83327ca49fd3737f9f10371a3e6b711e3bf) Thanks [@Andarist](https://github.com/Andarist)! - `changeset publish` now reads initial OTP values from npm and pnpm environment variables.
+
+- [#2065](https://github.com/changesets/changesets/pull/2065) [`0598e83`](https://github.com/changesets/changesets/commit/0598e83327ca49fd3737f9f10371a3e6b711e3bf) Thanks [@Andarist](https://github.com/Andarist)! - The generated `publish-plan.json` no longer includes a `registry` field on publish entries.
+
+- [#584](https://github.com/changesets/changesets/pull/584) [`6c79210`](https://github.com/changesets/changesets/commit/6c79210fabfe13d82ca4ac4dc92aab9b58fd58fd) Thanks [@Andarist](https://github.com/Andarist)! - Avoid an infinite loop when git commands fail to execute when Changesets try to retrieve commits that added files.
+- Updated dependencies [[`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`6c79210`](https://github.com/changesets/changesets/commit/6c79210fabfe13d82ca4ac4dc92aab9b58fd58fd), [`18bc470`](https://github.com/changesets/changesets/commit/18bc470ab550b2def6b52656b7b72f86c04429cb), [`3aae903`](https://github.com/changesets/changesets/commit/3aae903a668315c495ba09248bad2b9c63424449)]:
+  - @changesets/types@7.0.0-next.6
+  - @changesets/assemble-release-plan@7.0.0-next.7
+  - @changesets/pre@3.0.0-next.6
+  - @changesets/git@4.0.0-next.6
+  - @changesets/config@4.0.0-next.6
+  - @changesets/apply-release-plan@8.0.0-next.7
+  - @changesets/changelog-git@1.0.0-next.6
+  - @changesets/get-dependents-graph@3.0.0-next.6
+  - @changesets/read@1.0.0-next.7
+  - @changesets/should-skip-package@1.0.0-next.6
+  - @changesets/write@1.0.0-next.6
+
 ## 3.0.0-next.6
 
 ### Major Changes

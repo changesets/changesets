@@ -1,6 +1,6 @@
 {
   "name": "@changesets/should-skip-package",
-  "version": "1.0.0-next.5",
+  "version": "1.0.0-next.6",
   "description": "Checks if a package should be skipped for versioning or tagging purposes",
   "license": "MIT",
   "repository": {

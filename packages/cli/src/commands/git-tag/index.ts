@@ -4,6 +4,7 @@ import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { log, progress } from "@clack/prompts";
 import { getPackages, type Tool } from "@manypkg/get-packages";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { createOutputReport } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 
@@ -22,11 +23,13 @@ function buildTagMessage(
     : c.cyan(`v${pkg.newVersion}`);
 }
 
-export interface TagOptions {
+export interface GitTagOptions {
   cwd?: string;
+  output?: string;
 }
 
-export async function tag(options?: TagOptions) {
+export async function gitTag(options?: GitTagOptions) {
+  await using reporter = await createOutputReport(options?.output);
   const cwd = options?.cwd ?? process.cwd();
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
@@ -63,6 +66,11 @@ export async function tag(options?: TagOptions) {
     if (allExistingTags.has(tag)) continue;
 
     await git.tag(tag, packages.rootDir);
+    reporter?.write({
+      type: "git-tag",
+      tag,
+      packageName: pkg.name,
+    });
 
     p.advance(1, buildTagMessage(packages.tool, pkg));
   }

@@ -1,11 +1,13 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { describe, expect, it, type Mock, vi } from "vitest";
-import { tag } from "../index.ts";
+import { gitTag } from "../index.ts";
 
 vi.mock("@changesets/git");
 
-describe("tag command", () => {
+describe("git-tag command", () => {
   silenceLogsInBlock();
 
   describe("workspace project", () => {
@@ -33,10 +35,73 @@ describe("tag command", () => {
       (git.getAllTags as Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag({ cwd });
+      await gitTag({ cwd });
       expect(git.tag).toHaveBeenCalledTimes(2);
       expect((git.tag as Mock).mock.calls[0][0]).toEqual("pkg-a@1.0.0");
       expect((git.tag as Mock).mock.calls[1][0]).toEqual("pkg-b@1.0.0");
+    });
+
+    it("writes tag events when output path is provided", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+      const outputFile = path.join(cwd, "output.ndjson");
+
+      (git.getAllTags as Mock).mockReturnValue(new Set());
+
+      await gitTag({ cwd, output: outputFile });
+
+      await expect(fs.readFile(outputFile, "utf8")).resolves.toBe(
+        [
+          JSON.stringify({
+            type: "git-tag",
+            tag: "pkg-a@1.0.0",
+            packageName: "pkg-a",
+          }),
+          JSON.stringify({
+            type: "git-tag",
+            tag: "pkg-b@1.0.0",
+            packageName: "pkg-b",
+          }),
+          "",
+        ].join("\n"),
+      );
+    });
+
+    it("creates an empty output file when there is nothing to tag", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+      const outputFile = path.join(cwd, "output.ndjson");
+
+      (git.getAllTags as Mock).mockReturnValue(new Set(["pkg-a@1.0.0"]));
+      vi.mocked(git.tagExists).mockResolvedValueOnce(true);
+
+      await gitTag({ cwd, output: outputFile });
+
+      await expect(fs.readFile(outputFile, "utf8")).resolves.toBe("");
     });
 
     it("skips tags that already exist", async () => {
@@ -68,7 +133,7 @@ describe("tag command", () => {
       );
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag({ cwd });
+      await gitTag({ cwd });
       expect(git.tag).toHaveBeenCalledOnce();
       expect((git.tag as Mock).mock.calls[0][0]).toEqual("pkg-b@1.0.0");
     });
@@ -92,7 +157,7 @@ describe("tag command", () => {
       (git.getAllTags as Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag({ cwd });
+      await gitTag({ cwd });
       expect(git.tag).toHaveBeenCalledOnce();
       expect((git.tag as Mock).mock.calls[0][0]).toEqual("v1.0.0");
     });
@@ -109,7 +174,7 @@ describe("tag command", () => {
       (git.getAllTags as Mock).mockReturnValue(new Set());
 
       expect(git.tag).not.toHaveBeenCalled();
-      await tag({ cwd });
+      await gitTag({ cwd });
       expect(git.tag).toHaveBeenCalledTimes(0);
     });
   });
