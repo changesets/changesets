@@ -5,16 +5,13 @@ import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import * as npmUtils from "../../publish/npm-utils.ts";
 import { pack } from "../index.ts";
 
 vi.mock("@changesets/git");
 vi.mock("tinyexec");
-vi.mock("../../publish/npm-utils.ts");
 
 const mockedExec = vi.mocked(exec);
 const mockedGit = vi.mocked(git);
-const mockedNpmUtils = vi.mocked(npmUtils);
 
 function execResult(stdout: string, exitCode = 0) {
   return {
@@ -74,14 +71,13 @@ describe("pack", () => {
       }),
     });
     const outputDir = path.join(cwd, ".packed");
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
-      published: false,
-      pkgInfo: { version: "1.0.0" },
-    });
-    mockedNpmUtils.getPublishTool.mockReturnValue({ name: "npm" } as never);
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
     mockExecImplementation(async (cmd, args) => {
+      if (cmd === "npm" && args[0] === "info") {
+        return execResult(JSON.stringify({ versions: [] }));
+      }
+
       const dest = args[args.indexOf("--pack-destination") + 1];
       const tarballFilename = "pkg-a-1.0.0.tgz";
       await fs.mkdir(dest, { recursive: true });
@@ -154,7 +150,6 @@ describe("pack", () => {
       ],
     ];
 
-    mockedNpmUtils.getPublishTool.mockReturnValue({ name: "npm" } as never);
     await fs.writeFile(
       path.join(cwd, "publish-plan.json"),
       JSON.stringify({ version: 1, plan }, undefined, 2),
@@ -179,6 +174,46 @@ describe("pack", () => {
     await expect(
       fs.readFile(path.join(outputDir, "packages", "pkg-a-1.0.0.tgz"), "utf8"),
     ).resolves.toBe(tarballContents);
+  });
+
+  it("reads npm keyed-object pack output", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({}),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+    const outputDir = path.join(cwd, ".packed");
+
+    mockExecImplementation(async (cmd, args) => {
+      if (cmd === "npm" && args[0] === "info") {
+        return execResult(JSON.stringify({ versions: [] }));
+      }
+
+      const dest = args[args.indexOf("--pack-destination") + 1];
+      const tarballFilename = "pkg-a-1.0.0.tgz";
+      await fs.mkdir(dest, { recursive: true });
+      await fs.writeFile(path.join(dest, tarballFilename), tarballContents);
+      return execResult(
+        JSON.stringify({ "pkg-a": { filename: tarballFilename } }),
+      );
+    });
+
+    await pack({
+      cwd,
+      outDir: ".packed",
+    });
+
+    await expect(
+      fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"),
+    ).resolves.toContain(`"path": "packages/pkg-a-1.0.0.tgz"`);
   });
 
   it("throws on an unsupported plan file version", async () => {

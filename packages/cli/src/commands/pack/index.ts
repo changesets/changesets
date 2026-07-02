@@ -36,9 +36,22 @@ export interface PackedRelease {
 
 function getTarballFilenameFromStdout(stdout: string) {
   const json = getLastJsonObjectFromString(stdout);
-  // npm emits an array even when packing a single package
-  // pnpm emits an object when packing a single package, and an array when packing multiple packages
-  const filename = Array.isArray(json) ? json[0]?.filename : json?.filename;
+  // npm<12 emits an array even when packing a single package
+  // pnpm emits an object when packing a single package
+  // note: and an array when packing multiple packages but we don't call it that way
+  let filename = Array.isArray(json) ? json[0]?.filename : json?.filename;
+  if (!filename) {
+    // npm>=12 introduced a breaking change: https://github.com/npm/cli/pull/9247
+    // since that PR it emits `{ [packageName: string]: { filename: string, ... } }`
+    //
+    // note: it's technically possible that pnpm 10 could call into npm@12's pack
+    const pkgOutput = Object.values(json ?? {})[0];
+    filename =
+      pkgOutput &&
+      typeof pkgOutput === "object" &&
+      "filename" in pkgOutput &&
+      pkgOutput.filename;
+  }
   assert(typeof filename === "string", "Failed to determine tarball filename");
   // normalize to just basename, npm emits just the basename, pnpm emits absolute paths
   return path.basename(filename);
