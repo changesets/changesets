@@ -29,6 +29,7 @@ export interface GitTagOptions {
 }
 
 export async function gitTag(options?: GitTagOptions) {
+  await using reporter = await createOutputReport(options?.output);
   const cwd = options?.cwd ?? process.cwd();
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
@@ -59,8 +60,6 @@ export async function gitTag(options?: GitTagOptions) {
 
   const p = progress({ max: untaggedPackages.length - skippedTags.length });
   p.start("Creating tags...");
-
-  await using reporter = await createOutputReport(options?.output);
 
   for (const pkg of untaggedPackages) {
     const tag = buildTag(packages.tool, pkg);

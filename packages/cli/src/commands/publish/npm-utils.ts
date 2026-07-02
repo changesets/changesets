@@ -291,16 +291,30 @@ type InternalPublishResult =
 function formatPublishError(
   publishTool: PublishTool["name"],
   error: {
+    code?: string;
     summary?: string;
     message?: string;
     detail?: string;
   },
 ) {
-  // pnpm 11 uses .message but pnpm 10 delegates to npm and that uses .summary
-  const summary =
-    publishTool === "pnpm" ? (error.message ?? error.summary) : error.summary;
-  // .detail is npm-specific but for simplicity we handle it at all times
-  return `${summary}${error.detail ? `\n${error.detail}` : ""}`;
+  // pnpm uses .message in tested versions; npm uses .summary
+  const message =
+    (publishTool === "pnpm"
+      ? (error.message ?? error.summary)
+      : error.summary) ?? "Unknown error";
+  return {
+    code:
+      error.code ??
+      // npm 11 started to reject "already published" publish attempts *eagerly* based on the preflight check
+      // https://github.com/npm/cli/commit/31455b2e177b721292f3382726e3f5f3f2963b1d
+      //
+      // .code comes from the registry's endpoint response though:
+      // https://github.com/npm/npm-registry-fetch/blob/6b4159a2519ce5aab26cc4dd8d4596a0b47781d2/lib/errors.js#L29
+      // so it's not available for such eager errors, we normalize it to the code the registry would return in the case of an actual publish attempt
+      (isAlreadyPublishedError(message) ? "E403" : "EUNKNOWN"),
+    // .detail is npm-specific but for simplicity we handle it at all times
+    message: `${message}${error.detail ? `\n${error.detail}` : ""}`,
+  };
 }
 
 // we have this so that we can do try a publish again after a publish without
@@ -386,24 +400,29 @@ async function internalPublish(
     // We want to handle this as best we can but it has some struggles:
     // - output of those lifecycle scripts can contain JSON
     // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
+    // - npm9 switched back to printing `--json` errors to stdout (https://github.com/npm/cli/commit/d3543e945e721783dcb83385935f282a4bb32cf3)
     // Note that the `--json` output is always printed at the end so this should work
     const json =
       getLastJsonObjectFromString(stderr.toString()) ||
       getLastJsonObjectFromString(stdout.toString());
 
     if (json?.error) {
+      const publishError = formatPublishError(publishTool.name, json.error);
       if (
-        json.error.code === "E403" &&
-        isAlreadyPublishedError(json.error.summary)
+        publishError.code === "E403" &&
+        isAlreadyPublishedError(publishError.message)
       ) {
         // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
         return { result: "skipped" };
       }
-      // The first case is no 2fa provided, the second is when the 2fa is wrong (timeout or wrong words)
+      // Retry in delegated interactive mode when the publish tool reports that OTP/web auth is required:
+      // - npm uses EOTP for missing auth, or E401 + an --otp hint for an invalid/expired OTP
+      // - pnpm uses ERR_PNPM_OTP_NON_INTERACTIVE when the JSON-capturing child process cannot prompt
       if (
-        (json.error.code === "EOTP" ||
-          (json.error.code === "E401" &&
-            json.error.detail?.includes("--otp=<code>"))) &&
+        (publishError.code === "EOTP" ||
+          publishError.code === "ERR_PNPM_OTP_NON_INTERACTIVE" ||
+          (publishError.code === "E401" &&
+            publishError.message.includes("--otp=<code>"))) &&
         process.stdin.isTTY
       ) {
         // the current otp code must be invalid since it errored
@@ -420,8 +439,8 @@ async function internalPublish(
       }
       log.error(
         `
-An error occurred while publishing ${release.name}: ${json.error.code}
-${formatPublishError(publishTool.name, json.error)}
+An error occurred while publishing ${release.name}: ${publishError.code}
+${publishError.message}
         `.trim(),
       );
     }

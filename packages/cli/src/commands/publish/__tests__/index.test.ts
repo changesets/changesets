@@ -62,6 +62,7 @@ function stubIsTTY(value: boolean) {
     "isTTY",
   );
   Object.defineProperty(process.stdin, "isTTY", {
+    configurable: true,
     ...originalDescriptor,
     value,
   });
@@ -457,6 +458,39 @@ describe("Publish command", () => {
     );
   });
 
+  it("creates an empty output file when there is nothing to publish or tag", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+    const outputFile = path.join(cwd, "output.ndjson");
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult(
+          JSON.stringify({
+            version: "1.0.0",
+            versions: ["1.0.0"],
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await publishCommand({ cwd, output: outputFile });
+
+    await expect(fs.readFile(outputFile, "utf8")).resolves.toBe("");
+    expect(git.tag).not.toHaveBeenCalled();
+  });
+
   it("stops publishing after a failed chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -660,6 +694,227 @@ describe("Publish command", () => {
     expect(errorMessages.some((message) => message.includes("undefined"))).toBe(
       false,
     );
+  });
+
+  it("skips npm already-published JSON errors without a code", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult(
+          "",
+          1,
+          JSON.stringify({
+            error: {
+              summary:
+                "You cannot publish over the previously published versions: 1.0.0.",
+              detail: "",
+            },
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await publishCommand({ cwd });
+
+    expect(git.tag).not.toHaveBeenCalled();
+    const successMessages = mockedLogger.success.mock.calls.map((call) =>
+      stripVTControlCharacters(String(call[0])),
+    );
+    expect(
+      successMessages.some((message) =>
+        message.includes("Published pkg-a@1.0.0!"),
+      ),
+    ).toBe(false);
+  });
+
+  it("retries interactively when npm puts the OTP hint in the detail field", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(true);
+    let publishAttempts = 0;
+    mockedExec.mockImplementation(((cmd: string, args?: readonly string[]) => {
+      const safeArgs = args ?? [];
+      let result: ReturnType<typeof execResult>;
+      if (safeArgs[0] === "info") {
+        result = execResult("");
+      } else if (safeArgs[0] === "publish") {
+        publishAttempts++;
+        result =
+          publishAttempts === 1
+            ? execResult(
+                "",
+                1,
+                JSON.stringify({
+                  error: {
+                    code: "E401",
+                    summary:
+                      "This operation requires a one-time password from your authenticator.",
+                    detail:
+                      "You can provide a one-time password by passing --otp=<code> to the command you ran.",
+                  },
+                }),
+              )
+            : execResult("");
+      } else {
+        throw new Error(`Unexpected exec args: ${safeArgs.join(" ")}`);
+      }
+      return Object.assign(Promise.resolve(result), {
+        exitCode: result.exitCode,
+        command: cmd,
+      });
+    }) as any);
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(
+      mockedExec.mock.calls
+        .filter((call) => call[1]?.[0] === "publish")
+        .map((call) => call[1]),
+    ).toEqual([
+      expect.arrayContaining(["publish", "--json"]),
+      expect.not.arrayContaining(["--json"]),
+    ]);
+    expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
+  });
+
+  it("retries interactively when pnpm reports a non-interactive OTP error", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(true);
+    let publishAttempts = 0;
+    mockedExec.mockImplementation(((cmd: string, args?: readonly string[]) => {
+      const safeArgs = args ?? [];
+      let result: ReturnType<typeof execResult>;
+      if (safeArgs.length === 1 && safeArgs[0] === "--version") {
+        result = execResult("11.0.0");
+      } else if (safeArgs[0] === "info") {
+        result = execResult("");
+      } else if (safeArgs[0] === "publish") {
+        publishAttempts++;
+        result =
+          publishAttempts === 1
+            ? execResult(
+                "",
+                1,
+                JSON.stringify({
+                  error: {
+                    code: "ERR_PNPM_OTP_NON_INTERACTIVE",
+                    message:
+                      "The registry requires additional authentication, but pnpm is not running in an interactive terminal",
+                  },
+                }),
+              )
+            : execResult("");
+      } else {
+        throw new Error(`Unexpected exec args: ${safeArgs.join(" ")}`);
+      }
+      return Object.assign(Promise.resolve(result), {
+        exitCode: result.exitCode,
+        command: cmd,
+      });
+    }) as any);
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(
+      mockedExec.mock.calls
+        .filter((call) => call[1]?.[0] === "publish")
+        .map((call) => call[1]),
+    ).toEqual([
+      expect.arrayContaining(["publish", "--json"]),
+      expect.not.arrayContaining(["--json"]),
+    ]);
+    expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
+  });
+
+  it("skips already-published pnpm JSON errors from the message field", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("11.0.0");
+      }
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult(
+          "",
+          1,
+          JSON.stringify({
+            error: {
+              code: "E403",
+              message:
+                "You cannot publish over the previously published version 1.0.0.",
+            },
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await publishCommand({ cwd });
+
+    expect(git.tag).not.toHaveBeenCalled();
+    const successMessages = mockedLogger.success.mock.calls.map((call) =>
+      stripVTControlCharacters(String(call[0])),
+    );
+    expect(
+      successMessages.some((message) =>
+        message.includes("Published pkg-a@1.0.0!"),
+      ),
+    ).toBe(false);
   });
 
   it("tags tag-only releases within their chunk", async () => {

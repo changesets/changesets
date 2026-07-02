@@ -81,6 +81,29 @@ describe("git-tag command", () => {
       );
     });
 
+    it("creates an empty output file when there is nothing to tag", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+      const outputFile = path.join(cwd, "output.ndjson");
+
+      (git.getAllTags as Mock).mockReturnValue(new Set(["pkg-a@1.0.0"]));
+      vi.mocked(git.tagExists).mockResolvedValueOnce(true);
+
+      await gitTag({ cwd, output: outputFile });
+
+      await expect(fs.readFile(outputFile, "utf8")).resolves.toBe("");
+    });
+
     it("skips tags that already exist", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
