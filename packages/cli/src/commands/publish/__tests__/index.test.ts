@@ -630,8 +630,7 @@ describe("Publish command", () => {
             error: {
               summary:
                 "You cannot publish over the previously published versions: 1.0.0.",
-              detail:
-                "",
+              detail: "",
             },
           }),
         );
