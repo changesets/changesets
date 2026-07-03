@@ -299,20 +299,38 @@ function isAlreadyPublishedError(output: string): boolean {
   );
 }
 
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value != null && !Array.isArray(value);
+}
+
 type InternalPublishResult =
   | { result: "published" }
   | { result: "skipped" }
   | { result: "failed"; allowRetry?: boolean };
 
+type PublishError = {
+  code?: string;
+  summary?: string;
+  message?: string;
+  detail?: string;
+};
+
+type FormattedPublishError = {
+  code: string;
+  message: string;
+};
+
+type YarnBerryReporterEvent = {
+  type: "error";
+  name: number;
+  displayName: string;
+  data: string;
+};
+
 function formatPublishError(
   publishTool: PublishTool["name"],
-  error: {
-    code?: string;
-    summary?: string;
-    message?: string;
-    detail?: string;
-  },
-) {
+  error: PublishError,
+): FormattedPublishError {
   // pnpm uses .message in tested versions; npm uses .summary
   const message =
     (publishTool === "pnpm"
@@ -331,6 +349,154 @@ function formatPublishError(
     // .detail is npm-specific but for simplicity we handle it at all times
     message: `${message}${error.detail ? `\n${error.detail}` : ""}`,
   };
+}
+
+function isYarnBerryReporterEvent(
+  event: unknown,
+): event is YarnBerryReporterEvent {
+  if (!isJsonObject(event) || event.type !== "error") {
+    return false;
+  }
+
+  return (
+    typeof event.name === "number" &&
+    typeof event.displayName === "string" &&
+    typeof event.data === "string"
+  );
+}
+
+function* streamNdjson(output: string): Generator<unknown> {
+  let lineStart = 0;
+  while (lineStart <= output.length) {
+    let lineEnd = output.indexOf("\n", lineStart);
+    if (lineEnd === -1) {
+      lineEnd = output.length;
+    }
+
+    const line = output.slice(lineStart, lineEnd);
+    lineStart = lineEnd + 1;
+
+    if (/^\s*$/.test(line)) {
+      continue;
+    }
+
+    let event: unknown;
+    try {
+      event = JSON.parse(line);
+    } catch {
+      continue;
+    }
+
+    yield event;
+  }
+}
+
+function formatYarnBerryReporterError(
+  event: YarnBerryReporterEvent,
+): FormattedPublishError {
+  return {
+    code:
+      event.displayName ||
+      // Yarn emits an empty displayName when enableMessageNames is false.
+      `YN${String(event.name).padStart(4, "0")}`,
+    message: event.data,
+  };
+}
+
+function getYarnBerryReporterError(
+  output: string,
+): FormattedPublishError | undefined {
+  const errors: FormattedPublishError[] = [];
+  let code: string | undefined;
+
+  for (const event of streamNdjson(output)) {
+    if (!isYarnBerryReporterEvent(event)) {
+      continue;
+    }
+
+    const error = formatYarnBerryReporterError(event);
+    // this is YN0000 "summary" printed at the end, just skip it at all times
+    if (error.message.startsWith("Failed with errors")) {
+      continue;
+    }
+    if (errors.length > 0 && error.code !== code) {
+      break;
+    }
+
+    code = error.code;
+    errors.push(error);
+  }
+
+  if (!errors.length) {
+    return;
+  }
+
+  return {
+    code: errors[0].code,
+    message: errors.map((error) => error.message).join("\n"),
+  };
+}
+
+function getPublishError(
+  publishTool: PublishTool,
+  stderr: string,
+  stdout: string,
+): { code: string; message: string } | undefined {
+  if (publishTool.name === "yarn" && publishTool.version === "berry") {
+    return getYarnBerryReporterError(stdout);
+  }
+
+  // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
+  // We want to handle this as best we can but it has some struggles:
+  // - output of those lifecycle scripts can contain JSON
+  // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
+  // - npm9 switched back to printing `--json` errors to stdout (https://github.com/npm/cli/commit/d3543e945e721783dcb83385935f282a4bb32cf3)
+  // Note that the `--json` output is always printed at the end so this should work
+  const json =
+    getLastJsonObjectFromString(stderr) || getLastJsonObjectFromString(stdout);
+
+  if (json?.error) {
+    return formatPublishError(publishTool.name, json.error);
+  }
+
+  return undefined;
+}
+
+function isDuplicatePublishError(publishError: {
+  code: string;
+  message: string;
+}): boolean {
+  return (
+    (publishError.code === "E403" ||
+      publishError.code === "ERR_PNPM_FAILED_TO_PUBLISH" ||
+      publishError.code === "YN0035") &&
+    isAlreadyPublishedError(publishError.message)
+  );
+}
+
+function isInteractiveAuthError(
+  publishTool: PublishTool,
+  publishError: { code: string; message: string },
+): boolean {
+  if (publishTool.name === "yarn" && publishTool.version === "berry") {
+    return (
+      publishError.code === "YN0033" ||
+      /\b(otp|one-time password|authentication)\b/i.test(publishError.message)
+    );
+  }
+
+  if (
+    publishError.code === "EOTP" ||
+    publishError.code === "ERR_PNPM_OTP_NON_INTERACTIVE"
+  ) {
+    return true;
+  }
+
+  if (publishError.code === "E401") {
+    return publishError.message.includes("--otp=<code>");
+  }
+
+  return false;
 }
 
 // we have this so that we can do try a publish again after a publish without
@@ -412,34 +578,23 @@ async function internalPublish(
   );
 
   if (exitCode !== 0) {
-    // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
-    // We want to handle this as best we can but it has some struggles:
-    // - output of those lifecycle scripts can contain JSON
-    // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
-    // - npm9 switched back to printing `--json` errors to stdout (https://github.com/npm/cli/commit/d3543e945e721783dcb83385935f282a4bb32cf3)
-    // Note that the `--json` output is always printed at the end so this should work
-    const json =
-      getLastJsonObjectFromString(stderr.toString()) ||
-      getLastJsonObjectFromString(stdout.toString());
+    const publishError = getPublishError(
+      publishTool,
+      stderr.toString(),
+      stdout.toString(),
+    );
 
-    if (json?.error) {
-      const publishError = formatPublishError(publishTool.name, json.error);
-      if (
-        (publishError.code === "E403" ||
-          publishError.code === "ERR_PNPM_FAILED_TO_PUBLISH") &&
-        isAlreadyPublishedError(publishError.message)
-      ) {
+    if (publishError) {
+      if (isDuplicatePublishError(publishError)) {
         // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
         return { result: "skipped" };
       }
       // Retry in delegated interactive mode when the publish tool reports that OTP/web auth is required:
       // - npm uses EOTP for missing auth, or E401 + an --otp hint for an invalid/expired OTP
       // - pnpm uses ERR_PNPM_OTP_NON_INTERACTIVE when the JSON-capturing child process cannot prompt
+      // - Yarn Berry reports auth failures as reporter errors such as YN0033
       if (
-        (publishError.code === "EOTP" ||
-          publishError.code === "ERR_PNPM_OTP_NON_INTERACTIVE" ||
-          (publishError.code === "E401" &&
-            publishError.message.includes("--otp=<code>"))) &&
+        isInteractiveAuthError(publishTool, publishError) &&
         process.stdin.isTTY
       ) {
         // the current otp code must be invalid since it errored

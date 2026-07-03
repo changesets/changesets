@@ -1058,6 +1058,74 @@ describe("Publish command", () => {
     expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
   });
 
+  it("retries interactively when Yarn Berry reports an auth reporter error", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+        packageManager: "yarn@4.10.0",
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(true);
+    let publishAttempts = 0;
+    mockedExec.mockImplementation(((cmd: string, args?: readonly string[]) => {
+      const safeArgs = args ?? [];
+      let result: ReturnType<typeof execResult>;
+      if (safeArgs.length === 1 && safeArgs[0] === "--version") {
+        result = execResult("4.10.0");
+      } else if (safeArgs[0] === "npm" && safeArgs[1] === "info") {
+        result = execResult("");
+      } else if (safeArgs[0] === "npm" && safeArgs[1] === "publish") {
+        publishAttempts++;
+        result =
+          publishAttempts === 1
+            ? execResult(
+                `${JSON.stringify({ file: "package.json" })}\n${JSON.stringify({
+                  type: "error",
+                  name: 33,
+                  displayName: "YN0033",
+                  indent: "",
+                  data: "No authentication configured for request",
+                })}\n${JSON.stringify({
+                  type: "error",
+                  name: 0,
+                  displayName: "YN0000",
+                  indent: "",
+                  data: "Failed with errors in 0s 77ms",
+                })}\n`,
+                1,
+              )
+            : execResult("");
+      } else {
+        throw new Error(`Unexpected exec args: ${safeArgs.join(" ")}`);
+      }
+      return Object.assign(Promise.resolve(result), {
+        exitCode: result.exitCode,
+        command: cmd,
+      });
+    }) as any);
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(
+      mockedExec.mock.calls
+        .filter((call) => call[1]?.[0] === "npm" && call[1]?.[1] === "publish")
+        .map((call) => call[1]),
+    ).toEqual([
+      expect.arrayContaining(["npm", "publish", "--json"]),
+      expect.not.arrayContaining(["--json"]),
+    ]);
+    expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
+  });
+
   it("skips already-published pnpm JSON errors from the message field", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -1106,6 +1174,152 @@ describe("Publish command", () => {
         message.includes("Published pkg-a@1.0.0!"),
       ),
     ).toBe(false);
+  });
+
+  it("skips already-published Yarn Berry network reporter errors", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+        packageManager: "yarn@4.10.0",
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("4.10.0");
+      }
+      if (args[0] === "npm" && args[1] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "npm" && args[1] === "publish") {
+        return execResult(
+          `${JSON.stringify({ file: "package.json" })}\n${JSON.stringify({
+            type: "error",
+            name: 35,
+            displayName: "YN0035",
+            indent: "",
+            data: "You cannot publish over the previously published versions: 1.0.0.",
+          })}\n${JSON.stringify({
+            type: "error",
+            name: 35,
+            displayName: "YN0035",
+            indent: "",
+            data: "  Response Code: 403 (Forbidden)",
+          })}\n${JSON.stringify({
+            type: "error",
+            name: 35,
+            displayName: "YN0035",
+            indent: "",
+            data: "  Request Method: PUT",
+          })}\n${JSON.stringify({
+            type: "error",
+            name: 35,
+            displayName: "YN0035",
+            indent: "",
+            data: "  Request URL: https://registry.npmjs.org/pkg-a",
+          })}\n${JSON.stringify({
+            type: "error",
+            name: 0,
+            displayName: "YN0000",
+            indent: "",
+            data: "Failed with errors in 0s 706ms",
+          })}\n`,
+          1,
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await publishCommand({ cwd });
+
+    expect(git.tag).not.toHaveBeenCalled();
+    const successMessages = mockedLogger.success.mock.calls.map((call) =>
+      stripVTControlCharacters(String(call[0])),
+    );
+    expect(
+      successMessages.some((message) =>
+        message.includes("Published pkg-a@1.0.0!"),
+      ),
+    ).toBe(false);
+  });
+
+  it("logs Yarn Berry reporter error data", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+        packageManager: "yarn@4.10.0",
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(false);
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("4.10.0");
+      }
+      if (args[0] === "npm" && args[1] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "npm" && args[1] === "publish") {
+        return execResult(
+          `${JSON.stringify({ file: "package.json" })}\n${JSON.stringify({
+            type: "error",
+            name: 33,
+            displayName: "YN0033",
+            indent: "",
+            data: "No authentication configured for request",
+          })}\n${JSON.stringify({
+            type: "error",
+            name: 35,
+            displayName: "YN0035",
+            indent: "",
+            data: "This belongs to a different error group",
+          })}\n${JSON.stringify({
+            type: "error",
+            name: 0,
+            displayName: "YN0000",
+            indent: "",
+            data: "Failed with errors in 0s 77ms",
+          })}\n`,
+          1,
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await expect(publishCommand({ cwd })).rejects.toThrow();
+
+    expect(mockedLogger.error).toHaveBeenCalled();
+    const errorMessages = mockedLogger.error.mock.calls.map((call) =>
+      stripVTControlCharacters(String(call[0])),
+    );
+    expect(
+      errorMessages.some(
+        (message) =>
+          message.includes(
+            "An error occurred while publishing pkg-a: YN0033",
+          ) && message.includes("No authentication configured for request"),
+      ),
+    ).toBe(true);
+    const formattedError = errorMessages.find((message) =>
+      message.includes("An error occurred while publishing pkg-a: YN0033"),
+    );
+    expect(formattedError).not.toContain(
+      "This belongs to a different error group",
+    );
   });
 
   it("skips already-published pnpm publish failures wrapped in ERR_PNPM_FAILED_TO_PUBLISH", async () => {
