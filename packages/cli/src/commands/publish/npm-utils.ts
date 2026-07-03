@@ -6,6 +6,7 @@ import { log } from "@clack/prompts";
 import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
+import { streamNdjson } from "../../utils/streamNdjson.ts";
 import type { AuthState } from "../../utils/types.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
@@ -36,14 +37,6 @@ function jsonParse(input: string) {
       console.error("error parsing json:", input);
     }
     throw err;
-  }
-}
-
-function safeJsonParse(input: string): unknown {
-  try {
-    return JSON.parse(input);
-  } catch {
-    return undefined;
   }
 }
 
@@ -94,38 +87,20 @@ export async function getPublishTool(packages: Packages): Promise<PublishTool> {
 
 function parseInfoOutput(publishTool: PublishTool, output: string) {
   if (publishTool.name === "yarn") {
-    let cursor = output.length;
-
-    while (cursor >= 0) {
-      const lineStart = output.lastIndexOf("\n", cursor - 1) + 1;
-      const line = output.slice(lineStart, cursor).trim();
-      cursor = lineStart - 1;
-
-      if (line.length === 0) {
-        continue;
-      }
-
-      const entry = safeJsonParse(line);
-      if (!entry) {
-        continue;
-      }
+    let info: unknown;
+    for (const entry of streamNdjson(output)) {
       if (publishTool.version === "berry") {
         // `yarn npm info --json` writes the payload we care about as a direct NDJSON object,
         // not wrapped in a reporter event like classic's `inspect`.
-        return entry;
+        info = entry;
+        continue;
       }
-      if (
-        typeof entry === "object" &&
-        entry != null &&
-        "type" in entry &&
-        entry.type === "inspect" &&
-        "data" in entry
-      ) {
-        return entry.data;
+      if (isJsonObject(entry) && entry.type === "inspect" && "data" in entry) {
+        info = entry.data;
       }
     }
 
-    return undefined;
+    return info;
   }
 
   const parsedInfo = jsonParse(output);
@@ -363,32 +338,6 @@ function isYarnBerryReporterEvent(
     typeof event.displayName === "string" &&
     typeof event.data === "string"
   );
-}
-
-function* streamNdjson(output: string): Generator<unknown> {
-  let lineStart = 0;
-  while (lineStart <= output.length) {
-    let lineEnd = output.indexOf("\n", lineStart);
-    if (lineEnd === -1) {
-      lineEnd = output.length;
-    }
-
-    const line = output.slice(lineStart, lineEnd);
-    lineStart = lineEnd + 1;
-
-    if (/^\s*$/.test(line)) {
-      continue;
-    }
-
-    let event: unknown;
-    try {
-      event = JSON.parse(line);
-    } catch {
-      continue;
-    }
-
-    yield event;
-  }
 }
 
 function formatYarnBerryReporterError(
