@@ -33,21 +33,15 @@ All updating of dependencies is done as a patch bump. If you want to indicate a 
 
 There are two reasons we chose to do this. The first is so the changeset descriptions are editable after creation, and a user can go in and change this as they desire. The second is that it means we are unopinionated about your git workflows, with squashing and modifying commits being completely safe, without fear of breaking a release.
 
-## What distinguishes this from Semantic Release
+## How Changesets differs from conventional commit-based tools
 
-If you have been looking at automating versioning previously, you may have come across [semantic release](https://github.com/semantic-release/semantic-release), or its monorepo equivalent [lerna semantic release](https://github.com/atlassian/lerna-semantic-release). It's good to understand how changesets operate differently.
+While many versioning tools rely on conventional commits to determine releases, Changesets was built with a different philosophy, prioritizing monorepo management and flexible workflows over strict commit message parsing.
 
-1. Changesets are designed for monorepos first.
+1. Monorepo-first design: Changesets is built to manage complex workspace topologies. It allows you to group linked packages, define fixed packages, and explicitly declare how internal dependency bumps cascade through your repository.
 
-This means we manage dependencies within the repository, which other tools do not do.
+2. Intent-based files: Instead of parsing git commit messages, change intent is stored in dedicated Markdown files committed alongside your code. This ensures that release information is preserved regardless of how your git history is squashed or rewritten.
 
-2. We commit our change information to the file system, instead of storing it in git.
-
-See the above section on why we write files to disc.
-
-3. We use semver for specifying the change.
-
-When selecting the kind of change your package is, we do not specify any change types beyond `major`, `minor`, or `patch`. The semantic release allows you to specify a range of fields (bug-fix, feature) that it converts to an appropriate semver type. This is a design decision on our part to push adding this information into the changeset description itself.
+3. Direct Semver selection: When creating a changeset, you directly specify a `major`, `minor`, or `patch` bump. Conventional commit-based tools, by comparison, rely on mapping specific commit types (e.g., `feat`, `fix`) to semver increments. We believe this design choice provides more clarity by keeping the documentation and the versioning intent together.
 
 ## The versioning of peer dependencies
 
