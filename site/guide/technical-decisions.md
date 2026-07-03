@@ -37,7 +37,7 @@ There are two reasons we chose to do this. The first is so the changeset descrip
 
 While many versioning tools rely on conventional commits to determine releases, Changesets was built with a different philosophy, prioritizing monorepo management and flexible workflows over strict commit message parsing.
 
-1. Monorepo-first design: Changesets is built to manage complex workspace topologies. It allows you to group linked packages, define fixed packages, and explicitly declare how internal dependency bumps (like `peerDependencies`) cascade through your repository.
+1. Monorepo-first design: Changesets is built to manage complex workspace topologies. It allows you to group linked packages, define fixed packages, and explicitly declare how internal dependency bumps cascade through your repository.
 
 2. Intent-based files: Instead of parsing git commit messages, change intent is stored in dedicated Markdown files committed alongside your code. This ensures that release information is preserved regardless of how your git history is squashed or rewritten.
 
