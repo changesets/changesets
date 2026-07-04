@@ -338,6 +338,96 @@ describe("Publish command", () => {
     );
   });
 
+  it("passes publishConfig.registry to Yarn Classic publish", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        publishConfig: {
+          registry: "https://registry.example.test/",
+        },
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(false);
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("1.22.22");
+      }
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult("");
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(
+      mockedExec.mock.calls.find((call) => call[1]?.[0] === "publish")?.[1],
+    ).toEqual(
+      expect.arrayContaining(["--registry=https://registry.example.test/"]),
+    );
+  });
+
+  it("uses the publishConfig.directory manifest registry for Yarn Classic publish", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        publishConfig: {
+          directory: "dist",
+          registry: "https://source.example.test/",
+        },
+      }),
+      "packages/pkg-a/dist/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        publishConfig: {
+          registry: "https://dist.example.test/",
+        },
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(false);
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("1.22.22");
+      }
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult("");
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(
+      mockedExec.mock.calls.find((call) => call[1]?.[0] === "publish")?.[1],
+    ).toEqual(
+      expect.arrayContaining(["dist", "--registry=https://dist.example.test/"]),
+    );
+  });
+
   describe("in pre state", () => {
     it("should report error if the tag option is used in pre release", async () => {
       const cwd = await testdir({
