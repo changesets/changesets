@@ -1176,6 +1176,54 @@ describe("Publish command", () => {
     ).toBe(false);
   });
 
+  it("skips already-published Yarn Classic reporter errors", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(false);
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("1.22.22");
+      }
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult(
+          "",
+          1,
+          `${JSON.stringify({
+            type: "error",
+            data: 'Couldn\'t publish package: "https://registry.npmjs.org/pkg-a: You cannot publish over the previously published versions: 1.0.0."',
+          })}\n`,
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await publishCommand({ cwd });
+
+    expect(git.tag).not.toHaveBeenCalled();
+    const successMessages = mockedLogger.success.mock.calls.map((call) =>
+      stripVTControlCharacters(String(call[0])),
+    );
+    expect(
+      successMessages.some((message) =>
+        message.includes("Published pkg-a@1.0.0!"),
+      ),
+    ).toBe(false);
+  });
+
   it("skips already-published Yarn Berry network reporter errors", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

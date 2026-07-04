@@ -302,6 +302,11 @@ type YarnBerryReporterEvent = {
   data: string;
 };
 
+type YarnClassicReporterErrorEvent = {
+  type: "error";
+  data: string;
+};
+
 function formatPublishError(
   publishTool: PublishTool["name"],
   error: PublishError,
@@ -336,6 +341,16 @@ function isYarnBerryReporterEvent(
   return (
     typeof event.name === "number" &&
     typeof event.displayName === "string" &&
+    typeof event.data === "string"
+  );
+}
+
+function isYarnClassicReporterErrorEvent(
+  event: unknown,
+): event is YarnClassicReporterErrorEvent {
+  return (
+    isJsonObject(event) &&
+    event.type === "error" &&
     typeof event.data === "string"
   );
 }
@@ -386,6 +401,19 @@ function getYarnBerryReporterError(
   };
 }
 
+function getYarnClassicReporterError(
+  output: string,
+): FormattedPublishError | undefined {
+  for (const event of streamNdjson(output)) {
+    if (isYarnClassicReporterErrorEvent(event)) {
+      return {
+        code: isAlreadyPublishedError(event.data) ? "E403" : "EUNKNOWN",
+        message: event.data,
+      };
+    }
+  }
+}
+
 function getPublishError(
   publishTool: PublishTool,
   stderr: string,
@@ -393,6 +421,9 @@ function getPublishError(
 ): { code: string; message: string } | undefined {
   if (publishTool.name === "yarn" && publishTool.version === "berry") {
     return getYarnBerryReporterError(stdout);
+  }
+  if (publishTool.name === "yarn" && publishTool.version === "classic") {
+    return getYarnClassicReporterError(stderr);
   }
 
   // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
