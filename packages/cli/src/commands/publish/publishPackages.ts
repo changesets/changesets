@@ -140,7 +140,7 @@ export async function publishPackages({
         );
         throw new ExitError(1);
       }
-      target = resolve(pkg.dir, publishDirOverride!);
+      target = resolve(pkg.dir, publishDirOverride);
     }
     const publishConfirmation = await publish(
       publishTool,
