@@ -92,7 +92,7 @@ export async function pack(options: PackOptions) {
   const packagesByName = new Map(
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
-  const publishTool = await getPublishTool(packages);
+  const publishTool = getPublishTool(packages);
 
   const packedReleases = await Promise.all(
     releases.map((release) =>
@@ -106,12 +106,11 @@ export async function pack(options: PackOptions) {
         const publishDirOverride = pkg.packageJson.publishConfig?.directory;
         if (
           publishDirOverride &&
-          publishTool.name === "yarn" &&
-          publishTool.version === "berry"
+          publishTool.name === "yarn"
         ) {
-          // Yarn Berry doesn't allow publishing non-workspace directories
+          // Yarn doesn't allow publishing non-workspace directories
           log.error(
-            `Package ${c.blue(pkg.packageJson.name)} has publishConfig.directory set to ${c.blue(publishDirOverride)}, which is not supported when using Yarn Berry. Please remove publishConfig.directory from your package.json.`,
+            `Package ${c.blue(pkg.packageJson.name)} has publishConfig.directory set to ${c.blue(publishDirOverride)}, which is not supported when using Yarn. Please remove publishConfig.directory from your package.json.`,
           );
           throw new ExitError(1);
         }
@@ -130,17 +129,8 @@ export async function pack(options: PackOptions) {
           args = ["pack", "--out", tarballPath, "--json"];
           // pnpm supports `publishConfig.directory` natively. We have to let it resolve it on its own.
           cwd = pkg.dir;
-        } else if (
-          publishTool.name === "yarn" &&
-          publishTool.version === "berry"
-        ) {
+        } else if (publishTool.name === "yarn") {
           args = ["pack", "--out", tarballPath, "--json"];
-          cwd = packDir;
-        } else if (
-          publishTool.name === "yarn" &&
-          publishTool.version === "classic"
-        ) {
-          args = ["pack", "--filename", tarballPath, "--json"];
           cwd = packDir;
         } else {
           args = ["pack", packDir, "--pack-destination", packagesDir, "--json"];

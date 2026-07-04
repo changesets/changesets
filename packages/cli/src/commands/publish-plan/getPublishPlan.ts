@@ -101,7 +101,7 @@ export async function getUnpublishedPackages(
     allowPrivatePackages: boolean;
   },
 ): Promise<Array<PublishReleaseEntry>> {
-  const publishTool = await getPublishTool(packages);
+  const publishTool = getPublishTool(packages);
   const results = await Promise.all(
     packages.packages
       .filter(

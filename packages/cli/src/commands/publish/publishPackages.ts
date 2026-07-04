@@ -10,7 +10,6 @@ import {
   publish,
   type PublishTool,
   getPublishTool,
-  sanitizeEnv,
   NPM_PUBLISH_CONCURRENCY_LIMIT,
 } from "./npm-utils.ts";
 
@@ -65,17 +64,13 @@ export async function publishPackages({
   if (releases.length === 0) {
     return [];
   }
-  const publishTool = await getPublishTool(packages);
-  if (
-    artifactDir &&
-    publishTool.name === "yarn" &&
-    publishTool.version === "berry"
-  ) {
-    log.error(`Publishing packed packages is not supported with Yarn Berry.`);
+  const publishTool = getPublishTool(packages);
+  if (artifactDir && publishTool.name === "yarn") {
+    log.error(`Publishing packed packages is not supported with Yarn.`);
     throw new ExitError(1);
   }
   const authState = getInitialAuthState(publishTool, otp);
-  const env = sanitizeEnv({
+  const env = {
     ...process.env,
     // we take over initial OTP handling in our AuthState
     // so we unset those env variables so they don't become stale once we start delegating to the package manager CLIs for OTP prompting
@@ -91,7 +86,7 @@ export async function publishPackages({
           NPM_CONFIG_OTP: undefined,
           npm_config_otp: undefined,
         }),
-  });
+  };
   // in TTY mode let's allow the first publish to "check" if the publish process requires interactive auth or not
   // on CI everything has to be configured in a way that allows automation so we can safely allow concurrency up to the defined limit
   // but in TTY the user might rely on Changesets prompting (through the used package manager CLI) for OTP/web auth
@@ -117,7 +112,7 @@ export async function publishPackages({
       // pnpm supports `publishConfig.directory` natively. We have to let it resolve it on its own.
       // Otherwise we'd risk it re-resolving from within the `publishConfig.directory` itself
       // but original untouched relative paths in `publishConfig.directory` would not even point to correct locations anymore.
-      // npm, yarn classic and berry don't support `publishConfig.directory` natively.
+      // npm and Yarn don't support `publishConfig.directory` natively.
       // We inherited support for it from Lerna, so we have to resolve it ourselves.
       // It's worth noting it's still useful for, for example, `ng-packagr` users
       // as that tool puts a whole publishable package in a dist directory (with full `package.json` in it).
@@ -131,12 +126,11 @@ export async function publishPackages({
       const publishDirOverride = pkg.packageJson.publishConfig?.directory;
       if (
         publishDirOverride &&
-        publishTool.name === "yarn" &&
-        publishTool.version === "berry"
+        publishTool.name === "yarn"
       ) {
-        // Yarn Berry doesn't allow publishing non-workspace directories
+        // Yarn doesn't allow publishing non-workspace directories
         log.error(
-          `Package ${c.blue(pkg.packageJson.name)} has publishConfig.directory set to ${c.blue(publishDirOverride)}, which is not supported when using Yarn Berry. Please remove publishConfig.directory from your package.json.`,
+          `Package ${c.blue(pkg.packageJson.name)} has publishConfig.directory set to ${c.blue(publishDirOverride)}, which is not supported when using Yarn. Please remove publishConfig.directory from your package.json.`,
         );
         throw new ExitError(1);
       }

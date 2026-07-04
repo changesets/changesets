@@ -10,7 +10,7 @@ export type FormattedPackageManagerError = {
 export type PackageManagerTool =
   | { name: "npm" }
   | { name: "pnpm" }
-  | { name: "yarn"; version: "classic" | "berry" };
+  | { name: "yarn" };
 
 export function isJsonObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value != null && !Array.isArray(value);
@@ -73,23 +73,6 @@ export function getYarnBerryReporterError(
   };
 }
 
-export function getYarnClassicReporterError(
-  output: string,
-): FormattedPackageManagerError | undefined {
-  for (const event of streamNdjson(output)) {
-    if (
-      isJsonObject(event) &&
-      event.type === "error" &&
-      typeof event.data === "string"
-    ) {
-      return {
-        code: "EUNKNOWN",
-        message: event.data,
-      };
-    }
-  }
-}
-
 export function formatNpmPnpmJsonError(
   error: unknown,
 ): FormattedPackageManagerError | undefined {
@@ -115,12 +98,7 @@ export function getPackageManagerError(
   publishTool: PackageManagerTool,
   { stderr, stdout }: { stderr: string; stdout: string },
 ): FormattedPackageManagerError {
-  if (publishTool.name === "yarn" && publishTool.version === "classic") {
-    const reporterError = getYarnClassicReporterError(stderr);
-    if (reporterError) {
-      return reporterError;
-    }
-  } else if (publishTool.name === "yarn" && publishTool.version === "berry") {
+  if (publishTool.name === "yarn") {
     const reporterError = getYarnBerryReporterError(stdout);
     if (reporterError) {
       return reporterError;
