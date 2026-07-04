@@ -161,6 +161,9 @@ function parseInfoResult(
   if (stdout) {
     return parseInfoOutput(publishTool, stdout);
   }
+
+  // Successful empty stdout means the package manager found no matching data.
+  // For npm this can happen when a package exists but has no `latest` dist-tag.
 }
 
 function getInfoCommand(publishTool: PublishTool) {
@@ -264,8 +267,10 @@ export function getPackageInfo(
       return bareInfo;
     }
 
-    // Bare query returned no successful output — retry with exact version specifier
-    // to handle prerelease-only packages on registries without auto-`latest`.
+    // Bare query returned no successful output. Retry with an exact version
+    // specifier: npm can return empty stdout for a package that exists but has
+    // no `latest` dist-tag, while the exact version query can still return the
+    // package metadata if this local version was already published.
     result = await exec(
       infoTool,
       [...infoArgs, `${packageJson.name}@${packageJson.version}`, ...infoFlags],
@@ -301,17 +306,19 @@ export async function infoAllow404(
     // pnpm 11: the queried exact package version does not exist in the registry.
     pkgInfo.error?.code === "ERR_PNPM_PACKAGE_NOT_FOUND"
   ) {
-    log.warn(`Received 404 for ${c.cyan([...getInfoCommand(publishTool), packageJson.name].join(
-    " ",
-  ))}`);
+    log.warn(
+      `Received 404 for ${c.cyan(
+        [...getInfoCommand(publishTool), packageJson.name].join(" "),
+      )}`,
+    );
     return { published: false, pkgInfo: {} };
   }
   if (pkgInfo.error) {
     log.error(
       `
-Received an unknown error code: ${pkgInfo.error.code} for ${c.cyan([...getInfoCommand(publishTool), packageJson.name].join(
-    " ",
-  ))}
+Received an unknown error code: ${pkgInfo.error.code} for ${c.cyan(
+        [...getInfoCommand(publishTool), packageJson.name].join(" "),
+      )}
 ${pkgInfo.error.message}
       `.trim(),
     );
