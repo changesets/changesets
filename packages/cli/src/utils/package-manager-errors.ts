@@ -105,6 +105,7 @@ export function formatNpmPnpmJsonError(
 
   return {
     code: typeof error.code === "string" ? error.code : "EUNKNOWN",
+    // .detail is npm-specific but for simplicity we handle it at all times
     message: `${message}${typeof error.detail === "string" && error.detail ? `\n${error.detail}` : ""}`,
   };
 }

@@ -5,12 +5,9 @@ import type { PackageJSON, Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
-import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
 import {
-  getYarnBerryReporterError,
-  getYarnClassicReporterError,
+  getPackageManagerError,
   isJsonObject,
-  type FormattedPackageManagerError,
 } from "../../utils/package-manager-errors.ts";
 import { streamNdjson } from "../../utils/streamNdjson.ts";
 import type { AuthState } from "../../utils/types.ts";
@@ -122,57 +119,14 @@ function parseInfoOutput(publishTool: PublishTool, output: string) {
   return parsedInfo;
 }
 
-function getInfoError(
-  publishTool: PublishTool,
-  stderr: string,
-  stdout: string,
-) {
-  if (publishTool.name === "yarn" && publishTool.version === "classic") {
-    const reporterError = getYarnClassicReporterError(stderr);
-    if (reporterError) {
-      return {
-        error: {
-          code: reporterError.code,
-          message: reporterError.message,
-        },
-      };
-    }
-  } else if (publishTool.name === "yarn" && publishTool.version === "berry") {
-    const reporterError = getYarnBerryReporterError(stdout);
-    if (reporterError) {
-      return {
-        error: {
-          code: reporterError.code,
-          message: reporterError.message,
-        },
-      };
-    }
-  } else {
-    const json =
-      getLastJsonObjectFromString(stdout) ||
-      getLastJsonObjectFromString(stderr);
-
-    if (json?.error) {
-      return {
-        error: formatNpmPnpmError(publishTool.name, json.error),
-      };
-    }
-  }
-
-  return {
-    error: {
-      code: "EUNKNOWN",
-      message: stderr || stdout || "Unknown info error",
-    },
-  };
-}
-
 function parseInfoResult(
   publishTool: PublishTool,
   { exitCode, stdout, stderr }: import("tinyexec").Output,
 ) {
   if (exitCode !== 0) {
-    return getInfoError(publishTool, stderr, stdout);
+    return {
+      error: getPackageManagerError(publishTool, { stderr, stdout }),
+    };
   }
 
   if (stdout) {
@@ -376,75 +330,33 @@ type InternalPublishResult =
   | { result: "skipped" }
   | { result: "failed"; allowRetry?: boolean };
 
-type PublishError = {
-  code?: string;
-  summary?: string;
-  message?: string;
-  detail?: string;
-};
-
-function formatNpmPnpmError(
-  publishTool: PublishTool["name"],
-  error: PublishError,
-): FormattedPackageManagerError {
-  // pnpm uses .message in tested versions; npm uses .summary
-  const message =
-    (publishTool === "pnpm"
-      ? (error.message ?? error.summary)
-      : error.summary) ?? "Unknown error";
-  return {
-    code:
-      error.code ??
-      // npm 11 started to reject "already published" publish attempts *eagerly* based on the preflight check
-      // https://github.com/npm/cli/commit/31455b2e177b721292f3382726e3f5f3f2963b1d
-      //
-      // .code comes from the registry's endpoint response though:
-      // https://github.com/npm/npm-registry-fetch/blob/6b4159a2519ce5aab26cc4dd8d4596a0b47781d2/lib/errors.js#L29
-      // so it's not available for such eager errors, we normalize it to the code the registry would return in the case of an actual publish attempt
-      (isAlreadyPublishedError(message) ? "E403" : "EUNKNOWN"),
-    // .detail is npm-specific but for simplicity we handle it at all times
-    message: `${message}${error.detail ? `\n${error.detail}` : ""}`,
-  };
-}
-
-function getYarnClassicPublishReporterError(output: string) {
-  const reporterError = getYarnClassicReporterError(output);
-  if (reporterError) {
-    return {
-      code: isAlreadyPublishedError(reporterError.message)
-        ? "E403"
-        : "EUNKNOWN",
-      message: reporterError.message,
-    };
-  }
-}
-
 function getPublishError(
   publishTool: PublishTool,
   stderr: string,
   stdout: string,
-): { code: string; message: string } | undefined {
-  if (publishTool.name === "yarn" && publishTool.version === "berry") {
-    return getYarnBerryReporterError(stdout);
-  }
-  if (publishTool.name === "yarn" && publishTool.version === "classic") {
-    return getYarnClassicPublishReporterError(stderr);
+): { code: string; message: string } {
+  const publishError = getPackageManagerError(publishTool, {
+    stderr,
+    stdout,
+  });
+
+  if (
+    publishError.code === "EUNKNOWN" &&
+    isAlreadyPublishedError(publishError.message)
+  ) {
+    // npm 11 started to reject "already published" publish attempts *eagerly* based on the preflight check
+    // https://github.com/npm/cli/commit/31455b2e177b721292f3382726e3f5f3f2963b1d
+    //
+    // .code comes from the registry's endpoint response though:
+    // https://github.com/npm/npm-registry-fetch/blob/6b4159a2519ce5aab26cc4dd8d4596a0b47781d2/lib/errors.js#L29
+    // so it's not available for such eager errors, we normalize it to the code the registry would return in the case of an actual publish attempt
+    return {
+      code: "E403",
+      message: publishError.message,
+    };
   }
 
-  // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
-  // We want to handle this as best we can but it has some struggles:
-  // - output of those lifecycle scripts can contain JSON
-  // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
-  // - npm9 switched back to printing `--json` errors to stdout (https://github.com/npm/cli/commit/d3543e945e721783dcb83385935f282a4bb32cf3)
-  // Note that the `--json` output is always printed at the end so this should work
-  const json =
-    getLastJsonObjectFromString(stderr) || getLastJsonObjectFromString(stdout);
-
-  if (json?.error) {
-    return formatNpmPnpmError(publishTool.name, json.error);
-  }
-
-  return undefined;
+  return publishError;
 }
 
 function isDuplicatePublishError(publishError: {
@@ -569,40 +481,37 @@ async function internalPublish(
       stdout.toString(),
     );
 
-    if (publishError) {
-      if (isDuplicatePublishError(publishError)) {
-        // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
-        return { result: "skipped" };
-      }
-      // Retry in delegated interactive mode when the publish tool reports that OTP/web auth is required:
-      // - npm uses EOTP for missing auth, or E401 + an --otp hint for an invalid/expired OTP
-      // - pnpm uses ERR_PNPM_OTP_NON_INTERACTIVE when the JSON-capturing child process cannot prompt
-      // - Yarn Berry reports auth failures as reporter errors such as YN0033
-      if (
-        isInteractiveAuthError(publishTool, publishError) &&
-        process.stdin.isTTY
-      ) {
-        // the current otp code must be invalid since it errored
-        authState.otpToken = undefined;
-        authState.requiresInteractive = true;
-        npmPublishQueue.setConcurrency(1);
-        return {
-          result: "failed",
-          // given we have just adjusted the concurrency, we need to handle the retries in the layer that requeues the publish
-          // calling internalPublish again would allow concurrent failures to run again concurrently
-          // but only one retried publish should get delegated to the npm cli and other ones should "await" its successful result before being retried
-          allowRetry: true,
-        };
-      }
-      log.error(
-        `
+    if (isDuplicatePublishError(publishError)) {
+      // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
+      return { result: "skipped" };
+    }
+    // Retry in delegated interactive mode when the publish tool reports that OTP/web auth is required:
+    // - npm uses EOTP for missing auth, or E401 + an --otp hint for an invalid/expired OTP
+    // - pnpm uses ERR_PNPM_OTP_NON_INTERACTIVE when the JSON-capturing child process cannot prompt
+    // - Yarn Berry reports auth failures as reporter errors such as YN0033
+    if (
+      isInteractiveAuthError(publishTool, publishError) &&
+      process.stdin.isTTY
+    ) {
+      // the current otp code must be invalid since it errored
+      authState.otpToken = undefined;
+      authState.requiresInteractive = true;
+      npmPublishQueue.setConcurrency(1);
+      return {
+        result: "failed",
+        // given we have just adjusted the concurrency, we need to handle the retries in the layer that requeues the publish
+        // calling internalPublish again would allow concurrent failures to run again concurrently
+        // but only one retried publish should get delegated to the npm cli and other ones should "await" its successful result before being retried
+        allowRetry: true,
+      };
+    }
+    log.error(
+      `
 An error occurred while publishing ${release.name}: ${publishError.code}
 ${publishError.message}
         `.trim(),
-      );
-    }
+    );
 
-    log.error(stderr.toString() || stdout.toString());
     return { result: "failed" };
   }
   // bump the limit up in case we have started with the limit of 1 in the TTY mode
