@@ -131,21 +131,32 @@ function getInfoError(
         },
       };
     }
-  }
+  } else if (publishTool.name === "yarn" && publishTool.version === "berry") {
+    const reporterError = getYarnBerryReporterError(stdout);
+    if (reporterError) {
+      return {
+        error: {
+          code: reporterError.code,
+          message: reporterError.message,
+        },
+      };
+    }
+  } else {
+    const json =
+      getLastJsonObjectFromString(stdout) ||
+      getLastJsonObjectFromString(stderr);
 
-  const json =
-    getLastJsonObjectFromString(stdout) || getLastJsonObjectFromString(stderr);
-
-  if (json?.error) {
-    return {
-      error: formatNpmPnpmError(publishTool.name, json.error),
-    };
+    if (json?.error) {
+      return {
+        error: formatNpmPnpmError(publishTool.name, json.error),
+      };
+    }
   }
 
   return {
     error: {
       code: "EUNKNOWN",
-      message: "Unknown info error",
+      message: stderr || stdout || "Unknown info error",
     },
   };
 }
@@ -316,7 +327,13 @@ export async function infoAllow404(
     // pnpm 11: the queried package does not exist in the registry.
     pkgInfo.error?.code === "ERR_PNPM_FETCH_404" ||
     // pnpm 11: the queried exact package version does not exist in the registry.
-    pkgInfo.error?.code === "ERR_PNPM_PACKAGE_NOT_FOUND"
+    pkgInfo.error?.code === "ERR_PNPM_PACKAGE_NOT_FOUND" ||
+    // Yarn Berry: failed info requests are reporter errors. Missing packages
+    // use YN0035 with the registry response code included in the joined data.
+    (publishTool.name === "yarn" &&
+      publishTool.version === "berry" &&
+      pkgInfo.error?.code === "YN0035" &&
+      pkgInfo.error.message.includes("Response Code: 404"))
   ) {
     log.warn(
       `Received 404 for ${c.cyan(

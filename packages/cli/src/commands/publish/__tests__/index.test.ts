@@ -867,6 +867,113 @@ describe("Publish command", () => {
     );
   });
 
+  it("treats Yarn Berry info 404 reporter errors as unpublished", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+        packageManager: "yarn@4.10.0",
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(false);
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("4.10.0");
+      }
+      if (args[0] === "npm" && args[1] === "info") {
+        return execResult(
+          `${JSON.stringify({
+            type: "error",
+            name: 35,
+            displayName: "YN0035",
+            indent: "",
+            data: "Package not found",
+          })}\n${JSON.stringify({
+            type: "error",
+            name: 35,
+            displayName: "YN0035",
+            indent: "",
+            data: "  Response Code: 404 (Not Found)",
+          })}\n`,
+          1,
+        );
+      }
+      if (args[0] === "npm" && args[1] === "publish") {
+        return execResult("");
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd });
+
+    expect(
+      mockedExec.mock.calls.filter(
+        (call) => call[1]?.[0] === "npm" && call[1]?.[1] === "publish",
+      ),
+    ).toHaveLength(1);
+  });
+
+  it("does not treat Yarn Berry non-404 info reporter errors as unpublished", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+        packageManager: "yarn@4.10.0",
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    using _ = stubIsTTY(false);
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("4.10.0");
+      }
+      if (args[0] === "npm" && args[1] === "info") {
+        return execResult(
+          `${JSON.stringify({
+            type: "error",
+            name: 35,
+            displayName: "YN0035",
+            indent: "",
+            data: "You may not perform that action with these credentials.",
+          })}\n${JSON.stringify({
+            type: "error",
+            name: 35,
+            displayName: "YN0035",
+            indent: "",
+            data: "  Response Code: 403 (Forbidden)",
+          })}\n`,
+          1,
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await expect(publishCommand({ cwd })).rejects.toThrow();
+
+    expect(
+      mockedExec.mock.calls.filter(
+        (call) => call[1]?.[0] === "npm" && call[1]?.[1] === "publish",
+      ),
+    ).toHaveLength(0);
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("You may not perform that action"),
+    );
+  });
+
   it("does not log a success message for a failed publish", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
