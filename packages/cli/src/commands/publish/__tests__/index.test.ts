@@ -825,6 +825,48 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
+  it("does not treat Yarn Classic info reporter errors as unpublished packages", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("1.22.22");
+      }
+      if (args[0] === "info") {
+        return execResult(
+          "",
+          1,
+          `${JSON.stringify({
+            type: "error",
+            data: "Received invalid response from registry.",
+          })}\n`,
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await expect(publishCommand({ cwd })).rejects.toThrow();
+
+    expect(
+      mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
+    ).toHaveLength(0);
+    expect(git.tag).not.toHaveBeenCalled();
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("Received invalid response from registry."),
+    );
+  });
+
   it("does not log a success message for a failed publish", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
