@@ -116,6 +116,59 @@ function parseInfoOutput(publishTool: PublishTool, output: string) {
   return parsedInfo;
 }
 
+function getInfoError(
+  publishTool: PublishTool,
+  stderr: string,
+  stdout: string,
+) {
+  if (publishTool.name === "yarn" && publishTool.version === "classic") {
+    const reporterError = getYarnClassicReporterError(stderr);
+    if (reporterError) {
+      return {
+        error: {
+          code: reporterError.code,
+          message: reporterError.message,
+        },
+      };
+    }
+  }
+
+  const json =
+    getLastJsonObjectFromString(stdout) || getLastJsonObjectFromString(stderr);
+
+  if (json?.error) {
+    return {
+      error: formatNpmPnpmError(publishTool.name, json.error),
+    };
+  }
+
+  return {
+    error: {
+      code: "EUNKNOWN",
+      message: "Unknown info error",
+    },
+  };
+}
+
+function parseInfoResult(
+  publishTool: PublishTool,
+  { exitCode, stdout, stderr }: import("tinyexec").Output,
+) {
+  if (exitCode !== 0) {
+    return getInfoError(publishTool, stderr, stdout);
+  }
+
+  if (stdout) {
+    return parseInfoOutput(publishTool, stdout);
+  }
+}
+
+function getInfoCommand(publishTool: PublishTool) {
+  return publishTool.name === "yarn" && publishTool.version === "berry"
+    ? [publishTool.name, "npm", "info"]
+    : [publishTool.name, "info"];
+}
+
 // `npm info <pkg> --json` (aka `npm view`) behavior:
 //
 // - Bare package name starts with version string `'latest'`. If
@@ -193,47 +246,45 @@ export function getPackageInfo(
       }
     }
 
-    const infoArgs =
-      publishTool.name === "yarn" && publishTool.version === "berry"
-        ? ["npm", "info"]
-        : ["info"];
+    const [infoTool, ...infoArgs] = getInfoCommand(publishTool);
     const infoFlags = [...registryOverrides, "--json"];
 
     // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
     // bleed-through, enabling only-pre detection downstream. Returns empty when no `latest` exists.
     let result = await exec(
-      publishTool.name,
+      infoTool,
       [...infoArgs, packageJson.name, ...infoFlags],
       {
         nodeOptions: { cwd },
       },
     );
 
-    // Bare query returned nothing — retry with exact version specifier
-    // to handle prerelease-only packages on registries without auto-`latest`.
-    if (result.stdout.toString() === "") {
-      result = await exec(
-        publishTool.name,
-        [
-          ...infoArgs,
-          `${packageJson.name}@${packageJson.version}`,
-          ...infoFlags,
-        ],
-        { nodeOptions: { cwd } },
-      );
+    const bareInfo = parseInfoResult(publishTool, result);
+    if (bareInfo) {
+      return bareInfo;
     }
 
-    // Normalize, just in case. The above prerelease-only package query should already have returned:
+    // Bare query returned no successful output — retry with exact version specifier
+    // to handle prerelease-only packages on registries without auto-`latest`.
+    result = await exec(
+      infoTool,
+      [...infoArgs, `${packageJson.name}@${packageJson.version}`, ...infoFlags],
+      { nodeOptions: { cwd } },
+    );
+
+    const exactInfo = parseInfoResult(publishTool, result);
+    if (exactInfo) {
+      return exactInfo;
+    }
+
+    // Normalize successful empty output, just in case. The above prerelease-only package query should already have returned:
     // - either a result (when the package+version exists)
     // - or an error with: "code": "E404", "summary": "No match found for version $VERSION",
-    if (result.stdout.toString() === "") {
-      return {
-        error: {
-          code: "E404",
-        },
-      };
-    }
-    return parseInfoOutput(publishTool, result.stdout.toString());
+    return {
+      error: {
+        code: "E404",
+      },
+    };
   });
 }
 
@@ -250,14 +301,18 @@ export async function infoAllow404(
     // pnpm 11: the queried exact package version does not exist in the registry.
     pkgInfo.error?.code === "ERR_PNPM_PACKAGE_NOT_FOUND"
   ) {
-    log.warn(`Received 404 for ${c.cyan(`npm info ${packageJson.name}`)}`);
+    log.warn(`Received 404 for ${c.cyan([...getInfoCommand(publishTool), packageJson.name].join(
+    " ",
+  ))}`);
     return { published: false, pkgInfo: {} };
   }
   if (pkgInfo.error) {
     log.error(
       `
-Received an unknown error code: ${pkgInfo.error.code} for ${c.cyan(`npm info ${packageJson.name}`)}
-${pkgInfo.error.summary}${pkgInfo.error.detail ? `\n${pkgInfo.error.detail}` : ""}
+Received an unknown error code: ${pkgInfo.error.code} for ${c.cyan([...getInfoCommand(publishTool), packageJson.name].join(
+    " ",
+  ))}
+${pkgInfo.error.message}
       `.trim(),
     );
 
@@ -307,7 +362,7 @@ type YarnClassicReporterErrorEvent = {
   data: string;
 };
 
-function formatPublishError(
+function formatNpmPnpmError(
   publishTool: PublishTool["name"],
   error: PublishError,
 ): FormattedPublishError {
@@ -436,7 +491,7 @@ function getPublishError(
     getLastJsonObjectFromString(stderr) || getLastJsonObjectFromString(stdout);
 
   if (json?.error) {
-    return formatPublishError(publishTool.name, json.error);
+    return formatNpmPnpmError(publishTool.name, json.error);
   }
 
   return undefined;

@@ -602,6 +602,48 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
+  it("does not treat failed npm info with empty stdout as unpublished", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult(
+          "",
+          1,
+          JSON.stringify({
+            error: {
+              code: "ENEEDAUTH",
+              summary: "This command requires you to be logged in.",
+            },
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await expect(publishCommand({ cwd })).rejects.toThrow();
+
+    expect(
+      mockedExec.mock.calls
+        .filter((call) => call[1]?.[0] === "info")
+        .map((call) => call[1]),
+    ).toEqual([["info", "pkg-a", "--json"]]);
+    expect(
+      mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
+    ).toHaveLength(0);
+  });
+
   it("treats pnpm info ERR_PNPM_FETCH_404 errors as unpublished", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
