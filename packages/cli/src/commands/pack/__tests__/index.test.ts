@@ -7,18 +7,30 @@ import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { pack } from "../index.ts";
 
+const mockedLogger = vi.hoisted(() => ({
+  error: vi.fn(),
+  info: vi.fn(),
+}));
+
+vi.mock("@clack/prompts", async (importOriginal) => {
+  return {
+    ...(await importOriginal()),
+    log: mockedLogger,
+  };
+});
+
 vi.mock("@changesets/git");
 vi.mock("tinyexec");
 
 const mockedExec = vi.mocked(exec);
 const mockedGit = vi.mocked(git);
 
-function execResult(stdout: string, exitCode = 0) {
+function execResult(stdout: string, exitCode = 0, stderr = "") {
   return {
     command: "",
     args: [],
     stdout,
-    stderr: "",
+    stderr,
     exitCode,
     failed: exitCode !== 0,
     signal: undefined,
@@ -214,6 +226,183 @@ describe("pack", () => {
     await expect(
       fs.readFile(path.join(outputDir, "publish-plan.json"), "utf8"),
     ).resolves.toContain(`"path": "packages/pkg-a-1.0.0.tgz"`);
+  });
+
+  it("logs npm pack JSON error details", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({}),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    await fs.writeFile(
+      path.join(cwd, "publish-plan.json"),
+      JSON.stringify({
+        version: 1,
+        plan: [
+          [
+            {
+              kind: "publish",
+              name: "pkg-a",
+              version: "1.0.0",
+              access: "public",
+              tag: "latest",
+            },
+          ],
+        ],
+      }),
+    );
+    mockExecImplementation(async () =>
+      execResult(
+        "",
+        1,
+        JSON.stringify({
+          error: {
+            code: "EJSONPARSE",
+            summary: "Invalid package metadata",
+            detail: "package.json could not be parsed",
+          },
+        }),
+      ),
+    );
+
+    await expect(
+      pack({ cwd, fromPublishPlan: "publish-plan.json", outDir: ".packed" }),
+    ).rejects.toThrow();
+
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("EJSONPARSE"),
+    );
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("package.json could not be parsed"),
+    );
+  });
+
+  it("logs Yarn Classic pack reporter errors", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      ".changeset/config.json": JSON.stringify({}),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    await fs.writeFile(
+      path.join(cwd, "publish-plan.json"),
+      JSON.stringify({
+        version: 1,
+        plan: [
+          [
+            {
+              kind: "publish",
+              name: "pkg-a",
+              version: "1.0.0",
+              access: "public",
+              tag: "latest",
+            },
+          ],
+        ],
+      }),
+    );
+    mockExecImplementation(async (_cmd, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("1.22.22");
+      }
+      return execResult(
+        "",
+        1,
+        `${JSON.stringify({
+          type: "error",
+          data: "Couldn't pack package.",
+        })}\n`,
+      );
+    });
+
+    await expect(
+      pack({ cwd, fromPublishPlan: "publish-plan.json", outDir: ".packed" }),
+    ).rejects.toThrow();
+
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("Couldn't pack package."),
+    );
+  });
+
+  it("logs Yarn Berry pack reporter errors", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+        packageManager: "yarn@4.10.0",
+      }),
+      "yarn.lock": "",
+      ".changeset/config.json": JSON.stringify({}),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    await fs.writeFile(
+      path.join(cwd, "publish-plan.json"),
+      JSON.stringify({
+        version: 1,
+        plan: [
+          [
+            {
+              kind: "publish",
+              name: "pkg-a",
+              version: "1.0.0",
+              access: "public",
+              tag: "latest",
+            },
+          ],
+        ],
+      }),
+    );
+    mockExecImplementation(async (_cmd, args) => {
+      if (args.length === 1 && args[0] === "--version") {
+        return execResult("4.10.0");
+      }
+      return execResult(
+        `${JSON.stringify({
+          type: "error",
+          name: 1,
+          displayName: "YN0001",
+          indent: "",
+          data: "Pack failed.",
+        })}\n${JSON.stringify({
+          type: "error",
+          name: 1,
+          displayName: "YN0001",
+          indent: "",
+          data: "The manifest is invalid.",
+        })}\n`,
+        1,
+      );
+    });
+
+    await expect(
+      pack({ cwd, fromPublishPlan: "publish-plan.json", outDir: ".packed" }),
+    ).rejects.toThrow();
+
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("Pack failed.\nThe manifest is invalid."),
+    );
   });
 
   it("throws on an unsupported plan file version", async () => {

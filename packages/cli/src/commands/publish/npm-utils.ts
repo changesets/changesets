@@ -6,6 +6,12 @@ import { log } from "@clack/prompts";
 import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
+import {
+  getYarnBerryReporterError,
+  getYarnClassicReporterError,
+  isJsonObject,
+  type FormattedPackageManagerError,
+} from "../../utils/package-manager-errors.ts";
 import { streamNdjson } from "../../utils/streamNdjson.ts";
 import type { AuthState } from "../../utils/types.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
@@ -365,10 +371,6 @@ function isAlreadyPublishedError(output: string): boolean {
   );
 }
 
-function isJsonObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value != null && !Array.isArray(value);
-}
-
 type InternalPublishResult =
   | { result: "published" }
   | { result: "skipped" }
@@ -381,27 +383,10 @@ type PublishError = {
   detail?: string;
 };
 
-type FormattedPublishError = {
-  code: string;
-  message: string;
-};
-
-type YarnBerryReporterEvent = {
-  type: "error";
-  name: number;
-  displayName: string;
-  data: string;
-};
-
-type YarnClassicReporterErrorEvent = {
-  type: "error";
-  data: string;
-};
-
 function formatNpmPnpmError(
   publishTool: PublishTool["name"],
   error: PublishError,
-): FormattedPublishError {
+): FormattedPackageManagerError {
   // pnpm uses .message in tested versions; npm uses .summary
   const message =
     (publishTool === "pnpm"
@@ -422,86 +407,15 @@ function formatNpmPnpmError(
   };
 }
 
-function isYarnBerryReporterEvent(
-  event: unknown,
-): event is YarnBerryReporterEvent {
-  if (!isJsonObject(event) || event.type !== "error") {
-    return false;
-  }
-
-  return (
-    typeof event.name === "number" &&
-    typeof event.displayName === "string" &&
-    typeof event.data === "string"
-  );
-}
-
-function isYarnClassicReporterErrorEvent(
-  event: unknown,
-): event is YarnClassicReporterErrorEvent {
-  return (
-    isJsonObject(event) &&
-    event.type === "error" &&
-    typeof event.data === "string"
-  );
-}
-
-function formatYarnBerryReporterError(
-  event: YarnBerryReporterEvent,
-): FormattedPublishError {
-  return {
-    code:
-      event.displayName ||
-      // Yarn emits an empty displayName when enableMessageNames is false.
-      `YN${String(event.name).padStart(4, "0")}`,
-    message: event.data,
-  };
-}
-
-function getYarnBerryReporterError(
-  output: string,
-): FormattedPublishError | undefined {
-  const errors: FormattedPublishError[] = [];
-  let code: string | undefined;
-
-  for (const event of streamNdjson(output)) {
-    if (!isYarnBerryReporterEvent(event)) {
-      continue;
-    }
-
-    const error = formatYarnBerryReporterError(event);
-    // this is YN0000 "summary" printed at the end, just skip it at all times
-    if (error.message.startsWith("Failed with errors")) {
-      continue;
-    }
-    if (errors.length > 0 && error.code !== code) {
-      break;
-    }
-
-    code = error.code;
-    errors.push(error);
-  }
-
-  if (!errors.length) {
-    return;
-  }
-
-  return {
-    code: errors[0].code,
-    message: errors.map((error) => error.message).join("\n"),
-  };
-}
-
-function getYarnClassicReporterError(
-  output: string,
-): FormattedPublishError | undefined {
-  for (const event of streamNdjson(output)) {
-    if (isYarnClassicReporterErrorEvent(event)) {
-      return {
-        code: isAlreadyPublishedError(event.data) ? "E403" : "EUNKNOWN",
-        message: event.data,
-      };
-    }
+function getYarnClassicPublishReporterError(output: string) {
+  const reporterError = getYarnClassicReporterError(output);
+  if (reporterError) {
+    return {
+      code: isAlreadyPublishedError(reporterError.message)
+        ? "E403"
+        : "EUNKNOWN",
+      message: reporterError.message,
+    };
   }
 }
 
@@ -514,7 +428,7 @@ function getPublishError(
     return getYarnBerryReporterError(stdout);
   }
   if (publishTool.name === "yarn" && publishTool.version === "classic") {
-    return getYarnClassicReporterError(stderr);
+    return getYarnClassicPublishReporterError(stderr);
   }
 
   // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal

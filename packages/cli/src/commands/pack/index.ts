@@ -11,6 +11,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
+import { getPackageManagerError } from "../../utils/package-manager-errors.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { getDefaultWorkspaceConcurrency } from "../../utils/workspaceConcurrency.ts";
 import {
@@ -154,19 +155,13 @@ export async function pack(options: PackOptions) {
         );
 
         if (exitCode !== 0) {
-          const json =
-            getLastJsonObjectFromString(stderr.toString()) ||
-            getLastJsonObjectFromString(stdout.toString());
-
-          if (json?.error) {
-            log.error(
-              `An error occurred while packing ${release.name}: ${json.error.code}`,
-            );
-          } else if (stderr.toString()) {
-            log.error(stderr.toString());
-          } else {
-            log.error(stdout.toString());
-          }
+          const packError = getPackageManagerError(publishTool, {
+            stderr,
+            stdout,
+          });
+          log.error(
+            `An error occurred while packing ${release.name}: ${packError.code}\n${packError.message}`,
+          );
           throw new ExitError(1);
         }
 
