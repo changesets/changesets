@@ -263,7 +263,15 @@ export function getPackageInfo(
     );
 
     const bareInfo = parseInfoResult(publishTool, result);
-    if (bareInfo) {
+    if (
+      bareInfo &&
+      !(
+        publishTool.name === "pnpm" &&
+        isJsonObject(bareInfo) &&
+        isJsonObject(bareInfo.error) &&
+        bareInfo.error.code === "ERR_PNPM_PACKAGE_NOT_FOUND"
+      )
+    ) {
       return bareInfo;
     }
 
@@ -271,6 +279,10 @@ export function getPackageInfo(
     // specifier: npm can return empty stdout for a package that exists but has
     // no `latest` dist-tag, while the exact version query can still return the
     // package metadata if this local version was already published.
+    // pnpm has the same underlying `latest`-tag issue but reports it as
+    // ERR_PNPM_PACKAGE_NOT_FOUND: fetchPackageInfo.ts builds a tag spec with
+    // fetchSpec `latest`, and pickPackageFromMeta.ts resolves tag specs from
+    // meta["dist-tags"].
     result = await exec(
       infoTool,
       [...infoArgs, `${packageJson.name}@${packageJson.version}`, ...infoFlags],

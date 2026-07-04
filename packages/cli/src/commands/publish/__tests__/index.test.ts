@@ -724,6 +724,59 @@ describe("Publish command", () => {
     ).toHaveLength(1);
   });
 
+  it("retries exact pnpm info after bare package ERR_PNPM_PACKAGE_NOT_FOUND", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0-beta.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info" && args[1] === "pkg-a") {
+        return execResult(
+          JSON.stringify({
+            error: {
+              code: "ERR_PNPM_PACKAGE_NOT_FOUND",
+              message: "No matching version found for pkg-a@latest",
+            },
+          }),
+          1,
+        );
+      }
+      if (args[0] === "info" && args[1] === "pkg-a@1.0.0-beta.0") {
+        return execResult(
+          JSON.stringify({
+            version: "1.0.0-beta.0",
+            versions: ["1.0.0-beta.0"],
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await publishCommand({ cwd });
+
+    expect(
+      mockedExec.mock.calls
+        .filter((call) => call[1]?.[0] === "info")
+        .map((call) => call[1]),
+    ).toEqual([
+      ["info", "pkg-a", "--json"],
+      ["info", "pkg-a@1.0.0-beta.0", "--json"],
+    ]);
+    expect(git.tag).not.toHaveBeenCalled();
+    expect(
+      mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
+    ).toHaveLength(0);
+  });
+
   it("stops publishing after a failed chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
