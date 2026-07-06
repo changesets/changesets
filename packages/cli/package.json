@@ -58,6 +58,7 @@
   "devDependencies": {
     "@changesets/color": "workspace:^",
     "@changesets/test-utils": "workspace:*",
+    "@pnpm/pnpr": "0.0.0-26062401",
     "@types/semver": "^7.7.1",
     "human-id": "^4.2.0",
     "outdent": "^0.8.0"

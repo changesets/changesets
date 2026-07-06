@@ -226,6 +226,9 @@ importers:
       '@changesets/test-utils':
         specifier: workspace:*
         version: link:../../scripts/test-utils
+      '@pnpm/pnpr':
+        specifier: 0.0.0-26062401
+        version: 0.0.0-26062401
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
@@ -790,6 +793,55 @@ packages:
   '@pnpm/npm-conf@3.0.2':
     resolution: {integrity: sha512-h104Kh26rR8tm+a3Qkc5S4VLYint3FE48as7+/5oCEcKR2idC/pF1G6AhIXKI+eHPJa/3J9i5z0Al47IeGHPkA==}
     engines: {node: '>=12'}
+
+  '@pnpm/pnpr.darwin-arm64@0.0.0-26062401':
+    resolution: {integrity: sha512-4frh9yB77pNyBJcO7ye6YO6Qh/5cfLikC3AHzxnBVxwTixskB5a5XSEcD1Da8bMzBu21cg7+j3FXdVG7CtM3+w==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@pnpm/pnpr.darwin-x64@0.0.0-26062401':
+    resolution: {integrity: sha512-UhlGBuoaepqtGfgusGVGw6CGgnfb+JO3Vg0r0EIlazk4fs52YWqbilJuY/I8My+ztzXrH430eBiYT/AtiX1RFw==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@pnpm/pnpr.linux-arm64-musl@0.0.0-26062401':
+    resolution: {integrity: sha512-18X2CrAlwnkXYlug37gkXUvXkrLX4BD2CiKi5oHAm0gdp1VBGOQOdA+Ek+bw7Y/JG36jE91tqDd2h9Nnh3iuVA==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@pnpm/pnpr.linux-arm64@0.0.0-26062401':
+    resolution: {integrity: sha512-Xbg5QkCcD0V0xwGvC11MeR8Zzw/RKSbQfLmiQy57XNvLVOjogtE68Bn5B6Z12doboDfaXkY5E8Hp313O9kIgmQ==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/pnpr.linux-x64-musl@0.0.0-26062401':
+    resolution: {integrity: sha512-SSt6s3dG8nnhovkFMFCP58HqJcE/qhCEJ0HplDn5wgfbhLSDVN3lCNXgGXGA0FW28/T/2jS//yvPngDPVF2t2A==}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@pnpm/pnpr.linux-x64@0.0.0-26062401':
+    resolution: {integrity: sha512-GJrwxChzdKtWJ6NgBdBzhAVvBXgvAqSJ7J14IdPhSKBCuejwlc3NaIMfaTkf3uV9G6KhROFn/D5kmPwQRW5DYQ==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/pnpr.win32-arm64@0.0.0-26062401':
+    resolution: {integrity: sha512-0Pq9pzrQbzwcNoeTB4KXXWkGEJikSPykVUtsUr5aADRZp8xRC4Cs3dCrqkNLyqcb6hNiQ+9Xlzn9QaNLs/DfuQ==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@pnpm/pnpr.win32-x64@0.0.0-26062401':
+    resolution: {integrity: sha512-yY/9wkeOw1m7gDngRHxBXyEh4dAn61aXfEZcygD41vJHZ7PScm17FChOU6uLiZZvBJLZeCapfGpuy1lMOIouFg==}
+    cpu: [x64]
+    os: [win32]
+
+  '@pnpm/pnpr@0.0.0-26062401':
+    resolution: {integrity: sha512-p7K1W0n9476aG9XaKrQZoSV1H4UwWMTkqkAsDmiNfPHXRBesOsYwdQhEpcvzTfIOEuJOmwbipWgj+aThFdex5w==}
+    engines: {node: '>=18.*'}
+    hasBin: true
 
   '@publint/pack@0.1.4':
     resolution: {integrity: sha512-HDVTWq3H0uTXiU0eeSQntcVUTPP3GamzeXI41+x7uU9J65JgWQh3qWZHblR1i0npXfFtF+mxBiU2nJH8znxWnQ==}
@@ -2324,6 +2376,41 @@ snapshots:
       '@pnpm/config.env-replace': 1.1.0
       '@pnpm/network.ca-file': 1.0.2
       config-chain: 1.1.13
+
+  '@pnpm/pnpr.darwin-arm64@0.0.0-26062401':
+    optional: true
+
+  '@pnpm/pnpr.darwin-x64@0.0.0-26062401':
+    optional: true
+
+  '@pnpm/pnpr.linux-arm64-musl@0.0.0-26062401':
+    optional: true
+
+  '@pnpm/pnpr.linux-arm64@0.0.0-26062401':
+    optional: true
+
+  '@pnpm/pnpr.linux-x64-musl@0.0.0-26062401':
+    optional: true
+
+  '@pnpm/pnpr.linux-x64@0.0.0-26062401':
+    optional: true
+
+  '@pnpm/pnpr.win32-arm64@0.0.0-26062401':
+    optional: true
+
+  '@pnpm/pnpr.win32-x64@0.0.0-26062401':
+    optional: true
+
+  '@pnpm/pnpr@0.0.0-26062401':
+    optionalDependencies:
+      '@pnpm/pnpr.darwin-arm64': 0.0.0-26062401
+      '@pnpm/pnpr.darwin-x64': 0.0.0-26062401
+      '@pnpm/pnpr.linux-arm64': 0.0.0-26062401
+      '@pnpm/pnpr.linux-arm64-musl': 0.0.0-26062401
+      '@pnpm/pnpr.linux-x64': 0.0.0-26062401
+      '@pnpm/pnpr.linux-x64-musl': 0.0.0-26062401
+      '@pnpm/pnpr.win32-arm64': 0.0.0-26062401
+      '@pnpm/pnpr.win32-x64': 0.0.0-26062401
 
   '@publint/pack@0.1.4': {}
 
