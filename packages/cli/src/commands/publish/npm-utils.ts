@@ -18,26 +18,17 @@ interface PublishOptions {
   env: NodeJS.ProcessEnv;
 }
 
-const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
-export const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
-
-export const npmRequestQueue = createPromiseQueue(
-  NPM_REQUEST_CONCURRENCY_LIMIT,
-);
-export const npmPublishQueue = createPromiseQueue(
-  NPM_PUBLISH_CONCURRENCY_LIMIT,
-);
-
-function jsonParse(input: string) {
-  try {
-    return JSON.parse(input);
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      console.error("error parsing json:", input);
+(NPM_PUBLISH_CONCURRENCY_LIMIT,
+  function jsonParse(input: string) {
+    try {
+      return JSON.parse(input);
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        console.error("error parsing json:", input);
+      }
+      throw err;
     }
-    throw err;
-  }
-}
+  });
 
 export function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   if (env.npm_config_registry === "https://registry.yarnpkg.com") {
