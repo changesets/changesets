@@ -136,7 +136,7 @@ This is useful for CI pipelines that want to split the build and publish steps.
 
 <div v-html="data.statusHelpMessage" />
 
-The status command provides information about the changesets that currently exist. If there are no changesets present, it exits with exit code 1.
+The status command provides information about the changesets that currently exist. If there are changes to packages but no changesets are present, it exits with code `1`.
 
 ### JSON output
 

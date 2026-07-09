@@ -46,7 +46,7 @@ $ yarn changeset status --since main
 
 :::
 
-This will exit with exit code 1 if there have been no new changesets since the `main` branch.
+This will exit with code `1` if there are changed packages but no new changesets since main. It will not fail if there are no changed packages.
 
 If you want to merge a change without doing any releases (such as when you only change tests or build tools), you can run `changeset --empty` to add a special changeset that does not release anything.
 
