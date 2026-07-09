@@ -70,7 +70,7 @@ describe("publishing", () => {
         otpCode: null,
       });
 
-      expect(result.result).toEqual("skipped:already-published");
+      expect(result.result).toEqual("failed:already-published");
     },
   );
 

@@ -56,7 +56,7 @@ describe("publishing", () => {
   );
 
   it.each(alreadyPublishedCases)(
-    "should handle error if version is already published (%s)",
+    "should return correct error if version is already published (%s)",
     async (_, snapshot) => {
       mockedExec.mockResolvedValue(snapshot);
 
@@ -68,14 +68,14 @@ describe("publishing", () => {
         otpCode: null,
       });
 
-      expect(result.result).toEqual("skipped:already-published");
+      expect(result.result).toEqual("failed:already-published");
     },
   );
 
   const need2faCases = Object.entries(need2faErrorSnapshot.pnpm);
 
   it.each(need2faCases)(
-    "should handle error if action requires 2fa (%s)",
+    "should return correct error if action requires 2fa (%s)",
     async (_, snapshot) => {
       mockedExec.mockResolvedValue(snapshot);
 
@@ -96,9 +96,8 @@ describe("publishing", () => {
     },
   );
 
-  // TODO: requires https://github.com/pnpm/pnpm/issues/12724
-  // eslint-disable-next-line vitest/no-disabled-tests
-  it.skip("returns 2fa state details if provided & process is interactive", async () => {
+  // v11.10+ only
+  it("returns 2fa state details if provided & process is interactive", async () => {
     mockedExec.mockResolvedValue(need2faErrorSnapshot.pnpm.v11);
     vi.stubEnv("CHANGESETS_TEST_INTERACTIVE", "true");
 
@@ -112,7 +111,6 @@ describe("publishing", () => {
 
     expect(result.result).toEqual("failed:needs-2fa");
     const error = result as PublishResultFailedNeeds2fa;
-    expect(error).toEqual("needs-2fa");
     expect(error.authUrl).toMatchInlineSnapshot(
       `"https://www.npmjs.com/auth/cli/[uuid]"`,
     );

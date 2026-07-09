@@ -2,17 +2,10 @@ import type { Package } from "@changesets/types";
 import type { PublishReleaseEntry } from "../commands/publish-plan/getPublishPlan.ts";
 
 export type PublishTool = {
-  name: "npm" | "pnpm";
+  name: "npm" | "pnpm" | "mock";
   getOtpCode: (otp?: string) => string | null;
   publish: (options: PublishOptions) => Promise<PublishResult>;
 };
-
-export type AuthState =
-  | "interactive"
-  | "otp"
-  | "skipped-2fa"
-  | "trusted-publishing"
-  | "unknown";
 
 export type PublishOptions = {
   pkg: Package;
@@ -38,10 +31,9 @@ export type PublishResultFailed = PublishResultBase & {
   summary: string;
 };
 
-// export type PublishResultFailedNeedsToken = PublishResultBase & {
-//   result: "failed:needs-token";
-//   summary: string;
-// };
+export type PublishResultAlreadyPublished = PublishResultBase & {
+  result: "failed:already-published";
+};
 
 export type PublishResultFailedNeeds2fa = PublishResultBase & {
   result: "failed:needs-2fa";
@@ -52,8 +44,6 @@ export type PublishResultFailedNeeds2fa = PublishResultBase & {
 
 export type PublishResult =
   | PublishResultSuccess
-  // TODO: remove "skipped", add "failed:already-published"
-  | (PublishResultBase & { result: "skipped:already-published" })
   | PublishResultFailed
-  // | PublishResultFailedNeedsToken
+  | PublishResultAlreadyPublished
   | PublishResultFailedNeeds2fa;

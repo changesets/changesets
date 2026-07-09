@@ -1,6 +1,6 @@
 import path from "node:path";
 import { exec } from "tinyexec";
-import { isAlreadyPublishedError } from "./common.ts";
+import { isAlreadyPublishedError, npmPublishQueue } from "./common.ts";
 import type {
   PublishResultFailedNeeds2fa,
   PublishResult,
@@ -83,7 +83,7 @@ export function handlePublishError(
   // npm v11 doesn't return a `code` on already-published errors
   if (isAlreadyPublishedError(json.error.summary)) {
     // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
-    return { ...resultBase, result: "skipped:already-published" };
+    return { ...resultBase, result: "failed:already-published" };
   }
 
   const summary = `
@@ -99,7 +99,6 @@ ${json.error.detail ?? ""}
     };
 
     // npm v11 returns data we can use to handle 2fa in-process
-    // TODO: handle "needs-2fa" result
     if ("authUrl" in json.error) {
       result.authUrl = json.error.authUrl;
       result.doneUrl = json.error.doneUrl;
@@ -113,76 +112,77 @@ ${json.error.detail ?? ""}
 
 // we have this so that we can do try a publish again after a publish without
 // the call being wrapped in the npm request limit and causing the publishes to potentially never run
-export async function publish({
+export const publish: PublishTool["publish"] = async ({
   pkg,
   release,
   tarballPath,
   interactive,
   otpCode,
-}: PublishOptions): Promise<PublishResult> {
-  // cwd is super important for correct resolution of `.npmrc`
-  //
-  // In the past, we wouldn't be able to call npm in the package directory itself, because despite npm's workspace support introduced in npm 7.
-  // It wouldn't actually be particularly workspaces-aware until npm 9 (until https://github.com/npm/cli/pull/4372).
-  // So we'd have to call npm from the root with a nested package target because `.npmrc` would resolve in respect to cwd and not the target package and that's what we wanted.
-  // Nowadays, this isn't important as `.npmrc` lookup is workspace-aware and finds the root `.npmrc` just fine even if invoked from the package directory.
-  //
-  // So we prefer calling npm from the actual workspace package directory itself. It's important to call npm from a directory that is an actual workspace (as per the workspaces configuration)
-  // and not from, for example, `publishConfig.directory` because npm only resolves to the root's `.npmrc` for actual workspaces and not for arbitrary subdirectories of the root.
-  const cwd = pkg.dir;
-
-  const args: string[] = [
-    "--json",
-    "--access",
-    release.access,
-    "--tag",
-    release.tag,
-  ];
-  if (otpCode) args.push("--otp", otpCode);
-  if (tarballPath) {
-    args.unshift(path.relative(cwd, tarballPath));
-  } else if (pkg.packageJson.publishConfig?.directory != null) {
-    // npm, yarn classic and berry don't support `publishConfig.directory` natively.
-    // We inherited support for it from Lerna, so we have to resolve it ourselves.
-    // It's worth noting it's still useful for, for example, `ng-packagr` users
-    // as that tool puts a whole publishable package in a dist directory (with full `package.json` in it).
-    // Even though that tool doesn't support `publishConfig.directory` itself (it doesn't concern itself with publishing),
-    // it's a useful knob for its users to specify how a packing/publishing should handle their output.
+}: PublishOptions): Promise<PublishResult> =>
+  npmPublishQueue.add(async () => {
+    // cwd is super important for correct resolution of `.npmrc`
     //
-    // WARNING: When relying on this, it's important to prebuild the `publishConfig.directory` before running the publish command.
-    // It's not possible to rely on regular lifecycle publish scripts for that. We merely delegate to the package manager for publishing
-    // and we don't reimplement the pack+publish logic ourselves. So it's not possible for us to pack,
-    // and let appropriate lifecycle scripts run, from the package's original directory and then publish from a different `publishConfig.directory`.
-    args.unshift(path.resolve(cwd, pkg.packageJson.publishConfig.directory));
-  }
+    // In the past, we wouldn't be able to call npm in the package directory itself, because despite npm's workspace support introduced in npm 7.
+    // It wouldn't actually be particularly workspaces-aware until npm 9 (until https://github.com/npm/cli/pull/4372).
+    // So we'd have to call npm from the root with a nested package target because `.npmrc` would resolve in respect to cwd and not the target package and that's what we wanted.
+    // Nowadays, this isn't important as `.npmrc` lookup is workspace-aware and finds the root `.npmrc` just fine even if invoked from the package directory.
+    //
+    // So we prefer calling npm from the actual workspace package directory itself. It's important to call npm from a directory that is an actual workspace (as per the workspaces configuration)
+    // and not from, for example, `publishConfig.directory` because npm only resolves to the root's `.npmrc` for actual workspaces and not for arbitrary subdirectories of the root.
+    const cwd = pkg.dir;
 
-  const { exitCode, stdout, stderr } = await exec("npm", ["publish", ...args], {
-    nodeOptions: {
-      stdio: interactive ? "inherit" : "pipe",
-      env: sanitizeEnv(process.env),
-      cwd,
-    },
+    const args: string[] = [
+      "--json",
+      "--access",
+      release.access,
+      "--tag",
+      release.tag,
+    ];
+    if (otpCode) args.push("--otp", otpCode);
+    if (tarballPath) {
+      args.unshift(path.relative(cwd, tarballPath));
+    } else if (pkg.packageJson.publishConfig?.directory != null) {
+      // npm, yarn classic and berry don't support `publishConfig.directory` natively.
+      // We inherited support for it from Lerna, so we have to resolve it ourselves.
+      // It's worth noting it's still useful for, for example, `ng-packagr` users
+      // as that tool puts a whole publishable package in a dist directory (with full `package.json` in it).
+      // Even though that tool doesn't support `publishConfig.directory` itself (it doesn't concern itself with publishing),
+      // it's a useful knob for its users to specify how a packing/publishing should handle their output.
+      //
+      // WARNING: When relying on this, it's important to prebuild the `publishConfig.directory` before running the publish command.
+      // It's not possible to rely on regular lifecycle publish scripts for that. We merely delegate to the package manager for publishing
+      // and we don't reimplement the pack+publish logic ourselves. So it's not possible for us to pack,
+      // and let appropriate lifecycle scripts run, from the package's original directory and then publish from a different `publishConfig.directory`.
+      args.unshift(path.resolve(cwd, pkg.packageJson.publishConfig.directory));
+    }
+
+    const { exitCode, stdout, stderr } = await exec(
+      "npm",
+      ["publish", ...args],
+      {
+        nodeOptions: {
+          stdio: interactive ? "inherit" : "pipe",
+          env: sanitizeEnv(process.env),
+          cwd,
+        },
+      },
+    );
+    const resultBase = { name: release.name, version: release.version };
+    if (exitCode === 0) {
+      return {
+        ...resultBase,
+        result: !interactive ? "published" : "published:interactive",
+      };
+    }
+
+    /* -- error handling -- */
+
+    let json: unknown;
+    try {
+      json = JSON.parse(stdout.toString().trim());
+    } catch {
+      return { ...resultBase, result: "failed", summary: stderr || stdout };
+    }
+
+    return handlePublishError(resultBase, json, stderr || stdout);
   });
-  const resultBase = { name: release.name, version: release.version };
-  if (exitCode === 0) {
-    return {
-      ...resultBase,
-      result: !interactive ? "published" : "published:interactive",
-    };
-  }
-
-  /* -- error handling -- */
-
-  if (interactive) {
-    return { ...resultBase, result: "failed", summary: stderr || stdout };
-  }
-
-  let json: unknown;
-  try {
-    json = JSON.parse(stdout.toString().trim());
-  } catch {
-    return { ...resultBase, result: "failed", summary: stderr || stdout };
-  }
-
-  return handlePublishError(resultBase, json, stderr || stdout);
-}

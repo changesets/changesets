@@ -251,6 +251,24 @@ export async function getPublishPlan(
 ): Promise<PublishPlan> {
   const packages = await getPackages(rootDir);
   const preState = await readPreState(rootDir);
+
+  // removed in build process
+  if (process.env.CHANGESETS_FAKE_PUBLISH != null) {
+    return sortReleases(
+      packages,
+      packages.packages
+        .filter((p) => p.packageJson.private !== true)
+        .map((p) => ({
+          kind: "publish",
+          name: p.packageJson.name,
+          access: "public",
+          tag: "latest",
+          version: p.packageJson.version,
+        })),
+      config,
+    );
+  }
+
   const releases = await getUnpublishedPackages(
     packages,
     preState,

@@ -101,16 +101,18 @@ export const need2faErrorSnapshot = {
       exitCode: 1,
       stderr: "",
       stdout: strfy({
-        "error": {
-          "code": "EOTP",
-          "summary": "This operation requires a one-time password.",
-          "detail": "Open this URL in your browser to authenticate:/n  https://www.npmjs.com/auth/cli/[uuid]/n/nAfter authenticating, your token can be retrieved from:/n  https://registry.npmjs.org/-/v1/done?authId=[uuid]",
-          "authUrl": "https://www.npmjs.com/auth/cli/[uuid]",
-          "doneUrl": "https://registry.npmjs.org/-/v1/done?authId=[uuid]"
-        }
+        error: {
+          code: "EOTP",
+          summary: "This operation requires a one-time password.",
+          detail:
+            "Open this URL in your browser to authenticate:/n  https://www.npmjs.com/auth/cli/[uuid]/n/nAfter authenticating, your token can be retrieved from:/n  https://registry.npmjs.org/-/v1/done?authId=[uuid]",
+          authUrl: "https://www.npmjs.com/auth/cli/[uuid]",
+          doneUrl: "https://registry.npmjs.org/-/v1/done?authId=[uuid]",
+        },
       }),
     } satisfies Snapshot,
 
+    // v11.10+ only
     v11: {
       exitCode: 1,
       stderr: "",
@@ -119,6 +121,8 @@ export const need2faErrorSnapshot = {
           code: "ERR_PNPM_OTP_NON_INTERACTIVE",
           message:
             "The registry requires additional authentication, but pnpm is not running in an interactive terminal",
+          authUrl: "https://www.npmjs.com/auth/cli/[uuid]",
+          doneUrl: "https://registry.npmjs.org/-/v1/done?authId=[uuid]",
         },
       }),
     } satisfies Snapshot,

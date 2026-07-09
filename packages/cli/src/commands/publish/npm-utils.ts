@@ -1,54 +1,34 @@
-import path from "node:path";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import type { PackageJSON, Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { exec } from "tinyexec";
-import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
-import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
-import type { AuthState } from "../../utils/types.ts";
-import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
+import { npmRequestQueue } from "../../lib/common.ts";
+import * as mock from "../../lib/mock.ts";
+import * as npm from "../../lib/npm.ts";
+import * as pnpm from "../../lib/pnpm.ts";
+import type { PublishTool } from "../../lib/types.ts";
 
-interface PublishOptions {
-  /** The publish command argument, the path to the `publishConfig.directory` or tarball */
-  target: string | undefined;
-  /** The current working directory for the publish operation */
-  cwd: string;
-  /** The environment variables for the publish operation */
-  env: NodeJS.ProcessEnv;
-}
-
-(NPM_PUBLISH_CONCURRENCY_LIMIT,
-  function jsonParse(input: string) {
-    try {
-      return JSON.parse(input);
-    } catch (err) {
-      if (err instanceof SyntaxError) {
-        console.error("error parsing json:", input);
-      }
-      throw err;
+function jsonParse(input: string) {
+  try {
+    return JSON.parse(input);
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      console.error("error parsing json:", input);
     }
-  });
-
-export function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  if (env.npm_config_registry === "https://registry.yarnpkg.com") {
-    // Due to a super annoying issue in classic yarn, we have to manually strip this env variable.
-    // The issue is that `yarn run` overrides the `npm_config_registry` env variable with its read-only mirror.
-    // Then the publish command runs from within it and inherits that env variable. Env variable trumps config values
-    // and even trumps the `yarn publish`'s default publish registry (npm one) so the whole thing ends up failing.
-    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-    return {
-      ...env,
-      npm_config_registry: undefined,
-    };
+    throw err;
   }
-  return env;
 }
-
-export type PublishTool = { name: "npm" } | { name: "pnpm" };
 
 export function getPublishTool({ type }: Packages["tool"]): PublishTool {
-  return { name: type === "pnpm" ? "pnpm" : "npm" };
+  // removed in build process
+  if (process.env.CHANGESETS_FAKE_PUBLISH != null) {
+    return mock;
+  }
+
+  if (type === "pnpm") return pnpm;
+
+  return npm;
 }
 
 // `npm info <pkg> --json` (aka `npm view`) behavior:
@@ -90,7 +70,7 @@ export function getPackageInfo(
     //
     // We match that behavior and in pnpm we treat `publishConfig.registry` as a publish-time override only, and we don't use it to query the registry for existing versions.
     // It's a poorly documented manifest option anyway (docs don't mention it at all).
-    if (publishTool.name !== "pnpm") {
+    if (publishTool.name !== "pnpm" && publishTool.name !== "mock") {
       // npm actually uses the `publishConfig.registry` value when querying package info during publish:
       // https://github.com/npm/cli/blob/ed729620b1297f44ccf2517fd19fbaffdc225ed9/lib/commands/publish.js#L150
       //
@@ -128,12 +108,10 @@ export function getPackageInfo(
 
     // Bare query: when dist-tags.latest is set, returns the full `versions` array via packument
     // bleed-through, enabling only-pre detection downstream. Returns empty when no `latest` exists.
-    let result = await exec(publishTool.name, [
-      "info",
-      packageJson.name,
-      ...registryOverrides,
-      "--json",
-    ]);
+    let result = await exec(
+      publishTool.name !== "mock" ? publishTool.name : "npm",
+      ["info", packageJson.name, ...registryOverrides, "--json"],
+    );
 
     // Bare query returned nothing — retry with exact version specifier
     // to handle prerelease-only packages on registries without auto-`latest`.
@@ -180,192 +158,4 @@ ${pkgInfo.error.summary}${pkgInfo.error.detail ? `\n${pkgInfo.error.detail}` : "
     throw new ExitError(1);
   }
   return { published: true, pkgInfo };
-}
-
-// we check `npm info` before publishing but `npm info` can return stale data at times
-// so we need to gracefully handle this situation
-function isAlreadyPublishedError(output: string): boolean {
-  return output.includes(
-    "cannot publish over the previously published version",
-  );
-}
-
-type InternalPublishResult =
-  | { result: "published" }
-  | { result: "skipped" }
-  | { result: "failed"; allowRetry?: boolean };
-
-function formatPublishError(
-  publishTool: "npm" | "pnpm",
-  error: {
-    code?: string;
-    summary?: string;
-    message?: string;
-    detail?: string;
-  },
-) {
-  // pnpm uses .message in tested versions; npm uses .summary
-  const message =
-    (publishTool === "pnpm"
-      ? (error.message ?? error.summary)
-      : error.summary) ?? "Unknown error";
-  return {
-    code:
-      error.code ??
-      // npm 11 started to reject "already published" publish attempts *eagerly* based on the preflight check
-      // https://github.com/npm/cli/commit/31455b2e177b721292f3382726e3f5f3f2963b1d
-      //
-      // .code comes from the registry's endpoint response though:
-      // https://github.com/npm/npm-registry-fetch/blob/6b4159a2519ce5aab26cc4dd8d4596a0b47781d2/lib/errors.js#L29
-      // so it's not available for such eager errors, we normalize it to the code the registry would return in the case of an actual publish attempt
-      (isAlreadyPublishedError(message) ? "E403" : "EUNKNOWN"),
-    // .detail is npm-specific but for simplicity we handle it at all times
-    message: `${message}${error.detail ? `\n${error.detail}` : ""}`,
-  };
-}
-
-// we have this so that we can do try a publish again after a publish without
-// the call being wrapped in the npm request limit and causing the publishes to potentially never run
-async function internalPublish(
-  publishTool: PublishTool,
-  release: PublishReleaseEntry,
-  opts: PublishOptions,
-  authState: AuthState,
-): Promise<InternalPublishResult> {
-  const publishArgs = ["publish"];
-  if (opts.target) {
-    publishArgs.push(path.relative(opts.cwd, opts.target));
-  }
-  const publishFlags = ["--access", release.access, "--tag", release.tag];
-  if (publishTool.name === "pnpm") {
-    publishFlags.push("--no-git-checks");
-  }
-
-  if (process.stdin.isTTY && authState.requiresInteractive) {
-    // it's not easily controllable but ideally no other work should happen until this is done
-    // we specifically don't want any other output to interfere with the delegated auth flow
-    const child = exec(publishTool.name, [...publishArgs, ...publishFlags], {
-      nodeOptions: {
-        env: opts.env,
-        cwd: opts.cwd,
-        stdio: ["inherit", "inherit", "pipe"],
-      },
-    });
-
-    const result = await child;
-
-    if (child.exitCode === 0) {
-      authState.requiresInteractive = false;
-      // bump for remaining packages
-      npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
-      return { result: "published" };
-    }
-
-    // in the delegated mode all tested npm versions (v3-v10) log the error to stderr
-    if (isAlreadyPublishedError(result.stderr.toString())) {
-      // given this error happened in the delegated mode, the user was prompted to log in
-      // for that reason, it's nice to show this warning to the user so they are not confused by the printed error
-      log.warn(
-        `${release.name} is already published (likely a stale registry data led to a duplicate publish attempt)`,
-      );
-      authState.requiresInteractive = false;
-      npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
-      return { result: "skipped" };
-    }
-
-    return { result: "failed" };
-  }
-
-  // in the delegated mode we don't need the json output
-  // as we won't be handling the auth errors
-  publishFlags.push("--json");
-  if (authState.otpToken) {
-    publishFlags.push("--otp", authState.otpToken);
-  }
-
-  const { exitCode, stdout, stderr } = await exec(
-    publishTool.name,
-    [...publishArgs, ...publishFlags],
-    {
-      nodeOptions: {
-        env: opts.env,
-        cwd: opts.cwd,
-      },
-    },
-  );
-
-  if (exitCode !== 0) {
-    // NPM's --json output is included alongside the `prepublish` and `postpublish` output in terminal
-    // We want to handle this as best we can but it has some struggles:
-    // - output of those lifecycle scripts can contain JSON
-    // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
-    // - npm9 switched back to printing `--json` errors to stdout (https://github.com/npm/cli/commit/d3543e945e721783dcb83385935f282a4bb32cf3)
-    // Note that the `--json` output is always printed at the end so this should work
-    const json =
-      getLastJsonObjectFromString(stderr.toString()) ||
-      getLastJsonObjectFromString(stdout.toString());
-
-    if (json?.error) {
-      const publishError = formatPublishError(publishTool.name, json.error);
-      if (
-        publishError.code === "E403" &&
-        isAlreadyPublishedError(publishError.message)
-      ) {
-        // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
-        return { result: "skipped" };
-      }
-      // Retry in delegated interactive mode when the publish tool reports that OTP/web auth is required:
-      // - npm uses EOTP for missing auth, or E401 + an --otp hint for an invalid/expired OTP
-      // - pnpm uses ERR_PNPM_OTP_NON_INTERACTIVE when the JSON-capturing child process cannot prompt
-      if (
-        (publishError.code === "EOTP" ||
-          publishError.code === "ERR_PNPM_OTP_NON_INTERACTIVE" ||
-          (publishError.code === "E401" &&
-            publishError.message.includes("--otp=<code>"))) &&
-        process.stdin.isTTY
-      ) {
-        // the current otp code must be invalid since it errored
-        authState.otpToken = undefined;
-        authState.requiresInteractive = true;
-        npmPublishQueue.setConcurrency(1);
-        return {
-          result: "failed",
-          // given we have just adjusted the concurrency, we need to handle the retries in the layer that requeues the publish
-          // calling internalPublish again would allow concurrent failures to run again concurrently
-          // but only one retried publish should get delegated to the npm cli and other ones should "await" its successful result before being retried
-          allowRetry: true,
-        };
-      }
-      log.error(
-        `
-An error occurred while publishing ${release.name}: ${publishError.code}
-${publishError.message}
-        `.trim(),
-      );
-    }
-
-    log.error(stderr.toString() || stdout.toString());
-    return { result: "failed" };
-  }
-  // bump the limit up in case we have started with the limit of 1 in the TTY mode
-  npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
-  return { result: "published" };
-}
-
-export function publish(
-  publishTool: PublishTool,
-  release: PublishReleaseEntry,
-  opts: PublishOptions,
-  authState: AuthState,
-): Promise<{ result: "published" | "skipped" | "failed" }> {
-  return npmRequestQueue.add(async () => {
-    let result: InternalPublishResult;
-    do {
-      result = await npmPublishQueue.add(() =>
-        internalPublish(publishTool, release, opts, authState),
-      );
-    } while (result.result === "failed" && result.allowRetry);
-
-    return { result: result.result };
-  });
 }

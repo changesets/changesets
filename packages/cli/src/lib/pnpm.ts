@@ -1,15 +1,23 @@
 import path from "node:path";
 import { exec } from "tinyexec";
-import { isAlreadyPublishedError } from "./common.ts";
+import { isAlreadyPublishedError, npmPublishQueue } from "./common.ts";
 import * as npm from "./npm.ts";
 import type { PublishResult, PublishTool } from "./types.ts";
 
+export type PnpmPublish2faRequiredError = {
+  code: "ERR_PNPM_OTP_NON_INTERACTIVE";
+  message: string;
+  authUrl?: string;
+  doneUrl?: string;
+};
+
+export type PnpmPublishGenericError = {
+  code: "E403" | "E404";
+  message: string;
+};
+
 export type PnpmPublishError = {
-  error: {
-    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-    code: "E403" | "E404" | "ERR_PNPM_OTP_NON_INTERACTIVE" | string;
-    message: string;
-  };
+  error: PnpmPublishGenericError | PnpmPublish2faRequiredError;
 };
 
 function isPnpmPublishError(error: unknown): error is PnpmPublishError {
@@ -48,63 +56,70 @@ export const publish: PublishTool["publish"] = async ({
   tarballPath,
   interactive,
   otpCode,
-}) => {
-  const cwd = pkg.dir;
-  const args: string[] = [
-    "--json",
-    "--access",
-    release.access,
-    "--tag",
-    release.tag,
-    "--no-git-checks",
-  ];
-  if (otpCode) args.push("--otp", otpCode);
-  if (tarballPath) args.unshift(path.relative(cwd, tarballPath));
+}) =>
+  npmPublishQueue.add(async () => {
+    const cwd = pkg.dir;
+    const args: string[] = [
+      "--json",
+      "--access",
+      release.access,
+      "--tag",
+      release.tag,
+      "--no-git-checks",
+    ];
+    if (otpCode) args.push("--otp", otpCode);
+    if (tarballPath) args.unshift(path.relative(cwd, tarballPath));
 
-  const { exitCode, stdout, stderr } = await exec("npm", ["publish", ...args], {
-    nodeOptions: {
-      stdio: interactive ? "inherit" : "pipe",
-      env: sanitizeEnv(process.env),
-      cwd,
-    },
+    const { exitCode, stdout, stderr } = await exec(
+      "npm",
+      ["publish", ...args],
+      {
+        nodeOptions: {
+          stdio: interactive ? "inherit" : "pipe",
+          env: sanitizeEnv(process.env),
+          cwd,
+        },
+      },
+    );
+    const resultBase = { name: release.name, version: release.version };
+    if (exitCode === 0) {
+      return {
+        ...resultBase,
+        result: !interactive ? "published" : "published:interactive",
+      };
+    }
+
+    /* -- error handling -- */
+
+    let json: unknown;
+    try {
+      json = JSON.parse(stdout.toString().trim());
+    } catch {
+      return { ...resultBase, result: "failed", summary: stderr || stdout };
+    }
+
+    // let the npm error handler take care of any other non-json error, as pnpm 10 delegates publishing to npm
+    // TODO: use normal JSON parsing error handling after dropping pnpm 10 support
+    if (!isPnpmPublishError(json)) {
+      return npm.handlePublishError(resultBase, json, stderr || stdout);
+    }
+
+    if (isAlreadyPublishedError(json.error.message)) {
+      // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
+      return { ...resultBase, result: "failed:already-published" };
+    }
+
+    const summary = json.error.message.trim();
+
+    if (json.error.code === "ERR_PNPM_OTP_NON_INTERACTIVE") {
+      return {
+        ...resultBase,
+        result: "failed:needs-2fa",
+        summary,
+        authUrl: json.error.authUrl,
+        doneUrl: json.error.doneUrl,
+      } satisfies PublishResult;
+    }
+
+    return { ...resultBase, result: "failed", summary };
   });
-  const resultBase = { name: release.name, version: release.version };
-  if (exitCode === 0) {
-    return {
-      ...resultBase,
-      result: !interactive ? "published" : "published:interactive",
-    };
-  }
-
-  /* -- error handling -- */
-
-  let json: unknown;
-  try {
-    json = JSON.parse(stdout.toString().trim());
-  } catch {
-    return { ...resultBase, result: "failed", summary: stderr || stdout };
-  }
-
-  // let the npm error handler take care of any other non-json error, as pnpm 10 delegates publishing to npm
-  // TODO: use normal JSON parsing error handling after dropping pnpm 10 support
-  if (!isPnpmPublishError(json)) {
-    return npm.handlePublishError(resultBase, json, stderr || stdout);
-  }
-
-  if (isAlreadyPublishedError(json.error.message)) {
-    // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
-    return { ...resultBase, result: "skipped:already-published" };
-  }
-
-  const summary = json.error.message.trim();
-
-  if (json.error.code === "ERR_PNPM_OTP_NON_INTERACTIVE") {
-    return {
-      ...resultBase,
-      result: "failed:needs-2fa",
-      summary,
-    } satisfies PublishResult;
-  }
-
-  return { ...resultBase, result: "failed", summary };
-};

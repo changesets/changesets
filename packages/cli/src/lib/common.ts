@@ -1,6 +1,5 @@
 import { createPromiseQueue } from "../utils/createPromiseQueue.ts";
 import type {
-  AuthState,
   PublishResult,
   PublishResultFailed,
   PublishResultSuccess,
@@ -15,10 +14,6 @@ export const NPM_PUBLISH_CONCURRENCY_LIMIT = 10;
 export const npmPublishQueue = createPromiseQueue(
   NPM_PUBLISH_CONCURRENCY_LIMIT,
 );
-
-export function getInitialAuthState(otp: string | null): AuthState {
-  return otp != null ? "otp" : "unknown";
-}
 
 /*
  * We check `npm info` before publishing but it can return stale data at times

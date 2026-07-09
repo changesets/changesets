@@ -2,16 +2,15 @@
 
 - `published`
 - `published:interactive`
-- `skipped:already-published`
 - `failed` (generic error)
-- `failed:needs-token` (missing, expired, unpriveleged)
+- `failed:already-published`
 - `failed:needs-2fa { authUrl?: string; doneUrl?: string }`
 
 ## Publish Flow
 
 1. If non-TTY or user passed an OTP code, immediately go to step 4.
 2. Publish packages one-by-one, non-interactively.
-   1. `published` | `skipped:*` -> go to step 4.
+   1. `published` | `failed:already-published` -> go to step 4.
    2. `published:interactively` -> go to step 2, next package
    3. `failed:needs-2fa` (`authUrl`) -> handle 2fa flow inline
    4. `failed:needs-2fa` (no `authUrl`) -> retry 2. with interactive mode
