@@ -96,13 +96,13 @@ To publish public packages to NPM, you'll need to edit `.changeset/config.json` 
 ### add
 
 ```shell
-changeset [--empty] [--open] [--message <text>]
+changeset [--empty] [--open] [--since <ref>] [--message <text>] [--type <type>]
 ```
 
 or
 
 ```shell
-changeset add [--empty] [--open] [--message <text>]
+changeset add [--empty] [--open] [--since <ref>] [--message <text>] [--type <type>]
 ```
 
 This command will ask you a series of questions, first about what packages you want to release, then what semver bump type for each package, then it will ask for a summary of the entire changeset. At the final step it will show the changeset it will generate, and confirm that you want to add it.
@@ -134,6 +134,8 @@ If you set the `commit` option in the config, the command will add the updated c
 
 - `--open` - opens the created changeset in an external editor
 - `--message` (or `-m`) - provides the changeset summary from the command line instead of prompting for it.
+- `--type` - provides the semver bump type (`patch`, `minor` or `major`) from the command line instead of prompting for it. The bump type is applied to all packages that have changed since the base branch (or the ref provided with `--since`). When combined with `--message`, the changeset is created without any prompts, which is useful for scripts and other automation.
+- `--since` - uses the provided branch, tag, or git ref (such as `main` or a git commit hash) to detect which packages have changed. If not provided, the command falls back to the `baseBranch` value in your `.changeset/config.json`.
 
 ### version
 

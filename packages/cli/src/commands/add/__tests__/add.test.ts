@@ -650,6 +650,371 @@ describe("Add command", () => {
     );
   });
 
+  it("should create a changeset for the changed packages without prompting when type and message are provided", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await exec("git", ["checkout", "-b", "feature"], { nodeOptions: { cwd } });
+    await outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "b"',
+    );
+    await git.add(".", cwd);
+    await git.commit("update pkg-b", cwd);
+
+    await addChangeset({
+      cwd,
+      since: "main",
+      type: "patch",
+      message: "non-interactive summary",
+    });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "non-interactive summary",
+        releases: [{ name: "pkg-b", type: "patch" }],
+      }),
+    );
+    expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
+    expect(mockedUtils.askList).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
+    expect(mockedUtils.askConfirm).not.toHaveBeenCalled();
+    expect(mockedAskWithEditor).not.toHaveBeenCalled();
+  });
+
+  it("should apply the type to all changed packages sorted by name", async () => {
+    // pkg-b lives in a longer directory, so the changed packages are detected
+    // in the reverse order of the expected one
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b-long-dir/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await exec("git", ["checkout", "-b", "feature"], { nodeOptions: { cwd } });
+    await outputFile(
+      path.join(cwd, "packages/pkg-b-long-dir/b.js"),
+      'export default "b"',
+    );
+    await outputFile(
+      path.join(cwd, "packages/pkg-a/a.js"),
+      'export default "a"',
+    );
+    await git.add(".", cwd);
+    await git.commit("update pkg-a and pkg-b", cwd);
+
+    await addChangeset({
+      cwd,
+      since: "main",
+      type: "minor",
+      message: "bump them all",
+    });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "bump them all",
+        releases: [
+          { name: "pkg-a", type: "minor" },
+          { name: "pkg-b", type: "minor" },
+        ],
+      }),
+    );
+  });
+
+  it("should not apply the type to changed packages ignored by the config", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...defaultConfig,
+        ignore: ["pkg-b"],
+      }),
+    });
+
+    await exec("git", ["checkout", "-b", "feature"], { nodeOptions: { cwd } });
+    await outputFile(
+      path.join(cwd, "packages/pkg-a/a.js"),
+      'export default "a"',
+    );
+    await outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "b"',
+    );
+    await git.add(".", cwd);
+    await git.commit("update pkg-a and pkg-b", cwd);
+
+    await addChangeset({
+      cwd,
+      since: "main",
+      type: "patch",
+      message: "bump the changed packages",
+    });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "bump the changed packages",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      }),
+    );
+  });
+
+  it("should create a changeset without prompting in a single package repo when type and message are provided", async () => {
+    const loggerWarnSpy = vi.spyOn(clack.log, "warn");
+
+    // not a git repo, but a single package repo doesn't need to detect the changed packages
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await addChangeset({ cwd, type: "minor", message: "single package bump" });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "single package bump",
+        releases: [{ name: "single-package", type: "minor" }],
+      }),
+    );
+    expect(mockedUtils.askList).not.toHaveBeenCalled();
+    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
+    expect(mockedUtils.askConfirm).not.toHaveBeenCalled();
+    expect(mockedAskWithEditor).not.toHaveBeenCalled();
+    expect(loggerWarnSpy).not.toHaveBeenCalled();
+  });
+
+  it("should not ask for confirmation of a first major release when type is provided", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "0.5.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await addChangeset({ cwd, type: "major", message: "breaking change" });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "breaking change",
+        releases: [{ name: "single-package", type: "major" }],
+      }),
+    );
+    expect(mockedUtils.askConfirm).not.toHaveBeenCalled();
+  });
+
+  it("should only prompt for the summary when type is provided without message", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await exec("git", ["checkout", "-b", "feature"], { nodeOptions: { cwd } });
+    await outputFile(
+      path.join(cwd, "packages/pkg-b/b.js"),
+      'export default "b"',
+    );
+    await git.add(".", cwd);
+    await git.commit("update pkg-b", cwd);
+
+    mockedUtils.askQuestion.mockResolvedValue("typed summary");
+    mockedUtils.askConfirm.mockResolvedValue(true);
+
+    await addChangeset({ cwd, since: "main", type: "patch" });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "typed summary",
+        releases: [{ name: "pkg-b", type: "patch" }],
+      }),
+    );
+    expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
+    expect(mockedUtils.askList).not.toHaveBeenCalled();
+    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
+      "Is this your desired changeset?",
+    );
+  });
+
+  it("should exit with an error when an invalid type is provided", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({ cwd, type: "invalid", message: "some summary" }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    expect(stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0])).toBe(
+      "Only patch, minor or major is accepted as the bump type",
+    );
+  });
+
+  it("should exit with an error when type is used together with empty", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "single-package",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({ cwd, type: "patch", empty: true }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    expect(stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0])).toBe(
+      "The --type option cannot be used with --empty",
+    );
+  });
+
+  it("should exit with an error in a monorepo when changed packages cannot be detected and type is provided", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    // not a git repo, so detecting the changed packages fails
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({ cwd, type: "patch", message: "some summary" }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    expect(stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0])).toContain(
+      "Failed to identify which packages have changed",
+    );
+  });
+
+  it("should exit with an error in a monorepo when no packages have changed and type is provided", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        since: "main",
+        type: "patch",
+        message: "some summary",
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    expect(stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0])).toBe(
+      "No changed packages found since main to apply the bump type to",
+    );
+  });
+
   it("should throw when .changeset folder is missing when called from subdirectory", async () => {
     const loggerErrorSpy = vi.spyOn(clack.log, "error");
 

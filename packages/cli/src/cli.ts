@@ -61,6 +61,7 @@ cli
   .usage("[command] [options]")
   .example("  $ changeset -m 'Description'")
   .example("  $ changeset --open --since main")
+  .example("  $ changeset --type patch -m 'Description'")
   .alias("!") // special alias for default command
   .option("--empty", "Add an empty changeset")
   .option("--open", "Open the changeset in the editor after creating it")
@@ -69,6 +70,10 @@ cli
     "Detect changed packages since the provided git ref",
   )
   .option("-m, --message <text>", "Directly provide a message to the changeset")
+  .option(
+    "--type <type>",
+    "Directly provide a bump type (patch, minor or major) for the changed packages",
+  )
   .action(async (options) => {
     normalizeOptions(options);
     const { add } = await import("./commands/add/index.ts");

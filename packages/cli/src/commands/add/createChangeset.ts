@@ -7,6 +7,13 @@ import { askWithEditor } from "../../utils/askWithEditor.ts";
 import * as cli from "../../utils/cli-utilities.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 
+const bumpTypes = ["patch", "minor", "major"] as const;
+export type BumpType = (typeof bumpTypes)[number];
+
+export function isBumpType(value: string): value is BumpType {
+  return (bumpTypes as readonly string[]).includes(value);
+}
+
 async function confirmMajorRelease({ name, version }: PackageJSON) {
   if (semverLt(version, "1.0.0")) {
     importantWarning(
@@ -170,7 +177,7 @@ ${c.gray(patchBumpedPackages.join(", "))}
     const pkg = allPackages[0];
     const type = await cli.askList(
       `What kind of change is this for ${c.blue(pkg.packageJson.name)}? ${c.gray(`(current version is ${pkg.packageJson.version})`)}`,
-      ["patch", "minor", "major"],
+      [...bumpTypes],
     );
     if (type === "major") {
       const shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
@@ -189,6 +196,16 @@ ${c.gray(patchBumpedPackages.join(", "))}
     };
   }
 
+  return {
+    ...(await askSummary()),
+    releases,
+  };
+}
+
+export async function askSummary(): Promise<{
+  confirmed: boolean;
+  summary: string;
+}> {
   let summary = await cli.askQuestion(
     "Please enter a summary for this change (this will be in the changelogs).",
     { placeholder: "  (submit nothing to open an external editor)" },
@@ -203,7 +220,6 @@ ${c.gray(patchBumpedPackages.join(", "))}
         return {
           confirmed: true,
           summary,
-          releases,
         };
       }
     } catch {
@@ -224,6 +240,5 @@ ${c.gray(patchBumpedPackages.join(", "))}
   return {
     confirmed: false,
     summary,
-    releases,
   };
 }

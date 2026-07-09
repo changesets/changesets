@@ -61,6 +61,13 @@ const tests: CommandTest[] = [
           since: "next",
         },
       },
+      {
+        args: ["--type", "patch", "-m", "hello"],
+        options: {
+          type: "patch",
+          message: "hello",
+        },
+      },
     ],
   },
   {
