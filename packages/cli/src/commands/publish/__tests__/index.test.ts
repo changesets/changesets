@@ -924,11 +924,11 @@ describe("Publish command", () => {
         [
           "publish",
           path.join("..", "..", ".packed", "packages", "pkg-a-1.0.0.tgz"),
+          "--json",
           "--access",
           "public",
           "--tag",
           "latest",
-          "--json",
         ],
         expect.anything(),
       ]),
