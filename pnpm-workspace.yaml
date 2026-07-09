@@ -9,6 +9,7 @@ dedupePeerDependents: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - "@manypkg/tools@2.1.2"
+  - vitepress@2.0.0-alpha.18
 overrides:
   rolldown: 1.0.3
   "vitepress>@docsearch/js": "-"

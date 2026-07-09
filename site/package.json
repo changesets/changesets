@@ -10,8 +10,7 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
-    "oxc-minify": "^0.132.0",
-    "vitepress": "^2.0.0-alpha.17",
+    "vitepress": "^2.0.0-alpha.18",
     "vitepress-plugin-group-icons": "^1.7.5"
   },
   "engines": {
