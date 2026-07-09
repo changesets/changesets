@@ -8,4 +8,4 @@ We have a [github bot](https://github.com/apps/changeset-bot) and a
 alert users of missing changesets.
 
 If you want to cause a failure in CI on missing changesets (not recommended), you can run `changeset status --since=main`,
-which will exit with a status code of 1 if there are no new changesets.
+which will exit with a status code of 1 if there are changed packages but no new changesets. It will not fail if there are no changed packages.
