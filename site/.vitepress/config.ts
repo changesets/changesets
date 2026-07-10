@@ -16,23 +16,19 @@ const commitLink = commitRef
   ? `<a href="https://github.com/changesets/changesets/commit/${commitRef}" target="_blank">${commitRef.slice(0, 7)}</a>`
   : "dev";
 
-const ogTitle = "Changesets";
-const ogDescription =
+const siteUrl = "https://changesets.dev";
+const siteTitle = "Changesets";
+const siteDescription =
   "A tool to manage versioning and changelogs with a focus on monorepos";
-const ogUrl = "https://changesets.dev";
-const ogImage = "https://changesets.dev/og-image.png";
+const defaultOgImage = "https://changesets.dev/og-image.png";
 
 export default defineConfig({
-  title: ogTitle,
-  description: ogDescription,
+  title: siteTitle,
+  description: siteDescription,
   head: [
     ["link", { rel: "icon", href: "logo-light.svg" }],
     ["meta", { property: "og:type", content: "website" }],
-    ["meta", { property: "og:title", content: ogTitle }],
-    ["meta", { property: "og:image", content: ogImage }],
-    ["meta", { property: "og:url", content: ogUrl }],
-    ["meta", { property: "og:description", content: ogDescription }],
-    ["meta", { property: "og:site_name", content: ogTitle }],
+    ["meta", { property: "og:site_name", content: siteTitle }],
     ["meta", { name: "twitter:card", content: "summary_large_image" }],
     ["meta", { name: "theme-color", content: "#006dcc" }],
   ],
@@ -97,6 +93,10 @@ export default defineConfig({
         text: "Resources",
         items: [
           {
+            text: "Blog",
+            link: "/blog/",
+          },
+          {
             text: "Acknowledgements",
             link: "/acknowledgements",
           },
@@ -125,6 +125,25 @@ export default defineConfig({
       "/guide/": { items: getMainSidebar() },
       "/packages/": { items: getMainSidebar() },
     },
+  },
+  transformHead(ctx) {
+    const pathname =
+      "/" + ctx.page.replace(/(^|\/)index\.md$/, "$1").replace(/\.md$/, "");
+    const ogUrl = `${siteUrl}${pathname}`;
+    const isBlogPost = pathname.startsWith("/blog/") && pathname !== "/blog/";
+
+    return [
+      ["meta", { property: "og:title", content: ctx.title }],
+      ["meta", { property: "og:description", content: ctx.description }],
+      ["meta", { property: "og:url", content: ogUrl }],
+      [
+        "meta",
+        {
+          property: "og:image",
+          content: isBlogPost ? `${ogUrl}.png` : defaultOgImage,
+        },
+      ],
+    ];
   },
 });
 

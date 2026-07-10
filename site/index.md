@@ -33,7 +33,7 @@ features:
 ---
 
 <script setup>
-import { VPHomeSponsors } from 'vitepress/theme'
+import { VPHomeSponsors } from "vitepress/theme";
 </script>
 
 <VPHomeSponsors
