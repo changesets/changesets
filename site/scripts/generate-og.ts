@@ -2,29 +2,13 @@ import fss from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { render } from "takumi-js";
-import * as v from "valibot";
-import * as yaml from "yaml";
-import { formatDate } from "../.vitepress/theme/utils";
+import { extractBlogData } from "../.vitepress/theme/utils.ts";
 
 const blogDir = path.resolve(import.meta.dirname, "../blog");
 const blogOgOutDir = path.resolve(import.meta.dirname, "../public/blog");
 
-const frontmatterRegex = /^---\n([\s\S]+?)\n---/;
-const frontmatterSchema = v.object({
-  title: v.string(),
-  date: v.string(),
-  authors: v.array(
-    v.object({
-      name: v.string(),
-      url: v.optional(v.string()),
-    }),
-  ),
-});
-
-type Frontmatter = v.InferInput<typeof frontmatterSchema>;
-
 for (const blogFileName of await fs.readdir(blogDir)) {
-  if (blogFileName.startsWith(".")) continue;
+  if (!blogFileName.endsWith(".md") || blogFileName === "index.md") continue;
 
   const blogOgOutFile = path.join(
     blogOgOutDir,
@@ -32,22 +16,22 @@ for (const blogFileName of await fs.readdir(blogDir)) {
   );
   if (fss.existsSync(blogOgOutFile)) {
     console.log(`Skipping existing: ${blogOgOutFile}`);
-    // continue;
+    continue;
   }
 
   const blogFilePath = path.join(blogDir, blogFileName);
   const blogContent = await fs.readFile(blogFilePath, "utf8");
-  const frontmatter = getFrontmatter(blogContent, blogFilePath);
+  const blogData = extractBlogData(blogContent, `/blog/${blogFileName}`);
 
   console.log("Generating OG image for", blogFileName);
 
-  const ogImageBuffer = await generateOgImage(frontmatter);
+  const ogImageBuffer = await generateOgImage(blogData);
 
   await fs.mkdir(blogOgOutDir, { recursive: true });
   await fs.writeFile(blogOgOutFile, ogImageBuffer);
 }
 
-async function generateOgImage(frontmatter: Frontmatter) {
+async function generateOgImage(data: ReturnType<typeof extractBlogData>) {
   // NOTE: For the most part, you can copy and paste this template to https://takumi.kane.tw/playground
   // to easily adjust the styling, but update the `style` prop as React-style object so that it works.
   const template = `\
@@ -69,8 +53,8 @@ async function generateOgImage(frontmatter: Frontmatter) {
             backgroundImage: linear-gradient(135deg, white, #bbe6ff 80%);
             textWrap: pretty;
           "
-        >${frontmatter.title}</div>
-        <div tw="text-4xl opacity-90">${formatDate(frontmatter.date).string}</div>
+        >${data.title}</div>
+        <div tw="text-4xl opacity-90">${data.date}</div>
       </div>
     </div>
   `;
@@ -82,14 +66,4 @@ async function generateOgImage(frontmatter: Frontmatter) {
   });
 
   return buffer;
-}
-
-function getFrontmatter(content: string, contentPath: string) {
-  const frontmatter = yaml.parse(frontmatterRegex.exec(content)?.[1] ?? "");
-
-  try {
-    return v.parse(frontmatterSchema, frontmatter);
-  } catch (err) {
-    throw new Error(`Invalid frontmatter in ${contentPath}`, { cause: err });
-  }
 }

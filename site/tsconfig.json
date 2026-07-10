@@ -10,5 +10,5 @@
     "noEmit": true,
     "types": ["vitepress/client"]
   },
-  "include": ["src/**/*", ".vitepress/**/*"]
+  "include": ["**/*.ts", ".vitepress/**/*"]
 }

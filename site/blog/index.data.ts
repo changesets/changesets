@@ -1,4 +1,5 @@
 import { createContentLoader } from "vitepress";
+import { extractBlogData } from "../.vitepress/theme/utils.ts";
 
 interface Post {
   title: string;
@@ -14,28 +15,23 @@ declare const data: Post[];
 export { data };
 
 export default createContentLoader("blog/*.md", {
-  transform(raw): Post[] {
-    return raw
+  includeSrc: true,
+  transform(contents): Post[] {
+    return contents
       .filter(({ url }) => url !== "/blog/")
-      .map(({ url, frontmatter }) => ({
-        title: frontmatter.title,
-        url,
-        date: formatDate(frontmatter.date),
-      }))
+      .map(({ url, src }) => {
+        const { title, date } = extractBlogData(src!, url);
+        const dateObj = new Date(date);
+        return {
+          title,
+          url,
+          date: {
+            time: +dateObj,
+            iso: dateObj.toISOString(),
+            string: date,
+          },
+        };
+      })
       .sort((a, b) => b.date.time - a.date.time);
   },
 });
-
-function formatDate(raw: string): Post["date"] {
-  const date = new Date(raw);
-  date.setUTCHours(12);
-  return {
-    time: +date,
-    iso: date.toISOString(),
-    string: date.toLocaleDateString("en-UK", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }),
-  };
-}

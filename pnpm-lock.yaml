@@ -474,18 +474,12 @@ importers:
       takumi-js:
         specifier: ^2.0.2
         version: 2.0.2(csstype@3.2.3)
-      valibot:
-        specifier: ^1.4.1
-        version: 1.4.1(typescript@6.0.3)
       vitepress:
         specifier: ^2.0.0-alpha.18
         version: 2.0.0-alpha.18(@types/node@25.9.3)(postcss@8.5.15)(typescript@6.0.3)(yaml@2.9.0)
       vitepress-plugin-group-icons:
         specifier: ^1.7.5
         version: 1.7.5(vite@8.0.13)
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
 
 packages:
 

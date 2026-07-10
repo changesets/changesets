@@ -94,7 +94,7 @@ export default defineConfig({
         items: [
           {
             text: "Blog",
-            link: "/blog",
+            link: "/blog/",
           },
           {
             text: "Acknowledgements",
