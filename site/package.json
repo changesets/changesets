@@ -7,11 +7,15 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "preview": "vitepress preview"
+    "preview": "vitepress preview",
+    "generate-og": "node scripts/generate-og.ts"
   },
   "devDependencies": {
+    "takumi-js": "^2.0.2",
+    "valibot": "^1.4.1",
     "vitepress": "^2.0.0-alpha.18",
-    "vitepress-plugin-group-icons": "^1.7.5"
+    "vitepress-plugin-group-icons": "^1.7.5",
+    "yaml": "^2.9.0"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
