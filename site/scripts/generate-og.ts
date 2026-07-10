@@ -2,6 +2,7 @@ import fss from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { render } from "takumi-js";
+import { googleFonts } from "takumi-js/helpers";
 import { extractBlogData } from "../.vitepress/theme/utils.ts";
 
 const blogDir = path.resolve(import.meta.dirname, "../blog");
@@ -35,7 +36,7 @@ async function generateOgImage(data: ReturnType<typeof extractBlogData>) {
   // NOTE: For the most part, you can copy and paste this template to https://takumi.kane.tw/playground
   // to easily adjust the styling, but update the `style` prop as React-style object so that it works.
   const template = `\
-    <div tw="flex flex-col justify-between w-full h-full px-20 py-24 bg-[#162a42] text-white">
+    <div tw="flex flex-col justify-between w-full h-full px-20 py-24 bg-[#162a42] text-white tracking-[-.02em]">
       <div
         tw="absolute top-[-50px] left-[106px] w-[1600px] h-[1600px]"
         style="
@@ -63,6 +64,7 @@ async function generateOgImage(data: ReturnType<typeof extractBlogData>) {
     width: 1200,
     height: 630,
     format: "png",
+    fonts: googleFonts(["Inter"]),
   });
 
   return buffer;
