@@ -22,11 +22,11 @@ export type PublishedResult = {
 
 function getInitialAuthState(
   publishTool: PublishTool,
-  otp?: string,
+  otpCode?: string,
 ): AuthState {
-  if (otp) {
+  if (otpCode) {
     return {
-      otpToken: otp,
+      otpCode,
       requiresInteractive: false,
     };
   }
@@ -35,18 +35,18 @@ function getInitialAuthState(
     (process.env.PNPM_CONFIG_OTP || process.env.pnpm_config_otp)
   ) {
     return {
-      otpToken: process.env.PNPM_CONFIG_OTP || process.env.pnpm_config_otp,
+      otpCode: process.env.PNPM_CONFIG_OTP || process.env.pnpm_config_otp,
       requiresInteractive: false,
     };
   }
   if (process.env.NPM_CONFIG_OTP || process.env.npm_config_otp) {
     return {
-      otpToken: process.env.NPM_CONFIG_OTP || process.env.npm_config_otp,
+      otpCode: process.env.NPM_CONFIG_OTP || process.env.npm_config_otp,
       requiresInteractive: false,
     };
   }
   return {
-    otpToken: undefined,
+    otpCode: undefined,
     requiresInteractive: false,
   };
 }
@@ -97,7 +97,7 @@ export async function publishPackages({
   // but in TTY the user might rely on Changesets prompting (through the used package manager CLI) for OTP/web auth
   // this is just an appromixation of the best behavior that assumes a single publish target/registry with a consistent/shared auth setup
   npmPublishQueue.setConcurrency(
-    process.stdin.isTTY && !authState.otpToken
+    process.stdin.isTTY && !authState.otpCode
       ? 1
       : NPM_PUBLISH_CONCURRENCY_LIMIT,
   );
