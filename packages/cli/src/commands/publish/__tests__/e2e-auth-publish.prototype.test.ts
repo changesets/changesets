@@ -5,15 +5,29 @@ import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
+import { stripVTControlCharacters } from "node:util";
 import { createGzip } from "node:zlib";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import { getPackages } from "@manypkg/get-packages";
 import { packTar, type TarSource } from "modern-tar/fs";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { publish as publishCommand } from "../index.ts";
+
+const mockedLogger = vi.hoisted(() => ({
+  success: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
+}));
+
+vi.mock("@clack/prompts", async (importOriginal) => {
+  return {
+    ...(await importOriginal()),
+    log: mockedLogger,
+  };
+});
 
 vi.mock("@changesets/git");
 
@@ -130,6 +144,13 @@ async function captureBody(
   const body = await readBody(req);
   request.bodyLength = body.byteLength;
   request.body = tryParseJson(body);
+}
+
+function sanitizePublishLog(message: unknown, registryUrl: string) {
+  return stripVTControlCharacters(String(message)).replaceAll(
+    new URL(registryUrl).origin,
+    "[registry-url]",
+  );
 }
 
 async function waitForRegistry(url: string) {
@@ -609,59 +630,116 @@ describe("publish command auth/publish e2e prototype", () => {
     vi.clearAllMocks();
   });
 
-  it.skip("uses a programmable auth proxy in front of pnpr", async () => {
-    await using registry = await createTestRegistry();
+  it("surfaces npm web-auth OTP publish failures in non-tty mode", async () => {
+    await using registry = await createTestRegistry({
+      packages: {
+        "pkg-a": {
+          versions: ["0.0.1"],
+          tags: { latest: "0.0.1" },
+        },
+      },
+      auth: {
+        packages: {
+          "pkg-a": {
+            token: "publ1sh-t0k3n",
+            otp: { code: "123456", challenge: "web" },
+          },
+        },
+      },
+    });
     const cwd = await testdir({
       "package.json": JSON.stringify({
+        packageManager: "npm@10.9.8",
         private: true,
         workspaces: ["packages/*"],
       }),
-      "package-lock.json": "",
+      "package-lock.json": JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+          "": {
+            workspaces: ["packages/*"],
+          },
+        },
+      }),
       ".npmrc": [
         `registry=${registry.url}`,
-        `//${registry.host}/:_authToken=publish-token`,
-        "always-auth=true",
+        `//${registry.host}/:_authToken=publ1sh-t0k3n`,
       ].join("\n"),
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
+        description: "",
         files: ["index.js"],
+        license: "MIT",
+        type: "module",
       }),
-      "packages/pkg-a/index.js": "module.exports = 'pkg-a';\n",
-      ".changeset/config.json": JSON.stringify(defaultConfig),
+      "packages/pkg-a/index.js": "export default 'pkg-a';\n",
+      ".changeset/config.json": JSON.stringify({
+        ...defaultConfig,
+        access: "public",
+      }),
     });
 
-    using _ = stubIsTTY(true);
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd });
-
+    using _ = stubIsTTY(false);
+    await expect(publishCommand({ cwd })).rejects.toMatchObject({
+      code: 1,
+      message: "The process exited with code: 1",
+    });
     expect(
-      registry.requests.filter(
-        (request) =>
-          request.method === "PUT" && request.pathname === "/pkg-a",
+      mockedLogger.error.mock.calls.map((call) =>
+        sanitizePublishLog(call[0], registry.url),
       ),
-    ).toEqual([
+    ).toMatchInlineSnapshot(`
+      [
+        "An error occurred while publishing pkg-a: EOTP
+      This operation requires a one-time password.
+      Open this URL in your browser to authenticate:
+        [registry-url]/-/auth/cli/***
+
+      After authenticating, your token can be retrieved from:
+        [registry-url]/-/v1/done?authId=***",
+        "Some packages failed to publish:
+      pkg-a@1.0.0",
+      ]
+    `);
+
+    const publishRequests = registry.requests.filter(
+      (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+    );
+    expect(publishRequests).toEqual([
       expect.objectContaining({
-        authorization: "Bearer publish-token",
-        otpCode: "123456",
-        forwarded: true,
-        statusCode: expect.any(Number),
+        authorization: "Bearer publ1sh-t0k3n",
+        forwarded: false,
+        headers: expect.objectContaining({
+          "npm-auth-type": "web",
+          "npm-command": "publish",
+        }),
+        otpCode: undefined,
+        statusCode: 401,
       }),
     ]);
 
     const response = await fetch(`${registry.url}pkg-a`);
-    const packument = await response.json();
     expect(response.status).toBe(200);
+
+    const packument = await response.json();
     expect(packument).toMatchObject({
+      "dist-tags": {
+        latest: "0.0.1",
+      },
       name: "pkg-a",
       versions: {
-        "1.0.0": {
+        "0.0.1": {
           name: "pkg-a",
-          version: "1.0.0",
+          version: "0.0.1",
         },
       },
     });
-    expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
+    expect(packument).not.toMatchObject({
+      versions: {
+        "1.0.0": expect.anything(),
+      },
+    });
+    expect(git.tag).not.toHaveBeenCalled();
   });
 });
