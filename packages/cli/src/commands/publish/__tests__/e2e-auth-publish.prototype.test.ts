@@ -9,7 +9,11 @@ import { stripVTControlCharacters } from "node:util";
 import { createGzip } from "node:zlib";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
-import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import {
+  silenceLogsInBlock,
+  testdir,
+  type Fixture,
+} from "@changesets/test-utils";
 import { packTar, type TarSource } from "modern-tar/fs";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -66,6 +70,21 @@ type SeedPackageState = {
 
 type SeedRegistryState = Record<string, SeedPackageState>;
 
+type TestRegistry = {
+  host: string;
+  requests: RegistryRequest[];
+  url: string;
+  [Symbol.asyncDispose](): Promise<void>;
+};
+
+type PmBins = Partial<Record<"npm" | "pnpm" | "yarn", string>>;
+
+type PmCase = {
+  name: string;
+  bins: PmBins;
+  testdir: (registry: TestRegistry, fixture?: Fixture) => Promise<string>;
+};
+
 type TarballContentEntry = {
   path: string;
   content: string | Uint8Array;
@@ -73,6 +92,7 @@ type TarballContentEntry = {
 
 const TAR_ENTRY_MODE = 0o644;
 const TAR_ENTRY_MTIME = new Date("1985-10-26T08:15:00.000Z");
+const CLIENT_AUTH_TOKEN = "publ1sh-t0k3n";
 
 function firstHeader(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -153,6 +173,128 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
   );
 }
 
+function disposeValue(value: AsyncDisposable | Disposable | null | undefined) {
+  if (!value) {
+    return;
+  }
+  if (Symbol.asyncDispose in value) {
+    return value[Symbol.asyncDispose]();
+  }
+  return value[Symbol.dispose]();
+}
+
+class AbortableAsyncDisposableStack extends AsyncDisposableStack {
+  #signal: AbortSignal;
+
+  #abort = () => {
+    void this.disposeAsync();
+  };
+
+  constructor(signal: AbortSignal) {
+    super();
+    this.#signal = signal;
+    signal.throwIfAborted();
+    signal.addEventListener("abort", this.#abort, { once: true });
+  }
+
+  override use<T extends AsyncDisposable | Disposable | null | undefined>(
+    value: T,
+  ): T {
+    if (this.#signal.aborted) {
+      void disposeValue(value);
+    }
+    this.#signal.throwIfAborted();
+    return super.use(value);
+  }
+
+  override adopt<T>(
+    value: T,
+    onDisposeAsync: (value: T) => PromiseLike<void> | void,
+  ) {
+    if (this.#signal.aborted) {
+      void onDisposeAsync(value);
+    }
+    this.#signal.throwIfAborted();
+    return super.adopt(value, onDisposeAsync);
+  }
+
+  override defer(onDisposeAsync: () => PromiseLike<void> | void): void {
+    if (this.#signal.aborted) {
+      void onDisposeAsync();
+    }
+    this.#signal.throwIfAborted();
+    return super.defer(onDisposeAsync);
+  }
+
+  override async disposeAsync() {
+    this.#signal.removeEventListener("abort", this.#abort);
+    await super.disposeAsync();
+  }
+
+  override async [Symbol.asyncDispose]() {
+    await this.disposeAsync();
+  }
+}
+
+function createNpmTestdir(packageManager: string) {
+  return (registry: TestRegistry, fixture: Fixture = {}) =>
+    testdir({
+      "package.json": JSON.stringify({
+        packageManager,
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+          "": {
+            workspaces: ["packages/*"],
+          },
+        },
+      }),
+      ".npmrc": [
+        `registry=${registry.url}`,
+        `//${registry.host}/:_authToken=${CLIENT_AUTH_TOKEN}`,
+      ].join("\n"),
+      ...fixture,
+    });
+}
+
+function createPnpmTestdir(packageManager: string) {
+  return (registry: TestRegistry, fixture: Fixture = {}) =>
+    testdir({
+      "package.json": JSON.stringify({
+        packageManager,
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      ".npmrc": [
+        `registry=${registry.url}`,
+        `//${registry.host}/:_authToken=${CLIENT_AUTH_TOKEN}`,
+      ].join("\n"),
+      ...fixture,
+    });
+}
+
+function createYarnBerryTestdir(packageManager: string) {
+  return (registry: TestRegistry, fixture: Fixture = {}) =>
+    testdir({
+      "package.json": JSON.stringify({
+        packageManager,
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      ".yarnrc.yml": [
+        `npmRegistryServer: "${registry.url}"`,
+        `npmAuthToken: "${CLIENT_AUTH_TOKEN}"`,
+        "nodeLinker: node-modules",
+      ].join("\n"),
+      ...fixture,
+    });
+}
+
 async function waitForRegistry(url: string) {
   let lastError: unknown;
   for (let attempt = 0; attempt < 50; attempt++) {
@@ -193,6 +335,69 @@ async function createTempDir(prefix: string) {
     path: directory,
     async [Symbol.asyncDispose]() {
       await fs.rm(directory, { force: true, recursive: true });
+    },
+  };
+}
+
+async function resolvePackageBin(packageName: string, command: keyof PmBins) {
+  const packageRoot = path.join(cliPackageRoot, "node_modules", packageName);
+  const packageJson: unknown = JSON.parse(
+    await fs.readFile(path.join(packageRoot, "package.json"), "utf8"),
+  );
+
+  if (
+    !packageJson ||
+    typeof packageJson !== "object" ||
+    !("bin" in packageJson)
+  ) {
+    throw new Error(`Could not resolve ${command} bin from ${packageName}`);
+  }
+
+  const bin =
+    typeof packageJson.bin === "string"
+      ? packageJson.bin
+      : packageJson.bin &&
+          typeof packageJson.bin === "object" &&
+          command in packageJson.bin
+        ? (packageJson.bin as Record<keyof PmBins, string>)[command]
+        : undefined;
+
+  if (!bin) {
+    throw new Error(`Could not resolve ${command} bin from ${packageName}`);
+  }
+  return path.join(packageRoot, bin);
+}
+
+async function usePackageManagerBins(signal: AbortSignal, bins: PmBins) {
+  await using stack = new AbortableAsyncDisposableStack(signal);
+  const root = stack.use(await createTempDir("changesets-pm-bins-"));
+  const originalPath = process.env.PATH;
+  stack.defer(() => {
+    process.env.PATH = originalPath;
+  });
+
+  for (const [command, packageName] of Object.entries(bins)) {
+    const target = await resolvePackageBin(
+      packageName,
+      command as keyof PmBins,
+    );
+    const shimPath = path.join(root.path, command);
+    await fs.writeFile(
+      shimPath,
+      `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`,
+    );
+    await fs.chmod(shimPath, 0o755);
+  }
+
+  signal.throwIfAborted();
+  process.env.PATH = originalPath
+    ? `${root.path}${path.delimiter}${originalPath}`
+    : root.path;
+
+  const cleanup = stack.move();
+  return {
+    async [Symbol.asyncDispose]() {
+      await cleanup[Symbol.asyncDispose]();
     },
   };
 }
@@ -273,7 +478,7 @@ async function publishSeedPackage(
       content: `${JSON.stringify(manifest, undefined, 2)}\n`,
     },
     { path: "package/index.js", content: "export default 1;\n" },
-  ])
+  ]);
   const filename = getPackageTarballFilename(packageName, version);
   const response = await fetch(
     new URL(encodeURIComponent(packageName), pnprUrl),
@@ -303,7 +508,7 @@ async function publishSeedPackage(
               shasum: createHash("sha1").update(tarball).digest("hex"),
               tarball: new URL(
                 `${encodeURIComponent(packageName)}/-/${filename}`,
-                pnprUrl
+                pnprUrl,
               ).href,
             },
           },
@@ -338,13 +543,7 @@ async function seedPackage(
     const tags = Object.entries(state.tags)
       .filter(([, taggedVersion]) => taggedVersion === version)
       .map(([tag]) => tag);
-    await publishSeedPackage(
-      pnprUrl,
-      pnprToken,
-      packageName,
-      version,
-      tags,
-    );
+    await publishSeedPackage(pnprUrl, pnprToken, packageName, version, tags);
   }
 }
 
@@ -601,7 +800,7 @@ async function createAuthProxy(
 async function createTestRegistry(options?: {
   auth?: AuthProxyConfig;
   packages?: SeedRegistryState;
-}) {
+}): Promise<TestRegistry> {
   await using stack = new AsyncDisposableStack();
   const pnpr = stack.use(await createPnprRegistry());
   const pnprToken = await createPnprUser(pnpr.url);
@@ -623,6 +822,46 @@ async function createTestRegistry(options?: {
   };
 }
 
+const pmCases: PmCase[] = [
+  {
+    name: "npm 10",
+    bins: { npm: "npm-10" },
+    testdir: createNpmTestdir("npm@10.9.8"),
+  },
+  {
+    name: "npm 11",
+    bins: { npm: "npm-11" },
+    testdir: createNpmTestdir("npm@11"),
+  },
+  // {
+  //   name: "npm 12",
+  //   bins: {},
+  //   testdir: createNpmTestdir("npm@12.0.1"),
+  //   todo: true,
+  // },
+  {
+    name: "pnpm 10 + npm 10",
+    bins: { npm: "npm-10", pnpm: "pnpm-10" },
+    testdir: createPnpmTestdir("pnpm@10"),
+  },
+  {
+    name: "pnpm 11",
+    bins: { pnpm: "pnpm-11" },
+    testdir: createPnpmTestdir("pnpm@11.9.0"),
+  },
+  // {
+  //   name: "pnpm 12",
+  //   bins: {},
+  //   testdir: createPnpmTestdir("pnpm@12"),
+  //   todo: true,
+  // },
+  {
+    name: "yarn 4",
+    bins: { yarn: "yarn-4" },
+    testdir: createYarnBerryTestdir("yarn@4"),
+  },
+];
+
 describe("publish command auth/publish e2e prototype", () => {
   silenceLogsInBlock();
 
@@ -630,116 +869,95 @@ describe("publish command auth/publish e2e prototype", () => {
     vi.clearAllMocks();
   });
 
-  it("surfaces npm web-auth OTP publish failures in non-tty mode", async () => {
-    await using registry = await createTestRegistry({
-      packages: {
-        "pkg-a": {
-          versions: ["0.0.1"],
-          tags: { latest: "0.0.1" },
-        },
-      },
-      auth: {
-        packages: {
-          "pkg-a": {
-            token: "publ1sh-t0k3n",
-            otp: { code: "123456", challenge: "web" },
+  describe.each(pmCases)("$name", (pm) => {
+    it("surfaces web-auth OTP publish failures in non-tty mode", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      stack.use(await usePackageManagerBins(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
           },
-        },
-      },
-    });
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        packageManager: "npm@10.9.8",
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": JSON.stringify({
-        lockfileVersion: 3,
-        packages: {
-          "": {
-            workspaces: ["packages/*"],
+          auth: {
+            packages: {
+              "pkg-a": {
+                token: CLIENT_AUTH_TOKEN,
+                otp: { code: "123456", challenge: "web" },
+              },
+            },
           },
-        },
-      }),
-      ".npmrc": [
-        `registry=${registry.url}`,
-        `//${registry.host}/:_authToken=publ1sh-t0k3n`,
-      ].join("\n"),
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-        description: "",
-        files: ["index.js"],
-        license: "MIT",
-        type: "module",
-      }),
-      "packages/pkg-a/index.js": "export default 'pkg-a';\n",
-      ".changeset/config.json": JSON.stringify({
-        ...defaultConfig,
-        access: "public",
-      }),
-    });
-
-    using _ = stubIsTTY(false);
-    await expect(publishCommand({ cwd })).rejects.toMatchObject({
-      code: 1,
-      message: "The process exited with code: 1",
-    });
-    expect(
-      mockedLogger.error.mock.calls.map((call) =>
-        sanitizePublishLog(call[0], registry.url),
-      ),
-    ).toMatchInlineSnapshot(`
-      [
-        "An error occurred while publishing pkg-a: EOTP
-      This operation requires a one-time password.
-      Open this URL in your browser to authenticate:
-        [registry-url]/-/auth/cli/***
-
-      After authenticating, your token can be retrieved from:
-        [registry-url]/-/v1/done?authId=***",
-        "Some packages failed to publish:
-      pkg-a@1.0.0",
-      ]
-    `);
-
-    const publishRequests = registry.requests.filter(
-      (request) => request.method === "PUT" && request.pathname === "/pkg-a",
-    );
-    expect(publishRequests).toEqual([
-      expect.objectContaining({
-        authorization: "Bearer publ1sh-t0k3n",
-        forwarded: false,
-        headers: expect.objectContaining({
-          "npm-auth-type": "web",
-          "npm-command": "publish",
         }),
-        otpCode: undefined,
-        statusCode: 401,
-      }),
-    ]);
-
-    const response = await fetch(`${registry.url}pkg-a`);
-    expect(response.status).toBe(200);
-
-    const packument = await response.json();
-    expect(packument).toMatchObject({
-      "dist-tags": {
-        latest: "0.0.1",
-      },
-      name: "pkg-a",
-      versions: {
-        "0.0.1": {
+      );
+      const cwd = await pm.testdir(registry, {
+        "packages/pkg-a/package.json": JSON.stringify({
           name: "pkg-a",
-          version: "0.0.1",
+          version: "1.0.0",
+          description: "",
+          files: ["index.js"],
+          license: "MIT",
+          type: "module",
+        }),
+        "packages/pkg-a/index.js": "export default 'pkg-a';\n",
+        ".changeset/config.json": JSON.stringify({
+          ...defaultConfig,
+          access: "public",
+        }),
+      });
+
+      using _ = stubIsTTY(false);
+      await expect(publishCommand({ cwd })).rejects.toMatchObject({
+        code: 1,
+        message: "The process exited with code: 1",
+      });
+      expect(
+        mockedLogger.error.mock.calls.map((call) =>
+          sanitizePublishLog(call[0], registry.url),
+        ),
+      ).toMatchSnapshot();
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+          forwarded: false,
+          headers: expect.objectContaining({
+            "npm-auth-type": "web",
+            "npm-command": "publish",
+          }),
+          otpCode: undefined,
+          statusCode: 401,
+        }),
+      ]);
+
+      const response = await fetch(`${registry.url}pkg-a`);
+      expect(response.status).toBe(200);
+
+      const packument = await response.json();
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          latest: "0.0.1",
         },
-      },
+        name: "pkg-a",
+        versions: {
+          "0.0.1": {
+            name: "pkg-a",
+            version: "0.0.1",
+          },
+        },
+      });
+      expect(packument).not.toMatchObject({
+        versions: {
+          "1.0.0": expect.anything(),
+        },
+      });
+      expect(git.tag).not.toHaveBeenCalled();
     });
-    expect(packument).not.toMatchObject({
-      versions: {
-        "1.0.0": expect.anything(),
-      },
-    });
-    expect(git.tag).not.toHaveBeenCalled();
   });
 });
