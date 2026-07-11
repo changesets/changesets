@@ -231,26 +231,6 @@ async function packTarball(entries: TarballContentEntry[]) {
   return Buffer.concat(chunks);
 }
 
-async function createSeedPackageTarball(packageName: string, version: string) {
-  const packageJson = `${JSON.stringify(
-    {
-      name: packageName,
-      version,
-      description: "historical package version for testing",
-      files: ["index.js"],
-      license: "MIT",
-      type: "module",
-    },
-    undefined,
-    2,
-  )}\n`;
-
-  return packTarball([
-    { path: "package/package.json", content: packageJson },
-    { path: "package/index.js", content: "export default 1;\n" },
-  ]);
-}
-
 async function publishSeedPackage(
   pnprUrl: string,
   pnprToken: string,
@@ -258,11 +238,22 @@ async function publishSeedPackage(
   version: string,
   tags: string[],
 ) {
-  const tarball = await createSeedPackageTarball(packageName, version);
+  const manifest = {
+    name: packageName,
+    version,
+    description: "",
+    files: ["index.js"],
+    license: "MIT",
+    type: "module",
+  };
+  const tarball = await packTarball([
+    {
+      path: "package/package.json",
+      content: `${JSON.stringify(manifest, undefined, 2)}\n`,
+    },
+    { path: "package/index.js", content: "export default 1;\n" },
+  ])
   const filename = getPackageTarballFilename(packageName, version);
-  const distTags = Object.fromEntries(
-    tags.map((tag) => [tag, version]),
-  );
   const response = await fetch(
     new URL(encodeURIComponent(packageName), pnprUrl),
     {
@@ -280,24 +271,20 @@ async function publishSeedPackage(
           },
         },
         _id: packageName,
-        "dist-tags": distTags,
+        "dist-tags": Object.fromEntries(tags.map((tag) => [tag, version])),
         name: packageName,
         versions: {
           [version]: {
-            _id: `${packageName}@${version}`,
-            description: "historical package version for testing",
+            ...manifest,
+            _id: `${manifest.name}@${manifest.version}`,
             dist: {
               integrity: `sha512-${createHash("sha512").update(tarball).digest("base64")}`,
               shasum: createHash("sha1").update(tarball).digest("hex"),
               tarball: new URL(
                 `${encodeURIComponent(packageName)}/-/${filename}`,
-                pnprUrl,
+                pnprUrl
               ).href,
             },
-            license: "MIT",
-            name: packageName,
-            type: "module",
-            version,
           },
         },
       }),
