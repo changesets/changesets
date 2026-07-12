@@ -927,7 +927,7 @@ async function createTestRegistry(options?: {
   };
 }
 
-const pmCases: PmCase[] = [
+const pmCases = [
   {
     name: "npm 10",
     bins: { npm: "npm-10" },
@@ -965,7 +965,7 @@ const pmCases: PmCase[] = [
     bins: { yarn: "yarn-4" },
     testdir: createYarnBerryTestdir("yarn@4.17.0"),
   },
-];
+] as const satisfies ReadonlyArray<PmCase>;
 
 describe("publish command auth/publish e2e prototype", () => {
   silenceLogsInBlock();
@@ -1028,18 +1028,22 @@ describe("publish command auth/publish e2e prototype", () => {
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
-      expect(publishRequests).toEqual([
+      // Yarn 4 retries with our fake otp code provided to it in the stdin in the non-tty mode
+      expect(publishRequests).toHaveLength(pm.name === "yarn 4" ? 2 : 1);
+      expect(publishRequests[0]).toEqual(
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
           forwarded: false,
           headers: expect.objectContaining({
-            "npm-auth-type": "web",
-            "npm-command": "publish",
+            ...(pm.name !== "yarn 4" && {
+              "npm-auth-type": "web",
+              "npm-command": "publish",
+            }),
           }),
           otpCode: undefined,
           statusCode: 401,
         }),
-      ]);
+      );
 
       const response = await fetch(`${registry.url}pkg-a`, {
         signal: AbortSignal.timeout(5_000),
