@@ -30,8 +30,15 @@ pkg-a@1.0.0",
 
 exports[`publish command auth/publish e2e prototype > 'pnpm 10 + npm 10' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 [
-  "Received an unknown error code: EUNKNOWN for pnpm info pkg-a
-Invalid package manager specification in package.json (pnpm@10); expected a semver version",
+  "An error occurred while publishing pkg-a: EOTP
+This operation requires a one-time password.
+Open this URL in your browser to authenticate:
+  [registry-url]/-/auth/cli/***
+
+After authenticating, your token can be retrieved from:
+  [registry-url]/-/v1/done?authId=***",
+  "Some packages failed to publish:
+pkg-a@1.0.0",
 ]
 `;
 
@@ -46,116 +53,9 @@ pkg-a@1.0.0",
 
 exports[`publish command auth/publish e2e prototype > 'yarn 4' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 [
-  "Received an unknown error code: YN0081 for yarn npm info pkg-a
-Unsafe http requests must be explicitly whitelisted in your configuration (127.0.0.1)",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [npm 10] surfaces web-auth OTP publish failures in non-tty mode > npm 10 1`] = `
-[
-  "An error occurred while publishing pkg-a: EOTP
-This operation requires a one-time password.
-Open this URL in your browser to authenticate:
-  [registry-url]/-/auth/cli/***
-
-After authenticating, your token can be retrieved from:
-  [registry-url]/-/v1/done?authId=***",
+  "An error occurred while publishing pkg-a: YN0041
+Invalid OTP token",
   "Some packages failed to publish:
 pkg-a@1.0.0",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [npm 10] surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-[
-  "An error occurred while publishing pkg-a: EOTP
-This operation requires a one-time password.
-Open this URL in your browser to authenticate:
-  [registry-url]/-/auth/cli/***
-
-After authenticating, your token can be retrieved from:
-  [registry-url]/-/v1/done?authId=***",
-  "Some packages failed to publish:
-pkg-a@1.0.0",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [npm 11] surfaces web-auth OTP publish failures in non-tty mode > npm 11 1`] = `
-[
-  "An error occurred while publishing pkg-a: EOTP
-This operation requires a one-time password.
-Open this URL in your browser to authenticate:
-  [registry-url]/-/auth/cli/***
-
-After authenticating, your token can be retrieved from:
-  [registry-url]/-/v1/done?authId=***",
-  "Some packages failed to publish:
-pkg-a@1.0.0",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [npm 11] surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-[
-  "An error occurred while publishing pkg-a: EOTP
-This operation requires a one-time password.
-Open this URL in your browser to authenticate:
-  [registry-url]/-/auth/cli/***
-
-After authenticating, your token can be retrieved from:
-  [registry-url]/-/v1/done?authId=***",
-  "Some packages failed to publish:
-pkg-a@1.0.0",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [pnpm 10 + npm 10] surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-[
-  "Received an unknown error code: EUNKNOWN for pnpm info pkg-a
-Invalid package manager specification in package.json (pnpm@10); expected a semver version",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [pnpm 10 with npm 10] surfaces web-auth OTP publish failures in non-tty mode > pnpm 10 with npm 10 1`] = `
-[
-  "Received an unknown error code: EUNKNOWN for pnpm info pkg-a
-Invalid package manager specification in package.json (pnpm@10); expected a semver version",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [pnpm 10 with npm 10] surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-[
-  "Received an unknown error code: EUNKNOWN for pnpm info pkg-a
-Invalid package manager specification in package.json (pnpm@10); expected a semver version",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [pnpm 11] surfaces web-auth OTP publish failures in non-tty mode > pnpm 11 1`] = `
-[
-  "An error occurred while publishing pkg-a: ERR_PNPM_OTP_NON_INTERACTIVE
-The registry requires additional authentication, but pnpm is not running in an interactive terminal",
-  "Some packages failed to publish:
-pkg-a@1.0.0",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [pnpm 11] surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-[
-  "An error occurred while publishing pkg-a: ERR_PNPM_OTP_NON_INTERACTIVE
-The registry requires additional authentication, but pnpm is not running in an interactive terminal",
-  "Some packages failed to publish:
-pkg-a@1.0.0",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [yarn 4] surfaces web-auth OTP publish failures in non-tty mode > yarn 4 1`] = `
-[
-  "Received an unknown error code: YN0081 for yarn npm info pkg-a
-Unsafe http requests must be explicitly whitelisted in your configuration (127.0.0.1)",
-]
-`;
-
-exports[`publish command auth/publish e2e prototype > [yarn 4] surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-[
-  "Received an unknown error code: YN0081 for yarn npm info pkg-a
-Unsafe http requests must be explicitly whitelisted in your configuration (127.0.0.1)",
 ]
 `;

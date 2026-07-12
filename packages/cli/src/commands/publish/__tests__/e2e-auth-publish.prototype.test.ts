@@ -1,10 +1,13 @@
+import { execFile } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
+import { once } from "node:events";
 import fs from "node:fs/promises";
 import http from "node:http";
 import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
+import { setTimeout } from "node:timers/promises";
 import { stripVTControlCharacters } from "node:util";
 import { createGzip } from "node:zlib";
 import { defaultConfig } from "@changesets/config";
@@ -278,8 +281,8 @@ function createPnpmTestdir(packageManager: string) {
 }
 
 function createYarnBerryTestdir(packageManager: string) {
-  return (registry: TestRegistry, fixture: Fixture = {}) =>
-    testdir({
+  return async (registry: TestRegistry, fixture: Fixture = {}) => {
+    const cwd = await testdir({
       "package.json": JSON.stringify({
         packageManager,
         private: true,
@@ -289,22 +292,38 @@ function createYarnBerryTestdir(packageManager: string) {
       ".yarnrc.yml": [
         `npmRegistryServer: "${registry.url}"`,
         `npmAuthToken: "${CLIENT_AUTH_TOKEN}"`,
+        // we want yarn.lock to be updated on yarn install below
+        // this ensures that doesn't fail on CI where yarn.lock is often immutable/readonly
+        "enableImmutableInstalls: false",
         "nodeLinker: node-modules",
+        "unsafeHttpWhitelist:",
+        '  - "127.0.0.1"',
       ].join("\n"),
       ...fixture,
     });
+    await exec("yarn", ["install"], {
+      nodeOptions: {
+        cwd,
+      },
+      throwOnError: true,
+    });
+    return cwd;
+  };
 }
 
 async function waitForRegistry(url: string) {
   let lastError: unknown;
   for (let attempt = 0; attempt < 50; attempt++) {
     try {
-      const response = await fetch(url, { method: "HEAD" });
+      const response = await fetch(url, {
+        method: "HEAD",
+        signal: AbortSignal.timeout(250),
+      });
       if (response.status < 500) return;
     } catch (error) {
       lastError = error;
     }
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await setTimeout(100);
   }
   throw new Error(`Timed out waiting for pnpr at ${url}`, {
     cause: lastError,
@@ -382,10 +401,8 @@ async function usePackageManagerBins(signal: AbortSignal, bins: PmBins) {
       command as keyof PmBins,
     );
     const shimPath = path.join(root.path, command);
-    await fs.writeFile(
-      shimPath,
-      `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`,
-    );
+    const shim = `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`;
+    await fs.writeFile(shimPath, shim);
     await fs.chmod(shimPath, 0o755);
   }
 
@@ -547,6 +564,91 @@ async function seedPackage(
   }
 }
 
+function execChild(
+  command: Parameters<typeof exec>[0],
+  args?: Parameters<typeof exec>[1],
+  options?: Omit<Parameters<typeof exec>[2], "persist">,
+) {
+  const child = exec(command, args, {
+    ...options,
+    // so the dispose can kill the whole process group
+    persist: true,
+  });
+
+  let disposing: Promise<void> | undefined;
+
+  async function dispose(): Promise<void> {
+    const processHandle = child.process;
+    const pid = child.pid;
+
+    if (
+      !processHandle ||
+      !pid ||
+      processHandle.exitCode != null ||
+      processHandle.signalCode != null
+    ) {
+      return;
+    }
+
+    const closed = once(processHandle, "close");
+
+    if (process.platform === "win32") {
+      await new Promise<void>((resolve, reject) => {
+        execFile(
+          "taskkill.exe",
+          ["/PID", String(pid), "/T", "/F"],
+          { windowsHide: true },
+          (error) => {
+            if (error && error.code !== 128) {
+              // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+              reject(error);
+            } else {
+              resolve();
+            }
+          },
+        );
+      });
+
+      await closed;
+      return;
+    }
+
+    const killGroup = (signal: NodeJS.Signals) => {
+      try {
+        process.kill(-pid, signal);
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          !("code" in error) ||
+          error.code !== "ESRCH"
+        ) {
+          throw error;
+        }
+      }
+    };
+
+    killGroup("SIGTERM");
+
+    const closedGracefully = await Promise.race([
+      closed.then(() => true),
+      setTimeout(1_000, false),
+    ]);
+
+    if (!closedGracefully) {
+      killGroup("SIGKILL");
+      await closed;
+    }
+  }
+
+  return {
+    child,
+
+    [Symbol.asyncDispose]() {
+      return (disposing ??= dispose());
+    },
+  };
+}
+
 async function createPnprRegistry() {
   await using stack = new AsyncDisposableStack();
   const root = stack.use(await createTempDir("changesets-pnpr-"));
@@ -589,11 +691,9 @@ log:
 `.trimStart(),
   );
 
-  const child = exec(
-    "pnpm",
+  await using execResult = execChild(
+    path.join(cliPackageRoot, "node_modules", ".bin", "pnpr"),
     [
-      "exec",
-      "pnpr",
       "--config",
       config,
       "--listen",
@@ -606,15 +706,11 @@ log:
     {
       nodeOptions: {
         cwd: cliPackageRoot,
-        env: {
-          ...process.env,
-          pnpm_config_verify_deps_before_run: "false",
-        },
         stdio: ["ignore", "pipe", "pipe"],
       },
     },
   );
-  stack.defer(() => void child.kill());
+  const { child } = execResult;
   const pnprProcess = child.process!;
   const pnprStdout = pnprProcess.stdout!;
   const pnprStderr = pnprProcess.stderr!;
@@ -641,6 +737,9 @@ log:
   };
   pnprProcess.once("error", rejectStartupOnError);
   pnprProcess.once("exit", rejectStartupOnExit);
+  if (pnprProcess.exitCode != null || pnprProcess.signalCode != null) {
+    rejectStartupOnExit(pnprProcess.exitCode, pnprProcess.signalCode);
+  }
 
   try {
     await Promise.race([waitForRegistry(url), startupFailure.promise]);
@@ -789,9 +888,13 @@ async function createAuthProxy(
     url: `http://127.0.0.1:${address.port}/`,
     [Symbol.asyncDispose]: () =>
       new Promise<void>((resolve, reject) => {
+        server.closeAllConnections();
         server.close((error) => {
-          if (error) reject(error);
-          else resolve();
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
         });
       }),
   };
@@ -842,7 +945,7 @@ const pmCases: PmCase[] = [
   {
     name: "pnpm 10 + npm 10",
     bins: { npm: "npm-10", pnpm: "pnpm-10" },
-    testdir: createPnpmTestdir("pnpm@10"),
+    testdir: createPnpmTestdir("pnpm@10.0.0"),
   },
   {
     name: "pnpm 11",
@@ -858,7 +961,7 @@ const pmCases: PmCase[] = [
   {
     name: "yarn 4",
     bins: { yarn: "yarn-4" },
-    testdir: createYarnBerryTestdir("yarn@4"),
+    testdir: createYarnBerryTestdir("yarn@4.17.0"),
   },
 ];
 
@@ -887,7 +990,7 @@ describe("publish command auth/publish e2e prototype", () => {
             packages: {
               "pkg-a": {
                 token: CLIENT_AUTH_TOKEN,
-                otp: { code: "123456", challenge: "web" },
+                otp: { code: "654321", challenge: "web" },
               },
             },
           },
@@ -936,7 +1039,9 @@ describe("publish command auth/publish e2e prototype", () => {
         }),
       ]);
 
-      const response = await fetch(`${registry.url}pkg-a`);
+      const response = await fetch(`${registry.url}pkg-a`, {
+        signal: AbortSignal.timeout(5_000),
+      });
       expect(response.status).toBe(200);
 
       const packument = await response.json();
