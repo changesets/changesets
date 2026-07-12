@@ -691,24 +691,26 @@ log:
 `.trimStart(),
   );
 
-  await using execResult = execChild(
-    path.join(cliPackageRoot, "node_modules", ".bin", "pnpr"),
-    [
-      "--config",
-      config,
-      "--listen",
-      `127.0.0.1:${port}`,
-      "--storage",
-      storage,
-      "--public-url",
-      url,
-    ],
-    {
-      nodeOptions: {
-        cwd: cliPackageRoot,
-        stdio: ["ignore", "pipe", "pipe"],
+  const execResult = stack.use(
+    execChild(
+      path.join(cliPackageRoot, "node_modules", ".bin", "pnpr"),
+      [
+        "--config",
+        config,
+        "--listen",
+        `127.0.0.1:${port}`,
+        "--storage",
+        storage,
+        "--public-url",
+        url,
+      ],
+      {
+        nodeOptions: {
+          cwd: cliPackageRoot,
+          stdio: ["ignore", "pipe", "pipe"],
+        },
       },
-    },
+    ),
   );
   const { child } = execResult;
   const pnprProcess = child.process!;
