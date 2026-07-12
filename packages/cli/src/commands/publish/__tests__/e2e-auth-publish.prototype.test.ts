@@ -1055,9 +1055,11 @@ describe("publish command auth/publish e2e prototype", () => {
       expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
     });
 
-    it.runIf(pm.name !== "yarn 4")(
-      "reads initial otp from env in non-tty mode",
-      async ({ signal }) => {
+    it.runIf(
+      pm.name !== "yarn 4" &&
+        // pnpm 11 is currently broken, see https://github.com/pnpm/pnpm/pull/12957
+        pm.name !== "pnpm 11",
+    )("reads initial otp from env in non-tty mode", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       stack.use(await usePackageManagerBins(signal, pm.bins));
       const registry = stack.use(
@@ -1082,7 +1084,7 @@ describe("publish command auth/publish e2e prototype", () => {
 
       using _ = stubIsTTY(false);
       vi.stubEnv(
-        pm.name === 'pnpm 11' ? "PNPM_CONFIG_OTP" : "NPM_CONFIG_OTP",
+        pm.name === "pnpm 11" ? "PNPM_CONFIG_OTP" : "NPM_CONFIG_OTP",
         "654321",
       );
       vi.mocked(git.tag).mockResolvedValue(true);
@@ -1119,8 +1121,7 @@ describe("publish command auth/publish e2e prototype", () => {
         },
       });
       expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
-      },
-    );
+    });
 
     it("surfaces web-auth OTP publish failures in non-tty mode", async ({
       signal,
