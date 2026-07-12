@@ -117,48 +117,6 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  it("publishes without otp in non-tty mode", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    using _ = stubIsTTY(false);
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult("");
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd });
-
-    expect(mockedExec).toHaveBeenCalledWith(
-      "npm",
-      expect.not.arrayContaining(["--otp"]),
-      expect.objectContaining({
-        nodeOptions: expect.objectContaining({
-          cwd: path.join(cwd, "packages", "pkg-a"),
-          env: expect.objectContaining({
-            NPM_CONFIG_OTP: undefined,
-          }),
-        }),
-      }),
-    );
-  });
-
   it("reads initial otp from env and strips it from forwarded env", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

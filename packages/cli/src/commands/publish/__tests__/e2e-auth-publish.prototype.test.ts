@@ -927,6 +927,22 @@ async function createTestRegistry(options?: {
   };
 }
 
+const pkgAFixture = {
+  "packages/pkg-a/package.json": JSON.stringify({
+    name: "pkg-a",
+    version: "1.0.0",
+    description: "",
+    files: ["index.js"],
+    license: "MIT",
+    type: "module",
+  }),
+  "packages/pkg-a/index.js": "export default 'pkg-a';\n",
+  ".changeset/config.json": JSON.stringify({
+    ...defaultConfig,
+    access: "public",
+  }),
+};
+
 const pmCases = [
   {
     name: "npm 10",
@@ -975,6 +991,63 @@ describe("publish command auth/publish e2e prototype", () => {
   });
 
   describe.each(pmCases)("$name", (pm) => {
+    it("publishes without otp in non-tty mode", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      stack.use(await usePackageManagerBins(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.testdir(registry, pkgAFixture);
+
+      using _ = stubIsTTY(false);
+      vi.mocked(git.tag).mockResolvedValue(true);
+
+      await publishCommand({ cwd });
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+          forwarded: true,
+          otpCode: undefined,
+          statusCode: 201,
+        }),
+      ]);
+
+      const response = await fetch(`${registry.url}pkg-a`, {
+        signal: AbortSignal.timeout(5_000),
+      });
+      expect(response.status).toBe(200);
+
+      const packument = await response.json();
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          latest: "1.0.0",
+        },
+        name: "pkg-a",
+        versions: {
+          "0.0.1": {
+            name: "pkg-a",
+            version: "0.0.1",
+          },
+          "1.0.0": {
+            name: "pkg-a",
+            version: "1.0.0",
+          },
+        },
+      });
+      expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
+    });
+
     it("surfaces web-auth OTP publish failures in non-tty mode", async ({
       signal,
     }) => {
@@ -998,21 +1071,7 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.testdir(registry, {
-        "packages/pkg-a/package.json": JSON.stringify({
-          name: "pkg-a",
-          version: "1.0.0",
-          description: "",
-          files: ["index.js"],
-          license: "MIT",
-          type: "module",
-        }),
-        "packages/pkg-a/index.js": "export default 'pkg-a';\n",
-        ".changeset/config.json": JSON.stringify({
-          ...defaultConfig,
-          access: "public",
-        }),
-      });
+      const cwd = await pm.testdir(registry, pkgAFixture);
 
       using _ = stubIsTTY(false);
       await expect(publishCommand({ cwd })).rejects.toMatchObject({
