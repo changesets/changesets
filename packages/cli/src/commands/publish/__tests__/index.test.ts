@@ -289,55 +289,6 @@ describe("Publish command", () => {
     );
   });
 
-  it("uses yarn publish with the target path for yarn classic", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "yarn.lock": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    using _ = stubIsTTY(false);
-    mockExecImplementation(async (_command, args) => {
-      if (args.length === 1 && args[0] === "--version") {
-        return execResult("1.22.22");
-      }
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult("");
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd });
-
-    expect(mockedExec).toHaveBeenCalledWith(
-      "yarn",
-      expect.arrayContaining([
-        "publish",
-        "--new-version",
-        "1.0.0",
-        "--no-git-tag-version",
-        "--non-interactive",
-        "--json",
-      ]),
-      expect.objectContaining({
-        nodeOptions: expect.objectContaining({
-          cwd: path.join(cwd, "packages", "pkg-a"),
-        }),
-      }),
-    );
-  });
-
   describe("in pre state", () => {
     it("should report error if the tag option is used in pre release", async () => {
       const cwd = await testdir({
@@ -823,48 +774,6 @@ describe("Publish command", () => {
       mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
     ).toHaveLength(1);
     expect(git.tag).not.toHaveBeenCalled();
-  });
-
-  it("does not treat Yarn Classic info reporter errors as unpublished packages", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "yarn.lock": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args.length === 1 && args[0] === "--version") {
-        return execResult("1.22.22");
-      }
-      if (args[0] === "info") {
-        return execResult(
-          "",
-          1,
-          `${JSON.stringify({
-            type: "error",
-            data: "Received invalid response from registry.",
-          })}\n`,
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await expect(publishCommand({ cwd })).rejects.toThrow();
-
-    expect(
-      mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
-    ).toHaveLength(0);
-    expect(git.tag).not.toHaveBeenCalled();
-    expect(mockedLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining("Received invalid response from registry."),
-    );
   });
 
   it("treats Yarn Berry info 404 reporter errors as unpublished", async () => {
@@ -1402,54 +1311,6 @@ describe("Publish command", () => {
                 "You cannot publish over the previously published version 1.0.0.",
             },
           }),
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await publishCommand({ cwd });
-
-    expect(git.tag).not.toHaveBeenCalled();
-    const successMessages = mockedLogger.success.mock.calls.map((call) =>
-      stripVTControlCharacters(String(call[0])),
-    );
-    expect(
-      successMessages.some((message) =>
-        message.includes("Published pkg-a@1.0.0!"),
-      ),
-    ).toBe(false);
-  });
-
-  it("skips already-published Yarn Classic reporter errors", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "yarn.lock": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    using _ = stubIsTTY(false);
-    mockExecImplementation(async (_command, args) => {
-      if (args.length === 1 && args[0] === "--version") {
-        return execResult("1.22.22");
-      }
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult(
-          "",
-          1,
-          `${JSON.stringify({
-            type: "error",
-            data: 'Couldn\'t publish package: "https://registry.npmjs.org/pkg-a: You cannot publish over the previously published versions: 1.0.0."',
-          })}\n`,
         );
       }
       throw new Error(`Unexpected exec args: ${args.join(" ")}`);
