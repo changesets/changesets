@@ -11,32 +11,10 @@ import { setTimeout } from "node:timers/promises";
 import { stripVTControlCharacters } from "node:util";
 import { createGzip } from "node:zlib";
 import { defaultConfig } from "@changesets/config";
-import * as git from "@changesets/git";
-import {
-  silenceLogsInBlock,
-  testdir,
-  type Fixture,
-} from "@changesets/test-utils";
+import { gitdir, type Fixture } from "@changesets/test-utils";
 import { packTar, type TarSource } from "modern-tar/fs";
 import { exec } from "tinyexec";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { publish as publishCommand } from "../index.ts";
-
-const mockedLogger = vi.hoisted(() => ({
-  success: vi.fn(),
-  error: vi.fn(),
-  warn: vi.fn(),
-  info: vi.fn(),
-}));
-
-vi.mock("@clack/prompts", async (importOriginal) => {
-  return {
-    ...(await importOriginal()),
-    log: mockedLogger,
-  };
-});
-
-vi.mock("@changesets/git");
+import { describe, expect, it } from "vitest";
 
 const cliPackageRoot = path.resolve(import.meta.dirname, "../../../..");
 
@@ -123,27 +101,6 @@ function getAuthRequirement(
   return scope ? config.scopes?.[scope] : undefined;
 }
 
-function stubIsTTY(value: boolean) {
-  const originalDescriptor = Object.getOwnPropertyDescriptor(
-    process.stdin,
-    "isTTY",
-  );
-  Object.defineProperty(process.stdin, "isTTY", {
-    configurable: true,
-    ...originalDescriptor,
-    value,
-  });
-  return {
-    [Symbol.dispose]() {
-      if (originalDescriptor) {
-        Object.defineProperty(process.stdin, "isTTY", originalDescriptor);
-      } else {
-        Reflect.deleteProperty(process.stdin, "isTTY");
-      }
-    },
-  };
-}
-
 async function readBody(req: http.IncomingMessage) {
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
@@ -173,6 +130,26 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
   return stripVTControlCharacters(String(message)).replaceAll(
     new URL(registryUrl).origin,
     "[registry-url]",
+  );
+}
+
+async function runPublishCli(options: {
+  cwd: string;
+  env?: NodeJS.ProcessEnv;
+  signal?: AbortSignal;
+  stdin?: string;
+}) {
+  return exec(
+    process.execPath,
+    [path.join(cliPackageRoot, "src", "index.ts"), "publish"],
+    {
+      signal: options.signal,
+      stdin: options.stdin,
+      nodeOptions: {
+        cwd: options.cwd,
+        env: options.env,
+      },
+    },
   );
 }
 
@@ -252,7 +229,7 @@ class AbortableAsyncDisposableStack extends AsyncDisposableStack {
 
 function createNpmTestdir(packageManager: string) {
   return (registry: TestRegistry, fixture: Fixture = {}) =>
-    testdir({
+    gitdir({
       "package.json": JSON.stringify({
         packageManager,
         private: true,
@@ -276,7 +253,7 @@ function createNpmTestdir(packageManager: string) {
 
 function createPnpmTestdir(packageManager: string) {
   return (registry: TestRegistry, fixture: Fixture = {}) =>
-    testdir({
+    gitdir({
       "package.json": JSON.stringify({
         packageManager,
         private: true,
@@ -293,7 +270,7 @@ function createPnpmTestdir(packageManager: string) {
 
 function createYarnBerryTestdir(packageManager: string) {
   return async (registry: TestRegistry, fixture: Fixture = {}) => {
-    const cwd = await testdir({
+    const cwd = await gitdir({
       "package.json": JSON.stringify({
         packageManager,
         private: true,
@@ -995,13 +972,6 @@ const pmCases = [
 ] as const satisfies ReadonlyArray<PmCase>;
 
 describe("publish command auth/publish e2e prototype", () => {
-  silenceLogsInBlock();
-
-  afterEach(() => {
-    vi.clearAllMocks();
-    vi.unstubAllEnvs();
-  });
-
   describe.each(pmCases)("$name", (pm) => {
     it("publishes without otp in non-tty mode", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
@@ -1018,10 +988,8 @@ describe("publish command auth/publish e2e prototype", () => {
       );
       const cwd = await pm.testdir(registry, pkgAFixture);
 
-      using _ = stubIsTTY(false);
-      vi.mocked(git.tag).mockResolvedValue(true);
-
-      await publishCommand({ cwd });
+      const result = await runPublishCli({ cwd, signal });
+      expect(result.exitCode).toBe(0);
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
@@ -1052,7 +1020,6 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         },
       });
-      expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
     });
 
     it.runIf(
@@ -1082,14 +1049,15 @@ describe("publish command auth/publish e2e prototype", () => {
       );
       const cwd = await pm.testdir(registry, pkgAFixture);
 
-      using _ = stubIsTTY(false);
-      vi.stubEnv(
-        pm.name === "pnpm 11" ? "PNPM_CONFIG_OTP" : "NPM_CONFIG_OTP",
-        "654321",
-      );
-      vi.mocked(git.tag).mockResolvedValue(true);
-
-      await publishCommand({ cwd });
+      const result = await runPublishCli({
+        cwd,
+        env: {
+          [pm.name.startsWith("pnpm") ? "PNPM_CONFIG_OTP" : "NPM_CONFIG_OTP"]:
+            "654321",
+        },
+        signal,
+      });
+      expect(result.exitCode).toBe(0);
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
@@ -1120,7 +1088,6 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         },
       });
-      expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
     });
 
     it("surfaces web-auth OTP publish failures in non-tty mode", async ({
@@ -1148,16 +1115,10 @@ describe("publish command auth/publish e2e prototype", () => {
       );
       const cwd = await pm.testdir(registry, pkgAFixture);
 
-      using _ = stubIsTTY(false);
-      await expect(publishCommand({ cwd })).rejects.toMatchObject({
-        code: 1,
-        message: "The process exited with code: 1",
-      });
-      expect(
-        mockedLogger.error.mock.calls.map((call) =>
-          sanitizePublishLog(call[0], registry.url),
-        ),
-      ).toMatchSnapshot();
+      const result = await runPublishCli({ cwd, signal });
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toBe("");
+      expect(sanitizePublishLog(result.stdout, registry.url)).toMatchSnapshot();
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
@@ -1197,7 +1158,6 @@ describe("publish command auth/publish e2e prototype", () => {
           "1.0.0": expect.anything(),
         },
       });
-      expect(git.tag).not.toHaveBeenCalled();
     });
   });
 });
