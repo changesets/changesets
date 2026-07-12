@@ -176,6 +176,17 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
   );
 }
 
+async function fetchPackument(registry: TestRegistry, packageName: string) {
+  const response = await fetch(
+    new URL(encodeURIComponent(packageName), registry.url),
+    {
+      signal: AbortSignal.timeout(5_000),
+    },
+  );
+  expect(response.status).toBe(200);
+  return response.json();
+}
+
 function disposeValue(value: AsyncDisposable | Disposable | null | undefined) {
   if (!value) {
     return;
@@ -1023,12 +1034,7 @@ describe("publish command auth/publish e2e prototype", () => {
         }),
       ]);
 
-      const response = await fetch(`${registry.url}pkg-a`, {
-        signal: AbortSignal.timeout(5_000),
-      });
-      expect(response.status).toBe(200);
-
-      const packument = await response.json();
+      const packument = await fetchPackument(registry, "pkg-a");
       expect(packument).toMatchObject({
         "dist-tags": {
           latest: "1.0.0",
@@ -1104,12 +1110,7 @@ describe("publish command auth/publish e2e prototype", () => {
         }),
       );
 
-      const response = await fetch(`${registry.url}pkg-a`, {
-        signal: AbortSignal.timeout(5_000),
-      });
-      expect(response.status).toBe(200);
-
-      const packument = await response.json();
+      const packument = await fetchPackument(registry, "pkg-a");
       expect(packument).toMatchObject({
         "dist-tags": {
           latest: "0.0.1",
