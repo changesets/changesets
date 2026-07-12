@@ -999,6 +999,7 @@ describe("publish command auth/publish e2e prototype", () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
   });
 
   describe.each(pmCases)("$name", (pm) => {
@@ -1053,6 +1054,73 @@ describe("publish command auth/publish e2e prototype", () => {
       });
       expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
     });
+
+    it.runIf(pm.name !== "yarn 4")(
+      "reads initial otp from env in non-tty mode",
+      async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      stack.use(await usePackageManagerBins(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+          auth: {
+            packages: {
+              "pkg-a": {
+                token: CLIENT_AUTH_TOKEN,
+                otp: { code: "654321" },
+              },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.testdir(registry, pkgAFixture);
+
+      using _ = stubIsTTY(false);
+      vi.stubEnv(
+        pm.name === 'pnpm 11' ? "PNPM_CONFIG_OTP" : "NPM_CONFIG_OTP",
+        "654321",
+      );
+      vi.mocked(git.tag).mockResolvedValue(true);
+
+      await publishCommand({ cwd });
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+          forwarded: true,
+          otpCode: "654321",
+          statusCode: 201,
+        }),
+      ]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          latest: "1.0.0",
+        },
+        name: "pkg-a",
+        versions: {
+          "0.0.1": {
+            name: "pkg-a",
+            version: "0.0.1",
+          },
+          "1.0.0": {
+            name: "pkg-a",
+            version: "1.0.0",
+          },
+        },
+      });
+      expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
+      },
+    );
 
     it("surfaces web-auth OTP publish failures in non-tty mode", async ({
       signal,
