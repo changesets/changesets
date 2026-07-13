@@ -6,11 +6,13 @@ import http from "node:http";
 import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { setTimeout } from "node:timers/promises";
 import { stripVTControlCharacters } from "node:util";
 import { createGzip } from "node:zlib";
 import { defaultConfig } from "@changesets/config";
+import { tagExists } from "@changesets/git";
 import { gitdir, type Fixture } from "@changesets/test-utils";
 import { packTar, type TarSource } from "modern-tar/fs";
 import * as pty from "node-pty";
@@ -19,8 +21,8 @@ import { describe, expect, it } from "vitest";
 
 const cliPackageRoot = path.resolve(import.meta.dirname, "../../../..");
 
-type RegistryRequest = {
-  body?: unknown;
+type RegistryRequestRecord = {
+  bodyJson?: unknown;
   bodyLength?: number;
   headers: http.IncomingHttpHeaders;
   method: string;
@@ -28,7 +30,6 @@ type RegistryRequest = {
   pathname: string;
   authorization?: string;
   otpCode?: string;
-  forwarded: boolean;
   statusCode?: number;
 };
 
@@ -45,6 +46,11 @@ type AuthProxyConfig = {
   scopes?: Record<string, PackageAuthRequirement>;
 };
 
+type RegistryProxyConfig = {
+  auth?: AuthProxyConfig;
+  middleware?: RegistryMiddleware;
+};
+
 type SeedPackageState = {
   tags: Record<string, string>;
   versions: string[];
@@ -52,9 +58,25 @@ type SeedPackageState = {
 
 type SeedRegistryState = Record<string, SeedPackageState>;
 
+type ProxyMiddlewareContext = {
+  pnpr: {
+    fetch(request: Request): Promise<Response>;
+    seedPackage(
+      packageName: string,
+      state: SeedPackageState,
+    ): Promise<void>;
+  };
+  record: RegistryRequestRecord;
+  request: Request;
+};
+
+type RegistryMiddleware = (
+  context: ProxyMiddlewareContext,
+) => Promise<Response | undefined>;
+
 type TestRegistry = {
   host: string;
-  requests: RegistryRequest[];
+  requests: RegistryRequestRecord[];
   url: string;
   [Symbol.asyncDispose](): Promise<void>;
 };
@@ -86,10 +108,6 @@ const TAR_ENTRY_MODE = 0o644;
 const TAR_ENTRY_MTIME = new Date("1985-10-26T08:15:00.000Z");
 const CLIENT_AUTH_TOKEN = "publ1sh-t0k3n";
 
-function firstHeader(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
 function getPackageName(pathname: string) {
   const parts = pathname.split("/").filter(Boolean);
   if (parts[0]?.startsWith("@") && parts[1]) {
@@ -112,14 +130,6 @@ function getAuthRequirement(
   return scope ? config.scopes?.[scope] : undefined;
 }
 
-async function readBody(req: http.IncomingMessage) {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-  return Buffer.concat(chunks);
-}
-
 function tryParseJson(input: Buffer) {
   try {
     return JSON.parse(input.toString("utf8"));
@@ -128,13 +138,84 @@ function tryParseJson(input: Buffer) {
   }
 }
 
-async function captureBody(
-  request: RegistryRequest,
-  req: http.IncomingMessage,
+function toWebHeaders(
+  headers: http.IncomingHttpHeaders | http.OutgoingHttpHeaders,
 ) {
-  const body = await readBody(req);
-  request.bodyLength = body.byteLength;
-  request.body = tryParseJson(body);
+  const result = new Headers();
+  for (const [key, value] of Object.entries(headers)) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        result.append(key, item);
+      }
+    } else if (value != null) {
+      result.set(key, String(value));
+    }
+  }
+  return result;
+}
+
+function hasRequestBody(headers: Headers) {
+  return (
+    headers.get("content-length") != null ||
+    headers.get("transfer-encoding") != null
+  );
+}
+
+async function createWebRequest(req: http.IncomingMessage) {
+  const method = req.method ?? "GET";
+  const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
+  const headers = toWebHeaders(req.headers);
+  return new Request(url, {
+    body: hasRequestBody(headers) ? req : undefined,
+    duplex: "half",
+    headers,
+    method,
+  });
+}
+
+async function recordRequestBody(
+  request: Request,
+  record: RegistryRequestRecord,
+) {
+  if (!hasRequestBody(request.headers)) {
+    return;
+  }
+  const body = Buffer.from(await request.clone().arrayBuffer());
+  record.bodyLength = body.byteLength;
+  if (/^application\/json\b/i.test(request.headers.get("content-type") ?? "")) {
+    record.bodyJson = tryParseJson(body);
+  }
+  return record.bodyJson;
+}
+
+async function writeResponse(res: http.ServerResponse, response: Response) {
+  const headers: http.OutgoingHttpHeaders = {};
+  response.headers.forEach((value, key) => {
+    headers[key] = value;
+  });
+  delete headers["content-encoding"];
+  delete headers["transfer-encoding"];
+  res.writeHead(response.status, response.statusText, headers);
+  if (response.body) {
+    await pipeline(Readable.fromWeb(response.body), res);
+  } else {
+    res.end();
+  }
+}
+
+function createWebServer(handler: (request: Request) => Promise<Response>) {
+  return http.createServer((req, res) => {
+    void (async () => {
+      try {
+        await writeResponse(res, await handler(await createWebRequest(req)));
+      } catch  {
+        await writeResponse(
+          res,
+          Response.json({ error: "Internal Server Error" }, { status: 500 }),
+        );
+      }
+    })();
+  });
 }
 
 function sanitizePublishLog(message: unknown, registryUrl: string) {
@@ -844,118 +925,125 @@ log:
   };
 }
 
-async function proxyToPnpr(
+async function fetchPnpr(
   pnprUrl: string,
   pnprToken: string,
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
-): Promise<number> {
-  const upstream = new URL(req.url ?? "/", pnprUrl);
+  request: Request,
+): Promise<Response> {
+  const requestUrl = new URL(request.url);
+  const upstream = new URL(
+    `${requestUrl.pathname}${requestUrl.search}`,
+    pnprUrl,
+  );
+  const headers = new Headers(request.headers);
+  headers.set("authorization", `Bearer ${pnprToken}`);
+  headers.set("host", upstream.host);
+  headers.delete("content-length");
 
-  return new Promise((resolve) => {
-    const proxyReq = http.request(
-      upstream,
-      {
-        method: req.method,
-        headers: {
-          ...req.headers,
-          authorization: `Bearer ${pnprToken}`,
-          host: upstream.host,
-        },
-      },
-      (proxyRes) => {
-        const statusCode = proxyRes.statusCode ?? 500;
-        res.writeHead(statusCode, proxyRes.headers);
-        void pipeline(proxyRes, res).then(
-          () => resolve(statusCode),
-          () => resolve(statusCode),
-        );
-      },
-    );
-    proxyReq.on("error", (error) => {
-      res.writeHead(502, { "content-type": "application/json" });
-      res.end(JSON.stringify({ error: String(error) }));
-      resolve(502);
+  try {
+    return await fetch(upstream, {
+      body: hasRequestBody(request.headers) ? request.body : undefined,
+      duplex: "half",
+      headers,
+      method: request.method,
     });
-    req.pipe(proxyReq);
-  });
+  } catch {
+    return new Response("Bad Gateway", { status: 502 });
+  }
 }
 
 async function createAuthProxy(
   pnprUrl: string,
   pnprToken: string,
-  authConfig: AuthProxyConfig = {},
+  config: RegistryProxyConfig = {},
 ) {
-  const requests: RegistryRequest[] = [];
+  const requests: RegistryRequestRecord[] = [];
 
-  const server = http.createServer((req, res) => {
-    void (async () => {
-      const url = new URL(req.url ?? "/", "http://registry.test");
+  const server = createWebServer(async (webRequest) => {
+      const url = new URL(webRequest.url);
       const pathname = decodeURIComponent(url.pathname);
       const packageName = getPackageName(pathname);
-      const authRequirement = getAuthRequirement(packageName, authConfig);
-      const request: RegistryRequest = {
-        headers: req.headers,
-        method: req.method ?? "GET",
+      const authRequirement = getAuthRequirement(packageName, config.auth ?? {});
+      const request: RegistryRequestRecord = {
+        headers: Object.fromEntries(webRequest.headers),
+        method: webRequest.method,
         packageName,
         pathname,
-        authorization: firstHeader(req.headers.authorization),
-        otpCode: firstHeader(req.headers["npm-otp"]),
-        forwarded: false,
+        authorization: webRequest.headers.get("authorization") ?? undefined,
+        otpCode: webRequest.headers.get("npm-otp") ?? undefined,
       };
       requests.push(request);
+      await recordRequestBody(webRequest, request);
+
+      const middlewareResponse = await config.middleware?.({
+        pnpr: {
+          fetch(pnprRequest) {
+            return fetchPnpr(pnprUrl, pnprToken, pnprRequest);
+          },
+          seedPackage(packageName, state) {
+            return seedPackage(pnprUrl, pnprToken, packageName, state);
+          },
+        },
+        record: request,
+        request: webRequest,
+      });
+      if (middlewareResponse) {
+        request.statusCode = middlewareResponse.status;
+        return middlewareResponse;
+      }
 
       if (request.method === "PUT" && authRequirement && packageName) {
         if (request.authorization !== `Bearer ${authRequirement.token}`) {
-          await captureBody(request, req);
           request.statusCode = 401;
-          res.writeHead(401, { "content-type": "application/json" });
-          res.end(
-            JSON.stringify({
+          return Response.json(
+            {
               error: "Unauthorized",
               code: "E401",
               reason: "Invalid authentication token.",
-            }),
+            },
+            { status: 401 },
           );
-          return;
         }
 
         if (
           authRequirement.otp &&
           request.otpCode !== authRequirement.otp.code
         ) {
-          await captureBody(request, req);
           request.statusCode = 401;
-          let body: string;
           if (
             authRequirement.otp.webAuth &&
-            firstHeader(req.headers["npm-auth-type"]) === "web"
+            webRequest.headers.get("npm-auth-type") === "web"
           ) {
             const authId = randomUUID();
-            const registryUrl = `http://${req.headers.host}/`;
-            body = JSON.stringify({
-              authUrl: new URL(`-/auth/cli/${authId}`, registryUrl).href,
-              doneUrl: new URL(`-/v1/done?authId=${authId}`, registryUrl).href,
-            });
-          } else {
-            body = JSON.stringify({
+            const registryUrl = `http://${webRequest.headers.get("host")}/`;
+            return Response.json(
+              {
+                authUrl: new URL(`-/auth/cli/${authId}`, registryUrl).href,
+                doneUrl: new URL(`-/v1/done?authId=${authId}`, registryUrl)
+                  .href,
+              },
+              {
+                headers: { "www-authenticate": "OTP" },
+                status: 401,
+              },
+            );
+          }
+          return Response.json(
+            {
               error:
                 "You must provide a one-time pass. Upgrade your client to npm@latest in order to use 2FA.",
-            });
-          }
-          res.writeHead(401, {
-            "content-length": Buffer.byteLength(body),
-            "content-type": "application/json",
-            "www-authenticate": "OTP",
-          });
-          res.end(body);
-          return;
+            },
+            {
+              headers: { "www-authenticate": "OTP" },
+              status: 401,
+            },
+          );
         }
       }
 
-      request.forwarded = true;
-      request.statusCode = await proxyToPnpr(pnprUrl, pnprToken, req, res);
-    })();
+      const response = await fetchPnpr(pnprUrl, pnprToken, webRequest);
+      request.statusCode = response.status;
+      return response;
   });
 
   await new Promise<void>((resolve) => {
@@ -986,6 +1074,7 @@ async function createAuthProxy(
 
 async function createTestRegistry(options?: {
   auth?: AuthProxyConfig;
+  middleware?: RegistryProxyConfig["middleware"];
   packages?: SeedRegistryState;
 }): Promise<TestRegistry> {
   await using stack = new AsyncDisposableStack();
@@ -995,7 +1084,10 @@ async function createTestRegistry(options?: {
     await seedPackage(pnpr.url, pnprToken, packageName, state);
   }
   const proxy = stack.use(
-    await createAuthProxy(pnpr.url, pnprToken, options?.auth),
+    await createAuthProxy(pnpr.url, pnprToken, {
+      auth: options?.auth,
+      middleware: options?.middleware,
+    }),
   );
   const cleanup = stack.move();
 
@@ -1095,9 +1187,97 @@ describe("publish command auth/publish e2e prototype", () => {
       expect(publishRequests).toEqual([
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
-          forwarded: true,
           otpCode: undefined,
           statusCode: 201,
+        }),
+      ]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          latest: "1.0.0",
+        },
+        name: "pkg-a",
+        versions: {
+          "0.0.1": {
+            name: "pkg-a",
+            version: "0.0.1",
+          },
+          "1.0.0": {
+            name: "pkg-a",
+            version: "1.0.0",
+          },
+        },
+      });
+    });
+
+    it("skips already-published version publish errors", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+          async middleware({ pnpr, record, request }) {
+            if (request.method !== "PUT" || record.packageName !== "pkg-a") {
+              return;
+            }
+
+            const body = record.bodyJson;
+            const requestedVersions =
+              body &&
+              typeof body === "object" &&
+              "versions" in body &&
+              body.versions &&
+              typeof body.versions === "object"
+                ? Object.keys(body.versions)
+                : [];
+
+            if (!requestedVersions.includes("1.0.0")) {
+              return pnpr.fetch(request);
+            }
+
+            await pnpr.seedPackage("pkg-a", {
+              versions: ["1.0.0"],
+              tags: { latest: "1.0.0" },
+            });
+            // pnpr currently accepts publishing over an existing version here, while
+            // npm rejects it. Keep this response synthetic to exercise npm's
+            // already-published race semantics.
+            return Response.json(
+              {
+                error:
+                  "You cannot publish over the previously published versions: 1.0.0.",
+                success: false,
+              },
+              { status: 403 },
+            );
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
+
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect(result.exitCode).toBe(0);
+      expect(sanitizePublishLog(result.stdout, registry.url)).not.toContain(
+        "Published pkg-a@1.0.0!",
+      );
+      await expect(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
+      expect(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+          statusCode: 403,
         }),
       ]);
 
@@ -1164,7 +1344,6 @@ describe("publish command auth/publish e2e prototype", () => {
       expect(publishRequests).toEqual([
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
-          forwarded: true,
           otpCode: "654321",
           statusCode: 201,
         }),
@@ -1231,7 +1410,6 @@ describe("publish command auth/publish e2e prototype", () => {
       expect(publishRequests[0]).toEqual(
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
-          forwarded: false,
           headers: expect.objectContaining({
             ...(pm.name !== "yarn 4" && {
               "npm-auth-type": "web",
@@ -1307,7 +1485,6 @@ describe("publish command auth/publish e2e prototype", () => {
       expect(publishRequests[0]).toEqual(
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
-          forwarded: false,
           otpCode: undefined,
           statusCode: 401,
         }),
@@ -1315,7 +1492,6 @@ describe("publish command auth/publish e2e prototype", () => {
       expect(publishRequests.at(-2)).toEqual(
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
-          forwarded: false,
           otpCode: undefined,
           statusCode: 401,
         }),
@@ -1323,7 +1499,6 @@ describe("publish command auth/publish e2e prototype", () => {
       expect(publishRequests.at(-1)).toEqual(
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
-          forwarded: true,
           otpCode: "654321",
           statusCode: 201,
         }),
