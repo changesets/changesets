@@ -36,7 +36,7 @@ type PackageAuthRequirement = {
   token: string;
   otp?: {
     code: string;
-    challenge?: "web";
+    webAuth?: boolean;
   };
 };
 
@@ -926,30 +926,29 @@ async function createAuthProxy(
         ) {
           await captureBody(request, req);
           request.statusCode = 401;
+          let body: string;
+          if (
+            authRequirement.otp.webAuth &&
+            firstHeader(req.headers["npm-auth-type"]) === "web"
+          ) {
+            const authId = randomUUID();
+            const registryUrl = `http://${req.headers.host}/`;
+            body = JSON.stringify({
+              authUrl: new URL(`-/auth/cli/${authId}`, registryUrl).href,
+              doneUrl: new URL(`-/v1/done?authId=${authId}`, registryUrl).href,
+            });
+          } else {
+            body = JSON.stringify({
+              error:
+                "You must provide a one-time pass. Upgrade your client to npm@latest in order to use 2FA.",
+            });
+          }
           res.writeHead(401, {
+            "content-length": Buffer.byteLength(body),
             "content-type": "application/json",
             "www-authenticate": "OTP",
           });
-          if (authRequirement.otp.challenge === "web") {
-            const authId = randomUUID();
-            const registryUrl = `http://${req.headers.host}/`;
-            res.end(
-              JSON.stringify({
-                authUrl: new URL(`-/auth/cli/${authId}`, registryUrl).href,
-                doneUrl: new URL(`-/v1/done?authId=${authId}`, registryUrl)
-                  .href,
-              }),
-            );
-          } else {
-            res.end(
-              JSON.stringify({
-                error: "OTP required",
-                code: "EOTP",
-                reason:
-                  "This operation requires a one-time password from your authenticator.",
-              }),
-            );
-          }
+          res.end(body);
           return;
         }
       }
@@ -1207,7 +1206,7 @@ describe("publish command auth/publish e2e prototype", () => {
             packages: {
               "pkg-a": {
                 token: CLIENT_AUTH_TOKEN,
-                otp: { code: "654321", challenge: "web" },
+                otp: { code: "654321", webAuth: true },
               },
             },
           },
