@@ -153,6 +153,30 @@ export async function getTokenIsRequired() {
 //   queries return empty → no versions list → only-pre detection is not
 //   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
 //   published with preState.tag rather than "latest".
+
+// npm 12 always wraps successful `npm info --json` output in an array.
+// Unwrap it so downstream consumers keep seeing a single manifest, if multiple versions matched, the last entry is
+// the highest one
+function normalizeInfoJson(parsed: any) {
+  if (!Array.isArray(parsed)) {
+    return parsed;
+  }
+  return parsed.at(-1) ?? { error: { code: "E404" } };
+}
+
+// Bare query matched nothing in npm <=11 with empty stdout, npm >=12 with an E404 "No match found for version" error
+function isNoMatchResult(stdout: string): boolean {
+  if (stdout === "") {
+    return true;
+  }
+  const error = jsonParse(stdout)?.error;
+  return (
+    error?.code === "E404" &&
+    typeof error.summary === "string" &&
+    error.summary.startsWith("No match found for version")
+  );
+}
+
 export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestQueue.add(async () => {
     info(`npm info ${packageJson.name}`);
@@ -168,9 +192,9 @@ export function getPackageInfo(packageJson: PackageJSON) {
       "--json",
     ]);
 
-    // Bare query returned nothing — retry with exact version specifier
+    // Bare query matched nothing — retry with exact version specifier
     // to handle prerelease-only packages on registries without auto-`latest`.
-    if (result.stdout.toString() === "") {
+    if (isNoMatchResult(result.stdout.toString())) {
       result = await spawn("npm", [
         "info",
         `${packageJson.name}@${packageJson.version}`,
@@ -189,7 +213,7 @@ export function getPackageInfo(packageJson: PackageJSON) {
         },
       };
     }
-    return jsonParse(result.stdout.toString());
+    return normalizeInfoJson(jsonParse(result.stdout.toString()));
   });
 }
 

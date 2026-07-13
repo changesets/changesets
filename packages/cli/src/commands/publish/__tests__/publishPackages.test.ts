@@ -109,6 +109,109 @@ describe("publishPackages", () => {
     ).toBe(false);
   });
 
+  it("detects already-published versions when npm 12 wraps info output in an array", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    mockSpawnImplementation((cmd, args) => {
+      if (cmd === "npm" && args?.[0] === "info") {
+        return spawnResult(
+          JSON.stringify([
+            {
+              name: "pkg-a",
+              version: "1.0.0",
+              versions: ["1.0.0"],
+            },
+          ])
+        );
+      }
+      return spawnResult("", 1);
+    });
+
+    const result = await publishPackages({
+      packages: (await getPackages(cwd)).packages,
+      access: "public",
+      preState: undefined,
+    });
+
+    expect(result).toEqual([]);
+    expect(
+      mockSpawn.mock.calls.some(
+        ([cmd, args]) => cmd === "npm" && args?.[0] === "publish"
+      )
+    ).toBe(false);
+  });
+
+  it("retries with an exact version when npm 12 reports no match for the bare query", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    mockSpawnImplementation((cmd, args) => {
+      if (cmd === "npm" && args?.[0] === "info") {
+        if (args?.[1] === "pkg-a") {
+          // npm 12 emits an E404 error instead of empty stdout when nothing
+          // matches `latest` (e.g. GitHub Packages without a `latest` dist-tag)
+          return spawnResult(
+            JSON.stringify({
+              error: {
+                code: "E404",
+                summary: "No match found for version latest",
+                detail: "",
+              },
+            }),
+            1
+          );
+        }
+        if (args?.[1] === "pkg-a@1.0.0") {
+          return spawnResult(
+            JSON.stringify([
+              {
+                name: "pkg-a",
+                version: "1.0.0",
+                versions: ["1.0.0"],
+              },
+            ])
+          );
+        }
+      }
+      return spawnResult("", 1);
+    });
+
+    const result = await publishPackages({
+      packages: (await getPackages(cwd)).packages,
+      access: "public",
+      preState: undefined,
+    });
+
+    expect(result).toEqual([]);
+    expect(
+      mockSpawn.mock.calls
+        .filter(([cmd, args]) => cmd === "npm" && args?.[0] === "info")
+        .map(([, args]) => args?.[1])
+    ).toEqual(["pkg-a", "pkg-a@1.0.0"]);
+    expect(
+      mockSpawn.mock.calls.some(
+        ([cmd, args]) => cmd === "npm" && args?.[0] === "publish"
+      )
+    ).toBe(false);
+  });
+
   it("publishes a new prerelease when exact version fallback also 404s", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
