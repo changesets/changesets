@@ -64,7 +64,11 @@ type PmBins = Partial<Record<"npm" | "pnpm" | "yarn", string>>;
 type PmCase = {
   name: string;
   bins: PmBins;
-  testdir: (registry: TestRegistry, fixture?: Fixture) => Promise<string>;
+  gitdir: (
+    registry: TestRegistry,
+    pmBinPath: string,
+    fixture?: Fixture,
+  ) => Promise<string>;
 };
 
 type TarballContentEntry = {
@@ -143,18 +147,20 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
 async function runPublishCli(options: {
   cwd: string;
   env?: NodeJS.ProcessEnv;
+  pmBinPath: string;
   signal?: AbortSignal;
   stdin?: string;
   tty?: boolean;
 }): Promise<ExecResult> {
   const args = [path.join(cliPackageRoot, "src", "index.ts"), "publish"];
+  const env = createPmBinEnv(options.pmBinPath, options.env);
   if (options.tty) {
     return execTty(process.execPath, args, {
       signal: options.signal,
       stdin: options.stdin,
       nodeOptions: {
         cwd: options.cwd,
-        env: options.env,
+        env,
       },
     });
   }
@@ -164,7 +170,7 @@ async function runPublishCli(options: {
     stdin: options.stdin,
     nodeOptions: {
       cwd: options.cwd,
-      env: options.env,
+      env,
     },
   });
 }
@@ -302,8 +308,12 @@ class AbortableAsyncDisposableStack extends AsyncDisposableStack {
   }
 }
 
-function createNpmTestdir(packageManager: string) {
-  return (registry: TestRegistry, fixture: Fixture = {}) =>
+function createNpmGitdir(packageManager: string) {
+  return (
+    registry: TestRegistry,
+    _pmBinPath: string,
+    fixture: Fixture = {},
+  ) =>
     gitdir({
       "package.json": JSON.stringify({
         packageManager,
@@ -326,8 +336,12 @@ function createNpmTestdir(packageManager: string) {
     });
 }
 
-function createPnpmTestdir(packageManager: string) {
-  return (registry: TestRegistry, fixture: Fixture = {}) =>
+function createPnpmGitdir(packageManager: string) {
+  return (
+    registry: TestRegistry,
+    _pmBinPath: string,
+    fixture: Fixture = {},
+  ) =>
     gitdir({
       "package.json": JSON.stringify({
         packageManager,
@@ -343,8 +357,12 @@ function createPnpmTestdir(packageManager: string) {
     });
 }
 
-function createYarnBerryTestdir(packageManager: string) {
-  return async (registry: TestRegistry, fixture: Fixture = {}) => {
+function createYarnBerryGitdir(packageManager: string) {
+  return async (
+    registry: TestRegistry,
+    pmBinPath: string,
+    fixture: Fixture = {},
+  ) => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         packageManager,
@@ -367,6 +385,7 @@ function createYarnBerryTestdir(packageManager: string) {
     await exec("yarn", ["install"], {
       nodeOptions: {
         cwd,
+        env: createPmBinEnv(pmBinPath),
       },
       throwOnError: true,
     });
@@ -450,13 +469,18 @@ async function resolvePackageBin(packageName: string, command: keyof PmBins) {
   return path.join(packageRoot, bin);
 }
 
-async function usePackageManagerBins(signal: AbortSignal, bins: PmBins) {
+function createPmBinEnv(pmBinPath: string, env: NodeJS.ProcessEnv = {}) {
+  return {
+    ...env,
+    PATH: process.env.PATH
+      ? `${pmBinPath}${path.delimiter}${process.env.PATH}`
+      : pmBinPath,
+  };
+}
+
+async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
   await using stack = new AbortableAsyncDisposableStack(signal);
   const root = stack.use(await createTempDir("changesets-pm-bins-"));
-  const originalPath = process.env.PATH;
-  stack.defer(() => {
-    process.env.PATH = originalPath;
-  });
 
   for (const [command, packageName] of Object.entries(bins)) {
     const target = await resolvePackageBin(
@@ -469,13 +493,9 @@ async function usePackageManagerBins(signal: AbortSignal, bins: PmBins) {
     await fs.chmod(shimPath, 0o755);
   }
 
-  signal.throwIfAborted();
-  process.env.PATH = originalPath
-    ? `${root.path}${path.delimiter}${originalPath}`
-    : root.path;
-
   const cleanup = stack.move();
   return {
+    pmBinPath: root.path,
     async [Symbol.asyncDispose]() {
       await cleanup[Symbol.asyncDispose]();
     },
@@ -1010,39 +1030,39 @@ const pmCases = [
   {
     name: "npm 10",
     bins: { npm: "npm-10" },
-    testdir: createNpmTestdir("npm@10.9.8"),
+    gitdir: createNpmGitdir("npm@10.9.8"),
   },
   {
     name: "npm 11",
     bins: { npm: "npm-11" },
-    testdir: createNpmTestdir("npm@11"),
+    gitdir: createNpmGitdir("npm@11"),
   },
   // {
   //   name: "npm 12",
   //   bins: {},
-  //   testdir: createNpmTestdir("npm@12.0.1"),
+  //   gitdir: createNpmGitdir("npm@12.0.1"),
   //   todo: true,
   // },
   {
     name: "pnpm 10 + npm 10",
     bins: { npm: "npm-10", pnpm: "pnpm-10" },
-    testdir: createPnpmTestdir("pnpm@10.0.0"),
+    gitdir: createPnpmGitdir("pnpm@10.0.0"),
   },
   {
     name: "pnpm 11",
     bins: { pnpm: "pnpm-11" },
-    testdir: createPnpmTestdir("pnpm@11.9.0"),
+    gitdir: createPnpmGitdir("pnpm@11.9.0"),
   },
   // {
   //   name: "pnpm 12",
   //   bins: {},
-  //   testdir: createPnpmTestdir("pnpm@12"),
+  //   gitdir: createPnpmGitdir("pnpm@12"),
   //   todo: true,
   // },
   {
     name: "yarn 4",
     bins: { yarn: "yarn-4" },
-    testdir: createYarnBerryTestdir("yarn@4.17.0"),
+    gitdir: createYarnBerryGitdir("yarn@4.17.0"),
   },
 ] as const satisfies ReadonlyArray<PmCase>;
 
@@ -1050,7 +1070,7 @@ describe("publish command auth/publish e2e prototype", () => {
   describe.each(pmCases)("$name", (pm) => {
     it("publishes without otp in non-tty mode", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
-      stack.use(await usePackageManagerBins(signal, pm.bins));
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(
         await createTestRegistry({
           packages: {
@@ -1061,9 +1081,13 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.testdir(registry, pkgAFixture);
+      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
 
-      const result = await runPublishCli({ cwd, signal });
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
       expect(result.exitCode).toBe(0);
 
       const publishRequests = registry.requests.filter(
@@ -1103,7 +1127,7 @@ describe("publish command auth/publish e2e prototype", () => {
         pm.name !== "pnpm 11",
     )("reads initial otp from env in non-tty mode", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
-      stack.use(await usePackageManagerBins(signal, pm.bins));
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(
         await createTestRegistry({
           packages: {
@@ -1122,7 +1146,7 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.testdir(registry, pkgAFixture);
+      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
 
       const result = await runPublishCli({
         cwd,
@@ -1130,6 +1154,7 @@ describe("publish command auth/publish e2e prototype", () => {
           [pm.name.startsWith("pnpm") ? "PNPM_CONFIG_OTP" : "NPM_CONFIG_OTP"]:
             "654321",
         },
+        pmBinPath,
         signal,
       });
       expect(result.exitCode).toBe(0);
@@ -1169,7 +1194,7 @@ describe("publish command auth/publish e2e prototype", () => {
       signal,
     }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
-      stack.use(await usePackageManagerBins(signal, pm.bins));
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(
         await createTestRegistry({
           packages: {
@@ -1188,9 +1213,13 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.testdir(registry, pkgAFixture);
+      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
 
-      const result = await runPublishCli({ cwd, signal });
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toBe("");
       expect(sanitizePublishLog(result.stdout, registry.url)).toMatchSnapshot();
@@ -1239,7 +1268,7 @@ describe("publish command auth/publish e2e prototype", () => {
       signal,
     }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
-      stack.use(await usePackageManagerBins(signal, pm.bins));
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(
         await createTestRegistry({
           packages: {
@@ -1258,10 +1287,11 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.testdir(registry, pkgAFixture);
+      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
 
       const result = await runPublishCli({
         cwd,
+        pmBinPath,
         signal,
         stdin: "654321\n",
         tty: true,
