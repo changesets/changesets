@@ -467,11 +467,10 @@ async function internalPublish(
     publishTool.name,
     [...publishArgs, ...publishFlags],
     {
-      ...(!process.stdin.isTTY &&
-        publishTool.name === "yarn" &&
+      ...(publishTool.name === "yarn" &&
         publishTool.version === "berry" && {
           // Work around Yarn Berry prompting for OTP on stdin instead of reporting
-          // the auth failure non-interactively. Fixed upstream in:
+          // the auth failure in the JSON-capturing child process. Fixed upstream in:
           // https://github.com/yarnpkg/berry/pull/7209
           stdin: "not-otp\n",
         }),

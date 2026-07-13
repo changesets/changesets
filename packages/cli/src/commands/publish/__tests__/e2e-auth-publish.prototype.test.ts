@@ -13,6 +13,7 @@ import { createGzip } from "node:zlib";
 import { defaultConfig } from "@changesets/config";
 import { gitdir, type Fixture } from "@changesets/test-utils";
 import { packTar, type TarSource } from "modern-tar/fs";
+import * as pty from "node-pty";
 import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
 
@@ -69,6 +70,12 @@ type PmCase = {
 type TarballContentEntry = {
   path: string;
   content: string | Uint8Array;
+};
+
+type ExecResult = {
+  exitCode: number | undefined;
+  stderr: string;
+  stdout: string;
 };
 
 const TAR_ENTRY_MODE = 0o644;
@@ -138,19 +145,87 @@ async function runPublishCli(options: {
   env?: NodeJS.ProcessEnv;
   signal?: AbortSignal;
   stdin?: string;
-}) {
-  return exec(
-    process.execPath,
-    [path.join(cliPackageRoot, "src", "index.ts"), "publish"],
-    {
+  tty?: boolean;
+}): Promise<ExecResult> {
+  const args = [path.join(cliPackageRoot, "src", "index.ts"), "publish"];
+  if (options.tty) {
+    return execTty(process.execPath, args, {
       signal: options.signal,
       stdin: options.stdin,
       nodeOptions: {
         cwd: options.cwd,
         env: options.env,
       },
+    });
+  }
+
+  return exec(process.execPath, args, {
+    signal: options.signal,
+    stdin: options.stdin,
+    nodeOptions: {
+      cwd: options.cwd,
+      env: options.env,
     },
-  );
+  });
+}
+
+function execTty(
+  command: string,
+  args: string[],
+  options: {
+    signal?: AbortSignal;
+    stdin?: string;
+    nodeOptions: {
+      cwd: string;
+      env?: NodeJS.ProcessEnv;
+    };
+  },
+): Promise<ExecResult> {
+  return new Promise((resolve, reject) => {
+    if (options.signal?.aborted) {
+      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+      reject(options.signal.reason);
+      return;
+    }
+    let done = false;
+    let output = "";
+    const child = pty.spawn(command, args, {
+      cols: 80,
+      rows: 30,
+      cwd: options.nodeOptions.cwd,
+      env: options.nodeOptions.env,
+    });
+    const data = child.onData((chunk) => {
+      output += chunk;
+    });
+
+    const cleanup = () => {
+      if (done) {
+        return;
+      }
+      done = true;
+      data.dispose();
+      exit.dispose();
+      options.signal?.removeEventListener("abort", abort);
+    };
+
+    const abort = () => {
+      cleanup();
+      child.kill();
+      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+      reject(options.signal?.reason);
+    };
+
+    const exit = child.onExit(({ exitCode }) => {
+      cleanup();
+      resolve({ exitCode, stderr: "", stdout: output });
+    });
+
+    options.signal?.addEventListener("abort", abort, { once: true });
+    if (typeof options.stdin === "string") {
+      child.write(options.stdin.replaceAll("\n", "\r"));
+    }
+  });
 }
 
 async function fetchPackument(registry: TestRegistry, packageName: string) {
@@ -1156,6 +1231,90 @@ describe("publish command auth/publish e2e prototype", () => {
       expect(packument).not.toMatchObject({
         versions: {
           "1.0.0": expect.anything(),
+        },
+      });
+    });
+
+    it("retries interactively after an OTP auth challenge", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      stack.use(await usePackageManagerBins(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+          auth: {
+            packages: {
+              "pkg-a": {
+                token: CLIENT_AUTH_TOKEN,
+                otp: { code: "654321" },
+              },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.testdir(registry, pkgAFixture);
+
+      const result = await runPublishCli({
+        cwd,
+        signal,
+        stdin: "654321\n",
+        tty: true,
+      });
+      expect(result.exitCode).toBe(0);
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      // We end up with 3 requests because the first non-tty attempt fails without OTP,
+      // then the secon interactive attempt fails without OTP, prompts the user for the OTP and then sends the third (but second to its CLI invocation) request with the OTP.
+      // Yarn 4 retries with our fake otp code provided to it in the stdin in the non-tty mode so it has one extra.
+      expect(publishRequests).toHaveLength(pm.name === "yarn 4" ? 4 : 3);
+      expect(publishRequests[0]).toEqual(
+        expect.objectContaining({
+          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+          forwarded: false,
+          otpCode: undefined,
+          statusCode: 401,
+        }),
+      );
+      expect(publishRequests.at(-2)).toEqual(
+        expect.objectContaining({
+          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+          forwarded: false,
+          otpCode: undefined,
+          statusCode: 401,
+        }),
+      );
+      expect(publishRequests.at(-1)).toEqual(
+        expect.objectContaining({
+          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+          forwarded: true,
+          otpCode: "654321",
+          statusCode: 201,
+        }),
+      );
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          latest: "1.0.0",
+        },
+        name: "pkg-a",
+        versions: {
+          "0.0.1": {
+            name: "pkg-a",
+            version: "0.0.1",
+          },
+          "1.0.0": {
+            name: "pkg-a",
+            version: "1.0.0",
+          },
         },
       });
     });

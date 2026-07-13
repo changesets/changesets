@@ -2,6 +2,8 @@ packages:
   - packages/*
   - scripts/*
 
+allowBuilds:
+  node-pty: true
 blockExoticSubdeps: true
 dedupePeers: true
 dedupePeerDependents: true

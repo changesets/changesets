@@ -62,6 +62,7 @@
     "@types/semver": "^7.7.1",
     "human-id": "^4.2.0",
     "modern-tar": "^0.7.6",
+    "node-pty": "^1.0.0",
     "npm-10": "npm:npm@10.9.8",
     "npm-11": "npm:npm@^11.0.0",
     "outdent": "^0.8.0",
