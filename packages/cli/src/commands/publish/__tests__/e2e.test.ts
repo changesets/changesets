@@ -1171,21 +1171,36 @@ async function createTestRegistry(options?: {
   };
 }
 
-const pkgAFixture = {
-  "packages/pkg-a/package.json": JSON.stringify({
-    name: "pkg-a",
-    version: "1.0.0",
-    description: "",
-    files: ["index.js"],
-    license: "MIT",
-    type: "module",
-  }),
-  "packages/pkg-a/index.js": "export default 'pkg-a';\n",
-  ".changeset/config.json": JSON.stringify({
-    ...defaultConfig,
-    access: "public",
-  }),
-};
+function createPkgAFixture(
+  options: { version?: string; pre?: string } = {},
+): Fixture {
+  const fixture: Fixture = {
+    "packages/pkg-a/package.json": JSON.stringify({
+      name: "pkg-a",
+      version: options.version ?? "1.0.0",
+      description: "",
+      files: ["index.js"],
+      license: "MIT",
+      type: "module",
+    }),
+    "packages/pkg-a/index.js": "export default 'pkg-a';\n",
+    ".changeset/config.json": JSON.stringify({
+      ...defaultConfig,
+      access: "public",
+    }),
+  };
+
+  if (options.pre) {
+    fixture[".changeset/pre.json"] = JSON.stringify({
+      changesets: [],
+      initialVersions: {},
+      mode: "pre",
+      tag: options.pre,
+    });
+  }
+
+  return fixture;
+}
 
 const pmCases = [
   {
@@ -1240,7 +1255,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         }),
       );
-      const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
+      const cwd = await pm.gitdir({ pmBinPath, registry }, createPkgAFixture());
 
       const result = await runPublishCli({
         cwd,
@@ -1283,7 +1298,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(await createTestRegistry());
-      const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
+      const cwd = await pm.gitdir({ pmBinPath, registry }, createPkgAFixture());
 
       const result = await runPublishCli({
         cwd,
@@ -1318,7 +1333,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       });
     });
 
-    it("publishes a new pre version of a package without existing latest tag", async ({
+    it("publishes a new pre version of an only-pre package without existing latest tag", async ({
       signal,
     }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
@@ -1335,23 +1350,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
       const cwd = await pm.gitdir(
         { pmBinPath, registry },
-        {
-          ...pkgAFixture,
-          "packages/pkg-a/package.json": JSON.stringify({
-            name: "pkg-a",
-            version: "1.0.0-beta.1",
-            description: "",
-            files: ["index.js"],
-            license: "MIT",
-            type: "module",
-          }),
-          ".changeset/pre.json": JSON.stringify({
-            changesets: [],
-            initialVersions: {},
-            mode: "pre",
-            tag: "beta",
-          }),
-        },
+        createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
       const initialPackument = await fetchPackument(registry, "pkg-a");
@@ -1405,13 +1404,209 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       });
     });
 
+    it("publishes a new pre version of an only-pre package with existing latest tag", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["1.0.0-beta.0"],
+              tags: {
+                beta: "1.0.0-beta.0",
+                latest: "1.0.0-beta.0",
+              },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(
+        { pmBinPath, registry },
+        createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
+      );
+
+      const initialPackument = await fetchPackument(registry, "pkg-a");
+      expect(initialPackument).toMatchObject({
+        "dist-tags": {
+          beta: "1.0.0-beta.0",
+          latest: "1.0.0-beta.0",
+        },
+        name: "pkg-a",
+      });
+
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect(result.exitCode).toBe(0);
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${registry.pnprToken}`,
+          otpCode: undefined,
+          statusCode: 201,
+        }),
+      ]);
+      await expect(tagExists("pkg-a@1.0.0-beta.1", cwd)).resolves.toBe(true);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          beta: "1.0.0-beta.0",
+          latest: "1.0.0-beta.1",
+        },
+        name: "pkg-a",
+        versions: {
+          "1.0.0-beta.0": {
+            name: "pkg-a",
+            version: "1.0.0-beta.0",
+          },
+          "1.0.0-beta.1": {
+            name: "pkg-a",
+            version: "1.0.0-beta.1",
+          },
+        },
+      });
+    });
+
+    it("skips already-published pre version of an only-pre package without existing latest tag", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["1.0.0-beta.1"],
+              tags: { beta: "1.0.0-beta.1" },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(
+        { pmBinPath, registry },
+        createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
+      );
+
+      const initialPackument = await fetchPackument(registry, "pkg-a");
+      expect(initialPackument).not.toMatchObject({
+        "dist-tags": {
+          latest: expect.anything(),
+        },
+      });
+
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(sanitizePublishLog(result.stdout, registry.url)).not.toContain(
+        "Published pkg-a@1.0.0-beta.1!",
+      );
+      await expect(tagExists("pkg-a@1.0.0-beta.1", cwd)).resolves.toBe(false);
+      expect(
+        registry.requests.filter(
+          (request) =>
+            request.method === "PUT" && request.pathname === "/pkg-a",
+        ),
+      ).toEqual([]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          beta: "1.0.0-beta.1",
+        },
+        name: "pkg-a",
+        versions: {
+          "1.0.0-beta.1": {
+            name: "pkg-a",
+            version: "1.0.0-beta.1",
+          },
+        },
+      });
+      expect(packument).not.toMatchObject({
+        "dist-tags": {
+          latest: expect.anything(),
+        },
+      });
+    });
+
+    it("skips already-published pre version of an only-pre package with existing latest tag", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["1.0.0-beta.1"],
+              tags: {
+                beta: "1.0.0-beta.1",
+                latest: "1.0.0-beta.1",
+              },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(
+        { pmBinPath, registry },
+        createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
+      );
+
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(sanitizePublishLog(result.stdout, registry.url)).not.toContain(
+        "Published pkg-a@1.0.0-beta.1!",
+      );
+      await expect(tagExists("pkg-a@1.0.0-beta.1", cwd)).resolves.toBe(false);
+      expect(
+        registry.requests.filter(
+          (request) =>
+            request.method === "PUT" && request.pathname === "/pkg-a",
+        ),
+      ).toEqual([]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          beta: "1.0.0-beta.1",
+          latest: "1.0.0-beta.1",
+        },
+        name: "pkg-a",
+        versions: {
+          "1.0.0-beta.1": {
+            name: "pkg-a",
+            version: "1.0.0-beta.1",
+          },
+        },
+      });
+    });
+
     it.runIf(pm.name !== "yarn 4")(
       "publishes from a pack directory",
       async ({ signal }) => {
         await using stack = new AbortableAsyncDisposableStack(signal);
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
         const registry = stack.use(await createTestRegistry());
-        const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
+        const cwd = await pm.gitdir(
+          { pmBinPath, registry },
+          createPkgAFixture(),
+        );
         const packedDir = await createPackedDir(cwd, [
           { name: "pkg-a", version: "1.0.0" },
         ]);
@@ -1469,7 +1664,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
       const cwd = await pm.gitdir(
         { authToken: BAD_CLIENT_AUTH_TOKEN, pmBinPath, registry },
-        pkgAFixture,
+        createPkgAFixture(),
       );
 
       const result = await runPublishCli({
@@ -1526,7 +1721,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
       const cwd = await pm.gitdir(
         { authToken: null, pmBinPath, registry },
-        pkgAFixture,
+        createPkgAFixture(),
       );
 
       const result = await runPublishCli({
@@ -1587,7 +1782,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         }),
       );
-      const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
+      const cwd = await pm.gitdir({ pmBinPath, registry }, createPkgAFixture());
 
       const result = await runPublishCli({
         cwd,
@@ -1670,7 +1865,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         }),
       );
-      const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
+      const cwd = await pm.gitdir({ pmBinPath, registry }, createPkgAFixture());
 
       const result = await runPublishCli({
         cwd,
@@ -1736,7 +1931,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         );
         const cwd = await pm.gitdir(
           { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
-          pkgAFixture,
+          createPkgAFixture(),
         );
 
         const result = await runPublishCli({
@@ -1808,7 +2003,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
       const cwd = await pm.gitdir(
         { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
-        pkgAFixture,
+        createPkgAFixture(),
       );
 
       const result = await runPublishCli({
@@ -1884,7 +2079,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
       const cwd = await pm.gitdir(
         { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
-        pkgAFixture,
+        createPkgAFixture(),
       );
 
       const result = await runPublishCli({
