@@ -914,7 +914,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       });
       expect.soft(result.exitCode).toBe(0);
       expect.soft(result.stderr).toBe("");
-      expect.soft(result.stdout).toBe("");
+      expect.soft(result.stdout).toMatchSnapshot();
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
