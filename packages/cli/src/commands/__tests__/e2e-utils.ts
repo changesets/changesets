@@ -24,7 +24,7 @@ export type TestRegistryConfig = {
 
 export type PmGitdirContext = {
   pmBinPath: string;
-  registry: TestRegistryConfig;
+  registry?: TestRegistryConfig;
 };
 
 export type PmCase = {
@@ -299,8 +299,8 @@ function createNpmGitdir(packageManager: string) {
         },
       }),
       ".npmrc": [
-        `registry=${registry.url}`,
-        registry.authToken &&
+        registry && `registry=${registry.url}`,
+        registry?.authToken &&
           `//${registry.host}/:_authToken=${registry.authToken}`,
       ].join("\n"),
       ...fixture,
@@ -318,8 +318,8 @@ function createPnpmGitdir(packageManager: string) {
       }),
       "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
       ".npmrc": [
-        `registry=${registry.url}`,
-        registry.authToken &&
+        registry && `registry=${registry.url}`,
+        registry?.authToken &&
           `//${registry.host}/:_authToken=${registry.authToken}`,
       ].join("\n"),
       ...fixture,
@@ -340,8 +340,8 @@ function createYarnBerryGitdir(packageManager: string) {
       }),
       "yarn.lock": "",
       ".yarnrc.yml": [
-        `npmRegistryServer: "${registry.url}"`,
-        registry.authToken && `npmAuthToken: "${registry.authToken}"`,
+        registry && `npmRegistryServer: "${registry.url}"`,
+        registry?.authToken && `npmAuthToken: "${registry.authToken}"`,
         // we want yarn.lock to be updated on yarn install below
         // this ensures that doesn't fail on CI where yarn.lock is often immutable/readonly
         "enableImmutableInstalls: false",
