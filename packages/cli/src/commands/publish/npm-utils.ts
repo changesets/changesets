@@ -69,6 +69,7 @@ async function getYarnVersion(
   packages: Packages,
 ): Promise<YarnPublishTool["version"]> {
   const { stdout } = await exec("yarn", ["--version"], {
+    nodePath: false,
     nodeOptions: {
       cwd: packages.rootDir,
     },
@@ -229,6 +230,7 @@ export function getPackageInfo(
       infoTool,
       [...infoArgs, packageJson.name, ...infoFlags],
       {
+        nodePath: false,
         nodeOptions: { cwd },
       },
     );
@@ -262,7 +264,7 @@ export function getPackageInfo(
     result = await exec(
       infoTool,
       [...infoArgs, `${packageJson.name}@${packageJson.version}`, ...infoFlags],
-      { nodeOptions: { cwd } },
+      { nodePath: false, nodeOptions: { cwd } },
     );
 
     const exactInfo = parseInfoResult(publishTool, result);
@@ -434,6 +436,7 @@ async function internalPublish(
     // it's not easily controllable but ideally no other work should happen until this is done
     // we specifically don't want any other output to interfere with the delegated auth flow
     const child = exec(publishTool.name, [...publishArgs, ...publishFlags], {
+      nodePath: false,
       nodeOptions: {
         env: opts.env,
         cwd: opts.cwd,
@@ -487,6 +490,7 @@ async function internalPublish(
         env: opts.env,
         cwd: opts.cwd,
       },
+      nodePath: false,
     },
   );
 

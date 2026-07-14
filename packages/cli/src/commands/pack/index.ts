@@ -150,6 +150,7 @@ export async function pack(options: PackOptions) {
           publishTool.name,
           args,
           {
+            nodePath: false,
             nodeOptions: { cwd },
           },
         );

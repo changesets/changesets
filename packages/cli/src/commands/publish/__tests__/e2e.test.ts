@@ -220,10 +220,10 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
 }
 
 function sanitizePublishLog(message: unknown, registryUrl: string) {
-  return stripVTControlCharacters(String(message)).replaceAll(
-    new URL(registryUrl).origin,
-    "[registry-url]",
-  );
+  return stripVTControlCharacters(String(message))
+    .replaceAll(new URL(registryUrl).origin, "[registry-url]")
+    .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
+    .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]");
 }
 
 async function fetchPackument(registry: TestRegistry, packageName: string) {

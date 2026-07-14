@@ -273,6 +273,7 @@ export async function runCliCommand(options: {
   }
 
   return exec(process.execPath, args, {
+    nodePath: false,
     signal: options.signal,
     stdin: options.stdin,
     nodeOptions: {
@@ -352,6 +353,7 @@ function createYarnBerryGitdir(packageManager: string) {
       ...fixture,
     });
     await exec("yarn", ["install"], {
+      nodePath: false,
       nodeOptions: {
         cwd,
         env: createPmBinEnv(pmBinPath),
