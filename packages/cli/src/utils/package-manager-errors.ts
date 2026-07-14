@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { getLastJsonObjectFromString } from "./getLastJsonObjectFromString.ts";
 import { streamNdjson } from "./streamNdjson.ts";
 
@@ -48,7 +49,7 @@ export function getYarnBerryReporterError(
         typeof event.displayName === "string" && event.displayName
           ? event.displayName
           : `YN${String(event.name).padStart(4, "0")}`,
-      message: event.data,
+      message: stripVTControlCharacters(event.data),
     };
     // this is YN0000 "summary" printed at the end, just skip it at all times
     if (error.message.startsWith("Failed with errors")) {

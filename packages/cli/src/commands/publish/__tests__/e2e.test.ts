@@ -897,55 +897,50 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       });
     });
 
-    // eslint-disable-next-line vitest/no-focused-tests
-    it.runIf(pm.name === "yarn 4").only(
-      "publishes a first version of a package",
-      async ({ signal }) => {
-        await using stack = new AbortableAsyncDisposableStack(signal);
-        const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
-        const registry = stack.use(await createTestRegistry());
-        const cwd = await pm.gitdir(
-          createPmContext(registry, pmBinPath),
-          createPkgAFixture(),
-        );
+    it("publishes a first version of a package", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(await createTestRegistry());
+      const cwd = await pm.gitdir(
+        createPmContext(registry, pmBinPath),
+        createPkgAFixture(),
+      );
 
-        const result = await runCliCommand({
-          command: "publish",
-          cwd,
-          pmBinPath,
-          signal,
-        });
-        expect.soft(result.exitCode).toBe(0);
-        expect.soft(result.stderr).toBe("");
-        expect.soft(result.stdout).toBe("");
+      const result = await runCliCommand({
+        command: "publish",
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect.soft(result.exitCode).toBe(0);
+      expect.soft(result.stderr).toBe("");
+      expect.soft(result.stdout).toBe("");
 
-        const publishRequests = registry.requests.filter(
-          (request) =>
-            request.method === "PUT" && request.pathname === "/pkg-a",
-        );
-        expect.soft(publishRequests).toEqual([
-          expect.objectContaining({
-            authorization: `Bearer ${registry.pnprToken}`,
-            otpCode: undefined,
-            statusCode: 201,
-          }),
-        ]);
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect.soft(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${registry.pnprToken}`,
+          otpCode: undefined,
+          statusCode: 201,
+        }),
+      ]);
 
-        const packument = await fetchPackument(registry, "pkg-a");
-        expect.soft(packument).toMatchObject({
-          "dist-tags": {
-            latest: "1.0.0",
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect.soft(packument).toMatchObject({
+        "dist-tags": {
+          latest: "1.0.0",
+        },
+        name: "pkg-a",
+        versions: {
+          "1.0.0": {
+            name: "pkg-a",
+            version: "1.0.0",
           },
-          name: "pkg-a",
-          versions: {
-            "1.0.0": {
-              name: "pkg-a",
-              version: "1.0.0",
-            },
-          },
-        });
-      },
-    );
+        },
+      });
+    });
 
     it("publishes a new pre version of an only-pre package without existing latest tag", async ({
       signal,

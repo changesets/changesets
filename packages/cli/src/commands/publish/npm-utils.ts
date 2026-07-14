@@ -12,7 +12,6 @@ import {
 import { streamNdjson } from "../../utils/streamNdjson.ts";
 import type { AuthState } from "../../utils/types.ts";
 import type { PublishReleaseEntry } from "../publish-plan/getPublishPlan.ts";
-import { stripVTControlCharacters } from "node:util";
 
 interface PublishOptions {
   /** The publish command argument, the path to the `publishConfig.directory` or tarball */
@@ -301,7 +300,7 @@ export async function infoAllow404(
     (publishTool.name === "yarn" &&
       publishTool.version === "berry" &&
       pkgInfo.error?.code === "YN0035" &&
-      stripVTControlCharacters(pkgInfo.error.message).includes("Response Code: 404"))
+      pkgInfo.error.message.includes("Response Code: 404"))
   ) {
     log.warn(
       `Received 404 for ${c.cyan(
