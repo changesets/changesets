@@ -63,11 +63,12 @@
     "human-id": "^4.2.0",
     "modern-tar": "^0.7.6",
     "node-pty": "^1.0.0",
-    "npm-10": "npm:npm@10.9.8",
+    "npm-10": "npm:npm@^10.9.8",
     "npm-11": "npm:npm@^11.0.0",
+    "npm-12": "npm:npm@^12.0.1",
     "outdent": "^0.8.0",
-    "pnpm-10": "npm:pnpm@10.0.0",
-    "pnpm-11": "npm:pnpm@11.13.0",
+    "pnpm-10": "npm:pnpm@^10.34.5",
+    "pnpm-11": "npm:pnpm@^11.13.0",
     "yarn-4": "npm:@yarnpkg/cli-dist@^4.5.2"
   },
   "engines": {

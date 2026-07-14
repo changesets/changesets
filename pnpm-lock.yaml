@@ -242,19 +242,22 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       npm-10:
-        specifier: npm:npm@10.9.8
+        specifier: npm:npm@^10.9.8
         version: npm@10.9.8
       npm-11:
         specifier: npm:npm@^11.0.0
         version: npm@11.18.0
+      npm-12:
+        specifier: npm:npm@^12.0.1
+        version: npm@12.0.1
       outdent:
         specifier: ^0.8.0
         version: 0.8.0
       pnpm-10:
-        specifier: npm:pnpm@10.0.0
-        version: pnpm@10.0.0
+        specifier: npm:pnpm@^10.34.5
+        version: pnpm@10.34.5
       pnpm-11:
-        specifier: npm:pnpm@11.13.0
+        specifier: npm:pnpm@^11.13.0
         version: pnpm@11.13.0
       yarn-4:
         specifier: npm:@yarnpkg/cli-dist@^4.5.2
@@ -1833,6 +1836,80 @@ packages:
       - validate-npm-package-name
       - which
 
+  npm@12.0.1:
+    resolution: {integrity: sha512-L5T9i/YAQWQWqTS/xZxJkei/9zcu99hCeE4qi41IyBVV7mRQad3qc2JfuOktwmH+qwGI/V2rbCL+/UYxb1+RQA==}
+    engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
+    hasBin: true
+    bundledDependencies:
+      - '@isaacs/string-locale-compare'
+      - '@npmcli/arborist'
+      - '@npmcli/config'
+      - '@npmcli/fs'
+      - '@npmcli/git'
+      - '@npmcli/map-workspaces'
+      - '@npmcli/metavuln-calculator'
+      - '@npmcli/package-json'
+      - '@npmcli/promise-spawn'
+      - '@npmcli/redact'
+      - '@npmcli/run-script'
+      - '@sigstore/tuf'
+      - abbrev
+      - archy
+      - bin-links
+      - cacache
+      - chalk
+      - ci-info
+      - diff
+      - fastest-levenshtein
+      - fs-minipass
+      - glob
+      - graceful-fs
+      - hosted-git-info
+      - ini
+      - init-package-json
+      - is-cidr
+      - json-parse-even-better-errors
+      - libnpmaccess
+      - libnpmdiff
+      - libnpmexec
+      - libnpmfund
+      - libnpmorg
+      - libnpmpack
+      - libnpmpublish
+      - libnpmsearch
+      - libnpmteam
+      - libnpmversion
+      - make-fetch-happen
+      - minimatch
+      - minipass
+      - minipass-pipeline
+      - ms
+      - node-gyp
+      - nopt
+      - npm-audit-report
+      - npm-install-checks
+      - npm-package-arg
+      - npm-pick-manifest
+      - npm-profile
+      - npm-registry-fetch
+      - npm-user-validate
+      - p-map
+      - pacote
+      - parse-conflict-json
+      - proc-log
+      - qrcode-terminal
+      - read
+      - semver
+      - spdx-expression-parse
+      - ssri
+      - supports-color
+      - tar
+      - text-table
+      - tiny-relative-date
+      - treeverse
+      - validate-npm-package-name
+      - which
+
   obug@2.1.3:
     resolution: {integrity: sha512-9miFgM2OFba7hB+pRgvtV84pYTBaoTHohvmIgiRt6dRIzbwEOIaNaP+dIlGs2fNFoB0SeISs0Jz5WFVRid6Xyg==}
     engines: {node: '>=12.20.0'}
@@ -1910,8 +1987,8 @@ packages:
     resolution: {integrity: sha512-u9mdErTewKSMsr+ceCt8VcNuNP0ro5AXiPXhUVApuEyqr2Zlvt+DdCFBcm+yGWN8mhOdZJ27meIDbnoZgfzpOw==}
     hasBin: true
 
-  pnpm@10.0.0:
-    resolution: {integrity: sha512-uP71SUvT/ky9Ttq9B0XfLuW+PksLiwj6ZDqj5MZwLMwPANaPqKjJhYpzWgAySFpEmQ7SgQUmyHXkFvABsX3xKw==}
+  pnpm@10.34.5:
+    resolution: {integrity: sha512-pO4F8vc2WCVb1qiYWcBlpFwopX2u+uLIk6Fo7itzFow3uR6D5X6mdlStA/AwMXRkMOi84442LgQmBfuKvIAZLg==}
     engines: {node: '>=18.12'}
     hasBin: true
 
@@ -3338,6 +3415,8 @@ snapshots:
 
   npm@11.18.0: {}
 
+  npm@12.0.1: {}
+
   obug@2.1.3: {}
 
   onetime@7.0.0:
@@ -3416,7 +3495,7 @@ snapshots:
 
   pkg-pr-new@0.0.75: {}
 
-  pnpm@10.0.0: {}
+  pnpm@10.34.5: {}
 
   pnpm@11.13.0: {}
 

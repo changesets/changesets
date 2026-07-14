@@ -114,6 +114,63 @@ pkg-a@1.0.0
 "
 `;
 
+exports[`Publish command e2e > 'npm 12' > surfaces publish failures for bad credentials 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: E401
+401 Unauthorized - PUT [registry-url]/pkg-a
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`Publish command e2e > 'npm 12' > surfaces publish failures when not logged in 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: ENEEDAUTH
+This command requires you to be logged in to [registry-url]/
+You need to authorize this machine using \`npm adduser\`
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`Publish command e2e > 'npm 12' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: EOTP
+This operation requires a one-time password.
+Open this URL in your browser to authenticate:
+  [registry-url]/-/auth/cli/***
+
+After authenticating, your token can be retrieved from:
+  [registry-url]/-/v1/done?authId=***
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v3.0.0-next.8
 

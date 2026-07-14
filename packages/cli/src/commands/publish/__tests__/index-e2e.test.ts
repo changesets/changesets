@@ -1140,16 +1140,15 @@ const pmCases = [
     bins: { npm: "npm-11" },
     gitdir: createNpmGitdir("npm@11"),
   },
-  // {
-  //   name: "npm 12",
-  //   bins: {},
-  //   gitdir: createNpmGitdir("npm@12.0.1"),
-  //   todo: true,
-  // },
+  {
+    name: "npm 12",
+    bins: { npm: "npm-12" },
+    gitdir: createNpmGitdir("npm@12.0.1"),
+  },
   {
     name: "pnpm 10 + npm 10",
     bins: { npm: "npm-10", pnpm: "pnpm-10" },
-    gitdir: createPnpmGitdir("pnpm@10.0.0"),
+    gitdir: createPnpmGitdir("pnpm@10.34.5"),
   },
   {
     name: "pnpm 11",
@@ -1160,7 +1159,6 @@ const pmCases = [
   //   name: "pnpm 12",
   //   bins: {},
   //   gitdir: createPnpmGitdir("pnpm@12"),
-  //   todo: true,
   // },
   {
     name: "yarn 4",

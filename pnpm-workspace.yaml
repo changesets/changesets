@@ -10,7 +10,11 @@ dedupePeerDependents: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - pnpm@11.13.0
+  - npm@12.0.1
+  - pnpm@10.34.5
 overrides:
   rolldown: 1.0.3
 shellEmulator: true
 trustPolicy: no-downgrade
+trustPolicyExclude:
+  - pnpm@10.34.5
