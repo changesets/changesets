@@ -909,8 +909,8 @@ registries:
     packages:
       "**":
         access: $all
-        publish: $all
-        unpublish: $all
+        publish: $authenticated
+        unpublish: $authenticated
   main:
     type: router
     sources: [local]
