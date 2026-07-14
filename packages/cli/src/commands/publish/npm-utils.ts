@@ -365,6 +365,10 @@ function isDuplicatePublishError(publishError: {
 }): boolean {
   return (
     (publishError.code === "E403" ||
+      // this one comes from pnpm 12 and likely should already be reported by pnpm 11 but it seems to be buggy:
+      // - it's kinda meant to be thrown here: https://github.com/pnpm/pnpm/blob/6dcfadd5ae3aed1cb9dd090c4772b7843409df7b/pnpm11/releasing/commands/src/publish/publishPackedPkg.ts#L72-L85
+      // - but that only kicks in on `!response.ok` but pnpm 11 reuses `libnpmpublish`: https://github.com/pnpm/pnpm/blob/6dcfadd5ae3aed1cb9dd090c4772b7843409df7b/pnpm11/releasing/commands/src/publish/utils/shared-context.ts#L23
+      // - and that calls into `npm-registry-fetch` which ends up converting 403 to *thrown* `HttpErrorGeneral`: https://github.com/npm/npm-registry-fetch/blob/6b4159a2519ce5aab26cc4dd8d4596a0b47781d2/lib/check-response.js#L103-L105
       publishError.code === "ERR_PNPM_FAILED_TO_PUBLISH" ||
       publishError.code === "YN0035") &&
     isAlreadyPublishedError(publishError.message)
