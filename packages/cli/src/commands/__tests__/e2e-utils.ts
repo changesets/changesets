@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { defaultConfig } from "@changesets/config";
 import { gitdir, type Fixture } from "@changesets/test-utils";
-import * as pty from "node-pty";
+import * as pty from "@lydell/node-pty";
 import { exec } from "tinyexec";
 
 export const cliPackageRoot = path.resolve(import.meta.dirname, "../../..");

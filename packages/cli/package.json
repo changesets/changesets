@@ -56,11 +56,11 @@
   "devDependencies": {
     "@changesets/color": "workspace:^",
     "@changesets/test-utils": "workspace:*",
+    "@lydell/node-pty": "1.2.0-beta.12",
     "@pnpm/pnpr": "0.0.0-26070301",
     "@types/semver": "^7.7.1",
     "human-id": "^4.2.0",
     "modern-tar": "^0.7.6",
-    "node-pty": "^1.0.0",
     "npm-10": "npm:npm@^10.9.8",
     "npm-11": "npm:npm@^11.0.0",
     "npm-12": "npm:npm@^12.0.1",
