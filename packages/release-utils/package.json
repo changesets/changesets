@@ -7,6 +7,9 @@
     "url": "git+https://github.com/changesets/changesets.git",
     "directory": "packages/release-utils"
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",

@@ -21,9 +21,7 @@
   "files": [
     "default-files",
     "dist",
-    "bin.js",
-    "changelog",
-    "commit"
+    "bin.js"
   ],
   "type": "module",
   "exports": {
