@@ -1487,6 +1487,54 @@ describe("Publish command e2e", () => {
       });
     });
 
+    it("does not publish an already-published version", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["1.0.0"],
+              tags: { latest: "1.0.0" },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
+
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(sanitizePublishLog(result.stdout, registry.url)).not.toContain(
+        "Published pkg-a@1.0.0!",
+      );
+      await expect(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
+      expect(
+        registry.requests.filter(
+          (request) =>
+            request.method === "PUT" && request.pathname === "/pkg-a",
+        ),
+      ).toEqual([]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          latest: "1.0.0",
+        },
+        name: "pkg-a",
+        versions: {
+          "1.0.0": {
+            name: "pkg-a",
+            version: "1.0.0",
+          },
+        },
+      });
+    });
+
     it("skips already-published version publish errors", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
