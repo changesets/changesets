@@ -98,6 +98,11 @@ type TarballContentEntry = {
   content: string | Uint8Array;
 };
 
+type PackedPackage = {
+  name: string;
+  version: string;
+};
+
 type ExecResult = {
   exitCode: number | undefined;
   stderr: string;
@@ -239,13 +244,18 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
 
 async function runPublishCli(options: {
   cwd: string;
+  args?: string[];
   env?: NodeJS.ProcessEnv;
   pmBinPath: string;
   signal?: AbortSignal;
   stdin?: string;
   tty?: boolean;
 }): Promise<ExecResult> {
-  const args = [path.join(cliPackageRoot, "src", "index.ts"), "publish"];
+  const args = [
+    path.join(cliPackageRoot, "src", "index.ts"),
+    "publish",
+    ...(options.args ?? []),
+  ];
   const env = createPmBinEnv(options.pmBinPath, options.env);
   if (options.tty) {
     return execTty(process.execPath, args, {
@@ -647,6 +657,54 @@ async function packTarball(entries: TarballContentEntry[]) {
   }
 
   return Buffer.concat(chunks);
+}
+
+async function createPackedDir(cwd: string, packages: PackedPackage[]) {
+  const packedDir = path.join(cwd, ".packed");
+  const packagesDir = path.join(packedDir, "packages");
+  await fs.mkdir(packagesDir, { recursive: true });
+  const plan = [];
+
+  for (const pkg of packages) {
+    const manifest = {
+      name: pkg.name,
+      version: pkg.version,
+      description: "",
+      files: ["index.js"],
+      license: "MIT",
+      type: "module",
+      changesetsPackedManifest: true,
+    };
+    const tarball = await packTarball([
+      {
+        path: "package/package.json",
+        content: `${JSON.stringify(manifest, undefined, 2)}\n`,
+      },
+      { path: "package/index.js", content: `export default '${pkg.name}';\n` },
+    ]);
+    const filename = getPackageTarballFilename(pkg.name, pkg.version);
+    await fs.writeFile(path.join(packagesDir, filename), tarball);
+    plan.push({
+      kind: "publish",
+      name: pkg.name,
+      version: pkg.version,
+      access: "public",
+      tag: "latest",
+      tarball: {
+        path: `packages/${filename}`,
+        integrity: `sha256-${createHash("sha256").update(tarball).digest("base64")}`,
+      },
+    });
+  }
+
+  await fs.writeFile(
+    path.join(packedDir, "publish-plan.json"),
+    JSON.stringify({
+      version: 1,
+      plan: [plan],
+    }),
+  );
+  return packedDir;
 }
 
 async function publishSeedPackage(
@@ -1259,6 +1317,55 @@ describe("Publish command e2e", () => {
         },
       });
     });
+
+    it.runIf(pm.name !== "yarn 4")(
+      "publishes from a pack directory",
+      async ({ signal }) => {
+        await using stack = new AbortableAsyncDisposableStack(signal);
+        const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        const registry = stack.use(await createTestRegistry());
+        const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
+        const packedDir = await createPackedDir(cwd, [
+          { name: "pkg-a", version: "1.0.0" },
+        ]);
+
+        const result = await runPublishCli({
+          args: ["--from-pack-dir", packedDir],
+          cwd,
+          pmBinPath,
+          signal,
+        });
+        expect(result.exitCode).toBe(0);
+
+        const publishRequests = registry.requests.filter(
+          (request) =>
+            request.method === "PUT" && request.pathname === "/pkg-a",
+        );
+        expect(publishRequests).toEqual([
+          expect.objectContaining({
+            authorization: `Bearer ${registry.pnprToken}`,
+            otpCode: undefined,
+            statusCode: 201,
+          }),
+        ]);
+
+        await expect(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(true);
+        const packument = await fetchPackument(registry, "pkg-a");
+        expect(packument).toMatchObject({
+          "dist-tags": {
+            latest: "1.0.0",
+          },
+          name: "pkg-a",
+          versions: {
+            "1.0.0": {
+              name: "pkg-a",
+              version: "1.0.0",
+              changesetsPackedManifest: true,
+            },
+          },
+        });
+      },
+    );
 
     it("surfaces publish failures for bad credentials", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
