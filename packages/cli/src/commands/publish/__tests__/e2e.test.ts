@@ -1225,7 +1225,7 @@ const pmCases = [
   },
 ] as const satisfies ReadonlyArray<PmCase>;
 
-describe("Publish command e2e", () => {
+describe("Publish command e2e", { tags: ["slow"] }, () => {
   describe.each(pmCases)("$name", (pm) => {
     it("publishes a new version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
@@ -1313,6 +1313,93 @@ describe("Publish command e2e", () => {
           "1.0.0": {
             name: "pkg-a",
             version: "1.0.0",
+          },
+        },
+      });
+    });
+
+    it("publishes a new pre version of a package without existing latest tag", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["1.0.0-beta.0"],
+              tags: { beta: "1.0.0-beta.0" },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(
+        { pmBinPath, registry },
+        {
+          ...pkgAFixture,
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0-beta.1",
+            description: "",
+            files: ["index.js"],
+            license: "MIT",
+            type: "module",
+          }),
+          ".changeset/pre.json": JSON.stringify({
+            changesets: [],
+            initialVersions: {},
+            mode: "pre",
+            tag: "beta",
+          }),
+        },
+      );
+
+      const initialPackument = await fetchPackument(registry, "pkg-a");
+      expect(initialPackument).toMatchObject({
+        "dist-tags": {
+          beta: "1.0.0-beta.0",
+        },
+        name: "pkg-a",
+      });
+      expect(initialPackument).not.toMatchObject({
+        "dist-tags": {
+          latest: expect.anything(),
+        },
+      });
+
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect(result.exitCode).toBe(0);
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${registry.pnprToken}`,
+          otpCode: undefined,
+          statusCode: 201,
+        }),
+      ]);
+      await expect(tagExists("pkg-a@1.0.0-beta.1", cwd)).resolves.toBe(true);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          beta: "1.0.0-beta.1",
+        },
+        name: "pkg-a",
+        versions: {
+          "1.0.0-beta.0": {
+            name: "pkg-a",
+            version: "1.0.0-beta.0",
+          },
+          "1.0.0-beta.1": {
+            name: "pkg-a",
+            version: "1.0.0-beta.1",
           },
         },
       });
