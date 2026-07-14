@@ -121,6 +121,9 @@ export async function getUnpublishedPackages(
           if (
             preState != null &&
             response.pkgInfo.versions &&
+            // non-npm registries often don't auto-assign latest and when using those we don't have to care about only-pre case
+            // when the latest tag is not auto-assigned we can simply use the configured pre tag
+            response.pkgInfo["dist-tags"].latest &&
             response.pkgInfo.versions.every(
               (version: string) =>
                 semverParse(version)!.prerelease[0] === preState.tag,

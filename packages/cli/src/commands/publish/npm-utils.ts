@@ -234,6 +234,11 @@ export function getPackageInfo(
     );
 
     const bareInfo = parseInfoResult(publishTool, result);
+    // It's worth noting that Yarn Berry always returns nice `bareInfo` output, even if the package doesn't have a `latest` dist-tag.
+    // And it does return a `fallbackVersion` even when requesting an exact version that doesn't yet exist:
+    // https://github.com/yarnpkg/berry/blob/0a230c14e71247576f6b51fa811ae08edb6608aa/packages/plugin-npm-cli/sources/commands/npm/info.ts#L124
+    //
+    // The second bit isn't particularly important for us though as we don't have to request `exactInfo` in its case anyway.
     if (
       bareInfo &&
       !(
