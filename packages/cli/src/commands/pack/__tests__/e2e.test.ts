@@ -59,18 +59,18 @@ describe("Pack command e2e", { tags: ["slow"] }, () => {
         signal,
       });
 
-      expect(result.exitCode).toBe(0);
-      expect(result.stderr).toBe("");
-      expect(sanitizePackLog(result.stdout)).toMatchSnapshot();
+      expect.soft(result.exitCode).toBe(0);
+      expect.soft(result.stderr).toBe("");
+      expect.soft(sanitizePackLog(result.stdout)).toMatchSnapshot();
       const tarball = await fs.stat(
         path.join(cwd, ".packed/packages/pkg-a-1.0.0.tgz"),
       );
-      expect(tarball.size).toBeGreaterThan(0);
+      expect.soft(tarball.size).toBeGreaterThan(0);
 
       const packedPlan = JSON.parse(
         await fs.readFile(path.join(cwd, ".packed/publish-plan.json"), "utf8"),
       );
-      expect(packedPlan).toMatchObject({
+      expect.soft(packedPlan).toMatchObject({
         plan: [
           [
             {
@@ -139,12 +139,12 @@ describe("Pack command e2e", { tags: ["slow"] }, () => {
         signal,
       });
 
-      expect(result.exitCode).toBe(1);
-      expect(result.stderr).toBe("");
-      expect(sanitizePackLog(result.stdout)).toMatchSnapshot();
-      await expect(
-        fs.access(path.join(cwd, ".packed/publish-plan.json")),
-      ).rejects.toThrow();
+      expect.soft(result.exitCode).toBe(1);
+      expect.soft(result.stderr).toBe("");
+      expect.soft(sanitizePackLog(result.stdout)).toMatchSnapshot();
+      await expect
+        .soft(fs.access(path.join(cwd, ".packed/publish-plan.json")))
+        .rejects.toThrow();
     });
   });
 });

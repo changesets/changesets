@@ -8,6 +8,15 @@ import { exec } from "tinyexec";
 import { AsyncDisposableStack } from "../../ponyfills/async-disposable-stack.ts";
 
 export const cliPackageRoot = path.resolve(import.meta.dirname, "../../..");
+const oxcRegister = path.resolve(
+  cliPackageRoot,
+  "..",
+  "..",
+  "node_modules",
+  "@oxc-node",
+  "core",
+  "register.mjs",
+);
 
 export type ExecResult = {
   exitCode: number | undefined;
@@ -261,6 +270,9 @@ export async function runCliCommand(options: {
     options.command,
     ...(options.args ?? []),
   ];
+  if (!globalThis.AsyncDisposableStack) {
+    args.unshift("--import", oxcRegister);
+  }
   const env = createPmBinEnv(options.pmBinPath, options.env);
   if (options.tty) {
     return execTty(process.execPath, args, {

@@ -234,7 +234,7 @@ async function fetchPackument(registry: TestRegistry, packageName: string) {
       signal: AbortSignal.timeout(5_000),
     },
   );
-  expect(response.status).toBe(200);
+  expect.soft(response.status).toBe(200);
   return response.json();
 }
 
@@ -865,12 +865,12 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         pmBinPath,
         signal,
       });
-      expect(result.exitCode).toBe(0);
+      expect.soft(result.exitCode).toBe(0);
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
-      expect(publishRequests).toEqual([
+      expect.soft(publishRequests).toEqual([
         expect.objectContaining({
           authorization: `Bearer ${registry.pnprToken}`,
           otpCode: undefined,
@@ -879,7 +879,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       ]);
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           latest: "1.0.0",
         },
@@ -912,12 +912,12 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         pmBinPath,
         signal,
       });
-      expect(result.exitCode).toBe(0);
+      expect.soft(result.exitCode).toBe(0);
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
-      expect(publishRequests).toEqual([
+      expect.soft(publishRequests).toEqual([
         expect.objectContaining({
           authorization: `Bearer ${registry.pnprToken}`,
           otpCode: undefined,
@@ -926,7 +926,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       ]);
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           latest: "1.0.0",
         },
@@ -961,13 +961,13 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
 
       const initialPackument = await fetchPackument(registry, "pkg-a");
-      expect(initialPackument).toMatchObject({
+      expect.soft(initialPackument).toMatchObject({
         "dist-tags": {
           beta: "1.0.0-beta.0",
         },
         name: "pkg-a",
       });
-      expect(initialPackument).not.toMatchObject({
+      expect.soft(initialPackument).not.toMatchObject({
         "dist-tags": {
           latest: expect.anything(),
         },
@@ -979,22 +979,24 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         pmBinPath,
         signal,
       });
-      expect(result.exitCode).toBe(0);
+      expect.soft(result.exitCode).toBe(0);
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
-      expect(publishRequests).toEqual([
+      expect.soft(publishRequests).toEqual([
         expect.objectContaining({
           authorization: `Bearer ${registry.pnprToken}`,
           otpCode: undefined,
           statusCode: 201,
         }),
       ]);
-      await expect(tagExists("pkg-a@1.0.0-beta.1", cwd)).resolves.toBe(true);
+      await expect
+        .soft(tagExists("pkg-a@1.0.0-beta.1", cwd))
+        .resolves.toBe(true);
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           beta: "1.0.0-beta.1",
         },
@@ -1036,7 +1038,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
 
       const initialPackument = await fetchPackument(registry, "pkg-a");
-      expect(initialPackument).toMatchObject({
+      expect.soft(initialPackument).toMatchObject({
         "dist-tags": {
           beta: "1.0.0-beta.0",
           latest: "1.0.0-beta.0",
@@ -1050,22 +1052,24 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         pmBinPath,
         signal,
       });
-      expect(result.exitCode).toBe(0);
+      expect.soft(result.exitCode).toBe(0);
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
-      expect(publishRequests).toEqual([
+      expect.soft(publishRequests).toEqual([
         expect.objectContaining({
           authorization: `Bearer ${registry.pnprToken}`,
           otpCode: undefined,
           statusCode: 201,
         }),
       ]);
-      await expect(tagExists("pkg-a@1.0.0-beta.1", cwd)).resolves.toBe(true);
+      await expect
+        .soft(tagExists("pkg-a@1.0.0-beta.1", cwd))
+        .resolves.toBe(true);
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           beta: "1.0.0-beta.0",
           latest: "1.0.0-beta.1",
@@ -1105,7 +1109,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
 
       const initialPackument = await fetchPackument(registry, "pkg-a");
-      expect(initialPackument).not.toMatchObject({
+      expect.soft(initialPackument).not.toMatchObject({
         "dist-tags": {
           latest: expect.anything(),
         },
@@ -1118,20 +1122,24 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         signal,
       });
 
-      expect(result.exitCode).toBe(0);
-      expect(sanitizePublishLog(result.stdout, registry.url)).not.toContain(
-        "Published pkg-a@1.0.0-beta.1!",
-      );
-      await expect(tagExists("pkg-a@1.0.0-beta.1", cwd)).resolves.toBe(false);
-      expect(
-        registry.requests.filter(
-          (request) =>
-            request.method === "PUT" && request.pathname === "/pkg-a",
-        ),
-      ).toEqual([]);
+      expect.soft(result.exitCode).toBe(0);
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .not.toContain("Published pkg-a@1.0.0-beta.1!");
+      await expect
+        .soft(tagExists("pkg-a@1.0.0-beta.1", cwd))
+        .resolves.toBe(false);
+      expect
+        .soft(
+          registry.requests.filter(
+            (request) =>
+              request.method === "PUT" && request.pathname === "/pkg-a",
+          ),
+        )
+        .toEqual([]);
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           beta: "1.0.0-beta.1",
         },
@@ -1143,7 +1151,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         },
       });
-      expect(packument).not.toMatchObject({
+      expect.soft(packument).not.toMatchObject({
         "dist-tags": {
           latest: expect.anything(),
         },
@@ -1180,20 +1188,24 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         signal,
       });
 
-      expect(result.exitCode).toBe(0);
-      expect(sanitizePublishLog(result.stdout, registry.url)).not.toContain(
-        "Published pkg-a@1.0.0-beta.1!",
-      );
-      await expect(tagExists("pkg-a@1.0.0-beta.1", cwd)).resolves.toBe(false);
-      expect(
-        registry.requests.filter(
-          (request) =>
-            request.method === "PUT" && request.pathname === "/pkg-a",
-        ),
-      ).toEqual([]);
+      expect.soft(result.exitCode).toBe(0);
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .not.toContain("Published pkg-a@1.0.0-beta.1!");
+      await expect
+        .soft(tagExists("pkg-a@1.0.0-beta.1", cwd))
+        .resolves.toBe(false);
+      expect
+        .soft(
+          registry.requests.filter(
+            (request) =>
+              request.method === "PUT" && request.pathname === "/pkg-a",
+          ),
+        )
+        .toEqual([]);
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           beta: "1.0.0-beta.1",
           latest: "1.0.0-beta.1",
@@ -1229,13 +1241,13 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           pmBinPath,
           signal,
         });
-        expect(result.exitCode).toBe(0);
+        expect.soft(result.exitCode).toBe(0);
 
         const publishRequests = registry.requests.filter(
           (request) =>
             request.method === "PUT" && request.pathname === "/pkg-a",
         );
-        expect(publishRequests).toEqual([
+        expect.soft(publishRequests).toEqual([
           expect.objectContaining({
             authorization: `Bearer ${registry.pnprToken}`,
             otpCode: undefined,
@@ -1243,9 +1255,9 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           }),
         ]);
 
-        await expect(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(true);
+        await expect.soft(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(true);
         const packument = await fetchPackument(registry, "pkg-a");
-        expect(packument).toMatchObject({
+        expect.soft(packument).toMatchObject({
           "dist-tags": {
             latest: "1.0.0",
           },
@@ -1285,14 +1297,16 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         pmBinPath,
         signal,
       });
-      expect(result.exitCode).toBe(1);
-      expect(result.stderr).toBe("");
-      expect(sanitizePublishLog(result.stdout, registry.url)).toMatchSnapshot();
+      expect.soft(result.exitCode).toBe(1);
+      expect.soft(result.stderr).toBe("");
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .toMatchSnapshot();
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
-      expect(publishRequests).toEqual([
+      expect.soft(publishRequests).toEqual([
         expect.objectContaining({
           authorization: `Bearer ${BAD_CLIENT_AUTH_TOKEN}`,
           statusCode: 401,
@@ -1300,7 +1314,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       ]);
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           latest: "0.0.1",
         },
@@ -1312,7 +1326,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         },
       });
-      expect(packument).not.toMatchObject({
+      expect.soft(packument).not.toMatchObject({
         versions: {
           "1.0.0": expect.anything(),
         },
@@ -1343,28 +1357,32 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         pmBinPath,
         signal,
       });
-      expect(result.exitCode).toBe(1);
-      expect(result.stderr).toBe("");
-      expect(sanitizePublishLog(result.stdout, registry.url)).toMatchSnapshot();
+      expect.soft(result.exitCode).toBe(1);
+      expect.soft(result.stderr).toBe("");
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .toMatchSnapshot();
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
-      expect(
-        publishRequests.map(({ authorization, statusCode }) => ({
-          authorization,
-          statusCode,
-        })),
-      ).toEqual(
-        // Most package managers fail locally when no token is configured. pnpm 11
-        // still sends the publish request and lets the registry reject it.
-        pm.name === "pnpm 11"
-          ? [{ authorization: undefined, statusCode: 401 }]
-          : [],
-      );
+      expect
+        .soft(
+          publishRequests.map(({ authorization, statusCode }) => ({
+            authorization,
+            statusCode,
+          })),
+        )
+        .toEqual(
+          // Most package managers fail locally when no token is configured. pnpm 11
+          // still sends the publish request and lets the registry reject it.
+          pm.name === "pnpm 11"
+            ? [{ authorization: undefined, statusCode: 401 }]
+            : [],
+        );
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           latest: "0.0.1",
         },
@@ -1376,7 +1394,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         },
       });
-      expect(packument).not.toMatchObject({
+      expect.soft(packument).not.toMatchObject({
         versions: {
           "1.0.0": expect.anything(),
         },
@@ -1408,20 +1426,22 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         signal,
       });
 
-      expect(result.exitCode).toBe(0);
-      expect(sanitizePublishLog(result.stdout, registry.url)).not.toContain(
-        "Published pkg-a@1.0.0!",
-      );
-      await expect(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
-      expect(
-        registry.requests.filter(
-          (request) =>
-            request.method === "PUT" && request.pathname === "/pkg-a",
-        ),
-      ).toEqual([]);
+      expect.soft(result.exitCode).toBe(0);
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .not.toContain("Published pkg-a@1.0.0!");
+      await expect.soft(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
+      expect
+        .soft(
+          registry.requests.filter(
+            (request) =>
+              request.method === "PUT" && request.pathname === "/pkg-a",
+          ),
+        )
+        .toEqual([]);
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           latest: "1.0.0",
         },
@@ -1497,12 +1517,12 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
-      expect(result.exitCode).toBe(0);
-      expect(sanitizePublishLog(result.stdout, registry.url)).not.toContain(
-        "Published pkg-a@1.0.0!",
-      );
-      await expect(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
-      expect(publishRequests).toEqual([
+      expect.soft(result.exitCode).toBe(0);
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .not.toContain("Published pkg-a@1.0.0!");
+      await expect.soft(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
+      expect.soft(publishRequests).toEqual([
         expect.objectContaining({
           authorization: `Bearer ${registry.pnprToken}`,
           statusCode: 403,
@@ -1510,7 +1530,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       ]);
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           latest: "1.0.0",
         },
@@ -1567,13 +1587,13 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           pmBinPath,
           signal,
         });
-        expect(result.exitCode).toBe(0);
+        expect.soft(result.exitCode).toBe(0);
 
         const publishRequests = registry.requests.filter(
           (request) =>
             request.method === "PUT" && request.pathname === "/pkg-a",
         );
-        expect(publishRequests).toEqual([
+        expect.soft(publishRequests).toEqual([
           expect.objectContaining({
             authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
             otpCode: "654321",
@@ -1582,7 +1602,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         ]);
 
         const packument = await fetchPackument(registry, "pkg-a");
-        expect(packument).toMatchObject({
+        expect.soft(packument).toMatchObject({
           "dist-tags": {
             latest: "1.0.0",
           },
@@ -1635,16 +1655,18 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         pmBinPath,
         signal,
       });
-      expect(result.exitCode).toBe(1);
-      expect(result.stderr).toBe("");
-      expect(sanitizePublishLog(result.stdout, registry.url)).toMatchSnapshot();
+      expect.soft(result.exitCode).toBe(1);
+      expect.soft(result.stderr).toBe("");
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .toMatchSnapshot();
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
       // Yarn 4 retries with our fake otp code provided to it in the stdin in the non-tty mode
-      expect(publishRequests).toHaveLength(pm.name === "yarn 4" ? 2 : 1);
-      expect(publishRequests[0]).toEqual(
+      expect.soft(publishRequests).toHaveLength(pm.name === "yarn 4" ? 2 : 1);
+      expect.soft(publishRequests[0]).toEqual(
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
           headers: expect.objectContaining({
@@ -1659,7 +1681,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           latest: "0.0.1",
         },
@@ -1671,7 +1693,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         },
       });
-      expect(packument).not.toMatchObject({
+      expect.soft(packument).not.toMatchObject({
         versions: {
           "1.0.0": expect.anything(),
         },
@@ -1714,7 +1736,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         stdin: "654321\n",
         tty: true,
       });
-      expect(result.exitCode).toBe(0);
+      expect.soft(result.exitCode).toBe(0);
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
@@ -1722,22 +1744,22 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       // We end up with 3 requests because the first non-tty attempt fails without OTP,
       // then the secon interactive attempt fails without OTP, prompts the user for the OTP and then sends the third (but second to its CLI invocation) request with the OTP.
       // Yarn 4 retries with our fake otp code provided to it in the stdin in the non-tty mode so it has one extra.
-      expect(publishRequests).toHaveLength(pm.name === "yarn 4" ? 4 : 3);
-      expect(publishRequests[0]).toEqual(
+      expect.soft(publishRequests).toHaveLength(pm.name === "yarn 4" ? 4 : 3);
+      expect.soft(publishRequests[0]).toEqual(
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
           otpCode: undefined,
           statusCode: 401,
         }),
       );
-      expect(publishRequests.at(-2)).toEqual(
+      expect.soft(publishRequests.at(-2)).toEqual(
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
           otpCode: undefined,
           statusCode: 401,
         }),
       );
-      expect(publishRequests.at(-1)).toEqual(
+      expect.soft(publishRequests.at(-1)).toEqual(
         expect.objectContaining({
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
           otpCode: "654321",
@@ -1746,7 +1768,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
 
       const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
+      expect.soft(packument).toMatchObject({
         "dist-tags": {
           latest: "1.0.0",
         },

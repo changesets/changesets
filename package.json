@@ -43,6 +43,7 @@
     "@e18e/eslint-plugin": "^0.5.1",
     "@eslint/js": "10.0.1",
     "@manypkg/cli": "^0.25.1",
+    "@oxc-node/core": "^0.1.0",
     "@tsconfig/node22": "^22.0.5",
     "@types/node": "^25.9.3",
     "@types/semver": "^7.7.1",
