@@ -2,6 +2,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    allowOnly: true,
     experimental: { preParse: true },
     clearMocks: true,
     restoreMocks: true,
