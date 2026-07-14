@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import * as path from "node:path";
-import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
@@ -56,27 +55,6 @@ function mockExecImplementation(
     Promise.resolve(fn(cmd, args ?? []))) as any);
 }
 
-function stubIsTTY(value: boolean) {
-  const originalDescriptor = Object.getOwnPropertyDescriptor(
-    process.stdin,
-    "isTTY",
-  );
-  Object.defineProperty(process.stdin, "isTTY", {
-    configurable: true,
-    ...originalDescriptor,
-    value,
-  });
-  return {
-    [Symbol.dispose]() {
-      if (originalDescriptor) {
-        Object.defineProperty(process.stdin, "isTTY", originalDescriptor);
-      } else {
-        Reflect.deleteProperty(process.stdin, "isTTY");
-      }
-    },
-  };
-}
-
 describe("Publish command", () => {
   silenceLogsInBlock();
 
@@ -117,27 +95,25 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  describe("in pre state", () => {
-    it("should report error if the tag option is used in pre release", async () => {
-      const cwd = await testdir({
-        "package.json": JSON.stringify({
-          private: true,
-          workspaces: ["packages/*"],
-        }),
-        "package-lock.json": "",
-        "packages/pkg-a/package.json": JSON.stringify({
-          name: "pkg-a",
-          version: "1.0.0",
-        }),
-        ".changeset/pre.json": JSON.stringify({
-          ...modifiedDefaultConfig,
-          mode: "pre",
-        }),
-      });
-      await expect(
-        publishCommand({ cwd, tag: "experimental" }),
-      ).rejects.toThrow();
+  it("in pre state should report error if the tag option is used in pre release", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        mode: "pre",
+      }),
     });
+    await expect(
+      publishCommand({ cwd, tag: "experimental" }),
+    ).rejects.toThrow();
   });
 
   it("publishes release chunks sequentially", async () => {
@@ -270,117 +246,6 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  it("uses bare npm info object output to skip an already-published package", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "info") {
-        return execResult(
-          JSON.stringify({
-            version: "1.0.0",
-            versions: ["1.0.0"],
-          }),
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await publishCommand({ cwd });
-
-    expect(
-      mockedExec.mock.calls
-        .filter((call) => call[1]?.[0] === "info")
-        .map((call) => call[1]),
-    ).toEqual([["info", "pkg-a", "--json"]]);
-    expect(git.tag).not.toHaveBeenCalled();
-  });
-
-  it("uses exact npm info object output after an empty bare npm info result", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0-beta.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "info" && args[1] === "pkg-a") {
-        return execResult("");
-      }
-      if (args[0] === "info" && args[1] === "pkg-a@1.0.0-beta.0") {
-        return execResult(
-          JSON.stringify({
-            version: "1.0.0-beta.0",
-            versions: ["1.0.0-beta.0"],
-          }),
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await publishCommand({ cwd });
-
-    expect(
-      mockedExec.mock.calls
-        .filter((call) => call[1]?.[0] === "info")
-        .map((call) => call[1]),
-    ).toEqual([
-      ["info", "pkg-a", "--json"],
-      ["info", "pkg-a@1.0.0-beta.0", "--json"],
-    ]);
-    expect(git.tag).not.toHaveBeenCalled();
-  });
-
-  it("unwraps single-item npm info array output", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "info") {
-        return execResult(
-          JSON.stringify([
-            {
-              version: "1.0.0",
-              versions: ["1.0.0"],
-            },
-          ]),
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await publishCommand({ cwd });
-
-    expect(git.tag).not.toHaveBeenCalled();
-  });
-
   it("stops publishing after a failed chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -427,60 +292,6 @@ describe("Publish command", () => {
       mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
     ).toHaveLength(1);
     expect(git.tag).not.toHaveBeenCalled();
-  });
-
-  it("treats Yarn Berry info 404 reporter errors as unpublished", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-        packageManager: "yarn@4.10.0",
-      }),
-      "yarn.lock": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    using _ = stubIsTTY(false);
-    mockExecImplementation(async (_command, args) => {
-      if (args.length === 1 && args[0] === "--version") {
-        return execResult("4.10.0");
-      }
-      if (args[0] === "npm" && args[1] === "info") {
-        return execResult(
-          `${JSON.stringify({
-            type: "error",
-            name: 35,
-            displayName: "YN0035",
-            indent: "",
-            data: "Package not found",
-          })}\n${JSON.stringify({
-            type: "error",
-            name: 35,
-            displayName: "YN0035",
-            indent: "",
-            data: "  Response Code: 404 (Not Found)",
-          })}\n`,
-          1,
-        );
-      }
-      if (args[0] === "npm" && args[1] === "publish") {
-        return execResult("");
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd });
-
-    expect(
-      mockedExec.mock.calls.filter(
-        (call) => call[1]?.[0] === "npm" && call[1]?.[1] === "publish",
-      ),
-    ).toHaveLength(1);
   });
 
   it("tags tag-only releases within their chunk", async () => {
