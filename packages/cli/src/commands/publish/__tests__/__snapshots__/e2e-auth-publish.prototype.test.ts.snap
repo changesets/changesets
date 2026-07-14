@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`publish command auth/publish e2e prototype > 'npm 10' > surfaces pnpr publish failures for bad credentials 1`] = `
+exports[`publish command auth/publish e2e prototype > 'npm 10' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v3.0.0-next.8
 
 These packages will be published as they were not found in the registry:
@@ -9,6 +9,24 @@ pkg-a@1.0.0
 
 An error occurred while publishing pkg-a: E401
 401 Unauthorized - PUT [registry-url]/pkg-a
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`publish command auth/publish e2e prototype > 'npm 10' > surfaces publish failures when not logged in 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: ENEEDAUTH
+This command requires you to be logged in to [registry-url]/
+You need to authorize this machine using \`npm adduser\`
 
 Some packages failed to publish:
 pkg-a@1.0.0
@@ -39,7 +57,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`publish command auth/publish e2e prototype > 'npm 11' > surfaces pnpr publish failures for bad credentials 1`] = `
+exports[`publish command auth/publish e2e prototype > 'npm 11' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v3.0.0-next.8
 
 These packages will be published as they were not found in the registry:
@@ -48,6 +66,24 @@ pkg-a@1.0.0
 
 An error occurred while publishing pkg-a: E401
 401 Unauthorized - PUT [registry-url]/pkg-a
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`publish command auth/publish e2e prototype > 'npm 11' > surfaces publish failures when not logged in 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: ENEEDAUTH
+This command requires you to be logged in to [registry-url]/
+You need to authorize this machine using \`npm adduser\`
 
 Some packages failed to publish:
 pkg-a@1.0.0
@@ -78,7 +114,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`publish command auth/publish e2e prototype > 'pnpm 10 + npm 10' > surfaces pnpr publish failures for bad credentials 1`] = `
+exports[`publish command auth/publish e2e prototype > 'pnpm 10 + npm 10' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v3.0.0-next.8
 
 These packages will be published as they were not found in the registry:
@@ -87,6 +123,24 @@ pkg-a@1.0.0
 
 An error occurred while publishing pkg-a: E401
 401 Unauthorized - PUT [registry-url]/pkg-a
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`publish command auth/publish e2e prototype > 'pnpm 10 + npm 10' > surfaces publish failures when not logged in 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: ENEEDAUTH
+This command requires you to be logged in to [registry-url]/
+You need to authorize this machine using \`npm adduser\`
 
 Some packages failed to publish:
 pkg-a@1.0.0
@@ -117,7 +171,24 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`publish command auth/publish e2e prototype > 'pnpm 11' > surfaces pnpr publish failures for bad credentials 1`] = `
+exports[`publish command auth/publish e2e prototype > 'pnpm 11' > surfaces publish failures for bad credentials 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: E401
+401 Unauthorized - PUT [registry-url]/pkg-a
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`publish command auth/publish e2e prototype > 'pnpm 11' > surfaces publish failures when not logged in 1`] = `
 "🦋 changeset v3.0.0-next.8
 
 These packages will be published as they were not found in the registry:
@@ -151,7 +222,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`publish command auth/publish e2e prototype > 'yarn 4' > surfaces pnpr publish failures for bad credentials 1`] = `
+exports[`publish command auth/publish e2e prototype > 'yarn 4' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v3.0.0-next.8
 
 These packages will be published as they were not found in the registry:
@@ -160,6 +231,23 @@ pkg-a@1.0.0
 
 An error occurred while publishing pkg-a: YN0041
 Invalid authentication (as an unknown user)
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`publish command auth/publish e2e prototype > 'yarn 4' > surfaces publish failures when not logged in 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: YN0033
+No authentication configured for request
 
 Some packages failed to publish:
 pkg-a@1.0.0

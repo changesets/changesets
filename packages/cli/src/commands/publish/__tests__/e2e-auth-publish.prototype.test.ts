@@ -82,7 +82,7 @@ type TestRegistry = {
 type PmBins = Partial<Record<"npm" | "pnpm" | "yarn", string>>;
 
 type PmGitdirContext = {
-  authToken?: string;
+  authToken?: string | null;
   pmBinPath: string;
   registry: TestRegistry;
 };
@@ -422,7 +422,7 @@ function createNpmGitdir(packageManager: string) {
       }),
       ".npmrc": [
         `registry=${registry.url}`,
-        `//${registry.host}/:_authToken=${authToken}`,
+        authToken && `//${registry.host}/:_authToken=${authToken}`,
       ].join("\n"),
       ...fixture,
     });
@@ -443,7 +443,7 @@ function createPnpmGitdir(packageManager: string) {
       "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
       ".npmrc": [
         `registry=${registry.url}`,
-        `//${registry.host}/:_authToken=${authToken}`,
+        authToken && `//${registry.host}/:_authToken=${authToken}`,
       ].join("\n"),
       ...fixture,
     });
@@ -464,7 +464,7 @@ function createYarnBerryGitdir(packageManager: string) {
       "yarn.lock": "",
       ".yarnrc.yml": [
         `npmRegistryServer: "${registry.url}"`,
-        `npmAuthToken: "${authToken}"`,
+        authToken && `npmAuthToken: "${authToken}"`,
         // we want yarn.lock to be updated on yarn install below
         // this ensures that doesn't fail on CI where yarn.lock is often immutable/readonly
         "enableImmutableInstalls: false",
@@ -1223,7 +1223,7 @@ describe("publish command auth/publish e2e prototype", () => {
       });
     });
 
-    it("surfaces pnpr publish failures for bad credentials", async ({
+    it("surfaces publish failures for bad credentials", async ({
       signal,
     }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
@@ -1261,6 +1261,71 @@ describe("publish command auth/publish e2e prototype", () => {
           statusCode: 401,
         }),
       ]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          latest: "0.0.1",
+        },
+        name: "pkg-a",
+        versions: {
+          "0.0.1": {
+            name: "pkg-a",
+            version: "0.0.1",
+          },
+        },
+      });
+      expect(packument).not.toMatchObject({
+        versions: {
+          "1.0.0": expect.anything(),
+        },
+      });
+    });
+
+    it("surfaces publish failures when not logged in", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(
+        { authToken: null, pmBinPath, registry },
+        pkgAFixture,
+      );
+
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toBe("");
+      expect(sanitizePublishLog(result.stdout, registry.url)).toMatchSnapshot();
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect(
+        publishRequests.map(({ authorization, statusCode }) => ({
+          authorization,
+          statusCode,
+        })),
+      ).toEqual(
+        // Most package managers fail locally when no token is configured. pnpm 11
+      // still sends the publish request and lets the registry reject it.
+        pm.name === "pnpm 11"
+          ? [{ authorization: undefined, statusCode: 401 }]
+          : [],
+      );
 
       const packument = await fetchPackument(registry, "pkg-a");
       expect(packument).toMatchObject({
