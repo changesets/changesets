@@ -23,6 +23,7 @@ import {
   pmCases,
   runCliCommand,
   type ExecResult,
+  type TestRegistryConfig,
 } from "../../__tests__/e2e-utils.ts";
 
 type RegistryRequestRecord = {
@@ -838,6 +839,21 @@ async function createTestRegistry(options?: {
   };
 }
 
+function createPmContext(
+  registry: TestRegistry,
+  pmBinPath: string,
+  authToken: TestRegistryConfig["authToken"] = registry.pnprToken,
+) {
+  return {
+    pmBinPath,
+    registry: {
+      authToken,
+      host: registry.host,
+      url: registry.url,
+    },
+  };
+}
+
 describe("Publish command e2e", { tags: ["slow"] }, () => {
   describe.each(pmCases)("$name", (pm) => {
     it("publishes a new version of a package", async ({ signal }) => {
@@ -853,7 +869,10 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         }),
       );
-      const cwd = await pm.gitdir({ pmBinPath, registry }, createPkgAFixture());
+      const cwd = await pm.gitdir(
+        createPmContext(registry, pmBinPath),
+        createPkgAFixture(),
+      );
 
       const result = await runPublishCli({
         cwd,
@@ -896,7 +915,10 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(await createTestRegistry());
-      const cwd = await pm.gitdir({ pmBinPath, registry }, createPkgAFixture());
+      const cwd = await pm.gitdir(
+        createPmContext(registry, pmBinPath),
+        createPkgAFixture(),
+      );
 
       const result = await runPublishCli({
         cwd,
@@ -947,7 +969,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         }),
       );
       const cwd = await pm.gitdir(
-        { pmBinPath, registry },
+        createPmContext(registry, pmBinPath),
         createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
@@ -1021,7 +1043,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         }),
       );
       const cwd = await pm.gitdir(
-        { pmBinPath, registry },
+        createPmContext(registry, pmBinPath),
         createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
@@ -1089,7 +1111,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         }),
       );
       const cwd = await pm.gitdir(
-        { pmBinPath, registry },
+        createPmContext(registry, pmBinPath),
         createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
@@ -1157,7 +1179,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         }),
       );
       const cwd = await pm.gitdir(
-        { pmBinPath, registry },
+        createPmContext(registry, pmBinPath),
         createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
@@ -1202,7 +1224,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
         const registry = stack.use(await createTestRegistry());
         const cwd = await pm.gitdir(
-          { pmBinPath, registry },
+          createPmContext(registry, pmBinPath),
           createPkgAFixture(),
         );
         const packedDir = await createPackedDir(cwd, [
@@ -1261,7 +1283,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         }),
       );
       const cwd = await pm.gitdir(
-        { authToken: BAD_CLIENT_AUTH_TOKEN, pmBinPath, registry },
+        createPmContext(registry, pmBinPath, BAD_CLIENT_AUTH_TOKEN),
         createPkgAFixture(),
       );
 
@@ -1318,7 +1340,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         }),
       );
       const cwd = await pm.gitdir(
-        { authToken: null, pmBinPath, registry },
+        createPmContext(registry, pmBinPath, null),
         createPkgAFixture(),
       );
 
@@ -1380,7 +1402,10 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         }),
       );
-      const cwd = await pm.gitdir({ pmBinPath, registry }, createPkgAFixture());
+      const cwd = await pm.gitdir(
+        createPmContext(registry, pmBinPath),
+        createPkgAFixture(),
+      );
 
       const result = await runPublishCli({
         cwd,
@@ -1463,7 +1488,10 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           },
         }),
       );
-      const cwd = await pm.gitdir({ pmBinPath, registry }, createPkgAFixture());
+      const cwd = await pm.gitdir(
+        createPmContext(registry, pmBinPath),
+        createPkgAFixture(),
+      );
 
       const result = await runPublishCli({
         cwd,
@@ -1528,7 +1556,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           }),
         );
         const cwd = await pm.gitdir(
-          { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
+          createPmContext(registry, pmBinPath, CLIENT_AUTH_TOKEN),
           createPkgAFixture(),
         );
 
@@ -1600,7 +1628,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         }),
       );
       const cwd = await pm.gitdir(
-        { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
+        createPmContext(registry, pmBinPath, CLIENT_AUTH_TOKEN),
         createPkgAFixture(),
       );
 
@@ -1676,7 +1704,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         }),
       );
       const cwd = await pm.gitdir(
-        { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
+        createPmContext(registry, pmBinPath, CLIENT_AUTH_TOKEN),
         createPkgAFixture(),
       );
 

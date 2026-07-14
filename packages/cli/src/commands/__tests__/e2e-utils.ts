@@ -16,16 +16,15 @@ export type ExecResult = {
 
 export type PmBins = Partial<Record<"npm" | "pnpm" | "yarn", string>>;
 
-type RegistryLike = {
+export type TestRegistryConfig = {
+  authToken?: string | null;
   host: string;
-  pnprToken: string;
   url: string;
 };
 
 export type PmGitdirContext = {
-  authToken?: string | null;
   pmBinPath: string;
-  registry: RegistryLike;
+  registry: TestRegistryConfig;
 };
 
 export type PmCase = {
@@ -284,10 +283,7 @@ export async function runCliCommand(options: {
 }
 
 function createNpmGitdir(packageManager: string) {
-  return (
-    { registry, authToken = registry.pnprToken }: PmGitdirContext,
-    fixture: Fixture = {},
-  ) => {
+  return ({ registry }: PmGitdirContext, fixture: Fixture = {}) => {
     return gitdir({
       "package.json": JSON.stringify({
         packageManager,
@@ -304,7 +300,8 @@ function createNpmGitdir(packageManager: string) {
       }),
       ".npmrc": [
         `registry=${registry.url}`,
-        authToken && `//${registry.host}/:_authToken=${authToken}`,
+        registry.authToken &&
+          `//${registry.host}/:_authToken=${registry.authToken}`,
       ].join("\n"),
       ...fixture,
     });
@@ -312,10 +309,7 @@ function createNpmGitdir(packageManager: string) {
 }
 
 function createPnpmGitdir(packageManager: string) {
-  return (
-    { registry, authToken = registry.pnprToken }: PmGitdirContext,
-    fixture: Fixture = {},
-  ) => {
+  return ({ registry }: PmGitdirContext, fixture: Fixture = {}) => {
     return gitdir({
       "package.json": JSON.stringify({
         packageManager,
@@ -325,7 +319,8 @@ function createPnpmGitdir(packageManager: string) {
       "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
       ".npmrc": [
         `registry=${registry.url}`,
-        authToken && `//${registry.host}/:_authToken=${authToken}`,
+        registry.authToken &&
+          `//${registry.host}/:_authToken=${registry.authToken}`,
       ].join("\n"),
       ...fixture,
     });
@@ -334,7 +329,7 @@ function createPnpmGitdir(packageManager: string) {
 
 function createYarnBerryGitdir(packageManager: string) {
   return async (
-    { registry, authToken = registry.pnprToken, pmBinPath }: PmGitdirContext,
+    { registry, pmBinPath }: PmGitdirContext,
     fixture: Fixture = {},
   ) => {
     const cwd = await gitdir({
@@ -346,7 +341,7 @@ function createYarnBerryGitdir(packageManager: string) {
       "yarn.lock": "",
       ".yarnrc.yml": [
         `npmRegistryServer: "${registry.url}"`,
-        authToken && `npmAuthToken: "${authToken}"`,
+        registry.authToken && `npmAuthToken: "${registry.authToken}"`,
         // we want yarn.lock to be updated on yarn install below
         // this ensures that doesn't fail on CI where yarn.lock is often immutable/readonly
         "enableImmutableInstalls: false",
