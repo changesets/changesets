@@ -1249,6 +1249,8 @@ describe("publish command auth/publish e2e prototype", () => {
         signal,
       });
       expect(result.exitCode).toBe(1);
+      expect(result.stderr).toBe("");
+      expect(sanitizePublishLog(result.stdout, registry.url)).toMatchSnapshot();
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",

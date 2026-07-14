@@ -1,5 +1,22 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`publish command auth/publish e2e prototype > 'npm 10' > surfaces pnpr publish failures for bad credentials 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: E401
+401 Unauthorized - PUT [registry-url]/pkg-a
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`publish command auth/publish e2e prototype > 'npm 10' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 "🦋 changeset v3.0.0-next.8
 
@@ -14,6 +31,23 @@ Open this URL in your browser to authenticate:
 
 After authenticating, your token can be retrieved from:
   [registry-url]/-/v1/done?authId=***
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`publish command auth/publish e2e prototype > 'npm 11' > surfaces pnpr publish failures for bad credentials 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: E401
+401 Unauthorized - PUT [registry-url]/pkg-a
 
 Some packages failed to publish:
 pkg-a@1.0.0
@@ -44,6 +78,23 @@ pkg-a@1.0.0
 "
 `;
 
+exports[`publish command auth/publish e2e prototype > 'pnpm 10 + npm 10' > surfaces pnpr publish failures for bad credentials 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: E401
+401 Unauthorized - PUT [registry-url]/pkg-a
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`publish command auth/publish e2e prototype > 'pnpm 10 + npm 10' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 "🦋 changeset v3.0.0-next.8
 
@@ -66,6 +117,23 @@ pkg-a@1.0.0
 "
 `;
 
+exports[`publish command auth/publish e2e prototype > 'pnpm 11' > surfaces pnpr publish failures for bad credentials 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: E401
+401 Unauthorized - PUT [registry-url]/pkg-a
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`publish command auth/publish e2e prototype > 'pnpm 11' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 "🦋 changeset v3.0.0-next.8
 
@@ -75,6 +143,23 @@ pkg-a@1.0.0
 
 An error occurred while publishing pkg-a: ERR_PNPM_OTP_NON_INTERACTIVE
 The registry requires additional authentication, but pnpm is not running in an interactive terminal
+
+Some packages failed to publish:
+pkg-a@1.0.0
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`publish command auth/publish e2e prototype > 'yarn 4' > surfaces pnpr publish failures for bad credentials 1`] = `
+"🦋 changeset v3.0.0-next.8
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+An error occurred while publishing pkg-a: YN0041
+Invalid authentication (as an unknown user)
 
 Some packages failed to publish:
 pkg-a@1.0.0
