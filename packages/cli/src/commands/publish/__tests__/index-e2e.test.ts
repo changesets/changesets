@@ -1169,7 +1169,7 @@ const pmCases = [
   },
 ] as const satisfies ReadonlyArray<PmCase>;
 
-describe("publish command auth/publish e2e prototype", () => {
+describe("Publish command e2e", () => {
   describe.each(pmCases)("$name", (pm) => {
     it("publishes a new version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
