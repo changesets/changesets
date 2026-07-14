@@ -1171,7 +1171,7 @@ const pmCases = [
 
 describe("publish command auth/publish e2e prototype", () => {
   describe.each(pmCases)("$name", (pm) => {
-    it("publishes without otp in non-tty mode", async ({ signal }) => {
+    it("publishes a new version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(
@@ -1215,6 +1215,47 @@ describe("publish command auth/publish e2e prototype", () => {
             name: "pkg-a",
             version: "0.0.1",
           },
+          "1.0.0": {
+            name: "pkg-a",
+            version: "1.0.0",
+          },
+        },
+      });
+    });
+
+    it("publishes a first version of a package", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry(),
+      );
+      const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
+
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect(result.exitCode).toBe(0);
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${registry.pnprToken}`,
+          otpCode: undefined,
+          statusCode: 201,
+        }),
+      ]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          latest: "1.0.0",
+        },
+        name: "pkg-a",
+        versions: {
           "1.0.0": {
             name: "pkg-a",
             version: "1.0.0",
