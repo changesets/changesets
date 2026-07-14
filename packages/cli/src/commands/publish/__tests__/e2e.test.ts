@@ -13,6 +13,7 @@ import { tagExists } from "@changesets/git";
 import { packTar, type TarSource } from "modern-tar/fs";
 import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
+import { AsyncDisposableStack } from "../../../ponyfills/async-disposable-stack.ts";
 import {
   AbortableAsyncDisposableStack,
   cliPackageRoot,

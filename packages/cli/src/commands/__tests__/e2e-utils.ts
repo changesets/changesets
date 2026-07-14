@@ -5,6 +5,7 @@ import { defaultConfig } from "@changesets/config";
 import { gitdir, type Fixture } from "@changesets/test-utils";
 import * as pty from "@lydell/node-pty";
 import { exec } from "tinyexec";
+import { AsyncDisposableStack } from "../../ponyfills/async-disposable-stack.ts";
 
 export const cliPackageRoot = path.resolve(import.meta.dirname, "../../..");
 
