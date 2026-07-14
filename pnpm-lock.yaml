@@ -254,8 +254,8 @@ importers:
         specifier: npm:pnpm@10.0.0
         version: pnpm@10.0.0
       pnpm-11:
-        specifier: npm:pnpm@11.9.0
-        version: pnpm@11.9.0
+        specifier: npm:pnpm@11.13.0
+        version: pnpm@11.13.0
       yarn-4:
         specifier: npm:@yarnpkg/cli-dist@^4.5.2
         version: '@yarnpkg/cli-dist@4.17.0'
@@ -1915,8 +1915,8 @@ packages:
     engines: {node: '>=18.12'}
     hasBin: true
 
-  pnpm@11.9.0:
-    resolution: {integrity: sha512-vWgtXQP+Ul73yf1ngMaITR51asTJyf4AxTh4KCQxDc+Q493E9Tg18G3669UIXkGFXgvLs7YN4qxburieUDbwOw==}
+  pnpm@11.13.0:
+    resolution: {integrity: sha512-iNlHJNjy5sGGdEpVhMblnsrIaex7oV6ctM1ijo3HBmggskgdjuO1HqjaMjpzeAaKpYxVajcg0yt8IKBR0Ig2Og==}
     engines: {node: '>=22.13'}
     hasBin: true
 
@@ -3418,7 +3418,7 @@ snapshots:
 
   pnpm@10.0.0: {}
 
-  pnpm@11.9.0: {}
+  pnpm@11.13.0: {}
 
   postcss@8.5.15:
     dependencies:

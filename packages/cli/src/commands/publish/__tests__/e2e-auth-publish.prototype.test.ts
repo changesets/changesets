@@ -1154,7 +1154,7 @@ const pmCases = [
   {
     name: "pnpm 11",
     bins: { pnpm: "pnpm-11" },
-    gitdir: createPnpmGitdir("pnpm@11.9.0"),
+    gitdir: createPnpmGitdir("pnpm@11.13.0"),
   },
   // {
   //   name: "pnpm 12",
@@ -1226,9 +1226,7 @@ describe("publish command auth/publish e2e prototype", () => {
     it("publishes a first version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
-      const registry = stack.use(
-        await createTestRegistry(),
-      );
+      const registry = stack.use(await createTestRegistry());
       const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
 
       const result = await runPublishCli({
@@ -1264,9 +1262,7 @@ describe("publish command auth/publish e2e prototype", () => {
       });
     });
 
-    it("surfaces publish failures for bad credentials", async ({
-      signal,
-    }) => {
+    it("surfaces publish failures for bad credentials", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(
@@ -1323,9 +1319,7 @@ describe("publish command auth/publish e2e prototype", () => {
       });
     });
 
-    it("surfaces publish failures when not logged in", async ({
-      signal,
-    }) => {
+    it("surfaces publish failures when not logged in", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(
@@ -1362,7 +1356,7 @@ describe("publish command auth/publish e2e prototype", () => {
         })),
       ).toEqual(
         // Most package managers fail locally when no token is configured. pnpm 11
-      // still sends the publish request and lets the registry reject it.
+        // still sends the publish request and lets the registry reject it.
         pm.name === "pnpm 11"
           ? [{ authorization: undefined, statusCode: 401 }]
           : [],
@@ -1477,76 +1471,77 @@ describe("publish command auth/publish e2e prototype", () => {
       });
     });
 
-    it.runIf(
-      pm.name !== "yarn 4" &&
-        // pnpm 11 is currently broken, see https://github.com/pnpm/pnpm/pull/12957
-        pm.name !== "pnpm 11",
-    )("reads initial otp from env in non-tty mode", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
-      const registry = stack.use(
-        await createTestRegistry({
-          packages: {
-            "pkg-a": {
-              versions: ["0.0.1"],
-              tags: { latest: "0.0.1" },
-            },
-          },
-          auth: {
+    it.runIf(pm.name !== "yarn 4")(
+      "reads initial otp from env in non-tty mode",
+      async ({ signal }) => {
+        await using stack = new AbortableAsyncDisposableStack(signal);
+        const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        const registry = stack.use(
+          await createTestRegistry({
             packages: {
               "pkg-a": {
-                token: CLIENT_AUTH_TOKEN,
-                otp: { code: "654321" },
+                versions: ["0.0.1"],
+                tags: { latest: "0.0.1" },
               },
             },
-          },
-        }),
-      );
-      const cwd = await pm.gitdir(
-        { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
-        pkgAFixture,
-      );
+            auth: {
+              packages: {
+                "pkg-a": {
+                  token: CLIENT_AUTH_TOKEN,
+                  otp: { code: "654321" },
+                },
+              },
+            },
+          }),
+        );
+        const cwd = await pm.gitdir(
+          { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
+          pkgAFixture,
+        );
 
-      const result = await runPublishCli({
-        cwd,
-        env: {
-          [pm.name.startsWith("pnpm") ? "PNPM_CONFIG_OTP" : "NPM_CONFIG_OTP"]:
-            "654321",
-        },
-        pmBinPath,
-        signal,
-      });
-      expect(result.exitCode).toBe(0);
-
-      const publishRequests = registry.requests.filter(
-        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
-      );
-      expect(publishRequests).toEqual([
-        expect.objectContaining({
-          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
-          otpCode: "654321",
-          statusCode: 201,
-        }),
-      ]);
-
-      const packument = await fetchPackument(registry, "pkg-a");
-      expect(packument).toMatchObject({
-        "dist-tags": {
-          latest: "1.0.0",
-        },
-        name: "pkg-a",
-        versions: {
-          "0.0.1": {
-            name: "pkg-a",
-            version: "0.0.1",
+        const result = await runPublishCli({
+          cwd,
+          env: {
+            [pm.name.startsWith("pnpm 11")
+              ? "PNPM_CONFIG_OTP"
+              : "NPM_CONFIG_OTP"]: "654321",
           },
-          "1.0.0": {
-            name: "pkg-a",
-            version: "1.0.0",
+          pmBinPath,
+          signal,
+        });
+        expect(result.exitCode).toBe(0);
+
+        const publishRequests = registry.requests.filter(
+          (request) =>
+            request.method === "PUT" && request.pathname === "/pkg-a",
+        );
+        expect(publishRequests).toEqual([
+          expect.objectContaining({
+            authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+            otpCode: "654321",
+            statusCode: 201,
+          }),
+        ]);
+
+        const packument = await fetchPackument(registry, "pkg-a");
+        expect(packument).toMatchObject({
+          "dist-tags": {
+            latest: "1.0.0",
           },
-        },
-      });
-    });
+          name: "pkg-a",
+          versions: {
+            "0.0.1": {
+              name: "pkg-a",
+              version: "0.0.1",
+            },
+            "1.0.0": {
+              name: "pkg-a",
+              version: "1.0.0",
+            },
+          },
+        });
+      },
+    );
 
     it("surfaces web-auth OTP publish failures in non-tty mode", async ({
       signal,

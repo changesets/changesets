@@ -67,7 +67,7 @@
     "npm-11": "npm:npm@^11.0.0",
     "outdent": "^0.8.0",
     "pnpm-10": "npm:pnpm@10.0.0",
-    "pnpm-11": "npm:pnpm@11.9.0",
+    "pnpm-11": "npm:pnpm@11.13.0",
     "yarn-4": "npm:@yarnpkg/cli-dist@^4.5.2"
   },
   "engines": {
