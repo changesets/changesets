@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "vitest";
 import {
   AbortableAsyncDisposableStack,
@@ -10,7 +11,7 @@ import {
 } from "../../__tests__/e2e-utils.ts";
 
 function sanitizePackLog(message: unknown) {
-  return String(message).replace(
+  return stripVTControlCharacters(String(message)).replace(
     /logs can be found here: .*?\.log/g,
     "logs can be found here: [yarn-prepack-log]",
   );
