@@ -22,7 +22,6 @@ import {
   getPmBinPath,
   pmCases,
   runCliCommand,
-  type ExecResult,
   type TestRegistryConfig,
 } from "../../__tests__/e2e-utils.ts";
 
@@ -225,21 +224,6 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
     new URL(registryUrl).origin,
     "[registry-url]",
   );
-}
-
-async function runPublishCli(options: {
-  cwd: string;
-  args?: string[];
-  env?: NodeJS.ProcessEnv;
-  pmBinPath: string;
-  signal?: AbortSignal;
-  stdin?: string;
-  tty?: boolean;
-}): Promise<ExecResult> {
-  return runCliCommand({
-    ...options,
-    command: "publish",
-  });
 }
 
 async function fetchPackument(registry: TestRegistry, packageName: string) {
@@ -874,7 +858,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -920,7 +905,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -986,7 +972,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         },
       });
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -1056,7 +1043,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         name: "pkg-a",
       });
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -1122,7 +1110,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         },
       });
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -1183,7 +1172,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -1231,7 +1221,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           { name: "pkg-a", version: "1.0.0" },
         ]);
 
-        const result = await runPublishCli({
+        const result = await runCliCommand({
+          command: "publish",
           args: ["--from-pack-dir", packedDir],
           cwd,
           pmBinPath,
@@ -1287,7 +1278,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -1344,7 +1336,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -1407,7 +1400,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -1493,7 +1487,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -1560,7 +1555,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           createPkgAFixture(),
         );
 
-        const result = await runPublishCli({
+        const result = await runCliCommand({
+          command: "publish",
           cwd,
           env: {
             [pm.name.startsWith("pnpm 11")
@@ -1632,7 +1628,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
@@ -1708,7 +1705,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
-      const result = await runPublishCli({
+      const result = await runCliCommand({
+        command: "publish",
         cwd,
         pmBinPath,
         signal,
