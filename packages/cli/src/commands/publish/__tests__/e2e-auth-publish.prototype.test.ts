@@ -61,10 +61,7 @@ type SeedRegistryState = Record<string, SeedPackageState>;
 type ProxyMiddlewareContext = {
   pnpr: {
     fetch(request: Request): Promise<Response>;
-    seedPackage(
-      packageName: string,
-      state: SeedPackageState,
-    ): Promise<void>;
+    seedPackage(packageName: string, state: SeedPackageState): Promise<void>;
   };
   record: RegistryRequestRecord;
   request: Request;
@@ -76,6 +73,7 @@ type RegistryMiddleware = (
 
 type TestRegistry = {
   host: string;
+  pnprToken: string;
   requests: RegistryRequestRecord[];
   url: string;
   [Symbol.asyncDispose](): Promise<void>;
@@ -83,14 +81,16 @@ type TestRegistry = {
 
 type PmBins = Partial<Record<"npm" | "pnpm" | "yarn", string>>;
 
+type PmGitdirContext = {
+  authToken?: string;
+  pmBinPath: string;
+  registry: TestRegistry;
+};
+
 type PmCase = {
   name: string;
   bins: PmBins;
-  gitdir: (
-    registry: TestRegistry,
-    pmBinPath: string,
-    fixture?: Fixture,
-  ) => Promise<string>;
+  gitdir: (context: PmGitdirContext, fixture?: Fixture) => Promise<string>;
 };
 
 type TarballContentEntry = {
@@ -106,7 +106,13 @@ type ExecResult = {
 
 const TAR_ENTRY_MODE = 0o644;
 const TAR_ENTRY_MTIME = new Date("1985-10-26T08:15:00.000Z");
+// This token models npmjs-facing auth at the proxy layer. pnpr's own token is still needed upstream.
+// We can't reliably use pnpr tokens to check validity at publish time (read and write accesses can be configured differently).
+// We could get away with just using matching read/write $authenticated settings, but
+// - pnpr /GET can't reliably distinguish between "missing package" + "bad token"/"good token"
+// - it doesn't seem to even validate the tokens for existing packages.
 const CLIENT_AUTH_TOKEN = "publ1sh-t0k3n";
+const BAD_CLIENT_AUTH_TOKEN = "wr0ng-t0k3n";
 
 function getPackageName(pathname: string) {
   const parts = pathname.split("/").filter(Boolean);
@@ -114,6 +120,12 @@ function getPackageName(pathname: string) {
     return `${parts[0]}/${parts[1]}`;
   }
   return parts[0];
+}
+
+function withBearerToken(request: Request, token: string) {
+  const headers = new Headers(request.headers);
+  headers.set("Authorization", `Bearer ${token}`);
+  return new Request(request, { headers });
 }
 
 function getAuthRequirement(
@@ -208,7 +220,7 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
     void (async () => {
       try {
         await writeResponse(res, await handler(await createWebRequest(req)));
-      } catch  {
+      } catch {
         await writeResponse(
           res,
           Response.json({ error: "Internal Server Error" }, { status: 500 }),
@@ -391,11 +403,10 @@ class AbortableAsyncDisposableStack extends AsyncDisposableStack {
 
 function createNpmGitdir(packageManager: string) {
   return (
-    registry: TestRegistry,
-    _pmBinPath: string,
+    { registry, authToken = registry.pnprToken }: PmGitdirContext,
     fixture: Fixture = {},
-  ) =>
-    gitdir({
+  ) => {
+    return gitdir({
       "package.json": JSON.stringify({
         packageManager,
         private: true,
@@ -411,19 +422,19 @@ function createNpmGitdir(packageManager: string) {
       }),
       ".npmrc": [
         `registry=${registry.url}`,
-        `//${registry.host}/:_authToken=${CLIENT_AUTH_TOKEN}`,
+        `//${registry.host}/:_authToken=${authToken}`,
       ].join("\n"),
       ...fixture,
     });
+  };
 }
 
 function createPnpmGitdir(packageManager: string) {
   return (
-    registry: TestRegistry,
-    _pmBinPath: string,
+    { registry, authToken = registry.pnprToken }: PmGitdirContext,
     fixture: Fixture = {},
-  ) =>
-    gitdir({
+  ) => {
+    return gitdir({
       "package.json": JSON.stringify({
         packageManager,
         private: true,
@@ -432,16 +443,16 @@ function createPnpmGitdir(packageManager: string) {
       "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
       ".npmrc": [
         `registry=${registry.url}`,
-        `//${registry.host}/:_authToken=${CLIENT_AUTH_TOKEN}`,
+        `//${registry.host}/:_authToken=${authToken}`,
       ].join("\n"),
       ...fixture,
     });
+  };
 }
 
 function createYarnBerryGitdir(packageManager: string) {
   return async (
-    registry: TestRegistry,
-    pmBinPath: string,
+    { registry, authToken = registry.pnprToken, pmBinPath }: PmGitdirContext,
     fixture: Fixture = {},
   ) => {
     const cwd = await gitdir({
@@ -453,7 +464,7 @@ function createYarnBerryGitdir(packageManager: string) {
       "yarn.lock": "",
       ".yarnrc.yml": [
         `npmRegistryServer: "${registry.url}"`,
-        `npmAuthToken: "${CLIENT_AUTH_TOKEN}"`,
+        `npmAuthToken: "${authToken}"`,
         // we want yarn.lock to be updated on yarn install below
         // this ensures that doesn't fail on CI where yarn.lock is often immutable/readonly
         "enableImmutableInstalls: false",
@@ -925,18 +936,13 @@ log:
   };
 }
 
-async function fetchPnpr(
-  pnprUrl: string,
-  pnprToken: string,
-  request: Request,
-): Promise<Response> {
+async function fetchPnpr(pnprUrl: string, request: Request): Promise<Response> {
   const requestUrl = new URL(request.url);
   const upstream = new URL(
     `${requestUrl.pathname}${requestUrl.search}`,
     pnprUrl,
   );
   const headers = new Headers(request.headers);
-  headers.set("authorization", `Bearer ${pnprToken}`);
   headers.set("host", upstream.host);
   headers.delete("content-length");
 
@@ -960,39 +966,25 @@ async function createAuthProxy(
   const requests: RegistryRequestRecord[] = [];
 
   const server = createWebServer(async (webRequest) => {
-      const url = new URL(webRequest.url);
-      const pathname = decodeURIComponent(url.pathname);
-      const packageName = getPackageName(pathname);
-      const authRequirement = getAuthRequirement(packageName, config.auth ?? {});
-      const request: RegistryRequestRecord = {
-        headers: Object.fromEntries(webRequest.headers),
-        method: webRequest.method,
-        packageName,
-        pathname,
-        authorization: webRequest.headers.get("authorization") ?? undefined,
-        otpCode: webRequest.headers.get("npm-otp") ?? undefined,
-      };
-      requests.push(request);
-      await recordRequestBody(webRequest, request);
+    const url = new URL(webRequest.url);
+    const pathname = decodeURIComponent(url.pathname);
+    const packageName = getPackageName(pathname);
+    const authRequirement = getAuthRequirement(packageName, config.auth ?? {});
+    const request: RegistryRequestRecord = {
+      headers: Object.fromEntries(webRequest.headers),
+      method: webRequest.method,
+      packageName,
+      pathname,
+      authorization: webRequest.headers.get("authorization") ?? undefined,
+      otpCode: webRequest.headers.get("npm-otp") ?? undefined,
+    };
+    requests.push(request);
+    await recordRequestBody(webRequest, request);
 
-      const middlewareResponse = await config.middleware?.({
-        pnpr: {
-          fetch(pnprRequest) {
-            return fetchPnpr(pnprUrl, pnprToken, pnprRequest);
-          },
-          seedPackage(packageName, state) {
-            return seedPackage(pnprUrl, pnprToken, packageName, state);
-          },
-        },
-        record: request,
-        request: webRequest,
-      });
-      if (middlewareResponse) {
-        request.statusCode = middlewareResponse.status;
-        return middlewareResponse;
-      }
-
-      if (request.method === "PUT" && authRequirement && packageName) {
+    if (authRequirement && packageName) {
+      if (request.method !== "PUT") {
+        webRequest = withBearerToken(webRequest, pnprToken);
+      } else {
         if (request.authorization !== `Bearer ${authRequirement.token}`) {
           request.statusCode = 401;
           return Response.json(
@@ -1039,11 +1031,30 @@ async function createAuthProxy(
             },
           );
         }
+        webRequest = withBearerToken(webRequest, pnprToken);
       }
+    }
 
-      const response = await fetchPnpr(pnprUrl, pnprToken, webRequest);
-      request.statusCode = response.status;
-      return response;
+    const middlewareResponse = await config.middleware?.({
+      pnpr: {
+        fetch(pnprRequest) {
+          return fetchPnpr(pnprUrl, pnprRequest);
+        },
+        seedPackage(packageName, state) {
+          return seedPackage(pnprUrl, pnprToken, packageName, state);
+        },
+      },
+      record: request,
+      request: webRequest,
+    });
+    if (middlewareResponse) {
+      request.statusCode = middlewareResponse.status;
+      return middlewareResponse;
+    }
+
+    const response = await fetchPnpr(pnprUrl, webRequest);
+    request.statusCode = response.status;
+    return response;
   });
 
   await new Promise<void>((resolve) => {
@@ -1093,6 +1104,7 @@ async function createTestRegistry(options?: {
 
   return {
     host: new URL(proxy.url).host,
+    pnprToken,
     requests: proxy.requests,
     url: proxy.url,
     async [Symbol.asyncDispose]() {
@@ -1172,7 +1184,7 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
+      const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
 
       const result = await runPublishCli({
         cwd,
@@ -1186,7 +1198,7 @@ describe("publish command auth/publish e2e prototype", () => {
       );
       expect(publishRequests).toEqual([
         expect.objectContaining({
-          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+          authorization: `Bearer ${registry.pnprToken}`,
           otpCode: undefined,
           statusCode: 201,
         }),
@@ -1207,6 +1219,63 @@ describe("publish command auth/publish e2e prototype", () => {
             name: "pkg-a",
             version: "1.0.0",
           },
+        },
+      });
+    });
+
+    it("surfaces pnpr publish failures for bad credentials", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(
+        { authToken: BAD_CLIENT_AUTH_TOKEN, pmBinPath, registry },
+        pkgAFixture,
+      );
+
+      const result = await runPublishCli({
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect(result.exitCode).toBe(1);
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${BAD_CLIENT_AUTH_TOKEN}`,
+          statusCode: 401,
+        }),
+      ]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect(packument).toMatchObject({
+        "dist-tags": {
+          latest: "0.0.1",
+        },
+        name: "pkg-a",
+        versions: {
+          "0.0.1": {
+            name: "pkg-a",
+            version: "0.0.1",
+          },
+        },
+      });
+      expect(packument).not.toMatchObject({
+        versions: {
+          "1.0.0": expect.anything(),
         },
       });
     });
@@ -1259,7 +1328,7 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
+      const cwd = await pm.gitdir({ pmBinPath, registry }, pkgAFixture);
 
       const result = await runPublishCli({
         cwd,
@@ -1276,7 +1345,7 @@ describe("publish command auth/publish e2e prototype", () => {
       await expect(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
       expect(publishRequests).toEqual([
         expect.objectContaining({
-          authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
+          authorization: `Bearer ${registry.pnprToken}`,
           statusCode: 403,
         }),
       ]);
@@ -1325,7 +1394,10 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
+      const cwd = await pm.gitdir(
+        { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
+        pkgAFixture,
+      );
 
       const result = await runPublishCli({
         cwd,
@@ -1391,7 +1463,10 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
+      const cwd = await pm.gitdir(
+        { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
+        pkgAFixture,
+      );
 
       const result = await runPublishCli({
         cwd,
@@ -1464,7 +1539,10 @@ describe("publish command auth/publish e2e prototype", () => {
           },
         }),
       );
-      const cwd = await pm.gitdir(registry, pmBinPath, pkgAFixture);
+      const cwd = await pm.gitdir(
+        { authToken: CLIENT_AUTH_TOKEN, pmBinPath, registry },
+        pkgAFixture,
+      );
 
       const result = await runPublishCli({
         cwd,
