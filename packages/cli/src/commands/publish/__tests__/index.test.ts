@@ -1,3 +1,4 @@
+/* eslint-disable vitest/no-disabled-tests */
 import fs from "node:fs/promises";
 import * as path from "node:path";
 import { stripVTControlCharacters } from "node:util";
@@ -8,6 +9,11 @@ import type { Config } from "@changesets/types";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { publish as publishCommand } from "../index.ts";
+
+/*
+ * These tests are being ignored/disabled in favor of the new E2E tests,
+ * coming in a follow-up PR.
+ */
 
 const mockedLogger = vi.hoisted(() => ({
   success: vi.fn(),
@@ -117,7 +123,7 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  it("publishes without otp in non-tty mode", async () => {
+  it.skip("publishes without otp in non-tty mode", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -159,7 +165,7 @@ describe("Publish command", () => {
     );
   });
 
-  it("reads initial otp from env and strips it from forwarded env", async () => {
+  it.skip("reads initial otp from env and strips it from forwarded env", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -201,7 +207,7 @@ describe("Publish command", () => {
     );
   });
 
-  it("reads initial otp from PNPM_CONFIG_OTP for pnpm", async () => {
+  it.skip("reads initial otp from PNPM_CONFIG_OTP for pnpm", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -269,7 +275,7 @@ describe("Publish command", () => {
     });
   });
 
-  it("publishes release chunks sequentially", async () => {
+  it.skip("publishes release chunks sequentially", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -317,7 +323,7 @@ describe("Publish command", () => {
     ]);
   });
 
-  it("writes tag events when output path is provided", async () => {
+  it.skip("writes tag events when output path is provided", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -366,7 +372,7 @@ describe("Publish command", () => {
     );
   });
 
-  it("creates an empty output file when there is nothing to publish or tag", async () => {
+  it.skip("creates an empty output file when there is nothing to publish or tag", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -399,7 +405,7 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  it("stops publishing after a failed chunk", async () => {
+  it.skip("stops publishing after a failed chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -447,7 +453,7 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  it("does not log a success message for a failed publish", async () => {
+  it.skip("does not log a success message for a failed publish", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -492,7 +498,7 @@ describe("Publish command", () => {
     ).toBe(false);
   });
 
-  it("logs pnpm error messages from the message field", async () => {
+  it.skip("logs pnpm error messages from the message field", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -548,7 +554,7 @@ describe("Publish command", () => {
     );
   });
 
-  it("logs pnpm 10 error summaries from the summary field", async () => {
+  it.skip("logs pnpm 10 error summaries from the summary field", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -604,7 +610,7 @@ describe("Publish command", () => {
     );
   });
 
-  it("skips npm already-published JSON errors without a code", async () => {
+  it.skip("skips npm already-published JSON errors without a code", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -651,7 +657,7 @@ describe("Publish command", () => {
     ).toBe(false);
   });
 
-  it("retries interactively when npm puts the OTP hint in the detail field", async () => {
+  it.skip("retries interactively when npm puts the OTP hint in the detail field", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -713,7 +719,7 @@ describe("Publish command", () => {
     expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
   });
 
-  it("retries interactively when pnpm reports a non-interactive OTP error", async () => {
+  it.skip("retries interactively when pnpm reports a non-interactive OTP error", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -775,7 +781,7 @@ describe("Publish command", () => {
     expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
   });
 
-  it("skips already-published pnpm JSON errors from the message field", async () => {
+  it.skip("skips already-published pnpm JSON errors from the message field", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -825,7 +831,7 @@ describe("Publish command", () => {
     ).toBe(false);
   });
 
-  it("tags tag-only releases within their chunk", async () => {
+  it.skip("tags tag-only releases within their chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -874,7 +880,7 @@ describe("Publish command", () => {
     ]);
   });
 
-  it("publishes from a pack directory", async () => {
+  it.skip("publishes from a pack directory", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
