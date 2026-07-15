@@ -134,17 +134,24 @@ export async function createTempDir(prefix: string) {
   };
 }
 
-async function resolvePackageBin(packageName: string, command: keyof PmBins) {
+async function readInstalledPackageJson(packageName: string) {
   const packageRoot = path.join(cliPackageRoot, "node_modules", packageName);
   const packageJson: unknown = JSON.parse(
     await fs.readFile(path.join(packageRoot, "package.json"), "utf8"),
   );
 
-  if (
-    !packageJson ||
-    typeof packageJson !== "object" ||
-    !("bin" in packageJson)
-  ) {
+  if (!packageJson || typeof packageJson !== "object") {
+    throw new Error(`Could not read package.json from ${packageName}`);
+  }
+
+  return packageJson as Record<string, unknown>;
+}
+
+async function resolvePackageBin(packageName: string, command: keyof PmBins) {
+  const packageJson = await readInstalledPackageJson(packageName);
+  const packageRoot = path.join(cliPackageRoot, "node_modules", packageName);
+
+  if (!("bin" in packageJson)) {
     throw new Error(`Could not resolve ${command} bin from ${packageName}`);
   }
 
@@ -161,6 +168,19 @@ async function resolvePackageBin(packageName: string, command: keyof PmBins) {
     throw new Error(`Could not resolve ${command} bin from ${packageName}`);
   }
   return path.join(packageRoot, bin);
+}
+
+async function resolvePackageManagerSpec(
+  packageManager: "npm" | "pnpm" | "yarn",
+  packageName: string,
+) {
+  const packageJson = await readInstalledPackageJson(packageName);
+
+  if (typeof packageJson.version !== "string") {
+    throw new Error(`Could not resolve version from ${packageName}`);
+  }
+
+  return `${packageManager}@${packageJson.version}`;
 }
 
 export function createPmBinEnv(pmBinPath: string, env: NodeJS.ProcessEnv = {}) {
@@ -296,8 +316,10 @@ export async function runCliCommand(options: {
   });
 }
 
-function createNpmGitdir(packageManager: string) {
-  return ({ registry }: PmGitdirContext, fixture: Fixture = {}) => {
+function createNpmGitdir(packageName: string) {
+  return async ({ registry }: PmGitdirContext, fixture: Fixture = {}) => {
+    const packageManager = await resolvePackageManagerSpec("npm", packageName);
+
     return gitdir({
       "package.json": JSON.stringify({
         packageManager,
@@ -322,11 +344,12 @@ function createNpmGitdir(packageManager: string) {
   };
 }
 
-function createPnpmGitdir(packageManager: string) {
+function createPnpmGitdir(packageName: string) {
   return async (
     { pmBinPath, registry }: PmGitdirContext,
     fixture: Fixture = {},
   ) => {
+    const packageManager = await resolvePackageManagerSpec("pnpm", packageName);
     const npmPath = path.join(pmBinPath, "npm");
     const hasNpmShim = await fs
       .access(npmPath)
@@ -346,18 +369,20 @@ function createPnpmGitdir(packageManager: string) {
           `//${registry.host}/:_authToken=${registry.authToken}`,
         // pnpm 10 publish delegates to npm and prepends the active Node binary's
         // directory to PATH, which can otherwise pick the host-bundled npm.
-        hasNpmShim && `npm-path=${npmPath}`,
+        hasNpmShim ? `npm-path=${npmPath}` : undefined,
       ].join("\n"),
       ...fixture,
     });
   };
 }
 
-function createYarnBerryGitdir(packageManager: string) {
+function createYarnBerryGitdir(packageName: string) {
   return async (
     { registry, pmBinPath }: PmGitdirContext,
     fixture: Fixture = {},
   ) => {
+    const packageManager = await resolvePackageManagerSpec("yarn", packageName);
+
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         packageManager,
@@ -393,37 +418,37 @@ export const pmCases = [
   {
     name: "npm 10",
     bins: { npm: "npm-10" },
-    gitdir: createNpmGitdir("npm@10.9.8"),
+    gitdir: createNpmGitdir("npm-10"),
   },
   {
     name: "npm 11",
     bins: { npm: "npm-11" },
-    gitdir: createNpmGitdir("npm@11"),
+    gitdir: createNpmGitdir("npm-11"),
   },
   {
     name: "npm 12",
     bins: { npm: "npm-12" },
-    gitdir: createNpmGitdir("npm@12.0.1"),
+    gitdir: createNpmGitdir("npm-12"),
   },
   {
     name: "pnpm 10 + npm 10",
     bins: { npm: "npm-10", pnpm: "pnpm-10" },
-    gitdir: createPnpmGitdir("pnpm@10.34.5"),
+    gitdir: createPnpmGitdir("pnpm-10"),
   },
   {
     name: "pnpm 11",
     bins: { pnpm: "pnpm-11" },
-    gitdir: createPnpmGitdir("pnpm@11.13.0"),
+    gitdir: createPnpmGitdir("pnpm-11"),
   },
   // {
   //   name: "pnpm 12",
-  //   bins: {},
-  //   gitdir: createPnpmGitdir("pnpm@12"),
+  //   bins: { pnpm: "pnpm-12" },
+  //   gitdir: createPnpmGitdir("pnpm-12"),
   // },
   {
     name: "yarn 4",
     bins: { yarn: "yarn-4" },
-    gitdir: createYarnBerryGitdir("yarn@4.17.0"),
+    gitdir: createYarnBerryGitdir("yarn-4"),
   },
 ] as const satisfies ReadonlyArray<PmCase>;
 
