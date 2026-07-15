@@ -15,32 +15,12 @@ export function getOtpCode(otp?: string): string | null {
 
 let publishes = 0;
 export const publish = async ({
-  pkg,
   release,
-  tarballPath,
   interactive,
-  otpCode,
 }: PublishOptions): Promise<PublishResult> =>
   npmPublishQueue.add(async () => {
-    const cwd = pkg.dir;
-
-    const args: string[] = [
-      "--json",
-      "--access",
-      release.access,
-      "--tag",
-      release.tag,
-    ];
-    if (otpCode) args.push("--otp", otpCode);
-    if (tarballPath) {
-      args.unshift(path.relative(cwd, tarballPath));
-    } else if (pkg.packageJson.publishConfig?.directory != null) {
-      // support `publishConfig.directory`
-      args.unshift(path.resolve(cwd, pkg.packageJson.publishConfig.directory));
-    }
-
     await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 500 + 500),
+      setTimeout(resolve, Math.random() * 1000 + 500),
     );
 
     const resultBase = { name: release.name, version: release.version };

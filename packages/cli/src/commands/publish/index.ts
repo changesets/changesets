@@ -238,7 +238,8 @@ for every package being published after this!
 
   // bulk publishing
 
-  const p = progress({ max: totalPublishCount, size: finishedPackages.size });
+  const p = progress({ max: totalPublishCount });
+  p.advance(finishedPackages.size);
   p.start("Publishing packages...");
 
   npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
@@ -257,8 +258,15 @@ for every package being published after this!
       packagesByName,
       otp: options?.otp,
       artifactDir,
-      onResult: () => p.advance(1),
+      onResult: ({ packageJson }) => {
+        finishedPackages.add(packageJson.name);
+        p.advance(
+          1,
+          `Publishing packages (${finishedPackages.size}/${totalPublishCount})`,
+        );
+      },
     });
+
     successfulNpmPublishes.push(...results.filter(isPublishSuccessful));
     unsuccessfulNpmPublishes.push(...results.filter(isPublishFailure));
   }
@@ -279,6 +287,8 @@ ${formatPackageList(successfulNpmPublishes)}
         })),
       );
     }
+  } else {
+    p.clear();
   }
 
   if (unsuccessfulNpmPublishes.length > 0) {

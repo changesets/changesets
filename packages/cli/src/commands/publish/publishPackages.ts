@@ -16,15 +16,16 @@ export async function bulkPublishPackages({
   packagesByName: Map<string, Package>;
   artifactDir?: string;
   otp?: string;
-  onResult?: () => void;
+  onResult?: (pkg: Package) => void;
 }): Promise<PublishResult[]> {
   if (releases.length === 0) return [];
 
   const otpCode = publishTool.getOtpCode(otp);
 
   const publishPromises = releases.map(async (release) => {
+    const pkg = packagesByName.get(release.name)!;
     const result = publishTool.publish({
-      pkg: packagesByName.get(release.name)!,
+      pkg,
       release,
       tarballPath: artifactDir
         ? resolve(artifactDir, release.tarball!.path)
@@ -33,7 +34,7 @@ export async function bulkPublishPackages({
       otpCode,
     });
 
-    onResult?.();
+    onResult?.(pkg);
     return result;
   });
 
