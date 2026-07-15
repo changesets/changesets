@@ -298,7 +298,7 @@ export async function getChangedPackagesSinceRef({
     });
 }
 
-export async function tagExists(tagStr: string, cwd: string) {
+export async function tagExists(tagStr: string, cwd?: string) {
   const gitCmd = await exec("git", ["tag", "-l", tagStr], {
     nodeOptions: { cwd },
   });

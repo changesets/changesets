@@ -7,6 +7,11 @@ import type { PreState } from "@changesets/types";
 import { log, progress, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import {
+  buildGitTag,
+  createGitTags,
+  formatGitTagResults,
+} from "../../actions/git-tag.ts";
+import {
   isPublishFailure,
   isPublishSuccessful,
   NPM_PUBLISH_CONCURRENCY_LIMIT,
@@ -271,7 +276,7 @@ for every package being published after this!
     unsuccessfulNpmPublishes.push(...results.filter(isPublishFailure));
   }
 
-  if (successfulNpmPublishes.length > 0) {
+  if (successfulNpmPublishes.length !== 0) {
     p.stop(
       `
 Successfully published:
@@ -291,61 +296,34 @@ ${formatPackageList(successfulNpmPublishes)}
     p.clear();
   }
 
-  if (unsuccessfulNpmPublishes.length > 0) {
+  if (unsuccessfulNpmPublishes.length !== 0) {
     log.error(
       `
 Some packages failed to publish:
 ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
       `.trim(),
     );
-    throw new ExitError(1);
   }
 
   // finally, create git tags as plan instructs
-  const tagsToCreate = uniqBy(gitTagsToCreate, (r) => `${r.name}@${r.version}`);
+  const tagsToCreate = uniqBy(gitTagsToCreate, (r) =>
+    buildGitTag(packages.tool, r),
+  );
   if (tagsToCreate.length > 0 && process.env.CHANGESETS_FAKE_PUBLISH == null) {
-    log.success(
-      `
-Found untagged packages:
-${formatPackageList(tagsToCreate, c.yellowBright)}
-      `.trim(),
-    );
-
     const p = spinner();
-    p.start(`Creating git tag${tagsToCreate.length > 1 ? "s" : ""}...`);
-    await createGitTags(
-      packages.tool.type,
-      packages.rootDir,
-      tagsToCreate,
-      reporter,
-    );
-    p.stop(`Created git tag${tagsToCreate.length > 1 ? "s" : ""}.`);
-  }
-}
+    p.start("Creating git tags...");
 
-async function createGitTags(
-  tool: string,
-  cwd: string,
-  packageReleases: Array<{ name: string; version: string }>,
-  reporter: OutputReporter | undefined,
-) {
-  if (tool !== "root") {
-    for (const pkg of packageReleases) {
-      const tag = `${pkg.name}@${pkg.version}`;
-      await git.tag(tag, cwd);
-      reporter?.write({
-        type: "git-tag",
-        tag,
-        packageName: pkg.name,
-      });
-    }
-  } else {
-    const tag = `v${packageReleases[0].version}`;
-    await git.tag(tag, cwd);
-    reporter?.write({
-      type: "git-tag",
-      tag,
-      packageName: packageReleases[0].name,
+    const results = await createGitTags({
+      config,
+      packages,
+      plan: tagsToCreate,
+      reporter,
     });
+
+    p.stop(formatGitTagResults(packages.tool, results));
+  }
+
+  if (unsuccessfulNpmPublishes.length !== 0) {
+    throw new ExitError(1);
   }
 }
