@@ -153,6 +153,14 @@ export async function getTokenIsRequired() {
 //   queries return empty → no versions list → only-pre detection is not
 //   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
 //   published with preState.tag rather than "latest".
+
+// npm 12 always wraps successful `npm info --json` output in an array.
+// Unwrap it so downstream consumers keep seeing a single manifest.
+function normalizeInfoJson(parsed: any) {
+  // given we query the implicit `latest` tag or an exact version, the resulting array should have at most one element
+  return Array.isArray(parsed) ? parsed[0] : parsed;
+}
+
 export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestQueue.add(async () => {
     info(`npm info ${packageJson.name}`);
@@ -189,7 +197,7 @@ export function getPackageInfo(packageJson: PackageJSON) {
         },
       };
     }
-    return jsonParse(result.stdout.toString());
+    return normalizeInfoJson(jsonParse(result.stdout.toString()));
   });
 }
 

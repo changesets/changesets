@@ -109,6 +109,47 @@ describe("publishPackages", () => {
     ).toBe(false);
   });
 
+  it("detects already-published versions when npm 12 wraps info output in an array", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    mockSpawnImplementation((cmd, args) => {
+      if (cmd === "npm" && args?.[0] === "info") {
+        return spawnResult(
+          JSON.stringify([
+            {
+              name: "pkg-a",
+              version: "1.0.0",
+              versions: ["1.0.0"],
+            },
+          ])
+        );
+      }
+      return spawnResult("", 1);
+    });
+
+    const result = await publishPackages({
+      packages: (await getPackages(cwd)).packages,
+      access: "public",
+      preState: undefined,
+    });
+
+    expect(result).toEqual([]);
+    expect(
+      mockSpawn.mock.calls.some(
+        ([cmd, args]) => cmd === "npm" && args?.[0] === "publish"
+      )
+    ).toBe(false);
+  });
+
   it("publishes a new prerelease when exact version fallback also 404s", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
