@@ -20,6 +20,7 @@ import {
   getPublishPlan,
   type PublishReleaseEntry,
   readPlanFile,
+  type TagReleaseEntry,
 } from "../publish-plan/getPublishPlan.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { getPublishTool } from "./npm-utils.ts";
@@ -38,12 +39,19 @@ function uniqBy<T>(array: T[], key: (t: T) => string) {
 }
 
 function formatPackageList(
-  pkgs: Array<{ name: string; version: string }>,
+  entry: (PublishResult | TagReleaseEntry)[],
   versionColor = c.green,
 ) {
-  return pkgs
+  return entry
     .toSorted((a, b) => a.name.localeCompare(b.name))
-    .map((p) => `${c.blueBright(p.name)}@${versionColor(p.version)}`)
+    .map((entry) => {
+      const error =
+        "result" in entry && isPublishFailure(entry)
+          ? `\n${c.dim(`└`)} ${entry.summary}`
+          : "";
+
+      return `${c.blueBright(entry.name)}@${versionColor(entry.version)}${error}`;
+    })
     .join("\n");
 }
 

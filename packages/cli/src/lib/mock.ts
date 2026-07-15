@@ -1,5 +1,5 @@
 import path from "node:path";
-import {createInterface} from "node:readline/promises";
+import { createInterface } from "node:readline/promises";
 import { npmPublishQueue } from "./common.ts";
 import type { PublishOptions, PublishResult, PublishTool } from "./types.ts";
 
@@ -40,7 +40,7 @@ export const publish = async ({
     }
 
     await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 1500 + 500),
+      setTimeout(resolve, Math.random() * 500 + 500),
     );
 
     const resultBase = { name: release.name, version: release.version };
@@ -51,9 +51,12 @@ export const publish = async ({
       return { ...resultBase, result: "failed:needs-2fa", summary: "asdasd" };
     }
     if (publishes === 2 && interactive) {
-      const readline = createInterface({ input: process.stdin , output: process.stdout})
-      await readline.question("\nplease press enter to simulate 2fa:\n")
-      readline.close()
+      const readline = createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+      await readline.question("\nplease press enter to simulate 2fa:\n");
+      readline.close();
       return { ...resultBase, result: "published:interactive" };
     }
     if (publishes === 3 && !interactive) {
