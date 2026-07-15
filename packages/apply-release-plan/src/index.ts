@@ -18,12 +18,12 @@ import type {
   ReleasePlan,
 } from "@changesets/types";
 import { resolve } from "import-meta-resolve";
-import { editJson } from "./edit-json.ts";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
 import {
   versionPackage,
   type ModCompWithPackageAndChangelog,
 } from "./version-package.ts";
+export { updatePackageVersionsFromVersionProviders } from "./version-providers/index.ts";
 
 function importResolveFromDir(specifier: string, dir: string) {
   return resolve(specifier, pathToFileURL(path.join(dir, "x.mjs")).toString());
@@ -124,28 +124,30 @@ export async function applyReleasePlan(
   );
 
   // iterate over releases updating packages
-  const finalisedRelease = releaseWithChangelogs.map((release) => {
-    return versionPackage(release, versionsToUpdate, {
-      cwd,
-      updateInternalDependencies: config.updateInternalDependencies,
-      onlyUpdatePeerDependentsWhenOutOfRange:
-        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange,
-      bumpVersionsWithWorkspaceProtocolOnly:
-        config.bumpVersionsWithWorkspaceProtocolOnly,
-      snapshot,
-    });
-  });
+  const finalisedRelease = await Promise.all(
+    releaseWithChangelogs.map((release) => {
+      return versionPackage(release, versionsToUpdate, {
+        cwd,
+        updateInternalDependencies: config.updateInternalDependencies,
+        onlyUpdatePeerDependentsWhenOutOfRange:
+          config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+            .onlyUpdatePeerDependentsWhenOutOfRange,
+        bumpVersionsWithWorkspaceProtocolOnly:
+          config.bumpVersionsWithWorkspaceProtocolOnly,
+        snapshot,
+        versionProvider: config.versionProvider,
+      });
+    }),
+  );
 
   const filesToFormat: string[] = [];
   for (const release of finalisedRelease) {
-    const { changelog, pkgJsonEdits, dir, name } = release;
+    const { changelog, versionedFiles, dir, name } = release;
 
-    const pkgJsonPath = path.resolve(dir, "package.json");
-    const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
-    const pkgUpdated = editJson(pkgRaw, pkgJsonEdits);
-    await fs.writeFile(pkgJsonPath, pkgUpdated);
-    touchedFiles.push(pkgJsonPath);
+    for (const file of versionedFiles) {
+      await fs.writeFile(file.path, file.content);
+      touchedFiles.push(file.path);
+    }
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");

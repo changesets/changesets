@@ -172,6 +172,82 @@ describe("status", { tags: ["slow"] }, () => {
     `);
   });
 
+  it("should read current versions from configured version providers", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/demo-ruby-gem/package.json": JSON.stringify({
+        name: "demo-ruby-gem",
+        version: "0.1.0",
+        private: true,
+      }),
+      "packages/demo-ruby-gem/lib/demo_ruby_gem/version.rb": `module DemoRubyGem
+  VERSION = "0.2.0"
+end
+`,
+      ".changeset/config.json": JSON.stringify({
+        versionProvider: {
+          default: "node",
+          packages: {
+            "demo-ruby-gem": "ruby",
+          },
+        },
+      }),
+    });
+
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
+
+    await outputFile(
+      path.join(cwd, "packages/demo-ruby-gem/lib/demo_ruby_gem.rb"),
+      'require_relative "demo_ruby_gem/version"',
+    );
+    await writeChangeset(
+      {
+        summary: "This is a Ruby summary",
+        releases: [{ name: "demo-ruby-gem", type: "patch" }],
+      },
+      cwd,
+    );
+    await git.add(".", cwd);
+    await git.commit("updated ruby gem", cwd);
+
+    const releaseObj = await status({ cwd, since: "main" });
+    expect(replaceHumanIds(releaseObj)).toMatchInlineSnapshot(`
+      {
+        "changesets": [
+          {
+            "id": "~changeset-1~",
+            "releases": [
+              {
+                "name": "demo-ruby-gem",
+                "type": "patch",
+              },
+            ],
+            "summary": "This is a Ruby summary",
+          },
+        ],
+        "preState": undefined,
+        "releases": [
+          {
+            "changesets": [
+              "~changeset-1~",
+            ],
+            "name": "demo-ruby-gem",
+            "newVersion": "0.2.1",
+            "oldVersion": "0.2.0",
+            "type": "patch",
+          },
+        ],
+      }
+    `);
+  });
+
   it("should exit early with a non-zero error code when there are changed packages but no changesets", async () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({

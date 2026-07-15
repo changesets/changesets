@@ -55,6 +55,10 @@ describe("readConfig", () => {
           "useCalculatedVersion": false,
         },
         "updateInternalDependencies": "patch",
+        "versionProvider": {
+          "default": "auto",
+          "packages": {},
+        },
       }
     `);
   });
@@ -136,6 +140,10 @@ describe("defaultConfig", () => {
           "useCalculatedVersion": false,
         },
         "updateInternalDependencies": "patch",
+        "versionProvider": {
+          "default": "auto",
+          "packages": {},
+        },
       }
     `);
   });
@@ -337,6 +345,96 @@ describe("validateConfig", () => {
         },
       },
       {
+        name: "versionProvider: ruby",
+        config: { versionProvider: "ruby" },
+        expected: {
+          ...defaultConfig,
+          versionProvider: { default: "ruby", packages: {} },
+        },
+      },
+      {
+        name: "versionProvider: node object",
+        config: { versionProvider: { type: "node" } },
+        expected: {
+          ...defaultConfig,
+          versionProvider: { default: { type: "node" }, packages: {} },
+        },
+      },
+      {
+        name: "versionProvider: ruby object",
+        config: {
+          versionProvider: {
+            type: "ruby",
+            gemName: "custom-gem",
+            versionFile: "lib/custom/version.rb",
+            gemspec: "custom.gemspec",
+            gemfileLock: false,
+          },
+        },
+        expected: {
+          ...defaultConfig,
+          versionProvider: {
+            default: {
+              type: "ruby",
+              gemName: "custom-gem",
+              versionFile: "lib/custom/version.rb",
+              gemspec: "custom.gemspec",
+              gemfileLock: false,
+            },
+            packages: {},
+          },
+        },
+      },
+      {
+        name: "versionProvider: packages only",
+        config: {
+          versionProvider: {
+            packages: {
+              "pkg-a": "ruby",
+            },
+          },
+        },
+        expected: {
+          ...defaultConfig,
+          versionProvider: {
+            default: "auto",
+            packages: {
+              "pkg-a": "ruby",
+            },
+          },
+        },
+      },
+      {
+        name: "versionProvider: per package",
+        config: {
+          versionProvider: {
+            default: "node",
+            packages: {
+              "pkg-a": {
+                type: "ruby",
+                versionFile: "lib/custom/version.rb",
+                gemspec: false,
+                gemfileLock: false,
+              },
+            },
+          },
+        },
+        expected: {
+          ...defaultConfig,
+          versionProvider: {
+            default: "node",
+            packages: {
+              "pkg-a": {
+                type: "ruby",
+                versionFile: "lib/custom/version.rb",
+                gemspec: false,
+                gemfileLock: false,
+              },
+            },
+          },
+        },
+      },
+      {
         name: "updateInternalDependencies: minor",
         config: { updateInternalDependencies: "minor" },
         expected: { ...defaultConfig, updateInternalDependencies: "minor" },
@@ -531,6 +629,33 @@ describe("validateConfig", () => {
       {
         name: "privatePackages: should error when a public package depends on a private package skipped via privatePackages.version: false",
         config: { privatePackages: { version: false, tag: false } },
+      },
+      // versionProvider
+      {
+        name: "versionProvider: invalid string",
+        config: { versionProvider: "python" },
+        errors: ["Invalid type: Expected"],
+      },
+      {
+        name: "versionProvider: invalid object type",
+        config: { versionProvider: { type: "python" } },
+        errors: ["Invalid type: Expected"],
+      },
+      {
+        name: "versionProvider: invalid ruby versionFile",
+        config: { versionProvider: { type: "ruby", versionFile: true } },
+        errors: ["Invalid type: Expected"],
+      },
+      {
+        name: "versionProvider: invalid package provider",
+        config: {
+          versionProvider: {
+            packages: {
+              "pkg-a": "python",
+            },
+          },
+        },
+        errors: ["Invalid type: Expected"],
       },
       {
         name: "experimental: onlyUpdatePeerDependentsWhenOutOfRange: non-boolean",

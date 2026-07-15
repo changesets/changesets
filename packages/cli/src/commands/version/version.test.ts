@@ -231,6 +231,90 @@ describe("running version in a simple project", () => {
         expect.objectContaining({ name: "pkg-b", version: "1.0.1" }),
       );
     });
+
+    it("should use the Ruby provider version as the source for consecutive releases", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/demo-ruby-gem/package.json": JSON.stringify({
+          name: "demo-ruby-gem",
+          private: true,
+          version: "0.1.0",
+        }),
+        "packages/demo-ruby-gem/lib/demo_ruby_gem/version.rb": `module DemoRubyGem
+  VERSION = "0.1.0"
+end
+`,
+        "packages/demo-ruby-gem/demo-ruby-gem.gemspec": `Gem::Specification.new do |spec|
+  spec.name = "demo-ruby-gem"
+  spec.version = "0.1.0"
+end
+`,
+        "packages/demo-ruby-gem/Gemfile.lock": `PATH
+  remote: .
+  specs:
+    demo-ruby-gem (0.1.0)
+`,
+        ".changeset/config.json": JSON.stringify({
+          ...modifiedDefaultConfig,
+          changelog: false,
+          privatePackages: { version: true, tag: false },
+        }),
+      });
+
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary",
+            releases: [{ name: "demo-ruby-gem", type: "minor" }],
+          },
+        ],
+        cwd,
+      );
+
+      await version({ cwd });
+
+      expect(await getPkgJSON("demo-ruby-gem", cwd)).toEqual(
+        expect.objectContaining({ name: "demo-ruby-gem", version: "0.1.0" }),
+      );
+      await expect(
+        getFile("demo-ruby-gem", "lib/demo_ruby_gem/version.rb", cwd),
+      ).resolves.toContain(`VERSION = "0.2.0"`);
+      await expect(
+        getFile("demo-ruby-gem", "demo-ruby-gem.gemspec", cwd),
+      ).resolves.toContain(`spec.version = "0.2.0"`);
+      await expect(
+        getFile("demo-ruby-gem", "Gemfile.lock", cwd),
+      ).resolves.toContain(`demo-ruby-gem (0.2.0)`);
+
+      await writeChangesets(
+        [
+          {
+            summary: "This is another summary",
+            releases: [{ name: "demo-ruby-gem", type: "patch" }],
+          },
+        ],
+        cwd,
+      );
+
+      await version({ cwd });
+
+      expect(await getPkgJSON("demo-ruby-gem", cwd)).toEqual(
+        expect.objectContaining({ name: "demo-ruby-gem", version: "0.1.0" }),
+      );
+      await expect(
+        getFile("demo-ruby-gem", "lib/demo_ruby_gem/version.rb", cwd),
+      ).resolves.toContain(`VERSION = "0.2.1"`);
+      await expect(
+        getFile("demo-ruby-gem", "demo-ruby-gem.gemspec", cwd),
+      ).resolves.toContain(`spec.version = "0.2.1"`);
+      await expect(
+        getFile("demo-ruby-gem", "Gemfile.lock", cwd),
+      ).resolves.toContain(`demo-ruby-gem (0.2.1)`);
+    });
   });
 
   it("should not touch package.json of an ignored package when it is not a dependent of any releasedPackages", async () => {
