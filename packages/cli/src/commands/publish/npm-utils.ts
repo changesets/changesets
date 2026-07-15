@@ -161,19 +161,6 @@ function normalizeInfoJson(parsed: any) {
   return Array.isArray(parsed) ? parsed[0] : parsed;
 }
 
-// Bare query matched nothing in npm <=11 with empty stdout, npm >=12 with an E404 "No match found for version" error
-function isNoMatchResult(stdout: string): boolean {
-  if (stdout === "") {
-    return true;
-  }
-  const error = jsonParse(stdout)?.error;
-  return (
-    error?.code === "E404" &&
-    typeof error.summary === "string" &&
-    error.summary.startsWith("No match found for version")
-  );
-}
-
 export function getPackageInfo(packageJson: PackageJSON) {
   return npmRequestQueue.add(async () => {
     info(`npm info ${packageJson.name}`);
@@ -189,9 +176,9 @@ export function getPackageInfo(packageJson: PackageJSON) {
       "--json",
     ]);
 
-    // Bare query matched nothing — retry with exact version specifier
+    // Bare query returned nothing — retry with exact version specifier
     // to handle prerelease-only packages on registries without auto-`latest`.
-    if (isNoMatchResult(result.stdout.toString())) {
+    if (result.stdout.toString() === "") {
       result = await spawn("npm", [
         "info",
         `${packageJson.name}@${packageJson.version}`,
