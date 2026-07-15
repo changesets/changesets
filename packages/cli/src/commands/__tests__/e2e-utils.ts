@@ -323,7 +323,16 @@ function createNpmGitdir(packageManager: string) {
 }
 
 function createPnpmGitdir(packageManager: string) {
-  return ({ registry }: PmGitdirContext, fixture: Fixture = {}) => {
+  return async (
+    { pmBinPath, registry }: PmGitdirContext,
+    fixture: Fixture = {},
+  ) => {
+    const npmPath = path.join(pmBinPath, "npm");
+    const hasNpmShim = await fs
+      .access(npmPath)
+      .then(() => true)
+      .catch(() => false);
+
     return gitdir({
       "package.json": JSON.stringify({
         packageManager,
@@ -335,6 +344,9 @@ function createPnpmGitdir(packageManager: string) {
         registry && `registry=${registry.url}`,
         registry?.authToken &&
           `//${registry.host}/:_authToken=${registry.authToken}`,
+        // pnpm 10 publish delegates to npm and prepends the active Node binary's
+        // directory to PATH, which can otherwise pick the host-bundled npm.
+        hasNpmShim && `npm-path=${npmPath}`,
       ].join("\n"),
       ...fixture,
     });
