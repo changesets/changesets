@@ -1,4 +1,3 @@
-import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { npmPublishQueue } from "./common.ts";
 import type { PublishOptions, PublishResult, PublishTool } from "./types.ts";

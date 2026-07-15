@@ -1,7 +1,6 @@
 import path from "node:path";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
-import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import type { PreState } from "@changesets/types";
 import { log, progress, spinner } from "@clack/prompts";
@@ -19,7 +18,7 @@ import {
 } from "../../lib/common.ts";
 import type { PublishResult } from "../../lib/types.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
-import { createOutputReport, type OutputReporter } from "../../utils/output.ts";
+import { createOutputReport } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import {
   getPublishPlan,
