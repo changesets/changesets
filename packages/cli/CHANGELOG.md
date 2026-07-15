@@ -1,5 +1,11 @@
 # @changesets/cli
 
+## 2.31.1
+
+### Patch Changes
+
+- [#2159](https://github.com/changesets/changesets/pull/2159) [`15cf592`](https://github.com/changesets/changesets/commit/15cf5928fb9968ba20b59ed6c794013c52c92d09) Thanks [@ingvaldlorentzen](https://github.com/ingvaldlorentzen)! - Fixed already-published version detection with npm 12, which always wraps successful `npm info --json` output in an array. The unwrapped output made `changeset publish` treat every package as unpublished and fail attempting to republish existing versions.
+
 ## 2.31.0
 
 ### Minor Changes
