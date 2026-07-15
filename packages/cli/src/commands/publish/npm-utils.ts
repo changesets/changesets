@@ -155,13 +155,10 @@ export async function getTokenIsRequired() {
 //   published with preState.tag rather than "latest".
 
 // npm 12 always wraps successful `npm info --json` output in an array.
-// Unwrap it so downstream consumers keep seeing a single manifest, if multiple versions matched, the last entry is
-// the highest one
+// Unwrap it so downstream consumers keep seeing a single manifest.
 function normalizeInfoJson(parsed: any) {
-  if (!Array.isArray(parsed)) {
-    return parsed;
-  }
-  return parsed.at(-1) ?? { error: { code: "E404" } };
+  // given we query the implicit `latest` tag or an exact version, the resulting array should have at most one element
+  return Array.isArray(parsed) ? parsed[0] : parsed;
 }
 
 // Bare query matched nothing in npm <=11 with empty stdout, npm >=12 with an E404 "No match found for version" error
