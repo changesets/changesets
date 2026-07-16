@@ -21,7 +21,7 @@ exports[`Publish command e2e > 'npm 10' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -33,7 +33,7 @@ exports[`Publish command e2e > 'npm 10' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages◑  Publishing packages◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
+◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
 You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
@@ -46,7 +46,7 @@ exports[`Publish command e2e > 'npm 10' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages◇  pkg-a requires 2FA verification to publish...
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
 {
   "error": {
     "code": "EOTP",
@@ -82,7 +82,7 @@ exports[`Publish command e2e > 'npm 11' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -94,7 +94,7 @@ exports[`Publish command e2e > 'npm 11' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
+◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
 You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
@@ -107,7 +107,7 @@ exports[`Publish command e2e > 'npm 11' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages◇  pkg-a requires 2FA verification to publish...
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
 {
   "error": {
     "code": "EOTP",
@@ -143,7 +143,7 @@ exports[`Publish command e2e > 'npm 12' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -155,7 +155,7 @@ exports[`Publish command e2e > 'npm 12' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
+◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
 You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
@@ -168,7 +168,7 @@ exports[`Publish command e2e > 'npm 12' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages◇  pkg-a requires 2FA verification to publish...
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
 {
   "error": {
     "code": "EOTP",
@@ -191,7 +191,7 @@ Received 404 for pnpm info pkg-a
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-[?25l◒  Publishing packages[1G[J◐  Publishing packages[1G[J◓  Publishing packages[1G[J[?25h[?25l◇  Successfully published:
+[?25l◒  Publishing packages[1G[J◐  Publishing packages[1G[J◓  Publishing packages[1G[J◑  Publishing packages[1G[J◒  Publishing packages[1G[J[?25h[?25l◇  Successfully published:
 pkg-a@1.0.0
 [?25h[?25l◇  Created git tags:
 - pkg-a@1.0.0
@@ -204,7 +204,7 @@ exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures fo
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages◑  Publishing packages◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -216,7 +216,7 @@ exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures wh
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
+◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
 You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
@@ -229,7 +229,7 @@ exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces web-auth OTP publis
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages◇  pkg-a requires 2FA verification to publish...
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
 {
   "error": {
     "code": "EOTP",
@@ -265,7 +265,7 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures for bad cre
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -277,7 +277,7 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures when not lo
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
+◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
 You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
@@ -290,7 +290,7 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces web-auth OTP publish failure
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages◇  pkg-a requires 2FA verification to publish...
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
 {
   "error": {
     "code": "EOTP",
@@ -326,7 +326,7 @@ exports[`Publish command e2e > 'yarn 4' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages◑  Publishing packages▲  Failed to publish pkg-a: Invalid authentication (as an unknown user)
+◒  Publishing packages▲  Failed to publish pkg-a: Invalid authentication (as an unknown user)
 🦋 Exited with code 1
 
 "
@@ -338,7 +338,7 @@ exports[`Publish command e2e > 'yarn 4' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◐  Publishing packages◓  Publishing packages▲  Failed to publish pkg-a: No authentication configured for request
+◒  Publishing packages▲  Failed to publish pkg-a: No authentication configured for request
 🦋 Exited with code 1
 
 "

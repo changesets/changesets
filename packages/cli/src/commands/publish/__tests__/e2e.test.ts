@@ -222,6 +222,10 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
 
 function sanitizePublishLog(message: unknown, registryUrl: string) {
   return stripVTControlCharacters(String(message))
+    .replaceAll(
+      /(?:[◒◐◓◑] {2}Publishing packages)+/g,
+      "◒  Publishing packages",
+    )
     .replaceAll(new URL(registryUrl).origin, "[registry-url]")
     .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
     .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]");
