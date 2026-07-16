@@ -20,7 +20,7 @@
     "@changesets/errors": "workspace:^",
     "@changesets/types": "workspace:^",
     "@manypkg/get-packages": "^3.1.0",
-    "picomatch": "^4.0.4",
+    "picomatch": "^4.0.5",
     "tinyexec": "^1.2.4"
   },
   "devDependencies": {

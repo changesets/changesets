@@ -26,7 +26,7 @@
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",
     "@manypkg/get-packages": "^3.1.0",
-    "picomatch": "^4.0.4"
+    "picomatch": "^4.0.5"
   },
   "devDependencies": {
     "@changesets/test-utils": "workspace:*",
