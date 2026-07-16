@@ -93,7 +93,7 @@ export async function publish(options?: PublishOptions) {
   const packagesByName = new Map(
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
-  const publishTool = getPublishTool(packages.tool);
+  const publishTool = await getPublishTool(packages);
   await ensureChangesetFolder(packages.rootDir);
 
   const releaseTag =

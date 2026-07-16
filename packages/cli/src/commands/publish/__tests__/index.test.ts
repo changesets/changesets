@@ -1,4 +1,3 @@
-/* eslint-disable vitest/no-disabled-tests */
 import fs from "node:fs/promises";
 import * as path from "node:path";
 import { defaultConfig } from "@changesets/config";
@@ -56,27 +55,6 @@ function mockExecImplementation(
     Promise.resolve(fn(cmd, args ?? []))) as any);
 }
 
-function stubIsTTY(value: boolean) {
-  const originalDescriptor = Object.getOwnPropertyDescriptor(
-    process.stdin,
-    "isTTY",
-  );
-  Object.defineProperty(process.stdin, "isTTY", {
-    configurable: true,
-    ...originalDescriptor,
-    value,
-  });
-  return {
-    [Symbol.dispose]() {
-      if (originalDescriptor) {
-        Object.defineProperty(process.stdin, "isTTY", originalDescriptor);
-      } else {
-        Reflect.deleteProperty(process.stdin, "isTTY");
-      }
-    },
-  };
-}
-
 describe("Publish command", () => {
   silenceLogsInBlock();
 
@@ -117,27 +95,26 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  describe("in pre state", () => {
-    it("should report error if the tag option is used in pre release", async () => {
-      const cwd = await testdir({
-        "package.json": JSON.stringify({
-          private: true,
-          workspaces: ["packages/*"],
-        }),
-        "package-lock.json": "",
-        "packages/pkg-a/package.json": JSON.stringify({
-          name: "pkg-a",
-          version: "1.0.0",
-        }),
-        ".changeset/pre.json": JSON.stringify({
-          ...modifiedDefaultConfig,
-          mode: "pre",
-        }),
-      });
-      await expect(
-        publishCommand({ cwd, tag: "experimental" }),
-      ).rejects.toThrow();
+  it("in pre state should report error if the tag option is used in pre release", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/pre.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        mode: "pre",
+      }),
     });
+
+    await expect(
+      publishCommand({ cwd, tag: "experimental" }),
+    ).rejects.toThrow();
   });
 
   it("publishes release chunks sequentially", async () => {

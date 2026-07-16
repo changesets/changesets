@@ -1,4 +1,4 @@
-import type { ModCompWithPackage, VersionType } from "@changesets/types";
+import type { PackageJSON, VersionType } from "@changesets/types";
 import Range from "semver/classes/range.js";
 import semverPrerelease from "semver/functions/prerelease.js";
 import validRange from "semver/ranges/valid.js";
@@ -12,41 +12,34 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
-export type ModCompWithPackageAndChangelog = ModCompWithPackage & {
-  changelog: string | null;
+type VersionToUpdate = {
+  name: string;
+  version: string;
+  oldVersion: string;
+  type: VersionType;
+  dir: string;
 };
 
-type ModCompWithPackageAndChangelogAndEdits = ModCompWithPackageAndChangelog & {
-  pkgJsonEdits: EditJsonOperation[];
+export type DependencyUpdateOptions = {
+  cwd: string;
+  updateInternalDependencies: "patch" | "minor";
+  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+  bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  snapshot?: string | boolean | undefined;
 };
 
-export function versionPackage(
-  release: ModCompWithPackageAndChangelog,
-  versionsToUpdate: Array<{
-    name: string;
-    version: string;
-    oldVersion: string;
-    type: VersionType;
-    dir: string;
-  }>,
+export function getDependencyVersionEdits(
+  packageJson: PackageJSON,
+  versionsToUpdate: VersionToUpdate[],
   {
     cwd,
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
     bumpVersionsWithWorkspaceProtocolOnly,
     snapshot,
-  }: {
-    cwd: string;
-    updateInternalDependencies: "patch" | "minor";
-    onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-    bumpVersionsWithWorkspaceProtocolOnly?: boolean;
-    snapshot?: string | boolean | undefined;
-  },
-): ModCompWithPackageAndChangelogAndEdits {
+  }: DependencyUpdateOptions,
+): EditJsonOperation[] {
   const pkgJsonEdits: EditJsonOperation[] = [];
-  const { newVersion, packageJson } = release;
-
-  pkgJsonEdits.push({ keys: ["version"], value: newVersion });
 
   for (const depType of DEPENDENCY_TYPES) {
     const deps = packageJson[depType];
@@ -117,7 +110,7 @@ export function versionPackage(
     }
   }
 
-  return { ...release, pkgJsonEdits };
+  return pkgJsonEdits;
 }
 
 function getVersionRangeType(

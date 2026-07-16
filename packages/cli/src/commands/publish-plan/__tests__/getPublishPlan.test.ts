@@ -240,6 +240,9 @@ describe("getPublishPlan", () => {
       published: true,
       pkgInfo: {
         versions: ["1.0.0-next.1", "1.0.0-next.2"],
+        "dist-tags": {
+          latest: "1.0.0-next.2",
+        },
       },
     });
 
