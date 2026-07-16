@@ -1,7 +1,6 @@
 /* eslint-disable vitest/no-disabled-tests */
 import fs from "node:fs/promises";
 import * as path from "node:path";
-import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
@@ -9,11 +8,6 @@ import type { Config } from "@changesets/types";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { publish as publishCommand } from "../index.ts";
-
-/*
- * These tests are being ignored/disabled in favor of the new E2E tests,
- * coming in a follow-up PR.
- */
 
 const mockedLogger = vi.hoisted(() => ({
   success: vi.fn(),
@@ -123,135 +117,6 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  it.skip("publishes without otp in non-tty mode", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    using _ = stubIsTTY(false);
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult("");
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd });
-
-    expect(mockedExec).toHaveBeenCalledWith(
-      "npm",
-      expect.not.arrayContaining(["--otp"]),
-      expect.objectContaining({
-        nodeOptions: expect.objectContaining({
-          cwd: path.join(cwd, "packages", "pkg-a"),
-          env: expect.objectContaining({
-            NPM_CONFIG_OTP: undefined,
-          }),
-        }),
-      }),
-    );
-  });
-
-  it.skip("reads initial otp from env and strips it from forwarded env", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    vi.stubEnv("NPM_CONFIG_OTP", "123456");
-    using _ = stubIsTTY(false);
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult("");
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd });
-
-    expect(mockedExec).toHaveBeenCalledWith(
-      "npm",
-      expect.arrayContaining(["publish", "--otp", "123456"]),
-      expect.objectContaining({
-        nodeOptions: expect.objectContaining({
-          env: expect.objectContaining({
-            NPM_CONFIG_OTP: undefined,
-          }),
-        }),
-      }),
-    );
-  });
-
-  it.skip("reads initial otp from PNPM_CONFIG_OTP for pnpm", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    vi.stubEnv("PNPM_CONFIG_OTP", "654321");
-    using _ = stubIsTTY(false);
-    mockExecImplementation(async (_command, args) => {
-      if (args.length === 1 && args[0] === "--version") {
-        return execResult("11.0.0");
-      }
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult("");
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd });
-
-    expect(mockedExec).toHaveBeenCalledWith(
-      "pnpm",
-      expect.arrayContaining(["publish", "--otp", "654321"]),
-      expect.objectContaining({
-        nodeOptions: expect.objectContaining({
-          env: expect.objectContaining({
-            PNPM_CONFIG_OTP: undefined,
-          }),
-        }),
-      }),
-    );
-  });
-
   describe("in pre state", () => {
     it("should report error if the tag option is used in pre release", async () => {
       const cwd = await testdir({
@@ -275,7 +140,7 @@ describe("Publish command", () => {
     });
   });
 
-  it.skip("publishes release chunks sequentially", async () => {
+  it("publishes release chunks sequentially", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -323,7 +188,7 @@ describe("Publish command", () => {
     ]);
   });
 
-  it.skip("writes tag events when output path is provided", async () => {
+  it("writes tag events when output path is provided", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -372,7 +237,7 @@ describe("Publish command", () => {
     );
   });
 
-  it.skip("creates an empty output file when there is nothing to publish or tag", async () => {
+  it("creates an empty output file when there is nothing to publish or tag", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -405,7 +270,7 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  it.skip("stops publishing after a failed chunk", async () => {
+  it("stops publishing after a failed chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -453,385 +318,7 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
-  it.skip("does not log a success message for a failed publish", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult(
-          "",
-          1,
-          JSON.stringify({
-            error: {
-              code: "E403",
-              summary: "failed",
-            },
-          }),
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await expect(publishCommand({ cwd })).rejects.toThrow();
-
-    const successMessages = mockedLogger.success.mock.calls.map((call) =>
-      stripVTControlCharacters(String(call[0])),
-    );
-    expect(
-      successMessages.some((message) =>
-        message.includes("Published pkg-a@1.0.0!"),
-      ),
-    ).toBe(false);
-  });
-
-  it.skip("logs pnpm error messages from the message field", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args.length === 1 && args[0] === "--version") {
-        return execResult("11.0.0");
-      }
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult(
-          "",
-          1,
-          JSON.stringify({
-            error: {
-              code: "E404",
-              message: "404 Not Found - PUT https://registry.npmjs.org/pkg-a",
-            },
-          }),
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await expect(publishCommand({ cwd })).rejects.toThrow();
-
-    expect(mockedLogger.error).toHaveBeenCalled();
-    const errorMessages = mockedLogger.error.mock.calls.map((call) =>
-      stripVTControlCharacters(String(call[0])),
-    );
-    expect(
-      errorMessages.some(
-        (message) =>
-          message.includes("An error occurred while publishing pkg-a: E404") &&
-          message.includes(
-            "404 Not Found - PUT https://registry.npmjs.org/pkg-a",
-          ),
-      ),
-    ).toBe(true);
-    expect(errorMessages.some((message) => message.includes("undefined"))).toBe(
-      false,
-    );
-  });
-
-  it.skip("logs pnpm 10 error summaries from the summary field", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args.length === 1 && args[0] === "--version") {
-        return execResult("10.0.0");
-      }
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult(
-          "",
-          1,
-          JSON.stringify({
-            error: {
-              code: "E404",
-              summary: "404 Not Found - PUT https://registry.npmjs.org/pkg-a",
-            },
-          }),
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await expect(publishCommand({ cwd })).rejects.toThrow();
-
-    expect(mockedLogger.error).toHaveBeenCalled();
-    const errorMessages = mockedLogger.error.mock.calls.map((call) =>
-      stripVTControlCharacters(String(call[0])),
-    );
-    expect(
-      errorMessages.some(
-        (message) =>
-          message.includes("An error occurred while publishing pkg-a: E404") &&
-          message.includes(
-            "404 Not Found - PUT https://registry.npmjs.org/pkg-a",
-          ),
-      ),
-    ).toBe(true);
-    expect(errorMessages.some((message) => message.includes("undefined"))).toBe(
-      false,
-    );
-  });
-
-  it.skip("skips npm already-published JSON errors without a code", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult(
-          "",
-          1,
-          JSON.stringify({
-            error: {
-              summary:
-                "You cannot publish over the previously published versions: 1.0.0.",
-              detail: "",
-            },
-          }),
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await publishCommand({ cwd });
-
-    expect(git.tag).not.toHaveBeenCalled();
-    const successMessages = mockedLogger.success.mock.calls.map((call) =>
-      stripVTControlCharacters(String(call[0])),
-    );
-    expect(
-      successMessages.some((message) =>
-        message.includes("Published pkg-a@1.0.0!"),
-      ),
-    ).toBe(false);
-  });
-
-  it.skip("retries interactively when npm puts the OTP hint in the detail field", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    using _ = stubIsTTY(true);
-    let publishAttempts = 0;
-    mockedExec.mockImplementation(((cmd: string, args?: readonly string[]) => {
-      const safeArgs = args ?? [];
-      let result: ReturnType<typeof execResult>;
-      if (safeArgs[0] === "info") {
-        result = execResult("");
-      } else if (safeArgs[0] === "publish") {
-        publishAttempts++;
-        result =
-          publishAttempts === 1
-            ? execResult(
-                "",
-                1,
-                JSON.stringify({
-                  error: {
-                    code: "E401",
-                    summary:
-                      "This operation requires a one-time password from your authenticator.",
-                    detail:
-                      "You can provide a one-time password by passing --otp=<code> to the command you ran.",
-                  },
-                }),
-              )
-            : execResult("");
-      } else {
-        throw new Error(`Unexpected exec args: ${safeArgs.join(" ")}`);
-      }
-      return Object.assign(Promise.resolve(result), {
-        exitCode: result.exitCode,
-        command: cmd,
-      });
-    }) as any);
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd });
-
-    expect(
-      mockedExec.mock.calls
-        .filter((call) => call[1]?.[0] === "publish")
-        .map((call) => call[1]),
-    ).toEqual([
-      expect.arrayContaining(["publish", "--json"]),
-      expect.not.arrayContaining(["--json"]),
-    ]);
-    expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
-  });
-
-  it.skip("retries interactively when pnpm reports a non-interactive OTP error", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    using _ = stubIsTTY(true);
-    let publishAttempts = 0;
-    mockedExec.mockImplementation(((cmd: string, args?: readonly string[]) => {
-      const safeArgs = args ?? [];
-      let result: ReturnType<typeof execResult>;
-      if (safeArgs.length === 1 && safeArgs[0] === "--version") {
-        result = execResult("11.0.0");
-      } else if (safeArgs[0] === "info") {
-        result = execResult("");
-      } else if (safeArgs[0] === "publish") {
-        publishAttempts++;
-        result =
-          publishAttempts === 1
-            ? execResult(
-                "",
-                1,
-                JSON.stringify({
-                  error: {
-                    code: "ERR_PNPM_OTP_NON_INTERACTIVE",
-                    message:
-                      "The registry requires additional authentication, but pnpm is not running in an interactive terminal",
-                  },
-                }),
-              )
-            : execResult("");
-      } else {
-        throw new Error(`Unexpected exec args: ${safeArgs.join(" ")}`);
-      }
-      return Object.assign(Promise.resolve(result), {
-        exitCode: result.exitCode,
-        command: cmd,
-      });
-    }) as any);
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd });
-
-    expect(
-      mockedExec.mock.calls
-        .filter((call) => call[1]?.[0] === "publish")
-        .map((call) => call[1]),
-    ).toEqual([
-      expect.arrayContaining(["publish", "--json"]),
-      expect.not.arrayContaining(["--json"]),
-    ]);
-    expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
-  });
-
-  it.skip("skips already-published pnpm JSON errors from the message field", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args.length === 1 && args[0] === "--version") {
-        return execResult("11.0.0");
-      }
-      if (args[0] === "info") {
-        return execResult("");
-      }
-      if (args[0] === "publish") {
-        return execResult(
-          "",
-          1,
-          JSON.stringify({
-            error: {
-              code: "E403",
-              message:
-                "You cannot publish over the previously published version 1.0.0.",
-            },
-          }),
-        );
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-
-    await publishCommand({ cwd });
-
-    expect(git.tag).not.toHaveBeenCalled();
-    const successMessages = mockedLogger.success.mock.calls.map((call) =>
-      stripVTControlCharacters(String(call[0])),
-    );
-    expect(
-      successMessages.some((message) =>
-        message.includes("Published pkg-a@1.0.0!"),
-      ),
-    ).toBe(false);
-  });
-
-  it.skip("tags tag-only releases within their chunk", async () => {
+  it("tags tag-only releases within their chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -877,70 +364,6 @@ describe("Publish command", () => {
     expect(vi.mocked(git.tag).mock.calls.map((call) => call[0])).toEqual([
       "pkg-a@1.0.0",
       "pkg-b@1.0.0",
-    ]);
-  });
-
-  it.skip("publishes from a pack directory", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-      ".packed/publish-plan.json": JSON.stringify({
-        version: 1,
-        plan: [
-          [
-            {
-              kind: "publish",
-              name: "pkg-a",
-              version: "1.0.0",
-              access: "public",
-              tag: "latest",
-              tarball: {
-                path: "packages/pkg-a-1.0.0.tgz",
-                integrity: "sha256-abc",
-              },
-            },
-          ],
-        ],
-      }),
-    });
-
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "publish") {
-        return execResult("");
-      }
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
-    vi.mocked(git.tag).mockResolvedValue(true);
-
-    await publishCommand({ cwd, fromPackDir: ".packed" });
-
-    expect(
-      mockedExec.mock.calls.filter((call) => call[1]?.[0] === "publish"),
-    ).toEqual([
-      expect.arrayContaining([
-        "npm",
-        [
-          "publish",
-          path.join("..", "..", ".packed", "packages", "pkg-a-1.0.0.tgz"),
-          "--json",
-          "--access",
-          "public",
-          "--tag",
-          "latest",
-        ],
-        expect.anything(),
-      ]),
-    ]);
-    expect(vi.mocked(git.tag).mock.calls.map((call) => call[0])).toEqual([
-      "pkg-a@1.0.0",
     ]);
   });
 
