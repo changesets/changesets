@@ -1736,12 +1736,24 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
+      let output = "";
+      let otpWritten = false;
       const result = await runCliCommand({
         command: "publish",
         cwd,
+        onData(chunk, write) {
+          output += chunk;
+          if (
+            !otpWritten &&
+            (output.includes("Enter OTP:") ||
+              output.includes("One-time password:"))
+          ) {
+            otpWritten = true;
+            write("654321\r");
+          }
+        },
         pmBinPath,
         signal,
-        stdin: "654321\n",
         tty: true,
       });
       expect.soft(result.exitCode).toBe(0);

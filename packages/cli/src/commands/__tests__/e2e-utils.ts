@@ -220,8 +220,8 @@ function execTty(
   command: string,
   args: string[],
   options: {
+    onData?: (chunk: string, write: (data: string) => void) => void;
     signal?: AbortSignal;
-    stdin?: string;
     nodeOptions: {
       cwd: string;
       env?: NodeJS.ProcessEnv;
@@ -244,6 +244,7 @@ function execTty(
     });
     const data = child.onData((chunk) => {
       output += chunk;
+      options.onData?.(chunk, (data) => child.write(data));
     });
 
     const cleanup = () => {
@@ -269,9 +270,6 @@ function execTty(
     });
 
     options.signal?.addEventListener("abort", abort, { once: true });
-    if (typeof options.stdin === "string") {
-      child.write(options.stdin.replaceAll("\n", "\r"));
-    }
   });
 }
 
@@ -280,9 +278,9 @@ export async function runCliCommand(options: {
   cwd: string;
   args?: string[];
   env?: NodeJS.ProcessEnv;
+  onData?: (chunk: string, write: (data: string) => void) => void;
   pmBinPath: string;
   signal?: AbortSignal;
-  stdin?: string;
   tty?: boolean;
 }): Promise<ExecResult> {
   const args = [
@@ -296,8 +294,8 @@ export async function runCliCommand(options: {
   const env = createPmBinEnv(options.pmBinPath, options.env);
   if (options.tty) {
     return execTty(process.execPath, args, {
+      onData: options.onData,
       signal: options.signal,
-      stdin: options.stdin,
       nodeOptions: {
         cwd: options.cwd,
         env,
@@ -308,7 +306,6 @@ export async function runCliCommand(options: {
   return exec(process.execPath, args, {
     nodePath: false,
     signal: options.signal,
-    stdin: options.stdin,
     nodeOptions: {
       cwd: options.cwd,
       env,
