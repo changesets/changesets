@@ -170,6 +170,7 @@ describe("Publish command", () => {
       }
       throw new Error(`Unexpected exec args: ${args.join(" ")}`);
     });
+    vi.mocked(git.getAllTags).mockResolvedValue(new Set());
     vi.mocked(git.tag).mockResolvedValue(true);
 
     await publishCommand({ cwd });
@@ -216,6 +217,7 @@ describe("Publish command", () => {
       }
       throw new Error(`Unexpected exec args: ${args.join(" ")}`);
     });
+    vi.mocked(git.getAllTags).mockResolvedValue(new Set());
     vi.mocked(git.tag).mockResolvedValue(true);
 
     await publishCommand({ cwd, output: outputFile });
@@ -355,6 +357,7 @@ describe("Publish command", () => {
       }
       throw new Error(`Unexpected exec args: ${args.join(" ")}`);
     });
+    vi.mocked(git.getAllTags).mockResolvedValue(new Set());
     vi.mocked(git.tagExists).mockResolvedValue(false);
     vi.mocked(git.remoteTagExists).mockResolvedValue(false);
     vi.mocked(git.tag).mockResolvedValue(true);
