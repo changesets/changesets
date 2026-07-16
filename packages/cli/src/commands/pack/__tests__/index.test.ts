@@ -5,23 +5,32 @@ import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import * as npmUtils from "../../publish/npm-utils.ts";
 import { pack } from "../index.ts";
+
+const mockedLogger = vi.hoisted(() => ({
+  error: vi.fn(),
+  info: vi.fn(),
+}));
+
+vi.mock("@clack/prompts", async (importOriginal) => {
+  return {
+    ...(await importOriginal()),
+    log: mockedLogger,
+  };
+});
 
 vi.mock("@changesets/git");
 vi.mock("tinyexec");
-vi.mock("../../publish/npm-utils.ts");
 
 const mockedExec = vi.mocked(exec);
 const mockedGit = vi.mocked(git);
-const mockedNpmUtils = vi.mocked(npmUtils);
 
-function execResult(stdout: string, exitCode = 0) {
+function execResult(stdout: string, exitCode = 0, stderr = "") {
   return {
     command: "",
     args: [],
     stdout,
-    stderr: "",
+    stderr,
     exitCode,
     failed: exitCode !== 0,
     signal: undefined,
@@ -74,14 +83,13 @@ describe("pack", () => {
       }),
     });
     const outputDir = path.join(cwd, ".packed");
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
-      published: false,
-      pkgInfo: { version: "1.0.0" },
-    });
-    mockedNpmUtils.getPublishTool.mockReturnValue({ name: "npm" } as never);
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
     mockExecImplementation(async (cmd, args) => {
+      if (cmd === "npm" && args[0] === "info") {
+        return execResult(JSON.stringify({ versions: [] }));
+      }
+
       const dest = args[args.indexOf("--pack-destination") + 1];
       const tarballFilename = "pkg-a-1.0.0.tgz";
       await fs.mkdir(dest, { recursive: true });
@@ -154,7 +162,6 @@ describe("pack", () => {
       ],
     ];
 
-    mockedNpmUtils.getPublishTool.mockReturnValue({ name: "npm" } as never);
     await fs.writeFile(
       path.join(cwd, "publish-plan.json"),
       JSON.stringify({ version: 1, plan }, undefined, 2),
