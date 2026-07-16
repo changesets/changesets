@@ -320,10 +320,7 @@ exports[`Publish command e2e > 'yarn 4' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: {"file":"index.js"}
-{"file":"package.json"}
-? One-time password: › ERROR: Yarn is terminating due to an unexpected empty event loop.
-Please report this issue at https://github.com/yarnpkg/berry/issues.
+◒  Publishing packages▲  Failed to publish pkg-a: Invalid OTP token
 🦋 Exited with code 1
 
 "

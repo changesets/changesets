@@ -43,6 +43,10 @@ export const publish: PublishTool["publish"] = async ({
 
     const { exitCode, stdout, stderr } = await exec("yarn", args, {
       nodePath: false,
+      // Work around Yarn Berry prompting for OTP on stdin instead of reporting
+      // the auth failure in the JSON-capturing child process. Fixed upstream in:
+      // https://github.com/yarnpkg/berry/pull/7209
+      ...(!interactive && { stdin: "not-otp\n" }),
       nodeOptions: {
         cwd: pkg.dir,
         stdio: interactive ? "inherit" : "pipe",
