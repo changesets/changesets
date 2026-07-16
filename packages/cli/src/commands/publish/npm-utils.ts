@@ -43,31 +43,9 @@ function jsonParse(input: string) {
   }
 }
 
-export function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  if (env.npm_config_registry === "https://registry.yarnpkg.com") {
-    // Due to a super annoying issue in classic yarn, we have to manually strip this env variable.
-    // The issue is that `yarn run` overrides the `npm_config_registry` env variable with its read-only mirror.
-    // Then the publish command runs from within it and inherits that env variable. Env variable trumps config values
-    // and even trumps the `yarn publish`'s default publish registry (npm one) so the whole thing ends up failing.
-    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-    return {
-      ...env,
-      npm_config_registry: undefined,
-    };
-  }
-  return env;
-}
+export type PublishTool = { name: "npm" } | { name: "pnpm" } | { name: "yarn" };
 
-type YarnPublishTool = {
-  name: "yarn";
-  version: "classic" | "berry";
-};
-
-export type PublishTool = { name: "npm" } | { name: "pnpm" } | YarnPublishTool;
-
-async function getYarnVersion(
-  packages: Packages,
-): Promise<YarnPublishTool["version"]> {
+async function getYarnVersion(packages: Packages) {
   const { stdout } = await exec("yarn", ["--version"], {
     nodePath: false,
     nodeOptions: {
@@ -84,7 +62,12 @@ export async function getPublishTool(packages: Packages): Promise<PublishTool> {
     return { name: "pnpm" };
   }
   if (type === "yarn") {
-    return { name: "yarn", version: await getYarnVersion(packages) };
+    if ((await getYarnVersion(packages)) === "classic") {
+      throw new Error(
+        "Yarn Classic is not supported. Please upgrade to Yarn Berry or another maintained package manager.",
+      );
+    }
+    return { name: "yarn" };
   }
   return { name: "npm" };
 }
@@ -93,15 +76,7 @@ function parseInfoOutput(publishTool: PublishTool, output: string) {
   if (publishTool.name === "yarn") {
     let info: unknown;
     for (const entry of streamNdjson(output)) {
-      if (publishTool.version === "berry") {
-        // `yarn npm info --json` writes the payload we care about as a direct NDJSON object,
-        // not wrapped in a reporter event like classic's `inspect`.
-        info = entry;
-        continue;
-      }
-      if (isJsonObject(entry) && entry.type === "inspect" && "data" in entry) {
-        info = entry.data;
-      }
+      info = entry;
     }
 
     return info;
@@ -139,7 +114,7 @@ function parseInfoResult(
 }
 
 function getInfoCommand(publishTool: PublishTool) {
-  return publishTool.name === "yarn" && publishTool.version === "berry"
+  return publishTool.name === "yarn"
     ? [publishTool.name, "npm", "info"]
     : [publishTool.name, "info"];
 }
@@ -178,7 +153,7 @@ export function getPackageInfo(
   return npmRequestQueue.add(async () => {
     const registryOverrides: string[] = [];
 
-    // Yarn Berry doesn't support `yarn npm info --registry` even though it does support `publishConfig.registry` as a publish-time override.
+    // Yarn doesn't support `yarn npm info --registry` even though it does support `publishConfig.registry` as a publish-time override.
     // But it also supports separate `npmRegistryServer` and `npmPublishRegistry` for the same scope.
     // So it seems that in their model we should be using the *fetch* registry for info queries *anyway*.
     //
@@ -187,10 +162,7 @@ export function getPackageInfo(
     // https://github.com/pnpm/pnpm/blob/b4fdfe9b3381bde2b09c1aa8af9f31446b177c83/pnpm11/releasing/commands/src/publish/recursivePublish.ts#L85-L94
     //
     // We match that behavior and in pnpm we treat `publishConfig.registry` as a publish-time override only.
-    if (
-      publishTool.name !== "pnpm" &&
-      !(publishTool.name === "yarn" && publishTool.version === "berry")
-    ) {
+    if (publishTool.name === "npm") {
       // npm actually uses the `publishConfig.registry` value when querying package info during publish:
       // https://github.com/npm/cli/blob/ed729620b1297f44ccf2517fd19fbaffdc225ed9/lib/commands/publish.js#L150
       //
@@ -295,10 +267,9 @@ export async function infoAllow404(
     pkgInfo.error?.code === "ERR_PNPM_FETCH_404" ||
     // pnpm 11: the queried exact package version does not exist in the registry.
     pkgInfo.error?.code === "ERR_PNPM_PACKAGE_NOT_FOUND" ||
-    // Yarn Berry: failed info requests are reporter errors. Missing packages
+    // Yarn: failed info requests are reporter errors. Missing packages
     // use YN0035 with the registry response code included in the joined data.
     (publishTool.name === "yarn" &&
-      publishTool.version === "berry" &&
       pkgInfo.error?.code === "YN0035" &&
       pkgInfo.error.message.includes("Response Code: 404"))
   ) {
@@ -386,7 +357,7 @@ function isInteractiveAuthError(
   publishTool: PublishTool,
   publishError: { code: string; message: string },
 ): boolean {
-  if (publishTool.name === "yarn" && publishTool.version === "berry") {
+  if (publishTool.name === "yarn") {
     return (
       publishError.code === "YN0033" ||
       /\b(otp|one-time password|authentication)\b/i.test(publishError.message)
@@ -416,20 +387,13 @@ async function internalPublish(
   authState: AuthState,
 ): Promise<InternalPublishResult> {
   const publishArgs =
-    publishTool.name === "yarn" && publishTool.version === "berry"
-      ? ["npm", "publish"]
-      : ["publish"];
+    publishTool.name === "yarn" ? ["npm", "publish"] : ["publish"];
   if (opts.target) {
     publishArgs.push(path.relative(opts.cwd, opts.target));
   }
   const publishFlags = ["--access", release.access, "--tag", release.tag];
   if (publishTool.name === "pnpm") {
     publishFlags.push("--no-git-checks");
-  } else if (publishTool.name === "yarn" && publishTool.version === "classic") {
-    publishFlags.push("--new-version", release.version, "--no-git-tag-version");
-    if (!process.stdin.isTTY) {
-      publishFlags.push("--non-interactive");
-    }
   }
 
   if (process.stdin.isTTY && authState.requiresInteractive) {
@@ -479,13 +443,12 @@ async function internalPublish(
     publishTool.name,
     [...publishArgs, ...publishFlags],
     {
-      ...(publishTool.name === "yarn" &&
-        publishTool.version === "berry" && {
-          // Work around Yarn Berry prompting for OTP on stdin instead of reporting
-          // the auth failure in the JSON-capturing child process. Fixed upstream in:
-          // https://github.com/yarnpkg/berry/pull/7209
-          stdin: "not-otp\n",
-        }),
+      ...(publishTool.name === "yarn" && {
+        // Work around Yarn Berry prompting for OTP on stdin instead of reporting
+        // the auth failure in the JSON-capturing child process. Fixed upstream in:
+        // https://github.com/yarnpkg/berry/pull/7209
+        stdin: "not-otp\n",
+      }),
       nodeOptions: {
         env: opts.env,
         cwd: opts.cwd,
