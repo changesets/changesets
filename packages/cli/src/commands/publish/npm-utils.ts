@@ -45,12 +45,28 @@ function jsonParse(input: string) {
 
 export type PublishTool = { name: "npm" } | { name: "pnpm" } | { name: "yarn" };
 
-export function getPublishTool(packages: Packages): PublishTool {
+async function getYarnVersion(packages: Packages) {
+  const { stdout } = await exec("yarn", ["--version"], {
+    nodePath: false,
+    nodeOptions: {
+      cwd: packages.rootDir,
+    },
+  });
+  const major = Number(stdout.toString().trim().split(".")[0]);
+  return Number.isNaN(major) || major >= 2 ? "berry" : "classic";
+}
+
+export async function getPublishTool(packages: Packages): Promise<PublishTool> {
   const { type } = packages.tool;
   if (type === "pnpm") {
     return { name: "pnpm" };
   }
   if (type === "yarn") {
+    if ((await getYarnVersion(packages)) === "classic") {
+      throw new Error(
+        "Yarn Classic is not supported. Please upgrade to Yarn Berry or another maintained package manager.",
+      );
+    }
     return { name: "yarn" };
   }
   return { name: "npm" };

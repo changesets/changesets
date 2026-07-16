@@ -64,7 +64,7 @@ export async function publishPackages({
   if (releases.length === 0) {
     return [];
   }
-  const publishTool = getPublishTool(packages);
+  const publishTool = await getPublishTool(packages);
   if (artifactDir && publishTool.name === "yarn") {
     log.error(`Publishing packed packages is not supported with Yarn.`);
     throw new ExitError(1);

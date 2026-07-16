@@ -92,7 +92,7 @@ export async function pack(options: PackOptions) {
   const packagesByName = new Map(
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
-  const publishTool = getPublishTool(packages);
+  const publishTool = await getPublishTool(packages);
 
   const packedReleases = await Promise.all(
     releases.map((release) =>
