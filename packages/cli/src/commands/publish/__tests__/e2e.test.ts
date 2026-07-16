@@ -226,6 +226,14 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
       /[◒◐◓◑] {2}(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:[◒◐◓◑] {2}\1(?: \(\d+\/\d+\)|\.*))*/g,
       (_match, message: string) => `◒  ${message}`,
     )
+    .replaceAll(
+      /(?:◒ {2}Publishing packages)*((?:◇ {2}Successfully published:|▲ {2}Failed to publish))/g,
+      "◒  Publishing packages$1",
+    )
+    .replaceAll(
+      /(?:◒ {2}Creating git tags)*(◇ {2}Created git tags:)/g,
+      "◒  Creating git tags$1",
+    )
     .replaceAll(new URL(registryUrl).origin, "[registry-url]")
     .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
     .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]");

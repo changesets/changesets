@@ -10,7 +10,7 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tags:
+◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
 `;
@@ -65,7 +65,7 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tags:
+◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
 `;
@@ -122,7 +122,7 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tags:
+◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
 `;
@@ -179,7 +179,7 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tags:
+◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
 `;
@@ -234,7 +234,7 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tags:
+◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
 `;
@@ -285,7 +285,7 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tags:
+◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
 `;
