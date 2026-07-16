@@ -18,11 +18,11 @@ import type {
   ReleasePlan,
 } from "@changesets/types";
 import { resolve } from "import-meta-resolve";
-import { editJson } from "./edit-json.ts";
+import { editJson, type EditJsonOperation } from "./edit-json.ts";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
 import {
-  versionPackage,
-  type ModCompWithPackageAndChangelog,
+  getDependencyVersionEdits,
+  type DependencyUpdateOptions,
 } from "./version-package.ts";
 
 function importResolveFromDir(specifier: string, dir: string) {
@@ -58,6 +58,18 @@ async function getFormatter(
   return async (patterns: string[]) => {
     await format(patterns, { cwd, formatter });
   };
+}
+
+async function updatePackageJson(dir: string, edits: EditJsonOperation[]) {
+  if (edits.length === 0) {
+    return;
+  }
+
+  const pkgJsonPath = path.resolve(dir, "package.json");
+  const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
+  const pkgUpdated = editJson(pkgRaw, edits);
+  await fs.writeFile(pkgJsonPath, pkgUpdated);
+  return pkgJsonPath;
 }
 
 export async function applyReleasePlan(
@@ -123,35 +135,55 @@ export async function applyReleasePlan(
     }),
   );
 
-  // iterate over releases updating packages
-  const finalisedRelease = releaseWithChangelogs.map((release) => {
-    return versionPackage(release, versionsToUpdate, {
-      cwd,
-      updateInternalDependencies: config.updateInternalDependencies,
-      onlyUpdatePeerDependentsWhenOutOfRange:
-        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange,
-      bumpVersionsWithWorkspaceProtocolOnly:
-        config.bumpVersionsWithWorkspaceProtocolOnly,
-      snapshot,
-    });
-  });
+  const dependencyUpdateOptions: DependencyUpdateOptions = {
+    cwd,
+    updateInternalDependencies: config.updateInternalDependencies,
+    onlyUpdatePeerDependentsWhenOutOfRange:
+      config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+        .onlyUpdatePeerDependentsWhenOutOfRange,
+    bumpVersionsWithWorkspaceProtocolOnly:
+      config.bumpVersionsWithWorkspaceProtocolOnly,
+    snapshot,
+  };
 
   const filesToFormat: string[] = [];
-  for (const release of finalisedRelease) {
-    const { changelog, pkgJsonEdits, dir, name } = release;
+  for (const release of releaseWithChangelogs) {
+    const { changelog, dir, name, newVersion, packageJson } = release;
+    const pkgJsonEdits = [
+      { keys: ["version"], value: newVersion },
+      ...getDependencyVersionEdits(
+        packageJson,
+        versionsToUpdate,
+        dependencyUpdateOptions,
+      ),
+    ];
 
-    const pkgJsonPath = path.resolve(dir, "package.json");
-    const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
-    const pkgUpdated = editJson(pkgRaw, pkgJsonEdits);
-    await fs.writeFile(pkgJsonPath, pkgUpdated);
-    touchedFiles.push(pkgJsonPath);
+    const pkgJsonPath = await updatePackageJson(dir, pkgJsonEdits);
+    if (pkgJsonPath) {
+      touchedFiles.push(pkgJsonPath);
+    }
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
       await updateChangelog(changelogPath, changelog, name);
       touchedFiles.push(changelogPath);
       filesToFormat.push(changelogPath);
+    }
+  }
+
+  if (packages.rootPackage) {
+    const pkgJsonEdits = getDependencyVersionEdits(
+      packages.rootPackage.packageJson,
+      versionsToUpdate,
+      dependencyUpdateOptions,
+    );
+
+    const pkgJsonPath = await updatePackageJson(
+      packages.rootPackage.dir,
+      pkgJsonEdits,
+    );
+    if (pkgJsonPath) {
+      touchedFiles.push(pkgJsonPath);
     }
   }
 
@@ -205,7 +237,7 @@ async function getNewChangelogEntry(
   config: Config,
   cwd: string,
   contextDir: string,
-): Promise<ModCompWithPackageAndChangelog[]> {
+) {
   if (!config.changelog) {
     return Promise.resolve(
       releasesWithPackage.map((release) => ({
