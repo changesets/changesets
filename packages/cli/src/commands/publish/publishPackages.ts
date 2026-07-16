@@ -124,10 +124,7 @@ export async function publishPackages({
       // and we don't reimplement the pack+publish logic ourselves. So it's not possible for us to pack,
       // and let appropriate lifecycle scripts run, from the package's original directory and then publish from a different `publishConfig.directory`.
       const publishDirOverride = pkg.packageJson.publishConfig?.directory;
-      if (
-        publishDirOverride &&
-        publishTool.name === "yarn"
-      ) {
+      if (publishDirOverride && publishTool.name === "yarn") {
         // Yarn doesn't allow publishing non-workspace directories
         log.error(
           `Package ${c.blue(pkg.packageJson.name)} has publishConfig.directory set to ${c.blue(publishDirOverride)}, which is not supported when using Yarn. Please remove publishConfig.directory from your package.json.`,

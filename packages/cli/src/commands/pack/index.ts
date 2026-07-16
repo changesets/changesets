@@ -104,10 +104,7 @@ export async function pack(options: PackOptions) {
         }
 
         const publishDirOverride = pkg.packageJson.publishConfig?.directory;
-        if (
-          publishDirOverride &&
-          publishTool.name === "yarn"
-        ) {
+        if (publishDirOverride && publishTool.name === "yarn") {
           // Yarn doesn't allow publishing non-workspace directories
           log.error(
             `Package ${c.blue(pkg.packageJson.name)} has publishConfig.directory set to ${c.blue(publishDirOverride)}, which is not supported when using Yarn. Please remove publishConfig.directory from your package.json.`,

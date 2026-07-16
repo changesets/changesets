@@ -43,10 +43,7 @@ function jsonParse(input: string) {
   }
 }
 
-export type PublishTool =
-  | { name: "npm" }
-  | { name: "pnpm" }
-  | { name: "yarn" };
+export type PublishTool = { name: "npm" } | { name: "pnpm" } | { name: "yarn" };
 
 export function getPublishTool(packages: Packages): PublishTool {
   const { type } = packages.tool;
@@ -149,10 +146,7 @@ export function getPackageInfo(
     // https://github.com/pnpm/pnpm/blob/b4fdfe9b3381bde2b09c1aa8af9f31446b177c83/pnpm11/releasing/commands/src/publish/recursivePublish.ts#L85-L94
     //
     // We match that behavior and in pnpm we treat `publishConfig.registry` as a publish-time override only.
-    if (
-      publishTool.name === "npm"
-
-    ) {
+    if (publishTool.name === "npm") {
       // npm actually uses the `publishConfig.registry` value when querying package info during publish:
       // https://github.com/npm/cli/blob/ed729620b1297f44ccf2517fd19fbaffdc225ed9/lib/commands/publish.js#L150
       //
@@ -433,13 +427,12 @@ async function internalPublish(
     publishTool.name,
     [...publishArgs, ...publishFlags],
     {
-      ...(publishTool.name === "yarn" &&
-        publishTool.version === "berry" && {
-          // Work around Yarn Berry prompting for OTP on stdin instead of reporting
-          // the auth failure in the JSON-capturing child process. Fixed upstream in:
-          // https://github.com/yarnpkg/berry/pull/7209
-          stdin: "not-otp\n",
-        }),
+      ...(publishTool.name === "yarn" && {
+        // Work around Yarn Berry prompting for OTP on stdin instead of reporting
+        // the auth failure in the JSON-capturing child process. Fixed upstream in:
+        // https://github.com/yarnpkg/berry/pull/7209
+        stdin: "not-otp\n",
+      }),
       nodeOptions: {
         env: opts.env,
         cwd: opts.cwd,
