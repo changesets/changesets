@@ -46,16 +46,12 @@ exports[`Publish command e2e > 'npm 10' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
-{
-  "error": {
-    "code": "EOTP",
-    "summary": "This operation requires a one-time password.",
-    "detail": "Open this URL in your browser to authenticate:\\n  [registry-url]/-/auth/cli/[uuid] authenticating, your token can be retrieved from:\\n  [registry-url]/-/v1/done?authId=[uuid]",
-    "authUrl": "[registry-url]/-/auth/cli/[uuid]",
-    "doneUrl": "[registry-url]/-/v1/done?authId=[uuid]"
-  }
-}
+◒  Publishing packages▲  Failed to publish pkg-a: This operation requires a one-time password.
+Open this URL in your browser to authenticate:
+  [registry-url]/-/auth/cli/[uuid]
+
+After authenticating, your token can be retrieved from:
+  [registry-url]/-/v1/done?authId=[uuid]
 🦋 Exited with code 1
 
 "
@@ -107,16 +103,12 @@ exports[`Publish command e2e > 'npm 11' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
-{
-  "error": {
-    "code": "EOTP",
-    "summary": "This operation requires a one-time password.",
-    "detail": "Open this URL in your browser to authenticate:\\n  [registry-url]/-/auth/cli/[uuid] authenticating, your token can be retrieved from:\\n  [registry-url]/-/v1/done?authId=[uuid]",
-    "authUrl": "[registry-url]/-/auth/cli/[uuid]",
-    "doneUrl": "[registry-url]/-/v1/done?authId=[uuid]"
-  }
-}
+◒  Publishing packages▲  Failed to publish pkg-a: This operation requires a one-time password.
+Open this URL in your browser to authenticate:
+  [registry-url]/-/auth/cli/[uuid]
+
+After authenticating, your token can be retrieved from:
+  [registry-url]/-/v1/done?authId=[uuid]
 🦋 Exited with code 1
 
 "
@@ -168,16 +160,12 @@ exports[`Publish command e2e > 'npm 12' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
-{
-  "error": {
-    "code": "EOTP",
-    "summary": "This operation requires a one-time password.",
-    "detail": "Open this URL in your browser to authenticate:\\n  [registry-url]/-/auth/cli/[uuid] authenticating, your token can be retrieved from:\\n  [registry-url]/-/v1/done?authId=[uuid]",
-    "authUrl": "[registry-url]/-/auth/cli/[uuid]",
-    "doneUrl": "[registry-url]/-/v1/done?authId=[uuid]"
-  }
-}
+◒  Publishing packages▲  Failed to publish pkg-a: This operation requires a one-time password.
+Open this URL in your browser to authenticate:
+  [registry-url]/-/auth/cli/[uuid]
+
+After authenticating, your token can be retrieved from:
+  [registry-url]/-/v1/done?authId=[uuid]
 🦋 Exited with code 1
 
 "
@@ -193,7 +181,7 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tags:
+◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
 `;

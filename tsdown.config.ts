@@ -14,7 +14,6 @@ export const baseConfig = defineConfig({
   },
 
   env: {
-    CHANGESETS_TEST_INTERACTIVE: false,
     CHANGESETS_FAKE_PUBLISH: process.env.CHANGESETS_FAKE_PUBLISH ? true : null,
   },
 

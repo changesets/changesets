@@ -111,7 +111,10 @@ export const publish: PublishTool["publish"] = async ({
 
     const summary = json.error.message.trim();
 
-    if (json.error.code === "ERR_PNPM_OTP_NON_INTERACTIVE") {
+    if (
+      json.error.code === "ERR_PNPM_OTP_NON_INTERACTIVE" &&
+      process.stdin.isTTY === true
+    ) {
       return {
         ...resultBase,
         result: "failed:needs-2fa",

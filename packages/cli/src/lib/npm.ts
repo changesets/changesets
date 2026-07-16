@@ -91,7 +91,7 @@ ${json.error.summary ?? ""}
 ${json.error.detail ?? ""}
   `.trim();
 
-  if (json.error.code === "EOTP") {
+  if (json.error.code === "EOTP" && process.stdin.isTTY === true) {
     const result: PublishResultFailedNeeds2fa = {
       ...resultBase,
       result: "failed:needs-2fa",

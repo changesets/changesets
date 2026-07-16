@@ -1,23 +1,17 @@
+import { stubIsTTY } from "@changesets/test-utils";
 import type { Package } from "@changesets/types";
 import { exec } from "tinyexec";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { PublishReleaseEntry } from "../commands/publish-plan/getPublishPlan.ts";
 import * as pnpm from "./pnpm.ts";
 import {
   alreadyPublishedErrorSnapshot,
   need2faErrorSnapshot,
 } from "./testing/error-snapshots.ts";
-import type {
-  PublishResultFailed,
-  PublishResultFailedNeeds2fa,
-} from "./types.ts";
+import type { PublishResultFailedNeeds2fa } from "./types.ts";
 
 vi.mock("tinyexec");
 const mockedExec = vi.mocked(exec);
-
-beforeEach(() => {
-  vi.unstubAllEnvs();
-});
 
 describe("publishing", () => {
   const pkg = {
@@ -72,34 +66,10 @@ describe("publishing", () => {
     },
   );
 
-  const need2faCases = Object.entries(need2faErrorSnapshot.pnpm);
-
-  it.each(need2faCases)(
-    "should return correct error if action requires 2fa (%s)",
-    async (_, snapshot) => {
-      mockedExec.mockResolvedValue(snapshot);
-
-      const result = await pnpm.publish({
-        pkg,
-        release,
-        tarballPath: null,
-        interactive: false,
-        otpCode: null,
-      });
-
-      expect(result.result).toEqual("failed:needs-2fa");
-      expect((result as PublishResultFailed).summary).toEqual(
-        expect.stringMatching(
-          /(requires additional authentication)|(requires a one-time password)/,
-        ),
-      );
-    },
-  );
-
   // v11.10+ only
   it("returns 2fa state details if provided & process is interactive", async () => {
     mockedExec.mockResolvedValue(need2faErrorSnapshot.pnpm.v11);
-    vi.stubEnv("CHANGESETS_TEST_INTERACTIVE", "true");
+    using _isTTY = stubIsTTY(true);
 
     const result = await pnpm.publish({
       pkg,
