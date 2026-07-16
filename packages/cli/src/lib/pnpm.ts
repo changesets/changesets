@@ -76,7 +76,7 @@ export const publish: PublishTool["publish"] = async ({
     if (tarballPath) args.unshift(path.relative(cwd, tarballPath));
 
     const { exitCode, stdout, stderr } = await exec(
-      "npm",
+      "pnpm",
       ["publish", ...args],
       {
         nodeOptions: {

@@ -261,8 +261,7 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures when not lo
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
-You need to authorize this machine using \`npm adduser\`
+◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
