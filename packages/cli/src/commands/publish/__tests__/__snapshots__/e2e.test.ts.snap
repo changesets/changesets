@@ -8,11 +8,11 @@ Received 404 for npm info pkg-a
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-[?25l◒  Publishing packages[1G[J◐  Publishing packages[1G[J◓  Publishing packages[1G[J[?25h[?25l◇  Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-[?25h[?25l◇  Created git tags:
+◇  Created git tags:
 - pkg-a@1.0.0
-[?25h"
+"
 `;
 
 exports[`Publish command e2e > 'npm 10' > surfaces publish failures for bad credentials 1`] = `
@@ -69,11 +69,11 @@ Received 404 for npm info pkg-a
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-[?25l◒  Publishing packages[1G[J◐  Publishing packages[1G[J◓  Publishing packages[1G[J[?25h[?25l◇  Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-[?25h[?25l◇  Created git tags:
+◇  Created git tags:
 - pkg-a@1.0.0
-[?25h"
+"
 `;
 
 exports[`Publish command e2e > 'npm 11' > surfaces publish failures for bad credentials 1`] = `
@@ -130,11 +130,11 @@ Received 404 for npm info pkg-a
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-[?25l◒  Publishing packages[1G[J◐  Publishing packages[1G[J◓  Publishing packages[1G[J[?25h[?25l◇  Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-[?25h[?25l◇  Created git tags:
+◇  Created git tags:
 - pkg-a@1.0.0
-[?25h"
+"
 `;
 
 exports[`Publish command e2e > 'npm 12' > surfaces publish failures for bad credentials 1`] = `
@@ -191,11 +191,11 @@ Received 404 for pnpm info pkg-a
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-[?25l◒  Publishing packages[1G[J◐  Publishing packages[1G[J◓  Publishing packages[1G[J◑  Publishing packages[1G[J◒  Publishing packages[1G[J[?25h[?25l◇  Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-[?25h[?25l◇  Created git tags:
+◇  Created git tags:
 - pkg-a@1.0.0
-[?25h"
+"
 `;
 
 exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures for bad credentials 1`] = `
@@ -252,11 +252,11 @@ Received 404 for pnpm info pkg-a
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-[?25l◒  Publishing packages[1G[J◐  Publishing packages[1G[J◓  Publishing packages[1G[J[?25h[?25l◇  Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-[?25h[?25l◇  Created git tags:
+◇  Created git tags:
 - pkg-a@1.0.0
-[?25h"
+"
 `;
 
 exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures for bad credentials 1`] = `
@@ -313,11 +313,11 @@ Received 404 for yarn npm info pkg-a
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-[?25l◒  Publishing packages[1G[J◐  Publishing packages[1G[J[?25h[?25l◇  Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-[?25h[?25l◇  Created git tags:
+◇  Created git tags:
 - pkg-a@1.0.0
-[?25h"
+"
 `;
 
 exports[`Publish command e2e > 'yarn 4' > surfaces publish failures for bad credentials 1`] = `
@@ -350,12 +350,10 @@ exports[`Publish command e2e > 'yarn 4' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: YN0041
-Invalid OTP token
-
-Some packages failed to publish:
-pkg-a@1.0.0
+◒  Publishing packages▲  Failed to publish pkg-a: {"file":"index.js"}
+{"file":"package.json"}
+? One-time password: › ERROR: Yarn is terminating due to an unexpected empty event loop.
+Please report this issue at https://github.com/yarnpkg/berry/issues.
 🦋 Exited with code 1
 
 "

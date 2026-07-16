@@ -216,10 +216,15 @@ for every package being published after this!
 
         finishedPackages.add(plan.name);
 
-        if (
-          isPublishSuccessful(result) ||
-          result.result === "failed:already-published"
-        ) {
+        if (result.result === "failed:already-published") {
+          // we don't trust this error to mean that the authentication works
+          // this could be rejected by a preflight check (theoretically, we've not observed this in practice)
+          // in general, we should *rarely* see this error as we only try to publish packages that have not been published yet
+          s.clear();
+          continue;
+        }
+
+        if (isPublishSuccessful(result)) {
           // clear this spinner from logs so it will seamlessly be replaced
           // by the next spinner in the one-by-one or bulk publishing
           s.clear();

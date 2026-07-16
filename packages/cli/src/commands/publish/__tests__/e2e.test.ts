@@ -223,8 +223,8 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
 function sanitizePublishLog(message: unknown, registryUrl: string) {
   return stripVTControlCharacters(String(message))
     .replaceAll(
-      /(?:[◒◐◓◑] {2}Publishing packages)+/g,
-      "◒  Publishing packages",
+      /[◒◐◓◑] {2}(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:[◒◐◓◑] {2}\1(?: \(\d+\/\d+\)|\.*))*/g,
+      (_match, message: string) => `◒  ${message}`,
     )
     .replaceAll(new URL(registryUrl).origin, "[registry-url]")
     .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
@@ -918,7 +918,9 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       });
       expect.soft(result.exitCode).toBe(0);
       expect.soft(result.stderr).toBe("");
-      expect.soft(result.stdout).toMatchSnapshot();
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .toMatchSnapshot();
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
