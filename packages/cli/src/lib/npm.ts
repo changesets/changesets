@@ -155,6 +155,7 @@ export const publish: PublishTool["publish"] = async ({
       "npm",
       ["publish", ...args],
       {
+        nodePath: false,
         nodeOptions: {
           stdio: interactive ? "inherit" : "pipe",
           env: sanitizeEnv(process.env),
