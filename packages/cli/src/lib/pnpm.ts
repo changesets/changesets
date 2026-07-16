@@ -60,13 +60,13 @@ export const publish: PublishTool["publish"] = async ({
   npmPublishQueue.add(async () => {
     const cwd = pkg.dir;
     const args: string[] = [
-      "--json",
       "--access",
       release.access,
       "--tag",
       release.tag,
       "--no-git-checks",
     ];
+    if (!interactive) args.unshift("--json");
     if (otpCode) args.push("--otp", otpCode);
     if (tarballPath) args.unshift(path.relative(cwd, tarballPath));
 

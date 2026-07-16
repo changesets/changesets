@@ -131,13 +131,8 @@ export const publish: PublishTool["publish"] = async ({
     // and not from, for example, `publishConfig.directory` because npm only resolves to the root's `.npmrc` for actual workspaces and not for arbitrary subdirectories of the root.
     const cwd = pkg.dir;
 
-    const args: string[] = [
-      "--json",
-      "--access",
-      release.access,
-      "--tag",
-      release.tag,
-    ];
+    const args: string[] = ["--access", release.access, "--tag", release.tag];
+    if (!interactive) args.unshift("--json");
     if (otpCode) args.push("--otp", otpCode);
     if (tarballPath) {
       args.unshift(path.relative(cwd, tarballPath));
