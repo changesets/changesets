@@ -48,7 +48,12 @@ function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 export const name = "pnpm" satisfies PublishTool["name"];
 
 export const getOtpCode: PublishTool["getOtpCode"] = (otp?: string) =>
-  otp || process.env.PNPM_CONFIG_OTP || process.env.pnpm_config_otp || null;
+  otp ||
+  process.env.PNPM_CONFIG_OTP ||
+  process.env.pnpm_config_otp ||
+  process.env.NPM_CONFIG_OTP ||
+  process.env.npm_config_otp ||
+  null;
 
 export const publish: PublishTool["publish"] = async ({
   pkg,
