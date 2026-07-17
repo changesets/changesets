@@ -18,6 +18,8 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
     },
   });
 
+export const pack: PublishTool["pack"] = (options) => npm.pack(options);
+
 export function getOtpCode(otp?: string): string | null {
   return (
     otp || process.env.NPM_CONFIG_OTP || process.env.npm_config_otp || null

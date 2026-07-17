@@ -21,6 +21,7 @@ describe("getPublishPlan", () => {
       name: "mock",
       getOtpCode: () => null,
       info: mockedInfo,
+      pack: vi.fn<PublishTool["pack"]>(),
       publish: vi.fn<PublishTool["publish"]>(),
     });
   });

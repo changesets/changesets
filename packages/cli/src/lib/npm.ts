@@ -1,6 +1,8 @@
+import assert from "node:assert/strict";
 import path from "node:path";
 import type { PackageJSON } from "@changesets/types";
 import { exec } from "tinyexec";
+import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
 import { getNpmPnpmError } from "../utils/package-manager-errors.ts";
 import {
   isAlreadyPublishedError,
@@ -155,6 +157,39 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
     }
     return { published: true, pkgInfo: info.pkgInfo };
   });
+
+export const pack: PublishTool["pack"] = async ({
+  pkg,
+  packDir,
+  outputDir,
+}) => {
+  const { exitCode, stdout, stderr } = await exec(
+    "npm",
+    ["pack", packDir, "--pack-destination", outputDir, "--json"],
+    {
+      nodePath: false,
+      nodeOptions: { cwd: pkg.dir },
+    },
+  );
+  if (exitCode !== 0) {
+    return { error: getNpmPnpmError({ stderr, stdout }) };
+  }
+
+  const json = getLastJsonObjectFromString(stdout);
+  // npm<12 emits an array even when packing a single package.
+  let filename = Array.isArray(json) ? json[0]?.filename : json?.filename;
+  if (!filename) {
+    // npm>=12 emits `{ [packageName]: { filename, ... } }`.
+    const pkgOutput = Object.values(json ?? {})[0];
+    filename =
+      pkgOutput &&
+      typeof pkgOutput === "object" &&
+      "filename" in pkgOutput &&
+      pkgOutput.filename;
+  }
+  assert(typeof filename === "string", "Failed to determine tarball filename");
+  return { tarballPath: path.join(outputDir, path.basename(filename)) };
+};
 
 export function getOtpCode(otp?: string): string | null {
   return (

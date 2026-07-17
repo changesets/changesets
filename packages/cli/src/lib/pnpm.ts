@@ -106,6 +106,21 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
     return { published: true, pkgInfo: info.pkgInfo };
   });
 
+export const pack: PublishTool["pack"] = async ({ pkg, tarballPath }) => {
+  const { exitCode, stdout, stderr } = await exec(
+    "pnpm",
+    ["pack", "--out", tarballPath, "--json"],
+    {
+      nodePath: false,
+      // pnpm resolves publishConfig.directory itself.
+      nodeOptions: { cwd: pkg.dir },
+    },
+  );
+  return exitCode === 0
+    ? { tarballPath }
+    : { error: getNpmPnpmError({ stderr, stdout }) };
+};
+
 export const getOtpCode: PublishTool["getOtpCode"] = (otp?: string) =>
   otp ||
   process.env.PNPM_CONFIG_OTP ||

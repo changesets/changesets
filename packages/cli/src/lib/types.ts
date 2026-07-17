@@ -5,6 +5,7 @@ export type PublishTool = {
   name: "npm" | "pnpm" | "yarn" | "mock";
   getOtpCode: (otp?: string) => string | null;
   info: (options: InfoOptions) => Promise<PackageInfoResult>;
+  pack: (options: PackOptions) => Promise<PackResult>;
   publish: (options: PublishOptions) => Promise<PublishResult>;
 };
 
@@ -30,6 +31,24 @@ export type PackageInfoResult =
       error: {
         code: string;
         message?: string;
+      };
+    };
+
+export type PackOptions = {
+  pkg: Package;
+  packDir: string;
+  outputDir: string;
+  tarballPath: string;
+};
+
+export type PackResult =
+  | {
+      tarballPath: string;
+    }
+  | {
+      error: {
+        code: string;
+        message: string;
       };
     };
 

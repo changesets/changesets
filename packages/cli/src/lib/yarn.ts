@@ -114,6 +114,25 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
         };
   });
 
+export const pack: PublishTool["pack"] = async ({ packDir, tarballPath }) => {
+  const { exitCode, stdout, stderr } = await exec(
+    "yarn",
+    ["pack", "--out", tarballPath, "--json"],
+    {
+      nodePath: false,
+      nodeOptions: { cwd: packDir },
+    },
+  );
+  return exitCode === 0
+    ? { tarballPath }
+    : {
+        error: getYarnBerryReporterError(stdout) ?? {
+          code: "EUNKNOWN",
+          message: stderr || stdout || "Unknown error",
+        },
+      };
+};
+
 export const getOtpCode: PublishTool["getOtpCode"] = (otp?: string) =>
   otp || null;
 
