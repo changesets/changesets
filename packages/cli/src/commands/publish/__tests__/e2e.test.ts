@@ -223,15 +223,15 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
 function sanitizePublishLog(message: unknown, registryUrl: string) {
   return stripVTControlCharacters(String(message))
     .replaceAll(
-      /[◒◐◓◑] {2}(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:[◒◐◓◑] {2}\1(?: \(\d+\/\d+\)|\.*))*/g,
+      /[◒◐◓◑] {2}(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\r?\n)?[◒◐◓◑] {2}\1(?: \(\d+\/\d+\)|\.*))*/g,
       (_match, message: string) => `◒  ${message}`,
     )
     .replaceAll(
-      /(?:◒ {2}Publishing packages)*((?:◇ {2}Successfully published:|▲ {2}Failed to publish))/g,
+      /(?:◒ {2}Publishing packages(?:\r?\n)?)*((?:◇ {2}Successfully published:|▲ {2}Failed to publish))/g,
       "◒  Publishing packages$1",
     )
     .replaceAll(
-      /(?:◒ {2}Creating git tags)*(◇ {2}Created git tags:)/g,
+      /(?:◒ {2}Creating git tags(?:\r?\n)?)*(◇ {2}Created git tags:)/g,
       "◒  Creating git tags$1",
     )
     .replaceAll(new URL(registryUrl).origin, "[registry-url]")

@@ -191,6 +191,10 @@ export async function createPmBinEnv(
   const tempDir = path.join(cwd, ".tmp");
   await fs.mkdir(tempDir, { recursive: true });
   return {
+    // Exercise normal user behavior regardless of where the tests run.
+    // CI-specific tests can opt in through env when needed.
+    CI: undefined,
+    GITHUB_ACTIONS: undefined,
     ...env,
     // pnpm packs the package into TMPDIR and runs npm from there. If that is
     // /tmp/pkg and an unrelated /tmp/node_modules exists, npm can treat /tmp
