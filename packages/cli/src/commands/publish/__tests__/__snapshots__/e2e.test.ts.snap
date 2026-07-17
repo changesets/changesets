@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Publish command e2e > 'npm 10' > publishes a first version of a package 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Received 404 for npm info pkg-a
 
@@ -18,7 +18,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 10' > surfaces publish failures for bad credentials 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -35,7 +35,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 10' > surfaces publish failures when not logged in 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -53,7 +53,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 10' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -73,7 +73,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 11' > publishes a first version of a package 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Received 404 for npm info pkg-a
 
@@ -90,7 +90,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 11' > surfaces publish failures for bad credentials 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -107,7 +107,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 11' > surfaces publish failures when not logged in 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -125,7 +125,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 11' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -147,7 +147,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 12' > publishes a first version of a package 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Received 404 for npm info pkg-a
 
@@ -164,7 +164,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 12' > surfaces publish failures for bad credentials 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -181,7 +181,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 12' > surfaces publish failures when not logged in 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -199,7 +199,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'npm 12' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -221,7 +221,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'pnpm 10 + npm 10' > publishes a first version of a package 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Received 404 for pnpm info pkg-a
 
@@ -238,7 +238,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures for bad credentials 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -255,7 +255,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures when not logged in 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -273,7 +273,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -293,7 +293,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'pnpm 11' > publishes a first version of a package 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Received 404 for pnpm info pkg-a
 
@@ -310,7 +310,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures for bad credentials 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -327,7 +327,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures when not logged in 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -344,7 +344,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'pnpm 11' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -361,7 +361,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'yarn 4' > publishes a first version of a package 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Received 404 for yarn npm info pkg-a
 
@@ -378,7 +378,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'yarn 4' > surfaces publish failures for bad credentials 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -395,7 +395,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'yarn 4' > surfaces publish failures when not logged in 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -412,7 +412,7 @@ pkg-a@1.0.0
 `;
 
 exports[`Publish command e2e > 'yarn 4' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
