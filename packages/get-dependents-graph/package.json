@@ -1,6 +1,6 @@
 {
   "name": "@changesets/get-dependents-graph",
-  "version": "3.0.0-next.6",
+  "version": "3.0.0-next.7",
   "description": "Get the graph of dependents in a monorepo",
   "license": "MIT",
   "repository": {

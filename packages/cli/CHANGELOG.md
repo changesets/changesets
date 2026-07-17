@@ -1,5 +1,36 @@
 # @changesets/cli
 
+## 3.0.0-next.9
+
+### Major Changes
+
+- [#2145](https://github.com/changesets/changesets/pull/2145) [`f5887ff`](https://github.com/changesets/changesets/commit/f5887ff54a6b78eae87ae85fdac3294c4464da78) Thanks [@Andarist](https://github.com/Andarist)! - Removed Yarn Classic support
+
+- [#2097](https://github.com/changesets/changesets/pull/2097) [`8c88f6a`](https://github.com/changesets/changesets/commit/8c88f6a3362628ca580835a1a1f2310056ee5743) Thanks [@Andarist](https://github.com/Andarist)! - Packages with only prerelease versions published will now be published with the prerelease tag in the prerelease mode _if_ the target registry doesn't auto-assign `latest` tag. npm registry itself does that and such packages will continue to be released with `latest` tag (and not with the configured prerelease tag).
+
+### Patch Changes
+
+- [#2097](https://github.com/changesets/changesets/pull/2097) [`8c88f6a`](https://github.com/changesets/changesets/commit/8c88f6a3362628ca580835a1a1f2310056ee5743) Thanks [@Andarist](https://github.com/Andarist)! - Route package manager calls through their respective CLIs during publish (npm, pnpm, yarn). Notably, Yarn Berry publishes now let Yarn update workspace protocol ranges as part of the publish process.
+
+- [#2132](https://github.com/changesets/changesets/pull/2132) [`d35bb77`](https://github.com/changesets/changesets/commit/d35bb77f031a24e7ca95aecc06e1043d0f9bfb24) Thanks [@cyphercodes](https://github.com/cyphercodes)! - Improve publish error handling for npm and pnpm JSON errors. Changesets now skips npm 11 already-published errors that omit `code`, correctly skips pnpm 11 already-published errors, and retries pnpm 11 `ERR_PNPM_OTP_NON_INTERACTIVE` publish failures in delegated interactive mode.
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#2163](https://github.com/changesets/changesets/pull/2163) [`5f8d925`](https://github.com/changesets/changesets/commit/5f8d9255088639c07b90910343752ae26b0a324f) Thanks [@Andarist](https://github.com/Andarist)! - Update dependency ranges in the workspace root `package.json`.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640), [`5f8d925`](https://github.com/changesets/changesets/commit/5f8d9255088639c07b90910343752ae26b0a324f)]:
+  - @changesets/apply-release-plan@8.0.0-next.8
+  - @changesets/assemble-release-plan@7.0.0-next.8
+  - @changesets/changelog-git@1.0.0-next.7
+  - @changesets/errors@1.0.0-next.4
+  - @changesets/get-dependents-graph@3.0.0-next.7
+  - @changesets/git@4.0.0-next.7
+  - @changesets/pre@3.0.0-next.7
+  - @changesets/read@1.0.0-next.8
+  - @changesets/should-skip-package@1.0.0-next.7
+  - @changesets/types@7.0.0-next.7
+  - @changesets/write@1.0.0-next.7
+  - @changesets/config@4.0.0-next.7
+
 ## 3.0.0-next.8
 
 ### Patch Changes

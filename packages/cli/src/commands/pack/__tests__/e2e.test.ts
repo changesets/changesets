@@ -11,10 +11,12 @@ import {
 } from "../../__tests__/e2e-utils.ts";
 
 function sanitizePackLog(message: unknown) {
-  return stripVTControlCharacters(String(message)).replace(
-    /logs can be found here: .*?\.log/g,
-    "logs can be found here: [yarn-prepack-log]",
-  );
+  return stripVTControlCharacters(String(message))
+    .replace(/changeset v\S+/g, "changeset v[version]")
+    .replace(
+      /logs can be found here: .*?\.log/g,
+      "logs can be found here: [yarn-prepack-log]",
+    );
 }
 
 // to avoid depending on pnpr here we only test the pack command with precomputed publish plans

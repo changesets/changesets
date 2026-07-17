@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Pack command e2e > 'npm 10' > packs from a publish plan 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Packed packages:
 - pkg-a@1.0.0
@@ -9,7 +9,7 @@ Packed packages:
 `;
 
 exports[`Pack command e2e > 'npm 10' > surfaces pack errors 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 An error occurred while packing pkg-a: EUNKNOWN
 command failed
@@ -20,7 +20,7 @@ sh -c node -e "console.error('prepack failed'); process.exit(1)"
 `;
 
 exports[`Pack command e2e > 'npm 11' > packs from a publish plan 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Packed packages:
 - pkg-a@1.0.0
@@ -28,7 +28,7 @@ Packed packages:
 `;
 
 exports[`Pack command e2e > 'npm 11' > surfaces pack errors 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 An error occurred while packing pkg-a: EUNKNOWN
 command failed
@@ -39,7 +39,7 @@ sh -c node -e "console.error('prepack failed'); process.exit(1)"
 `;
 
 exports[`Pack command e2e > 'npm 12' > packs from a publish plan 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Packed packages:
 - pkg-a@1.0.0
@@ -47,7 +47,7 @@ Packed packages:
 `;
 
 exports[`Pack command e2e > 'npm 12' > surfaces pack errors 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 An error occurred while packing pkg-a: EUNKNOWN
 command failed
@@ -58,7 +58,7 @@ sh -c node -e "console.error('prepack failed'); process.exit(1)"
 `;
 
 exports[`Pack command e2e > 'pnpm 10 + npm 10' > packs from a publish plan 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Packed packages:
 - pkg-a@1.0.0
@@ -66,7 +66,7 @@ Packed packages:
 `;
 
 exports[`Pack command e2e > 'pnpm 10 + npm 10' > surfaces pack errors 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 An error occurred while packing pkg-a: ELIFECYCLE
 pkg-a@1.0.0 prepack: \`node -e "console.error('prepack failed'); process.exit(1)"\`
@@ -77,7 +77,7 @@ Exit status 1
 `;
 
 exports[`Pack command e2e > 'pnpm 11' > packs from a publish plan 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Packed packages:
 - pkg-a@1.0.0
@@ -85,7 +85,7 @@ Packed packages:
 `;
 
 exports[`Pack command e2e > 'pnpm 11' > surfaces pack errors 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 An error occurred while packing pkg-a: ELIFECYCLE
 pkg-a@1.0.0 prepack: \`node -e "console.error('prepack failed'); process.exit(1)"\`
@@ -96,7 +96,7 @@ Exit status 1
 `;
 
 exports[`Pack command e2e > 'yarn 4' > packs from a publish plan 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 Packed packages:
 - pkg-a@1.0.0
@@ -104,7 +104,7 @@ Packed packages:
 `;
 
 exports[`Pack command e2e > 'yarn 4' > surfaces pack errors 1`] = `
-"🦋 changeset v3.0.0-next.8
+"🦋 changeset v[version]
 
 An error occurred while packing pkg-a: YN0036
 Prepack script failed (exit code 1, logs can be found here: [yarn-prepack-log]); run yarn prepack to investigate

@@ -1,5 +1,18 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.8
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#2163](https://github.com/changesets/changesets/pull/2163) [`5f8d925`](https://github.com/changesets/changesets/commit/5f8d9255088639c07b90910343752ae26b0a324f) Thanks [@Andarist](https://github.com/Andarist)! - Update dependency ranges in the workspace root `package.json`.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/git@4.0.0-next.7
+  - @changesets/should-skip-package@1.0.0-next.7
+  - @changesets/types@7.0.0-next.7
+  - @changesets/config@4.0.0-next.7
+
 ## 8.0.0-next.7
 
 ### Patch Changes

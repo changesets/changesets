@@ -1,6 +1,6 @@
 {
   "name": "@changesets/cli",
-  "version": "3.0.0-next.8",
+  "version": "3.0.0-next.9",
   "description": "A tool to manage versioning and changelogs with a focus on monorepos",
   "homepage": "https://changesets.dev",
   "license": "MIT",
@@ -44,7 +44,7 @@
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",
     "@changesets/write": "workspace:^",
-    "@clack/prompts": "^1.5.1",
+    "@clack/prompts": "^1.7.0",
     "@manypkg/get-packages": "^3.1.0",
     "@pnpm/deps.graph-sequencer": "^1100.0.0",
     "cac": "^7.0.0",
@@ -66,7 +66,7 @@
     "npm-12": "npm:npm@^12.0.1",
     "outdent": "^0.8.0",
     "pnpm-10": "npm:pnpm@^10.34.5",
-    "pnpm-11": "npm:pnpm@^11.13.0",
+    "pnpm-11": "npm:pnpm@^11.13.1",
     "yarn-4": "npm:@yarnpkg/cli-dist@^4.5.2"
   },
   "engines": {

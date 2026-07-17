@@ -1,5 +1,14 @@
 # @changesets/config
 
+## 4.0.0-next.7
+
+### Patch Changes
+
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/get-dependents-graph@3.0.0-next.7
+  - @changesets/should-skip-package@1.0.0-next.7
+  - @changesets/types@7.0.0-next.7
+
 ## 4.0.0-next.6
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@changesets/logger",
-  "version": "1.0.0-next.3",
+  "version": "1.0.0-next.4",
   "description": "Console log alias",
   "license": "MIT",
   "repository": {
