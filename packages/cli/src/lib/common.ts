@@ -26,6 +26,7 @@ export function isAlreadyPublishedError(message: string) {
 export const isPublishSuccessful = (
   result: PublishResult,
 ): result is PublishResultSuccess => result.result.startsWith("published");
+
 export const isPublishFailure = (
   result: PublishResult,
 ): result is PublishResultFailed => result.result.startsWith("failed");

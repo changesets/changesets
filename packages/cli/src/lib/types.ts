@@ -4,8 +4,34 @@ import type { PublishReleaseEntry } from "../commands/publish-plan/getPublishPla
 export type PublishTool = {
   name: "npm" | "pnpm" | "yarn" | "mock";
   getOtpCode: (otp?: string) => string | null;
+  info: (options: InfoOptions) => Promise<PackageInfoResult>;
   publish: (options: PublishOptions) => Promise<PublishResult>;
 };
+
+export type InfoOptions = {
+  cwd: string;
+  pkg: Package;
+};
+
+export type PackageInfo = Record<string, unknown> & {
+  "dist-tags": Record<string, string>;
+  versions: string[];
+};
+
+export type PackageInfoResult =
+  | {
+      published: true;
+      pkgInfo: PackageInfo;
+    }
+  | {
+      published: false;
+    }
+  | {
+      error: {
+        code: string;
+        message?: string;
+      };
+    };
 
 export type PublishOptions = {
   pkg: Package;

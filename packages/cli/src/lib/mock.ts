@@ -1,10 +1,22 @@
 import { createInterface } from "node:readline/promises";
 import { npmPublishQueue } from "./common.ts";
+import * as npm from "./npm.ts";
 import type { PublishOptions, PublishResult, PublishTool } from "./types.ts";
 
 // -- PublishTool -- //
 
 export const name = "mock" satisfies PublishTool["name"];
+
+export const info: PublishTool["info"] = ({ cwd, pkg }) =>
+  npm.info({
+    cwd,
+    // Fake publishing historically queried npm without publish-time registry
+    // overrides, so keep that behavior while reusing npm's output handling.
+    pkg: {
+      ...pkg,
+      packageJson: { ...pkg.packageJson, publishConfig: undefined },
+    },
+  });
 
 export function getOtpCode(otp?: string): string | null {
   return (

@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import c from "@changesets/color";
+import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { readPreState } from "@changesets/pre";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
@@ -16,7 +17,7 @@ import { getPackages } from "@manypkg/get-packages";
 import { graphSequencer } from "@pnpm/deps.graph-sequencer";
 import semverParse from "semver/functions/parse.js";
 import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
-import { getPublishTool, infoAllow404 } from "../publish/npm-utils.ts";
+import { getPublishTool } from "../publish/getPublishTool.ts";
 
 export const CURRENT_PUBLISH_PLAN_VERSION = 1;
 
@@ -108,19 +109,34 @@ export async function getUnpublishedPackages(
         (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
       )
       .map(async (pkg) => {
-        const response = await infoAllow404(
-          packages.rootDir,
-          publishTool,
-          pkg.packageJson,
-        );
+        const response = await publishTool.info({
+          cwd: packages.rootDir,
+          pkg,
+        });
+        if ("error" in response) {
+          log.error(
+            `
+Received an unknown error code: ${response.error.code} for ${c.cyan(pkg.packageJson.name)}
+${response.error.message ?? ""}
+            `.trim(),
+          );
+          throw new ExitError(1);
+        }
+        if (!response.published) {
+          log.warn(
+            `Package ${c.cyan(pkg.packageJson.name)} was not found in the registry.`,
+          );
+        }
+
         let publishedState: PublishedState = "never";
+        let publishedVersions: string[] = [];
 
         if (response.published) {
           publishedState = "published";
+          publishedVersions = response.pkgInfo.versions;
 
           if (
             preState != null &&
-            response.pkgInfo.versions &&
             // non-npm registries often don't auto-assign latest and when using those we don't have to care about only-pre case
             // when the latest tag is not auto-assigned we can simply use the configured pre tag
             response.pkgInfo["dist-tags"].latest &&
@@ -136,7 +152,7 @@ export async function getUnpublishedPackages(
         return {
           pkg,
           publishedState,
-          publishedVersions: response.pkgInfo.versions || [],
+          publishedVersions,
         };
       }),
   );

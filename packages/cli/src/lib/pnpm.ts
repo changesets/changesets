@@ -1,8 +1,13 @@
 import path from "node:path";
 import { exec } from "tinyexec";
-import { isAlreadyPublishedError, npmPublishQueue } from "./common.ts";
+import { getNpmPnpmError } from "../utils/package-manager-errors.ts";
+import {
+  isAlreadyPublishedError,
+  npmPublishQueue,
+  npmRequestQueue,
+} from "./common.ts";
 import * as npm from "./npm.ts";
-import type { PublishResult, PublishTool } from "./types.ts";
+import type { PackageInfo, PublishResult, PublishTool } from "./types.ts";
 
 export type PnpmPublish2faRequiredError = {
   code: "ERR_PNPM_OTP_NON_INTERACTIVE";
@@ -46,6 +51,60 @@ function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 // -- PublishTool -- //
 
 export const name = "pnpm" satisfies PublishTool["name"];
+
+function parseInfoResult({
+  exitCode,
+  stdout,
+  stderr,
+}: import("tinyexec").Output):
+  | { pkgInfo: PackageInfo }
+  | { error: { code: string; message?: string } }
+  | undefined {
+  if (exitCode !== 0) {
+    return { error: getNpmPnpmError({ stderr, stdout }) };
+  }
+  return stdout ? { pkgInfo: JSON.parse(stdout) as PackageInfo } : undefined;
+}
+
+export const info: PublishTool["info"] = ({ cwd, pkg }) =>
+  npmRequestQueue.add(async () => {
+    const { packageJson } = pkg;
+    // pnpm treats publishConfig.registry as a publish-time override only,
+    // matching its recursive publish implementation.
+    const latestResult = await exec(
+      "pnpm",
+      ["info", packageJson.name, "--json"],
+      {
+        nodePath: false,
+        nodeOptions: { cwd },
+      },
+    );
+    let info = parseInfoResult(latestResult);
+    if (
+      !info ||
+      ("error" in info && info.error.code === "ERR_PNPM_PACKAGE_NOT_FOUND")
+    ) {
+      const exactResult = await exec(
+        "pnpm",
+        ["info", `${packageJson.name}@${packageJson.version}`, "--json"],
+        {
+          nodePath: false,
+          nodeOptions: { cwd },
+        },
+      );
+      info = parseInfoResult(exactResult) ?? {
+        error: { code: "E404" },
+      };
+    }
+    if ("error" in info) {
+      return info.error.code === "E404" ||
+        info.error.code === "ERR_PNPM_FETCH_404" ||
+        info.error.code === "ERR_PNPM_PACKAGE_NOT_FOUND"
+        ? { published: false }
+        : { error: info.error };
+    }
+    return { published: true, pkgInfo: info.pkgInfo };
+  });
 
 export const getOtpCode: PublishTool["getOtpCode"] = (otp?: string) =>
   otp ||

@@ -1,7 +1,14 @@
 import path from "node:path";
+import type { PackageJSON } from "@changesets/types";
 import { exec } from "tinyexec";
-import { isAlreadyPublishedError, npmPublishQueue } from "./common.ts";
+import { getNpmPnpmError } from "../utils/package-manager-errors.ts";
+import {
+  isAlreadyPublishedError,
+  npmPublishQueue,
+  npmRequestQueue,
+} from "./common.ts";
 import type {
+  PackageInfo,
   PublishResultFailedNeeds2fa,
   PublishResult,
   PublishOptions,
@@ -63,6 +70,91 @@ function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 // -- PublishTool -- //
 
 export const name = "npm" satisfies PublishTool["name"];
+
+function parseInfoResult({
+  exitCode,
+  stdout,
+  stderr,
+}: import("tinyexec").Output):
+  | { pkgInfo: PackageInfo }
+  | { error: { code: string; message?: string } }
+  | undefined {
+  if (exitCode !== 0) {
+    return { error: getNpmPnpmError({ stderr, stdout }) };
+  }
+  if (!stdout) {
+    return;
+  }
+  const parsed: unknown = JSON.parse(stdout);
+  if (Array.isArray(parsed)) {
+    // npm 12 stopped unwrapping single-version JSON results.
+    if (parsed.length !== 1) {
+      throw new Error("Unexpected array output from npm info --json");
+    }
+    return { pkgInfo: parsed[0] as PackageInfo };
+  }
+  return { pkgInfo: parsed as PackageInfo };
+}
+
+function getRegistryOverrides(packageJson: PackageJSON) {
+  const registryOverrides: string[] = [];
+
+  // npm publish uses publishConfig.registry when fetching package metadata.
+  // Scoped registries take precedence over the plain registry flag.
+  if (packageJson.name.startsWith("@")) {
+    const scope = packageJson.name.split("/")[0];
+    if (packageJson.publishConfig?.[`${scope}:registry`]) {
+      registryOverrides.push(
+        `--${scope}:registry=${packageJson.publishConfig[`${scope}:registry`]}`,
+      );
+    }
+    if (packageJson.publishConfig?.registry) {
+      registryOverrides.push(
+        `--registry=${packageJson.publishConfig.registry}`,
+      );
+    }
+  } else if (packageJson.publishConfig?.registry) {
+    registryOverrides.push(`--registry=${packageJson.publishConfig.registry}`);
+  }
+
+  return registryOverrides;
+}
+
+export const info: PublishTool["info"] = ({ cwd, pkg }) =>
+  npmRequestQueue.add(async () => {
+    const { packageJson } = pkg;
+    const flags = [...getRegistryOverrides(packageJson), "--json"];
+    const latestResult = await exec(
+      "npm",
+      ["info", packageJson.name, ...flags],
+      {
+        nodePath: false,
+        nodeOptions: { cwd },
+      },
+    );
+    let info = parseInfoResult(latestResult);
+    if (!info) {
+      // A package without a latest dist-tag produces successful empty output for
+      // the bare query. An exact query can still find the local version.
+      const exactResult = await exec(
+        "npm",
+        ["info", `${packageJson.name}@${packageJson.version}`, ...flags],
+        {
+          nodePath: false,
+          nodeOptions: { cwd },
+        },
+      );
+      info = parseInfoResult(exactResult) ?? {
+        error: { code: "E404" },
+      };
+    }
+    if ("error" in info) {
+      return info.error.code === "E404"
+        ? { published: false }
+        : { error: info.error };
+    }
+    return { published: true, pkgInfo: info.pkgInfo };
+  });
 
 export function getOtpCode(otp?: string): string | null {
   return (

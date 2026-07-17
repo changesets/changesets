@@ -9,9 +9,10 @@ import { ExitError } from "@changesets/errors";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { exec } from "tinyexec";
+import { getYarnBerryReporterError } from "../../lib/yarn.ts";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
 import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
-import { getPackageManagerError } from "../../utils/package-manager-errors.ts";
+import { getNpmPnpmError } from "../../utils/package-manager-errors.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { getDefaultWorkspaceConcurrency } from "../../utils/workspaceConcurrency.ts";
 import {
@@ -20,7 +21,7 @@ import {
   readPlanFile,
   type TarballMetadata,
 } from "../publish-plan/getPublishPlan.ts";
-import { getPublishTool } from "../publish/npm-utils.ts";
+import { getPublishTool } from "../publish/getPublishTool.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 
 export interface PackOptions {
@@ -143,10 +144,13 @@ export async function pack(options: PackOptions) {
         );
 
         if (exitCode !== 0) {
-          const packError = getPackageManagerError(publishTool, {
-            stderr,
-            stdout,
-          });
+          const packError =
+            publishTool.name === "yarn"
+              ? (getYarnBerryReporterError(stdout) ?? {
+                  code: "EUNKNOWN",
+                  message: stderr || stdout || "Unknown error",
+                })
+              : getNpmPnpmError({ stderr, stdout });
           log.error(
             `An error occurred while packing ${release.name}: ${packError.code}\n${packError.message}`,
           );

@@ -27,7 +27,7 @@ import {
   type TagReleaseEntry,
 } from "../publish-plan/getPublishPlan.ts";
 import { ensureChangesetFolder } from "../shared.ts";
-import { getPublishTool } from "./npm-utils.ts";
+import { getPublishTool } from "./getPublishTool.ts";
 import { bulkPublishPackages } from "./publishPackages.ts";
 
 function uniqBy<T>(array: T[], key: (t: T) => string) {

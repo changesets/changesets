@@ -3,7 +3,7 @@
 exports[`Publish command e2e > 'npm 10' > publishes a first version of a package 1`] = `
 "🦋 changeset v3.0.0-next.8
 
-Received 404 for npm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -58,7 +58,7 @@ it, or it timed out. Please try again.
 exports[`Publish command e2e > 'npm 11' > publishes a first version of a package 1`] = `
 "🦋 changeset v3.0.0-next.8
 
-Received 404 for npm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -115,7 +115,7 @@ After authenticating, your token can be retrieved from:
 exports[`Publish command e2e > 'npm 12' > publishes a first version of a package 1`] = `
 "🦋 changeset v3.0.0-next.8
 
-Received 404 for npm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -172,7 +172,7 @@ After authenticating, your token can be retrieved from:
 exports[`Publish command e2e > 'pnpm 10 + npm 10' > publishes a first version of a package 1`] = `
 "🦋 changeset v3.0.0-next.8
 
-Received 404 for pnpm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -227,7 +227,7 @@ it, or it timed out. Please try again.
 exports[`Publish command e2e > 'pnpm 11' > publishes a first version of a package 1`] = `
 "🦋 changeset v3.0.0-next.8
 
-Received 404 for pnpm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
@@ -278,7 +278,7 @@ pkg-a@1.0.0
 exports[`Publish command e2e > 'yarn 4' > publishes a first version of a package 1`] = `
 "🦋 changeset v3.0.0-next.8
 
-Received 404 for yarn npm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0

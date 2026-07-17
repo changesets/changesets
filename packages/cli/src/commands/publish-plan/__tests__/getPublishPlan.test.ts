@@ -1,18 +1,29 @@
 import { readConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import * as npmUtils from "../../publish/npm-utils.ts";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { PublishTool } from "../../../lib/types.ts";
+import * as getPublishToolModule from "../../publish/getPublishTool.ts";
 import { getPublishPlan } from "../getPublishPlan.ts";
 
 vi.mock("@changesets/git");
-vi.mock("../../publish/npm-utils.ts");
+vi.mock("../../publish/getPublishTool.ts");
 
-const mockedNpmUtils = vi.mocked(npmUtils);
+const mockedGetPublishTool = vi.mocked(getPublishToolModule);
 const mockedGit = vi.mocked(git);
+const mockedInfo = vi.fn<PublishTool["info"]>();
 
 describe("getPublishPlan", () => {
   silenceLogsInBlock();
+
+  beforeEach(() => {
+    mockedGetPublishTool.getPublishTool.mockResolvedValue({
+      name: "mock",
+      getOtpCode: () => null,
+      info: mockedInfo,
+      publish: vi.fn<PublishTool["publish"]>(),
+    });
+  });
 
   afterEach(() => {
     vi.clearAllMocks();
@@ -40,9 +51,8 @@ describe("getPublishPlan", () => {
       }),
     });
 
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
+    mockedInfo.mockResolvedValue({
       published: false,
-      pkgInfo: { version: "1.0.0" },
     });
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
@@ -89,7 +99,7 @@ describe("getPublishPlan", () => {
     const result = await getPublishPlan(cwd, config.config!);
 
     expect(result).toEqual([]);
-    expect(mockedNpmUtils.infoAllow404).not.toHaveBeenCalled();
+    expect(mockedInfo).not.toHaveBeenCalled();
   });
 
   it("chunks releases in dependency order", async () => {
@@ -124,9 +134,8 @@ describe("getPublishPlan", () => {
       }),
     });
 
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
+    mockedInfo.mockResolvedValue({
       published: false,
-      pkgInfo: { version: "1.0.0" },
     });
     mockedGit.tagExists.mockResolvedValue(false);
     mockedGit.remoteTagExists.mockResolvedValue(false);
@@ -188,9 +197,8 @@ describe("getPublishPlan", () => {
       }),
     });
 
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
+    mockedInfo.mockResolvedValue({
       published: false,
-      pkgInfo: { version: "1.0.0" },
     });
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
@@ -236,7 +244,7 @@ describe("getPublishPlan", () => {
       }),
     });
 
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
+    mockedInfo.mockResolvedValue({
       published: true,
       pkgInfo: {
         versions: ["1.0.0-next.1", "1.0.0-next.2"],
@@ -277,9 +285,10 @@ describe("getPublishPlan", () => {
       }),
     });
 
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
+    mockedInfo.mockResolvedValue({
       published: true,
       pkgInfo: {
+        "dist-tags": {},
         versions: ["1.0.0"],
       },
     });
