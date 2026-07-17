@@ -1,5 +1,14 @@
 # @changesets/changelog-github
 
+## 1.0.0-next.7
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/get-github-info@1.0.0-next.4
+  - @changesets/types@7.0.0-next.7
+
 ## 1.0.0-next.6
 
 ### Minor Changes
