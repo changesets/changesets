@@ -183,9 +183,21 @@ async function resolvePackageManagerSpec(
   return `${packageManager}@${packageJson.version}`;
 }
 
-export function createPmBinEnv(pmBinPath: string, env: NodeJS.ProcessEnv = {}) {
+export async function createPmBinEnv(
+  cwd: string,
+  pmBinPath: string,
+  env: NodeJS.ProcessEnv = {},
+) {
+  const tempDir = path.join(cwd, ".tmp");
+  await fs.mkdir(tempDir, { recursive: true });
   return {
     ...env,
+    // pnpm packs the package into TMPDIR and runs npm from there. If that is
+    // /tmp/pkg and an unrelated /tmp/node_modules exists, npm can treat /tmp
+    // as the project root and miss the fixture's .npmrc (and test registry).
+    // Keeping TMPDIR inside cwd means npm still walks upward, but stops at the
+    // fixture package.json and "accidentally" finds the equivalent .npmrc.
+    TMPDIR: tempDir,
     PATH: process.env.PATH
       ? `${pmBinPath}${path.delimiter}${process.env.PATH}`
       : pmBinPath,
@@ -291,7 +303,7 @@ export async function runCliCommand(options: {
   if (!globalThis.AsyncDisposableStack) {
     args.unshift("--import", oxcRegister);
   }
-  const env = createPmBinEnv(options.pmBinPath, options.env);
+  const env = await createPmBinEnv(options.cwd, options.pmBinPath, options.env);
   if (options.tty) {
     return execTty(process.execPath, args, {
       onData: options.onData,
@@ -403,7 +415,7 @@ function createYarnBerryGitdir(packageName: string) {
       nodePath: false,
       nodeOptions: {
         cwd,
-        env: createPmBinEnv(pmBinPath),
+        env: await createPmBinEnv(cwd, pmBinPath),
       },
       throwOnError: true,
     });
