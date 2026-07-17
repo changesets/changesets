@@ -1,5 +1,16 @@
 # @changesets/assemble-release-plan
 
+## 7.0.0-next.8
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/errors@1.0.0-next.4
+  - @changesets/get-dependents-graph@3.0.0-next.7
+  - @changesets/should-skip-package@1.0.0-next.7
+  - @changesets/types@7.0.0-next.7
+
 ## 7.0.0-next.7
 
 ### Major Changes
