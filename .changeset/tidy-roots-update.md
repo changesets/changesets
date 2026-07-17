@@ -1,5 +1,5 @@
 ---
-"@changesets/cli": cli
+"@changesets/cli": patch
 "@changesets/apply-release-plan": patch
 ---
 
