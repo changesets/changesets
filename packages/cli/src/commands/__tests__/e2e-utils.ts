@@ -188,7 +188,9 @@ async function resolvePackageManagerSpec(
 
 export function createPmBinEnv(pmBinPath: string, env: NodeJS.ProcessEnv = {}) {
   return {
+    ...process.env,
     ...env,
+    TERM: "xterm-256color",
     PATH: process.env.PATH
       ? `${pmBinPath}${path.delimiter}${process.env.PATH}`
       : pmBinPath,

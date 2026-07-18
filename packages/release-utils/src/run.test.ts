@@ -69,7 +69,7 @@ describe("version", { tags: ["slow"] }, () => {
         name: "pkg-b",
         version: "1.0.0",
       }),
-      ".changeset/config.json": JSON.stringify({}),
+      ".changeset/config.json": JSON.stringify({ format: false }),
     });
 
     await writeChangesets(
@@ -185,7 +185,7 @@ describe("version", { tags: ["slow"] }, () => {
         null,
         2,
       ),
-      ".changeset/config.json": JSON.stringify({}),
+      ".changeset/config.json": JSON.stringify({ format: false }),
     });
 
     await writeChangesets(
@@ -286,6 +286,7 @@ describe("version", { tags: ["slow"] }, () => {
         version: "1.0.0",
       }),
       ".changeset/config.json": JSON.stringify({
+        format: false,
         ignore: ["pkg-a"],
       }),
     });

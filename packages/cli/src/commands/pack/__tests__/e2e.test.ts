@@ -13,7 +13,9 @@ import {
 function sanitizePackLog(message: unknown) {
   return stripVTControlCharacters(String(message))
     .replaceAll("\r\n", "\n")
+    .replaceAll("\r", "\n")
     .replace(/changeset v\S+/g, "changeset v[version]")
+    .replace(/^[A-Za-z]:\\(?:[^\\\r\n]+\\)*cmd\.exe \/d \/s \/c /gim, "sh -c ")
     .replace(
       /logs can be found here: .*?\.log/g,
       "logs can be found here: [yarn-prepack-log]",
