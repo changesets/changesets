@@ -15,6 +15,57 @@ pkg-a@1.0.0
 "
 `;
 
+exports[`Publish command e2e > 'npm 10' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'npm 10' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+npm notice
+npm notice package: pkg-a@1.0.0
+npm notice Tarball Contents
+npm notice 24B index.js
+npm notice 104B package.json
+npm notice Tarball Details
+npm notice name: pkg-a
+npm notice version: 1.0.0
+npm notice filename: pkg-a-1.0.0.tgz
+npm notice package size: 234 B
+npm notice unpacked size: 128 B
+npm notice shasum: 843d50e8a5f1a01846a86f4e30b58913b9403183
+npm notice integrity: sha512-IJNHXvYGzsReN[...]0lxUHcQEkBaTw==
+npm notice total files: 2
+npm notice
+npm notice Publishing to [registry-url]/ with tag latest and public access
+This operation requires a one-time password.
+Enter OTP: 654321
+
+
++ pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
 exports[`Publish command e2e > 'npm 10' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
@@ -74,6 +125,56 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'npm 11' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'npm 11' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+npm notice
+npm notice package: pkg-a@1.0.0
+npm notice Tarball Contents
+npm notice 24B index.js
+npm notice 104B package.json
+npm notice Tarball Details
+npm notice name: pkg-a
+npm notice version: 1.0.0
+npm notice filename: pkg-a-1.0.0.tgz
+npm notice package size: 234 B
+npm notice unpacked size: 128 B
+npm notice shasum: 843d50e8a5f1a01846a86f4e30b58913b9403183
+npm notice integrity: sha512-IJNHXvYGzsReN[...]0lxUHcQEkBaTw==
+npm notice total files: 2
+npm notice
+npm notice Publishing to [registry-url]/ with tag latest and public access
+This operation requires a one-time password.
+Enter OTP: 654321
+
++ pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
 ◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
@@ -145,6 +246,56 @@ pkg-a@1.0.0
 "
 `;
 
+exports[`Publish command e2e > 'npm 12' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'npm 12' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+npm notice
+npm notice package: pkg-a@1.0.0
+npm notice Tarball Contents
+npm notice 24B index.js
+npm notice 104B package.json
+npm notice Tarball Details
+npm notice name: pkg-a
+npm notice version: 1.0.0
+npm notice filename: pkg-a-1.0.0.tgz
+npm notice package size: 234 B
+npm notice unpacked size: 128 B
+npm notice shasum: 843d50e8a5f1a01846a86f4e30b58913b9403183
+npm notice integrity: sha512-IJNHXvYGzsReN[...]0lxUHcQEkBaTw==
+npm notice total files: 2
+npm notice
+npm notice Publishing to [registry-url]/ with tag latest and public access
+This operation requires a one-time password.
+Enter OTP: 654321
+
++ pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
 exports[`Publish command e2e > 'npm 12' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
@@ -206,6 +357,57 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 10' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 10' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+npm notice
+npm notice package: pkg-a@1.0.0
+npm notice Tarball Contents
+npm notice 24B index.js
+npm notice 137B package.json
+npm notice Tarball Details
+npm notice name: pkg-a
+npm notice version: 1.0.0
+npm notice filename: pkg-a-1.0.0.tgz
+npm notice package size: 257 B
+npm notice unpacked size: 161 B
+npm notice shasum: fc5c76124e04c65bd31d1164b1f608a663df1f4e
+npm notice integrity: sha512-pYioh/zUbmGPH[...]dPmfzo8n4gEaA==
+npm notice total files: 2
+npm notice
+npm notice Publishing to [registry-url]/ with tag latest and public access
+This operation requires a one-time password.
+Enter OTP: 654321
+
+
++ pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
 ◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
@@ -275,6 +477,49 @@ pkg-a@1.0.0
 "
 `;
 
+exports[`Publish command e2e > 'pnpm 11' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 11' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+[WARN] Skipped OIDC: ERR_PNPM_ID_TOKEN_GITHUB_WORKFLOW_INCORRECT_PERMISSIONS: Incorrect permissions for idToken within GitHub Workflows
+📦 pkg-a@1.0.0 → [registry-url]/
+? This operation requires a one-time password.
+Enter OTP:? This operation requires a one-time password.
+Enter OTP: 6? This operation requires a one-time password.
+Enter OTP: 65? This operation requires a one-time password.
+Enter OTP: 654? This operation requires a one-time password.
+Enter OTP: 6543? This operation requires a one-time password.
+Enter OTP: 65432? This operation requires a one-time password.
+Enter OTP: 654321? This operation requires a one-time password.
+Enter OTP: 654321✔ This operation requires a one-time password.
+Enter OTP: 654321
+✅ Published package pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
 exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
@@ -330,6 +575,43 @@ pkg-a@1.0.0
 0 packages are already published.
 ◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'yarn 4' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'yarn 4' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+➤ YN0000: Publishing to [registry-url] with tag latest
+➤ YN0000: index.js
+➤ YN0000: package.json
+? One-time password: › ✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******
+
+➤ YN0000: Package archive published
+➤ YN0000: Done in 0s 72ms
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
 ◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
 "
