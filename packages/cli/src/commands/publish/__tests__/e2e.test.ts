@@ -227,6 +227,10 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
     .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
     .replace(/changeset v\S+/g, "changeset v[version]")
     .replace(/^[A-Za-z]:\\(?:[^\\\r\n]+\\)*cmd\.exe \/d \/s \/c /gim, "sh -c ")
+    .replaceAll(
+      /(?:^[◒◐◓◑] {2}Creating git tag\.*\n)+(?=^◇ {2}Created git tag\.$)/gm,
+      "",
+    )
     .replaceAll(new URL(registryUrl).origin, "[registry-url]")
     .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
     .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]");
