@@ -224,6 +224,10 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
   return stripVTControlCharacters(String(message))
     .replace(/changeset v\S+/g, "changeset v[version]")
     .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
+    .replace(
+      /logs can be found here: .*?\.log/g,
+      "logs can be found here: [yarn-prepack-log]",
+    )
     .replaceAll(
       /[◒◐◓◑] {2}(?:━+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\r?\n)?[◒◐◓◑] {2}(?:━+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
       (_match, message: string) => `◒  ${message}`,
@@ -907,6 +911,71 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
             name: "pkg-a",
             version: "1.0.0",
           },
+        },
+      });
+    });
+
+    it("surfaces pre-publish errors", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(createPmContext(registry, pmBinPath), {
+        ...createPkgAFixture(),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          description: "",
+          files: ["index.js"],
+          license: "MIT",
+          scripts: {
+            prepack:
+              "node -e \"console.error('prepack failed'); process.exit(1)\"",
+          },
+          type: "module",
+        }),
+      });
+
+      const result = await runCliCommand({
+        command: "publish",
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect.soft(result.exitCode).toBe(1);
+      expect.soft(result.stderr).toBe("");
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .toMatchSnapshot();
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect.soft(publishRequests).toEqual([]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect.soft(packument).toMatchObject({
+        "dist-tags": {
+          latest: "0.0.1",
+        },
+        versions: {
+          "0.0.1": {
+            name: "pkg-a",
+            version: "0.0.1",
+          },
+        },
+      });
+      expect.soft(packument).not.toMatchObject({
+        versions: {
+          "1.0.0": expect.anything(),
         },
       });
     });

@@ -66,6 +66,22 @@ Enter OTP: 654321
 "
 `;
 
+exports[`Publish command e2e > 'npm 10' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 1: command failed
+sh -c node -e "console.error('prepack failed'); process.exit(1)"
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`Publish command e2e > 'npm 10' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
@@ -177,6 +193,22 @@ Enter OTP: 654321
 │
 ◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'npm 11' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 1: command failed
+sh -c node -e "console.error('prepack failed'); process.exit(1)"
+🦋 Exited with code 1
+
 "
 `;
 
@@ -293,6 +325,22 @@ Enter OTP: 654321
 │
 ◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'npm 12' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 1: command failed
+sh -c node -e "console.error('prepack failed'); process.exit(1)"
+🦋 Exited with code 1
+
 "
 `;
 
@@ -413,6 +461,21 @@ Enter OTP: 654321
 "
 `;
 
+exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ (no code): prepack failed
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
@@ -520,6 +583,22 @@ Enter OTP: 654321
 "
 `;
 
+exports[`Publish command e2e > 'pnpm 11' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.error('prepack failed'); process.exit(1)"\`
+Exit status 1
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
@@ -614,6 +693,21 @@ exports[`Publish command e2e > 'yarn 4' > retries interactively after an OTP aut
 │
 ◒  Creating git tags◇  Created git tags:
 - pkg-a@1.0.0
+"
+`;
+
+exports[`Publish command e2e > 'yarn 4' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ YN0036: Prepack script failed (exit code 1, logs can be found here: [yarn-prepack-log]); run yarn prepack to investigate
+🦋 Exited with code 1
+
 "
 `;
 
