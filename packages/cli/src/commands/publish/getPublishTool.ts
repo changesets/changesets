@@ -1,6 +1,5 @@
 import type { Packages } from "@changesets/types";
 import { exec } from "tinyexec";
-import * as mock from "../../lib/mock.ts";
 import * as npm from "../../lib/npm.ts";
 import * as pnpm from "../../lib/pnpm.ts";
 import type { PublishTool } from "../../lib/types.ts";
@@ -18,10 +17,6 @@ async function getYarnVersion(packages: Packages) {
 }
 
 export async function getPublishTool(packages: Packages): Promise<PublishTool> {
-  // removed in build process
-  if (process.env.CHANGESETS_FAKE_PUBLISH != null) {
-    return mock;
-  }
   if (packages.tool.type === "pnpm") {
     return pnpm;
   }

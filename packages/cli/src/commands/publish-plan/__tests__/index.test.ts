@@ -19,7 +19,7 @@ describe("publish-plan", () => {
 
   beforeEach(() => {
     mockedGetPublishTool.getPublishTool.mockResolvedValue({
-      name: "mock",
+      name: "npm",
       getOtpCode: () => null,
       info: mockedInfo,
       pack: vi.fn<PublishTool["pack"]>(),

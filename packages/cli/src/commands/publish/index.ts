@@ -391,7 +391,7 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
   const tagsToCreate = uniqBy(gitTagsToCreate, (r) =>
     buildGitTag(packages.tool, r),
   );
-  if (tagsToCreate.length > 0 && process.env.CHANGESETS_FAKE_PUBLISH == null) {
+  if (tagsToCreate.length > 0) {
     const p = spinner();
     p.start("Creating git tags...");
 
