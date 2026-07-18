@@ -204,13 +204,21 @@ export function handlePublishError(
 ): PublishResult {
   // if we get back an unknown error
   if (!isNpmPublishError(json)) {
-    return { ...resultBase, result: "failed", summary: processOutput };
+    return {
+      ...resultBase,
+      result: "failed",
+      summary: processOutput,
+    };
   }
 
   // npm v11 doesn't return a `code` on already-published errors
   if (isAlreadyPublishedError(json.error.summary)) {
     // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
-    return { ...resultBase, result: "failed:already-published" };
+    return {
+      ...resultBase,
+      result: "failed:already-published",
+      code: json.error.code!,
+    };
   }
 
   const summary = `
@@ -222,6 +230,7 @@ ${json.error.detail ?? ""}
     const result: PublishResultFailedNeeds2fa = {
       ...resultBase,
       result: "failed:needs-2fa",
+      code: json.error.code,
       summary,
     };
 
@@ -234,7 +243,12 @@ ${json.error.detail ?? ""}
     return result;
   }
 
-  return { ...resultBase, result: "failed", summary };
+  return {
+    ...resultBase,
+    result: "failed",
+    code: json.error.code,
+    summary,
+  };
 }
 
 // we have this so that we can do try a publish again after a publish without
@@ -304,7 +318,11 @@ export const publish: PublishTool["publish"] = async ({
     try {
       json = JSON.parse(stdout.toString().trim());
     } catch {
-      return { ...resultBase, result: "failed", summary: stderr || stdout };
+      return {
+        ...resultBase,
+        result: "failed",
+        summary: stderr || stdout,
+      };
     }
 
     return handlePublishError(resultBase, json, stderr || stdout);

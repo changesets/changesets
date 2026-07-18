@@ -175,7 +175,11 @@ export const publish: PublishTool["publish"] = async ({
     try {
       json = JSON.parse(stdout.toString().trim());
     } catch {
-      return { ...resultBase, result: "failed", summary: stderr || stdout };
+      return {
+        ...resultBase,
+        result: "failed",
+        summary: stderr || stdout,
+      };
     }
 
     // let the npm error handler take care of any other non-json error, as pnpm 10 delegates publishing to npm
@@ -186,7 +190,11 @@ export const publish: PublishTool["publish"] = async ({
 
     if (isAlreadyPublishedError(json.error.message)) {
       // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
-      return { ...resultBase, result: "failed:already-published" };
+      return {
+        ...resultBase,
+        result: "failed:already-published",
+        code: json.error.code,
+      };
     }
 
     const summary = json.error.message.trim();
@@ -195,11 +203,12 @@ export const publish: PublishTool["publish"] = async ({
       return {
         ...resultBase,
         result: "failed:needs-2fa",
+        code: json.error.code,
         summary,
         authUrl: json.error.authUrl,
         doneUrl: json.error.doneUrl,
       } satisfies PublishResult;
     }
 
-    return { ...resultBase, result: "failed", summary };
+    return { ...resultBase, result: "failed", code: json.error.code, summary };
   });

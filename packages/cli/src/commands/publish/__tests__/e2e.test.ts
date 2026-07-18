@@ -223,6 +223,7 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
 function sanitizePublishLog(message: unknown, registryUrl: string) {
   return stripVTControlCharacters(String(message))
     .replace(/changeset v\S+/g, "changeset v[version]")
+    .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
     .replaceAll(
       /[◒◐◓◑] {2}(?:━+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\r?\n)?[◒◐◓◑] {2}(?:━+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
       (_match, message: string) => `◒  ${message}`,
@@ -1472,7 +1473,81 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       });
     });
 
-    it("skips already-published version publish errors", async ({ signal }) => {
+    it("skips already-published version publish errors after our publish plan preflight", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      let packageSeeded = false;
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+          async middleware({ pnpr, record, request }) {
+            if (record.packageName !== "pkg-a") {
+              return;
+            }
+
+            if (request.method === "GET" && !packageSeeded) {
+              const response = await pnpr.fetch(request);
+              await pnpr.seedPackage("pkg-a", {
+                versions: ["1.0.0"],
+                tags: { latest: "1.0.0" },
+              });
+              packageSeeded = true;
+              return response;
+            }
+
+            if (request.method === "PUT") {
+              // pnpr currently accepts publishing over an existing version here, while
+              // npm rejects it. Keep this response synthetic to exercise npm's
+              // already-published race semantics.
+              return Response.json(
+                {
+                  error:
+                    "You cannot publish over the previously published versions: 1.0.0.",
+                  success: false,
+                },
+                { status: 403 },
+              );
+            }
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(
+        createPmContext(registry, pmBinPath),
+        createPkgAFixture(),
+      );
+
+      const result = await runCliCommand({
+        command: "publish",
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect.soft(result.exitCode).toBe(0);
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .not.toContain("Published pkg-a@1.0.0!");
+      await expect.soft(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect.soft(publishRequests.map((request) => request.statusCode)).toEqual(
+        // npm 11+ rejects an already-published version during its local
+        // preflight. Other clients send the PUT and receive the registry's 403.
+        pm.name !== "npm 11" && pm.name !== "npm 12" ? [403] : [],
+      );
+    });
+
+    it("skips already-published version publish errors after possible package manager preflights", async ({
+      signal,
+    }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(

@@ -41,7 +41,12 @@ export const publish = async ({
 
     // when in interactive mode, return published:interactive on the first package
     if (publishes === 1) {
-      return { ...resultBase, result: "failed:needs-2fa", summary: "asdasd" };
+      return {
+        ...resultBase,
+        result: "failed:needs-2fa",
+        code: "EOTP",
+        summary: "asdasd",
+      };
     }
     if (publishes === 2 && interactive) {
       const readline = createInterface({
@@ -63,6 +68,7 @@ export const publish = async ({
       return {
         ...resultBase,
         result: "failed",
+        code: "EUNKNOWN",
         summary: "Fake publish failure...",
       };
     }

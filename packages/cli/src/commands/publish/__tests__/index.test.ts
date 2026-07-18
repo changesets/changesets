@@ -321,14 +321,13 @@ describe("Publish command", () => {
       }
       if (args[0] === "publish") {
         return execResult(
-          "",
-          1,
           JSON.stringify({
             error: {
               code: "E403",
               summary: "failed",
             },
           }),
+          1,
         );
       }
       throw new Error(`Unexpected exec args: ${args.join(" ")}`);
@@ -345,6 +344,9 @@ describe("Publish command", () => {
     );
     expect(mockedLogger.error).toHaveBeenCalledWith(
       expect.stringContaining("Some packages failed to publish:"),
+    );
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("E403: failed"),
     );
     expect(git.tag).not.toHaveBeenCalled();
   });

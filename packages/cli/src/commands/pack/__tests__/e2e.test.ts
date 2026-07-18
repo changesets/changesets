@@ -13,6 +13,7 @@ import {
 function sanitizePackLog(message: unknown) {
   return stripVTControlCharacters(String(message))
     .replace(/changeset v\S+/g, "changeset v[version]")
+    .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
     .replace(
       /logs can be found here: .*?\.log/g,
       "logs can be found here: [yarn-prepack-log]",

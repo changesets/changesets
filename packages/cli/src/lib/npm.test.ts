@@ -10,7 +10,10 @@ import {
   alreadyPublishedErrorSnapshot,
   need2faErrorSnapshot,
 } from "./testing/error-snapshots.ts";
-import type { PublishResultFailedNeeds2fa } from "./types.ts";
+import type {
+  PublishResultFailed,
+  PublishResultFailedNeeds2fa,
+} from "./types.ts";
 
 vi.mock("tinyexec");
 const mockedExec = vi.mocked(exec);
@@ -82,12 +85,37 @@ describe("publishing", () => {
 
     expect(result.result).toEqual("failed:needs-2fa");
     const error = result as PublishResultFailedNeeds2fa;
+    expect(error.code).toEqual("EOTP");
     expect(error.authUrl).toMatchInlineSnapshot(
       `"https://www.npmjs.com/auth/cli/[uuid]"`,
     );
     expect(error.doneUrl).toMatchInlineSnapshot(
       `"https://registry.npmjs.org/-/v1/done?authId=[uuid]"`,
     );
+  });
+
+  it("preserves npm error codes", async () => {
+    mockedExec.mockResolvedValue({
+      exitCode: 1,
+      stdout: JSON.stringify({
+        error: {
+          code: "ECUSTOM",
+          summary: "failed",
+          detail: "",
+        },
+      }),
+      stderr: "",
+    });
+
+    const result = await npm.publish({
+      pkg,
+      release,
+      tarballPath: null,
+      interactive: false,
+      otpCode: null,
+    });
+
+    expect((result as PublishResultFailed).code).toBe("ECUSTOM");
   });
 
   it("respects `publishConfig.directory`", async () => {

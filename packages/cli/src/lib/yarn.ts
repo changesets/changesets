@@ -186,16 +186,20 @@ export const publish: PublishTool["publish"] = async ({
       };
     }
 
-    const publishError = getYarnBerryReporterError(stdout) ?? {
-      code: "EUNKNOWN",
-      message: stderr || stdout || "Unknown error",
-    };
+    const publishError: { code?: string; message: string } =
+      getYarnBerryReporterError(stdout) ?? {
+        message: stderr || stdout || "Unknown error",
+      };
 
     if (
       publishError.code === "YN0035" &&
       isAlreadyPublishedError(publishError.message)
     ) {
-      return { ...resultBase, result: "failed:already-published" };
+      return {
+        ...resultBase,
+        result: "failed:already-published",
+        code: publishError.code,
+      };
     }
 
     if (
@@ -205,6 +209,7 @@ export const publish: PublishTool["publish"] = async ({
       return {
         ...resultBase,
         result: "failed:needs-2fa",
+        code: publishError.code,
         summary: publishError.message,
       };
     }
@@ -212,6 +217,7 @@ export const publish: PublishTool["publish"] = async ({
     return {
       ...resultBase,
       result: "failed",
+      code: publishError.code,
       summary: publishError.message,
     };
   });

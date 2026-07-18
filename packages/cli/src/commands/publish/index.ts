@@ -50,7 +50,7 @@ function formatPackageList(
     .map((entry) => {
       const error =
         "result" in entry && isPublishFailure(entry)
-          ? `\n${c.dim(`└`)} ${entry.summary}`
+          ? `\n${c.dim(`└`)} ${entry.code || "(no code)"}: ${entry.summary}`
           : "";
 
       return `${c.blueBright(entry.name)}@${versionColor(entry.version)}${error}`;
