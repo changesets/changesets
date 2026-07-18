@@ -528,7 +528,67 @@ describe("Publish command", () => {
     }
   });
 
-  it("tags tag-only releases within their chunk", async () => {
+  it("tags tag-only releases from a failing chunk", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        private: true,
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...defaultConfig,
+        privatePackages: {
+          version: true,
+          tag: true,
+        },
+      }),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult("");
+      }
+      if (args[0] === "publish") {
+        return execResult(
+          "",
+          1,
+          JSON.stringify({
+            error: {
+              code: "E403",
+              summary: "failed",
+            },
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.getAllTags).mockResolvedValue(new Set());
+    vi.mocked(git.tagExists).mockResolvedValue(false);
+    vi.mocked(git.remoteTagExists).mockResolvedValue(false);
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await expect(publishCommand({ cwd })).rejects.toThrow();
+
+    expect(
+      mockedExec.mock.calls
+        .filter((call) => call[1]?.[0] === "publish")
+        .map((call) => call[2]?.nodeOptions?.cwd),
+    ).toEqual([path.join(cwd, "packages", "pkg-a")]);
+    expect(vi.mocked(git.tag).mock.calls.map((call) => call[0])).toEqual([
+      "pkg-b@1.0.0",
+    ]);
+  });
+
+  it("does not tag tag-only releases after a failing chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -561,7 +621,16 @@ describe("Publish command", () => {
         return execResult("");
       }
       if (args[0] === "publish") {
-        return execResult("");
+        return execResult(
+          "",
+          1,
+          JSON.stringify({
+            error: {
+              code: "E403",
+              summary: "failed",
+            },
+          }),
+        );
       }
       throw new Error(`Unexpected exec args: ${args.join(" ")}`);
     });
@@ -570,17 +639,14 @@ describe("Publish command", () => {
     vi.mocked(git.remoteTagExists).mockResolvedValue(false);
     vi.mocked(git.tag).mockResolvedValue(true);
 
-    await publishCommand({ cwd });
+    await expect(publishCommand({ cwd })).rejects.toThrow();
 
     expect(
       mockedExec.mock.calls
         .filter((call) => call[1]?.[0] === "publish")
         .map((call) => call[2]?.nodeOptions?.cwd),
     ).toEqual([path.join(cwd, "packages", "pkg-a")]);
-    expect(vi.mocked(git.tag).mock.calls.map((call) => call[0])).toEqual([
-      "pkg-a@1.0.0",
-      "pkg-b@1.0.0",
-    ]);
+    expect(git.tag).not.toHaveBeenCalled();
   });
 
   it("rejects custom tags when publishing from a pack directory", async () => {
