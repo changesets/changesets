@@ -152,7 +152,7 @@ export const publish: PublishTool["publish"] = async ({
       return {
         ...resultBase,
         result: "failed",
-        summary: "Yarn does not support publishing from a tarball.",
+        message: "Yarn does not support publishing from a tarball.",
       } satisfies PublishResult;
     }
 
@@ -210,7 +210,7 @@ export const publish: PublishTool["publish"] = async ({
         ...resultBase,
         result: "failed:needs-2fa",
         code: publishError.code,
-        summary: publishError.message,
+        message: publishError.message,
       };
     }
 
@@ -218,6 +218,6 @@ export const publish: PublishTool["publish"] = async ({
       ...resultBase,
       result: "failed",
       code: publishError.code,
-      summary: publishError.message,
+      message: publishError.message,
     };
   });

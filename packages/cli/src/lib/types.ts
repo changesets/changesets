@@ -74,7 +74,7 @@ export type PublishResultSuccess = PublishResultBase & {
 export type PublishResultFailed = PublishResultBase & {
   result: "failed";
   code?: string;
-  summary: string;
+  message: string;
 };
 
 export type PublishResultAlreadyPublished = PublishResultBase & {
@@ -85,7 +85,7 @@ export type PublishResultAlreadyPublished = PublishResultBase & {
 export type PublishResultFailedNeeds2fa = PublishResultBase & {
   result: "failed:needs-2fa";
   code?: string;
-  summary: string;
+  message: string;
   authUrl?: string;
   doneUrl?: string;
 };

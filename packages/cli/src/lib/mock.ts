@@ -45,7 +45,7 @@ export const publish = async ({
         ...resultBase,
         result: "failed:needs-2fa",
         code: "EOTP",
-        summary: "asdasd",
+        message: "asdasd",
       };
     }
     if (publishes === 2 && interactive) {
@@ -69,7 +69,7 @@ export const publish = async ({
         ...resultBase,
         result: "failed",
         code: "EUNKNOWN",
-        summary: "Fake publish failure...",
+        message: "Fake publish failure...",
       };
     }
   });

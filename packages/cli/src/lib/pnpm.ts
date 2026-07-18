@@ -178,7 +178,7 @@ export const publish: PublishTool["publish"] = async ({
       return {
         ...resultBase,
         result: "failed",
-        summary: stderr || stdout,
+        message: stderr || stdout,
       };
     }
 
@@ -197,18 +197,18 @@ export const publish: PublishTool["publish"] = async ({
       };
     }
 
-    const summary = json.error.message.trim();
+    const message = json.error.message.trim();
 
     if (json.error.code === "ERR_PNPM_OTP_NON_INTERACTIVE") {
       return {
         ...resultBase,
         result: "failed:needs-2fa",
         code: json.error.code,
-        summary,
+        message,
         authUrl: json.error.authUrl,
         doneUrl: json.error.doneUrl,
       } satisfies PublishResult;
     }
 
-    return { ...resultBase, result: "failed", code: json.error.code, summary };
+    return { ...resultBase, result: "failed", code: json.error.code, message };
   });

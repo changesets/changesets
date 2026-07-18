@@ -207,7 +207,7 @@ export function handlePublishError(
     return {
       ...resultBase,
       result: "failed",
-      summary: processOutput,
+      message: processOutput,
     };
   }
 
@@ -221,7 +221,7 @@ export function handlePublishError(
     };
   }
 
-  const summary = `
+  const message = `
 ${json.error.summary ?? ""}
 ${json.error.detail ?? ""}
   `.trim();
@@ -231,7 +231,7 @@ ${json.error.detail ?? ""}
       ...resultBase,
       result: "failed:needs-2fa",
       code: json.error.code,
-      summary,
+      message,
     };
 
     // npm v11 returns data we can use to handle 2fa in-process
@@ -247,7 +247,7 @@ ${json.error.detail ?? ""}
     ...resultBase,
     result: "failed",
     code: json.error.code,
-    summary,
+    message,
   };
 }
 
@@ -321,7 +321,7 @@ export const publish: PublishTool["publish"] = async ({
       return {
         ...resultBase,
         result: "failed",
-        summary: stderr || stdout,
+        message: stderr || stdout,
       };
     }
 
