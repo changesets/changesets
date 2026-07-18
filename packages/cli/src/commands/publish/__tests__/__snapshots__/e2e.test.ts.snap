@@ -21,7 +21,10 @@ exports[`Publish command e2e > 'npm 10' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -33,7 +36,10 @@ exports[`Publish command e2e > 'npm 10' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ This command requires you to be logged in to [registry-url]/
 You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
@@ -46,7 +52,10 @@ exports[`Publish command e2e > 'npm 10' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: This operation requires a one-time password from your authenticator.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ This operation requires a one-time password from your authenticator.
 You can provide a one-time password by passing --otp=<code> to the command you ran.
 If you already provided a one-time password then it is likely that you either typoed
 it, or it timed out. Please try again.
@@ -76,7 +85,10 @@ exports[`Publish command e2e > 'npm 11' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -88,7 +100,10 @@ exports[`Publish command e2e > 'npm 11' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ This command requires you to be logged in to [registry-url]/
 You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
@@ -101,7 +116,10 @@ exports[`Publish command e2e > 'npm 11' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: This operation requires a one-time password.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ This operation requires a one-time password.
 Open this URL in your browser to authenticate:
   [registry-url]/-/auth/cli/[uuid]
 
@@ -133,7 +151,10 @@ exports[`Publish command e2e > 'npm 12' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -145,7 +166,10 @@ exports[`Publish command e2e > 'npm 12' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ This command requires you to be logged in to [registry-url]/
 You need to authorize this machine using \`npm login\`
 🦋 Exited with code 1
 
@@ -158,7 +182,10 @@ exports[`Publish command e2e > 'npm 12' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: This operation requires a one-time password.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ This operation requires a one-time password.
 Open this URL in your browser to authenticate:
   [registry-url]/-/auth/cli/[uuid]
 
@@ -190,7 +217,10 @@ exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures fo
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -202,7 +232,10 @@ exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures wh
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: This command requires you to be logged in to [registry-url]/
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ This command requires you to be logged in to [registry-url]/
 You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
@@ -215,7 +248,10 @@ exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces web-auth OTP publis
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: This operation requires a one-time password from your authenticator.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ This operation requires a one-time password from your authenticator.
 You can provide a one-time password by passing --otp=<code> to the command you ran.
 If you already provided a one-time password then it is likely that you either typoed
 it, or it timed out. Please try again.
@@ -245,7 +281,10 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures for bad cre
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -257,7 +296,10 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures when not lo
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: 401 Unauthorized - PUT [registry-url]/pkg-a
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -269,7 +311,10 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces web-auth OTP publish failure
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: The registry requires additional authentication, but pnpm is not running in an interactive terminal
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ The registry requires additional authentication, but pnpm is not running in an interactive terminal
 🦋 Exited with code 1
 
 "
@@ -296,7 +341,10 @@ exports[`Publish command e2e > 'yarn 4' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: Invalid authentication (as an unknown user)
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ Invalid authentication (as an unknown user)
 🦋 Exited with code 1
 
 "
@@ -308,7 +356,10 @@ exports[`Publish command e2e > 'yarn 4' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: No authentication configured for request
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ No authentication configured for request
 🦋 Exited with code 1
 
 "
@@ -320,7 +371,10 @@ exports[`Publish command e2e > 'yarn 4' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages▲  Failed to publish pkg-a: Invalid OTP token
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ Invalid OTP token
 🦋 Exited with code 1
 
 "

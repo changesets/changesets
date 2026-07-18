@@ -2,7 +2,6 @@ import { promiseTry } from "../ponyfills/promise-try.ts";
 
 interface PromiseQueue {
   add: <T>(fn: () => Promise<T>) => Promise<T>;
-  setConcurrency: (newConcurrency: number) => void;
 }
 
 export function createPromiseQueue(concurrency: number): PromiseQueue {
@@ -51,10 +50,6 @@ export function createPromiseQueue(concurrency: number): PromiseQueue {
       });
       run();
       return promise as Promise<T>;
-    },
-    setConcurrency: (newConcurrency: number) => {
-      concurrency = newConcurrency;
-      run();
     },
   };
 }

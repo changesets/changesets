@@ -1,8 +1,8 @@
-import path from "node:path";
+import path, { resolve } from "node:path";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { readPreState } from "@changesets/pre";
-import type { PreState } from "@changesets/types";
+import type { Package, PreState } from "@changesets/types";
 import { log, progress, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import {
@@ -10,25 +10,24 @@ import {
   createGitTags,
   formatGitTagResults,
 } from "../../actions/git-tag.ts";
-import {
-  isPublishFailure,
-  isPublishSuccessful,
-  NPM_PUBLISH_CONCURRENCY_LIMIT,
-  npmPublishQueue,
-} from "../../lib/common.ts";
-import type { PublishResult } from "../../lib/types.ts";
+import { isPublishFailure, isPublishSuccessful } from "../../lib/common.ts";
+import type { PublishResult, PublishTool } from "../../lib/types.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { createOutputReport } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import {
   getPublishPlan,
-  type PublishReleaseEntry,
   readPlanFile,
   type TagReleaseEntry,
+  type PublishReleaseEntry,
 } from "../publish-plan/getPublishPlan.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 import { getPublishTool } from "./getPublishTool.ts";
-import { bulkPublishPackages } from "./publishPackages.ts";
+
+type PublishQueueItem = {
+  release: PublishReleaseEntry;
+  result: PublishResult | undefined;
+};
 
 function uniqBy<T>(array: T[], key: (t: T) => string) {
   const seen = new Set<string>();
@@ -70,6 +69,43 @@ ${c.red("except")} for packages that have not had normal releases, which will be
   } else if (tag !== "latest") {
     log.warn(`Packages will be released under the ${tag} tag.`);
   }
+}
+
+async function bulkPublishPackages({
+  publishTool,
+  publishQueue,
+  packagesByName,
+  artifactDir,
+  otpCode,
+  onResult,
+}: {
+  publishTool: PublishTool;
+  publishQueue: PublishQueueItem[];
+  packagesByName: Map<string, Package>;
+  artifactDir?: string;
+  otpCode: string | null;
+  onResult?: (result: PublishResult) => void;
+}): Promise<PublishQueueItem[]> {
+  if (publishQueue.length === 0) return [];
+
+  const publishPromises = publishQueue.map(async (item) => {
+    const { release } = item;
+    const pkg = packagesByName.get(release.name)!;
+    const result = await publishTool.publish({
+      pkg,
+      release,
+      tarballPath: artifactDir
+        ? resolve(artifactDir, release.tarball!.path)
+        : null,
+      interactive: false,
+      otpCode,
+    });
+
+    onResult?.(result);
+    return { release, result };
+  });
+
+  return Promise.all(publishPromises);
 }
 
 export interface PublishOptions {
@@ -132,55 +168,65 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     return;
   }
 
-  // three stages
-  // one where we step through each package until we know we don't need user interaction
-  // second where we chunk publish any remaining packages in chunks
-  // third where we create git tags
-
-  npmPublishQueue.setConcurrency(1);
-
-  const finishedPackages = new Set<string>();
+  let finishedCount = 0;
   const successfulNpmPublishes: PublishResult[] = [];
   const unsuccessfulNpmPublishes: PublishResult[] = [];
 
-  const publishPlan = plan.map((chunk) =>
-    chunk.filter((plan) => plan.kind === "publish"),
-  );
   const totalPublishCount: number = plan.reduce(
     (count, chunk) =>
       count + chunk.filter((release) => release.kind === "publish").length,
     0,
   );
-  const gitTagsToCreate = plan.flatMap((chunk) =>
-    chunk.filter((plan) => plan.kind === "tag-only"),
-  );
+  const gitTagsToCreate: TagReleaseEntry[] = [];
 
-  const otpCode = publishTool.getOtpCode(options?.otp);
+  let otpCode = publishTool.getOtpCode(options?.otp);
+  let sequential = process.stdin.isTTY;
+  const p = progress({ max: totalPublishCount });
+  const advanceProgress = () => {
+    p.advance(
+      1,
+      `Publishing packages (${++finishedCount}/${totalPublishCount})`,
+    );
+  };
+  if (!sequential && totalPublishCount > 0) {
+    p.start("Publishing packages...");
+  }
+  // Publish packages in chunks based on the package graph.
+  publishChunks: for (const chunk of plan) {
+    gitTagsToCreate.push(
+      ...chunk.filter((release) => release.kind === "tag-only"),
+    );
 
-  // if we have an otpCode we can skip the interactive handling
-  if (otpCode == null) {
-    // publish each package one-by-one until we see that we no longer need user interaction.
-    // there's no reason to run chunk-publishing until then,
-    // since the user will have to do 2FA between each publish anyways
-    root: for (const chunk of publishPlan) {
-      for (const plan of chunk) {
+    let publishQueue: PublishQueueItem[] = chunk
+      .filter((release) => release.kind === "publish")
+      .map((release) => ({ release, result: undefined }));
+
+    while (publishQueue.length > 0) {
+      if (sequential) {
+        const item = publishQueue.shift()!;
+        const { release } = item;
         const s = spinner();
         s.start(`Publishing packages...`);
 
-        let result = await publishTool.publish({
-          pkg: packagesByName.get(plan.name)!,
-          release: plan,
-          tarballPath: artifactDir
-            ? path.resolve(artifactDir, plan.tarball!.path)
-            : null,
-          interactive: false,
-          otpCode,
-        });
+        let result =
+          item.result ??
+          (await publishTool.publish({
+            pkg: packagesByName.get(release.name)!,
+            release,
+            tarballPath: artifactDir
+              ? path.resolve(artifactDir, release.tarball!.path)
+              : null,
+            interactive: false,
+            otpCode,
+          }));
 
         // retry publishing with interactive mode if we need 2fa
         while (result.result === "failed:needs-2fa") {
+          // Don't pass a rejected OTP to the interactive retry or any
+          // subsequent publish.
+          otpCode = null;
           s.stop(
-            `${c.blue(plan.name)} requires 2FA verification to publish...`,
+            `${c.blue(release.name)} requires 2FA verification to publish...`,
           );
 
           if (totalPublishCount >= 2) {
@@ -203,18 +249,18 @@ for every package being published after this!
           } else {
             // run publish again in TTY mode, the user handle 2fa for us
             result = await publishTool.publish({
-              pkg: packagesByName.get(plan.name)!,
-              release: plan,
+              pkg: packagesByName.get(release.name)!,
+              release,
               tarballPath: artifactDir
-                ? path.resolve(artifactDir, plan.tarball!.path)
+                ? path.resolve(artifactDir, release.tarball!.path)
                 : null,
               interactive: true,
-              otpCode,
+              otpCode: null,
             });
           }
         }
 
-        finishedPackages.add(plan.name);
+        advanceProgress();
 
         if (result.result === "failed:already-published") {
           // we don't trust this error to mean that the authentication works
@@ -230,63 +276,95 @@ for every package being published after this!
           s.clear();
           successfulNpmPublishes.push(result);
 
-          // if a publish is successful without interactive mode, we should be able
-          // to continue to bulk publishing
+          // A successful non-interactive publish proves that bulk publishing is
+          // currently possible. If 2FA becomes necessary again, bulk publishing
+          // will hand the affected packages back to this sequential path.
           if (result.result === "published") {
-            break root;
+            sequential = false;
+            // start with the current advanced progress message
+            p.start(
+              `Publishing packages (${finishedCount}/${totalPublishCount})`,
+            );
           }
         }
 
         if (isPublishFailure(result)) {
-          s.error(`Failed to publish ${c.blue(plan.name)}: ${result.summary}`);
-          throw new ExitError(1);
+          s.clear();
+          unsuccessfulNpmPublishes.push(result);
+          break publishChunks;
         }
+
+        continue;
+      }
+
+      const publishedItems = await bulkPublishPackages({
+        publishTool,
+        publishQueue,
+        packagesByName,
+        otpCode,
+        artifactDir,
+        onResult: (result) => {
+          // those can be recovered in tty mode, so we don't want to advance the progress bar for them
+          if (process.stdin.isTTY && result.result === "failed:needs-2fa") {
+            return;
+          }
+
+          advanceProgress();
+        },
+      });
+
+      const results = publishedItems.map((item) => item.result!);
+
+      const successes = results.filter(isPublishSuccessful);
+      successfulNpmPublishes.push(...successes);
+      const failures = results.filter((result) => result.result === "failed");
+      unsuccessfulNpmPublishes.push(...failures);
+
+      const recoverableItems = publishedItems.filter(
+        (item) => item.result!.result === "failed:needs-2fa",
+      );
+      if (failures.length > 0 || !process.stdin.isTTY) {
+        // We could still retry the recoverable failures, but mixing recovery
+        // with hard failures complicates the flow. Only recover when every
+        // failure is recoverable; failed:already-published is acceptable here.
+        unsuccessfulNpmPublishes.push(
+          ...recoverableItems.map((item) => item.result!),
+        );
+        publishQueue = [];
+        // Hard failures are always terminal. Without a TTY, 2FA failures are
+        // terminal too because interactive recovery is unavailable.
+        if (failures.length > 0 || recoverableItems.length > 0) {
+          break publishChunks;
+        }
+        continue;
+      }
+
+      publishQueue = recoverableItems.map((item, index) => ({
+        release: item.release,
+        // The first failure can proceed directly to interactive recovery.
+        // The remaining results become stale after authentication may change.
+        result: index === 0 ? item.result : undefined,
+      }));
+
+      if (publishQueue.length > 0) {
+        sequential = true;
+        // Bulk publishing proved that the current OTP is absent or no longer
+        // valid, so don't reuse it during sequential recovery.
+        otpCode = null;
+        p.clear();
       }
     }
   }
 
-  // bulk publishing
-
-  const p = progress({ max: totalPublishCount });
-  p.advance(finishedPackages.size);
-  p.start("Publishing packages...");
-
-  npmPublishQueue.setConcurrency(NPM_PUBLISH_CONCURRENCY_LIMIT);
-
-  // publish packages in chunks based on package graph
-  for (const chunk of plan) {
-    const unpublishedPackages = chunk.filter(
-      (release): release is PublishReleaseEntry =>
-        !finishedPackages.has(release.name),
-    );
-    if (unpublishedPackages.length === 0) continue;
-
-    const results = await bulkPublishPackages({
-      publishTool,
-      releases: unpublishedPackages,
-      packagesByName,
-      otp: options?.otp,
-      artifactDir,
-      onResult: ({ packageJson }) => {
-        finishedPackages.add(packageJson.name);
-        p.advance(
-          1,
-          `Publishing packages (${finishedPackages.size}/${totalPublishCount})`,
-        );
-      },
-    });
-
-    successfulNpmPublishes.push(...results.filter(isPublishSuccessful));
-    unsuccessfulNpmPublishes.push(...results.filter(isPublishFailure));
-  }
-
   if (successfulNpmPublishes.length !== 0) {
-    p.stop(
-      `
-Successfully published:
-${formatPackageList(successfulNpmPublishes)}
-      `.trim(),
-    );
+    const message = `Successfully published:
+${formatPackageList(successfulNpmPublishes)}`;
+
+    if (sequential) {
+      log.success(message);
+    } else {
+      p.stop(message);
+    }
 
     if (options?.gitTag ?? true) {
       gitTagsToCreate.push(

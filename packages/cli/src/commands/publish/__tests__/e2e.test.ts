@@ -224,7 +224,7 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
   return stripVTControlCharacters(String(message))
     .replace(/changeset v\S+/g, "changeset v[version]")
     .replaceAll(
-      /[◒◐◓◑] {2}(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\r?\n)?[◒◐◓◑] {2}\1(?: \(\d+\/\d+\)|\.*))*/g,
+      /[◒◐◓◑] {2}(?:━+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\r?\n)?[◒◐◓◑] {2}(?:━+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
       (_match, message: string) => `◒  ${message}`,
     )
     .replaceAll(
