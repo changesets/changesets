@@ -198,15 +198,9 @@ export const publish: PublishTool["publish"] = async ({
       return { ...resultBase, result: "failed:already-published" };
     }
 
-    // Yarn reports registry authentication and OTP failures using reporter
-    // errors rather than npm's EOTP-shaped JSON errors.
     if (
-      !interactive &&
-      process.stdin.isTTY &&
-      (publishError.code === "YN0033" ||
-        /\b(otp|one-time password|authentication)\b/i.test(
-          publishError.message,
-        ))
+      publishError.code === "YN0033" ||
+      /\b(otp|one-time password|authentication)\b/i.test(publishError.message)
     ) {
       return {
         ...resultBase,
