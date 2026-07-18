@@ -1,6 +1,4 @@
-import os from "node:os";
 import path from "node:path";
-import { stubIsTTY } from "@changesets/test-utils";
 import type { Package } from "@changesets/types";
 import { exec } from "tinyexec";
 import { describe, expect, it, vi } from "vitest";
@@ -17,6 +15,50 @@ import type {
 
 vi.mock("tinyexec");
 const mockedExec = vi.mocked(exec);
+
+describe("package info", () => {
+  it("passes scoped and fallback publish registries in precedence order", async () => {
+    const pkgInfo = {
+      "dist-tags": { latest: "0.0.1" },
+      versions: ["0.0.1"],
+    };
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: {
+        name: "@test/package",
+        version: "0.0.1",
+        publishConfig: {
+          "@test:registry": "https://scoped.example.test",
+          registry: "https://fallback.example.test",
+        },
+      },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stdout: JSON.stringify(pkgInfo),
+      stderr: "",
+    });
+
+    await expect(npm.info({ cwd: "/workspace", pkg })).resolves.toEqual({
+      published: true,
+      pkgInfo,
+    });
+    expect(mockedExec).toHaveBeenCalledWith(
+      "npm",
+      [
+        "info",
+        "@test/package",
+        "--@test:registry=https://scoped.example.test",
+        "--registry=https://fallback.example.test",
+        "--json",
+      ],
+      {
+        nodePath: false,
+        nodeOptions: { cwd: "/workspace" },
+      },
+    );
+  });
+});
 
 describe("publishing", () => {
   const release = {
@@ -71,9 +113,8 @@ describe("publishing", () => {
     },
   );
 
-  it("returns 2fa state details if provided by npm & process is interactive", async () => {
+  it("returns 2fa state details if provided by npm", async () => {
     mockedExec.mockResolvedValue(need2faErrorSnapshot.npm.v11);
-    using _isTTY = stubIsTTY(true);
 
     const result = await npm.publish({
       pkg,
@@ -121,10 +162,7 @@ describe("publishing", () => {
   it("respects `publishConfig.directory`", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
-    const publishDir = path.join(
-      os.tmpdir(),
-      `changesets-pubConfDir-${crypto.randomUUID()}`,
-    );
+    const publishDir = "dist";
     const pkgWithPublishConfigDirectory = {
       ...pkg,
       packageJson: {
@@ -144,7 +182,57 @@ describe("publishing", () => {
     });
 
     expect(result.result).toEqual("published");
-    // should call npm publish with the publish directory as an argument
-    expect(mockedExec.mock.calls[0][1]?.[1]).toEqual(publishDir);
+    expect(mockedExec).toHaveBeenCalledWith(
+      "npm",
+      [
+        "publish",
+        path.resolve(pkg.dir, publishDir),
+        "--json",
+        "--access",
+        "public",
+        "--tag",
+        "latest",
+      ],
+      {
+        nodePath: false,
+        nodeOptions: expect.objectContaining({
+          cwd: pkg.dir,
+          env: expect.objectContaining({
+            NPM_CONFIG_OTP: undefined,
+            npm_config_otp: undefined,
+            npm_config_registry: undefined,
+          }),
+        }),
+      },
+    );
+  });
+
+  it("publishes a tarball instead of `publishConfig.directory` when both are provided", async () => {
+    mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
+    const tarballPath = path.join(pkg.dir, ".packed", "package.tgz");
+
+    await npm.publish({
+      pkg: {
+        ...pkg,
+        packageJson: {
+          ...pkg.packageJson,
+          publishConfig: { directory: "dist" },
+        },
+      },
+      release,
+      tarballPath,
+      interactive: false,
+      otpCode: null,
+    });
+
+    expect(mockedExec.mock.calls[0][1]).toEqual([
+      "publish",
+      path.relative(pkg.dir, tarballPath),
+      "--json",
+      "--access",
+      "public",
+      "--tag",
+      "latest",
+    ]);
   });
 });

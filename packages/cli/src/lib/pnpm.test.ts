@@ -1,4 +1,3 @@
-import { stubIsTTY } from "@changesets/test-utils";
 import type { Package } from "@changesets/types";
 import { exec } from "tinyexec";
 import { describe, expect, it, vi } from "vitest";
@@ -15,6 +14,76 @@ import type {
 
 vi.mock("tinyexec");
 const mockedExec = vi.mocked(exec);
+
+describe("package info", () => {
+  it("does not use the publish-time registry override for info requests", async () => {
+    const pkgInfo = {
+      "dist-tags": { latest: "0.0.1" },
+      versions: ["0.0.1"],
+    };
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: {
+        name: "@test/package",
+        version: "0.0.1",
+        publishConfig: {
+          registry: "https://publish.example.test",
+        },
+      },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stdout: JSON.stringify(pkgInfo),
+      stderr: "",
+    });
+
+    await expect(pnpm.info({ cwd: "/workspace", pkg })).resolves.toEqual({
+      published: true,
+      pkgInfo,
+    });
+    expect(mockedExec).toHaveBeenCalledWith(
+      "pnpm",
+      ["info", "@test/package", "--json"],
+      {
+        nodePath: false,
+        nodeOptions: { cwd: "/workspace" },
+      },
+    );
+  });
+});
+
+describe("packing", () => {
+  it("lets pnpm resolve `publishConfig.directory` from the package manifest", async () => {
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: {
+        name: "@test/package",
+        version: "0.0.1",
+        publishConfig: { directory: "dist" },
+      },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
+
+    await expect(
+      pnpm.pack({
+        pkg,
+        packDir: "/workspace/packages/package/dist",
+        outputDir: "/workspace/.packed",
+        tarballPath: "/workspace/.packed/package.tgz",
+      }),
+    ).resolves.toEqual({
+      tarballPath: "/workspace/.packed/package.tgz",
+    });
+    expect(mockedExec).toHaveBeenCalledWith(
+      "pnpm",
+      ["pack", "--out", "/workspace/.packed/package.tgz", "--json"],
+      {
+        nodePath: false,
+        nodeOptions: { cwd: pkg.dir },
+      },
+    );
+  });
+});
 
 describe("publishing", () => {
   const pkg = {
@@ -70,9 +139,8 @@ describe("publishing", () => {
   );
 
   // v11.10+ only
-  it("returns 2fa state details if provided & process is interactive", async () => {
+  it("returns 2fa state details if provided", async () => {
     mockedExec.mockResolvedValue(need2faErrorSnapshot.pnpm.v11);
-    using _isTTY = stubIsTTY(true);
 
     const result = await pnpm.publish({
       pkg,
@@ -114,5 +182,48 @@ describe("publishing", () => {
     });
 
     expect((result as PublishResultFailed).code).toBe("E404");
+  });
+
+  it("lets pnpm publish `publishConfig.directory` natively", async () => {
+    mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
+
+    await pnpm.publish({
+      pkg: {
+        ...pkg,
+        packageJson: {
+          ...pkg.packageJson,
+          publishConfig: { directory: "dist" },
+        },
+      },
+      release,
+      tarballPath: null,
+      interactive: false,
+      otpCode: null,
+    });
+
+    expect(mockedExec).toHaveBeenCalledWith(
+      "pnpm",
+      [
+        "publish",
+        "--json",
+        "--access",
+        "public",
+        "--tag",
+        "latest",
+        "--no-git-checks",
+      ],
+      {
+        nodePath: false,
+        nodeOptions: expect.objectContaining({
+          cwd: pkg.dir,
+          env: expect.objectContaining({
+            PNPM_CONFIG_OTP: undefined,
+            pnpm_config_otp: undefined,
+            NPM_CONFIG_OTP: undefined,
+            npm_config_otp: undefined,
+          }),
+        }),
+      },
+    );
   });
 });
