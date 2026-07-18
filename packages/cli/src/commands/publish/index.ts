@@ -5,16 +5,16 @@ import { readPreState } from "@changesets/pre";
 import type { Package, PreState } from "@changesets/types";
 import { log, progress, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import {
-  buildGitTag,
-  createGitTags,
-  formatGitTagResults,
-} from "../../actions/git-tag.ts";
 import { isPublishFailure, isPublishSuccessful } from "../../lib/common.ts";
 import type { PublishResult, PublishTool } from "../../lib/types.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { createOutputReport } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
+import {
+  buildGitTag,
+  createGitTags,
+  formatGitTagResults,
+} from "../git-tag/utils.ts";
 import {
   getPublishPlan,
   readPlanFile,

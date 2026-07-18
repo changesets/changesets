@@ -2,8 +2,8 @@ import c from "@changesets/color";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type { Config, Package, Packages } from "@changesets/types";
-import type { TagReleaseEntry } from "../commands/publish-plan/getPublishPlan.ts";
-import type { OutputReporter } from "../utils/output.ts";
+import type { OutputReporter } from "../../utils/output.ts";
+import type { TagReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 export function buildGitTag(
   tool: Packages["tool"],

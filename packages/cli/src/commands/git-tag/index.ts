@@ -1,9 +1,9 @@
 import { spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import { createGitTags, formatGitTagResults } from "../../actions/git-tag.ts";
 import { createOutputReport } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { ensureChangesetFolder } from "../shared.ts";
+import { createGitTags, formatGitTagResults } from "./utils.ts";
 
 export interface GitTagOptions {
   cwd?: string;
