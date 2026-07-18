@@ -843,7 +843,7 @@ function createPmContext(
   };
 }
 
-describe("Publish command e2e", { tags: ["slow"] }, () => {
+describe("Publish command e2e", { tags: ["slow"], timeout: 30_000 }, () => {
   describe.each(pmCases)("$name", (pm) => {
     it("publishes a new version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);

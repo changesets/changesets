@@ -190,7 +190,8 @@ export function createPmBinEnv(pmBinPath: string, env: NodeJS.ProcessEnv = {}) {
   return {
     ...process.env,
     ...env,
-    TERM: "xterm-256color",
+    // Keep terminal output deterministic on Windows.
+    TERM: process.platform === "win32" ? "xterm-256color" : process.env.TERM,
     PATH: process.env.PATH
       ? `${pmBinPath}${path.delimiter}${process.env.PATH}`
       : pmBinPath,

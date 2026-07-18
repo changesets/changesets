@@ -20,6 +20,8 @@ const writeChangesets = (changesets: Changeset[], cwd: string) => {
   );
 };
 
+const normalizeNewlines = (value: string) => value.replaceAll("\r\n", "\n");
+
 vi.setConfig({ testTimeout: 10000 });
 silenceLogsInBlock();
 
@@ -119,9 +121,11 @@ describe("version", { tags: ["slow"] }, () => {
       ),
     ).toMatchInlineSnapshot(`"{"name":"pkg-b","version":"1.1.0"}"`);
     expect(
-      await fs.readFile(
-        path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf8",
+      normalizeNewlines(
+        await fs.readFile(
+          path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
+          "utf8",
+        ),
       ),
     ).toContain(`# pkg-a
 
@@ -131,9 +135,11 @@ describe("version", { tags: ["slow"] }, () => {
 
 `);
     expect(
-      await fs.readFile(
-        path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
-        "utf8",
+      normalizeNewlines(
+        await fs.readFile(
+          path.join(cwd, "packages", "pkg-b", "CHANGELOG.md"),
+          "utf8",
+        ),
       ),
     ).toContain(`# pkg-b
 
@@ -237,9 +243,11 @@ describe("version", { tags: ["slow"] }, () => {
     `);
 
     expect(
-      await fs.readFile(
-        path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
-        "utf8",
+      normalizeNewlines(
+        await fs.readFile(
+          path.join(cwd, "packages", "pkg-a", "CHANGELOG.md"),
+          "utf8",
+        ),
       ),
     ).toContain(`# pkg-a
 
