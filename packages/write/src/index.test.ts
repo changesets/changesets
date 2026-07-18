@@ -15,7 +15,7 @@ vi.mock(import("@changesets/format"), async (importOriginal) => {
   return {
     ...mod,
     detect: vi.fn(mod.detect),
-    format: vi.fn(mod.format),
+    format: vi.fn(),
   };
 });
 

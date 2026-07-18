@@ -12,6 +12,7 @@ import {
 
 function sanitizePackLog(message: unknown) {
   return stripVTControlCharacters(String(message))
+    .replaceAll("\r\n", "\n")
     .replace(/changeset v\S+/g, "changeset v[version]")
     .replace(
       /logs can be found here: .*?\.log/g,

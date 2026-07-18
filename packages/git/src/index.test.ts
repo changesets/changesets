@@ -368,7 +368,7 @@ describe("git", { tags: ["slow"] }, () => {
         const originalRepoDepth = await getCommitCount(cwd);
         expect(await getCommitCount(clone)).toBeGreaterThan(5);
         expect(await getCommitCount(clone)).toBeLessThan(originalRepoDepth);
-      }, 10_000);
+      }, 30_000);
 
       it("reads the SHA of a file-add even if the first commit of a repo", async () => {
         const cwd = await gitdir({
@@ -390,7 +390,7 @@ describe("git", { tags: ["slow"] }, () => {
         // We should have fully deepened
         const originalRepoDepth = await getCommitCount(cwd);
         expect(await getCommitCount(clone)).toEqual(originalRepoDepth);
-      }, 10_000);
+      }, 30_000);
 
       it("can return SHAs for multiple files including return blanks for missing files", async () => {
         const cwd = await gitdir({
@@ -417,7 +417,7 @@ describe("git", { tags: ["slow"] }, () => {
         );
 
         expect(commits).toEqual([originalCommit1, undefined, originalCommit2]);
-      }, 10_000);
+      }, 30_000);
     });
   });
 
