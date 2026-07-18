@@ -228,6 +228,15 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
       /logs can be found here: .*?\.log/g,
       "logs can be found here: [yarn-prepack-log]",
     )
+    .replace(/^npm notice shasum: .+$/gm, "npm notice shasum: [shasum]")
+    .replace(
+      /^npm notice integrity: .+$/gm,
+      "npm notice integrity: [integrity]",
+    )
+    .replace(
+      /^\? One-time password: [^\r\n]*$/gm,
+      "? One-time password: [prompt]",
+    )
     .replaceAll(
       /[◒◐◓◑] {2}(?:━+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\r?\n)?[◒◐◓◑] {2}(?:━+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
       (_match, message: string) => `◒  ${message}`,

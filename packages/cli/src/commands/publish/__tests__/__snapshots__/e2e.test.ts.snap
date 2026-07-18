@@ -47,8 +47,8 @@ npm notice version: 1.0.0
 npm notice filename: pkg-a-1.0.0.tgz
 npm notice package size: 234 B
 npm notice unpacked size: 128 B
-npm notice shasum: 843d50e8a5f1a01846a86f4e30b58913b9403183
-npm notice integrity: sha512-IJNHXvYGzsReN[...]0lxUHcQEkBaTw==
+npm notice shasum: [shasum]
+npm notice integrity: [integrity]
 npm notice total files: 2
 npm notice
 npm notice Publishing to [registry-url]/ with tag latest and public access
@@ -178,8 +178,8 @@ npm notice version: 1.0.0
 npm notice filename: pkg-a-1.0.0.tgz
 npm notice package size: 234 B
 npm notice unpacked size: 128 B
-npm notice shasum: 843d50e8a5f1a01846a86f4e30b58913b9403183
-npm notice integrity: sha512-IJNHXvYGzsReN[...]0lxUHcQEkBaTw==
+npm notice shasum: [shasum]
+npm notice integrity: [integrity]
 npm notice total files: 2
 npm notice
 npm notice Publishing to [registry-url]/ with tag latest and public access
@@ -310,8 +310,8 @@ npm notice version: 1.0.0
 npm notice filename: pkg-a-1.0.0.tgz
 npm notice package size: 234 B
 npm notice unpacked size: 128 B
-npm notice shasum: 843d50e8a5f1a01846a86f4e30b58913b9403183
-npm notice integrity: sha512-IJNHXvYGzsReN[...]0lxUHcQEkBaTw==
+npm notice shasum: [shasum]
+npm notice integrity: [integrity]
 npm notice total files: 2
 npm notice
 npm notice Publishing to [registry-url]/ with tag latest and public access
@@ -442,8 +442,8 @@ npm notice version: 1.0.0
 npm notice filename: pkg-a-1.0.0.tgz
 npm notice package size: 257 B
 npm notice unpacked size: 161 B
-npm notice shasum: fc5c76124e04c65bd31d1164b1f608a663df1f4e
-npm notice integrity: sha512-pYioh/zUbmGPH[...]dPmfzo8n4gEaA==
+npm notice shasum: [shasum]
+npm notice integrity: [integrity]
 npm notice total files: 2
 npm notice
 npm notice Publishing to [registry-url]/ with tag latest and public access
@@ -683,7 +683,7 @@ exports[`Publish command e2e > 'yarn 4' > retries interactively after an OTP aut
 ➤ YN0000: Publishing to [registry-url] with tag latest
 ➤ YN0000: index.js
 ➤ YN0000: package.json
-? One-time password: › ✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******✔ One-time password: · ******
+? One-time password: [prompt]
 
 ➤ YN0000: Package archive published
 ➤ YN0000: Done in [duration]
