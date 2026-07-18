@@ -8,6 +8,8 @@ import * as pty from "@lydell/node-pty";
 import { exec } from "tinyexec";
 import { AsyncDisposableStack } from "../../ponyfills/async-disposable-stack.ts";
 
+const isWindows = process.platform === "win32";
+
 export const cliPackageRoot = path.resolve(import.meta.dirname, "../../..");
 const oxcRegister = pathToFileURL(
   path.resolve(
@@ -191,8 +193,6 @@ export function createPmBinEnv(pmBinPath: string, env: NodeJS.ProcessEnv = {}) {
     // Required by ConPTY-launched processes on Windows.
     SystemRoot: process.env.SystemRoot,
     ...env,
-    // Keep terminal output deterministic on Windows.
-    TERM: process.platform === "win32" ? "xterm-256color" : process.env.TERM,
     PATH: process.env.PATH
       ? `${pmBinPath}${path.delimiter}${process.env.PATH}`
       : pmBinPath,
@@ -208,7 +208,6 @@ export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
       packageName,
       command as keyof PmBins,
     );
-    const isWindows = process.platform === "win32";
     const shimPath = path.join(
       root.path,
       isWindows ? `${command}.cmd` : command,
@@ -367,7 +366,7 @@ function createPnpmGitdir(packageName: string) {
     const packageManager = await resolvePackageManagerSpec("pnpm", packageName);
     const npmPath = path.join(
       pmBinPath,
-      process.platform === "win32" ? "npm.cmd" : "npm",
+      isWindows ? "npm.cmd" : "npm",
     );
     const hasNpmShim = await fs
       .access(npmPath)
