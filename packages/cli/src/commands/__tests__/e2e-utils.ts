@@ -188,7 +188,8 @@ async function resolvePackageManagerSpec(
 
 export function createPmBinEnv(pmBinPath: string, env: NodeJS.ProcessEnv = {}) {
   return {
-    ...process.env,
+    // Required by ConPTY-launched processes on Windows.
+    SystemRoot: process.env.SystemRoot,
     ...env,
     // Keep terminal output deterministic on Windows.
     TERM: process.platform === "win32" ? "xterm-256color" : process.env.TERM,
