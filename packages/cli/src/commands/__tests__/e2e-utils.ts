@@ -364,10 +364,7 @@ function createPnpmGitdir(packageName: string) {
     fixture: Fixture = {},
   ) => {
     const packageManager = await resolvePackageManagerSpec("pnpm", packageName);
-    const npmPath = path.join(
-      pmBinPath,
-      isWindows ? "npm.cmd" : "npm",
-    );
+    const npmPath = path.join(pmBinPath, isWindows ? "npm.cmd" : "npm");
     const hasNpmShim = await fs
       .access(npmPath)
       .then(() => true)
