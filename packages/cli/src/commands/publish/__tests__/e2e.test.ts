@@ -224,6 +224,7 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
   return stripVTControlCharacters(String(message))
     .replaceAll("\r\n", "\n")
     .replaceAll("\r", "\n")
+    .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
     .replace(/changeset v\S+/g, "changeset v[version]")
     .replace(/^[A-Za-z]:\\(?:[^\\\r\n]+\\)*cmd\.exe \/d \/s \/c /gim, "sh -c ")
     .replaceAll(new URL(registryUrl).origin, "[registry-url]")
