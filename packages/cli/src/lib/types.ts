@@ -29,7 +29,7 @@ export type PackageInfoResult =
     }
   | {
       error: {
-        code: string;
+        code?: string;
         message?: string;
       };
     };
@@ -47,8 +47,8 @@ export type PackResult =
     }
   | {
       error: {
-        code: string;
-        message: string;
+        code?: string;
+        message?: string;
       };
     };
 
@@ -74,7 +74,7 @@ export type PublishResultSuccess = PublishResultBase & {
 export type PublishResultFailed = PublishResultBase & {
   result: "failed";
   code?: string;
-  message: string;
+  message?: string;
 };
 
 export type PublishResultAlreadyPublished = PublishResultBase & {
@@ -85,7 +85,7 @@ export type PublishResultAlreadyPublished = PublishResultBase & {
 export type PublishResultFailedNeeds2fa = PublishResultBase & {
   result: "failed:needs-2fa";
   code?: string;
-  message: string;
+  message?: string;
   authUrl?: string;
   doneUrl?: string;
 };

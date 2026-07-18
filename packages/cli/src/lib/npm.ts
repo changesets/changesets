@@ -3,7 +3,6 @@ import path from "node:path";
 import type { PackageJSON } from "@changesets/types";
 import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
-import { getNpmPnpmError } from "../utils/package-manager-errors.ts";
 import {
   isAlreadyPublishedError,
   npmPublishQueue,
@@ -69,6 +68,55 @@ function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   };
 }
 
+type NpmCommandError = {
+  code?: string;
+  message?: string;
+};
+
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value != null && !Array.isArray(value);
+}
+
+function formatJsonError(error: unknown): NpmCommandError | undefined {
+  if (!isJsonObject(error)) return;
+
+  let message =
+    typeof error.message === "string"
+      ? error.message
+      : typeof error.summary === "string"
+        ? error.summary
+        : undefined;
+  if (typeof error.detail === "string" && error.detail) {
+    message = message ? `${message}\n${error.detail}` : error.detail;
+  }
+
+  return {
+    code: typeof error.code === "string" ? error.code : undefined,
+    message,
+  };
+}
+
+function getNpmError({
+  stderr,
+  stdout,
+}: {
+  stderr: string;
+  stdout: string;
+}): NpmCommandError {
+  // npm's --json output can be included alongside lifecycle scripts' output,
+  // so parse the final JSON object. npm 7 printed it to stderr, while npm 9
+  // switched back to stdout.
+  const json =
+    getLastJsonObjectFromString(stderr) || getLastJsonObjectFromString(stdout);
+  if (json?.error) {
+    const jsonError = formatJsonError(json.error);
+    if (jsonError) {
+      return jsonError;
+    }
+  }
+  return { message: stderr || stdout || undefined };
+}
+
 // -- PublishTool -- //
 
 export const name = "npm" satisfies PublishTool["name"];
@@ -79,10 +127,10 @@ function parseInfoResult({
   stderr,
 }: import("tinyexec").Output):
   | { pkgInfo: PackageInfo }
-  | { error: { code: string; message?: string } }
+  | { error: NpmCommandError }
   | undefined {
   if (exitCode !== 0) {
-    return { error: getNpmPnpmError({ stderr, stdout }) };
+    return { error: getNpmError({ stderr, stdout }) };
   }
   if (!stdout) {
     return;
@@ -172,7 +220,7 @@ export const pack: PublishTool["pack"] = async ({
     },
   );
   if (exitCode !== 0) {
-    return { error: getNpmPnpmError({ stderr, stdout }) };
+    return { error: getNpmError({ stderr, stdout }) };
   }
 
   const json = getLastJsonObjectFromString(stdout);
@@ -207,7 +255,7 @@ export function handlePublishError(
     return {
       ...resultBase,
       result: "failed",
-      message: processOutput,
+      message: processOutput || undefined,
     };
   }
 
@@ -231,7 +279,7 @@ ${json.error.detail ?? ""}
       ...resultBase,
       result: "failed:needs-2fa",
       code: json.error.code,
-      message,
+      message: message || undefined,
     };
 
     // npm v11 returns data we can use to handle 2fa in-process
@@ -247,7 +295,7 @@ ${json.error.detail ?? ""}
     ...resultBase,
     result: "failed",
     code: json.error.code,
-    message,
+    message: message || undefined,
   };
 }
 

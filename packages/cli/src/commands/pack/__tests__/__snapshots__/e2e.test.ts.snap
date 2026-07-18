@@ -11,7 +11,7 @@ Packed packages:
 exports[`Pack command e2e > 'npm 10' > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
-An error occurred while packing pkg-a: EUNKNOWN
+An error occurred while packing pkg-a
 command failed
 sh -c node -e "console.error('prepack failed'); process.exit(1)"
 🦋 Exited with code 1
@@ -30,7 +30,7 @@ Packed packages:
 exports[`Pack command e2e > 'npm 11' > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
-An error occurred while packing pkg-a: EUNKNOWN
+An error occurred while packing pkg-a
 command failed
 sh -c node -e "console.error('prepack failed'); process.exit(1)"
 🦋 Exited with code 1
@@ -49,7 +49,7 @@ Packed packages:
 exports[`Pack command e2e > 'npm 12' > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
-An error occurred while packing pkg-a: EUNKNOWN
+An error occurred while packing pkg-a
 command failed
 sh -c node -e "console.error('prepack failed'); process.exit(1)"
 🦋 Exited with code 1

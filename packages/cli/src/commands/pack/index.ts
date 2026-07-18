@@ -98,8 +98,11 @@ export async function pack(options: PackOptions) {
         });
 
         if ("error" in packResult) {
+          const code = packResult.error.code
+            ? `: ${packResult.error.code}`
+            : "";
           log.error(
-            `An error occurred while packing ${release.name}: ${packResult.error.code}\n${packResult.error.message}`,
+            `An error occurred while packing ${release.name}${code}\n${packResult.error.message || "Unknown error"}`,
           );
           throw new ExitError(1);
         }

@@ -116,8 +116,8 @@ export async function getUnpublishedPackages(
         if ("error" in response) {
           log.error(
             `
-Received an unknown error code: ${response.error.code} for ${c.cyan(pkg.packageJson.name)}
-${response.error.message ?? ""}
+Received an unexpected error for ${c.cyan(pkg.packageJson.name)}: ${response.error.code || "(no code)"}
+${response.error.message || "Unknown error"}
             `.trim(),
           );
           throw new ExitError(1);

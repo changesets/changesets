@@ -1,9 +1,5 @@
 import { stripVTControlCharacters } from "node:util";
 import { exec } from "tinyexec";
-import {
-  type FormattedPackageManagerError,
-  isJsonObject,
-} from "../utils/package-manager-errors.ts";
 import { streamNdjson } from "../utils/streamNdjson.ts";
 import {
   isAlreadyPublishedError,
@@ -16,12 +12,26 @@ import type { PackageInfo, PublishResult, PublishTool } from "./types.ts";
 
 export const name = "yarn" satisfies PublishTool["name"];
 
+type YarnCommandError = {
+  code?: string;
+  message?: string;
+};
+
+type YarnReporterError = {
+  code: string;
+  message: string;
+};
+
 type YarnBerryReporterEvent = {
   type: "error";
   name: number;
   displayName?: string;
   data: string;
 };
+
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value != null && !Array.isArray(value);
+}
 
 function isYarnBerryReporterEvent(
   event: unknown,
@@ -35,8 +45,8 @@ function isYarnBerryReporterEvent(
 
 export function getYarnBerryReporterError(
   output: string,
-): FormattedPackageManagerError | undefined {
-  const errors: FormattedPackageManagerError[] = [];
+): YarnReporterError | undefined {
+  const errors: YarnReporterError[] = [];
   let code: string | undefined;
 
   for (const event of streamNdjson(output)) {
@@ -90,10 +100,9 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
     // has no `latest` dist-tag, so it doesn't need npm/pnpm's exact fallback.
     // https://github.com/yarnpkg/berry/blob/0a230c14e71247576f6b51fa811ae08edb6608aa/packages/plugin-npm-cli/sources/commands/npm/info.ts#L124
     if (result.exitCode !== 0) {
-      const error = getYarnBerryReporterError(result.stdout) ?? {
-        code: "EUNKNOWN",
-        message: result.stderr || result.stdout || "Unknown error",
-      };
+      const error: YarnCommandError = getYarnBerryReporterError(
+        result.stdout,
+      ) ?? { message: result.stderr || result.stdout };
       return error.code === "YN0035" &&
         error.message?.includes("Response Code: 404") === true
         ? { published: false }
@@ -104,14 +113,7 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
     for (const entry of streamNdjson(result.stdout)) {
       pkgInfo = entry as PackageInfo;
     }
-    return pkgInfo
-      ? { published: true, pkgInfo }
-      : {
-          error: {
-            code: "EUNKNOWN",
-            message: "Yarn returned no package info",
-          },
-        };
+    return pkgInfo ? { published: true, pkgInfo } : { error: {} };
   });
 
 export const pack: PublishTool["pack"] = async ({ packDir, tarballPath }) => {
@@ -123,14 +125,12 @@ export const pack: PublishTool["pack"] = async ({ packDir, tarballPath }) => {
       nodeOptions: { cwd: packDir },
     },
   );
-  return exitCode === 0
-    ? { tarballPath }
-    : {
-        error: getYarnBerryReporterError(stdout) ?? {
-          code: "EUNKNOWN",
-          message: stderr || stdout || "Unknown error",
-        },
-      };
+  if (exitCode !== 0) {
+    return {
+      error: getYarnBerryReporterError(stdout) || { message: stderr || stdout },
+    };
+  }
+  return { tarballPath };
 };
 
 export const getOtpCode: PublishTool["getOtpCode"] = (otp?: string) =>
@@ -186,38 +186,43 @@ export const publish: PublishTool["publish"] = async ({
       };
     }
 
-    const publishError: { code?: string; message: string } =
-      getYarnBerryReporterError(stdout) ?? {
-        message: stderr || stdout || "Unknown error",
-      };
+    const reporterError = getYarnBerryReporterError(stdout);
 
-    if (
-      publishError.code === "YN0035" &&
-      isAlreadyPublishedError(publishError.message)
-    ) {
+    if (!reporterError) {
       return {
         ...resultBase,
-        result: "failed:already-published",
-        code: publishError.code,
+        result: "failed",
+        message: stderr || stdout,
       };
     }
 
     if (
-      publishError.code === "YN0033" ||
-      /\b(otp|one-time password|authentication)\b/i.test(publishError.message)
+      reporterError.code === "YN0035" &&
+      isAlreadyPublishedError(reporterError.message)
+    ) {
+      return {
+        ...resultBase,
+        result: "failed:already-published",
+        code: reporterError.code,
+      };
+    }
+
+    if (
+      reporterError.code === "YN0033" ||
+      /\b(otp|one-time password|authentication)\b/i.test(reporterError.message)
     ) {
       return {
         ...resultBase,
         result: "failed:needs-2fa",
-        code: publishError.code,
-        message: publishError.message,
+        code: reporterError.code,
+        message: reporterError.message,
       };
     }
 
     return {
       ...resultBase,
       result: "failed",
-      code: publishError.code,
-      message: publishError.message,
+      code: reporterError.code,
+      message: reporterError.message,
     };
   });

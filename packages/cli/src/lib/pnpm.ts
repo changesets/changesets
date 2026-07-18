@@ -1,6 +1,6 @@
 import path from "node:path";
 import { exec } from "tinyexec";
-import { getNpmPnpmError } from "../utils/package-manager-errors.ts";
+import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
 import {
   isAlreadyPublishedError,
   npmPublishQueue,
@@ -48,6 +48,30 @@ function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   };
 }
 
+type PnpmCommandError = {
+  code?: string;
+  message?: string;
+};
+
+function getPnpmError({
+  stderr,
+  stdout,
+}: {
+  stderr: string;
+  stdout: string;
+}): PnpmCommandError {
+  const json =
+    getLastJsonObjectFromString(stderr) || getLastJsonObjectFromString(stdout);
+  const error = json?.error;
+  if (error && typeof error === "object" && !Array.isArray(error)) {
+    return {
+      code: typeof error.code === "string" ? error.code : undefined,
+      message: typeof error.message === "string" ? error.message : undefined,
+    };
+  }
+  return { message: stderr || stdout || undefined };
+}
+
 // -- PublishTool -- //
 
 export const name = "pnpm" satisfies PublishTool["name"];
@@ -58,10 +82,10 @@ function parseInfoResult({
   stderr,
 }: import("tinyexec").Output):
   | { pkgInfo: PackageInfo }
-  | { error: { code: string; message?: string } }
+  | { error: PnpmCommandError }
   | undefined {
   if (exitCode !== 0) {
-    return { error: getNpmPnpmError({ stderr, stdout }) };
+    return { error: getPnpmError({ stderr, stdout }) };
   }
   return stdout ? { pkgInfo: JSON.parse(stdout) as PackageInfo } : undefined;
 }
@@ -116,9 +140,10 @@ export const pack: PublishTool["pack"] = async ({ pkg, tarballPath }) => {
       nodeOptions: { cwd: pkg.dir },
     },
   );
-  return exitCode === 0
-    ? { tarballPath }
-    : { error: getNpmPnpmError({ stderr, stdout }) };
+  if (exitCode !== 0) {
+    return { error: getPnpmError({ stderr, stdout }) };
+  }
+  return { tarballPath };
 };
 
 export const getOtpCode: PublishTool["getOtpCode"] = (otp?: string) =>
@@ -178,7 +203,7 @@ export const publish: PublishTool["publish"] = async ({
       return {
         ...resultBase,
         result: "failed",
-        message: stderr || stdout,
+        message: stderr || stdout || undefined,
       };
     }
 
@@ -204,11 +229,16 @@ export const publish: PublishTool["publish"] = async ({
         ...resultBase,
         result: "failed:needs-2fa",
         code: json.error.code,
-        message,
+        message: message || undefined,
         authUrl: json.error.authUrl,
         doneUrl: json.error.doneUrl,
       } satisfies PublishResult;
     }
 
-    return { ...resultBase, result: "failed", code: json.error.code, message };
+    return {
+      ...resultBase,
+      result: "failed",
+      code: json.error.code,
+      message: message || undefined,
+    };
   });
