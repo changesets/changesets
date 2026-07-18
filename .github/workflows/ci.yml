@@ -65,13 +65,17 @@ jobs:
           advanced-security: false
 
   test:
-    name: "Test using Node ${{ matrix.node_version }}"
+    name: "Test using Node ${{ matrix.node_version }} on ${{ matrix.os }}"
     needs: [build]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       matrix:
         node_version: [22, 24, 26]
+        os: [ubuntu-latest]
+        include:
+          - node_version: 22
+            os: windows-latest
       fail-fast: false
     steps:
       - name: Check out repo
@@ -104,30 +108,6 @@ jobs:
         if: matrix.node_version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-
-  test-windows:
-    name: Test on Windows
-    needs: [build]
-    runs-on: windows-latest
-    timeout-minutes: 20
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
-        with:
-          download-dist: true
-
-      - name: Check Git version
-        run: git --version
-
-      - name: Setup mock Git user
-        run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
-
-      - name: Vitest tests
-        run: pnpm test:fast
 
   typecheck:
     name: Typecheck
@@ -172,7 +152,7 @@ jobs:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [lint-workflows, build, test, test-windows, typecheck, lint]
+    needs: [lint-workflows, build, test, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1
