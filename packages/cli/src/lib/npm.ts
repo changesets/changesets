@@ -89,20 +89,13 @@ function formatJsonError(error: unknown): NpmCommandError | undefined {
   };
 }
 
-function getNpmError({
-  stderr,
-  stdout,
-}: {
-  stderr: string;
-  stdout: string;
-}): NpmCommandError {
-// NPM's --json output can be included alongside lifecycle scripts' output, like `prepublish` and `postpublish`, in terminal.
-// Lifecycle scripts can contain JSON but `--json` output is always printed at the end so this should work
-// historical notes:
-// - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
-// - npm9 switched back to printing `--json` errors to stdout (https://github.com/npm/cli/commit/d3543e945e721783dcb83385935f282a4bb32cf3)
-  const json =
-    getLastJsonObjectFromString(stderr) || getLastJsonObjectFromString(stdout);
+function getNpmError(stdout: string, stderr: string): NpmCommandError {
+  // NPM's --json output can be included alongside lifecycle scripts' output, like `prepublish` and `postpublish`, in terminal.
+  // Lifecycle scripts can contain JSON but `--json` output is always printed at the end so this should work
+  // historical notes:
+  // - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
+  // - npm9 switched back to printing `--json` errors to stdout (https://github.com/npm/cli/commit/d3543e945e721783dcb83385935f282a4bb32cf3)
+  const json = getLastJsonObjectFromString(stdout);
   if (json?.error) {
     const jsonError = formatJsonError(json.error);
     if (jsonError) {
@@ -125,7 +118,7 @@ function parseInfoResult({
   | { error: NpmCommandError }
   | undefined {
   if (exitCode !== 0) {
-    return { error: getNpmError({ stderr, stdout }) };
+    return { error: getNpmError(stdout, stderr) };
   }
   if (!stdout) {
     // Successful empty stdout means the package manager found no matching data but the package does exist in the registry.
@@ -137,7 +130,10 @@ function parseInfoResult({
     // npm 12 stopped unwrapping single-version JSON results. Changesets only
     // queries a bare name or an exact version, so more than one item would mean
     // npm matched a shape we don't intentionally request.
-    assert(parsed.length === 1, "Unexpected empty array output from npm info --json");
+    assert(
+      parsed.length === 1,
+      "Unexpected empty array output from npm info --json",
+    );
     return { info: parsed[0] as PackageInfo };
   }
   return { info: parsed as PackageInfo };
@@ -251,7 +247,7 @@ export const pack: PublishTool["pack"] = async ({
     },
   );
   if (exitCode !== 0) {
-    return { error: getNpmError({ stderr, stdout }) };
+    return { error: getNpmError(stdout, stderr) };
   }
 
   // npm is the only package manager that doesn't support an explicit output path for the tarball

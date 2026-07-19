@@ -53,15 +53,8 @@ type PnpmCommandError = {
   message?: string;
 };
 
-function getPnpmError({
-  stderr,
-  stdout,
-}: {
-  stderr: string;
-  stdout: string;
-}): PnpmCommandError {
-  const json =
-    getLastJsonObjectFromString(stderr) || getLastJsonObjectFromString(stdout);
+function getPnpmError(stderr: string, stdout: string): PnpmCommandError {
+  const json = getLastJsonObjectFromString(stdout);
   const error = json?.error;
   if (error && typeof error === "object" && !Array.isArray(error)) {
     return {
@@ -85,7 +78,7 @@ function parseInfoResult({
   | { error: PnpmCommandError }
   | undefined {
   if (exitCode !== 0) {
-    return { error: getPnpmError({ stderr, stdout }) };
+    return { error: getPnpmError(stderr, stdout) };
   }
   return stdout ? { info: JSON.parse(stdout) as PackageInfo } : undefined;
 }
@@ -146,7 +139,7 @@ export const pack: PublishTool["pack"] = async ({ pkg, tarballPath }) => {
     },
   );
   if (exitCode !== 0) {
-    return { error: getPnpmError({ stderr, stdout }) };
+    return { error: getPnpmError(stderr, stdout) };
   }
   return { tarballPath };
 };
