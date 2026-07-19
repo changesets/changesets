@@ -147,6 +147,14 @@ export const publish: PublishTool["publish"] = async ({
   npmPublishQueue.add(async () => {
     const resultBase = { name: release.name, version: release.version };
 
+    if (pkg.packageJson.publishConfig?.directory) {
+      return {
+        ...resultBase,
+        result: "failed",
+        message: `Package has publishConfig.directory configured in its package.json, which is not supported when using Yarn.`,
+      } satisfies PublishResult;
+    }
+
     // Yarn Berry only publishes the workspace at cwd; it doesn't accept a
     // tarball (or another directory) as a positional argument.
     if (tarballPath) {
