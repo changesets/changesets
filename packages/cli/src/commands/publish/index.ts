@@ -297,6 +297,7 @@ for every package being published after this!
         if (isPublishFailure(result)) {
           s.clear();
           unsuccessfulNpmPublishes.push(result);
+          // note that other packages in this chunk could theoretically succeed but we bail out on the first hard failure
           break publishChunks;
         }
 
