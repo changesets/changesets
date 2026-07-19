@@ -180,7 +180,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   const gitTagsToCreate: TagReleaseEntry[] = [];
 
   let otpCode = publishTool.getOtpCode(options?.otp);
-  let sequential = process.stdin.isTTY;
+  let sequential = process.stdin.isTTY || otpCode != null;
   const p = progress({ max: totalPublishCount });
   const advanceProgress = () => {
     p.advance(
