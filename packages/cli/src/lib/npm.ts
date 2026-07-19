@@ -360,7 +360,7 @@ export const publish: PublishTool["publish"] = async ({
     if (tarballPath) {
       args.unshift(path.relative(cwd, tarballPath));
     } else if (pkg.packageJson.publishConfig?.directory != null) {
-      // npm, yarn classic and berry don't support `publishConfig.directory` natively.
+      // npm doesn't support `publishConfig.directory` natively.
       // We inherited support for it from Lerna, so we have to resolve it ourselves.
       // It's worth noting it's still useful for, for example, `ng-packagr` users
       // as that tool puts a whole publishable package in a dist directory (with full `package.json` in it).

@@ -134,7 +134,6 @@ export const pack: PublishTool["pack"] = async ({ pkg, tarballPath }) => {
     ["pack", "--out", tarballPath, "--json"],
     {
       nodePath: false,
-      // pnpm resolves publishConfig.directory itself.
       nodeOptions: { cwd: pkg.dir },
     },
   );
@@ -161,6 +160,9 @@ export const publish: PublishTool["publish"] = async ({
 }) =>
   npmPublishQueue.add(async () => {
     const cwd = pkg.dir;
+    // pnpm supports `publishConfig.directory` natively. We have to let it resolve it on its own.
+    // Otherwise we'd risk it re-resolving from within the `publishConfig.directory` itself
+    // but original untouched relative paths in `publishConfig.directory` would not even point to correct locations anymore.
     const args: string[] = [
       "--access",
       release.access,
