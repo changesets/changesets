@@ -49,7 +49,9 @@ function isNpmPublishError(err: unknown): err is NpmPublishError {
     err != null &&
     typeof err === "object" &&
     "error" in err &&
-    "summary" in (err as NpmPublishError).error
+    err.error != null &&
+    typeof err.error === "object" &&
+    "summary" in err.error
   );
 }
 
