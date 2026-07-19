@@ -58,7 +58,7 @@
     "pkg-pr-new": "^0.0.75",
     "publint": "^0.3.21",
     "tsdown": "^0.22.4",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.63.0",
     "vitest": "^4.1.10"
   },
