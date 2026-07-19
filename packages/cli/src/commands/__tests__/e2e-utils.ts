@@ -196,7 +196,7 @@ export async function createPmBinEnv(
     CI: undefined,
     GITHUB_ACTIONS: undefined,
     ...env,
-    // pnpm packs the package into TMPDIR and runs npm from there. If that is
+    // pnpm 10 packs the package into TMPDIR and runs npm from there. If that is
     // /tmp/pkg and an unrelated /tmp/node_modules exists, npm can treat /tmp
     // as the project root and miss the fixture's .npmrc (and test registry).
     // Keeping TMPDIR inside cwd means npm still walks upward, but stops at the
