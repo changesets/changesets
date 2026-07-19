@@ -89,20 +89,19 @@ async function bulkPublishPackages({
   if (publishQueue.length === 0) return [];
 
   const publishPromises = publishQueue.map(async (item) => {
-    const { release } = item;
-    const pkg = packagesByName.get(release.name)!;
+    const pkg = packagesByName.get(item.release.name)!;
     const result = await publishTool.publish({
       pkg,
-      release,
+      release: item.release,
       tarballPath: artifactDir
-        ? resolve(artifactDir, release.tarball!.path)
+        ? resolve(artifactDir, item.release.tarball!.path)
         : null,
       interactive: false,
       otpCode,
     });
 
     onResult?.(result);
-    return { release, result };
+    return { release: item.release, result };
   });
 
   return Promise.all(publishPromises);
@@ -184,6 +183,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   // on CI everything has to be configured in a way that allows automation so we can go straight to bulk publishing
   // similarly, when OTP is provided we can go straight to bulk publishing as well
   let sequential = process.stdin.isTTY && otpCode == null;
+
   const p = progress({ max: totalPublishCount });
   const advanceProgress = () => {
     p.advance(
@@ -194,6 +194,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   if (!sequential && totalPublishCount > 0) {
     p.start("Publishing packages...");
   }
+
   // Publish packages in chunks based on the package graph.
   publishChunks: for (const chunk of plan) {
     gitTagsToCreate.push(
@@ -207,7 +208,6 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     while (publishQueue.length > 0) {
       if (sequential) {
         const item = publishQueue.shift()!;
-        const { release } = item;
         const s = spinner();
         s.start(`Publishing packages...`);
 
@@ -216,10 +216,10 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
         let result =
           item.result ??
           (await publishTool.publish({
-            pkg: packagesByName.get(release.name)!,
-            release,
+            pkg: packagesByName.get(item.release.name)!,
+            release: item.release,
             tarballPath: artifactDir
-              ? path.resolve(artifactDir, release.tarball!.path)
+              ? path.resolve(artifactDir, item.release.tarball!.path)
               : null,
             interactive,
             otpCode,
@@ -231,7 +231,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
           // subsequent publish.
           otpCode = null;
           s.stop(
-            `${c.blue(release.name)} requires 2FA verification to publish...`,
+            `${c.blue(item.release.name)} requires 2FA verification to publish...`,
           );
 
           if (totalPublishCount >= 2) {
@@ -255,10 +255,10 @@ for every package being published after this!
             // run publish again in TTY mode, the user handle 2fa for us
             interactive = true;
             result = await publishTool.publish({
-              pkg: packagesByName.get(release.name)!,
-              release,
+              pkg: packagesByName.get(item.release.name)!,
+              release: item.release,
               tarballPath: artifactDir
-                ? path.resolve(artifactDir, release.tarball!.path)
+                ? path.resolve(artifactDir, item.release.tarball!.path)
                 : null,
               interactive,
               otpCode: null,
