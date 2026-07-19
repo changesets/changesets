@@ -138,6 +138,30 @@ describe("publishing", () => {
     },
   );
 
+  const need2faCases = Object.entries(need2faErrorSnapshot.pnpm);
+
+  it.each(need2faCases)(
+    "should return correct error if action requires 2fa (%s)",
+    async (_, snapshot) => {
+      mockedExec.mockResolvedValue(snapshot);
+
+      const result = await pnpm.publish({
+        pkg,
+        release,
+        tarballPath: null,
+        interactive: false,
+        otpCode: null,
+      });
+
+      expect(result.result).toEqual("failed:needs-2fa");
+      expect((result as PublishResultFailedNeeds2fa).message).toEqual(
+        expect.stringMatching(
+          /(requires additional authentication)|(requires a one-time password)/,
+        ),
+      );
+    },
+  );
+
   // v11.10+ only
   it("returns 2fa state details if provided", async () => {
     mockedExec.mockResolvedValue(need2faErrorSnapshot.pnpm.v11);

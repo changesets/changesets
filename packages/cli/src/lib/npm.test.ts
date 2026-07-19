@@ -113,6 +113,28 @@ describe("publishing", () => {
     },
   );
 
+  const need2faCases = Object.entries(need2faErrorSnapshot.npm);
+
+  it.each(need2faCases)(
+    "should handle error if action requires 2fa (%s)",
+    async (_, snapshot) => {
+      mockedExec.mockResolvedValue(snapshot);
+
+      const result = await npm.publish({
+        pkg,
+        release,
+        tarballPath: null,
+        interactive: false,
+        otpCode: null,
+      });
+
+      expect(result.result).toEqual("failed:needs-2fa");
+      expect((result as PublishResultFailedNeeds2fa).message).toContain(
+        "one-time password",
+      );
+    },
+  );
+
   it("returns 2fa state details if provided by npm", async () => {
     mockedExec.mockResolvedValue(need2faErrorSnapshot.npm.v11);
 
