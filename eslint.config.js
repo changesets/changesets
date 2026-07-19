@@ -10,8 +10,10 @@ import tseslint from "typescript-eslint";
 export default defineConfig(
   {
     ignores: [
-      "**/node_modules/**",
+      "**/*.{json,md}",
       "**/dist/**",
+      "**/coverage/**",
+      "**/node_modules/**",
       "site/.vitepress",
       "packages/cli/bin.js",
       "site/.vitepress/cache/**",
@@ -107,11 +109,9 @@ export default defineConfig(
   {
     files: [
       "**/index.ts", // to be removed in next release (v4) when we are dropping default export
-      "**/.vitepress/config.ts",
+      "**/*config.*", // config files often return default exports
       "site/**/*.data.ts",
       "site/**/*.paths.ts",
-      "**/vitest.config.mts",
-      "**/eslint.config.mjs",
     ],
     rules: {
       "import-lite/no-default-export": "off",
@@ -126,13 +126,6 @@ export default defineConfig(
     rules: {
       // mock functions often have to be async to match the original fn
       "@typescript-eslint/require-await": "off",
-    },
-  },
-  {
-    files: ["**/*.config.*"],
-    rules: {
-      // config files often return default exports
-      "import-lite/no-default-export": "off",
     },
   },
   eslintConfigPrettier,

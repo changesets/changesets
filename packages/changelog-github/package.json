@@ -1,6 +1,6 @@
 {
   "name": "@changesets/changelog-github",
-  "version": "1.0.0-next.5",
+  "version": "1.0.0-next.7",
   "description": "A changelog entry generator for GitHub that links to commits, PRs and users",
   "license": "MIT",
   "repository": {
@@ -8,6 +8,9 @@
     "url": "git+https://github.com/changesets/changesets.git",
     "directory": "packages/changelog-github"
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",

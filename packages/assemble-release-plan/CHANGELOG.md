@@ -1,5 +1,35 @@
 # @changesets/assemble-release-plan
 
+## 7.0.0-next.8
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/errors@1.0.0-next.4
+  - @changesets/get-dependents-graph@3.0.0-next.7
+  - @changesets/should-skip-package@1.0.0-next.7
+  - @changesets/types@7.0.0-next.7
+
+## 7.0.0-next.7
+
+### Major Changes
+
+- [#2117](https://github.com/changesets/changesets/pull/2117) [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1) Thanks [@bluwy](https://github.com/bluwy)! - Remove the `pre.json` `initialVersions` property and handling as it's unused internally
+
+- [#2090](https://github.com/changesets/changesets/pull/2090) [`3aae903`](https://github.com/changesets/changesets/commit/3aae903a668315c495ba09248bad2b9c63424449) Thanks [@beeequeue](https://github.com/beeequeue)! - Peer dependencies now bump packages that depend on them by `patch` instead of `major`.
+
+  This means a peer dependency update is no longer assumed (forced) to be a breaking change.
+
+  If the dependent package is not compatible with the peer's new release you should manually add a `major` changeset describing why and how to migrate.
+
+### Patch Changes
+
+- Updated dependencies [[`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1)]:
+  - @changesets/types@7.0.0-next.6
+  - @changesets/get-dependents-graph@3.0.0-next.6
+  - @changesets/should-skip-package@1.0.0-next.6
+
 ## 7.0.0-next.6
 
 ### Minor Changes

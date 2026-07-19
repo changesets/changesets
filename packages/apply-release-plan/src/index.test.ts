@@ -588,6 +588,40 @@ describe("apply release plan", () => {
       });
     });
 
+    it("should update root dependencies without versioning the root package", async () => {
+      const releasePlan = new FakeReleasePlan();
+      const { changedFiles, tempDir } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            name: "root-pkg",
+            workspaces: ["packages/*"],
+            devDependencies: {
+              "pkg-a": "workspace:^1.0.0",
+            },
+          }),
+          "package-lock.json": "",
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+        },
+        releasePlan.getReleasePlan(),
+        releasePlan.config,
+      );
+
+      const rootPackageJsonPath = path.join(tempDir, "package.json");
+      expect(changedFiles).toContain(rootPackageJsonPath);
+      expect(await readJson(rootPackageJsonPath)).toEqual({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+        devDependencies: {
+          "pkg-a": "workspace:^1.1.0",
+        },
+      });
+    });
+
     it("should update a version for two packages with different new versions", async () => {
       const releasePlan = new FakeReleasePlan(
         [],

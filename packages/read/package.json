@@ -1,6 +1,6 @@
 {
   "name": "@changesets/read",
-  "version": "1.0.0-next.6",
+  "version": "1.0.0-next.8",
   "description": "Read changesets from disc, and return the information as JSON",
   "license": "MIT",
   "repository": {
@@ -8,6 +8,9 @@
     "url": "git+https://github.com/changesets/changesets.git",
     "directory": "packages/read"
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",

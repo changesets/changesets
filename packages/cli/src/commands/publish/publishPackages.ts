@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import c from "@changesets/color";
+import { ExitError } from "@changesets/errors";
 import type { Packages } from "@changesets/types";
 import { log } from "@clack/prompts";
 import type { AuthState } from "../../utils/types.ts";
@@ -9,7 +10,6 @@ import {
   publish,
   type PublishTool,
   getPublishTool,
-  sanitizeEnv,
   NPM_PUBLISH_CONCURRENCY_LIMIT,
 } from "./npm-utils.ts";
 
@@ -21,11 +21,11 @@ export type PublishedResult = {
 
 function getInitialAuthState(
   publishTool: PublishTool,
-  otp?: string,
+  otpCode?: string,
 ): AuthState {
-  if (otp) {
+  if (otpCode) {
     return {
-      otpToken: otp,
+      otpCode,
       requiresInteractive: false,
     };
   }
@@ -34,18 +34,18 @@ function getInitialAuthState(
     (process.env.PNPM_CONFIG_OTP || process.env.pnpm_config_otp)
   ) {
     return {
-      otpToken: process.env.PNPM_CONFIG_OTP || process.env.pnpm_config_otp,
+      otpCode: process.env.PNPM_CONFIG_OTP || process.env.pnpm_config_otp,
       requiresInteractive: false,
     };
   }
   if (process.env.NPM_CONFIG_OTP || process.env.npm_config_otp) {
     return {
-      otpToken: process.env.NPM_CONFIG_OTP || process.env.npm_config_otp,
+      otpCode: process.env.NPM_CONFIG_OTP || process.env.npm_config_otp,
       requiresInteractive: false,
     };
   }
   return {
-    otpToken: undefined,
+    otpCode: undefined,
     requiresInteractive: false,
   };
 }
@@ -64,9 +64,13 @@ export async function publishPackages({
   if (releases.length === 0) {
     return [];
   }
-  const publishTool = getPublishTool(packages.tool);
+  const publishTool = await getPublishTool(packages);
+  if (artifactDir && publishTool.name === "yarn") {
+    log.error(`Publishing packed packages is not supported with Yarn.`);
+    throw new ExitError(1);
+  }
   const authState = getInitialAuthState(publishTool, otp);
-  const env = sanitizeEnv({
+  const env = {
     ...process.env,
     // we take over initial OTP handling in our AuthState
     // so we unset those env variables so they don't become stale once we start delegating to the package manager CLIs for OTP prompting
@@ -82,13 +86,13 @@ export async function publishPackages({
           NPM_CONFIG_OTP: undefined,
           npm_config_otp: undefined,
         }),
-  });
+  };
   // in TTY mode let's allow the first publish to "check" if the publish process requires interactive auth or not
   // on CI everything has to be configured in a way that allows automation so we can safely allow concurrency up to the defined limit
   // but in TTY the user might rely on Changesets prompting (through the used package manager CLI) for OTP/web auth
   // this is just an appromixation of the best behavior that assumes a single publish target/registry with a consistent/shared auth setup
   npmPublishQueue.setConcurrency(
-    process.stdin.isTTY && !authState.otpToken
+    process.stdin.isTTY && !authState.otpCode
       ? 1
       : NPM_PUBLISH_CONCURRENCY_LIMIT,
   );
@@ -108,8 +112,7 @@ export async function publishPackages({
       // pnpm supports `publishConfig.directory` natively. We have to let it resolve it on its own.
       // Otherwise we'd risk it re-resolving from within the `publishConfig.directory` itself
       // but original untouched relative paths in `publishConfig.directory` would not even point to correct locations anymore.
-      //
-      // npm, yarn classic and berry don't support `publishConfig.directory` natively.
+      // npm and Yarn don't support `publishConfig.directory` natively.
       // We inherited support for it from Lerna, so we have to resolve it ourselves.
       // It's worth noting it's still useful for, for example, `ng-packagr` users
       // as that tool puts a whole publishable package in a dist directory (with full `package.json` in it).
@@ -120,7 +123,15 @@ export async function publishPackages({
       // It's not possible to rely on regular lifecycle publish scripts for that. We merely delegate to the package manager for publishing
       // and we don't reimplement the pack+publish logic ourselves. So it's not possible for us to pack,
       // and let appropriate lifecycle scripts run, from the package's original directory and then publish from a different `publishConfig.directory`.
-      target = resolve(pkg.dir, pkg.packageJson.publishConfig.directory);
+      const publishDirOverride = pkg.packageJson.publishConfig?.directory;
+      if (publishDirOverride && publishTool.name === "yarn") {
+        // Yarn doesn't allow publishing non-workspace directories
+        log.error(
+          `Package ${c.blue(pkg.packageJson.name)} has publishConfig.directory set to ${c.blue(publishDirOverride)}, which is not supported when using Yarn. Please remove publishConfig.directory from your package.json.`,
+        );
+        throw new ExitError(1);
+      }
+      target = resolve(pkg.dir, publishDirOverride);
     }
     const publishConfirmation = await publish(
       publishTool,

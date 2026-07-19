@@ -1,5 +1,19 @@
 # @changesets/types
 
+## 7.0.0-next.7
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+## 7.0.0-next.6
+
+### Major Changes
+
+- [#2133](https://github.com/changesets/changesets/pull/2133) [`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f) Thanks [@bluwy](https://github.com/bluwy)! - Remove `"private"` type support for `WrittenConfig.access`. Only `"public"` and `"restricted"` are valid values. This change was also already made in [#2015](https://github.com/changesets/changesets/pull/2015) in the runtime.
+
+- [#2117](https://github.com/changesets/changesets/pull/2117) [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1) Thanks [@bluwy](https://github.com/bluwy)! - Remove the `pre.json` `initialVersions` property and handling as it's unused internally
+
 ## 7.0.0-next.5
 
 ### Major Changes

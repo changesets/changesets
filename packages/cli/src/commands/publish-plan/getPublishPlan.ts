@@ -101,14 +101,18 @@ export async function getUnpublishedPackages(
     allowPrivatePackages: boolean;
   },
 ): Promise<Array<PublishReleaseEntry>> {
-  const publishTool = getPublishTool(packages.tool);
+  const publishTool = await getPublishTool(packages);
   const results = await Promise.all(
     packages.packages
       .filter(
         (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
       )
       .map(async (pkg) => {
-        const response = await infoAllow404(publishTool, pkg.packageJson);
+        const response = await infoAllow404(
+          packages.rootDir,
+          publishTool,
+          pkg.packageJson,
+        );
         let publishedState: PublishedState = "never";
 
         if (response.published) {
@@ -117,6 +121,9 @@ export async function getUnpublishedPackages(
           if (
             preState != null &&
             response.pkgInfo.versions &&
+            // non-npm registries often don't auto-assign latest and when using those we don't have to care about only-pre case
+            // when the latest tag is not auto-assigned we can simply use the configured pre tag
+            response.pkgInfo["dist-tags"].latest &&
             response.pkgInfo.versions.every(
               (version: string) =>
                 semverParse(version)!.prerelease[0] === preState.tag,

@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { cli } from "./cli.ts";
 import { add } from "./commands/add/index.ts";
 import { gitTag } from "./commands/git-tag/index.ts";
@@ -20,6 +20,10 @@ vi.mock("./commands/status/index.ts");
 vi.mock("./commands/git-tag/index.ts");
 vi.mock("./commands/pre/index.ts");
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 interface CommandTest {
   command: string;
   fn: (...args: any[]) => unknown;
@@ -29,6 +33,7 @@ interface CommandTest {
 interface CommandCase {
   args: string[];
   options: Record<string, unknown>;
+  env?: Record<string, string>;
 }
 
 const tests: CommandTest[] = [
@@ -63,6 +68,23 @@ const tests: CommandTest[] = [
         args: ["--since", "main", "--since", "next"],
         options: {
           since: "next",
+        },
+      },
+      {
+        args: [
+          "--major",
+          "pkg-a",
+          "--minor",
+          "pkg-b",
+          "--patch",
+          "pkg-c",
+          "--patch",
+          "pkg-d",
+        ],
+        options: {
+          major: ["pkg-a"],
+          minor: ["pkg-b"],
+          patch: ["pkg-c", "pkg-d"],
         },
       },
     ],
@@ -126,6 +148,16 @@ const tests: CommandTest[] = [
         options: {
           fromPackDir: ".packed",
           gitTag: true,
+        },
+      },
+      {
+        args: [],
+        env: {
+          CHANGESETS_OUTPUT: "output.ndjson",
+        },
+        options: {
+          gitTag: true,
+          output: "output.ndjson",
         },
       },
     ],
@@ -203,6 +235,15 @@ const tests: CommandTest[] = [
         args: [],
         options: {},
       },
+      {
+        args: [],
+        env: {
+          CHANGESETS_OUTPUT: "output.ndjson",
+        },
+        options: {
+          output: "output.ndjson",
+        },
+      },
     ],
   },
   {
@@ -234,9 +275,14 @@ const tests: CommandTest[] = [
 
 for (const { command, fn, cases } of tests) {
   describe(`changeset ${command}`, () => {
-    for (const { args, options } of cases) {
+    for (const { args, options, env } of cases) {
       test(`${args.join(" ") || "<no args>"}`, async () => {
         vi.clearAllMocks();
+        if (env) {
+          for (const [name, value] of Object.entries(env)) {
+            vi.stubEnv(name, value);
+          }
+        }
         cli.parse(["node", "changeset", command, ...args], { run: false });
         await cli.runMatchedCommand();
 

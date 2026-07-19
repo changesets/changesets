@@ -1,12 +1,15 @@
 {
   "name": "@changesets/release-utils",
-  "version": "1.0.0-next.6",
+  "version": "1.0.0-next.8",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/changesets/changesets.git",
     "directory": "packages/release-utils"
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
