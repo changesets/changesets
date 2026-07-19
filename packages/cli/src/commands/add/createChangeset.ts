@@ -1,6 +1,11 @@
 import c from "@changesets/color";
 import { ExitError, InternalError } from "@changesets/errors";
-import type { Package, PackageJSON, Release } from "@changesets/types";
+import type {
+  Package,
+  PackageJSON,
+  Release,
+  VersionType,
+} from "@changesets/types";
 import { log, type Option } from "@clack/prompts";
 import semverLt from "semver/functions/lt.js";
 import { askWithEditor } from "../../utils/askWithEditor.ts";
@@ -248,9 +253,13 @@ ${c.gray(patchBumpedPackages.join(", "))}
     }
   } else {
     const pkg = allPackages[0];
-    const type = await cli.askList(
+    const type = await cli.askList<VersionType>(
       `What kind of change is this for ${c.blue(pkg.packageJson.name)}? ${c.gray(`(current version is ${pkg.packageJson.version})`)}`,
-      ["patch", "minor", "major"],
+      [
+        { value: "patch", label: `patch ${c.gray(`(X.X.${c.blue("X")})`)}` },
+        { value: "minor", label: `minor ${c.gray(`(X.${c.green("X")}.X)`)}` },
+        { value: "major", label: `major ${c.gray(`(${c.red("X")}.X.X)`)}` },
+      ],
     );
     if (type === "major") {
       const shouldReleaseAsMajor = await confirmMajorRelease(pkg.packageJson);
