@@ -362,10 +362,8 @@ export const publish: PublishTool["publish"] = async ({
 
     /* -- error handling -- */
 
-    let json: unknown;
-    try {
-      json = JSON.parse(stdout.toString().trim());
-    } catch {
+    const json = getLastJsonObjectFromString(stdout);
+    if (!json) {
       return {
         ...resultBase,
         result: "failed",

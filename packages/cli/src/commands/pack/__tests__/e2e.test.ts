@@ -91,6 +91,66 @@ describe("Pack command e2e", { tags: ["slow"] }, () => {
       });
     });
 
+    it("handles lifecycle stdout while packing", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const cwd = await pm.gitdir(
+        {
+          pmBinPath,
+        },
+        {
+          ...createPkgAFixture(),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            description: "",
+            files: ["index.js"],
+            license: "MIT",
+            scripts: {
+              prepack:
+                "node -e \"console.log(JSON.stringify({ lifecycle: 'output' }))\"",
+            },
+            type: "module",
+          }),
+          "publish-plan.json": JSON.stringify({
+            version: 1,
+            plan: [
+              [
+                {
+                  kind: "publish",
+                  name: "pkg-a",
+                  version: "1.0.0",
+                  access: "public",
+                  tag: "latest",
+                },
+              ],
+            ],
+          }),
+        },
+      );
+
+      const result = await runCliCommand({
+        command: "pack",
+        args: [
+          "--from-publish-plan",
+          "publish-plan.json",
+          "--out-dir",
+          ".packed",
+        ],
+        cwd,
+        pmBinPath,
+        signal,
+      });
+
+      expect.soft(result.exitCode).toBe(0);
+      expect.soft(result.stderr).toBe("");
+      expect.soft(sanitizePackLog(result.stdout)).toMatchSnapshot();
+      const tarball = await fs.stat(
+        path.join(cwd, ".packed/packages/pkg-a-1.0.0.tgz"),
+      );
+      expect.soft(tarball.size).toBeGreaterThan(0);
+    });
+
     it("surfaces pack errors", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
@@ -108,7 +168,7 @@ describe("Pack command e2e", { tags: ["slow"] }, () => {
             license: "MIT",
             scripts: {
               prepack:
-                "node -e \"console.error('prepack failed'); process.exit(1)\"",
+                "node -e \"console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)\"",
             },
             type: "module",
           }),

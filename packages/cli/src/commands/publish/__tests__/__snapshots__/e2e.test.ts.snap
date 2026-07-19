@@ -1,5 +1,20 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Publish command e2e > 'npm 10' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
+"
+`;
+
 exports[`Publish command e2e > 'npm 10' > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
@@ -76,7 +91,7 @@ pkg-a@1.0.0
 Some packages failed to publish:
 pkg-a@1.0.0
 └ 1: command failed
-sh -c node -e "console.error('prepack failed'); process.exit(1)"
+sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
 🦋 Exited with code 1
 
 "
@@ -128,6 +143,21 @@ If you already provided a one-time password then it is likely that you either ty
 it, or it timed out. Please try again.
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'npm 11' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
 "
 `;
 
@@ -206,7 +236,7 @@ pkg-a@1.0.0
 Some packages failed to publish:
 pkg-a@1.0.0
 └ 1: command failed
-sh -c node -e "console.error('prepack failed'); process.exit(1)"
+sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
 🦋 Exited with code 1
 
 "
@@ -260,6 +290,21 @@ After authenticating, your token can be retrieved from:
   [registry-url]/-/v1/done?authId=[uuid]
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'npm 12' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
 "
 `;
 
@@ -338,7 +383,7 @@ pkg-a@1.0.0
 Some packages failed to publish:
 pkg-a@1.0.0
 └ 1: command failed
-sh -c node -e "console.error('prepack failed'); process.exit(1)"
+sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
 🦋 Exited with code 1
 
 "
@@ -392,6 +437,21 @@ After authenticating, your token can be retrieved from:
   [registry-url]/-/v1/done?authId=[uuid]
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 10' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
 "
 `;
 
@@ -470,7 +530,8 @@ pkg-a@1.0.0
 ◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
-└ (no code): prepack failed
+└ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
+Exit status 1
 🦋 Exited with code 1
 
 "
@@ -522,6 +583,21 @@ If you already provided a one-time password then it is likely that you either ty
 it, or it timed out. Please try again.
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 11' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
 "
 `;
 
@@ -592,7 +668,7 @@ pkg-a@1.0.0
 ◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
-└ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.error('prepack failed'); process.exit(1)"\`
+└ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
 Exit status 1
 🦋 Exited with code 1
 
@@ -641,6 +717,21 @@ pkg-a@1.0.0
 └ ERR_PNPM_OTP_NON_INTERACTIVE: The registry requires additional authentication, but pnpm is not running in an interactive terminal
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'yarn 4' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags:
+- pkg-a@1.0.0
 "
 `;
 

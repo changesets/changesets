@@ -947,7 +947,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           license: "MIT",
           scripts: {
             prepack:
-              "node -e \"console.error('prepack failed'); process.exit(1)\"",
+              "node -e \"console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)\"",
           },
           type: "module",
         }),
@@ -997,6 +997,64 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPmContext(registry, pmBinPath),
         createPkgAFixture(),
       );
+
+      const result = await runCliCommand({
+        command: "publish",
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect.soft(result.exitCode).toBe(0);
+      expect.soft(result.stderr).toBe("");
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .toMatchSnapshot();
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect.soft(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${registry.pnprToken}`,
+          otpCode: undefined,
+          statusCode: 201,
+        }),
+      ]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect.soft(packument).toMatchObject({
+        "dist-tags": {
+          latest: "1.0.0",
+        },
+        name: "pkg-a",
+        versions: {
+          "1.0.0": {
+            name: "pkg-a",
+            version: "1.0.0",
+          },
+        },
+      });
+    });
+
+    it("handles lifecycle stdout while publishing", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(await createTestRegistry());
+      const cwd = await pm.gitdir(createPmContext(registry, pmBinPath), {
+        ...createPkgAFixture(),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          description: "",
+          files: ["index.js"],
+          license: "MIT",
+          scripts: {
+            prepack:
+              "node -e \"console.log(JSON.stringify({ lifecycle: 'output' }))\"",
+          },
+          type: "module",
+        }),
+      });
 
       const result = await runCliCommand({
         command: "publish",
