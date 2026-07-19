@@ -109,11 +109,11 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
         : { error };
     }
 
-    let pkgInfo: PackageInfo | undefined;
+    let info: PackageInfo | undefined;
     for (const entry of streamNdjson(result.stdout)) {
-      pkgInfo = entry as PackageInfo;
+      info = entry as PackageInfo;
     }
-    return pkgInfo ? { published: true, pkgInfo } : { error: {} };
+    return info ? { published: true, info } : { error: {} };
   });
 
 export const pack: PublishTool["pack"] = async ({ packDir, tarballPath }) => {

@@ -52,7 +52,7 @@ describe("reporter errors", () => {
 
 describe("package info", () => {
   it("uses Yarn's fetch registry and returns the last NDJSON entry", async () => {
-    const pkgInfo = {
+    const info = {
       "dist-tags": { latest: "0.0.1" },
       versions: ["0.0.1"],
     };
@@ -60,7 +60,7 @@ describe("package info", () => {
       exitCode: 0,
       stdout: [
         JSON.stringify({ name: "@test/package" }),
-        JSON.stringify(pkgInfo),
+        JSON.stringify(info),
       ].join("\n"),
       stderr: "",
     });
@@ -78,7 +78,7 @@ describe("package info", () => {
           },
         },
       }),
-    ).resolves.toEqual({ published: true, pkgInfo });
+    ).resolves.toEqual({ published: true, info });
     expect(mockedExec).toHaveBeenCalledWith(
       "yarn",
       ["npm", "info", "@test/package", "--json"],

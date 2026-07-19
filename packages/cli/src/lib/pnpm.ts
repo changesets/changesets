@@ -81,13 +81,13 @@ function parseInfoResult({
   stdout,
   stderr,
 }: import("tinyexec").Output):
-  | { pkgInfo: PackageInfo }
+  | { info: PackageInfo }
   | { error: PnpmCommandError }
   | undefined {
   if (exitCode !== 0) {
     return { error: getPnpmError({ stderr, stdout }) };
   }
-  return stdout ? { pkgInfo: JSON.parse(stdout) as PackageInfo } : undefined;
+  return stdout ? { info: JSON.parse(stdout) as PackageInfo } : undefined;
 }
 
 export const info: PublishTool["info"] = ({ cwd, pkg }) =>
@@ -127,7 +127,7 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
         ? { published: false }
         : { error: info.error };
     }
-    return { published: true, pkgInfo: info.pkgInfo };
+    return { published: true, info: info.info };
   });
 
 export const pack: PublishTool["pack"] = async ({ pkg, tarballPath }) => {

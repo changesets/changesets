@@ -18,7 +18,7 @@ const mockedExec = vi.mocked(exec);
 
 describe("package info", () => {
   it("passes scoped and fallback publish registries in precedence order", async () => {
-    const pkgInfo = {
+    const info = {
       "dist-tags": { latest: "0.0.1" },
       versions: ["0.0.1"],
     };
@@ -35,13 +35,13 @@ describe("package info", () => {
     } satisfies Package;
     mockedExec.mockResolvedValue({
       exitCode: 0,
-      stdout: JSON.stringify(pkgInfo),
+      stdout: JSON.stringify(info),
       stderr: "",
     });
 
     await expect(npm.info({ cwd: "/workspace", pkg })).resolves.toEqual({
       published: true,
-      pkgInfo,
+      info,
     });
     expect(mockedExec).toHaveBeenCalledWith(
       "npm",

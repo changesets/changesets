@@ -247,7 +247,7 @@ describe("getPublishPlan", () => {
 
     mockedInfo.mockResolvedValue({
       published: true,
-      pkgInfo: {
+      info: {
         versions: ["1.0.0-next.1", "1.0.0-next.2"],
         "dist-tags": {
           latest: "1.0.0-next.2",
@@ -288,7 +288,7 @@ describe("getPublishPlan", () => {
 
     mockedInfo.mockResolvedValue({
       published: true,
-      pkgInfo: {
+      info: {
         "dist-tags": {},
         versions: ["1.0.0"],
       },

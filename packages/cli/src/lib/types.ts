@@ -22,7 +22,7 @@ export type PackageInfo = Record<string, unknown> & {
 export type PackageInfoResult =
   | {
       published: true;
-      pkgInfo: PackageInfo;
+      info: PackageInfo;
     }
   | {
       published: false;

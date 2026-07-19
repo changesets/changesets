@@ -133,14 +133,14 @@ ${response.error.message || "Unknown error"}
 
         if (response.published) {
           publishedState = "published";
-          publishedVersions = response.pkgInfo.versions;
+          publishedVersions = response.info.versions;
 
           if (
             preState != null &&
             // non-npm registries often don't auto-assign latest and when using those we don't have to care about only-pre case
             // when the latest tag is not auto-assigned we can simply use the configured pre tag
-            response.pkgInfo["dist-tags"].latest &&
-            response.pkgInfo.versions.every(
+            response.info["dist-tags"].latest &&
+            response.info.versions.every(
               (version: string) =>
                 semverParse(version)!.prerelease[0] === preState.tag,
             )

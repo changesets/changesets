@@ -96,7 +96,7 @@ describe("publish-plan", () => {
 
     mockedInfo.mockResolvedValue({
       published: true,
-      pkgInfo: {
+      info: {
         "dist-tags": {},
         version: "1.0.0",
         versions: ["1.0.0"],

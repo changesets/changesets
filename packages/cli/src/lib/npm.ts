@@ -126,7 +126,7 @@ function parseInfoResult({
   stdout,
   stderr,
 }: import("tinyexec").Output):
-  | { pkgInfo: PackageInfo }
+  | { info: PackageInfo }
   | { error: NpmCommandError }
   | undefined {
   if (exitCode !== 0) {
@@ -141,9 +141,9 @@ function parseInfoResult({
     if (parsed.length !== 1) {
       throw new Error("Unexpected array output from npm info --json");
     }
-    return { pkgInfo: parsed[0] as PackageInfo };
+    return { info: parsed[0] as PackageInfo };
   }
-  return { pkgInfo: parsed as PackageInfo };
+  return { info: parsed as PackageInfo };
 }
 
 function getRegistryOverrides(packageJson: PackageJSON) {
@@ -203,7 +203,7 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
         ? { published: false }
         : { error: info.error };
     }
-    return { published: true, pkgInfo: info.pkgInfo };
+    return { published: true, info: info.info };
   });
 
 export const pack: PublishTool["pack"] = async ({
