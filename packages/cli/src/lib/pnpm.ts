@@ -93,8 +93,11 @@ function parseInfoResult({
 export const info: PublishTool["info"] = ({ cwd, pkg }) =>
   npmRequestQueue.add(async () => {
     const { packageJson } = pkg;
-    // pnpm treats publishConfig.registry as a publish-time override only,
-    // matching its recursive publish implementation.
+    // In pnpm `publishConfig.registry` is the only supported registry value and it's a strong publish-time override.
+    // However, pnpm's recursive publish doesn't use that to query which packages are already published:
+    // https://github.com/pnpm/pnpm/blob/b4fdfe9b3381bde2b09c1aa8af9f31446b177c83/pnpm11/releasing/commands/src/publish/recursivePublish.ts#L85-L94
+    //
+    // We match that behavior and in pnpm we treat `publishConfig.registry` as a publish-time override only. So we don't use `--registry` here.
     const latestResult = await exec(
       "pnpm",
       ["info", packageJson.name, "--json"],
@@ -131,6 +134,8 @@ export const info: PublishTool["info"] = ({ cwd, pkg }) =>
   });
 
 export const pack: PublishTool["pack"] = async ({ pkg, tarballPath }) => {
+  // note: pnpm emits an object when packing a single package and an array when packing multiple packages
+  // but with pnpm we don't even have to extract it from stdout as we are relying on explicitly configured --out
   const { exitCode, stdout, stderr } = await exec(
     "pnpm",
     ["pack", "--out", tarballPath, "--json"],

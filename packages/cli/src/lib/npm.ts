@@ -58,13 +58,6 @@ function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
     ...env,
     NPM_CONFIG_OTP: undefined,
     npm_config_otp: undefined,
-    // TODO: verify if still a problem in Yarn v3+
-    // Due to a super annoying issue in classic yarn, we have to manually strip this env variable.
-    // The issue is that `yarn run` overrides the `npm_config_registry` env variable with its read-only mirror.
-    // Then the publish command runs from within it and inherits that env variable. Env variable trumps config values
-    // and even trumps the `yarn publish`'s default publish registry (npm one) so the whole thing ends up failing.
-    // See: https://github.com/yarnpkg/yarn/issues/2935#issuecomment-355292633
-    npm_config_registry: undefined,
   };
 }
 
@@ -103,9 +96,11 @@ function getNpmError({
   stderr: string;
   stdout: string;
 }): NpmCommandError {
-  // npm's --json output can be included alongside lifecycle scripts' output,
-  // so parse the final JSON object. npm 7 printed it to stderr, while npm 9
-  // switched back to stdout.
+// NPM's --json output can be included alongside lifecycle scripts' output, like `prepublish` and `postpublish`, in terminal.
+// Lifecycle scripts can contain JSON but `--json` output is always printed at the end so this should work
+// historical notes:
+// - npm7 has switched to printing `--json` errors to stderr (https://github.com/npm/cli/commit/1dbf0f9bb26ba70f4c6d0a807701d7652c31d7d4)
+// - npm9 switched back to printing `--json` errors to stdout (https://github.com/npm/cli/commit/d3543e945e721783dcb83385935f282a4bb32cf3)
   const json =
     getLastJsonObjectFromString(stderr) || getLastJsonObjectFromString(stdout);
   if (json?.error) {
@@ -133,14 +128,16 @@ function parseInfoResult({
     return { error: getNpmError({ stderr, stdout }) };
   }
   if (!stdout) {
+    // Successful empty stdout means the package manager found no matching data but the package does exist in the registry.
+    // For npm this can happen when a package exists but has no `latest` dist-tag.
     return;
   }
   const parsed: unknown = JSON.parse(stdout);
   if (Array.isArray(parsed)) {
-    // npm 12 stopped unwrapping single-version JSON results.
-    if (parsed.length !== 1) {
-      throw new Error("Unexpected array output from npm info --json");
-    }
+    // npm 12 stopped unwrapping single-version JSON results. Changesets only
+    // queries a bare name or an exact version, so more than one item would mean
+    // npm matched a shape we don't intentionally request.
+    assert(parsed.length === 1, "Unexpected empty array output from npm info --json");
     return { info: parsed[0] as PackageInfo };
   }
   return { info: parsed as PackageInfo };
@@ -149,8 +146,16 @@ function parseInfoResult({
 function getRegistryOverrides(packageJson: PackageJSON) {
   const registryOverrides: string[] = [];
 
-  // npm publish uses publishConfig.registry when fetching package metadata.
-  // Scoped registries take precedence over the plain registry flag.
+  // npm actually uses the `publishConfig.registry` value when querying package info during publish:
+  // https://github.com/npm/cli/blob/ed729620b1297f44ccf2517fd19fbaffdc225ed9/lib/commands/publish.js#L150
+  //
+  // for a scoped package the priority of registry resolution in `npm info` is:
+  // --@scope:registry
+  // .npmrc @scope:registry=
+  // --registry
+  // .npmrc registry=
+  //
+  // so we can't rely on a simple --registry override here
   if (packageJson.name.startsWith("@")) {
     const scope = packageJson.name.split("/")[0];
     if (packageJson.publishConfig?.[`${scope}:registry`]) {
@@ -170,6 +175,32 @@ function getRegistryOverrides(packageJson: PackageJSON) {
   return registryOverrides;
 }
 
+// `npm info <pkg> --json` (aka `npm view`) behavior:
+//
+// - Bare package name starts with version string `'latest'`. If
+//   `dist-tags['latest']` exists, it's replaced with that value (e.g.
+//   `'1.0.0'`). Then ALL versions are filtered through
+//   `semver.satisfies(v, version, loose=true)`. When `latest` resolved to
+//   an exact version, this is effectively an exact match. When `latest`
+//   doesn't exist, the literal string `'latest'` reaches satisfies and
+//   matches nothing — zero results, empty stdout.
+// - Prereleases are invisible: satisfies runs WITHOUT `includePrerelease`,
+//   so no range (not even `*`) matches prerelease versions.
+// - When at least one version matches, the JSON output includes a `versions`
+//   array with ALL published versions including prereleases (bleeds through
+//   from the packument, unfiltered).
+// - npmjs.org auto-assigns `latest` on first publish in addition to the
+//   provided --tag, so bare queries always work there. GitHub Packages does
+//   NOT auto-assign `latest`, so the empty-stdout case above applies.
+// - `npm info <pkg>@<exact-prerelease> --json` works as long as that
+//   version exists on the registry: exact strings pass `semver.satisfies`,
+//   and the output still includes the full `versions` history (same
+//   packument merge). Returns empty when the version doesn't exist yet.
+// - Consequence: the exact-version fallback only provides data when
+//   localVersion is already published. For a new unpublished version both
+//   queries return empty → no versions list → only-pre detection is not
+//   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
+//   published with preState.tag rather than "latest".
 export const info: PublishTool["info"] = ({ cwd, pkg }) =>
   npmRequestQueue.add(async () => {
     const { packageJson } = pkg;
@@ -223,11 +254,16 @@ export const pack: PublishTool["pack"] = async ({
     return { error: getNpmError({ stderr, stdout }) };
   }
 
+  // npm is the only package manager that doesn't support an explicit output path for the tarball
+  // it still uses a pretty stable pattern for the output filename:
+  // https://github.com/npm/cli/blob/42b12c250ff3e2ecd756fd82666454ebafc9386c/lib/utils/tar.js#L101-L103
+  // we prefer to extract it explicitly, just in case
   const json = getLastJsonObjectFromString(stdout);
   // npm<12 emits an array even when packing a single package.
   let filename = Array.isArray(json) ? json[0]?.filename : json?.filename;
   if (!filename) {
-    // npm>=12 emits `{ [packageName]: { filename, ... } }`.
+    // npm>=12 introduced a breaking change: https://github.com/npm/cli/pull/9247
+    // since that PR it emits `{ [packageName: string]: { filename: string, ... } }`
     const pkgOutput = Object.values(json ?? {})[0];
     filename =
       pkgOutput &&

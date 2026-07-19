@@ -86,8 +86,9 @@ export function getYarnBerryReporterError(
 export const info: PublishTool["info"] = ({ cwd, pkg }) =>
   npmRequestQueue.add(async () => {
     const { packageJson } = pkg;
-    // Yarn uses its fetch registry for info queries and doesn't support a
-    // --registry override on `yarn npm info`.
+    // Yarn doesn't support `yarn npm info --registry` even though it does support `publishConfig.registry` as a publish-time override.
+    // But it also supports separate `npmRegistryServer` and `npmPublishRegistry` for the same scope.
+    // So it seems that in their model we should be using the *fetch* registry for info queries *anyway*.
     const result = await exec(
       "yarn",
       ["npm", "info", packageJson.name, "--json"],

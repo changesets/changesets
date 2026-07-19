@@ -222,7 +222,6 @@ describe("publishing", () => {
           env: expect.objectContaining({
             NPM_CONFIG_OTP: undefined,
             npm_config_otp: undefined,
-            npm_config_registry: undefined,
           }),
         }),
       },
