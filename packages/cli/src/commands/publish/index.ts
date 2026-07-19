@@ -183,7 +183,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   // in TTY mode the first publish "checks" if the publish process requires interactive auth or not
   // on CI everything has to be configured in a way that allows automation so we can go straight to bulk publishing
   // similarly, when OTP is provided we can go straight to bulk publishing as well
-  let sequential = process.stdin.isTTY || otpCode != null;
+  let sequential = process.stdin.isTTY && otpCode == null;
   const p = progress({ max: totalPublishCount });
   const advanceProgress = () => {
     p.advance(
