@@ -68,7 +68,7 @@ type PublishResultBase = {
 };
 
 export type PublishResultSuccess = PublishResultBase & {
-  result: "published" | "published:interactive";
+  result: "published";
 };
 
 export type PublishResultFailed = PublishResultBase & {

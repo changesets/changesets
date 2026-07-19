@@ -208,6 +208,8 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
         const s = spinner();
         s.start(`Publishing packages...`);
 
+        let interactive = false;
+
         let result =
           item.result ??
           (await publishTool.publish({
@@ -216,7 +218,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
             tarballPath: artifactDir
               ? path.resolve(artifactDir, release.tarball!.path)
               : null,
-            interactive: false,
+            interactive,
             otpCode,
           }));
 
@@ -248,13 +250,14 @@ for every package being published after this!
             // await handle2fa(result);
           } else {
             // run publish again in TTY mode, the user handle 2fa for us
+            interactive = true;
             result = await publishTool.publish({
               pkg: packagesByName.get(release.name)!,
               release,
               tarballPath: artifactDir
                 ? path.resolve(artifactDir, release.tarball!.path)
                 : null,
-              interactive: true,
+              interactive,
               otpCode: null,
             });
           }
@@ -279,7 +282,7 @@ for every package being published after this!
           // A successful non-interactive publish proves that bulk publishing is
           // currently possible. If 2FA becomes necessary again, bulk publishing
           // will hand the affected packages back to this sequential path.
-          if (result.result === "published") {
+          if (!interactive) {
             sequential = false;
             // start with the current advanced progress message
             p.start(

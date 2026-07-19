@@ -182,7 +182,7 @@ export const publish: PublishTool["publish"] = async ({
     if (exitCode === 0) {
       return {
         ...resultBase,
-        result: interactive ? "published:interactive" : "published",
+        result: "published",
       };
     }
 

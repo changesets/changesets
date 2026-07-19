@@ -1,7 +1,6 @@
 ## Returned values from `{PM}.publish()`
 
 - `published`
-- `published:interactive`
 - `failed` (generic error)
 - `failed:already-published`
 - `failed:needs-2fa { authUrl?: string; doneUrl?: string }`
@@ -11,7 +10,7 @@
 1. Process the publish plan one topological chunk at a time.
 2. In a TTY, publish sequentially until a non-interactive publish succeeds.
    - A provided OTP is reused while it remains valid and discarded before an interactive retry.
-   - `published:interactive` and `failed:already-published` continue sequentially.
+   - Interactive successes and `failed:already-published` continue sequentially.
 3. Bulk publish the rest of the current chunk.
    - Successful and already-published packages are finished.
    - Generic failures are reported and prevent later chunks from publishing.
