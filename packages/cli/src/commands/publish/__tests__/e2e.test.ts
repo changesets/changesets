@@ -222,9 +222,17 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
 
 function sanitizePublishLog(message: unknown, registryUrl: string) {
   return (
-    stripVTControlCharacters(String(message))
-      // Normalize CRLF line endings from Windows PTY output.
-      .replaceAll("\r\n", "\n")
+    stripVTControlCharacters(
+      String(message).replace(
+        // Strip OSC sequences first because stripVTControlCharacters removes
+        // their introducer but leaves the title and terminator behind.
+        // eslint-disable-next-line no-control-regex -- OSC sequences are delimited by ESC and BEL control characters.
+        /\u001B\](?:[^\u0007\u001B]|\u001B(?!\\))*(?:\u0007|\u001B\\)/g,
+        "",
+      ),
+    )
+      // Windows PTYs may duplicate the carriage return in CRLF.
+      .replace(/\r+\n/g, "\n")
       // Normalize standalone carriage returns used for terminal progress redraws.
       .replaceAll("\r", "\n")
       .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
@@ -244,24 +252,30 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
         "npm notice integrity: [integrity]",
       )
       .replace(
-        /^\? One-time password: [^\r\n]*$/gm,
+        /^[?√] One-time password:[^\n]*?(?=➤ YN)/gm,
+        "? One-time password: [prompt]\n\n",
+      )
+      .replace(
+        /^[?√] One-time password: [^\n]*$/gm,
         "? One-time password: [prompt]",
       )
       .replaceAll(
-        /(?:^[◒◐◓◑] {2}Creating git tag\.*\n)+(?=^◇ {2}Created git tag\.$)/gm,
+        /(?:^[◒◐◓◑•oO0] {2}Creating git tag\.*\n)+(?=^[◇o] {2}Created git tag\.$)/gm,
         "",
       )
+      .replaceAll(/^o {2}Created git tag\.$/gm, "◇  Created git tag.")
       .replaceAll(
-        /[◒◐◓◑] {2}(?:━+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\r?\n)?[◒◐◓◑] {2}(?:━+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
+        /[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\n)?[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
         (_match, message: string) => `◒  ${message}`,
       )
       .replaceAll(
-        /(?:◒ {2}Publishing packages(?:\r?\n)?)*((?:◇ {2}Successfully published:|▲ {2}Failed to publish))/g,
-        "◒  Publishing packages$1",
+        /(?:◒ {2}Publishing packages(?:\n)?)*(?:[◇o] {2}(Successfully published:)|[▲x] {2}(Failed to publish))/g,
+        (_match, success: string | undefined, failure: string | undefined) =>
+          `◒  Publishing packages${success ? `◇  ${success}` : `▲  ${failure}`}`,
       )
       .replaceAll(
-        /(?:◒ {2}Creating git tags(?:\r?\n)?)*(◇ {2}Created git tags:)/g,
-        "◒  Creating git tags$1",
+        /(?:◒ {2}Creating git tags(?:\n)?)*[◇o] {2}(Created git tags:)/g,
+        "◒  Creating git tags◇  $1",
       )
       .replaceAll(new URL(registryUrl).origin, "[registry-url]")
       .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
