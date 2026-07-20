@@ -188,7 +188,7 @@ export async function deepenCloneBy({ by, cwd }: { by: number; cwd: string }) {
 async function getRepoRoot({ cwd }: { cwd: string }) {
   const { stdout, exitCode, stderr } = await exec(
     "git",
-    ["rev-parse", "--show-toplevel"],
+    ["rev-parse", "--show-cdup"],
     { nodeOptions: { cwd } },
   );
 
@@ -196,7 +196,7 @@ async function getRepoRoot({ cwd }: { cwd: string }) {
     throw new Error(stderr.toString());
   }
 
-  return stdout.toString().trim().replace(/\n|\r/g, "");
+  return path.resolve(cwd, stdout.toString().trim().replace(/\n|\r/g, ""));
 }
 
 export async function getChangedFilesSince({
