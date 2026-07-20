@@ -31,7 +31,7 @@ const idsInComments = new Set(
 
 const diff = changesetIds.difference(idsInComments);
 console.log(
-  `❌ Found ${diff.size} changesets missing from the migration guide:`,
+  `❌ Found ${diff.size}/${changesetIds.size} changesets missing from the migration guide:`,
 );
 console.log(
   [...diff.values()]
