@@ -15,11 +15,6 @@
     "type": "git",
     "url": "git+https://github.com/changesets/changesets.git"
   },
-  "workspaces": [
-    "packages/*",
-    "scripts/*",
-    "site"
-  ],
   "type": "module",
   "scripts": {
     "postinstall": "manypkg check",
