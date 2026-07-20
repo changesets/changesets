@@ -12,7 +12,9 @@ import {
 
 function sanitizePackLog(message: unknown) {
   return stripVTControlCharacters(String(message))
+    // Normalize CRLF line endings from Windows PTY output.
     .replaceAll("\r\n", "\n")
+    // Normalize standalone carriage returns used for terminal progress redraws.
     .replaceAll("\r", "\n")
     .replace(/changeset v\S+/g, "changeset v[version]")
     .replace(/^[A-Za-z]:\\(?:[^\\\r\n]+\\)*cmd\.exe \/d \/s \/c /gim, "sh -c ")

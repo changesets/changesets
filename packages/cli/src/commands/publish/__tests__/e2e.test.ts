@@ -222,7 +222,9 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
 
 function sanitizePublishLog(message: unknown, registryUrl: string) {
   return stripVTControlCharacters(String(message))
+    // Normalize CRLF line endings from Windows PTY output.
     .replaceAll("\r\n", "\n")
+    // Normalize standalone carriage returns used for terminal progress redraws.
     .replaceAll("\r", "\n")
     .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
     .replace(/changeset v\S+/g, "changeset v[version]")
