@@ -9,6 +9,7 @@ dedupePeers: true
 dedupePeerDependents: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  - "@changesets/format@0.1.1"
   - pnpm@11.13.1
   - npm@12.0.1
   - pnpm@10.34.5

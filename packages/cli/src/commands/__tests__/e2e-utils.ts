@@ -1,22 +1,27 @@
 import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { defaultConfig } from "@changesets/config";
 import { gitdir, type Fixture } from "@changesets/test-utils";
 import * as pty from "@lydell/node-pty";
 import { exec } from "tinyexec";
 import { AsyncDisposableStack } from "../../ponyfills/async-disposable-stack.ts";
 
+const isWindows = process.platform === "win32";
+
 export const cliPackageRoot = path.resolve(import.meta.dirname, "../../..");
-const oxcRegister = path.resolve(
-  cliPackageRoot,
-  "..",
-  "..",
-  "node_modules",
-  "@oxc-node",
-  "core",
-  "register.mjs",
-);
+const oxcRegister = pathToFileURL(
+  path.resolve(
+    cliPackageRoot,
+    "..",
+    "..",
+    "node_modules",
+    "@oxc-node",
+    "core",
+    "register.mjs",
+  ),
+).href;
 
 export type ExecResult = {
   exitCode: number | undefined;
@@ -195,6 +200,8 @@ export async function createPmBinEnv(
     // CI-specific tests can opt in through env when needed.
     CI: undefined,
     GITHUB_ACTIONS: undefined,
+    // Required by ConPTY-launched processes on Windows.
+    SystemRoot: process.env.SystemRoot,
     ...env,
     // pnpm 10 packs the package into TMPDIR and runs npm from there. If that is
     // /tmp/pkg and an unrelated /tmp/node_modules exists, npm can treat /tmp
@@ -217,10 +224,17 @@ export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
       packageName,
       command as keyof PmBins,
     );
-    const shimPath = path.join(root.path, command);
-    const shim = `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`;
+    const shimPath = path.join(
+      root.path,
+      isWindows ? `${command}.cmd` : command,
+    );
+    const shim = isWindows
+      ? `@echo off\r\n"${process.execPath}" "${target}" %*\r\n`
+      : `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`;
     await fs.writeFile(shimPath, shim);
-    await fs.chmod(shimPath, 0o755);
+    if (!isWindows) {
+      await fs.chmod(shimPath, 0o755);
+    }
   }
 
   const cleanup = stack.move();
@@ -363,7 +377,7 @@ function createPnpmGitdir(packageName: string) {
     fixture: Fixture = {},
   ) => {
     const packageManager = await resolvePackageManagerSpec("pnpm", packageName);
-    const npmPath = path.join(pmBinPath, "npm");
+    const npmPath = path.join(pmBinPath, isWindows ? "npm.cmd" : "npm");
     const hasNpmShim = await fs
       .access(npmPath)
       .then(() => true)

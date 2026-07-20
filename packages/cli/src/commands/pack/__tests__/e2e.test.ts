@@ -11,13 +11,23 @@ import {
 } from "../../__tests__/e2e-utils.ts";
 
 function sanitizePackLog(message: unknown) {
-  return stripVTControlCharacters(String(message))
-    .replace(/changeset v\S+/g, "changeset v[version]")
-    .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
-    .replace(
-      /logs can be found here: .*?\.log/g,
-      "logs can be found here: [yarn-prepack-log]",
-    );
+  return (
+    stripVTControlCharacters(String(message))
+      // Normalize CRLF line endings from Windows PTY output.
+      .replaceAll("\r\n", "\n")
+      // Normalize standalone carriage returns used for terminal progress redraws.
+      .replaceAll("\r", "\n")
+      .replace(/changeset v\S+/g, "changeset v[version]")
+      .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
+      .replace(
+        /^[A-Za-z]:\\(?:[^\\\r\n]+\\)*cmd\.exe \/d \/s \/c /gim,
+        "sh -c ",
+      )
+      .replace(
+        /logs can be found here: .*?\.log/g,
+        "logs can be found here: [yarn-prepack-log]",
+      )
+  );
 }
 
 // to avoid depending on pnpr here we only test the pack command with precomputed publish plans

@@ -221,37 +221,52 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
 }
 
 function sanitizePublishLog(message: unknown, registryUrl: string) {
-  return stripVTControlCharacters(String(message))
-    .replace(/changeset v\S+/g, "changeset v[version]")
-    .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
-    .replace(
-      /logs can be found here: .*?\.log/g,
-      "logs can be found here: [yarn-prepack-log]",
-    )
-    .replace(/^npm notice shasum: .+$/gm, "npm notice shasum: [shasum]")
-    .replace(
-      /^npm notice integrity: .+$/gm,
-      "npm notice integrity: [integrity]",
-    )
-    .replace(
-      /^\? One-time password: [^\r\n]*$/gm,
-      "? One-time password: [prompt]",
-    )
-    .replaceAll(
-      /[◒◐◓◑] {2}(?:━+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\r?\n)?[◒◐◓◑] {2}(?:━+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
-      (_match, message: string) => `◒  ${message}`,
-    )
-    .replaceAll(
-      /(?:◒ {2}Publishing packages(?:\r?\n)?)*((?:◇ {2}Successfully published:|▲ {2}Failed to publish))/g,
-      "◒  Publishing packages$1",
-    )
-    .replaceAll(
-      /(?:◒ {2}Creating git tags(?:\r?\n)?)*(◇ {2}Created git tags:)/g,
-      "◒  Creating git tags$1",
-    )
-    .replaceAll(new URL(registryUrl).origin, "[registry-url]")
-    .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
-    .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]");
+  return (
+    stripVTControlCharacters(String(message))
+      // Normalize CRLF line endings from Windows PTY output.
+      .replaceAll("\r\n", "\n")
+      // Normalize standalone carriage returns used for terminal progress redraws.
+      .replaceAll("\r", "\n")
+      .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
+      .replace(/changeset v\S+/g, "changeset v[version]")
+      .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
+      .replace(
+        /^[A-Za-z]:\\(?:[^\\\r\n]+\\)*cmd\.exe \/d \/s \/c /gim,
+        "sh -c ",
+      )
+      .replace(
+        /logs can be found here: .*?\.log/g,
+        "logs can be found here: [yarn-prepack-log]",
+      )
+      .replace(/^npm notice shasum: .+$/gm, "npm notice shasum: [shasum]")
+      .replace(
+        /^npm notice integrity: .+$/gm,
+        "npm notice integrity: [integrity]",
+      )
+      .replace(
+        /^\? One-time password: [^\r\n]*$/gm,
+        "? One-time password: [prompt]",
+      )
+      .replaceAll(
+        /(?:^[◒◐◓◑] {2}Creating git tag\.*\n)+(?=^◇ {2}Created git tag\.$)/gm,
+        "",
+      )
+      .replaceAll(
+        /[◒◐◓◑] {2}(?:━+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\r?\n)?[◒◐◓◑] {2}(?:━+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
+        (_match, message: string) => `◒  ${message}`,
+      )
+      .replaceAll(
+        /(?:◒ {2}Publishing packages(?:\r?\n)?)*((?:◇ {2}Successfully published:|▲ {2}Failed to publish))/g,
+        "◒  Publishing packages$1",
+      )
+      .replaceAll(
+        /(?:◒ {2}Creating git tags(?:\r?\n)?)*(◇ {2}Created git tags:)/g,
+        "◒  Creating git tags$1",
+      )
+      .replaceAll(new URL(registryUrl).origin, "[registry-url]")
+      .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
+      .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]")
+  );
 }
 
 async function fetchPackument(registry: TestRegistry, packageName: string) {
