@@ -3738,6 +3738,59 @@ Nice simple summary, much wow
     ]);
   });
 
+  it("should update dependencies in a private package without a version field", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        privatePackages: {
+          version: false,
+          tag: false,
+        },
+      }),
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary",
+      },
+      cwd,
+    );
+    await version({ cwd });
+
+    const packages = await getPackages(cwd);
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.0.1",
+        },
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1",
+      },
+    ]);
+  });
+
   it("should not throw if dependents of unversioned private packages are not explicitly listed by the ignore flag", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

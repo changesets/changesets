@@ -149,15 +149,14 @@ export async function applyReleasePlan(
   const filesToFormat: string[] = [];
   for (const release of releaseWithChangelogs) {
     const { changelog, dir, name, newVersion, packageJson } = release;
-    const pkgJsonEdits = [
-      { keys: ["version"], value: newVersion },
-      ...getDependencyVersionEdits(
-        packageJson,
-        versionsToUpdate,
-        dependencyUpdateOptions,
-      ),
-    ];
-
+    const pkgJsonEdits = getDependencyVersionEdits(
+      packageJson,
+      versionsToUpdate,
+      dependencyUpdateOptions,
+    );
+    if (newVersion) {
+      pkgJsonEdits.push({ keys: ["version"], value: newVersion });
+    }
     const pkgJsonPath = await updatePackageJson(dir, pkgJsonEdits);
     if (pkgJsonPath) {
       touchedFiles.push(pkgJsonPath);
