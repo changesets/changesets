@@ -7,14 +7,22 @@ import path from "node:path";
  * If any are missing, it will report them to help us to not miss any changes.
  */
 
+const majorChangeRegex = /: major/;
+
+const changesets = await Array.fromAsync(
+  fs.glob("*.md", {
+    exclude: ["README.md"],
+    cwd: path.resolve(import.meta.dirname, "..", "..", ".changeset"),
+  }),
+  async (p) => ({
+    id: path.basename(p).slice(0, -3),
+    major: majorChangeRegex.test(
+      await fs.readFile(path.join(".changeset", p), "utf8"),
+    ),
+  }),
+);
 const changesetIds = new Set(
-  await Array.fromAsync(
-    fs.glob("*.md", {
-      exclude: ["README.md"],
-      cwd: path.resolve(import.meta.dirname, "..", "..", ".changeset"),
-    }),
-    (p) => path.basename(p).slice(0, -3),
-  ),
+  changesets.filter((set) => set.major).map((set) => set.id),
 );
 
 const commentRegex = /<!--\s+(.+?)\s+-->/g;
@@ -31,7 +39,7 @@ const idsInComments = new Set(
 
 const diff = changesetIds.difference(idsInComments);
 console.log(
-  `❌ Found ${diff.size}/${changesetIds.size} changesets missing from the migration guide:`,
+  `❌ ${diff.size}/${changesetIds.size} major changesets are missing from the migration guide:`,
 );
 console.log(
   [...diff.values()]
