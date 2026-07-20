@@ -277,18 +277,23 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
       )
       .replaceAll(/^o {2}Created git tag\.$/gm, "◇  Created git tag.")
       .replaceAll(
-        /[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\n)?[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
+        /[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\n[ \t]*)*[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
         (_match, message: string) => `◒  ${message}`,
       )
       .replaceAll(
-        /(?:◒ {2}Publishing packages(?:\n)?)*(?:[◇o] {2}(Successfully published:)|[▲x] {2}(Failed to publish))/g,
+        /(?:◒ {2}Publishing packages(?:\n[ \t]*)*)+[◇o] {2}([^\n]*requires 2FA verification to publish\.\.\.)(?:\n[ \t]*)*/g,
+        "◒  Publishing packages◇  $1\n",
+      )
+      .replaceAll(
+        /(?:◒ {2}Publishing packages(?:\n[ \t]*)*)*(?:[◇o] {2}(Successfully published:)|[▲x] {2}(Failed to publish))/g,
         (_match, success: string | undefined, failure: string | undefined) =>
           `◒  Publishing packages${success ? `◇  ${success}` : `▲  ${failure}`}`,
       )
       .replaceAll(
-        /(?:◒ {2}Creating git tags(?:\n)?)*[◇o] {2}(Created git tags:)/g,
+        /(?:◒ {2}Creating git tags(?:\n[ \t]*)*)*[◇o] {2}(Created git tags:)/g,
         "◒  Creating git tags◇  $1",
       )
+      .replace(/(\n- [^\n]+)\n+$/, "$1\n")
       .replaceAll(new URL(registryUrl).origin, "[registry-url]")
       .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
       .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]")
@@ -909,7 +914,7 @@ function createPmContext(
 
 describe("sanitizePublishLog", () => {
   it("normalizes Windows terminal redraws", () => {
-    const redraw = "\r\u001B[2K\u001B[1A";
+    const redraw = "\r\n\r\n\r\n\u001B[2K\u001B[1A";
     const output =
       "\u001B]0;C:\\hostedtoolcache\\windows\\node\\26.5.0\\x64\\node.exe\u0007" +
       "•  ======================================== Publishing packages" +
@@ -918,21 +923,28 @@ describe("sanitizePublishLog", () => {
       redraw +
       "O  ======================================== Publishing packages" +
       redraw +
-      "o  Successfully published:\r\r\n" +
+      "◇  pkg-a requires 2FA verification to publish..." +
+      redraw +
+      "➤ YN0000: Publishing to https://registry.example.com with tag latest\n" +
+      "? One-time password:" +
+      "\r\u001B[2K\u001B[1A" +
+      "√ One-time password: · ******➤ YN0000: Package archive published\n" +
       "•  Creating git tags" +
       redraw +
       "o  Creating git tags" +
       redraw +
-      "o  Created git tags:\r\r\n" +
-      "? One-time password:" +
+      "o  Created git tags:\n" +
+      "- pkg-a@1.0.0" +
       redraw +
-      "√ One-time password: · ******➤ YN0000: Package archive published";
+      "\r\n";
 
     expect(sanitizePublishLog(output, "https://registry.example.com")).toBe(
-      "◒  Publishing packages◇  Successfully published:\n" +
-        "◒  Creating git tags◇  Created git tags:\n" +
+      "◒  Publishing packages◇  pkg-a requires 2FA verification to publish...\n" +
+        "➤ YN0000: Publishing to [registry-url] with tag latest\n" +
         "? One-time password: [prompt]\n\n" +
-        "➤ YN0000: Package archive published",
+        "➤ YN0000: Package archive published\n" +
+        "◒  Creating git tags◇  Created git tags:\n" +
+        "- pkg-a@1.0.0\n",
     );
   });
 
