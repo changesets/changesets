@@ -233,8 +233,10 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
     )
       // Windows PTYs may duplicate the carriage return in CRLF.
       .replace(/\r+\n/g, "\n")
-      // Normalize standalone carriage returns used for terminal progress redraws.
-      .replaceAll("\r", "\n")
+      // Standalone carriage returns redraw the current line rather than adding
+      // a new one. Removing them lets the redraw normalizers below collapse
+      // the concatenated terminal states.
+      .replaceAll("\r", "")
       .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
       .replace(/changeset v\S+/g, "changeset v[version]")
       .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
@@ -259,6 +261,16 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
         /^[?√] One-time password: [^\n]*$/gm,
         "? One-time password: [prompt]",
       )
+      .replace(
+        /(?:Enter OTP:[^\n]*?(?:\?|✔) This operation requires a one-time password\.)+(?=Enter OTP: 654321)/g,
+        "",
+      )
+      .replace(
+        /^Enter OTP:.*(?:\?|✔) This operation requires a one-time password\.\n/gm,
+        "",
+      )
+      .replace(/Enter OTP:(?:\n[ \t]*)+654321/g, "Enter OTP: 654321")
+      .replace(/(Enter OTP: 654321)(?=\+ )/g, "$1\n\n")
       .replaceAll(
         /(?:^[◒◐◓◑•oO0] {2}Creating git tag\.*\n)+(?=^[◇o] {2}Created git tag\.$)/gm,
         "",
@@ -894,6 +906,50 @@ function createPmContext(
     },
   };
 }
+
+describe("sanitizePublishLog", () => {
+  it("normalizes Windows terminal redraws", () => {
+    const redraw = "\r\u001B[2K\u001B[1A";
+    const output =
+      "\u001B]0;C:\\hostedtoolcache\\windows\\node\\26.5.0\\x64\\node.exe\u0007" +
+      "•  ======================================== Publishing packages" +
+      redraw +
+      "o  ======================================== Publishing packages" +
+      redraw +
+      "O  ======================================== Publishing packages" +
+      redraw +
+      "o  Successfully published:\r\r\n" +
+      "•  Creating git tags" +
+      redraw +
+      "o  Creating git tags" +
+      redraw +
+      "o  Created git tags:\r\r\n" +
+      "? One-time password:" +
+      redraw +
+      "√ One-time password: · ******➤ YN0000: Package archive published";
+
+    expect(sanitizePublishLog(output, "https://registry.example.com")).toBe(
+      "◒  Publishing packages◇  Successfully published:\n" +
+        "◒  Creating git tags◇  Created git tags:\n" +
+        "? One-time password: [prompt]\n\n" +
+        "➤ YN0000: Package archive published",
+    );
+  });
+
+  it("removes package-manager OTP prompt redraws", () => {
+    const prompt = "This operation requires a one-time password.";
+    const output =
+      `? ${prompt}\n` +
+      `Enter OTP:\r? ${prompt}\r` +
+      `Enter OTP: 6\r? ${prompt}\r` +
+      `Enter OTP: 654321\r✔ ${prompt}\r` +
+      "Enter OTP: 654321\n";
+
+    expect(sanitizePublishLog(output, "https://registry.example.com")).toBe(
+      `? ${prompt}\nEnter OTP: 654321\n`,
+    );
+  });
+});
 
 describe("Publish command e2e", { tags: ["slow"] }, () => {
   describe.each(pmCases)("$name", (pm) => {

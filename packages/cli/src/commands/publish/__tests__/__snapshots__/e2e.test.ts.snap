@@ -636,14 +636,6 @@ exports[`Publish command e2e > 'pnpm 11' > retries interactively after an OTP au
 [WARN] Skipped OIDC: ERR_PNPM_ID_TOKEN_GITHUB_WORKFLOW_INCORRECT_PERMISSIONS: Incorrect permissions for idToken within GitHub Workflows
 📦 pkg-a@1.0.0 → [registry-url]/
 ? This operation requires a one-time password.
-Enter OTP:? This operation requires a one-time password.
-Enter OTP: 6? This operation requires a one-time password.
-Enter OTP: 65? This operation requires a one-time password.
-Enter OTP: 654? This operation requires a one-time password.
-Enter OTP: 6543? This operation requires a one-time password.
-Enter OTP: 65432? This operation requires a one-time password.
-Enter OTP: 654321? This operation requires a one-time password.
-Enter OTP: 654321✔ This operation requires a one-time password.
 Enter OTP: 654321
 ✅ Published package pkg-a@1.0.0
 │
