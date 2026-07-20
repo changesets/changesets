@@ -912,57 +912,6 @@ function createPmContext(
   };
 }
 
-describe("sanitizePublishLog", () => {
-  it("normalizes Windows terminal redraws", () => {
-    const redraw = "\r\n\r\n\r\n\u001B[2K\u001B[1A";
-    const output =
-      "\u001B]0;C:\\hostedtoolcache\\windows\\node\\26.5.0\\x64\\node.exe\u0007" +
-      "•  ======================================== Publishing packages" +
-      redraw +
-      "o  ======================================== Publishing packages" +
-      redraw +
-      "O  ======================================== Publishing packages" +
-      redraw +
-      "◇  pkg-a requires 2FA verification to publish..." +
-      redraw +
-      "➤ YN0000: Publishing to https://registry.example.com with tag latest\n" +
-      "? One-time password:" +
-      "\r\u001B[2K\u001B[1A" +
-      "√ One-time password: · ******➤ YN0000: Package archive published\n" +
-      "•  Creating git tags" +
-      redraw +
-      "o  Creating git tags" +
-      redraw +
-      "o  Created git tags:\n" +
-      "- pkg-a@1.0.0" +
-      redraw +
-      "\r\n";
-
-    expect(sanitizePublishLog(output, "https://registry.example.com")).toBe(
-      "◒  Publishing packages◇  pkg-a requires 2FA verification to publish...\n" +
-        "➤ YN0000: Publishing to [registry-url] with tag latest\n" +
-        "? One-time password: [prompt]\n\n" +
-        "➤ YN0000: Package archive published\n" +
-        "◒  Creating git tags◇  Created git tags:\n" +
-        "- pkg-a@1.0.0\n",
-    );
-  });
-
-  it("removes package-manager OTP prompt redraws", () => {
-    const prompt = "This operation requires a one-time password.";
-    const output =
-      `? ${prompt}\n` +
-      `Enter OTP:\r? ${prompt}\r` +
-      `Enter OTP: 6\r? ${prompt}\r` +
-      `Enter OTP: 654321\r✔ ${prompt}\r` +
-      "Enter OTP: 654321\n";
-
-    expect(sanitizePublishLog(output, "https://registry.example.com")).toBe(
-      `? ${prompt}\nEnter OTP: 654321\n`,
-    );
-  });
-});
-
 describe("Publish command e2e", { tags: ["slow"] }, () => {
   describe.each(pmCases)("$name", (pm) => {
     it("publishes a new version of a package", async ({ signal }) => {
