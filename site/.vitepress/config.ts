@@ -179,7 +179,6 @@ function getMainSidebar(): DefaultTheme.SidebarItem[] {
         { text: "Getting Started", link: "getting-started" },
         { text: "Why Changesets", link: "why" },
         { text: "Technical Decisions", link: "technical-decisions" },
-        { text: "Migration from v2", link: "migration" },
       ],
     },
     {
@@ -212,6 +211,7 @@ function getMainSidebar(): DefaultTheme.SidebarItem[] {
         },
         { text: "Snapshot Releases", link: "snapshot-releases" },
         { text: "Prereleases", link: "prereleases" },
+        { text: "Migrating to v3", link: "migration/v3" },
         { text: "Beyond npm", link: "beyond-npm" },
       ],
     },
