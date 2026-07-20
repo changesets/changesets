@@ -1,11 +1,5 @@
 import path from "node:path";
-import { pathToFileURL } from "node:url";
-import {
-  disableGitBackgroundMaintenance,
-  gitdir,
-  outputFile,
-  testdir,
-} from "@changesets/test-utils";
+import { gitdir, outputFile, shallowClone } from "@changesets/test-utils";
 import { writeChangeset } from "@changesets/write";
 import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
@@ -296,31 +290,6 @@ describe("git", { tags: ["slow"] }, () => {
         return commitSha;
       }
 
-      async function createShallowClone(
-        depth: number,
-        cwd: string,
-      ): Promise<string> {
-        // Make a 1-commit-deep shallow clone of this repo
-        const cloneDir = await testdir();
-        await exec(
-          "git",
-          // Note: a file:// URL is needed in order to make a shallow clone of
-          // a local repo
-          [
-            "clone",
-            "--depth",
-            depth.toString(),
-            pathToFileURL(cwd).toString(),
-            ".",
-          ],
-          {
-            nodeOptions: { cwd: cloneDir },
-          },
-        );
-        await disableGitBackgroundMaintenance(cloneDir);
-        return cloneDir;
-      }
-
       it("reads the SHA of a file-add without deepening if commit already included in the shallow clone", async () => {
         const cwd = await gitdir({
           "a.js": 'export default "a"',
@@ -333,7 +302,7 @@ describe("git", { tags: ["slow"] }, () => {
         await outputFile(path.join(cwd, "b.js"), 'export default "b"');
         const originalCommit = await addFileAndCommit("b.js", cwd);
 
-        const clone = await createShallowClone(5, cwd);
+        const clone = await shallowClone(cwd, 5);
 
         // This file was added in the head commit, so will definitely be in our
         // 1-commit clone.
@@ -356,7 +325,7 @@ describe("git", { tags: ["slow"] }, () => {
         const originalCommit = await addFileAndCommit("b.js", cwd);
         await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3, cwd);
 
-        const clone = await createShallowClone(5, cwd);
+        const clone = await shallowClone(cwd, 5);
 
         // Finding this commit will require deepening the clone until it appears.
         const commit = (
@@ -379,7 +348,7 @@ describe("git", { tags: ["slow"] }, () => {
         // of the repo history, and coping with a commit that has no parent.
         const originalCommit = await getCurrentCommitId({ cwd });
         await createDummyCommits(shallowCloneDeepeningAmount * 2, cwd);
-        const clone = await createShallowClone(5, cwd);
+        const clone = await shallowClone(cwd, 5);
 
         // Finding this commit will require fully deepening the repo
         const commit = (
@@ -409,7 +378,7 @@ describe("git", { tags: ["slow"] }, () => {
         await outputFile(path.join(cwd, "c.js"), 'export default "c"');
         const originalCommit2 = await addFileAndCommit("c.js", cwd);
 
-        const clone = await createShallowClone(5, cwd);
+        const clone = await shallowClone(cwd, 5);
 
         const commits = await getCommitsThatAddFiles(
           ["b.js", "this-file-does-not-exist", "c.js"],
