@@ -70,7 +70,6 @@ npm notice Publishing to [registry-url]/ with tag latest and public access
 This operation requires a one-time password.
 Enter OTP: 654321
 
-
 + pkg-a@1.0.0
 │
 ◆  Successfully published:
@@ -215,7 +214,6 @@ npm notice
 npm notice Publishing to [registry-url]/ with tag latest and public access
 This operation requires a one-time password.
 Enter OTP: 654321
-
 + pkg-a@1.0.0
 │
 ◆  Successfully published:
@@ -362,7 +360,6 @@ npm notice
 npm notice Publishing to [registry-url]/ with tag latest and public access
 This operation requires a one-time password.
 Enter OTP: 654321
-
 + pkg-a@1.0.0
 │
 ◆  Successfully published:
@@ -509,7 +506,6 @@ npm notice
 npm notice Publishing to [registry-url]/ with tag latest and public access
 This operation requires a one-time password.
 Enter OTP: 654321
-
 
 + pkg-a@1.0.0
 │
