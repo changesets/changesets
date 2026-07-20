@@ -31,7 +31,6 @@ beforeEach(() => {
 describe("version", { tags: ["slow"] }, () => {
   it("returns the right changed packages and pushes to the remote", async () => {
     const cwd = await gitdir({
-      ".gitattributes": "* text=auto eol=lf\n",
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -144,7 +143,6 @@ describe("version", { tags: ["slow"] }, () => {
 
   it("only includes bumped packages in the returned changed packages", async () => {
     const cwd = await gitdir({
-      ".gitattributes": "* text=auto eol=lf\n",
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -249,7 +247,6 @@ describe("version", { tags: ["slow"] }, () => {
 
   it("doesn't include ignored package that got a dependency update in returned versions", async () => {
     const cwd = await gitdir({
-      ".gitattributes": "* text=auto eol=lf\n",
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -300,7 +297,6 @@ describe("version", { tags: ["slow"] }, () => {
 describe("publish", () => {
   it("publishes packages in a single package repo", async () => {
     const cwd = await gitdir({
-      ".gitattributes": "* text=auto eol=lf\n",
       "package.json": JSON.stringify({
         private: true,
         name: "single-package",
@@ -337,7 +333,6 @@ describe("publish", () => {
 
   it("publishes packages in a multi package repo", async () => {
     const cwd = await gitdir({
-      ".gitattributes": "* text=auto eol=lf\n",
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",

@@ -92,7 +92,10 @@ export async function disableGitBackgroundMaintenance(cwd: string) {
 }
 
 export async function gitdir(dir: Fixture) {
-  const cwd = await testdir(dir);
+  const cwd = await testdir({
+    ".gitattributes": "* text=auto eol=lf\n",
+    ...dir,
+  });
 
   await exec("git", ["init"], { nodeOptions: { cwd } });
   await disableGitBackgroundMaintenance(cwd);
