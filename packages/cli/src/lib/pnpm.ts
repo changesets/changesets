@@ -206,7 +206,7 @@ export const publish: PublishTool["publish"] = async ({
     }
 
     // let the npm error handler take care of any other non-json error, as pnpm 10 delegates publishing to npm
-    // TODO: use normal JSON parsing error handling after dropping pnpm 10 support
+    // TODO: after dropping pnpm 10 support stop delegating to npm and handle all errors here instead
     if (!isPnpmPublishError(json)) {
       return npm.handlePublishError(resultBase, json, stderr || stdout);
     }
