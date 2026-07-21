@@ -83,6 +83,7 @@ export type RegistryRequestRecord = {
 type PackageAuthRequirement = {
   token: string;
   otp?: {
+    allowMissingAfterSuccess?: boolean;
     code: string;
     webAuth?: boolean;
   };
@@ -1164,6 +1165,7 @@ export async function createAuthProxy(
   } = {},
 ) {
   const requests: RegistryRequestRecord[] = [];
+  const otpVerifiedTokens = new Set<string>();
 
   const server = createWebServer(async (webRequest) => {
     const url = new URL(webRequest.url);
@@ -1197,13 +1199,15 @@ export async function createAuthProxy(
           );
         }
 
-        if (
-          authRequirement.otp &&
-          request.otpCode !== authRequirement.otp.code
-        ) {
+        const otp = authRequirement.otp;
+        const canOmitOtp =
+          otp?.allowMissingAfterSuccess === true &&
+          request.otpCode == null &&
+          otpVerifiedTokens.has(authRequirement.token);
+        if (otp && request.otpCode !== otp.code && !canOmitOtp) {
           request.statusCode = 401;
           if (
-            authRequirement.otp.webAuth &&
+            otp.webAuth &&
             webRequest.headers.get("npm-auth-type") === "web"
           ) {
             const authId = randomUUID();
@@ -1230,6 +1234,12 @@ export async function createAuthProxy(
               status: 401,
             },
           );
+        }
+        if (
+          otp?.allowMissingAfterSuccess === true &&
+          request.otpCode === otp.code
+        ) {
+          otpVerifiedTokens.add(authRequirement.token);
         }
         webRequest = withBearerToken(webRequest, pnprToken);
       }

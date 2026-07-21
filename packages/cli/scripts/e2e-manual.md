@@ -6,10 +6,12 @@ From the repository root, run:
 pnpm --filter @changesets/cli e2e:manual
 ```
 
-Choose a package manager, optionally enable OTP authentication, and keep this
-terminal open. The command creates a temporary nine-package workspace and
-starts its authenticated pnpr registry. When OTP is enabled, enter `123321` at
-each publish prompt.
+Choose a package manager and an OTP mode, then keep this terminal open. OTP can
+be disabled, required for every publish, or required only once per pnpr server
+session. The accepted OTP is `123321`.
+
+The command creates a temporary nine-package workspace and starts its
+authenticated pnpr registry.
 
 In another terminal, use the printed directory and publish command, for example:
 

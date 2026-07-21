@@ -3,6 +3,7 @@ import path from "node:path";
 import { testdir } from "@changesets/test-utils";
 import { describe, expect, it, vi } from "vitest";
 import {
+  createAuthProxy,
   pmCases,
   writePmBins,
   type RegistryRequestRecord,
@@ -73,10 +74,55 @@ describe("manual publish e2e", () => {
       Object.values(requirements).every(
         (requirement) =>
           requirement.token === "manual-token" &&
-          requirement.otp?.code === MANUAL_OTP_CODE,
+          requirement.otp?.code === MANUAL_OTP_CODE &&
+          requirement.otp.allowMissingAfterSuccess === false,
       ),
     ).toBe(true);
     expect(MANUAL_OTP_CODE).toBe("123321");
+  });
+
+  it("can allow missing OTPs after one successful verification", () => {
+    const requirements = createManualAuthConfig(
+      "manual-token",
+      "once",
+    ).packages!;
+
+    expect(
+      Object.values(requirements).every(
+        (requirement) => requirement.otp?.allowMissingAfterSuccess === true,
+      ),
+    ).toBe(true);
+  });
+
+  it("accepts a missing OTP only after one valid OTP", async () => {
+    await using proxy = await createAuthProxy(
+      "http://registry.invalid",
+      "upstream-token",
+      {
+        auth: createManualAuthConfig("manual-token", "once"),
+        middleware: async () => new Response(null, { status: 201 }),
+      },
+    );
+    const publish = (otpCode?: string) =>
+      fetch(new URL("/pkg-a", proxy.url), {
+        headers: {
+          authorization: "Bearer manual-token",
+          ...(otpCode && { "npm-otp": otpCode }),
+        },
+        method: "PUT",
+      });
+
+    const missingBeforeVerification = await publish();
+    expect(missingBeforeVerification.status).toBe(401);
+    expect(missingBeforeVerification.headers.get("www-authenticate")).toBe(
+      "OTP",
+    );
+    await expect(publish(MANUAL_OTP_CODE)).resolves.toHaveProperty(
+      "status",
+      201,
+    );
+    await expect(publish()).resolves.toHaveProperty("status", 201);
+    await expect(publish("000000")).resolves.toHaveProperty("status", 401);
   });
 
   it("delays package PUTs but not reads or registry endpoints", async () => {

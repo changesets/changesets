@@ -25,7 +25,11 @@ export const MANUAL_OTP_CODE = "123321";
 
 type ManualFixture = Record<string, string>;
 
+export type ManualOtpMode = "disabled" | "always" | "once";
+
 type ManualConfig = {
+  otpMode?: ManualOtpMode;
+  // Kept so sandboxes created before otpMode can still restart pnpr.
   otpRequired?: boolean;
   pmId: string;
   proxyPort: number;
@@ -43,12 +47,21 @@ const manualPackageNames = [
   "pkg-i",
 ];
 
-export function createManualAuthConfig(token: string): AuthProxyConfig {
+export function createManualAuthConfig(
+  token: string,
+  otpMode: Exclude<ManualOtpMode, "disabled"> = "always",
+): AuthProxyConfig {
   return {
     packages: Object.fromEntries(
       manualPackageNames.map((packageName) => [
         packageName,
-        { token, otp: { code: MANUAL_OTP_CODE } },
+        {
+          token,
+          otp: {
+            allowMissingAfterSuccess: otpMode === "once",
+            code: MANUAL_OTP_CODE,
+          },
+        },
       ]),
     ),
   };
@@ -151,6 +164,10 @@ async function readManualConfig(cwd: string): Promise<ManualConfig> {
     typeof config.pmId !== "string" ||
     !("proxyPort" in config) ||
     typeof config.proxyPort !== "number" ||
+    ("otpMode" in config &&
+      config.otpMode !== "disabled" &&
+      config.otpMode !== "always" &&
+      config.otpMode !== "once") ||
     ("otpRequired" in config && typeof config.otpRequired !== "boolean")
   ) {
     throw new Error("Invalid manual e2e configuration");
@@ -158,14 +175,20 @@ async function readManualConfig(cwd: string): Promise<ManualConfig> {
   return config as ManualConfig;
 }
 
+function getManualOtpMode(config: ManualConfig): ManualOtpMode {
+  return config.otpMode ?? (config.otpRequired ? "always" : "disabled");
+}
+
 async function startManualRegistry(cwd: string): Promise<TestRegistry> {
   const config = await readManualConfig(cwd);
+  const otpMode = getManualOtpMode(config);
   const tokenPath = getTokenPath(cwd);
   const savedToken = (await readOptionalFile(tokenPath))?.trim();
   const registry = await createTestRegistry({
-    auth: config.otpRequired
-      ? (pnprToken) => createManualAuthConfig(pnprToken)
-      : undefined,
+    auth:
+      otpMode !== "disabled"
+        ? (pnprToken) => createManualAuthConfig(pnprToken, otpMode)
+        : undefined,
     middleware: createPublishDelayMiddleware({
       onDelay(record) {
         console.log(
@@ -330,7 +353,7 @@ export async function createManualProjectFixture(
   );
 }
 
-async function createManualSandbox(pm: PmCase, otpRequired: boolean) {
+async function createManualSandbox(pm: PmCase, otpMode: ManualOtpMode) {
   const cwd = await fs.mkdtemp(path.join(tmpdir(), "changesets-manual-"));
   const pmBinPath = path.join(cwd, ".manual", "bin");
   await writePmBins(pmBinPath, pm.bins);
@@ -338,7 +361,7 @@ async function createManualSandbox(pm: PmCase, otpRequired: boolean) {
   await fs.mkdir(path.join(cwd, ".pnpr"), { recursive: true });
   await fs.writeFile(
     getManualConfigPath(cwd),
-    `${JSON.stringify({ otpRequired, pmId: pm.id, proxyPort }, undefined, 2)}\n`,
+    `${JSON.stringify({ otpMode, pmId: pm.id, proxyPort }, undefined, 2)}\n`,
   );
 
   const registry = await startManualRegistry(cwd);
@@ -403,14 +426,29 @@ async function choosePackageManager(pmId: string | undefined) {
   return pmCases.find((pm) => pm.id === selected)!;
 }
 
-async function chooseOtpRequirement(otpRequired: boolean | undefined) {
-  if (otpRequired != null) return otpRequired;
+async function chooseOtpMode(
+  requestedMode: string | undefined,
+  otpRequired: boolean | undefined,
+): Promise<ManualOtpMode | undefined> {
+  if (
+    requestedMode != null &&
+    requestedMode !== "disabled" &&
+    requestedMode !== "always" &&
+    requestedMode !== "once"
+  ) {
+    throw new Error(
+      `Unknown OTP mode ${JSON.stringify(requestedMode)}. Expected disabled, always, or once.`,
+    );
+  }
+  if (requestedMode != null) return requestedMode;
+  if (otpRequired) return "always";
 
   const selected = await select({
-    message: "Should package publishing require an OTP?",
+    message: "What OTP behavior should publishing use?",
     options: [
-      { label: "No OTP", value: false },
-      { label: "Require OTP", value: true },
+      { label: "No OTP", value: "disabled" },
+      { label: "Require OTP for every publish", value: "always" },
+      { label: "Require OTP once", value: "once" },
     ],
   });
   if (isCancel(selected)) {
@@ -425,6 +463,7 @@ async function main() {
   const { values } = parseArgs({
     options: {
       otp: { type: "boolean" },
+      "otp-mode": { type: "string" },
       pm: { type: "string" },
     },
     strict: true,
@@ -432,11 +471,11 @@ async function main() {
   intro("Changesets manual publish e2e");
   const pm = await choosePackageManager(values.pm);
   if (!pm) return;
-  const otpRequired = await chooseOtpRequirement(values.otp);
-  if (otpRequired == null) return;
+  const otpMode = await chooseOtpMode(values["otp-mode"], values.otp);
+  if (otpMode == null) return;
 
   log.info("Creating sandbox and starting pnpr...");
-  const sandbox = await createManualSandbox(pm, otpRequired);
+  const sandbox = await createManualSandbox(pm, otpMode);
   const publishCommand = getPublishCommand(pm);
   try {
     log.success(`Sandbox: ${sandbox.cwd}`);
@@ -445,8 +484,12 @@ async function main() {
     );
     log.info(`Registry: ${sandbox.registry.url}`);
     log.info("Every package publish is delayed by 3 seconds at the proxy.");
-    if (otpRequired) {
-      log.info(`Accepted publish OTP: ${MANUAL_OTP_CODE}`);
+    if (otpMode !== "disabled") {
+      const requirement =
+        otpMode === "once"
+          ? "required once per pnpr session"
+          : "required for every package";
+      log.info(`Accepted publish OTP: ${MANUAL_OTP_CODE} (${requirement})`);
     }
     await waitForTermination();
   } finally {
