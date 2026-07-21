@@ -47,6 +47,7 @@ type CreateGitTagsResult = {
   existing: TagReleaseEntry[];
 };
 
+// TODO: deduplicate with packages/cli/src/utils/getUntaggedPackages.ts
 export async function createGitTags(
   opts: CreateGitTagsOptions,
 ): Promise<CreateGitTagsResult> {

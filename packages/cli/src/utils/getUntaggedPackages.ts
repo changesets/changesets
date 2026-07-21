@@ -1,6 +1,7 @@
 import * as git from "@changesets/git";
 import type { Package, Packages } from "@changesets/types";
 
+// TODO: deduplicate with packages/cli/src/commands/git-tag/utils.ts
 export async function getUntaggedPackages(
   cwd: string,
   tool: Packages["tool"],
@@ -11,7 +12,7 @@ export async function getUntaggedPackages(
   }
 
   const localTags = await git.getAllTags(cwd);
-  const packageWithTags = await Promise.all(
+  const packagesWithTags = await Promise.all(
     packages.map(async (pkg) => {
       const tagName =
         tool.type === "root"
@@ -26,7 +27,7 @@ export async function getUntaggedPackages(
 
   const untagged: Array<{ name: string; newVersion: string }> = [];
 
-  for (const packageWithTag of packageWithTags) {
+  for (const packageWithTag of packagesWithTags) {
     if (!packageWithTag.hasTag) {
       untagged.push({
         name: packageWithTag.pkg.packageJson.name,
