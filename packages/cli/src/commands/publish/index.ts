@@ -160,7 +160,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
       count + chunk.filter((release) => release.kind === "publish").length,
     0,
   );
-  const gitTagsToCreate: TagReleaseEntry[] = [];
+  const gitTagReleases: TagReleaseEntry[] = [];
 
   let otpCode = publishTool.getOtpCode(options?.otp);
   // in TTY mode the first publish "checks" if the publish process requires interactive auth or not
@@ -186,7 +186,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     for (const release of chunk) {
       if (release.kind === "tag-only") {
         if (options?.gitTag ?? true) {
-          gitTagsToCreate.push(release);
+          gitTagReleases.push(release);
         }
         continue;
       }
@@ -362,7 +362,7 @@ ${formatPackageList(successfulNpmPublishes)}`;
     }
 
     if (options?.gitTag ?? true) {
-      gitTagsToCreate.push(
+      gitTagReleases.push(
         ...successfulNpmPublishes.map((result) => ({
           kind: "tag-only" as const,
           ...result,
@@ -383,13 +383,13 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
   }
 
   // finally, create git tags as plan instructs
-  if (gitTagsToCreate.length > 0) {
+  if (gitTagReleases.length > 0) {
     const p = spinner();
     p.start("Creating git tags...");
 
     const results = await createGitTags({
       packages,
-      releases: gitTagsToCreate,
+      releases: gitTagReleases,
       reporter,
     });
 
