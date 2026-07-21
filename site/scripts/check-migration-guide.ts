@@ -28,7 +28,7 @@ const changesetIds = new Set(
 const commentRegex = /<!--\s+(.+?)\s+-->/g;
 
 const migrationGuide = await fs.readFile(
-  path.join(import.meta.dirname, "..", "guide", "migration", "v3.md"),
+  path.join(import.meta.dirname, "..", "guide", "migrating-to-v3.md"),
   "utf8",
 );
 
