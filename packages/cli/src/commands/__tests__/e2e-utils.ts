@@ -478,7 +478,13 @@ function createPnpmFixture(packageName: string) {
         private: true,
         workspaces: ["packages/*"],
       }),
-      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      "pnpm-workspace.yaml": [
+        "packages:",
+        "  - packages/*",
+        // pnpm 11 otherwise auto-installs before running commands from a
+        // package subdirectory, where unpublished workspace deps cannot resolve.
+        packageName === "pnpm-11" ? "verifyDepsBeforeRun: false" : undefined,
+      ].join("\n"),
       ".npmrc": [
         registry && `registry=${registry.url}`,
         registry?.authToken &&

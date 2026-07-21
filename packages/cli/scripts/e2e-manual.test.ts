@@ -35,10 +35,15 @@ describe("manual publish e2e", () => {
     const config = String(
       fixture[pm.command === "yarn" ? ".yarnrc.yml" : ".npmrc"],
     );
+    const workspaceConfig = fixture["pnpm-workspace.yaml"];
     const packageJson = JSON.parse(String(fixture["package.json"]));
 
     expect(config).toContain(registry.url);
     expect(config).toContain(registry.authToken);
+    expect(
+      typeof workspaceConfig === "string" &&
+        workspaceConfig.includes("verifyDepsBeforeRun: false"),
+    ).toBe(pm.id === "pnpm-11");
     expect(packageJson.scripts.changeset).toContain(".manual/changeset.mjs");
     expect(packageJson.scripts.pnpr).toContain(".manual/pnpr.mjs");
     expect(String(fixture[".manual/changeset.mjs"])).toContain(
