@@ -208,7 +208,7 @@ export async function getUntaggedPrivatePackages(
     (pkg) => pkg.packageJson.private && !shouldSkipPackage(pkg, options),
   );
 
-  return (await getUntaggedPackages(taggablePackages, cwd, tool)).map(
+  return (await getUntaggedPackages(cwd, tool, taggablePackages)).map(
     ({ name, newVersion }) => ({
       kind: "tag-only",
       name,

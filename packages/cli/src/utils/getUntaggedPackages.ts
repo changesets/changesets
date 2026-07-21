@@ -2,9 +2,9 @@ import * as git from "@changesets/git";
 import type { Package, Packages } from "@changesets/types";
 
 export async function getUntaggedPackages(
-  packages: Package[],
   cwd: string,
   tool: Packages["tool"],
+  packages: Package[],
 ) {
   if (packages.length === 0) {
     return [];
