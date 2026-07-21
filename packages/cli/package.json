@@ -31,6 +31,9 @@
     "./package.json": "./package.json",
     "./bin.js": "./bin.js"
   },
+  "scripts": {
+    "e2e:manual": "node --import ../../node_modules/@oxc-node/core/register.mjs scripts/e2e-manual.ts"
+  },
   "dependencies": {
     "@changesets/apply-release-plan": "workspace:^",
     "@changesets/assemble-release-plan": "workspace:^",

@@ -2,6 +2,7 @@ import { readConfig } from "@changesets/config";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createDefaultManualFixture } from "../../../../scripts/e2e-manual.ts";
 import type { PublishTool } from "../../../lib/types.ts";
 import * as getPublishToolModule from "../../publish/getPublishTool.ts";
 import { getPublishPlan } from "../getPublishPlan.ts";
@@ -170,6 +171,33 @@ describe("getPublishPlan", () => {
           version: "1.0.0",
         },
       ],
+    ]);
+  });
+
+  it("chunks the manual e2e fixture into three groups of three", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      ...createDefaultManualFixture(),
+    });
+
+    mockedInfo.mockResolvedValue({ published: false });
+    mockedGit.getAllTags.mockResolvedValue(new Set());
+    mockedGit.remoteTagExists.mockResolvedValue(false);
+
+    const config = await readConfig(cwd);
+    const result = await getPublishPlan(cwd, config.config!);
+
+    expect(
+      result.map((chunk) => chunk.map((release) => release.name).toSorted()),
+    ).toEqual([
+      ["pkg-a", "pkg-b", "pkg-c"],
+      ["pkg-d", "pkg-e", "pkg-f"],
+      ["pkg-g", "pkg-h", "pkg-i"],
     ]);
   });
 

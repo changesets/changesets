@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
+import { gitdir } from "@changesets/test-utils";
 import { describe, expect, it } from "vitest";
 import {
   AbortableAsyncDisposableStack,
@@ -8,7 +9,10 @@ import {
   getPmBinPath,
   pmCases,
   runCliCommand,
+  setTestGitdir,
 } from "../../__tests__/e2e-utils.ts";
+
+setTestGitdir(gitdir);
 
 function sanitizePackLog(message: unknown) {
   return (
