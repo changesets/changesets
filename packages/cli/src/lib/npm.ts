@@ -3,11 +3,7 @@ import path from "node:path";
 import type { PackageJSON } from "@changesets/types";
 import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
-import {
-  isAlreadyPublishedError,
-  npmPublishQueue,
-  npmRequestQueue,
-} from "./common.ts";
+import { isAlreadyPublishedError } from "./common.ts";
 import type {
   PackageInfo,
   PublishResultFailedNeeds2fa,
@@ -199,41 +195,36 @@ function getRegistryOverrides(packageJson: PackageJSON) {
 //   queries return empty → no versions list → only-pre detection is not
 //   possible. Such packages (e.g. GitHub Packages with no auto-latest) are
 //   published with preState.tag rather than "latest".
-export const info: PublishTool["info"] = ({ cwd, pkg }) =>
-  npmRequestQueue.add(async () => {
-    const { packageJson } = pkg;
-    const flags = [...getRegistryOverrides(packageJson), "--json"];
-    const latestResult = await exec(
+export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
+  const { packageJson } = pkg;
+  const flags = [...getRegistryOverrides(packageJson), "--json"];
+  const latestResult = await exec("npm", ["info", packageJson.name, ...flags], {
+    nodePath: false,
+    nodeOptions: { cwd },
+  });
+  let info = parseInfoResult(latestResult);
+  if (!info) {
+    // A package without a latest dist-tag produces successful empty output for
+    // the bare query. An exact query can still find the local version.
+    const exactResult = await exec(
       "npm",
-      ["info", packageJson.name, ...flags],
+      ["info", `${packageJson.name}@${packageJson.version}`, ...flags],
       {
         nodePath: false,
         nodeOptions: { cwd },
       },
     );
-    let info = parseInfoResult(latestResult);
-    if (!info) {
-      // A package without a latest dist-tag produces successful empty output for
-      // the bare query. An exact query can still find the local version.
-      const exactResult = await exec(
-        "npm",
-        ["info", `${packageJson.name}@${packageJson.version}`, ...flags],
-        {
-          nodePath: false,
-          nodeOptions: { cwd },
-        },
-      );
-      info = parseInfoResult(exactResult) ?? {
-        error: { code: "E404" },
-      };
-    }
-    if ("error" in info) {
-      return info.error.code === "E404"
-        ? { published: false }
-        : { error: info.error };
-    }
-    return { published: true, info: info.info };
-  });
+    info = parseInfoResult(exactResult) ?? {
+      error: { code: "E404" },
+    };
+  }
+  if ("error" in info) {
+    return info.error.code === "E404"
+      ? { published: false }
+      : { error: info.error };
+  }
+  return { published: true, info: info.info };
+};
 
 export const pack: PublishTool["pack"] = async ({
   pkg,
@@ -333,77 +324,70 @@ ${json.error.detail ?? ""}
   };
 }
 
-// we have this so that we can do try a publish again after a publish without
-// the call being wrapped in the npm request limit and causing the publishes to potentially never run
 export const publish: PublishTool["publish"] = async ({
   pkg,
   release,
   tarballPath,
   interactive,
   otpCode,
-}: PublishOptions): Promise<PublishResult> =>
-  npmPublishQueue.add(async () => {
-    // cwd is super important for correct resolution of `.npmrc`
+}: PublishOptions): Promise<PublishResult> => {
+  // cwd is super important for correct resolution of `.npmrc`
+  //
+  // In the past, we wouldn't be able to call npm in the package directory itself, because despite npm's workspace support introduced in npm 7.
+  // It wouldn't actually be particularly workspaces-aware until npm 9 (until https://github.com/npm/cli/pull/4372).
+  // So we'd have to call npm from the root with a nested package target because `.npmrc` would resolve in respect to cwd and not the target package and that's what we wanted.
+  // Nowadays, this isn't important as `.npmrc` lookup is workspace-aware and finds the root `.npmrc` just fine even if invoked from the package directory.
+  //
+  // So we prefer calling npm from the actual workspace package directory itself. It's important to call npm from a directory that is an actual workspace (as per the workspaces configuration)
+  // and not from, for example, `publishConfig.directory` because npm only resolves to the root's `.npmrc` for actual workspaces and not for arbitrary subdirectories of the root.
+  const cwd = pkg.dir;
+
+  const args: string[] = ["--access", release.access, "--tag", release.tag];
+  if (!interactive) args.unshift("--json");
+  if (otpCode) args.push("--otp", otpCode);
+  if (tarballPath) {
+    args.unshift(path.relative(cwd, tarballPath));
+  } else if (pkg.packageJson.publishConfig?.directory != null) {
+    // npm doesn't support `publishConfig.directory` natively.
+    // We inherited support for it from Lerna, so we have to resolve it ourselves.
+    // It's worth noting it's still useful for, for example, `ng-packagr` users
+    // as that tool puts a whole publishable package in a dist directory (with full `package.json` in it).
+    // Even though that tool doesn't support `publishConfig.directory` itself (it doesn't concern itself with publishing),
+    // it's a useful knob for its users to specify how a packing/publishing should handle their output.
     //
-    // In the past, we wouldn't be able to call npm in the package directory itself, because despite npm's workspace support introduced in npm 7.
-    // It wouldn't actually be particularly workspaces-aware until npm 9 (until https://github.com/npm/cli/pull/4372).
-    // So we'd have to call npm from the root with a nested package target because `.npmrc` would resolve in respect to cwd and not the target package and that's what we wanted.
-    // Nowadays, this isn't important as `.npmrc` lookup is workspace-aware and finds the root `.npmrc` just fine even if invoked from the package directory.
-    //
-    // So we prefer calling npm from the actual workspace package directory itself. It's important to call npm from a directory that is an actual workspace (as per the workspaces configuration)
-    // and not from, for example, `publishConfig.directory` because npm only resolves to the root's `.npmrc` for actual workspaces and not for arbitrary subdirectories of the root.
-    const cwd = pkg.dir;
+    // WARNING: When relying on this, it's important to prebuild the `publishConfig.directory` before running the publish command.
+    // It's not possible to rely on regular lifecycle publish scripts for that. We merely delegate to the package manager for publishing
+    // and we don't reimplement the pack+publish logic ourselves. So it's not possible for us to pack,
+    // and let appropriate lifecycle scripts run, from the package's original directory and then publish from a different `publishConfig.directory`.
+    args.unshift(path.resolve(cwd, pkg.packageJson.publishConfig.directory));
+  }
 
-    const args: string[] = ["--access", release.access, "--tag", release.tag];
-    if (!interactive) args.unshift("--json");
-    if (otpCode) args.push("--otp", otpCode);
-    if (tarballPath) {
-      args.unshift(path.relative(cwd, tarballPath));
-    } else if (pkg.packageJson.publishConfig?.directory != null) {
-      // npm doesn't support `publishConfig.directory` natively.
-      // We inherited support for it from Lerna, so we have to resolve it ourselves.
-      // It's worth noting it's still useful for, for example, `ng-packagr` users
-      // as that tool puts a whole publishable package in a dist directory (with full `package.json` in it).
-      // Even though that tool doesn't support `publishConfig.directory` itself (it doesn't concern itself with publishing),
-      // it's a useful knob for its users to specify how a packing/publishing should handle their output.
-      //
-      // WARNING: When relying on this, it's important to prebuild the `publishConfig.directory` before running the publish command.
-      // It's not possible to rely on regular lifecycle publish scripts for that. We merely delegate to the package manager for publishing
-      // and we don't reimplement the pack+publish logic ourselves. So it's not possible for us to pack,
-      // and let appropriate lifecycle scripts run, from the package's original directory and then publish from a different `publishConfig.directory`.
-      args.unshift(path.resolve(cwd, pkg.packageJson.publishConfig.directory));
-    }
-
-    const { exitCode, stdout, stderr } = await exec(
-      "npm",
-      ["publish", ...args],
-      {
-        nodePath: false,
-        nodeOptions: {
-          stdio: interactive ? "inherit" : "pipe",
-          env: sanitizeEnv(process.env),
-          cwd,
-        },
-      },
-    );
-    const resultBase = { name: release.name, version: release.version };
-    if (exitCode === 0) {
-      return {
-        ...resultBase,
-        result: "published",
-      };
-    }
-
-    /* -- error handling -- */
-
-    const json = getLastJsonObjectFromString(stdout);
-    if (!json) {
-      return {
-        ...resultBase,
-        result: "failed",
-        message: stderr || stdout,
-      };
-    }
-
-    return handlePublishError(resultBase, json, stderr || stdout);
+  const { exitCode, stdout, stderr } = await exec("npm", ["publish", ...args], {
+    nodePath: false,
+    nodeOptions: {
+      stdio: interactive ? "inherit" : "pipe",
+      env: sanitizeEnv(process.env),
+      cwd,
+    },
   });
+  const resultBase = { name: release.name, version: release.version };
+  if (exitCode === 0) {
+    return {
+      ...resultBase,
+      result: "published",
+    };
+  }
+
+  /* -- error handling -- */
+
+  const json = getLastJsonObjectFromString(stdout);
+  if (!json) {
+    return {
+      ...resultBase,
+      result: "failed",
+      message: stderr || stdout,
+    };
+  }
+
+  return handlePublishError(resultBase, json, stderr || stdout);
+};

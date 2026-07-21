@@ -16,6 +16,7 @@ import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { graphSequencer } from "@pnpm/deps.graph-sequencer";
 import semverParse from "semver/functions/parse.js";
+import { npmRequestQueue } from "../../lib/common.ts";
 import { splitByTagStatus } from "../../utils/gitTags.ts";
 import { getPublishTool } from "../publish/getPublishTool.ts";
 
@@ -109,10 +110,12 @@ export async function getUnpublishedPackages(
         (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
       )
       .map(async (pkg) => {
-        const response = await publishTool.info({
-          cwd: packages.rootDir,
-          pkg,
-        });
+        const response = await npmRequestQueue.add(() =>
+          publishTool.info({
+            cwd: packages.rootDir,
+            pkg,
+          }),
+        );
         if ("error" in response) {
           log.error(
             `

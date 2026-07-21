@@ -5,7 +5,11 @@ import { readPreState } from "@changesets/pre";
 import type { Package, PreState } from "@changesets/types";
 import { log, progress, spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import { isPublishFailure, isPublishSuccessful } from "../../lib/common.ts";
+import {
+  isPublishFailure,
+  isPublishSuccessful,
+  npmPublishQueue,
+} from "../../lib/common.ts";
 import type { PublishResult, PublishTool } from "../../lib/types.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { createOutputReport } from "../../utils/output.ts";
@@ -74,15 +78,17 @@ async function bulkPublishPackages({
 
   const publishPromises = publishQueue.map(async (item) => {
     const pkg = packagesByName.get(item.release.name)!;
-    const result = await publishTool.publish({
-      pkg,
-      release: item.release,
-      tarballPath: artifactDir
-        ? resolve(artifactDir, item.release.tarball!.path)
-        : null,
-      interactive: false,
-      otpCode,
-    });
+    const result = await npmPublishQueue.add(() =>
+      publishTool.publish({
+        pkg,
+        release: item.release,
+        tarballPath: artifactDir
+          ? resolve(artifactDir, item.release.tarball!.path)
+          : null,
+        interactive: false,
+        otpCode,
+      }),
+    );
 
     onResult?.(result);
     return { release: item.release, result };
@@ -203,15 +209,17 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
 
         let result =
           item.result ??
-          (await publishTool.publish({
-            pkg: packagesByName.get(item.release.name)!,
-            release: item.release,
-            tarballPath: artifactDir
-              ? path.resolve(artifactDir, item.release.tarball!.path)
-              : null,
-            interactive,
-            otpCode,
-          }));
+          (await npmPublishQueue.add(() =>
+            publishTool.publish({
+              pkg: packagesByName.get(item.release.name)!,
+              release: item.release,
+              tarballPath: artifactDir
+                ? path.resolve(artifactDir, item.release.tarball!.path)
+                : null,
+              interactive,
+              otpCode,
+            }),
+          ));
 
         // retry publishing with interactive mode if we need 2fa
         while (result.result === "failed:needs-2fa") {
@@ -242,15 +250,17 @@ for every package being published after this!
           } else {
             // run publish again in TTY mode, the user handle 2fa for us
             interactive = true;
-            result = await publishTool.publish({
-              pkg: packagesByName.get(item.release.name)!,
-              release: item.release,
-              tarballPath: artifactDir
-                ? path.resolve(artifactDir, item.release.tarball!.path)
-                : null,
-              interactive,
-              otpCode: null,
-            });
+            result = await npmPublishQueue.add(() =>
+              publishTool.publish({
+                pkg: packagesByName.get(item.release.name)!,
+                release: item.release,
+                tarballPath: artifactDir
+                  ? path.resolve(artifactDir, item.release.tarball!.path)
+                  : null,
+                interactive,
+                otpCode: null,
+              }),
+            );
           }
         }
 
