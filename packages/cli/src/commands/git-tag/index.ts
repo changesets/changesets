@@ -1,3 +1,4 @@
+import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { createOutputReport } from "../../utils/output.ts";
@@ -20,14 +21,23 @@ export async function gitTag(options?: GitTagOptions) {
   const s = spinner();
   s.start("Creating git tags...");
 
-  const results = await createGitTags({
-    config,
-    packages,
-    releases: packages.packages.map((pkg) => ({
-      kind: "tag-only",
+  const releases = packages.packages
+    .filter(
+      (pkg) =>
+        !shouldSkipPackage(pkg, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.tag,
+        }),
+    )
+    .map((pkg) => ({
+      kind: "tag-only" as const,
       name: pkg.packageJson.name,
       version: pkg.packageJson.version,
-    })),
+    }));
+
+  const results = await createGitTags({
+    packages,
+    releases,
     reporter,
   });
   if (results.tagged.length === 0) {

@@ -42,6 +42,33 @@ describe("git-tag command", () => {
       expect(mockedGit.tag.mock.calls[1][0]).toEqual("pkg-b@1.0.0");
     });
 
+    it("does not tag ignored packages", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          ignore: ["pkg-a"],
+        }),
+      });
+
+      mockedGit.getAllTags.mockResolvedValueOnce(new Set());
+
+      await gitTag({ cwd });
+
+      expect(mockedGit.tag).toHaveBeenCalledExactlyOnceWith("pkg-b@1.0.0", cwd);
+    });
+
     it("writes tag events when output path is provided", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({

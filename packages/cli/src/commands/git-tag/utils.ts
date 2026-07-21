@@ -1,7 +1,6 @@
 import c from "@changesets/color";
 import * as git from "@changesets/git";
-import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config, Package, Packages } from "@changesets/types";
+import type { Package, Packages } from "@changesets/types";
 import type { OutputReporter } from "../../utils/output.ts";
 import type { TagReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
@@ -23,7 +22,6 @@ export function buildGitTag(
 }
 
 async function splitByTagStatus(
-  config: Config,
   packages: Packages,
   releases: TagReleaseEntry[],
   localTags: Set<string>,
@@ -33,15 +31,6 @@ async function splitByTagStatus(
 
   await Promise.all(
     releases.map(async (entry) => {
-      const pkg = packages.packages.find(
-        (pkg) => pkg.packageJson.name === entry.name,
-      );
-      const shouldSkip = shouldSkipPackage(pkg!, {
-        ignore: config.ignore,
-        allowPrivatePackages: config.privatePackages.tag,
-      });
-      if (shouldSkip) return;
-
       const tagName = buildGitTag(packages.tool, entry);
       const hasTag =
         localTags.has(tagName) || (await git.remoteTagExists(tagName));
@@ -58,7 +47,6 @@ async function splitByTagStatus(
 }
 
 type CreateGitTagsOptions = {
-  config: Config;
   packages: Packages;
   releases: TagReleaseEntry[];
   reporter?: OutputReporter;
@@ -74,7 +62,6 @@ export async function createGitTags(
 ): Promise<CreateGitTagsResult> {
   const existingTags = await git.getAllTags(opts.packages.rootDir);
   const { untagged, existing } = await splitByTagStatus(
-    opts.config,
     opts.packages,
     opts.releases,
     existingTags,

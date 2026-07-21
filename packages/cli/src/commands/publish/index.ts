@@ -388,7 +388,6 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
     p.start("Creating git tags...");
 
     const results = await createGitTags({
-      config,
       packages,
       releases: gitTagsToCreate,
       reporter,
