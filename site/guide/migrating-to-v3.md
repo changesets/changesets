@@ -7,9 +7,9 @@
 
 ### Updated Node.js and Package Manager Version Requirements
 
-<!-- free-results-love, free-results-love-2, deep-coins-attend, lucky-terms-sink -->
+<!-- free-results-love, free-results-love-2, deep-coins-attend, lucky-terms-sink, spotty-chairs-call -->
 
-Changesets v3 requires [Node.js](https://nodejs.org) `^22.11 || ^24 || >=26` and supports these package managers:
+Changesets v3 is now published as ESM, requires [Node.js](https://nodejs.org) `^22.11 || ^24 || >=26` and supports these package managers:
 
 - [pnpm](https://pnpm.io) `>=10.0.0`
 - [npm](https://www.npmjs.com) `>=10.9.0`
@@ -22,6 +22,24 @@ Lower versions may still work but are not guaranteed nor tested.
 <!-- plain-planes-arrive -->
 
 We recommend migrating to [`pnpm`](https://pnpm.io/workspaces) or [`npm`](https://docs.npmjs.com/cli/v12/using-npm/workspaces) workspaces.
+
+### `useCalculatedVersionForSnapshots` is no longer experimental
+
+<!-- tangy-buses-smoke -->
+
+Replace the experimental option with the proper one: `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.useCalculatedVersionForSnapshots` from configuration and replace it with `snapshot.useCalculatedVersion`
+
+```diff
+{
+  "$schema": "https://...",
+- "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+-   "useCalculatedVersionForSnapshots": true
+- }
++ "snapshot": {
++   "useCalculatedVersion": true
++ }
+}
+```
 
 ### Removed all backwards support for Changesets v1
 
@@ -51,7 +69,30 @@ If your repo uses `main` you can now remove the config field:
 }
 ```
 
+### Private packages are no longer versioned by default
+
+<!-- tidy-pandas-wave -->
+
+To preserve the v2 behavior of versioning private packages without creating Git tags for them, update your configuration:
+
+```diff
+{
+  "$schema": "https://...",
++ "privatePackages": { "version": true, "tag": false }
+}
+```
+
+Alternatively, set `privatePackages` to `true` to both version and tag private packages.
+
 ## The CLI
+
+### Versioned prerelease changesets are moved to `.changeset/pre/`
+
+<!-- loud-parents-crash -->
+
+Changesets now stores changesets already included in a prerelease under `.changeset/pre/` instead of keeping them in the root and recording their IDs in `.changeset/pre.json`.
+
+Existing prerelease state is migrated automatically the next time you run `changeset version` or `changeset status`. You can then edit or delete files in `.changeset/pre/` that are no longer relevant to the final stable release; you do not need to update `.changeset/pre.json` manually.
 
 ### `prettier` option is replaced with `format`
 
@@ -129,8 +170,6 @@ TODO: deprecate package in npm after releasing v3
 
 ### `@changesets/config`
 
-#### Reworked package
-
 <!-- cool-camels-type -->
 
 Config parsing has been made more robust and maintainable. As part of this the exported functionality has been reworked from the ground up.
@@ -171,6 +210,12 @@ if (config == null) {
   console.error(errors.join("\n"));
 }
 ```
+
+### `@changesets/error`
+
+<!-- wicked-dryers-shave -->
+
+`ValidationError` was removed as part of the config parsing rework.
 
 ### `@changesets/get-github-info`
 
