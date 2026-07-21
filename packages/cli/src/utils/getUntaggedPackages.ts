@@ -6,6 +6,11 @@ export async function getUntaggedPackages(
   cwd: string,
   tool: Packages["tool"],
 ) {
+  if (packages.length === 0) {
+    return [];
+  }
+
+  const localTags = await git.getAllTags(cwd);
   const packageWithTags = await Promise.all(
     packages.map(async (pkg) => {
       const tagName =
@@ -13,8 +18,7 @@ export async function getUntaggedPackages(
           ? `v${pkg.packageJson.version}`
           : `${pkg.packageJson.name}@${pkg.packageJson.version}`;
       const hasTag =
-        (await git.tagExists(tagName, cwd)) ||
-        (await git.remoteTagExists(tagName));
+        localTags.has(tagName) || (await git.remoteTagExists(tagName));
 
       return { pkg, hasTag };
     }),

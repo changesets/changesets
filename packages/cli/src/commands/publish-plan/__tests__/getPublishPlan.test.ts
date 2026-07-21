@@ -55,7 +55,7 @@ describe("getPublishPlan", () => {
     mockedInfo.mockResolvedValue({
       published: false,
     });
-    mockedGit.tagExists.mockResolvedValue(false);
+    mockedGit.getAllTags.mockResolvedValue(new Set());
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
     const config = await readConfig(cwd);
@@ -138,7 +138,7 @@ describe("getPublishPlan", () => {
     mockedInfo.mockResolvedValue({
       published: false,
     });
-    mockedGit.tagExists.mockResolvedValue(false);
+    mockedGit.getAllTags.mockResolvedValue(new Set());
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
     const config = await readConfig(cwd);

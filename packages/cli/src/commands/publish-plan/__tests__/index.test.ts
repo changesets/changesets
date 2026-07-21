@@ -56,7 +56,7 @@ describe("publish-plan", () => {
     mockedInfo.mockResolvedValue({
       published: false,
     });
-    mockedGit.tagExists.mockResolvedValue(false);
+    mockedGit.getAllTags.mockResolvedValue(new Set());
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
     const result = await publishPlan({ cwd });

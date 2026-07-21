@@ -85,12 +85,12 @@ describe("Publish command", () => {
       }),
     });
 
-    vi.mocked(git.tagExists).mockResolvedValue(false);
+    vi.mocked(git.getAllTags).mockResolvedValue(new Set());
     vi.mocked(git.remoteTagExists).mockResolvedValue(false);
 
     await publishCommand({ cwd });
 
-    expect(git.tagExists).not.toHaveBeenCalled();
+    expect(git.getAllTags).not.toHaveBeenCalled();
     expect(git.remoteTagExists).not.toHaveBeenCalled();
     expect(git.tag).not.toHaveBeenCalled();
   });
@@ -574,7 +574,6 @@ describe("Publish command", () => {
       throw new Error(`Unexpected exec args: ${args.join(" ")}`);
     });
     vi.mocked(git.getAllTags).mockResolvedValue(new Set());
-    vi.mocked(git.tagExists).mockResolvedValue(false);
     vi.mocked(git.remoteTagExists).mockResolvedValue(false);
     vi.mocked(git.tag).mockResolvedValue(true);
 
@@ -637,7 +636,6 @@ describe("Publish command", () => {
       throw new Error(`Unexpected exec args: ${args.join(" ")}`);
     });
     vi.mocked(git.getAllTags).mockResolvedValue(new Set());
-    vi.mocked(git.tagExists).mockResolvedValue(false);
     vi.mocked(git.remoteTagExists).mockResolvedValue(false);
     vi.mocked(git.tag).mockResolvedValue(true);
 
