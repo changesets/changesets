@@ -3,7 +3,7 @@ import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { readPreState } from "@changesets/pre";
 import type { Package, PreState } from "@changesets/types";
-import { log, progress, spinner } from "@clack/prompts";
+import { log, progress, spinner, type SpinnerResult } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import {
   isPublishFailure,
@@ -202,9 +202,13 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     while (publishQueue.length > 0) {
       if (sequential) {
         const item = publishQueue.shift()!;
-        const s = spinner();
-        s.start(`Publishing packages...`);
-
+        let s: SpinnerResult | undefined;
+        if (finishedCount === 0) {
+          // this is the first time we are entering sequential mode
+          // so we start with a simple spinner (no progress bar)
+          s = spinner();
+          s.start(`Publishing packages...`);
+        }
         let interactive = false;
 
         let result =
@@ -226,7 +230,8 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
           // Don't pass a rejected OTP to the interactive retry or any
           // subsequent publish.
           otpCode = null;
-          s.stop(
+          // stop the current spinner
+          (s ?? p).stop(
             `${c.blue(item.release.name)} requires 2FA verification to publish...`,
           );
 
@@ -270,14 +275,14 @@ for every package being published after this!
           // we don't trust this error to mean that the authentication works
           // this could be rejected by a preflight check (theoretically, we've not observed this in practice)
           // in general, we should *rarely* see this error as we only try to publish packages that have not been published yet
-          s.clear();
+          s?.clear();
           continue;
         }
 
         if (isPublishSuccessful(result)) {
           // clear this spinner from logs so it will seamlessly be replaced
           // by the next spinner in the one-by-one or bulk publishing
-          s.clear();
+          s?.clear();
           successfulNpmPublishes.push(result);
 
           // A successful non-interactive publish proves that bulk publishing is
@@ -293,7 +298,7 @@ for every package being published after this!
         }
 
         if (isPublishFailure(result)) {
-          s.clear();
+          s?.clear();
           unsuccessfulNpmPublishes.push(result);
           // note that other packages in this chunk could theoretically succeed but we bail out on the first hard failure
           break publishChunks;
@@ -356,7 +361,6 @@ for every package being published after this!
         // Bulk publishing proved that the current OTP is absent or no longer
         // valid, so don't reuse it during sequential recovery.
         otpCode = null;
-        p.clear();
       }
     }
   }
