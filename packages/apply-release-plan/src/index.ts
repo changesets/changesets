@@ -11,6 +11,7 @@ import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   ChangelogFunctions,
+  ComprehensiveRelease,
   Packages,
   Config,
   ModCompWithPackage,
@@ -126,12 +127,9 @@ export async function applyReleasePlan(
   }
 
   const versionsToUpdate = releases.map(
-    ({ name, newVersion, oldVersion, type }) => ({
-      name,
-      version: newVersion,
-      oldVersion,
-      type,
-      dir: packagesByName.get(name)!.dir,
+    (release): ComprehensiveRelease & { dir: string } => ({
+      ...release,
+      dir: packagesByName.get(release.name)!.dir,
     }),
   );
 
@@ -154,7 +152,7 @@ export async function applyReleasePlan(
       versionsToUpdate,
       dependencyUpdateOptions,
     );
-    if (newVersion) {
+    if (newVersion != null) {
       pkgJsonEdits.push({ keys: ["version"], value: newVersion });
     }
     const pkgJsonPath = await updatePackageJson(dir, pkgJsonEdits);

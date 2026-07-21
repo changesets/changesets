@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { VersionType } from "@changesets/types";
+import type { ComprehensiveRelease, VersionType } from "@changesets/types";
 /**
  * Shared utility functions and business logic
  */
@@ -19,12 +19,7 @@ function getBumpLevel(type: VersionType) {
 
 export function shouldUpdateDependencyBasedOnConfig(
   cwd: string,
-  release: {
-    version: string;
-    oldVersion: string;
-    type: VersionType;
-    dir: string;
-  },
+  release: ComprehensiveRelease & { dir: string },
   {
     depVersionRange,
     depType,
@@ -44,6 +39,9 @@ export function shouldUpdateDependencyBasedOnConfig(
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   },
 ): boolean {
+  if (release.newVersion == null) {
+    return false;
+  }
   const usesWorkspaceRange = depVersionRange.startsWith("workspace:");
   if (usesWorkspaceRange) {
     depVersionRange = depVersionRange.replace(/^workspace:/, "");
@@ -66,7 +64,7 @@ export function shouldUpdateDependencyBasedOnConfig(
       }
     }
   }
-  if (!semverSatisfies(release.version, depVersionRange)) {
+  if (!semverSatisfies(release.newVersion, depVersionRange)) {
     // Dependencies leaving semver range should always be updated
     return true;
   }
