@@ -14,19 +14,45 @@ import {
   pmCases,
   writePmBins,
   type PmCase,
+  type AuthProxyConfig,
   type RegistryMiddleware,
   type RegistryRequestRecord,
   type TestRegistry,
 } from "../src/commands/__tests__/e2e-utils.ts";
 
 export const MANUAL_PUBLISH_DELAY_MS = 3_000;
+export const MANUAL_OTP_CODE = "123321";
 
 type ManualFixture = Record<string, string>;
 
 type ManualConfig = {
+  otpRequired?: boolean;
   pmId: string;
   proxyPort: number;
 };
+
+const manualPackageNames = [
+  "pkg-a",
+  "pkg-b",
+  "pkg-c",
+  "pkg-d",
+  "pkg-e",
+  "pkg-f",
+  "pkg-g",
+  "pkg-h",
+  "pkg-i",
+];
+
+export function createManualAuthConfig(token: string): AuthProxyConfig {
+  return {
+    packages: Object.fromEntries(
+      manualPackageNames.map((packageName) => [
+        packageName,
+        { token, otp: { code: MANUAL_OTP_CODE } },
+      ]),
+    ),
+  };
+}
 
 function createPackageFixture(
   name: string,
@@ -124,7 +150,8 @@ async function readManualConfig(cwd: string): Promise<ManualConfig> {
     !("pmId" in config) ||
     typeof config.pmId !== "string" ||
     !("proxyPort" in config) ||
-    typeof config.proxyPort !== "number"
+    typeof config.proxyPort !== "number" ||
+    ("otpRequired" in config && typeof config.otpRequired !== "boolean")
   ) {
     throw new Error("Invalid manual e2e configuration");
   }
@@ -136,6 +163,9 @@ async function startManualRegistry(cwd: string): Promise<TestRegistry> {
   const tokenPath = getTokenPath(cwd);
   const savedToken = (await readOptionalFile(tokenPath))?.trim();
   const registry = await createTestRegistry({
+    auth: config.otpRequired
+      ? (pnprToken) => createManualAuthConfig(pnprToken)
+      : undefined,
     middleware: createPublishDelayMiddleware({
       onDelay(record) {
         console.log(
@@ -300,7 +330,7 @@ export async function createManualProjectFixture(
   );
 }
 
-async function createManualSandbox(pm: PmCase) {
+async function createManualSandbox(pm: PmCase, otpRequired: boolean) {
   const cwd = await fs.mkdtemp(path.join(tmpdir(), "changesets-manual-"));
   const pmBinPath = path.join(cwd, ".manual", "bin");
   await writePmBins(pmBinPath, pm.bins);
@@ -308,7 +338,7 @@ async function createManualSandbox(pm: PmCase) {
   await fs.mkdir(path.join(cwd, ".pnpr"), { recursive: true });
   await fs.writeFile(
     getManualConfigPath(cwd),
-    `${JSON.stringify({ pmId: pm.id, proxyPort }, undefined, 2)}\n`,
+    `${JSON.stringify({ otpRequired, pmId: pm.id, proxyPort }, undefined, 2)}\n`,
   );
 
   const registry = await startManualRegistry(cwd);
@@ -373,9 +403,28 @@ async function choosePackageManager(pmId: string | undefined) {
   return pmCases.find((pm) => pm.id === selected)!;
 }
 
+async function chooseOtpRequirement(otpRequired: boolean | undefined) {
+  if (otpRequired != null) return otpRequired;
+
+  const selected = await select({
+    message: "Should package publishing require an OTP?",
+    options: [
+      { label: "No OTP", value: false },
+      { label: "Require OTP", value: true },
+    ],
+  });
+  if (isCancel(selected)) {
+    cancel("Canceled.");
+    process.exitCode = 1;
+    return;
+  }
+  return selected;
+}
+
 async function main() {
   const { values } = parseArgs({
     options: {
+      otp: { type: "boolean" },
       pm: { type: "string" },
     },
     strict: true,
@@ -383,9 +432,11 @@ async function main() {
   intro("Changesets manual publish e2e");
   const pm = await choosePackageManager(values.pm);
   if (!pm) return;
+  const otpRequired = await chooseOtpRequirement(values.otp);
+  if (otpRequired == null) return;
 
   log.info("Creating sandbox and starting pnpr...");
-  const sandbox = await createManualSandbox(pm);
+  const sandbox = await createManualSandbox(pm, otpRequired);
   const publishCommand = getPublishCommand(pm);
   try {
     log.success(`Sandbox: ${sandbox.cwd}`);
@@ -394,6 +445,9 @@ async function main() {
     );
     log.info(`Registry: ${sandbox.registry.url}`);
     log.info("Every package publish is delayed by 3 seconds at the proxy.");
+    if (otpRequired) {
+      log.info(`Accepted publish OTP: ${MANUAL_OTP_CODE}`);
+    }
     await waitForTermination();
   } finally {
     await sandbox[Symbol.asyncDispose]();

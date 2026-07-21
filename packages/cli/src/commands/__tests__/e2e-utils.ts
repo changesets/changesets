@@ -1291,7 +1291,7 @@ export async function createAuthProxy(
 }
 
 export async function createTestRegistry(options?: {
-  auth?: AuthProxyConfig;
+  auth?: AuthProxyConfig | ((pnprToken: string) => AuthProxyConfig | undefined);
   middleware?: RegistryMiddleware;
   packages?: Record<string, SeedPackageState>;
   pnprToken?: string;
@@ -1312,9 +1312,13 @@ export async function createTestRegistry(options?: {
   for (const [packageName, state] of Object.entries(options?.packages ?? {})) {
     await seedPackage(pnpr.url, pnprToken, packageName, state);
   }
+  const auth =
+    typeof options?.auth === "function"
+      ? options.auth(pnprToken)
+      : options?.auth;
   const proxy = stack.use(
     await createAuthProxy(pnpr.url, pnprToken, {
-      auth: options?.auth,
+      auth,
       middleware: options?.middleware,
       port: options?.proxyPort,
     }),

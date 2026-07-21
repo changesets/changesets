@@ -8,8 +8,10 @@ import {
   type RegistryRequestRecord,
 } from "../src/commands/__tests__/e2e-utils.ts";
 import {
+  createManualAuthConfig,
   createManualProjectFixture,
   createPublishDelayMiddleware,
+  MANUAL_OTP_CODE,
   MANUAL_PUBLISH_DELAY_MS,
 } from "./e2e-manual.ts";
 
@@ -61,6 +63,20 @@ describe("manual publish e2e", () => {
     );
 
     expect(shim).toContain("npm-10");
+  });
+
+  it("requires the documented OTP for every fixture package", () => {
+    const requirements = createManualAuthConfig("manual-token").packages!;
+
+    expect(Object.keys(requirements)).toHaveLength(9);
+    expect(
+      Object.values(requirements).every(
+        (requirement) =>
+          requirement.token === "manual-token" &&
+          requirement.otp?.code === MANUAL_OTP_CODE,
+      ),
+    ).toBe(true);
+    expect(MANUAL_OTP_CODE).toBe("123321");
   });
 
   it("delays package PUTs but not reads or registry endpoints", async () => {
