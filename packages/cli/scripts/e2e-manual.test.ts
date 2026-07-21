@@ -125,6 +125,45 @@ describe("manual publish e2e", () => {
     await expect(publish("000000")).resolves.toHaveProperty("status", 401);
   });
 
+  it("can require a second OTP for pkg-e without blocking its chunk", async () => {
+    const auth = createManualAuthConfig("manual-token", "twice");
+    expect(auth.packages?.["pkg-e"].otp?.requiredVerificationCount).toBe(2);
+    expect(auth.packages?.["pkg-d"].otp?.requiredVerificationCount).toBe(
+      undefined,
+    );
+
+    await using proxy = await createAuthProxy(
+      "http://registry.invalid",
+      "upstream-token",
+      {
+        auth,
+        middleware: async () => new Response(null, { status: 201 }),
+      },
+    );
+    const publish = (packageName: string, otpCode?: string) =>
+      fetch(new URL(`/${packageName}`, proxy.url), {
+        headers: {
+          authorization: "Bearer manual-token",
+          ...(otpCode && { "npm-otp": otpCode }),
+        },
+        method: "PUT",
+      });
+
+    await expect(publish("pkg-a")).resolves.toHaveProperty("status", 401);
+    await expect(publish("pkg-a", MANUAL_OTP_CODE)).resolves.toHaveProperty(
+      "status",
+      201,
+    );
+    await expect(publish("pkg-b")).resolves.toHaveProperty("status", 201);
+    await expect(publish("pkg-e")).resolves.toHaveProperty("status", 401);
+    await expect(publish("pkg-d")).resolves.toHaveProperty("status", 201);
+    await expect(publish("pkg-e", MANUAL_OTP_CODE)).resolves.toHaveProperty(
+      "status",
+      201,
+    );
+    await expect(publish("pkg-e")).resolves.toHaveProperty("status", 201);
+  });
+
   it("delays package PUTs but not reads or registry endpoints", async () => {
     const wait = vi.fn(async () => {});
     const fetch = vi.fn(async () => new Response(null, { status: 200 }));

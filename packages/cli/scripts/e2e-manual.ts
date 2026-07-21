@@ -25,7 +25,7 @@ export const MANUAL_OTP_CODE = "123321";
 
 type ManualFixture = Record<string, string>;
 
-export type ManualOtpMode = "disabled" | "always" | "once";
+export type ManualOtpMode = "disabled" | "always" | "once" | "twice";
 
 type ManualConfig = {
   otpMode?: ManualOtpMode;
@@ -58,8 +58,10 @@ export function createManualAuthConfig(
         {
           token,
           otp: {
-            allowMissingAfterSuccess: otpMode === "once",
+            allowMissingAfterSuccess: otpMode === "once" || otpMode === "twice",
             code: MANUAL_OTP_CODE,
+            requiredVerificationCount:
+              otpMode === "twice" && packageName === "pkg-e" ? 2 : undefined,
           },
         },
       ]),
@@ -167,7 +169,8 @@ async function readManualConfig(cwd: string): Promise<ManualConfig> {
     ("otpMode" in config &&
       config.otpMode !== "disabled" &&
       config.otpMode !== "always" &&
-      config.otpMode !== "once") ||
+      config.otpMode !== "once" &&
+      config.otpMode !== "twice") ||
     ("otpRequired" in config && typeof config.otpRequired !== "boolean")
   ) {
     throw new Error("Invalid manual e2e configuration");
@@ -434,10 +437,11 @@ async function chooseOtpMode(
     requestedMode != null &&
     requestedMode !== "disabled" &&
     requestedMode !== "always" &&
-    requestedMode !== "once"
+    requestedMode !== "once" &&
+    requestedMode !== "twice"
   ) {
     throw new Error(
-      `Unknown OTP mode ${JSON.stringify(requestedMode)}. Expected disabled, always, or once.`,
+      `Unknown OTP mode ${JSON.stringify(requestedMode)}. Expected disabled, always, once, or twice.`,
     );
   }
   if (requestedMode != null) return requestedMode;
@@ -449,6 +453,7 @@ async function chooseOtpMode(
       { label: "No OTP", value: "disabled" },
       { label: "Require OTP for every publish", value: "always" },
       { label: "Require OTP once", value: "once" },
+      { label: "Require OTP twice (again in chunk 2)", value: "twice" },
     ],
   });
   if (isCancel(selected)) {
@@ -488,7 +493,9 @@ async function main() {
       const requirement =
         otpMode === "once"
           ? "required once per pnpr session"
-          : "required for every package";
+          : otpMode === "twice"
+            ? "required initially and again for pkg-e"
+            : "required for every package";
       log.info(`Accepted publish OTP: ${MANUAL_OTP_CODE} (${requirement})`);
     }
     await waitForTermination();
