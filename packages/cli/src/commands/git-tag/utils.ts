@@ -1,23 +1,13 @@
 import c from "@changesets/color";
 import * as git from "@changesets/git";
-import type { Package, Packages } from "@changesets/types";
+import type { Packages } from "@changesets/types";
 import type { OutputReporter } from "../../utils/output.ts";
 import type { TagReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 export function buildGitTag(
   tool: Packages["tool"],
-  pkg:
-    | Package
-    | { name: string; newVersion: string }
-    | { name: string; version: string },
+  { name, version }: { name: string; version: string },
 ) {
-  const name = "packageJson" in pkg ? pkg.packageJson.name : pkg.name;
-  const version =
-    "packageJson" in pkg
-      ? pkg.packageJson.version
-      : ((pkg as { newVersion: string }).newVersion ??
-        (pkg as { version: string }).version);
-
   return tool.type !== "root" ? `${name}@${version}` : `v${version}`;
 }
 
