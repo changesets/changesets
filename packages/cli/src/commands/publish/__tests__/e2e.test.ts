@@ -241,32 +241,22 @@ function normalizeOtpPrompts(message: string) {
   );
 }
 
-function normalizeTerminalOutput(message: unknown) {
-  return (
-    String(message)
+function sanitizePublishLog(message: unknown, registryUrl: string) {
+  const output = stripVTControlCharacters(
+    String(message).replace(
       // Strip OSC sequences first because stripVTControlCharacters removes
       // their introducer but leaves the title and terminator behind.
-      .replace(
-        // eslint-disable-next-line no-control-regex -- OSC sequences are delimited by ESC and BEL control characters.
-        /\u001B\](?:[^\u0007\u001B]|\u001B(?!\\))*(?:\u0007|\u001B\\)/g,
-        "",
-      )
-      // ConPTY may turn a redraw into blank rows followed by erase-line and
-      // cursor-up sequences. Normalize the whole redraw before stripping ANSI;
-      // otherwise its marker is lost and the blank rows become snapshot output.
-      // eslint-disable-next-line no-control-regex -- ANSI erase-line and cursor-up sequences are delimited by ESC.
-      .replace(/(?:\r*\n)*\r?\u001B\[\d*K\u001B\[\d*A/g, "")
-      // Windows PTYs may duplicate the carriage return in CRLF.
-      .replace(/\r+\n/g, "\n")
-      // Standalone carriage returns redraw the current line rather than adding
-      // a new one. Removing them lets the redraw normalizers below collapse
-      // the concatenated terminal states.
-      .replaceAll("\r", "")
-  );
-}
-
-function sanitizePublishLog(message: unknown, registryUrl: string) {
-  const output = stripVTControlCharacters(normalizeTerminalOutput(message))
+      // eslint-disable-next-line no-control-regex -- OSC sequences are delimited by ESC and BEL control characters.
+      /\u001B\](?:[^\u0007\u001B]|\u001B(?!\\))*(?:\u0007|\u001B\\)/g,
+      "",
+    ),
+  )
+    // Windows PTYs may duplicate the carriage return in CRLF.
+    .replace(/\r+\n/g, "\n")
+    // Standalone carriage returns redraw the current line rather than adding
+    // a new one. Removing them lets the redraw normalizers below collapse
+    // the concatenated terminal states.
+    .replaceAll("\r", "")
     .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
     .replace(/changeset v\S+/g, "changeset v[version]")
     .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
@@ -288,18 +278,23 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
     )
     .replaceAll(/^o {2}Created git tag\.$/gm, "◇  Created git tag.")
     .replaceAll(
-      /[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\n)?[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
+      /[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\n[ \t]*)*[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
       (_match, message: string) => `◒  ${message}`,
     )
     .replaceAll(
-      /(?:◒ {2}Publishing packages(?:\n)?)*(?:[◇o] {2}(Successfully published:)|[▲x] {2}(Failed to publish))/g,
+      /(?:◒ {2}Publishing packages(?:\n[ \t]*)*)+[◇o] {2}([^\n]*requires 2FA verification to publish\.\.\.)(?:\n[ \t]*)*/g,
+      "◒  Publishing packages◇  $1\n",
+    )
+    .replaceAll(
+      /(?:◒ {2}Publishing packages(?:\n[ \t]*)*)*(?:[◇o] {2}(Successfully published:)|[▲x] {2}(Failed to publish))/g,
       (_match, success: string | undefined, failure: string | undefined) =>
         `◒  Publishing packages${success ? `◇  ${success}` : `▲  ${failure}`}`,
     )
     .replaceAll(
-      /(?:◒ {2}Creating git tags(?:\n)?)*[◇o] {2}(Created git tags:)/g,
+      /(?:◒ {2}Creating git tags(?:\n[ \t]*)*)*[◇o] {2}(Created git tags:)/g,
       "◒  Creating git tags◇  $1",
     )
+    .replace(/(\n- [^\n]+)\n+$/, "$1\n")
     .replaceAll(new URL(registryUrl).origin, "[registry-url]")
     .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
     .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]");
