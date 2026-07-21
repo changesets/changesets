@@ -95,6 +95,35 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
+  it("does not tag tag-only releases when git tagging is disabled", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        private: true,
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...defaultConfig,
+        privatePackages: {
+          version: true,
+          tag: true,
+        },
+      }),
+    });
+
+    vi.mocked(git.getAllTags).mockResolvedValue(new Set());
+    vi.mocked(git.remoteTagExists).mockResolvedValue(false);
+
+    await publishCommand({ cwd, gitTag: false });
+
+    expect(git.tag).not.toHaveBeenCalled();
+  });
+
   it("in pre state should report error if the tag option is used in pre release", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

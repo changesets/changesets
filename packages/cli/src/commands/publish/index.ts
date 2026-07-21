@@ -181,13 +181,17 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
 
   // Publish packages in chunks based on the package graph.
   publishChunks: for (const chunk of plan) {
-    gitTagsToCreate.push(
-      ...chunk.filter((release) => release.kind === "tag-only"),
-    );
+    let publishQueue: PublishQueueItem[] = [];
 
-    let publishQueue: PublishQueueItem[] = chunk
-      .filter((release) => release.kind === "publish")
-      .map((release) => ({ release, result: undefined }));
+    for (const release of chunk) {
+      if (release.kind === "tag-only") {
+        if (options?.gitTag ?? true) {
+          gitTagsToCreate.push(release);
+        }
+        continue;
+      }
+      publishQueue.push({ release, result: undefined });
+    }
 
     while (publishQueue.length > 0) {
       if (sequential) {
@@ -386,7 +390,7 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
     const results = await createGitTags({
       config,
       packages,
-      plan: gitTagsToCreate,
+      releases: gitTagsToCreate,
       reporter,
     });
 

@@ -23,6 +23,11 @@ export async function gitTag(options?: GitTagOptions) {
   const results = await createGitTags({
     config,
     packages,
+    releases: packages.packages.map((pkg) => ({
+      kind: "tag-only",
+      name: pkg.packageJson.name,
+      version: pkg.packageJson.version,
+    })),
     reporter,
   });
   if (results.tagged.length === 0) {

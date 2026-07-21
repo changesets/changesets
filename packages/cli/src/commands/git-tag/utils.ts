@@ -25,14 +25,14 @@ export function buildGitTag(
 async function splitByTagStatus(
   config: Config,
   packages: Packages,
-  plan: TagReleaseEntry[],
+  releases: TagReleaseEntry[],
   localTags: Set<string>,
 ): Promise<{ untagged: TagReleaseEntry[]; existing: TagReleaseEntry[] }> {
   const untagged: TagReleaseEntry[] = [];
   const existing: TagReleaseEntry[] = [];
 
   await Promise.all(
-    plan.map(async (entry) => {
+    releases.map(async (entry) => {
       const pkg = packages.packages.find(
         (pkg) => pkg.packageJson.name === entry.name,
       );
@@ -60,7 +60,7 @@ async function splitByTagStatus(
 type CreateGitTagsOptions = {
   config: Config;
   packages: Packages;
-  plan?: TagReleaseEntry[];
+  releases: TagReleaseEntry[];
   reporter?: OutputReporter;
 };
 
@@ -72,19 +72,11 @@ type CreateGitTagsResult = {
 export async function createGitTags(
   opts: CreateGitTagsOptions,
 ): Promise<CreateGitTagsResult> {
-  const plan =
-    opts.plan ??
-    opts.packages.packages.map((pkg) => ({
-      kind: "tag-only",
-      name: pkg.packageJson.name,
-      version: pkg.packageJson.version,
-    }));
-
   const existingTags = await git.getAllTags(opts.packages.rootDir);
   const { untagged, existing } = await splitByTagStatus(
     opts.config,
     opts.packages,
-    plan,
+    opts.releases,
     existingTags,
   );
 
