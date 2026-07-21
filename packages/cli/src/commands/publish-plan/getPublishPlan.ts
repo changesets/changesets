@@ -16,7 +16,7 @@ import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { graphSequencer } from "@pnpm/deps.graph-sequencer";
 import semverParse from "semver/functions/parse.js";
-import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
+import { splitByTagStatus } from "../../utils/gitTags.ts";
 import { getPublishTool } from "../publish/getPublishTool.ts";
 
 export const CURRENT_PUBLISH_PLAN_VERSION = 1;
@@ -204,17 +204,19 @@ export async function getUntaggedPrivatePackages(
   tool: Packages["tool"],
   options: { ignore: PackageGroup; allowPrivatePackages: boolean },
 ): Promise<Array<TagReleaseEntry>> {
-  const taggablePackages = packages.filter(
-    (pkg) => pkg.packageJson.private && !shouldSkipPackage(pkg, options),
-  );
+  const taggableReleases = packages
+    .filter(
+      (pkg) => pkg.packageJson.private && !shouldSkipPackage(pkg, options),
+    )
+    .map(
+      (pkg): TagReleaseEntry => ({
+        kind: "tag-only",
+        name: pkg.packageJson.name,
+        version: pkg.packageJson.version,
+      }),
+    );
 
-  return (await getUntaggedPackages(cwd, tool, taggablePackages)).map(
-    ({ name, newVersion }) => ({
-      kind: "tag-only",
-      name,
-      version: newVersion,
-    }),
-  );
+  return (await splitByTagStatus(cwd, tool, taggableReleases)).untagged;
 }
 
 function sortReleases(
