@@ -10,11 +10,7 @@ import type { PublishResult, PublishTool } from "../../lib/types.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { createOutputReport } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
-import {
-  buildGitTag,
-  createGitTags,
-  formatGitTagResults,
-} from "../git-tag/utils.ts";
+import { createGitTags, formatGitTagResults } from "../git-tag/utils.ts";
 import {
   getPublishPlan,
   readPlanFile,
@@ -28,18 +24,6 @@ type PublishQueueItem = {
   release: PublishReleaseEntry;
   result: PublishResult | undefined;
 };
-
-function uniqBy<T>(array: T[], key: (t: T) => string) {
-  const seen = new Set<string>();
-  return array.filter((item) => {
-    const k = key(item);
-    if (seen.has(k)) {
-      return false;
-    }
-    seen.add(k);
-    return true;
-  });
-}
 
 function formatPackageList(
   entry: (PublishResult | TagReleaseEntry)[],
@@ -395,17 +379,14 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
   }
 
   // finally, create git tags as plan instructs
-  const tagsToCreate = uniqBy(gitTagsToCreate, (r) =>
-    buildGitTag(packages.tool, r),
-  );
-  if (tagsToCreate.length > 0) {
+  if (gitTagsToCreate.length > 0) {
     const p = spinner();
     p.start("Creating git tags...");
 
     const results = await createGitTags({
       config,
       packages,
-      plan: tagsToCreate,
+      plan: gitTagsToCreate,
       reporter,
     });
 
