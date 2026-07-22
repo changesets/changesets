@@ -1,6 +1,7 @@
 import type { Packages } from "@changesets/types";
 import { detect } from "package-manager-detector/detect";
 import { exec } from "tinyexec";
+import * as bun from "../../lib/bun.ts";
 import * as npm from "../../lib/npm.ts";
 import * as pnpm from "../../lib/pnpm.ts";
 import type { PublishTool } from "../../lib/types.ts";
@@ -20,10 +21,13 @@ async function getYarnVersion(packages: Packages) {
 export async function getPublishTool(packages: Packages): Promise<PublishTool> {
   let packageManager = packages.tool.type;
 
-  if (!["npm", "pnpm", "yarn"].includes(packageManager)) {
+  if (!["bun", "npm", "pnpm", "yarn"].includes(packageManager)) {
     packageManager = (await detect({ cwd: packages.rootDir }))?.name ?? "npm";
   }
 
+  if (packageManager === "bun") {
+    return bun;
+  }
   if (packageManager === "pnpm") {
     return pnpm;
   }
