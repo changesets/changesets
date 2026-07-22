@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import c from "@changesets/color";
+import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
 import { readPreState } from "@changesets/pre";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
@@ -15,8 +16,9 @@ import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { graphSequencer } from "@pnpm/deps.graph-sequencer";
 import semverParse from "semver/functions/parse.js";
-import { getUntaggedPackages } from "../../utils/getUntaggedPackages.ts";
-import { getPublishTool, infoAllow404 } from "../publish/npm-utils.ts";
+import { npmRequestQueue } from "../../lib/common.ts";
+import { splitByTagStatus } from "../../utils/gitTags.ts";
+import { getPublishTool } from "../publish/getPublishTool.ts";
 
 export const CURRENT_PUBLISH_PLAN_VERSION = 1;
 
@@ -108,23 +110,40 @@ export async function getUnpublishedPackages(
         (pkg) => !pkg.packageJson.private && !shouldSkipPackage(pkg, options),
       )
       .map(async (pkg) => {
-        const response = await infoAllow404(
-          packages.rootDir,
-          publishTool,
-          pkg.packageJson,
+        const response = await npmRequestQueue.add(() =>
+          publishTool.info({
+            cwd: packages.rootDir,
+            pkg,
+          }),
         );
+        if ("error" in response) {
+          log.error(
+            `
+Received an unexpected error for ${c.cyan(pkg.packageJson.name)}: ${response.error.code || "(no code)"}
+${response.error.message || "Unknown error"}
+            `.trim(),
+          );
+          throw new ExitError(1);
+        }
+        if (!response.published) {
+          log.warn(
+            `Package ${c.cyan(pkg.packageJson.name)} was not found in the registry.`,
+          );
+        }
+
         let publishedState: PublishedState = "never";
+        let publishedVersions: string[] = [];
 
         if (response.published) {
           publishedState = "published";
+          publishedVersions = response.info.versions;
 
           if (
             preState != null &&
-            response.pkgInfo.versions &&
             // non-npm registries often don't auto-assign latest and when using those we don't have to care about only-pre case
             // when the latest tag is not auto-assigned we can simply use the configured pre tag
-            response.pkgInfo["dist-tags"].latest &&
-            response.pkgInfo.versions.every(
+            response.info["dist-tags"].latest &&
+            response.info.versions.every(
               (version: string) =>
                 semverParse(version)!.prerelease[0] === preState.tag,
             )
@@ -136,7 +155,7 @@ export async function getUnpublishedPackages(
         return {
           pkg,
           publishedState,
-          publishedVersions: response.pkgInfo.versions || [],
+          publishedVersions,
         };
       }),
   );
@@ -188,17 +207,19 @@ export async function getUntaggedPrivatePackages(
   tool: Packages["tool"],
   options: { ignore: PackageGroup; allowPrivatePackages: boolean },
 ): Promise<Array<TagReleaseEntry>> {
-  const taggablePackages = packages.filter(
-    (pkg) => pkg.packageJson.private && !shouldSkipPackage(pkg, options),
-  );
+  const taggableReleases = packages
+    .filter(
+      (pkg) => pkg.packageJson.private && !shouldSkipPackage(pkg, options),
+    )
+    .map(
+      (pkg): TagReleaseEntry => ({
+        kind: "tag-only",
+        name: pkg.packageJson.name,
+        version: pkg.packageJson.version,
+      }),
+    );
 
-  return (await getUntaggedPackages(taggablePackages, cwd, tool)).map(
-    ({ name, newVersion }) => ({
-      kind: "tag-only",
-      name,
-      version: newVersion,
-    }),
-  );
+  return (await splitByTagStatus(cwd, tool, taggableReleases)).untagged;
 }
 
 function sortReleases(
@@ -258,6 +279,7 @@ export async function getPublishPlan(
 ): Promise<PublishPlan> {
   const packages = await getPackages(rootDir);
   const preState = await readPreState(rootDir);
+
   const releases = await getUnpublishedPackages(
     packages,
     preState,

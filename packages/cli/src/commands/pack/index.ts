@@ -1,4 +1,3 @@
-import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
@@ -8,10 +7,7 @@ import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
-import { exec } from "tinyexec";
 import { createPromiseQueue } from "../../utils/createPromiseQueue.ts";
-import { getLastJsonObjectFromString } from "../../utils/getLastJsonObjectFromString.ts";
-import { getPackageManagerError } from "../../utils/package-manager-errors.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { getDefaultWorkspaceConcurrency } from "../../utils/workspaceConcurrency.ts";
 import {
@@ -20,7 +16,7 @@ import {
   readPlanFile,
   type TarballMetadata,
 } from "../publish-plan/getPublishPlan.ts";
-import { getPublishTool } from "../publish/npm-utils.ts";
+import { getPublishTool } from "../publish/getPublishTool.ts";
 import { ensureChangesetFolder } from "../shared.ts";
 
 export interface PackOptions {
@@ -33,31 +29,6 @@ export interface PackedRelease {
   name: string;
   version: string;
   tarball: TarballMetadata;
-}
-
-// npm is the only package manager that doesn't support an explicit output path for the tarball
-// it still uses a pretty stable pattern for the output filename:
-// https://github.com/npm/cli/blob/42b12c250ff3e2ecd756fd82666454ebafc9386c/lib/utils/tar.js#L101-L103
-// we prefer to extract it explicitly, just in case
-function getNpmTarballFilenameFromStdout(stdout: string) {
-  const json = getLastJsonObjectFromString(stdout);
-  // npm<12 emits an array even when packing a single package
-  // note: pnpm emits an object when packing a single package and an array when packing multiple packages
-  // but with pnpm we don't even have to extract it from stdout as we are relying on explicitly configured --out
-  let filename = Array.isArray(json) ? json[0]?.filename : json?.filename;
-  if (!filename) {
-    // npm>=12 introduced a breaking change: https://github.com/npm/cli/pull/9247
-    // since that PR it emits `{ [packageName: string]: { filename: string, ... } }`
-    const pkgOutput = Object.values(json ?? {})[0];
-    filename =
-      pkgOutput &&
-      typeof pkgOutput === "object" &&
-      "filename" in pkgOutput &&
-      pkgOutput.filename;
-  }
-  assert(typeof filename === "string", "Failed to determine tarball filename");
-  // normalize to just basename, npm emits just the basename, pnpm emits absolute paths
-  return path.basename(filename);
 }
 
 function getNormalizedTarballFilename(name: string, version: string) {
@@ -119,53 +90,25 @@ export async function pack(options: PackOptions) {
           release.version,
         );
         const tarballPath = path.join(packagesDir, tarballFilename);
-        let args: string[];
-        let cwd: string;
+        const packResult = await publishTool.pack({
+          pkg,
+          packDir,
+          outputDir: packagesDir,
+          tarballPath,
+        });
 
-        if (publishTool.name === "pnpm") {
-          args = ["pack", "--out", tarballPath, "--json"];
-          // pnpm supports `publishConfig.directory` natively. We have to let it resolve it on its own.
-          cwd = pkg.dir;
-        } else if (publishTool.name === "yarn") {
-          args = ["pack", "--out", tarballPath, "--json"];
-          cwd = packDir;
-        } else {
-          args = ["pack", packDir, "--pack-destination", packagesDir, "--json"];
-          cwd = pkg.dir;
-        }
-        const { exitCode, stdout, stderr } = await exec(
-          publishTool.name,
-          args,
-          {
-            nodePath: false,
-            nodeOptions: { cwd },
-          },
-        );
-
-        if (exitCode !== 0) {
-          const packError = getPackageManagerError(publishTool, {
-            stderr,
-            stdout,
-          });
+        if ("error" in packResult) {
+          const code = packResult.error.code
+            ? `: ${packResult.error.code}`
+            : "";
           log.error(
-            `An error occurred while packing ${release.name}: ${packError.code}\n${packError.message}`,
+            `An error occurred while packing ${release.name}${code}\n${packResult.error.message || "Unknown error"}`,
           );
           throw new ExitError(1);
         }
 
-        const resolvedTarballFilename =
-          publishTool.name === "npm"
-            ? getNpmTarballFilenameFromStdout(stdout.toString())
-            : tarballFilename;
-
-        if (!resolvedTarballFilename) {
-          throw new Error(
-            `Failed to determine tarball filename for ${release.name}`,
-          );
-        }
-        const integrity = await getIntegrity(
-          path.join(packagesDir, resolvedTarballFilename),
-        );
+        const resolvedTarballFilename = path.basename(packResult.tarballPath);
+        const integrity = await getIntegrity(packResult.tarballPath);
 
         return {
           name: release.name,

@@ -220,27 +220,85 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
   });
 }
 
-function sanitizePublishLog(message: unknown, registryUrl: string) {
+function normalizeOtpPrompts(message: string) {
   return (
-    stripVTControlCharacters(String(message))
-      // Normalize CRLF line endings from Windows PTY output.
-      .replaceAll("\r\n", "\n")
-      // Normalize standalone carriage returns used for terminal progress redraws.
-      .replaceAll("\r", "\n")
-      .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
-      .replace(/changeset v\S+/g, "changeset v[version]")
+    message
+      // Yarn redraws the completed prompt on the same terminal line.
       .replace(
-        /^[A-Za-z]:\\(?:[^\\\r\n]+\\)*cmd\.exe \/d \/s \/c /gim,
-        "sh -c ",
+        /^[?√] One-time password:[^\n]*?(?=(➤ YN)|$)/gm,
+        (_match, continuedOutput: string | undefined) =>
+          `? One-time password: [prompt]${continuedOutput ? "\n\n" : ""}`,
       )
-      .replaceAll(
-        /(?:^[◒◐◓◑] {2}Creating git tag\.*\n)+(?=^◇ {2}Created git tag\.$)/gm,
+      // pnpm redraws the prompt after every entered digit.
+      .replace(
+        /Enter OTP:[^\n]*?(?:\?|✔) This operation requires a one-time password\.(?:\n|(?=Enter OTP:))/g,
         "",
       )
-      .replaceAll(new URL(registryUrl).origin, "[registry-url]")
-      .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
-      .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]")
+      // npm may render the prompt and entered code on separate terminal lines.
+      .replace(/Enter OTP:(?:\n[ \t]*)+(\d{6})/g, "Enter OTP: $1")
+      // npm 10 may concatenate the following publish result onto the prompt.
+      .replace(/(Enter OTP: \d{6})(?=\+ )/g, "$1\n\n")
   );
+}
+
+function sanitizePublishLog(message: unknown, registryUrl: string) {
+  const output = stripVTControlCharacters(
+    String(message).replace(
+      // Strip OSC sequences first because stripVTControlCharacters removes
+      // their introducer but leaves the title and terminator behind.
+      // eslint-disable-next-line no-control-regex -- OSC sequences are delimited by ESC and BEL control characters.
+      /\u001B\](?:[^\u0007\u001B]|\u001B(?!\\))*(?:\u0007|\u001B\\)/g,
+      "",
+    ),
+  )
+    // Windows PTYs may duplicate the carriage return in CRLF.
+    .replace(/\r+\n/g, "\n")
+    // Standalone carriage returns redraw the current line rather than adding
+    // a new one. Removing them lets the redraw normalizers below collapse
+    // the concatenated terminal states.
+    .replaceAll("\r", "")
+    .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
+    .replace(/changeset v\S+/g, "changeset v[version]")
+    .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
+    .replace(/^[A-Za-z]:\\(?:[^\\\r\n]+\\)*cmd\.exe \/d \/s \/c /gim, "sh -c ")
+    .replace(
+      /logs can be found here: .*?\.log/g,
+      "logs can be found here: [yarn-prepack-log]",
+    )
+    .replace(/^npm notice shasum: .+$/gm, "npm notice shasum: [shasum]")
+    .replace(
+      /^npm notice integrity: .+$/gm,
+      "npm notice integrity: [integrity]",
+    );
+
+  return normalizeOtpPrompts(output)
+    .replaceAll(
+      /(?:^[◒◐◓◑•oO0] {2}Creating git tag\.*\n)+(?=^[◇o] {2}Created git tag\.$)/gm,
+      "",
+    )
+    .replaceAll(/^o {2}Created git tag\.$/gm, "◇  Created git tag.")
+    .replaceAll(
+      /[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?(Publishing packages|Creating git tags)(?: \(\d+\/\d+\)|\.*)(?:(?:\n[ \t]*)*[◒◐◓◑•oO0] {2}(?:(?:━|=)+ )?\1(?: \(\d+\/\d+\)|\.*))*/g,
+      (_match, message: string) => `◒  ${message}`,
+    )
+    .replaceAll(
+      /(?:◒ {2}Publishing packages(?:\n[ \t]*)*)+[◇o] {2}([^\n]*requires 2FA verification to publish\.\.\.)(?:\n[ \t]*)*/g,
+      "◒  Publishing packages◇  $1\n",
+    )
+    .replaceAll(
+      /(?:◒ {2}Publishing packages(?:\n[ \t]*)*)*(?:[◇o] {2}(Successfully published:)|[▲x] {2}(Failed to publish))/g,
+      (_match, success: string | undefined, failure: string | undefined) =>
+        `◒  Publishing packages${success ? `◇  ${success}` : `▲  ${failure}`}`,
+    )
+    .replaceAll(
+      /(?:◒ {2}Creating git tags(?:\n[ \t]*)*)*[◇o] {2}(Created git tags[:.])/g,
+      "◒  Creating git tags◇  $1",
+    )
+    .replace(/(Created git tags\.)\n+$/, "$1\n")
+    .replace(/(\n- [^\n]+)\n+$/, "$1\n")
+    .replaceAll(new URL(registryUrl).origin, "[registry-url]")
+    .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
+    .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]");
 }
 
 async function fetchPackument(registry: TestRegistry, packageName: string) {
@@ -913,6 +971,71 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       });
     });
 
+    it("surfaces pre-publish errors", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(createPmContext(registry, pmBinPath), {
+        ...createPkgAFixture(),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          description: "",
+          files: ["index.js"],
+          license: "MIT",
+          scripts: {
+            prepack:
+              "node -e \"console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)\"",
+          },
+          type: "module",
+        }),
+      });
+
+      const result = await runCliCommand({
+        command: "publish",
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect.soft(result.exitCode).toBe(1);
+      expect.soft(result.stderr).toBe("");
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .toMatchSnapshot();
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect.soft(publishRequests).toEqual([]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect.soft(packument).toMatchObject({
+        "dist-tags": {
+          latest: "0.0.1",
+        },
+        versions: {
+          "0.0.1": {
+            name: "pkg-a",
+            version: "0.0.1",
+          },
+        },
+      });
+      expect.soft(packument).not.toMatchObject({
+        versions: {
+          "1.0.0": expect.anything(),
+        },
+      });
+    });
+
     it("publishes a first version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
@@ -921,6 +1044,64 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPmContext(registry, pmBinPath),
         createPkgAFixture(),
       );
+
+      const result = await runCliCommand({
+        command: "publish",
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect.soft(result.exitCode).toBe(0);
+      expect.soft(result.stderr).toBe("");
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .toMatchSnapshot();
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect.soft(publishRequests).toEqual([
+        expect.objectContaining({
+          authorization: `Bearer ${registry.pnprToken}`,
+          otpCode: undefined,
+          statusCode: 201,
+        }),
+      ]);
+
+      const packument = await fetchPackument(registry, "pkg-a");
+      expect.soft(packument).toMatchObject({
+        "dist-tags": {
+          latest: "1.0.0",
+        },
+        name: "pkg-a",
+        versions: {
+          "1.0.0": {
+            name: "pkg-a",
+            version: "1.0.0",
+          },
+        },
+      });
+    });
+
+    it("handles lifecycle stdout while publishing", async ({ signal }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      const registry = stack.use(await createTestRegistry());
+      const cwd = await pm.gitdir(createPmContext(registry, pmBinPath), {
+        ...createPkgAFixture(),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          description: "",
+          files: ["index.js"],
+          license: "MIT",
+          scripts: {
+            prepack:
+              "node -e \"console.log(JSON.stringify({ lifecycle: 'output' }))\"",
+          },
+          type: "module",
+        }),
+      });
 
       const result = await runCliCommand({
         command: "publish",
@@ -1475,7 +1656,81 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       });
     });
 
-    it("skips already-published version publish errors", async ({ signal }) => {
+    it("skips already-published version publish errors after our publish plan preflight", async ({
+      signal,
+    }) => {
+      await using stack = new AbortableAsyncDisposableStack(signal);
+      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      let packageSeeded = false;
+      const registry = stack.use(
+        await createTestRegistry({
+          packages: {
+            "pkg-a": {
+              versions: ["0.0.1"],
+              tags: { latest: "0.0.1" },
+            },
+          },
+          async middleware({ pnpr, record, request }) {
+            if (record.packageName !== "pkg-a") {
+              return;
+            }
+
+            if (request.method === "GET" && !packageSeeded) {
+              const response = await pnpr.fetch(request);
+              await pnpr.seedPackage("pkg-a", {
+                versions: ["1.0.0"],
+                tags: { latest: "1.0.0" },
+              });
+              packageSeeded = true;
+              return response;
+            }
+
+            if (request.method === "PUT") {
+              // pnpr currently accepts publishing over an existing version here, while
+              // npm rejects it. Keep this response synthetic to exercise npm's
+              // already-published race semantics.
+              return Response.json(
+                {
+                  error:
+                    "You cannot publish over the previously published versions: 1.0.0.",
+                  success: false,
+                },
+                { status: 403 },
+              );
+            }
+          },
+        }),
+      );
+      const cwd = await pm.gitdir(
+        createPmContext(registry, pmBinPath),
+        createPkgAFixture(),
+      );
+
+      const result = await runCliCommand({
+        command: "publish",
+        cwd,
+        pmBinPath,
+        signal,
+      });
+      expect.soft(result.exitCode).toBe(0);
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .not.toContain("Published pkg-a@1.0.0!");
+      await expect.soft(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
+
+      const publishRequests = registry.requests.filter(
+        (request) => request.method === "PUT" && request.pathname === "/pkg-a",
+      );
+      expect.soft(publishRequests.map((request) => request.statusCode)).toEqual(
+        // npm 11+ rejects an already-published version during its local
+        // preflight. Other clients send the PUT and receive the registry's 403.
+        pm.name !== "npm 11" && pm.name !== "npm 12" ? [403] : [],
+      );
+    });
+
+    it("skips already-published version publish errors after possible package manager preflights", async ({
+      signal,
+    }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(
@@ -1748,15 +2003,30 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         createPkgAFixture(),
       );
 
+      let output = "";
+      let otpWritten = false;
       const result = await runCliCommand({
         command: "publish",
         cwd,
+        onData(chunk, write) {
+          output += chunk;
+          if (
+            !otpWritten &&
+            (output.includes("Enter OTP:") ||
+              output.includes("One-time password:"))
+          ) {
+            otpWritten = true;
+            write("654321\r");
+          }
+        },
         pmBinPath,
         signal,
-        stdin: "654321\n",
         tty: true,
       });
       expect.soft(result.exitCode).toBe(0);
+      expect
+        .soft(sanitizePublishLog(result.stdout, registry.url))
+        .toMatchSnapshot();
 
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",

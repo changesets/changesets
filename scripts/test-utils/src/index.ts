@@ -77,6 +77,27 @@ export const temporarilySilenceLogs =
 
 export type Fixture = FileTree;
 
+export function stubIsTTY(value: boolean) {
+  const originalDescriptor = Object.getOwnPropertyDescriptor(
+    process.stdin,
+    "isTTY",
+  );
+  Object.defineProperty(process.stdin, "isTTY", {
+    configurable: true,
+    ...originalDescriptor,
+    value,
+  });
+  return {
+    [Symbol.dispose]() {
+      if (originalDescriptor) {
+        Object.defineProperty(process.stdin, "isTTY", originalDescriptor);
+      } else {
+        Reflect.deleteProperty(process.stdin, "isTTY");
+      }
+    },
+  };
+}
+
 export async function testdir(dir?: Fixture) {
   const fixture = await createFixture(dir);
   onTestFinished(() => fixture.rm());

@@ -55,8 +55,8 @@ export function getDependentsGraph(
 
   const simplifiedDependentsGraph: Map<string, string[]> = new Map();
 
-  graph.forEach((pkgInfo, pkgName) => {
-    simplifiedDependentsGraph.set(pkgName, pkgInfo.dependents);
+  graph.forEach((info, pkgName) => {
+    simplifiedDependentsGraph.set(pkgName, info.dependents);
   });
 
   return simplifiedDependentsGraph;

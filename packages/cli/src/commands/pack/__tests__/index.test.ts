@@ -83,7 +83,7 @@ describe("pack", () => {
       }),
     });
     const outputDir = path.join(cwd, ".packed");
-    mockedGit.tagExists.mockResolvedValue(false);
+    mockedGit.getAllTags.mockResolvedValue(new Set());
     mockedGit.remoteTagExists.mockResolvedValue(false);
     mockExecImplementation(async (cmd, args) => {
       if (cmd === "npm" && args[0] === "info") {

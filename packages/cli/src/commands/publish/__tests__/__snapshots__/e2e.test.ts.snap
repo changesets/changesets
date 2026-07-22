@@ -1,19 +1,94 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Publish command e2e > 'npm 10' > publishes a first version of a package 1`] = `
+exports[`Publish command e2e > 'npm 10' > handles lifecycle stdout while publishing 1`] = `
 "🦋 changeset v[version]
 
-Received 404 for npm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-Published pkg-a@1.0.0!
-
-Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tag.
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 10' > publishes a first version of a package 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 10' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 10' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+npm notice
+npm notice package: pkg-a@1.0.0
+npm notice Tarball Contents
+npm notice 24B index.js
+npm notice 104B package.json
+npm notice Tarball Details
+npm notice name: pkg-a
+npm notice version: 1.0.0
+npm notice filename: pkg-a-1.0.0.tgz
+npm notice package size: 234 B
+npm notice unpacked size: 128 B
+npm notice shasum: [shasum]
+npm notice integrity: [integrity]
+npm notice total files: 2
+npm notice
+npm notice Publishing to [registry-url]/ with tag latest and public access
+This operation requires a one-time password.
+Enter OTP: 654321
+
++ pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 10' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 1: command failed
+sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
+🦋 Exited with code 1
+
 "
 `;
 
@@ -23,12 +98,10 @@ exports[`Publish command e2e > 'npm 10' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: E401
-401 Unauthorized - PUT [registry-url]/pkg-a
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -40,13 +113,11 @@ exports[`Publish command e2e > 'npm 10' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: ENEEDAUTH
-This command requires you to be logged in to [registry-url]/
-You need to authorize this machine using \`npm adduser\`
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
+You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
 "
@@ -58,34 +129,106 @@ exports[`Publish command e2e > 'npm 10' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: EOTP
-This operation requires a one-time password from your authenticator.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ EOTP: This operation requires a one-time password from your authenticator.
 You can provide a one-time password by passing --otp=<code> to the command you ran.
 If you already provided a one-time password then it is likely that you either typoed
 it, or it timed out. Please try again.
-
-Some packages failed to publish:
-pkg-a@1.0.0
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'npm 11' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
 "
 `;
 
 exports[`Publish command e2e > 'npm 11' > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
-Received 404 for npm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-Published pkg-a@1.0.0!
-
-Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tag.
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 11' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 11' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+npm notice
+npm notice package: pkg-a@1.0.0
+npm notice Tarball Contents
+npm notice 24B index.js
+npm notice 104B package.json
+npm notice Tarball Details
+npm notice name: pkg-a
+npm notice version: 1.0.0
+npm notice filename: pkg-a-1.0.0.tgz
+npm notice package size: 234 B
+npm notice unpacked size: 128 B
+npm notice shasum: [shasum]
+npm notice integrity: [integrity]
+npm notice total files: 2
+npm notice
+npm notice Publishing to [registry-url]/ with tag latest and public access
+This operation requires a one-time password.
+Enter OTP: 654321
++ pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 11' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 1: command failed
+sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
+🦋 Exited with code 1
+
 "
 `;
 
@@ -95,12 +238,10 @@ exports[`Publish command e2e > 'npm 11' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: E401
-401 Unauthorized - PUT [registry-url]/pkg-a
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -112,13 +253,11 @@ exports[`Publish command e2e > 'npm 11' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: ENEEDAUTH
-This command requires you to be logged in to [registry-url]/
-You need to authorize this machine using \`npm adduser\`
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
+You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
 "
@@ -130,36 +269,108 @@ exports[`Publish command e2e > 'npm 11' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: EOTP
-This operation requires a one-time password.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ EOTP: This operation requires a one-time password.
 Open this URL in your browser to authenticate:
   [registry-url]/-/auth/cli/[uuid]
 
 After authenticating, your token can be retrieved from:
   [registry-url]/-/v1/done?authId=[uuid]
-
-Some packages failed to publish:
-pkg-a@1.0.0
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'npm 12' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
 "
 `;
 
 exports[`Publish command e2e > 'npm 12' > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
-Received 404 for npm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-Published pkg-a@1.0.0!
-
-Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tag.
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 12' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 12' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+npm notice
+npm notice package: pkg-a@1.0.0
+npm notice Tarball Contents
+npm notice 24B index.js
+npm notice 104B package.json
+npm notice Tarball Details
+npm notice name: pkg-a
+npm notice version: 1.0.0
+npm notice filename: pkg-a-1.0.0.tgz
+npm notice package size: 234 B
+npm notice unpacked size: 128 B
+npm notice shasum: [shasum]
+npm notice integrity: [integrity]
+npm notice total files: 2
+npm notice
+npm notice Publishing to [registry-url]/ with tag latest and public access
+This operation requires a one-time password.
+Enter OTP: 654321
++ pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'npm 12' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ 1: command failed
+sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
+🦋 Exited with code 1
+
 "
 `;
 
@@ -169,12 +380,10 @@ exports[`Publish command e2e > 'npm 12' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: E401
-401 Unauthorized - PUT [registry-url]/pkg-a
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -186,13 +395,11 @@ exports[`Publish command e2e > 'npm 12' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: ENEEDAUTH
-This command requires you to be logged in to [registry-url]/
-You need to authorize this machine using \`npm login\`
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
+You need to authorize this machine using \`npm login\`
 🦋 Exited with code 1
 
 "
@@ -204,36 +411,109 @@ exports[`Publish command e2e > 'npm 12' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: EOTP
-This operation requires a one-time password.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ EOTP: This operation requires a one-time password.
 Open this URL in your browser to authenticate:
   [registry-url]/-/auth/cli/[uuid]
 
 After authenticating, your token can be retrieved from:
   [registry-url]/-/v1/done?authId=[uuid]
-
-Some packages failed to publish:
-pkg-a@1.0.0
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 10' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
 "
 `;
 
 exports[`Publish command e2e > 'pnpm 10 + npm 10' > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
-Received 404 for pnpm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-Published pkg-a@1.0.0!
-
-Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tag.
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 10' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 10' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+npm notice
+npm notice package: pkg-a@1.0.0
+npm notice Tarball Contents
+npm notice 24B index.js
+npm notice 137B package.json
+npm notice Tarball Details
+npm notice name: pkg-a
+npm notice version: 1.0.0
+npm notice filename: pkg-a-1.0.0.tgz
+npm notice package size: 257 B
+npm notice unpacked size: 161 B
+npm notice shasum: [shasum]
+npm notice integrity: [integrity]
+npm notice total files: 2
+npm notice
+npm notice Publishing to [registry-url]/ with tag latest and public access
+This operation requires a one-time password.
+Enter OTP: 654321
+
++ pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
+Exit status 1
+🦋 Exited with code 1
+
 "
 `;
 
@@ -243,12 +523,10 @@ exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures fo
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: E401
-401 Unauthorized - PUT [registry-url]/pkg-a
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -260,13 +538,11 @@ exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures wh
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: ENEEDAUTH
-This command requires you to be logged in to [registry-url]/
-You need to authorize this machine using \`npm adduser\`
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
+You need to authorize this machine using \`npm adduser\`
 🦋 Exited with code 1
 
 "
@@ -278,34 +554,92 @@ exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces web-auth OTP publis
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: EOTP
-This operation requires a one-time password from your authenticator.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ EOTP: This operation requires a one-time password from your authenticator.
 You can provide a one-time password by passing --otp=<code> to the command you ran.
 If you already provided a one-time password then it is likely that you either typoed
 it, or it timed out. Please try again.
-
-Some packages failed to publish:
-pkg-a@1.0.0
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 11' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
 "
 `;
 
 exports[`Publish command e2e > 'pnpm 11' > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
-Received 404 for pnpm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-Published pkg-a@1.0.0!
-
-Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tag.
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 11' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 11' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+[WARN] Skipped OIDC: ERR_PNPM_ID_TOKEN_GITHUB_WORKFLOW_INCORRECT_PERMISSIONS: Incorrect permissions for idToken within GitHub Workflows
+📦 pkg-a@1.0.0 → [registry-url]/
+? This operation requires a one-time password.
+Enter OTP: 654321
+✅ Published package pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 11' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
+Exit status 1
+🦋 Exited with code 1
+
 "
 `;
 
@@ -315,12 +649,10 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures for bad cre
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: E401
-401 Unauthorized - PUT [registry-url]/pkg-a
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -332,12 +664,10 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures when not lo
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: E401
-401 Unauthorized - PUT [registry-url]/pkg-a
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
 🦋 Exited with code 1
 
 "
@@ -349,31 +679,90 @@ exports[`Publish command e2e > 'pnpm 11' > surfaces web-auth OTP publish failure
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: ERR_PNPM_OTP_NON_INTERACTIVE
-The registry requires additional authentication, but pnpm is not running in an interactive terminal
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ ERR_PNPM_OTP_NON_INTERACTIVE: The registry requires additional authentication, but pnpm is not running in an interactive terminal
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Publish command e2e > 'yarn 4' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
 "
 `;
 
 exports[`Publish command e2e > 'yarn 4' > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
-Received 404 for yarn npm info pkg-a
+Package pkg-a was not found in the registry.
 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-Published pkg-a@1.0.0!
-
-Successfully published:
+◒  Publishing packages◇  Successfully published:
 pkg-a@1.0.0
-◇  Created git tag.
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'yarn 4' > publishes a new version of a package 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'yarn 4' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+➤ YN0000: Publishing to [registry-url] with tag latest
+➤ YN0000: index.js
+➤ YN0000: package.json
+? One-time password: [prompt]
+
+➤ YN0000: Package archive published
+➤ YN0000: Done in [duration]
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'yarn 4' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ YN0036: Prepack script failed (exit code 1, logs can be found here: [yarn-prepack-log]); run yarn prepack to investigate
+🦋 Exited with code 1
+
 "
 `;
 
@@ -383,12 +772,10 @@ exports[`Publish command e2e > 'yarn 4' > surfaces publish failures for bad cred
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: YN0041
-Invalid authentication (as an unknown user)
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ YN0041: Invalid authentication (as an unknown user)
 🦋 Exited with code 1
 
 "
@@ -400,12 +787,10 @@ exports[`Publish command e2e > 'yarn 4' > surfaces publish failures when not log
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: YN0033
-No authentication configured for request
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ YN0033: No authentication configured for request
 🦋 Exited with code 1
 
 "
@@ -417,12 +802,10 @@ exports[`Publish command e2e > 'yarn 4' > surfaces web-auth OTP publish failures
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-
-An error occurred while publishing pkg-a: YN0041
-Invalid OTP token
-
+◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
+└ YN0041: Invalid OTP token
 🦋 Exited with code 1
 
 "

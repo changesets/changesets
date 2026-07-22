@@ -2,18 +2,30 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import * as npmUtils from "../../publish/npm-utils.ts";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { PublishTool } from "../../../lib/types.ts";
+import * as getPublishToolModule from "../../publish/getPublishTool.ts";
 import { publishPlan } from "../index.ts";
 
 vi.mock("@changesets/git");
-vi.mock("../../publish/npm-utils.ts");
+vi.mock("../../publish/getPublishTool.ts");
 
-const mockedNpmUtils = vi.mocked(npmUtils);
+const mockedGetPublishTool = vi.mocked(getPublishToolModule);
 const mockedGit = vi.mocked(git);
+const mockedInfo = vi.fn<PublishTool["info"]>();
 
 describe("publish-plan", () => {
   silenceLogsInBlock();
+
+  beforeEach(() => {
+    mockedGetPublishTool.getPublishTool.mockResolvedValue({
+      name: "npm",
+      getOtpCode: () => null,
+      info: mockedInfo,
+      pack: vi.fn<PublishTool["pack"]>(),
+      publish: vi.fn<PublishTool["publish"]>(),
+    });
+  });
 
   afterEach(() => {
     vi.clearAllMocks();
@@ -41,11 +53,10 @@ describe("publish-plan", () => {
       }),
     });
 
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
+    mockedInfo.mockResolvedValue({
       published: false,
-      pkgInfo: { version: "1.0.0" },
     });
-    mockedGit.tagExists.mockResolvedValue(false);
+    mockedGit.getAllTags.mockResolvedValue(new Set());
     mockedGit.remoteTagExists.mockResolvedValue(false);
 
     const result = await publishPlan({ cwd });
@@ -83,9 +94,10 @@ describe("publish-plan", () => {
       }),
     });
 
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
+    mockedInfo.mockResolvedValue({
       published: true,
-      pkgInfo: {
+      info: {
+        "dist-tags": {},
         version: "1.0.0",
         versions: ["1.0.0"],
       },
@@ -111,9 +123,8 @@ describe("publish-plan", () => {
       }),
     });
 
-    mockedNpmUtils.infoAllow404.mockResolvedValue({
+    mockedInfo.mockResolvedValue({
       published: false,
-      pkgInfo: { version: "1.0.0" },
     });
 
     const output = "publish-plan.json";
