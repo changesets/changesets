@@ -291,7 +291,7 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
         `◒  Publishing packages${success ? `◇  ${success}` : `▲  ${failure}`}`,
     )
     .replaceAll(
-      /(?:◒ {2}Creating git tags(?:\n[ \t]*)*)*[◇o] {2}(Created git tags:)/g,
+      /(?:◒ {2}Creating git tags(?:\n[ \t]*)*)*[◇o] {2}(Created git tags[:.])/g,
       "◒  Creating git tags◇  $1",
     )
     .replace(/(\n- [^\n]+)\n+$/, "$1\n")

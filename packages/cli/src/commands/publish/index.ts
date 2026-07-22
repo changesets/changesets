@@ -167,6 +167,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
     0,
   );
   const gitTagReleases: TagReleaseEntry[] = [];
+  const tagOnlyReleases = new Set<TagReleaseEntry>();
 
   let otpCode = publishTool.getOtpCode(options?.otp);
   // in TTY mode the first publish "checks" if the publish process requires interactive auth or not
@@ -195,6 +196,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
       if (release.kind === "tag-only") {
         if (options?.gitTag ?? true) {
           gitTagReleases.push(release);
+          tagOnlyReleases.add(release);
         }
         continue;
       }
@@ -399,7 +401,14 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
       reporter,
     });
 
-    p.stop(formatGitTagResults(packages.tool, results));
+    p.stop(
+      formatGitTagResults(packages.tool, {
+        tagged: results.tagged.filter((release) =>
+          tagOnlyReleases.has(release),
+        ),
+        existing: results.existing,
+      }),
+    );
   }
 
   if (unsuccessfulNpmPublishes.length !== 0) {

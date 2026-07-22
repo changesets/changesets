@@ -14,11 +14,16 @@ const mockedLogger = vi.hoisted(() => ({
   warn: vi.fn(),
   info: vi.fn(),
 }));
+const mockedSpinner = vi.hoisted(() => ({
+  start: vi.fn(),
+  stop: vi.fn(),
+}));
 
 vi.mock("@clack/prompts", async (importOriginal) => {
   return {
     ...(await importOriginal()),
     log: mockedLogger,
+    spinner: () => mockedSpinner,
   };
 });
 
@@ -193,6 +198,42 @@ describe("Publish command", () => {
       "pkg-b@1.0.0",
       "pkg-a@1.0.0",
     ]);
+    expect(mockedSpinner.stop).toHaveBeenCalledExactlyOnceWith(
+      "Created git tags.",
+    );
+  });
+
+  it("renders existing tags for successful publishes", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info" || args[0] === "publish") {
+        return execResult("");
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.getAllTags).mockResolvedValue(new Set(["pkg-a@1.0.0"]));
+
+    await publishCommand({ cwd });
+
+    expect(git.tag).not.toHaveBeenCalled();
+    expect(mockedSpinner.stop).toHaveBeenCalledWith(
+      expect.stringContaining("Skipped tags (already exist):"),
+    );
+    expect(mockedSpinner.stop).toHaveBeenCalledWith(
+      expect.stringContaining("pkg-a@1.0.0"),
+    );
   });
 
   it("writes tag events when output path is provided", async () => {
@@ -616,6 +657,12 @@ describe("Publish command", () => {
     expect(vi.mocked(git.tag).mock.calls.map((call) => call[0])).toEqual([
       "pkg-b@1.0.0",
     ]);
+    expect(mockedSpinner.stop).toHaveBeenCalledWith(
+      expect.stringContaining("pkg-b@1.0.0"),
+    );
+    expect(mockedSpinner.stop).not.toHaveBeenCalledWith(
+      expect.stringContaining("pkg-a@1.0.0"),
+    );
   });
 
   it("does not tag tag-only releases after a failing chunk", async () => {

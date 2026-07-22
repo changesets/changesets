@@ -50,12 +50,17 @@ export function formatGitTagResults(
   tool: Packages["tool"],
   results: CreateGitTagsResult,
 ): string {
-  const lines = [
-    "Created git tags:",
-    results.tagged
-      .map((entry) => `- ${buildTagMessage(tool, entry)}`)
-      .join(`\n`),
-  ];
+  if (results.tagged.length === 0 && results.existing.length === 0) {
+    return "Created git tags.";
+  }
+
+  const lines = [];
+  if (results.tagged.length !== 0) {
+    lines.push(
+      "Created git tags:",
+      ...results.tagged.map((entry) => `- ${buildTagMessage(tool, entry)}`),
+    );
+  }
   if (results.existing.length !== 0) {
     lines.push(
       "Skipped tags (already exist):",
