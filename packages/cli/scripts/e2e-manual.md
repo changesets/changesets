@@ -6,13 +6,16 @@ From the repository root, run:
 pnpm --filter @changesets/cli e2e:manual
 ```
 
-Choose a package manager and an OTP mode, then keep this terminal open. OTP can
-be disabled, required for every publish, or required only once per pnpr server
-session. A fourth mode requires it initially and again for `pkg-e` in the second
-chunk. The accepted OTP is `123321`.
+Choose a package manager, an OTP mode, and whether to include tag-only releases;
+then keep this terminal open. OTP can be disabled, required for every publish,
+or required only once per pnpr server session. A fourth mode requires it
+initially and again for `pkg-e` in the second chunk. The accepted OTP is
+`123321`.
 
-The command creates a temporary nine-package workspace and starts its
-authenticated pnpr registry.
+The command creates a temporary workspace with nine public packages and starts
+its authenticated pnpr registry. The tag-only option adds three private
+packages, one to each dependency chunk; they receive Git tags without being
+published to pnpr.
 
 In another terminal, use the printed directory and publish command, for example:
 

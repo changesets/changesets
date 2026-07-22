@@ -66,6 +66,32 @@ describe("manual publish e2e", () => {
     expect(shim).toContain("npm-10");
   });
 
+  it("can include private tag-only package fixtures", async () => {
+    const pm = pmCases.find((candidate) => candidate.id === "npm-10")!;
+    const fixture = await createManualProjectFixture(
+      pm,
+      {
+        pmBinPath: path.join("manual", "bin"),
+        registry: {
+          authToken: "manual-token",
+          host: "127.0.0.1:4873",
+          url: "http://127.0.0.1:4873/",
+        },
+      },
+      { includeTagOnly: true },
+    );
+    const config = JSON.parse(String(fixture[".changeset/config.json"]));
+    const tagOnlyPackage = JSON.parse(
+      String(fixture["packages/pkg-tag-d/package.json"]),
+    );
+
+    expect(config.privatePackages).toEqual({ version: true, tag: true });
+    expect(tagOnlyPackage).toMatchObject({
+      dependencies: { "pkg-a": "^1.0.0" },
+      private: true,
+    });
+  });
+
   it("requires the documented OTP for every fixture package", () => {
     const requirements = createManualAuthConfig("manual-token").packages!;
 

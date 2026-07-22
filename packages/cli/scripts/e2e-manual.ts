@@ -72,6 +72,7 @@ export function createManualAuthConfig(
 function createPackageFixture(
   name: string,
   dependencies?: Record<string, string>,
+  options?: { private?: boolean },
 ): ManualFixture {
   return {
     [`packages/${name}/package.json`]: `${JSON.stringify(
@@ -82,6 +83,7 @@ function createPackageFixture(
         files: ["index.js"],
         license: "MIT",
         type: "module",
+        ...(options?.private && { private: true }),
         ...(dependencies && { dependencies }),
       },
       undefined,
@@ -91,7 +93,9 @@ function createPackageFixture(
   };
 }
 
-export function createDefaultManualFixture(): ManualFixture {
+export function createDefaultManualFixture(
+  options: { includeTagOnly?: boolean } = {},
+): ManualFixture {
   return {
     ...createPackageFixture("pkg-a"),
     ...createPackageFixture("pkg-b"),
@@ -102,8 +106,29 @@ export function createDefaultManualFixture(): ManualFixture {
     ...createPackageFixture("pkg-g", { "pkg-d": "^1.0.0" }),
     ...createPackageFixture("pkg-h", { "pkg-e": "^1.0.0" }),
     ...createPackageFixture("pkg-i", { "pkg-f": "^1.0.0" }),
+    ...(options.includeTagOnly
+      ? {
+          ...createPackageFixture("pkg-tag-a", undefined, { private: true }),
+          ...createPackageFixture(
+            "pkg-tag-d",
+            { "pkg-a": "^1.0.0" },
+            { private: true },
+          ),
+          ...createPackageFixture(
+            "pkg-tag-g",
+            { "pkg-d": "^1.0.0" },
+            { private: true },
+          ),
+        }
+      : {}),
     ".changeset/config.json": `${JSON.stringify(
-      { ...defaultConfig, access: "public" },
+      {
+        ...defaultConfig,
+        access: "public",
+        ...(options.includeTagOnly && {
+          privatePackages: { version: true, tag: true },
+        }),
+      },
       undefined,
       2,
     )}\n`,
@@ -349,14 +374,19 @@ function withManualScripts(
 export async function createManualProjectFixture(
   pm: PmCase,
   context: Parameters<PmCase["fixture"]>[0],
+  options?: { includeTagOnly?: boolean },
 ) {
   return withManualScripts(
-    await pm.fixture(context, manualFixtures.default()),
+    await pm.fixture(context, manualFixtures.default(options)),
     context.pmBinPath,
   );
 }
 
-async function createManualSandbox(pm: PmCase, otpMode: ManualOtpMode) {
+async function createManualSandbox(
+  pm: PmCase,
+  otpMode: ManualOtpMode,
+  includeTagOnly: boolean,
+) {
   const cwd = await fs.mkdtemp(path.join(tmpdir(), "changesets-manual-"));
   const pmBinPath = path.join(cwd, ".manual", "bin");
   await writePmBins(pmBinPath, pm.bins);
@@ -377,7 +407,9 @@ async function createManualSandbox(pm: PmCase, otpMode: ManualOtpMode) {
         url: registry.url,
       },
     };
-    const fixture = await createManualProjectFixture(pm, context);
+    const fixture = await createManualProjectFixture(pm, context, {
+      includeTagOnly,
+    });
     await writeFixture(cwd, fixture);
     await pm.prepare(cwd, context);
     await initializeGit(cwd);
@@ -464,12 +496,31 @@ async function chooseOtpMode(
   return selected;
 }
 
+async function chooseTagOnlyReleases(includeTagOnly: boolean | undefined) {
+  if (includeTagOnly != null) return includeTagOnly;
+
+  const selected = await select({
+    message: "Include private tag-only releases?",
+    options: [
+      { label: "No tag-only releases", value: false },
+      { label: "Include tag-only releases", value: true },
+    ],
+  });
+  if (isCancel(selected)) {
+    cancel("Canceled.");
+    process.exitCode = 1;
+    return;
+  }
+  return selected;
+}
+
 async function main() {
   const { values } = parseArgs({
     options: {
       otp: { type: "boolean" },
       "otp-mode": { type: "string" },
       pm: { type: "string" },
+      "tag-only": { type: "boolean" },
     },
     strict: true,
   });
@@ -478,9 +529,11 @@ async function main() {
   if (!pm) return;
   const otpMode = await chooseOtpMode(values["otp-mode"], values.otp);
   if (otpMode == null) return;
+  const includeTagOnly = await chooseTagOnlyReleases(values["tag-only"]);
+  if (includeTagOnly == null) return;
 
   log.info("Creating sandbox and starting pnpr...");
-  const sandbox = await createManualSandbox(pm, otpMode);
+  const sandbox = await createManualSandbox(pm, otpMode, includeTagOnly);
   const publishCommand = getPublishCommand(pm);
   try {
     log.success(`Sandbox: ${sandbox.cwd}`);
@@ -489,6 +542,11 @@ async function main() {
     );
     log.info(`Registry: ${sandbox.registry.url}`);
     log.info("Every package publish is delayed by 3 seconds at the proxy.");
+    if (includeTagOnly) {
+      log.info(
+        "Includes tag-only releases pkg-tag-a, pkg-tag-d, and pkg-tag-g.",
+      );
+    }
     if (otpMode !== "disabled") {
       const requirement =
         otpMode === "once"

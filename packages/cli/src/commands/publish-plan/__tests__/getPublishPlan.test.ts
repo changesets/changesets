@@ -201,6 +201,35 @@ describe("getPublishPlan", () => {
     ]);
   });
 
+  it("adds one optional tag-only release to each manual e2e chunk", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      ...createDefaultManualFixture({ includeTagOnly: true }),
+    });
+
+    mockedInfo.mockResolvedValue({ published: false });
+    mockedGit.getAllTags.mockResolvedValue(new Set());
+    mockedGit.remoteTagExists.mockResolvedValue(false);
+
+    const config = await readConfig(cwd);
+    const result = await getPublishPlan(cwd, config.config!);
+
+    expect(
+      result.map((chunk) =>
+        chunk.map((release) => `${release.kind}:${release.name}`).toSorted(),
+      ),
+    ).toEqual([
+      ["publish:pkg-a", "publish:pkg-b", "publish:pkg-c", "tag-only:pkg-tag-a"],
+      ["publish:pkg-d", "publish:pkg-e", "publish:pkg-f", "tag-only:pkg-tag-d"],
+      ["publish:pkg-g", "publish:pkg-h", "publish:pkg-i", "tag-only:pkg-tag-g"],
+    ]);
+  });
+
   it("keeps cyclic dependencies in one chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
