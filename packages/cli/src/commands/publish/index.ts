@@ -271,14 +271,15 @@ for every package being published after this!
           // we don't trust this error to mean that the authentication works
           // this could be rejected by a preflight check (theoretically, we've not observed this in practice)
           // in general, we should *rarely* see this error as we only try to publish packages that have not been published yet
-          p.clear();
+          if (finishedCount === totalPublishCount) {
+            p.clear();
+          } else if (interactive) {
+            p.start(renderProgressMessage());
+          }
           continue;
         }
 
         if (isPublishSuccessful(result)) {
-          // clear this spinner from logs so it will seamlessly be replaced
-          // by the next spinner in the one-by-one or bulk publishing
-          p.clear();
           successfulNpmPublishes.push(result);
 
           // A successful non-interactive publish proves that bulk publishing is
@@ -286,8 +287,6 @@ for every package being published after this!
           // will hand the affected packages back to this sequential path.
           if (!interactive) {
             sequential = false;
-            // start with the current advanced progress message
-            p.start(renderProgressMessage());
           } else if (finishedCount < totalPublishCount) {
             // The interactive child owned the terminal, so publishing progress
             // was stopped while it ran. Resume it before publishing the next
