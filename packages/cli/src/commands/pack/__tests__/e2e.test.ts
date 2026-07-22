@@ -208,9 +208,6 @@ describe("Pack command e2e", { tags: ["slow"] }, () => {
           ".packed",
         ],
         cwd,
-        // Avoid racing Yarn's prepack log file descriptor with child-process
-        // spawning on Windows; inline capture uses stable subprocess pipes.
-        env: { YARN_ENABLE_INLINE_BUILDS: "true" },
         pmBinPath,
         signal,
       });
