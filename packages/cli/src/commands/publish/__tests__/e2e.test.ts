@@ -294,6 +294,7 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
       /(?:◒ {2}Creating git tags(?:\n[ \t]*)*)*[◇o] {2}(Created git tags[:.])/g,
       "◒  Creating git tags◇  $1",
     )
+    .replace(/(Created git tags\.)\n+$/, "$1\n")
     .replace(/(\n- [^\n]+)\n+$/, "$1\n")
     .replaceAll(new URL(registryUrl).origin, "[registry-url]")
     .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
