@@ -27,13 +27,13 @@ export async function getPublishTool(packages: Packages): Promise<PublishTool> {
   if (packageManager === "pnpm") {
     return pnpm;
   }
-  if (packageManager !== "yarn") {
-    return npm;
+  if (packageManager === "yarn") {
+    if ((await getYarnVersion(packages)) === "classic") {
+      throw new Error(
+        "Yarn Classic is not supported. Please upgrade to Yarn Berry or another maintained package manager.",
+      );
+    }
+    return yarn;
   }
-  if ((await getYarnVersion(packages)) === "classic") {
-    throw new Error(
-      "Yarn Classic is not supported. Please upgrade to Yarn Berry or another maintained package manager.",
-    );
-  }
-  return yarn;
+  return npm;
 }
