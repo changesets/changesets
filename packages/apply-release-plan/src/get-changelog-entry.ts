@@ -62,12 +62,7 @@ export async function getChangelogEntry(
       (usesWorkspaceRange || validRange(versionRange) != null) &&
       shouldUpdateDependencyBasedOnConfig(
         cwd,
-        {
-          type: rel.type,
-          version: rel.newVersion,
-          oldVersion: rel.oldVersion,
-          dir: rel.dir,
-        },
+        rel,
         {
           depVersionRange: versionRange,
           depType: dependencyVersionRange ? "dependencies" : "peerDependencies",

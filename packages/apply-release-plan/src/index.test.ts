@@ -2272,6 +2272,67 @@ describe("apply release plan", () => {
       `);
     });
 
+    it("should ignore unversioned packages when generating dependency changelog entries", async () => {
+      const releasePlan = new FakeReleasePlan(
+        [],
+        [
+          {
+            name: "pkg-b",
+            type: "none",
+            oldVersion: undefined,
+            newVersion: undefined,
+            changesets: [],
+          },
+        ],
+      );
+
+      const { changedFiles } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "package-lock.json": "",
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": "1.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            private: true,
+          }),
+        },
+        releasePlan.getReleasePlan(),
+        {
+          ...releasePlan.config,
+          changelog: [changesetsCliChangelogPath, null],
+          privatePackages: { version: false, tag: false },
+        },
+      );
+
+      const changelogPath = changedFiles.find((file) =>
+        file.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
+      );
+
+      if (!changelogPath) {
+        throw new Error(`could not find an updated changelog`);
+      }
+
+      const changelog = await fs.readFile(changelogPath, "utf-8");
+      expect(changelog.trim()).toMatchInlineSnapshot(`
+        "# pkg-a
+
+        ## 1.1.0
+
+        ### Minor Changes
+
+        - Hey, let's have fun with testing!"
+      `);
+    });
+
     it("should not update the changelog if only devDeps changed", async () => {
       const { changedFiles } = await testSetup(
         {

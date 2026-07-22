@@ -47,7 +47,7 @@ describe("assembleReleasePlan", () => {
     );
 
     expect(releases.length).toBe(1);
-    expect(/0\.0\.0-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
+    expect(releases[0].newVersion).toMatch(/0\.0\.0-\d{14}/);
   });
 
   it("should assemble plan for basic setup with snapshot and tag", () => {
@@ -62,7 +62,7 @@ describe("assembleReleasePlan", () => {
     );
 
     expect(releases.length).toBe(1);
-    expect(/0\.0\.0-foo-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
+    expect(releases[0].newVersion).toMatch(/0\.0\.0-foo-\d{14}/);
   });
 
   it("should assemble plan with multiple packages", () => {

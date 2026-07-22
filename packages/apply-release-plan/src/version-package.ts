@@ -1,4 +1,4 @@
-import type { PackageJSON, VersionType } from "@changesets/types";
+import type { ComprehensiveRelease, PackageJSON } from "@changesets/types";
 import Range from "semver/classes/range.js";
 import semverPrerelease from "semver/functions/prerelease.js";
 import validRange from "semver/ranges/valid.js";
@@ -12,13 +12,7 @@ const DEPENDENCY_TYPES = [
   "optionalDependencies",
 ] as const;
 
-type VersionToUpdate = {
-  name: string;
-  version: string;
-  oldVersion: string;
-  type: VersionType;
-  dir: string;
-};
+type VersionToUpdate = ComprehensiveRelease & { dir: string };
 
 export type DependencyUpdateOptions = {
   cwd: string;
@@ -44,7 +38,12 @@ export function getDependencyVersionEdits(
   for (const depType of DEPENDENCY_TYPES) {
     const deps = packageJson[depType];
     if (deps) {
-      for (const { name, version, oldVersion, type, dir } of versionsToUpdate) {
+      for (const release of versionsToUpdate) {
+        if (release.newVersion == null) {
+          continue;
+        }
+
+        const { name, newVersion } = release;
         let depCurrentVersion = deps[name];
         if (
           !depCurrentVersion ||
@@ -52,7 +51,7 @@ export function getDependencyVersionEdits(
           depCurrentVersion.startsWith("link:") ||
           !shouldUpdateDependencyBasedOnConfig(
             cwd,
-            { version, oldVersion, type, dir },
+            release,
             {
               depVersionRange: depCurrentVersion,
               depType,
@@ -98,11 +97,11 @@ export function getDependencyVersionEdits(
           new Range(depCurrentVersion).range !== "" ||
           // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-          semverPrerelease(version) != null
+          semverPrerelease(newVersion) != null
         ) {
           let newNewRange = snapshot
-            ? version
-            : `${getVersionRangeType(depCurrentVersion)}${version}`;
+            ? newVersion
+            : `${getVersionRangeType(depCurrentVersion)}${newVersion}`;
           if (usesWorkspaceRange) newNewRange = `workspace:${newNewRange}`;
           pkgJsonEdits.push({ keys: [depType, name], value: newNewRange });
         }
