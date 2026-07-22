@@ -288,6 +288,11 @@ for every package being published after this!
             sequential = false;
             // start with the current advanced progress message
             p.start(renderProgressMessage());
+          } else if (finishedCount < totalPublishCount) {
+            // The interactive child owned the terminal, so publishing progress
+            // was stopped while it ran. Resume it before publishing the next
+            // package sequentially.
+            p.start(renderProgressMessage());
           }
         }
 
