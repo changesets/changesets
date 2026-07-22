@@ -1,5 +1,5 @@
 ---
-"@changesets/cli": patch
+"@changesets/cli": minor
 ---
 
 Refactored the `changeset publish` flow.
