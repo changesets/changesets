@@ -1990,7 +1990,7 @@ describe("Publish command e2e", () => {
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
           headers: expect.objectContaining({
             ...(pm.name !== "yarn 4" && {
-              "npm-auth-type": "web",
+              "npm-auth-type": pm.name === "bun 1" ? "legacy" : "web",
               "npm-command": "publish",
             }),
           }),
