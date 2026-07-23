@@ -187,7 +187,13 @@ export function assembleReleasePlan(
       // If a package had a prerelease, but didn't trigger a version bump in the regular release,
       // we want to give it a patch release.
       // Detailed explanation at https://github.com/changesets/changesets/pull/382#discussion_r434434182
-      if (preInfo.preVersions.get(pkg.packageJson.name) !== 0) {
+      if (
+        preInfo.preVersions.get(pkg.packageJson.name) !== 0 &&
+        !shouldSkipPackage(pkg, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        })
+      ) {
         const existingRelease = releases.get(pkg.packageJson.name);
         if (!existingRelease) {
           releases.set(pkg.packageJson.name, {
@@ -196,13 +202,7 @@ export function assembleReleasePlan(
             oldVersion: pkg.packageJson.version,
             changesets: [],
           });
-        } else if (
-          existingRelease.type === "none" &&
-          !shouldSkipPackage(pkg, {
-            ignore: config.ignore,
-            allowPrivatePackages: config.privatePackages.version,
-          })
-        ) {
+        } else if (existingRelease.type === "none") {
           existingRelease.type = "patch";
         }
       }
