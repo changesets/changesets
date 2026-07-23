@@ -3,11 +3,20 @@ import { createWriteStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-export type OutputEvent = {
-  type: "git-tag";
-  tag: string;
-  packageName: string;
-};
+export type OutputEvent =
+  | {
+      type: "git-tag";
+      tag: string;
+      packageName: string;
+    }
+  | {
+      type: "npm-stage";
+      packageName: string;
+      version: string;
+      tag: string;
+      gitTag: string;
+      stageId: string;
+    };
 
 export interface OutputReporter {
   write(event: OutputEvent): void;

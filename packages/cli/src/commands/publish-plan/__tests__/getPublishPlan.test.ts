@@ -69,6 +69,7 @@ describe("getPublishPlan", () => {
           version: "1.0.0",
           access: "restricted",
           tag: "latest",
+          isNew: true,
         },
         {
           kind: "tag-only",
@@ -152,6 +153,7 @@ describe("getPublishPlan", () => {
           version: "1.0.0",
           access: "restricted",
           tag: "latest",
+          isNew: true,
         },
       ],
       [
@@ -161,6 +163,7 @@ describe("getPublishPlan", () => {
           version: "1.0.0",
           access: "restricted",
           tag: "latest",
+          isNew: true,
         },
       ],
       [
@@ -212,6 +215,7 @@ describe("getPublishPlan", () => {
           version: "1.0.0",
           access: "restricted",
           tag: "latest",
+          isNew: true,
         },
         {
           kind: "publish",
@@ -219,6 +223,7 @@ describe("getPublishPlan", () => {
           version: "1.0.0",
           access: "restricted",
           tag: "latest",
+          isNew: true,
         },
       ],
     ]);
@@ -266,6 +271,7 @@ describe("getPublishPlan", () => {
           version: "1.0.0-next.3",
           access: "restricted",
           tag: "latest",
+          isNew: false,
         },
       ],
     ]);
@@ -305,6 +311,7 @@ describe("getPublishPlan", () => {
           version: "1.1.0",
           access: "restricted",
           tag: "latest",
+          isNew: false,
         },
       ],
     ]);

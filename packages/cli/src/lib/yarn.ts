@@ -138,6 +138,7 @@ export const publish: PublishTool["publish"] = async ({
   tarballPath,
   interactive,
   otpCode,
+  stage,
 }) => {
   const resultBase = { name: release.name, version: release.version };
 
@@ -169,6 +170,7 @@ export const publish: PublishTool["publish"] = async ({
   ];
   if (!interactive) args.push("--json");
   if (otpCode) args.push("--otp", otpCode);
+  if (stage) args.push("--staged");
 
   const { exitCode, stdout, stderr } = await exec("yarn", args, {
     nodePath: false,
@@ -183,6 +185,31 @@ export const publish: PublishTool["publish"] = async ({
   });
 
   if (exitCode === 0) {
+    if (stage) {
+      let stageId: string | undefined;
+      for (const entry of streamNdjson(stdout)) {
+        if (
+          entry &&
+          typeof entry === "object" &&
+          "stageId" in entry &&
+          typeof entry.stageId === "string"
+        ) {
+          stageId = entry.stageId;
+        }
+      }
+      if (!stageId) {
+        return {
+          ...resultBase,
+          result: "failed",
+          message: "The Yarn stage command did not report a stage ID.",
+        };
+      }
+      return {
+        ...resultBase,
+        result: "staged",
+        stageId,
+      };
+    }
     return {
       ...resultBase,
       result: "published",

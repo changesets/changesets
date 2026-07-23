@@ -9,9 +9,11 @@ import {
   isPublishFailure,
   isPublishSuccessful,
   npmPublishQueue,
+  npmRequestQueue,
 } from "../../lib/common.ts";
 import type { PublishResult, PublishTool } from "../../lib/types.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
+import { buildGitTag } from "../../utils/gitTags.ts";
 import { createOutputReport } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { createGitTags, formatGitTagResults } from "../git-tag/utils.ts";
@@ -65,6 +67,7 @@ async function bulkPublishPackages({
   packagesByName,
   artifactDir,
   otpCode,
+  stage,
   onResult,
 }: {
   publishTool: PublishTool;
@@ -72,6 +75,7 @@ async function bulkPublishPackages({
   packagesByName: Map<string, Package>;
   artifactDir?: string;
   otpCode: string | null;
+  stage: boolean;
   onResult?: (result: PublishResult) => void;
 }): Promise<PublishQueueItem[]> {
   if (publishQueue.length === 0) return [];
@@ -87,6 +91,7 @@ async function bulkPublishPackages({
           : null,
         interactive: false,
         otpCode,
+        stage,
       }),
     );
 
@@ -105,6 +110,7 @@ export interface PublishOptions {
   output?: string;
   /** @default true */
   gitTag?: boolean;
+  stage?: boolean;
 }
 
 export async function publish(options?: PublishOptions) {
@@ -147,6 +153,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   }
 
   const config = await readConfig(packages);
+  const stagedPublishing = options?.stage ?? config.stagedPublishing ?? false;
   const plan = artifactDir
     ? await readPlanFile(path.join(artifactDir, "publish-plan.json"))
     : await getPublishPlan(packages.rootDir, config, {
@@ -155,6 +162,53 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   if (plan.length === 0) {
     log.warn("No unpublished projects to publish.");
     return;
+  }
+
+  if (stagedPublishing) {
+    const publishReleases = plan
+      .flat()
+      .filter(
+        (release): release is PublishReleaseEntry => release.kind === "publish",
+      );
+    const unknownNewPackages = new Set(
+      (
+        await Promise.all(
+          publishReleases
+            .filter((release) => release.isNew == null)
+            .map(async (release) => {
+              const pkg = packagesByName.get(release.name);
+              if (!pkg) {
+                throw new Error(`Package not found: ${release.name}`);
+              }
+              const response = await npmRequestQueue.add(() =>
+                publishTool.info({ cwd: packages.rootDir, pkg }),
+              );
+              if ("error" in response) {
+                log.error(
+                  `Failed to verify whether ${c.cyan(release.name)} already exists in the registry: ${response.error.message || response.error.code || "Unknown error"}`,
+                );
+                throw new ExitError(1);
+              }
+              return response.published ? undefined : release.name;
+            }),
+        )
+      ).filter((name): name is string => name != null),
+    );
+    const newPackages = publishReleases.filter(
+      (release) =>
+        release.isNew === true || unknownNewPackages.has(release.name),
+    );
+    if (newPackages.length > 0) {
+      log.error(
+        `Staged publishing does not support packages that have never been published:\n${newPackages
+          .map(
+            (release) =>
+              `${c.blueBright(release.name)}@${c.red(release.version)}`,
+          )
+          .join("\n")}`,
+      );
+      throw new ExitError(1);
+    }
   }
 
   let finishedCount = 0;
@@ -173,13 +227,13 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   // in TTY mode the first publish "checks" if the publish process requires interactive auth or not
   // on CI everything has to be configured in a way that allows automation so we can go straight to bulk publishing
   // similarly, when OTP is provided we can go straight to bulk publishing as well
-  let sequential = process.stdin.isTTY && otpCode == null;
+  let sequential = stagedPublishing || (process.stdin.isTTY && otpCode == null);
 
   const p = progress({ max: totalPublishCount });
   const renderProgressMessage = () =>
     finishedCount === 0
-      ? "Publishing packages"
-      : `Publishing packages (${finishedCount}/${totalPublishCount})`;
+      ? `${stagedPublishing ? "Staging" : "Publishing"} packages`
+      : `${stagedPublishing ? "Staging" : "Publishing"} packages (${finishedCount}/${totalPublishCount})`;
   const advanceProgress = () => {
     finishedCount++;
     p.advance(1, renderProgressMessage());
@@ -219,6 +273,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
                 : null,
               interactive,
               otpCode,
+              stage: stagedPublishing,
             }),
           ));
 
@@ -260,6 +315,7 @@ for every package being published after this!
                   : null,
                 interactive,
                 otpCode: null,
+                stage: stagedPublishing,
               }),
             );
           }
@@ -267,7 +323,7 @@ for every package being published after this!
 
         advanceProgress();
 
-        if (result.result === "failed:already-published") {
+        if (result.result === "failed:already-published" && !stagedPublishing) {
           // we don't trust this error to mean that the authentication works
           // this could be rejected by a preflight check (theoretically, we've not observed this in practice)
           // in general, we should *rarely* see this error as we only try to publish packages that have not been published yet
@@ -281,11 +337,21 @@ for every package being published after this!
 
         if (isPublishSuccessful(result)) {
           successfulNpmPublishes.push(result);
+          if (result.result === "staged") {
+            reporter?.write({
+              type: "npm-stage",
+              packageName: result.name,
+              version: result.version,
+              tag: item.release.tag,
+              gitTag: buildGitTag(packages.tool, item.release),
+              stageId: result.stageId,
+            });
+          }
 
           // A successful non-interactive publish proves that bulk publishing is
           // currently possible. If 2FA becomes necessary again, bulk publishing
           // will hand the affected packages back to this sequential path.
-          if (!interactive) {
+          if (!stagedPublishing && !interactive) {
             sequential = false;
           } else if (finishedCount < totalPublishCount) {
             // The interactive child owned the terminal, so publishing progress
@@ -310,6 +376,7 @@ for every package being published after this!
         publishQueue,
         packagesByName,
         otpCode,
+        stage: stagedPublishing,
         artifactDir,
         onResult: (result) => {
           // those can be recovered in tty mode, so we don't want to advance the progress bar for them
@@ -364,16 +431,20 @@ for every package being published after this!
   }
 
   if (successfulNpmPublishes.length !== 0) {
-    const message = `Successfully published:
+    const message = `Successfully ${stagedPublishing ? "staged" : "published"}:
 ${formatPackageList(successfulNpmPublishes)}`;
 
-    if (sequential) {
+    if (sequential && !stagedPublishing) {
       log.success(message);
     } else {
       p.stop(message);
     }
 
-    if (options?.gitTag ?? true) {
+    // Staged publishing normally defers tags until approval. An explicit
+    // --git-tag is still respected as an intentional opt-out of that safety.
+    if (
+      stagedPublishing ? options?.gitTag === true : (options?.gitTag ?? true)
+    ) {
       gitTagReleases.push(
         ...successfulNpmPublishes.map((result) => ({
           kind: "tag-only" as const,
@@ -392,6 +463,26 @@ Some packages failed to publish:
 ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
       `.trim(),
     );
+    if (stagedPublishing && successfulNpmPublishes.length > 0) {
+      const stageIds = successfulNpmPublishes
+        .filter(
+          (result): result is Extract<PublishResult, { result: "staged" }> =>
+            result.result === "staged",
+        )
+        .map((result) => result.stageId);
+      log.warn(
+        `Reject the successfully staged packages, then retry:\nchangeset stage reject ${stageIds.join(" ")}`,
+      );
+    }
+  } else if (stagedPublishing && successfulNpmPublishes.length > 0) {
+    const stageIds = successfulNpmPublishes
+      .filter(
+        (result): result is Extract<PublishResult, { result: "staged" }> =>
+          result.result === "staged",
+      )
+      .map((result) => result.stageId);
+    log.info(`Approve the staged packages in this order:
+changeset stage approve ${stageIds.join(" ")}`);
   }
 
   // finally, create git tags as plan instructs

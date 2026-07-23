@@ -56,8 +56,12 @@ function mockExecImplementation(
     args: readonly string[],
   ) => Promise<ReturnType<typeof execResult>>,
 ) {
-  mockedExec.mockImplementation(((cmd: string, args?: readonly string[]) =>
-    Promise.resolve(fn(cmd, args ?? []))) as any);
+  mockedExec.mockImplementation(((cmd: string, args?: readonly string[]) => {
+    if (args?.[0] === "dist-tag") {
+      return Promise.resolve(execResult('{"error":{"code":"E404"}}', 1));
+    }
+    return Promise.resolve(fn(cmd, args ?? []));
+  }) as any);
 }
 
 describe("Publish command", () => {
@@ -723,6 +727,196 @@ describe("Publish command", () => {
         .map((call) => call[2]?.nodeOptions?.cwd),
     ).toEqual([path.join(cwd, "packages", "pkg-a")]);
     expect(git.tag).not.toHaveBeenCalled();
+  });
+
+  it("reports staged packages in topological order without tagging by default", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: { "pkg-b": "workspace:*" },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...defaultConfig,
+        stagedPublishing: true,
+      }),
+    });
+    const output = path.join(cwd, "stages.ndjson");
+    const stageIds = [
+      "1de6f3db-2ed9-4d72-b3dd-8f0e2b474a2f",
+      "2de6f3db-2ed9-4d72-b3dd-8f0e2b474a2f",
+    ];
+    let stageIndex = 0;
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult(
+          JSON.stringify({
+            versions: ["0.9.0"],
+            "dist-tags": { latest: "0.9.0" },
+          }),
+        );
+      }
+      if (args[0] === "stage" && args[1] === "publish") {
+        return execResult(JSON.stringify({ stageId: stageIds[stageIndex++] }));
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.getAllTags).mockResolvedValue(new Set());
+    vi.mocked(git.remoteTagExists).mockResolvedValue(false);
+
+    await publishCommand({ cwd, output });
+
+    const events = (await fs.readFile(output, "utf8"))
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line));
+    expect(events).toEqual([
+      {
+        type: "npm-stage",
+        packageName: "pkg-b",
+        version: "1.0.0",
+        tag: "latest",
+        gitTag: "pkg-b@1.0.0",
+        stageId: stageIds[0],
+      },
+      {
+        type: "npm-stage",
+        packageName: "pkg-a",
+        version: "1.0.0",
+        tag: "latest",
+        gitTag: "pkg-a@1.0.0",
+        stageId: stageIds[1],
+      },
+    ]);
+    expect(git.tag).not.toHaveBeenCalled();
+    expect(mockedLogger.info).toHaveBeenCalledWith(
+      `Approve the staged packages in this order:
+changeset stage approve ${stageIds.join(" ")}`,
+    );
+  });
+
+  it("respects explicit git tagging in staged mode", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult(
+          JSON.stringify({
+            versions: ["0.9.0"],
+            "dist-tags": { latest: "0.9.0" },
+          }),
+        );
+      }
+      if (args[0] === "stage") {
+        return execResult(
+          JSON.stringify({
+            stageId: "1de6f3db-2ed9-4d72-b3dd-8f0e2b474a2f",
+          }),
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    vi.mocked(git.getAllTags).mockResolvedValue(new Set());
+    vi.mocked(git.remoteTagExists).mockResolvedValue(false);
+    vi.mocked(git.tag).mockResolvedValue(true);
+
+    await publishCommand({ cwd, stage: true, gitTag: true });
+
+    expect(git.tag).toHaveBeenCalledWith("pkg-a@1.0.0", cwd);
+  });
+
+  it("prints topological rejection guidance after a partial stage failure", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        dependencies: { "pkg-b": "workspace:*" },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+    const stageId = "1de6f3db-2ed9-4d72-b3dd-8f0e2b474a2f";
+    let stageIndex = 0;
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") {
+        return execResult(
+          JSON.stringify({
+            versions: ["0.9.0"],
+            "dist-tags": { latest: "0.9.0" },
+          }),
+        );
+      }
+      if (args[0] === "stage" && stageIndex++ === 0) {
+        return execResult(JSON.stringify({ stageId }));
+      }
+      if (args[0] === "stage") {
+        return execResult(
+          JSON.stringify({
+            error: { code: "E403", summary: "failed", detail: "" },
+          }),
+          1,
+        );
+      }
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await expect(publishCommand({ cwd, stage: true })).rejects.toThrow();
+
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      `Reject the successfully staged packages, then retry:
+changeset stage reject ${stageId}`,
+    );
+  });
+
+  it("preflights new packages before staging anything", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info") return execResult("");
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+
+    await expect(publishCommand({ cwd, stage: true })).rejects.toThrow();
+    expect(mockedExec.mock.calls.some((call) => call[1]?.[0] === "stage")).toBe(
+      false,
+    );
   });
 
   it("rejects custom tags when publishing from a pack directory", async () => {
