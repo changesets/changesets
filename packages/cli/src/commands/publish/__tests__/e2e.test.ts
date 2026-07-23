@@ -766,6 +766,17 @@ async function createAuthProxy(
     requests.push(request);
     await recordRequestBody(webRequest, request);
 
+    if (
+      pathname === "/-/v1/done" &&
+      request.headers["user-agent"]?.startsWith("Bun/")
+    ) {
+      request.statusCode = 202;
+      return new Response(null, {
+        headers: { "retry-after": "1" },
+        status: 202,
+      });
+    }
+
     if (authRequirement && packageName) {
       if (request.method !== "PUT") {
         webRequest = withBearerToken(webRequest, pnprToken);
@@ -1946,7 +1957,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
           headers: expect.objectContaining({
             ...(pm.name !== "yarn 4" && {
-              "npm-auth-type": pm.name === "bun 1" ? "legacy" : "web",
+              "npm-auth-type": "web",
               "npm-command": "publish",
             }),
           }),

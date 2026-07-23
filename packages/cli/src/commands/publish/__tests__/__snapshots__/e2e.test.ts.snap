@@ -118,7 +118,7 @@ pkg-a@1.0.0
 
 Some packages failed to publish:
 pkg-a@1.0.0
-└ (no code): EndOfStream: failed to read OTP input
+└ (no code): Bun attempted web authentication during a non-interactive publish. The publish was stopped because Bun does not exit in this mode. Provide an OTP through the Changesets --otp option or NPM_CONFIG_OTP.
 🦋 Exited with code 1
 
 "
