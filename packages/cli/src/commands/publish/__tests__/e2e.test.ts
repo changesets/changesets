@@ -1722,8 +1722,8 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
       expect.soft(publishRequests.map((request) => request.statusCode)).toEqual(
-        // npm 11+ rejects an already-published version during its local
-        // preflight. Other clients send the PUT and receive the registry's 403.
+        // Bun with --tolerate-republish and npm 11+ detect an already-published
+        // version during preflight. Other clients send the PUT and receive 403.
         pm.name !== "bun 1" && pm.name !== "npm 11" && pm.name !== "npm 12"
           ? [403]
           : [],
