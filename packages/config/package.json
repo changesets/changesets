@@ -1,6 +1,6 @@
 {
   "name": "@changesets/config",
-  "version": "4.0.0-next.7",
+  "version": "4.0.0-next.8",
   "description": "Utilities for reading and parsing Changeset's config",
   "license": "MIT",
   "repository": {

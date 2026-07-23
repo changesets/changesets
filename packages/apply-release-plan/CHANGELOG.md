@@ -1,5 +1,16 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.9
+
+### Patch Changes
+
+- [#2177](https://github.com/changesets/changesets/pull/2177) [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784) Thanks [@Andarist](https://github.com/Andarist)! - Avoid writing an `undefined` version when updating dependencies in unversioned private packages.
+- Updated dependencies [[`a736a20`](https://github.com/changesets/changesets/commit/a736a20c230a89232a122fe12ffd612361e0eef9), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/git@4.0.0-next.8
+  - @changesets/types@7.0.0-next.8
+  - @changesets/config@4.0.0-next.8
+  - @changesets/should-skip-package@1.0.0-next.8
+
 ## 8.0.0-next.8
 
 ### Patch Changes

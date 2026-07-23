@@ -1,5 +1,14 @@
 # @changesets/release-utils
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- Updated dependencies [[`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/types@7.0.0-next.8
+  - @changesets/read@1.0.0-next.9
+  - @changesets/pre@3.0.0-next.8
+
 ## 1.0.0-next.8
 
 ### Patch Changes
