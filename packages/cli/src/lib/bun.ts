@@ -127,7 +127,6 @@ export const publish: PublishTool["publish"] = async ({
     release.access,
     "--tag",
     release.tag,
-    "--tolerate-republish",
     "--auth-type",
     "legacy",
   ];
@@ -148,12 +147,6 @@ export const publish: PublishTool["publish"] = async ({
   const resultBase = { name: release.name, version: release.version };
   const output = [stdout, stderr].filter(Boolean).join("\n");
 
-  if (output.includes("Registry already knows about version")) {
-    return {
-      ...resultBase,
-      result: "failed:already-published",
-    } satisfies PublishResult;
-  }
   if (exitCode === 0) {
     return {
       ...resultBase,
