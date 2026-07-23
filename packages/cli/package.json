@@ -60,6 +60,7 @@
     "@lydell/node-pty": "1.2.0-beta.12",
     "@pnpm/pnpr": "0.0.0-26070301",
     "@types/semver": "^7.7.1",
+    "bun-1": "npm:bun@^1.3.14",
     "human-id": "^4.2.0",
     "modern-tar": "^0.7.6",
     "npm-10": "npm:npm@^10.9.8",
@@ -71,6 +72,7 @@
     "yarn-4": "npm:@yarnpkg/cli-dist@^4.5.2"
   },
   "engines": {
+    "bun": ">=1.3.1",
     "node": "^22.11 || ^24 || >=26",
     "npm": ">=10.9.0",
     "pnpm": ">=10.0.0",

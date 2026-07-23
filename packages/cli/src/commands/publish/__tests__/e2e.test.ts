@@ -766,6 +766,17 @@ async function createAuthProxy(
     requests.push(request);
     await recordRequestBody(webRequest, request);
 
+    if (
+      pathname === "/-/v1/done" &&
+      request.headers["user-agent"]?.startsWith("Bun/")
+    ) {
+      request.statusCode = 202;
+      return new Response(null, {
+        headers: { "retry-after": "1" },
+        status: 202,
+      });
+    }
+
     if (authRequirement && packageName) {
       if (request.method !== "PUT") {
         webRequest = withBearerToken(webRequest, pnprToken);
@@ -1722,7 +1733,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
       expect.soft(publishRequests.map((request) => request.statusCode)).toEqual(
-        // npm 11+ rejects an already-published version during its local
+        // npm 11+ detects an already-published version during its local
         // preflight. Other clients send the PUT and receive the registry's 403.
         pm.name !== "npm 11" && pm.name !== "npm 12" ? [403] : [],
       );
