@@ -1,4 +1,5 @@
 import type { Packages } from "@changesets/types";
+import { detect } from "package-manager-detector/detect";
 import { exec } from "tinyexec";
 import * as npm from "../../lib/npm.ts";
 import * as pnpm from "../../lib/pnpm.ts";
@@ -17,10 +18,16 @@ async function getYarnVersion(packages: Packages) {
 }
 
 export async function getPublishTool(packages: Packages): Promise<PublishTool> {
-  if (packages.tool.type === "pnpm") {
+  let packageManager = packages.tool.type;
+
+  if (!["npm", "pnpm", "yarn"].includes(packageManager)) {
+    packageManager = (await detect({ cwd: packages.rootDir }))?.name ?? "npm";
+  }
+
+  if (packageManager === "pnpm") {
     return pnpm;
   }
-  if (packages.tool.type === "yarn") {
+  if (packageManager === "yarn") {
     if ((await getYarnVersion(packages)) === "classic") {
       throw new Error(
         "Yarn Classic is not supported. Please upgrade to Yarn Berry or another maintained package manager.",
