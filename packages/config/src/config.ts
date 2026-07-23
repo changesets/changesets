@@ -103,6 +103,11 @@ export const WrittenConfigSchema = v.object({
     "Opt in to tracking non-npm / private packages",
     {},
   ),
+  stagedPublishing: rootKey(
+    v.boolean(),
+    "Stages packages for approval instead of publishing them immediately.",
+    false,
+  ),
   bumpVersionsWithWorkspaceProtocolOnly: rootKey(
     v.boolean(),
     "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.",

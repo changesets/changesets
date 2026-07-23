@@ -303,6 +303,7 @@ describe("init", () => {
       "fixed",
       "linked",
       "updateInternalDependencies",
+      "stagedPublishing",
     ]);
   });
 });
