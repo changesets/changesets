@@ -8,6 +8,8 @@ type BunCommandError = {
   message?: string;
 };
 
+const webAuthPrompt = "Authenticate your account at";
+
 function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return {
     ...env,
@@ -122,20 +124,13 @@ export const publish: PublishTool["publish"] = async ({
   const cwd = pkg.packageJson.publishConfig?.directory
     ? path.resolve(pkg.dir, pkg.packageJson.publishConfig.directory)
     : pkg.dir;
-  const args = [
-    "--access",
-    release.access,
-    "--tag",
-    release.tag,
-    "--auth-type",
-    "legacy",
-  ];
+  const args = ["--access", release.access, "--tag", release.tag];
   if (otpCode) args.push("--otp", otpCode);
   // Bun resolves positional tarballs from the workspace root rather than cwd,
   // so an absolute path is needed for artifacts outside the package directory.
   if (tarballPath) args.unshift(tarballPath);
 
-  const { exitCode, stdout, stderr } = await exec("bun", ["publish", ...args], {
+  const publishProcess = exec("bun", ["publish", ...args], {
     nodePath: false,
     ...(!interactive && { stdin: "" }),
     nodeOptions: {
@@ -144,25 +139,47 @@ export const publish: PublishTool["publish"] = async ({
       env: sanitizeEnv(process.env),
     },
   });
+  let webAuthDetected = false;
+  let recentOutput = "";
+  if (!interactive) {
+    const detectWebAuth = (chunk: Buffer | string) => {
+      const output = recentOutput + chunk.toString();
+      if (output.includes(webAuthPrompt)) {
+        webAuthDetected = true;
+        publishProcess.kill();
+      }
+      recentOutput = output.slice(-webAuthPrompt.length);
+    };
+    publishProcess.process?.stdout?.on("data", detectWebAuth);
+    publishProcess.process?.stderr?.on("data", detectWebAuth);
+  }
+  const { exitCode, stdout, stderr } = await publishProcess;
   const resultBase = { name: release.name, version: release.version };
-  const output = [stdout, stderr].filter(Boolean).join("\n");
+  const error = getBunError(stdout, stderr);
 
+  if (webAuthDetected) {
+    return {
+      ...resultBase,
+      result: "failed",
+      message:
+        "Bun attempted web authentication during a non-interactive publish. The publish was stopped because Bun does not exit in this mode. Provide an OTP through the Changesets --otp option or NPM_CONFIG_OTP.",
+    } satisfies PublishResult;
+  }
   if (exitCode === 0) {
     return {
       ...resultBase,
       result: "published",
     } satisfies PublishResult;
   }
-  if (isAlreadyPublishedError(output)) {
+  if (isAlreadyPublishedError(error.message ?? "")) {
     return {
       ...resultBase,
       result: "failed:already-published",
-      code: getBunError(stdout, stderr).code,
+      code: error.code,
     } satisfies PublishResult;
   }
 
-  const error = getBunError(stdout, stderr);
-  if (/\b(otp|one-time pass(?:word)?)\b/i.test(output)) {
+  if (/\b(otp|one-time pass(?:word)?)\b/i.test(error.message ?? "")) {
     return {
       ...resultBase,
       result: "failed:needs-2fa",
