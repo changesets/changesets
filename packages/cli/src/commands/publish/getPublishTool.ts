@@ -35,26 +35,27 @@ export async function getPublishTool(packages: Packages): Promise<PublishTool> {
     packageManager = (await detect({ cwd: packages.rootDir }))?.name ?? "npm";
   }
 
-  if (packageManager === "bun") {
-    return bun;
-  }
-  if (packageManager === "pnpm") {
-    const major = await getPnpmMajor(packages);
-    return {
-      name: pnpm.name,
-      getOtpCode: pnpm.getOtpCode,
-      info: (args) => pnpm.info(args, { major }),
-      pack: (args) => pnpm.pack(args, { major }),
-      publish: (args) => pnpm.publish(args, { major }),
-    };
-  }
-  if (packageManager === "yarn") {
-    if ((await getYarnVersion(packages)) === "classic") {
-      throw new Error(
-        "Yarn Classic is not supported. Please upgrade to Yarn Berry or another maintained package manager.",
-      );
+  switch (packageManager) {
+    case "bun":
+      return bun;
+    case "pnpm": {
+      const major = await getPnpmMajor(packages);
+      return {
+        name: pnpm.name,
+        getOtpCode: pnpm.getOtpCode,
+        info: (args) => pnpm.info(args, { major }),
+        pack: (args) => pnpm.pack(args, { major }),
+        publish: (args) => pnpm.publish(args, { major }),
+      };
     }
-    return yarn;
+    case "yarn":
+      if ((await getYarnVersion(packages)) === "classic") {
+        throw new Error(
+          "Yarn Classic is not supported. Please upgrade to Yarn Berry or another maintained package manager.",
+        );
+      }
+      return yarn;
+    default:
+      return npm;
   }
-  return npm;
 }
