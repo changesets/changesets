@@ -1,6 +1,6 @@
 {
   "name": "@changesets/pre",
-  "version": "3.0.0-next.7",
+  "version": "3.0.0-next.8",
   "description": "Utils to make a Changesets repo enter and exit pre mode",
   "license": "MIT",
   "repository": {

@@ -1,5 +1,13 @@
 # @changesets/git
 
+## 4.0.0-next.8
+
+### Patch Changes
+
+- [#2169](https://github.com/changesets/changesets/pull/2169) [`a736a20`](https://github.com/changesets/changesets/commit/a736a20c230a89232a122fe12ffd612361e0eef9) Thanks [@Andarist](https://github.com/Andarist)! - Preserve the caller's path spelling when resolving the Git repository root on Windows.
+- Updated dependencies [[`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/types@7.0.0-next.8
+
 ## 4.0.0-next.7
 
 ### Patch Changes

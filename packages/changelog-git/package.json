@@ -1,6 +1,6 @@
 {
   "name": "@changesets/changelog-git",
-  "version": "1.0.0-next.7",
+  "version": "1.0.0-next.8",
   "description": "A changelog entry generator for git that writes hashes",
   "license": "MIT",
   "repository": {

@@ -1,5 +1,11 @@
 # @changesets/types
 
+## 7.0.0-next.8
+
+### Patch Changes
+
+- [#2177](https://github.com/changesets/changesets/pull/2177) [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784) Thanks [@Andarist](https://github.com/Andarist)! - Allow `oldVersion` and `newVersion` to be undefined for unversioned private packages.
+
 ## 7.0.0-next.7
 
 ### Patch Changes
