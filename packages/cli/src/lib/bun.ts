@@ -132,6 +132,9 @@ export const publish: PublishTool["publish"] = async ({
 
   const publishProcess = exec("bun", ["publish", ...args], {
     nodePath: false,
+    // Close piped stdin so Bun's CLI OTP prompt receives EOF instead of
+    // waiting forever. Yarn gets a fake OTP to force its JSON error path;
+    // Bun has no JSON publish mode and reports the EOF itself.
     ...(!interactive && { stdin: "" }),
     nodeOptions: {
       cwd,
@@ -140,18 +143,26 @@ export const publish: PublishTool["publish"] = async ({
     },
   });
   let webAuthDetected = false;
-  let recentOutput = "";
+  let observedStdout = "";
+  let observedStderr = "";
   if (!interactive) {
-    const detectWebAuth = (chunk: Buffer | string) => {
-      const output = recentOutput + chunk.toString();
-      if (output.includes(webAuthPrompt)) {
+    const detectWebAuth = () => {
+      if (
+        observedStdout.includes(webAuthPrompt) ||
+        observedStderr.includes(webAuthPrompt)
+      ) {
         webAuthDetected = true;
         publishProcess.kill();
       }
-      recentOutput = output.slice(-webAuthPrompt.length);
     };
-    publishProcess.process?.stdout?.on("data", detectWebAuth);
-    publishProcess.process?.stderr?.on("data", detectWebAuth);
+    publishProcess.process?.stdout?.on("data", (chunk: Buffer | string) => {
+      observedStdout += chunk.toString();
+      detectWebAuth();
+    });
+    publishProcess.process?.stderr?.on("data", (chunk: Buffer | string) => {
+      observedStderr += chunk.toString();
+      detectWebAuth();
+    });
   }
   const { exitCode, stdout, stderr } = await publishProcess;
   const resultBase = { name: release.name, version: release.version };
