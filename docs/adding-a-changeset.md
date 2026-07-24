@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/faq#how-do-i-add-a-changeset
+
 # Adding a changeset
 
 Hi! You might be here because a person or a bot has asked you to 'add a changeset' to a project. Let's walk through adding a changeset. But first, what is a changeset?

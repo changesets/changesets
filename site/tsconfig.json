@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "libReplacement": false,
+    "strict": true,
+    "noEmit": true,
+    "types": ["vitepress/client"]
+  },
+  "include": ["**/*.ts", ".vitepress/**/*"]
+}

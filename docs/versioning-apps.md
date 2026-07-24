@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/private-packages
+
 # Managing applications or non-npm packages
 
 Changesets can also be used to manage application versions or non-npm packages (ie dotnet NuGet packages, ruby gems, docker images etc).

@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/why
+
 # A Detailed Explanation of Changesets
 
 Below, you will find a detailed explanation of what changesets are, and how they are being thought about.

@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/fixed-packages
+
 # Fixed Packages
 
 Fixed packages allow you to specify a group or groups of packages that should be versioned and published together.

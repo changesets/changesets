@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/technical-decisions
+
 # Decisions
 
 This file is a discussion of some of the rules and design decisions that have gone into making changesets. The goal of all of these has been to make the experience of using changesets easy, while still providing the maximum value possible.

@@ -1,21 +1,29 @@
 packages:
   - packages/*
   - scripts/*
+  - site
 
 allowBuilds:
   "@pnpm/pnpr": true
+
 blockExoticSubdeps: true
 dedupePeers: true
 dedupePeerDependents: true
+
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - "@changesets/format@0.1.1"
   - pnpm@11.13.1
   - npm@12.0.1
   - pnpm@10.34.5
+  - vitepress@2.0.0-alpha.19
+
 overrides:
-  rolldown: 1.0.3
+  "vitepress>@docsearch/js": "-"
+  "vitepress>@docsearch/sidepanel-js": "-"
+
 shellEmulator: true
+
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - pnpm@10.34.5

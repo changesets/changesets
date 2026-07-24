@@ -15,10 +15,6 @@
     "type": "git",
     "url": "git+https://github.com/changesets/changesets.git"
   },
-  "workspaces": [
-    "packages/*",
-    "scripts/*"
-  ],
   "type": "module",
   "scripts": {
     "postinstall": "manypkg check",
@@ -32,6 +28,9 @@
     "test:fast": "vitest --tags-filter=!slow",
     "types:check": "tsc",
     "check-all": "pnpm build && pnpm test run && pnpm types:check && pnpm lint && pnpm format",
+    "site:dev": "pnpm --filter=./site dev",
+    "site:build": "pnpm --filter=./site build",
+    "site:preview": "pnpm --filter=./site preview",
     "version-packages": "changeset version && pnpm format:fix",
     "lint-staged:setup": "pnpm run --sequential \"/lint-staged:setup:\\d/\"",
     "lint-staged:setup:1": "git config set hook.\"lint-staged\".event pre-commit",

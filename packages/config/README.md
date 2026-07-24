@@ -1,11 +1,13 @@
 # @changesets/config
 
-> Utilities for reading and parsing Changeset's config
-
 [![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/config?name=true)](https://npmx.dev/package/@changesets/config)
 [![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
-```tsx
+Utilities for reading and parsing the Changesets config (i.e. `.changeset/config.json`).
+
+## Usage
+
+```ts
 import { readConfig } from "@changesets/config";
 
 const { config, warnings, errors } = await readConfig(process.cwd());

@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/cli
+
 # Command line options
 
 The command line for changesets is the main way of interacting with it. There are 4 main commands. If you are looking for how we recommend you setup and manage changesets with the commands, check out our [intro to using changesets](./intro-to-using-changesets.md)

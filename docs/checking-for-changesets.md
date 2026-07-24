@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/automating#how-do-i-ensure-pull-requests-have-changesets
+
 # Checking for changesets
 
 Using `@changesets/cli`, there is a `status` command. See the docs for it in the

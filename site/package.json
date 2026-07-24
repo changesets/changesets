@@ -1,0 +1,21 @@
+{
+  "name": "@changesets/docs",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The official documentation for Changesets",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "generate-og": "node scripts/generate-og.ts"
+  },
+  "devDependencies": {
+    "takumi-js": "^2.0.2",
+    "vitepress": "^2.0.0-alpha.18",
+    "vitepress-plugin-group-icons": "^1.7.5"
+  },
+  "engines": {
+    "node": "^22.11 || ^24 || >=26"
+  }
+}
