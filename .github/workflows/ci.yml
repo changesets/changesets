@@ -106,7 +106,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  typecheck:
+  lint:
     name: Typecheck
     needs: [build]
     runs-on: ubuntu-latest
@@ -121,35 +121,19 @@ jobs:
         with:
           download-dist: true
 
-      - name: Typecheck
-        run: pnpm types:check
-
-  lint:
-    name: Lint
-    needs: [build]
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
-        with:
-          download-dist: true
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Format
-        run: pnpm format
+      - parallel:
+          - name: Lint
+            run: pnpm lint
+          - name: Check formatting
+            run: pnpm format
+          - name: Typecheck
+            run: pnpm types:check
 
   ci-ok:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [lint-workflows, build, test, typecheck, lint]
+    needs: [build, lint, lint-workflows]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1
