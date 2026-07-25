@@ -15,7 +15,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "bumpVersionsWithWorkspaceProtocolOnly": false,
   "changedFilePatterns": ["**"],
   "format": "auto",
-  "privatePackages": { "version": true, "tag": false }
+  "privatePackages": { "version": false, "tag": false }
 }
 ```
 
@@ -229,11 +229,11 @@ Default value: `true`
 
 ## `privatePackages` (object or false)
 
-This option is for setting how private packages should be handled. By default, Changesets will update the changelog for private packages and update their version, but will not create a tag. You can configure this option to change the default behavior.
+This option is for setting how private packages should be handled. By default, Changesets will not version or tag private packages. You can configure this option to opt into either behavior.
 
 ### `version` (optional boolean)
 
-Default value: `true`
+Default value: `false`
 
 When `version` is set to `true`, Changesets will update the version for private packages. If set to `false`, Changesets will not update the version for private packages.
 

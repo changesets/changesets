@@ -112,7 +112,7 @@
           "properties": {
             "version": {
               "type": "boolean",
-              "default": true
+              "default": false
             },
             "tag": {
               "type": "boolean",

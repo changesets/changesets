@@ -49,7 +49,7 @@ describe("readConfig", () => {
         "linked": [],
         "privatePackages": {
           "tag": false,
-          "version": true,
+          "version": false,
         },
         "snapshot": {
           "useCalculatedVersion": false,
@@ -130,7 +130,7 @@ describe("defaultConfig", () => {
         "linked": [],
         "privatePackages": {
           "tag": false,
-          "version": true,
+          "version": false,
         },
         "snapshot": {
           "useCalculatedVersion": false,
@@ -337,6 +337,19 @@ describe("validateConfig", () => {
         },
       },
       {
+        name: "privatePackages: empty object",
+        config: { privatePackages: {} },
+        expected: defaultConfig,
+      },
+      {
+        name: "privatePackages: version",
+        config: { privatePackages: { version: true } },
+        expected: {
+          ...defaultConfig,
+          privatePackages: { version: true, tag: false },
+        },
+      },
+      {
         name: "updateInternalDependencies: minor",
         config: { updateInternalDependencies: "minor" },
         expected: { ...defaultConfig, updateInternalDependencies: "minor" },
@@ -531,6 +544,11 @@ describe("validateConfig", () => {
       {
         name: "privatePackages: should error when a public package depends on a private package skipped via privatePackages.version: false",
         config: { privatePackages: { version: false, tag: false } },
+      },
+      {
+        name: "privatePackages: tag requires version",
+        config: { privatePackages: { tag: true } },
+        errors: ['"tag" is set to "true" but "version" is set to "false"'],
       },
       {
         name: "experimental: onlyUpdatePeerDependentsWhenOutOfRange: non-boolean",
