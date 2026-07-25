@@ -1,6 +1,6 @@
 {
   "name": "@changesets/parse",
-  "version": "1.0.0-next.8",
+  "version": "1.0.0-next.9",
   "description": "Parse a changeset file's contents into a usable json object",
   "license": "MIT",
   "repository": {
