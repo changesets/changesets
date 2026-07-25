@@ -251,13 +251,17 @@ export async function getChangedChangesetFilesSinceRef({
       },
     );
 
-    const tester = /.changeset\/[^/]+\.md$/;
+    const rootChangesetsRegex = /\.changeset\/[^/]+\.md$/;
+    const preChangesetsRegex = /\.changeset\/pre\/[^/]+\.md$/;
 
     const files = cmd.stdout
       .toString()
       .trim()
       .split("\n")
-      .filter((file) => tester.test(file));
+      .filter(
+        (file) =>
+          rootChangesetsRegex.test(file) || preChangesetsRegex.test(file),
+      );
     return files;
   } catch (err) {
     if (err instanceof GitError) return [];

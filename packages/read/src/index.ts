@@ -17,7 +17,9 @@ async function filterChangesetsSinceRef(
     cwd: changesetBase,
     ref: sinceRef,
   });
-  const newHashes = newChangesets.map((c) => c.split("/").pop());
+  const newHashes = newChangesets.map((c) =>
+    c.replace(/^.*\/\.changeset\//, ""),
+  );
 
   return changesets.filter((dir) => newHashes.includes(dir));
 }
@@ -27,9 +29,11 @@ export async function readChangesets(
   sinceRef?: string,
 ): Promise<Array<NewChangeset>> {
   const changesetBase = path.join(rootDir, ".changeset");
-  let contents: string[];
+  let changesets: string[] = [];
+
+  // Collect root changesets
   try {
-    contents = await fs.readdir(changesetBase);
+    changesets.push(...(await fs.readdir(changesetBase)));
   } catch (err) {
     if ((err as { code: string }).code === "ENOENT") {
       throw new Error("There is no .changeset directory in this project", {
@@ -39,15 +43,28 @@ export async function readChangesets(
     throw err;
   }
 
+  // Collect pre changesets
+  try {
+    changesets.push(
+      ...(await fs.readdir(path.join(changesetBase, "pre"))).map(
+        (file) => `pre/${file}`,
+      ),
+    );
+  } catch (err) {
+    if ((err as { code: string }).code !== "ENOENT") {
+      throw err;
+    }
+  }
+
   if (sinceRef != null) {
-    contents = await filterChangesetsSinceRef(
-      contents,
+    changesets = await filterChangesetsSinceRef(
+      changesets,
       changesetBase,
       sinceRef,
     );
   }
 
-  const changesets = contents.filter(
+  changesets = changesets.filter(
     (file) =>
       !file.startsWith(".") &&
       file.endsWith(".md") &&
@@ -59,7 +76,7 @@ export async function readChangesets(
   const changesetContents = changesets.map(async (file) => {
     const changeset = await fs.readFile(path.join(changesetBase, file), "utf8");
 
-    return { ...parseChangesetFile(changeset), id: file.replace(".md", "") };
+    return { ...parseChangesetFile(changeset), id: file.replace(/\.md$/, "") };
   });
   return await Promise.all(changesetContents);
 }

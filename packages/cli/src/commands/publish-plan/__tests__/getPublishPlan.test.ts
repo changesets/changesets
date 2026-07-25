@@ -236,8 +236,6 @@ describe("getPublishPlan", () => {
       ".changeset/pre.json": JSON.stringify({
         mode: "pre",
         tag: "next",
-        initialVersions: {},
-        changesets: [],
       }),
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",

@@ -111,18 +111,11 @@ export async function applyReleasePlan(
     contextDir,
   );
 
-  if (releasePlan.preState != null && snapshot == null) {
-    if (releasePlan.preState.mode === "exit") {
-      await fs.rm(path.join(cwd, ".changeset", "pre.json"), {
-        recursive: true,
-        force: true,
-      });
-    } else {
-      await fs.writeFile(
-        path.join(cwd, ".changeset", "pre.json"),
-        JSON.stringify(releasePlan.preState, null, 2) + "\n",
-      );
-    }
+  if (releasePlan.preState?.mode === "exit" && snapshot == null) {
+    await fs.rm(path.join(cwd, ".changeset", "pre.json"), {
+      recursive: true,
+      force: true,
+    });
     touchedFiles.push(path.join(cwd, ".changeset", "pre.json"));
   }
 
@@ -189,40 +182,55 @@ export async function applyReleasePlan(
     await formatter(filesToFormat);
   }
 
-  if (releasePlan.preState == null || releasePlan.preState.mode === "exit") {
-    const changesetFolder = path.resolve(cwd, ".changeset");
-    await Promise.all(
-      changesets.map(async (changeset) => {
-        const changesetPath = path.resolve(
-          changesetFolder,
-          `${changeset.id}.md`,
-        );
+  const isPreChangesets = releasePlan.preState?.mode === "pre";
+  if (isPreChangesets && changesets.length > 0) {
+    await fs.mkdir(path.resolve(cwd, ".changeset", "pre"), { recursive: true });
+  }
+
+  await Promise.all(
+    changesets.map(async (changeset) => {
+      const changesetPath = path.resolve(
+        cwd,
+        ".changeset",
+        `${changeset.id}.md`,
+      );
+      if (
+        await fs.access(changesetPath).then(
+          () => true,
+          () => false,
+        )
+      ) {
+        // DO NOT remove changeset for skipped packages
+        // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
+        // At this point, we know there is no such changeset, because otherwise the program would've already failed,
+        // so we just check if any skipped package exists in this changeset, and only remove it if none exists
+        // options to skip packages were added in v2, so we don't need to do it for v1 changesets
         if (
-          await fs.access(changesetPath).then(
-            () => true,
-            () => false,
+          !changeset.releases.some((release) =>
+            shouldSkipPackage(packagesByName.get(release.name)!, {
+              ignore: config.ignore,
+              allowPrivatePackages: config.privatePackages.version,
+            }),
           )
         ) {
-          // DO NOT remove changeset for skipped packages
-          // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
-          // At this point, we know there is no such changeset, because otherwise the program would've already failed,
-          // so we just check if any skipped package exists in this changeset, and only remove it if none exists
-          // options to skip packages were added in v2, so we don't need to do it for v1 changesets
-          if (
-            !changeset.releases.some((release) =>
-              shouldSkipPackage(packagesByName.get(release.name)!, {
-                ignore: config.ignore,
-                allowPrivatePackages: config.privatePackages.version,
-              }),
-            )
-          ) {
-            touchedFiles.push(changesetPath);
+          if (isPreChangesets) {
+            const newChangesetPath = path.resolve(
+              cwd,
+              ".changeset",
+              "pre",
+              `${changeset.id}.md`,
+            );
+            await fs.rename(changesetPath, newChangesetPath);
+            touchedFiles.push(changesetPath, newChangesetPath);
+          } else {
             await fs.rm(changesetPath, { recursive: true, force: true });
+            touchedFiles.push(changesetPath);
           }
         }
-      }),
-    );
-  }
+      }
+    }),
+  );
+  // }
 
   // We return the touched files to be committed in the cli
   return touchedFiles;

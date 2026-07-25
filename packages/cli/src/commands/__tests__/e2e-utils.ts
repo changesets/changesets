@@ -500,8 +500,6 @@ export function createPkgAFixture(
 
   if (options.pre) {
     fixture[".changeset/pre.json"] = JSON.stringify({
-      changesets: [],
-      initialVersions: {},
       mode: "pre",
       tag: options.pre,
     });

@@ -3403,7 +3403,6 @@ describe("apply release plan", () => {
       const preState: PreState = {
         mode: "pre",
         tag: "beta",
-        changesets: [],
       };
 
       const { tempDir } = await testSetup(
@@ -3440,9 +3439,6 @@ describe("apply release plan", () => {
         nodeOptions: { cwd: tempDir },
       });
 
-      expect(gitCmd.stdout.toString()).toContain(
-        "modified:   .changeset/pre.json",
-      );
       expect(gitCmd.stdout.toString()).toContain(
         "modified:   packages/pkg-a/package.json",
       );
