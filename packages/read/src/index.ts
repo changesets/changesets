@@ -17,7 +17,7 @@ async function filterChangesetsSinceRef(
     cwd: changesetBase,
     ref: sinceRef,
   });
-  const newHashes = newChangesets.map((c) => c.slice(".changeset/".length));
+  const newHashes = newChangesets.map((c) => c.replace(/^.*\.changeset\//, ""));
 
   return changesets.filter((dir) => newHashes.includes(dir));
 }
@@ -53,6 +53,8 @@ export async function readChangesets(
       throw err;
     }
   }
+
+  console.log(changesets);
 
   if (sinceRef != null) {
     changesets = await filterChangesetsSinceRef(
