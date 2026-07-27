@@ -1,6 +1,7 @@
 import type fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { createFixture, type FileTree } from "fs-fixture";
 import { exec } from "tinyexec";
 import { afterEach, beforeEach, onTestFinished, vi } from "vitest";
@@ -76,6 +77,27 @@ export const temporarilySilenceLogs =
 
 export type Fixture = FileTree;
 
+export function stubIsTTY(value: boolean) {
+  const originalDescriptor = Object.getOwnPropertyDescriptor(
+    process.stdin,
+    "isTTY",
+  );
+  Object.defineProperty(process.stdin, "isTTY", {
+    configurable: true,
+    ...originalDescriptor,
+    value,
+  });
+  return {
+    [Symbol.dispose]() {
+      if (originalDescriptor) {
+        Object.defineProperty(process.stdin, "isTTY", originalDescriptor);
+      } else {
+        Reflect.deleteProperty(process.stdin, "isTTY");
+      }
+    },
+  };
+}
+
 export async function testdir(dir?: Fixture) {
   const fixture = await createFixture(dir);
   onTestFinished(() => fixture.rm());
@@ -91,7 +113,10 @@ export async function disableGitBackgroundMaintenance(cwd: string) {
 }
 
 export async function gitdir(dir: Fixture) {
-  const cwd = await testdir(dir);
+  const cwd = await testdir({
+    ".gitattributes": "* text=auto eol=lf\n",
+    ...dir,
+  });
 
   await exec("git", ["init"], { nodeOptions: { cwd } });
   await disableGitBackgroundMaintenance(cwd);
@@ -125,6 +150,17 @@ export async function gitdir(dir: Fixture) {
   });
 
   return cwd;
+}
+
+export async function shallowClone(cwd: string, depth = 1) {
+  const cloneDir = await testdir();
+  await exec(
+    "git",
+    ["clone", "--depth", depth.toString(), pathToFileURL(cwd).toString(), "."],
+    { nodeOptions: { cwd: cloneDir } },
+  );
+  await disableGitBackgroundMaintenance(cloneDir);
+  return cloneDir;
 }
 
 export async function outputFile(

@@ -50,10 +50,6 @@ const mockUserResponses = (mockResponses: {
     return returnValues[callCount++];
   });
 
-  const confirmAnswers: Record<string, boolean> = {
-    "Is this your desired changeset?": true,
-  };
-
   if (
     mockResponses.consoleSummaries != null &&
     mockResponses.editorSummaries != null
@@ -75,13 +71,6 @@ const mockUserResponses = (mockResponses: {
   } else {
     mockedUtils.askQuestion.mockResolvedValue(summary);
   }
-  mockedUtils.askConfirm.mockImplementation(async (question) => {
-    question = stripVTControlCharacters(question);
-    if (confirmAnswers[question]) {
-      return confirmAnswers[question];
-    }
-    throw new Error(`An answer could not be found for ${question}`);
-  });
 };
 
 beforeEach(() => {
@@ -173,7 +162,6 @@ describe("Add command", () => {
   it("should generate a changeset in a single package repo", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
-        private: true,
         name: "single-package",
         version: "1.0.0",
       }),
@@ -183,18 +171,8 @@ describe("Add command", () => {
     const summary = "summary message mock";
     mockedUtils.askList.mockResolvedValueOnce("minor");
 
-    const confirmAnswers: Record<string, boolean> = {
-      "Is this your desired changeset?": true,
-    };
     mockedUtils.askQuestion.mockResolvedValue("");
     mockedAskWithEditor.mockResolvedValueOnce(summary);
-    mockedUtils.askConfirm.mockImplementation(async (question) => {
-      question = stripVTControlCharacters(question);
-      if (confirmAnswers[question]) {
-        return confirmAnswers[question];
-      }
-      throw new Error(`An answer could not be found for ${question}`);
-    });
 
     await addChangeset({ cwd });
 
@@ -284,7 +262,6 @@ describe("Add command", () => {
   it("should use summary passed via message and keep confirmation flow", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
-        private: true,
         name: "single-package",
         version: "1.0.0",
       }),
@@ -292,7 +269,6 @@ describe("Add command", () => {
     });
 
     mockedUtils.askList.mockReturnValueOnce(Promise.resolve("minor"));
-    mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
 
     await addChangeset({ cwd, message: "summary from message" });
 
@@ -304,9 +280,6 @@ describe("Add command", () => {
         releases: [{ name: "single-package", type: "minor" }],
       }),
     );
-    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
-      "Is this your desired changeset?",
-    );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
     expect(mockedAskWithEditor).not.toHaveBeenCalled();
   });
@@ -314,7 +287,6 @@ describe("Add command", () => {
   it("should allow empty summary when message is an empty string", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
-        private: true,
         name: "single-package",
         version: "1.0.0",
       }),
@@ -322,7 +294,6 @@ describe("Add command", () => {
     });
 
     mockedUtils.askList.mockReturnValueOnce(Promise.resolve("patch"));
-    mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
 
     await addChangeset({ cwd, message: "" });
 
@@ -368,82 +339,8 @@ describe("Add command", () => {
         releases: [{ name: "pkg-a", type: "patch" }],
       }),
     );
-    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
-      "Is this your desired changeset?",
-    );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
     expect(mockedAskWithEditor).not.toHaveBeenCalled();
-  });
-
-  it("should skip confirmation when release type flags and message are passed", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    await addChangeset({
-      cwd,
-      message: "summary from message",
-      patch: ["pkg-a"],
-    });
-
-    const changesets = await getChangesets(cwd);
-    expect(changesets.length).toBe(1);
-    expect(changesets[0]).toEqual(
-      expect.objectContaining({
-        summary: "summary from message",
-        releases: [{ name: "pkg-a", type: "patch" }],
-      }),
-    );
-    expect(mockedUtils.askConfirm).not.toHaveBeenCalled();
-    expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
-    expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
-    expect(mockedAskWithEditor).not.toHaveBeenCalled();
-  });
-
-  it("should keep confirmation flow when only release type flags are passed", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-
-    mockedUtils.askQuestion.mockResolvedValue("summary from prompt");
-    mockedUtils.askConfirm.mockResolvedValue(true);
-
-    await addChangeset({
-      cwd,
-      patch: ["pkg-a"],
-    });
-
-    const changesets = await getChangesets(cwd);
-    expect(changesets.length).toBe(1);
-    expect(changesets[0]).toEqual(
-      expect.objectContaining({
-        summary: "summary from prompt",
-        releases: [{ name: "pkg-a", type: "patch" }],
-      }),
-    );
-    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
-      "Is this your desired changeset?",
-    );
-    expect(mockedUtils.askQuestion).toHaveBeenCalledOnce();
-    expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
   });
 
   it("should allow using message with empty changesets", async () => {
@@ -603,7 +500,7 @@ describe("Add command", () => {
     ]);
   });
 
-  it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
+  it("should not include private packages with a version in the prompt by default", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -624,13 +521,7 @@ describe("Add command", () => {
         name: "pkg-c",
         version: "1.0.0",
       }),
-      ".changeset/config.json": JSON.stringify({
-        ...defaultConfig,
-        privatePackages: {
-          version: false,
-          tag: false,
-        },
-      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
     });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });

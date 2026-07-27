@@ -14,7 +14,10 @@ try {
   const commandName = cli.matchedCommand?.name;
 
   // Enable clack guide for interactive commands
-  if (commandName === "add") {
+  if (
+    process.stdin.isTTY &&
+    (commandName === "add" || commandName === "publish")
+  ) {
     updateSettings({ withGuide: true });
   }
   // Show intro when running a command, except for --help and --version (has no command name)

@@ -1,5 +1,39 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.9
+
+### Patch Changes
+
+- [#2177](https://github.com/changesets/changesets/pull/2177) [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784) Thanks [@Andarist](https://github.com/Andarist)! - Avoid writing an `undefined` version when updating dependencies in unversioned private packages.
+- Updated dependencies [[`a736a20`](https://github.com/changesets/changesets/commit/a736a20c230a89232a122fe12ffd612361e0eef9), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/git@4.0.0-next.8
+  - @changesets/types@7.0.0-next.8
+  - @changesets/config@4.0.0-next.8
+  - @changesets/should-skip-package@1.0.0-next.8
+
+## 8.0.0-next.8
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#2163](https://github.com/changesets/changesets/pull/2163) [`5f8d925`](https://github.com/changesets/changesets/commit/5f8d9255088639c07b90910343752ae26b0a324f) Thanks [@Andarist](https://github.com/Andarist)! - Update dependency ranges in the workspace root `package.json`.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/git@4.0.0-next.7
+  - @changesets/should-skip-package@1.0.0-next.7
+  - @changesets/types@7.0.0-next.7
+  - @changesets/config@4.0.0-next.7
+
+## 8.0.0-next.7
+
+### Patch Changes
+
+- Updated dependencies [[`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`6c79210`](https://github.com/changesets/changesets/commit/6c79210fabfe13d82ca4ac4dc92aab9b58fd58fd), [`18bc470`](https://github.com/changesets/changesets/commit/18bc470ab550b2def6b52656b7b72f86c04429cb)]:
+  - @changesets/types@7.0.0-next.6
+  - @changesets/git@4.0.0-next.6
+  - @changesets/config@4.0.0-next.6
+  - @changesets/should-skip-package@1.0.0-next.6
+
 ## 8.0.0-next.6
 
 ### Minor Changes

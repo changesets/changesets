@@ -43,23 +43,24 @@
     "@e18e/eslint-plugin": "^0.5.1",
     "@eslint/js": "10.0.1",
     "@manypkg/cli": "^0.25.1",
+    "@oxc-node/core": "^0.1.0",
     "@tsconfig/node22": "^22.0.5",
-    "@types/node": "^25.9.3",
+    "@types/node": "^26.1.1",
     "@types/semver": "^7.7.1",
-    "@vitest/coverage-v8": "^4.1.9",
-    "@vitest/eslint-plugin": "^1.6.20",
-    "eslint": "^10.5.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/eslint-plugin": "^1.6.22",
+    "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-lite": "~0.6.0",
-    "eslint-plugin-n": "^18.1.0",
-    "lint-staged": "^17.0.7",
-    "oxfmt": "^0.54.0",
+    "eslint-plugin-n": "^18.2.1",
+    "lint-staged": "^17.0.8",
+    "oxfmt": "^0.58.0",
     "pkg-pr-new": "^0.0.75",
     "publint": "^0.3.21",
-    "tsdown": "^0.22.2",
+    "tsdown": "^0.22.4",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0",
-    "vitest": "^4.1.9"
+    "typescript-eslint": "^8.63.0",
+    "vitest": "^4.1.10"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,json5,yaml,yml,css,scss,md}": [
@@ -69,5 +70,5 @@
   "engines": {
     "node": "^22.11 || ^24 || >=26"
   },
-  "packageManager": "pnpm@11.5.2+sha512.71c631e382066efc25625d5cf029075de07b61b37f6e27350fbd84b1bda5864c8c1967adc280776b45c30a715c0359a3be08fef42d5bb09e2b99029979692916"
+  "packageManager": "pnpm@11.13.1+sha512.b2fc7683b8a6525414e7d13e1ba28caaddde96bf66ec540bfaeb7e702b81f3e0be4d1f295edf7f9fe0396740a8dce4509c582ddf79891f4543fea32d37645f25"
 }

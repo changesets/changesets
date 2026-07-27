@@ -1,5 +1,48 @@
 # @changesets/get-github-info
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+## 1.0.0-next.3
+
+### Major Changes
+
+- [#2121](https://github.com/changesets/changesets/pull/2121) [`dae394c`](https://github.com/changesets/changesets/commit/dae394c29952ce27dc34884c26dcd57a2756325f) Thanks [@bluwy](https://github.com/bluwy)! - Rename `getInfo` to `getCommitInfo`, and `getInfoFromPullRequest` to `getPullRequestInfo`. They may now return `undefined` if the commit or pull request is not found in the GitHub repository.
+
+  The return types are also slightly changed but should contain the same information as before. To migrate:
+
+  ```ts
+  const info = await getCommitInfo({ commit, repo });
+  if (info == null) return;
+
+  // Before:
+  const authorLogin = info.user;
+  const authorLink = info.links.author;
+
+  const pullNumber = info.pull;
+  const pullLink = info.links.pull;
+
+  const commitLink = info.links.commit;
+
+  // After:
+  const authorLogin = info.author.login;
+  const authorLink = info.author.markdownLink;
+
+  const pullNumber = info.pull.number;
+  const pullLink = info.pull.markdownLink;
+
+  const commitLink = info.commit.markdownLink;
+  ```
+
+  `getPullRequestInfo` also has a similar migration path.
+
+### Minor Changes
+
+- [#2121](https://github.com/changesets/changesets/pull/2121) [`dae394c`](https://github.com/changesets/changesets/commit/dae394c29952ce27dc34884c26dcd57a2756325f) Thanks [@bluwy](https://github.com/bluwy)! - Improve data fetching by using GraphQL fragments to reduce the query size, and set a maximum batch size of 50 to avoid hitting rate limits
+
 ## 1.0.0-next.2
 
 ### Major Changes

@@ -100,8 +100,7 @@ export default defineConfig(
   {
     files: [
       "**/index.ts", // to be removed in next release (v4) when we are dropping default export
-      "**/vitest.config.mts",
-      "**/eslint.config.mjs",
+      "**/*.config.*", // config files often return default exports
     ],
     rules: {
       "import-lite/no-default-export": "off",
@@ -116,13 +115,6 @@ export default defineConfig(
     rules: {
       // mock functions often have to be async to match the original fn
       "@typescript-eslint/require-await": "off",
-    },
-  },
-  {
-    files: ["**/*.config.*"],
-    rules: {
-      // config files often return default exports
-      "import-lite/no-default-export": "off",
     },
   },
   eslintConfigPrettier,
