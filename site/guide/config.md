@@ -12,7 +12,7 @@ Changesets keeps its configuration in `.changeset/config.json`. The default conf
   "baseBranch": "main",
   "changedFilePatterns": ["**"],
   "format": "auto",
-  "privatePackages": { "version": true, "tag": false },
+  "privatePackages": { "version": false, "tag": false },
   "updateInternalDependencies": "patch",
   "ignore": [],
   "bumpVersionsWithWorkspaceProtocolOnly": false
@@ -143,14 +143,15 @@ In `"auto"` mode, Changesets uses [@changesets/format](https://github.com/change
 
 ## privatePackages
 
-- **Type:** `{ version?: boolean; tag?: boolean } | false`
+- **Type:** `{ version?: boolean; tag?: boolean } | boolean`
+- **Related:** [Beyond npm](./beyond-npm.md)
 
-Controls how private packages should be versioned and tagged. By default, Changesets will update the version for private packages but will not create a tag.
+Controls how private packages should be versioned and tagged. By default, Changesets will not version or tag private packages. Set `true` to version and tag private packages, or use the object form to configure each behavior separately.
 
 ### privatePackages.version
 
 - **Type:** `boolean`
-- **Default:** `true`
+- **Default:** `false`
 
 Whether to update the version of private packages when running `changeset version`.
 

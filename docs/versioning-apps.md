@@ -1,5 +1,5 @@
 > [!WARNING]
-> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/private-packages
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/beyond-npm
 
 # Managing applications or non-npm packages
 

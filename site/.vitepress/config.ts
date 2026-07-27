@@ -189,7 +189,7 @@ function getMainSidebar(): DefaultTheme.SidebarItem[] {
         },
         { text: "Snapshot Releases", link: "snapshot-releases" },
         { text: "Prereleases", link: "prereleases" },
-        { text: "Private Packages", link: "private-packages" },
+        { text: "Beyond npm", link: "beyond-npm" },
       ],
     },
     {

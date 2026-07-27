@@ -1,10 +1,10 @@
-# Private Packages
+# Beyond npm
 
-Changesets can be used to manage private packages such as applications or non-npm packages (i.e. dotnet NuGet packages, ruby gems, docker images, etc).
+When using Changesets, you are not limited to only publishing to npm. Changesets can also be used to manage private packages such as applications or non-npm packages (i.e. dotnet NuGet packages, ruby gems, docker images, etc).
 
 The only requirement is that the project has a `package.json` file to manage the versions and dependencies within the repo. It should have at least `name`, `private` and `version` set:
 
-```json
+```json [packages/my-project/package.json]
 {
   "name": "my-project",
   "private": true,
@@ -12,7 +12,7 @@ The only requirement is that the project has a `package.json` file to manage the
 }
 ```
 
-By default, changesets can be added for private packages and be versioned as a normal package. Private packages can also be tagged by setting [`privatePackages.tag`](./config.md#privatepackagestag) to `true` in your `.changeset/config.json` file.
+And set [`privatePackages.version`](./config.md#privatepackages-version) to `true` in your `.changesets/config.json` file to enable versioning for these private packages. The packages can also be tagged during `changeset publish` by setting [`privatePackages.tag`](./config.md#privatepackages-tag) to `true`.
 
 ## Private Dependencies
 
