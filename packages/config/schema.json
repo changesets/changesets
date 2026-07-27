@@ -122,7 +122,7 @@
           "required": []
         },
         {
-          "const": false
+          "type": "boolean"
         }
       ],
       "description": "Opt in to tracking non-npm / private packages",

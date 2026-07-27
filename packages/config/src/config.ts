@@ -98,7 +98,7 @@ export const WrittenConfigSchema = v.object({
         version: v.optional(v.boolean(), false),
         tag: v.optional(v.boolean(), false),
       }),
-      v.literal(false),
+      v.boolean(),
     ]),
     "Opt in to tracking non-npm / private packages",
     {},

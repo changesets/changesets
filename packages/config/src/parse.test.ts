@@ -337,6 +337,14 @@ describe("validateConfig", () => {
         },
       },
       {
+        name: "privatePackages: true",
+        config: { privatePackages: true },
+        expected: {
+          ...defaultConfig,
+          privatePackages: { version: true, tag: false },
+        },
+      },
+      {
         name: "privatePackages: empty object",
         config: { privatePackages: {} },
         expected: defaultConfig,
