@@ -95,7 +95,12 @@ async function migratePreState(
     for (const changeset of preState.changesets) {
       const oldPath = path.resolve(rootDir, ".changeset", `${changeset}.md`);
       const newPath = path.resolve(preChangesetsDir, `${changeset}.md`);
-      await fs.rename(oldPath, newPath);
+      try {
+        await fs.rename(oldPath, newPath);
+      } catch {
+        // Best-effort only. It's possible for "changesets" to refer to a non-existing
+        // changeset id before without errors
+      }
     }
 
     delete preState.changesets;
