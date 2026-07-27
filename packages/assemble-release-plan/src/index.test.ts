@@ -861,8 +861,6 @@ describe("assembleReleasePlan", () => {
         },
       );
 
-      console.log(setup.changesets, setup.packages, releases);
-
       expect(releases.length).toEqual(2);
       expect(releases[0].name).toEqual("pkg-a");
       expect(releases[0].newVersion).toEqual("1.0.1");

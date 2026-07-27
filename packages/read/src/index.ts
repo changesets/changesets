@@ -17,9 +17,7 @@ async function filterChangesetsSinceRef(
     cwd: changesetBase,
     ref: sinceRef,
   });
-  const newHashes = newChangesets.map((c) =>
-    c.replace(/^.*\/\.changeset\//, ""),
-  );
+  const newHashes = newChangesets.map((c) => c.slice(".changeset/".length));
 
   return changesets.filter((dir) => newHashes.includes(dir));
 }
@@ -64,14 +62,16 @@ export async function readChangesets(
     );
   }
 
-  changesets = changesets.filter(
-    (file) =>
+  changesets = changesets.filter((file) => {
+    file = path.basename(file);
+    return (
       !file.startsWith(".") &&
       file.endsWith(".md") &&
       !ignoredMdFiles.some((pattern) =>
         typeof pattern === "string" ? pattern === file : pattern.test(file),
-      ),
-  );
+      )
+    );
+  });
 
   const changesetContents = changesets.map(async (file) => {
     const changeset = await fs.readFile(path.join(changesetBase, file), "utf8");
