@@ -1,5 +1,33 @@
 # @changesets/cli
 
+## 3.0.0-next.10
+
+### Minor Changes
+
+- [#2155](https://github.com/changesets/changesets/pull/2155) [`5a8119b`](https://github.com/changesets/changesets/commit/5a8119b99db13d82f2123250da6cf4de0ebcc769) Thanks [@beeequeue](https://github.com/beeequeue)! - Refactored the `changeset publish` flow.
+
+- [#2172](https://github.com/changesets/changesets/pull/2172) [`9349503`](https://github.com/changesets/changesets/commit/934950382e96eb32de223d8250d181a480a82438) Thanks [@beeequeue](https://github.com/beeequeue)! - Added version change preview when selecting a version type for a single package.
+
+### Patch Changes
+
+- [#2182](https://github.com/changesets/changesets/pull/2182) [`3816f4f`](https://github.com/changesets/changesets/commit/3816f4f9ec4a27d6620d0b8a9b309a9a47e51297) Thanks [@Andarist](https://github.com/Andarist)! - Detect the package manager when a monorepo tool does not map directly to a supported publish tool
+
+- [#2171](https://github.com/changesets/changesets/pull/2171) [`3257f57`](https://github.com/changesets/changesets/commit/3257f57a59e14540fd0009cc4f664262f629e6f2) Thanks [@beeequeue](https://github.com/beeequeue)! - Enabled Node's Compile Cache to improve CLI startup speed.
+
+- [#2177](https://github.com/changesets/changesets/pull/2177) [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784) Thanks [@Andarist](https://github.com/Andarist)! - Avoid writing an `undefined` version when updating dependencies in unversioned private packages.
+- Updated dependencies [[`a736a20`](https://github.com/changesets/changesets/commit/a736a20c230a89232a122fe12ffd612361e0eef9), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/git@4.0.0-next.8
+  - @changesets/types@7.0.0-next.8
+  - @changesets/apply-release-plan@8.0.0-next.9
+  - @changesets/read@1.0.0-next.9
+  - @changesets/assemble-release-plan@7.0.0-next.9
+  - @changesets/changelog-git@1.0.0-next.8
+  - @changesets/config@4.0.0-next.8
+  - @changesets/get-dependents-graph@3.0.0-next.8
+  - @changesets/pre@3.0.0-next.8
+  - @changesets/should-skip-package@1.0.0-next.8
+  - @changesets/write@1.0.0-next.8
+
 ## 3.0.0-next.9
 
 ### Major Changes

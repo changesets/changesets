@@ -16,7 +16,7 @@ export default defineConfig({
         name: "slow",
         description:
           "Slow tests, like ones that require lots of git operations",
-        timeout: 10_000,
+        timeout: process.platform === "win32" ? 30_000 : 10_000,
       },
     ],
   },

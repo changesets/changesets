@@ -65,13 +65,14 @@ jobs:
           advanced-security: false
 
   test:
-    name: "Test using Node ${{ matrix.node_version }}"
+    name: "Test using Node ${{ matrix.node_version }} on ${{ matrix.os }}"
     needs: [build]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       matrix:
         node_version: [22, 24, 26]
+        os: [ubuntu-latest, windows-latest]
       fail-fast: false
     steps:
       - name: Check out repo
@@ -91,17 +92,17 @@ jobs:
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
       - name: Vitest tests
-        if: matrix.node_version != 24
+        if: matrix.node_version != 24 || matrix.os != 'ubuntu-latest'
         run: pnpm test
 
       # Run coverage only once on node 24 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
-        if: matrix.node_version == 24
+        if: matrix.node_version == 24 && matrix.os == 'ubuntu-latest'
         run: pnpm test --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
-        if: matrix.node_version == 24
+        if: matrix.node_version == 24 && matrix.os == 'ubuntu-latest'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 

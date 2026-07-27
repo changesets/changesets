@@ -1,5 +1,13 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Pack command e2e > 'npm 10' > handles lifecycle stdout while packing 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
+"
+`;
+
 exports[`Pack command e2e > 'npm 10' > packs from a publish plan 1`] = `
 "🦋 changeset v[version]
 
@@ -11,11 +19,19 @@ Packed packages:
 exports[`Pack command e2e > 'npm 10' > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
-An error occurred while packing pkg-a: EUNKNOWN
+An error occurred while packing pkg-a
 command failed
-sh -c node -e "console.error('prepack failed'); process.exit(1)"
+sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Pack command e2e > 'npm 11' > handles lifecycle stdout while packing 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
 "
 `;
 
@@ -30,11 +46,19 @@ Packed packages:
 exports[`Pack command e2e > 'npm 11' > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
-An error occurred while packing pkg-a: EUNKNOWN
+An error occurred while packing pkg-a
 command failed
-sh -c node -e "console.error('prepack failed'); process.exit(1)"
+sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Pack command e2e > 'npm 12' > handles lifecycle stdout while packing 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
 "
 `;
 
@@ -49,11 +73,19 @@ Packed packages:
 exports[`Pack command e2e > 'npm 12' > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
-An error occurred while packing pkg-a: EUNKNOWN
+An error occurred while packing pkg-a
 command failed
-sh -c node -e "console.error('prepack failed'); process.exit(1)"
+sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Pack command e2e > 'pnpm 10 + npm 10' > handles lifecycle stdout while packing 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
 "
 `;
 
@@ -69,10 +101,18 @@ exports[`Pack command e2e > 'pnpm 10 + npm 10' > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
 An error occurred while packing pkg-a: ELIFECYCLE
-pkg-a@1.0.0 prepack: \`node -e "console.error('prepack failed'); process.exit(1)"\`
+pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
 Exit status 1
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Pack command e2e > 'pnpm 11' > handles lifecycle stdout while packing 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
 "
 `;
 
@@ -88,10 +128,18 @@ exports[`Pack command e2e > 'pnpm 11' > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
 An error occurred while packing pkg-a: ELIFECYCLE
-pkg-a@1.0.0 prepack: \`node -e "console.error('prepack failed'); process.exit(1)"\`
+pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
 Exit status 1
 🦋 Exited with code 1
 
+"
+`;
+
+exports[`Pack command e2e > 'yarn 4' > handles lifecycle stdout while packing 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
 "
 `;
 

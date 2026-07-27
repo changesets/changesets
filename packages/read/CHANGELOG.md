@@ -1,5 +1,14 @@
 # @changesets/read
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- Updated dependencies [[`a736a20`](https://github.com/changesets/changesets/commit/a736a20c230a89232a122fe12ffd612361e0eef9), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/git@4.0.0-next.8
+  - @changesets/types@7.0.0-next.8
+  - @changesets/parse@1.0.0-next.9
+
 ## 1.0.0-next.8
 
 ### Patch Changes

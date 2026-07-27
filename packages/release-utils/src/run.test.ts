@@ -1,23 +1,24 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 import { add, commit } from "@changesets/git";
 import {
+  gitdir,
   linkNodeModules,
+  shallowClone,
   silenceLogsInBlock,
-  testdir,
 } from "@changesets/test-utils";
 import type { Changeset } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
 import { exec } from "tinyexec";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getCurrentBranch } from "./gitUtils.ts";
 import { runPublish, runVersion } from "./run.ts";
 
-const writeChangesets = (changesets: Changeset[], cwd: string) => {
-  return Promise.all(
+const writeChangesets = async (changesets: Changeset[], cwd: string) => {
+  await Promise.all(
     changesets.map((changeset) => writeChangeset(changeset, cwd)),
   );
+  await add(".", cwd);
+  await commit("add changesets", cwd);
 };
 
 vi.setConfig({ testTimeout: 10000 });
@@ -27,31 +28,9 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-async function setupRepoAndClone(cwd: string) {
-  await exec("git", ["init"], { nodeOptions: { cwd } });
-  await add(".", cwd);
-  await commit("commit1", cwd);
-
-  const mainBranch = await getCurrentBranch(cwd);
-
-  // Make a 1-commit-deep shallow clone of this repo
-  const clone = await testdir();
-  await exec(
-    "git",
-    // Note: a file:// URL is needed in order to make a shallow clone of
-    // a local repo
-    ["clone", "--depth", "1", pathToFileURL(cwd).toString(), "."],
-    { nodeOptions: { cwd: clone } },
-  );
-  await exec("git", ["checkout", "-b", "some-other-branch"], {
-    nodeOptions: { cwd },
-  });
-  return { clone, mainBranch };
-}
-
 describe("version", { tags: ["slow"] }, () => {
   it("returns the right changed packages and pushes to the remote", async () => {
-    const cwd = await testdir({
+    const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -91,7 +70,7 @@ describe("version", { tags: ["slow"] }, () => {
       cwd,
     );
 
-    const { clone, mainBranch } = await setupRepoAndClone(cwd);
+    const clone = await shallowClone(cwd);
 
     await linkNodeModules(clone);
 
@@ -99,7 +78,7 @@ describe("version", { tags: ["slow"] }, () => {
       cwd: clone,
     });
 
-    await exec("git", ["checkout", `changeset-release/${mainBranch}`], {
+    await exec("git", ["checkout", "changeset-release/main"], {
       nodeOptions: { cwd },
     });
 
@@ -163,7 +142,7 @@ describe("version", { tags: ["slow"] }, () => {
   });
 
   it("only includes bumped packages in the returned changed packages", async () => {
-    const cwd = await testdir({
+    const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -203,7 +182,7 @@ describe("version", { tags: ["slow"] }, () => {
       cwd,
     );
 
-    const { clone, mainBranch } = await setupRepoAndClone(cwd);
+    const clone = await shallowClone(cwd);
 
     await linkNodeModules(clone);
 
@@ -211,7 +190,7 @@ describe("version", { tags: ["slow"] }, () => {
       cwd: clone,
     });
 
-    await exec("git", ["checkout", `changeset-release/${mainBranch}`], {
+    await exec("git", ["checkout", "changeset-release/main"], {
       nodeOptions: { cwd },
     });
 
@@ -267,7 +246,7 @@ describe("version", { tags: ["slow"] }, () => {
   });
 
   it("doesn't include ignored package that got a dependency update in returned versions", async () => {
-    const cwd = await testdir({
+    const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -300,7 +279,7 @@ describe("version", { tags: ["slow"] }, () => {
       cwd,
     );
 
-    const { clone } = await setupRepoAndClone(cwd);
+    const clone = await shallowClone(cwd);
 
     await linkNodeModules(clone);
 
@@ -317,7 +296,7 @@ describe("version", { tags: ["slow"] }, () => {
 
 describe("publish", () => {
   it("publishes packages in a single package repo", async () => {
-    const cwd = await testdir({
+    const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
         name: "single-package",
@@ -325,7 +304,10 @@ describe("publish", () => {
       }),
     });
 
-    const { clone } = await setupRepoAndClone(cwd);
+    const clone = await shallowClone(cwd);
+    await exec("git", ["checkout", "-b", "some-other-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await linkNodeModules(clone);
 
@@ -350,7 +332,7 @@ describe("publish", () => {
   });
 
   it("publishes packages in a multi package repo", async () => {
-    const cwd = await testdir({
+    const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
@@ -371,7 +353,10 @@ describe("publish", () => {
       ".changeset/config.json": JSON.stringify({}),
     });
 
-    const { clone } = await setupRepoAndClone(cwd);
+    const clone = await shallowClone(cwd);
+    await exec("git", ["checkout", "-b", "some-other-branch"], {
+      nodeOptions: { cwd },
+    });
 
     await linkNodeModules(clone);
 

@@ -1,22 +1,27 @@
 import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { defaultConfig } from "@changesets/config";
 import { gitdir, type Fixture } from "@changesets/test-utils";
 import * as pty from "@lydell/node-pty";
 import { exec } from "tinyexec";
 import { AsyncDisposableStack } from "../../ponyfills/async-disposable-stack.ts";
 
+const isWindows = process.platform === "win32";
+
 export const cliPackageRoot = path.resolve(import.meta.dirname, "../../..");
-const oxcRegister = path.resolve(
-  cliPackageRoot,
-  "..",
-  "..",
-  "node_modules",
-  "@oxc-node",
-  "core",
-  "register.mjs",
-);
+const oxcRegister = pathToFileURL(
+  path.resolve(
+    cliPackageRoot,
+    "..",
+    "..",
+    "node_modules",
+    "@oxc-node",
+    "core",
+    "register.mjs",
+  ),
+).href;
 
 export type ExecResult = {
   exitCode: number | undefined;
@@ -183,9 +188,27 @@ async function resolvePackageManagerSpec(
   return `${packageManager}@${packageJson.version}`;
 }
 
-export function createPmBinEnv(pmBinPath: string, env: NodeJS.ProcessEnv = {}) {
+export async function createPmBinEnv(
+  cwd: string,
+  pmBinPath: string,
+  env: NodeJS.ProcessEnv = {},
+) {
+  const tempDir = path.join(cwd, ".tmp");
+  await fs.mkdir(tempDir, { recursive: true });
   return {
+    // Exercise normal user behavior regardless of where the tests run.
+    // CI-specific tests can opt in through env when needed.
+    CI: undefined,
+    GITHUB_ACTIONS: undefined,
+    // Required by ConPTY-launched processes on Windows.
+    SystemRoot: process.env.SystemRoot,
     ...env,
+    // pnpm 10 packs the package into TMPDIR and runs npm from there. If that is
+    // /tmp/pkg and an unrelated /tmp/node_modules exists, npm can treat /tmp
+    // as the project root and miss the fixture's .npmrc (and test registry).
+    // Keeping TMPDIR inside cwd means npm still walks upward, but stops at the
+    // fixture package.json and "accidentally" finds the equivalent .npmrc.
+    TMPDIR: tempDir,
     PATH: process.env.PATH
       ? `${pmBinPath}${path.delimiter}${process.env.PATH}`
       : pmBinPath,
@@ -201,10 +224,17 @@ export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
       packageName,
       command as keyof PmBins,
     );
-    const shimPath = path.join(root.path, command);
-    const shim = `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`;
+    const shimPath = path.join(
+      root.path,
+      isWindows ? `${command}.cmd` : command,
+    );
+    const shim = isWindows
+      ? `@echo off\r\n"${process.execPath}" "${target}" %*\r\n`
+      : `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`;
     await fs.writeFile(shimPath, shim);
-    await fs.chmod(shimPath, 0o755);
+    if (!isWindows) {
+      await fs.chmod(shimPath, 0o755);
+    }
   }
 
   const cleanup = stack.move();
@@ -220,8 +250,8 @@ function execTty(
   command: string,
   args: string[],
   options: {
+    onData?: (chunk: string, write: (data: string) => void) => void;
     signal?: AbortSignal;
-    stdin?: string;
     nodeOptions: {
       cwd: string;
       env?: NodeJS.ProcessEnv;
@@ -244,6 +274,7 @@ function execTty(
     });
     const data = child.onData((chunk) => {
       output += chunk;
+      options.onData?.(chunk, (data) => child.write(data));
     });
 
     const cleanup = () => {
@@ -269,9 +300,6 @@ function execTty(
     });
 
     options.signal?.addEventListener("abort", abort, { once: true });
-    if (typeof options.stdin === "string") {
-      child.write(options.stdin.replaceAll("\n", "\r"));
-    }
   });
 }
 
@@ -280,9 +308,9 @@ export async function runCliCommand(options: {
   cwd: string;
   args?: string[];
   env?: NodeJS.ProcessEnv;
+  onData?: (chunk: string, write: (data: string) => void) => void;
   pmBinPath: string;
   signal?: AbortSignal;
-  stdin?: string;
   tty?: boolean;
 }): Promise<ExecResult> {
   const args = [
@@ -293,11 +321,11 @@ export async function runCliCommand(options: {
   if (!globalThis.AsyncDisposableStack) {
     args.unshift("--import", oxcRegister);
   }
-  const env = createPmBinEnv(options.pmBinPath, options.env);
+  const env = await createPmBinEnv(options.cwd, options.pmBinPath, options.env);
   if (options.tty) {
     return execTty(process.execPath, args, {
+      onData: options.onData,
       signal: options.signal,
-      stdin: options.stdin,
       nodeOptions: {
         cwd: options.cwd,
         env,
@@ -308,7 +336,6 @@ export async function runCliCommand(options: {
   return exec(process.execPath, args, {
     nodePath: false,
     signal: options.signal,
-    stdin: options.stdin,
     nodeOptions: {
       cwd: options.cwd,
       env,
@@ -350,7 +377,7 @@ function createPnpmGitdir(packageName: string) {
     fixture: Fixture = {},
   ) => {
     const packageManager = await resolvePackageManagerSpec("pnpm", packageName);
-    const npmPath = path.join(pmBinPath, "npm");
+    const npmPath = path.join(pmBinPath, isWindows ? "npm.cmd" : "npm");
     const hasNpmShim = await fs
       .access(npmPath)
       .then(() => true)
@@ -406,7 +433,7 @@ function createYarnBerryGitdir(packageName: string) {
       nodePath: false,
       nodeOptions: {
         cwd,
-        env: createPmBinEnv(pmBinPath),
+        env: await createPmBinEnv(cwd, pmBinPath),
       },
       throwOnError: true,
     });
