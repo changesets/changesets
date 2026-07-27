@@ -91,6 +91,42 @@ describe("package info", () => {
 });
 
 describe("publishing", () => {
+  it("stages a publish and returns its stage id", async () => {
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stdout: JSON.stringify({ stageId: "stage-1" }),
+      stderr: "",
+    });
+
+    await expect(
+      yarn.publish({
+        pkg,
+        release,
+        tarballPath: null,
+        interactive: false,
+        otpCode: "123456",
+        stage: true,
+      }),
+    ).resolves.toEqual({
+      name: "@test/package",
+      version: "0.0.1",
+      result: "staged",
+      stageId: "stage-1",
+    });
+    expect(mockedExec.mock.calls[0][1]).toEqual([
+      "npm",
+      "publish",
+      "--access",
+      "public",
+      "--tag",
+      "latest",
+      "--json",
+      "--otp",
+      "123456",
+      "--staged",
+    ]);
+  });
+
   it("rejects tarballs without invoking Yarn", async () => {
     await expect(
       yarn.publish({

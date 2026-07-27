@@ -115,12 +115,29 @@ cli
   .option("--otp <code>", "One time password for npm publish")
   .option("--tag <name>", "Publish with the given npm dist-tag")
   .option("--from-pack-dir <dir>", "Publish from a packed output directory")
-  .option("--git-tag", "Create a git tag for the release", { default: true })
+  .option("--git-tag", "Create a git tag for the release")
+  .option("--stage", "Stage packages for approval instead of publishing")
   .action(async (options) => {
     withEnvOptions(normalizeOptions(options));
     const { publish } = await import("./commands/publish/index.ts");
     await publish(options);
   });
+
+cli
+  .command("stage <operation> [...ids]", "Approve or reject staged package IDs")
+  .option("--otp <code>", "One time password for the stage operation")
+  .option("--registry <url>", "Registry containing the staged packages")
+  .action(
+    async (
+      operation: string,
+      ids: string[],
+      options: Record<string, unknown>,
+    ) => {
+      normalizeOptions(options);
+      const { stage } = await import("./commands/stage/index.ts");
+      await stage({ ...options, operation, ids });
+    },
+  );
 
 cli
   .command("publish-plan", "Show packages that are ready to publish or tag")

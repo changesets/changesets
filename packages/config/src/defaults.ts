@@ -11,6 +11,7 @@ export const defaultWrittenConfig: WrittenConfig = {
   ignore: [],
   fixed: [],
   linked: [],
+  stagedPublishing: false,
   format: "auto",
   updateInternalDependencies: "patch",
   commit: false,

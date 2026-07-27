@@ -169,6 +169,29 @@ function getRegistryOverrides(packageJson: PackageJSON) {
   return registryOverrides;
 }
 
+function parseDistTags(output: string): Record<string, string> {
+  if (!output) return {};
+
+  try {
+    const parsed: unknown = JSON.parse(output);
+    return isJsonObject(parsed)
+      ? Object.fromEntries(
+          Object.entries(parsed).filter(
+            (entry): entry is [string, string] => typeof entry[1] === "string",
+          ),
+        )
+      : {};
+  } catch {
+    return Object.fromEntries(
+      output
+        .split("\n")
+        .map((line) => line.match(/^(.+?):\s+(\S+)\s*$/))
+        .filter((match): match is RegExpMatchArray => match != null)
+        .map((match) => [match[1], match[2]]),
+    );
+  }
+}
+
 // `npm info <pkg> --json` (aka `npm view`) behavior:
 //
 // - Bare package name starts with version string `'latest'`. If
@@ -217,6 +240,28 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
     info = parseInfoResult(exactResult) ?? {
       error: { code: "E404" },
     };
+  }
+  if ("error" in info && info.error.code === "E404") {
+    const tagsResult = await exec(
+      "npm",
+      ["dist-tag", "ls", packageJson.name, ...flags],
+      {
+        nodePath: false,
+        nodeOptions: { cwd },
+      },
+    );
+    if (tagsResult.exitCode === 0) {
+      const tags = parseDistTags(tagsResult.stdout);
+      // The exact local-version query already proved that version is absent.
+      // Here we only need to distinguish a truly new package from an existing
+      // package without `latest`; querying another exact version is unnecessary.
+      info = {
+        info: {
+          "dist-tags": tags,
+          versions: [...new Set(Object.values(tags))],
+        },
+      };
+    }
   }
   if ("error" in info) {
     return info.error.code === "E404"
@@ -330,6 +375,7 @@ export const publish: PublishTool["publish"] = async ({
   tarballPath,
   interactive,
   otpCode,
+  stage,
 }: PublishOptions): Promise<PublishResult> => {
   // cwd is super important for correct resolution of `.npmrc`
   //
@@ -362,16 +408,46 @@ export const publish: PublishTool["publish"] = async ({
     args.unshift(path.resolve(cwd, pkg.packageJson.publishConfig.directory));
   }
 
-  const { exitCode, stdout, stderr } = await exec("npm", ["publish", ...args], {
-    nodePath: false,
-    nodeOptions: {
-      stdio: interactive ? "inherit" : "pipe",
-      env: sanitizeEnv(process.env),
-      cwd,
+  const command = stage ? ["stage", "publish"] : ["publish"];
+  const { exitCode, stdout, stderr } = await exec(
+    "npm",
+    [...command, ...args],
+    {
+      nodePath: false,
+      nodeOptions: {
+        stdio: interactive ? "inherit" : "pipe",
+        env: sanitizeEnv(process.env),
+        cwd,
+      },
     },
-  });
+  );
   const resultBase = { name: release.name, version: release.version };
   if (exitCode === 0) {
+    if (stage) {
+      const json = getLastJsonObjectFromString(stdout);
+      const value = Array.isArray(json)
+        ? json[0]
+        : (json?.[release.name] ?? json);
+      const stageId =
+        value &&
+        typeof value === "object" &&
+        "stageId" in value &&
+        typeof value.stageId === "string"
+          ? value.stageId
+          : undefined;
+      if (!stageId) {
+        return {
+          ...resultBase,
+          result: "failed",
+          message: "The npm stage command did not report a stage ID.",
+        };
+      }
+      return {
+        ...resultBase,
+        result: "staged",
+        stageId,
+      };
+    }
     return {
       ...resultBase,
       result: "published",

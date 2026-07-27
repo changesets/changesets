@@ -111,6 +111,7 @@ describe("pack", () => {
               "version": "1.0.0",
               "access": "restricted",
               "tag": "latest",
+              "isNew": false,
               "tarball": {
                 "path": "packages/pkg-a-1.0.0.tgz",
                 "integrity": "sha256-20tNDRy0gL+a7qJTdxwA/r5ifyNnZfo31qVhTweaOqA="
@@ -153,6 +154,7 @@ describe("pack", () => {
           version: "1.0.0",
           access: "public",
           tag: "latest",
+          isNew: false,
         },
         {
           kind: "tag-only",

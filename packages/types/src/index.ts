@@ -112,6 +112,8 @@ export type Config = {
   format: "auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false;
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
+  /** Stage packages for approval instead of publishing them immediately. */
+  stagedPublishing?: boolean;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies: "patch" | "minor";
   ignore: ReadonlyArray<string>;
@@ -143,6 +145,8 @@ export type WrittenConfig = {
         version?: boolean;
         tag?: boolean;
       };
+  /** Stage packages for approval instead of publishing them immediately. */
+  stagedPublishing?: boolean;
   /** The minimum bump type to trigger automatic update of internal dependencies that are part of the same release */
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;

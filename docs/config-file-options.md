@@ -15,6 +15,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "bumpVersionsWithWorkspaceProtocolOnly": false,
   "changedFilePatterns": ["**"],
   "format": "auto",
+  "stagedPublishing": false,
   "privatePackages": { "version": true, "tag": false }
 }
 ```
@@ -253,6 +254,18 @@ When `tag` is set to `true`, Changesets will create a tag for private packages. 
   }
 }
 ```
+
+## `stagedPublishing` (optional boolean)
+
+Default value: `false`
+
+When enabled, `changeset publish` stages existing package versions for later
+approval instead of publishing them immediately. It can be overridden per
+invocation with `--stage` or `--no-stage`.
+
+New packages are rejected during preflight because npm staged publishing does
+not support their first publication. Staged packages skip Git tags by default;
+an explicit `--git-tag` is respected.
 
 ## `changedFilePatterns` (array of strings)
 

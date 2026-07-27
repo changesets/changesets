@@ -915,6 +915,107 @@ function createPmContext(
 
 describe("Publish command e2e", { tags: ["slow"] }, () => {
   describe.each(pmCases)("$name", (pm) => {
+    if (pm.name === "npm 12" || pm.name === "pnpm 11" || pm.name === "yarn 4") {
+      it("stages and approves an existing package version", async ({
+        signal,
+      }) => {
+        await using stack = new AbortableAsyncDisposableStack(signal);
+        const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        const stageId = randomUUID();
+        let stagedRequest: { body: ArrayBuffer; headers: Headers } | undefined;
+        const registry = stack.use(
+          await createTestRegistry({
+            packages: {
+              "pkg-a": {
+                versions: ["0.0.1"],
+                tags: { latest: "0.0.1" },
+              },
+            },
+            async middleware({ pnpr, request }) {
+              const { pathname } = new URL(request.url);
+              if (
+                request.method === "POST" &&
+                pathname === "/-/stage/package/pkg-a"
+              ) {
+                stagedRequest = {
+                  body: await request.clone().arrayBuffer(),
+                  headers: new Headers(request.headers),
+                };
+                return Response.json({ stageId }, { status: 201 });
+              }
+              if (
+                request.method === "POST" &&
+                pathname === `/-/stage/${stageId}/approve`
+              ) {
+                if (!stagedRequest) {
+                  return Response.json(
+                    { error: "Unknown staged package" },
+                    { status: 404 },
+                  );
+                }
+                return pnpr.fetch(
+                  new Request(new URL("/pkg-a", request.url), {
+                    method: "PUT",
+                    headers: stagedRequest.headers,
+                    body: stagedRequest.body,
+                  }),
+                );
+              }
+              return undefined;
+            },
+          }),
+        );
+        const cwd = await pm.gitdir(
+          createPmContext(registry, pmBinPath),
+          createPkgAFixture(),
+        );
+        const outputPath = path.join(cwd, "staged-output.ndjson");
+
+        const stageResult = await runCliCommand({
+          command: "publish",
+          args: ["--stage"],
+          cwd,
+          env: { CHANGESETS_OUTPUT: outputPath },
+          pmBinPath,
+          signal,
+        });
+        expect.soft(stageResult.exitCode).toBe(0);
+        const events = (await fs.readFile(outputPath, "utf8"))
+          .trim()
+          .split("\n")
+          .map((line) => JSON.parse(line));
+        expect.soft(events).toEqual([
+          expect.objectContaining({
+            type: "npm-stage",
+            packageName: "pkg-a",
+            version: "1.0.0",
+            tag: "latest",
+            gitTag: "pkg-a@1.0.0",
+            stageId,
+          }),
+        ]);
+        expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(false);
+
+        const approveResult = await runCliCommand({
+          command: "stage",
+          args: ["approve", events[0].stageId, "--otp", "123456"],
+          cwd,
+          pmBinPath,
+          signal,
+        });
+        expect.soft(approveResult.exitCode).toBe(0);
+
+        const packument = await fetchPackument(registry, "pkg-a");
+        expect.soft(packument).toMatchObject({
+          "dist-tags": { latest: "1.0.0" },
+          versions: {
+            "0.0.1": { name: "pkg-a", version: "0.0.1" },
+            "1.0.0": { name: "pkg-a", version: "1.0.0" },
+          },
+        });
+      }, 30_000);
+    }
+
     it("publishes a new version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));

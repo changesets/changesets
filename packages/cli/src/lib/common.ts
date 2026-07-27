@@ -2,6 +2,7 @@ import { createPromiseQueue } from "../utils/createPromiseQueue.ts";
 import type {
   PublishResult,
   PublishResultFailed,
+  PublishResultStaged,
   PublishResultSuccess,
 } from "./types.ts";
 
@@ -25,7 +26,8 @@ export function isAlreadyPublishedError(message: string) {
 
 export const isPublishSuccessful = (
   result: PublishResult,
-): result is PublishResultSuccess => result.result === "published";
+): result is PublishResultSuccess | PublishResultStaged =>
+  result.result === "published" || result.result === "staged";
 
 export const isPublishFailure = (
   result: PublishResult,

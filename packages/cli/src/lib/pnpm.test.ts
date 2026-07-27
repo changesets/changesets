@@ -50,6 +50,39 @@ describe("package info", () => {
       },
     );
   });
+
+  it("falls back to plain-text dist-tags when latest is missing", async () => {
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: {
+        name: "@test/package",
+        version: "0.0.2-beta.0",
+      },
+    } satisfies Package;
+    const notFound = {
+      exitCode: 1,
+      stdout: JSON.stringify({
+        error: { code: "ERR_PNPM_PACKAGE_NOT_FOUND" },
+      }),
+      stderr: "",
+    };
+    mockedExec
+      .mockResolvedValueOnce(notFound)
+      .mockResolvedValueOnce(notFound)
+      .mockResolvedValueOnce({
+        exitCode: 0,
+        stdout: "beta: 0.0.1-beta.0\n",
+        stderr: "",
+      });
+
+    await expect(pnpm.info({ cwd: "/workspace", pkg })).resolves.toEqual({
+      published: true,
+      info: {
+        "dist-tags": { beta: "0.0.1-beta.0" },
+        versions: ["0.0.1-beta.0"],
+      },
+    });
+  });
 });
 
 describe("packing", () => {
@@ -115,6 +148,44 @@ describe("publishing", () => {
     });
 
     expect(result.result).toEqual("published");
+  });
+
+  it("stages a publish and returns its stage id", async () => {
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stdout: JSON.stringify({
+        "@test/package": { stageId: "stage-1" },
+      }),
+      stderr: "",
+    });
+
+    await expect(
+      pnpm.publish({
+        pkg,
+        release,
+        tarballPath: null,
+        interactive: false,
+        otpCode: "123456",
+        stage: true,
+      }),
+    ).resolves.toEqual({
+      name: "@test/package",
+      version: "0.0.1",
+      result: "staged",
+      stageId: "stage-1",
+    });
+    expect(mockedExec.mock.calls[0][1]).toEqual([
+      "stage",
+      "publish",
+      "--json",
+      "--access",
+      "public",
+      "--tag",
+      "latest",
+      "--no-git-checks",
+      "--otp",
+      "123456",
+    ]);
   });
 
   const alreadyPublishedCases = Object.entries(

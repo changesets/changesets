@@ -59,6 +59,7 @@ export type PublishOptions = {
   tarballPath: string | null;
   interactive: boolean;
   otpCode: string | null;
+  stage?: boolean;
 };
 
 type PublishResultBase = {
@@ -69,6 +70,11 @@ type PublishResultBase = {
 
 export type PublishResultSuccess = PublishResultBase & {
   result: "published";
+};
+
+export type PublishResultStaged = PublishResultBase & {
+  result: "staged";
+  stageId: string;
 };
 
 export type PublishResultFailed = PublishResultBase & {
@@ -92,6 +98,7 @@ export type PublishResultFailedNeeds2fa = PublishResultBase & {
 
 export type PublishResult =
   | PublishResultSuccess
+  | PublishResultStaged
   | PublishResultFailed
   | PublishResultAlreadyPublished
   | PublishResultFailedNeeds2fa;
