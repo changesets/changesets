@@ -85,6 +85,7 @@ export async function getCommitsThatAddFiles(
             [
               "log",
               "--diff-filter=A",
+              "--follow",
               "--max-count=1",
               short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
               gitPath,
