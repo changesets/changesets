@@ -138,7 +138,7 @@ export type WrittenConfig = {
   format?: "auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false;
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
-    | false
+    | boolean
     | {
         version?: boolean;
         tag?: boolean;

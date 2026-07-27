@@ -95,10 +95,10 @@ export const WrittenConfigSchema = v.object({
   privatePackages: rootKey(
     v.union([
       v.object({
-        version: v.optional(v.boolean(), true),
+        version: v.optional(v.boolean(), false),
         tag: v.optional(v.boolean(), false),
       }),
-      v.literal(false),
+      v.boolean(),
     ]),
     "Opt in to tracking non-npm / private packages",
     {},
@@ -182,16 +182,14 @@ export function normalizeWrittenConfig({
     config.ignore = globMatch(packageNames, writtenConfig.ignore);
   }
 
-  // TODO consider enabling this by default in the next major version
-  // might be more context in here: https://github.com/changesets/changesets/pull/662
   if (typeof writtenConfig.privatePackages !== "object") {
     config.privatePackages = {
-      version: writtenConfig.privatePackages ?? true,
-      tag: false,
+      version: writtenConfig.privatePackages ?? false,
+      tag: writtenConfig.privatePackages ?? false,
     };
   } else {
     config.privatePackages = {
-      version: writtenConfig.privatePackages.version ?? true,
+      version: writtenConfig.privatePackages.version ?? false,
       tag: writtenConfig.privatePackages.tag ?? false,
     };
   }
