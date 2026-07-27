@@ -229,7 +229,7 @@ Default value: `true`
 
 ## `privatePackages` (object or boolean)
 
-This option is for setting how private packages should be handled. By default, Changesets will not version or tag private packages. Set it to `true` to version private packages without tagging them, or use the object form to configure each behavior separately.
+This option is for setting how private packages should be handled. By default, Changesets will not version or tag private packages. Set it to `true` to version and tag private packages, or use the object form to configure each behavior separately.
 
 ### `version` (optional boolean)
 
@@ -257,7 +257,7 @@ This is equivalent to:
 {
   "privatePackages": {
     "version": true,
-    "tag": false
+    "tag": true
   }
 }
 ```

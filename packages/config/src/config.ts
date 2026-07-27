@@ -185,7 +185,7 @@ export function normalizeWrittenConfig({
   if (typeof writtenConfig.privatePackages !== "object") {
     config.privatePackages = {
       version: writtenConfig.privatePackages ?? false,
-      tag: false,
+      tag: writtenConfig.privatePackages ?? false,
     };
   } else {
     config.privatePackages = {
