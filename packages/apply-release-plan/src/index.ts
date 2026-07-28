@@ -230,7 +230,6 @@ export async function applyReleasePlan(
       }
     }),
   );
-  // }
 
   // We return the touched files to be committed in the cli
   return touchedFiles;
