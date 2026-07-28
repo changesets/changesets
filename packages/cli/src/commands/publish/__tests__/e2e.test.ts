@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, type ExecException } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { once } from "node:events";
 import fs from "node:fs/promises";
@@ -553,21 +553,29 @@ function execChild(
     const closed = once(processHandle, "close");
 
     if (process.platform === "win32") {
-      await new Promise<void>((resolve, reject) => {
-        execFile(
-          "taskkill.exe",
-          ["/PID", String(pid), "/T", "/F"],
-          { windowsHide: true },
-          (error) => {
-            if (error && error.code !== 128) {
-              // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-              reject(error);
-            } else {
-              resolve();
-            }
-          },
-        );
-      });
+      const taskkillError = await new Promise<(ExecException & Error) | null>(
+        (resolve) => {
+          execFile(
+            "taskkill.exe",
+            ["/PID", String(pid), "/T", "/F"],
+            { windowsHide: true },
+            (error) => resolve(error),
+          );
+        },
+      );
+
+      if (taskkillError && taskkillError.code !== 128) {
+        // A child can exit while taskkill is walking the process tree. It then
+        // reports failure even when it successfully terminated the root.
+        const closedDespiteError = await Promise.race([
+          closed.then(() => true),
+          setTimeout(1_000, false),
+        ]);
+        if (!closedDespiteError) {
+          throw taskkillError;
+        }
+        return;
+      }
 
       await closed;
       return;
