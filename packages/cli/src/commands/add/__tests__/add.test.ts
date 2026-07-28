@@ -162,7 +162,6 @@ describe("Add command", () => {
   it("should generate a changeset in a single package repo", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
-        private: true,
         name: "single-package",
         version: "1.0.0",
       }),
@@ -263,7 +262,6 @@ describe("Add command", () => {
   it("should use summary passed via message and keep confirmation flow", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
-        private: true,
         name: "single-package",
         version: "1.0.0",
       }),
@@ -289,7 +287,6 @@ describe("Add command", () => {
   it("should allow empty summary when message is an empty string", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
-        private: true,
         name: "single-package",
         version: "1.0.0",
       }),
@@ -503,7 +500,7 @@ describe("Add command", () => {
     ]);
   });
 
-  it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
+  it("should not include private packages with a version in the prompt by default", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -524,13 +521,7 @@ describe("Add command", () => {
         name: "pkg-c",
         version: "1.0.0",
       }),
-      ".changeset/config.json": JSON.stringify({
-        ...defaultConfig,
-        privatePackages: {
-          version: false,
-          tag: false,
-        },
-      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
     });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
