@@ -1,5 +1,34 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Pack command e2e > 'bun 1' > handles lifecycle stdout while packing 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Pack command e2e > 'bun 1' > packs from a publish plan 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Pack command e2e > 'bun 1' > surfaces pack errors 1`] = `
+"🦋 changeset v[version]
+
+An error occurred while packing pkg-a
+$ node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"
+prepack failed
+error: script "prepack" exited with code 1
+
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`Pack command e2e > 'npm 10' > handles lifecycle stdout while packing 1`] = `
 "🦋 changeset v[version]
 

@@ -4,6 +4,7 @@ packages:
 
 allowBuilds:
   "@pnpm/pnpr": true
+  bun: true
 blockExoticSubdeps: true
 dedupePeers: true
 dedupePeerDependents: true

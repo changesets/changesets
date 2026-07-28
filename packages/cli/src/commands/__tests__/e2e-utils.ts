@@ -29,7 +29,7 @@ export type ExecResult = {
   stdout: string;
 };
 
-export type PmBins = Partial<Record<"npm" | "pnpm" | "yarn", string>>;
+export type PmBins = Partial<Record<"bun" | "npm" | "pnpm" | "yarn", string>>;
 
 export type TestRegistryConfig = {
   authToken?: string | null;
@@ -176,7 +176,7 @@ async function resolvePackageBin(packageName: string, command: keyof PmBins) {
 }
 
 async function resolvePackageManagerSpec(
-  packageManager: "npm" | "pnpm" | "yarn",
+  packageManager: "bun" | "npm" | "pnpm" | "yarn",
   packageName: string,
 ) {
   const packageJson = await readInstalledPackageJson(packageName);
@@ -228,9 +228,14 @@ export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
       root.path,
       isWindows ? `${command}.cmd` : command,
     );
-    const shim = isWindows
-      ? `@echo off\r\n"${process.execPath}" "${target}" %*\r\n`
-      : `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`;
+    const shim =
+      command === "bun"
+        ? isWindows
+          ? `@echo off\r\n"${target}" %*\r\n`
+          : `#!/bin/sh\nexec ${JSON.stringify(target)} "$@"\n`
+        : isWindows
+          ? `@echo off\r\n"${process.execPath}" "${target}" %*\r\n`
+          : `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`;
     await fs.writeFile(shimPath, shim);
     if (!isWindows) {
       await fs.chmod(shimPath, 0o755);
@@ -441,7 +446,45 @@ function createYarnBerryGitdir(packageName: string) {
   };
 }
 
+function createBunGitdir(packageName: string) {
+  return async (
+    { registry, pmBinPath }: PmGitdirContext,
+    fixture: Fixture = {},
+  ) => {
+    const packageManager = await resolvePackageManagerSpec("bun", packageName);
+
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        name: "bun-workspace-root",
+        packageManager,
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".npmrc": [
+        registry && `registry=${registry.url}`,
+        registry?.authToken &&
+          `//${registry.host}/:_authToken=${registry.authToken}`,
+      ].join("\n"),
+      ...fixture,
+    });
+    await exec("bun", ["install", "--lockfile-only"], {
+      nodePath: false,
+      nodeOptions: {
+        cwd,
+        env: await createPmBinEnv(cwd, pmBinPath),
+      },
+      throwOnError: true,
+    });
+    return cwd;
+  };
+}
+
 export const pmCases = [
+  {
+    name: "bun 1",
+    bins: { bun: "bun-1" },
+    gitdir: createBunGitdir("bun-1"),
+  },
   {
     name: "npm 10",
     bins: { npm: "npm-10" },

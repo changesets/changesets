@@ -214,6 +214,6 @@ export interface Packages {
   rootPackage?: Package;
   packages: Array<Package>;
   tool: {
-    type: "yarn" | "pnpm" | "lerna" | "bolt" | "root" | (string & {});
+    type: "bun" | "yarn" | "pnpm" | "lerna" | "bolt" | "root" | (string & {});
   };
 }
