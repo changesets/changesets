@@ -61,7 +61,7 @@ You can set up the [Changesets GitHub Action](https://github.com/changesets/acti
 
 #### GitHub permissions issues
 
-One important step to not miss is to enable appropriate permissions for the action to work :
+GitHub requires manually enabling actions to manage pull requests:
 
 1. Add writing permissions for the GitHub access token used by the job that triggers `changesets/action` :
 
