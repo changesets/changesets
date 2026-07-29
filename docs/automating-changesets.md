@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/automating
+
 # Automating Changesets
 
 While changesets are designed to work with a fully manual process, it also provides tools to help automate these releases. These can be broken into two major decisions:

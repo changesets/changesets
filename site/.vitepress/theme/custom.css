@@ -1,0 +1,66 @@
+/**
+ * Customize default theme styling by overriding CSS variables:
+ * https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/styles/vars.css
+ */
+
+:root {
+  --vp-c-brand-1: #006dcc;
+  --vp-c-brand-2: #006cc8;
+  --vp-c-brand-3: #1f9ce2;
+  --vp-c-brand-soft: rgba(102, 204, 255, 0.14);
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(
+    135deg,
+    var(--vp-c-brand-1) 10%,
+    var(--vp-c-brand-3) 90%
+  );
+  --vp-home-hero-image-background-image: linear-gradient(
+    135deg,
+    var(--vp-c-brand-1) 50%,
+    var(--vp-c-brand-3) 50%
+  );
+  --vp-home-hero-image-filter: blur(80px) opacity(0.7);
+
+  /* Add transparency for navigation bars */
+  --vp-nav-bg-color: color-mix(in srgb, var(--vp-c-bg) 70%, transparent);
+  --vp-local-nav-bg-color: color-mix(in srgb, var(--vp-c-bg) 70%, transparent);
+}
+
+.dark {
+  --vp-c-brand-1: #9ccfff;
+  --vp-c-brand-2: #4d9ee4;
+  --vp-c-brand-3: #2a7fc4;
+  --vp-c-brand-soft: rgba(77, 158, 228, 0.16);
+
+  --vp-home-hero-image-filter: blur(80px) opacity(0.5);
+}
+
+/* Ensure tagline stays single line */
+.VPHero .heading > .text {
+  font-size: 48px;
+}
+
+/* Loosen heading in mobile view */
+@media (max-width: 768px) {
+  .VPHero .heading > .name,
+  .VPHero .heading > .text {
+    letter-spacing: 0px;
+  }
+}
+
+/* Blur effect for navigation bars */
+.VPNavBar:not(.home.top),
+.VPLocalNav {
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* We do not need sponsor images for now */
+.VPHomeSponsors .sponsors {
+  display: none;
+}
+
+.VPFeature .details > a {
+  color: var(--vp-c-text-1);
+  text-decoration: underline;
+}

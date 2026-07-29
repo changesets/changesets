@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/linked-packages
+
 # Linked Packages
 
 Linked packages allow you to specify a group or groups of packages that should be versioned together. There are some complex cases, so some examples are shown below to demonstrate various cases.

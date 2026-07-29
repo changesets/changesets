@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/prereleases
+
 # Prereleases
 
 > Warning! Prereleases are very complicated! Using them requires a thorough understanding of all parts of npm publishes. Mistakes can lead to repository and publish states that are very hard to fix.
