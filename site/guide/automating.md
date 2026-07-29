@@ -72,8 +72,10 @@ jobs:
   release:
     # ...
     permissions:
-      contents: write # For changesets to create/update PRs
-      pull-requests: write # For changesets to push tags
+      contents: write # to create git tags, GitHub Releases
+      pull-requests: write # to create/update Pull Requests
+      # optional, for npm Trusted Publishing
+      id-token: write # allow creating OIDC token
     steps:
       # ...
       - name: Create Release PR
