@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. There is no up-to-date version of this documentation as the relevant concepts are explained inlined where needed.
+
 # Changesets Dictionary
 
 This is a list of some words and phrases that are used in changesets which are helpful to know so that contributors to changesets have a shared understanding of various concepts in the project.
