@@ -63,7 +63,7 @@ You can set up the [Changesets GitHub Action](https://github.com/changesets/acti
 
 GitHub requires manually enabling actions to manage pull requests:
 
-1. Add writing permissions for the GitHub access token used by the job that triggers `changesets/action` :
+1. Add write permissions for the GitHub token used by the job that executes `changesets/action` :
 
 ```yml
 # In .github/workflows/release.yml or similar
