@@ -1,0 +1,43 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+
+# recommended: reset permissions and explicitly specify for each job
+permissions: {}
+
+# recommended: avoid concurrent runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to check out repo (actions/checkout) and to create releases (changesets/action)
+      pull-requests: write # to create pull request (changesets/action)
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/ # set this option to set up npm authentication
+          package-manager-cache: false # recommended: avoid cache poisoning
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build packages
+        run: npm build
+
+      - name: Version or publish packages
+        uses: changesets/action@v2
+        with:
+          publish-script: npm @changesets/cli publish # set this option to any command that executes `changeset publish` to publish packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # pass the token here

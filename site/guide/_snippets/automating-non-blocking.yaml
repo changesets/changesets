@@ -1,0 +1,36 @@
+name: Comment Changesets PR Status
+
+on:
+  pull_request_target:
+
+permissions: {} # recommended: reset permissions
+
+# recommended: avoid concurrent runs for the same pr
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+
+jobs:
+  pr-status:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read # to check out repo (actions/checkout)
+    outputs:
+      comment-body: ${{ steps.pr-status.outputs.comment-body }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+
+      - name: Generate PR status
+        id: pr-status
+        uses: changesets/action/pr-status@v2
+
+  pr-comment:
+    needs: pr-status
+    runs-on: ubuntu-slim
+    permissions:
+      pull-requests: write # to create and update comments on PRs (changesets/action/pr-comment)
+    steps:
+      - name: Comment on PR
+        uses: changesets/action/pr-comment@v2
+        with:
+          body: ${{ needs.pr-status.outputs.comment-body }}

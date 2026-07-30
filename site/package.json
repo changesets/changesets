@@ -13,6 +13,7 @@
   "devDependencies": {
     "takumi-js": "^2.0.2",
     "vitepress": "^2.0.0-alpha.18",
+    "vitepress-plugin-graphviz": "^0.1.0",
     "vitepress-plugin-group-icons": "^1.7.5"
   },
   "engines": {

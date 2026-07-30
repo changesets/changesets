@@ -1,6 +1,7 @@
 import type { Theme } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 import "./custom.css";
+import "vitepress-plugin-graphviz/style.css";
 import "virtual:group-icons.css";
 import { syncCodeGroups } from "./sync-code-groups.ts";
 
