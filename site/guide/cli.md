@@ -56,7 +56,10 @@ $ git commit -m "Version packages"
 
 ### Ignoring packages
 
-The `--ignore` flag allows you to skip packages from being published. This allows you to run partial publishes of the repository. This extends the [`ignore`](./config.md#ignore) option with the same documented caveats.
+The `--ignore` flag allows you to skip packages from being published. This allows you to run partial publishes of the repository. This extends the [`ignore`](./config.md#ignore) option with the same safety rails:
+
+1. If an ignored package is mentioned in a changeset that also includes a package that is not ignored, publishing will fail.
+2. If an ignored package requires one of its dependencies to be updated as part of a publish, publishing will also fail.
 
 ```bash
 $ changeset version --ignore pkg-a --ignore pkg-b
