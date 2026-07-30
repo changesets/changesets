@@ -333,7 +333,7 @@ async function internalPublish(
     if (json?.error) {
       if (
         json.error.code === "E403" &&
-        isAlreadyPublishedError(json.error.summary)
+        isAlreadyPublishedError(json.error.summary ?? json.error.message)
       ) {
         // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
         return { result: "skipped" };
