@@ -201,7 +201,6 @@ export type CommitFunctions = {
 export type PreState = {
   mode: "pre" | "exit";
   tag: string;
-  changesets: string[];
 };
 
 export interface Package {

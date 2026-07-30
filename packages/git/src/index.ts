@@ -85,6 +85,7 @@ export async function getCommitsThatAddFiles(
             [
               "log",
               "--diff-filter=A",
+              "--follow",
               "--max-count=1",
               short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
               gitPath,
@@ -251,13 +252,17 @@ export async function getChangedChangesetFilesSinceRef({
       },
     );
 
-    const tester = /.changeset\/[^/]+\.md$/;
+    const rootChangesetsRegex = /\.changeset\/[^/]+\.md$/;
+    const preChangesetsRegex = /\.changeset\/pre\/[^/]+\.md$/;
 
     const files = cmd.stdout
       .toString()
       .trim()
       .split("\n")
-      .filter((file) => tester.test(file));
+      .filter(
+        (file) =>
+          rootChangesetsRegex.test(file) || preChangesetsRegex.test(file),
+      );
     return files;
   } catch (err) {
     if (err instanceof GitError) return [];

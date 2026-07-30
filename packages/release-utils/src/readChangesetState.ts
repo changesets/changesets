@@ -15,9 +15,8 @@ export async function readChangesetState(
 
   let changesets = await readChangesets(cwd);
 
-  if (isInPreMode && preState != null) {
-    const changesetsToFilter = new Set(preState.changesets);
-    changesets = changesets.filter((x) => !changesetsToFilter.has(x.id));
+  if (isInPreMode) {
+    changesets = changesets.filter((x) => !x.id.startsWith("pre/"));
   }
 
   return {

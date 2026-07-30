@@ -1,3 +1,4 @@
+import fs from "node:fs/promises";
 import path from "node:path";
 import { gitdir, outputFile, shallowClone } from "@changesets/test-utils";
 import { writeChangeset } from "@changesets/write";
@@ -290,6 +291,17 @@ describe("git", { tags: ["slow"] }, () => {
         return commitSha;
       }
 
+      async function renameFileAndCommit(
+        fileA: string,
+        fileB: string,
+        cwd: string,
+      ) {
+        await fs.rename(path.join(cwd, fileA), path.join(cwd, fileB));
+        await add(fileA, cwd);
+        await add(fileB, cwd);
+        await commit(`rename file ${fileA} to ${fileB}`, cwd);
+      }
+
       it("reads the SHA of a file-add without deepening if commit already included in the shallow clone", async () => {
         const cwd = await gitdir({
           "a.js": 'export default "a"',
@@ -386,6 +398,31 @@ describe("git", { tags: ["slow"] }, () => {
         );
 
         expect(commits).toEqual([originalCommit1, undefined, originalCommit2]);
+      });
+
+      it("reads the SHA of a file-add even if renamed", async () => {
+        const cwd = await gitdir({
+          "a.js": 'export default "a"',
+        });
+        const originalCommit = await getCurrentCommitId({ cwd });
+
+        await renameFileAndCommit("a.js", "b.js", cwd);
+
+        const clone = await shallowClone(cwd, 1);
+        const commits = await getCommitsThatAddFiles(["b.js"], { cwd: clone });
+        expect(commits).toEqual([originalCommit]);
+      });
+
+      it("reads the SHA of a file-add even if renamed in later commits", async () => {
+        const cwd = await gitdir({});
+        await outputFile(path.join(cwd, "a.js"), 'export default "a"');
+        const originalCommit = await addFileAndCommit("a.js", cwd);
+
+        await renameFileAndCommit("a.js", "b.js", cwd);
+
+        const clone = await shallowClone(cwd, 1);
+        const commits = await getCommitsThatAddFiles(["b.js"], { cwd: clone });
+        expect(commits).toEqual([originalCommit]);
       });
     });
   });
