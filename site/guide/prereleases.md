@@ -8,7 +8,11 @@ Prereleases allow you to release alpha/beta versions of your packages before you
 
 Changesets can be configured to enter prerelease mode which will publish all packages as prerelease versions. When you're ready to do a stable release, you can exit prerelease mode and publish everything as stable versions. Note that you cannot enter prerelease mode for only a subset of packages.
 
-It is also recommended to **run prereleases on a different branch** than the default branch, so that you can continue making changes to your stable version for important bug and security fixes. Alternatively, make a copy of the default branch, e.g. `v1`, before entering prerelease for `v2`. See the [Backporting Changes](./backporting-changes.md) guide for more information for making changes to older versions.
+## Prepare Branches
+
+In this guide, we assume that prerelease mode is done on the default branch (e.g. `main`). Before entering prerelease mode, consider making a copy of the default branch, named e.g. `v1`, that will allow you to continue making changes to your stable version for important bug and security fixes. See the [Backporting Changes](./backporting-changes.md) guide for more information of the process.
+
+Alternatively, if you plan to continue active development on the current stable version, you can enter prerelease mode on a separate branch (e.g. `next`). Periodically, merge changes from the default branch into the prerelease branch to bring in the changes from the stable version. When you are ready to do a stable release, consider making a copy of the default branch (similar to the advice above), exit prerelease mode on the prerelease branch, and merge the branch back into the default branch.
 
 ## Enter Prerelease Mode
 
@@ -38,15 +42,15 @@ This will generate a `pre.json` file in the `.changeset` folder that stores the 
 
 ::: info Prerelease mode on a separate branch
 
-- Update the [`baseBranch`](./config.md#baseBranch) option with the branch name. This allows the [`add`](./cli.md#add) command to properly detect the changed packages.
+1. Update the [`baseBranch`](./config.md#baseBranch) option with the branch name. This allows the [`add`](./cli.md#add) command to properly detect the changed packages.
 
-- If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), make sure to allow running the workflow for this branch too.
+2. If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), make sure to allow running the workflow for this branch too.
 
 :::
 
 Commit the changes and Changesets will now be in prerelease mode.
 
-## Releasing Prerelease Versions
+## Release Prerelease Versions
 
 When you want to release a prerelease version, you can run the [`version`](./cli.md#version) and [`publish`](./cli.md#publish) commands as usual. See the [Versioning and Publishing](./versioning-and-publishing.md) guide for the usual flow.
 
@@ -90,6 +94,27 @@ If you publish a **new**, unpublished package for the first time in prerelease m
 This is because npm enforces that all packages have a `latest` tagged version.
 :::
 
+## Change Prerelease Tag
+
+During prerelease mode, you may want to change the tag for different stages of the prerelease, e.g. `alpha` -> `beta` -> `rc`. You can do this by directly changing the `"tag"` value in `.changeset/pre.json`:
+
+```json [.changeset/pre.json]
+{
+  "tag": "alpha", // [!code --]
+  "tag": "beta" // [!code ++]
+}
+```
+
+::: info Prerelease mode on a separate branch
+You do not need to rename the branch for the new tag. Prerelease only uses the specified tag for versions and dist-tags.
+:::
+
+## Manage Prerelease Changesets
+
+In prerelease mode, changesets are managed and created in the `.changeset` folder as usual. However after versioning, the changesets are not deleted, instead they are moved to the `.changeset/pre` folder. These changesets are collected to be used for the stable release after exiting prerelease mode, and will be included in the changelogs of the new stable versions.
+
+As such, some changesets that only matter between prerelease versions, e.g. a bug fix for a prerelease version, may not be relevant for the stable release. You can update or delete these changesets from the `.changeset/pre` folder anytime before exiting prerelease mode. If you do not want to include any changelog for the stable version, you can also choose to delete all the changesets directly. The stable release will still work as usual.
+
 ## Exit Prerelease Mode
 
 When you're ready to do a stable release, you can exit prerelease mode with the [`pre exit`](./cli.md#pre) command. This will set an intent to exit prerelease mode in the `pre.json` file but it won't do any actual versioning.
@@ -98,11 +123,11 @@ When you're ready to do a stable release, you can exit prerelease mode with the 
 
 Make sure to revert the changes you made before merging back into the default branch:
 
-- Update the [`baseBranch`](./config.md#baseBranch) option back to the default branch.
+1. Update the [`baseBranch`](./config.md#baseBranch) option back to the default branch.
 
-- If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), remove any configuration to run the workflow for the prerelease branch.
+2. If you have set up CI to [automatically run version and publish](./automating.md#how-do-i-run-the-version-and-publish-commands), remove any configuration to run the workflow for the prerelease branch.
 
-- You can now run the `exit` command, commit, and merge the changes back into the default branch.
+3. You can now run the `pre exit` command, commit, and merge the changes back into the default branch.
 
 :::
 
@@ -136,16 +161,3 @@ pkg-a @ version 1.0.1
 pkg-b @ version 2.1.0
 pkg-c @ version 3.0.0
 ```
-
-## Changing the Prerelease Tag
-
-During prerelease mode, you may want to change the tag for different stages of the prerelease, e.g. `alpha` -> `beta` -> `rc`. You can do this by directly changing the `"tag"` value in `.changeset/pre.json`:
-
-```json [.changeset/pre.json]
-{
-  "tag": "alpha", // [!code --]
-  "tag": "beta" // [!code ++]
-}
-```
-
-If you're using a different branch for prereleases, you do not need to rename the branch for the new tag. Prereleases only uses the specified tag for versions and dist-tags.
