@@ -12,7 +12,9 @@ The only requirement is that the project has a `package.json` file to manage the
 }
 ```
 
-And set [`privatePackages.version`](./config.md#privatepackages-version) to `true` in your `.changesets/config.json` file to enable versioning for these private packages. The packages can also be tagged during `changeset publish` by setting [`privatePackages.tag`](./config.md#privatepackages-tag) to `true`.
+And set [`privatePackages.version`](./config.md#privatepackages-version) to `true` in your `.changesets/config.json` file to enable versioning for these private packages.
+
+The packages can also be tagged during `changeset publish` by setting [`privatePackages.tag`](./config.md#privatepackages-tag) to `true`, which can be useful for [automating releases](./automating.md#publish-git-tags-only) of private packages via git tags.
 
 ## Private Dependencies
 
@@ -27,11 +29,3 @@ For example, if you have an app `A` that depends on a private library `B`, you c
 ```
 
 This works because `A` is private and will never be published to npm with a stale reference to `B`.
-
-## Automated Releases
-
-If [`privatePackages.tag`](./config.md#privatepackagestag) is enabled, you can also automate releases for private packages by following the [Automating Changesets](./automating.md) guide.
-
-When calling `changeset publish` from the GitHub Action, it will create the git tags and GitHub releases for the private packages. They will not be published to npm.
-
-You can also create custom workflows that trigger on tags/releases being created to publish the private packages to other environments.

@@ -1,4 +1,5 @@
-import { type DefaultTheme, defineConfig } from "vitepress";
+import { type DefaultTheme, defineConfig, MarkdownRenderer } from "vitepress";
+import { graphvizMarkdownPlugin } from "vitepress-plugin-graphviz";
 import {
   groupIconMdPlugin,
   groupIconVitePlugin,
@@ -35,8 +36,14 @@ export default defineConfig({
   lastUpdated: true,
   cleanUrls: true,
   markdown: {
-    config(md) {
-      md.use(groupIconMdPlugin);
+    async config(md) {
+      // @ts-expect-error upstream type issue
+      await graphvizMarkdownPlugin(md);
+      md.use(groupIconMdPlugin, {
+        titleBar: {
+          includeSnippet: true,
+        },
+      });
     },
   },
   vite: {
@@ -49,6 +56,7 @@ export default defineConfig({
             light: localIconLoader(import.meta.url, "../public/logo-light.svg"),
             dark: localIconLoader(import.meta.url, "../public/logo-dark.svg"),
           },
+          "github/workflows/": "logos:github-actions",
         },
       }),
     ],
