@@ -206,8 +206,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       '@pnpm/deps.graph-sequencer':
-        specifier: ^1100.0.0
-        version: 1100.0.0
+        specifier: ^1100.0.1
+        version: 1100.0.1
       cac:
         specifier: ^7.0.0
         version: 7.0.0
@@ -218,8 +218,8 @@ importers:
         specifier: ^2.14.1
         version: 2.14.1
       package-manager-detector:
-        specifier: ^1.6.0
-        version: 1.6.0
+        specifier: ^1.8.0
+        version: 1.8.0
       semver:
         specifier: ^7.8.1
         version: 7.8.5
@@ -970,8 +970,8 @@ packages:
     resolution: {integrity: sha512-htyl8TWnKL7K/ESFa1oW2UB5lVDxuF5DpM7tBi6Hu2LNL3mWkIzNLG6N4zoCUP1lCKNxWy/3iu8mS8MvToGd6w==}
     engines: {node: '>=12.22.0'}
 
-  '@pnpm/deps.graph-sequencer@1100.0.0':
-    resolution: {integrity: sha512-IfhLdXMjNaAt2Z/r0hAqMvH4UN/Eb6LAbnSHqF9Ay1EhQId8rFX58yIWXLUit6VjJTJAptnSPtO8nSu2/ggQsg==}
+  '@pnpm/deps.graph-sequencer@1100.0.1':
+    resolution: {integrity: sha512-pOr5+q1fLYKwFN3LAJuGZEnfXDcQ73zqgDHMtGy+K+uIoUqyY+6MeDCWFwfu+4EFuq76I5EPFofoNAI+Bmmq4A==}
     engines: {node: '>=22.13'}
 
   '@pnpm/network.ca-file@1.0.2':
@@ -2549,6 +2549,9 @@ packages:
   package-manager-detector@1.6.0:
     resolution: {integrity: sha512-61A5ThoTiDG/C8s8UMZwSorAGwMJ0ERVGj2OjoW5pAalsNOg15+iQiPzrLJ4jhZ1HJzmC2PIHT2oEiH3R5fzNA==}
 
+  package-manager-detector@1.8.0:
+    resolution: {integrity: sha512-yQA4H19AmPEoMUeavPMDIe1higySl/gH/yaQrkT/s07Qp+7pp2hYz30N3z2l5BkjVkF9Ow6o0wjJamm2y7Sn0A==}
+
   parse-github-url@1.0.4:
     resolution: {integrity: sha512-CEtCOt55fHmd6DpBc/N7H5NC4vJpcquhzzs9Iw2mRj8bVxo1O5TQI5MXKOMO7+yBOqD+5dKCCRK4Kj1KskZc6Q==}
     engines: {node: '>= 0.10'}
@@ -3077,7 +3080,7 @@ snapshots:
 
   '@antfu/install-pkg@1.1.0':
     dependencies:
-      package-manager-detector: 1.6.0
+      package-manager-detector: 1.8.0
       tinyexec: 1.2.4
 
   '@babel/helper-string-parser@7.29.7': {}
@@ -3461,7 +3464,7 @@ snapshots:
 
   '@pnpm/config.env-replace@1.1.0': {}
 
-  '@pnpm/deps.graph-sequencer@1100.0.0': {}
+  '@pnpm/deps.graph-sequencer@1100.0.1': {}
 
   '@pnpm/network.ca-file@1.0.2':
     dependencies:
@@ -4666,6 +4669,8 @@ snapshots:
       semver: 7.8.5
 
   package-manager-detector@1.6.0: {}
+
+  package-manager-detector@1.8.0: {}
 
   parse-github-url@1.0.4: {}
 
