@@ -10,8 +10,8 @@ import path from "node:path";
 const majorChangeRegex = /: major/;
 
 const changesets = await Array.fromAsync(
-  fs.glob("*.md", {
-    exclude: ["README.md"],
+  fs.glob("**/*.md", {
+    exclude: ["**/README.md"],
     cwd: path.resolve(import.meta.dirname, "..", "..", ".changeset"),
   }),
   async (p) => ({
@@ -38,16 +38,22 @@ const idsInComments = new Set(
 );
 
 const diff = changesetIds.difference(idsInComments);
-console.log(
-  `❌ ${diff.size}/${changesetIds.size} major changesets are missing from the migration guide:`,
-);
-console.log(
-  [...diff.values()]
-    .slice(0, 10)
-    .map((id) => ` - ${id}.md`)
-    .join("\n"),
-);
-if (diff.size > 10) {
-  console.log(`... and ${diff.size - 10} more`);
+if (diff.size === 0) {
+  console.log(
+    `✅ All ${changesetIds.size} major changesets are included in the migration guide`,
+  );
+} else {
+  console.log(
+    `❌ ${diff.size}/${changesetIds.size} major changesets are missing from the migration guide:`,
+  );
+  console.log(
+    [...diff.values()]
+      .slice(0, 10)
+      .map((id) => ` - ${id}.md`)
+      .join("\n"),
+  );
+  if (diff.size > 10) {
+    console.log(`... and ${diff.size - 10} more`);
+  }
+  process.exit(1);
 }
-if (diff.size !== 0) process.exit(1);

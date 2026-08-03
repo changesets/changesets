@@ -1,6 +1,6 @@
 # Migrating to v3
 
-<!-- not breaking: afraid-radios-fetch, brown-jokes-clap, changelog-github-template, eight-ears-study, every-boats-crash -->
+<!-- not breaking: afraid-radios-fetch, brown-jokes-clap, changelog-github-template, eight-ears-study, every-boats-crash, many-regions-cough, wet-loops-watch -->
 <!-- todo: bright-points-think -->
 
 ## All Packages & CLI
@@ -84,7 +84,27 @@ To preserve the v2 behavior of versioning private packages without creating Git 
 
 Alternatively, set `privatePackages` to `true` to both version and tag private packages.
 
+### Peer dependency updates now bump dependents by `patch`
+
+<!-- wide-feet-lie -->
+
+When a peer dependency is updated, Changesets now bumps dependent packages by `patch` instead of assuming the update is breaking and bumping them by `major`.
+
+If a dependent package is incompatible with the peer dependency's new version, add a `major` changeset for that package explicitly.
+
 ## The CLI
+
+### `version` exits with code 1 when there are no changesets
+
+<!-- fix-version-no-changesets-exit-code -->
+
+`changeset version` no longer exits successfully when there are no unreleased changesets. Update scripts that rely on the previous exit code `0` for this case.
+
+### Removed the `--sinceMaster` flag
+
+<!-- rare-carrots-read -->
+
+Replace the removed `changeset status --sinceMaster` flag with `changeset status --since=master` or `changeset status --since=main`.
 
 ### Versioned prerelease changesets are moved to `.changeset/pre/`
 
@@ -94,9 +114,13 @@ Changesets now stores changesets already included in a prerelease under `.change
 
 Existing prerelease state is migrated automatically the next time you run `changeset version` or `changeset status`. You can then edit or delete files in `.changeset/pre/` that are no longer relevant to the final stable release; you do not need to update `.changeset/pre.json` manually.
 
+The unused `initialVersions` property is also removed from `.changeset/pre.json`. Update custom tooling that reads this property.
+
+<!-- ready-rockets-boil -->
+
 ### `prettier` option is replaced with `format`
 
-<!-- clean-cameras-fix, green-forks-carry -->
+<!-- clean-cameras-fix, green-forks-carry, wise-mirrors-fry -->
 
 Changesets now supports more formatters than of just Prettier. It will auto-detect if one is installed already and use it.
 
@@ -154,7 +178,19 @@ TODO: how should we handle deprecations?
 
 ## Changelog Formatters
 
-...
+### Default changelog functions are now synchronous
+
+<!-- some-papayas-bet -->
+
+`ChangelogFunctions` may now return either synchronous or asynchronous results, while `defaultChangelogFunctions` now returns synchronous results. Update direct consumers that always expect a promise.
+
+## Commit Formatters
+
+### Default commit functions are now synchronous
+
+<!-- some-papayas-gamble -->
+
+`CommitFunctions` may now return either synchronous or asynchronous results, while `defaultCommitFunctions` now returns synchronous results. Update direct consumers that always expect a promise.
 
 ## The Rest
 
