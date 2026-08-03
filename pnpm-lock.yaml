@@ -85,6 +85,9 @@ importers:
 
   packages/apply-release-plan:
     dependencies:
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/config':
         specifier: workspace:^
         version: link:../config

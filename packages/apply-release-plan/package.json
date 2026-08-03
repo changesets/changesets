@@ -17,6 +17,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@changesets/catalogs": "workspace:^",
     "@changesets/config": "workspace:^",
     "@changesets/format": "^0.1.2",
     "@changesets/git": "workspace:^",
