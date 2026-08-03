@@ -72,7 +72,13 @@ jobs:
     strategy:
       matrix:
         node_version: [22, 24, 26]
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
+        include:
+          # Active LTS + other OS
+          - node_version: 24
+            os: macos-latest
+          - node_version: 24
+            os: windows-latest
       fail-fast: false
     steps:
       - name: Check out repo
