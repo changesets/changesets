@@ -17,6 +17,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@changesets/catalogs": "workspace:^",
     "@changesets/types": "workspace:^",
     "semver": "^7.8.1"
   },

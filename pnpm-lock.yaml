@@ -299,6 +299,9 @@ importers:
 
   packages/get-dependents-graph:
     dependencies:
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
