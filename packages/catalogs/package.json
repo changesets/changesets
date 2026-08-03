@@ -1,0 +1,30 @@
+{
+  "name": "@changesets/catalogs",
+  "version": "1.0.0-next.0",
+  "description": "Reads and updates the dependency catalogs of pnpm, Yarn and Bun workspaces",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/changesets/changesets.git",
+    "directory": "packages/catalogs"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@changesets/types": "workspace:^",
+    "jsonc-parser": "^3.3.1",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@changesets/test-utils": "workspace:*"
+  },
+  "engines": {
+    "node": "^22.11 || ^24 || >=26"
+  }
+}
