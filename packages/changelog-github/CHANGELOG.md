@@ -1,5 +1,12 @@
 # @changesets/changelog-github
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- Updated dependencies [[`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a)]:
+  - @changesets/types@7.0.0-next.9
+
 ## 1.0.0-next.8
 
 ### Patch Changes
