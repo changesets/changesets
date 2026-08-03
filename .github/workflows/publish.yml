@@ -41,7 +41,7 @@ jobs:
       - name: Select mode
         id: select-mode
         # https://github.com/changesets/action
-        uses: changesets/action/select-mode@8f7aee55a02899b4d6140157e482211eb49fcbee # v2.0.0-next.2
+        uses: changesets/action/select-mode@c47fa68bd43bb8ae0bae7e558622593deebf5955 # v2.0.0-next.3
 
   version:
     name: Version
@@ -75,7 +75,7 @@ jobs:
       - name: Create or update release pull request
         id: changesets
         # https://github.com/changesets/action
-        uses: changesets/action/version@8f7aee55a02899b4d6140157e482211eb49fcbee # v2.0.0-next.2
+        uses: changesets/action/version@c47fa68bd43bb8ae0bae7e558622593deebf5955 # v2.0.0-next.3
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: pnpm version-packages
@@ -107,7 +107,7 @@ jobs:
       - name: Pack
         id: pack
         # https://github.com/changesets/action
-        uses: changesets/action/pack@8f7aee55a02899b4d6140157e482211eb49fcbee # v2.0.0-next.2
+        uses: changesets/action/pack@c47fa68bd43bb8ae0bae7e558622593deebf5955 # v2.0.0-next.3
         with:
           publish-plan-artifact-id: ${{ needs.select-mode.outputs.publish-plan-artifact-id }}
 
@@ -136,6 +136,6 @@ jobs:
 
       - name: Publish to npm
         # https://github.com/changesets/action
-        uses: changesets/action/publish@8f7aee55a02899b4d6140157e482211eb49fcbee # v2.0.0-next.2
+        uses: changesets/action/publish@c47fa68bd43bb8ae0bae7e558622593deebf5955 # v2.0.0-next.3
         with:
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
