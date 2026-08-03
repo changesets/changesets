@@ -27,7 +27,22 @@ export default defineConfig({
   title: siteTitle,
   description: siteDescription,
   head: [
-    ["link", { rel: "icon", href: "logo-light.svg" }],
+    [
+      "link",
+      {
+        rel: "icon",
+        href: "logo-light.svg",
+        media: "(prefers-color-scheme: light)",
+      },
+    ],
+    [
+      "link",
+      {
+        rel: "icon",
+        href: "logo-dark.svg",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:site_name", content: siteTitle }],
     ["meta", { name: "twitter:card", content: "summary_large_image" }],
