@@ -1,4 +1,6 @@
+import { resolveCatalogRange } from "@changesets/catalogs";
 import type {
+  Catalogs,
   ChangelogFunctions,
   ModCompWithPackage,
   NewChangesetWithCommit,
@@ -23,9 +25,11 @@ export async function getChangelogEntry(
   {
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
+    catalogs,
   }: {
     updateInternalDependencies: "patch" | "minor";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
+    catalogs: Catalogs | undefined;
   },
 ) {
   if (release.type === "none") return null;
@@ -55,10 +59,21 @@ export async function getChangelogEntry(
     const peerDependencyVersionRange =
       release.packageJson.peerDependencies?.[rel.name];
 
-    const versionRange = dependencyVersionRange || peerDependencyVersionRange;
-    const usesWorkspaceRange = versionRange?.startsWith("workspace:");
+    const declaredRange = dependencyVersionRange || peerDependencyVersionRange;
+
+    if (!declaredRange) {
+      return false;
+    }
+
+    const versionRange = resolveCatalogRange(declaredRange, rel.name, catalogs);
+
+    if (versionRange == null) {
+      return false;
+    }
+
+    const usesWorkspaceRange = versionRange.startsWith("workspace:");
+
     return (
-      versionRange &&
       (usesWorkspaceRange || validRange(versionRange) != null) &&
       shouldUpdateDependencyBasedOnConfig(
         cwd,
