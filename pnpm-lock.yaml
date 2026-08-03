@@ -142,6 +142,22 @@ importers:
         specifier: workspace:*
         version: link:../config
 
+  packages/catalogs:
+    dependencies:
+      '@changesets/types':
+        specifier: workspace:^
+        version: link:../types
+      jsonc-parser:
+        specifier: ^3.3.1
+        version: 3.3.1
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
+    devDependencies:
+      '@changesets/test-utils':
+        specifier: workspace:*
+        version: link:../../scripts/test-utils
+
   packages/changelog-git:
     dependencies:
       '@changesets/types':
