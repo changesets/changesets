@@ -1,4 +1,4 @@
-import { type DefaultTheme, defineConfig } from "vitepress";
+import { type DefaultTheme, defineConfig, MarkdownRenderer } from "vitepress";
 import { graphvizMarkdownPlugin } from "vitepress-plugin-graphviz";
 import {
   groupIconMdPlugin,
