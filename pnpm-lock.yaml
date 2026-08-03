@@ -122,6 +122,9 @@ importers:
 
   packages/assemble-release-plan:
     dependencies:
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/errors':
         specifier: workspace:^
         version: link:../errors
