@@ -95,7 +95,7 @@ changeset version --ignore PACKAGE_NAME
 This command is used to allow you to skip packages from being published. This allows you to run partial publishes of the repository. Using ignore has some safety rails:
 
 1. If the package is mentioned in a changeset that also includes a package that is not ignored, publishing will fail.
-2. If the package requires one of its dependencies to be updated as part of a publish.
+2. If the package requires one of its dependencies to be updated as part of a publish, publishing will also fail.
 
 These restrictions exist to ensure your repository or published code does not end up in a broken state. For additional information on the intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos.md).
 
