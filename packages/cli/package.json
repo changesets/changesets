@@ -34,6 +34,7 @@
   "dependencies": {
     "@changesets/apply-release-plan": "workspace:^",
     "@changesets/assemble-release-plan": "workspace:^",
+    "@changesets/catalogs": "workspace:^",
     "@changesets/changelog-git": "workspace:^",
     "@changesets/config": "workspace:^",
     "@changesets/errors": "workspace:^",

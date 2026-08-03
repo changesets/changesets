@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { applyReleasePlan } from "@changesets/apply-release-plan";
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
+import { withCatalogs } from "@changesets/catalogs";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -27,7 +28,7 @@ export interface VersionOptions {
 export async function version(options: VersionOptions) {
   const cwd = options.cwd ?? process.cwd();
 
-  const packages = await getPackages(cwd);
+  const packages = await withCatalogs(await getPackages(cwd));
   await ensureChangesetFolder(packages.rootDir);
   const config = await readConfig(packages);
 

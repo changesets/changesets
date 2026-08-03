@@ -1,4 +1,5 @@
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
+import { withCatalogs } from "@changesets/catalogs";
 import { readConfig } from "@changesets/config";
 import { readPreState } from "@changesets/pre";
 import { readChangesets } from "@changesets/read";
@@ -10,7 +11,7 @@ export async function getReleasePlan(
   sinceRef?: string,
   passedConfig?: Config,
 ): Promise<ReleasePlan> {
-  const packages = await getPackages(cwd);
+  const packages = await withCatalogs(await getPackages(cwd));
 
   const configResult = await readConfig(packages.rootDir, packages);
   if (configResult.config == null) {

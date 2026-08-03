@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { withCatalogs } from "@changesets/catalogs";
 import type { Config, Packages } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import { type BaseIssue, getDotPath, safeParse } from "valibot";
@@ -61,7 +62,7 @@ export async function readConfig(
   packages?: Packages,
 ): Promise<ParseResult> {
   cwd ??= process.cwd();
-  packages ??= await getPackages(cwd);
+  packages ??= await withCatalogs(await getPackages(cwd));
 
   // read
   const json = JSON.parse(
