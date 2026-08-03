@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@changesets/assemble-release-plan": "workspace:^",
+    "@changesets/catalogs": "workspace:^",
     "@changesets/config": "workspace:^",
     "@changesets/pre": "workspace:^",
     "@changesets/read": "workspace:^",

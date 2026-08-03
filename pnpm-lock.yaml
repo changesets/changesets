@@ -191,6 +191,9 @@ importers:
       '@changesets/assemble-release-plan':
         specifier: workspace:^
         version: link:../assemble-release-plan
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/changelog-git':
         specifier: workspace:^
         version: link:../changelog-git
@@ -296,6 +299,9 @@ importers:
 
   packages/config:
     dependencies:
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/get-dependents-graph':
         specifier: workspace:^
         version: link:../get-dependents-graph
@@ -361,6 +367,9 @@ importers:
       '@changesets/assemble-release-plan':
         specifier: workspace:^
         version: link:../assemble-release-plan
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/config':
         specifier: workspace:^
         version: link:../config
