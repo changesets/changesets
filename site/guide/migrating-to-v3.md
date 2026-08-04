@@ -1,20 +1,19 @@
 # Migrating from v2 to v3
 
-This guide covers the changes you may need to make when upgrading a project from Changesets v2 to v3.
+This guide focuses on changes visible through `@changesets/cli`, which is how most people use Changesets.
 
-If you only use `@changesets/cli`, focus on the requirements, configuration, CLI, prerelease, and release-behavior sections. If you import other `@changesets/*` packages directly, also read [Package API changes](#package-api-changes).
+It does not cover every breaking API change in the lower-level `@changesets/*` packages. Those packages are mainly used by advanced integrations. If you import one directly, read that package's `CHANGELOG.md` in the [packages directory](https://github.com/changesets/changesets/tree/main/packages) before upgrading it.
 
-<!-- no migration action: afraid-radios-fetch, bright-points-think, brown-jokes-clap, changelog-github-template, curly-kids-thank, eight-ears-study -->
+<!-- no CLI migration action: afraid-radios-fetch, bright-points-think, brown-jokes-clap, changelog-github-template, chatty-kings-bake, clever-frogs-kick, cool-camels-type, cozy-knives-brake, curly-kids-thank, eight-ears-study, fiery-animals-knock, ready-rockets-boil, some-papayas-bet, some-papayas-gamble, wicked-dryers-shave -->
 
 ## Migration checklist
 
 1. Upgrade Node.js and your package manager to a supported version.
-2. If you import `@changesets/*` packages directly, make sure your code can load ES modules.
+2. Upgrade `@changesets/cli` to v3.
 3. Review `.changeset/config.json` for renamed options and changed defaults.
 4. Update renamed CLI commands and any CI logic that depends on exit codes.
 5. Review the prerelease and dependency-bumping behavior changes.
-6. Upgrade `@changesets/cli` and any directly installed `@changesets/*` packages together.
-7. Follow the [verification steps](#verify-the-migration) before publishing.
+6. Follow the [verification steps](#verify-the-migration) before publishing.
 
 ## Requirements and module format
 
@@ -30,18 +29,13 @@ Changesets v3 requires [Node.js](https://nodejs.org) `^22.11 || ^24 || >=26` and
 
 Upgrade these tools before installing Changesets v3. Older versions may still work, but they are not tested or supported. Yarn Classic is no longer supported.
 
-### Changesets packages are now ES modules
+### The CLI package is now an ES module
 
 <!-- spotty-chairs-call -->
 
-All Changesets packages are now published as ES modules. Using the CLI from package scripts does not require a code change, but code that imports Changesets packages must use ESM-compatible imports.
+`@changesets/cli` and the other Changesets packages are now published as ES modules. Invoking `changeset` from package scripts or CI continues to work normally on a supported Node.js version.
 
-```diff
--const { readChangesets } = require("@changesets/read");
-+import { readChangesets } from "@changesets/read";
-```
-
-If your project still uses CommonJS, use dynamic `import()` or migrate the consuming module to ESM.
+Only custom JavaScript that imports Changesets packages directly needs ESM migration work. Follow the release notes for the package being imported in that case.
 
 ### Bolt workspaces are no longer detected
 
@@ -200,12 +194,6 @@ You may edit or delete files in `.changeset/pre/` before the stable release if t
 
 See [Manage Prerelease Changesets](./prereleases.md#manage-prerelease-changesets) for the complete workflow.
 
-### `initialVersions` was removed from `pre.json`
-
-<!-- ready-rockets-boil -->
-
-The unused `initialVersions` property has been removed. Normal Changesets workflows require no action, but custom tooling that reads `.changeset/pre.json` must stop relying on this property.
-
 ### Prerelease tags are more consistent on non-npm registries
 
 <!-- many-regions-cough -->
@@ -231,104 +219,6 @@ If a dependent package is incompatible with the peer dependency's new version, a
 For pnpm projects, unpublished-package checks now follow pnpm's registry behavior. Scope-based `publishConfig` registry overrides and `publishConfig.registry` are ignored during these checks.
 
 If your repository relied on those fields to select a registry during unpublished-package detection, verify the result against your pnpm and npm configuration after upgrading.
-
-## Package API changes
-
-You can skip this section if your project only invokes `@changesets/cli` and does not import other Changesets packages.
-
-### `@changesets/config`: use `readConfig` or `validateConfig`
-
-<!-- cool-camels-type -->
-
-The `read` and `parse` exports were removed. Use `readConfig` to read `.changeset/config.json` from a project:
-
-```diff
--import { read } from "@changesets/config";
-+import { readConfig } from "@changesets/config";
-
--const config = await read(process.cwd());
-+const { config, warnings, errors } = await readConfig(process.cwd());
-+
-+for (const warning of warnings) {
-+  console.warn(warning);
-+}
-+if (config === undefined) {
-+  throw new Error(errors.join("\n"));
-+}
-```
-
-Use `validateConfig(json, packages)` when you already have an in-memory configuration object. Both functions return `{ config, warnings, errors }`; invalid configuration is reported in `errors` instead of being thrown.
-
-### `@changesets/errors`: `ValidationError` was removed
-
-<!-- wicked-dryers-shave -->
-
-Configuration validation no longer throws `ValidationError`. Handle the `errors` returned by `readConfig` or `validateConfig` as shown above.
-
-### `@changesets/get-github-info`: renamed functions and result fields
-
-<!-- fiery-animals-knock -->
-
-`getInfo` was renamed to `getCommitInfo`, and `getInfoFromPullRequest` was renamed to `getPullRequestInfo`. Both functions may return `undefined` when the requested repository item cannot be found.
-
-```diff
--import { getInfo } from "@changesets/get-github-info";
-+import { getCommitInfo } from "@changesets/get-github-info";
-
--const info = await getInfo({ commit, repo });
--const authorLogin = info.user;
--const authorLink = info.links.author;
--const pullNumber = info.pull;
--const pullLink = info.links.pull;
--const commitLink = info.links.commit;
-+const info = await getCommitInfo({ commit, repo });
-+if (info === undefined) return;
-+
-+const authorLogin = info.author?.login;
-+const authorLink = info.author?.markdownLink;
-+const pullNumber = info.pull?.number;
-+const pullLink = info.pull?.markdownLink;
-+const commitLink = info.commit.markdownLink;
-```
-
-`getPullRequestInfo` returns the same nested `author`, `pull`, and `commit` shapes where applicable.
-
-### `@changesets/release-utils`: pass commands and arguments separately
-
-<!-- clever-frogs-kick -->
-
-The publish helper now takes a command and argument array instead of a shell-script string:
-
-```diff
-await publish({
-- script: "pnpm changeset publish",
-+ command: "pnpm",
-+ args: ["changeset", "publish"],
-  cwd: process.cwd(),
-});
-```
-
-### `@changesets/release-utils`: removed process helpers
-
-<!-- chatty-kings-bake -->
-
-`execWithOutput` and `spawnWithOutput` were removed. They were not intended to be public APIs. Replace direct usage with [`tinyexec`](https://github.com/tinylibs/tinyexec) or `node:child_process`.
-
-### Formatter functions may be synchronous
-
-<!-- some-papayas-bet, some-papayas-gamble -->
-
-`ChangelogFunctions` and `CommitFunctions` may now return either a value or a promise. The default changelog and commit functions now return values synchronously.
-
-Code that uses `await` works with both versions and requires no change. Code that calls `.then()` directly on a default formatter result must switch to `await` or wrap the result in `Promise.resolve()`.
-
-### Formatter option types are stricter
-
-<!-- cozy-knives-brake -->
-
-The option parameters for `CommitFunctions` and `ChangelogFunctions`, together with the `commit` and `changelog` fields in `Config` and `WrittenConfig`, now use `null | Record<string, unknown>` instead of `any`-based types.
-
-This may reveal TypeScript errors in custom formatters. Give the options an explicit type and narrow unknown values before using them.
 
 ## Verify the migration
 
