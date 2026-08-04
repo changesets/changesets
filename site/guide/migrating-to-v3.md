@@ -1,19 +1,19 @@
 # Migrating from v2 to v3
 
-This guide focuses on changes visible through `@changesets/cli`, which is how most people use Changesets.
+Most projects interact with Changesets through `@changesets/cli`, so this guide focuses on the changes affecting this most common level of usage.
 
-It does not cover every breaking API change in the lower-level `@changesets/*` packages. Those packages are mainly used by advanced integrations. If you import one directly, read that package's `CHANGELOG.md` in the [packages directory](https://github.com/changesets/changesets/tree/main/packages) before upgrading it.
+The lower-level `@changesets/*` packages have their own breaking API changes. Using them directly is an advanced use case; if that applies to your project, read the package's `CHANGELOG.md` in the [packages directory](https://github.com/changesets/changesets/tree/main/packages) before upgrading it.
 
 <!-- no CLI migration action: afraid-radios-fetch, bright-points-think, brown-jokes-clap, changelog-github-template, chatty-kings-bake, clever-frogs-kick, cool-camels-type, cozy-knives-brake, curly-kids-thank, eight-ears-study, fiery-animals-knock, ready-rockets-boil, some-papayas-bet, some-papayas-gamble, wicked-dryers-shave -->
 
 ## Migration checklist
 
-1. Upgrade Node.js and your package manager to a supported version.
-2. Upgrade `@changesets/cli` to v3.
-3. Review `.changeset/config.json` for renamed options and changed defaults.
-4. Update renamed CLI commands and any CI logic that depends on exit codes.
-5. Review the prerelease and dependency-bumping behavior changes.
-6. Follow the [verification steps](#verify-the-migration) before publishing.
+1. **Upgrade the CLI.** Upgrade `@changesets/cli` to v3.
+2. **Check tool compatibility.** Make sure you're using supported versions of Node.js and your package manager.
+3. **Using the GitHub Action?** Upgrade it to v2 as well. Choose a v2 release from the action's [release notes](https://github.com/changesets/action/releases), then pin your workflow to that release's full commit SHA rather than the floating `@v2` tag.
+4. **Check your configuration.** Look through `.changeset/config.json` for renamed options and defaults that have changed.
+5. **Update scripts and CI.** Replace renamed commands and review any logic that depends on CLI exit codes.
+6. **Review release behavior.** Pay close attention to prereleases, private packages, and peer dependencies adjustments.
 
 ## Requirements and module format
 
