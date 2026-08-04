@@ -17,47 +17,47 @@ The lower-level `@changesets/*` packages have their own breaking API changes. Us
 
 ## Requirements and module format
 
-### Upgrade Node.js and your package manager
+### Check Node.js and package manager compatibility
 
 <!-- deep-coins-attend, every-boats-crash, free-results-love, free-results-love-2, lucky-terms-sink -->
 
-Changesets v3 requires [Node.js](https://nodejs.org) `^22.11 || ^24 || >=26` and supports:
+Changesets v3 is compatible with [Node.js](https://nodejs.org) `^22.11 || ^24 || >=26` and the following package manager versions:
 
 - [pnpm](https://pnpm.io) `>=10.0.0`
 - [npm](https://www.npmjs.com) `>=10.9.0`
 - [Yarn](https://yarnpkg.com) `>=4.5.2`
 
-Upgrade these tools before installing Changesets v3. Older versions may still work, but they are not tested or supported. Yarn Classic is no longer supported.
+Before installing Changesets v3, check that your local development and CI environments use supported versions. If they already do, you don't need to change them. Older versions might happen to work, but we don't test or support them. Yarn Classic is no longer supported.
 
 ### The CLI package is now an ES module
 
 <!-- spotty-chairs-call -->
 
-`@changesets/cli` and the other Changesets packages are now published as ES modules. Invoking `changeset` from package scripts or CI continues to work normally on a supported Node.js version.
+`@changesets/cli` and the other Changesets packages are now published as ES modules. If you only run `changeset` from package scripts or CI, nothing else needs to change once you're using a supported Node.js version.
 
-Only custom JavaScript that imports Changesets packages directly needs ESM migration work. Follow the release notes for the package being imported in that case.
+If custom JavaScript uses `require()` to load a Changesets package on Node.js 22.11, migrate it to ESM or use `--experimental-require-module`.
 
 ### Bolt workspaces are no longer detected
 
 <!-- plain-planes-arrive -->
 
-Changesets no longer supports Bolt monorepos. Migrate the workspace to [pnpm](https://pnpm.io/workspaces), [npm](https://docs.npmjs.com/cli/v12/using-npm/workspaces), or Yarn workspaces before upgrading.
+If your monorepo uses [Bolt](https://github.com/boltpkg/bolt), which is no longer maintained, move it to [pnpm](https://pnpm.io/workspaces), [npm](https://docs.npmjs.com/cli/v12/using-npm/workspaces), or [Yarn workspaces](https://yarnpkg.com/features/workspaces) before upgrading.
 
-### Upgrade v1 projects to v2 first
+### Still using v1?
 
 <!-- busy-points-guess, cool-places-hug, green-pianos-sneeze, lovely-years-spend, orange-cups-ask -->
 
-Changesets v3 removes the remaining compatibility code for v1 changeset files, configuration, and the old `changeset bump` workflow. If your project still uses v1 behavior, upgrade it to the latest v2 release before moving to v3.
+Upgrade to the latest v2 release first. v3 no longer supports v1 changeset files, configuration, or `changeset bump`.
 
 ## Configuration changes
 
-Only apply the changes below when the affected option is present in your `.changeset/config.json` or when you need to preserve the v2 default behavior.
+Open `.changeset/config.json` and work through the sections that match your setup. Most projects will only need one or two of these changes.
 
-### Move `useCalculatedVersionForSnapshots` to `snapshot`
+### Move experimental `useCalculatedVersionForSnapshots` to `snapshot`
 
 <!-- tangy-buses-smoke -->
 
-The experimental snapshot option has been removed. Move it to the stable `snapshot` configuration:
+The old experimental location for this option is gone. Move it to the stable `snapshot` configuration:
 
 ```diff
 {
@@ -76,9 +76,9 @@ See [`snapshot.useCalculatedVersion`](./config.md#snapshot-usecalculatedversion)
 
 <!-- plenty-forks-sip -->
 
-The default value of `baseBranch` changed from `master` to `main`.
+`main` is now the default value of `baseBranch`.
 
-If your repository still uses `master`, make the value explicit:
+If your repository uses `master`, add it explicitly:
 
 ```diff
 {
@@ -86,7 +86,7 @@ If your repository still uses `master`, make the value explicit:
 }
 ```
 
-If your repository uses `main`, you can keep an explicit value or remove it:
+If it uses `main`, an existing explicit value is harmless, but you can remove it:
 
 ```diff
 {
@@ -98,7 +98,7 @@ If your repository uses `main`, you can keep an explicit value or remove it:
 
 <!-- tidy-pandas-wave -->
 
-Private packages are no longer versioned by default. To preserve the v2 behavior of versioning them without creating Git tags, add:
+In v2, private packages were versioned without creating Git tags. To keep that behavior, add:
 
 ```diff
 {
@@ -106,13 +106,13 @@ Private packages are no longer versioned by default. To preserve the v2 behavior
 }
 ```
 
-Set `privatePackages` to `true` if you want Changesets to both version and tag private packages. See [`privatePackages`](./config.md#privatepackages) for all options.
+Use `"privatePackages": true` instead if you want Changesets to both version and tag private packages. See [`privatePackages`](./config.md#privatepackages) for all options.
 
 ### Replace `prettier` with `format`
 
 <!-- clean-cameras-fix, green-forks-carry, wise-mirrors-fry -->
 
-The `prettier` option has been replaced by [`format`](./config.md#format). Changesets can now format generated changesets, changelogs, and rewritten `package.json` files with Prettier, Oxfmt, Deno, or dprint.
+Formatting is now configured with [`format`](./config.md#format) rather than `prettier`. The new option supports Prettier, Oxfmt, Deno, and dprint for generated changesets and changelogs. When Changesets updates a `package.json`, it preserves the file's existing formatting.
 
 If you previously disabled formatting, rename the option:
 
@@ -123,13 +123,13 @@ If you previously disabled formatting, rename the option:
 }
 ```
 
-If you previously enabled Prettier, either use `"format": "prettier"` or remove the option to use automatic formatter detection. The default is `"auto"`.
+If you previously enabled Prettier, set `"format": "prettier"`. You can also remove the option and let the default `"auto"` mode detect the formatter used by your project.
 
 ### Replace `access: "private"` with `"restricted"`
 
 <!-- light-friends-warn -->
 
-The `private` alias is no longer accepted by the TypeScript configuration types. Use the npm access value `restricted`:
+The `private` alias is no longer accepted by the configuration types. Replace it with npm's `restricted` access value:
 
 ```diff
 {
@@ -144,41 +144,41 @@ The `private` alias is no longer accepted by the TypeScript configuration types.
 
 <!-- clean-tags-rename -->
 
-The `tag` command was renamed to make it clear that it creates Git tags rather than npm dist-tags:
+The `tag` command is now called `git-tag`, making it clearer that the command creates Git tags rather than npm dist-tags:
 
 ```diff
 -$ changeset tag
 +$ changeset git-tag
 ```
 
-Update package scripts and CI workflows that call the old command.
+Remember to update any package scripts or CI workflows that call the old command.
 
 ### Replace `--sinceMaster`
 
 <!-- rare-carrots-read -->
 
-The deprecated `changeset status --sinceMaster` flag has been removed. Pass the branch explicitly:
+The deprecated `--sinceMaster` shortcut has been removed. Pass the branch name to `--since` instead:
 
 ```diff
 -$ changeset status --sinceMaster
 +$ changeset status --since=main
 ```
 
-Use `--since=master` instead if that is your repository's base branch.
+Use `--since=master` if that is your repository's base branch.
 
 ### Handle `version` returning exit code 1 when there is nothing to release
 
 <!-- fix-version-no-changesets-exit-code -->
 
-`changeset version` now exits with code `1` when there are no unreleased changesets. Previously, this case exited successfully without changing anything.
+One CI behavior deserves extra attention: `changeset version` now exits with code `1` when there are no unreleased changesets. In v2, it exited successfully without changing anything.
 
-Review automation that treats every non-zero exit as an unexpected failure. In particular, make sure snapshot and release workflows distinguish “nothing to version” from an actual versioning error when that distinction matters.
+If an empty release is acceptable in your workflow, update the containing script so it doesn't treat this case as an unexpected failure. This is especially important for snapshot and automated release jobs.
 
 ### Expect small changes to interactive prompts
 
 <!-- wet-loops-watch -->
 
-The CLI now uses a different prompt library. The workflow is unchanged, but prompts look slightly different and cancellation is handled more reliably. No migration action is required unless tests or automation depend on the exact terminal output.
+The interactive workflow hasn't changed, but the prompts look a little different and cancellation is more reliable. You only need to do something here if tests or automation depend on the exact terminal output.
 
 ## Prerelease changes
 
@@ -186,11 +186,11 @@ The CLI now uses a different prompt library. The workflow is unchanged, but prom
 
 <!-- loud-parents-crash -->
 
-During prerelease mode, changesets that have already been included in a prerelease are now moved from `.changeset/` to `.changeset/pre/`. Their IDs are no longer accumulated in `.changeset/pre.json`.
+In prerelease mode, changesets that have already gone into a prerelease now move from `.changeset/` to `.changeset/pre/`. Their IDs are no longer collected in `.changeset/pre.json`.
 
-Existing prerelease state is migrated automatically the next time you run `changeset version` or `changeset status`. Commit the resulting file moves.
+The first time you run `changeset version` or `changeset status`, v3 migrates any existing prerelease state for you. This produces file moves that should be committed.
 
-You may edit or delete files in `.changeset/pre/` before the stable release if their changelog entries are no longer relevant. You do not need to update `.changeset/pre.json` after doing so.
+The files in `.changeset/pre/` provide the changelog entries for the eventual stable release. You can edit or delete entries that are no longer relevant without updating `.changeset/pre.json` by hand.
 
 See [Manage Prerelease Changesets](./prereleases.md#manage-prerelease-changesets) for the complete workflow.
 
@@ -198,9 +198,9 @@ See [Manage Prerelease Changesets](./prereleases.md#manage-prerelease-changesets
 
 <!-- many-regions-cough -->
 
-When a package has only prerelease versions, Changesets now uses the configured prerelease tag on registries that do not automatically assign `latest`.
+This change mainly matters if you publish somewhere other than npm. When a package has only prerelease versions, Changesets now uses the configured prerelease tag on registries that don't assign `latest` automatically.
 
-The npm registry does assign `latest` automatically, so publishing a new package there continues to use `latest` rather than the configured prerelease tag. If you publish to another registry, verify its resulting dist-tags once after upgrading.
+npm does assign `latest` automatically, so a new package published there continues to use `latest` rather than the configured prerelease tag.
 
 ## Release behavior to review
 
@@ -208,28 +208,16 @@ The npm registry does assign `latest` automatically, so publishing a new package
 
 <!-- wide-feet-lie -->
 
-When a peer dependency is updated, Changesets now bumps dependent packages by `patch` instead of assuming the update is breaking and bumping them by `major`.
+Updating a peer dependency now gives dependent packages a `patch` bump instead of assuming the update is breaking and giving them a `major` bump.
 
-If a dependent package is incompatible with the peer dependency's new version, add a `major` changeset for that package explicitly.
+Review these dependents when you add the changeset. If one really is incompatible with the new peer dependency, add an explicit `major` changeset for it.
 
 ### pnpm registry detection follows pnpm more closely
 
 <!-- fair-lamps-relate -->
 
-For pnpm projects, unpublished-package checks now follow pnpm's registry behavior. Scope-based `publishConfig` registry overrides and `publishConfig.registry` are ignored during these checks.
+This only affects pnpm projects. When Changesets checks whether a package is unpublished, it now follows pnpm's registry behavior and ignores scope-based `publishConfig` registry overrides and `publishConfig.registry`.
 
-If your repository relied on those fields to select a registry during unpublished-package detection, verify the result against your pnpm and npm configuration after upgrading.
-
-## Verify the migration
-
-Before publishing with v3:
-
-1. Install dependencies and run your normal build, type-check, lint, and test commands.
-2. Run `changeset status` and confirm the expected release plan is produced.
-3. If the project is in prerelease mode, review and commit any files moved into `.changeset/pre/`.
-4. On a disposable branch, run `changeset version` with representative changesets and inspect the version, changelog, dependency, and formatting changes.
-5. Confirm private packages are versioned or skipped as intended.
-6. Test release automation both with pending changesets and with nothing to version.
-7. If you publish to a non-npm registry, verify the registry and dist-tags selected for a prerelease.
+If you relied on either field for this check, make sure v3 selects the registry you expect from your pnpm and npm configuration.
 
 For more detail, see the [configuration reference](./config.md), [CLI reference](./cli.md), [prerelease guide](./prereleases.md), and [versioning and publishing guide](./versioning-and-publishing.md).
