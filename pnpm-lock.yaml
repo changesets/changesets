@@ -206,8 +206,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       '@pnpm/deps.graph-sequencer':
-        specifier: ^1100.0.0
-        version: 1100.0.0
+        specifier: ^1100.0.1
+        version: 1100.0.1
       cac:
         specifier: ^7.0.0
         version: 7.0.0
@@ -964,8 +964,8 @@ packages:
     resolution: {integrity: sha512-htyl8TWnKL7K/ESFa1oW2UB5lVDxuF5DpM7tBi6Hu2LNL3mWkIzNLG6N4zoCUP1lCKNxWy/3iu8mS8MvToGd6w==}
     engines: {node: '>=12.22.0'}
 
-  '@pnpm/deps.graph-sequencer@1100.0.0':
-    resolution: {integrity: sha512-IfhLdXMjNaAt2Z/r0hAqMvH4UN/Eb6LAbnSHqF9Ay1EhQId8rFX58yIWXLUit6VjJTJAptnSPtO8nSu2/ggQsg==}
+  '@pnpm/deps.graph-sequencer@1100.0.1':
+    resolution: {integrity: sha512-pOr5+q1fLYKwFN3LAJuGZEnfXDcQ73zqgDHMtGy+K+uIoUqyY+6MeDCWFwfu+4EFuq76I5EPFofoNAI+Bmmq4A==}
     engines: {node: '>=22.13'}
 
   '@pnpm/network.ca-file@1.0.2':
@@ -3359,7 +3359,7 @@ snapshots:
 
   '@pnpm/config.env-replace@1.1.0': {}
 
-  '@pnpm/deps.graph-sequencer@1100.0.0': {}
+  '@pnpm/deps.graph-sequencer@1100.0.1': {}
 
   '@pnpm/network.ca-file@1.0.2':
     dependencies:
