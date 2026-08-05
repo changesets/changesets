@@ -54,8 +54,6 @@ export async function readChangesets(
     }
   }
 
-  console.log(changesets);
-
   if (sinceRef != null) {
     changesets = await filterChangesetsSinceRef(
       changesets,
