@@ -88,10 +88,19 @@ jobs:
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
       - name: Vitest tests
-        if: matrix.node_version != 24 || matrix.os != 'ubuntu-latest'
+        if: matrix.os != 'windows-latest' && !(matrix.node_version == 24 && matrix.os == 'ubuntu-latest')
         run: pnpm test
 
-      # Run coverage only once on node 24 to avoid duplicate codecov uploads
+      # For Windows, run fixtures in the runner tempdir instead of os tempdir. The default tempdir
+      # is in the D drive which is known to be slow: https://github.com/actions/runner-images/issues/8755
+      - name: Vitest tests on Windows
+        if: matrix.os == 'windows-latest'
+        run: pnpm test
+        env:
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
+
+      # Run coverage only once on Ubuntu & node 24 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
         if: matrix.node_version == 24 && matrix.os == 'ubuntu-latest'
         run: pnpm test --coverage
