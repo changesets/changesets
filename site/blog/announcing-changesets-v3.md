@@ -8,9 +8,10 @@ Today, we are excited to announce the release of Changesets v3. Since the releas
 
 Quick links:
 
-- [What is Changesets?](/guide/getting-started#what-is-changesets)
-- [Migrate from v2 to v3](/guide/migration)
-- [Changelog](https://github.com/changesets/changesets/blob/main/packages/cli/CHANGELOG.md)
+- [What is Changesets?](../guide/getting-started.md#what-is-changesets)
+- [Frequently Asked Questions](../faq.md)
+- [Migrate from v2 to v3](../guide/migration.md)
+- [Changelog](https://github.com/changesets/changesets/blob/main/packages/cli/CHANGELOG.md#300)
 - [Chat on Discord](https://chat.changesets.dev)
 
 ## Thanks
@@ -56,7 +57,7 @@ Internally, we are now using [pnpm](https://pnpm.io), [tsdown](https://tsdown.de
 
 <!-- TODO: might need to update link -->
 
-Check out the [Migrate from v2 to v3](/guide/migration) guide for a full list of breaking changes.
+Check out the [Migrate from v2 to v3](../guide/migration.md) guide for a full list of breaking changes.
 
 ### Less aggressive peer dependency bumping
 
