@@ -26,9 +26,7 @@ We'd like to thank all contributors who have helped discuss, test, and improve C
 
 As Changesets remains one of the most popular release tool in the npm ecosystem, with more than 3M weekly downloads, we'd like to thank everyone who has supported Changesets over the years.
 
-If you or your company uses Changesets, you can help support our work to improve and evolve the project via our Open Collective or GitHub Sponsors.
-
-<!-- TODO: link to sponsors, or add image links? -->
+If you or your company uses Changesets, you can help support our work to improve and evolve the project via our [Open Collective](https://opencollective.com/changesets) or [GitHub Sponsors](https://github.com/sponsors/changesets).
 
 ## Highlights
 
@@ -74,7 +72,7 @@ This has been the most requested change to Changesets for years (as can be seen 
 Changesets now uses [`cac`](https://npmx.dev/cac) for CLI arguments and help messages rather than our old custom implementation,
 and we use [`@clack/prompts`](https://npmx.dev/@clack/prompts) for CLI prompts and rendering, which should make the CLI prettier and easier to use.
 
-![cli flow example](/blog/cli-example.webp)
+![cli flow example](../assets/cli-example.webp)
 
 ### Use installed formatters to format changelogs
 
