@@ -211,3 +211,25 @@ Review these dependents when you add the changeset. If one really is incompatibl
 This only affects pnpm projects. When Changesets checks whether a package is unpublished, it now follows pnpm's registry behavior and ignores scope-based `publishConfig` registry overrides and `publishConfig.registry`.
 
 If you relied on either field for this check, make sure v3 selects the registry you expect from your pnpm and npm configuration.
+
+## GitHub Actions Changes
+
+### Update to `changesets/action@v2`
+
+Update to `changesets/action@v2` in your GitHub Actions workflows to support Changesets v3. The v1 action will only work with Changesets v2.
+
+<!-- prettier-ignore -->
+```yaml [.github/workflows/publish.yml]
+# ...
+        uses: changesets/action/publish@v1 # [!code --]
+        uses: changesets/action/publish@v2 # [!code ++]
+# ...
+```
+
+The v2 action contains some breaking changes that you should review in the [action's changelog](https://github.com/changesets/action/blob/main/CHANGELOG.md#200).
+
+### Review your workflow setup
+
+While the existing action should work as before, the v2 action exposes more sub-actions that allow you to better customize, compose, and secure your GitHub Actions workflows.
+
+Check the new [Automating Changesets](./automating.md) guide and consider adopting the new setup recommendations.
