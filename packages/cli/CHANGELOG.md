@@ -1,5 +1,34 @@
 # @changesets/cli
 
+## 3.0.0-next.11
+
+### Major Changes
+
+- [#2190](https://github.com/changesets/changesets/pull/2190) [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a) Thanks [@bluwy](https://github.com/bluwy)! - Move versioned prerelease changesets to `.changeset/pre/` folder instead of accumulating in the root and tracking the versioned changeset ids in the `.changeset/pre.json` file. Existing `pre.json` will auto-migrate to this new structure on the next run of `changeset version` or when calling `changeset status`.
+
+  This change allows easier management of versioned prerelease changesets (for the final stable release) and current queued changesets (for the next prerelease). Changesets in `.changeset/pre/` can be edited or deleted depending if it's still relevant for the final stable release of a package. There's no need to synchronize the changeset ids in `pre.json` if certain changesets are deleted.
+
+- [#2186](https://github.com/changesets/changesets/pull/2186) [`3910adf`](https://github.com/changesets/changesets/commit/3910adf3ebaef14196093715228885c4819d0cbf) Thanks [@Andarist](https://github.com/Andarist)! - Private packages are no longer versioned by default. Set `privatePackages` to `true` to opt into versioning and tagging them, or set `privatePackages.version` to `true` to version them without tagging.
+
+### Minor Changes
+
+- [#2135](https://github.com/changesets/changesets/pull/2135) [`fd7724a`](https://github.com/changesets/changesets/commit/fd7724ad63cee56f6868d3e7f140d51cd8f88932) Thanks [@youdie006](https://github.com/youdie006)! - Allow comma-separated values in array-valued CLI flags: the `--major`, `--minor`, and `--patch` flags of the `add` command, and the `--ignore` flag of the `version` command. For example, `--minor pkg-a,pkg-b` is now equivalent to `--minor pkg-a --minor pkg-b`. Surrounding whitespace is trimmed and empty entries are ignored.
+
+### Patch Changes
+
+- Updated dependencies [[`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a), [`3910adf`](https://github.com/changesets/changesets/commit/3910adf3ebaef14196093715228885c4819d0cbf), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a)]:
+  - @changesets/apply-release-plan@8.0.0-next.10
+  - @changesets/assemble-release-plan@7.0.0-next.10
+  - @changesets/git@4.0.0-next.9
+  - @changesets/pre@3.0.0-next.9
+  - @changesets/read@1.0.0-next.10
+  - @changesets/types@7.0.0-next.9
+  - @changesets/config@4.0.0-next.9
+  - @changesets/changelog-git@1.0.0-next.9
+  - @changesets/get-dependents-graph@3.0.0-next.9
+  - @changesets/should-skip-package@1.0.0-next.9
+  - @changesets/write@1.0.0-next.9
+
 ## 3.0.0-next.10
 
 ### Minor Changes

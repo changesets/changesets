@@ -12,11 +12,7 @@ dedupePeerDependents: true
 
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
-  - "@changesets/format@0.1.1"
-  - pnpm@11.13.1
-  - npm@12.0.1
-  - pnpm@10.34.5
-  - vitepress@2.0.0-alpha.19
+  - vite@8.2.0
 
 overrides:
   "vitepress>@docsearch/js": "-"
