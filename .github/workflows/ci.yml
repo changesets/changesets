@@ -91,7 +91,8 @@ jobs:
         if: matrix.os != 'windows-latest' && !(matrix.node_version == 24 && matrix.os == 'ubuntu-latest')
         run: pnpm test
 
-      # For Windows, run fixtures in the runner tempdir instead of os tempdir so it runs faster
+      # For Windows, run fixtures in the runner tempdir instead of os tempdir. The default tempdir
+      # is in the D drive which is known to be slow: https://github.com/actions/runner-images/issues/8755
       - name: Vitest tests on Windows
         if: matrix.os == 'windows-latest'
         run: pnpm test
