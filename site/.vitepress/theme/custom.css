@@ -109,3 +109,8 @@ code {
   color: var(--vp-c-text-1);
   text-decoration: underline;
 }
+
+.VPContent img {
+  border-radius: 10px;
+  box-shadow: 2px 4px 15px rgba(0, 0, 0, 0.5);
+}
