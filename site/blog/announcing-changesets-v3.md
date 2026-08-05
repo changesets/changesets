@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import { VPImage } from "vitepress/theme"
+</script>
+
 # Announcing Changesets v3
 
 _10 August 2026_
@@ -32,7 +36,9 @@ If you or your company uses Changesets, you can help support our work to improve
 
 ### New Website
 
-You are currently reading this post on our new website! https://changesets.dev. With new and re-written docs, we hope this makes it easier to get started with Changesets and find the information you need.
+You are currently reading this post on our new website: https://changesets.dev!
+
+With new and re-written docs, we hope this makes it easier to get started with Changesets and find the information you need.
 
 ### Modernized Tooling
 
@@ -46,12 +52,12 @@ Internally, we are now using [pnpm](https://pnpm.io), [tsdown](https://tsdown.de
 ### ... and more!
 
 - [Less aggressive peer dependency bumping](#less-aggressive-peer-dependency-bumping)
-- [More robust version, pack, and publish flows](#)
-- [More flexible GitHub Actions workflows setups](#)
+- [More robust and flexible version, pack, and publish flows](#)
 - [Use installed formatters to format changelogs by default](#use-installed-formatters-to-format-changelogs)
-- [Re-written support for pnpm, npm, and yarn package managers](#)
+- [Improved CLI argument parsing and UX](#improved-cli-argument-parsing-and-ux)
 - [Greatly simplified pre-release metadata](#)
-- [More robust config loading and validation](#)
+- Re-written support for pnpm, npm, and yarn
+- More robust config loading and validation
 
 <!-- TODO: might need to update link -->
 
@@ -66,6 +72,30 @@ Now, all change types will bump peer dependents by a **patch** version, while au
 This has been the most requested change to Changesets for years (as can be seen in the [closed issues](https://github.com/changesets/changesets/pull/2090)), and we're happy to finally release it!
 
 <!-- TODO: add image/graph/text example -->
+
+### More robust and flexible version, pack, and publish flows
+
+We have created new commands and GitHub Actions to improve automated publishing workflows.
+
+The goal is to allow users to implement the "build and pack then publish" flow,
+[the recommended way to publish packages by the e18e community](https://e18e.dev/docs/publishing.html#standard-workflow).
+
+**For more information, check out the new [automation documentation!](/guide/automating#how-do-i-run-the-version-and-publish-commands)**
+
+::: info Regarding staged publishing
+We are working on it, and it will be included in the next feature update.
+:::
+
+<!-- https://lexidraw.app/#atproto=did:plc:skqg5gindwkuzjmjub6db6yn,3msdmimnqlf2s -->
+
+<VPImage
+  class="no-shadow"
+  alt="Publishing flow diagram"
+  :image="{
+    dark: '../assets/pack-then-publish.excalidraw.svg',
+    light: '../assets/pack-then-publish-light.excalidraw.svg'
+  }"
+/>
 
 ### Improved CLI argument parsing and UX
 
