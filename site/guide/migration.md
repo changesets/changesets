@@ -38,7 +38,7 @@ Changesets v3 is compatible with [Node.js](https://nodejs.org) `^22.11 || ^24 ||
 
 Before installing Changesets v3, check that your local development and CI environments use supported versions. Older versions might happen to work, but we don't test or support them. Yarn Classic is also no longer supported.
 
-### All packages are now an ES modules
+### All packages are now ES modules
 
 `@changesets/cli` and the other Changesets packages are now published as ES modules. If you only run `changeset` from package scripts or CI, nothing else needs to change once you're using a supported Node.js version.
 
