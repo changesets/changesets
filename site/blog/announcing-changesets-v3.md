@@ -9,7 +9,7 @@ Today, we are excited to announce the release of Changesets v3. Since the releas
 Quick links:
 
 - [What is Changesets?](/guide/getting-started#what-is-changesets)
-- [Migrate to v3](/guide/migration) <!-- TODO: might need to update link -->
+- [Migrate from v2 to v3](/guide/migration)
 - [Changelog](https://github.com/changesets/changesets/blob/main/packages/cli/CHANGELOG.md)
 - [Chat on Discord](https://chat.changesets.dev)
 
@@ -43,9 +43,7 @@ We have also added a number of new features, notably:
 
 ### Breaking Changes
 
-<!-- TODO: might need to update link -->
-
-Check the [Migrate to v3](/guide/migration) guide for the the full list of breaking changes.
+Check the [Migrate from v2 to v3](/guide/migration) guide for the the full list of breaking changes.
 
 ## Thanks
 
