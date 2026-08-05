@@ -47,6 +47,18 @@ export default defineConfig({
     ["meta", { property: "og:site_name", content: siteTitle }],
     ["meta", { name: "twitter:card", content: "summary_large_image" }],
     ["meta", { name: "theme-color", content: "#006dcc" }],
+
+    ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
+    [
+      "link",
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },
+    ],
+    [
+      "link",
+      {
+        href: "https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&display=swap",
+      },
+    ],
   ],
   lastUpdated: true,
   cleanUrls: true,

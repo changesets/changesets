@@ -25,6 +25,37 @@
   /* Add transparency for navigation bars */
   --vp-nav-bg-color: color-mix(in srgb, var(--vp-c-bg) 70%, transparent);
   --vp-local-nav-bg-color: color-mix(in srgb, var(--vp-c-bg) 70%, transparent);
+
+  /* Fonts */
+  --vp-font-family-serif: "Averia Serif Libre", serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+h1,
+h1 *,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #c7dbeb;
+  font-family: var(--vp-font-family-serif) !important;
+}
+
+.VPDoc h1 {
+  font-size: 32px;
+}
+
+.VPDoc h2 {
+  font-size: 28px;
+}
+
+.VPDoc h3 {
+  font-size: 24px;
 }
 
 .dark {
@@ -53,6 +84,11 @@
 .VPNavBar:not(.home.top),
 .VPLocalNav {
   backdrop-filter: saturate(180%) blur(20px);
+}
+
+.VPNavBarTitle span {
+  font-family: var(--vp-font-family-serif);
+  font-size: 1.5em;
 }
 
 /* We do not need sponsor images for now */
