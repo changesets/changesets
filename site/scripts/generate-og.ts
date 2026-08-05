@@ -58,7 +58,7 @@ async function generateOgImage(data: ReturnType<typeof extractBlogData>) {
         <div tw="text-4xl opacity-90">${data.date}</div>
       </div>
     </div>
-  `;
+  `.trim();
 
   const buffer = await render(template, {
     width: 1200,
