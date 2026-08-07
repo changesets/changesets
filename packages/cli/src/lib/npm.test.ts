@@ -113,6 +113,16 @@ describe("publishing", () => {
     },
   );
 
+  it("should handle an already-published error the JSON payload doesn't describe", () => {
+    const result = npm.handlePublishError(
+      { name: "@test/package", version: "1.0.0" },
+      { error: { code: "E403" } },
+      "npm error code E403\nnpm error 403 Forbidden - PUT https://registry.npmjs.org/@test%2fpackage - You cannot publish over the previously published versions: 1.0.0.",
+    );
+
+    expect(result.result).toEqual("failed:already-published");
+  });
+
   const need2faCases = Object.entries(need2faErrorSnapshot.npm);
 
   it.each(need2faCases)(

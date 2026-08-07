@@ -17,10 +17,19 @@ export const npmPublishQueue = createPromiseQueue(
 
 /*
  * We check `npm info` before publishing but it can return stale data at times
- * so we need to gracefully handle this situation
+ * so we need to gracefully handle this situation.
+ *
+ * Which field carries the message varies by package manager and version, so
+ * callers pass every candidate and we match across all of them.
  */
-export function isAlreadyPublishedError(message: string) {
-  return message.includes("cannot publish over the previously published");
+export function isAlreadyPublishedError(
+  ...messages: (string | undefined)[]
+): boolean {
+  return messages
+    .filter((message) => message != null)
+    .some((message) =>
+      message.includes("cannot publish over the previously published"),
+    );
 }
 
 export const isPublishSuccessful = (

@@ -277,6 +277,15 @@ export function handlePublishError(
 ): PublishResult {
   // if we get back an unknown error
   if (!isNpmPublishError(json)) {
+    // the JSON payload doesn't always carry a `summary` (trusted publishing is
+    // one case), but the process output still says the version is already up
+    if (isAlreadyPublishedError(processOutput)) {
+      return {
+        ...resultBase,
+        result: "failed:already-published",
+      };
+    }
+
     return {
       ...resultBase,
       result: "failed",
@@ -285,7 +294,13 @@ export function handlePublishError(
   }
 
   // npm v11 doesn't return a `code` on already-published errors
-  if (isAlreadyPublishedError(json.error.summary)) {
+  if (
+    isAlreadyPublishedError(
+      json.error.summary,
+      json.error.detail,
+      processOutput,
+    )
+  ) {
     // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
     return {
       ...resultBase,
